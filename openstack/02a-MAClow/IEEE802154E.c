@@ -70,6 +70,7 @@ bool     isValidJoin(OpenQueueEntry_t* eb, ieee802154_header_iht *parsedHeader);
 bool     ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE);
 // ASN handling
 void     incrementAsnOffset(void);
+void     ieee154e_resetAsn(void);
 void     ieee154e_syncSlotOffset(void);
 void     asnStoreFromEB(uint8_t* asn);
 void     joinPriorityStoreFromEB(uint8_t jp);
@@ -193,8 +194,7 @@ void isr_ieee154e_newSlot() {
    if (ieee154e_vars.isSync==FALSE) {
       if (idmanager_getIsDAGroot()==TRUE) {
          changeIsSync(TRUE);
-         incrementAsnOffset();
-         ieee154e_syncSlotOffset();
+         ieee154e_resetAsn();
          ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
       } else {
          activity_synchronize_newSlot();
@@ -1854,6 +1854,16 @@ port_INLINE void incrementAsnOffset() {
       ieee154e_vars.slotOffset  = (ieee154e_vars.slotOffset+1)%frameLength;
    }
    ieee154e_vars.asnOffset   = (ieee154e_vars.asnOffset+1)%16;
+}
+
+port_INLINE void ieee154e_resetAsn(){
+    // reset slotoffset
+    ieee154e_vars.slotOffset     = 0;
+    ieee154e_vars.asnOffset      = 0;
+    // reset asn
+    ieee154e_vars.asn.byte4      = 0;
+    ieee154e_vars.asn.bytes2and3 = 0;
+    ieee154e_vars.asn.bytes0and1 = 0;
 }
 
 //from upper layer that want to send the ASN to compute timing or latency
