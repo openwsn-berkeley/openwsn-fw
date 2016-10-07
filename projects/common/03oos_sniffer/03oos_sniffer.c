@@ -166,28 +166,32 @@ void task_uploadPacket(){
 }
 // ================================= stubbing ==================================
 
-void openbridge_triggerData(void){return;}
+void ieee154e_setSingleChannel(uint8_t channel)         {return;}
+void ieee154e_setIsSecurityEnabled(bool isEnabled)      {return;}
+void ieee154e_setSlotDuration(uint16_t duration)        {return;}
+void ieee154e_setIsAckEnabled(bool isEnabled)           {return;}
+void ieee154e_getAsn(uint8_t* array)                    {return;}
 
-void sixtop_setEBPeriod(uint8_t ebPeriod){return;}
+void schedule_startDAGroot(void)                        {return;}
+void schedule_setFrameLength(uint16_t frameLength)      {return;}
+
+void sixtop_setEBPeriod(uint8_t ebPeriod)               {return;}
 void sixtop_addORremoveCellByInfo(uint8_t code,open_addr_t* neighbor,cellInfo_ht* cellInfo){return;}
-void sixtop_request(uint8_t code,open_addr_t* neighbor, uint8_t numCells){return;}
-void sixtop_setHandler(six2six_handler_t handler){return;}
-void sixtop_setIsResponseEnabled(bool isEnabled){return;}
-void ieee154e_setSingleChannel(uint8_t channel){return;}
-void icmpv6rpl_setDIOPeriod(uint16_t dioPeriod) {return;}
-void icmpv6rpl_setDAOPeriod(uint16_t daoPeriod) {return;}
-void icmpv6rpl_setMyDAGrank(uint16_t rank) {return;}
-void sixtop_setKaPeriod(uint16_t kaPeriod) {return;}
-void ieee154e_setIsSecurityEnabled(bool isEnabled) {return;}
-void ieee154e_setSlotDuration(uint16_t duration) {return;}
-void schedule_setFrameLength(uint16_t frameLength) {return;}
-void icmpv6rpl_writeDODAGid(uint8_t* dodagid) {return;}
-void ieee154e_setIsAckEnabled(bool isEnabled) {return;}
-void ieee154e_getAsn(uint8_t* array) {return;}
-void icmpv6rpl_updateMyDAGrankAndParentSelection(void) {return;}
-bool icmpv6rpl_getPreferredParentEui64(open_addr_t* neighbor){return TRUE;}
-void schedule_startDAGroot(void) {return;}
-void sf0_appPktPeriod(uint8_t numAppPacketsPerSlotFrame){return;}
+void sixtop_request(uint8_t code,open_addr_t* neighbor, uint8_t numCells)   {return;}
+void sixtop_setHandler(six2six_handler_t handler)                           {return;}
+void sixtop_setIsResponseEnabled(bool isEnabled)                            {return;}
+void sixtop_setKaPeriod(uint16_t kaPeriod)                                  {return;}
+void sf0_appPktPeriod(uint8_t numAppPacketsPerSlotFrame)                    {return;}
+
+void openbridge_triggerData(void)                                           {return;}
+
+void icmpv6rpl_setDIOPeriod(uint16_t dioPeriod)                             {return;}
+void icmpv6rpl_setDAOPeriod(uint16_t daoPeriod)                             {return;}
+void icmpv6rpl_setMyDAGrank(uint16_t rank)                                  {return;}
+void icmpv6rpl_writeDODAGid(uint8_t* dodagid)                               {return;}
+void icmpv6rpl_updateMyDAGrankAndParentSelection(void)                      {return;}
+bool icmpv6rpl_getPreferredParentEui64(open_addr_t* neighbor)               {return TRUE;}
+void icmpv6echo_setIsReplyEnabled(bool isEnabled)                           {return;}
 
 bool debugPrint_asn(void)       {return TRUE;}
 bool debugPrint_isSync(void)    {return TRUE;}
