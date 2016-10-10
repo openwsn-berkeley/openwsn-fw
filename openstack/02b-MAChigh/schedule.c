@@ -293,7 +293,7 @@ owerror_t schedule_addActiveSlot(
    // abort it schedule overflow
    if (slotContainer>&schedule_vars.scheduleBuf[schedule_vars.maxActiveSlots-1]) {
       ENABLE_INTERRUPTS();
-      openserial_printCritical(
+      openserial_printError(
          COMPONENT_SCHEDULE,ERR_SCHEDULE_OVERFLOWN,
          (errorparameter_t)0,
          (errorparameter_t)0
@@ -555,6 +555,25 @@ uint8_t schedule_getNumOfSlotsByType(cellType_t type){
    ENABLE_INTERRUPTS();
    
    return returnVal;
+}
+
+uint8_t schedule_getNumberOfFreeEntries(){
+   uint8_t i; 
+   uint8_t counter;
+   
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   
+   counter = 0;
+   for(i=0;i<MAXACTIVESLOTS;i++) {
+      if(schedule_vars.scheduleBuf[i].type == CELLTYPE_OFF){
+         counter++;
+      }
+   }
+   
+   ENABLE_INTERRUPTS();
+   
+   return counter;
 }
 
 //=== from IEEE802154E: reading the schedule and updating statistics
