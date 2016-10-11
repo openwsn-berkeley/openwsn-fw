@@ -60,7 +60,11 @@ void sfx_addCell_task(void) {
       return;
    }
    
-   sixtop_setHandler(SIX_HANDLER_SFX);
+   if (sixtop_setHandler(SIX_HANDLER_SFX)==FALSE){
+      // one sixtop transcation is happening, only one instance at one time
+      return;
+   }
+   
    // call sixtop
    sixtop_request(
       IANA_6TOP_CMD_ADD,
@@ -79,7 +83,10 @@ void sfx_removeCell_task(void) {
       return;
    }
    
-   sixtop_setHandler(SIX_HANDLER_SFX);
+   if (sixtop_setHandler(SIX_HANDLER_SFX)==FALSE){
+      // one sixtop transcation is happening only one instance at one time
+      return;
+   }
    // call sixtop
    sixtop_request(
       IANA_6TOP_CMD_DELETE,
@@ -130,7 +137,10 @@ void sfx_cellUsageCalculation_task(){
 //   cellUsage += schedule_getTotalCellUsageStatus(CELLTYPE_TXRX,NULL);
    
    if(numberOfCells==0){
-       sixtop_setHandler(SIX_HANDLER_SFX);
+       if (sixtop_setHandler(SIX_HANDLER_SFX)==FALSE){
+          // one sixtop transcation is happening, only one instance at one time
+          return;
+       }
        // call sixtop
        sixtop_request(
           IANA_6TOP_CMD_ADD,
@@ -142,7 +152,10 @@ void sfx_cellUsageCalculation_task(){
    
    // cell usage scheduling, bandwith estimation algorithm
    if (cellUsage/numberOfCells>=SFX_ADD_THRESHOLD){
-       sixtop_setHandler(SIX_HANDLER_SFX);
+       if (sixtop_setHandler(SIX_HANDLER_SFX)==FALSE){
+          // one sixtop transcation is happening, only one instance at one time
+          return;
+       }
        // call sixtop
        sixtop_request(
           IANA_6TOP_CMD_ADD,
@@ -153,7 +166,10 @@ void sfx_cellUsageCalculation_task(){
      if (cellUsage/numberOfCells<SFX_DELETE_THRESHOLD){
          // at least keep one cell
          if (numberOfCells>1){
-             sixtop_setHandler(SIX_HANDLER_SFX);
+             if (sixtop_setHandler(SIX_HANDLER_SFX)==FALSE){
+                // one sixtop transcation is happening, only one instance at one time
+                return;
+             }
              // call sixtop
              sixtop_request(
                 IANA_6TOP_CMD_DELETE,

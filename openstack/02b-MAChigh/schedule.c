@@ -924,6 +924,11 @@ void schedule_housekeeping(){
             // remove Tx cell if it's scheduled to non-perferred parent
             if (icmpv6rpl_getPreferredParentEui64(&neighbor)==TRUE) {
                 if(packetfunctions_sameAddress(&neighbor,&(schedule_vars.scheduleBuf[i].neighbor))==FALSE){
+                    if (sixtop_setHandler(SIX_HANDLER_SFX)==FALSE){
+                       // one sixtop transcation is happening, only one instance at one time
+                       return;
+                    }
+                    sixtop_request(IANA_6TOP_CMD_ADD,&(schedule_vars.scheduleBuf[i].neighbor),1);
                     schedule_removeActiveSlot(
                         schedule_vars.scheduleBuf[i].slotOffset,
                         &(schedule_vars.scheduleBuf[i].neighbor)
@@ -936,7 +941,10 @@ void schedule_housekeeping(){
                 schedule_vars.scheduleBuf[i].numTx>5 &&
                 schedule_vars.scheduleBuf[i].numTxACK*10/schedule_vars.scheduleBuf[i].numTx<5
             ){
-                sixtop_setHandler(SIX_HANDLER_RELOCATION);
+                if (sixtop_setHandler(SIX_HANDLER_RELOCATION)==FALSE){
+                   // one sixtop transcation is happening, only one instance at one time
+                   return;
+                }
                 sixtop_request(IANA_6TOP_CMD_ADD,&(schedule_vars.scheduleBuf[i].neighbor),1);
                 break;
             }

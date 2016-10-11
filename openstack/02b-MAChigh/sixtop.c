@@ -167,8 +167,15 @@ void sixtop_setEBPeriod(uint8_t ebPeriod) {
    } 
 }
 
-void sixtop_setHandler(six2six_handler_t handler) {
-    sixtop_vars.handler = handler;
+bool sixtop_setHandler(six2six_handler_t handler) {
+    if (sixtop_vars.handler == SIX_HANDLER_NONE){
+        sixtop_vars.handler = handler;
+        return TRUE;
+    } else {
+        // another handler is using sixtop
+        return FALSE;
+        
+    }
 }
 
 //======= scheduling
