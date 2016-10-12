@@ -75,7 +75,7 @@ typedef enum {
 
 //=========================== typedef =========================================
 
-#define SIX2SIX_TIMEOUT_MS      75000 // >2^4*3*101*15=72720 (2^MAXEB * amxretries * slotframe * slotlength(ms))
+#define SIX2SIX_TIMEOUT_MS      25000 // >2^4*3*101*15/3=24240 (2^MAXEB * maxretries * slotframe * slotlength / numberOfsharedCellsFor6p) (ms))
 #define SIXTOP_MINIMAL_EBPERIOD     5 // minist period of sending EB
 
 //=========================== module variables ================================
