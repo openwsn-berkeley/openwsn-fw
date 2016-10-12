@@ -21,6 +21,7 @@ defaultApps   = [
 ]
 if localEnv['board']=='python':
     defaultApps  += [
+        'cexample',
     ]
 
 # apps which should always be present

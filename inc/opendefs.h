@@ -38,6 +38,8 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 
 #define MAXNUMNEIGHBORS 10
 
+#define EB_DIO_PIGGYBACK
+
 enum {
    E_SUCCESS                           = 0,
    E_FAIL                              = 1,

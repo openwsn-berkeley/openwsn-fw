@@ -52,6 +52,7 @@ void          timer_sixtop_sendEb_fired(void);
 void          timer_sixtop_management_fired(void);
 void          sixtop_sendEB(void);
 void          sixtop_sendKA(void);
+void          sixtop_sendEB_piggyback(OpenQueueEntry_t*    eb);
 
 //=== six2six task
 
@@ -129,12 +130,14 @@ void sixtop_init() {
    sixtop_vars.isResponseEnabled  = TRUE;
    sixtop_vars.handler            = SIX_HANDLER_NONE;
    
+#ifndef EB_DIO_PIGGYBACK
    sixtop_vars.ebSendingTimerId   = opentimers_start(
       (EBPERIOD-EBPERIOD_RANDOM_RANG+(openrandom_get16b()%(2*EBPERIOD_RANDOM_RANG))),
       TIMER_PERIODIC,
       TIME_MS,
       sixtop_sendingEb_timer_cb
    );
+#endif
    
    sixtop_vars.maintenanceTimerId = opentimers_start(
       sixtop_vars.periodMaintenance,
@@ -384,12 +387,21 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
    
    // set metadata
    msg->owner        = COMPONENT_SIXTOP;
+#ifdef EB_DIO_PIGGYBACK  
+   if (packetfunctions_isBroadcastMulticast(&(msg->l2_nextORpreviousHop))){
+       // this is a DIO, do piggyback on EB
+       sixtop_sendEB_piggyback(msg);
+   } else {
+       msg->l2_frameType = IEEE154_TYPE_DATA;
+   }
+#else
    msg->l2_frameType = IEEE154_TYPE_DATA;
 
    // set l2-security attributes
    msg->l2_securityLevel   = IEEE802154_SECURITY_LEVEL;
    msg->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE; 
    msg->l2_keyIndex        = IEEE802154_SECURITY_K2_KEY_INDEX;
+#endif
 
    if (msg->l2_payloadIEpresent == FALSE) {
       return sixtop_send_internal(
@@ -537,10 +549,20 @@ void task_sixtopNotifReceive() {
     case IEEE154_TYPE_CMD:
         if (msg->length>0) {
             if (msg->l2_frameType == IEEE154_TYPE_BEACON){
+#ifdef EB_DIO_PIGGYBACK
+                // I have one byte frequence field
+                packetfunctions_tossHeader(msg,1);
+                if (msg->length==0){
+                    openqueue_freePacketBuffer(msg);
+                } else {
+                    // this is a piggy back packet, forward to iphc later
+                }
+#else
                 // I have one byte frequence field, no useful for upper layer
                 // free up the RAM
                 openqueue_freePacketBuffer(msg);
                 break;
+#endif
             }
             // send to upper layer
             iphc_receive(msg);
@@ -782,6 +804,43 @@ port_INLINE void sixtop_sendEB() {
    
    // I'm now busy sending an EB
    sixtop_vars.busySendingEB = TRUE;
+}
+
+
+port_INLINE void sixtop_sendEB_piggyback(OpenQueueEntry_t* eb){
+   uint8_t len;
+   
+   len = 0;
+   
+   eb->owner   = COMPONENT_SIXTOP;
+   
+   // reserve one byte to indicate the real frequence
+   packetfunctions_reserveHeaderSize(eb,1);
+   eb->l2_realFrequence = eb->payload;
+   
+   // reserve space for EB-specific header
+   // reserving for IEs.
+   len += processIE_prependSlotframeLinkIE(eb);
+   len += processIE_prependChannelHoppingIE(eb);
+   len += processIE_prependTSCHTimeslotIE(eb);
+   len += processIE_prependSyncIE(eb);
+   
+   //add IE header 
+   processIE_prependMLMEIE(eb,len);
+  
+   // some l2 information about this packet
+   eb->l2_frameType                     = IEEE154_TYPE_BEACON;
+   eb->l2_nextORpreviousHop.type        = ADDR_16B;
+   eb->l2_nextORpreviousHop.addr_16b[0] = 0xff;
+   eb->l2_nextORpreviousHop.addr_16b[1] = 0xff;
+   
+   //I has an IE in my payload
+   eb->l2_payloadIEpresent = TRUE;
+
+   // set l2-security attributes
+   eb->l2_securityLevel   = IEEE802154_SECURITY_LEVEL_BEACON;
+   eb->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE;
+   eb->l2_keyIndex        = IEEE802154_SECURITY_K1_KEY_INDEX;
 }
 
 /**
