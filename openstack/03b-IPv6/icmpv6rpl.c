@@ -379,9 +379,12 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
          tentativeDAGrank = (uint32_t)neighborRank+rankIncrease;
          if (tentativeDAGrank > 65535) {tentativeDAGrank = 65535;}
          // if not low enough to justify switch, pass (i.e. hysterisis)
-         //if ((previousDAGrank<tentativeDAGrank) ||
-         // next line is wrong, difference can be negative
-         //    (tentativeDAGrank-previousDAGrank < 2*MINHOPRANKINCREASE)) continue;
+         if (
+             (previousDAGrank<tentativeDAGrank) ||
+             (previousDAGrank-tentativeDAGrank< 2*MINHOPRANKINCREASE)
+         ) {
+               continue;
+         }
          // remember that we have at least one valid candidate parent
          foundBetterParent=TRUE;
          // select best candidate so far
@@ -434,9 +437,6 @@ void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t* msg) {
    uint8_t          temp_8b;
    dagrank_t        neighborRank;
    open_addr_t      NeighborAddress;
-  
-   // take ownership over the packet
-   msg->owner = COMPONENT_NEIGHBORS;
    
    // save pointer to incoming DIO header in global structure for simplfying debug.
    icmpv6rpl_vars.incomingDio = (icmpv6rpl_dio_ht*)(msg->payload);
