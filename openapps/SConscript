@@ -26,13 +26,6 @@ if localEnv['board']=='python':
 
 # apps which should always be present
 defaultAppsInit   = [
-    'c6t',
-    'cinfo',
-    'cleds',
-    'cwellknown',
-    'techo',
-    'uecho',
-    'rrt',
 ]
 
 # additional apps the user wants to build
