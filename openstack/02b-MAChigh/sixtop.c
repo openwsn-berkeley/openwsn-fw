@@ -854,6 +854,7 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
   
    if(error == E_FAIL) {
       sixtop_vars.six2six_state = SIX_IDLE;
+      sixtop_vars.handler       = SIX_HANDLER_NONE;
       openqueue_freePacketBuffer(msg);
       return;
    }
