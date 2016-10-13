@@ -16,18 +16,19 @@
 #define IANA_6TOP_6P_VERSION   0x01 
 // 6P command Id
 #define IANA_6TOP_CMD_NONE     0x00
-#define IANA_6TOP_CMD_ADD      0x01 // CMD_ADD      | add one or more cells     
-#define IANA_6TOP_CMD_DELETE   0x02 // CMD_DELETE   | delete one or more cells  
-#define IANA_6TOP_CMD_COUNT    0x03 // CMD_COUNT    | count scheduled cells     
-#define IANA_6TOP_CMD_LIST     0x04 // CMD_LIST     | list the scheduled cells  
-#define IANA_6TOP_CMD_CLEAR    0x05 // CMD_CLEAR    | clear all cells
+#define IANA_6TOP_CMD_ADD      0x01 // CMD_ADD          | add one or more cells     
+#define IANA_6TOP_CMD_DELETE   0x02 // CMD_DELETE       | delete one or more cells  
+#define IANA_6TOP_CMD_COUNT    0x03 // CMD_COUNT        | count scheduled cells     
+#define IANA_6TOP_CMD_LIST     0x04 // CMD_LIST         | list the scheduled cells  
+#define IANA_6TOP_CMD_CLEAR    0x05 // CMD_CLEAR        | clear all cells
 // 6P return code
-#define IANA_6TOP_RC_SUCCESS   0x06 // RC_SUCCESS  | operation succeeded      
-#define IANA_6TOP_RC_VER_ERR   0x07 // RC_VER_ERR  | unsupported 6P version   
-#define IANA_6TOP_RC_SFID_ERR  0x08 // RC_SFID_ERR | unsupported SFID         
-#define IANA_6TOP_RC_BUSY      0x09 // RC_BUSY     | handling previous request
-#define IANA_6TOP_RC_RESET     0x0a // RC_RESET    | abort 6P transaction     
-#define IANA_6TOP_RC_ERR       0x0b // RC_ERR      | operation failed         
+#define IANA_6TOP_RC_SUCCESS   0x06 // RC_SUCCESS       | operation succeeded      
+#define IANA_6TOP_RC_ERR_VER   0x07 // RC_ERR_VER       | unsupported 6P version   
+#define IANA_6TOP_RC_ERR_SFID  0x08 // RC_ERR_SFID      | unsupported SFID         
+#define IANA_6TOP_RC_ERR_BUSY  0x09 // RC_ERR_BUSY      | handling previous request
+#define IANA_6TOP_RC_ERR_NORES 0x0a // RC_ERROR_NORES   | not enough resources
+#define IANA_6TOP_RC_ERR_RESET 0x0b // RC_ERR_RESET     | abort 6P transaction     
+#define IANA_6TOP_RC_ERR       0x0c // RC_ERR           | operation failed         
 
 // SF ID
 #define SFID_SF0  0

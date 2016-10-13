@@ -1071,9 +1071,9 @@ void sixtop_notifyReceiveCommand(
     //===== if the version or sfID are correct
     if (version != IANA_6TOP_6P_VERSION || sfId != SFID_SF0){
         if (version != IANA_6TOP_6P_VERSION){
-            code = IANA_6TOP_RC_VER_ERR;
+            code = IANA_6TOP_RC_ERR_VER;
         } else {
-            code = IANA_6TOP_RC_SFID_ERR;
+            code = IANA_6TOP_RC_ERR_SFID;
         }
     } else {
         //====== the version and sfID are correct
@@ -1087,7 +1087,7 @@ void sixtop_notifyReceiveCommand(
         ){
             // if I am already in a 6top transactions
             if (sixtop_vars.six2six_state != SIX_IDLE){
-                code = IANA_6TOP_RC_ERR;
+                code = IANA_6TOP_RC_ERR_BUSY;
             } else {
                 sixtop_vars.six2six_state = SIX_REQUEST_RECEIVED;
 
@@ -1098,6 +1098,14 @@ void sixtop_notifyReceiveCommand(
                     container  = *((uint8_t*)(pkt->payload)+ptr+1);
                     frameID = container;
                     processIE_retrieve_sixCelllist(pkt,ptr+2,length-2,cellList);
+                    if (
+                        commandIdORcode == IANA_6TOP_CMD_ADD &&
+                        schedule_getNumberOfFreeEntries() < numOfCells
+                    ){
+                        // no enough free buffer for adding more cells
+                        code = IANA_6TOP_RC_ERR_NORES;
+                        break;
+                    }
                     if (
                         (
                           commandIdORcode == IANA_6TOP_CMD_ADD &&
@@ -1111,7 +1119,7 @@ void sixtop_notifyReceiveCommand(
                         code = IANA_6TOP_RC_SUCCESS;
                         len += processIE_prepend_sixCelllist(response_pkt,cellList);
                     } else {
-                        code = IANA_6TOP_RC_ERR;
+                        code = IANA_6TOP_RC_ERR_RESET;
                     }
                     break;
                 case IANA_6TOP_CMD_COUNT:
@@ -1144,6 +1152,9 @@ void sixtop_notifyReceiveCommand(
                                             &(pkt->l2_nextORpreviousHop));
                     code = IANA_6TOP_RC_SUCCESS;
                     break;
+                default:
+                    // don't know this 6top command
+                    code = IANA_6TOP_RC_ERR;
                 }
             }
             response_pkt->l2_sixtop_requestCommand = commandIdORcode;
@@ -1202,13 +1213,33 @@ void sixtop_notifyReceiveCommand(
                            (errorparameter_t)cellList[1].tsNum);
                     break;
                 case SIX_WAIT_CLEARRESPONSE:
-                  
+                    frameID = SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;
+                    schedule_removeAllCells(frameID,
+                                            &(pkt->l2_nextORpreviousHop));
                     break;
                 default:
                     code = IANA_6TOP_RC_ERR;
                 }
             } else {
-                // TBD...
+                if (commandIdORcode==IANA_6TOP_RC_ERR_BUSY){
+                    // TBD: the neighbor is in a transaction, call scheduling function to to make a decision 
+                    // (e.g. issue another 6p request with some delay)
+                } else {
+                    if (commandIdORcode==IANA_6TOP_RC_ERR_NORES){
+                        // TBD: the neighbor has no enough resource for adding cells, call sf0 to make a decision
+                    } else {
+                        if (commandIdORcode==IANA_6TOP_RC_ERR_RESET){
+                            // TBD: the neighbor can't statisfy the 6p request with given cells, call sf0 to make a decision 
+                            // (e.g. issue another 6p request with different cell list)
+                        } else {
+                            if (commandIdORcode==IANA_6TOP_RC_ERR){
+                                // TBD: the neighbor can't statisfy the 6p request, call sf0 to make a decision
+                            } else {
+                                // TBD...
+                            }
+                        }
+                    }
+                }
             }
            openserial_printInfo(COMPONENT_SIXTOP,ERR_SIXTOP_RETURNCODE,
                            (errorparameter_t)commandIdORcode,
