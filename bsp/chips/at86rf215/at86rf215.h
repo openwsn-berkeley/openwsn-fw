@@ -15,20 +15,33 @@
  * Licensed under Atmel's Limited License Agreement --> EULA.txt
  */
 
+/* Prevent double inclusion */
+#ifndef RF215_H
+#define RF215_H
 
 /* === INCLUDES ============================================================ */
 
 /* === EXTERNALS =========================================================== */
 
-
 /* === TYPES =============================================================== */
+typedef struct
+{
+  uint16_t  addr;
+  uint8_t   data;
+}registerSetting_t;
 
 
 /* === MACROS ============================================================== */
-#define FLAG_WRITE                  0x80
-#define FLAG_READ                   0x00
+#define FLAG_WRITE        0x80
+#define FLAG_READ         0x00
 
-/** Parameter definitions */
+#define CMD_RF_NOP        0x0
+#define CMD_RF_SLEEP      0x1
+#define CMD_RF_TRXOFF     0x2
+#define CMD_RF_TRXPREP    0x3
+#define CMD_RF_TX         0x4
+#define CMD_RF_RX         0x5
+#define CMD_RF_RESET      0x7
 
 /** Typical timing values. */
 /* TRX Parameter: SPI_T2 */
@@ -3940,3 +3953,29 @@ typedef enum bb_irq_tag
     BB_IRQ_ALL_IRQ =                    (0xFF)
 } bb_irq_t;
 
+/* ========================== prototypes =================================== */
+void at86rf215_spiStrobe      (uint8_t strobe);
+void at86rf215_spiWriteReg    (uint16_t reg, uint8_t regValueToWrite);
+void at86rf215_spiReadReg     (uint16_t reg, uint8_t* regValueRead);
+void at86rf215_spiWriteFifo   (uint8_t* bufToWrite, uint16_t len);
+void at86rf215_spiReadRxFifo  ( uint8_t* pBufRead);
+
+/** Preferred settings for OFDM */
+static const registerSetting_t basic_settings_ofdm[] = {
+  {RG_RF09_CMD,       0x02},
+  {RG_RF09_IRQM,      0x1F},
+  {RG_RF09_RXBWC,     0x17},
+  {RG_RF09_RXDFE,     0x43},
+  {RG_RF09_AGCC,      0x11},
+  {RG_RF09_EDD,       0x7A},
+  {RG_RF09_TXCUTC,    0x0B},
+  {RG_RF09_TXDFE,     0x63},
+  {RG_RF09_PAC,       0x64},
+  {RG_BBC0_IRQM,      0x1F},
+  {RG_BBC0_PC,        0x16},
+  {RG_BBC0_OFDMC,     0x01},
+  {RG_BBC0_OFDMPHRTX, 0x03},  
+};
+
+
+#endif /* RF215_H */

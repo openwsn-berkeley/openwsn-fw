@@ -12,6 +12,11 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 */
 
+/*
+\modifications to implement the IEEE 802.15.4-SUN 
+\done by Jonathan Munoz <jonathan.munoz@inria.fr>
+*/
+
 #include "radiotimer.h"
 
 //=========================== define ==========================================
@@ -62,7 +67,7 @@ PORT_TIMER_WIDTH radio_getTimerValue(void);
 void     radio_setTimerPeriod(PORT_TIMER_WIDTH period);
 PORT_TIMER_WIDTH radio_getTimerPeriod(void);
 // RF admin
-void     radio_setFrequency(uint8_t frequency);
+void     radio_setFrequency(uint16_t channel_spacing, uint32_t frequency_0, uint16_t frequency_nb) ;
 void     radio_rfOn(void);
 void     radio_rfOff(void);
 // TX
@@ -72,12 +77,12 @@ void     radio_txNow(void);
 // RX
 void     radio_rxEnable(void);
 void     radio_rxNow(void);
-void     radio_getReceivedFrame(uint8_t* bufRead,
+void     radio_getReceivedFrame(uint8_t* bufRead/*,
                                 uint8_t* lenRead,
                                 uint8_t  maxBufLen,
                                  int8_t* rssi,
                                 uint8_t* lqi,
-                                   bool* crc);
+                                   bool* crc*/);
 
 // interrupt handlers
 kick_scheduler_t   radio_isr(void);

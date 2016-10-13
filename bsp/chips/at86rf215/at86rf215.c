@@ -14,30 +14,28 @@
 
 //extern const cc1200_rf_cfg_t cc1200_rf_cfg;
 
-void at86rf215_spiStrobe(uint8_t strobe, /*radio_status_t* statusRead,*/ uint16_t address) {
+void at86rf215_spiStrobe(uint8_t strobe) {
    uint8_t  spi_tx_buffer[3];
    
-   spi_tx_buffer[0]     = (FLAG_WRITE | (uint8_t)(address/256));
-   spi_tx_buffer[1]     = (uint8_t)(address%256);
-   spi_tx_buffer[0]     = strobe;
+   spi_tx_buffer[0]     = ((FLAG_WRITE) | (uint8_t)(RG_RF09_CMD/0xFF));
+   spi_tx_buffer[1]     = (uint8_t)(RG_RF09_CMD%0xFF);
+   spi_tx_buffer[2]     = strobe;
 
    spi_txrx(
       spi_tx_buffer,              // bufTx
       sizeof(spi_tx_buffer),      // lenbufTx
       SPI_FIRSTBYTE,              // returnType
-      (uint8_t*)statusRead,       // bufRx
+      NULL,                       // bufRx
       1,                          // maxLenBufRx
       SPI_FIRST,                  // isFirst
       SPI_LAST                    // isLast
    );
 }
 
-void at86rf215_spiWriteReg(uint16_t reg, /*radio_status_t* statusRead,*/ uint8_t regValueToWrite) {
+void at86rf215_spiWriteReg(uint16_t reg, uint8_t regValueToWrite) {
      
    
    uint8_t spi_tx_buffer[3];
-  
-   tempAddr  = (uint8_t)(reg & 0x00FF);
         
    spi_tx_buffer[0]     = (FLAG_WRITE | (uint8_t)((reg)/256));
    spi_tx_buffer[1]     = (uint8_t)((reg)%256);
@@ -47,14 +45,14 @@ void at86rf215_spiWriteReg(uint16_t reg, /*radio_status_t* statusRead,*/ uint8_t
        spi_tx_buffer,              // bufTx
        3,                          // lenbufTx
        SPI_FIRSTBYTE,              // returnType
-       (uint8_t*)statusRead,       // bufRx
+       NULL,                        // bufRx
        1,                          // maxLenBufRx
        SPI_FIRST,                  // isFirst
        SPI_LAST                    // isLast
    );
 }
 
-void at86rf215_spiReadReg(uint16_t reg, /*radio_status_t* statusRead,*/ uint8_t* regValueRead) {
+void at86rf215_spiReadReg(uint16_t reg, uint8_t* regValueRead) {
   
     uint8_t              spi_tx_buffer[3];
     uint8_t              spi_rx_buffer[3];
@@ -78,34 +76,34 @@ void at86rf215_spiReadReg(uint16_t reg, /*radio_status_t* statusRead,*/ uint8_t*
    
 }
 
-void at86rf215_spiWriteFifo(/*radio_status_t* statusRead,*/ uint8_t* bufToWrite, uint16_t len) {
+void at86rf215_spiWriteFifo(uint8_t* bufToWrite, uint16_t len) {
     uint8_t              spi_tx_buffer[4];
-    uint8_t              spi_rx_buffer[length];  
+    uint8_t              spi_rx_buffer[2047];  
     // step 1. send packet length. 
-    spi_tx_buffer[0]     = (radio_FLAG_WRITE | 0x03);
+    spi_tx_buffer[0]     = (FLAG_WRITE | 0x03);
     spi_tx_buffer[1]     = 0x06;
-    spi_tx_buffer[2]     = (radio_FLAG_READ | (uint8_t)((len)/256));
+    spi_tx_buffer[2]     = (FLAG_READ | (uint8_t)((len)/256));
     spi_tx_buffer[3]     = (uint8_t)((len)%256);   
   
     spi_txrx(
         spi_tx_buffer,              // bufTx
         sizeof(spi_tx_buffer),      // lenbufTx
         SPI_FIRSTBYTE,              // returnType
-        (uint8_t*)statusRead,       // bufRx
+        NULL,                       // bufRx
         1,                          // maxLenBufRx
         SPI_FIRST,                  // isFirst
         SPI_LAST                    // isLast
     );
 
-    spi_tx_buffer[0]     = (FLAG_WRITE | 0xa8);
-    spi_tx_buffer[1]     = 0x00;
+    spi_tx_buffer[0]     = (FLAG_WRITE | (uint8_t)(RG_BBC0_FBTXS/256));
+    spi_tx_buffer[1]     = (uint8_t)(RG_BBC0_FBTXS%256);
    
     // step 2. send the address to the Tx buffer.
     spi_txrx(
         bufToWrite,                // bufTx
         2,                         // lenbufTx
         SPI_FIRSTBYTE,             // returnType
-        (uint8_t*)statusRead,      // bufRx
+        NULL,                       // bufRx
         1,                         // maxLenBufRx
         SPI_FIRST,                 // isFirst
         SPI_NOTLAST                // isLast
@@ -123,10 +121,7 @@ void at86rf215_spiWriteFifo(/*radio_status_t* statusRead,*/ uint8_t* bufToWrite,
     );
 }
 
-void at86rf215_spiReadRxFifo(radio_status_t* statusRead,
-                         uint8_t*         pBufRead,
-                         /*uint8_t*         pLenRead,
-                         uint8_t          maxBufLen*/) {
+void at86rf215_spiReadRxFifo( uint8_t* pBufRead) {
     // when reading the packet over SPI from the RX buffer, you get the following:
     // - *[1B]     dummy byte because of SPI
     // - *[1B]     length byte
@@ -157,8 +152,8 @@ void at86rf215_spiReadRxFifo(radio_status_t* statusRead,
     
     length = PHR[1] + (PHR[0] & (0x07))*256; 
     
-    spi_tx_buffer[0]    = (FLAG_READ | 0x20);
-    spi_tx_buffer[1]    = 0x00;      
+    spi_tx_buffer[0]    = (FLAG_READ | (uint8_t)(BASE_ADDR_BBC0_FB0/256));
+    spi_tx_buffer[1]    = (uint8_t)(BASE_ADDR_BBC0_FB0%256);      
     //read FIFO 
     spi_txrx(
         spi_tx_buffer,              // bufTx
