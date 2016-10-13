@@ -288,7 +288,6 @@ elif env['toolchain']=='armgcc':
         
         # compiler (C)
         env.Replace(CC           = 'arm-none-eabi-gcc')
-        env.Replace(ASTUDIO_PATH = '"C:/Program Files (x86)/Atmel/Studio/7.0/packs"')
         env.Append(CCFLAGS       = '-O1')
         env.Append(CCFLAGS       = '-Wall')
         env.Append(CCFLAGS       = '-Wa,-adhlns=${TARGET.base}.lst')
