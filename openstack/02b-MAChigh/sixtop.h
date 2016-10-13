@@ -37,40 +37,40 @@
 #define DEFAULT_CHANNEL_OFFSET 2
 
 enum sixtop_CommandID_num{
-    SIXTOP_SOFT_CELL_REQ                = 0x00,
-    SIXTOP_SOFT_CELL_RESPONSE           = 0x01,
-    SIXTOP_REMOVE_SOFT_CELL_REQUEST     = 0x02,
+    SIXTOP_SOFT_CELL_REQ                        = 0x00,
+    SIXTOP_SOFT_CELL_RESPONSE                   = 0x01,
+    SIXTOP_REMOVE_SOFT_CELL_REQUEST             = 0x02,
 };
 
 // states of the sixtop-to-sixtop state machine
 typedef enum {
     // ready for next event
-    SIX_IDLE                            = 0x00,
+    SIX_STATE_IDLE                              = 0x00,
     // sending
-    SIX_SENDING_REQUEST                 = 0x01,
+    SIX_STATE_SENDING_REQUEST                   = 0x01,
     // waiting for SendDone confirmation
-    SIX_WAIT_ADDREQUEST_SENDDONE        = 0x02,   
-    SIX_WAIT_DELETEREQUEST_SENDDONE     = 0x03,
-    SIX_WAIT_COUNTREQUEST_SENDDONE      = 0x04,
-    SIX_WAIT_LISTREQUEST_SENDDONE       = 0x05,
-    SIX_WAIT_CLEARREQUEST_SENDDONE      = 0x06,
+    SIX_STATE_WAIT_ADDREQUEST_SENDDONE          = 0x02,   
+    SIX_STATE_WAIT_DELETEREQUEST_SENDDONE       = 0x03,
+    SIX_STATE_WAIT_COUNTREQUEST_SENDDONE        = 0x04,
+    SIX_STATE_WAIT_LISTREQUEST_SENDDONE         = 0x05,
+    SIX_STATE_WAIT_CLEARREQUEST_SENDDONE        = 0x06,
     // waiting for response from the neighbor
-    SIX_WAIT_ADDRESPONSE                = 0x07, 
-    SIX_WAIT_DELETERESPONSE             = 0x08,
-    SIX_WAIT_COUNTRESPONSE              = 0x09,
-    SIX_WAIT_LISTRESPONSE               = 0x0a,
-    SIX_WAIT_CLEARRESPONSE              = 0x0b,
+    SIX_STATE_WAIT_ADDRESPONSE                  = 0x07, 
+    SIX_STATE_WAIT_DELETERESPONSE               = 0x08,
+    SIX_STATE_WAIT_COUNTRESPONSE                = 0x09,
+    SIX_STATE_WAIT_LISTRESPONSE                 = 0x0a,
+    SIX_STATE_WAIT_CLEARRESPONSE                = 0x0b,
    
     // response senddone
-    SIX_REQUEST_RECEIVED                = 0x0c,
-    SIX_WAIT_RESPONSE_SENDDONE          = 0x0d
+    SIX_STATE_REQUEST_RECEIVED                  = 0x0c,
+    SIX_STATE_WAIT_RESPONSE_SENDDONE            = 0x0d
 } six2six_state_t;
 
 // before sixtop protocol is called, sixtop handler must be set
 typedef enum {
-    SIX_HANDLER_NONE                    = 0x00, // when complete reservation, handler must be set to none
-    SIX_HANDLER_MAINTAIN                = 0x01, // the handler is maintenance process
-    SIX_HANDLER_SF0                     = 0x02  // the handler is otf
+    SIX_HANDLER_NONE                            = 0x00, // when complete reservation, handler must be set to none
+    SIX_HANDLER_MAINTAIN                        = 0x01, // the handler is maintenance process
+    SIX_HANDLER_SF0                             = 0x02  // the handler is otf
 } six2six_handler_t;
 
 //=========================== typedef =========================================
