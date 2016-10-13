@@ -16,18 +16,19 @@
 #define IANA_6TOP_6P_VERSION   0x01 
 // 6P command Id
 #define IANA_6TOP_CMD_NONE     0x00
-#define IANA_6TOP_CMD_ADD      0x01 // CMD_ADD      | add one or more cells     
-#define IANA_6TOP_CMD_DELETE   0x02 // CMD_DELETE   | delete one or more cells  
-#define IANA_6TOP_CMD_COUNT    0x03 // CMD_COUNT    | count scheduled cells     
-#define IANA_6TOP_CMD_LIST     0x04 // CMD_LIST     | list the scheduled cells  
-#define IANA_6TOP_CMD_CLEAR    0x05 // CMD_CLEAR    | clear all cells
+#define IANA_6TOP_CMD_ADD      0x01 // CMD_ADD          | add one or more cells     
+#define IANA_6TOP_CMD_DELETE   0x02 // CMD_DELETE       | delete one or more cells  
+#define IANA_6TOP_CMD_COUNT    0x03 // CMD_COUNT        | count scheduled cells     
+#define IANA_6TOP_CMD_LIST     0x04 // CMD_LIST         | list the scheduled cells  
+#define IANA_6TOP_CMD_CLEAR    0x05 // CMD_CLEAR        | clear all cells
 // 6P return code
-#define IANA_6TOP_RC_SUCCESS   0x06 // RC_SUCCESS  | operation succeeded      
-#define IANA_6TOP_RC_VER_ERR   0x07 // RC_VER_ERR  | unsupported 6P version   
-#define IANA_6TOP_RC_SFID_ERR  0x08 // RC_SFID_ERR | unsupported SFID         
-#define IANA_6TOP_RC_BUSY      0x09 // RC_BUSY     | handling previous request
-#define IANA_6TOP_RC_RESET     0x0a // RC_RESET    | abort 6P transaction     
-#define IANA_6TOP_RC_ERR       0x0b // RC_ERR      | operation failed         
+#define IANA_6TOP_RC_SUCCESS   0x06 // RC_SUCCESS       | operation succeeded      
+#define IANA_6TOP_RC_ERR_VER   0x07 // RC_ERR_VER       | unsupported 6P version   
+#define IANA_6TOP_RC_ERR_SFID  0x08 // RC_ERR_SFID      | unsupported SFID         
+#define IANA_6TOP_RC_ERR_BUSY  0x09 // RC_ERR_BUSY      | handling previous request
+#define IANA_6TOP_RC_ERR_NORES 0x0a // RC_ERROR_NORES   | not enough resources
+#define IANA_6TOP_RC_ERR_RESET 0x0b // RC_ERR_RESET     | abort 6P transaction     
+#define IANA_6TOP_RC_ERR       0x0c // RC_ERR           | operation failed         
 
 // SF ID
 #define SFID_SF0  0
@@ -36,33 +37,33 @@
 #define DEFAULT_CHANNEL_OFFSET 2
 
 enum sixtop_CommandID_num{
-    SIXTOP_SOFT_CELL_REQ                = 0x00,
-    SIXTOP_SOFT_CELL_RESPONSE           = 0x01,
-    SIXTOP_REMOVE_SOFT_CELL_REQUEST     = 0x02,
+    SIXTOP_SOFT_CELL_REQ                        = 0x00,
+    SIXTOP_SOFT_CELL_RESPONSE                   = 0x01,
+    SIXTOP_REMOVE_SOFT_CELL_REQUEST             = 0x02,
 };
 
 // states of the sixtop-to-sixtop state machine
 typedef enum {
     // ready for next event
-    SIX_IDLE                            = 0x00,
+    SIX_STATE_IDLE                              = 0x00,
     // sending
-    SIX_SENDING_REQUEST                 = 0x01,
+    SIX_STATE_SENDING_REQUEST                   = 0x01,
     // waiting for SendDone confirmation
-    SIX_WAIT_ADDREQUEST_SENDDONE        = 0x02,   
-    SIX_WAIT_DELETEREQUEST_SENDDONE     = 0x03,
-    SIX_WAIT_COUNTREQUEST_SENDDONE      = 0x04,
-    SIX_WAIT_LISTREQUEST_SENDDONE       = 0x05,
-    SIX_WAIT_CLEARREQUEST_SENDDONE      = 0x06,
+    SIX_STATE_WAIT_ADDREQUEST_SENDDONE          = 0x02,   
+    SIX_STATE_WAIT_DELETEREQUEST_SENDDONE       = 0x03,
+    SIX_STATE_WAIT_COUNTREQUEST_SENDDONE        = 0x04,
+    SIX_STATE_WAIT_LISTREQUEST_SENDDONE         = 0x05,
+    SIX_STATE_WAIT_CLEARREQUEST_SENDDONE        = 0x06,
     // waiting for response from the neighbor
-    SIX_WAIT_ADDRESPONSE                = 0x07, 
-    SIX_WAIT_DELETERESPONSE             = 0x08,
-    SIX_WAIT_COUNTRESPONSE              = 0x09,
-    SIX_WAIT_LISTRESPONSE               = 0x0a,
-    SIX_WAIT_CLEARRESPONSE              = 0x0b,
+    SIX_STATE_WAIT_ADDRESPONSE                  = 0x07, 
+    SIX_STATE_WAIT_DELETERESPONSE               = 0x08,
+    SIX_STATE_WAIT_COUNTRESPONSE                = 0x09,
+    SIX_STATE_WAIT_LISTRESPONSE                 = 0x0a,
+    SIX_STATE_WAIT_CLEARRESPONSE                = 0x0b,
    
     // response senddone
-    SIX_REQUEST_RECEIVED                = 0x0c,
-    SIX_WAIT_RESPONSE_SENDDONE          = 0x0d
+    SIX_STATE_REQUEST_RECEIVED                  = 0x0c,
+    SIX_STATE_WAIT_RESPONSE_SENDDONE            = 0x0d
 } six2six_state_t;
 
 // before sixtop protocol is called, sixtop handler must be set
