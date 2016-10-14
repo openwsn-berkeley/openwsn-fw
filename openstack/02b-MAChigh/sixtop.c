@@ -295,12 +295,14 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells, track
    openserial_ncat_uint8_t_hex(str, neighbor->addr_64b[6], 150);
    openserial_ncat_uint8_t_hex(str, neighbor->addr_64b[7], 150);
    strncat(str, ", bw=", 150);
-   openserial_ncat_uint32_t(str, (uint32_t)numCells, 150);
+   openserial_ncat_uint8_t(str, (uint8_t)numCells, 150);
    strncat(str, ", track ", 150);
    openserial_ncat_uint32_t(str, (uint32_t)track.instance, 150);
    strncat(str, ", owner=", 150);
    openserial_ncat_uint8_t_hex(str, (uint32_t)track.owner.addr_64b[6], 150);
    openserial_ncat_uint8_t_hex(str, (uint32_t)track.owner.addr_64b[7], 150);
+   strncat(str, ", queuePos=", 150);
+   openserial_ncat_uint8_t(str, (uint8_t)openqueue_getPos(pkt), 150);
 
    for(i=0; i<SCHEDULEIEMAXNUMCELLS; i++){
       strncat(str, ", slot ", 150);
@@ -1134,13 +1136,13 @@ port_INLINE void sixtop_sendKA() {
 //changes the current sixtop state
 void sixtop_setState(six2six_state_t state){
    //TODO
- /*char str[150];
+ char str[150];
    sprintf(str, "state ");
    openserial_ncat_uint8_t(str, sixtop_vars.six2six_state, 150);
    strncat(str, " > ", 150);
    openserial_ncat_uint32_t(str, (uint32_t)state, 150);
    openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
-*/
+
    uint32_t  timeout_sixtop_value;    // to change the timeout value (jitter)
 
 
@@ -1170,14 +1172,14 @@ void sixtop_setState(six2six_state_t state){
       );
 
       //TODO
-/*
+
       char str[150];
       sprintf(str, "LinkRep/LinkReq sixtop timeout ");
       openserial_ncat_uint32_t(str, (uint32_t)timeout_sixtop_value, 150);
       strncat(str, " / ", 150);
       openserial_ncat_uint32_t(str, (uint32_t)SIX2SIX_TIMEOUT_MS, 150);
       openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
-*/
+
    }
 
    //otf callback when we come back to the idle state
@@ -1283,6 +1285,8 @@ void sixtop_sendDone_LinkRep(OpenQueueEntry_t* msg, owerror_t error){
             openserial_ncat_uint32_t(str, (uint32_t)numOfCells, 150);
             strncat(str, ", state ", 150);
             openserial_ncat_uint32_t(str, (uint32_t)sixtop_vars.six2six_state, 150);
+            strncat(str, ", queuePos=", 150);
+            openserial_ncat_uint32_t(str, (uint32_t)openqueue_getPos(msg), 150);
             for(i=0; i<numOfCells; i++){
                strncat(str, ", slot ", 150);
                openserial_ncat_uint32_t(str, (uint32_t)cellList[i].tsNum, 150);
@@ -1345,6 +1349,8 @@ void sixtop_sendDone_LinkRep(OpenQueueEntry_t* msg, owerror_t error){
          openserial_ncat_uint32_t(str, (uint32_t)numOfCells, 150);
          strncat(str, ", state ", 150);
          openserial_ncat_uint32_t(str, (uint32_t)sixtop_vars.six2six_state, 150);
+         strncat(str, ", queuePos=", 150);
+         openserial_ncat_uint32_t(str, (uint32_t)openqueue_getPos(msg), 150);
          for(i=0; i<numOfCells; i++){
             strncat(str, ", slot ", 150);
             openserial_ncat_uint32_t(str, (uint32_t)cellList[i].tsNum, 150);
@@ -1402,9 +1408,9 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
 
 
    //This is a reply (stateless)
-   if (msg->l2_sixtop_reply == TRUE)
+   if (msg->l2_sixtop_reply == TRUE){
       sixtop_sendDone_LinkRep(msg, error);
-
+   }
    //This is a request (stateful)
    else{
       switch (sixtop_vars.six2six_state) {
@@ -1420,6 +1426,8 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
                sprintf(str, "LinkRem txed: to ");
             openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[6], 150);
             openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[7], 150);
+            strncat(str, ", queuePos=", 150);
+            openserial_ncat_uint32_t(str, (uint32_t)openqueue_getPos(msg), 150);
             openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 #endif
             sixtop_setState(SIX_WAIT_ADDRESPONSE);
@@ -1434,6 +1442,10 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
                sprintf(str, "LinkRem failed: to ");
             openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[6], 150);
             openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[7], 150);
+            strncat(str, ", queuePos=", 150);
+            openserial_ncat_uint32_t(str, (uint32_t)openqueue_getPos(msg), 150);
+            sprintf(str, " cmd code ");
+            openserial_ncat_uint8_t(str, msg->l2_sixtop_requestCommand, 150);
             openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 #endif
             sixtop_setState(SIX_IDLE);
@@ -1452,10 +1464,8 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
       case SIX_WAIT_CLEARREQUEST_SENDDONE:
          sixtop_setState(SIX_WAIT_CLEARRESPONSE);
          break;
-         //  case SIX_IDLE:
-         //  case SIX_WAIT_ADDRESPONSE:
 
-         //     break;
+
       default:
          openserial_printInfo(
                COMPONENT_SIXTOP,
@@ -1463,7 +1473,7 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
                (errorparameter_t)111,
                (errorparameter_t)sixtop_vars.six2six_state
          );
-         sixtop_setState(SIX_IDLE);
+         //sixtop_setState(SIX_IDLE);
          break;
       }
 
@@ -1773,7 +1783,7 @@ void sixtop_notifyReceiveCommand(
               strncat(str, ", owner=", 150);
               openserial_ncat_uint8_t_hex(str, (uint32_t)response_pkt->l2_track.owner.addr_64b[6], 150);
               openserial_ncat_uint8_t_hex(str, (uint32_t)response_pkt->l2_track.owner.addr_64b[7], 150);
-              strncat(str, ", pos ", 150);
+              strncat(str, ", queuePos=", 150);
               openserial_ncat_uint32_t(str, (uint32_t)openqueue_getPos(response_pkt), 150);
               for(i=0; i<numOfCells; i++){
                  strncat(str, ", slot ", 150);
@@ -2042,7 +2052,7 @@ bool sixtop_candidateAddCellList(
     slotnb = openrandom_get16b() % schedule_getFrameLength();
 #endif
 
-#ifdef _DEBUG_SIXTOP_
+#ifdef _DEBUG_SIXTOP_BIS_
     char str[150];
     sprintf(str, "SELECT SCHED: ");
 #endif
@@ -2069,7 +2079,7 @@ bool sixtop_candidateAddCellList(
             cellList[SCHEDULEIEMAXNUMCELLS-numCandCells].choffset    = 0;
 #endif
 
-#ifdef _DEBUG_SIXTOP_
+#ifdef _DEBUG_SIXTOP_BIS_
             openserial_ncat_uint32_t(str, (uint32_t)cellList[SCHEDULEIEMAXNUMCELLS-numCandCells].tsNum, 150);
             strncat(str, "/", 150);
             openserial_ncat_uint32_t(str, (uint32_t)cellList[SCHEDULEIEMAXNUMCELLS-numCandCells].choffset, 150);
@@ -2082,7 +2092,7 @@ bool sixtop_candidateAddCellList(
             }
         }
     }
-#ifdef _DEBUG_SIXTOP_
+#ifdef _DEBUG_SIXTOP_BIS_
     openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 #endif
 

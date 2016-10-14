@@ -243,11 +243,6 @@ void sfloc_remove_obsolete_parents(void){
    return;
 #endif
 
-   //TODO
-   return;
-
-
-
    scheduleEntry_t  *cell;
    uint8_t          i;
    open_addr_t      parent;
@@ -270,7 +265,7 @@ void sfloc_remove_obsolete_parents(void){
 
 #ifdef _DEBUG_SFLOC_
           char str[150];
-          sprintf(str, "SFLOC LinkRem(oldParent)=");
+          sprintf(str, "SFLOC LinkRem(oldParent-silent)=");
           openserial_ncat_uint8_t_hex(str, (uint8_t)(cell->neighbor.addr_64b[6]), 150);
           openserial_ncat_uint8_t_hex(str, (uint8_t)(cell->neighbor.addr_64b[7]), 150);
           strncat(str, ",slotOffset=", 150);
@@ -296,9 +291,6 @@ void sfloc_remove_unused_cells(void){
 #ifndef SFLOC_REMOVE_UNUSED_CELLS
    return;
 #endif
-
-   //TODO
-   return;
 
    //no ongoing 6top transaction
    if (!sixtop_isIdle())
@@ -343,7 +335,7 @@ void sfloc_remove_unused_cells(void){
                  if (cell->type == CELLTYPE_RX){
 #ifdef _DEBUG_SFLOC_
                      char str[150];
-                     sprintf(str, "SFLOC LinkRem(silent)=");
+                     sprintf(str, "SFLOC LinkRem(unused-silent)=");
                      openserial_ncat_uint8_t_hex(str, (uint8_t)cell->neighbor.addr_64b[6], 150);
                      openserial_ncat_uint8_t_hex(str, (uint8_t)cell->neighbor.addr_64b[7], 150);
                      strncat(str, ",slotOffset=", 150);
@@ -353,10 +345,12 @@ void sfloc_remove_unused_cells(void){
                      openserial_printf(COMPONENT_SFLOC, str, strlen(str));
 #endif
 
+                     //silent remove (RX TIMEOUT >> TX_TIMEOUT)
                      schedule_removeActiveSlot(cell->slotOffset, &(cell->neighbor));
                  }
                  //sends a 6P request
                  else {
+                    //TODO
                     return;
 
 #ifdef _DEBUG_SFLOC_
@@ -371,6 +365,7 @@ void sfloc_remove_unused_cells(void){
                      openserial_printf(COMPONENT_SFLOC, str, strlen(str));
 #endif
 
+                     //sends a 6P command to remove this cell
                      sixtop_setHandler(SIX_HANDLER_SFLOC);
                      sixtop_request(
                              IANA_6TOP_CMD_DELETE,

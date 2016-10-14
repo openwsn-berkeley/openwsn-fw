@@ -157,11 +157,12 @@ void cexample_task_cb() {
    (cexample_vars.seqnum)++;
 
    //stat for data packet generation
-   open_addr_t dest_128b, dest_64b, prefix;
+/*   open_addr_t dest_128b, dest_64b, prefix;
    dest_128b.type = ADDR_128B;
    icmpv6rpl_getRPLDODAGid(&(dest_128b.addr_128b[0]));
    packetfunctions_ip128bToMac64b(&dest_128b, &prefix, &dest_64b);
-   openserial_statDataGen(cexample_vars.seqnum, &(cexample_vars.track), idmanager_getMyID(ADDR_64B), &dest_64b);
+*/
+
 
    // don't run if not synch
    if (ieee154e_isSynch() == FALSE)
@@ -213,7 +214,6 @@ void cexample_task_cb() {
    pkt->l3_destinationAdd.type = ADDR_128B;
    icmpv6rpl_getRPLDODAGid(&(pkt->l3_destinationAdd.addr_128b[0]));
 
-
    // send
    outcome = opencoap_send(
       pkt,
@@ -223,6 +223,12 @@ void cexample_task_cb() {
       &cexample_vars.desc
    );
    
+   //stats
+   openserial_statDataGen(cexample_vars.seqnum, pkt);
+         //&(cexample_vars.track), idmanager_getMyID(ADDR_64B), &dest_64b);
+
+
+
    // avoid overflowing the queue if fails
    if (outcome==E_FAIL) {
       openqueue_freePacketBuffer(pkt);

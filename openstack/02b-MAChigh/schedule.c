@@ -178,8 +178,7 @@ bool debugPrint_schedule() {
    while (rowNbWritten < SCHEDULE_NBROWS_OPENSERIALSTATUS){
 
       //this cell is not OFF and was not reinitialized recently
-      if (1){
-     // if (schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].type != CELLTYPE_OFF || schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].reinit){
+      if (schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].type != CELLTYPE_OFF || schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].reinit){
 
          debugPrint_schedule_entry(schedule_vars.debugPrintRow);
          schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].reinit = FALSE;

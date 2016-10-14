@@ -7,6 +7,7 @@
 
 #include "opendefs.h"
 #include "openserial.h"
+#include "packetfunctions.h"
 #include "IEEE802154E.h"
 #include "neighbors.h"
 #include "sixtop.h"
@@ -1272,17 +1273,12 @@ void openserial_fillPktTx(evtPktTx_t *evt, OpenQueueEntry_t* msg){
    evt->txPower          = msg->l1_txPower;
    evt->track_instance   = msg->l2_track.instance;
    evt->numTxAttempts    = msg->l2_numTxAttempts;
- //  evt->l4_protocol      = msg->l4_protocol;
    evt->frame_type       = msg->l2_frameType;
    evt->slotOffset       = schedule_getSlotOffset();
    evt->frequency        = calculateFrequency(schedule_getChannelOffset());
-//   evt->l4_sourcePortORicmpv6Type = msg->l4_sourcePortORicmpv6Type;
-//   evt->l4_destination_port       = msg->l4_destination_port;
-
+   evt->queuePos         = openqueue_getPos(msg);
    memcpy(evt->track_owner, msg->l2_track.owner.addr_64b, 8);
    memcpy(evt->l2Dest,      msg->l2_nextORpreviousHop.addr_64b, 8);
-//   memcpy(evt->l3Source,    msg->l3_sourceAdd.addr_128b, 16);
-//   memcpy(evt->l3Dest,      msg->l3_destinationAdd.addr_128b, 16);
 }
 
 //info for a received packet
@@ -1295,6 +1291,7 @@ void openserial_fillPktRx(evtPktRx_t *evt, OpenQueueEntry_t* msg){
    evt->frame_type       = msg->l2_frameType;
    evt->slotOffset       = schedule_getSlotOffset();
    evt->frequency        = calculateFrequency(schedule_getChannelOffset());
+   evt->queuePos         = openqueue_getPos(msg);
    memcpy(evt->track_owner, msg->l2_track.owner.addr_64b, 8);
    memcpy(evt->l2Src, msg->l2_nextORpreviousHop.addr_64b, 8);
 
@@ -1371,31 +1368,30 @@ void openserial_statPktError(OpenQueueEntry_t* msg){
 
 
 //push an event to track generated frames
-void openserial_statDataGen(uint32_t seqnum, track_t *track, open_addr_t *src, open_addr_t *dest){
+void openserial_statDataGen(uint32_t seqnum, OpenQueueEntry_t* msg){ //track_t *track, open_addr_t *src, open_addr_t *dest){
 
-   #ifdef OPENSERIAL_STAT
-      evtPktData_t          dataGen;
+#ifdef OPENSERIAL_STAT
+   evtPktData_t   dataGen;
+   open_addr_t    addr_64b, prefix;
 
-      //wrong arguments
-        if (src->type != ADDR_64B){
-            openserial_printError(COMPONENT_OPENSERIAL, ERR_WRONG_ADDR_TYPE, src->type, 5);
-            return;
-         }
-        if (dest->type != ADDR_64B){
-            openserial_printError(COMPONENT_OPENSERIAL, ERR_WRONG_ADDR_TYPE, dest->type, 6);
-            return;
-         }
+   //error
+    if (msg->l3_destinationAdd.type != ADDR_128B){
+        openserial_printError(COMPONENT_OPENSERIAL, ERR_WRONG_ADDR_TYPE, msg->l3_destinationAdd.type, 12);
+        return;
+     }
 
-      //info
-      dataGen.seqnum          = seqnum ;
-      dataGen.track_instance  = track->instance;
-      memcpy(dataGen.track_owner, track->owner.addr_64b, 8);
-      memcpy(dataGen.l3Source, src->addr_64b, 8);
-      memcpy(dataGen.l3Dest, dest->addr_64b, 8);
+   //info
+   dataGen.seqnum          = seqnum ;
+   dataGen.queuePos        = openqueue_getPos(msg);
+   dataGen.track_instance  =  msg->l2_track.instance;
+   memcpy(dataGen.track_owner,   msg->l2_track.owner.addr_64b, 8);
+   packetfunctions_ip128bToMac64b(&(msg->l3_destinationAdd), &prefix, &addr_64b);
+   memcpy(dataGen.l3Dest, addr_64b.addr_64b, 8);
+   memcpy(&addr_64b, idmanager_getMyID(ADDR_64B), sizeof(open_addr_t));
+   memcpy(dataGen.l3Source, addr_64b.addr_64b, 8);
 
-
-      openserial_printStat(SERTYPE_DATA_GENERATION, COMPONENT_CEXAMPLE, (uint8_t*)&dataGen, sizeof(dataGen));
-   #endif
+   openserial_printStat(SERTYPE_DATA_GENERATION, COMPONENT_CEXAMPLE, (uint8_t*)&dataGen, sizeof(dataGen));
+#endif
 
 }
 

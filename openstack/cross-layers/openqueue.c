@@ -178,8 +178,6 @@ void openqueue_timeout_drop(void){
                //sixtop will desallocate the packet itself
                openqueue_vars.queue[i].l2_sendDoneError = E_FAIL;
                sixtop_NotifSendDispatch(&(openqueue_vars.queue[i]));
-               //openqueue_reset_entry(&(openqueue_vars.queue[i]));
-
             }
    }
 
@@ -376,7 +374,10 @@ void openqueue_removeAllCreatedBy(uint8_t creator) {
    for (i=0;i<QUEUELENGTH;i++){
       if (openqueue_vars.queue[i].creator == creator) {
 
-         openqueue_reset_entry(&(openqueue_vars.queue[i]));
+         //tx failure
+         openqueue_vars.queue[i].l2_sendDoneError = E_FAIL;
+         sixtop_NotifSendDispatch(&(openqueue_vars.queue[i]));
+
 
 #ifdef _DEBUG_OQ_MEM_
          char str[150];
@@ -414,7 +415,9 @@ void openqueue_removeAllOwnedBy(uint8_t owner) {
    DISABLE_INTERRUPTS();
    for (i=0;i<QUEUELENGTH;i++){
       if (openqueue_vars.queue[i].owner==owner) {
-         openqueue_reset_entry(&(openqueue_vars.queue[i]));
+         //tx failure
+         openqueue_vars.queue[i].l2_sendDoneError = E_FAIL;
+         sixtop_NotifSendDispatch(&(openqueue_vars.queue[i]));
       }
    }
    ENABLE_INTERRUPTS();

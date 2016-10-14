@@ -148,6 +148,7 @@ typedef struct{
    uint32_t    seqnum;
    uint8_t     l3Source[8];
    uint8_t     l3Dest[8];
+   uint8_t     queuePos;
 } evtPktData_t;
 END_PACK
 
@@ -162,11 +163,7 @@ typedef struct{
    uint8_t     l2Dest[8];
    uint8_t     txPower;
    uint8_t     numTxAttempts;
-//   uint8_t     l4_protocol;
-//   uint16_t    l4_sourcePortORicmpv6Type;
-//   uint16_t    l4_destination_port;
-//   uint8_t     l3Source[16];
-//   uint8_t     l3Dest[16];
+   uint8_t     queuePos;
 } evtPktTx_t;
 END_PACK
 
@@ -182,6 +179,7 @@ typedef struct{
    uint8_t     rssi;
    uint8_t     lqi;
    uint8_t     crc;
+   uint8_t     queuePos;
 } evtPktRx_t;
 END_PACK
 
@@ -318,7 +316,7 @@ void  openserial_statRx(OpenQueueEntry_t* msg);
 void  openserial_statTx(OpenQueueEntry_t* msg);
 void  openserial_statPktTimeout(OpenQueueEntry_t* msg);
 void  openserial_statPktBufferOverflow(OpenQueueEntry_t* msg);
-void  openserial_statDataGen(uint32_t seqnum, track_t *track, open_addr_t *src, open_addr_t *dest);
+void  openserial_statDataGen(uint32_t seqnum, OpenQueueEntry_t* msg); //track_t *track, open_addr_t *src, open_addr_t *dest);
 void  openserial_statDataRx(uint32_t seqnum, track_t *track, open_addr_t *src, open_addr_t *dest);
 void  openserial_statDIOtx(void);
 void  openserial_statDAOtx(uint8_t *parent);
