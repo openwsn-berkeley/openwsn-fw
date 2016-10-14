@@ -42,16 +42,11 @@ void radio_init(void) {
     // change state
     radio_vars.state          = RADIOSTATE_RFOFF;
    
-    P1SEL &= (~BIT3); // Set P1.3 SEL as GPIO
-    P1DIR &= (~BIT3); // Set P1.3 SEL as Input
-    P1IES |= (BIT3); // Falling Edge
-    P1IFG &= (~BIT3); // Clear interrupt flag for P1.3
-    P1IE |= (BIT3); // Enable interrupt for P1.3
-    P1SEL &= (~BIT7); // Set P1.7 SEL as GPIO
-    P1DIR &= (~BIT7); // Set P1.7 SEL as Input
-    P1IES &= (~BIT7); // Rising Edge //P1IES |= (BIT7); // Falling Edge
-    P1IFG &= (~BIT7); // Clear interrupt flag for P1.7
-    P1IE |= (BIT7); // Enable interrupt for P1.7
+    P1SEL &= (~BIT0); // Set P1.0 SEL as GPIO
+    P1DIR &= (~BIT0); // Set P1.0 SEL as Input
+    P1IES |= (~BIT0); // low to high edge
+    P1IFG &= (~BIT0); // Clear interrupt flag for P1.0
+    P1IE |= (BIT0); // Enable interrupt for P1.0
     // Write registers to radio
     for(uint16_t i = 0;
         i < (sizeof(basic_settings_ofdm)/sizeof(registerSetting_t)); i++) {
@@ -104,14 +99,14 @@ uint16_t radio_getTimerPeriod(void) {
 //channel spacing in KHz
 //frequency_0 in kHz
 //frequency_nb integer
-void radio_setFrequency(uint16_t channel_spacing, uint32_t frequency_0, uint16_t frequency_nb) {
+void radio_setFrequency(uint16_t channel_spacing, uint32_t frequency_0, uint16_t channel) {
     
     frequency_0 = ((frequency_0 * 1000)/25000);
     at86rf215_spiWriteReg(RG_RF09_CS, (uint8_t)(channel_spacing/0xFF));
     at86rf215_spiWriteReg(RG_RF09_CCF0L, (uint8_t)(frequency_0%0xFF));
     at86rf215_spiWriteReg(RG_RF09_CCF0H, (uint8_t)(frequency_0/0xFF));
-    at86rf215_spiWriteReg(RG_RF09_CNL, (uint8_t)(frequency_nb%0xFF));
-    at86rf215_spiWriteReg(RG_RF09_CNL, (uint8_t)(frequency_nb/0xFF));
+    at86rf215_spiWriteReg(RG_RF09_CNL, (uint8_t)(channel%0xFF));
+    at86rf215_spiWriteReg(RG_RF09_CNL, (uint8_t)(channel/0xFF));
     // change state
     radio_vars.state = RADIOSTATE_FREQUENCY_SET;
     

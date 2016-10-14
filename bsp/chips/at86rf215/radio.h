@@ -67,7 +67,7 @@ PORT_TIMER_WIDTH radio_getTimerValue(void);
 void     radio_setTimerPeriod(PORT_TIMER_WIDTH period);
 PORT_TIMER_WIDTH radio_getTimerPeriod(void);
 // RF admin
-void     radio_setFrequency(uint16_t channel_spacing, uint32_t frequency_0, uint16_t frequency_nb) ;
+void     radio_setFrequency(uint16_t channel_spacing, uint32_t frequency_0, uint16_t channel);
 void     radio_rfOn(void);
 void     radio_rfOff(void);
 // TX
