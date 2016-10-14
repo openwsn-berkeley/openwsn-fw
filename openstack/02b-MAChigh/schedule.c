@@ -926,9 +926,9 @@ void schedule_housekeeping(){
                 if(packetfunctions_sameAddress(&neighbor,&(schedule_vars.scheduleBuf[i].neighbor))==FALSE){
                     if (sixtop_setHandler(SIX_HANDLER_SFX)==FALSE){
                        // one sixtop transcation is happening, only one instance at one time
-                       return;
+                       continue;
                     }
-                    sixtop_request(IANA_6TOP_CMD_ADD,&(schedule_vars.scheduleBuf[i].neighbor),1);
+                    sixtop_request(IANA_6TOP_CMD_CLEAR,&(schedule_vars.scheduleBuf[i].neighbor),1);
                     schedule_removeActiveSlot(
                         schedule_vars.scheduleBuf[i].slotOffset,
                         &(schedule_vars.scheduleBuf[i].neighbor)
@@ -943,7 +943,7 @@ void schedule_housekeeping(){
             ){
                 if (sixtop_setHandler(SIX_HANDLER_RELOCATION)==FALSE){
                    // one sixtop transcation is happening, only one instance at one time
-                   return;
+                   continue;
                 }
                 sixtop_request(IANA_6TOP_CMD_ADD,&(schedule_vars.scheduleBuf[i].neighbor),1);
                 break;

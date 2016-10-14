@@ -385,6 +385,10 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
          ) {
                continue;
          }
+         if (neighbors_getNeighborNoResource(i)==TRUE){
+               // don't select neighbor which has no resource
+               continue;
+         }
          // remember that we have at least one valid candidate parent
          foundBetterParent=TRUE;
          // select best candidate so far

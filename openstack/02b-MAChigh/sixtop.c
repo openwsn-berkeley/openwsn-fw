@@ -22,7 +22,7 @@
 
 #define MAX_6P_REQUEST            5
 // in seconds: sixtop maintaince is called every 30 seconds
-#define MAINTENANCE_PERIOD       30
+#define MAINTENANCE_PERIOD        5
 // in miliseconds: sending EB every 10 seconds
 #define EBPERIOD              10000 
 // in miliseconds: EB will be sent with period of 
@@ -1294,12 +1294,12 @@ void sixtop_notifyReceiveCommand(
                 }
             } else {
                 if (commandIdORcode==IANA_6TOP_RC_ERR_BUSY){
-                    // TBD: the neighbor is in a transaction, call scheduling function to to make a decision 
                     // disable sfx for [0...2^4] slotframe long time
                     sfx_setBackoff(openrandom_get16b()%(1<<4));
                 } else {
                     if (commandIdORcode==IANA_6TOP_RC_ERR_NORES){
-                        // TBD: the neighbor has no enough resource for adding cells, call sf0 to make a decision
+                        // mark this neighbor as no resource for future processing
+                        neighbors_setNeighborNoResource(&(pkt->l2_nextORpreviousHop));
                     } else {
                         if (commandIdORcode==IANA_6TOP_RC_ERR_RESET){
                             // TBD: the neighbor can't statisfy the 6p request with given cells, call sf0 to make a decision 

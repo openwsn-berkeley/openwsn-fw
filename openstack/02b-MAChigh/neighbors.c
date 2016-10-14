@@ -92,7 +92,11 @@ open_addr_t* neighbors_getKANeighbor(uint16_t kaPeriod) {
       }
    }
    return NULL;
- }
+}
+
+bool neighbors_getNeighborNoResource(uint8_t index){
+    return neighbors_vars.neighbors[index].isNoRes;
+}
 
 //===== interrogators
 
@@ -357,6 +361,18 @@ void neighbors_setNeighborRank(uint8_t index, dagrank_t rank) {
 
 }
 
+void neighbors_setNeighborNoResource(open_addr_t* address){
+   uint8_t i;
+   
+   // loop through neighbor table
+   for (i=0;i<MAXNUMNEIGHBORS;i++) {
+      if (isThisRowMatching(address,i)) {
+          neighbors_vars.neighbors[i].isNoRes = TRUE;
+          break;
+      }
+   }
+}
+
 //===== managing routing info
 
 /**
@@ -395,27 +411,41 @@ void  neighbors_removeOld() {
    uint8_t    i, j;
    uint16_t   timeSinceHeard;
    bool       haveParent;
-   uint8_t    neighborIndexWithHighestRank[3];
+   uint8_t    neighborIndexWithLowestRank[3];
    dagrank_t  lowestRank;
+   // neighbors marked as NO_RES will never removed.
+   // neighbors marked as NO_RES aren't take into account when finding the 3 lowest rank neighbor. 
    // first round
    lowestRank = MAXDAGRANK;
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
       if (neighbors_vars.neighbors[i].used==1) {
          timeSinceHeard = ieee154e_asnDiff(&neighbors_vars.neighbors[i].asn);
-         if (timeSinceHeard>DESYNCTIMEOUT) {
+         // remove the neighbor has no activity for a while and the one marked as isNoRes
+         if (timeSinceHeard>DESYNCTIMEOUT || neighbors_vars.neighbors[i].isNoRes) {
             haveParent = icmpv6rpl_getPreferredParentIndex(&j);
             if (haveParent && (i==j)) { // this is our preferred parent, carefull!
                 icmpv6rpl_killPreferredParent();
-                removeNeighbor(i);
+                if (neighbors_vars.neighbors[i].isNoRes==FALSE){
+                    // don't remove neighbor marked as isNoRes, 
+                    // keep this information in the future to avoid reselect it as parent
+                    removeNeighbor(i);
+                }
                 icmpv6rpl_updateMyDAGrankAndParentSelection();
             }
             else {
-                removeNeighbor(i);
+                if (neighbors_vars.neighbors[i].isNoRes==FALSE){
+                    // don't remove neighbor marked as isNoRes, 
+                    // keep this information in the future to avoid reselect it as parent
+                    removeNeighbor(i);
+                }
             }
          } else {
-            if (lowestRank>neighbors_vars.neighbors[i].DAGrank){
+            if (
+                lowestRank>neighbors_vars.neighbors[i].DAGrank && 
+                neighbors_vars.neighbors[i].isNoRes==FALSE
+            ){
                 lowestRank = neighbors_vars.neighbors[i].DAGrank;
-                neighborIndexWithHighestRank[0] = i;
+                neighborIndexWithLowestRank[0] = i;
             }
          }
       }
@@ -431,10 +461,11 @@ void  neighbors_removeOld() {
       if (neighbors_vars.neighbors[i].used==1) {
           if (
               lowestRank>neighbors_vars.neighbors[i].DAGrank &&
-              i != neighborIndexWithHighestRank[0]
+              i != neighborIndexWithLowestRank[0]           && 
+              neighbors_vars.neighbors[i].isNoRes==FALSE
           ){
               lowestRank = neighbors_vars.neighbors[i].DAGrank;
-              neighborIndexWithHighestRank[1] = i;
+              neighborIndexWithLowestRank[1] = i;
           }
       }
    }
@@ -449,11 +480,12 @@ void  neighbors_removeOld() {
       if (neighbors_vars.neighbors[i].used==1) {
           if (
               lowestRank>neighbors_vars.neighbors[i].DAGrank &&
-              i != neighborIndexWithHighestRank[0]           &&
-              i != neighborIndexWithHighestRank[1]
+              i != neighborIndexWithLowestRank[0]           &&
+              i != neighborIndexWithLowestRank[1]           && 
+              neighbors_vars.neighbors[i].isNoRes==FALSE
           ){
               lowestRank = neighbors_vars.neighbors[i].DAGrank;
-              neighborIndexWithHighestRank[2] = i;
+              neighborIndexWithLowestRank[2] = i;
           }
       }
    }
@@ -466,19 +498,23 @@ void  neighbors_removeOld() {
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
       if (neighbors_vars.neighbors[i].used==1) {
          if (
-             i!= neighborIndexWithHighestRank[0] &&
-             i!= neighborIndexWithHighestRank[1] &&
-             i!= neighborIndexWithHighestRank[2] &&
+             i!= neighborIndexWithLowestRank[0] &&
+             i!= neighborIndexWithLowestRank[1] &&
+             i!= neighborIndexWithLowestRank[2] &&
              neighbors_vars.neighbors[i].DAGrank != MAXDAGRANK
          ) {
             haveParent = icmpv6rpl_getPreferredParentIndex(&j);
             if (haveParent && (i==j)) { // this is our preferred parent, carefull!
                 icmpv6rpl_killPreferredParent();
-                removeNeighbor(i);
+                if (neighbors_vars.neighbors[i].isNoRes==FALSE){
+                    removeNeighbor(i);
+                }
                 icmpv6rpl_updateMyDAGrankAndParentSelection();
             }
             else {
-                removeNeighbor(i);
+                if (neighbors_vars.neighbors[i].isNoRes==FALSE){
+                    removeNeighbor(i);
+                }
             }
          }
       }
@@ -582,6 +618,7 @@ void removeNeighbor(uint8_t neighborIndex) {
    neighbors_vars.neighbors[neighborIndex].asn.bytes0and1            = 0;
    neighbors_vars.neighbors[neighborIndex].asn.bytes2and3            = 0;
    neighbors_vars.neighbors[neighborIndex].asn.byte4                 = 0;
+   neighbors_vars.neighbors[neighborIndex].isNoRes                   = FALSE;
 }
 
 //=========================== helpers =========================================
