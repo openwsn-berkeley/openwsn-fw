@@ -39,7 +39,7 @@ The superframe repears over time and can be arbitrarly long.
   for seiral port to tranmit data to dagroot. 
 */
 
-#define NUMSLOTSOFF          15
+#define NUMSLOTSOFF          10
 
 /**
 \brief Maximum number of active slots in a superframe.
