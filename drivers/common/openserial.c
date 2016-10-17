@@ -1368,19 +1368,31 @@ void openserial_statPktError(OpenQueueEntry_t* msg){
 
 
 //push an event to track generated frames
-void openserial_statDataGen(uint32_t seqnum, OpenQueueEntry_t* msg){ //track_t *track, open_addr_t *src, open_addr_t *dest){
+void openserial_statDataGen(uint32_t seqnum, track_t *track, open_addr_t *l3_destinationAdd, uint8_t queuePos){
 
 #ifdef OPENSERIAL_STAT
    evtPktData_t   dataGen;
    open_addr_t    addr_64b, prefix;
 
    //error
-    if (msg->l3_destinationAdd.type != ADDR_128B){
-        openserial_printError(COMPONENT_OPENSERIAL, ERR_WRONG_ADDR_TYPE, msg->l3_destinationAdd.type, 12);
-        return;
-     }
+   if (l3_destinationAdd->type != ADDR_128B){
+       openserial_printError(COMPONENT_OPENSERIAL, ERR_WRONG_ADDR_TYPE, l3_destinationAdd->type, 12);
+       return;
+    }
 
    //info
+   dataGen.seqnum          = seqnum ;
+   dataGen.queuePos        = queuePos;
+   dataGen.track_instance  =  track->instance;
+   memcpy(dataGen.track_owner,   track->owner.addr_64b, 8);
+   packetfunctions_ip128bToMac64b(l3_destinationAdd, &prefix, &addr_64b);
+   memcpy(dataGen.l3Dest, addr_64b.addr_64b, 8);
+   memcpy(&addr_64b, idmanager_getMyID(ADDR_64B), sizeof(open_addr_t));
+   memcpy(dataGen.l3Source, addr_64b.addr_64b, 8);
+
+   openserial_printStat(SERTYPE_DATA_GENERATION, COMPONENT_CEXAMPLE, (uint8_t*)&dataGen, sizeof(dataGen));
+#endif
+   /*
    dataGen.seqnum          = seqnum ;
    dataGen.queuePos        = openqueue_getPos(msg);
    dataGen.track_instance  =  msg->l2_track.instance;
@@ -1389,9 +1401,7 @@ void openserial_statDataGen(uint32_t seqnum, OpenQueueEntry_t* msg){ //track_t *
    memcpy(dataGen.l3Dest, addr_64b.addr_64b, 8);
    memcpy(&addr_64b, idmanager_getMyID(ADDR_64B), sizeof(open_addr_t));
    memcpy(dataGen.l3Source, addr_64b.addr_64b, 8);
-
-   openserial_printStat(SERTYPE_DATA_GENERATION, COMPONENT_CEXAMPLE, (uint8_t*)&dataGen, sizeof(dataGen));
-#endif
+*/
 
 }
 

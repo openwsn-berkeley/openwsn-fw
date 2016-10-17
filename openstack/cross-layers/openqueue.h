@@ -58,6 +58,7 @@ OpenQueueEntry_t*  openqueue_getFreePacketBuffer_with_timeout(uint8_t creator, c
 void               openqueue_set_timeout(OpenQueueEntry_t* entry, const uint32_t duration_ms);
 owerror_t          openqueue_freePacketBuffer(OpenQueueEntry_t* pkt);
 void               openqueue_removeEntry(OpenQueueEntry_t* entry);
+void               openqueue_removeFirstCreatedBy(uint8_t creator);
 void               openqueue_removeAllCreatedBy(uint8_t creator);
 void               openqueue_removeAllOwnedBy(uint8_t owner);
 uint8_t            openqueue_count_track(track_t track);
@@ -69,8 +70,6 @@ OpenQueueEntry_t*    openqueue_getPacket(uint8_t pos);
 // called by IEEE80215E
 OpenQueueEntry_t*  openqueue_macGetDataPacket(open_addr_t* toNeighbor, track_t *track);
 OpenQueueEntry_t*  openqueue_macGetEBPacket(void);
-//called by openbridge
-//OpenQueueEntry_t* openqueue_copy_for_openbridge(OpenQueueEntry_t* pkt);
 //management
 bool              openqueue_overflow_for_data(void);
 //for debug

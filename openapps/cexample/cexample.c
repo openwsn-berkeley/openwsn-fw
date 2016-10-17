@@ -156,22 +156,28 @@ void cexample_task_cb() {
    //increment the sequence number
    (cexample_vars.seqnum)++;
 
-   //stat for data packet generation
-/*   open_addr_t dest_128b, dest_64b, prefix;
-   dest_128b.type = ADDR_128B;
-   icmpv6rpl_getRPLDODAGid(&(dest_128b.addr_128b[0]));
-   packetfunctions_ip128bToMac64b(&dest_128b, &prefix, &dest_64b);
-*/
 
+   //stats
+   open_addr_t l3_destinationAdd;
+   l3_destinationAdd.type = ADDR_128B;
+   icmpv6rpl_getRPLDODAGid(&(l3_destinationAdd.addr_128b[0]));
 
    // don't run if not synch
-   if (ieee154e_isSynch() == FALSE)
+   if (ieee154e_isSynch() == FALSE){
+      openserial_statDataGen(cexample_vars.seqnum, &(cexample_vars.track), &(l3_destinationAdd), -1);
       return;
+   }
 
+   //Queue overflow!
+   if (openqueue_overflow_for_data()){
+      openserial_statDataGen(cexample_vars.seqnum, &(cexample_vars.track), &(l3_destinationAdd), -1);
+      return;
+   }
 
    // create a CoAP packet
    pkt = openqueue_getFreePacketBuffer_with_timeout(COMPONENT_CEXAMPLE, cexample_timeout);
    if (pkt==NULL) {
+      openserial_statDataGen(cexample_vars.seqnum, &(cexample_vars.track), &(l3_destinationAdd), -1);
       return;
    }
    // take ownership over that packet
@@ -211,8 +217,10 @@ void cexample_task_cb() {
    pkt->l4_destination_port       = WKP_UDP_COAP;
 
    // set PKT destination
-   pkt->l3_destinationAdd.type = ADDR_128B;
-   icmpv6rpl_getRPLDODAGid(&(pkt->l3_destinationAdd.addr_128b[0]));
+   memcpy(&(pkt->l3_destinationAdd), &(l3_destinationAdd), sizeof(open_addr_t));
+
+   //stats
+   openserial_statDataGen(cexample_vars.seqnum, &(cexample_vars.track), &(l3_destinationAdd), openqueue_getPos(pkt));
 
    // send
    outcome = opencoap_send(
@@ -222,12 +230,6 @@ void cexample_task_cb() {
       1,
       &cexample_vars.desc
    );
-   
-   //stats
-   openserial_statDataGen(cexample_vars.seqnum, pkt);
-         //&(cexample_vars.track), idmanager_getMyID(ADDR_64B), &dest_64b);
-
-
 
    // avoid overflowing the queue if fails
    if (outcome==E_FAIL) {

@@ -154,6 +154,8 @@ void openqueue_timeout_drop(void){
 
    uint8_t     i;
    timeout_t   now;
+   char     list[150];
+   list[0] = '\0';
 
    //initialization
    ieee154e_getAsn(now.byte);
@@ -168,21 +170,26 @@ void openqueue_timeout_drop(void){
             if (openqueue_timeout_is_greater(now, openqueue_vars.queue[i].timeout)){
 
                openserial_statPktTimeout(&(openqueue_vars.queue[i]));
-//#ifdef _DEBUG_OQ_MEM_
-               char str[150];
-               sprintf(str, "rem(timeout), pos=");
-               openserial_ncat_uint32_t(str, (uint32_t)i, 150);
-               openserial_printf(COMPONENT_OPENQUEUE, str, strlen(str));
-//#endif
 
                //sixtop will desallocate the packet itself
                openqueue_vars.queue[i].l2_sendDoneError = E_FAIL;
                sixtop_NotifSendDispatch(&(openqueue_vars.queue[i]));
+
+               openserial_ncat_uint32_t(list, (uint32_t)i, 150);
+               strncat(list, "", 150);
             }
    }
 
-
    ENABLE_INTERRUPTS();
+
+   //#ifdef _DEBUG_OQ_MEM_
+   if (strlen(list) > 0){
+      char str[150];
+      sprintf(str, "rem(timeout), pos=");
+      openserial_ncat_uint32_t(str, (uint32_t)i, 150);
+      openserial_printf(COMPONENT_OPENQUEUE, str, strlen(str));
+   }
+   //#endif
 
 }
 
@@ -360,6 +367,63 @@ owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
 
 
 
+/**
+\brief Free the first packet in the buffer created by a specific module.
+
+\param creator The identifier of the component, taken in COMPONENT_*.
+
+ */
+void openqueue_removeFirstCreatedBy(uint8_t creator) {
+   uint8_t i;
+#ifdef _DEBUG_OQ_MEM_
+   char     list[150];
+   list[0] = '\0';
+   char str[150];
+
+   sprintf(str, "remove (openqueue_removeFirstCreatedBy)----");
+   openserial_printf(COMPONENT_OPENQUEUE, str, strlen(str));
+#endif
+
+
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   for (i=0;i<QUEUELENGTH;i++){
+      if (openqueue_vars.queue[i].creator == creator) {
+
+         //this is a LinkReply (with a timeout), handled separately
+         if(!openqueue_timeout_is_zero(openqueue_vars.queue[i].timeout)){
+#ifdef _DEBUG_OQ_MEM_
+         openserial_ncat_uint32_t(list, (uint32_t)i, 150);
+            strncat(list, " (rep) ", 150);
+#endif
+         }
+         //tx failure (ONE single ongoing LINKreq/m)
+         else{
+            openqueue_vars.queue[i].l2_sendDoneError = E_FAIL;
+            sixtop_NotifSendDispatch(&(openqueue_vars.queue[i]));
+#ifdef _DEBUG_OQ_MEM_
+            openserial_ncat_uint32_t(list, (uint32_t)i, 150);
+            strncat(list, " (req/m) ", 150);
+#endif
+            break;
+         }
+      }
+   }
+   ENABLE_INTERRUPTS();
+
+
+#ifdef _DEBUG_OQ_MEM_
+   if (strlen(list) > 0){
+      sprintf(str, "remove (AllCreatedBy) +++ pos=");
+      strncat(str, list, 150);
+      openserial_printf(COMPONENT_OPENQUEUE, str, strlen(str));
+   }
+#endif
+}
+
+
+
+
 
 /**
 \brief Free all the packet buffers created by a specific module.
@@ -369,26 +433,17 @@ owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
 void openqueue_removeAllCreatedBy(uint8_t creator) {
    uint8_t i;
 
+
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
-   for (i=0;i<QUEUELENGTH;i++){
+   for (i=0;i<QUEUELENGTH;i++)
       if (openqueue_vars.queue[i].creator == creator) {
-
-         //tx failure
-         openqueue_vars.queue[i].l2_sendDoneError = E_FAIL;
-         sixtop_NotifSendDispatch(&(openqueue_vars.queue[i]));
-
-
-#ifdef _DEBUG_OQ_MEM_
-         char str[150];
-         sprintf(str, "remove (AllCreatedBy), pos=");
-         openserial_ncat_uint32_t(str, (uint32_t)i, 150);
-         openserial_printf(COMPONENT_OPENQUEUE, str, strlen(str));
-#endif
+            openqueue_vars.queue[i].l2_sendDoneError = E_FAIL;
+            sixtop_NotifSendDispatch(&(openqueue_vars.queue[i]));
 
       }
-   }
    ENABLE_INTERRUPTS();
+
 }
 
 
@@ -411,10 +466,12 @@ void openqueue_removeEntry(OpenQueueEntry_t* entry){
  */
 void openqueue_removeAllOwnedBy(uint8_t owner) {
    uint8_t i;
+
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    for (i=0;i<QUEUELENGTH;i++){
       if (openqueue_vars.queue[i].owner==owner) {
+
          //tx failure
          openqueue_vars.queue[i].l2_sendDoneError = E_FAIL;
          sixtop_NotifSendDispatch(&(openqueue_vars.queue[i]));
