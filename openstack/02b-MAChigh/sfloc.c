@@ -23,9 +23,8 @@ sfloc_vars_t sfloc_vars;
 
 //=========================== prototypes ======================================
 
-void sfloc_addCell_task(void);
-void sfloc_removeCell_task(void);
-void sfloc_bandwidthEstimate_task(void);
+void sfloc_verifSchedule_task(void);
+
 
 //=========================== public ==========================================
 
@@ -41,7 +40,6 @@ void sfloc_notif_addedCell(void) {
             (errorparameter_t)10,
             (errorparameter_t)1);
 
-    //   scheduler_push_task(sfloc_addCell_task,TASKPRIO_SF0);
 }
 
 void sfloc_notif_removedCell(void) {
@@ -50,13 +48,11 @@ void sfloc_notif_removedCell(void) {
             ERR_GENERIC,
             (errorparameter_t)10,
             (errorparameter_t)2);
-
-    //   scheduler_push_task(sfloc_removeCell_task,TASKPRIO_SF0);
 }
 
 // this function is called once per slotframe. 
 void sfloc_notifyNewSlotframe(void) {
-    //scheduler_push_task(sfloc_verifSchedule,TASKPRIO_SF0);
+    scheduler_push_task(sfloc_verifSchedule_task, TASKPRIO_SF0);
 }
 
 //=========================== private =========================================
@@ -426,7 +422,7 @@ bool sfloc_verifPossible(void){
 
 
 //updates the schedule
-void sfloc_verifSchedule(void){
+void sfloc_verifSchedule_task(void){
 
    //must some actions be triggered before reserving new cells?
    if (!sfloc_verifPossible())
@@ -439,28 +435,15 @@ void sfloc_verifSchedule(void){
 #endif
 }
 
+/*
 
-
-//a packet is pushed to the MAC layer -> SFLOC notification
-void sfloc_notif_pktTx(OpenQueueEntry_t* msg){
-
-   //must some actions be triggered before reserving new cells?
-   if (!sfloc_verifPossible())
-      return;
-
-   //remove inconsistencies in the schedule
-   sfloc_verifSchedule();
-
-#if (TRACK_MGMT > TRACK_MGMT_NO)
-   sfloc_reserve_agressive_for(msg);
-#endif
+//task is added in the queue
+void sfloc_notif_pktTx(void) {
+    scheduler_push_task(sfloc_verifSchedule_task,TASKPRIO_SF0);
 }
+*/
 
-
-
-
-
-
+//period for the data packet generation
 void sfloc_appPktPeriod(uint8_t numAppPacketsPerSlotFrame){
     sfloc_vars.numAppPacketsPerSlotFrame = numAppPacketsPerSlotFrame;
 }

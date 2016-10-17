@@ -581,6 +581,12 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
 
 //may be called via task_sixtopNotifSendDone or directly by openqueue_timeout_drop (at the end of a slot)
 void sixtop_NotifSendDispatch(OpenQueueEntry_t* msg){
+//TODO
+   /*
+   char str[150];
+   sprintf(str, "sixtop_NotifSendDispatch()");
+   openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+*/
 
    // send the packet to where it belongs
    switch (msg->creator) {
@@ -871,14 +877,6 @@ owerror_t sixtop_send_internal(
    // change owner to IEEE802154E fetches it from queue
    msg->owner  = COMPONENT_SIXTOP_TO_IEEE802154E;
 
-   //SF notification
-#if (SFMETHOD == SFMETHOD_SF0)
-   //nothing to do
-#endif
-#if (SFMETHOD == SFMETHOD_SFLOC)
-   sfloc_notif_pktTx(msg);
-#endif
-
    return E_SUCCESS;
 }
 
@@ -1047,7 +1045,7 @@ port_INLINE void sixtop_sendKA() {
    
    if (ieee154e_isSynch()==FALSE) {
       // I'm not sync'ed
-      
+
       // delete packets genereted by this module (EB and KA) from openqueue
       openqueue_removeAllCreatedBy(COMPONENT_SIXTOP);
       
@@ -1136,7 +1134,7 @@ port_INLINE void sixtop_sendKA() {
 //changes the current sixtop state
 void sixtop_setState(six2six_state_t state){
    //TODO
- char str[150];
+   char str[150];
    sprintf(str, "state ");
    openserial_ncat_uint8_t(str, sixtop_vars.six2six_state, 150);
    strncat(str, " > ", 150);
@@ -1161,7 +1159,7 @@ void sixtop_setState(six2six_state_t state){
       //and starts a new one (randomized to avoid all the nodes regenerate one request simultaneously)
       // timeout in [SIX2SIX_TIMEOUT_MS, SIX2SIX_TIMEOUT_MS*1.5]
       timeout_sixtop_value = SIX2SIX_TIMEOUT_MS + openrandom_get16b();    //65536 at most
-      while (timeout_sixtop_value > SIX2SIX_TIMEOUT_MS * 1.5){
+      while (timeout_sixtop_value > SIX2SIX_TIMEOUT_MS){
          timeout_sixtop_value -= SIX2SIX_TIMEOUT_MS / 2;
       }
       sixtop_vars.timeoutTimerId     = opentimers_start(
@@ -1176,20 +1174,18 @@ void sixtop_setState(six2six_state_t state){
       char str[150];
       sprintf(str, "LinkRep/LinkReq sixtop timeout ");
       openserial_ncat_uint32_t(str, (uint32_t)timeout_sixtop_value, 150);
-      strncat(str, " / ", 150);
+      strncat(str, " ms / max = ", 150);
       openserial_ncat_uint32_t(str, (uint32_t)SIX2SIX_TIMEOUT_MS, 150);
+      strncat(str, " ms", 150);
       openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 
    }
 
-   //otf callback when we come back to the idle state
-   if (state == SIX_IDLE){
+   //I become IDLE
+   else{
       opentimers_stop(sixtop_vars.timeoutTimerId);
       sixtop_vars.timeoutTimerId = TOO_MANY_TIMERS_ERROR;
       sixtop_vars.handler = SIX_HANDLER_NONE;
-#if (SFMETHOD == SFMETHOD_SFLOC)
-      sfloc_verifSchedule();
-#endif
    }
 
 }
@@ -1208,12 +1204,23 @@ void timer_sixtop_six2six_timeout_fired(void) {
    );
 #endif
 
+   openserial_printInfo(
+       COMPONENT_SIXTOP,
+       ERR_SIXTOP_TIMEOUT,
+       (errorparameter_t)sixtop_vars.six2six_state,
+       (errorparameter_t)opentimers_getPeriod(sixtop_vars.timeoutTimerId)
+    );
+
+   char str[150];
+   sprintf(str, "timer_sixtop_six2six_timeout_fired, ongoing=");
+   openserial_ncat_uint8_t(str, (uint8_t)ieee154e_is_ongoing(COMPONENT_SIXTOP_RES), 150);
+   openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+
 
    // timeout timer fired, reset the state of sixtop to idle (only if we don't have an on-going transmission for this component)
-   // no need to call notif_sendDone() since the LinkReq/LinkRem did not modify a priori the schedule (only LlinkRep do)
    if (!ieee154e_is_ongoing(COMPONENT_SIXTOP_RES)) {
-      openqueue_removeAllCreatedBy(COMPONENT_SIXTOP_RES);
-      sixtop_setState(SIX_IDLE);
+      openqueue_removeFirstCreatedBy(COMPONENT_SIXTOP_RES);
+      //sixtop_setState(SIX_IDLE);
    }
    //starts a new timer (duration = 2 cells) so that the on-going transmission will be terminated
    else{
@@ -1406,6 +1413,9 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
 
    msg->owner = COMPONENT_SIXTOP_RES;
 
+/*   sprintf(str, "sixtop_six2six_sendDone()");
+   openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+*/
 
    //This is a reply (stateless)
    if (msg->l2_sixtop_reply == TRUE){
@@ -1444,7 +1454,7 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
             openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[7], 150);
             strncat(str, ", queuePos=", 150);
             openserial_ncat_uint32_t(str, (uint32_t)openqueue_getPos(msg), 150);
-            sprintf(str, " cmd code ");
+            strncat(str, " cmd code ", 150);
             openserial_ncat_uint8_t(str, msg->l2_sixtop_requestCommand, 150);
             openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 #endif

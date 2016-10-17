@@ -17,8 +17,8 @@
 //tracks are handled by 6top
 #define SFLOC_REMOVE_OBSOLETE_PARENTS    // when a node is removed from the parent list, its associated cells are removed
 #define SFLOC_REMOVE_UNUSED_CELLS        // a cell is removed when it is not used for a sufficient long time
-#define SFLOC_CELL_TIMEOUT_RX         (2.5 * TIMER_DAO_TIMEOUT)        //ms before a cell in RX is considered unused if nothing is received
-#define SFLOC_CELL_TIMEOUT_TX         (2 * TIMER_DAO_TIMEOUT)        //ms before a cell in TX is considered unused if nothing is transmitted
+#define SFLOC_CELL_TIMEOUT_RX         (5 * TIMER_DAO_TIMEOUT)        //ms before a cell in RX is considered unused if nothing is received (has to take into account bad PDR)
+#define SFLOC_CELL_TIMEOUT_TX         (3 * TIMER_DAO_TIMEOUT)        //ms before a cell in TX is considered unused if nothing is transmitted
 
 
 
@@ -40,8 +40,6 @@ void      sfloc_notif_removedCell(void);
 // notification from schedule
 void      sfloc_notifyNewSlotframe(void);
 void      sfloc_appPktPeriod(uint8_t numAppPacketsPerSlotFrame);
-void      sfloc_verifSchedule(void);
-void      sfloc_notif_pktTx(OpenQueueEntry_t* msg);
 
 
 
