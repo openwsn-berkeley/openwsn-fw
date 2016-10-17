@@ -25,7 +25,7 @@
 
 
 
-#define _DEBUG_SIXTOP_
+//#define _DEBUG_SIXTOP_
 //#define _DEBUG_SIXTOP_TIMEOUT_
 //#define _DEBUG_EB_
 //#define _DEBUG_KA_
@@ -1133,13 +1133,17 @@ port_INLINE void sixtop_sendKA() {
 
 //changes the current sixtop state
 void sixtop_setState(six2six_state_t state){
-   //TODO
+#if defined(_DEBUG_SIXTOP_TIMEOUT_) || defined(_DEBUG_SIXTOP_)
    char str[150];
+#endif
+
+#ifdef _DEBUG_SIXTOP_
    sprintf(str, "state ");
    openserial_ncat_uint8_t(str, sixtop_vars.six2six_state, 150);
    strncat(str, " > ", 150);
    openserial_ncat_uint32_t(str, (uint32_t)state, 150);
    openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+#endif
 
    uint32_t  timeout_sixtop_value;    // to change the timeout value (jitter)
 
@@ -1170,13 +1174,14 @@ void sixtop_setState(six2six_state_t state){
       );
 
       //TODO
-      char str[150];
+#ifdef _DEBUG_SIXTOP_TIMEOUT_
       sprintf(str, "LinkRep/LinkReq sixtop timeout ");
       openserial_ncat_uint32_t(str, (uint32_t)timeout_sixtop_value, 150);
       strncat(str, " ms / max = ", 150);
       openserial_ncat_uint32_t(str, (uint32_t)SIX2SIX_TIMEOUT_MS, 150);
       strncat(str, " ms", 150);
       openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+#endif
    }
 
    //I become IDLE
@@ -1201,18 +1206,6 @@ void timer_sixtop_six2six_timeout_fired(void) {
       (errorparameter_t)opentimers_getPeriod(sixtop_vars.timeoutTimerId)
    );
 #endif
-
-   openserial_printInfo(
-       COMPONENT_SIXTOP,
-       ERR_SIXTOP_TIMEOUT,
-       (errorparameter_t)sixtop_vars.six2six_state,
-       (errorparameter_t)opentimers_getPeriod(sixtop_vars.timeoutTimerId)
-    );
-
-   char str[150];
-   sprintf(str, "timer_sixtop_six2six_timeout_fired, ongoing=");
-   openserial_ncat_uint8_t(str, (uint8_t)ieee154e_is_ongoing(COMPONENT_SIXTOP_RES), 150);
-   openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 
 
    // timeout timer fired, reset the state of sixtop to idle (only if we don't have an on-going transmission for this component)

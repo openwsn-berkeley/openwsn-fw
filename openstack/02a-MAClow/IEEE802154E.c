@@ -975,8 +975,8 @@ port_INLINE void activity_ti1ORri1() {
          }
 
          //TODO
-         char str[150];
-         if (ieee154e_vars.dataToSend != NULL){
+         /*char str[150];
+         if (0 && ieee154e_vars.dataToSend != NULL){
 
             snprintf(str, 150, "PKT GET, dest ");
             openserial_ncat_uint8_t_hex(str, ieee154e_vars.dataToSend->l2_nextORpreviousHop.addr_64b[6], 150);
@@ -994,7 +994,7 @@ port_INLINE void activity_ti1ORri1() {
             strncat(str, ", slot=", 150);
             openserial_ncat_uint8_t(str, (uint32_t)entry->slotOffset, 150);
             openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
-         }
+         }*/
 
 
          // check whether we can send (Backoff or dedicated cell, other conditions)
