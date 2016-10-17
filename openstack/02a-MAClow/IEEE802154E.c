@@ -16,6 +16,7 @@
 #include "sixtop.h"
 #include "adaptive_sync.h"
 #include "processIE.h"
+#include "openrandom.h"
 
 //=========================== definition ======================================
 
@@ -958,6 +959,15 @@ port_INLINE void activity_ti1ORri1() {
                 case 2:
                 case 3:
                     couldSendEB=FALSE;
+                    if (ieee154e_vars.slotOffset==1 && openrandom_get16b()>(0xffff/3)){
+                        ieee154e_vars.dataToSend = NULL;
+                        break;
+                    } else {
+                        if (ieee154e_vars.slotOffset==2 && openrandom_get16b()>(0xffff/2)){
+                            ieee154e_vars.dataToSend = NULL;
+                            break;
+                        }
+                    }
                     // only send Unicast
                     ieee154e_vars.dataToSend = openqueue_macGetUnicastPacket(&neighbor);
                     // if I have Tx slot for the unicast packet, send it at that Tx slot
