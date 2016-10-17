@@ -82,12 +82,13 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
     msg->owner                = COMPONENT_FORWARDING;
 
     //too many packets in the buffer? We should drop this one to save data for management packets (e.g. sixtop)
-      if((msg->creator != COMPONENT_ICMPv6RPL) && (openqueue_overflow_for_data())){
-         openserial_statPktBufferOverflow(msg);
+    if((msg->creator != COMPONENT_ICMPv6RPL) && (openqueue_overflow_for_data())){
+       openserial_statPktBufferOverflow(msg);
 
-         // openqueue_freePacketBuffer(msg);
-         return(E_FAIL);
-      }
+       // openqueue_freePacketBuffer(msg);
+       return(E_FAIL);
+    }
+
 
 
     m   = IPHC_M_NO;
@@ -255,6 +256,7 @@ void forwarding_receive(
     memcpy(&(msg->l3_destinationAdd),&ipv6_inner_header->dest, sizeof(open_addr_t));
     memcpy(&(msg->l3_sourceAdd),     &ipv6_inner_header->src,  sizeof(open_addr_t));
    
+
     if (
         (
             idmanager_isMyAddress(&(msg->l3_destinationAdd))
@@ -300,9 +302,16 @@ void forwarding_receive(
         msg->creator = COMPONENT_FORWARDING;
 
         //timeout when a packet is forwarded
-  #ifdef TIMEOUT_FORWARDING
+#ifdef TIMEOUT_FORWARDING
         openqueue_set_timeout(msg, QUEUE_TIMEOUT_DEFAULT);
-  #endif
+#endif
+
+        //too many packets in the buffer? We should drop this one to save data for management packets (e.g. sixtop)
+        if (openqueue_overflow_for_data()){
+           openserial_statPktBufferOverflow(msg);
+           openqueue_freePacketBuffer(msg);
+           return;
+        }
 
         if (ipv6_outer_header->next_header!=IANA_IPv6ROUTE) {
             flags = rpl_option->flags;
