@@ -1170,7 +1170,6 @@ void sixtop_setState(six2six_state_t state){
       );
 
       //TODO
-
       char str[150];
       sprintf(str, "LinkRep/LinkReq sixtop timeout ");
       openserial_ncat_uint32_t(str, (uint32_t)timeout_sixtop_value, 150);
@@ -1178,7 +1177,6 @@ void sixtop_setState(six2six_state_t state){
       openserial_ncat_uint32_t(str, (uint32_t)SIX2SIX_TIMEOUT_MS, 150);
       strncat(str, " ms", 150);
       openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
-
    }
 
    //I become IDLE
@@ -1220,7 +1218,10 @@ void timer_sixtop_six2six_timeout_fired(void) {
    // timeout timer fired, reset the state of sixtop to idle (only if we don't have an on-going transmission for this component)
    if (!ieee154e_is_ongoing(COMPONENT_SIXTOP_RES)) {
       openqueue_removeFirstCreatedBy(COMPONENT_SIXTOP_RES);
-      //sixtop_setState(SIX_IDLE);
+
+      //If the linkReq has not triggered a return to the IDLE state
+      if (sixtop_vars.six2six_state != SIX_IDLE)
+         sixtop_setState(SIX_IDLE);
    }
    //starts a new timer (duration = 2 cells) so that the on-going transmission will be terminated
    else{
