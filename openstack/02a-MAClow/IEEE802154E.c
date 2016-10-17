@@ -976,17 +976,17 @@ port_INLINE void activity_ti1ORri1() {
 
          //TODO
          char str[150];
-         if (0 && track.instance != 0){
+         if (ieee154e_vars.dataToSend != NULL){
 
-            snprintf(str, 150, "PKT GET, neigh ");
-            openserial_ncat_uint8_t_hex(str, neighbor.addr_64b[6], 150);
-            openserial_ncat_uint8_t_hex(str, neighbor.addr_64b[7], 150);
+            snprintf(str, 150, "PKT GET, dest ");
+            openserial_ncat_uint8_t_hex(str, ieee154e_vars.dataToSend->l2_nextORpreviousHop.addr_64b[6], 150);
+            openserial_ncat_uint8_t_hex(str, ieee154e_vars.dataToSend->l2_nextORpreviousHop.addr_64b[7], 150);
             strncat(str, ", track=", 150);
             openserial_ncat_uint32_t(str, (uint32_t)track.instance, 150);
             strncat(str, ", owner=", 150);
             openserial_ncat_uint8_t_hex(str, (uint32_t)track.owner.addr_64b[6], 150);
             openserial_ncat_uint8_t_hex(str, (uint32_t)track.owner.addr_64b[7], 150);
-            strncat(str, ", pPos =", 150);
+            strncat(str, ", queuePos =", 150);
             openserial_ncat_uint32_t(str, (uint32_t)openqueue_getPos(ieee154e_vars.dataToSend), 150);
             strncat(str, ", token=", 150);
             openserial_ncat_uint32_t(str, (uint32_t)schedule_getOkToSend(ieee154e_vars.dataToSend), 150);

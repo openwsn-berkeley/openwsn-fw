@@ -423,6 +423,18 @@ bool sfloc_verifPossible(void){
 
 //updates the schedule
 void sfloc_verifSchedule_task(void){
+uint8_t i;
+   char str[150];
+   sprintf(str, "sfloc_verifSchedule_task() - bool = ");
+   openserial_ncat_uint8_t(str, sfloc_verifPossible(), 150);
+   if (!sfloc_verifPossible()){
+      strncat(str, " idle ", 150);
+       openserial_ncat_uint8_t(str, sixtop_isIdle(), 150);
+       strncat(str, " prefparrent ", 150);
+       openserial_ncat_uint8_t(str, icmpv6rpl_getPreferredParentIndex(&i), 150);
+      }
+   openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+
 
    //must some actions be triggered before reserving new cells?
    if (!sfloc_verifPossible())
