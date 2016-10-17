@@ -16,17 +16,18 @@
 
 void at86rf215_spiStrobe(uint8_t strobe) {
    uint8_t  spi_tx_buffer[3];
+   uint8_t spi_rx_buffer[3];
    
-   spi_tx_buffer[0]     = ((FLAG_WRITE) | (uint8_t)(RG_RF09_CMD/0xFF));
-   spi_tx_buffer[1]     = (uint8_t)(RG_RF09_CMD%0xFF);
+   spi_tx_buffer[0]     = ((FLAG_WRITE) | (uint8_t)(RG_RF09_CMD/256));
+   spi_tx_buffer[1]     = (uint8_t)(RG_RF09_CMD%256);
    spi_tx_buffer[2]     = strobe;
 
    spi_txrx(
       spi_tx_buffer,              // bufTx
       sizeof(spi_tx_buffer),      // lenbufTx
       SPI_FIRSTBYTE,              // returnType
-      NULL,                       // bufRx
-      1,                          // maxLenBufRx
+      spi_rx_buffer,              // bufRx
+      3,                          // maxLenBufRx
       SPI_FIRST,                  // isFirst
       SPI_LAST                    // isLast
    );
@@ -34,7 +35,7 @@ void at86rf215_spiStrobe(uint8_t strobe) {
 
 void at86rf215_spiWriteReg(uint16_t reg, uint8_t regValueToWrite) {
      
-   
+   uint8_t spi_rx_buffer[3];
    uint8_t spi_tx_buffer[3];
         
    spi_tx_buffer[0]     = (FLAG_WRITE | (uint8_t)((reg)/256));
@@ -45,8 +46,8 @@ void at86rf215_spiWriteReg(uint16_t reg, uint8_t regValueToWrite) {
        spi_tx_buffer,              // bufTx
        3,                          // lenbufTx
        SPI_FIRSTBYTE,              // returnType
-       NULL,                        // bufRx
-       1,                          // maxLenBufRx
+       spi_rx_buffer,              // bufRx
+       3,                          // maxLenBufRx
        SPI_FIRST,                  // isFirst
        SPI_LAST                    // isLast
    );
@@ -82,8 +83,8 @@ void at86rf215_spiWriteFifo(uint8_t* bufToWrite, uint16_t len) {
     // step 1. send packet length. 
     spi_tx_buffer[0]     = (FLAG_WRITE | 0x03);
     spi_tx_buffer[1]     = 0x06;
-    spi_tx_buffer[2]     = (FLAG_READ | (uint8_t)((len)/256));
-    spi_tx_buffer[3]     = (uint8_t)((len)%256);   
+    spi_tx_buffer[2]     = (uint8_t)((len)%256);
+    spi_tx_buffer[3]     = (uint8_t)((len)/256);   
   
     spi_txrx(
         spi_tx_buffer,              // bufTx
@@ -167,6 +168,51 @@ void at86rf215_spiReadRxFifo( uint8_t* pBufRead) {
 
 }
 
+uint8_t at86rf215_status (void){
+    uint8_t spi_tx_buffer[3];
+    uint8_t spi_rx_buffer[3];
+    
+    spi_tx_buffer[0] = (FLAG_READ | (uint8_t)(RG_RF09_STATE/256));
+    spi_tx_buffer[1] = (uint8_t)(RG_RF09_STATE%256);
+    spi_tx_buffer[2] = 0x00;
+
+    spi_txrx(
+        spi_tx_buffer,              // bufTx
+        3,                          // lenbufTx
+        SPI_BUFFER,                 // returnType
+        spi_rx_buffer,              // bufRx
+        3,                          // maxLenBufRx
+        SPI_FIRST,                  // isFirst
+        SPI_LAST                    // isLast
+    );
+    
+    return spi_rx_buffer[2];
+}
+
+void at86rf215_read_isr (uint8_t* rf09_isr){
+    uint8_t spi_tx[6];
+    uint8_t spi_rx[6];
+    memset(&spi_tx[0],0,sizeof(spi_tx));
+    memset(&spi_rx[0],0,sizeof(spi_rx));
+    spi_tx[0]   = (FLAG_READ | (uint8_t)((BASE_ADDR_RF09_RFIRQS09|RG_RF09_IRQS)/256)); //rf09_ISR address (0x00) 
+    spi_tx[1]   = (uint8_t)((BASE_ADDR_RF09_RFIRQS09|RG_RF09_IRQS)%256);               //rf09_ISR address (0x00)
+    
+    
+     spi_txrx(
+        spi_tx,                     // bufTx
+        6,                          // lenbufTx
+        SPI_BUFFER,                 // returnType
+        spi_rx,                      // bufRx
+        6,                          // maxLenBufRx
+        SPI_FIRST,                  // isFirst
+        SPI_LAST                    // isLast
+    );
+    *(rf09_isr)     = spi_rx[2];
+    *(rf09_isr+1)   = spi_rx[3];
+    *(rf09_isr+2)   = spi_rx[4];
+    *(rf09_isr+3)   = spi_rx[5];
+    
+}
 //const cc1200_rf_cfg_t cc1200_rf_cfg = {
 //  .register_settings = cc1200_register_settings,
 //  .size_of_register_settings = sizeof(cc1200_register_settings),

@@ -17,7 +17,7 @@ typedef struct {
     // information about the current transaction
     uint8_t*        pNextTxByte;
     uint16_t        numTxedBytes;
-    uint8_t         txBytesLeft;
+    uint16_t         txBytesLeft;
     spi_return_t    returnType;
     uint8_t*        pNextRxByte;
     uint16_t        maxRxBytes;

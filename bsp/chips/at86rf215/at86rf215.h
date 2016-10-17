@@ -3959,11 +3959,14 @@ void at86rf215_spiWriteReg    (uint16_t reg, uint8_t regValueToWrite);
 void at86rf215_spiReadReg     (uint16_t reg, uint8_t* regValueRead);
 void at86rf215_spiWriteFifo   (uint8_t* bufToWrite, uint16_t len);
 void at86rf215_spiReadRxFifo  ( uint8_t* pBufRead);
+uint8_t at86rf215_status      (void);
+void at86rf215_read_isr       (uint8_t* rf09_isr);
 
 /** Preferred settings for OFDM */
 static const registerSetting_t basic_settings_ofdm[] = {
   {RG_RF09_CMD,       0x02},
   {RG_RF09_IRQM,      0x1F},
+  {RG_RF24_IRQM,      0x00},
   {RG_RF09_RXBWC,     0x17},
   {RG_RF09_RXDFE,     0x43},
   {RG_RF09_AGCC,      0x11},
@@ -3972,6 +3975,7 @@ static const registerSetting_t basic_settings_ofdm[] = {
   {RG_RF09_TXDFE,     0x63},
   {RG_RF09_PAC,       0x64},
   {RG_BBC0_IRQM,      0x1F},
+  {RG_BBC1_IRQM,      0x00},
   {RG_BBC0_PC,        0x16},
   {RG_BBC0_OFDMC,     0x01},
   {RG_BBC0_OFDMPHRTX, 0x03},  

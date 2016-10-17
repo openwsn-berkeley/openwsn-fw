@@ -2298,6 +2298,9 @@
       <name>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\chips\cc1200\radio.c</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
     </file>
     <file>
@@ -2319,9 +2322,6 @@
       <name>$PROJ_DIR$\..\..\..\bsp\boards\uart.h</name>
     </file>
   </group>
-  <file>
-    <name>$PROJ_DIR$\..\..\..\bsp\chips\cc1200\radio.c</name>
-  </file>
 </project>
 
 
