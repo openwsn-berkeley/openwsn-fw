@@ -163,7 +163,7 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells){
     memset(cellList,0,sizeof(cellList));
    
     // filter parameters
-    if(sixtop_vars.six2six_state!=SIX_IDLE){
+    if(sixtop_vars.six2six_state!=SIX_STATE_IDLE){
         return;
     }
     if (neighbor==NULL){
@@ -206,7 +206,7 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells){
     }
    
     // update state
-    sixtop_vars.six2six_state  = SIX_SENDING_REQUEST;
+    sixtop_vars.six2six_state  = SIX_STATE_SENDING_REQUEST;
    
     // take ownership
     pkt->creator = COMPONENT_SIXTOP_RES;
@@ -249,19 +249,19 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells){
     //update states
     switch(code){
     case IANA_6TOP_CMD_ADD:
-        sixtop_vars.six2six_state = SIX_WAIT_ADDREQUEST_SENDDONE;
+        sixtop_vars.six2six_state = SIX_STATE_WAIT_ADDREQUEST_SENDDONE;
         break;
     case IANA_6TOP_CMD_DELETE:
-        sixtop_vars.six2six_state = SIX_WAIT_DELETEREQUEST_SENDDONE;
+        sixtop_vars.six2six_state = SIX_STATE_WAIT_DELETEREQUEST_SENDDONE;
         break;
     case IANA_6TOP_CMD_COUNT:
-        sixtop_vars.six2six_state = SIX_WAIT_COUNTREQUEST_SENDDONE;
+        sixtop_vars.six2six_state = SIX_STATE_WAIT_COUNTREQUEST_SENDDONE;
         break;
     case IANA_6TOP_CMD_LIST:
-        sixtop_vars.six2six_state = SIX_WAIT_LISTREQUEST_SENDDONE;
+        sixtop_vars.six2six_state = SIX_STATE_WAIT_LISTREQUEST_SENDDONE;
         break;
     case IANA_6TOP_CMD_CLEAR:
-        sixtop_vars.six2six_state = SIX_WAIT_CLEARREQUEST_SENDDONE;
+        sixtop_vars.six2six_state = SIX_STATE_WAIT_CLEARREQUEST_SENDDONE;
         break;
     }
 }
@@ -276,7 +276,7 @@ void sixtop_addORremoveCellByInfo(uint8_t code,open_addr_t* neighbor,cellInfo_ht
     memset(cellList,0,sizeof(cellList));
    
     // filter parameters
-    if (sixtop_vars.six2six_state!=SIX_IDLE){
+    if (sixtop_vars.six2six_state!=SIX_STATE_IDLE){
         return;
     }
     if (neighbor==NULL){
@@ -306,7 +306,7 @@ void sixtop_addORremoveCellByInfo(uint8_t code,open_addr_t* neighbor,cellInfo_ht
     }
    
     // update state
-    sixtop_vars.six2six_state = SIX_SENDING_REQUEST;
+    sixtop_vars.six2six_state = SIX_STATE_SENDING_REQUEST;
    
     // declare ownership over that packet
     pkt->creator = COMPONENT_SIXTOP_RES;
@@ -340,10 +340,10 @@ void sixtop_addORremoveCellByInfo(uint8_t code,open_addr_t* neighbor,cellInfo_ht
     //update states
     switch(code){
     case IANA_6TOP_CMD_ADD:
-        sixtop_vars.six2six_state = SIX_WAIT_ADDREQUEST_SENDDONE;
+        sixtop_vars.six2six_state = SIX_STATE_WAIT_ADDREQUEST_SENDDONE;
         break;
     case IANA_6TOP_CMD_DELETE:
-        sixtop_vars.six2six_state = SIX_WAIT_DELETEREQUEST_SENDDONE;
+        sixtop_vars.six2six_state = SIX_STATE_WAIT_DELETEREQUEST_SENDDONE;
         break;
     }
 }
@@ -836,7 +836,7 @@ port_INLINE void sixtop_sendKA() {
 
 void timer_sixtop_six2six_timeout_fired(void) {
    // timeout timer fired, reset the state of sixtop to idle
-   sixtop_vars.six2six_state = SIX_IDLE;
+   sixtop_vars.six2six_state = SIX_STATE_IDLE;
    sixtop_vars.handler = SIX_HANDLER_NONE;
    opentimers_stop(sixtop_vars.timeoutTimerId);
 }
@@ -853,28 +853,29 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
    msg->owner = COMPONENT_SIXTOP_RES;
   
    if(error == E_FAIL) {
-      sixtop_vars.six2six_state = SIX_IDLE;
+      sixtop_vars.six2six_state = SIX_STATE_IDLE;
+      sixtop_vars.handler       = SIX_HANDLER_NONE;
       openqueue_freePacketBuffer(msg);
       return;
    }
 
     switch (sixtop_vars.six2six_state) {
-    case SIX_WAIT_ADDREQUEST_SENDDONE:
-        sixtop_vars.six2six_state = SIX_WAIT_ADDRESPONSE;
+    case SIX_STATE_WAIT_ADDREQUEST_SENDDONE:
+        sixtop_vars.six2six_state = SIX_STATE_WAIT_ADDRESPONSE;
         break;
-    case SIX_WAIT_DELETEREQUEST_SENDDONE:
-        sixtop_vars.six2six_state = SIX_WAIT_DELETERESPONSE;
+    case SIX_STATE_WAIT_DELETEREQUEST_SENDDONE:
+        sixtop_vars.six2six_state = SIX_STATE_WAIT_DELETERESPONSE;
         break;
-    case SIX_WAIT_LISTREQUEST_SENDDONE:
-        sixtop_vars.six2six_state = SIX_WAIT_LISTRESPONSE;
+    case SIX_STATE_WAIT_LISTREQUEST_SENDDONE:
+        sixtop_vars.six2six_state = SIX_STATE_WAIT_LISTRESPONSE;
         break;
-    case SIX_WAIT_COUNTREQUEST_SENDDONE:
-        sixtop_vars.six2six_state = SIX_WAIT_COUNTRESPONSE;
+    case SIX_STATE_WAIT_COUNTREQUEST_SENDDONE:
+        sixtop_vars.six2six_state = SIX_STATE_WAIT_COUNTRESPONSE;
         break;
-    case SIX_WAIT_CLEARREQUEST_SENDDONE:
-        sixtop_vars.six2six_state = SIX_WAIT_CLEARRESPONSE;
+    case SIX_STATE_WAIT_CLEARREQUEST_SENDDONE:
+        sixtop_vars.six2six_state = SIX_STATE_WAIT_CLEARRESPONSE;
         break;
-    case SIX_WAIT_RESPONSE_SENDDONE:
+    case SIX_STATE_WAIT_RESPONSE_SENDDONE:
         if (msg->l2_sixtop_returnCode == IANA_6TOP_RC_SUCCESS && error == E_SUCCESS){
             if (
                 msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD ||
@@ -914,7 +915,7 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
             }
         }
         
-        sixtop_vars.six2six_state = SIX_IDLE;
+        sixtop_vars.six2six_state = SIX_STATE_IDLE;
         opentimers_stop(sixtop_vars.timeoutTimerId);
        
         if (
@@ -935,16 +936,16 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
         break;
     default:
         //log error
-        sixtop_vars.six2six_state = SIX_IDLE;
+        sixtop_vars.six2six_state = SIX_STATE_IDLE;
         break;
     }
   
     if (
-        sixtop_vars.six2six_state == SIX_WAIT_ADDRESPONSE        ||
-        sixtop_vars.six2six_state == SIX_WAIT_DELETERESPONSE     ||
-        sixtop_vars.six2six_state == SIX_WAIT_COUNTRESPONSE      ||
-        sixtop_vars.six2six_state == SIX_WAIT_LISTRESPONSE       ||
-        sixtop_vars.six2six_state == SIX_WAIT_CLEARRESPONSE
+        sixtop_vars.six2six_state == SIX_STATE_WAIT_ADDRESPONSE        ||
+        sixtop_vars.six2six_state == SIX_STATE_WAIT_DELETERESPONSE     ||
+        sixtop_vars.six2six_state == SIX_STATE_WAIT_COUNTRESPONSE      ||
+        sixtop_vars.six2six_state == SIX_STATE_WAIT_LISTRESPONSE       ||
+        sixtop_vars.six2six_state == SIX_STATE_WAIT_CLEARRESPONSE
     ){  
         // start timeout timer if I am waiting for a response
         opentimers_setPeriod(
@@ -1070,9 +1071,9 @@ void sixtop_notifyReceiveCommand(
     //===== if the version or sfID are correct
     if (version != IANA_6TOP_6P_VERSION || sfId != SFID_SF0){
         if (version != IANA_6TOP_6P_VERSION){
-            code = IANA_6TOP_RC_VER_ERR;
+            code = IANA_6TOP_RC_ERR_VER;
         } else {
-            code = IANA_6TOP_RC_SFID_ERR;
+            code = IANA_6TOP_RC_ERR_SFID;
         }
     } else {
         //====== the version and sfID are correct
@@ -1085,10 +1086,10 @@ void sixtop_notifyReceiveCommand(
             commandIdORcode == IANA_6TOP_CMD_CLEAR
         ){
             // if I am already in a 6top transactions
-            if (sixtop_vars.six2six_state != SIX_IDLE){
-                code = IANA_6TOP_RC_ERR;
+            if (sixtop_vars.six2six_state != SIX_STATE_IDLE){
+                code = IANA_6TOP_RC_ERR_BUSY;
             } else {
-                sixtop_vars.six2six_state = SIX_REQUEST_RECEIVED;
+                sixtop_vars.six2six_state = SIX_STATE_REQUEST_RECEIVED;
 
                 switch(commandIdORcode){
                 case IANA_6TOP_CMD_ADD: 
@@ -1097,6 +1098,14 @@ void sixtop_notifyReceiveCommand(
                     container  = *((uint8_t*)(pkt->payload)+ptr+1);
                     frameID = container;
                     processIE_retrieve_sixCelllist(pkt,ptr+2,length-2,cellList);
+                    if (
+                        commandIdORcode == IANA_6TOP_CMD_ADD &&
+                        schedule_getNumberOfFreeEntries() < numOfCells
+                    ){
+                        // no enough free buffer for adding more cells
+                        code = IANA_6TOP_RC_ERR_NORES;
+                        break;
+                    }
                     if (
                         (
                           commandIdORcode == IANA_6TOP_CMD_ADD &&
@@ -1110,7 +1119,7 @@ void sixtop_notifyReceiveCommand(
                         code = IANA_6TOP_RC_SUCCESS;
                         len += processIE_prepend_sixCelllist(response_pkt,cellList);
                     } else {
-                        code = IANA_6TOP_RC_ERR;
+                        code = IANA_6TOP_RC_ERR_RESET;
                     }
                     break;
                 case IANA_6TOP_CMD_COUNT:
@@ -1143,6 +1152,9 @@ void sixtop_notifyReceiveCommand(
                                             &(pkt->l2_nextORpreviousHop));
                     code = IANA_6TOP_RC_SUCCESS;
                     break;
+                default:
+                    // don't know this 6top command
+                    code = IANA_6TOP_RC_ERR;
                 }
             }
             response_pkt->l2_sixtop_requestCommand = commandIdORcode;
@@ -1158,7 +1170,7 @@ void sixtop_notifyReceiveCommand(
                 sixtop_send(response_pkt);
             }
             // update state
-            sixtop_vars.six2six_state = SIX_WAIT_RESPONSE_SENDDONE;
+            sixtop_vars.six2six_state = SIX_STATE_WAIT_RESPONSE_SENDDONE;
         } else {
             //------ if this is a return code
             // The response packet is not required, release it
@@ -1167,12 +1179,12 @@ void sixtop_notifyReceiveCommand(
             // if the code is SUCCESS
             if (commandIdORcode==IANA_6TOP_RC_SUCCESS){
                 switch(sixtop_vars.six2six_state){
-                case SIX_WAIT_ADDRESPONSE:
-                case SIX_WAIT_DELETERESPONSE:
+                case SIX_STATE_WAIT_ADDRESPONSE:
+                case SIX_STATE_WAIT_DELETERESPONSE:
                     processIE_retrieve_sixCelllist(pkt,ptr,length,cellList);
                     // always default frameID
                     frameID = SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;
-                    if (sixtop_vars.six2six_state == SIX_WAIT_ADDRESPONSE){
+                    if (sixtop_vars.six2six_state == SIX_STATE_WAIT_ADDRESPONSE){
                         sixtop_addCellsByState(frameID,
                                               cellList,
                                               &(pkt->l2_nextORpreviousHop),
@@ -1185,7 +1197,7 @@ void sixtop_notifyReceiveCommand(
                               &(pkt->l2_nextORpreviousHop));
                     }
                     break;
-                case SIX_WAIT_COUNTRESPONSE:
+                case SIX_STATE_WAIT_COUNTRESPONSE:
                     count  = *((uint8_t*)(pkt->payload)+ptr);
                     ptr += 1;
                     count |= (*((uint8_t*)(pkt->payload)+ptr))<<8;
@@ -1193,26 +1205,46 @@ void sixtop_notifyReceiveCommand(
                            (errorparameter_t)count,
                            (errorparameter_t)sixtop_vars.six2six_state);
                     break;
-                case SIX_WAIT_LISTRESPONSE:
+                case SIX_STATE_WAIT_LISTRESPONSE:
                     processIE_retrieve_sixCelllist(pkt,ptr,length,cellList);
                     // print out first two cells in the list
                     openserial_printInfo(COMPONENT_SIXTOP,ERR_SIXTOP_LIST,
                            (errorparameter_t)cellList[0].tsNum,
                            (errorparameter_t)cellList[1].tsNum);
                     break;
-                case SIX_WAIT_CLEARRESPONSE:
-                  
+                case SIX_STATE_WAIT_CLEARRESPONSE:
+                    frameID = SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;
+                    schedule_removeAllCells(frameID,
+                                            &(pkt->l2_nextORpreviousHop));
                     break;
                 default:
                     code = IANA_6TOP_RC_ERR;
                 }
             } else {
-                // TBD...
+                if (commandIdORcode==IANA_6TOP_RC_ERR_BUSY){
+                    // TBD: the neighbor is in a transaction, call scheduling function to to make a decision 
+                    // (e.g. issue another 6p request with some delay)
+                } else {
+                    if (commandIdORcode==IANA_6TOP_RC_ERR_NORES){
+                        // TBD: the neighbor has no enough resource for adding cells, call sf0 to make a decision
+                    } else {
+                        if (commandIdORcode==IANA_6TOP_RC_ERR_RESET){
+                            // TBD: the neighbor can't statisfy the 6p request with given cells, call sf0 to make a decision 
+                            // (e.g. issue another 6p request with different cell list)
+                        } else {
+                            if (commandIdORcode==IANA_6TOP_RC_ERR){
+                                // TBD: the neighbor can't statisfy the 6p request, call sf0 to make a decision
+                            } else {
+                                // TBD...
+                            }
+                        }
+                    }
+                }
             }
            openserial_printInfo(COMPONENT_SIXTOP,ERR_SIXTOP_RETURNCODE,
                            (errorparameter_t)commandIdORcode,
                            (errorparameter_t)sixtop_vars.six2six_state);
-            sixtop_vars.six2six_state = SIX_IDLE;
+            sixtop_vars.six2six_state = SIX_STATE_IDLE;
             sixtop_vars.handler = SIX_HANDLER_NONE;
             opentimers_stop(sixtop_vars.timeoutTimerId);
         }
@@ -1333,7 +1365,7 @@ void sixtop_addCellsByState(
       //only schedule when the request side wants to schedule a tx cell
       if(cellList[i].linkoptions != CELLTYPE_OFF){
          switch(state) {
-            case SIX_WAIT_RESPONSE_SENDDONE:
+            case SIX_STATE_WAIT_RESPONSE_SENDDONE:
                memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
                //add a RX link
                schedule_addActiveSlot(
@@ -1345,7 +1377,7 @@ void sixtop_addCellsByState(
                );
 
                break;
-            case SIX_WAIT_ADDRESPONSE:
+            case SIX_STATE_WAIT_ADDRESPONSE:
                memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
                //add a TX link
                schedule_addActiveSlot(
