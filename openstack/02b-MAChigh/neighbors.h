@@ -13,8 +13,8 @@
 //=========================== define ==========================================
 
 #define MAXPREFERENCE             2
-#define BADNEIGHBORMAXRSSI        -80 //dBm
-#define GOODNEIGHBORMINRSSI       -90 //dBm
+#define BADNEIGHBORMAXRSSI        -70 //dBm
+#define GOODNEIGHBORMINRSSI       -80 //dBm
 #define SWITCHSTABILITYTHRESHOLD  3
 #define DEFAULTLINKCOST           15
 
@@ -22,7 +22,7 @@
 #define DEFAULTDAGRANK            MAXDAGRANK
 #define MINHOPRANKINCREASE        256  //default value in RPL and Minimal 6TiSCH draft
 
-
+#define LOWESTRSSIASPARENT        -90 //dBm
 //=========================== typedef =========================================
 
 BEGIN_PACK
