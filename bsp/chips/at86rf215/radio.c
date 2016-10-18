@@ -76,12 +76,9 @@ void radio_setEndFrameCb(radiotimer_capture_cbt cb) {
 //===== reset
 
 void radio_reset(void) {
-  
-    
+   
     at86rf215_spiWriteReg( RG_RF_RST, CMD_RF_RESET); 
-    do{
-        at86rf215_spiStrobe(CMD_RF_TRXOFF);
-    }while(at86rf215_status() != RF_TRXOFF);
+    at86rf215_spiStrobe(CMD_RF_TRXOFF);
 }
 
 //===== timer
@@ -120,9 +117,9 @@ void radio_setFrequency(uint16_t channel_spacing, uint32_t frequency_0, uint16_t
 }
 
 void radio_rfOn(void) {
+  
     //put the radio in the TRXPREP state
-    //do{
-        at86rf215_spiStrobe(CMD_RF_TRXPREP);
+    at86rf215_spiStrobe(CMD_RF_TXPREP);
     while(radio_vars.state != RADIOSTATE_TX_ENABLED);
 
 }
@@ -132,9 +129,9 @@ void radio_rfOff(void) {
     // change state
     radio_vars.state = RADIOSTATE_TURNING_OFF;
    
-    //do{
+    do{
         at86rf215_spiStrobe(CMD_RF_TRXOFF);
-    while(at86rf215_status() != RF_TRXOFF);
+    }while(at86rf215_status() != RF_TRXOFF);
     // wiggle debug pin
     debugpins_radio_clr();
     leds_radio_off();
@@ -157,23 +154,23 @@ void radio_loadPacket(uint8_t* packet, uint16_t len) {
 void radio_txEnable(void) {
     // change state
     radio_vars.state = RADIOSTATE_ENABLING_TX;
-    at86rf215_spiStrobe(RF_TXPREP);
+    at86rf215_spiStrobe(CMD_RF_TXPREP);
     // wiggle debug pin
     debugpins_radio_set();
     leds_radio_on();
-    
-    
-    while(radio_vars.state != RADIOSTATE_TX_ENABLED); 
+        
+    //while(radio_vars.state != RADIOSTATE_TX_ENABLED); 
     // change state
     
 }
 
 void radio_txNow(void) {
     // change state
+    if (at86rf215_status() != RF_TXPREP)at86rf215_spiStrobe(CMD_RF_TXPREP);
     radio_vars.state = RADIOSTATE_TRANSMITTING;
 
     at86rf215_spiStrobe(CMD_RF_TX);
-    while(radio_vars.state != RADIOSTATE_TXRX_DONE);
+    while(radio_vars.state != RADIOSTATE_TXRX_DONE && radio_vars.bb0_isr != 0x10);
     at86rf215_spiStrobe(RF_TRXOFF);
 }
 
@@ -283,7 +280,7 @@ kick_scheduler_t radio_isr() {
                 while(1);
                 }                
             }
-            memset(&radio_vars.rf09_isr, 0, 2);
+            memset(&radio_vars.rf09_isr, 0, 4);
             //P1IE |= (BIT0); // enable interrupt for P1.0
             break;
         case 12:

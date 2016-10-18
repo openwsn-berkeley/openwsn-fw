@@ -38,7 +38,7 @@ typedef struct
 #define CMD_RF_NOP        0x0
 #define CMD_RF_SLEEP      0x1
 #define CMD_RF_TRXOFF     0x2
-#define CMD_RF_TRXPREP    0x3
+#define CMD_RF_TXPREP     0x3
 #define CMD_RF_TX         0x4
 #define CMD_RF_RX         0x5
 #define CMD_RF_RESET      0x7
