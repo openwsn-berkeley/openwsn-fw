@@ -60,6 +60,7 @@ uint8_t       neighbors_getNumNeighbors(void);
 uint16_t      neighbors_getLinkMetric(uint8_t index);
 open_addr_t*  neighbors_getKANeighbor(uint16_t kaPeriod);
 bool          neighbors_getNeighborNoResource(uint8_t index);
+int8_t        neighbors_getRssi(uint8_t index);
 // setters
 void          neighbors_setNeighborRank(uint8_t index, dagrank_t rank);
 void          neighbors_setNeighborNoResource(open_addr_t* address);

@@ -63,6 +63,10 @@ dagrank_t neighbors_getNeighborRank(uint8_t index) {
    return neighbors_vars.neighbors[index].DAGrank;
 }
 
+int8_t neighbors_getRssi(uint8_t index){
+   return neighbors_vars.neighbors[index].rssi;
+}
+
 /**
 \brief Find neighbor to which to send KA.
 

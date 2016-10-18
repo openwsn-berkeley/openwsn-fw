@@ -371,6 +371,10 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
          rankIncrease=neighbors_getLinkMetric(i);
          // if this link cost is too high, pass on this neighbor
          // TODO
+         // if this rssi is too low, pass on this neighbor
+         if (neighbors_getRssi(i)<LOWESTRSSIASPARENT){
+            continue;
+         }
          // get this neighbor's advertized rank
          neighborRank=neighbors_getNeighborRank(i);
          // if this neighbor has unknown/infinite rank, pass on it
