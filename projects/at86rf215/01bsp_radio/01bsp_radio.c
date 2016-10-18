@@ -80,7 +80,7 @@ void     cb_timer(void);
 \brief The program starts executing here.
 */
 int mote_main(void) {
-   uint8_t i;
+   uint16_t i;
    
    // clear local variables
    memset(&app_vars,0,sizeof(app_vars_t));

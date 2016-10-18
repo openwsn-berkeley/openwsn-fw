@@ -151,7 +151,7 @@ void at86rf215_spiReadRxFifo( uint8_t* pBufRead) {
     PHR[0] = spi_rx_buffer[2];
     PHR[1] = spi_rx_buffer[3];
     
-    length = PHR[1] + (PHR[0] & (0x07))*256; 
+    length = PHR[0] + (PHR[1] & (0x07))*256; 
     
     spi_tx_buffer[0]    = (FLAG_READ | (uint8_t)(BASE_ADDR_BBC0_FB0/256));
     spi_tx_buffer[1]    = (uint8_t)(BASE_ADDR_BBC0_FB0%256);      

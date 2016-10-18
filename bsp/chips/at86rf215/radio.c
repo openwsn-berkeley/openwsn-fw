@@ -129,9 +129,7 @@ void radio_rfOff(void) {
     // change state
     radio_vars.state = RADIOSTATE_TURNING_OFF;
    
-    do{
-        at86rf215_spiStrobe(CMD_RF_TRXOFF);
-    }while(at86rf215_status() != RF_TRXOFF);
+    at86rf215_spiStrobe(CMD_RF_TRXOFF);
     // wiggle debug pin
     debugpins_radio_clr();
     leds_radio_off();
@@ -159,18 +157,18 @@ void radio_txEnable(void) {
     debugpins_radio_set();
     leds_radio_on();
         
-    //while(radio_vars.state != RADIOSTATE_TX_ENABLED); 
+    while(radio_vars.state != RADIOSTATE_TX_ENABLED); 
     // change state
     
 }
 
 void radio_txNow(void) {
     // change state
-    if (at86rf215_status() != RF_TXPREP)at86rf215_spiStrobe(CMD_RF_TXPREP);
+    //if (at86rf215_status() != RF_TXPREP)at86rf215_spiStrobe(CMD_RF_TXPREP);
     radio_vars.state = RADIOSTATE_TRANSMITTING;
 
     at86rf215_spiStrobe(CMD_RF_TX);
-    while(radio_vars.state != RADIOSTATE_TXRX_DONE && radio_vars.bb0_isr != 0x10);
+    while(radio_vars.state != RADIOSTATE_TXRX_DONE);
     at86rf215_spiStrobe(RF_TRXOFF);
 }
 
@@ -195,7 +193,7 @@ void radio_getReceivedFrame(uint8_t* bufRead) {
 
     // read the received packet from the RXFIFO
     at86rf215_spiReadRxFifo(bufRead);
-    
+        
     //TODO
     // On reception, the CC1200 replaces the
     // received CRC by:
@@ -259,19 +257,33 @@ kick_scheduler_t radio_isr() {
                     // call the callback
                     radio_vars.startFrame_cb(capturedTime);
                     // kick the OS
-                    return KICK_SCHEDULER;
+                    //return KICK_SCHEDULER;
                 } else {
                 while(1);
                 }
             }
-            else if ((radio_vars.bb0_isr & IRQS_RXFE_MASK) || (radio_vars.bb0_isr & IRQS_TXFE_MASK)){
+            
+            else if ((radio_vars.bb0_isr & IRQS_TXFE_MASK)){ //|| (radio_vars.bb0_isr & IRQS_TXFE_MASK)){
                 P4OUT ^= BIT0;
                 radio_vars.state = RADIOSTATE_TXRX_DONE;
                 if (radio_vars.endFrame_cb!=NULL) {
                     // call the callback
                     radio_vars.endFrame_cb(capturedTime);
                     // kick the OS
-                    return KICK_SCHEDULER;
+                    //return KICK_SCHEDULER;
+                } else {
+                while(1);
+                }                
+            }            
+            else if ((radio_vars.bb0_isr & IRQS_RXFE_MASK)){ //|| (radio_vars.bb0_isr & IRQS_TXFE_MASK)){
+                P4OUT ^= BIT0;
+                radio_vars.state = RADIOSTATE_TXRX_DONE;
+                if (radio_vars.endFrame_cb!=NULL) {
+                    // call the callback
+                    radio_vars.endFrame_cb(capturedTime);
+                    // kick the OS
+                    //return KICK_SCHEDULER;
+                    at86rf215_spiStrobe(CMD_RF_RX);
                 } else {
                 while(1);
                 }                
