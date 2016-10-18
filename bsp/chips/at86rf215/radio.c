@@ -182,17 +182,13 @@ void radio_rxEnable(void) {
     // wiggle debug pin
     debugpins_radio_set();
     leds_radio_on();
-    do{
-        at86rf215_spiStrobe(RF_TXPREP);
-    }while(at86rf215_status() != RF_TXPREP);
+    at86rf215_spiStrobe(CMD_RF_RX);
     // change state
     radio_vars.state = RADIOSTATE_LISTENING;
 }
 
 void radio_rxNow(void) {
-    do{
-        at86rf215_spiStrobe(CMD_RF_RX); //sniffer mode
-    }while(at86rf215_status() != RF_RX);
+    
 }
 
 void radio_getReceivedFrame(uint8_t* bufRead) {
