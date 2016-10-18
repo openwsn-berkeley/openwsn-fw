@@ -76,10 +76,10 @@ typedef enum {
 
 //=========================== typedef =========================================
 
-// >2^4*3*(503/9)*15*2=80,480 (2^MAXEB * maxretries * (slotframe / numberOfsharedCellsFor6p)*slotlength)*2 (bi-direction) (ms))
+// >2^4*3*(101/3)*15*2=48480 (2^MAXEB * maxretries * (slotframe / numberOfsharedCellsFor6p)*slotlength)*2 (bi-direction) (ms))
 // on the receiver side of sixtop, it may has mutiple sixtop request in the queue to response (most of them will return with RC BUSY)
 // increase the timeout longer than calculated value
-#define SIX2SIX_TIMEOUT_MS     810000 
+#define SIX2SIX_TIMEOUT_MS      50000 
       
 #define SIXTOP_MINIMAL_EBPERIOD     5 // minist period of sending EB
 

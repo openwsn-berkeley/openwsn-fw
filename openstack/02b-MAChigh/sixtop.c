@@ -24,10 +24,10 @@
 // in seconds: sixtop maintaince is called every 30 seconds
 #define MAINTENANCE_PERIOD        5
 // in miliseconds: sending EB every 10 seconds
-#define EBPERIOD              30000 
+#define EBPERIOD              10000 
 // in miliseconds: EB will be sent with period of 
 // (EBPERIOD-EBPERIOD_RANDOM_RANG: EBPERIOD+EBPERIOD_RANDOM_RANG)
-#define EBPERIOD_RANDOM_RANG  15000
+#define EBPERIOD_RANDOM_RANG   5000
 
 //=========================== variables =======================================
 
@@ -1294,8 +1294,8 @@ void sixtop_notifyReceiveCommand(
                 }
             } else {
                 if (commandIdORcode==IANA_6TOP_RC_ERR_BUSY){
-                    // disable sfx for [0...2^2] slotframe long time
-                    sfx_setBackoff(openrandom_get16b()%(1<<2));
+                    // disable sfx for [0...2^4] slotframe long time
+                    sfx_setBackoff(openrandom_get16b()%(1<<4));
                 } else {
                     if (commandIdORcode==IANA_6TOP_RC_ERR_NORES){
                         // mark this neighbor as no resource for future processing

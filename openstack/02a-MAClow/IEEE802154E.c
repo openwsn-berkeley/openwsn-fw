@@ -958,43 +958,14 @@ port_INLINE void activity_ti1ORri1() {
                 case 1:
                 case 2:
                 case 3:
-                case 4:
-                case 5:
-                case 6:
-                case 7:
-                case 8:
-                case 9:
-                case 10:
                     couldSendEB=FALSE;
-                    if (
-                        (ieee154e_vars.slotOffset==1 || ieee154e_vars.slotOffset==2) && 
-                        openrandom_get16b()>(0xffff/5)
-                    ){
+                    if (ieee154e_vars.slotOffset==1 && openrandom_get16b()>(0xffff/3)){
                         ieee154e_vars.dataToSend = NULL;
                         break;
                     } else {
-                        if (
-                          (ieee154e_vars.slotOffset==3 || ieee154e_vars.slotOffset==4) && 
-                          openrandom_get16b()>(0xffff/4)
-                        ){
+                        if (ieee154e_vars.slotOffset==2 && openrandom_get16b()>(0xffff/2)){
                             ieee154e_vars.dataToSend = NULL;
                             break;
-                        }  else {
-                            if (
-                              (ieee154e_vars.slotOffset==5 || ieee154e_vars.slotOffset==6) && 
-                              openrandom_get16b()>(0xffff/3)
-                            ){
-                                ieee154e_vars.dataToSend = NULL;
-                                break;
-                            }   else {
-                                if (
-                                  (ieee154e_vars.slotOffset==7 || ieee154e_vars.slotOffset==8) && 
-                                  openrandom_get16b()>(0xffff/2)
-                                ){
-                                    ieee154e_vars.dataToSend = NULL;
-                                    break;
-                                }
-                            }
                         }
                     }
                     // only send Unicast
