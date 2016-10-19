@@ -26,7 +26,7 @@ remainder of the packet contains an incrementing bytes.
 #define CHANNEL_SPACING 800                 // 800 kHz
 #define FREQUENCY_0     9028000             // 902.8 MHz
 #define TIMER_PERIOD    (32768>>1)          // (32768>>1) = 500ms @ 32kHz
-
+//#define TIMER_PERIOD    (65535)          // 2s @ 32kHz
 //=========================== variables =======================================
 
 typedef struct {

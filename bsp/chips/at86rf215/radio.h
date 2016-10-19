@@ -77,7 +77,12 @@ void     radio_txNow(void);
 // RX
 void     radio_rxEnable(void);
 void     radio_rxNow(void);
-void     radio_getReceivedFrame(uint8_t* bufRead);
+void     radio_getReceivedFrame(uint8_t* bufRead,
+                                uint16_t* lenRead,
+                                uint16_t  maxBufLen,
+                                 int8_t* rssi,
+                                uint8_t* lqi,
+                                   bool* crc);
 
 // interrupt handlers
 kick_scheduler_t   radio_isr(void);

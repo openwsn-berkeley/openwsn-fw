@@ -110,7 +110,8 @@ void radio_setFrequency(uint16_t channel_spacing, uint32_t frequency_0, uint16_t
     at86rf215_spiWriteReg(RG_RF09_CCF0L, (uint8_t)(frequency_0%256));
     at86rf215_spiWriteReg(RG_RF09_CCF0H, (uint8_t)(frequency_0/256));
     at86rf215_spiWriteReg(RG_RF09_CNL, (uint8_t)(channel%256));
-    at86rf215_spiWriteReg(RG_RF09_CNL, (uint8_t)(channel/256));
+    //at86rf215_spiWriteReg(RG_RF09_CNM, (uint8_t)(channel/256));
+    if (channel > 255)at86rf215_spiWriteReg(RG_RF09_CNM, 0x1); 
     // change state
     radio_vars.state = RADIOSTATE_FREQUENCY_SET;
     
@@ -146,7 +147,7 @@ void radio_loadPacket(uint8_t* packet, uint16_t len) {
     at86rf215_spiWriteFifo(packet, len);
     // change state
     radio_vars.state = RADIOSTATE_PACKET_LOADED;
-   
+    //at86rf215_readBurst(0x0306, packet, len);
 }
 
 void radio_txEnable(void) {
@@ -189,10 +190,17 @@ void radio_rxNow(void) {
     
 }
 
-void radio_getReceivedFrame(uint8_t* bufRead) {
+void radio_getReceivedFrame(
+    uint8_t* bufRead,
+    uint16_t* lenRead,
+    uint16_t  maxBufLen,
+    int8_t*  rssi,
+    uint8_t* lqi,
+    bool*    crc
+    ) {
 
     // read the received packet from the RXFIFO
-    at86rf215_spiReadRxFifo(bufRead);
+    at86rf215_spiReadRxFifo(bufRead, *lenRead);
         
     //TODO
     // On reception, the CC1200 replaces the
@@ -247,17 +255,19 @@ kick_scheduler_t radio_isr() {
             P1IFG &= ~(BIT4);
             radio_read_isr(&radio_vars.rf09_isr);
             if (radio_vars.rf09_isr & IRQS_TRXRDY_MASK){
+                memset(&radio_vars.rf09_isr, 0, 4);
                 radio_vars.state = RADIOSTATE_TX_ENABLED;
             }
             
             else if (radio_vars.bb0_isr & IRQS_RXFS_MASK){
+                memset(&radio_vars.rf09_isr, 0, 4);
                 P4OUT ^= BIT2;
                 radio_vars.state = RADIOSTATE_RECEIVING;
                 if (radio_vars.startFrame_cb!=NULL) {
                     // call the callback
                     radio_vars.startFrame_cb(capturedTime);
                     // kick the OS
-                    //return KICK_SCHEDULER;
+                    return KICK_SCHEDULER;
                 } else {
                 while(1);
                 }
@@ -265,12 +275,13 @@ kick_scheduler_t radio_isr() {
             
             else if ((radio_vars.bb0_isr & IRQS_TXFE_MASK)){ //|| (radio_vars.bb0_isr & IRQS_TXFE_MASK)){
                 P4OUT ^= BIT0;
+                memset(&radio_vars.rf09_isr, 0, 4);
                 radio_vars.state = RADIOSTATE_TXRX_DONE;
                 if (radio_vars.endFrame_cb!=NULL) {
                     // call the callback
                     radio_vars.endFrame_cb(capturedTime);
                     // kick the OS
-                    //return KICK_SCHEDULER;
+                    return KICK_SCHEDULER;
                 } else {
                 while(1);
                 }                
@@ -282,13 +293,14 @@ kick_scheduler_t radio_isr() {
                     // call the callback
                     radio_vars.endFrame_cb(capturedTime);
                     // kick the OS
-                    //return KICK_SCHEDULER;
-                    at86rf215_spiStrobe(CMD_RF_RX);
+                    //at86rf215_spiStrobe(CMD_RF_RX);
+                    return KICK_SCHEDULER;
+                    //at86rf215_spiStrobe(CMD_RF_RX);
                 } else {
                 while(1);
                 }                
             }
-            memset(&radio_vars.rf09_isr, 0, 4);
+            //memset(&radio_vars.rf09_isr, 0, 4);
             //P1IE |= (BIT0); // enable interrupt for P1.0
             break;
         case 12:

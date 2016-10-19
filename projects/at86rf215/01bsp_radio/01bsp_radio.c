@@ -165,8 +165,13 @@ int mote_main(void) {
                   
                   // get packet from radio
                   radio_getReceivedFrame(
-                     app_vars.packet
-                  );
+                    app_vars.packet,
+                    &app_vars.packet_len,
+                    sizeof(app_vars.packet),
+                    &app_vars.rxpk_rssi,
+                    &app_vars.rxpk_lqi,
+                    &app_vars.rxpk_crc
+                    );
                   
                   // led
                   leds_error_off();
