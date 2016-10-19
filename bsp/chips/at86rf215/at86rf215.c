@@ -161,11 +161,21 @@ void at86rf215_spiReadRxFifo( uint8_t* pBufRead, uint16_t lenRead) {
     //read FIFO 
     spi_txrx(
         spi_tx_buffer,              // bufTx
-        sizeof(spi_tx_buffer)+2,     // lenbufTx
+        2,                          // size of the address
+        SPI_BUFFER,                 // returnType
+        spi_rx_buffer,              // bufRx
+        2,                          // maxLenBufRx
+        SPI_FIRST,                  // isFirst
+        SPI_NOTLAST                    // isLast
+    );
+    
+        spi_txrx(
+        spi_tx_buffer,              // bufTx
+        sizeof(spi_tx_buffer),     // lenbufTx
         SPI_BUFFER,                 // returnType
         pBufRead,                  // bufRx
         length,                     // maxLenBufRx
-        SPI_FIRST,                  // isFirst
+        SPI_NOTFIRST,               // isFirst
         SPI_LAST                    // isLast
     );
 
