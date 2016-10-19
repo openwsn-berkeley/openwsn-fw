@@ -63,7 +63,7 @@ typedef enum {
    
     // response senddone
     SIX_STATE_REQUEST_RECEIVED                  = 0x0c,
-    SIX_STATE_WAIT_RESPONSE_SENDDONE            = 0x0d
+    SIX_STATE_WAIT_RESPONSE_SENDDONE            = 0x0d,
 } six2six_state_t;
 
 // before sixtop protocol is called, sixtop handler must be set
