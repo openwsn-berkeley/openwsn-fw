@@ -190,7 +190,7 @@ int mote_main(void) {
    opentimers_init();
 
    leds_all_off();
-   radiotimer_start(0xffffff);
+   radiotimer_start(0xffff);
    radiotimer_cancel();
    
    // get mac
