@@ -586,7 +586,6 @@ void cb_endFrame(uint16_t timestamp) {
       memcpy(srcmac,       mercator_vars.rxpk_buf     , 8);
       memcpy(&transctr,    &mercator_vars.rxpk_buf[8] , 1);
       memcpy(&pkctr,       mercator_vars.rxpk_buf + 9 , 2);
-      pkctr = htons(pkctr);
       memcpy(&txfillbyte,  &mercator_vars.rxpk_buf[11], 1);
 
       // check srcmac
