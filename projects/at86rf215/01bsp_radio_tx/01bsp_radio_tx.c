@@ -97,7 +97,7 @@ int mote_main(void) {
       app_vars.txpk_num++;
       app_vars.txpk_len           = sizeof(app_vars.txpk_buf);
       app_vars.txpk_buf[0]        = app_vars.txpk_num;
-      for (i=1;i<app_vars.txpk_len;i++) {
+      for (i=1;i<app_vars.txpk_len - LENGTH_CRC;i++) {
          app_vars.txpk_buf[i] = i;
       }
       

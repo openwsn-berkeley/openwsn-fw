@@ -198,16 +198,18 @@ void radio_getReceivedFrame(
     uint8_t* lqi,
     bool*    crc
     ) {
-
+    uint8_t RSSI;
     // read the received packet from the RXFIFO
     at86rf215_spiReadRxFifo(bufRead, *lenRead);
-        
+      
+    at86rf215_spiReadReg(RG_RF09_EDV, &RSSI);   
+
+    *rssi = (int8_t)RSSI;
     //TODO
     // On reception, the CC1200 replaces the
     // received CRC by:
     // - [1B] RSSI
     // - [1B] whether CRC checked (bit 7) and LQI (bit 6-0)
-    //*rssi  =  *(bufRead+*lenRead-1);
     //*crc   = ((*(bufRead+*lenRead))&0x80)>>7;
     //*lqi   =  (*(bufRead+*lenRead))&0x7f;
     //clean RX FIFO  

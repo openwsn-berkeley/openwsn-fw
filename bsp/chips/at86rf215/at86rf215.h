@@ -3978,7 +3978,7 @@ static const registerSetting_t basic_settings_ofdm[] = {
   {RG_RF09_PAC,       0x64},
   {RG_BBC0_IRQM,      0x1F},
   {RG_BBC1_IRQM,      0x00},
-  {RG_BBC0_PC,        0x16},
+  {RG_BBC0_PC,        0x56},
   {RG_BBC0_OFDMC,     0x01},
   {RG_BBC0_OFDMPHRTX, 0x03},  
 };
