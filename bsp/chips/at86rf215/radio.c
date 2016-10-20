@@ -200,7 +200,7 @@ void radio_getReceivedFrame(
     ) {
     uint8_t RSSI;
     // read the received packet from the RXFIFO
-    at86rf215_spiReadRxFifo(bufRead, *lenRead);
+    at86rf215_spiReadRxFifo(bufRead, lenRead);
       
     at86rf215_spiReadReg(RG_RF09_EDV, &RSSI);   
 

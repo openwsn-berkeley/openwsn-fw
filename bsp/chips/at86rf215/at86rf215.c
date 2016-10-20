@@ -123,7 +123,7 @@ void at86rf215_spiWriteFifo(uint8_t* bufToWrite, uint16_t len) {
     spi_rx_buffer[0] = spi_rx_buffer[0] & 0xff;
 }
 
-void at86rf215_spiReadRxFifo( uint8_t* pBufRead, uint16_t lenRead) {
+void at86rf215_spiReadRxFifo( uint8_t* pBufRead, uint16_t* lenRead) {
     // when reading the packet over SPI from the RX buffer, you get the following:
     // - *[1B]     dummy byte because of SPI
     // - *[1B]     length byte
@@ -154,7 +154,7 @@ void at86rf215_spiReadRxFifo( uint8_t* pBufRead, uint16_t lenRead) {
     PHR[1] = spi_rx_buffer[3];
     
     length = PHR[0] + (PHR[1] & (0x07))*256; 
-    //*(lenRead) = length;
+    *(lenRead) = length;
     
     spi_tx_buffer[0]    = (FLAG_READ | (uint8_t)(BASE_ADDR_BBC0_FB0/256));
     spi_tx_buffer[1]    = (uint8_t)(BASE_ADDR_BBC0_FB0%256);      

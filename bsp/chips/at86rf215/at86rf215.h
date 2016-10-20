@@ -3959,7 +3959,7 @@ void at86rf215_spiWriteReg    (uint16_t reg, uint8_t regValueToWrite);
 void at86rf215_spiReadReg     (uint16_t reg, uint8_t* regValueRead);
 void at86rf215_spiWriteFifo   (uint8_t* bufToWrite, uint16_t len);
 //void at86rf215_spiReadRxFifo  (uint8_t* pBufRead, uint16_t* lenRead);
-void at86rf215_spiReadRxFifo  (uint8_t* pBufRead, uint16_t lenRead);
+void at86rf215_spiReadRxFifo  (uint8_t* pBufRead, uint16_t* lenRead);
 uint8_t at86rf215_status      (void);
 void at86rf215_read_isr       (uint8_t* rf09_isr);
 void at86rf215_readBurst(uint16_t reg, uint8_t* regValueRead, uint16_t size);
