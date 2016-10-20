@@ -891,21 +891,7 @@ port_INLINE void activity_ti1ORri1() {
       schedule_advanceSlot();
       
       // find the next one
-      ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
-      if (idmanager_getIsSlotSkip() && idmanager_getIsDAGroot()==FALSE) {
-          if (ieee154e_vars.nextActiveSlotOffset>ieee154e_vars.slotOffset) {
-               ieee154e_vars.numOfSleepSlots = ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset;
-          } else {
-               ieee154e_vars.numOfSleepSlots = schedule_getFrameLength()+ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset; 
-          }
-          
-          radio_setTimerPeriod(TsSlotDuration*(ieee154e_vars.numOfSleepSlots));
-           
-          //increase ASN by numOfSleepSlots-1 slots as at this slot is already incremented by 1
-          for (i=0;i<ieee154e_vars.numOfSleepSlots-1;i++){
-             incrementAsnOffset();
-          }
-      }       
+      ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();      
    } else {
       // this is NOT the next active slot, abort
       // stop using serial
@@ -2242,9 +2228,26 @@ function should already have been done. If this is not the case, this function
 will do that for you, but assume that something went wrong.
 */
 void endSlot() {
+    uint8_t i;
   
    // turn off the radio
    radio_rfOff();
+   
+   if (idmanager_getIsSlotSkip() && idmanager_getIsDAGroot()==FALSE) {
+       if (ieee154e_vars.nextActiveSlotOffset>ieee154e_vars.slotOffset) {
+            ieee154e_vars.numOfSleepSlots = ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset;
+       } else {
+            ieee154e_vars.numOfSleepSlots = schedule_getFrameLength()+ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset; 
+       }
+       radio_setTimerPeriod(TsSlotDuration*(ieee154e_vars.numOfSleepSlots));
+        
+       //increase ASN by numOfSleepSlots-1 slots as at this slot is already incremented by 1
+       for (i=0;i<ieee154e_vars.numOfSleepSlots-1;i++){
+          incrementAsnOffset();
+       }
+   }
+   
+   
    // compute the duty cycle if radio has been turned on
    if (ieee154e_vars.radioOnThisSlot==TRUE){  
       ieee154e_vars.radioOnTics+=(radio_getTimerValue()-ieee154e_vars.radioOnInit);
