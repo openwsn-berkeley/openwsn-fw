@@ -890,6 +890,9 @@ port_INLINE void activity_ti1ORri1() {
       // advance the schedule
       schedule_advanceSlot();
       
+      // calculate the frequency to transmit on
+      ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset()); 
+      
       // find the next one
       ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
       if (idmanager_getIsSlotSkip() && idmanager_getIsDAGroot()==FALSE) {
@@ -1049,9 +1052,6 @@ port_INLINE void activity_ti2() {
    
    // add 2 CRC bytes only to the local copy as we end up here for each retransmission
    packetfunctions_reserveFooterSize(&ieee154e_vars.localCopyForTransmission, 2);
-   
-   // calculate the frequency to transmit on
-   ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset()); 
    
    // configure the radio for that frequency
    radio_setFrequency(ieee154e_vars.freq);
