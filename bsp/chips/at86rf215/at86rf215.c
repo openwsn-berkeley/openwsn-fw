@@ -89,9 +89,9 @@ void at86rf215_spiWriteFifo(uint8_t* bufToWrite, uint16_t len) {
     spi_txrx(
         spi_tx_buffer,              // bufTx
         sizeof(spi_tx_buffer),      // lenbufTx
-        SPI_BUFFER,              // returnType
-        spi_rx_buffer,             // bufRx
-        sizeof(spi_tx_buffer),    // maxLenBufRx
+        SPI_BUFFER,                 // returnType
+        spi_rx_buffer,              // bufRx
+        sizeof(spi_tx_buffer),      // maxLenBufRx
         SPI_FIRST,                  // isFirst
         SPI_LAST                    // isLast
     );
@@ -103,7 +103,7 @@ void at86rf215_spiWriteFifo(uint8_t* bufToWrite, uint16_t len) {
     spi_txrx(
         spi_tx_buffer,              // bufTx
         2,                         // lenbufTx
-        SPI_BUFFER,             // returnType
+        SPI_BUFFER,                // returnType
         spi_rx_buffer,             // bufRx
         2,                         // maxLenBufRx
         SPI_FIRST,                 // isFirst
@@ -113,14 +113,14 @@ void at86rf215_spiWriteFifo(uint8_t* bufToWrite, uint16_t len) {
     // step 3. send the payload.
     spi_txrx(
         bufToWrite,                 // bufTx
-        len - 4,                     // lenbufTx
+        len - LENGTH_CRC,          // lenbufTx
         SPI_BUFFER,                 // returnType
         spi_rx_buffer,             // bufRx
         sizeof(spi_rx_buffer),     // maxLenBufRx
         SPI_NOTFIRST,              // isFirst
         SPI_LAST                   // isLast
     );
-    spi_rx_buffer[0] = spi_rx_buffer[0] & 0xff;
+    
 }
 
 void at86rf215_spiReadRxFifo( uint8_t* pBufRead, uint16_t* lenRead) {

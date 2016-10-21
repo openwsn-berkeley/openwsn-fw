@@ -165,7 +165,6 @@ void radio_txEnable(void) {
 
 void radio_txNow(void) {
     // change state
-    //if (at86rf215_status() != RF_TXPREP)at86rf215_spiStrobe(CMD_RF_TXPREP);
     radio_vars.state = RADIOSTATE_TRANSMITTING;
 
     at86rf215_spiStrobe(CMD_RF_TX);
@@ -187,7 +186,7 @@ void radio_rxEnable(void) {
 }
 
 void radio_rxNow(void) {
-    
+    //nothing to do
 }
 
 void radio_getReceivedFrame(
@@ -205,17 +204,7 @@ void radio_getReceivedFrame(
     at86rf215_spiReadReg(RG_RF09_EDV, &RSSI);   
 
     *rssi = (int8_t)RSSI;
-    //TODO
-    // On reception, the CC1200 replaces the
-    // received CRC by:
-    // - [1B] RSSI
-    // - [1B] whether CRC checked (bit 7) and LQI (bit 6-0)
-    //*crc   = ((*(bufRead+*lenRead))&0x80)>>7;
-    //*lqi   =  (*(bufRead+*lenRead))&0x7f;
-    //clean RX FIFO  
-    //at86rf215_spiStrobe( CC1200_SFRX, &radio_vars.radioStatusByte);
-    //put radio in reception mode
-    //at86rf215_spiStrobe(CC1200_SWOR, &radio_vars.radioStatusByte);
+
 }
 
 //=========================== private =========================================
@@ -238,7 +227,6 @@ void radio_read_isr(uint8_t* rf09_isr){
 //=========================== interrupt handlers ==============================
 kick_scheduler_t radio_isr() {
     PORT_TIMER_WIDTH capturedTime;
-    //uint8_t  irq_status;
     // capture the time
     capturedTime = radiotimer_getCapturedTime();
     switch(__even_in_range(P1IV,16)){
@@ -253,7 +241,6 @@ kick_scheduler_t radio_isr() {
         case 8:
             break;
         case 10:
-          //P1IE &= ~(BIT0); // disable interrupt for P1.0
             P1IFG &= ~(BIT4);
             radio_read_isr(&radio_vars.rf09_isr);
             if (radio_vars.rf09_isr & IRQS_TRXRDY_MASK){
@@ -275,7 +262,7 @@ kick_scheduler_t radio_isr() {
                 }
             }
             
-            else if ((radio_vars.bb0_isr & IRQS_TXFE_MASK)){ //|| (radio_vars.bb0_isr & IRQS_TXFE_MASK)){
+            else if ((radio_vars.bb0_isr & IRQS_TXFE_MASK)){ 
                 P4OUT ^= BIT0;
                 memset(&radio_vars.rf09_isr, 0, 4);
                 radio_vars.state = RADIOSTATE_TXRX_DONE;
@@ -288,22 +275,21 @@ kick_scheduler_t radio_isr() {
                 while(1);
                 }                
             }            
-            else if ((radio_vars.bb0_isr & IRQS_RXFE_MASK)){ //|| (radio_vars.bb0_isr & IRQS_TXFE_MASK)){
+            else if ((radio_vars.bb0_isr & IRQS_RXFE_MASK)){ 
                 P4OUT ^= BIT0;
+                memset(&radio_vars.rf09_isr, 0, 4);
                 radio_vars.state = RADIOSTATE_TXRX_DONE;
                 if (radio_vars.endFrame_cb!=NULL) {
                     // call the callback
                     radio_vars.endFrame_cb(capturedTime);
                     // kick the OS
-                    //at86rf215_spiStrobe(CMD_RF_RX);
+
                     return KICK_SCHEDULER;
-                    //at86rf215_spiStrobe(CMD_RF_RX);
+
                 } else {
                 while(1);
                 }                
             }
-            //memset(&radio_vars.rf09_isr, 0, 4);
-            //P1IE |= (BIT0); // enable interrupt for P1.0
             break;
         case 12:
             break;
