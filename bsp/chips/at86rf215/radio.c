@@ -41,6 +41,8 @@ void radio_init(void) {
    
     // reset radio
     radio_reset();
+    at86rf215_spiStrobe(CMD_RF_TRXOFF);
+    while(at86rf215_status() != RF_STATE_TRXOFF);
     // change state
     radio_vars.state          = RADIOSTATE_RFOFF;
    
@@ -78,7 +80,6 @@ void radio_setEndFrameCb(radiotimer_capture_cbt cb) {
 void radio_reset(void) {
    
     at86rf215_spiWriteReg( RG_RF_RST, CMD_RF_RESET); 
-    at86rf215_spiStrobe(CMD_RF_TRXOFF);
 }
 
 //===== timer
@@ -105,8 +106,8 @@ uint16_t radio_getTimerPeriod(void) {
 //frequency_nb integer
 void radio_setFrequency(uint16_t channel_spacing, uint32_t frequency_0, uint16_t channel) {
     
-    frequency_0 = ((frequency_0 * 1000)/25000);
-    at86rf215_spiWriteReg(RG_RF09_CS, (uint8_t)(channel_spacing/256));
+    frequency_0 = (frequency_0/25);
+    at86rf215_spiWriteReg(RG_RF09_CS, (uint8_t)(channel_spacing/25));
     at86rf215_spiWriteReg(RG_RF09_CCF0L, (uint8_t)(frequency_0%256));
     at86rf215_spiWriteReg(RG_RF09_CCF0H, (uint8_t)(frequency_0/256));
     at86rf215_spiWriteReg(RG_RF09_CNL, (uint8_t)(channel%256));
@@ -197,27 +198,12 @@ void radio_getReceivedFrame(
     uint8_t* lqi,
     bool*    crc
     ) {
-    uint8_t RSSI;
     // read the received packet from the RXFIFO
     at86rf215_spiReadRxFifo(bufRead, lenRead);
-      
-    at86rf215_spiReadReg(RG_RF09_EDV, &RSSI);   
-
-    *rssi = (int8_t)RSSI;
-
+    *rssi = at86rf215_spiReadReg(RG_RF09_EDV);   
 }
 
-//=========================== private =========================================
-uint8_t rf09_isr(void){
-    uint8_t spi_rx[1];
-    at86rf215_spiReadReg(RG_RF09_IRQS, spi_rx);
-    return spi_rx[0];
-}
-uint8_t bbc0_isr(void){
-    uint8_t spi_rx[1];
-    at86rf215_spiReadReg(RG_BBC0_IRQS, spi_rx);
-    return spi_rx[0];    
-} 
+//=========================== private ========================================= 
 
 void radio_read_isr(uint8_t* rf09_isr){
     at86rf215_read_isr(rf09_isr);

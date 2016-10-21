@@ -165,13 +165,12 @@ int mote_main(void) {
       app_vars.uart_txFrame[0] = (uint8_t)(app_vars.rxpk_len/256);  // packet length
       app_vars.uart_txFrame[1] = (uint8_t)(app_vars.rxpk_len%256);  // packet length
       app_vars.uart_txFrame[2] = app_vars.rxpk_num;  // packet number
-     // app_vars.uart_txFrame[2] = app_vars.rxpk_rssi; // RSSI
+      app_vars.uart_txFrame[3] = app_vars.rxpk_rssi; // RSSI
      // app_vars.uart_txFrame[3] = app_vars.rxpk_lqi;  // LQI
      // app_vars.uart_txFrame[4] = app_vars.rxpk_crc;  // CRC
-      app_vars.uart_txFrame[3] = 0x50;
+      app_vars.uart_txFrame[4] = 0xff;               // closing flag
       app_vars.uart_txFrame[5] = 0xff;               // closing flag
       app_vars.uart_txFrame[6] = 0xff;               // closing flag
-      app_vars.uart_txFrame[7] = 0xff;               // closing flag
       
       app_vars.uart_done          = 0;
       app_vars.uart_lastTxByte    = 0;

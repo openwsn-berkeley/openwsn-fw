@@ -43,6 +43,14 @@ typedef struct
 #define CMD_RF_RX         0x5
 #define CMD_RF_RESET      0x7
 
+
+#define RF_STATE_TRXOFF     0x2
+#define RF_STATE_TXPREP     0x3
+#define RF_STATE_TX         0x4
+#define RF_STATE_RX         0x5
+#define RF_STATE_TRANSITION 0x6
+#define RF_STATE_RESET      0x7
+
 /** Typical timing values. */
 /* TRX Parameter: SPI_T2 */
 #define RST_PULSE_WIDTH_NS                                 (5)
@@ -3956,9 +3964,10 @@ typedef enum bb_irq_tag
 /* ========================== prototypes =================================== */
 void at86rf215_spiStrobe      (uint8_t strobe);
 void at86rf215_spiWriteReg    (uint16_t reg, uint8_t regValueToWrite);
-void at86rf215_spiReadReg     (uint16_t reg, uint8_t* regValueRead);
+uint8_t at86rf215_spiReadReg  (uint16_t regAddr16);
 void at86rf215_spiWriteFifo   (uint8_t* bufToWrite, uint16_t len);
-void at86rf215_spiReadRxFifo  (uint8_t* pBufRead, uint16_t* lenRead);
+void at86rf215_spiReadRxFifo  (uint8_t* pBufRead, 
+                                    uint16_t* lenRead);
 uint8_t at86rf215_status      (void);
 void at86rf215_read_isr       (uint8_t* rf09_isr);
 void at86rf215_readBurst(uint16_t reg, uint8_t* regValueRead, uint16_t size);
