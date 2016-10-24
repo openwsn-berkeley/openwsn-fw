@@ -20,7 +20,7 @@
 
 //=========================== define ==========================================
 
-#define MAX_6P_REQUEST            5
+#define MAX_6P_REQUEST            1
 // in seconds: sixtop maintaince is called every 30 seconds
 #define MAINTENANCE_PERIOD        5
 // in miliseconds: sending EB every 10 seconds
@@ -1112,7 +1112,7 @@ void sixtop_notifyReceiveCommand(
     
     memset(cellList,0,sizeof(cellList));
     
-    if (openqueue_sixtopGetNumberOfPacketCreatedBy(COMPONENT_SIXTOP_RES)>=MAX_6P_REQUEST){
+    if (openqueue_sixtopGetNumberOfPacketCreatedBy(COMPONENT_SIXTOP_RES)>MAX_6P_REQUEST){
         // only deal with max number of 6p request at same time
         return;
     }
