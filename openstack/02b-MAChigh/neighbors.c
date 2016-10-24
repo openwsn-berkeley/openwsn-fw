@@ -427,14 +427,10 @@ void  neighbors_removeOld() {
          // remove the neighbor has no activity for a while and the one marked as isNoRes
          if (timeSinceHeard>DESYNCTIMEOUT || neighbors_vars.neighbors[i].isNoRes) {
             haveParent = icmpv6rpl_getPreferredParentIndex(&j);
-            if (haveParent && (i==j)) { // this is our preferred parent, carefull!
-                icmpv6rpl_killPreferredParent();
-                if (neighbors_vars.neighbors[i].isNoRes==FALSE){
-                    // don't remove neighbor marked as isNoRes, 
-                    // keep this information in the future to avoid reselect it as parent
-                    removeNeighbor(i);
-                }
-                icmpv6rpl_updateMyDAGrankAndParentSelection();
+            if (haveParent && (i==j)) {
+                // don't remove the parent, parent won't send unicast packet to child
+                // if it reaches here, it means I haven't send packet to my parent successfully
+                // for a while. This neighbor should be removed after the parent is changed.
             }
             else {
                 if (neighbors_vars.neighbors[i].isNoRes==FALSE){
