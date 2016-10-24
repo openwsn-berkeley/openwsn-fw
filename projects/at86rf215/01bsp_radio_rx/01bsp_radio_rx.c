@@ -74,8 +74,8 @@ len=17  num=84  rssi=-81  lqi=108 crc=1
 #define LENGTH_PACKET   2043+LENGTH_CRC     // maximum length is 2047 bytes
 #define CHANNEL         0                   // 902.800 MHz
 #define CHANNEL_SPACING 800                 // 800 kHz
-#define FREQUENCY_0     9028000             // 902.8 MHz
-#define LENGTH_SERIAL_FRAME  8              ///< length of the serial frame
+#define FREQUENCY_0     863425              // 902.8 MHz
+#define LENGTH_SERIAL_FRAME  9              ///< length of the serial frame
 
 //=========================== variables =======================================
 
@@ -93,7 +93,7 @@ typedef struct {
    volatile   uint8_t    rxpk_done;
               uint8_t    rxpk_buf[LENGTH_PACKET];
               uint16_t   rxpk_len;
-              uint8_t    rxpk_num;
+              uint16_t    rxpk_num;
               int8_t     rxpk_rssi;
               uint8_t    rxpk_lqi;
               bool       rxpk_crc;
@@ -162,15 +162,16 @@ int mote_main(void) {
       leds_error_on();
       
       // format frame to send over serial port
-      app_vars.uart_txFrame[0] = (uint8_t)(app_vars.rxpk_len/256);  // packet length
-      app_vars.uart_txFrame[1] = (uint8_t)(app_vars.rxpk_len%256);  // packet length
-      app_vars.uart_txFrame[2] = app_vars.rxpk_num;  // packet number
-      app_vars.uart_txFrame[3] = app_vars.rxpk_rssi; // RSSI
+      app_vars.uart_txFrame[0] = (uint8_t)((app_vars.rxpk_len)>>8);  // packet length
+      app_vars.uart_txFrame[1] = (uint8_t)((app_vars.rxpk_len)&0xFF);  // packet length
+      app_vars.uart_txFrame[2] = (uint8_t)((app_vars.rxpk_num)>>8);  // packet number
+      app_vars.uart_txFrame[3] = (uint8_t)((app_vars.rxpk_num)&0xFF);  // packet number
+      app_vars.uart_txFrame[4] = app_vars.rxpk_rssi; // RSSI
      // app_vars.uart_txFrame[3] = app_vars.rxpk_lqi;  // LQI
-     // app_vars.uart_txFrame[4] = app_vars.rxpk_crc;  // CRC
-      app_vars.uart_txFrame[4] = 0xff;               // closing flag
-      app_vars.uart_txFrame[5] = 0xff;               // closing flag
+      app_vars.uart_txFrame[5] = (uint8_t)(app_vars.rxpk_crc);  // CRC
       app_vars.uart_txFrame[6] = 0xff;               // closing flag
+      app_vars.uart_txFrame[7] = 0xff;               // closing flag
+      app_vars.uart_txFrame[8] = 0xff;               // closing flag
       
       app_vars.uart_done          = 0;
       app_vars.uart_lastTxByte    = 0;
@@ -234,7 +235,7 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
    );
    
    // read the packet number
-   app_vars.rxpk_num = app_vars.rxpk_buf[0];
+   app_vars.rxpk_num = (((app_vars.rxpk_buf[0])<<8) | ((app_vars.rxpk_buf[1]) & 0xFF));
    
    // led
    leds_sync_off();

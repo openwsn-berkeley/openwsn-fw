@@ -3972,8 +3972,73 @@ uint8_t at86rf215_status      (void);
 void at86rf215_read_isr       (uint8_t* rf09_isr);
 void at86rf215_readBurst(uint16_t reg, uint8_t* regValueRead, uint16_t size);
 
+//------------------------------------ FSK --------------------------------//
+
+static const registerSetting_t basic_settings_fsk_option1 []={
+  {RG_RF09_CMD,       0x02}, //we make sure we are in the trxoff state
+  {RG_RF09_IRQM,      0x1F}, // TRXERR, BATLOW, EDC, TRXRDY, WAKEUP interrupts enabled
+  {RG_RF24_IRQM,      0x00},
+  {RG_RF09_RXBWC,     0x11}, //IF shift, 200 kHz bandwidth
+  {RG_RF09_RXDFE,     0x43}, //find the right values
+  {RG_RF09_AGCC,      0x11},
+  {RG_RF09_EDD,       0x7A},
+  {RG_RF09_TXCUTC,    0x0B}, //find the right values
+  {RG_RF09_TXDFE,     0x63}, //find the right values
+  {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
+  {RG_BBC0_IRQM,      0x1F},// TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
+  {RG_BBC1_IRQM,      0x00},
+  {RG_BBC0_PC,        0x15},// No FCS filter, 32 bits FCS, FSK.
+  {RG_BBC0_FSKC0,     0x00},
+  {RG_BBC0_FSKC1,     0x00},
+  {RG_BBC0_FSKC2,     0x00},
+  {RG_BBC0_FSKC3,     0x00},
+  {RG_BBC0_FSKPHRTX,  0x00},// No data whitening SFD0 used. 
+};
+
+static const registerSetting_t basic_settings_fsk_option2 []={  
+  {RG_RF09_CMD,       0x02}, //we make sure we are in the trxoff state
+  {RG_RF09_IRQM,      0x1F}, // TRXERR, BATLOW, EDC, TRXRDY, WAKEUP interrupts enabled
+  {RG_RF24_IRQM,      0x00},
+  {RG_RF09_RXBWC,     0x14}, //IF shift, 400 kHz bandwidth
+  {RG_RF09_RXDFE,     0x43}, //find the right values
+  {RG_RF09_AGCC,      0x11},
+  {RG_RF09_EDD,       0x7A},
+  {RG_RF09_TXCUTC,    0x0B}, //find the right values
+  {RG_RF09_TXDFE,     0x63}, //find the right values
+  {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
+  {RG_BBC0_IRQM,      0x1F},// TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
+  {RG_BBC1_IRQM,      0x00},
+  {RG_BBC0_PC,        0x15},// No FCS filter, 32 bits FCS, FSK. 
+  {RG_BBC0_FSKC0,     0x00},
+  {RG_BBC0_FSKC1,     0x01},
+  {RG_BBC0_FSKC2,     0x00},
+  {RG_BBC0_FSKC3,     0x00},
+  {RG_BBC0_FSKPHRTX,  0x00},// No data whitening SFD0 used. 
+};
+
+static const registerSetting_t basic_settings_fsk_option3 []={  
+  {RG_RF09_CMD,       0x02}, //we make sure we are in the trxoff state
+  {RG_RF09_IRQM,      0x1F}, // TRXERR, BATLOW, EDC, TRXRDY, WAKEUP interrupts enabled
+  {RG_RF24_IRQM,      0x00},
+  {RG_RF09_RXBWC,     0x14}, //IF shift, 200 kHz bandwidth
+  {RG_RF09_RXDFE,     0x43}, //find the right values
+  {RG_RF09_AGCC,      0x11},
+  {RG_RF09_EDD,       0x7A},
+  {RG_RF09_TXCUTC,    0x0B}, //find the right values
+  {RG_RF09_TXDFE,     0x63}, //find the right values
+  {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
+  {RG_BBC0_IRQM,      0x1F},// TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
+  {RG_BBC1_IRQM,      0x00},
+  {RG_BBC0_PC,        0x15},// No FCS filter, 32 bits FCS, FSK. 
+  {RG_BBC0_FSKC0,     0x00},
+  {RG_BBC0_FSKC1,     0x03},
+  {RG_BBC0_FSKC2,     0x00},
+  {RG_BBC0_FSKC3,     0x00},
+  {RG_BBC0_FSKPHRTX,  0x00},// No data whitening SFD0 used. 
+};
+//------------------------------------ OFDM -----------------------------------//
 /** Preferred settings for OFDM */
-static const registerSetting_t basic_settings_ofdm[] = {
+static const registerSetting_t basic_settings_ofdm_1_mcs3[] = {  //TODO
   {RG_RF09_CMD,       0x02},
   {RG_RF09_IRQM,      0x1F},
   {RG_RF24_IRQM,      0x00},
@@ -3990,6 +4055,64 @@ static const registerSetting_t basic_settings_ofdm[] = {
   {RG_BBC0_OFDMC,     0x01},
   {RG_BBC0_OFDMPHRTX, 0x03},  
 };
+
+static const registerSetting_t basic_settings_ofdm_2_mcs3[] = {
+  {RG_RF09_CMD,       0x02},
+  {RG_RF09_IRQM,      0x1F},
+  {RG_RF24_IRQM,      0x00},
+  {RG_RF09_RXBWC,     0x17},
+  {RG_RF09_RXDFE,     0x43},
+  {RG_RF09_AGCC,      0x11},
+  {RG_RF09_EDD,       0x7A},
+  {RG_RF09_TXCUTC,    0x0B},
+  {RG_RF09_TXDFE,     0x63},
+  {RG_RF09_PAC,       0x64}, // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
+  {RG_BBC0_IRQM,      0x1F},
+  {RG_BBC1_IRQM,      0x00},
+  {RG_BBC0_PC,        0x56},
+  {RG_BBC0_OFDMC,     0x01},
+  {RG_BBC0_OFDMPHRTX, 0x03},  
+};
+
+static const registerSetting_t basic_settings_ofdm_3_mcs3[] = {     //TODO
+  {RG_RF09_CMD,       0x02},
+  {RG_RF09_IRQM,      0x1F},
+  {RG_RF24_IRQM,      0x00},
+  {RG_RF09_RXBWC,     0x17},
+  {RG_RF09_RXDFE,     0x43},
+  {RG_RF09_AGCC,      0x11},
+  {RG_RF09_EDD,       0x7A},
+  {RG_RF09_TXCUTC,    0x0B},
+  {RG_RF09_TXDFE,     0x63},
+  {RG_RF09_PAC,       0x64}, // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
+  {RG_BBC0_IRQM,      0x1F},
+  {RG_BBC1_IRQM,      0x00},
+  {RG_BBC0_PC,        0x56},
+  {RG_BBC0_OFDMC,     0x01},
+  {RG_BBC0_OFDMPHRTX, 0x03},  
+};
+
+static const registerSetting_t basic_settings_ofdm_4_mcs3[] = {  //TODO
+  {RG_RF09_CMD,       0x02},
+  {RG_RF09_IRQM,      0x1F},
+  {RG_RF24_IRQM,      0x00},
+  {RG_RF09_RXBWC,     0x17},
+  {RG_RF09_RXDFE,     0x43},
+  {RG_RF09_AGCC,      0x11},
+  {RG_RF09_EDD,       0x7A},
+  {RG_RF09_TXCUTC,    0x0B},
+  {RG_RF09_TXDFE,     0x63},
+  {RG_RF09_PAC,       0x64}, // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
+  {RG_BBC0_IRQM,      0x1F},
+  {RG_BBC1_IRQM,      0x00},
+  {RG_BBC0_PC,        0x56},
+  {RG_BBC0_OFDMC,     0x01},
+  {RG_BBC0_OFDMPHRTX, 0x03},  
+};
+
+//static const registerSetting_t basic_settings_[] = {
+
+//};
 
 
 #endif /* RF215_H */

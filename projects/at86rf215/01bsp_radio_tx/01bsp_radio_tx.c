@@ -24,7 +24,7 @@ remainder of the packet contains an incrementing bytes.
 #define LENGTH_PACKET   2043+LENGTH_CRC     // maximum length is 2047 bytes
 #define CHANNEL         0                   // 902.8 MHz
 #define CHANNEL_SPACING 800                 // 800 kHz
-#define FREQUENCY_0     9028000             // 902.8 MHz
+#define FREQUENCY_0     863425             // 902.8 MHz
 #define TIMER_PERIOD    (32768>>1)          // (32768>>1) = 500ms @ 32kHz
 //#define TIMER_PERIOD    (65535)          // 2s @ 32kHz
 //=========================== variables =======================================
@@ -42,7 +42,7 @@ typedef struct {
    uint8_t              txpk_txNow;
    uint8_t              txpk_buf[LENGTH_PACKET];
    uint16_t             txpk_len;
-   uint8_t              txpk_num;
+   uint16_t             txpk_num;
 } app_vars_t;
 
 app_vars_t app_vars;
@@ -96,9 +96,10 @@ int mote_main(void) {
       // prepare packet
       app_vars.txpk_num++;
       app_vars.txpk_len           = sizeof(app_vars.txpk_buf);
-      app_vars.txpk_buf[0]        = app_vars.txpk_num;
-      for (i=1;i<app_vars.txpk_len;i++) {
-         app_vars.txpk_buf[i] = i;
+      app_vars.txpk_buf[0]        = (uint8_t)((app_vars.txpk_num)>>8);
+      app_vars.txpk_buf[1]        = (uint8_t)((app_vars.txpk_num)&0xFF);
+      for (i=2;i<app_vars.txpk_len;i++) {
+         app_vars.txpk_buf[i] = i-1;
       }
       
       // send packet

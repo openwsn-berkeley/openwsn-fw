@@ -52,11 +52,21 @@ void radio_init(void) {
     P1IFG &= (~BIT4); // Clear interrupt flag for P1.4
     P1IE |= (BIT4); // Enable interrupt for P1.4
     // Write registers to radio
-    for(uint16_t i = 0;
-        i < (sizeof(basic_settings_ofdm)/sizeof(registerSetting_t)); i++) {
-        at86rf215_spiWriteReg( basic_settings_ofdm[i].addr, basic_settings_ofdm[i].data);
+    for(uint16_t i = 0; i < (sizeof(basic_settings_ofdm_2_mcs3)/sizeof(registerSetting_t)); i++) {
+        at86rf215_spiWriteReg( basic_settings_ofdm_2_mcs3[i].addr, basic_settings_ofdm_2_mcs3[i].data);
     };
     radio_read_isr(&radio_vars.rf09_isr);
+}
+
+void radio_change_modulation(uint8_t* settings){
+
+    at86rf215_spiStrobe(CMD_RF_TRXOFF);
+    while(at86rf215_status() != RF_STATE_TRXOFF);
+    for(uint16_t i = 0; i < (sizeof(basic_settings_ofdm_2_mcs3)/sizeof(registerSetting_t)); i++) {
+        at86rf215_spiWriteReg( basic_settings_ofdm_2_mcs3[i].addr, basic_settings_ofdm_2_mcs3[i].data);
+        };
+    radio_read_isr(&radio_vars.rf09_isr);
+
 }
 
 void radio_setOverflowCb(radiotimer_compare_cbt cb) {
@@ -111,8 +121,7 @@ void radio_setFrequency(uint16_t channel_spacing, uint32_t frequency_0, uint16_t
     at86rf215_spiWriteReg(RG_RF09_CCF0L, (uint8_t)(frequency_0%256));
     at86rf215_spiWriteReg(RG_RF09_CCF0H, (uint8_t)(frequency_0/256));
     at86rf215_spiWriteReg(RG_RF09_CNL, (uint8_t)(channel%256));
-    //at86rf215_spiWriteReg(RG_RF09_CNM, (uint8_t)(channel/256));
-    if (channel > 255)at86rf215_spiWriteReg(RG_RF09_CNM, 0x1); 
+    at86rf215_spiWriteReg(RG_RF09_CNM, (uint8_t)(channel/256));
     // change state
     radio_vars.state = RADIOSTATE_FREQUENCY_SET;
     
@@ -121,8 +130,8 @@ void radio_setFrequency(uint16_t channel_spacing, uint32_t frequency_0, uint16_t
 void radio_rfOn(void) {
   
     //put the radio in the TRXPREP state
-    at86rf215_spiStrobe(CMD_RF_TXPREP);
-    while(radio_vars.state != RADIOSTATE_TX_ENABLED);
+    at86rf215_spiStrobe(CMD_RF_TRXOFF);
+    //while(radio_vars.state != RADIOSTATE_TX_ENABLED);
 
 }
 
@@ -166,6 +175,8 @@ void radio_txEnable(void) {
 
 void radio_txNow(void) {
     // change state
+    at86rf215_spiReadReg(RG_RF09_CCF0L);
+    at86rf215_spiReadReg(RG_RF09_CCF0H);
     radio_vars.state = RADIOSTATE_TRANSMITTING;
 
     at86rf215_spiStrobe(CMD_RF_TX);
@@ -200,7 +211,8 @@ void radio_getReceivedFrame(
     ) {
     // read the received packet from the RXFIFO
     at86rf215_spiReadRxFifo(bufRead, lenRead);
-    *rssi = at86rf215_spiReadReg(RG_RF09_EDV);   
+    *rssi = at86rf215_spiReadReg(RG_RF09_EDV);
+    *crc  = (at86rf215_spiReadReg(RG_BBC0_PC)>>6);
 }
 
 //=========================== private ========================================= 
