@@ -75,7 +75,7 @@ len=17  num=84  rssi=-81  lqi=108 crc=1
 #define CHANNEL         0                   // 902.800 MHz
 #define CHANNEL_SPACING 800                 // 800 kHz
 #define FREQUENCY_0     863425              // 902.8 MHz
-#define LENGTH_SERIAL_FRAME  9              ///< length of the serial frame
+#define LENGTH_SERIAL_FRAME  10              ///< length of the serial frame
 
 //=========================== variables =======================================
 
@@ -93,10 +93,11 @@ typedef struct {
    volatile   uint8_t    rxpk_done;
               uint8_t    rxpk_buf[LENGTH_PACKET];
               uint16_t   rxpk_len;
-              uint16_t    rxpk_num;
+              uint16_t   rxpk_num;
               int8_t     rxpk_rssi;
               uint8_t    rxpk_lqi;
               bool       rxpk_crc;
+              uint8_t    rxpk_mcs;
    // uart
               uint8_t    uart_txFrame[LENGTH_SERIAL_FRAME];
               uint8_t    uart_lastTxByte;
@@ -167,11 +168,11 @@ int mote_main(void) {
       app_vars.uart_txFrame[2] = (uint8_t)((app_vars.rxpk_num)>>8);  // packet number
       app_vars.uart_txFrame[3] = (uint8_t)((app_vars.rxpk_num)&0xFF);  // packet number
       app_vars.uart_txFrame[4] = app_vars.rxpk_rssi; // RSSI
-     // app_vars.uart_txFrame[3] = app_vars.rxpk_lqi;  // LQI
       app_vars.uart_txFrame[5] = (uint8_t)(app_vars.rxpk_crc);  // CRC
-      app_vars.uart_txFrame[6] = 0xff;               // closing flag
+      app_vars.uart_txFrame[6] = (uint8_t)(app_vars.rxpk_mcs);
       app_vars.uart_txFrame[7] = 0xff;               // closing flag
       app_vars.uart_txFrame[8] = 0xff;               // closing flag
+      app_vars.uart_txFrame[9] = 0xff;               // closing flag
       
       app_vars.uart_done          = 0;
       app_vars.uart_lastTxByte    = 0;
@@ -186,9 +187,11 @@ int mote_main(void) {
       
       // led
       leds_error_off();
+      if ((app_vars.rxpk_num%100) == 0){
+        radio_change_modulation();
+      }
       radio_rxEnable();
-      
-   }
+     }
 }
 
 //=========================== callbacks =======================================
@@ -231,7 +234,8 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
       sizeof(app_vars.rxpk_buf),
       &app_vars.rxpk_rssi,
       &app_vars.rxpk_lqi,
-      &app_vars.rxpk_crc
+      &app_vars.rxpk_crc,
+      &app_vars.rxpk_mcs
    );
    
    // read the packet number

@@ -25,7 +25,7 @@ remainder of the packet contains an incrementing bytes.
 #define CHANNEL         0                   // 902.8 MHz
 #define CHANNEL_SPACING 800                 // 800 kHz
 #define FREQUENCY_0     863425             // 902.8 MHz
-#define TIMER_PERIOD    (32768>>1)          // (32768>>1) = 500ms @ 32kHz
+#define TIMER_PERIOD    (32768>>8)          // (32768>>1) = 500ms @ 32kHz
 //#define TIMER_PERIOD    (65535)          // 2s @ 32kHz
 //=========================== variables =======================================
 
@@ -60,7 +60,8 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp);
 \brief The program starts executing here.
 */
 int mote_main(void) {
-   uint16_t  i;
+   uint16_t  i,x =0, y =0;
+   
    
    // clear local variables
    memset(&app_vars,0,sizeof(app_vars_t));
@@ -80,32 +81,42 @@ int mote_main(void) {
    radio_rfOff();
    
    // start periodic overflow
-   radiotimer_start(TIMER_PERIOD);
-   
-   while(1) {
+    radiotimer_start(TIMER_PERIOD);
+    radio_change_size(&app_vars.txpk_len);
+    while(1){
+      while(y<4){
+        while(x<100) {
       
-      // wait for timer to elapse
-      app_vars.txpk_txNow = 0;
-      while (app_vars.txpk_txNow==0) {
-         board_sleep();
+            // wait for timer to elapse
+            app_vars.txpk_txNow = 0;
+            while (app_vars.txpk_txNow==0) {
+                board_sleep();
+            }
+      
+            // led
+            leds_error_toggle();
+      
+            // prepare packet
+            app_vars.txpk_num++;
+            //app_vars.txpk_len           = sizeof(app_vars.txpk_buf);
+            app_vars.txpk_buf[0]        = (uint8_t)((app_vars.txpk_num)>>8);
+            app_vars.txpk_buf[1]        = (uint8_t)((app_vars.txpk_num)&0xFF);
+            for (i=2;i<app_vars.txpk_len;i++) {
+                app_vars.txpk_buf[i] = i-1;
+            }
+      
+            // send packet
+            radio_loadPacket(app_vars.txpk_buf,app_vars.txpk_len);
+            radio_txEnable();
+            radio_txNow();
+            x++;
+        }
+        x = 0;
+        y++;
+        radio_change_modulation();
       }
-      
-      // led
-      leds_error_toggle();
-      
-      // prepare packet
-      app_vars.txpk_num++;
-      app_vars.txpk_len           = sizeof(app_vars.txpk_buf);
-      app_vars.txpk_buf[0]        = (uint8_t)((app_vars.txpk_num)>>8);
-      app_vars.txpk_buf[1]        = (uint8_t)((app_vars.txpk_num)&0xFF);
-      for (i=2;i<app_vars.txpk_len;i++) {
-         app_vars.txpk_buf[i] = i-1;
-      }
-      
-      // send packet
-      radio_loadPacket(app_vars.txpk_buf,app_vars.txpk_len);
-      radio_txEnable();
-      radio_txNow();
+      y = 0;
+      radio_change_size(&app_vars.txpk_len);
    }
 }
 

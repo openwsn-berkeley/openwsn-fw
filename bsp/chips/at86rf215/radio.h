@@ -70,6 +70,8 @@ PORT_TIMER_WIDTH radio_getTimerPeriod(void);
 void     radio_setFrequency(uint16_t channel_spacing, uint32_t frequency_0, uint16_t channel);
 void     radio_rfOn(void);
 void     radio_rfOff(void);
+void     radio_change_modulation();
+void     radio_change_size(uint16_t* size);
 // TX
 void     radio_loadPacket(uint8_t* packet, uint16_t len);
 void     radio_txEnable(void);
@@ -82,7 +84,9 @@ void     radio_getReceivedFrame(uint8_t* bufRead,
                                 uint16_t  maxBufLen,
                                  int8_t* rssi,
                                 uint8_t* lqi,
-                                   bool* crc);
+                                   bool* crc,
+                                   uint8_t* mcs);
+
 
 // interrupt handlers
 kick_scheduler_t   radio_isr(void);

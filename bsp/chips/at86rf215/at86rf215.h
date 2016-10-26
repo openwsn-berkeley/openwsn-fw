@@ -26,8 +26,8 @@
 /* === TYPES =============================================================== */
 typedef struct
 {
-  uint16_t  addr;
-  uint8_t   data;
+    uint16_t  addr;
+    uint8_t   data;
 }registerSetting_t;
 
 
@@ -4038,7 +4038,80 @@ static const registerSetting_t basic_settings_fsk_option3 []={
 };
 //------------------------------------ OFDM -----------------------------------//
 /** Preferred settings for OFDM */
+
+static const registerSetting_t basic_settings_ofdm_1_mcs0[] = {
+  {RG_RF09_CMD,       0x02},
+  {RG_RF09_IRQM,      0x1F},
+  {RG_RF24_IRQM,      0x00},
+  {RG_RF09_RXBWC,     0x19},
+  {RG_RF09_RXDFE,     0x83},
+  {RG_RF09_AGCC,      0x11},
+  {RG_RF09_EDD,       0x7A},
+  {RG_RF09_TXCUTC,    0x0A},//recommended value (0x0B)
+  {RG_RF09_TXDFE,     0x83},
+  {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. // 0x64 - 0dBm  mettre 0x7F
+  {RG_BBC0_IRQM,      0x1F},
+  {RG_BBC1_IRQM,      0x00},
+  {RG_BBC0_PC,        0x16},//NO FCS FILTER
+  {RG_BBC0_OFDMC,     0x00},
+  {RG_BBC0_OFDMPHRTX, 0x00},  
+};
+
+static const registerSetting_t basic_settings_ofdm_1_mcs1[] = {
+  {RG_RF09_CMD,       0x02},
+  {RG_RF09_IRQM,      0x1F},
+  {RG_RF24_IRQM,      0x00},
+  {RG_RF09_RXBWC,     0x19},
+  {RG_RF09_RXDFE,     0x83},
+  {RG_RF09_AGCC,      0x11},
+  {RG_RF09_EDD,       0x7A},
+  {RG_RF09_TXCUTC,    0x0A},//recommended value (0x0B)
+  {RG_RF09_TXDFE,     0x83},
+  {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. // 0x64 - 0dBm  mettre 0x7F
+  {RG_BBC0_IRQM,      0x1F},
+  {RG_BBC1_IRQM,      0x00},
+  {RG_BBC0_PC,        0x16},//NO FCS FILTER
+  {RG_BBC0_OFDMC,     0x00},
+  {RG_BBC0_OFDMPHRTX, 0x01},  
+};
+
+static const registerSetting_t basic_settings_ofdm_1_mcs2[] = {
+  {RG_RF09_CMD,       0x02},
+  {RG_RF09_IRQM,      0x1F},
+  {RG_RF24_IRQM,      0x00},
+  {RG_RF09_RXBWC,     0x19},
+  {RG_RF09_RXDFE,     0x83},
+  {RG_RF09_AGCC,      0x11},
+  {RG_RF09_EDD,       0x7A},
+  {RG_RF09_TXCUTC,    0x0A},//recommended value (0x0B)
+  {RG_RF09_TXDFE,     0x83},
+  {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. // 0x64 - 0dBm  mettre 0x7F
+  {RG_BBC0_IRQM,      0x1F},
+  {RG_BBC1_IRQM,      0x00},
+  {RG_BBC0_PC,        0x16},//NO FCS FILTER
+  {RG_BBC0_OFDMC,     0x00},
+  {RG_BBC0_OFDMPHRTX, 0x02},  
+};
+
 static const registerSetting_t basic_settings_ofdm_1_mcs3[] = {  //TODO
+  {RG_RF09_CMD,       0x02},
+  {RG_RF09_IRQM,      0x1F},
+  {RG_RF24_IRQM,      0x00},
+  {RG_RF09_RXBWC,     0x19},
+  {RG_RF09_RXDFE,     0x83},
+  {RG_RF09_AGCC,      0x11},
+  {RG_RF09_EDD,       0x7A},
+  {RG_RF09_TXCUTC,    0x0A},//recommended value (0x0B)
+  {RG_RF09_TXDFE,     0x83},
+  {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. // 0x64 - 0dBm  mettre 0x7F
+  {RG_BBC0_IRQM,      0x1F},
+  {RG_BBC1_IRQM,      0x00},
+  {RG_BBC0_PC,        0x16},//NO FCS FILTER
+  {RG_BBC0_OFDMC,     0x00},
+  {RG_BBC0_OFDMPHRTX, 0x03},  
+};
+
+static const registerSetting_t basic_settings_ofdm_2_mcs0[] = {
   {RG_RF09_CMD,       0x02},
   {RG_RF09_IRQM,      0x1F},
   {RG_RF24_IRQM,      0x00},
@@ -4046,14 +4119,50 @@ static const registerSetting_t basic_settings_ofdm_1_mcs3[] = {  //TODO
   {RG_RF09_RXDFE,     0x43},
   {RG_RF09_AGCC,      0x11},
   {RG_RF09_EDD,       0x7A},
-  {RG_RF09_TXCUTC,    0x0B},
+  {RG_RF09_TXCUTC,    0x08},//recommended value ()
   {RG_RF09_TXDFE,     0x63},
-  {RG_RF09_PAC,       0x64}, // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
+  {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
   {RG_BBC0_IRQM,      0x1F},
   {RG_BBC1_IRQM,      0x00},
-  {RG_BBC0_PC,        0x56},
+  {RG_BBC0_PC,        0x16},//NO FCS FILTER
   {RG_BBC0_OFDMC,     0x01},
-  {RG_BBC0_OFDMPHRTX, 0x03},  
+  {RG_BBC0_OFDMPHRTX, 0x00},  
+};
+
+static const registerSetting_t basic_settings_ofdm_2_mcs1[] = {
+  {RG_RF09_CMD,       0x02},
+  {RG_RF09_IRQM,      0x1F},
+  {RG_RF24_IRQM,      0x00},
+  {RG_RF09_RXBWC,     0x17},
+  {RG_RF09_RXDFE,     0x43},
+  {RG_RF09_AGCC,      0x11},
+  {RG_RF09_EDD,       0x7A},
+  {RG_RF09_TXCUTC,    0x08},//recommended value ()
+  {RG_RF09_TXDFE,     0x63},
+  {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
+  {RG_BBC0_IRQM,      0x1F},
+  {RG_BBC1_IRQM,      0x00},
+  {RG_BBC0_PC,        0x16},//NO FCS FILTER
+  {RG_BBC0_OFDMC,     0x01},
+  {RG_BBC0_OFDMPHRTX, 0x01},  
+};
+
+static const registerSetting_t basic_settings_ofdm_2_mcs2[] = {
+  {RG_RF09_CMD,       0x02},
+  {RG_RF09_IRQM,      0x1F},
+  {RG_RF24_IRQM,      0x00},
+  {RG_RF09_RXBWC,     0x17},
+  {RG_RF09_RXDFE,     0x43},
+  {RG_RF09_AGCC,      0x11},
+  {RG_RF09_EDD,       0x7A},
+  {RG_RF09_TXCUTC,    0x08},//recommended value ()
+  {RG_RF09_TXDFE,     0x63},
+  {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
+  {RG_BBC0_IRQM,      0x1F},
+  {RG_BBC1_IRQM,      0x00},
+  {RG_BBC0_PC,        0x16},//NO FCS FILTER
+  {RG_BBC0_OFDMC,     0x01},
+  {RG_BBC0_OFDMPHRTX, 0x02},  
 };
 
 static const registerSetting_t basic_settings_ofdm_2_mcs3[] = {
@@ -4064,55 +4173,299 @@ static const registerSetting_t basic_settings_ofdm_2_mcs3[] = {
   {RG_RF09_RXDFE,     0x43},
   {RG_RF09_AGCC,      0x11},
   {RG_RF09_EDD,       0x7A},
-  {RG_RF09_TXCUTC,    0x0B},
+  {RG_RF09_TXCUTC,    0x08},//recommended value ()
   {RG_RF09_TXDFE,     0x63},
-  {RG_RF09_PAC,       0x64}, // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
+  {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
   {RG_BBC0_IRQM,      0x1F},
   {RG_BBC1_IRQM,      0x00},
-  {RG_BBC0_PC,        0x56},
+  {RG_BBC0_PC,        0x16},//NO FCS FILTER
   {RG_BBC0_OFDMC,     0x01},
   {RG_BBC0_OFDMPHRTX, 0x03},  
+};
+
+static const registerSetting_t basic_settings_ofdm_2_mcs4[] = {
+  {RG_RF09_CMD,       0x02},
+  {RG_RF09_IRQM,      0x1F},
+  {RG_RF24_IRQM,      0x00},
+  {RG_RF09_RXBWC,     0x17},
+  {RG_RF09_RXDFE,     0x43},
+  {RG_RF09_AGCC,      0x11},
+  {RG_RF09_EDD,       0x7A},
+  {RG_RF09_TXCUTC,    0x08},//recommended value ()
+  {RG_RF09_TXDFE,     0x63},
+  {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
+  {RG_BBC0_IRQM,      0x1F},
+  {RG_BBC1_IRQM,      0x00},
+  {RG_BBC0_PC,        0x16},//NO FCS FILTER
+  {RG_BBC0_OFDMC,     0x01},
+  {RG_BBC0_OFDMPHRTX, 0x04},  
+};
+
+static const registerSetting_t basic_settings_ofdm_2_mcs5[] = {
+  {RG_RF09_CMD,       0x02},
+  {RG_RF09_IRQM,      0x1F},
+  {RG_RF24_IRQM,      0x00},
+  {RG_RF09_RXBWC,     0x17},
+  {RG_RF09_RXDFE,     0x43},
+  {RG_RF09_AGCC,      0x11},
+  {RG_RF09_EDD,       0x7A},
+  {RG_RF09_TXCUTC,    0x08},//recommended value ()
+  {RG_RF09_TXDFE,     0x63},
+  {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
+  {RG_BBC0_IRQM,      0x1F},
+  {RG_BBC1_IRQM,      0x00},
+  {RG_BBC0_PC,        0x16},//NO FCS FILTER
+  {RG_BBC0_OFDMC,     0x01},
+  {RG_BBC0_OFDMPHRTX, 0x05},  
+};
+
+static const registerSetting_t basic_settings_ofdm_3_mcs1[] = {     //TODO
+  {RG_RF09_CMD,       0x02},
+  {RG_RF09_IRQM,      0x1F},
+  {RG_RF24_IRQM,      0x00},
+  {RG_RF09_RXBWC,     0x04},
+  {RG_RF09_RXDFE,     0x46},
+  {RG_RF09_AGCC,      0x11},
+  {RG_RF09_EDD,       0x7A},
+  {RG_RF09_TXCUTC,    0x05},//recommended value ()
+  {RG_RF09_TXDFE,     0x66},
+  {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
+  {RG_BBC0_IRQM,      0x1F},
+  {RG_BBC1_IRQM,      0x00},
+  {RG_BBC0_PC,        0x16},//NO FCS FILTER
+  {RG_BBC0_OFDMC,     0x02},
+  {RG_BBC0_OFDMPHRTX, 0x01},  
+};
+
+static const registerSetting_t basic_settings_ofdm_3_mcs2[] = {     //TODO
+  {RG_RF09_CMD,       0x02},
+  {RG_RF09_IRQM,      0x1F},
+  {RG_RF24_IRQM,      0x00},
+  {RG_RF09_RXBWC,     0x04},
+  {RG_RF09_RXDFE,     0x46},
+  {RG_RF09_AGCC,      0x11},
+  {RG_RF09_EDD,       0x7A},
+  {RG_RF09_TXCUTC,    0x05},//recommended value ()
+  {RG_RF09_TXDFE,     0x66},
+  {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
+  {RG_BBC0_IRQM,      0x1F},
+  {RG_BBC1_IRQM,      0x00},
+  {RG_BBC0_PC,        0x16},//NO FCS FILTER
+  {RG_BBC0_OFDMC,     0x02},
+  {RG_BBC0_OFDMPHRTX, 0x02},  
 };
 
 static const registerSetting_t basic_settings_ofdm_3_mcs3[] = {     //TODO
   {RG_RF09_CMD,       0x02},
   {RG_RF09_IRQM,      0x1F},
   {RG_RF24_IRQM,      0x00},
-  {RG_RF09_RXBWC,     0x17},
-  {RG_RF09_RXDFE,     0x43},
+  {RG_RF09_RXBWC,     0x04},
+  {RG_RF09_RXDFE,     0x46},
   {RG_RF09_AGCC,      0x11},
   {RG_RF09_EDD,       0x7A},
-  {RG_RF09_TXCUTC,    0x0B},
-  {RG_RF09_TXDFE,     0x63},
-  {RG_RF09_PAC,       0x64}, // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
+  {RG_RF09_TXCUTC,    0x05},//recommended value ()
+  {RG_RF09_TXDFE,     0x66},
+  {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
   {RG_BBC0_IRQM,      0x1F},
   {RG_BBC1_IRQM,      0x00},
-  {RG_BBC0_PC,        0x56},
-  {RG_BBC0_OFDMC,     0x01},
+  {RG_BBC0_PC,        0x16},//NO FCS FILTER
+  {RG_BBC0_OFDMC,     0x02},
   {RG_BBC0_OFDMPHRTX, 0x03},  
+};
+
+static const registerSetting_t basic_settings_ofdm_3_mcs4[] = {     //TODO
+  {RG_RF09_CMD,       0x02},
+  {RG_RF09_IRQM,      0x1F},
+  {RG_RF24_IRQM,      0x00},
+  {RG_RF09_RXBWC,     0x04},
+  {RG_RF09_RXDFE,     0x46},
+  {RG_RF09_AGCC,      0x11},
+  {RG_RF09_EDD,       0x7A},
+  {RG_RF09_TXCUTC,    0x05},//recommended value ()
+  {RG_RF09_TXDFE,     0x66},
+  {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
+  {RG_BBC0_IRQM,      0x1F},
+  {RG_BBC1_IRQM,      0x00},
+  {RG_BBC0_PC,        0x16},//NO FCS FILTER
+  {RG_BBC0_OFDMC,     0x02},
+  {RG_BBC0_OFDMPHRTX, 0x04},  
+};
+
+static const registerSetting_t basic_settings_ofdm_3_mcs5[] = {     //TODO
+  {RG_RF09_CMD,       0x02},
+  {RG_RF09_IRQM,      0x1F},
+  {RG_RF24_IRQM,      0x00},
+  {RG_RF09_RXBWC,     0x04},
+  {RG_RF09_RXDFE,     0x46},
+  {RG_RF09_AGCC,      0x11},
+  {RG_RF09_EDD,       0x7A},
+  {RG_RF09_TXCUTC,    0x05},//recommended value ()
+  {RG_RF09_TXDFE,     0x66},
+  {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
+  {RG_BBC0_IRQM,      0x1F},
+  {RG_BBC1_IRQM,      0x00},
+  {RG_BBC0_PC,        0x16},//NO FCS FILTER
+  {RG_BBC0_OFDMC,     0x02},
+  {RG_BBC0_OFDMPHRTX, 0x05},  
+};
+
+static const registerSetting_t basic_settings_ofdm_3_mcs6[] = {     //TODO
+  {RG_RF09_CMD,       0x02},
+  {RG_RF09_IRQM,      0x1F},
+  {RG_RF24_IRQM,      0x00},
+  {RG_RF09_RXBWC,     0x04},
+  {RG_RF09_RXDFE,     0x46},
+  {RG_RF09_AGCC,      0x11},
+  {RG_RF09_EDD,       0x7A},
+  {RG_RF09_TXCUTC,    0x05},//recommended value ()
+  {RG_RF09_TXDFE,     0x66},
+  {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
+  {RG_BBC0_IRQM,      0x1F},
+  {RG_BBC1_IRQM,      0x00},
+  {RG_BBC0_PC,        0x16},//NO FCS FILTER
+  {RG_BBC0_OFDMC,     0x02},
+  {RG_BBC0_OFDMPHRTX, 0x06},  
+};
+
+static const registerSetting_t basic_settings_ofdm_4_mcs2[] = {  //TODO
+  {RG_RF09_CMD,       0x02},
+  {RG_RF09_IRQM,      0x1F},
+  {RG_RF24_IRQM,      0x00},
+  {RG_RF09_RXBWC,     0x12},
+  {RG_RF09_RXDFE,     0x26},
+  {RG_RF09_AGCC,      0x11},
+  {RG_RF09_EDD,       0x7A},
+  {RG_RF09_TXCUTC,    0x03},//recommended value ()
+  {RG_RF09_TXDFE,     0x46},
+  {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
+  {RG_BBC0_IRQM,      0x1F},
+  {RG_BBC1_IRQM,      0x00},
+  {RG_BBC0_PC,        0x16},//NO FCS FILTER
+  {RG_BBC0_OFDMC,     0x03},
+  {RG_BBC0_OFDMPHRTX, 0x02},  
 };
 
 static const registerSetting_t basic_settings_ofdm_4_mcs3[] = {  //TODO
   {RG_RF09_CMD,       0x02},
   {RG_RF09_IRQM,      0x1F},
   {RG_RF24_IRQM,      0x00},
-  {RG_RF09_RXBWC,     0x17},
-  {RG_RF09_RXDFE,     0x43},
+  {RG_RF09_RXBWC,     0x12},
+  {RG_RF09_RXDFE,     0x26},
   {RG_RF09_AGCC,      0x11},
   {RG_RF09_EDD,       0x7A},
-  {RG_RF09_TXCUTC,    0x0B},
-  {RG_RF09_TXDFE,     0x63},
-  {RG_RF09_PAC,       0x64}, // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
+  {RG_RF09_TXCUTC,    0x03},//recommended value ()
+  {RG_RF09_TXDFE,     0x46},
+  {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
   {RG_BBC0_IRQM,      0x1F},
   {RG_BBC1_IRQM,      0x00},
-  {RG_BBC0_PC,        0x56},
-  {RG_BBC0_OFDMC,     0x01},
+  {RG_BBC0_PC,        0x16},//NO FCS FILTER
+  {RG_BBC0_OFDMC,     0x03},
   {RG_BBC0_OFDMPHRTX, 0x03},  
 };
 
-//static const registerSetting_t basic_settings_[] = {
+static const registerSetting_t basic_settings_ofdm_4_mcs4[] = {  //TODO
+  {RG_RF09_CMD,       0x02},
+  {RG_RF09_IRQM,      0x1F},
+  {RG_RF24_IRQM,      0x00},
+  {RG_RF09_RXBWC,     0x12},
+  {RG_RF09_RXDFE,     0x26},
+  {RG_RF09_AGCC,      0x11},
+  {RG_RF09_EDD,       0x7A},
+  {RG_RF09_TXCUTC,    0x03},//recommended value ()
+  {RG_RF09_TXDFE,     0x46},
+  {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
+  {RG_BBC0_IRQM,      0x1F},
+  {RG_BBC1_IRQM,      0x00},
+  {RG_BBC0_PC,        0x16},//NO FCS FILTER
+  {RG_BBC0_OFDMC,     0x03},
+  {RG_BBC0_OFDMPHRTX, 0x04},  
+};
 
-//};
+static const registerSetting_t basic_settings_ofdm_4_mcs5[] = {  //TODO
+  {RG_RF09_CMD,       0x02},
+  {RG_RF09_IRQM,      0x1F},
+  {RG_RF24_IRQM,      0x00},
+  {RG_RF09_RXBWC,     0x12},
+  {RG_RF09_RXDFE,     0x26},
+  {RG_RF09_AGCC,      0x11},
+  {RG_RF09_EDD,       0x7A},
+  {RG_RF09_TXCUTC,    0x03},//recommended value ()
+  {RG_RF09_TXDFE,     0x46},
+  {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
+  {RG_BBC0_IRQM,      0x1F},
+  {RG_BBC1_IRQM,      0x00},
+  {RG_BBC0_PC,        0x16},//NO FCS FILTER
+  {RG_BBC0_OFDMC,     0x03},
+  {RG_BBC0_OFDMPHRTX, 0x05},  
+};
 
+static const registerSetting_t basic_settings_ofdm_4_mcs6[] = {  //TODO
+  {RG_RF09_CMD,       0x02},
+  {RG_RF09_IRQM,      0x1F},
+  {RG_RF24_IRQM,      0x00},
+  {RG_RF09_RXBWC,     0x12},
+  {RG_RF09_RXDFE,     0x26},
+  {RG_RF09_AGCC,      0x11},
+  {RG_RF09_EDD,       0x7A},
+  {RG_RF09_TXCUTC,    0x03},//recommended value ()
+  {RG_RF09_TXDFE,     0x46},
+  {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.  mettre 0x7F
+  {RG_BBC0_IRQM,      0x1F},
+  {RG_BBC1_IRQM,      0x00},
+  {RG_BBC0_PC,        0x16},//NO FCS FILTER
+  {RG_BBC0_OFDMC,     0x03},
+  {RG_BBC0_OFDMPHRTX, 0x06},  
+};
 
+static const registerSetting_t* modulation_list[] = {
+  {basic_settings_ofdm_1_mcs0},
+  {basic_settings_ofdm_1_mcs1},
+  {basic_settings_ofdm_1_mcs2},
+  {basic_settings_ofdm_1_mcs3},
+  {basic_settings_ofdm_2_mcs0},
+  {basic_settings_ofdm_2_mcs1},
+  {basic_settings_ofdm_2_mcs2},
+  {basic_settings_ofdm_2_mcs3},
+  {basic_settings_ofdm_2_mcs4},
+  {basic_settings_ofdm_2_mcs5},
+  {basic_settings_ofdm_3_mcs1},
+  {basic_settings_ofdm_3_mcs2},
+  {basic_settings_ofdm_3_mcs3},
+  {basic_settings_ofdm_3_mcs4},
+  {basic_settings_ofdm_3_mcs5},
+  {basic_settings_ofdm_3_mcs6},
+  {basic_settings_ofdm_4_mcs2},
+  {basic_settings_ofdm_4_mcs3},
+  {basic_settings_ofdm_4_mcs4},
+  {basic_settings_ofdm_4_mcs5},
+  {basic_settings_ofdm_4_mcs6},
+  
+};
+static const uint16_t sizes[] = {
+    6, 127, 1000, 2047,
+};
+
+/*
+basic_settings_ofdm_1_mcs0--
+basic_settings_ofdm_2_mcs0--
+basic_settings_ofdm_1_mcs1--
+basic_settings_ofdm_2_mcs1--
+basic_settings_ofdm_3_mcs1--
+basic_settings_ofdm_1_mcs2--
+basic_settings_ofdm_2_mcs2--
+basic_settings_ofdm_3_mcs2--
+basic_settings_ofdm_4_mcs2--
+basic_settings_ofdm_1_mcs3--
+basic_settings_ofdm_2_mcs3--
+basic_settings_ofdm_3_mcs3--
+basic_settings_ofdm_4_mcs3--
+basic_settings_ofdm_2_mcs4--
+basic_settings_ofdm_3_mcs4--
+basic_settings_ofdm_4_mcs4--
+basic_settings_ofdm_2_mcs5--
+basic_settings_ofdm_3_mcs5--
+basic_settings_ofdm_4_mcs5--
+basic_settings_ofdm_3_mcs6--
+basic_settings_ofdm_4_mcs6
+*/
 #endif /* RF215_H */

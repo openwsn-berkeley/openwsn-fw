@@ -75,15 +75,16 @@ while True:
         byte  = mote.read(1)
         rawFrame += [ord(byte)]
     
-    if rawFrame[-3:]==[0xff]*3 and len(rawFrame)>=9:
+    if rawFrame[-3:]==[0xff]*3 and len(rawFrame)>=10:
         
-        (rxpk_len,rxpk_num,rxpk_rssi,rxpk_crc) = \
-            struct.unpack('>HHbB', ''.join([chr(b) for b in rawFrame[-9:-3]]))
-        print 'len={0:<4} num={1:<5} rssi={2:<4} crc={3}'.format(
+        (rxpk_len,rxpk_num,rxpk_rssi,rxpk_crc,rxpk_mcs) = \
+            struct.unpack('>HHbBB', ''.join([chr(b) for b in rawFrame[-10:-3]]))
+        print 'len={0:<4} num={1:<5} rssi={2:<4} crc={3}  mcs={4}'.format(
             rxpk_len,
             rxpk_num,
             rxpk_rssi,
-            rxpk_crc
+            rxpk_crc,
+			rxpk_mcs
         )
         
         if rxpk_len>2047:
