@@ -964,39 +964,7 @@ port_INLINE void activity_ti1ORri1() {
                 case 7:
                 case 8:
                 case 9:
-                case 10:
                     couldSendEB=FALSE;
-                    if (
-                        (ieee154e_vars.slotOffset==1 || ieee154e_vars.slotOffset==2) && 
-                        openrandom_get16b()<(0xffff/3)
-                    ){
-                        ieee154e_vars.dataToSend = NULL;
-                        break;
-                    } else {
-                        if (
-                            (ieee154e_vars.slotOffset==3 || ieee154e_vars.slotOffset==4) && 
-                            openrandom_get16b()<(0xffff/4)
-                        ){
-                            ieee154e_vars.dataToSend = NULL;
-                            break;
-                        }  else {
-                            if (
-                                (ieee154e_vars.slotOffset==5 || ieee154e_vars.slotOffset==6) && 
-                                openrandom_get16b()<(0xffff/5)
-                            ){
-                                ieee154e_vars.dataToSend = NULL;
-                                break;
-                            }   else {
-                                if (
-                                    (ieee154e_vars.slotOffset==7 || ieee154e_vars.slotOffset==8) && 
-                                    openrandom_get16b()<(0xffff/6)
-                                ){
-                                    ieee154e_vars.dataToSend = NULL;
-                                    break;
-                                }
-                            }
-                        }
-                    }
                     // only send Unicast
                     ieee154e_vars.dataToSend = openqueue_macGetUnicastPacket(&neighbor);
                     // if I have Tx slot for the unicast packet, send it at that Tx slot
