@@ -125,6 +125,7 @@ void radio_setFrequency(uint8_t frequency) {
 
 void radio_rfOn() {
    PORT_PIN_RADIO_RESET_LOW();
+   PORT_PIN_RADIO_RESET_HIGH();
 }
 
 void radio_rfOff() {
