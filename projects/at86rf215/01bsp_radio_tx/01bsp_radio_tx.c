@@ -25,7 +25,7 @@ remainder of the packet contains an incrementing bytes.
 #define CHANNEL         0                   // 902.8 MHz
 #define CHANNEL_SPACING 800                 // 800 kHz
 #define FREQUENCY_0     863425             // 902.8 MHz
-#define TIMER_PERIOD    (32768>>8)          // (32768>>1) = 500ms @ 32kHz
+#define TIMER_PERIOD    (32768>>5)          // (32768>>1) = 500ms @ 32kHz
 //#define TIMER_PERIOD    (65535)          // 2s @ 32kHz
 //=========================== variables =======================================
 
@@ -84,7 +84,7 @@ int mote_main(void) {
     radiotimer_start(TIMER_PERIOD);
     radio_change_size(&app_vars.txpk_len);
     while(1){
-      while(y<4){
+      while(y<21){
         while(x<100) {
       
             // wait for timer to elapse

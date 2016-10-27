@@ -52,8 +52,8 @@ void radio_init(void) {
     P1IFG &= (~BIT4); // Clear interrupt flag for P1.4
     P1IE |= (BIT4); // Enable interrupt for P1.4
     // Write registers to radio
-    for(uint16_t i = 0; i < (sizeof(basic_settings_ofdm_2_mcs3)/sizeof(registerSetting_t)); i++) {
-        at86rf215_spiWriteReg( basic_settings_ofdm_2_mcs3[i].addr, basic_settings_ofdm_2_mcs3[i].data);
+    for(uint16_t i = 0; i < (sizeof(basic_settings_ofdm_1_mcs0)/sizeof(registerSetting_t)); i++) {
+        at86rf215_spiWriteReg( basic_settings_ofdm_1_mcs0[i].addr, basic_settings_ofdm_1_mcs0[i].data);
     };
     radio_read_isr(&radio_vars.rf09_isr);
 }
@@ -64,7 +64,7 @@ void radio_change_size(uint16_t* size){
     i++;
 }
 void radio_change_modulation(){
-    static int mod_list = 0;
+    static int mod_list = 1;
     at86rf215_spiStrobe(CMD_RF_TRXOFF);
     while(at86rf215_status() != RF_STATE_TRXOFF);
     for(uint16_t i = 0; i < /*(sizeof(*modulation_list[mod_list])/sizeof(registerSetting_t))*/15; i++) {
