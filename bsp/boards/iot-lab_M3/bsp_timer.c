@@ -37,7 +37,7 @@ any compare registers, so no interrupt will fire.
 void bsp_timer_init() 
 {
     // clear local variables
-    memset(&bsp_timer_vars,0,sizeof(bsp_timer_vars_t));
+    memset((void*)&bsp_timer_vars,0,sizeof(bsp_timer_vars_t));
     
     //Configure TIM2, Clock
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2 , ENABLE);

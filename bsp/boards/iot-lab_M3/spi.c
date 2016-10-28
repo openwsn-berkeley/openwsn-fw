@@ -50,7 +50,7 @@ inline static void SLEEP_CLR(void) { GPIOA->BRR = 1<<2; }
 
 void spi_init() {
  // clear variables
-  memset(&spi_vars,0,sizeof(spi_vars_t));
+  memset((void*)&spi_vars,0,sizeof(spi_vars_t));
  
   SPI_InitTypeDef  SPI_InitStructure;
 
