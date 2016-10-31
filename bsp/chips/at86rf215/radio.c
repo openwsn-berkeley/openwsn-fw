@@ -51,6 +51,11 @@ void radio_init(void) {
     P1IES &= (~BIT4); // low to high edge
     P1IFG &= (~BIT4); // Clear interrupt flag for P1.4
     P1IE |= (BIT4); // Enable interrupt for P1.4
+    //check part number and version
+    if ((at86rf215_spiReadReg(RG_RF_PN) != 0x34) | (at86rf215_spiReadReg(RG_RF_VN) != 0x03)) {
+      while(1); //UNKNOWN DEVICE, FINISH
+    }
+    
     // Write registers to radio
     for(uint16_t i = 0; i < (sizeof(basic_settings_ofdm_1_mcs0)/sizeof(registerSetting_t)); i++) {
         at86rf215_spiWriteReg( basic_settings_ofdm_1_mcs0[i].addr, basic_settings_ofdm_1_mcs0[i].data);
@@ -69,6 +74,7 @@ void radio_change_modulation(){
     while(at86rf215_status() != RF_STATE_TRXOFF);
     for(uint16_t i = 0; i < /*(sizeof(*modulation_list[mod_list])/sizeof(registerSetting_t))*/15; i++) {
         at86rf215_spiWriteReg( modulation_list[mod_list%21][i].addr, modulation_list[mod_list%21][i].data);
+        //at86rf215_spiWriteReg( basic_settings_fsk_option1[i].addr, basic_settings_fsk_option1[i].data);
         };
     radio_read_isr(&radio_vars.rf09_isr);
     mod_list++;

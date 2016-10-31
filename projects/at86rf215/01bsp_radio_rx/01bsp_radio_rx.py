@@ -4,6 +4,7 @@
 import sys
 import struct
 import socket
+import logging
 try:
    import serial
 except ImportError:
@@ -65,6 +66,7 @@ else:
 #============================ read ============================================
 
 rawFrame = []
+logging.basicConfig(filename='log.txt', filemode='w+', level=logging.DEBUG)
 
 while True:
     
@@ -86,7 +88,13 @@ while True:
             rxpk_crc,
 			rxpk_mcs
         )
-        
+        logging.info('len={0:<4} num={1:<5} rssi={2:<4} crc={3}  mcs={4}'.format(
+            rxpk_len,
+            rxpk_num,
+            rxpk_rssi,
+            rxpk_crc,
+            rxpk_mcs
+        ))
         if rxpk_len>2047:
             print "ERROR: frame too long.\a"
         
