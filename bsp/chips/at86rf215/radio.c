@@ -57,8 +57,8 @@ void radio_init(void) {
     }
     
     // Write registers to radio
-    for(uint16_t i = 0; i < (sizeof(basic_settings_ofdm_1_mcs0)/sizeof(registerSetting_t)); i++) {
-        at86rf215_spiWriteReg( basic_settings_fsk_option1[i].addr, basic_settings_fsk_option1[i].data);
+    for(uint16_t i = 0; i < (sizeof(basic_settings_fsk_option2)/sizeof(registerSetting_t)); i++) {
+        at86rf215_spiWriteReg( basic_settings_fsk_option2[i].addr, basic_settings_fsk_option2[i].data);
         //at86rf215_spiWriteReg( basic_settings_ofdm_1_mcs0[i].addr, basic_settings_ofdm_1_mcs0[i].data);
     };
     radio_read_isr(&radio_vars.rf09_isr);
