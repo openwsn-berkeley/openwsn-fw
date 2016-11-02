@@ -3978,20 +3978,22 @@ static const registerSetting_t basic_settings_fsk_option1 []={
   {RG_RF09_CMD,       0x02}, //we make sure we are in the trxoff state
   {RG_RF09_IRQM,      0x1F}, // TRXERR, BATLOW, EDC, TRXRDY, WAKEUP interrupts enabled
   {RG_RF24_IRQM,      0x00},
-  {RG_RF09_RXBWC,     0x11}, //IF shift, 200 kHz bandwidth
-  {RG_RF09_RXDFE,     0x43}, //find the right values
-  {RG_RF09_AGCC,      0x11},
+  {RG_RF09_RXBWC,     0x00}, //IF shift, 200 kHz bandwidth
+  {RG_RF09_RXDFE,     0x1A}, //find the right values
+  {RG_RF09_AGCC,      0x01},
   {RG_RF09_EDD,       0x7A},
-  {RG_RF09_TXCUTC,    0x0B}, //find the right values
-  {RG_RF09_TXDFE,     0x63}, //find the right values
+  {RG_RF09_TXCUTC,    0xC0}, //find the right values
+  {RG_RF09_TXDFE,     0x98}, //find the right values
   {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
   {RG_BBC0_IRQM,      0x1F},// TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
   {RG_BBC1_IRQM,      0x00},
-  {RG_BBC0_PC,        0x15},// No FCS filter, 32 bits FCS, FSK.
-  {RG_BBC0_FSKC0,     0x00},
+  {RG_BBC0_PC,        0x1D},// No FCS filter, 32 bits FCS, FSK.
+  {RG_BBC0_FSKDM,     0x01},//Direct modulation enabled. No preemphasis
+  {RG_BBC0_FSKC0,     0xD6},
   {RG_BBC0_FSKC1,     0x00},
   {RG_BBC0_FSKC2,     0x00},
-  {RG_BBC0_FSKC3,     0x00},
+  {RG_BBC0_FSKC3,     0x85},
+  {RG_BBC0_FSKC4,     0x00}, //BBCn_FSKDM
   {RG_BBC0_FSKPHRTX,  0x00},// No data whitening SFD0 used. 
 };
 
@@ -3999,20 +4001,22 @@ static const registerSetting_t basic_settings_fsk_option2 []={
   {RG_RF09_CMD,       0x02}, //we make sure we are in the trxoff state
   {RG_RF09_IRQM,      0x1F}, // TRXERR, BATLOW, EDC, TRXRDY, WAKEUP interrupts enabled
   {RG_RF24_IRQM,      0x00},
-  {RG_RF09_RXBWC,     0x14}, //IF shift, 400 kHz bandwidth
-  {RG_RF09_RXDFE,     0x43}, //find the right values
-  {RG_RF09_AGCC,      0x11},
+  {RG_RF09_RXBWC,     0x03}, //IF shift, 400 kHz bandwidth
+  {RG_RF09_RXDFE,     0x15}, //find the right values
+  {RG_RF09_AGCC,      0x01},
   {RG_RF09_EDD,       0x7A},
-  {RG_RF09_TXCUTC,    0x0B}, //find the right values
-  {RG_RF09_TXDFE,     0x63}, //find the right values
+  {RG_RF09_TXCUTC,    0x83}, //find the right values
+  {RG_RF09_TXDFE,     0x94}, //find the right values
   {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
   {RG_BBC0_IRQM,      0x1F},// TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
   {RG_BBC1_IRQM,      0x00},
-  {RG_BBC0_PC,        0x15},// No FCS filter, 32 bits FCS, FSK. 
-  {RG_BBC0_FSKC0,     0x00},
+  {RG_BBC0_PC,        0x1D},// No FCS filter, 32 bits FCS, FSK. 
+  {RG_BBC0_FSKDM,     0x03},//Direct modulation and Preemphasis enabled. 
+  {RG_BBC0_FSKC0,     0xD6},
   {RG_BBC0_FSKC1,     0x01},
   {RG_BBC0_FSKC2,     0x00},
-  {RG_BBC0_FSKC3,     0x00},
+  {RG_BBC0_FSKC3,     0x85},
+  {RG_BBC0_FSKC4,     0x00},
   {RG_BBC0_FSKPHRTX,  0x00},// No data whitening SFD0 used. 
 };
 
