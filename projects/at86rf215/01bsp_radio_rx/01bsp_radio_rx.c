@@ -73,8 +73,8 @@ len=17  num=84  rssi=-81  lqi=108 crc=1
 
 #define LENGTH_PACKET   2043+LENGTH_CRC     // maximum length is 2047 bytes
 #define CHANNEL         0                   // 902.800 MHz
-#define CHANNEL_SPACING 400                 // 800 kHz
-#define FREQUENCY_0     863425              // 902.8 MHz
+#define CHANNEL_SPACING 600                 // 800 kHz
+#define FREQUENCY_0     868300              // 902.8 MHz
 #define LENGTH_SERIAL_FRAME  10              ///< length of the serial frame
 
 //=========================== variables =======================================

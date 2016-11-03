@@ -4050,29 +4050,25 @@ static const registerSetting_t basic_settings_fsk_option3 []={  //TODO
   {RG_BBC0_FSKPHRTX,  0x00},// No data whitening SFD0 used. 
 };
 //------------------------------------ OQPSK -----------------------------------//
-static const registerSetting_t basic_settings_oqpsk[] = {
-    {RG_BBC0_PC,        0x1F},  // PT=BB_MROQPSK, 16-bit FCS
-    {RG_BBC0_OQPSKPHRTX, 0x06}, // MR-OQPSK, rate mode 3
-    {RG_BBC0_OQPSKC0,   0x00},  // 100kchips/s, RC-0.8 shaping, direct-modulation disabled
-    {RG_BBC0_OQPSKC1,   0x3F},  // MINIMUM preamble-detection sensitivities, rx-override disabled
-    {RG_BBC0_OQPSKC2,   0x00},  // listen for MR-OQPSK frames only
-    {RG_BBC0_OQPSKC3,   0x00},  // legacy OQPSK, search for SFD_1 only
+static const registerSetting_t basic_settings_oqpsk_rate1[] = {
+    {RG_BBC0_PC,        0x17},  
+    {RG_BBC0_OQPSKPHRTX, 0x00}, // MR-OQPSK, rate mode 0
+    {RG_BBC0_OQPSKC0,   0x10},  // 100kchips/s, RC-0.8 shaping, direct-modulation enabled
+//  {RG_BBC0_OQPSKC1,   0x3F},  // MINIMUM preamble-detection sensitivities, rx-override disabled
+//  {RG_BBC0_OQPSKC2,   0x00},  // listen for MR-OQPSK frames only
+//  {RG_BBC0_OQPSKC3,   0x00},  // legacy OQPSK, search for SFD_1 only
     {RG_BBC0_IRQM,      0x13},  // TXFE, RXFE, RXFS interrupts enabled
     {RG_BBC1_IRQM,      0x00},
     {RG_RF09_IRQM,      0x12},  // TRXERR, TRXRDY interrupts enabled
     {RG_RF24_IRQM,      0x00},
-    {RG_RF09_RXBWC,     0x02},  // Rx BW 250kHz, IF 250kHz
-    {RG_RF09_RXDFE,     0x4A},  // Rx SR 400kHz, fcut 100kHz
-//    {RG_RF09_RXBWC,     0x0B},  // Rx BW 2000kHz, IF 2000kHz
-//    {RG_RF09_RXDFE,     0x41},  // Rx SR 4000kHz, fcut 1000kHz
-    {RG_RF09_AGCC,      0x11},  // AGC enabled, 16 samples averaged
-//    {RG_RF09_EDD,       0x7A},  // 30 * 32us
-//    {RG_RF09_EDC,       0x02},  // continuous energy measurements - TEMPORARY
+    {RG_RF09_RXBWC,     0x00},  //  Rx BW 160kHz, IF 250kHz
+    {RG_RF09_RXDFE,     0x2A},  // 
+    {RG_RF09_AGCC,      0x21},  
+    {RG_RF09_EDD,       0x2B},  
+    {RG_RF09_AGCS,      0x77},
     {RG_RF09_TXCUTC,    0xC7},  // .PARAMP = 3, .LPFCUT = 7
-    {RG_RF09_TXDFE,     0x6A},  // .SR = 0xA, .RCUT = 3
-//    {RG_RF09_TXCUTC,    0x0B},  // .PARAMP = 0, .LPFCUT = 0xB
-//    {RG_RF09_TXDFE,     0x61},  // .SR = 1, .RCUT = 3
-    {RG_RF09_PAC,       0x00},  // minimum Tx power
+    {RG_RF09_TXDFE,     0x7A},  // .SR = 0xA, .RCUT = 3
+    {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
 };
 //------------------------------------ OFDM -----------------------------------//
 /** Preferred settings for OFDM */
