@@ -12,6 +12,7 @@
 #include "cleds.h"
 #include "cexample.h"
 #include "cstorm.h"
+#include "cjoin.h"
 #include "cwellknown.h"
 #include "rrt.h"
 // TCP
@@ -35,6 +36,7 @@ void openapps_init(void) {
    //cexample_init();
    cleds__init();
    cstorm_init();
+   cjoin_init();
    cwellknown_init();
    rrt_init();
    // TCP

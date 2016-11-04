@@ -17,6 +17,7 @@ defaultApps   = [
     'uinject',
     'userialbridge',
     'rrt',
+    'cjoin',
 ]
 if localEnv['board']=='python':
     defaultApps  += [
@@ -33,6 +34,7 @@ defaultAppsInit   = [
     'techo',
     'uecho',
     'rrt',
+    'cjoin',
 ]
 
 # additional apps the user wants to build
