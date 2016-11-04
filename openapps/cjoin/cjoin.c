@@ -18,7 +18,7 @@
 //=========================== defines =========================================
 
 /// inter-packet period (in ms)
-#define CJOINPERIOD             30000
+#define CJOINPERIOD             300000
 #define NUMBER_OF_EXCHANGES     6 
 
 const uint8_t cjoin_path0[] = "j";
@@ -40,7 +40,7 @@ void    cjoin_timer_cb(opentimer_id_t id);
 void    cjoin_task_cb(void);
 void    cjoin_sendDone(OpenQueueEntry_t* msg,
                        owerror_t error);
-
+owerror_t cjoin_sendPut(uint8_t payload); 
 //=========================== public ==========================================
 
 void cjoin_init() {
@@ -75,6 +75,7 @@ owerror_t cjoin_receive(OpenQueueEntry_t* msg,
         openserial_printError(COMPONENT_IEEE802154E,ERR_MAXRXACKPREPARE_OVERFLOWS,
                          (errorparameter_t)ieee154e_vars.state,
                          (errorparameter_t)msg->payload[0]);
+        cjoin_sendPut(msg->payload[0]--);
     }
 
    return E_SUCCESS;
@@ -87,9 +88,7 @@ void cjoin_timer_cb(opentimer_id_t id){
 }
 
 void cjoin_task_cb() {
-   OpenQueueEntry_t*    pkt;
-   owerror_t            outcome;
-   
+  
    // don't run if not synch
    if (ieee154e_isSynch() == FALSE) return;
    
@@ -99,8 +98,20 @@ void cjoin_task_cb() {
       return;
    }
    
-   
-   // create a CoAP RD packet
+   cjoin_sendPut(NUMBER_OF_EXCHANGES-1);
+
+   return;
+}
+
+void cjoin_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
+   openqueue_freePacketBuffer(msg);
+}
+
+owerror_t cjoin_sendPut(uint8_t payload) {
+   OpenQueueEntry_t*    pkt;
+   owerror_t            outcome;
+ 
+ // create a CoAP RD packet
    pkt = openqueue_getFreePacketBuffer(COMPONENT_CJOIN);
    if (pkt==NULL) {
       openserial_printError(
@@ -110,14 +121,14 @@ void cjoin_task_cb() {
          (errorparameter_t)0
       );
       openqueue_freePacketBuffer(pkt);
-      return;
+      return E_FAIL;
    }
    // take ownership over that packet
    pkt->creator                   = COMPONENT_CJOIN;
    pkt->owner                     = COMPONENT_CJOIN;
    // CoAP payload
    packetfunctions_reserveHeaderSize(pkt,1);
-   pkt->payload[0]             = NUMBER_OF_EXCHANGES - 1;
+   pkt->payload[0]             = payload;
 
    packetfunctions_reserveHeaderSize(pkt,1);
    pkt->payload[0] = COAP_PAYLOAD_MARKER;
@@ -150,11 +161,8 @@ void cjoin_task_cb() {
    // avoid overflowing the queue if fails
    if (outcome==E_FAIL) {
       openqueue_freePacketBuffer(pkt);
+      return E_FAIL;
    }
-   
-   return;
-}
 
-void cjoin_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
-   openqueue_freePacketBuffer(msg);
+  return E_SUCCESS;
 }
