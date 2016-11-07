@@ -45,6 +45,7 @@ void icmpv6rpl_init() {
    
    //=== routing
    icmpv6rpl_vars.haveParent=FALSE;
+   icmpv6rpl_vars.daoSent=FALSE;
    if (idmanager_getIsDAGroot()==TRUE) {
       icmpv6rpl_vars.myDAGrank=MINHOPRANKINCREASE;
    } else {
@@ -642,6 +643,8 @@ void icmpv6rpl_timer_DAO_task() {
    
    // send DAO
    sendDAO();
+
+   icmpv6rpl_vars.daoSent = TRUE;
    
    // arm the DAO timer with this new value
    daoPeriod = icmpv6rpl_vars.daoPeriod - 0x80 + (openrandom_get16b()&0xff);
@@ -839,3 +842,8 @@ void icmpv6rpl_setDAOPeriod(uint16_t daoPeriod){
        daoPeriodRandom
    );
 }
+
+bool     icmpv6rpl_daoSent(void) {
+    return icmpv6rpl_vars.daoSent;
+}
+
