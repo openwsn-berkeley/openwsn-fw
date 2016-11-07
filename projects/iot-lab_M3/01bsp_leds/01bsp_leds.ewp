@@ -246,18 +246,11 @@
         </option>
         <option>
           <name>IExtraOptionsCheck</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>IExtraOptions</name>
-          <state>--no_path_in_file_macros</state>
-          <state>--enum_is_int</state>
-          <state>--no_cse</state>
-          <state>--no_unroll</state>
-          <state>--no_inline</state>
-          <state>--no_code_motion</state>
-          <state>--no_tbaa</state>
-          <state>--debug</state>
+          <state></state>
         </option>
         <option>
           <name>CCLangConformance</name>
@@ -1988,12 +1981,6 @@
     <name>drivers</name>
     <group>
       <name>common</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.h</name>
-      </file>
     </group>
   </group>
   <group>

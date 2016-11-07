@@ -1986,6 +1986,9 @@
   <group>
     <name>inc</name>
   </group>
+  <group>
+    <name>kernel</name>
+  </group>
 </project>
 
 
