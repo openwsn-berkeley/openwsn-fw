@@ -168,7 +168,7 @@
         <debug>1</debug>
         <option>
           <name>CCDefines</name>
-          <state>STM32F10X_HD</state>
+          <state>STM32F10X_MD</state>
           <state>USE_STDPERIPH_DRIVER</state>
         </option>
         <option>

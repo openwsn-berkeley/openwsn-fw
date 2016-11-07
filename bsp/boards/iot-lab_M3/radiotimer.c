@@ -144,7 +144,9 @@ void radiotimer_setPeriod(PORT_RADIOTIMER_WIDTH period) {
 
 PORT_RADIOTIMER_WIDTH radiotimer_getPeriod() {
     RTC_WaitForSynchro();
-    uint32_t period = RTC_GetAlarm();
+    uint16_t tmp = 0;
+    tmp = RTC->ALRL;
+    uint32_t period = (((uint32_t)RTC->ALRH << 16 ) | tmp);
     period = period <<1;
     return (PORT_RADIOTIMER_WIDTH)period;
 }

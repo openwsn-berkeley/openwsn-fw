@@ -136,7 +136,9 @@ uint8_t leds_radio_isOn()
 void leds_debug_on() {}
 void leds_debug_off() {}
 void leds_debug_toggle() {}
-uint8_t leds_debug_isOn() {}
+uint8_t leds_debug_isOn() {
+  return 0;
+}
 
 void leds_all_on()
 {
