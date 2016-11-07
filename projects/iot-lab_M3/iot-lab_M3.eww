@@ -4,6 +4,9 @@
   <project>
     <path>$WS_DIR$\01bsp_bsp_timer\01bsp_bsp_timer.ewp</path>
   </project>
+  <project>
+    <path>$WS_DIR$\01bsp_leds\01bsp_leds.ewp</path>
+  </project>
   <batchBuild/>
 </workspace>
 
