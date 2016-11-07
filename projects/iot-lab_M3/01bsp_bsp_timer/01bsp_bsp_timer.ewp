@@ -721,7 +721,7 @@
         </option>
         <option>
           <name>IlinkIcfFile</name>
-          <state>lnk0t.icf</state>
+          <state>$TOOLKIT_DIR$\CONFIG\generic_cortex.icf</state>
         </option>
         <option>
           <name>IlinkIcfFileSlave</name>
@@ -781,7 +781,7 @@
         </option>
         <option>
           <name>IlinkProgramEntryLabel</name>
-          <state></state>
+          <state>__iar_program_start</state>
         </option>
         <option>
           <name>DoFill</name>
@@ -2089,9 +2089,6 @@
       <name>chips</name>
       <group>
         <name>at86rf231</name>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf231\at86rf231.h</name>
-        </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf231\radio.c</name>
         </file>

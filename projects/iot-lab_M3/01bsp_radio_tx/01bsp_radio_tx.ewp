@@ -1893,6 +1893,12 @@
         <group>
           <name>library</name>
           <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\library\STM32F10x_StdPeriph_Lib_V3.5.0\Libraries\STM32F10x_StdPeriph_Driver\src\misc.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\library\STM32F10x_StdPeriph_Lib_V3.5.0\Libraries\STM32F10x_StdPeriph_Driver\src\stm32f10x_dbgmcu.c</name>
+          </file>
+          <file>
             <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\library\STM32F10x_StdPeriph_Lib_V3.5.0\Libraries\STM32F10x_StdPeriph_Driver\src\stm32f10x_exti.c</name>
           </file>
           <file>
