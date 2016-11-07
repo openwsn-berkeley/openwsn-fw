@@ -13,6 +13,9 @@
   <project>
     <path>$WS_DIR$\01bsp_radiotimer\01bsp_radiotimer.ewp</path>
   </project>
+  <project>
+    <path>$WS_DIR$\01bsp_uart\01bsp_uart.ewp</path>
+  </project>
   <batchBuild/>
 </workspace>
 
