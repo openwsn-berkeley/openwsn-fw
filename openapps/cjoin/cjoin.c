@@ -14,11 +14,11 @@
 //#include "ADC_Channel.h"
 #include "idmanager.h"
 #include "IEEE802154E.h"
+#include "icmpv6rpl.h"
 
 //=========================== defines =========================================
 
 /// inter-packet period (in ms)
-#define CJOINPERIOD             300000
 #define NUMBER_OF_EXCHANGES     6 
 
 const uint8_t cjoin_path0[] = "j";
@@ -54,12 +54,27 @@ void cjoin_init() {
    cjoin_vars.desc.discoverable         = TRUE;
    cjoin_vars.desc.callbackRx           = &cjoin_receive;
    cjoin_vars.desc.callbackSendDone     = &cjoin_sendDone;
+   cjoin_vars.joined = 0;
    
    
    opencoap_register(&cjoin_vars.desc);
-   cjoin_vars.timerId    = opentimers_start(CJOINPERIOD,
-                                                TIMER_PERIODIC,TIME_MS,
-                                                cjoin_timer_cb);
+
+   cjoin_schedule();
+}
+
+void cjoin_schedule() {
+    uint16_t delay;
+    
+    if (cjoin_vars.joined == 0) {
+        delay = openrandom_get16b();
+        cjoin_vars.timerId    = opentimers_start((uint32_t) delay,        // random wait from 0 to 65535ms
+                                                    TIMER_PERIODIC,TIME_MS,
+                                                    cjoin_timer_cb);
+   
+        openserial_printError(COMPONENT_IEEE802154E,ERR_WDRADIO_OVERFLOWS,
+                             (errorparameter_t)ieee154e_vars.state,
+                            (errorparameter_t)delay);
+    }
 }
 
 //=========================== private =========================================
@@ -68,8 +83,10 @@ owerror_t cjoin_receive(OpenQueueEntry_t* msg,
                       coap_header_iht* coap_header,
                       coap_option_iht* coap_options) {
 
+
     if (msg->payload[0] == 0) {
-        // join is over
+        cjoin_vars.joined = 1;               // declare join is over
+        opentimers_stop(cjoin_vars.timerId); // stop the timer
     }
     else {
         openserial_printError(COMPONENT_IEEE802154E,ERR_MAXRXACKPREPARE_OVERFLOWS,
@@ -88,17 +105,31 @@ void cjoin_timer_cb(opentimer_id_t id){
 }
 
 void cjoin_task_cb() {
+    uint8_t temp;
   
    // don't run if not synch
    if (ieee154e_isSynch() == FALSE) return;
-   
+
+   // don't run if no route to DAG root
+   if (icmpv6rpl_getPreferredParentIndex(&temp) == FALSE) { 
+        return;
+   }
+
+/*   if (icmpv6rpl_daoSent() == FALSE) {
+        return;
+   }
+*/
+
    // don't run on dagroot
    if (idmanager_getIsDAGroot()) {
       opentimers_stop(cjoin_vars.timerId);
       return;
    }
-   
+
    cjoin_sendPut(NUMBER_OF_EXCHANGES-1);
+   openserial_printError(COMPONENT_IEEE802154E,ERR_MAXRXACKPREPARE_OVERFLOWS,
+                         (errorparameter_t)ieee154e_vars.state,
+                         (errorparameter_t)NUMBER_OF_EXCHANGES-1);
 
    return;
 }
