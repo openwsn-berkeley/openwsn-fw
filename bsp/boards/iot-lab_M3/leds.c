@@ -137,6 +137,7 @@ void leds_debug_on() {}
 void leds_debug_off() {}
 void leds_debug_toggle() {}
 uint8_t leds_debug_isOn() {
+  // IoT-lab_M3 does not have debug a led
   return 0;
 }
 
