@@ -65,7 +65,7 @@
         </option>
         <option>
           <name>OGCoreOrChip</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>GRuntimeLibSelect</name>
@@ -99,7 +99,7 @@
         </option>
         <option>
           <name>OGChipSelectEditMenu</name>
-          <state>Default	None</state>
+          <state>STM32F103xE	ST STM32F103xE</state>
         </option>
         <option>
           <name>GenLowLevelInterface</name>
