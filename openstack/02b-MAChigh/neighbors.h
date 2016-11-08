@@ -22,7 +22,7 @@
 #define DEFAULTDAGRANK            MAXDAGRANK
 #define MINHOPRANKINCREASE        256  //default value in RPL and Minimal 6TiSCH draft
 
-#define LOWESTRSSIASPARENT        -90 //dBm
+#define LOWESTRSSIASPARENT        -80 //dBm
 //=========================== typedef =========================================
 
 BEGIN_PACK
