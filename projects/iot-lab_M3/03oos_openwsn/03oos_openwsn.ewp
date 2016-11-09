@@ -65,7 +65,7 @@
         </option>
         <option>
           <name>OGCoreOrChip</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>GRuntimeLibSelect</name>
@@ -99,7 +99,7 @@
         </option>
         <option>
           <name>OGChipSelectEditMenu</name>
-          <state>Default	None</state>
+          <state>STM32F103xE	ST STM32F103xE</state>
         </option>
         <option>
           <name>GenLowLevelInterface</name>
@@ -1917,9 +1917,24 @@
       <group>
         <name>iot-lab_M3</name>
         <group>
+          <name>configure</name>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\configure\stm32f10x_conf.h</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\configure\stm32f10x_it.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\configure\stm32f10x_it.h</name>
+          </file>
+        </group>
+        <group>
           <name>library</name>
           <file>
             <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\library\STM32F10x_StdPeriph_Lib_V3.5.0\Libraries\STM32F10x_StdPeriph_Driver\src\misc.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\library\STM32F10x_StdPeriph_Lib_V3.5.0\Libraries\CMSIS\CM3\DeviceSupport\ST\STM32F10x\startup\iar\startup_stm32f10x_hd.s</name>
           </file>
           <file>
             <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\library\STM32F10x_StdPeriph_Lib_V3.5.0\Libraries\STM32F10x_StdPeriph_Driver\src\stm32f10x_adc.c</name>
@@ -1983,6 +1998,9 @@
           </file>
           <file>
             <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\library\STM32F10x_StdPeriph_Lib_V3.5.0\Libraries\STM32F10x_StdPeriph_Driver\src\stm32f10x_usart.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\library\STM32F10x_StdPeriph_Lib_V3.5.0\Libraries\CMSIS\CM3\DeviceSupport\ST\STM32F10x\system_stm32f10x.c</name>
           </file>
         </group>
         <file>
