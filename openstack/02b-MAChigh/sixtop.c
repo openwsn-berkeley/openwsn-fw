@@ -25,7 +25,7 @@
 
 
 
-//#define _DEBUG_SIXTOP_
+#define _DEBUG_SIXTOP_
 //#define _DEBUG_SIXTOP_TIMEOUT_
 //#define _DEBUG_EB_
 //#define _DEBUG_KA_
@@ -1877,7 +1877,7 @@ void sixtop_notifyReceiveCommand(
                     //get the list of cells
                     processIE_retrieve_sixCelllist(pkt,ptr+local_len,length-local_len,cellList);
 
-
+#ifdef _DEBUG_SIXTOP_
                     char      str[150];
                     sprintf(str, "LinkRep rcvd from ");
                     openserial_ncat_uint8_t_hex(str, pkt->l2_nextORpreviousHop.addr_64b[6], 150);
@@ -1890,8 +1890,7 @@ void sixtop_notifyReceiveCommand(
                     strncat(str, ", blacklist=", 150);
                     openserial_ncat_uint8_t(str, (uint8_t)pkt->l2_sixtop_blacklist, 150);
                     openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
-
-
+#endif
 
                     // always default frameID
                     frameID = SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;

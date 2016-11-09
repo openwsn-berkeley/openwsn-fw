@@ -993,7 +993,7 @@ port_INLINE void activity_ti1ORri1() {
             scheduleEntry_t *entry = schedule_getCurrentScheduleEntry();
             strncat(str, ", slot=", 150);
             openserial_ncat_uint8_t(str, (uint32_t)entry->slotOffset, 150);
-            openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+            openserial_printf(COMPONENT_, str, strlen(str));
          }*/
 
 
@@ -1008,17 +1008,11 @@ port_INLINE void activity_ti1ORri1() {
             if (cellType==CELLTYPE_TX) {
                // abort
                endSlot();
-               //TODO
-               //snprintf(str, 150, "PKT GET STOP ");
-               //openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
                break;
             } else {
                changeToRX=TRUE;
             }
          } else {
-            //TODO
-            //snprintf(str, 150, "PKT GET TX ");
-            //openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 
             // change state
             changeState(S_TXDATAOFFSET);
@@ -1042,14 +1036,6 @@ port_INLINE void activity_ti1ORri1() {
             // stop using serial
             openserial_stop();
          }
-         //TODO
-/*
-                   snprintf(str, 150, "RX MODE");
-                   scheduleEntry_t *entry = schedule_getCurrentScheduleEntry();
-                   strncat(str, ", slot=", 150);
-                   openserial_ncat_uint8_t(str, (uint32_t)entry->slotOffset, 150);
-                   openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
-*/
 
          // change state
          changeState(S_RXDATAOFFSET);
@@ -1089,13 +1075,29 @@ port_INLINE void activity_ti1ORri1() {
                 incrementAsnOffset();
              }
          }
-         // set the timer based on calcualted number of slots to skip
+
+         // set the timer based on calculated number of slots to skip
          radio_setTimerPeriod(TsSlotDuration*(ieee154e_vars.numOfSleepSlots));
          
 #ifdef ADAPTIVE_SYNC
          // deal with the case when schedule multi slots
          adaptive_sync_countCompensationTimeout_compoundSlots(NUMSERIALRX-1);
 #endif
+/*
+ *       //TODO- SYNCHRONIZATION - FABRICE
+         // set the timer based on calculated number of slots to skip
+         radio_setTimerPeriod(TsSlotDuration*(ieee154e_vars.numOfSleepSlots) + 500);      //100 ticks -> 2ms
+
+         char str[150];
+         sprintf(str, "RESYNCH: old=");
+         openserial_ncat_uint32_t(str, (uint32_t)TsSlotDuration*(ieee154e_vars.numOfSleepSlots), 150);
+         strncat(str, " new=", 150);
+         openserial_ncat_uint32_t(str, (uint32_t)TsSlotDuration*(ieee154e_vars.numOfSleepSlots)+500, 150);
+         openserial_printf(COMPONENT_IEEE802154E, str, strlen(str));
+*/
+
+
+
          break;
       case CELLTYPE_MORESERIALRX:
          // do nothing (not even endSlot())

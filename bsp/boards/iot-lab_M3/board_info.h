@@ -34,6 +34,7 @@ to return the board's description.
 
 #define PORT_SIGNED_INT_WIDTH               int16_t
 #define PORT_TICS_PER_MS                    32
+//#define PORT_TICS_PER_MS                    64
 #define SCHEDULER_WAKEUP()                  EXTI->SWIER |= EXTI_Line1;
 #define SCHEDULER_ENABLE_INTERRUPT()        //enable in board use EXTI_Line1
 
@@ -50,6 +51,7 @@ to return the board's description.
 
 //===== IEEE802154E timing
 // time-slot related
+//#define PORT_TsSlotDuration                 328   // counter counts one extra count, see datasheet
 #define PORT_TsSlotDuration                 491   // counter counts one extra count, see datasheet
 // execution speed related
 #define PORT_maxTxDataPrepare               66    // 2014us (measured 746us)
