@@ -2034,6 +2034,9 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\rcc.c</name>
         </file>
         <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\rtc_timer.c</name>
+        </file>
+        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\spi.c</name>
         </file>
         <file>
