@@ -5,7 +5,7 @@
 \author Chang Tengfei <tengfei.chang@gmail.com>,  July 2012.
 \author Alaeddine Weslati <alaeddine.weslati@inria.fr>, January 2014.
 */
-#include "stm32f10x_lib.h"
+#include "stm32f10x_conf.h"
 #include "stdio.h"
 #include "stdint.h"
 #include "string.h"
