@@ -644,7 +644,6 @@ void icmpv6rpl_timer_DAO_task() {
    // send DAO
    sendDAO();
 
-   icmpv6rpl_vars.daoSent = TRUE;
    
    // arm the DAO timer with this new value
    daoPeriod = icmpv6rpl_vars.daoPeriod - 0x80 + (openrandom_get16b()&0xff);
@@ -814,6 +813,7 @@ void sendDAO() {
    //===== send
    if (icmpv6_send(msg)==E_SUCCESS) {
       icmpv6rpl_vars.busySendingDAO = TRUE;
+      icmpv6rpl_vars.daoSent = TRUE;
    } else {
       openqueue_freePacketBuffer(msg);
    }
