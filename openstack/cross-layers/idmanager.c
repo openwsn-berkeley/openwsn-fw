@@ -5,6 +5,7 @@
 #include "openserial.h"
 #include "neighbors.h"
 #include "schedule.h"
+#include "cjoin.h"
 
 //=========================== variables =======================================
 
@@ -77,6 +78,7 @@ void idmanager_setIsDAGroot(bool newRole) {
    DISABLE_INTERRUPTS();
    idmanager_vars.isDAGroot = newRole;
    icmpv6rpl_updateMyDAGrankAndParentSelection();
+   cjoin_setIsJoined(TRUE);
    schedule_startDAGroot();
    ENABLE_INTERRUPTS();
 }
