@@ -637,9 +637,6 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       
       // declare synchronized
       changeIsSync(TRUE);
-      // force isJoined to FALSE
-      cjoin_setIsJoined(FALSE);
-      
       // log the info
       openserial_printInfo(COMPONENT_IEEE802154E,ERR_SYNCHRONIZED,
                             (errorparameter_t)ieee154e_vars.slotOffset,
