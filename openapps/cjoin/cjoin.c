@@ -144,11 +144,9 @@ void cjoin_task_cb() {
         return;
    }
 
-/*   if (icmpv6rpl_daoSent() == FALSE) {
+   if (icmpv6rpl_daoSent() == FALSE) {
         return;
    }
-*/
-
     opentimers_stop(cjoin_vars.startupTimerId);
 
     cjoin_sendPut(NUMBER_OF_EXCHANGES-1);
