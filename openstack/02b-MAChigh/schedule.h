@@ -101,7 +101,8 @@ typedef enum {
    CELLTYPE_TXRX             = 3,
    CELLTYPE_SERIALRX         = 4,
    CELLTYPE_MORESERIALRX     = 5,
-   CELLTYPE_BUSY             = 6
+   CELLTYPE_BUSY             = 6,
+   CELLTYPE_RESERVED         = 7    //when a cell is temporarly reserved
 } cellType_t;
 
 typedef struct {
@@ -199,6 +200,8 @@ owerror_t          schedule_removeActiveSlot(
    slotOffset_t         slotOffset,
    open_addr_t*         neighbor
 );
+owerror_t          schedule_removeReservedCells(void);
+
 bool               schedule_isSlotOffsetAvailable(uint16_t slotOffset);
 // return the slot info which has a poor quality
 scheduleEntry_t*  schedule_statistic_poorLinkQuality(void);

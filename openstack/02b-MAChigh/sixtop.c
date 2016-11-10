@@ -26,7 +26,7 @@
 
 
 #define _DEBUG_SIXTOP_
-//#define _DEBUG_SIXTOP_TIMEOUT_
+#define _DEBUG_SIXTOP_TIMEOUT_
 //#define _DEBUG_EB_
 //#define _DEBUG_KA_
 
@@ -389,7 +389,12 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells, track
     switch(code){
     case IANA_6TOP_CMD_ADD:
        sixtop_setState(SIX_WAIT_ADDREQUEST_SENDDONE);
-        break;
+
+       //these cells are reserved
+       for(i=0; i<SCHEDULEIEMAXNUMCELLS; i++)
+          schedule_addActiveSlot(cellList[i].tsNum,CELLTYPE_RESERVED, FALSE, cellList[i].choffset, neighbor, pkt->l2_track);
+
+       break;
     case IANA_6TOP_CMD_DELETE:
        sixtop_setState(SIX_WAIT_DELETEREQUEST_SENDDONE);
         break;
@@ -1189,6 +1194,9 @@ void sixtop_setState(six2six_state_t state){
       opentimers_stop(sixtop_vars.timeoutTimerId);
       sixtop_vars.timeoutTimerId = TOO_MANY_TIMERS_ERROR;
       sixtop_vars.handler = SIX_HANDLER_NONE;
+
+      //flush the previously reserved cells
+      schedule_removeReservedCells();
    }
 
 }
@@ -1891,6 +1899,10 @@ void sixtop_notifyReceiveCommand(
                     openserial_ncat_uint8_t(str, (uint8_t)pkt->l2_sixtop_blacklist, 150);
                     openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 #endif
+
+                    //remove old temporary cells (reserved during for the LinkReq)
+                    schedule_removeReservedCells();
+
 
                     // always default frameID
                     frameID = SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;

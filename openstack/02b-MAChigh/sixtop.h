@@ -87,7 +87,7 @@ typedef enum {
 #define SIXTOP_MINIMAL_EBPERIOD 5 // minist period of sending EB
 
 //TODO: fix a correct timeout
-#define SIX2SIX_TIMEOUT_MS ((uint32_t)(MAXBE * TXRETRIES * SLOTFRAME_LENGTH * TSLOTDURATION_MS))
+#define SIX2SIX_TIMEOUT_MS ((uint32_t)(2 * MAXBE * TXRETRIES * SLOTFRAME_LENGTH * TSLOTDURATION_MS))
 #define SIX2SIX_LINKREP_TIMEOUT_MS  (SIX2SIX_TIMEOUT_MS / 2)
 
 

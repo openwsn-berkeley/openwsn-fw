@@ -530,6 +530,75 @@ owerror_t schedule_removeActiveSlot(slotOffset_t slotOffset, open_addr_t* neighb
 }
 
 
+
+owerror_t schedule_removeReservedCells(void){
+   scheduleEntry_t* slotContainer;
+   scheduleEntry_t* previousSlotWalker;
+
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+
+   //infinite loop: return() when no more cell is found
+   while(1){
+      // find the schedule entry
+      slotContainer = &schedule_vars.scheduleBuf[0];
+      while (slotContainer<=&schedule_vars.scheduleBuf[schedule_vars.maxActiveSlots-1]) {
+         if (slotContainer->type==CELLTYPE_RESERVED){
+            break;
+         }
+         slotContainer++;
+      }
+
+      // no more slot
+      if (slotContainer>&schedule_vars.scheduleBuf[schedule_vars.maxActiveSlots-1]) {
+         ENABLE_INTERRUPTS();
+         return E_SUCCESS;
+      }
+
+
+      //notification of openvisualizer
+      openserial_statCellremove(slotContainer);
+
+      // remove from linked list
+      if (slotContainer->next==slotContainer) {
+         // this is the last active slot
+
+         // the next slot of this slot is NULL
+         slotContainer->next                   = NULL;
+
+         // current slot points to this slot
+         schedule_vars.currentScheduleEntry    = NULL;
+      } else  {
+         // this is NOT the last active slot
+
+         // find the previous in the schedule
+         previousSlotWalker                    = schedule_vars.currentScheduleEntry;
+
+         while (1) {
+            if (previousSlotWalker->next==slotContainer){
+               break;
+            }
+            previousSlotWalker                 = previousSlotWalker->next;
+         }
+
+         // remove this element from the linked list, i.e. have the previous slot
+         // "jump" to slotContainer's next
+         previousSlotWalker->next              = slotContainer->next;
+
+         // update current slot if points to slot I just removed
+         if (schedule_vars.currentScheduleEntry==slotContainer) {
+            schedule_vars.currentScheduleEntry = slotContainer->next;
+         }
+      }
+
+      // reset removed schedule entry
+      schedule_resetEntry(slotContainer);
+   }
+
+   //never executed
+}
+
+
 bool schedule_isSlotOffsetAvailable(uint16_t slotOffset){
    
    scheduleEntry_t* scheduleWalker;
@@ -660,6 +729,17 @@ void schedule_syncSlotOffset(slotOffset_t targetSlotOffset) {
    ENABLE_INTERRUPTS();
 }
 
+
+/**
+\brief is the slot "active"?
+*/
+bool schedule_isSlotActive(scheduleEntry_t *entry){
+
+   if (entry->type == CELLTYPE_BUSY || entry->type == CELLTYPE_RESERVED)
+      return(FALSE);
+   return(TRUE);
+}
+
 /**
 \brief advance to next active slot
 */
@@ -667,6 +747,8 @@ void schedule_advanceSlot() {
    
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
+
+   do{
    if (schedule_vars.currentScheduleEntry->slotOffset >= ((scheduleEntry_t*)schedule_vars.currentScheduleEntry->next)->slotOffset
        ) {
 #if (SFMETHOD == SFMETHOD_SF0)
@@ -678,7 +760,9 @@ void schedule_advanceSlot() {
 
    }   
    schedule_vars.currentScheduleEntry = schedule_vars.currentScheduleEntry->next;
-   
+   }while(!schedule_isSlotActive(schedule_vars.currentScheduleEntry));
+
+
    ENABLE_INTERRUPTS();
 }
 
