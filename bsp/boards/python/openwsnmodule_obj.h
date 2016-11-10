@@ -32,6 +32,7 @@
 // applications
 #include "c6t_obj.h"
 #include "cexample_obj.h"
+#include "cjoin_obj.h"
 #include "cinfo_obj.h"
 #include "cleds_obj.h"
 #include "cstorm_obj.h"
@@ -249,6 +250,7 @@ struct OpenMote {
    cwellknown_vars_t    cwellknown_vars;
    rrt_vars_t           rrt_vars;
    //tohlone_vars_t       tohlone_vars;
+   cjoin_vars_t         cjoin_vars;
 };
 
 #endif
