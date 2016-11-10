@@ -60,8 +60,7 @@ void cjoin_init() {
    cjoin_vars.desc.callbackRx           = &cjoin_receive;
    cjoin_vars.desc.callbackSendDone     = &cjoin_sendDone;
    cjoin_vars.lastPayload               = NUMBER_OF_EXCHANGES - 1;
-   
-   cjoin_setIsJoined(FALSE);
+   cjoin_vars.isJoined                  = FALSE;   
 
    opencoap_register(&cjoin_vars.desc);
 
