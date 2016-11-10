@@ -40,7 +40,11 @@ void    cjoin_timer_cb(opentimer_id_t id);
 void    cjoin_task_cb(void);
 void    cjoin_sendDone(OpenQueueEntry_t* msg,
                        owerror_t error);
-owerror_t cjoin_sendPut(uint8_t payload); 
+owerror_t cjoin_sendPut(uint8_t payload);
+void cjoin_retransmission_cb(opentimer_id_t id);
+void cjoin_retransmission_task_cb(void);
+bool cjoin_getIsJoined(void);
+void cjoin_setIsJoined(bool newValue);
 //=========================== public ==========================================
 
 void cjoin_init() {
@@ -54,9 +58,10 @@ void cjoin_init() {
    cjoin_vars.desc.discoverable         = TRUE;
    cjoin_vars.desc.callbackRx           = &cjoin_receive;
    cjoin_vars.desc.callbackSendDone     = &cjoin_sendDone;
-   cjoin_vars.joined = 0;
+   cjoin_vars.lastPayload               = NUMBER_OF_EXCHANGES - 1;
    
-   
+   cjoin_setIsJoined(FALSE);
+
    opencoap_register(&cjoin_vars.desc);
 
    cjoin_schedule();
@@ -65,15 +70,11 @@ void cjoin_init() {
 void cjoin_schedule() {
     uint16_t delay;
     
-    if (cjoin_vars.joined == 0) {
+    if (cjoin_getIsJoined() == FALSE) {
         delay = openrandom_get16b();
-        cjoin_vars.timerId    = opentimers_start((uint32_t) delay,        // random wait from 0 to 65535ms
+        cjoin_vars.startupTimerId    = opentimers_start((uint32_t) delay,        // random wait from 0 to 65535ms
                                                     TIMER_PERIODIC,TIME_MS,
                                                     cjoin_timer_cb);
-   
-        openserial_printError(COMPONENT_IEEE802154E,ERR_WDRADIO_OVERFLOWS,
-                             (errorparameter_t)ieee154e_vars.state,
-                            (errorparameter_t)delay);
     }
 }
 
@@ -83,25 +84,48 @@ owerror_t cjoin_receive(OpenQueueEntry_t* msg,
                       coap_header_iht* coap_header,
                       coap_option_iht* coap_options) {
 
+    uint8_t asn[5];
+    uint32_t asnCropped;
 
-    if (msg->payload[0] == 0) {
-        cjoin_vars.joined = 1;               // declare join is over
-        opentimers_stop(cjoin_vars.timerId); // stop the timer
-    }
-    else {
-        openserial_printError(COMPONENT_IEEE802154E,ERR_MAXRXACKPREPARE_OVERFLOWS,
-                         (errorparameter_t)ieee154e_vars.state,
-                         (errorparameter_t)msg->payload[0]);
-        cjoin_sendPut(msg->payload[0]--);
-    }
 
-   return E_SUCCESS;
+        opentimers_stop(cjoin_vars.retransmissionTimerId); // stop the timer
+
+        openserial_printError(COMPONENT_IEEE802154E,ERR_WDRADIO_OVERFLOWS,
+                             (errorparameter_t)0,
+                             (errorparameter_t)msg->payload[0]);
+ 
+        if (msg->payload[0] == 0) {
+            cjoin_setIsJoined(TRUE);                  // declare join is over
+            ieee154e_getAsn(asn);
+            asnCropped = ((uint32_t) asn[3] << 24) | ((uint32_t) asn[2] << 16) | ((uint32_t) asn[1] << 8) | ((uint32_t) asn[0]);
+            printf("JOIN ASN: %u\n", asnCropped);
+        }
+        else if (msg->payload[0] == cjoin_vars.lastPayload - 1) {
+            cjoin_sendPut(msg->payload[0] - 1);
+        }
+        else {
+            openserial_printError(COMPONENT_IEEE802154E,ERR_WDDATADURATION_OVERFLOWS,
+                                     (errorparameter_t)0,
+                                     (errorparameter_t)0);
+        }
+    
+    return E_SUCCESS;
 }
 
 //timer fired, but we don't want to execute task in ISR mode
 //instead, push task to scheduler with COAP priority, and let scheduler take care of it
 void cjoin_timer_cb(opentimer_id_t id){
    scheduler_push_task(cjoin_task_cb,TASKPRIO_COAP);
+}
+
+void cjoin_retransmission_cb(opentimer_id_t id) {
+
+    scheduler_push_task(cjoin_retransmission_task_cb, TASKPRIO_COAP);
+}
+
+void cjoin_retransmission_task_cb() {
+   cjoin_vars.lastPayload = NUMBER_OF_EXCHANGES - 1; // get around the bug of starting with 1 after retransmit
+   cjoin_sendPut(cjoin_vars.lastPayload);
 }
 
 void cjoin_task_cb() {
@@ -142,6 +166,11 @@ owerror_t cjoin_sendPut(uint8_t payload) {
    OpenQueueEntry_t*    pkt;
    owerror_t            outcome;
  
+   cjoin_vars.lastPayload = payload;
+
+   openserial_printError(COMPONENT_IEEE802154E,ERR_MAXRXACKPREPARE_OVERFLOWS,
+                         (errorparameter_t)0,
+                         (errorparameter_t)payload);
  // create a CoAP RD packet
    pkt = openqueue_getFreePacketBuffer(COMPONENT_CJOIN);
    if (pkt==NULL) {
@@ -195,5 +224,35 @@ owerror_t cjoin_sendPut(uint8_t payload) {
       return E_FAIL;
    }
 
+   cjoin_vars.retransmissionTimerId    = opentimers_start((uint32_t) TIMEOUT,
+                                                 TIMER_ONESHOT,TIME_MS,
+                                                 cjoin_retransmission_cb);
   return E_SUCCESS;
+}
+
+bool cjoin_getIsJoined() {   
+   bool res;
+   INTERRUPT_DECLARATION();
+   
+   DISABLE_INTERRUPTS();
+   res=cjoin_vars.isJoined;
+   ENABLE_INTERRUPTS();
+
+   return res;
+}
+
+void cjoin_setIsJoined(bool newValue) {
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   
+   cjoin_vars.isJoined = newValue;
+
+   ENABLE_INTERRUPTS();
+
+   if (newValue == TRUE) {
+        // log the info
+        openserial_printInfo(COMPONENT_CJOIN, ERR_JOINED,
+                             (errorparameter_t)0,
+                             (errorparameter_t)0);
+   }
 }

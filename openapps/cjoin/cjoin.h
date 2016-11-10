@@ -14,8 +14,10 @@
 
 typedef struct {
    coap_resource_desc_t desc;
-   opentimer_id_t       timerId;
-   uint8_t              joined;
+   opentimer_id_t       startupTimerId;
+   opentimer_id_t       retransmissionTimerId;
+   uint8_t              lastPayload;
+   bool                 isJoined;
 } cjoin_vars_t;
 
 //=========================== variables =======================================
@@ -24,6 +26,8 @@ typedef struct {
 
 void cjoin_init(void);
 void cjoin_schedule(void);
+bool cjoin_getIsJoined(void);
+void cjoin_setIsJoined(bool newValue);
 
 /**
 \}
