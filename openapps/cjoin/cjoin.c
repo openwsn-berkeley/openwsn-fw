@@ -20,6 +20,7 @@
 
 /// inter-packet period (in ms)
 #define NUMBER_OF_EXCHANGES     6 
+#define TIMEOUT                 60000
 
 const uint8_t cjoin_path0[] = "j";
 
