@@ -134,6 +134,11 @@ void cjoin_task_cb() {
    // don't run if not synch
    if (ieee154e_isSynch() == FALSE) return;
 
+   // don't run if DAG root
+   if (idmanager_getIsDAGroot() == TRUE) {
+        return;
+   }
+
    // don't run if no route to DAG root
    if (icmpv6rpl_getPreferredParentIndex(&temp) == FALSE) { 
         return;
@@ -144,16 +149,9 @@ void cjoin_task_cb() {
    }
 */
 
-   // don't run on dagroot
-   if (idmanager_getIsDAGroot()) {
-      opentimers_stop(cjoin_vars.timerId);
-      return;
-   }
+    opentimers_stop(cjoin_vars.startupTimerId);
 
-   cjoin_sendPut(NUMBER_OF_EXCHANGES-1);
-   openserial_printError(COMPONENT_IEEE802154E,ERR_MAXRXACKPREPARE_OVERFLOWS,
-                         (errorparameter_t)ieee154e_vars.state,
-                         (errorparameter_t)NUMBER_OF_EXCHANGES-1);
+    cjoin_sendPut(NUMBER_OF_EXCHANGES-1);
 
    return;
 }
