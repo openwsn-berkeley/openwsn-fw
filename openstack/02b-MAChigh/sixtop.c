@@ -17,6 +17,7 @@
 #include "IEEE802154_security.h"
 #include "idmanager.h"
 #include "schedule.h"
+#include "cjoin.h"
 
 //=========================== define ==========================================
 
@@ -709,8 +710,8 @@ port_INLINE void sixtop_sendEB() {
    
    len = 0;
    
-   if ((ieee154e_isSynch()==FALSE) || (icmpv6rpl_getMyDAGrank()==DEFAULTDAGRANK)){
-      // I'm not sync'ed or I did not acquire a DAGrank
+   if ((ieee154e_isSynch()==FALSE) || (icmpv6rpl_getMyDAGrank()==DEFAULTDAGRANK) || (cjoin_getIsJoined()==FALSE)){
+      // I'm not sync'ed or I did not acquire a DAGrank or I did not join yet
       
       // delete packets genereted by this module (EB and KA) from openqueue
       openqueue_removeAllCreatedBy(COMPONENT_SIXTOP);
