@@ -124,7 +124,6 @@ void cjoin_retransmission_cb(opentimer_id_t id) {
 }
 
 void cjoin_retransmission_task_cb() {
-   cjoin_vars.lastPayload = NUMBER_OF_EXCHANGES - 1; // get around the bug of starting with 1 after retransmit
    cjoin_sendPut(cjoin_vars.lastPayload);
 }
 
