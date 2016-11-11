@@ -13,7 +13,6 @@
 //=========================== typedef =========================================
 
 typedef struct {
-   coap_resource_desc_t desc;
    opentimer_id_t       startupTimerId;
    opentimer_id_t       retransmissionTimerId;
    uint8_t              lastPayload;

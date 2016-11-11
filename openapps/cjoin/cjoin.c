@@ -27,7 +27,7 @@ const uint8_t cjoin_path0[] = "j";
 static const uint8_t ipAddr_jce[] = {0xbb, 0xbb, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, \
                                      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01};
 
-
+coap_resource_desc_t desc;
 //=========================== variables =======================================
 
 cjoin_vars_t cjoin_vars;
@@ -51,18 +51,18 @@ void cjoin_setIsJoined(bool newValue);
 void cjoin_init() {
    
    // prepare the resource descriptor for the /j path
-   cjoin_vars.desc.path0len             = sizeof(cjoin_path0)-1;
-   cjoin_vars.desc.path0val             = (uint8_t*)(&cjoin_path0);
-   cjoin_vars.desc.path1len             = 0;
-   cjoin_vars.desc.path1val             = NULL;
-   cjoin_vars.desc.componentID          = COMPONENT_CJOIN;
-   cjoin_vars.desc.discoverable         = TRUE;
-   cjoin_vars.desc.callbackRx           = &cjoin_receive;
-   cjoin_vars.desc.callbackSendDone     = &cjoin_sendDone;
+   desc.path0len                        = sizeof(cjoin_path0)-1;
+   desc.path0val                        = (uint8_t*)(&cjoin_path0);
+   desc.path1len                        = 0;
+   desc.path1val                        = NULL;
+   desc.componentID                     = COMPONENT_CJOIN;
+   desc.discoverable                    = TRUE;
+   desc.callbackRx                      = &cjoin_receive;
+   desc.callbackSendDone                = &cjoin_sendDone;
    cjoin_vars.lastPayload               = NUMBER_OF_EXCHANGES - 1;
    cjoin_vars.isJoined                  = FALSE;   
 
-   opencoap_register(&cjoin_vars.desc);
+   opencoap_register(&desc);
 
    cjoin_schedule();
 }
@@ -211,7 +211,7 @@ owerror_t cjoin_sendPut(uint8_t payload) {
       COAP_TYPE_NON,
       COAP_CODE_REQ_PUT,
       1,
-      &cjoin_vars.desc
+      &desc
    );
    
    // avoid overflowing the queue if fails
