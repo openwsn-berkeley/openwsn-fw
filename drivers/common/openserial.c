@@ -23,6 +23,7 @@
 #include "icmpv6rpl.h"
 #include "icmpv6echo.h"
 #include "sf0.h"
+#include "cjoin.h"
 
 //=========================== variables =======================================
 
@@ -367,6 +368,10 @@ void openserial_startOutput() {
             }
         case STATUS_KAPERIOD:
             if (debugPrint_kaPeriod()==TRUE) {
+                break;
+            }
+        case STATUS_JOINED:
+            if (debugPrint_joined()==TRUE) {
                 break;
             }
         default:

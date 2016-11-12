@@ -62,6 +62,8 @@ void cjoin_init() {
    cjoin_vars.lastPayload               = NUMBER_OF_EXCHANGES - 1;
    cjoin_vars.isJoined                  = FALSE;   
 
+   memset(&cjoin_vars.joinAsn, 0x00, sizeof(asn_t));
+
    opencoap_register(&desc);
 
    cjoin_schedule();
@@ -250,4 +252,21 @@ void cjoin_setIsJoined(bool newValue) {
                              (errorparameter_t)0,
                              (errorparameter_t)0);
    }
+}
+
+/**
+\brief Trigger this module to print status information, over serial.
+
+debugPrint_* functions are used by the openserial module to continuously print
+status information about several modules in the OpenWSN stack.
+
+\returns TRUE if this function printed something, FALSE otherwise.
+*/
+bool debugPrint_joined() {
+   asn_t output;
+   output.byte4         =  cjoin_vars.joinAsn.byte4;
+   output.bytes2and3    =  cjoin_vars.joinAsn.bytes2and3;
+   output.bytes0and1    =  cjoin_vars.joinAsn.bytes0and1;
+   openserial_printStatus(STATUS_JOINED,(uint8_t*)&output,sizeof(output));
+   return TRUE;
 }
