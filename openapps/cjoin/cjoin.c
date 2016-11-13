@@ -95,20 +95,21 @@ owerror_t cjoin_receive(OpenQueueEntry_t* msg,
         openserial_printError(COMPONENT_IEEE802154E,ERR_WDRADIO_OVERFLOWS,
                              (errorparameter_t)0,
                              (errorparameter_t)msg->payload[0]);
- 
-        if (msg->payload[0] == 0) {
-            cjoin_setIsJoined(TRUE);                  // declare join is over
-            ieee154e_getAsn(asn);
-            asnCropped = ((uint32_t) asn[3] << 24) | ((uint32_t) asn[2] << 16) | ((uint32_t) asn[1] << 8) | ((uint32_t) asn[0]);
-            printf("JOIN ASN: %u\n", asnCropped);
-        }
-        else if (msg->payload[0] == cjoin_vars.lastPayload - 1) {
-            cjoin_sendPut(msg->payload[0] - 1);
-        }
-        else {
-            openserial_printError(COMPONENT_IEEE802154E,ERR_WDDATADURATION_OVERFLOWS,
-                                     (errorparameter_t)0,
-                                     (errorparameter_t)0);
+        if (cjoin_getIsJoined() == FALSE) { 
+            if (msg->payload[0] == 0) {
+                cjoin_setIsJoined(TRUE);                  // declare join is over
+                ieee154e_getAsn(asn);
+                asnCropped = ((uint32_t) asn[3] << 24) | ((uint32_t) asn[2] << 16) | ((uint32_t) asn[1] << 8) | ((uint32_t) asn[0]);
+                printf("JOIN ASN: %u\n", asnCropped);
+            }
+            else if (msg->payload[0] == cjoin_vars.lastPayload - 1) {
+                cjoin_sendPut(msg->payload[0] - 1);
+            }
+            else {
+                openserial_printError(COMPONENT_IEEE802154E,ERR_WDDATADURATION_OVERFLOWS,
+                                      (errorparameter_t)0,
+                                      (errorparameter_t)0);
+            }
         }
     
     return E_SUCCESS;
