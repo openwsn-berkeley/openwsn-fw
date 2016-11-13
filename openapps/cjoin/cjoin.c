@@ -239,11 +239,22 @@ bool cjoin_getIsJoined() {
 }
 
 void cjoin_setIsJoined(bool newValue) {
+   uint8_t array[5];
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    
    cjoin_vars.isJoined = newValue;
 
+   // Update Join ASN value
+   if (idmanager_getIsDAGroot() == FALSE) {
+        ieee154e_getAsn(array);
+        cjoin_vars.joinAsn.bytes0and1           = ((uint16_t) array[1] << 8) | ((uint16_t) array[0]);
+        cjoin_vars.joinAsn.bytes2and3           = ((uint16_t) array[3] << 8) | ((uint16_t) array[2]);
+        cjoin_vars.joinAsn.byte4                = array[4]; 
+    } else {
+        // Dag root resets the ASN value to zero
+        memset(&cjoin_vars.joinAsn, 0x00, sizeof(asn_t));
+    }
    ENABLE_INTERRUPTS();
 
    if (newValue == TRUE) {
