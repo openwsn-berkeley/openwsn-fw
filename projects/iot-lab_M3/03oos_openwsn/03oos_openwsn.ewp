@@ -170,6 +170,7 @@
           <name>CCDefines</name>
           <state>STM32F10X_HD</state>
           <state>USE_STDPERIPH_DRIVER</state>
+          <state>HSE_VALUE=((uint32_t)16000000)</state>
         </option>
         <option>
           <name>CCPreprocFile</name>
@@ -258,7 +259,7 @@
         </option>
         <option>
           <name>CCSignedPlainChar</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>CCRequirePrototypes</name>
@@ -612,11 +613,11 @@
         </option>
         <option>
           <name>OCOutputOverride</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>OOCOutputFile</name>
-          <state></state>
+          <state>03oos_openwsn.srec</state>
         </option>
         <option>
           <name>OOCCommandLineProducer</name>
@@ -2034,13 +2035,7 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\rcc.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\rtc_timer.c</name>
-        </file>
-        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\spi.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\Systick.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\uart.c</name>

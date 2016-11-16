@@ -170,6 +170,7 @@
           <name>CCDefines</name>
           <state>STM32F10X_HD</state>
           <state>USE_STDPERIPH_DRIVER</state>
+          <state>HSE_VALUE=((uint32_t)16000000)</state>
         </option>
         <option>
           <name>CCPreprocFile</name>
