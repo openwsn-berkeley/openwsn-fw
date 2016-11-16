@@ -216,7 +216,7 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells){
    
     // create packet
     len  = 0;
-    if (code == IANA_6TOP_CMD_ADD || IANA_6TOP_CMD_DELETE){
+    if (code == IANA_6TOP_CMD_ADD || code == IANA_6TOP_CMD_DELETE){
         len += processIE_prepend_sixCelllist(pkt,cellList);
         // reserve space for container
         packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));

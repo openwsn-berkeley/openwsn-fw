@@ -9,5 +9,5 @@ openocd -f "${BIN_FOLDER}/iot-lab_m3_jtag.cfg" \
   -c "telnet_port 4444"
 	-c "init" \
 	-c "targets" \
-	-c "reset halt"
+	-c "reset"
 
