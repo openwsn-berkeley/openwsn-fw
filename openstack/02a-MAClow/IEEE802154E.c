@@ -1169,12 +1169,6 @@ port_INLINE void activity_ti6() {
    // change state
    changeState(S_RXACKPREPARE);
    
-   // calculate the frequency to transmit on
-   ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset()); 
-   
-   // configure the radio for that frequency
-   radio_setFrequency(ieee154e_vars.freq);
-   
    // enable the radio in Rx mode. The radio is not actively listening yet.
    radio_rxEnable();
    //caputre init of radio for duty cycle calculation
@@ -1664,12 +1658,6 @@ port_INLINE void activity_ri6() {
     // space for 2-byte CRC
    packetfunctions_reserveFooterSize(ieee154e_vars.ackToSend,2);
   
-    // calculate the frequency to transmit on
-   ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset()); 
-   
-   // configure the radio for that frequency
-   radio_setFrequency(ieee154e_vars.freq);
-   
    // load the packet in the radio's Tx buffer
    radio_loadPacket(ieee154e_vars.ackToSend->payload,
                     ieee154e_vars.ackToSend->length);
