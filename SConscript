@@ -35,7 +35,8 @@ dummyFunc = Builder(
     action = '',
     suffix = '.ihex',
 )
-
+if env['panid']:
+    env.Append(CPPDEFINES    = {'PANID_DEFINED' : env['panid']})
 if env['dagroot']==1:
     env.Append(CPPDEFINES    = 'DAGROOT')
 if env['forcetopology']==1:

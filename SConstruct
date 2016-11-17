@@ -130,6 +130,7 @@ command_line_options = {
     'fastsim':          ['1','0'],
     'simhost':          ['amd64-linux','x86-linux','amd64-windows','x86-windows'],
     'simhostpy':        [''],                               # No reasonable default
+    'panid':            [''],
     'dagroot':          ['0','1'],
     'forcetopology':    ['0','1'],
     'debug':            ['0','1'],
@@ -236,6 +237,13 @@ command_line_vars.AddVariables(
         'simhostpy',                                       # key
         '',                                                # help
         command_line_options['simhostpy'][0],              # default
+        None,                                              # validator
+        None,                                              # converter
+    ),
+    (
+        'panid',                                           # key
+        '0xFFFF',                                          # help
+        command_line_options['panid'][0],                  # default
         None,                                              # validator
         None,                                              # converter
     ),

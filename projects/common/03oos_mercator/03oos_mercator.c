@@ -190,7 +190,7 @@ int mote_main(void) {
    opentimers_init();
 
    leds_all_off();
-   radiotimer_start(0xffffff);
+   radiotimer_start(0xffff);
    radiotimer_cancel();
    
    // get mac
@@ -586,7 +586,6 @@ void cb_endFrame(uint16_t timestamp) {
       memcpy(srcmac,       mercator_vars.rxpk_buf     , 8);
       memcpy(&transctr,    &mercator_vars.rxpk_buf[8] , 1);
       memcpy(&pkctr,       mercator_vars.rxpk_buf + 9 , 2);
-      pkctr = htons(pkctr);
       memcpy(&txfillbyte,  &mercator_vars.rxpk_buf[11], 1);
 
       // check srcmac
