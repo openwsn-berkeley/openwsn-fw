@@ -48,6 +48,7 @@ void serial_enable(void) {
    uart_clearTxInterrupts();
    uart_clearRxInterrupts();      // clear possible pending interrupts
    uart_enableInterrupts();       // Enable USCI_A1 TX & RX interrupt
+   mercator_vars.uartlastRxByte = 0x00;
 }
 
 void serial_disable(void) {
