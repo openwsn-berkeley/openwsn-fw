@@ -703,8 +703,9 @@ port_INLINE void sixtop_sendEB() {
       // delete packets genereted by this module (EB and KA) from openqueue
       openqueue_removeAllCreatedBy(COMPONENT_SIXTOP);
       
-      // I'm now busy sending an EB
+      // I'm not busy sending an EB or KA
       sixtop_vars.busySendingEB = FALSE;
+      sixtop_vars.busySendingKA = FALSE;
       
       // stop here
       return;
@@ -778,7 +779,8 @@ port_INLINE void sixtop_sendKA() {
       // delete packets genereted by this module (EB and KA) from openqueue
       openqueue_removeAllCreatedBy(COMPONENT_SIXTOP);
       
-      // I'm now busy sending a KA
+      // I'm not busy sending an EB or KA
+      sixtop_vars.busySendingEB = FALSE;
       sixtop_vars.busySendingKA = FALSE;
       
       // stop here
