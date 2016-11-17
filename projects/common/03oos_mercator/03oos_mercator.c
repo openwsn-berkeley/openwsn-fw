@@ -332,6 +332,8 @@ void isr_openserial_rx_mod(void) {
       
       // add the byte just received
       inputHdlcWriteMod(rxbyte);
+      
+      // reset buffer if frame too long
       if (mercator_vars.uartbufrxfill+1>UART_BUF_LEN){
          mercator_vars.uartbufrxfill         = 0;
          mercator_vars.uartrxbusy        = FALSE;
