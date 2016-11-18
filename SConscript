@@ -302,6 +302,8 @@ elif env['toolchain']=='armgcc':
         env.Append(CCFLAGS       = '-Ibsp/boards/samr21_xpro/cmsis/inc')
         env.Append(CCFLAGS       = '-D__SAMR21G18A__')
         env.Append(CCFLAGS       = '-Ibsp/boards/samr21_xpro/SAMR21_DFP/1.0.34/include')
+        env.Append(CCFLAGS       = '-std=c99')
+        -std=c99
         # assembler
         env.Replace(AS           = 'arm-none-eabi-as')
         env.Append(ASFLAGS       = '-ggdb -g3 -mcpu=cortex-m0plus -mlittle-endian')
