@@ -5,7 +5,7 @@
 \author Chang Tengfei <tengfei.chang@gmail.com>,  July 2012.
 \author Alaeddine Weslati <alaeddine.weslati@inria.fr>, January 2014.
 */
-#include "stm32f10x_lib.h"
+#include "stm32f10x_conf.h"
 #include "stdio.h"
 #include "stdint.h"
 #include "string.h"
@@ -43,14 +43,13 @@ volatile spi_vars_t spi_vars;
 inline static void RESET_CLR(void) { GPIOC->BRR = 1<<1; }
 inline static void RESET_SET(void) { GPIOC->BSRR = 1<<1; }
 inline static void CSn_SET(void) { GPIOA->BSRR = 1<<4; }
-inline static void CSn_CLR(void) { GPIOA->BRR = 1<<4; }
 inline static void SLEEP_CLR(void) { GPIOA->BRR = 1<<2; }
 
 //=========================== public ==========================================
 
 void spi_init() {
  // clear variables
-  memset(&spi_vars,0,sizeof(spi_vars_t));
+  memset((void*)&spi_vars,0,sizeof(spi_vars_t));
  
   SPI_InitTypeDef  SPI_InitStructure;
 

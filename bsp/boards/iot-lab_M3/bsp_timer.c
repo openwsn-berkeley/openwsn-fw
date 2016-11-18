@@ -1,11 +1,11 @@
 /**
 \brief openmoteSTM32 definition of the "bsp_timer" bsp module.
 
-On openmoteSTM32, we use TIM2 for the bsp_timer module.
+TODO: On openmoteSTM32, we use TIM2 for the bsp_timer module.
 
 \author Chang Tengfei <tengfei.chang@gmail.com>,  July 2012.
 */
-#include "stm32f10x_lib.h"
+#include "stm32f10x_conf.h"
 #include "string.h"
 #include "bsp_timer.h"
 #include "board.h"
@@ -37,7 +37,7 @@ any compare registers, so no interrupt will fire.
 void bsp_timer_init() 
 {
     // clear local variables
-    memset(&bsp_timer_vars,0,sizeof(bsp_timer_vars_t));
+    memset((void*)&bsp_timer_vars,0,sizeof(bsp_timer_vars_t));
     
     //Configure TIM2, Clock
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2 , ENABLE);
@@ -45,7 +45,7 @@ void bsp_timer_init()
     //Configure TIM2: Period = 0xffff, prescaler = 2303(72M/(2303+1) = 32.768KHz), CounterMode  = upCounting mode
     TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure ;
     TIM_TimeBaseStructure.TIM_Period        = 0xFFFF;
-    TIM_TimeBaseStructure.TIM_Prescaler     = 2303;;
+    TIM_TimeBaseStructure.TIM_Prescaler     = 2303;
     TIM_TimeBaseStructure.TIM_ClockDivision = 0;
     TIM_TimeBaseStructure.TIM_CounterMode   = TIM_CounterMode_Up;
     TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
@@ -59,17 +59,7 @@ void bsp_timer_init()
     TIM_OC1Init(TIM2, &TIM_OCInitStructure);
           
     //enable TIM2
-    TIM_Cmd(TIM2, ENABLE); 
-    //disable interrupt
-    //bsp_timer_cancel_schedule();
-    
-//    //Configure NVIC: Preemption Priority = 2 and Sub Priority = 1
-//    NVIC_InitTypeDef NVIC_InitStructure;
-//    NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQChannel;
-//    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
-//    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
-//    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-//    NVIC_Init(&NVIC_InitStructure);
+    TIM_Cmd(TIM2, ENABLE);
 }
 
 /**
