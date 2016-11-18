@@ -10,7 +10,7 @@
 //=========================== defines ==========================================
 
 #define UART_BUF_LEN         30
-#define RF_BUF_LEN           128
+#define RF_BUF_LEN           125+LENGTH_CRC // maximum length is 127 bytes
 
 #define TASK_PRIO_SERIAL     TASKPRIO_MAX
 #define TASK_PRIO_WIRELESS   TASKPRIO_SIXTOP_TIMEOUT
