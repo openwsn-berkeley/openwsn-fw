@@ -4,7 +4,7 @@
 \author Alaeddine Weslati <alaeddine.weslati@inria.fr>, January 2014.
 \author Tengfei Chang <tengfei.chang@inria.fr>,         september 2016.
 */
-#include "stm32f10x_conf.h"
+#include "stm32f10x_lib.h"
 #include "board.h"
 // bsp modules
 #include "leds.h"
