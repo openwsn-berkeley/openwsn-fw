@@ -1,4 +1,4 @@
-#include "stm32f10x_conf.h"
+#include "stm32f10x_lib.h"
 
 unsigned char systik_i;
 unsigned char rtc_sig=1,rtc_play;

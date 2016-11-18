@@ -12,7 +12,7 @@ to return the board's description.
 #ifndef __BOARD_INFO_H
 #define __BOARD_INFO_H
 
-#include "stm32f10x_conf.h"
+#include "stm32f10x_lib.h"
 #include "stdint.h"
 #include "string.h"
 

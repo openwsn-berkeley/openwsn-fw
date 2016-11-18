@@ -6,7 +6,7 @@
 \author Elodie Morin <elodie.morin@imag.fr>, July 2015.
 */
 
-#include "stm32f10x_conf.h"
+#include "stm32f10x_lib.h"
 #include "stdio.h"
 #include "stdint.h"
 #include "string.h"
