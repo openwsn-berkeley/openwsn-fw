@@ -602,7 +602,7 @@ void USART1_IRQHandler(void)
     uart_rx_isr();
   }
 
-  if(USART_GetFlagStatus(USART1, USART_FLAG_TXE) != RESET)
+  if(USART_GetFlagStatus(USART1, USART_FLAG_TC) != RESET)
   { 
     uart_tx_isr(); 
   }
