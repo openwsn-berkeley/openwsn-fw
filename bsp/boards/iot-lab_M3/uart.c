@@ -96,7 +96,7 @@ void uart_clearTxInterrupts() {
 }
 
 void uart_writeByte(uint8_t byteToWrite) {
-    USART_SendData(USART1, byteToWrite);
+    USART_SendData(USART1,(uint16_t)byteToWrite);
 }
 
 uint8_t uart_readByte() {
