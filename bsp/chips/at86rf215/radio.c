@@ -55,11 +55,9 @@ void radio_init(void) {
     if ((at86rf215_spiReadReg(RG_RF_PN) != 0x34) | (at86rf215_spiReadReg(RG_RF_VN) != 0x03)) {
       while(1); //UNKNOWN DEVICE, FINISH
     }
-    
     // Write registers to radio
-    for(uint16_t i = 0; i < (sizeof(basic_settings_oqpsk_rate1)/sizeof(registerSetting_t)); i++) {
-        at86rf215_spiWriteReg( basic_settings_oqpsk_rate1[i].addr, basic_settings_oqpsk_rate1[i].data);
-        //at86rf215_spiWriteReg( basic_settings_ofdm_1_mcs0[i].addr, basic_settings_ofdm_1_mcs0[i].data);
+    for(uint16_t i = 0; i < (sizeof(basic_settings_fsk_option2)/sizeof(registerSetting_t)); i++) {
+        at86rf215_spiWriteReg( basic_settings_fsk_option2[i].addr, basic_settings_fsk_option2[i].data);
     };
     radio_read_isr(&radio_vars.rf09_isr);
 }
@@ -73,8 +71,8 @@ void radio_change_modulation(){
     static int mod_list = 1;
     at86rf215_spiStrobe(CMD_RF_TRXOFF);
     while(at86rf215_status() != RF_STATE_TRXOFF);
-    for(uint16_t i = 0; i < /*(sizeof(*modulation_list[mod_list])/sizeof(registerSetting_t))*/15; i++) {
-        at86rf215_spiWriteReg( modulation_list[mod_list%21][i].addr, modulation_list[mod_list%21][i].data);
+    for(uint16_t i = 0; i < (sizeof(basic_settings_fsk_option1)/sizeof(registerSetting_t)); i++) {
+        at86rf215_spiWriteReg( modulation_list[mod_list%5][i].addr, modulation_list[mod_list%5][i].data);
         //at86rf215_spiWriteReg( basic_settings_fsk_option1[i].addr, basic_settings_fsk_option1[i].data);
         };
     radio_read_isr(&radio_vars.rf09_isr);
@@ -173,13 +171,14 @@ void radio_loadPacket(uint8_t* packet, uint16_t len) {
 }
 
 void radio_txEnable(void) {
+ 
     // change state
     radio_vars.state = RADIOSTATE_ENABLING_TX;
     at86rf215_spiStrobe(CMD_RF_TXPREP);
     // wiggle debug pin
     debugpins_radio_set();
     leds_radio_on();
-        
+    at86rf215_spiReadReg(0);
     while(radio_vars.state != RADIOSTATE_TX_ENABLED); 
     // change state
     
@@ -187,8 +186,6 @@ void radio_txEnable(void) {
 
 void radio_txNow(void) {
     // change state
-    at86rf215_spiReadReg(RG_RF09_CCF0L);
-    at86rf215_spiReadReg(RG_RF09_CCF0H);
     radio_vars.state = RADIOSTATE_TRANSMITTING;
 
     at86rf215_spiStrobe(CMD_RF_TX);

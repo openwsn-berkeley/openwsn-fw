@@ -73,8 +73,8 @@ len=17  num=84  rssi=-81  lqi=108 crc=1
 
 #define LENGTH_PACKET   2043+LENGTH_CRC     // maximum length is 2047 bytes
 #define CHANNEL         0                   // 902.800 MHz
-#define CHANNEL_SPACING 600                 // 800 kHz
-#define FREQUENCY_0     868300              // 902.8 MHz
+#define CHANNEL_SPACING 400                 // 800 kHz
+#define FREQUENCY_0     863225              // 902.8 MHz
 #define LENGTH_SERIAL_FRAME  10              ///< length of the serial frame
 
 //=========================== variables =======================================
@@ -154,7 +154,7 @@ int mote_main(void) {
       while (app_vars.rxpk_done==0) {
          board_sleep();
       }
-      
+      radio_rxEnable();
       // if I get here, I just received a packet
       
       //===== send notification over serial port
@@ -187,10 +187,10 @@ int mote_main(void) {
       
       // led
       leds_error_off();
-      if ((app_vars.rxpk_num%100) == 0){
-        //radio_change_modulation();
-      }
-      radio_rxEnable();
+      //if ((app_vars.rxpk_num%100) == 0){
+      //  radio_change_modulation();
+     // }
+      
      }
 }
 

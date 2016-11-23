@@ -1,5 +1,5 @@
 /**
-\brief msp430f5438a-specific definition of the "radiotimer" bsp module.
+\brief cc1200dk-specific definition of the "radiotimer" bsp module.
 
 \author Jonathan Munoz <jonathan.munoz@inria.fr>, August 2016.
 */
@@ -47,11 +47,6 @@ void radiotimer_setEndFrameCb(radiotimer_capture_cbt cb) {
 }
 
 void radiotimer_start(PORT_RADIOTIMER_WIDTH period) {
-   // radio's SFD pin connected to P4.1
-   //P4DIR   &= ~0x02; // input
-   //P4SEL   |=  0x02; // in CCI1a/B mode
-   
-   // CCR0 contains period of counter
    // do not interrupt when counter reaches TBCCR0, but when it resets
    TBCCR0   =  period-1;
    
@@ -60,7 +55,7 @@ void radiotimer_start(PORT_RADIOTIMER_WIDTH period) {
    TBCCR1   =  0;
    
    // CCR2 in compare mode (disabled for now)
-   TBCCTL2  =  0;
+   //TBCCTL2  =  CCIE;
    TBCCR2   =  0;
    
    // start counting

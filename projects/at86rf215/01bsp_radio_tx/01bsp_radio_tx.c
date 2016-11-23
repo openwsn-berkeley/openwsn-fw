@@ -22,10 +22,10 @@ remainder of the packet contains an incrementing bytes.
 //=========================== defines =========================================
 
 #define LENGTH_PACKET   2043+LENGTH_CRC     // maximum length is 2047 bytes
-#define CHANNEL         0                   // 902.8 MHz
-#define CHANNEL_SPACING 600                 // 800 kHz
-#define FREQUENCY_0     868300             // 902.8 MHz
-#define TIMER_PERIOD    (32768>>5)          // (32768>>1) = 500ms @ 32kHz
+#define CHANNEL         0                   // 
+#define CHANNEL_SPACING 400                 // 400 kHz
+#define FREQUENCY_0     863225            // 864.225 MHz
+#define TIMER_PERIOD    (32768>>2)          // (32768>>2) = 250ms @ 32kHz
 //#define TIMER_PERIOD    (65535)          // 2s @ 32kHz
 //=========================== variables =======================================
 
@@ -60,7 +60,11 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp);
 \brief The program starts executing here.
 */
 int mote_main(void) {
-   uint16_t  i,x =0, y =0;
+   uint16_t  i,x,y;
+   x = 0;
+   y = 0;
+   //PORT_RADIOTIMER_WIDTH delay_tx;
+   //delay_tx = 32768>>6;
    
    
    // clear local variables
@@ -68,7 +72,8 @@ int mote_main(void) {
    
    // initialize board
    board_init();
-   
+   P3DIR |= BIT4 | BIT5 | BIT6 | BIT7 ;   
+   P3OUT |= BIT4 | BIT5 | BIT6 | BIT7 ;
    // add radio callback functions
    radio_setOverflowCb(cb_radioTimerOverflows);
    radio_setCompareCb(cb_radioTimerCompare);
@@ -79,21 +84,25 @@ int mote_main(void) {
    radio_rfOn();
    radio_setFrequency(CHANNEL_SPACING, FREQUENCY_0, CHANNEL) ; 
    radio_rfOff();
-   
+
    // start periodic overflow
     radiotimer_start(TIMER_PERIOD);
+   
     radio_change_size(&app_vars.txpk_len);
+           
+   //prepare packet
+   for (i=2;i<app_vars.txpk_len;i++) {
+        app_vars.txpk_buf[i] = i-1;
+    }
+
     while(1){
+        P3OUT     ^=  BIT4;
+        P3OUT     ^=  BIT6;
       //while(y<21){
       while(y<4){
+
         while(x<100) {
-      
-            // wait for timer to elapse
-            app_vars.txpk_txNow = 0;
-            while (app_vars.txpk_txNow==0) {
-                board_sleep();
-            }
-      
+                 
             // led
             leds_error_toggle();
       
@@ -102,22 +111,44 @@ int mote_main(void) {
             //app_vars.txpk_len           = sizeof(app_vars.txpk_buf);
             app_vars.txpk_buf[0]        = (uint8_t)((app_vars.txpk_num)>>8);
             app_vars.txpk_buf[1]        = (uint8_t)((app_vars.txpk_num)&0xFF);
-            for (i=2;i<app_vars.txpk_len;i++) {
-                app_vars.txpk_buf[i] = i-1;
-            }
+            //for (i=2;i<app_vars.txpk_len;i++) {
+            //    app_vars.txpk_buf[i] = i-1;
+            //}
       
             // send packet
             radio_loadPacket(app_vars.txpk_buf,app_vars.txpk_len);
             radio_txEnable();
+            P3OUT     ^=  BIT4;
             radio_txNow();
+            P3OUT     ^=  BIT4;
+            P3OUT     ^=  BIT6;
             x++;
+            radio_loadPacket(app_vars.txpk_buf,app_vars.txpk_len);
+            // wait for timer to elapse
+            //app_vars.txpk_txNow = 0;
+            //radiotimer_schedule( delay_tx + radiotimer_getPeriod());
+            //while (app_vars.txpk_txNow==0) {
+                //board_sleep();
+            //}
+            //radiotimer_cancel();
         }
         x = 0;
         y++;
+        radio_change_size(&app_vars.txpk_len);
         //radio_change_modulation();
+        app_vars.txpk_txNow = 0;
+        while (app_vars.txpk_txNow==0) {
+            board_sleep();
+        }
+        app_vars.txpk_txNow = 0;
+        while (app_vars.txpk_txNow==0) {
+            board_sleep();
+        }
       }
       y = 0;
-      radio_change_size(&app_vars.txpk_len);
+//      radio_change_modulation();
+      //radio_change_size(&app_vars.txpk_len);
+      //P3OUT     ^=  BIT4;
    }
 }
 
@@ -127,6 +158,7 @@ void cb_radioTimerCompare(void) {
    
    // update debug vals
    app_dbg.num_radioTimerCompare++;
+   //app_vars.txpk_txNow = 1;
 }
 
 void cb_radioTimerOverflows(void) {
