@@ -156,7 +156,7 @@ void radio_rfOn() {
    MC13192_ATTN = 1;
 }
 
-void radio_loadPacket(uint8_t* packet, uint8_t len) {
+void radio_loadPacket(uint8_t* packet, uint16_t len) {
    // load packet in TXFIFO
    radio_spiWriteTxFifo(packet,len);
 }
