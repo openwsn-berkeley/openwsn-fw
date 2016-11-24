@@ -266,15 +266,11 @@ void EXTI3_IRQHandler(void)
 void EXTI4_IRQHandler(void)
 {
   if(EXTI_GetITStatus(EXTI_Line4) != RESET){
-    debugpins_isr_set();
-
     //leds_error_toggle();
     EXTI_ClearITPendingBit(EXTI_Line4);
 
     //RCC_Wakeup();
     radio_isr();
-
-    debugpins_isr_clr();
   }
 }
 
@@ -478,13 +474,11 @@ void TIM1_CC_IRQHandler(void)
 *******************************************************************************/
 void TIM2_IRQHandler(void)
 {
-  debugpins_isr_set();
   if(TIM_GetFlagStatus(TIM2, TIM_FLAG_CC1) != RESET)
   {
     TIM_ClearFlag(TIM2, TIM_FLAG_CC1);
     bsp_timer_isr();
   }
-  debugpins_isr_clr();
 }
 
 /*******************************************************************************
@@ -566,12 +560,10 @@ void I2C2_ER_IRQHandler(void)
 *******************************************************************************/
 void SPI1_IRQHandler(void)
 {
-  debugpins_isr_set();
   if(SPI_I2S_GetFlagStatus(SPI1,SPI_I2S_FLAG_RXNE) != RESET)
   {
     spi_isr();
   }
-  debugpins_isr_clr();
 }
 
 /*******************************************************************************
@@ -594,7 +586,6 @@ void SPI2_IRQHandler(void)
 *******************************************************************************/
 void USART1_IRQHandler(void)
 {  
-  debugpins_isr_set();
   if(USART_GetFlagStatus(USART1, USART_FLAG_RXNE) != RESET)
   {
     USART_ClearFlag(USART1, USART_FLAG_RXNE);
@@ -606,7 +597,6 @@ void USART1_IRQHandler(void)
   { 
     uart_tx_isr(); 
   }
-  debugpins_isr_clr();
 }
 
 /*******************************************************************************
@@ -651,13 +641,11 @@ void EXTI15_10_IRQHandler(void)
 *******************************************************************************/
 void RTCAlarm_IRQHandler(void)
 {
-  debugpins_isr_set();
   if(EXTI_GetITStatus(EXTI_Line17) != RESET)
   {
 	EXTI_ClearITPendingBit(EXTI_Line17);
         radiotimer_isr();
   }
-  debugpins_isr_clr();
 }
 
 /*******************************************************************************
