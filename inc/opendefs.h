@@ -305,6 +305,7 @@ typedef struct {
    uint8_t       l2_retriesLeft;                 // number Tx retries left before packet dropped (dropped when hits 0)
    uint8_t       l2_numTxAttempts;               // number Tx attempts
    asn_t         l2_asn;                         // at what ASN the packet was Tx'ed or Rx'ed
+   uint16_t      l2_slotoffset;                  // at waht slotoffset the packet was Tx'ed or Rx'ed
    uint8_t*      l2_payload;                     // pointer to the start of the payload of l2 (used for MAC to fill in ASN in ADV)
    uint8_t*      l2_sixtop_cellObjects;          // pointer to the start of cell Objects in 6P
    uint8_t       l2_sixtop_numOfCells;           // number of cells were going to be scheduled or removed.

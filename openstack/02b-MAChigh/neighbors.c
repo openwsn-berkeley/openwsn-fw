@@ -299,39 +299,45 @@ The fields which are updated are:
 void neighbors_indicateTx(open_addr_t* l2_dest,
                           uint8_t      numTxAttempts,
                           bool         was_finally_acked,
-                          asn_t*       asnTs) {
-   uint8_t i;
-   // don't run through this function if packet was sent to broadcast address
-   if (packetfunctions_isBroadcastMulticast(l2_dest)==TRUE) {
-      return;
-   }
+                          asn_t*       asnTs,
+                          uint16_t     slotOffset) {
+    uint8_t i;
+    // don't run through this function if packet was sent to broadcast address
+    if (packetfunctions_isBroadcastMulticast(l2_dest)==TRUE) {
+        return;
+    }
    
-   // loop through neighbor table
-   for (i=0;i<MAXNUMNEIGHBORS;i++) {
-      if (isThisRowMatching(l2_dest,i)) {
-         // handle roll-over case
-        
-          if (neighbors_vars.neighbors[i].numTx>(0xff-numTxAttempts)) {
-              neighbors_vars.neighbors[i].numWraps++; //counting the number of times that tx wraps.
-              neighbors_vars.neighbors[i].numTx/=2;
-              neighbors_vars.neighbors[i].numTxACK/=2;
-           }
-         // update statistics
-        neighbors_vars.neighbors[i].numTx += numTxAttempts; 
-        
-        if (was_finally_acked==TRUE) {
-            neighbors_vars.neighbors[i].numTxACK++;
-            memcpy(&neighbors_vars.neighbors[i].asn,asnTs,sizeof(asn_t));
+    // loop through neighbor table
+    for (i=0;i<MAXNUMNEIGHBORS;i++) {
+        if (isThisRowMatching(l2_dest,i)) {
+            // handle roll-over case
+            if (slotOffset<SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS){
+                if (was_finally_acked==TRUE){
+                    memcpy(&neighbors_vars.neighbors[i].asn,asnTs,sizeof(asn_t));
+                }
+                return;
+            }
+            if (neighbors_vars.neighbors[i].numTx>(0xff-numTxAttempts)) {
+                neighbors_vars.neighbors[i].numWraps++; //counting the number of times that tx wraps.
+                neighbors_vars.neighbors[i].numTx/=2;
+                neighbors_vars.neighbors[i].numTxACK/=2;
+            }
+            // update statistics
+            neighbors_vars.neighbors[i].numTx += numTxAttempts; 
+            
+            if (was_finally_acked==TRUE) {
+                neighbors_vars.neighbors[i].numTxACK++;
+                memcpy(&neighbors_vars.neighbors[i].asn,asnTs,sizeof(asn_t));
+            }
+            // #TODO : investigate this TX wrap thing! @incorrect in the meantime
+            // DB (Nov 2015) I believe this is correct. The ratio numTx/numTxAck is still a correct approximation
+            // of ETX after scaling down by a factor 2. Obviously, each one of numTx and numTxAck is no longer an
+            // accurate count of the related events, so don't rely of them to keep track of frames sent and ack received,
+            // and don't use numTx as a frame sequence number!
+            // The scaling means that older events have less weight when the scaling occurs. It is a way of progressively
+            // forgetting about the ancient past and giving more importance to recent observations.
+            break;
         }
-        // #TODO : investigate this TX wrap thing! @incorrect in the meantime
-        // DB (Nov 2015) I believe this is correct. The ratio numTx/numTxAck is still a correct approximation
-        // of ETX after scaling down by a factor 2. Obviously, each one of numTx and numTxAck is no longer an
-        // accurate count of the related events, so don't rely of them to keep track of frames sent and ack received,
-        // and don't use numTx as a frame sequence number!
-        // The scaling means that older events have less weight when the scaling occurs. It is a way of progressively
-        // forgetting about the ancient past and giving more importance to recent observations.
-        break;
-      }
    }
 }
 

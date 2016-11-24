@@ -442,14 +442,16 @@ void task_sixtopNotifSendDone() {
          &(msg->l2_nextORpreviousHop),
          msg->l2_numTxAttempts,
          TRUE,
-         &msg->l2_asn
+         &msg->l2_asn,
+         msg->l2_slotoffset
       );
    } else {
       neighbors_indicateTx(
          &(msg->l2_nextORpreviousHop),
          msg->l2_numTxAttempts,
          FALSE,
-         &msg->l2_asn
+         &msg->l2_asn,
+         msg->l2_slotoffset
       );
    }
    

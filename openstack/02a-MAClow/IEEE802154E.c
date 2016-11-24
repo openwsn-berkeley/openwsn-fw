@@ -2219,6 +2219,7 @@ void notif_sendDone(OpenQueueEntry_t* packetSent, owerror_t error) {
    packetSent->l2_sendDoneError   = error;
    // record the current ASN
    memcpy(&packetSent->l2_asn,&ieee154e_vars.asn,sizeof(asn_t));
+   packetSent->l2_slotoffset      = ieee154e_vars.slotOffset;
    // associate this packet with the virtual component
    // COMPONENT_IEEE802154E_TO_RES so RES can knows it's for it
    packetSent->owner              = COMPONENT_IEEE802154E_TO_SIXTOP;
@@ -2232,6 +2233,7 @@ void notif_sendDone(OpenQueueEntry_t* packetSent, owerror_t error) {
 void notif_receive(OpenQueueEntry_t* packetReceived) {
    // record the current ASN
    memcpy(&packetReceived->l2_asn, &ieee154e_vars.asn, sizeof(asn_t));
+   packetReceived->l2_slotoffset  = ieee154e_vars.slotOffset;
    // indicate reception to the schedule, to keep statistics
    schedule_indicateRx(&packetReceived->l2_asn);
    // associate this packet with the virtual component

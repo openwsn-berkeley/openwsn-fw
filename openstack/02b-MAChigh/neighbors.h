@@ -83,7 +83,8 @@ void          neighbors_indicateTx(
    open_addr_t*         dest,
    uint8_t              numTxAttempts,
    bool                 was_finally_acked,
-   asn_t*               asnTimestamp
+   asn_t*               asnTimestamp,
+   uint16_t             slotOffset
 );
 
 // get addresses
