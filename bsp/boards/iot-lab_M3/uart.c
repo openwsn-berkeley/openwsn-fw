@@ -6,7 +6,7 @@
 \author Elodie Morin <elodie.morin@imag.fr>, July 2015.
 */
 
-#include "stm32f10x_lib.h"
+#include "stm32f10x_conf.h"
 #include "stdio.h"
 #include "stdint.h"
 #include "string.h"
@@ -96,7 +96,7 @@ void uart_clearTxInterrupts() {
 }
 
 void uart_writeByte(uint8_t byteToWrite) {
-    USART_SendData(USART1, byteToWrite);
+    USART_SendData(USART1,(uint16_t)byteToWrite);
 }
 
 uint8_t uart_readByte() {

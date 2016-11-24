@@ -5,178 +5,7 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, November 2014.
 */
 
-#include "board.h"
-#include "scheduler.h"
-#include "opentimers.h"
-#include "openhdlc.h"
-#include "leds.h"
-#include "uart.h"
-#include "radio.h"
-#include "eui64.h"
-
-//=========================== defines ==========================================
-
-#define UART_BUF_LEN         30
-#define RF_BUF_LEN           128
-
-#define TASK_PRIO_SERIAL     TASKPRIO_MAX
-#define TASK_PRIO_WIRELESS   TASKPRIO_SIXTOP_TIMEOUT
-
-#define TYPE_REQ_ST          1
-#define TYPE_RESP_ST         2
-#define TYPE_REQ_IDLE        3
-#define TYPE_REQ_TX          4
-#define TYPE_IND_TXDONE      5
-#define TYPE_REQ_RX          6 
-#define TYPE_IND_RX          7
-
-#define ST_IDLE              1
-#define ST_TX                2
-#define ST_TXDONE            3
-#define ST_RX                4
-
-//=========================== frame formats ===================================
-
-BEGIN_PACK
-typedef struct {
-   uint8_t         type;
-} REQ_ST_ht;
-END_PACK
-
-BEGIN_PACK
-typedef struct {
-   uint8_t         type;
-   uint8_t         status;
-   uint16_t        numnotifications;
-   uint8_t         mac[8];
-} RESP_ST_ht;
-END_PACK
-
-BEGIN_PACK
-typedef struct {
-   uint8_t         type;
-} REQ_IDLE_ht;
-END_PACK
-
-BEGIN_PACK
-typedef struct {
-   uint8_t         type;
-   uint8_t         frequency;
-    int8_t         txpower;
-   uint8_t         transctr;
-   uint16_t        txnumpk;
-   uint16_t        txifdur;
-   uint8_t         txlength;
-   uint8_t         txfillbyte;
-} REQ_TX_ht;
-END_PACK
-
-BEGIN_PACK
-typedef struct {
-   uint8_t         type;
-} IND_TXDONE_ht;
-END_PACK
-
-BEGIN_PACK
-typedef struct {
-   uint8_t         type;
-   uint8_t         frequency;
-   uint8_t         srcmac[8];
-   uint8_t         transctr;
-   uint8_t         txlength;
-   uint8_t         txfillbyte;
-} REQ_RX_ht;
-END_PACK
-
-BEGIN_PACK
-typedef struct {
-   uint8_t         type;
-   uint8_t         length;
-   int8_t          rssi;
-   uint8_t         flags;
-   uint16_t        pkctr;
-} IND_RX_ht;
-END_PACK
-
-//=========================== variables =======================================
-
-typedef struct {
-   opentimer_id_t  sendTimerId;             ///< Each time expires, a packet is sent.
-   
-   //=== state machine
-   uint8_t         status;
-   uint16_t        numnotifications;
-   
-   //=== UART
-   // tx
-   uint8_t         uartbuftx[UART_BUF_LEN];
-   uint8_t         uartbufrdidx;
-   uint8_t         uartbuftxfill;
-   uint8_t         uarttxescape;
-   uint16_t        uarttxcrc;
-   uint8_t         uarttxcrcAdded;
-   uint8_t         uarttxclosingSent;
-   // rx
-   uint8_t         uartbufrx[UART_BUF_LEN];
-   uint8_t         uartbufrxfill;
-   uint8_t         uartlastRxByte;
-   uint8_t         uartrxescaping;
-   uint16_t        uartrxcrc;
-   uint8_t         uartrxbusy;
-   
-   //=== stats
-   uint16_t        uartNumRxCrcOk;
-   uint16_t        uartNumRxCrcWrong;
-   uint16_t        uartNumTx;
-   uint16_t        serialNumRxOk;
-   uint16_t        serialNumRxWrongLength;
-   uint16_t        serialNumRxUnknownRequest;
-   
-   //=== RF
-   // tx
-   uint8_t         rfbuftx[RF_BUF_LEN];
-   uint16_t        txpk_numpk;
-   uint8_t         txpk_len;
-   uint8_t         txpk_totalnumpk;
-   uint8_t         mac[8];
-   // rx
-   uint8_t         rxpk_buf[RF_BUF_LEN];
-   uint8_t         rxpk_len;
-   uint8_t         rxpk_num;
-    int8_t         rxpk_rssi;
-   uint8_t         rxpk_lqi;
-      bool         rxpk_crc;
-   uint8_t         rxpk_txfillbyte;
-   uint8_t         rxpk_srcmac[8];
-   uint8_t         rxpk_transctr;
-   
-} mercator_vars_t;
-
-mercator_vars_t mercator_vars;
-
-//=========================== prototypes ======================================
-
-void serial_enable(void);
-void serial_disable(void);
-void serial_flushtx(void);
-
-void serial_rx_all(void);
-void serial_rx_REQ_ST(void);
-void serial_tx_RESP_ST(void);
-void serial_rx_REQ_IDLE(void);
-void serial_rx_REQ_TX(void);
-void serial_rx_REQ_RX(void);
-
-void isr_openserial_tx_mod(void);
-void isr_openserial_rx_mod(void);
-
-uint16_t htons(uint16_t val);
-
-   // initial radio
-void cb_startFrame(uint16_t timestamp);
-void cb_endFrame(uint16_t timestamp);
-void cb_sendPacket(opentimer_id_t id);
-void cb_finishTx(void);
+#include "03oos_mercator.h"
 
 //=========================== initialization ==================================
 
@@ -219,6 +48,7 @@ void serial_enable(void) {
    uart_clearTxInterrupts();
    uart_clearRxInterrupts();      // clear possible pending interrupts
    uart_enableInterrupts();       // Enable USCI_A1 TX & RX interrupt
+   mercator_vars.uartlastRxByte = 0x00;
 }
 
 void serial_disable(void) {
@@ -342,7 +172,8 @@ void serial_rx_REQ_TX(void) {
    memcpy(&mercator_vars.rfbuftx[8], &req->transctr, 1);
    pkctr = htons(mercator_vars.txpk_numpk);
    memcpy(mercator_vars.rfbuftx + 9, &pkctr, 2);
-   memset(mercator_vars.rfbuftx + 11, req->txfillbyte, mercator_vars.txpk_len - 11);
+   memset(mercator_vars.rfbuftx + 11, req->txfillbyte, 
+          mercator_vars.txpk_len - 11 - LENGTH_CRC);
 
    // prepare radio
    radio_rfOn();
@@ -503,6 +334,8 @@ void isr_openserial_rx_mod(void) {
       
       // add the byte just received
       inputHdlcWriteMod(rxbyte);
+      
+      // reset buffer if frame too long
       if (mercator_vars.uartbufrxfill+1>UART_BUF_LEN){
          mercator_vars.uartbufrxfill         = 0;
          mercator_vars.uartrxbusy        = FALSE;
@@ -609,13 +442,16 @@ void cb_endFrame(uint16_t timestamp) {
       resp->length   =  mercator_vars.rxpk_len;
       resp->rssi     =  mercator_vars.rxpk_rssi;
       resp->flags    =  mercator_vars.rxpk_crc << 7 | is_expected << 6;
-      resp->pkctr    =  htons(pkctr);
+      resp->pkctr    =  pkctr;
 
       mercator_vars.uartbuftxfill = sizeof(IND_RX_ht);
 
       serial_flushtx();
 
       mercator_vars.numnotifications++;
+
+      radio_rfOn();
+      radio_rxEnable();
    }
 }
 

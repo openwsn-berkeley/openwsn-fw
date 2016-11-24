@@ -8,7 +8,7 @@ On openmoteSTM32, we use RTC for the radiotimer module.
 
 #include "stdint.h"
 
-#include "stm32f10x_lib.h"
+#include "stm32f10x_conf.h"
 #include "leds.h"
 #include "radiotimer.h"
 #include "board.h"
@@ -83,11 +83,11 @@ void radiotimer_start(PORT_RADIOTIMER_WIDTH period) {
     RTC_SetCounter(0);
     RTC_WaitForLastTask();
 
-    // Set the RTC time alarm(the length of slot)
-    RTC_SetAlarm(period);
-    RTC_WaitForLastTask();
-    
     radiotimer_vars.currentSlotPeriod = period >> 1;
+    
+    // Set the RTC time alarm(the length of slot)
+    RTC_SetAlarm(radiotimer_vars.currentSlotPeriod);
+    RTC_WaitForLastTask();
     
     //interrupt when reach alarm value
     RTC_ClearFlag(RTC_IT_ALR);
@@ -144,7 +144,9 @@ void radiotimer_setPeriod(PORT_RADIOTIMER_WIDTH period) {
 
 PORT_RADIOTIMER_WIDTH radiotimer_getPeriod() {
     RTC_WaitForSynchro();
-    uint32_t period = RTC_GetAlarm();
+    uint16_t tmp = 0;
+    tmp = RTC->ALRL;
+    uint32_t period = (((uint32_t)RTC->ALRH << 16 ) | tmp);
     period = period <<1;
     return (PORT_RADIOTIMER_WIDTH)period;
 }
