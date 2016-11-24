@@ -929,10 +929,6 @@ void schedule_housekeeping(){
                        continue;
                     }
                     sixtop_request(IANA_6TOP_CMD_CLEAR,&(schedule_vars.scheduleBuf[i].neighbor),1);
-                    schedule_removeActiveSlot(
-                        schedule_vars.scheduleBuf[i].slotOffset,
-                        &(schedule_vars.scheduleBuf[i].neighbor)
-                    );
                     break;
                 }
             }
