@@ -2088,13 +2088,25 @@
         <name>$PROJ_DIR$\..\..\..\drivers\common\openhdlc.c</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\..\..\drivers\common\openhdlc.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\drivers\common\opensensors.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\drivers\common\opensensors.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\drivers\common\openserial.c</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\..\..\drivers\common\openserial.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.h</name>
       </file>
     </group>
   </group>
@@ -2108,6 +2120,9 @@
     <name>kernel</name>
     <file>
       <name>$PROJ_DIR$\..\..\..\kernel\openos\scheduler.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\kernel\scheduler.h</name>
     </file>
   </group>
   <group>
@@ -2205,19 +2220,40 @@
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\adaptive_sync.c</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\adaptive_sync.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154_dummy_security.c</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154_dummy_security.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154_security.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154_security.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\ieee802154_security_driver.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154E.c</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154E.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\topology.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\topology.h</name>
       </file>
     </group>
     <group>
@@ -2226,19 +2262,37 @@
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\neighbors.c</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\neighbors.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\processIE.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\processIE.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\schedule.c</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\schedule.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sf0.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sf0.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sfx.c</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sfx.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sixtop.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sixtop.h</name>
       </file>
     </group>
     <group>
@@ -2247,7 +2301,13 @@
         <name>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\iphc.c</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\iphc.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\openbridge.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\openbridge.h</name>
       </file>
     </group>
     <group>
@@ -2256,13 +2316,25 @@
         <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\forwarding.c</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\forwarding.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\icmpv6.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\icmpv6.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\icmpv6echo.c</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\icmpv6echo.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\icmpv6rpl.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\icmpv6rpl.h</name>
       </file>
     </group>
     <group>
@@ -2271,10 +2343,19 @@
         <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\opencoap.c</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\opencoap.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\opentcp.c</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\opentcp.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\openudp.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\openudp.h</name>
       </file>
     </group>
     <group>
@@ -2283,13 +2364,25 @@
         <name>$PROJ_DIR$\..\..\..\openstack\cross-layers\idmanager.c</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\cross-layers\idmanager.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\openstack\cross-layers\openqueue.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\cross-layers\openqueue.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\cross-layers\openrandom.c</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\cross-layers\openrandom.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\openstack\cross-layers\packetfunctions.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\cross-layers\packetfunctions.h</name>
       </file>
     </group>
     <file>

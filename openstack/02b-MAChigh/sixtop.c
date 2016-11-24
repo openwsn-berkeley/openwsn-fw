@@ -5,7 +5,7 @@
 #include "neighbors.h"
 #include "IEEE802154E.h"
 #include "iphc.h"
-#include "sf0.h"
+#include "sfx.h"
 #include "packetfunctions.h"
 #include "openrandom.h"
 #include "scheduler.h"
@@ -570,7 +570,7 @@ void task_sixtopNotifReceive() {
             // free up the RAM
             openqueue_freePacketBuffer(msg);
         }
-            break;
+        break;
     case IEEE154_TYPE_ACK:
     default:
         // free the packet's RAM memory
@@ -1218,8 +1218,8 @@ void sixtop_notifyReceiveCommand(
                 case IANA_6TOP_CMD_CLEAR:
                     container  = *((uint8_t*)(pkt->payload)+ptr);
                     frameID = container;
-                    schedule_removeAllCells(frameID,
-                                            &(pkt->l2_nextORpreviousHop));
+                    // the cells will be removed when the repsonse sendone is successfully
+                    // don't clear cells here
                     code = IANA_6TOP_RC_SUCCESS;
                     break;
                 default:
@@ -1290,7 +1290,7 @@ void sixtop_notifyReceiveCommand(
                 default:
                     code = IANA_6TOP_RC_ERR;
                     // record the wrong status
-                  break;
+                    break;
                 }
             } else {
                 if (commandIdORcode==IANA_6TOP_RC_ERR_BUSY){
@@ -1323,7 +1323,7 @@ void sixtop_notifyReceiveCommand(
             if (sixtop_vars.handler==SIX_HANDLER_RELOCATION){
                 if(commandIdORcode==IANA_6TOP_RC_SUCCESS){
                     memset(&cellList[0],0,sizeof(cellList));
-                    schedule_getToBeRemovedCells(&cellList[0].tsNum,&cellList[0].choffset,&cellList[0].linkoptions,neighbor);
+                    schedule_getToBeRemovedCells(&(cellList[0].tsNum),&(cellList[0].choffset),&(cellList[0].linkoptions),neighbor);
                     if (cellList[0].linkoptions==CELLTYPE_TX){
                         sixtop_addORremoveCellByInfo(IANA_6TOP_CMD_DELETE,neighbor,&cellList[0]);
                     } else {
