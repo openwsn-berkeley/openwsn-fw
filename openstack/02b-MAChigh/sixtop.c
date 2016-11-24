@@ -20,7 +20,6 @@
 
 //=========================== define ==========================================
 
-#define MAX_6P_REQUEST            1
 // in seconds: sixtop maintaince is called every 30 seconds
 #define MAINTENANCE_PERIOD        5
 // in miliseconds: sending EB every 10 seconds
@@ -1114,11 +1113,6 @@ void sixtop_notifyReceiveCommand(
     
     memset(cellList,0,sizeof(cellList));
     
-    if (openqueue_sixtopGetNumberOfPacketCreatedBy(COMPONENT_SIXTOP_RES)>MAX_6P_REQUEST){
-        // only deal with max number of 6p request at same time
-        return;
-    }
-    
     // get a free packet buffer
     response_pkt = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP_RES);
     if (response_pkt==NULL) {
@@ -1164,7 +1158,7 @@ void sixtop_notifyReceiveCommand(
                 sixtop_vars.six2six_state = SIX_STATE_REQUEST_RECEIVED;
 
                 switch(commandIdORcode){
-                case IANA_6TOP_CMD_ADD: 
+                case IANA_6TOP_CMD_ADD:
                 case IANA_6TOP_CMD_DELETE:
                     numOfCells = *((uint8_t*)(pkt->payload)+ptr);
                     container  = *((uint8_t*)(pkt->payload)+ptr+1);
@@ -1229,6 +1223,16 @@ void sixtop_notifyReceiveCommand(
                     code = IANA_6TOP_RC_ERR;
                 }
             }
+            
+            if (code == IANA_6TOP_RC_ERR_BUSY){
+                // I have one 6top transcation on going
+                // currently I only maintain one sixtop transcation
+                // drop the request so the sender will wait for timeout long time to try next time.
+                // this will light the traffic on shared cell.
+                openqueue_freePacketBuffer(response_pkt);
+                return;
+            }
+            
             response_pkt->l2_sixtop_requestCommand = commandIdORcode;
             response_pkt->l2_sixtop_frameID        = frameID;
             
@@ -1316,7 +1320,7 @@ void sixtop_notifyReceiveCommand(
                     }
                 }
             }
-           openserial_printInfo(COMPONENT_SIXTOP,ERR_SIXTOP_RETURNCODE,
+            openserial_printInfo(COMPONENT_SIXTOP,ERR_SIXTOP_RETURNCODE,
                            (errorparameter_t)commandIdORcode,
                            (errorparameter_t)sixtop_vars.six2six_state);
             sixtop_vars.six2six_state = SIX_STATE_IDLE;
