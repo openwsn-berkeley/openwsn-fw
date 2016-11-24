@@ -100,10 +100,7 @@ void uart_writeByte(uint8_t byteToWrite) {
 }
 
 uint8_t uart_readByte() {
-    uint16_t temp;
-
-    temp = USART_ReceiveData(USART1);
-    return (uint8_t)temp;
+    return (uint8_t)USART_ReceiveData(USART1);
 }
 
 //=========================== interrupt handlers ==============================
