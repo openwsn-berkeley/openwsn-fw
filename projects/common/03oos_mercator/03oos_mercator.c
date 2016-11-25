@@ -51,8 +51,8 @@ void serial_enable(void) {
    mercator_vars.uartlastRxByte = 0x00;
 }
 
-void serial_disable(void) {
-   uart_disableInterrupts();      // disable USCI_A1 TX & RX interrupt
+void serial_rx_disable(void) {
+   uart_clearRxPolling();         // disable RX Polling
 }
 
 void serial_flushtx(void) {
@@ -365,7 +365,7 @@ void isr_openserial_rx_mod(void) {
             mercator_vars.uartbufrxfill    -= 2;
             
             // stop receiving (until frame handled)
-            serial_disable();
+            serial_rx_disable();
             
             // schedule task to handle frame
             scheduler_push_task(serial_rx_all,TASK_PRIO_SERIAL);
