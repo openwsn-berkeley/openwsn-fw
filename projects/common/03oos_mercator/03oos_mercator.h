@@ -22,6 +22,7 @@
 #define TYPE_IND_TXDONE      5
 #define TYPE_REQ_RX          6 
 #define TYPE_IND_RX          7
+#define TYPE_IND_UP          8
 
 #define ST_IDLE              1
 #define ST_TX                2
@@ -89,6 +90,12 @@ typedef struct {
    uint8_t         flags;
    uint16_t        pkctr;
 } IND_RX_ht;
+END_PACK
+
+BEGIN_PACK
+typedef struct {
+   uint8_t         type;
+} IND_UP_ht;
 END_PACK
 
 //=========================== variables =======================================
@@ -159,6 +166,7 @@ void serial_tx_RESP_ST(void);
 void serial_rx_REQ_IDLE(void);
 void serial_rx_REQ_TX(void);
 void serial_rx_REQ_RX(void);
+void serial_tx_IND_UP(void);
 
 void isr_openserial_tx_mod(void);
 void isr_openserial_rx_mod(void);

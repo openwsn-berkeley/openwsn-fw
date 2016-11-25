@@ -35,6 +35,7 @@ int mote_main(void) {
       isr_openserial_rx_mod
    );
    serial_enable();
+   scheduler_push_task(serial_tx_IND_UP,TASK_PRIO_SERIAL);
    
    scheduler_start();
    return 0; // this line should never be reached
@@ -219,6 +220,18 @@ void serial_rx_REQ_RX(void) {
    mercator_vars.status = ST_RX;
 
    return;
+}
+
+void serial_tx_IND_UP(void) {
+   IND_UP_ht* resp;
+   
+   resp = (IND_UP_ht*)mercator_vars.uartbuftx;
+   
+   resp->type                     = TYPE_IND_UP;
+
+   mercator_vars.uartbuftxfill    = sizeof(IND_UP_ht);
+   
+   serial_flushtx();
 }
 
 //===== helpers
