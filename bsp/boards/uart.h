@@ -35,8 +35,8 @@ void    uart_init(void);
 void    uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb);
 void    uart_enableInterrupts(void);
 void    uart_disableInterrupts(void);
-void    uart_clearRxInterrupts(void);
-void    uart_clearTxInterrupts(void);
+void    uart_clearRxPolling(void);
+void    uart_clearTxPolling(void);
 void    uart_writeByte(uint8_t byteToWrite);
 #ifdef FASTSIM
 void    uart_writeCircularBuffer_FASTSIM(uint8_t* buffer, uint8_t* outputBufIdxR, uint8_t* outputBufIdxW);
