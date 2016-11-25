@@ -76,13 +76,11 @@ void serial_flushtx(void) {
 }
 
 void serial_rx_all(void) {
-   do {
-      if (mercator_vars.uartbufrxfill<1){
-         // update stats
-         mercator_vars.serialNumRxWrongLength++;
-         break;
-      }
-      
+
+    if (mercator_vars.uartbufrxfill<1){
+       // update stats
+       mercator_vars.serialNumRxWrongLength++;
+    } else {    
       switch(mercator_vars.uartbufrx[0]) {
          case TYPE_REQ_ST:
             serial_rx_REQ_ST();
@@ -101,10 +99,8 @@ void serial_rx_all(void) {
             mercator_vars.serialNumRxUnknownRequest++;
             break;
       }
-      
-   } while(0);
-   
-   serial_enable();
+    }
+    serial_enable();
 }
 
 void serial_rx_REQ_ST(void) {
