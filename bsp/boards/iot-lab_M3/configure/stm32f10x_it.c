@@ -587,9 +587,7 @@ void SPI2_IRQHandler(void)
 void USART1_IRQHandler(void)
 {  
   if(USART_GetFlagStatus(USART1, USART_FLAG_RXNE) != RESET)
-  {
-    USART_ClearFlag(USART1, USART_FLAG_RXNE);
-    
+  {    
     uart_rx_isr();
   }
 
