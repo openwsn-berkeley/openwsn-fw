@@ -646,6 +646,8 @@ void sendDAO() {
    uint8_t              numTransitParents,numTargetParents;  // the number of parents indicated in transit option
    open_addr_t         address;
    open_addr_t*        prefix;
+   uint8_t             index;
+   open_addr_t         parentAddr;
    
    if (ieee154e_isSynch()==FALSE) {
       // I'm not sync'ed 
@@ -668,6 +670,18 @@ void sendDAO() {
    
    // dont' send a DAO if you did not acquire a DAGrank
    if (icmpv6rpl_getMyDAGrank()==DEFAULTDAGRANK) {
+       return;
+   }
+   
+   // maybe I have not parent even I have non-default dagrank if rssi must > LOWESTRSSIASPARENT when selecting parent. 
+   if (icmpv6rpl_getPreferredParentIndex(&index)==FALSE) {
+      return;
+   }
+   
+   neighbors_getNeighborEui64(&parentAddr,ADDR_64B,index);
+   
+   // only generate DAO when I have Tx cell to parent
+   if (schedule_getCellsCounts(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,CELLTYPE_TX,&parentAddr)==0){
        return;
    }
    
