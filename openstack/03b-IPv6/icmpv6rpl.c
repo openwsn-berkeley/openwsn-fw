@@ -523,6 +523,7 @@ void icmpv6rpl_timer_DIO_task() {
 */
 void sendDIO() {
    OpenQueueEntry_t*    msg;
+   uint8_t index;
    
    // stop if I'm not sync'ed
    if (ieee154e_isSynch()==FALSE) {
@@ -540,6 +541,11 @@ void sendDIO() {
    
    // do not send DIO if I have the default DAG rank
    if (icmpv6rpl_getMyDAGrank()==DEFAULTDAGRANK) {
+      return;
+   }
+   
+   // maybe I have not parent even I have non-default dagrank if rssi must > LOWESTRSSIASPARENT when selecting parent. 
+   if (icmpv6rpl_getPreferredParentIndex(&index)==FALSE) {
       return;
    }
    
