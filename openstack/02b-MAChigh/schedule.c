@@ -323,6 +323,11 @@ owerror_t schedule_addActiveSlot(
    slotContainer->lastUsedAsn.bytes2and3 = 256*asn[3]+asn[2];
    slotContainer->lastUsedAsn.byte4      = asn[4];
    
+   // fill that schedule entry with default usage vlalue
+   slotContainer->bitMapIndex            = 0;
+   slotContainer->usageBitMap            = 0x003F;// last 6 bits are pre-set
+   
+   
    // insert in circular list
    if (schedule_vars.currentScheduleEntry==NULL) {
       // this is the first active slot added
