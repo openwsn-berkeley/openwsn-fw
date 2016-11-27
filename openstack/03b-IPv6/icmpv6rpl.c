@@ -396,7 +396,12 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
          // remember that we have at least one valid candidate parent
          foundBetterParent=TRUE;
          // select best candidate so far
-         if (icmpv6rpl_vars.myDAGrank>tentativeDAGrank) {
+         if (
+             icmpv6rpl_vars.myDAGrank>tentativeDAGrank &&
+             (
+                prevHadParent == FALSE || (prevHadParent == TRUE && neighbors_getNumTx(prevParentIndex)>=5)
+             )
+         ) {
             icmpv6rpl_vars.myDAGrank    = (uint16_t)tentativeDAGrank;
             icmpv6rpl_vars.ParentIndex  = i;
             icmpv6rpl_vars.rankIncrease = rankIncrease;

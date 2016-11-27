@@ -67,6 +67,9 @@ int8_t neighbors_getRssi(uint8_t index){
    return neighbors_vars.neighbors[index].rssi;
 }
 
+uint8_t neighbors_getNumTx(uint8_t index){
+   return neighbors_vars.neighbors[index].numTx;
+}
 /**
 \brief Find neighbor to which to send KA.
 
