@@ -909,17 +909,17 @@ void schedule_housekeeping(){
 
     for(i=0;i<MAXACTIVESLOTS;i++) {
         // remove Rx cell if haven't heard anything for a while longer than 2*DESYNCTIMEOUT
-        if(schedule_vars.scheduleBuf[i].type == CELLTYPE_RX){
-            timeSinceHeard = ieee154e_asnDiff(&(schedule_vars.scheduleBuf[i].lastUsedAsn));
-            // max interval of two packet on Rx, 2*DESYNCTIMEOUT
-            if (timeSinceHeard>2*DESYNCTIMEOUT){
-                schedule_removeActiveSlot(
-                    schedule_vars.scheduleBuf[i].slotOffset,
-                    &(schedule_vars.scheduleBuf[i].neighbor)
-                );
-                break;
-            }
-        }
+//        if(schedule_vars.scheduleBuf[i].type == CELLTYPE_RX){
+//            timeSinceHeard = ieee154e_asnDiff(&(schedule_vars.scheduleBuf[i].lastUsedAsn));
+//            // max interval of two packet on Rx, 2*DESYNCTIMEOUT
+//            if (timeSinceHeard>2*DESYNCTIMEOUT){
+//                schedule_removeActiveSlot(
+//                    schedule_vars.scheduleBuf[i].slotOffset,
+//                    &(schedule_vars.scheduleBuf[i].neighbor)
+//                );
+//                break;
+//            }
+//        }
         if(schedule_vars.scheduleBuf[i].type == CELLTYPE_TX){
             // remove Tx cell if it's scheduled to non-perferred parent
             if (icmpv6rpl_getPreferredParentEui64(&neighbor)==TRUE) {
