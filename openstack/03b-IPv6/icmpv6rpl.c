@@ -550,7 +550,7 @@ void sendDIO() {
    }
    
    // maybe I have not parent even I have non-default dagrank if rssi must > LOWESTRSSIASPARENT when selecting parent. 
-   if (icmpv6rpl_getPreferredParentIndex(&index)==FALSE) {
+   if (idmanager_getIsDAGroot()==FALSE && icmpv6rpl_getPreferredParentIndex(&index)==FALSE) {
       return;
    }
    
