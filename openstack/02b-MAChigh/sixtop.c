@@ -925,11 +925,6 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
             msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD
         ){
             if (sixtop_vars.handler == SIX_HANDLER_MAINTAIN){
-                sixtop_request(
-                    IANA_6TOP_CMD_DELETE,
-                    &(msg->l2_nextORpreviousHop),
-                    1
-                );
                 sixtop_request(IANA_6TOP_CMD_ADD,&(msg->l2_nextORpreviousHop),1);
             } else {
                 sixtop_vars.handler = SIX_HANDLER_NONE;
