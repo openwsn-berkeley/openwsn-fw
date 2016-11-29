@@ -528,7 +528,8 @@ void icmpv6rpl_timer_DIO_task() {
 */
 void sendDIO() {
    OpenQueueEntry_t*    msg;
-   uint8_t index;
+   uint8_t              index;
+   open_addr_t          parentAddr;
    
    // stop if I'm not sync'ed
    if (ieee154e_isSynch()==FALSE) {
@@ -552,6 +553,15 @@ void sendDIO() {
    // maybe I have not parent even I have non-default dagrank if rssi must > LOWESTRSSIASPARENT when selecting parent. 
    if (idmanager_getIsDAGroot()==FALSE && icmpv6rpl_getPreferredParentIndex(&index)==FALSE) {
       return;
+   }
+   
+   if (idmanager_getIsDAGroot()==FALSE) {
+      neighbors_getNeighborEui64(&parentAddr,ADDR_64B,index);
+      // only generate DIO when I have Tx cell to parent.
+      // this is to avoid too many neighbors sync'ed and send packet on the shared slots, which leads to much collision.
+      if (schedule_getCellsCounts(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,CELLTYPE_TX,&parentAddr)==0){
+          return;
+      }
    }
    
    // do not send DIO if I'm already busy sending
