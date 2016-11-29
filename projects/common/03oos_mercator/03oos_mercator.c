@@ -73,7 +73,7 @@ void serial_flushtx(void) {
 
 void serial_rx_all(void) {
 
-    if (mercator_vars.uartbufrxfill<1){
+    if (mercator_vars.uartbufrxindex<1){
        // update stats
        mercator_vars.serialNumRxWrongLength++;
     } else {    
@@ -100,7 +100,7 @@ void serial_rx_all(void) {
 }
 
 void serial_rx_REQ_ST(void) {
-   if (mercator_vars.uartbufrxfill!=sizeof(REQ_ST_ht)){
+   if (mercator_vars.uartbufrxindex!=sizeof(REQ_ST_ht)){
       // update stats
       mercator_vars.serialNumRxWrongLength++;
       return;
@@ -127,7 +127,7 @@ void serial_tx_RESP_ST(void) {
 }
 
 void serial_rx_REQ_IDLE(void) {
-   if (mercator_vars.uartbufrxfill!=sizeof(REQ_IDLE_ht)){
+   if (mercator_vars.uartbufrxindex!=sizeof(REQ_IDLE_ht)){
       // update stats
       mercator_vars.serialNumRxWrongLength++;
       return;
@@ -145,7 +145,7 @@ void serial_rx_REQ_TX(void) {
    uint16_t pkctr;
    REQ_TX_ht* req;
 
-   if (mercator_vars.uartbufrxfill!=sizeof(REQ_TX_ht)){
+   if (mercator_vars.uartbufrxindex!=sizeof(REQ_TX_ht)){
       // update stats
       mercator_vars.serialNumRxWrongLength++;
       return;
@@ -186,7 +186,7 @@ void serial_rx_REQ_TX(void) {
 
 void serial_rx_REQ_RX(void) {
    REQ_RX_ht* req;
-   if (mercator_vars.uartbufrxfill!=sizeof(REQ_RX_ht)){
+   if (mercator_vars.uartbufrxindex!=sizeof(REQ_RX_ht)){
       // update stats
       mercator_vars.serialNumRxWrongLength++;
       return;
@@ -293,8 +293,8 @@ void inputHdlcWriteMod(uint8_t b) {
       }
       
       // add byte to input buffer
-      mercator_vars.uartbufrx[mercator_vars.uartbufrxfill] = b;
-      mercator_vars.uartbufrxfill++;
+      mercator_vars.uartbufrx[mercator_vars.uartbufrxindex] = b;
+      mercator_vars.uartbufrxindex++;
       
       // iterate through CRC calculator
       mercator_vars.uartrxcrc = crcIteration(mercator_vars.uartrxcrc,b);
@@ -323,7 +323,7 @@ void isr_openserial_rx_mod(void) {
       mercator_vars.uartrxbusy           = TRUE;
       
       // reset the input buffer index
-      mercator_vars.uartbufrxfill            = 0;
+      mercator_vars.uartbufrxindex            = 0;
       
       // initialize the value of the CRC
       mercator_vars.uartrxcrc                = HDLC_CRCINIT;
@@ -340,8 +340,8 @@ void isr_openserial_rx_mod(void) {
       inputHdlcWriteMod(rxbyte);
       
       // reset buffer if frame too long
-      if (mercator_vars.uartbufrxfill+1>UART_BUF_LEN){
-         mercator_vars.uartbufrxfill         = 0;
+      if (mercator_vars.uartbufrxindex+1>UART_BUF_LEN){
+         mercator_vars.uartbufrxindex         = 0;
          mercator_vars.uartrxbusy        = FALSE;
       }
    } else if (
@@ -358,7 +358,7 @@ void isr_openserial_rx_mod(void) {
             mercator_vars.uartNumRxCrcOk++;
             
             // remove the CRC from the input buffer
-            mercator_vars.uartbufrxfill    -= 2;
+            mercator_vars.uartbufrxindex    -= 2;
                         
             // schedule task to handle frame
             scheduler_push_task(serial_rx_all,TASK_PRIO_SERIAL);

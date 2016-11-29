@@ -118,7 +118,7 @@ typedef struct {
    uint8_t         uarttxclosingSent;
    // rx
    uint8_t         uartbufrx[UART_BUF_LEN];
-   uint8_t         uartbufrxfill;
+   uint8_t         uartbufrxindex;
    uint8_t         uartlastRxByte;
    uint8_t         uartrxescaping;
    uint16_t        uartrxcrc;
