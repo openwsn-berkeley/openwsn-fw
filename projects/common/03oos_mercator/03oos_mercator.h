@@ -123,7 +123,6 @@ typedef struct {
    uint8_t         uartrxescaping;
    uint16_t        uartrxcrc;
    uint8_t         uartrxbusy;
-   uint8_t         uartrxhandling;
    
    //=== stats
    uint16_t        uartNumRxCrcOk;
