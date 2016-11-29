@@ -444,17 +444,19 @@ void cb_endFrame(uint16_t timestamp) {
          is_expected = FALSE;
       }
 
-      resp = (IND_RX_ht*)mercator_vars.uartbuftx;
+      if (is_expected == TRUE){
+        resp = (IND_RX_ht*)mercator_vars.uartbuftx;
 
-      resp->type     =  TYPE_IND_RX;
-      resp->length   =  mercator_vars.rxpk_len;
-      resp->rssi     =  mercator_vars.rxpk_rssi;
-      resp->flags    =  mercator_vars.rxpk_crc << 7 | is_expected << 6;
-      resp->pkctr    =  pkctr;
+        resp->type     =  TYPE_IND_RX;
+        resp->length   =  mercator_vars.rxpk_len;
+        resp->rssi     =  mercator_vars.rxpk_rssi;
+        resp->flags    =  mercator_vars.rxpk_crc << 7 | is_expected << 6;
+        resp->pkctr    =  pkctr;
 
-      mercator_vars.uartbuftxfill = sizeof(IND_RX_ht);
+        mercator_vars.uartbuftxfill = sizeof(IND_RX_ht);
 
-      serial_flushtx();
+        serial_flushtx();
+      }
 
       mercator_vars.numnotifications++;
 
