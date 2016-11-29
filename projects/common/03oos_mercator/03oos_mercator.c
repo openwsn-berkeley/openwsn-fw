@@ -51,10 +51,6 @@ void serial_enable(void) {
    mercator_vars.uartlastRxByte = 0x00;
 }
 
-void serial_rx_disable(void) {
-   uart_clearRxPolling();         // disable RX Polling
-}
-
 void serial_flushtx(void) {
    
    // abort if nothing to print
@@ -363,10 +359,7 @@ void isr_openserial_rx_mod(void) {
             
             // remove the CRC from the input buffer
             mercator_vars.uartbufrxfill    -= 2;
-            
-            // stop receiving (until frame handled)
-            serial_rx_disable();
-            
+                        
             // schedule task to handle frame
             scheduler_push_task(serial_rx_all,TASK_PRIO_SERIAL);
             
