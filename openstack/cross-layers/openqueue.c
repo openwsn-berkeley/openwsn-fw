@@ -9,6 +9,7 @@
 //=========================== defination =====================================
 
 //#define OPENQUEUE_DEBUG
+#define HIGH_PRIORITY_QUEUE_ENTRY 4
 
 //=========================== variables =======================================
 
@@ -80,6 +81,12 @@ OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
    
    // walk through queue and find free entry
    for (i=0;i<QUEUELENGTH;i++) {
+      // reserve first HIGH_PRIORITY_QUEUE_ENTRY entries for component with id no greator than COMPONENT_SIXTOP_RES 
+      if (creator>COMPONENT_SIXTOP_RES){
+          if (i<HIGH_PRIORITY_QUEUE_ENTRY){
+              continue;
+          }
+      }
       if (openqueue_vars.queue[i].owner==COMPONENT_NULL) {
          openqueue_vars.queue[i].creator=creator;
          openqueue_vars.queue[i].owner=COMPONENT_OPENQUEUE;
