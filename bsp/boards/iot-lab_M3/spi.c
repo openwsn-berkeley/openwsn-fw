@@ -178,7 +178,7 @@ void spi_txrx(uint8_t*     bufTx,
    
    // put CS signal high to signal end of transmission to slave
    if (spi_vars.isLast==SPI_LAST) {
-   GPIO_SetBits(GPIOA, GPIO_Pin_4);
+      GPIO_SetBits(GPIOA, GPIO_Pin_4);
    }
    
    // SPI is not busy anymore
@@ -215,11 +215,11 @@ kick_scheduler_t spi_isr() {
    
    if (spi_vars.txBytesLeft>0) {
       // write next byte to TX buffer
-   SPI_SendData(SPI1,*spi_vars.pNextTxByte);
+      SPI_SendData(SPI1,*spi_vars.pNextTxByte);
    } else {
       // put CS signal high to signal end of transmission to slave
       if (spi_vars.isLast==SPI_LAST) {
-   GPIO_SetBits(GPIOA, GPIO_Pin_4);
+         GPIO_SetBits(GPIOA, GPIO_Pin_4);
       }
       // SPI is not busy anymore
       spi_vars.busy          =  0;
