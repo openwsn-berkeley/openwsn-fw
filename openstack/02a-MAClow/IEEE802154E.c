@@ -2411,10 +2411,16 @@ void endSlot() {
    
    // clean up dataReceived
    if (ieee154e_vars.dataReceived!=NULL) {
+     /*
       // assume something went wrong. If everything went well, dataReceived
       // would have been set to NULL in ri9.
       // indicate  "received packet" to upper layer since we don't want to loose packets
       notif_receive(ieee154e_vars.dataReceived);
+     */
+      // if this is a sixtop resonse, if I indicate "received packet", the schedule to my parent may not consistent
+      // free dataReceived  so corresponding RAM memory can be recycled 
+      openqueue_freePacketBuffer(ieee154e_vars.dataReceived);
+     
       // reset local variable
       ieee154e_vars.dataReceived = NULL;
    }
