@@ -204,10 +204,10 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells){
         return;
     }
    
-   if (schedule_getNumberOfFreeEntries() < numCells){
-      // no enough free buffer for adding more cells
-      return ;
-   }
+    if (code==IANA_6TOP_CMD_ADD && schedule_getNumberOfFreeEntries() < numCells){
+       // no enough free buffer for adding more cells
+       return ;
+    }
     
    
     // generate candidate cell list
