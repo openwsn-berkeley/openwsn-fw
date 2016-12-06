@@ -284,6 +284,14 @@ void forwarding_receive(
       
         // change the creator of the packet
         msg->creator = COMPONENT_FORWARDING;
+        
+        if(openqueue_isHighPriorityEntryEnough()==FALSE){
+          // after change the creator to COMPONENT_FORWARDING,
+          // there is no space for high priority packet, drop this message
+          // by free the buffer.
+          openqueue_freePacketBuffer(msg);
+          return;
+        }
       
         if (ipv6_outer_header->next_header!=IANA_IPv6ROUTE) {
             flags = rpl_option->flags;

@@ -9,7 +9,7 @@
 //=========================== defination =====================================
 
 //#define OPENQUEUE_DEBUG
-#define HIGH_PRIORITY_QUEUE_ENTRY 4
+#define HIGH_PRIORITY_QUEUE_ENTRY 5
 
 //=========================== variables =======================================
 
@@ -79,14 +79,14 @@ OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
    
    // if you get here, I will try to allocate a buffer for you
    
+   // if there is no space left for high priority queue, don't reserve
+   if (openqueue_isHighPriorityEntryEnough()==FALSE && creator>COMPONENT_SIXTOP_RES){
+      ENABLE_INTERRUPTS();
+      return NULL;
+   }
+   
    // walk through queue and find free entry
    for (i=0;i<QUEUELENGTH;i++) {
-      // reserve first HIGH_PRIORITY_QUEUE_ENTRY entries for component with id no greator than COMPONENT_SIXTOP_RES 
-      if (creator>COMPONENT_SIXTOP_RES){
-          if (i<HIGH_PRIORITY_QUEUE_ENTRY){
-              continue;
-          }
-      }
       if (openqueue_vars.queue[i].owner==COMPONENT_NULL) {
          openqueue_vars.queue[i].creator=creator;
          openqueue_vars.queue[i].owner=COMPONENT_OPENQUEUE;
@@ -301,6 +301,28 @@ OpenQueueEntry_t* openqueue_getIpPacket(){
    }
    ENABLE_INTERRUPTS();
    return NULL;
+}
+
+bool openqueue_isHighPriorityEntryEnough(){
+   uint8_t i;
+   uint8_t numberOfEntry;
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   
+   numberOfEntry = 0;
+   for (i=0;i<QUEUELENGTH;i++) {
+     if(openqueue_vars.queue[i].creator>COMPONENT_SIXTOP_RES){
+        numberOfEntry++;
+     }
+   }
+   
+   if (numberOfEntry>QUEUELENGTH-HIGH_PRIORITY_QUEUE_ENTRY){
+      ENABLE_INTERRUPTS();
+      return FALSE;
+   } else {
+      ENABLE_INTERRUPTS();
+      return TRUE;
+   }
 }
 
 OpenQueueEntry_t* openqueue_macGetEBPacket() {

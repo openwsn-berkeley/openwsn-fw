@@ -13,7 +13,7 @@
 
 //=========================== define ==========================================
 
-#define QUEUELENGTH  10
+#define QUEUELENGTH  15
 
 //=========================== typedef =========================================
 
@@ -39,6 +39,7 @@ owerror_t          openqueue_freePacketBuffer(OpenQueueEntry_t* pkt);
 void               openqueue_removeAllCreatedBy(uint8_t creator);
 void               openqueue_removeAllOwnedBy(uint8_t owner);
 OpenQueueEntry_t*  openqueue_getIpPacket();
+bool               openqueue_isHighPriorityEntryEnough();
 // called by res
 OpenQueueEntry_t*  openqueue_sixtopGetSentPacket(void);
 OpenQueueEntry_t*  openqueue_sixtopGetReceivedPacket(void);
