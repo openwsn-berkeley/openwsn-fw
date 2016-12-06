@@ -569,6 +569,9 @@ void registerNewNeighbor(open_addr_t* address,
       i=0;
       while(i<MAXNUMNEIGHBORS) {
          if (neighbors_vars.neighbors[i].used==FALSE) {
+            if (rssi < BADNEIGHBORMAXRSSI){
+                break;
+            }
             // add this neighbor
             neighbors_vars.neighbors[i].used                   = TRUE;
             // neighbors_vars.neighbors[i].stableNeighbor         = FALSE;

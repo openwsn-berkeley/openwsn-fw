@@ -13,8 +13,8 @@
 //=========================== define ==========================================
 
 #define MAXPREFERENCE             2
-#define BADNEIGHBORMAXRSSI        -70 //dBm
-#define GOODNEIGHBORMINRSSI       -80 //dBm
+#define BADNEIGHBORMAXRSSI        -65 //dBm
+#define GOODNEIGHBORMINRSSI       -75 //dBm
 #define SWITCHSTABILITYTHRESHOLD  3
 #define DEFAULTLINKCOST           15
 
