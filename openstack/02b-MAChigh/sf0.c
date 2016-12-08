@@ -53,7 +53,10 @@ void sf0_addCell_task(void) {
       return;
    }
    
-   sixtop_setHandler(SIX_HANDLER_SF0);
+   if (sixtop_setHandler(SIX_HANDLER_SF0)==FALSE){
+      // one sixtop transcation is happening, only one instance at one time
+      return;
+   }
    // call sixtop
    sixtop_request(
       IANA_6TOP_CMD_ADD,
@@ -72,7 +75,10 @@ void sf0_removeCell_task(void) {
       return;
    }
    
-   sixtop_setHandler(SIX_HANDLER_SF0);
+   if (sixtop_setHandler(SIX_HANDLER_SF0)==FALSE){
+      // one sixtop transcation is happening, only one instance at one time
+      return;
+   }
    // call sixtop
    sixtop_request(
       IANA_6TOP_CMD_DELETE,
@@ -99,7 +105,10 @@ void sf0_bandwidthEstimate_task(void){
         return;
     }
     
-    sixtop_setHandler(SIX_HANDLER_SF0);
+    if (sixtop_setHandler(SIX_HANDLER_SF0)==FALSE){
+        // one sixtop transcation is happening, only one instance at one time
+        return;
+    }
     
     // get bandwidth of outgoing, incoming and self.
     // Here we just calculate the estimated bandwidth for 
@@ -131,7 +140,10 @@ void sf0_bandwidthEstimate_task(void){
         
         // remove cell(s)
         if ( (bw_incoming+bw_self) < (bw_outgoing-SF0THRESHOLD)) {
-            sixtop_setHandler(SIX_HANDLER_SF0);
+            if (sixtop_setHandler(SIX_HANDLER_SF0)==FALSE){
+               // one sixtop transcation is happening, only one instance at one time
+               return;
+            }
             
             sixtop_request(
                 IANA_6TOP_CMD_DELETE,

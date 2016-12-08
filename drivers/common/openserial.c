@@ -627,8 +627,11 @@ void openserial_handleCommands(void){
             if (foundNeighbor==FALSE) {
                 break;
             }
-             
-            sixtop_setHandler(SIX_HANDLER_SF0);
+            
+            if (sixtop_setHandler(SIX_HANDLER_SF0)==FALSE){
+                // one sixtop transcation is happening, only one instance at one time
+                return;
+            }
             if ( 
                 (
                   commandId != COMMAND_SET_6P_ADD &&
