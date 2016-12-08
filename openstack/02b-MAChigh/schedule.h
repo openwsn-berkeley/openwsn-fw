@@ -213,7 +213,6 @@ void               schedule_indicateTx(
 
 void               schedule_updateCellUsageBitMap(bool hasPacketToSend);
 void               schedule_housekeeping();
-void               schedule_getToBeRemovedCells(uint16_t* tsNum,uint16_t* choffset,uint8_t* linkoptions,open_addr_t* neighbor);
 
 /**
 \}
