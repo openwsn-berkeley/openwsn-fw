@@ -86,7 +86,9 @@ void uart_disableInterrupts() {
     USART_ITConfig(USART1, USART_IT_RXNE, DISABLE);
 }
 
-void uart_clearTxPolling() {
+void uart_clearRxInterrupts(){}
+
+void uart_clearTxInterrupts() {
     USART_ClearFlag(USART1, USART_FLAG_TC);
 }
 
@@ -101,7 +103,7 @@ uint8_t uart_readByte() {
 //=========================== interrupt handlers ==============================
 
 kick_scheduler_t uart_tx_isr() {
-    uart_clearTxPolling();
+    uart_clearTxInterrupts();
     uart_vars.txCb();
     return DO_NOT_KICK_SCHEDULER;
 }
