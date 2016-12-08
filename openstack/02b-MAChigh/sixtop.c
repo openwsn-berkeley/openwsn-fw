@@ -365,24 +365,6 @@ void sixtop_addORremoveCellByInfo(uint8_t code,open_addr_t* neighbor,cellInfo_ht
     }
 }
 
-//======= maintaning 
-void sixtop_maintaining(uint16_t slotOffset,open_addr_t* neighbor){
-    slotinfo_element_t info;
-    cellInfo_ht linkInfo;
-    schedule_getSlotInfo(slotOffset,neighbor,&info);
-    if(info.link_type != CELLTYPE_OFF){
-        linkInfo.tsNum       = slotOffset;
-        linkInfo.choffset    = info.channelOffset;
-        linkInfo.linkoptions = info.link_type;
-        sixtop_vars.handler  = SIX_HANDLER_MAINTAIN;
-        sixtop_addORremoveCellByInfo(IANA_6TOP_CMD_DELETE,neighbor, &linkInfo);
-    } else {
-        //should log this error
-        
-        return;
-    }
-}
-
 //======= from upper layer
 
 owerror_t sixtop_send(OpenQueueEntry_t *msg) {
@@ -684,16 +666,6 @@ void timer_sixtop_management_fired(void) {
          // called every EBPERIOD seconds
          neighbors_removeOld();
          break;
-      case 2:
-         // called every EBPERIOD seconds
-         entry = schedule_statistic_poorLinkQuality();
-         if (
-             entry       != NULL                        && \
-             entry->type != CELLTYPE_OFF                && \
-             entry->type != CELLTYPE_TXRX               
-         ){
-             sixtop_maintaining(entry->slotOffset,&(entry->neighbor));
-         }
       default:
          // called every second, except third times every EBPERIOD seconds
          sixtop_sendKA();
@@ -934,18 +906,8 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
         }
         
         sixtop_vars.six2six_state = SIX_STATE_IDLE;
+        sixtop_vars.handler       = SIX_HANDLER_NONE;
         opentimers_stop(sixtop_vars.timeoutTimerId);
-       
-        if (
-            msg->l2_sixtop_returnCode     == IANA_6TOP_RC_SUCCESS && 
-            msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD
-        ){
-            if (sixtop_vars.handler == SIX_HANDLER_MAINTAIN){
-                sixtop_request(IANA_6TOP_CMD_ADD,&(msg->l2_nextORpreviousHop),1);
-            } else {
-                sixtop_vars.handler = SIX_HANDLER_NONE;
-            }
-        }
         break;
     default:
         //log error

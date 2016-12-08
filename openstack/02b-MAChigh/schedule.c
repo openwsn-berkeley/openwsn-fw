@@ -462,32 +462,6 @@ bool schedule_isSlotOffsetAvailable(uint16_t slotOffset){
    return TRUE;
 }
 
-scheduleEntry_t* schedule_statistic_poorLinkQuality(){
-   scheduleEntry_t* scheduleWalker;
-   
-   INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
-   
-   scheduleWalker = schedule_vars.currentScheduleEntry;
-   do {
-      if(
-         scheduleWalker->numTx > MIN_NUMTX_FOR_PDR                     &&\
-         PDR_THRESHOLD > 100*scheduleWalker->numTxACK/scheduleWalker->numTx
-      ){
-         break;
-      }
-      scheduleWalker = scheduleWalker->next;
-   }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
-   
-   if (scheduleWalker == schedule_vars.currentScheduleEntry){
-       ENABLE_INTERRUPTS();
-       return NULL;
-   } else {
-       ENABLE_INTERRUPTS();
-       return scheduleWalker;
-   }
-}
-
 uint16_t  schedule_getCellsCounts(uint8_t frameID,cellType_t type, open_addr_t* neighbor){
     uint16_t         count = 0;
     scheduleEntry_t* scheduleWalker;
