@@ -41,6 +41,10 @@ void sf0_notifyNewSlotframe(void) {
    scheduler_push_task(sf0_bandwidthEstimate_task,TASKPRIO_SF0);
 }
 
+void sf0_setBackoff(uint8_t value){
+    sf0_vars.backoff = value;
+}
+
 //=========================== private =========================================
 
 void sf0_addCell_task(void) {
@@ -97,6 +101,11 @@ void sf0_bandwidthEstimate_task(void){
     // do not reserve cells if I'm a DAGroot
     if (idmanager_getIsDAGroot()){
         return;
+    }
+    
+    if (sf0_vars.backoff>0){
+      sf0_vars.backoff -= 1;
+      return;
     }
     
     // get preferred parent

@@ -92,7 +92,11 @@ open_addr_t* neighbors_getKANeighbor(uint16_t kaPeriod) {
       }
    }
    return NULL;
- }
+}
+
+bool neighbors_getNeighborNoResource(uint8_t index){
+    return neighbors_vars.neighbors[index].isNoRes;
+}
 
 //===== interrogators
 
@@ -357,6 +361,18 @@ void neighbors_setNeighborRank(uint8_t index, dagrank_t rank) {
 
 }
 
+void neighbors_setNeighborNoResource(open_addr_t* address){
+   uint8_t i;
+   
+   // loop through neighbor table
+   for (i=0;i<MAXNUMNEIGHBORS;i++) {
+      if (isThisRowMatching(address,i)) {
+          neighbors_vars.neighbors[i].isNoRes = TRUE;
+          break;
+      }
+   }
+}
+
 //===== managing routing info
 
 /**
@@ -511,6 +527,7 @@ void removeNeighbor(uint8_t neighborIndex) {
    neighbors_vars.neighbors[neighborIndex].asn.bytes0and1            = 0;
    neighbors_vars.neighbors[neighborIndex].asn.bytes2and3            = 0;
    neighbors_vars.neighbors[neighborIndex].asn.byte4                 = 0;
+   neighbors_vars.neighbors[neighborIndex].isNoRes                   = FALSE;
 }
 
 //=========================== helpers =========================================

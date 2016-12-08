@@ -1106,7 +1106,7 @@ void sixtop_notifyReceiveCommand(
                 sixtop_vars.six2six_state = SIX_STATE_REQUEST_RECEIVED;
 
                 switch(commandIdORcode){
-                case IANA_6TOP_CMD_ADD: 
+                case IANA_6TOP_CMD_ADD:
                 case IANA_6TOP_CMD_DELETE:
                     numOfCells = *((uint8_t*)(pkt->payload)+ptr);
                     container  = *((uint8_t*)(pkt->payload)+ptr+1);
@@ -1236,11 +1236,12 @@ void sixtop_notifyReceiveCommand(
                 }
             } else {
                 if (commandIdORcode==IANA_6TOP_RC_ERR_BUSY){
-                    // TBD: the neighbor is in a transaction, call scheduling function to to make a decision 
-                    // (e.g. issue another 6p request with some delay)
+                    // disable sfx for [0...2^4] slotframe long time
+                    sf0_setBackoff(openrandom_get16b()%(1<<4));
                 } else {
                     if (commandIdORcode==IANA_6TOP_RC_ERR_NORES){
-                        // TBD: the neighbor has no enough resource for adding cells, call sf0 to make a decision
+                        // mark this neighbor as no resource for future processing
+                        neighbors_setNeighborNoResource(&(pkt->l2_nextORpreviousHop));
                     } else {
                         if (commandIdORcode==IANA_6TOP_RC_ERR_RESET){
                             // TBD: the neighbor can't statisfy the 6p request with given cells, call sf0 to make a decision 
@@ -1255,11 +1256,11 @@ void sixtop_notifyReceiveCommand(
                     }
                 }
             }
-           openserial_printInfo(COMPONENT_SIXTOP,ERR_SIXTOP_RETURNCODE,
+            openserial_printInfo(COMPONENT_SIXTOP,ERR_SIXTOP_RETURNCODE,
                            (errorparameter_t)commandIdORcode,
                            (errorparameter_t)sixtop_vars.six2six_state);
-            sixtop_vars.six2six_state = SIX_STATE_IDLE;
-            sixtop_vars.handler = SIX_HANDLER_NONE;
+            sixtop_vars.six2six_state   = SIX_STATE_IDLE;
+            sixtop_vars.handler         = SIX_HANDLER_NONE;
             opentimers_stop(sixtop_vars.timeoutTimerId);
         }
     }
