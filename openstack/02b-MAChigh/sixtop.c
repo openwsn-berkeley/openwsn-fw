@@ -1323,26 +1323,9 @@ void sixtop_notifyReceiveCommand(
             openserial_printInfo(COMPONENT_SIXTOP,ERR_SIXTOP_RETURNCODE,
                            (errorparameter_t)commandIdORcode,
                            (errorparameter_t)sixtop_vars.six2six_state);
-            sixtop_vars.six2six_state = SIX_STATE_IDLE;
+            sixtop_vars.six2six_state   = SIX_STATE_IDLE;
+            sixtop_vars.handler         = SIX_HANDLER_NONE;
             opentimers_stop(sixtop_vars.timeoutTimerId);
-            // relocation handler
-            if (sixtop_vars.handler==SIX_HANDLER_RELOCATION){
-                if(commandIdORcode==IANA_6TOP_RC_SUCCESS){
-                    memset(&cellList[0],0,sizeof(cellList));
-                    schedule_getToBeRemovedCells(&(cellList[0].tsNum),&(cellList[0].choffset),&(cellList[0].linkoptions),neighbor);
-                    if (cellList[0].linkoptions==CELLTYPE_TX){
-                        sixtop_addORremoveCellByInfo(IANA_6TOP_CMD_DELETE,neighbor,&cellList[0]);
-                    } else {
-                        // no cell to be removed, end relocation process
-                        sixtop_vars.handler = SIX_HANDLER_NONE;
-                    }
-                } else {
-                    // Relocation failed for adding cells, just finish the relocation process. The relocation may happens again later
-                    sixtop_vars.handler = SIX_HANDLER_NONE;
-                }
-            } else {
-                sixtop_vars.handler = SIX_HANDLER_NONE;
-            }
         }
     }
 }

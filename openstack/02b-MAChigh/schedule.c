@@ -937,18 +937,6 @@ void schedule_housekeeping(){
                     break;
                 }
             }
-            // remove Tx cell if its PDR is lower than 50% (at least have tried more than 5 times)
-            if (
-                schedule_vars.scheduleBuf[i].numTx>5 &&
-                schedule_vars.scheduleBuf[i].numTxACK*10/schedule_vars.scheduleBuf[i].numTx<5
-            ){
-                if (sixtop_setHandler(SIX_HANDLER_RELOCATION)==FALSE){
-                   // one sixtop transcation is happening, only one instance at one time
-                   continue;
-                }
-                sixtop_request(IANA_6TOP_CMD_ADD,&(schedule_vars.scheduleBuf[i].neighbor),1);
-                break;
-            }
         }
     }
    
