@@ -293,7 +293,7 @@ owerror_t schedule_addActiveSlot(
    // abort it schedule overflow
    if (slotContainer>&schedule_vars.scheduleBuf[schedule_vars.maxActiveSlots-1]) {
       ENABLE_INTERRUPTS();
-      openserial_printCritical(
+      openserial_printError(
          COMPONENT_SCHEDULE,ERR_SCHEDULE_OVERFLOWN,
          (errorparameter_t)0,
          (errorparameter_t)0

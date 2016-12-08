@@ -182,6 +182,16 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells){
         return;
     }
    
+    if (code==IANA_6TOP_CMD_ADD && schedule_getNumberOfFreeEntries() < numCells){
+        // no enough free buffer for adding more cells
+        openserial_printError(
+            COMPONENT_SIXTOP,ERR_SCHEDULE_OVERFLOWN,
+            (errorparameter_t)0,
+            (errorparameter_t)0
+        );
+        return ;
+    }
+
     // generate candidate cell list
     if (code == IANA_6TOP_CMD_ADD){
         if (sixtop_candidateAddCellList(&frameID,cellList,numCells)==FALSE){
@@ -533,7 +543,7 @@ void task_sixtopNotifReceive() {
             // free up the RAM
             openqueue_freePacketBuffer(msg);
         }
-            break;
+        break;
     case IEEE154_TYPE_ACK:
     default:
         // free the packet's RAM memory
