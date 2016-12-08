@@ -861,23 +861,22 @@ void timer_sixtop_six2six_timeout_fired(void) {
 }
 
 void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
-   uint8_t i,numOfCells;
-   uint8_t* ptr;
-   cellInfo_ht cellList[SCHEDULEIEMAXNUMCELLS];
-   
-   memset(cellList,0,SCHEDULEIEMAXNUMCELLS*sizeof(cellInfo_ht));
+    uint8_t i,numOfCells;
+    uint8_t* ptr;
+    cellInfo_ht cellList[SCHEDULEIEMAXNUMCELLS];
+
+    memset(cellList,0,SCHEDULEIEMAXNUMCELLS*sizeof(cellInfo_ht));
+
+    ptr = msg->l2_sixtop_cellObjects;
+    numOfCells = msg->l2_sixtop_numOfCells;
+    msg->owner = COMPONENT_SIXTOP_RES;
   
-   ptr = msg->l2_sixtop_cellObjects;
-   numOfCells = msg->l2_sixtop_numOfCells;
-   msg->owner = COMPONENT_SIXTOP_RES;
-  
-   if(error == E_FAIL) {
+    if(error == E_FAIL) {
       sixtop_vars.six2six_state = SIX_STATE_IDLE;
       sixtop_vars.handler       = SIX_HANDLER_NONE;
       openqueue_freePacketBuffer(msg);
       return;
-   }
-
+    }
     switch (sixtop_vars.six2six_state) {
     case SIX_STATE_WAIT_ADDREQUEST_SENDDONE:
         sixtop_vars.six2six_state = SIX_STATE_WAIT_ADDRESPONSE;
@@ -1162,8 +1161,8 @@ void sixtop_notifyReceiveCommand(
                 case IANA_6TOP_CMD_CLEAR:
                     container  = *((uint8_t*)(pkt->payload)+ptr);
                     frameID = container;
-                    schedule_removeAllCells(frameID,
-                                            &(pkt->l2_nextORpreviousHop));
+                    // the cells will be removed when the repsonse sendone successfully
+                    // don't clear cells here
                     code = IANA_6TOP_RC_SUCCESS;
                     break;
                 default:
