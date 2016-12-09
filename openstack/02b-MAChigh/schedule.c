@@ -293,7 +293,7 @@ owerror_t schedule_addActiveSlot(
    // abort it schedule overflow
    if (slotContainer>&schedule_vars.scheduleBuf[schedule_vars.maxActiveSlots-1]) {
       ENABLE_INTERRUPTS();
-      openserial_printCritical(
+      openserial_printError(
          COMPONENT_SCHEDULE,ERR_SCHEDULE_OVERFLOWN,
          (errorparameter_t)0,
          (errorparameter_t)0
@@ -460,32 +460,6 @@ bool schedule_isSlotOffsetAvailable(uint16_t slotOffset){
    ENABLE_INTERRUPTS();
    
    return TRUE;
-}
-
-scheduleEntry_t* schedule_statistic_poorLinkQuality(){
-   scheduleEntry_t* scheduleWalker;
-   
-   INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
-   
-   scheduleWalker = schedule_vars.currentScheduleEntry;
-   do {
-      if(
-         scheduleWalker->numTx > MIN_NUMTX_FOR_PDR                     &&\
-         PDR_THRESHOLD > 100*scheduleWalker->numTxACK/scheduleWalker->numTx
-      ){
-         break;
-      }
-      scheduleWalker = scheduleWalker->next;
-   }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
-   
-   if (scheduleWalker == schedule_vars.currentScheduleEntry){
-       ENABLE_INTERRUPTS();
-       return NULL;
-   } else {
-       ENABLE_INTERRUPTS();
-       return scheduleWalker;
-   }
 }
 
 uint16_t  schedule_getCellsCounts(uint8_t frameID,cellType_t type, open_addr_t* neighbor){
