@@ -63,6 +63,7 @@ bool          neighbors_getNeighborNoResource(uint8_t index);
 // setters
 void          neighbors_setNeighborRank(uint8_t index, dagrank_t rank);
 void          neighbors_setNeighborNoResource(open_addr_t* address);
+void          neighbors_setPreferredParent(uint8_t index, bool isPreferred);
 
 // interrogators
 bool          neighbors_isStableNeighbor(open_addr_t* address);
