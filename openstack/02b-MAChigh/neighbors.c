@@ -95,7 +95,7 @@ open_addr_t* neighbors_getKANeighbor(uint16_t kaPeriod) {
 }
 
 bool neighbors_getNeighborNoResource(uint8_t index){
-    return neighbors_vars.neighbors[index].isNoRes;
+    return neighbors_vars.neighbors[index].f6PNORES;
 }
 
 //===== interrogators
@@ -367,7 +367,7 @@ void neighbors_setNeighborNoResource(open_addr_t* address){
    // loop through neighbor table
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
       if (isThisRowMatching(address,i)) {
-          neighbors_vars.neighbors[i].isNoRes = TRUE;
+          neighbors_vars.neighbors[i].f6PNORES = TRUE;
           break;
       }
    }
@@ -528,7 +528,7 @@ void removeNeighbor(uint8_t neighborIndex) {
    neighbors_vars.neighbors[neighborIndex].asn.bytes0and1            = 0;
    neighbors_vars.neighbors[neighborIndex].asn.bytes2and3            = 0;
    neighbors_vars.neighbors[neighborIndex].asn.byte4                 = 0;
-   neighbors_vars.neighbors[neighborIndex].isNoRes                   = FALSE;
+   neighbors_vars.neighbors[neighborIndex].f6PNORES                  = FALSE;
 }
 
 //=========================== helpers =========================================
