@@ -1197,7 +1197,7 @@ void sixtop_notifyReceiveCommand(
                 }
             } else {
                 if (commandIdORcode==IANA_6TOP_RC_ERR_BUSY){
-                    // disable sfx for [0...2^4] slotframe long time
+                    // disable sf0 for [0...2^4] slotframe long time
                     sf0_setBackoff(openrandom_get16b()%(1<<4));
                 } else {
                     if (commandIdORcode==IANA_6TOP_RC_ERR_NORES){
