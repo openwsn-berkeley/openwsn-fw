@@ -104,18 +104,13 @@ void sf0_bandwidthEstimate_task(void){
     }
     
     if (sf0_vars.backoff>0){
-      sf0_vars.backoff -= 1;
-      return;
+        sf0_vars.backoff -= 1;
+        return;
     }
     
     // get preferred parent
     foundNeighbor = icmpv6rpl_getPreferredParentEui64(&neighbor);
     if (foundNeighbor==FALSE) {
-        return;
-    }
-    
-    if (sixtop_setHandler(SIX_HANDLER_SF0)==FALSE){
-        // one sixtop transcation is happening, only one instance at one time
         return;
     }
     
@@ -138,22 +133,22 @@ void sf0_bandwidthEstimate_task(void){
     // when scheduledCells<requiredCells, add one or more cell
     
     if (bw_outgoing <= bw_incoming+bw_self){
-        
-        // all cell(s)
+        if (sixtop_setHandler(SIX_HANDLER_SF0)==FALSE){
+            // one sixtop transcation is happening, only one instance at one time
+            return;
+        }
         sixtop_request(
             IANA_6TOP_CMD_ADD,
             &neighbor,
             bw_incoming+bw_self-bw_outgoing+1
         );
     } else {
-        
         // remove cell(s)
         if ( (bw_incoming+bw_self) < (bw_outgoing-SF0THRESHOLD)) {
             if (sixtop_setHandler(SIX_HANDLER_SF0)==FALSE){
                // one sixtop transcation is happening, only one instance at one time
                return;
             }
-            
             sixtop_request(
                 IANA_6TOP_CMD_DELETE,
                 &neighbor,

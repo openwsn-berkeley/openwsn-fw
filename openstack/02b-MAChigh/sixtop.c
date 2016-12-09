@@ -195,6 +195,7 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells){
     // generate candidate cell list
     if (code == IANA_6TOP_CMD_ADD){
         if (sixtop_candidateAddCellList(&frameID,cellList,numCells)==FALSE){
+              sixtop_vars.handler = SIX_HANDLER_NONE;
               return;
         } else{
             // container to be define by SF, currently equals to frameID
@@ -203,6 +204,7 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells){
     }
     if (code == IANA_6TOP_CMD_DELETE){
         if (sixtop_candidateRemoveCellList(&frameID,cellList,neighbor,numCells)==FALSE){
+              sixtop_vars.handler = SIX_HANDLER_NONE;
               return;
         } else{
             // container to be define by SF, currently equals to frameID
