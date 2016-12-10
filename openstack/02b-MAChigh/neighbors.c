@@ -373,6 +373,10 @@ void neighbors_setNeighborNoResource(open_addr_t* address){
    }
 }
 
+void neighbors_setPreferredParent(uint8_t index, bool isPreferred){
+    neighbors_vars.neighbors[index].parentPreference = isPreferred;
+}
+
 //===== managing routing info
 
 /**

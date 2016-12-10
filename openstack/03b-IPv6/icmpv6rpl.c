@@ -399,15 +399,22 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
    if (foundBetterParent) {
       icmpv6rpl_vars.haveParent=TRUE;
       if (!prevHadParent) {
-         // only report on link creation
+         // in case preParent is killed before calling this function, clear the preferredParent flag
+         neighbors_setPreferredParent(prevParentIndex, FALSE);
+         // set neighbors as preferred parent
+         neighbors_setPreferredParent(icmpv6rpl_vars.ParentIndex, TRUE);
       } else {
          if (icmpv6rpl_vars.ParentIndex==prevParentIndex) {
-            // report on the rank change if any, not on the deletion/creation of parent
-               if (icmpv6rpl_vars.myDAGrank!=previousDAGrank) {
-               } else ;// same parent, same rank, nothing to report about 
+             // report on the rank change if any, not on the deletion/creation of parent
+             if (icmpv6rpl_vars.myDAGrank!=previousDAGrank) {
+             } else {
+                 // same parent, same rank, nothing to report about 
+             }
          } else {
-            // report on deletion of parent
-            // report on creation of new parent
+             // clear neighbors preferredParent flag
+             neighbors_setPreferredParent(prevParentIndex, FALSE);
+             // set neighbors as preferred parent
+             neighbors_setPreferredParent(icmpv6rpl_vars.ParentIndex, TRUE);
          }
       }
    } else {
