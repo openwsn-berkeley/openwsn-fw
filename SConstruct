@@ -105,7 +105,7 @@ command_line_options = {
         'wsn430v14',
         'z1',
         # Cortex-M3
-        'OpenMote-CC2538',
+        'openmote-cc2538',
         'openmotestm',
         'iot-lab_M3',
         'iot-lab_A8-M3',

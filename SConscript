@@ -164,7 +164,7 @@ elif env['toolchain']=='iar':
 
 elif env['toolchain']=='iar-proj':
     
-    if env['board'] not in ['telosb','gina','wsn430v13b','wsn430v14','z1','openmotestm','agilefox','OpenMote-CC2538','iot-lab_M3']:
+    if env['board'] not in ['telosb','gina','wsn430v13b','wsn430v14','z1','openmotestm','agilefox','openmote-cc2538','iot-lab_M3']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     env['IAR_EW430_INSTALLDIR'] = os.environ['IAR_EW430_INSTALLDIR']
@@ -194,10 +194,10 @@ elif env['toolchain']=='iar-proj':
     
 elif env['toolchain']=='armgcc':
     
-    if env['board'] not in ['OpenMote-CC2538','iot-lab_M3','iot-lab_A8-M3','openmotestm', 'samr21_xpro']:
+    if env['board'] not in ['openmote-cc2538','iot-lab_M3','iot-lab_A8-M3','openmotestm', 'samr21_xpro']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
-    if   env['board']=='OpenMote-CC2538':
+    if   env['board']=='openmote-cc2538':
         
         # compiler (C)
         env.Replace(CC           = 'arm-none-eabi-gcc')
@@ -214,7 +214,7 @@ elif env['toolchain']=='armgcc':
         env.Replace(AS           = 'arm-none-eabi-as')
         env.Append(ASFLAGS       = '-ggdb -g3 -mcpu=cortex-m3 -mlittle-endian')
         # linker
-        env.Append(LINKFLAGS     = '-Tbsp/boards/OpenMote-CC2538/cc2538.lds')
+        env.Append(LINKFLAGS     = '-Tbsp/boards/openmote-cc2538/cc2538.lds')
         env.Append(LINKFLAGS     = '-nostartfiles')
         env.Append(LINKFLAGS     = '-Wl,-Map,${TARGET.base}.map')
         env.Append(LINKFLAGS     = '-mcpu=cortex-m3')
@@ -501,7 +501,7 @@ class OpenMoteCC2538_bootloadThread(threading.Thread):
     def run(self):
         print 'starting bootloading on {0}'.format(self.comPort)
         subprocess.call(
-            'python '+os.path.join('bootloader','OpenMote-CC2538','cc2538-bsl.py')+' -e -w -b 400000 -p {0} {1}'.format(self.comPort,self.hexFile),
+            'python '+os.path.join('bootloader','openmote-cc2538','cc2538-bsl.py')+' -e -w -b 400000 -p {0} {1}'.format(self.comPort,self.hexFile),
             shell=True
         )
         print 'done bootloading on {0}'.format(self.comPort)
@@ -625,7 +625,7 @@ def BootloadFunc():
             suffix      = '.phonyupload',
             src_suffix  = '.ihex',
         )
-    elif env['board']=='OpenMote-CC2538':
+    elif env['board']=='openmote-cc2538':
         return Builder(
             action      = OpenMoteCC2538_bootload,
             suffix      = '.phonyupload',
