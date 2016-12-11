@@ -5,12 +5,17 @@
 #include "IEEE802154E.h"
 #include "ieee802154_security_driver.h"
 
+
+//=========================== defination =====================================
+
+#define HIGH_PRIORITY_QUEUE_ENTRY 5
+
 //=========================== variables =======================================
 
 openqueue_vars_t openqueue_vars;
 
 //=========================== prototypes ======================================
-
+bool openqueue_isHighPriorityEntryEnough();
 void openqueue_reset_entry(OpenQueueEntry_t* entry);
 
 //=========================== public ==========================================
@@ -72,6 +77,12 @@ OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
    }
    
    // if you get here, I will try to allocate a buffer for you
+   
+   // if there is no space left for high priority queue, don't reserve
+   if (openqueue_isHighPriorityEntryEnough()==FALSE && creator>COMPONENT_SIXTOP_RES){
+      ENABLE_INTERRUPTS();
+      return NULL;
+   }
    
    // walk through queue and find free entry
    for (i=0;i<QUEUELENGTH;i++) {
@@ -192,11 +203,30 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
    uint8_t i;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
+
+    // first to look the sixtop RES packet
+    for (i=0;i<QUEUELENGTH;i++) {
+       if (
+           openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
+           openqueue_vars.queue[i].creator==COMPONENT_SIXTOP_RES &&
+           (
+               (
+                   toNeighbor->type==ADDR_64B &&
+                   packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)
+               ) || toNeighbor->type==ADDR_ANYCAST
+           )
+       ){
+          ENABLE_INTERRUPTS();
+          return &openqueue_vars.queue[i];
+       }
+    }
+  
    if (toNeighbor->type==ADDR_64B) {
       // a neighbor is specified, look for a packet unicast to that neigbhbor
       for (i=0;i<QUEUELENGTH;i++) {
          if (openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
-            packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)) {
+            packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)
+          ) {
             ENABLE_INTERRUPTS();
             return &openqueue_vars.queue[i];
          }
@@ -220,6 +250,24 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
    }
    ENABLE_INTERRUPTS();
    return NULL;
+}
+
+bool openqueue_isHighPriorityEntryEnough(){
+    uint8_t i;
+    uint8_t numberOfEntry;
+    
+    numberOfEntry = 0;
+    for (i=0;i<QUEUELENGTH;i++) {
+        if(openqueue_vars.queue[i].creator>COMPONENT_SIXTOP_RES){
+            numberOfEntry++;
+        }
+    }
+    
+    if (numberOfEntry>QUEUELENGTH-HIGH_PRIORITY_QUEUE_ENTRY){
+        return FALSE;
+    } else {
+        return TRUE;
+    }
 }
 
 OpenQueueEntry_t* openqueue_macGetEBPacket() {
