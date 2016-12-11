@@ -349,6 +349,12 @@ owerror_t schedule_addActiveSlot(
                (errorparameter_t)slotContainer->slotOffset,
                (errorparameter_t)0
             );
+            // reset the entry
+            slotContainer->slotOffset                = 0;
+            slotContainer->type                      = CELLTYPE_OFF;
+            slotContainer->shared                    = FALSE;
+            slotContainer->channelOffset             = 0;
+            memset(&slotContainer->neighbor,0,sizeof(open_addr_t));
             ENABLE_INTERRUPTS();
             return E_FAIL;
          }
