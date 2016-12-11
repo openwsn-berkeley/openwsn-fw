@@ -818,6 +818,34 @@ void schedule_indicateTx(asn_t* asnTimestamp, bool succesfullTx) {
    ENABLE_INTERRUPTS();
 }
 
+
+void schedule_housekeeping(){
+    uint8_t     i;
+    open_addr_t neighbor;
+    
+    
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+
+    for(i=0;i<MAXACTIVESLOTS;i++) {
+        if(schedule_vars.scheduleBuf[i].type == CELLTYPE_TX){
+            // remove Tx cell if it's scheduled to non-preferred parent
+            if (icmpv6rpl_getPreferredParentEui64(&neighbor)==TRUE) {
+                if(packetfunctions_sameAddress(&neighbor,&(schedule_vars.scheduleBuf[i].neighbor))==FALSE){
+                    if (sixtop_setHandler(SIX_HANDLER_SF0)==FALSE){
+                       // one sixtop transcation is happening, only one instance at one time
+                       continue;
+                    }
+                    sixtop_request(IANA_6TOP_CMD_CLEAR,&(schedule_vars.scheduleBuf[i].neighbor),1);
+                    break;
+                }
+            }
+        }
+    }
+   
+    ENABLE_INTERRUPTS();
+}
+
 //=========================== private =========================================
 
 /**
