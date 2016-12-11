@@ -203,6 +203,7 @@ void               schedule_indicateTx(
                         bool      succesfullTx
                    );
 
+void               schedule_housekeeping();
 /**
 \}
 \}
