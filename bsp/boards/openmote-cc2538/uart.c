@@ -5,22 +5,25 @@
  * Description: CC2538-specific definition of the "uart" bsp module.
  */
 
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+
 #include <headers/hw_ints.h>
 #include <headers/hw_ioc.h>
 #include <headers/hw_memmap.h>
 #include <headers/hw_types.h>
 
-#include "stdint.h"
-#include "stdio.h"
-#include "string.h"
-#include "uart.h"
-#include "uarthal.h"
-#include "interrupt.h"
-#include "sys_ctrl.h"
-#include "gpio.h"
+#include <source/gpio.h>
+#include <source/interrupt.h>
+#include <source/ioc.h>
+#include <source/sys_ctrl.h>
+#include <source/uart.h>
+
+
 #include "board.h"
-#include "ioc.h"
 #include "debugpins.h"
+#include "uart.h"
 
 //=========================== defines =========================================
 

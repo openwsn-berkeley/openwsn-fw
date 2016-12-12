@@ -8,9 +8,10 @@
 #include <headers/hw_memmap.h>
 #include <headers/hw_types.h>
 
-#include "debugpins.h"
-#include "gpio.h"
+#include <source/gpio.h>
+
 #include "board.h"
+#include "debugpins.h"
 
 //=========================== defines =========================================
 // Board dbPINS defines

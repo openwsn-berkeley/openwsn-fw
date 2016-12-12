@@ -3,12 +3,13 @@
     \author Nicola Accettura <nicola.accettura@eecs.berkeley.edu>, March 2015.
 */
 
+#include "adc_sensor.h"
 #include "board.h"
 #include "sensors.h"
+
 #include "adxl346.h"
 #include "max44009.h"
 #include "sht21.h"
-#include "adc_sensor.h"
 
 //=========================== defines =========================================
 

@@ -198,6 +198,10 @@ elif env['toolchain']=='armgcc':
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     if   env['board']=='openmote-cc2538':
+        if env['revision'] == "A1":
+            linker_file = 'cc2538sf23.lds'
+        else:
+            linker_file = 'cc2538sf53.lds'
         
         # compiler (C)
         env.Replace(CC           = 'arm-none-eabi-gcc')
@@ -214,7 +218,7 @@ elif env['toolchain']=='armgcc':
         env.Replace(AS           = 'arm-none-eabi-as')
         env.Append(ASFLAGS       = '-ggdb -g3 -mcpu=cortex-m3 -mlittle-endian')
         # linker
-        env.Append(LINKFLAGS     = '-Tbsp/boards/openmote-cc2538/cc2538.lds')
+        env.Append(LINKFLAGS     = '-Tbsp/boards/openmote-cc2538/' + linker_file)
         env.Append(LINKFLAGS     = '-nostartfiles')
         env.Append(LINKFLAGS     = '-Wl,-Map,${TARGET.base}.map')
         env.Append(LINKFLAGS     = '-mcpu=cortex-m3')

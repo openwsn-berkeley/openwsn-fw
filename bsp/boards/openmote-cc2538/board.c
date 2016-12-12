@@ -11,21 +11,22 @@
 #include <headers/hw_sys_ctrl.h>
 #include <headers/hw_types.h>
 
+#include <source/flash.h>
+#include <source/interrupt.h>
+#include <source/ioc.h>
+#include <source/gpio.h>
+#include <source/gptimer.h>
+#include <source/sys_ctrl.h>
+
 #include "board.h"
-#include "leds.h"
-#include "ioc.h"
-#include "gpio.h"
-#include "gptimer.h"
-#include "sys_ctrl.h"
-#include "interrupt.h"
 #include "bsp_timer.h"
-#include "radiotimer.h"
 #include "debugpins.h"
-#include "uart.h"
-#include "radio.h"
-#include "flash.h"
 #include "i2c.h"
+#include "leds.h"
+#include "radio.h"
+#include "radiotimer.h"
 #include "sensors.h"
+#include "uart.h"
 
 //=========================== variables =======================================
 
@@ -91,11 +92,11 @@ void board_sleep(void) {
  * The timer is divided by 32, whichs gives a 1 microsecond ticks
  */
 void board_timer_init(void) {
-	// Configure the timer
-	TimerConfigure(GPTIMER2_BASE, GPTIMER_CFG_PERIODIC_UP);
-	
-	// Enable the timer
-  TimerEnable(GPTIMER2_BASE, GPTIMER_BOTH);
+    // Configure the timer
+    TimerConfigure(GPTIMER2_BASE, GPTIMER_CFG_PERIODIC_UP);
+    
+    // Enable the timer
+    TimerEnable(GPTIMER2_BASE, GPTIMER_BOTH);
 }
 
 /**
@@ -133,7 +134,7 @@ bool board_timer_expired(uint32_t future) {
  * Resets the board
  */
 void board_reset(void) {
-	SysCtrlReset();
+    SysCtrlReset();
 }
 
 //=========================== private =========================================

@@ -8,10 +8,8 @@
 #ifndef CC2538RF_H_
 #define CC2538RF_H_
 
-
 #include <headers/hw_rfcore_sfr.h>
 #include <headers/hw_rfcore_xreg.h>
-
 
 /*---------------------------------------------------------------------------
  * RF Config
