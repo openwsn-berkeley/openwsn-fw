@@ -73,13 +73,15 @@ static uint32_t pui32Stack[512];
 //*****************************************************************************
 //
 // Customer Configuration Area in Lock Page
-// Holds Image Vector table address (bytes 2013 - 2015) and
-// Image Valid bytes (bytes 2008 -2011)
+// Holds Application entry point (bytes 2012 - 2015) and
+// Image Valid (bytes 2008 - 2011) and
+// Bootloader backdoor (byte 2007) and
+// Reserved (byte 2006 - 2004)
 //
 //*****************************************************************************
 typedef struct
 {
-	uint32_t ui32BootldrCfg;
+    uint32_t ui32BootldrCfg;
     uint32_t ui32ImageValid;
     uint32_t ui32ImageVectorAddr;
 } 
@@ -89,8 +91,8 @@ __attribute__ ((section(".flashcca"), used))
 const lockPageCCA_t __cca =
 {
   BOOTLOADER_BACKDOOR_ENABLE,   // Bootloader backdoor enabled
-  0,               				// Image valid bytes
-  FLASH_START_ADDR 				// Vector table located at flash start address
+  0,               				      // Image valid bytes
+  FLASH_START_ADDR 				      // Vector table located at flash start address
 };
 
 __attribute__ ((section(".vectors"), used))
