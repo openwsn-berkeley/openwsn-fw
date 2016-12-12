@@ -867,13 +867,31 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
     ptr = msg->l2_sixtop_cellObjects;
     numOfCells = msg->l2_sixtop_numOfCells;
     msg->owner = COMPONENT_SIXTOP_RES;
+          
+    if (msg->l2_sixtop_returnCode == IANA_6TOP_RC_ERR_BUSY){
+        // no matter successfully being sent out or not, if this is 
+        // a sixtop response with ERR_BUSY code, there is nothing need to do
+        // free the buffer
+        openqueue_freePacketBuffer(msg);
+        return;
+    }
   
     if(error == E_FAIL) {
-      sixtop_vars.six2six_state = SIX_STATE_IDLE;
-      sixtop_vars.handler       = SIX_HANDLER_NONE;
-      openqueue_freePacketBuffer(msg);
-      return;
+        if (
+            sixtop_vars.six2six_state == SIX_STATE_WAIT_ADDREQUEST_SENDDONE    ||
+            sixtop_vars.six2six_state == SIX_STATE_WAIT_DELETEREQUEST_SENDDONE ||
+            sixtop_vars.six2six_state == SIX_STATE_WAIT_LISTREQUEST_SENDDONE   ||
+            sixtop_vars.six2six_state == SIX_STATE_WAIT_COUNTREQUEST_SENDDONE  ||
+            sixtop_vars.six2six_state == SIX_STATE_WAIT_CLEARREQUEST_SENDDONE
+        ){
+            // reset handler if the request is failed to send out
+            sixtop_vars.handler       = SIX_HANDLER_NONE;
+        }
+        sixtop_vars.six2six_state = SIX_STATE_IDLE;
+        openqueue_freePacketBuffer(msg);
+        return;
     }
+    // the packet has been sent out successfully
     switch (sixtop_vars.six2six_state) {
     case SIX_STATE_WAIT_ADDREQUEST_SENDDONE:
         sixtop_vars.six2six_state = SIX_STATE_WAIT_ADDRESPONSE;
@@ -891,7 +909,7 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
         sixtop_vars.six2six_state = SIX_STATE_WAIT_CLEARRESPONSE;
         break;
     case SIX_STATE_WAIT_RESPONSE_SENDDONE:
-        if (msg->l2_sixtop_returnCode == IANA_6TOP_RC_SUCCESS && error == E_SUCCESS){
+        if (msg->l2_sixtop_returnCode == IANA_6TOP_RC_SUCCESS){
             if (
                 msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD ||
                 msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_DELETE
@@ -926,17 +944,16 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
                 if (msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_CLEAR){
                     schedule_removeAllCells(msg->l2_sixtop_frameID,
                                           &(msg->l2_nextORpreviousHop));
+                } else {
+                    // the return code is RC_ERR_NORES or RC_ERR_RESET
+                    // nothing needs to do
                 }
             }
         }
-        
         sixtop_vars.six2six_state = SIX_STATE_IDLE;
-        sixtop_vars.handler       = SIX_HANDLER_NONE;
-        opentimers_stop(sixtop_vars.timeoutTimerId);
         break;
     default:
-        //log error
-        sixtop_vars.six2six_state = SIX_STATE_IDLE;
+        // should never happens
         break;
     }
   
@@ -946,7 +963,7 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
         sixtop_vars.six2six_state == SIX_STATE_WAIT_COUNTRESPONSE      ||
         sixtop_vars.six2six_state == SIX_STATE_WAIT_LISTRESPONSE       ||
         sixtop_vars.six2six_state == SIX_STATE_WAIT_CLEARRESPONSE
-    ){  
+    ){
         // start timeout timer if I am waiting for a response
         opentimers_setPeriod(
             sixtop_vars.timeoutTimerId,
@@ -955,7 +972,6 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
         );
         opentimers_restart(sixtop_vars.timeoutTimerId);
     }
-   
     // discard reservation packets this component has created
     openqueue_freePacketBuffer(msg);
 }
@@ -1168,9 +1184,16 @@ void sixtop_notifyReceiveCommand(
             if (sixtop_vars.isResponseEnabled){
                 // send packet
                 sixtop_send(response_pkt);
+                if (code == IANA_6TOP_RC_ERR_BUSY){
+                    // do not update status, I'm in a sixtop transaction already
+                } else {
+                    // update state
+                    sixtop_vars.six2six_state = SIX_STATE_WAIT_RESPONSE_SENDDONE;
+                }
+            } else {
+                openqueue_freePacketBuffer(response_pkt);
+                sixtop_vars.six2six_state = SIX_STATE_IDLE;
             }
-            // update state
-            sixtop_vars.six2six_state = SIX_STATE_WAIT_RESPONSE_SENDDONE;
         } else {
             //------ if this is a return code
             // The response packet is not required, release it
