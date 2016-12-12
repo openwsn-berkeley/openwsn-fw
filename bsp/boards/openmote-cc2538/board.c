@@ -29,10 +29,6 @@
 
 //=========================== variables =======================================
 
-#define BSP_ANTENNA_BASE                ( GPIO_D_BASE )
-#define BSP_ANTENNA_INT                 ( GPIO_PIN_5 )
-#define BSP_ANTENNA_EXT                 ( GPIO_PIN_4 )
-
 #define BSP_BUTTON_BASE                 ( GPIO_C_BASE )
 #define BSP_BUTTON_USER                 ( GPIO_PIN_3 )
 
@@ -40,14 +36,9 @@
 
 //=========================== prototypes ======================================
 
-void antenna_init(void);
-void antenna_internal(void);
-void antenna_external(void);
-
 void board_timer_init(void);
 uint32_t board_timer_get(void);
 bool board_timer_expired(uint32_t future);
-
 
 static void clock_init(void);
 static void gpio_init(void);
@@ -75,9 +66,6 @@ void board_init(void) {
    clock_init();
 
    board_timer_init();
-
-   antenna_init();
-   antenna_external();
 
    leds_init();
    debugpins_init();
@@ -107,7 +95,7 @@ void board_timer_init(void) {
 	TimerConfigure(GPTIMER2_BASE, GPTIMER_CFG_PERIODIC_UP);
 	
 	// Enable the timer
-    TimerEnable(GPTIMER2_BASE, GPTIMER_BOTH);
+  TimerEnable(GPTIMER2_BASE, GPTIMER_BOTH);
 }
 
 /**
@@ -146,37 +134,6 @@ bool board_timer_expired(uint32_t future) {
  */
 void board_reset(void) {
 	SysCtrlReset();
-}
-
-/**
- * Configures the antenna using a RF switch
- * INT is the internal antenna (chip) configured through ANT1_SEL (V1)
- * EXT is the external antenna (connector) configured through ANT2_SEL (V2)
- */
-void antenna_init(void) {
-    /* Configure the ANT1 and ANT2 GPIO as output */
-    GPIOPinTypeGPIOOutput(BSP_ANTENNA_BASE, BSP_ANTENNA_INT);
-    GPIOPinTypeGPIOOutput(BSP_ANTENNA_BASE, BSP_ANTENNA_EXT);
-
-    /* By default the chip antenna is selected as the default */
-    GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_INT, BSP_ANTENNA_INT);
-    GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_EXT, ~BSP_ANTENNA_EXT);
-}
-
-/**
- * Selects the external (connector) antenna
- */
-void antenna_external(void) {
-    GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_EXT, BSP_ANTENNA_EXT);
-    GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_INT, ~BSP_ANTENNA_INT);
-}
-
-/**
- * Selects the internal (chip) antenna
- */
-void antenna_internal(void) {
-    GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_EXT, ~BSP_ANTENNA_EXT);
-    GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_INT, BSP_ANTENNA_INT);
 }
 
 //=========================== private =========================================
