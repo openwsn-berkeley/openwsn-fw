@@ -37,6 +37,7 @@ void scheduler_start() {
       while(scheduler_vars.task_list!=NULL) {
          // there is still at least one task in the linked-list of tasks
          
+    	 INTERRUPT_DECLARATION();
     	 DISABLE_INTERRUPTS();
 
          // the task to execute is the one at the head of the queue
