@@ -87,7 +87,7 @@ void scheduler_start() {
    // find position in queue
    taskListWalker                 = &scheduler_vars.task_list;
    while (*taskListWalker!=NULL &&
-          (*taskListWalker)->prio < taskContainer->prio) {
+          (*taskListWalker)->prio <= taskContainer->prio) {
       taskListWalker              = (taskList_item_t**)&((*taskListWalker)->next);
    }
    // insert at that position
