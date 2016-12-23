@@ -5,6 +5,7 @@ import subprocess
 import platform
 import distutils.sysconfig
 import sconsUtils
+import glob
 from tools import qtcreator as q
 
 Import('env')
@@ -448,6 +449,43 @@ if env['jtag']:
 
 #============================ bootload ========================================
 
+##
+# Pass a list, a range or all ports to do the bootloading
+# list  -> /dev/ttyUSB0,ttyUSB1,/dev/ttyUSB2
+# range -> /dev/ttyUSB[0-2] = /dev/ttyUSB0,ttyUSB1,/dev/ttyUSB2
+# all   -> /dev/ttyUSBX = /dev/ttyUSB0,ttyUSB1,/dev/ttyUSB2
+##
+def expandBootloadPortList(ports):
+    # Process only when there is a single port
+    if (len(ports) == 1):
+        port  = ports[0]
+        ports = []
+        last_char = port[-1:]
+        base_dir  = os.path.dirname(port)      
+
+        # /dev/ttyUSBX means bootload all ttyUSB ports
+        if (last_char == "X"):
+            base_file = os.path.basename(port[:-1])
+            ports     = sorted(glob.glob(os.path.join(base_dir, base_file) + "*"))
+
+        # /dev/ttyUSB[1-2] means bootload a range of ttyUSB ports
+        elif (last_char == "]"):
+            base_file   = os.path.basename(port.split('[')[0])
+            first, last = sorted(map(int, ((port.split('['))[1].split(']')[0]).split('-')))
+
+            # For all elements in range
+            for i in range(first, last + 1):
+                p = os.path.join(base_dir, base_file + str(i))
+                ports.append(p)
+        else:
+            ports = [port]
+
+    # Check if new list is empty
+    if (not ports):
+        raise SystemError("Bootload port expansion is empty or erroneous!")
+
+    return ports
+
 class telosb_bootloadThread(threading.Thread):
     def __init__(self,comPort,hexFile,countingSem):
         
@@ -505,7 +543,7 @@ class OpenMoteCC2538_bootloadThread(threading.Thread):
     def run(self):
         print 'starting bootloading on {0}'.format(self.comPort)
         subprocess.call(
-            'python '+os.path.join('bootloader','openmote-cc2538','cc2538-bsl.py')+' -e -w -b 400000 -p {0} {1}'.format(self.comPort,self.hexFile),
+            'python '+os.path.join('bootloader','openmote-cc2538','cc2538-bsl.py')+' -e --bootloader-invert-lines -w -b 500000 -p {0} {1}'.format(self.comPort,self.hexFile),
             shell=True
         )
         print 'done bootloading on {0}'.format(self.comPort)
@@ -516,8 +554,15 @@ class OpenMoteCC2538_bootloadThread(threading.Thread):
 def OpenMoteCC2538_bootload(target, source, env):
     bootloadThreads = []
     countingSem     = threading.Semaphore(0)
+
+    # Enumerate ports
+    comPorts = env['bootload'].split(',')
+
+    # Check comPorts to bootload
+    comPorts = expandBootloadPortList(comPorts)
+
     # create threads
-    for comPort in env['bootload'].split(','):
+    for comPort in comPorts:
         bootloadThreads += [
             OpenMoteCC2538_bootloadThread(
                 comPort      = comPort,
