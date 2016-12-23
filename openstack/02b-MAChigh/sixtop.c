@@ -124,6 +124,7 @@ void sixtop_init() {
     sixtop_vars.ebPeriod           = EBPERIOD;
     sixtop_vars.isResponseEnabled  = TRUE;
     sixtop_vars.handler            = SIX_HANDLER_NONE;
+    sixtop_vars.six2six_state      = SIX_STATE_IDLE;
     
     sixtop_vars.ebSendingTimerId   = opentimers_start(
         (sixtop_vars.ebPeriod-EBPERIOD_RANDOM_RANG+(openrandom_get16b()%(2*EBPERIOD_RANDOM_RANG))),
@@ -184,21 +185,24 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells){
    
     memset(cellList,0,sizeof(cellList));
    
-    // filter parameters
-    if(sixtop_vars.six2six_state!=SIX_STATE_IDLE){
+    // filter parameters: handler, status and neighbor
+    if(
+        sixtop_vars.handler       == SIX_HANDLER_NONE ||
+        sixtop_vars.six2six_state != SIX_STATE_IDLE   ||
+        neighbor                  == NULL
+    ){
+        // parameters are wrong
+        // DONOT change sixtop status for the new transaction
         return;
     }
-    if (neighbor==NULL){
-        return;
-    }
-   
-    if (sixtop_vars.handler == SIX_HANDLER_NONE) {
-        // sxitop handler must not be NONE
-        return;
-    }
-   
+      
+    // new transaction parameter checking passed.
+    
+    // check whether free entries are enough for reserving more cells
     if (code==IANA_6TOP_CMD_ADD && schedule_getNumberOfFreeEntries() < numCells){
-        // no enough free buffer for adding more cells
+        // no enough free buffer for adding more cells, reset handler 
+        sixtop_vars.handler = SIX_HANDLER_NONE;
+        // print out error information 
         openserial_printError(
             COMPONENT_SIXTOP,ERR_SCHEDULE_OVERFLOWN,
             (errorparameter_t)0,
@@ -230,6 +234,7 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells){
     // get a free packet buffer
     pkt = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP_RES);
     if (pkt==NULL) {
+        sixtop_vars.handler = SIX_HANDLER_NONE;
         openserial_printError(
             COMPONENT_SIXTOP_RES,
             ERR_NO_FREE_PACKET_BUFFER,
@@ -309,17 +314,18 @@ void sixtop_addORremoveCellByInfo(uint8_t code,open_addr_t* neighbor,cellInfo_ht
    
     memset(cellList,0,sizeof(cellList));
    
-    // filter parameters
-    if (sixtop_vars.six2six_state!=SIX_STATE_IDLE){
+    // filter parameters: handler, status and neighbor
+    if(
+        sixtop_vars.handler       == SIX_HANDLER_NONE ||
+        sixtop_vars.six2six_state != SIX_STATE_IDLE   ||
+        neighbor                  == NULL
+    ){
+        // parameters are wrong
+        // DONOT change sixtop status for the new transaction
         return;
     }
-    if (neighbor==NULL){
-        return;
-    }
-    if (sixtop_vars.handler == SIX_HANDLER_NONE) {
-        // sixtop handler must not be NONE
-        return;
-    }
+      
+    // new transaction parameter checking passed.
    
     // set cell list (only first one is to be removed)
     frameID        = SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;
@@ -330,6 +336,7 @@ void sixtop_addORremoveCellByInfo(uint8_t code,open_addr_t* neighbor,cellInfo_ht
     // get a free packet buffer
     pkt = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP_RES);
     if(pkt==NULL) {
+        sixtop_vars.handler = SIX_HANDLER_NONE;
         openserial_printError(
             COMPONENT_SIXTOP_RES,
             ERR_NO_FREE_PACKET_BUFFER,
