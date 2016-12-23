@@ -22,6 +22,7 @@
 #define TYPE_IND_TXDONE      5
 #define TYPE_REQ_RX          6 
 #define TYPE_IND_RX          7
+#define TYPE_IND_UP          8
 
 #define ST_IDLE              1
 #define ST_TX                2
@@ -91,6 +92,12 @@ typedef struct {
 } IND_RX_ht;
 END_PACK
 
+BEGIN_PACK
+typedef struct {
+   uint8_t         type;
+} IND_UP_ht;
+END_PACK
+
 //=========================== variables =======================================
 
 typedef struct {
@@ -111,7 +118,7 @@ typedef struct {
    uint8_t         uarttxclosingSent;
    // rx
    uint8_t         uartbufrx[UART_BUF_LEN];
-   uint8_t         uartbufrxfill;
+   uint8_t         uartbufrxindex;
    uint8_t         uartlastRxByte;
    uint8_t         uartrxescaping;
    uint16_t        uartrxcrc;
@@ -159,6 +166,7 @@ void serial_tx_RESP_ST(void);
 void serial_rx_REQ_IDLE(void);
 void serial_rx_REQ_TX(void);
 void serial_rx_REQ_RX(void);
+void serial_tx_IND_UP(void);
 
 void isr_openserial_tx_mod(void);
 void isr_openserial_rx_mod(void);
