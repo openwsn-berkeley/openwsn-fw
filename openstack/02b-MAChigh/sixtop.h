@@ -76,7 +76,6 @@ typedef enum {
 //=========================== typedef =========================================
 
 #define SIX2SIX_TIMEOUT_MS 4000
-#define SIXTOP_MINIMAL_EBPERIOD 5 // minist period of sending EB
 
 //=========================== module variables ================================
 
@@ -86,6 +85,7 @@ typedef struct {
    bool                 busySendingEB;           // TRUE when busy sending an enhanced beacon
    uint8_t              dsn;                     // current data sequence number
    uint8_t              mgtTaskCounter;          // counter to determine what management task to do
+   opentimer_id_t       ebSendingTimerId;        // EB sending timer id
    opentimer_id_t       maintenanceTimerId;
    opentimer_id_t       timeoutTimerId;          // TimeOut timer id
    uint16_t             kaPeriod;                // period of sending KA
@@ -102,12 +102,10 @@ typedef struct {
 void      sixtop_init(void);
 void      sixtop_setKaPeriod(uint16_t kaPeriod);
 void      sixtop_setEBPeriod(uint8_t ebPeriod);
-void      sixtop_setHandler(six2six_handler_t handler);
+bool      sixtop_setHandler(six2six_handler_t handler);
 // scheduling
 void      sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells);
 void      sixtop_addORremoveCellByInfo(uint8_t code,open_addr_t*  neighbor,cellInfo_ht* cellInfo);
-// maintaining
-void      sixtop_maintaining(uint16_t slotOffset,open_addr_t* neighbor);
 // from upper layer
 owerror_t sixtop_send(OpenQueueEntry_t *msg);
 // from lower layer

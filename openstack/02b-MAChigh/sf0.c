@@ -41,6 +41,10 @@ void sf0_notifyNewSlotframe(void) {
    scheduler_push_task(sf0_bandwidthEstimate_task,TASKPRIO_SF0);
 }
 
+void sf0_setBackoff(uint8_t value){
+    sf0_vars.backoff = value;
+}
+
 //=========================== private =========================================
 
 void sf0_addCell_task(void) {
@@ -53,7 +57,10 @@ void sf0_addCell_task(void) {
       return;
    }
    
-   sixtop_setHandler(SIX_HANDLER_SF0);
+   if (sixtop_setHandler(SIX_HANDLER_SF0)==FALSE){
+      // one sixtop transcation is happening, only one instance at one time
+      return;
+   }
    // call sixtop
    sixtop_request(
       IANA_6TOP_CMD_ADD,
@@ -72,7 +79,10 @@ void sf0_removeCell_task(void) {
       return;
    }
    
-   sixtop_setHandler(SIX_HANDLER_SF0);
+   if (sixtop_setHandler(SIX_HANDLER_SF0)==FALSE){
+      // one sixtop transcation is happening, only one instance at one time
+      return;
+   }
    // call sixtop
    sixtop_request(
       IANA_6TOP_CMD_DELETE,
@@ -93,13 +103,16 @@ void sf0_bandwidthEstimate_task(void){
         return;
     }
     
+    if (sf0_vars.backoff>0){
+        sf0_vars.backoff -= 1;
+        return;
+    }
+    
     // get preferred parent
     foundNeighbor = icmpv6rpl_getPreferredParentEui64(&neighbor);
     if (foundNeighbor==FALSE) {
         return;
     }
-    
-    sixtop_setHandler(SIX_HANDLER_SF0);
     
     // get bandwidth of outgoing, incoming and self.
     // Here we just calculate the estimated bandwidth for 
@@ -120,19 +133,22 @@ void sf0_bandwidthEstimate_task(void){
     // when scheduledCells<requiredCells, add one or more cell
     
     if (bw_outgoing <= bw_incoming+bw_self){
-        
-        // all cell(s)
+        if (sixtop_setHandler(SIX_HANDLER_SF0)==FALSE){
+            // one sixtop transcation is happening, only one instance at one time
+            return;
+        }
         sixtop_request(
             IANA_6TOP_CMD_ADD,
             &neighbor,
             bw_incoming+bw_self-bw_outgoing+1
         );
     } else {
-        
         // remove cell(s)
         if ( (bw_incoming+bw_self) < (bw_outgoing-SF0THRESHOLD)) {
-            sixtop_setHandler(SIX_HANDLER_SF0);
-            
+            if (sixtop_setHandler(SIX_HANDLER_SF0)==FALSE){
+               // one sixtop transcation is happening, only one instance at one time
+               return;
+            }
             sixtop_request(
                 IANA_6TOP_CMD_DELETE,
                 &neighbor,
