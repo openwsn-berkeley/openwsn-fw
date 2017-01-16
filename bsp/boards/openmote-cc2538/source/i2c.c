@@ -50,7 +50,7 @@
 #include <headers/hw_memmap.h>
 #include <headers/hw_sys_ctrl.h>
 #include "debug.h"
-#include "i2c_lib.h"
+#include "i2c.h"
 #include "interrupt.h"
 
 //*****************************************************************************

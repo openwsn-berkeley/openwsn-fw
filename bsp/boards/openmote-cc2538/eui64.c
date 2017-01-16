@@ -5,7 +5,8 @@
  * Description: CC2538-specific definition of the "eui64" bsp module.
  */
 
-#include "string.h"
+#include <string.h>
+
 #include "eui64.h"
 
 //=========================== defines =========================================

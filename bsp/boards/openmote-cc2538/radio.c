@@ -5,6 +5,9 @@
  * Description: CC2538-specific definition of the "radio" bsp module.
  */
 
+#include <stdio.h>
+#include <string.h>
+
 #include <headers/hw_ana_regs.h>
 #include <headers/hw_ints.h>
 #include <headers/hw_rfcore_sfr.h>
@@ -12,17 +15,15 @@
 #include <headers/hw_rfcore_xreg.h>
 #include <headers/hw_types.h>
 
+#include <source/interrupt.h>
+#include <source/sys_ctrl.h>
+
 #include "board.h"
-#include "radio.h"
-#include "leds.h"
-#include "stdio.h"
-#include "string.h"
-#include "radiotimer.h"
-#include "debugpins.h"
-#include "interrupt.h"
-#include "sys_ctrl.h"
-#include "sys_ctrl.h"
 #include "cc2538rf.h"
+#include "debugpins.h"
+#include "leds.h"
+#include "radio.h"
+#include "radiotimer.h"
 
 //=========================== defines =========================================
 
