@@ -543,7 +543,7 @@ class OpenMoteCC2538_bootloadThread(threading.Thread):
     def run(self):
         print 'starting bootloading on {0}'.format(self.comPort)
         subprocess.call(
-            'python '+os.path.join('bootloader','openmote-cc2538','cc2538-bsl.py')+' -e --bootloader-invert-lines -w -b 500000 -p {0} {1}'.format(self.comPort,self.hexFile),
+            'python '+os.path.join('bootloader','openmote-cc2538','cc2538-bsl.py')+' -e --bootloader-invert-lines -w -b 400000 -p {0} {1}'.format(self.comPort,self.hexFile),
             shell=True
         )
         print 'done bootloading on {0}'.format(self.comPort)
