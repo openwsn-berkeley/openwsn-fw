@@ -164,7 +164,10 @@ void sixtop_setEBPeriod(uint8_t ebPeriod) {
 }
 
 bool sixtop_setHandler(six2six_handler_t handler) {
-    if (sixtop_vars.handler == SIX_HANDLER_NONE){
+    if (
+        sixtop_vars.handler       == SIX_HANDLER_NONE &&
+        sixtop_vars.six2six_state == SIX_STATE_IDLE
+    ){
         sixtop_vars.handler = handler;
         return TRUE;
     } else {
