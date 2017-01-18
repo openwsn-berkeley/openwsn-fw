@@ -68,7 +68,23 @@ PORT_RADIOTIMER_WIDTH radiotimer_getValue(void) {
 }
 
 void radiotimer_setPeriod(PORT_RADIOTIMER_WIDTH period) {
-   TACCR0   =  period;
+    
+    PORT_RADIOTIMER_WIDTH temp;
+    
+    // this is aiming for clear the pending bit of radiotimer overflow interrupt.
+    // there are 2 cases that setperiod function is called in the protocol:
+    // 1. At the beginning of slot, used for setting new slot duration 
+    // 2. In synchronization, used for aligning slot boundary
+    // For each cases, usually there is no interrupt pending except one specifical cases:
+    //      when joining a network, a node calls synchronizePacket to calcuate new slot duration 
+    //      in side of radio end of frame interrupt routine, but radiotimer interrupt (new slot) 
+    //      happens during this routine.
+    // to make sure the new slotduration calculated in synchroinizePacket function 
+    // will not be over-written by newSlot interrupt routine following, 
+    // the radiotimer interrupt pending bit should  be cleared.
+    temp     = TAIV;
+    
+    TACCR0   =  period;
 }
 
 PORT_RADIOTIMER_WIDTH radiotimer_getPeriod(void) {
