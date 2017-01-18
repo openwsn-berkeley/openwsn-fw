@@ -891,10 +891,10 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
             sixtop_vars.six2six_state == SIX_STATE_WAIT_COUNTREQUEST_SENDDONE  ||
             sixtop_vars.six2six_state == SIX_STATE_WAIT_CLEARREQUEST_SENDDONE
         ){
-            // reset handler if the request is failed to send out
+            // reset handler and state if the request is failed to send out
+            sixtop_vars.six2six_state = SIX_STATE_IDLE;
             sixtop_vars.handler       = SIX_HANDLER_NONE;
         }
-        sixtop_vars.six2six_state = SIX_STATE_IDLE;
         openqueue_freePacketBuffer(msg);
         return;
     }
@@ -915,53 +915,50 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
     case SIX_STATE_WAIT_CLEARREQUEST_SENDDONE:
         sixtop_vars.six2six_state = SIX_STATE_WAIT_CLEARRESPONSE;
         break;
-    case SIX_STATE_WAIT_RESPONSE_SENDDONE:
-        if (msg->l2_sixtop_returnCode == IANA_6TOP_RC_SUCCESS){
-            if (
-                msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD ||
-                msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_DELETE
-            ){
-                if (numOfCells>0){
-                    for (i=0;i<numOfCells;i++){
-                        //TimeSlot 2B
-                        cellList[i].tsNum       = *(ptr);
-                        cellList[i].tsNum      |= (*(ptr+1))<<8;
-                        //Ch.Offset 2B
-                        cellList[i].choffset    = *(ptr+2);
-                        cellList[i].choffset   |= (*(ptr+3))<<8;
-                        ptr += 4;
-                        // mark with linkoptions as ocuppied
-                        cellList[i].linkoptions = CELLTYPE_TX;
-                    }
-                    if (msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD){
-                         sixtop_addCellsByState(
-                              msg->l2_sixtop_frameID,
-                              cellList,
-                              &(msg->l2_nextORpreviousHop),
-                              sixtop_vars.six2six_state);
-                    } else {
-                          sixtop_removeCellsByState(
-                              msg->l2_sixtop_frameID,
-                              cellList,
-                              &(msg->l2_nextORpreviousHop));
-                    }
+    default:
+        break;
+    }
+    
+    // in case a response is sent out, check the return code
+    if (msg->l2_sixtop_returnCode == IANA_6TOP_RC_SUCCESS){
+        if (
+            msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD ||
+            msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_DELETE
+        ){
+            if (numOfCells>0){
+                for (i=0;i<numOfCells;i++){
+                    //TimeSlot 2B
+                    cellList[i].tsNum       = *(ptr);
+                    cellList[i].tsNum      |= (*(ptr+1))<<8;
+                    //Ch.Offset 2B
+                    cellList[i].choffset    = *(ptr+2);
+                    cellList[i].choffset   |= (*(ptr+3))<<8;
+                    ptr += 4;
+                    // mark with linkoptions as ocuppied
+                    cellList[i].linkoptions = CELLTYPE_RX;
                 }
-                  
-            } else{
-                if (msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_CLEAR){
-                    schedule_removeAllCells(msg->l2_sixtop_frameID,
-                                          &(msg->l2_nextORpreviousHop));
+                if (msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD){
+                     sixtop_addCellsByState(
+                          msg->l2_sixtop_frameID,
+                          cellList,
+                          &(msg->l2_nextORpreviousHop),
+                          sixtop_vars.six2six_state);
                 } else {
-                    // the return code is RC_ERR_NORES or RC_ERR_RESET
-                    // nothing needs to do
+                      sixtop_removeCellsByState(
+                          msg->l2_sixtop_frameID,
+                          cellList,
+                          &(msg->l2_nextORpreviousHop));
                 }
             }
+        } else {
+            if (msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_CLEAR){
+                schedule_removeAllCells(msg->l2_sixtop_frameID,
+                                      &(msg->l2_nextORpreviousHop));
+            } else {
+                // the return code is RC_ERR_NORES or RC_ERR_RESET
+                // nothing needs to do
+            }
         }
-        sixtop_vars.six2six_state = SIX_STATE_IDLE;
-        break;
-    default:
-        // should never happens
-        break;
     }
   
     if (
@@ -1112,8 +1109,6 @@ void sixtop_notifyReceiveCommand(
             if (sixtop_vars.six2six_state != SIX_STATE_IDLE){
                 code = IANA_6TOP_RC_ERR_BUSY;
             } else {
-                sixtop_vars.six2six_state = SIX_STATE_REQUEST_RECEIVED;
-
                 switch(commandIdORcode){
                 case IANA_6TOP_CMD_ADD:
                 case IANA_6TOP_CMD_DELETE:
@@ -1191,15 +1186,8 @@ void sixtop_notifyReceiveCommand(
             if (sixtop_vars.isResponseEnabled){
                 // send packet
                 sixtop_send(response_pkt);
-                if (code == IANA_6TOP_RC_ERR_BUSY){
-                    // do not update status, I'm in a sixtop transaction already
-                } else {
-                    // update state
-                    sixtop_vars.six2six_state = SIX_STATE_WAIT_RESPONSE_SENDDONE;
-                }
             } else {
                 openqueue_freePacketBuffer(response_pkt);
-                sixtop_vars.six2six_state = SIX_STATE_IDLE;
             }
         } else {
             //------ if this is a return code
@@ -1393,36 +1381,16 @@ void sixtop_addCellsByState(
    //set schedule according links
    
    for(i = 0;i<SCHEDULEIEMAXNUMCELLS;i++){
-      //only schedule when the request side wants to schedule a tx cell
       if(cellList[i].linkoptions != CELLTYPE_OFF){
-         switch(state) {
-            case SIX_STATE_WAIT_RESPONSE_SENDDONE:
-               memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
-               //add a RX link
-               schedule_addActiveSlot(
-                  cellList[i].tsNum,
-                  CELLTYPE_RX,
-                  FALSE,
-                  cellList[i].choffset,
-                  &temp_neighbor
-               );
-
-               break;
-            case SIX_STATE_WAIT_ADDRESPONSE:
-               memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
-               //add a TX link
-               schedule_addActiveSlot(
-                  cellList[i].tsNum,
-                  CELLTYPE_TX,
-                  FALSE,
-                  cellList[i].choffset,
-                  &temp_neighbor
-               );
-               break;
-            default:
-               //log error
-               break;
-         }
+          memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
+          //add a RX link
+          schedule_addActiveSlot(
+              cellList[i].tsNum,
+              cellList[i].linkoptions,
+              FALSE,
+              cellList[i].choffset,
+              &temp_neighbor
+          );
       }
    }
 }
