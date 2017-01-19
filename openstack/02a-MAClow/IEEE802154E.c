@@ -888,7 +888,25 @@ port_INLINE void activity_ti1ORri1() {
       // advance the schedule
       schedule_advanceSlot();
       
+      // calculate the frequency to transmit on
+      ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset()); 
+      
       // find the next one
+      ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
+      if (idmanager_getIsSlotSkip() && idmanager_getIsDAGroot()==FALSE) {
+          if (ieee154e_vars.nextActiveSlotOffset>ieee154e_vars.slotOffset) {
+               ieee154e_vars.numOfSleepSlots = ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset;
+          } else {
+               ieee154e_vars.numOfSleepSlots = schedule_getFrameLength()+ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset; 
+          }
+          
+          radio_setTimerPeriod(TsSlotDuration*(ieee154e_vars.numOfSleepSlots));
+           
+          //increase ASN by numOfSleepSlots-1 slots as at this slot is already incremented by 1
+          for (i=0;i<ieee154e_vars.numOfSleepSlots-1;i++){
+             incrementAsnOffset();
+          }
+      }  
       ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();      
    } else {
       // this is NOT the next active slot, abort
@@ -1034,9 +1052,6 @@ port_INLINE void activity_ti2() {
    // add 2 CRC bytes only to the local copy as we end up here for each retransmission
    packetfunctions_reserveFooterSize(&ieee154e_vars.localCopyForTransmission, 2);
    
-   // calculate the frequency to transmit on
-   ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset()); 
-   
    // configure the radio for that frequency
    radio_setFrequency(ieee154e_vars.freq);
    
@@ -1152,9 +1167,6 @@ port_INLINE void activity_ti5(PORT_RADIOTIMER_WIDTH capturedTime) {
 port_INLINE void activity_ti6() {
    // change state
    changeState(S_RXACKPREPARE);
-   
-   // calculate the frequency to transmit on
-   ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset()); 
    
    // configure the radio for that frequency
    radio_setFrequency(ieee154e_vars.freq);
@@ -1367,9 +1379,6 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
 port_INLINE void activity_ri2() {
    // change state
    changeState(S_RXDATAPREPARE);
-   
-   // calculate the frequency to transmit on
-   ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset()); 
    
    // configure the radio for that frequency
    radio_setFrequency(ieee154e_vars.freq);
@@ -1647,9 +1656,6 @@ port_INLINE void activity_ri6() {
    }
     // space for 2-byte CRC
    packetfunctions_reserveFooterSize(ieee154e_vars.ackToSend,2);
-  
-    // calculate the frequency to transmit on
-   ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset()); 
    
    // configure the radio for that frequency
    radio_setFrequency(ieee154e_vars.freq);
@@ -2235,25 +2241,8 @@ function should already have been done. If this is not the case, this function
 will do that for you, but assume that something went wrong.
 */
 void endSlot() {
-    uint8_t i;
-  
    // turn off the radio
    radio_rfOff();
-   
-   if (idmanager_getIsSlotSkip() && idmanager_getIsDAGroot()==FALSE) {
-       if (ieee154e_vars.nextActiveSlotOffset>ieee154e_vars.slotOffset) {
-            ieee154e_vars.numOfSleepSlots = ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset;
-       } else {
-            ieee154e_vars.numOfSleepSlots = schedule_getFrameLength()+ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset; 
-       }
-       radio_setTimerPeriod(TsSlotDuration*(ieee154e_vars.numOfSleepSlots));
-        
-       //increase ASN by numOfSleepSlots-1 slots as at this slot is already incremented by 1
-       for (i=0;i<ieee154e_vars.numOfSleepSlots-1;i++){
-          incrementAsnOffset();
-       }
-   }
-   
    
    // compute the duty cycle if radio has been turned on
    if (ieee154e_vars.radioOnThisSlot==TRUE){  
