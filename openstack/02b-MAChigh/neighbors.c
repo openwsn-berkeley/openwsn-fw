@@ -479,7 +479,7 @@ void  neighbors_removeOld() {
         return;
     }
     
-    // remove all neighbor that either f6PNORES is set or recorded as lowest 3 rank neighbors
+    // remove all neighbors except the ones that f6PNORES flag is set or is recorded as lowest 3 rank neighbors
     for (i=0;i<MAXNUMNEIGHBORS;i++) {
         if (neighbors_vars.neighbors[i].used==1) {
             if (
