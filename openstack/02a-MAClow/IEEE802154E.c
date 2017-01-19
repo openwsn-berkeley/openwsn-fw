@@ -1984,10 +1984,12 @@ port_INLINE void channelhoppingTemplateIDStoreFromEB(uint8_t id){
 void synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived) {
    PORT_SIGNED_INT_WIDTH timeCorrection;
    PORT_RADIOTIMER_WIDTH newPeriod;
+   PORT_RADIOTIMER_WIDTH currentPeriod;
    PORT_RADIOTIMER_WIDTH currentValue;
    
    // record the current timer value and period
    currentValue                   =  radio_getTimerValue();
+   currentPeriod                  =  radio_getTimerPeriod();
    
    // calculate new period
    timeCorrection                 =  (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)timeReceived - (PORT_SIGNED_INT_WIDTH)TsTxOffset);
@@ -2003,7 +2005,7 @@ void synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived) {
    if (currentValue < timeReceived) {
        newPeriod = (PORT_RADIOTIMER_WIDTH)timeCorrection;
    } else {
-       newPeriod =  (PORT_RADIOTIMER_WIDTH)((PORT_SIGNED_INT_WIDTH)ieee154e_vars.slotDuration + timeCorrection);
+       newPeriod =  (PORT_RADIOTIMER_WIDTH)((PORT_SIGNED_INT_WIDTH)currentPeriod + timeCorrection);
    }
 
    // detect whether I'm too close to the edge of the slot, in that case,
