@@ -362,10 +362,21 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
     }
     
     // prep for loop, remember state before neighbor table scanning
-    previousDAGrank      = icmpv6rpl_vars.myDAGrank;
     prevParentIndex      = icmpv6rpl_vars.ParentIndex;
     prevHadParent        = icmpv6rpl_vars.haveParent;
     prevRankIncrease     = icmpv6rpl_vars.rankIncrease;
+    // update my rank to current parent first
+    if (icmpv6rpl_vars.haveParent==TRUE){
+        rankIncrease     = neighbors_getLinkMetric(icmpv6rpl_vars.ParentIndex);
+        neighborRank     = neighbors_getNeighborRank(icmpv6rpl_vars.ParentIndex);
+        tentativeDAGrank = (uint32_t)neighborRank+rankIncrease;
+        if (tentativeDAGrank>65535) {
+            icmpv6rpl_vars.myDAGrank = 65535;
+        } else {
+            icmpv6rpl_vars.myDAGrank = (uint16_t)tentativeDAGrank;
+        }
+    }
+    previousDAGrank      = icmpv6rpl_vars.myDAGrank;
     foundBetterParent    = FALSE;
     icmpv6rpl_vars.haveParent = FALSE;
     
