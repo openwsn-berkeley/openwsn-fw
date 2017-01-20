@@ -18,7 +18,7 @@
 #include <source/interrupt.h>
 #include <source/ioc.h>
 #include <source/sys_ctrl.h>
-#include <source/uart.h>
+#include <source/uarthal.h>
 
 
 #include "board.h"

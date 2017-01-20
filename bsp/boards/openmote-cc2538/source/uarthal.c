@@ -50,7 +50,7 @@
 #include <headers/hw_uart.h>
 #include "debug.h"
 #include "interrupt.h"
-#include "uart.h"
+#include "uarthal.h"
 
 //*****************************************************************************
 //
