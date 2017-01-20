@@ -29,7 +29,11 @@ static const uint8_t chTemplate_default[] = {
 #define US_PER_TICK                 30 // number of us per 32kHz clock tick
 #define EBPERIOD                  2000 // in miliseconds: 2000 -> EB every 2000 miseconds
 #define MAXKAPERIOD               2000 // in slots: @15ms per slot -> ~30 seconds. Max value used by adaptive synchronization.
-#define DESYNCTIMEOUT             2333 // in slots: @15ms per slot -> ~35 seconds. A larger DESYNCTIMEOUT is needed if using a larger KATIMEOUT.
+#ifdef NOADAPTIVESYNC
+    #define DESYNCTIMEOUT         2333 // in slots: @15ms per slot -> ~35 seconds. A larger DESYNCTIMEOUT is needed if using a larger KATIMEOUT.
+#else
+    #define DESYNCTIMEOUT        65535 // in slots: @15ms per slot -> ~16 minutes. Adaptive sync decreases the drift dramatically, which allow DESYNCTIMEOUT use a larger value.
+#endif
 #define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"
 #define LENGTH_IEEE154_MAX         128 // max length of a valid radio packet  
 #define DUTY_CYCLE_WINDOW_LIMIT    (0xFFFFFFFF>>1) // limit of the dutycycle window
