@@ -737,7 +737,8 @@ uint8_t iphc_retrieveIphcHeader(open_addr_t* temp_addr_16b,
     uint8_t page;
     uint8_t temp_8b;
     uint8_t ipinip_length;
-    
+    uint8_t lowpan_nhc;
+
     temp_8b = *((uint8_t*)(msg->payload)+ipv6_header->header_length+previousLen);
     
     if ((temp_8b&PAGE_DISPATCH_TAG) == PAGE_DISPATCH_TAG){
@@ -949,6 +950,16 @@ uint8_t iphc_retrieveIphcHeader(open_addr_t* temp_addr_16b,
                  break;
            }
        }
+      //TODO, check NH if compressed no?
+      if (ipv6_header->next_header_compressed){
+          lowpan_nhc = *(msg->payload+ipv6_header->header_length+previousLen);//get the next element after addresses
+          if ((lowpan_nhc & NHC_UDP_ID) == NHC_UDP_ID){ //check if it is UDP LOWPAN_NHC
+             ipv6_header->next_header = IANA_UDP;
+          }
+          else{
+              //error?
+          }
+      }
     } else {
         // we are in 6LoRH now
         if (page == 1){
