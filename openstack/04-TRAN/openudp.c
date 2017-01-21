@@ -105,7 +105,6 @@ owerror_t openudp_send(OpenQueueEntry_t* msg) {
 
        //after filling the packet we calculate the checksum
        packetfunctions_calculateChecksum(msg,checksum_position);
-       printf("sending udp packet\n");
 
    } else{
        packetfunctions_reserveHeaderSize(msg,sizeof(udp_ht));

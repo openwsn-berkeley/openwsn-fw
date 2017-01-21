@@ -200,7 +200,6 @@ void forwarding_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
             opentcp_sendDone(msg,error);
             break;
          case IANA_UDP:
-            printf("udp packet send done\n");
             openudp_sendDone(msg,error);
             break;
          case IANA_ICMPv6:
@@ -252,8 +251,6 @@ void forwarding_receive(
     memcpy(&(msg->l3_destinationAdd),&ipv6_inner_header->dest, sizeof(open_addr_t));
     memcpy(&(msg->l3_sourceAdd),     &ipv6_inner_header->src,  sizeof(open_addr_t));
 
-    printf("FW received packet 1 %d\n", msg->l3_sourceAdd.addr_64b[7] );
-
     if (
         (
             idmanager_isMyAddress(&(msg->l3_destinationAdd))
@@ -280,7 +277,6 @@ void forwarding_receive(
             icmpv6_receive(msg);
             break;
         default:
-            printf("L4 protocol is %d\n", msg->l4_protocol);
             // log error
             openserial_printError(
                 COMPONENT_FORWARDING,ERR_WRONG_TRAN_PROTOCOL,
