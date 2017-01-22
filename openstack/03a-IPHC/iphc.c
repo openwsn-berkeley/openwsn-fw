@@ -953,7 +953,7 @@ uint8_t iphc_retrieveIphcHeader(open_addr_t* temp_addr_16b,
       //TODO, check NH if compressed no?
       if (ipv6_header->next_header_compressed){
           lowpan_nhc = *(msg->payload+ipv6_header->header_length+previousLen);//get the next element after addresses
-          if ((lowpan_nhc & NHC_UDP_ID) == NHC_UDP_ID){ //check if it is UDP LOWPAN_NHC
+          if ((lowpan_nhc & NHC_UDP_MASK) == NHC_UDP_ID){ //check if it is UDP LOWPAN_NHC
              ipv6_header->next_header = IANA_UDP;
           }
           else{
