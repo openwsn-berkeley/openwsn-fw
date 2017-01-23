@@ -575,6 +575,7 @@ void sendDIO() {
    
    // set transport information
    msg->l4_protocol                         = IANA_ICMPv6;
+   msg->l4_protocol_compressed              = FALSE;
    msg->l4_sourcePortORicmpv6Type           = IANA_ICMPv6_RPL;
    
    // set DIO destination
