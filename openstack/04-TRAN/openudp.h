@@ -37,7 +37,7 @@ enum UDP_PORTS_enums {
 typedef struct {
    uint16_t port_src;
    uint16_t port_dest;
-   uint16_t length;
+   uint16_t length; // this should not be here. See RFC6282 section 4.3.3.
    uint16_t checksum;
 } udp_ht;
 
