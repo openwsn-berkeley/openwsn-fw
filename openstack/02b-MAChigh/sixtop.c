@@ -219,20 +219,18 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells){
         if (sixtop_candidateAddCellList(&frameID,cellList,numCells)==FALSE){
               sixtop_vars.handler = SIX_HANDLER_NONE;
               return;
-        } else{
-            // container to be define by SF, currently equals to frameID
-            container  = frameID;
         }
     }
     if (code == IANA_6TOP_CMD_DELETE){
         if (sixtop_candidateRemoveCellList(&frameID,cellList,neighbor,numCells)==FALSE){
               sixtop_vars.handler = SIX_HANDLER_NONE;
               return;
-        } else{
-            // container to be define by SF, currently equals to frameID
-            container  = frameID;
         }
     }
+    
+    // container to be define by SF, currently equals to frameID
+    frameID        = SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;
+    container      = frameID;
     
     // get a free packet buffer
     pkt = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP_RES);
