@@ -5,6 +5,7 @@ import subprocess
 import platform
 import distutils.sysconfig
 import sconsUtils
+import glob
 from tools import qtcreator as q
 
 Import('env')
@@ -164,7 +165,7 @@ elif env['toolchain']=='iar':
 
 elif env['toolchain']=='iar-proj':
     
-    if env['board'] not in ['telosb','gina','wsn430v13b','wsn430v14','z1','openmotestm','agilefox','OpenMote-CC2538','iot-lab_M3']:
+    if env['board'] not in ['telosb','gina','wsn430v13b','wsn430v14','z1','openmotestm','agilefox','openmote-cc2538','iot-lab_M3']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     env['IAR_EW430_INSTALLDIR'] = os.environ['IAR_EW430_INSTALLDIR']
@@ -194,10 +195,14 @@ elif env['toolchain']=='iar-proj':
     
 elif env['toolchain']=='armgcc':
     
-    if env['board'] not in ['OpenMote-CC2538','iot-lab_M3','iot-lab_A8-M3','openmotestm', 'samr21_xpro']:
+    if env['board'] not in ['openmote-cc2538','iot-lab_M3','iot-lab_A8-M3','openmotestm', 'samr21_xpro']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
-    if   env['board']=='OpenMote-CC2538':
+    if   env['board']=='openmote-cc2538':
+        if env['revision'] == "A1":
+            linker_file = 'cc2538sf23.lds'
+        else:
+            linker_file = 'cc2538sf53.lds'
         
         # compiler (C)
         env.Replace(CC           = 'arm-none-eabi-gcc')
@@ -214,7 +219,7 @@ elif env['toolchain']=='armgcc':
         env.Replace(AS           = 'arm-none-eabi-as')
         env.Append(ASFLAGS       = '-ggdb -g3 -mcpu=cortex-m3 -mlittle-endian')
         # linker
-        env.Append(LINKFLAGS     = '-Tbsp/boards/OpenMote-CC2538/cc2538.lds')
+        env.Append(LINKFLAGS     = '-Tbsp/boards/openmote-cc2538/' + linker_file)
         env.Append(LINKFLAGS     = '-nostartfiles')
         env.Append(LINKFLAGS     = '-Wl,-Map,${TARGET.base}.map')
         env.Append(LINKFLAGS     = '-mcpu=cortex-m3')
@@ -444,6 +449,43 @@ if env['jtag']:
 
 #============================ bootload ========================================
 
+##
+# Pass a list, a range or all ports to do the bootloading
+# list  -> /dev/ttyUSB0,ttyUSB1,/dev/ttyUSB2
+# range -> /dev/ttyUSB[0-2] = /dev/ttyUSB0,ttyUSB1,/dev/ttyUSB2
+# all   -> /dev/ttyUSBX = /dev/ttyUSB0,ttyUSB1,/dev/ttyUSB2
+##
+def expandBootloadPortList(ports):
+    # Process only when there is a single port
+    if (len(ports) == 1):
+        port  = ports[0]
+        ports = []
+        last_char = port[-1:]
+        base_dir  = os.path.dirname(port)      
+
+        # /dev/ttyUSBX means bootload all ttyUSB ports
+        if (last_char == "X"):
+            base_file = os.path.basename(port[:-1])
+            ports     = sorted(glob.glob(os.path.join(base_dir, base_file) + "*"))
+
+        # /dev/ttyUSB[1-2] means bootload a range of ttyUSB ports
+        elif (last_char == "]"):
+            base_file   = os.path.basename(port.split('[')[0])
+            first, last = sorted(map(int, ((port.split('['))[1].split(']')[0]).split('-')))
+
+            # For all elements in range
+            for i in range(first, last + 1):
+                p = os.path.join(base_dir, base_file + str(i))
+                ports.append(p)
+        else:
+            ports = [port]
+
+    # Check if new list is empty
+    if (not ports):
+        raise SystemError("Bootload port expansion is empty or erroneous!")
+
+    return ports
+
 class telosb_bootloadThread(threading.Thread):
     def __init__(self,comPort,hexFile,countingSem):
         
@@ -501,7 +543,7 @@ class OpenMoteCC2538_bootloadThread(threading.Thread):
     def run(self):
         print 'starting bootloading on {0}'.format(self.comPort)
         subprocess.call(
-            'python '+os.path.join('bootloader','OpenMote-CC2538','cc2538-bsl.py')+' -e -w -b 400000 -p {0} {1}'.format(self.comPort,self.hexFile),
+            'python '+os.path.join('bootloader','openmote-cc2538','cc2538-bsl.py')+' -e --bootloader-invert-lines -w -b 400000 -p {0} {1}'.format(self.comPort,self.hexFile),
             shell=True
         )
         print 'done bootloading on {0}'.format(self.comPort)
@@ -512,8 +554,15 @@ class OpenMoteCC2538_bootloadThread(threading.Thread):
 def OpenMoteCC2538_bootload(target, source, env):
     bootloadThreads = []
     countingSem     = threading.Semaphore(0)
+
+    # Enumerate ports
+    comPorts = env['bootload'].split(',')
+
+    # Check comPorts to bootload
+    comPorts = expandBootloadPortList(comPorts)
+
     # create threads
-    for comPort in env['bootload'].split(','):
+    for comPort in comPorts:
         bootloadThreads += [
             OpenMoteCC2538_bootloadThread(
                 comPort      = comPort,
@@ -625,7 +674,7 @@ def BootloadFunc():
             suffix      = '.phonyupload',
             src_suffix  = '.ihex',
         )
-    elif env['board']=='OpenMote-CC2538':
+    elif env['board']=='openmote-cc2538':
         return Builder(
             action      = OpenMoteCC2538_bootload,
             suffix      = '.phonyupload',

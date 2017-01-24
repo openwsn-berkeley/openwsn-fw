@@ -3,6 +3,7 @@
 
 \author Malisa Vucinic <malishav@gmail.com>, March 2015.
 */
+
 #ifndef __CC2538_CRYPTO_ENGINE_H__
 #define __CC2538_CRYPTO_ENGINE_H__
 

@@ -89,7 +89,7 @@ enum {
    //UDP
    WKP_UDP_COAP                        =    5683,
    WKP_UDP_ECHO                        =       7,
-   WKP_UDP_INJECT                      =    2000,
+   WKP_UDP_INJECT                      =   61617,// 0xf0b1
    WKP_UDP_RINGMASTER                  =   15000,
    WKP_UDP_SERIALBRIDGE                =    2001,
 };

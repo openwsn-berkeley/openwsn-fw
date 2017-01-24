@@ -888,6 +888,9 @@ port_INLINE void activity_ti1ORri1() {
       // advance the schedule
       schedule_advanceSlot();
       
+      // calculate the frequency to transmit on
+      ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset()); 
+      
       // find the next one
       ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
       if (idmanager_getIsSlotSkip() && idmanager_getIsDAGroot()==FALSE) {
@@ -903,7 +906,8 @@ port_INLINE void activity_ti1ORri1() {
           for (i=0;i<ieee154e_vars.numOfSleepSlots-1;i++){
              incrementAsnOffset();
           }
-      }       
+      }  
+      ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();      
    } else {
       // this is NOT the next active slot, abort
       // stop using serial
@@ -1048,9 +1052,6 @@ port_INLINE void activity_ti2() {
    // add 2 CRC bytes only to the local copy as we end up here for each retransmission
    packetfunctions_reserveFooterSize(&ieee154e_vars.localCopyForTransmission, 2);
    
-   // calculate the frequency to transmit on
-   ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset()); 
-   
    // configure the radio for that frequency
    radio_setFrequency(ieee154e_vars.freq);
    
@@ -1166,9 +1167,6 @@ port_INLINE void activity_ti5(PORT_RADIOTIMER_WIDTH capturedTime) {
 port_INLINE void activity_ti6() {
    // change state
    changeState(S_RXACKPREPARE);
-   
-   // calculate the frequency to transmit on
-   ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset()); 
    
    // configure the radio for that frequency
    radio_setFrequency(ieee154e_vars.freq);
@@ -1336,7 +1334,7 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
       // check the security level of the ACK frame and decrypt/authenticate
       if (ieee154e_vars.ackReceived->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
           if (IEEE802154_SECURITY.incomingFrame(ieee154e_vars.ackReceived) != E_SUCCESS) {
-         	 break;
+             break;
           }
       } // checked if unsecured frame should pass during header retrieval
       
@@ -1381,9 +1379,6 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
 port_INLINE void activity_ri2() {
    // change state
    changeState(S_RXDATAPREPARE);
-   
-   // calculate the frequency to transmit on
-   ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset()); 
    
    // configure the radio for that frequency
    radio_setFrequency(ieee154e_vars.freq);
@@ -1540,7 +1535,7 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       // if security is enabled, decrypt/authenticate the frame.
       if (ieee154e_vars.dataReceived->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
          if (IEEE802154_SECURITY.incomingFrame(ieee154e_vars.dataReceived) != E_SUCCESS) {
-        	 break;
+             break;
          }
       } // checked if unsecured frame should pass during header retrieval
 
@@ -1654,16 +1649,13 @@ port_INLINE void activity_ri6() {
    // if security is enabled, encrypt directly in OpenQueue as there are no retransmissions for ACKs
    if (ieee154e_vars.ackToSend->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
       if (IEEE802154_SECURITY.outgoingFrame(ieee154e_vars.ackToSend) != E_SUCCESS) {
-     	   openqueue_freePacketBuffer(ieee154e_vars.ackToSend);
-     	   endSlot();
-     	   return;
+           openqueue_freePacketBuffer(ieee154e_vars.ackToSend);
+           endSlot();
+           return;
       }
    }
     // space for 2-byte CRC
    packetfunctions_reserveFooterSize(ieee154e_vars.ackToSend,2);
-  
-    // calculate the frequency to transmit on
-   ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset()); 
    
    // configure the radio for that frequency
    radio_setFrequency(ieee154e_vars.freq);
@@ -1992,25 +1984,36 @@ port_INLINE void channelhoppingTemplateIDStoreFromEB(uint8_t id){
 void synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived) {
    PORT_SIGNED_INT_WIDTH timeCorrection;
    PORT_RADIOTIMER_WIDTH newPeriod;
-   PORT_RADIOTIMER_WIDTH currentValue;
    PORT_RADIOTIMER_WIDTH currentPeriod;
+   PORT_RADIOTIMER_WIDTH currentValue;
    
    // record the current timer value and period
    currentValue                   =  radio_getTimerValue();
    currentPeriod                  =  radio_getTimerPeriod();
    
    // calculate new period
-   timeCorrection                 =  (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)timeReceived-(PORT_SIGNED_INT_WIDTH)TsTxOffset);
+   timeCorrection                 =  (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)timeReceived - (PORT_SIGNED_INT_WIDTH)TsTxOffset);
 
-   newPeriod                      =  ieee154e_vars.slotDuration;
-   
+
+   // The interrupt beginning a new slot can either occur after the packet has been
+   // or while it is being received, possibly because the mote is not yet synchronized.
+   // In the former case we simply take the usual slotLength and correct it.
+   // In the latter case the timer did already roll over and
+   // currentValue < timeReceived. slotLength did then already pass which is why
+   // we need the new slot to end after the remaining time which is timeCorrection
+   // and in this constellation is guaranteed to be positive.
+   if (currentValue < timeReceived) {
+       newPeriod = (PORT_RADIOTIMER_WIDTH)timeCorrection;
+   } else {
+       newPeriod =  (PORT_RADIOTIMER_WIDTH)((PORT_SIGNED_INT_WIDTH)currentPeriod + timeCorrection);
+   }
+
    // detect whether I'm too close to the edge of the slot, in that case,
    // skip a slot and increase the temporary slot length to be 2 slots long
-   if (currentValue<timeReceived || currentPeriod-currentValue<RESYNCHRONIZATIONGUARD) {
+   if ((PORT_SIGNED_INT_WIDTH)newPeriod - (PORT_SIGNED_INT_WIDTH)currentValue < (PORT_SIGNED_INT_WIDTH)RESYNCHRONIZATIONGUARD) {
       newPeriod                  +=  ieee154e_vars.slotDuration;
       incrementAsnOffset();
    }
-   newPeriod                      =  (PORT_RADIOTIMER_WIDTH)((PORT_SIGNED_INT_WIDTH)newPeriod+timeCorrection);
    
    // resynchronize by applying the new period
    radio_setTimerPeriod(newPeriod);
@@ -2240,9 +2243,9 @@ function should already have been done. If this is not the case, this function
 will do that for you, but assume that something went wrong.
 */
 void endSlot() {
-  
    // turn off the radio
    radio_rfOff();
+   
    // compute the duty cycle if radio has been turned on
    if (ieee154e_vars.radioOnThisSlot==TRUE){  
       ieee154e_vars.radioOnTics+=(radio_getTimerValue()-ieee154e_vars.radioOnInit);

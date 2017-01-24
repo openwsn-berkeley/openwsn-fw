@@ -4,13 +4,17 @@
 \author Malisa Vucinic <malishav@gmail.com>, March 2015.
 */
 #include <stdint.h>
+
 #include <headers/hw_sys_ctrl.h>
-#include "sys_ctrl.h"
+
+#include <source/sys_ctrl.h>
+#include <source/aes.h>
+#include <source/ccm.h>
+
 #include "cc2538_crypto_engine.h"
+
 #include "aes_ctr.h"
 #include "aes_cbc.h"
-#include "aes.h"  // CC2538 specific headers
-#include "ccm.h"  // CC2538 specific headers
 
 #define DEFAULT_KEY_AREA KEY_AREA_0
 /**

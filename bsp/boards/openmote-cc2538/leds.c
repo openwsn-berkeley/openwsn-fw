@@ -5,14 +5,17 @@
  * Description: CC2538-specific definition of the "leds" bsp module.
  */
 
+#include <stdint.h>
+
 #include <headers/hw_memmap.h>
 #include <headers/hw_types.h>
 
-#include "stdint.h"
-#include "leds.h"
-#include "gpio.h"
-#include "board.h"
+#include <source/gpio.h>
 
+#include "board.h"
+#include "leds.h"
+
+//=========================== defines =========================================
 
 // Board LED defines
 #define BSP_LED_BASE            GPIO_C_BASE
@@ -25,8 +28,6 @@
                                  BSP_LED_2 | \
                                  BSP_LED_3 | \
                                  BSP_LED_4)     //!< Bitmask of all LEDs
-
-//=========================== defines =========================================
 
 //=========================== variables =======================================
 
