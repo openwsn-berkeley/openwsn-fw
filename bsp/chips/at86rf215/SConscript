@@ -1,0 +1,13 @@
+# chip support sconscripts are expected to return a list of objects, so
+# that they can be included in a board bsp library. This allows the board
+# to include the chip support without knowing exactly what the filenames
+# are or where they live.
+
+Import('env')
+
+localEnv = env.Clone()
+
+source = ['radio.c']
+rf231  = localEnv.Object(source=source)
+
+Return('rf231')

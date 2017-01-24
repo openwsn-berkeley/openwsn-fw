@@ -4,7 +4,7 @@
 \author Alaeddine Weslati <alaeddine.weslati@inria.fr>, January 2014.
 */
 
-#include "stm32f10x_lib.h"
+#include "stm32f10x_conf.h"
 #include "leds.h"
 
 //=========================== defines =========================================
@@ -72,7 +72,12 @@ uint8_t leds_error_isOn()
   }
   return bitstatus;
 }
-void leds_error_blink() {}
+void leds_error_blink() {
+    for(int i=0;i<16;i++) {
+        leds_error_toggle();
+        Delay();
+    }
+}
 
 // green
 void leds_sync_on()
@@ -131,7 +136,10 @@ uint8_t leds_radio_isOn()
 void leds_debug_on() {}
 void leds_debug_off() {}
 void leds_debug_toggle() {}
-uint8_t leds_debug_isOn() {}
+uint8_t leds_debug_isOn() {
+  // IoT-lab_M3 does not have a debug led
+  return 0;
+}
 
 void leds_all_on()
 {

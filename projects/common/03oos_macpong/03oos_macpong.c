@@ -146,6 +146,7 @@ void icmpv6rpl_setMyDAGrank(dagrank_t rank)                          { return; }
 void icmpv6rpl_killPreferredParent(void)                             { return; }
 void icmpv6rpl_updateMyDAGrankAndParentSelection(void)               { return; }
 void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t* msg)                  { return; }
+void icmpv6echo_setIsReplyEnabled(bool isEnabled)                    { return; }
 
 
 

@@ -3,7 +3,6 @@
 
 On openmoteSTM32, we use RTC for the radiotimer module.
 
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 \author Chang Tengfei <tengfei.chang@gmail.com>,  July 2012.
 */
 
@@ -84,11 +83,11 @@ void radiotimer_start(PORT_RADIOTIMER_WIDTH period) {
     RTC_SetCounter(0);
     RTC_WaitForLastTask();
 
-    // Set the RTC time alarm(the length of slot)
-    RTC_SetAlarm(period);
-    RTC_WaitForLastTask();
-    
     radiotimer_vars.currentSlotPeriod = period >> 1;
+    
+    // Set the RTC time alarm(the length of slot)
+    RTC_SetAlarm(radiotimer_vars.currentSlotPeriod);
+    RTC_WaitForLastTask();
     
     //interrupt when reach alarm value
     RTC_ClearFlag(RTC_IT_ALR);
@@ -113,6 +112,7 @@ void radiotimer_start(PORT_RADIOTIMER_WIDTH period) {
 //===== direct access
 
 PORT_RADIOTIMER_WIDTH radiotimer_getValue() {
+    
     RTC_WaitForSynchro();
     uint32_t counter = RTC_GetCounter();
     counter = counter << 1;
@@ -205,41 +205,42 @@ inline PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime() {
 //=========================== interrupt handlers ==============================
 
 kick_scheduler_t radiotimer_isr() {
-   uint8_t taiv_temp = radiotimer_vars.overflowORcompare;
-   switch (taiv_temp) {
-      case RADIOTIMER_COMPARE:
-         if (radiotimer_vars.compare_cb!=NULL) {
-            RCC_Wakeup();
-            // call the callback
-            radiotimer_vars.compare_cb();
-            // kick the OS
-            return KICK_SCHEDULER;
-         }
-         break;
-      case RADIOTIMER_OVERFLOW: // timer overflows
-         if (radiotimer_vars.overflow_cb!=NULL) {
-           
-            //Wait until last write operation on RTC registers has finished
-            RTC_WaitForLastTask();                            
+    uint8_t taiv_temp = radiotimer_vars.overflowORcompare;
+    switch (taiv_temp) {
+        case RADIOTIMER_COMPARE:
+            if (radiotimer_vars.compare_cb!=NULL) {
+                
+                RCC_Wakeup();
+                // call the callback
+                radiotimer_vars.compare_cb();
+                // kick the OS
+                return KICK_SCHEDULER;
+            }
+            break;
+        case RADIOTIMER_OVERFLOW: // timer overflows
+            if (radiotimer_vars.overflow_cb!=NULL) {
             
-            DISABLE_INTERRUPTS();
+                //Wait until last write operation on RTC registers has finished
+                RTC_WaitForLastTask();                            
             
-            //Set the RTC time counter to 0
-            RTC_SetCounter(0x00000000);
-            RTC_WaitForLastTask();
+                DISABLE_INTERRUPTS();
             
-            ENABLE_INTERRUPTS();
+                //Set the RTC time counter to 0
+                RTC_SetCounter(0x00000000);
+                RTC_WaitForLastTask();
             
-            RCC_Wakeup();
-            // call the callback
-            radiotimer_vars.overflow_cb();
-            // kick the OS
-            return KICK_SCHEDULER;
-         }
-         break;
-      case RADIOTIMER_NONE:                     // this should not happen
-      default:
-         while(1);                               // this should not happen
-   }
-  return DO_NOT_KICK_SCHEDULER;
+                ENABLE_INTERRUPTS();
+            
+                RCC_Wakeup();
+                // call the callback
+                radiotimer_vars.overflow_cb();
+                // kick the OS
+                return KICK_SCHEDULER;
+            }
+            break;
+        case RADIOTIMER_NONE:                     // this should not happen
+        default:
+            while(1);                               // this should not happen
+    }
+    return DO_NOT_KICK_SCHEDULER;
 }

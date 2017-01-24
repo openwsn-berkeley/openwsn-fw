@@ -72,7 +72,12 @@ uint8_t leds_error_isOn()
   }
   return bitstatus;
 }
-void leds_error_blink() {}
+void leds_error_blink() {
+    for(int i=0;i<16;i++) {
+        leds_error_toggle();
+        Delay();
+    }
+}
 
 // green
 void leds_sync_on()
