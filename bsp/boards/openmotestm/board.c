@@ -23,21 +23,28 @@
 
 //Configures the different GPIO ports as Analog Inputs.
 void GPIO_Config_ALL_AIN(void);
+// configure the hard fault exception
+void board_enableHardFaultExceptionHandler();
 
 //=========================== main ============================================
 
 extern int mote_main();
 
 int main() {
-   return mote_main();
+    return mote_main();
 }
 
 //=========================== public ==========================================
 
-void board_init()
-{
-    RCC_Configuration();//Configure rcc
-    NVIC_Configuration();//configure NVIC and Vector Table
+void board_init(){
+    
+    //Configure rcc
+    RCC_Configuration();
+    //configure NVIC and Vector Table
+    NVIC_Configuration();
+    
+    // configure hardfault exception
+    board_enableHardFaultExceptionHandler();
     
     //configure ALL GPIO to AIN to get lowest power
     GPIO_Config_ALL_AIN();
@@ -105,7 +112,7 @@ void board_sleep() {
 
 
 void board_reset(){
-  NVIC_GenerateSystemReset();
+    NVIC_GenerateSystemReset();
 }
 
 // ========================== private =========================================
@@ -115,33 +122,39 @@ void board_reset(){
   * @param  None
   * @retval : None
   */
-void GPIO_Config_ALL_AIN(void)
-{
-  GPIO_InitTypeDef GPIO_InitStructure;
+void GPIO_Config_ALL_AIN(void){
+    GPIO_InitTypeDef GPIO_InitStructure;
 
-  /* Enable GPIOD and GPIOE clock */
-  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB 
+    /* Enable GPIOD and GPIOE clock */
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB 
                          | RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOD 
                          | RCC_APB2Periph_AFIO, ENABLE);
-  
+
     /* PA  */
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_All;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
-  GPIO_Init(GPIOA, &GPIO_InitStructure);
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_All;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
       /* PB  */
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_All;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
-  GPIO_Init(GPIOB, &GPIO_InitStructure);
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_All;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
+    GPIO_Init(GPIOB, &GPIO_InitStructure);
       /* PC  */
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_All;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
-  GPIO_Init(GPIOC, &GPIO_InitStructure);
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_All;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
+    GPIO_Init(GPIOC, &GPIO_InitStructure);
         /* PD  */
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_All;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
-  GPIO_Init(GPIOD, &GPIO_InitStructure);
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_All;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
+    GPIO_Init(GPIOD, &GPIO_InitStructure);
 }
 
+void board_enableHardFaultExceptionHandler(){
+    // Configures:
+    //    bit9. stack alignment on exception entry 
+    //    bit4. enables faulting
+    //    bit3. unaligned access traps
+    SCB->CCR = 0x00000210;
+}
 
  
 

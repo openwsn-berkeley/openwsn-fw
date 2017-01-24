@@ -79,7 +79,8 @@ enum {
     COMMAND_SET_SLOTDURATION      = 14,
     COMMAND_SET_6PRESPONSE        = 15,
     COMMAND_SET_UINJECTPERIOD     = 16,
-    COMMAND_MAX                   = 17,
+    COMMAND_SET_ECHO_REPLY_STATUS = 17,
+    COMMAND_MAX                   = 18,
 };
 
 //=========================== variables =======================================

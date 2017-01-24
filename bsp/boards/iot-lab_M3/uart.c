@@ -6,7 +6,7 @@
 \author Elodie Morin <elodie.morin@imag.fr>, July 2015.
 */
 
-#include "stm32f10x_lib.h"
+#include "stm32f10x_conf.h"
 #include "stdio.h"
 #include "stdint.h"
 #include "string.h"
@@ -62,8 +62,7 @@ void uart_init() {
     USART_Init(USART1, &USART_InitStructure);
     
     // make sure no interrupts fire as we enable the UART
-    uart_clearTxInterrupts();
-    uart_clearRxInterrupts();
+    uart_disableInterrupts();
     
     // enable USART1
     USART_Cmd(USART1, ENABLE);
@@ -87,23 +86,18 @@ void uart_disableInterrupts() {
     USART_ITConfig(USART1, USART_IT_RXNE, DISABLE);
 }
 
-void uart_clearRxInterrupts() {
-    USART_ClearFlag(USART1, USART_FLAG_RXNE);
-}
+void uart_clearRxInterrupts(){}
 
 void uart_clearTxInterrupts() {
     USART_ClearFlag(USART1, USART_FLAG_TC);
 }
 
 void uart_writeByte(uint8_t byteToWrite) {
-    USART_SendData(USART1, byteToWrite);
+    USART_SendData(USART1,(uint16_t)byteToWrite);
 }
 
 uint8_t uart_readByte() {
-    uint16_t temp;
-
-    temp = USART_ReceiveData(USART1);
-    return (uint8_t)temp;
+    return (uint8_t)USART_ReceiveData(USART1);
 }
 
 //=========================== interrupt handlers ==============================
@@ -115,7 +109,6 @@ kick_scheduler_t uart_tx_isr() {
 }
 
 kick_scheduler_t uart_rx_isr() {
-    uart_clearRxInterrupts();
     uart_vars.rxCb();
     return DO_NOT_KICK_SCHEDULER;
 }

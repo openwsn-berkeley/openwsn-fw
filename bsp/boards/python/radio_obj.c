@@ -287,7 +287,7 @@ void radio_rfOff(OpenMote* self) {
 
 //===== TX
 
-void radio_loadPacket(OpenMote* self, uint8_t* packet, uint8_t len) {
+void radio_loadPacket(OpenMote* self, uint8_t* packet, uint16_t len) {
    PyObject*   pkt;
    PyObject*   arglist;
    PyObject*   result;

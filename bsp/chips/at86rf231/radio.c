@@ -125,6 +125,7 @@ void radio_setFrequency(uint8_t frequency) {
 
 void radio_rfOn() {
    PORT_PIN_RADIO_RESET_LOW();
+   PORT_PIN_RADIO_RESET_HIGH();
 }
 
 void radio_rfOff() {
@@ -146,7 +147,7 @@ void radio_rfOff() {
 
 //===== TX
 
-void radio_loadPacket(uint8_t* packet, uint8_t len) {
+void radio_loadPacket(uint8_t* packet, uint16_t len) {
    // change state
    radio_vars.state = RADIOSTATE_LOADING_PACKET;
    

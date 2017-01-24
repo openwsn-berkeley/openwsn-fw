@@ -21,6 +21,7 @@
 #include "openhdlc.h"
 #include "schedule.h"
 #include "icmpv6rpl.h"
+#include "icmpv6echo.h"
 #include "sf0.h"
 
 //=========================== variables =======================================
@@ -626,8 +627,11 @@ void openserial_handleCommands(void){
             if (foundNeighbor==FALSE) {
                 break;
             }
-             
-            sixtop_setHandler(SIX_HANDLER_SF0);
+            
+            if (sixtop_setHandler(SIX_HANDLER_SF0)==FALSE){
+                // one sixtop transcation is happening, only one instance at one time
+                return;
+            }
             if ( 
                 (
                   commandId != COMMAND_SET_6P_ADD &&
@@ -669,6 +673,18 @@ void openserial_handleCommands(void){
             break;
        case COMMAND_SET_UINJECTPERIOD:
             sf0_appPktPeriod(comandParam_8);
+            break;
+       case COMMAND_SET_ECHO_REPLY_STATUS:
+            if (comandParam_8 == 1) {
+                icmpv6echo_setIsReplyEnabled(TRUE);
+            } else {
+                if (comandParam_8 == 0) {
+                    icmpv6echo_setIsReplyEnabled(FALSE);
+                } else {
+                    // ack reply
+                    break;
+                }
+            }
             break;
        default:
            // wrong command ID

@@ -16,6 +16,7 @@
 
 typedef struct {
    uint8_t numAppPacketsPerSlotFrame;
+   uint8_t backoff;
 } sf0_vars_t;
 
 //=========================== module variables ================================
@@ -30,6 +31,8 @@ void      sf0_notif_removedCell(void);
 // notification from schedule
 void      sf0_notifyNewSlotframe(void);
 void      sf0_appPktPeriod(uint8_t numAppPacketsPerSlotFrame);
+
+void      sf0_setBackoff(uint8_t value);
 /**
 \}
 \}

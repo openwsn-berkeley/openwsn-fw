@@ -25,6 +25,7 @@
 #include "uart.h"
 #include "debugpins.h"
 #include "rcc.h"
+#include "board.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -54,10 +55,8 @@ void NMIException(void)
 *******************************************************************************/
 void HardFaultException(void)
 {
-  /* Go to infinite loop when Hard Fault exception occurs */
-  while (1)
-  {
-  }
+  /* reset when Hard Fault exception occurs */
+  board_reset();
 }
 
 /*******************************************************************************

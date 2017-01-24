@@ -89,7 +89,15 @@ owerror_t c6t_receive(
             break;
          }
          
-         sixtop_setHandler(SIX_HANDLER_SF0);
+         if (sixtop_setHandler(SIX_HANDLER_SF0)==FALSE){
+            // one sixtop transcation is happening, only one instance at one time
+            
+            // set the CoAP header
+            coap_header->Code             = COAP_CODE_RESP_CHANGED;
+           
+            outcome                       = E_FAIL;
+            break;
+         }
          // call sixtop
          sixtop_request(
             IANA_6TOP_CMD_ADD,
@@ -118,7 +126,15 @@ owerror_t c6t_receive(
             break;
          }
          
-         sixtop_setHandler(SIX_HANDLER_SF0);
+         if (sixtop_setHandler(SIX_HANDLER_SF0)==FALSE){
+            // one sixtop transcation is happening, only one instance at one time
+            
+            // set the CoAP header
+            coap_header->Code             = COAP_CODE_RESP_CHANGED;
+           
+            outcome                       = E_FAIL;
+            break;
+         }
          // call sixtop
          sixtop_request(
             IANA_6TOP_CMD_DELETE,

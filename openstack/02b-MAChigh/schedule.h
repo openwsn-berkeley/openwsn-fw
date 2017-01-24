@@ -173,8 +173,6 @@ owerror_t          schedule_removeActiveSlot(
    open_addr_t*         neighbor
 );
 bool               schedule_isSlotOffsetAvailable(uint16_t slotOffset);
-// return the slot info which has a poor quality
-scheduleEntry_t*  schedule_statistic_poorLinkQuality(void);
 uint16_t          schedule_getCellsCounts(
     uint8_t frameID,
     cellType_t type,
@@ -186,7 +184,7 @@ void              schedule_removeAllCells(
 );
 scheduleEntry_t*  schedule_getCurrentScheduleEntry(void);
 uint8_t           schedule_getNumOfSlotsByType(cellType_t type);
-
+uint8_t           schedule_getNumberOfFreeEntries();
 // from IEEE802154E
 void               schedule_syncSlotOffset(slotOffset_t targetSlotOffset);
 void               schedule_advanceSlot(void);
@@ -205,6 +203,7 @@ void               schedule_indicateTx(
                         bool      succesfullTx
                    );
 
+void               schedule_housekeeping();
 /**
 \}
 \}
