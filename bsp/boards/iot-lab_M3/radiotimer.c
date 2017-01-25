@@ -3,13 +3,12 @@
 
 On openmoteSTM32, we use RTC for the radiotimer module.
 
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 \author Chang Tengfei <tengfei.chang@gmail.com>,  July 2012.
 */
 
 #include "stdint.h"
 
-#include "stm32f10x_lib.h"
+#include "stm32f10x_conf.h"
 #include "leds.h"
 #include "radiotimer.h"
 #include "board.h"
@@ -30,10 +29,10 @@ typedef struct {
    radiotimer_compare_cbt    overflow_cb;
    radiotimer_compare_cbt    compare_cb;
    uint8_t                   overflowORcompare;//indicate RTC alarm interrupt status
-   uint16_t                  currentSlotPeriod;
+   PORT_RADIOTIMER_WIDTH                  currentSlotPeriod;
 } radiotimer_vars_t;
 
-volatile radiotimer_vars_t radiotimer_vars;
+radiotimer_vars_t radiotimer_vars;
 
 //=========================== prototypes ======================================
 
@@ -62,7 +61,7 @@ void radiotimer_setEndFrameCb(radiotimer_capture_cbt cb) {
    while(1);
 }
 
-void radiotimer_start(uint16_t period) {
+void radiotimer_start(PORT_RADIOTIMER_WIDTH period) {
     //enable BKP and PWR, Clock
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_BKP|RCC_APB1Periph_PWR , ENABLE);
     
@@ -84,11 +83,11 @@ void radiotimer_start(uint16_t period) {
     RTC_SetCounter(0);
     RTC_WaitForLastTask();
 
-    // Set the RTC time alarm(the length of slot)
-    RTC_SetAlarm(period);
-    RTC_WaitForLastTask();
+    radiotimer_vars.currentSlotPeriod = period >> 1;
     
-    radiotimer_vars.currentSlotPeriod = period;
+    // Set the RTC time alarm(the length of slot)
+    RTC_SetAlarm(radiotimer_vars.currentSlotPeriod);
+    RTC_WaitForLastTask();
     
     //interrupt when reach alarm value
     RTC_ClearFlag(RTC_IT_ALR);
@@ -107,32 +106,33 @@ void radiotimer_start(uint16_t period) {
     EXTI_Init(&EXTI_InitStructure);
     
     //Configure RTC Alarm interrupt:
-    //Configure NVIC: Preemption Priority = 1 and Sub Priority = 0
-    NVIC_InitTypeDef NVIC_InitStructure;
-    NVIC_InitStructure.NVIC_IRQChannel                    = RTCAlarm_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority  = 1;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority         = 0;
-    NVIC_InitStructure.NVIC_IRQChannelCmd                 = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
+    NVIC_radiotimer();
 }
 
 //===== direct access
 
-uint16_t radiotimer_getValue() {
+PORT_RADIOTIMER_WIDTH radiotimer_getValue() {
+    
     RTC_WaitForSynchro();
     uint32_t counter = RTC_GetCounter();
-    return (uint16_t)counter;
+    counter = counter << 1;
+    return (PORT_RADIOTIMER_WIDTH)counter;
 }
 
-void radiotimer_setPeriod(uint16_t period) {
+void radiotimer_setPeriod(PORT_RADIOTIMER_WIDTH period) {
+  
+    period = period >> 1;
 
     RTC_ITConfig(RTC_IT_ALR, DISABLE);
     //need to disable radio also in case that a radio interrupt is happening when set Alarm value
     
+    DISABLE_INTERRUPTS();
     
     //Reset RTC Counter to begin a new slot
     RTC_SetAlarm(period);
     RTC_WaitForLastTask();
+    
+    ENABLE_INTERRUPTS();
     
     radiotimer_vars.currentSlotPeriod = period;
     
@@ -142,21 +142,31 @@ void radiotimer_setPeriod(uint16_t period) {
     RTC_ITConfig(RTC_IT_ALR, ENABLE);
 }
 
-uint16_t radiotimer_getPeriod() {
+PORT_RADIOTIMER_WIDTH radiotimer_getPeriod() {
     RTC_WaitForSynchro();
-    uint32_t period = RTC_GetAlarm();
-    return (uint16_t)period;
+    uint16_t tmp = 0;
+    tmp = RTC->ALRL;
+    uint32_t period = (((uint32_t)RTC->ALRH << 16 ) | tmp);
+    period = period <<1;
+    return (PORT_RADIOTIMER_WIDTH)period;
 }
 
 //===== compare
 
-void radiotimer_schedule(uint16_t offset) {
+void radiotimer_schedule(PORT_RADIOTIMER_WIDTH offset) {
+    
+    offset = offset >>1;
+    
     RTC_ITConfig(RTC_IT_ALR, DISABLE);
     //need to disable radio also in case that a radio interrupt is happening
+    
+    DISABLE_INTERRUPTS();
     
     // Set the RTC alarm(RTC timer will alarm at next state of slot)
     RTC_SetAlarm(offset);
     RTC_WaitForLastTask();
+    
+    ENABLE_INTERRUPTS();
     
     //set radiotimer irpstatus
     radiotimer_vars.overflowORcompare = RADIOTIMER_COMPARE;
@@ -165,13 +175,17 @@ void radiotimer_schedule(uint16_t offset) {
 }
 
 void radiotimer_cancel() {
+  
     RTC_ITConfig(RTC_IT_ALR, DISABLE);
     //need to disable radio also in case that a radio interrupt is happening
     
+    DISABLE_INTERRUPTS();
     
     // set RTC alarm (slotlength) 
     RTC_SetAlarm(radiotimer_vars.currentSlotPeriod);
     RTC_WaitForLastTask();
+    
+    ENABLE_INTERRUPTS();
     
     //set radiotimer irpstatus
     radiotimer_vars.overflowORcompare = RADIOTIMER_OVERFLOW;
@@ -181,10 +195,11 @@ void radiotimer_cancel() {
 
 //===== capture
 
-inline uint16_t radiotimer_getCapturedTime() {
+inline PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime() {
     RTC_WaitForSynchro();
     uint32_t counter = RTC_GetCounter();
-    return (uint16_t)counter;
+    counter = counter << 1;
+    return (PORT_RADIOTIMER_WIDTH)counter;
 }
 
 //=========================== private =========================================
@@ -192,36 +207,42 @@ inline uint16_t radiotimer_getCapturedTime() {
 //=========================== interrupt handlers ==============================
 
 kick_scheduler_t radiotimer_isr() {
-   uint8_t taiv_temp = radiotimer_vars.overflowORcompare;
-   switch (taiv_temp) {
-      case RADIOTIMER_COMPARE:
-         if (radiotimer_vars.compare_cb!=NULL) {
-            RCC_Wakeup();
-            // call the callback
-            radiotimer_vars.compare_cb();
-            // kick the OS
-            return KICK_SCHEDULER;
-         }
-         break;
-      case RADIOTIMER_OVERFLOW: // timer overflows
-         if (radiotimer_vars.overflow_cb!=NULL) {
-           
-            //Wait until last write operation on RTC registers has finished
-            RTC_WaitForLastTask();                            
+    uint8_t taiv_temp = radiotimer_vars.overflowORcompare;
+    switch (taiv_temp) {
+        case RADIOTIMER_COMPARE:
+            if (radiotimer_vars.compare_cb!=NULL) {
+                
+                RCC_Wakeup();
+                // call the callback
+                radiotimer_vars.compare_cb();
+                // kick the OS
+                return KICK_SCHEDULER;
+            }
+            break;
+        case RADIOTIMER_OVERFLOW: // timer overflows
+            if (radiotimer_vars.overflow_cb!=NULL) {
             
-            //Set the RTC time counter to 0
-            RTC_SetCounter(0x00000000);
-            RTC_WaitForLastTask();
-            RCC_Wakeup();
-            // call the callback
-            radiotimer_vars.overflow_cb();
-            // kick the OS
-            return KICK_SCHEDULER;
-         }
-         break;
-      case RADIOTIMER_NONE:                     // this should not happen
-      default:
-         while(1);                               // this should not happen
-   }
-  return DO_NOT_KICK_SCHEDULER;
+                //Wait until last write operation on RTC registers has finished
+                RTC_WaitForLastTask();                            
+            
+                DISABLE_INTERRUPTS();
+            
+                //Set the RTC time counter to 0
+                RTC_SetCounter(0x00000000);
+                RTC_WaitForLastTask();
+            
+                ENABLE_INTERRUPTS();
+            
+                RCC_Wakeup();
+                // call the callback
+                radiotimer_vars.overflow_cb();
+                // kick the OS
+                return KICK_SCHEDULER;
+            }
+            break;
+        case RADIOTIMER_NONE:                     // this should not happen
+        default:
+            while(1);                               // this should not happen
+    }
+    return DO_NOT_KICK_SCHEDULER;
 }

@@ -27,7 +27,7 @@ static const uint8_t chTemplate_default[] = {
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to successfully synchronize
 #define US_PER_TICK                 30 // number of us per 32kHz clock tick
-#define EBPERIOD                    30 // in seconds: sending EB every 30 seconds
+#define EBPERIOD                  2000 // in miliseconds: 2000 -> EB every 2000 miseconds
 #define MAXKAPERIOD               2000 // in slots: @15ms per slot -> ~30 seconds. Max value used by adaptive synchronization.
 #define DESYNCTIMEOUT             2333 // in slots: @15ms per slot -> ~35 seconds. A larger DESYNCTIMEOUT is needed if using a larger KATIMEOUT.
 #define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"
@@ -38,10 +38,11 @@ static const uint8_t chTemplate_default[] = {
 #define IEEE802154E_PAYLOAD_DESC_LEN_SHIFT                 0x04
 #define IEEE802154E_PAYLOAD_DESC_GROUP_ID_MLME             (1<<11)
 #define IEEE802154E_PAYLOAD_DESC_TYPE_MLME                 (1<<15)
-#define IEEE802154E_DESC_TYPE_LONG                         (1<<15)
-#define IEEE802154E_DESC_TYPE_SHORT                        (0<<15)
+#define IEEE802154E_DESC_TYPE_LONG                         ((uint16_t)(1<<15))
+#define IEEE802154E_DESC_TYPE_SHORT                        ((uint16_t)(0<<15))
 
-#define IANA_6TOP_IE_GROUP_ID                              (2<<11)
+// GROUP_ID changed to 3 https://openwsn.atlassian.net/browse/FW-569
+#define IANA_6TOP_IE_GROUP_ID                              (3<<11)
 #define IANA_6TOP_IE_GROUP_ID_TYPE                         (1<<15)
 
 #define IEEE802154E_DESC_TYPE_HEADER_IE                    0x0000
@@ -141,7 +142,7 @@ typedef enum {
 //    - duration_in_seconds = ticks / 32768
 enum ieee154e_atomicdurations_enum {
    // time-slot related
-#ifdef GOLDEN_IMAGE_ROOT
+#ifdef SLOTDURATION_10MS
    TsTxOffset                =   70,                  //  2120us
    TsLongGT                  =   36,                  //  1100us
    TsTxAckDelay              =   33,                  //  1000us
@@ -162,13 +163,11 @@ enum ieee154e_atomicdurations_enum {
    delayTx                   =  PORT_delayTx,         // between GO signal and SFD
    delayRx                   =  PORT_delayRx,         // between GO signal and start listening
    // radio watchdog
-#ifdef GOLDEN_IMAGE_ROOT
    wdRadioTx                 =   33,                  //  1000us (needs to be >delayTx)
    wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
+#ifdef SLOTDURATION_10MS
    wdAckDuration             =   80,                  //  2400us (measured 1000us)
 #else
-   wdRadioTx                 =   33,                  //  1000us (needs to be >delayTx)
-   wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
    wdAckDuration             =   98,                  //  3000us (measured 1000us)
 #endif
 };
@@ -223,6 +222,7 @@ typedef struct {
    PORT_RADIOTIMER_WIDTH     deSyncTimeout;           // how many slots left before looses sync
    bool                      isSync;                  // TRUE iff mote is synchronized to network
    OpenQueueEntry_t          localCopyForTransmission;// copy of the frame used for current TX
+   PORT_RADIOTIMER_WIDTH     numOfSleepSlots;         // number of slots to sleep between active slots
    // as shown on the chronogram
    ieee154e_state_t          state;                   // state of the FSM
    OpenQueueEntry_t*         dataToSend;              // pointer to the data to send
@@ -285,7 +285,7 @@ void               ieee154e_setIsAckEnabled(bool isEnabled);
 void               ieee154e_setSingleChannel(uint8_t channel);
 void               ieee154e_setIsSecurityEnabled(bool isEnabled);
 void               ieee154e_setSlotDuration(uint16_t duration);
-uint16_t           ieee154e_getSlotDuration();
+uint16_t           ieee154e_getSlotDuration(void);
 
 uint16_t           ieee154e_getTimeCorrection(void);
 // events

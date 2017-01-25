@@ -45,7 +45,7 @@ void main(void)
    BCSCTL1    =  RSEL0 | RSEL1 | RSEL2;          // MCLK at ~8MHz
                                                  // by default, ACLK from 32kHz XTAL which is running
    P5DIR     |=  0x70;                           // P5DIR = 0bx111xxxx for LEDs
-   P5OUT     |=  0x70;                           // P2OUT = 0bx111xxxx, all LEDs off
+   P5OUT     |=  0x70;                           // P5OUT = 0bx111xxxx, all LEDs off
    
    P3SEL      =  0xC0;                           // P3.6,7 = UART1TX/RX
   

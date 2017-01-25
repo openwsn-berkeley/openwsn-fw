@@ -120,6 +120,7 @@ class moteProbe(threading.Thread):
     
     CMD_SET_DAGROOT = '7e5259bbbb0000000000000c347e'
     CMD_SEND_DATA   = '7e44141592000012e63b78001180bbbb0000000000000000000000000001bbbb000000000000141592000012e63b07d007d0000ea30d706f69706f697a837e'
+    SLOT_DURATION    = 0.015
     
     def __init__(self,serialport=None):
         
@@ -144,6 +145,7 @@ class moteProbe(threading.Thread):
         
         # give this thread a name
         self.name                 = 'moteProbe@'+self.serialport
+        print "counter latency(second)"
         
         # start myself
         self.start()
@@ -202,13 +204,16 @@ class moteProbe(threading.Thread):
                                             #print ''.join(['{0:02x}'.format(ord(b)) for b in outputToWrite])
                                             self.serial.write(outputToWrite)
                                 elif self.inputBuf[0]==ord('D'):
-                                    if len(self.inputBuf)==57:
-                                        counter = struct.unpack('<h',''.join([chr(b) for b in self.inputBuf[-2:]]))[0]
+                                    if len(self.inputBuf)==62:
+                                        asn_inital  = struct.unpack('<HHB',''.join([chr(c) for c in self.inputBuf[3:8]]))
+                                        asn_arrive  = struct.unpack('<HHB',''.join([chr(c) for c in self.inputBuf[-7:-2]]))
+                                        counter  = struct.unpack('<h',''.join([chr(b) for b in self.inputBuf[-2:]]))[0]
+
                                         if self.last_counter!=None:
                                             if counter-self.last_counter!=1:
                                                 print 'MISSING {0} packets!!'.format(counter-self.last_counter-1)
                                         self.last_counter = counter
-                                        print counter
+                                        print "{0:^7} {1:^15}".format(counter, self.SLOT_DURATION*((asn_inital[0]-asn_arrive[0])+(asn_inital[1]-asn_arrive[1])*256+(asn_inital[2]-asn_arrive[2])*65536))
                                         
                                         with self.outputBufLock:
                                             self.outputBuf += [binascii.unhexlify(self.CMD_SEND_DATA)]

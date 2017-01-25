@@ -5,7 +5,7 @@
 */
 
 // Includes ------------------------------------------------------------------*/
-#include "stm32f10x_lib.h"
+#include "stm32f10x_conf.h"
 #include "stm32f10x_gpio.h"
 
 void Exti_Init(void)

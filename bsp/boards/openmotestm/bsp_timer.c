@@ -34,8 +34,7 @@ bsp_timer_vars_t bsp_timer_vars;
 This functions starts the timer, i.e. the counter increments, but doesn't set
 any compare registers, so no interrupt will fire.
 */
-void bsp_timer_init() 
-{
+void bsp_timer_init() {
     // clear local variables
     memset(&bsp_timer_vars,0,sizeof(bsp_timer_vars_t));
     
@@ -52,24 +51,14 @@ void bsp_timer_init()
     
     //Configure TIM2's out compare mode:  out compare mode = toggle, out compare value = 0 (useless before enable compare interrupt), enable TIM2_CH1
     TIM_OCInitTypeDef TIM_OCInitStructure;
-    TIM_OCInitStructure.TIM_OCMode      = TIM_OCMode_Toggle;
-    TIM_OCInitStructure.TIM_Pulse       = 0;
-    TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
-    TIM_OCInitStructure.TIM_OCPolarity  = TIM_OCPolarity_High;
+    TIM_OCInitStructure.TIM_OCMode          = TIM_OCMode_Toggle;
+    TIM_OCInitStructure.TIM_Pulse           = 0;
+    TIM_OCInitStructure.TIM_OutputState     = TIM_OutputState_Enable;
+    TIM_OCInitStructure.TIM_OCPolarity      = TIM_OCPolarity_High;
     TIM_OC1Init(TIM2, &TIM_OCInitStructure);
           
     //enable TIM2
     TIM_Cmd(TIM2, ENABLE); 
-    //disable interrupt
-    //bsp_timer_cancel_schedule();
-    
-//    //Configure NVIC: Preemption Priority = 2 and Sub Priority = 1
-//    NVIC_InitTypeDef NVIC_InitStructure;
-//    NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQChannel;
-//    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
-//    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
-//    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-//    NVIC_Init(&NVIC_InitStructure);
 }
 
 /**
@@ -77,11 +66,10 @@ void bsp_timer_init()
 
 \param cb The function to be called when a compare event happens.
 */
-void bsp_timer_set_callback(bsp_timer_cbt cb)
-{
-   bsp_timer_vars.cb   = cb;
-   //enable nvic
-   NVIC_bsptimer();
+void bsp_timer_set_callback(bsp_timer_cbt cb){
+    bsp_timer_vars.cb   = cb;
+    //enable nvic
+    NVIC_bsptimer();
 }
 
 /**
@@ -90,8 +78,7 @@ void bsp_timer_set_callback(bsp_timer_cbt cb)
 This function does not stop the timer, it rather resets the value of the
 counter, and cancels a possible pending compare event.
 */
-void bsp_timer_reset()
-{
+void bsp_timer_reset(){
     // reset compare
     TIM_SetCompare1(TIM2,0);
   
@@ -123,38 +110,36 @@ propagate to subsequent timers.
 \param delayTicks Number of ticks before the timer expired, relative to the
                   last compare event.
 */
-void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) 
-{
-   PORT_TIMER_WIDTH newCompareValue;
-   PORT_TIMER_WIDTH temp_last_compare_value;
-   //enable it if not enabled.
-   TIM_Cmd(TIM2, ENABLE); 
+void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
+    PORT_TIMER_WIDTH newCompareValue;
+    PORT_TIMER_WIDTH temp_last_compare_value;
+    //enable it if not enabled.
+    TIM_Cmd(TIM2, ENABLE); 
+
+    temp_last_compare_value = bsp_timer_vars.last_compare_value;
+
+    newCompareValue = bsp_timer_vars.last_compare_value+delayTicks;
+    bsp_timer_vars.last_compare_value = newCompareValue;
    
-   temp_last_compare_value = bsp_timer_vars.last_compare_value;
-   
-   newCompareValue = bsp_timer_vars.last_compare_value+delayTicks;
-   bsp_timer_vars.last_compare_value = newCompareValue;
-   
-   if (delayTicks < (TIM_GetCounter(TIM2)-temp_last_compare_value)) 
-   {
+    if (delayTicks < (TIM_GetCounter(TIM2)-temp_last_compare_value)) 
+    {
       // setting the interrupt flag triggers an interrupt
 //        TIM2->SR |= (u16)TIM_FLAG_CC1; //it can not write one to TIM2 State register.
-     TIM_GenerateEvent(TIM2,TIM_EventSource_CC1);
-   } 
-   else
-   {
-      // this is the normal case, have timer expire at newCompareValue
-      TIM_SetCompare1(TIM2,newCompareValue);
-      TIM_ClearFlag(TIM2, TIM_FLAG_CC1);
-      TIM_ITConfig(TIM2, TIM_IT_CC1, ENABLE);
-   }
+        TIM_GenerateEvent(TIM2,TIM_EventSource_CC1);
+    } 
+    else
+    {
+        // this is the normal case, have timer expire at newCompareValue
+        TIM_SetCompare1(TIM2,newCompareValue);
+        TIM_ClearFlag(TIM2, TIM_FLAG_CC1);
+        TIM_ITConfig(TIM2, TIM_IT_CC1, ENABLE);
+    }
 }
 
 /**
 \brief Cancel a running compare.
 */
-void bsp_timer_cancel_schedule() 
-{
+void bsp_timer_cancel_schedule() {
     TIM_SetCompare1(TIM2,0);
     TIM_ITConfig(TIM2, TIM_IT_CC1, DISABLE); 
 }
@@ -164,19 +149,17 @@ void bsp_timer_cancel_schedule()
 
 \returns The current value of the timer's counter.
 */
-PORT_TIMER_WIDTH bsp_timer_get_currentValue() 
-{
-   return TIM_GetCounter(TIM2);
+PORT_TIMER_WIDTH bsp_timer_get_currentValue() {
+    return TIM_GetCounter(TIM2);
 }
 
 //=========================== private =========================================
 
 //=========================== interrupt handlers ==============================
 
-kick_scheduler_t bsp_timer_isr()
-{
-   // call the callback
-   bsp_timer_vars.cb();
-   // kick the OS
-   return KICK_SCHEDULER;
+kick_scheduler_t bsp_timer_isr(){
+    // call the callback
+    bsp_timer_vars.cb();
+    // kick the OS
+    return KICK_SCHEDULER;
 }

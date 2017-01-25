@@ -337,23 +337,3 @@ void RTC_ClearITPendingBit(uint16_t RTC_IT)
   */
 
 /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
-
-//
-// Copy pasted from version 2.0.x
-//
-/*******************************************************************************
-* Function Name  : RTC_GetAlarm
-* Description    : Gets the RTC alarm value.
-* Input          : None
-* Output         : None
-* Return         : RTC alarm value.
-*******************************************************************************/
-u32 RTC_GetAlarm(void)
-{  
-  u16 tmp = 0;
-  tmp = RTC->ALRL;
-
-  return (((u32)RTC->ALRH << 16 ) | tmp) ;
-}
-
-
