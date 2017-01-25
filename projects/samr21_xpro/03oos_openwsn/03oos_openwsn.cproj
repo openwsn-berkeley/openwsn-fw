@@ -27,15 +27,15 @@
     <eraseonlaunchrule>0</eraseonlaunchrule>
     <AsfFrameworkConfig>
       <framework-data>
-  <options />
-  <configurations />
-  <files />
-  <documentation help="" />
-  <offline-documentation help="" />
-  <dependencies>
-    <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.20.1" />
-  </dependencies>
-</framework-data>
+        <options />
+        <configurations />
+        <files />
+        <documentation help="" />
+        <offline-documentation help="" />
+        <dependencies>
+          <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.20.1" />
+        </dependencies>
+      </framework-data>
     </AsfFrameworkConfig>
     <avrtool>com.atmel.avrdbg.tool.edbg</avrtool>
     <avrtoolinterface>SWD</avrtoolinterface>
@@ -185,6 +185,8 @@
       <Value>../../../../openstack/cross-layers</Value>
       <Value>../../../../openstack</Value>
       <Value>../../../../bsp/boards/samr21_xpro/drivers/inc</Value>
+      <Value>../../../../openapps/uinject</Value>
+      <Value>../../../../openapps/userialbridge</Value>
     </ListValues>
   </armgcc.compiler.directories.IncludePaths>
   <armgcc.compiler.optimization.level>Optimize (-O1)</armgcc.compiler.optimization.level>
@@ -223,10 +225,6 @@
       <SubType>compile</SubType>
       <Link>openapps\openapps.c</Link>
     </Compile>
-    <Compile Include="..\..\..\openstack\02b-MAChigh\otf.c">
-      <SubType>compile</SubType>
-      <Link>openstack\02b-MAChigh\otf.c</Link>
-    </Compile>
     <Compile Include="..\..\..\openstack\02b-MAChigh\processIE.c">
       <SubType>compile</SubType>
       <Link>openstack\02b-MAChigh\processIE.c</Link>
@@ -238,6 +236,10 @@
     <Compile Include="..\..\..\bsp\boards\samr21_xpro\drivers\inc\base_type.h">
       <SubType>compile</SubType>
       <Link>bsp\boards\samr21_xpro\drivers\inc\base_type.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\common\dummy_crypto_engine.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\common\dummy_crypto_engine.c</Link>
     </Compile>
     <Compile Include="..\..\..\bsp\boards\samr21_xpro\drivers\inc\cm0plus_interrupt.h">
       <SubType>compile</SubType>
@@ -391,6 +393,14 @@
       <SubType>compile</SubType>
       <Link>openstack\02a-MAClow\IEEE802154E.c</Link>
     </Compile>
+    <Compile Include="..\..\..\openstack\02a-MAClow\IEEE802154_security.c">
+      <SubType>compile</SubType>
+      <Link>openstack\02a-MAClow\IEEE802154_security.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\openstack\02a-MAClow\IEEE802154_dummy_security.c">
+      <SubType>compile</SubType>
+      <Link>openstack\02a-MAClow\IEEE802154_dummy_security.c</Link>
+    </Compile>
     <Compile Include="..\..\..\openstack\02a-MAClow\topology.c">
       <SubType>compile</SubType>
       <Link>openstack\02a-MAClow\topology.c</Link>
@@ -398,6 +408,10 @@
     <Compile Include="..\..\..\openstack\02b-MAChigh\neighbors.c">
       <SubType>compile</SubType>
       <Link>openstack\02b-MAChigh\neighbors.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\openstack\02b-MAChigh\sf0.c">
+      <SubType>compile</SubType>
+      <Link>openstack\02b-MAChigh\sf0.c</Link>
     </Compile>
     <Compile Include="..\..\..\openstack\02b-MAChigh\schedule.c">
       <SubType>compile</SubType>
@@ -495,6 +509,14 @@
       <SubType>compile</SubType>
       <Link>openapps\uecho\uecho.c</Link>
     </Compile>
+    <Compile Include="..\..\..\openapps\uinject\uinject.c">
+      <SubType>compile</SubType>
+      <Link>openapps\uinject\uinject.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\openapps\userialbridge\userialbridge.c">
+      <SubType>compile</SubType>
+      <Link>openapps\userialbridge\userialbridge.c</Link>
+    </Compile>
     <Compile Include="..\..\..\openapps\rrt\rrt.c">
       <SubType>compile</SubType>
       <Link>openapps\rrt\rrt.c</Link>
@@ -509,6 +531,7 @@
   <ItemGroup>
     <Folder Include="bsp" />
     <Folder Include="bsp\boards" />
+    <Folder Include="bsp\boards\common\" />
     <Folder Include="bsp\boards\samr21_xpro" />
     <Folder Include="chips" />
     <Folder Include="chips\at86rf233" />
@@ -521,6 +544,8 @@
     <Folder Include="drivers\" />
     <Folder Include="drivers\common\" />
     <Folder Include="kernel" />
+    <Folder Include="openapps\userialbridge" />
+    <Folder Include="openapps\uinject" />
     <Folder Include="openstack" />
     <Folder Include="openapps\" />
     <Folder Include="openstack\02a-MAClow" />
