@@ -1079,7 +1079,6 @@ port_INLINE void activity_ti2() {
     
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
 #else
-       
     // arm tt2
     radiotimer_schedule(DURATION_tt2);
 
@@ -1109,14 +1108,8 @@ port_INLINE void activity_ti2() {
     // enable the radio in Tx mode. This does not send the packet.
     radio_txEnable();
 
-
     ieee154e_vars.radioOnInit=radio_getTimerValue();
     ieee154e_vars.radioOnThisSlot=TRUE;
-#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
-#else
-    // arm tt2
-    radiotimer_schedule(DURATION_tt2);
-#endif
     // change state
     changeState(S_TXDATAREADY);
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
