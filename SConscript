@@ -5,6 +5,8 @@ import subprocess
 import platform
 import distutils.sysconfig
 import sconsUtils
+import glob
+from tools import qtcreator as q
 
 Import('env')
 
@@ -34,7 +36,8 @@ dummyFunc = Builder(
     action = '',
     suffix = '.ihex',
 )
-
+if env['panid']:
+    env.Append(CPPDEFINES    = {'PANID_DEFINED' : env['panid']})
 if env['dagroot']==1:
     env.Append(CPPDEFINES    = 'DAGROOT')
 if env['forcetopology']==1:
@@ -45,16 +48,8 @@ if env['cryptoengine']:
     env.Append(CPPDEFINES    = {'CRYPTO_ENGINE_SCONS' : env['cryptoengine']})
 if env['l2_security']==1:
     env.Append(CPPDEFINES    = 'L2_SECURITY_ACTIVE')
-if env['goldenImage']=='sniffer':
-    env.Append(CPPDEFINES    = 'GOLDEN_IMAGE_SNIFFER')
-else:
-    if env['goldenImage']=='root':
-        env.Append(CPPDEFINES    = 'GOLDEN_IMAGE_ROOT')
-    else:
-        env.Append(CPPDEFINES    = 'GOLDEN_IMAGE_NONE')
-        
 
-if   env['toolchain']=='mspgcc':
+if env['toolchain']=='mspgcc':
     
     if env['board'] not in ['telosb','wsn430v13b','wsn430v14','gina','z1']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
@@ -170,7 +165,7 @@ elif env['toolchain']=='iar':
 
 elif env['toolchain']=='iar-proj':
     
-    if env['board'] not in ['telosb','gina','wsn430v13b','wsn430v14','z1','openmotestm','agilefox','OpenMote-CC2538']:
+    if env['board'] not in ['telosb','gina','wsn430v13b','wsn430v14','z1','openmotestm','agilefox','openmote-cc2538','iot-lab_M3']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     env['IAR_EW430_INSTALLDIR'] = os.environ['IAR_EW430_INSTALLDIR']
@@ -183,8 +178,8 @@ elif env['toolchain']=='iar-proj':
     
     iarProjBuilderFunction = Builder(
         action = '"{0}" $SOURCE Debug'.format(
-                    os.path.join(iarEw430CommonBinDir,'IarBuild')
-                ),
+            os.path.join(iarEw430CommonBinDir,'IarBuild')
+        ),
         src_suffix  = '.ewp',
     )
     env.Append(BUILDERS = {'iarProjBuilder' : iarProjBuilderFunction})
@@ -200,10 +195,14 @@ elif env['toolchain']=='iar-proj':
     
 elif env['toolchain']=='armgcc':
     
-    if env['board'] not in ['OpenMote-CC2538','iot-lab_M3','iot-lab_A8-M3']:
+    if env['board'] not in ['openmote-cc2538','iot-lab_M3','iot-lab_A8-M3','openmotestm', 'samr21_xpro']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
-    if   env['board']=='OpenMote-CC2538':
+    if   env['board']=='openmote-cc2538':
+        if env['revision'] == "A1":
+            linker_file = 'cc2538sf23.lds'
+        else:
+            linker_file = 'cc2538sf53.lds'
         
         # compiler (C)
         env.Replace(CC           = 'arm-none-eabi-gcc')
@@ -220,7 +219,7 @@ elif env['toolchain']=='armgcc':
         env.Replace(AS           = 'arm-none-eabi-as')
         env.Append(ASFLAGS       = '-ggdb -g3 -mcpu=cortex-m3 -mlittle-endian')
         # linker
-        env.Append(LINKFLAGS     = '-Tbsp/boards/OpenMote-CC2538/cc2538.lds')
+        env.Append(LINKFLAGS     = '-Tbsp/boards/openmote-cc2538/' + linker_file)
         env.Append(LINKFLAGS     = '-nostartfiles')
         env.Append(LINKFLAGS     = '-Wl,-Map,${TARGET.base}.map')
         env.Append(LINKFLAGS     = '-mcpu=cortex-m3')
@@ -238,7 +237,7 @@ elif env['toolchain']=='armgcc':
         env.Replace(NM           = 'arm-none-eabi-nm')
         env.Replace(SIZE         = 'arm-none-eabi-size')
         
-    elif env['board'] in ['iot-lab_M3', 'iot-lab_A8-M3']:
+    elif env['board'] in ['iot-lab_M3', 'iot-lab_A8-M3','openmotestm']:
         
         # compiler (C)
         env.Replace(CC           = 'arm-none-eabi-gcc')
@@ -279,6 +278,47 @@ elif env['toolchain']=='armgcc':
         env.Append(LINKFLAGS     = '-Tbsp/boards/'+env['board']+'/stm32_flash.ld')
         env.Append(LINKFLAGS     = os.path.join('build',env['board']+'_armgcc','bsp','boards',env['board'],'startup.o'))
         env.Append(LINKFLAGS     = os.path.join('build',env['board']+'_armgcc','bsp','boards',env['board'],'configure','stm32f10x_it.o'))
+        # object manipulation
+        env.Replace(OBJCOPY      = 'arm-none-eabi-objcopy')
+        env.Replace(OBJDUMP      = 'arm-none-eabi-objdump')
+        # archiver
+        env.Replace(AR           = 'arm-none-eabi-ar')
+        env.Append(ARFLAGS       = '')
+        env.Replace(RANLIB       = 'arm-none-eabi-ranlib')
+        env.Append(RANLIBFLAGS   = '')
+        # misc
+        env.Replace(NM           = 'arm-none-eabi-nm')
+        env.Replace(SIZE         = 'arm-none-eabi-size')
+        
+    elif   env['board']=='samr21_xpro':
+        
+        # compiler (C)
+        env.Replace(CC           = 'arm-none-eabi-gcc')
+        env.Append(CCFLAGS       = '-O1')
+        env.Append(CCFLAGS       = '-Wall')
+        env.Append(CCFLAGS       = '-Wa,-adhlns=${TARGET.base}.lst')
+        env.Append(CCFLAGS       = '-c')
+        env.Append(CCFLAGS       = '-fmessage-length=0')
+        env.Append(CCFLAGS       = '-mcpu=cortex-m0plus')
+        env.Append(CCFLAGS       = '-mthumb')
+        env.Append(CCFLAGS       = '-g3')
+        env.Append(CCFLAGS       = '-Wstrict-prototypes')
+        env.Append(CCFLAGS       = '-Ibsp/boards/samr21_xpro/drivers/inc')
+        env.Append(CCFLAGS       = '-Ibsp/boards/samr21_xpro/cmsis/inc')
+        env.Append(CCFLAGS       = '-D__SAMR21G18A__')
+        env.Append(CCFLAGS       = '-Ibsp/boards/samr21_xpro/SAMR21_DFP/1.0.34/include')
+        env.Append(CCFLAGS       = '-std=c99')
+        # assembler
+        env.Replace(AS           = 'arm-none-eabi-as')
+        env.Append(ASFLAGS       = '-ggdb -g3 -mcpu=cortex-m0plus -mlittle-endian')
+        # linker
+        env.Append(LINKFLAGS     = '-Tbsp/boards/samr21_xpro/cmsis/linkerScripts/samr21g18a_flash.ld')
+#        env.Append(LINKFLAGS     = '-Tbsp/boards/samr21_xpro/cmsis/linkerScripts/samr21g18a_sram.ld')
+        env.Append(LINKFLAGS     = '-nostartfiles')
+        env.Append(LINKFLAGS     = '-Wl,-Map,${TARGET.base}.map')
+        env.Append(LINKFLAGS     = '-mcpu=cortex-m0plus')
+        env.Append(LINKFLAGS     = '-mthumb')
+        env.Append(LINKFLAGS     = '-g3')
         # object manipulation
         env.Replace(OBJCOPY      = 'arm-none-eabi-objcopy')
         env.Replace(OBJDUMP      = 'arm-none-eabi-objdump')
@@ -362,6 +402,12 @@ elif env['toolchain']=='gcc':
 
 else:
     raise SystemError('unexpected toolchain {0}'.format(env['toolchain']))
+
+if env['ide']=='qtcreator':
+    print env['board']
+    q.QtCreatorManager().initialize(env['board'])
+else:
+    print env['ide']
     
     
 #============================ upload over JTAG ================================
@@ -402,6 +448,43 @@ if env['jtag']:
     env.Append(BUILDERS = {'JtagUpload' : jtagUploadFunc(env['jtag'])})
 
 #============================ bootload ========================================
+
+##
+# Pass a list, a range or all ports to do the bootloading
+# list  -> /dev/ttyUSB0,ttyUSB1,/dev/ttyUSB2
+# range -> /dev/ttyUSB[0-2] = /dev/ttyUSB0,ttyUSB1,/dev/ttyUSB2
+# all   -> /dev/ttyUSBX = /dev/ttyUSB0,ttyUSB1,/dev/ttyUSB2
+##
+def expandBootloadPortList(ports):
+    # Process only when there is a single port
+    if (len(ports) == 1):
+        port  = ports[0]
+        ports = []
+        last_char = port[-1:]
+        base_dir  = os.path.dirname(port)      
+
+        # /dev/ttyUSBX means bootload all ttyUSB ports
+        if (last_char == "X"):
+            base_file = os.path.basename(port[:-1])
+            ports     = sorted(glob.glob(os.path.join(base_dir, base_file) + "*"))
+
+        # /dev/ttyUSB[1-2] means bootload a range of ttyUSB ports
+        elif (last_char == "]"):
+            base_file   = os.path.basename(port.split('[')[0])
+            first, last = sorted(map(int, ((port.split('['))[1].split(']')[0]).split('-')))
+
+            # For all elements in range
+            for i in range(first, last + 1):
+                p = os.path.join(base_dir, base_file + str(i))
+                ports.append(p)
+        else:
+            ports = [port]
+
+    # Check if new list is empty
+    if (not ports):
+        raise SystemError("Bootload port expansion is empty or erroneous!")
+
+    return ports
 
 class telosb_bootloadThread(threading.Thread):
     def __init__(self,comPort,hexFile,countingSem):
@@ -460,7 +543,7 @@ class OpenMoteCC2538_bootloadThread(threading.Thread):
     def run(self):
         print 'starting bootloading on {0}'.format(self.comPort)
         subprocess.call(
-            'python '+os.path.join('bootloader','OpenMote-CC2538','cc2538-bsl.py')+' -e -w -b 115200 -p {0} --bsl {1}'.format(self.comPort,self.hexFile),
+            'python '+os.path.join('bootloader','openmote-cc2538','cc2538-bsl.py')+' -e --bootloader-invert-lines -w -b 400000 -p {0} {1}'.format(self.comPort,self.hexFile),
             shell=True
         )
         print 'done bootloading on {0}'.format(self.comPort)
@@ -471,13 +554,20 @@ class OpenMoteCC2538_bootloadThread(threading.Thread):
 def OpenMoteCC2538_bootload(target, source, env):
     bootloadThreads = []
     countingSem     = threading.Semaphore(0)
+
+    # Enumerate ports
+    comPorts = env['bootload'].split(',')
+
+    # Check comPorts to bootload
+    comPorts = expandBootloadPortList(comPorts)
+
     # create threads
-    for comPort in env['bootload'].split(','):
+    for comPort in comPorts:
         bootloadThreads += [
             OpenMoteCC2538_bootloadThread(
                 comPort      = comPort,
                 #hexFile      = os.path.split(source[0].path)[1].split('.')[0]+'.bin',
-                hexFile      = source[0].path.split('.')[0]+'.bin',
+                hexFile      = source[0].path.split('.')[0]+'.ihex',
                 countingSem  = countingSem,
             )
         ]
@@ -534,6 +624,48 @@ def IotLabM3_bootload(target, source, env):
     for t in bootloadThreads:
         countingSem.acquire()
 
+class openmotestm_bootloadThread(threading.Thread):
+    def __init__(self,comPort,binaryFile,countingSem):
+        
+        # store params
+        self.comPort         = comPort
+        self.binaryFile      = binaryFile
+        self.countingSem     = countingSem
+        
+        # initialize parent class
+        threading.Thread.__init__(self)
+        self.name            = 'openmotestm_bootloadThread_{0}'.format(self.comPort)
+    
+    def run(self):
+        print 'starting bootloading on {0}'.format(self.comPort)
+        subprocess.call(
+            'python '+ os.path.join('bootloader','openmotestm','bin.py' + ' -p {0} {1}'.format(self.comPort, self.binaryFile)),
+            shell=True
+        )
+        print 'done bootloading on {0}'.format(self.comPort)
+        
+        # indicate done
+        self.countingSem.release()
+        
+def openmotestm_bootload(target, source, env):
+    bootloadThreads = []
+    countingSem     = threading.Semaphore(0)
+    # create threads
+    for comPort in env['bootload'].split(','):
+        bootloadThreads += [
+            openmotestm_bootloadThread(
+                comPort      = comPort,
+                binaryFile   = source[0].path.split('.')[0]+'.bin',
+                countingSem  = countingSem,
+            )
+        ]
+    # start threads
+    for t in bootloadThreads:
+        t.start()
+    # wait for threads to finish
+    for t in bootloadThreads:
+        countingSem.acquire()
+        
 # bootload
 def BootloadFunc():
     if   env['board']=='telosb':
@@ -542,7 +674,7 @@ def BootloadFunc():
             suffix      = '.phonyupload',
             src_suffix  = '.ihex',
         )
-    elif env['board']=='OpenMote-CC2538':
+    elif env['board']=='openmote-cc2538':
         return Builder(
             action      = OpenMoteCC2538_bootload,
             suffix      = '.phonyupload',
@@ -553,6 +685,12 @@ def BootloadFunc():
             action      = IotLabM3_bootload,
             suffix      = '.phonyupload',
             src_suffix  = ''
+         )
+    elif env['board']=='openmotestm':
+         return Builder(
+            action      = openmotestm_bootload,
+            suffix      = '.phonyupload',
+            src_suffix  = '.bin'
          )
     else:
         raise SystemError('bootloading on board={0} unsupported.'.format(env['board']))
@@ -612,7 +750,7 @@ def populateTargetGroup(localEnv,targetName):
         if targetName.startswith(prefix):
             env['targets']['all_'+prefix].append(targetName)
 
-def sconscript_scanner(localEnv):
+def project_finder(localEnv):
     '''
     This function is called from the following directories:
     - projects\common\
@@ -620,24 +758,31 @@ def sconscript_scanner(localEnv):
     '''
     
     # list subdirectories
-    PATH_TO_PROJECTS = os.path.join('..','..','..','..','projects',os.path.split(os.getcwd())[-1])
-    allsubdirs     = os.listdir(os.path.join(PATH_TO_PROJECTS))
-    subdirs        = [name for name in allsubdirs if os.path.isdir(os.path.join(PATH_TO_PROJECTS,name)) ]
+    
+    if env['toolchain']=='iar-proj':
+        # no VariantDir is used
+        PATH_TO_BOARD_PROJECTS    = os.getcwd()
+    else:
+        # VariantDir is used
+        PATH_TO_BOARD_PROJECTS    = os.path.join('..','..','..','..','projects',os.path.split(os.getcwd())[-1])
+    tempsubdirs                   = os.listdir(PATH_TO_BOARD_PROJECTS)
+    subdirs                       = [name for name in tempsubdirs if os.path.isdir(os.path.join(PATH_TO_BOARD_PROJECTS,name)) ]
     
     # parse dirs and build targets
     for projectDir in subdirs:
         
-        src_dir         = os.path.join(PATH_TO_PROJECTS,projectDir)
+        src_dir         = os.path.join(PATH_TO_BOARD_PROJECTS,projectDir)
         variant_dir     = os.path.join(env['VARDIR'],'projects',projectDir)
         
         added           = False
         targetName      = projectDir[2:]
         
         if  (
-                ('{0}.c'.format(projectDir) in os.listdir(os.path.join(PATH_TO_PROJECTS,projectDir))) and
+                ('{0}.c'.format(projectDir) in os.listdir(os.path.join(PATH_TO_BOARD_PROJECTS,projectDir))) and
                 (localEnv['toolchain']!='iar-proj') and 
                 (localEnv['board']!='python')
             ):
+            # "normal" case
             
             localEnv.VariantDir(
                 src_dir     = src_dir,
@@ -667,9 +812,10 @@ def sconscript_scanner(localEnv):
             added = True
         
         elif (
-                ('{0}.c'.format(projectDir) in os.listdir(os.path.join(PATH_TO_PROJECTS,projectDir))) and
+                ('{0}.c'.format(projectDir) in os.listdir(os.path.join(PATH_TO_BOARD_PROJECTS,projectDir))) and
                 (localEnv['board']=='python')
             ):
+            # Python case
             
             # build the artifacts in a separate directory
             localEnv.VariantDir(
@@ -736,17 +882,13 @@ def sconscript_scanner(localEnv):
             added = True
             
         elif (
-                ('{0}.ewp'.format(projectDir) in os.listdir(os.path.join(PATH_TO_PROJECTS,projectDir))) and
+                ('{0}.ewp'.format(projectDir) in os.listdir(os.path.join(PATH_TO_BOARD_PROJECTS,projectDir))) and
                 (localEnv['toolchain']=='iar-proj')
-             ):
+            ):
+            # iar-proj case
             
-            VariantDir(
-                src_dir     = src_dir,
-                variant_dir = variant_dir,
-            )
-            
-            source = [os.path.join(projectDir,'{0}.ewp'.format(projectDir))]
-        
+            source = [os.path.join(projectDir,'{0}.ewp'.format(projectDir)),]
+                        
             targetAction = localEnv.iarProjBuilder(
                 source  = source,
             )
@@ -757,7 +899,7 @@ def sconscript_scanner(localEnv):
         if added:
             populateTargetGroup(localEnv,targetName)
 
-env.AddMethod(sconscript_scanner, 'SconscriptScanner')
+env.AddMethod(project_finder, 'ProjectFinder')
 
 #============================ board ===========================================
 
@@ -843,7 +985,10 @@ buildEnv.Append(LIBPATH = [openappsVarDir])
 
 # projects
 projectsDir        = os.path.join('#','projects')
-projectsVarDir     = os.path.join(buildEnv['VARDIR'],'projects')
+if env['toolchain']=='iar-proj':
+    projectsVarDir = None
+else:
+    projectsVarDir = os.path.join(buildEnv['VARDIR'],'projects')
 buildEnv.SConscript(
     os.path.join(projectsDir,'SConscript'),
     exports        = {'env': buildEnv},

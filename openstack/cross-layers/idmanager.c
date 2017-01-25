@@ -18,6 +18,8 @@ void idmanager_init() {
    
    // reset local variables
    memset(&idmanager_vars, 0, sizeof(idmanager_vars_t));
+   // this is used to not wakeup in non-activeslot
+   idmanager_vars.slotSkip             = FALSE;
    
    // isDAGroot
 #ifdef DAGROOT
@@ -30,7 +32,13 @@ void idmanager_init() {
    idmanager_vars.myPANID.type         = ADDR_PANID;
    idmanager_vars.myPANID.panid[0]     = 0xca;
    idmanager_vars.myPANID.panid[1]     = 0xfe;
-   
+#ifdef PANID_DEFINED 
+   idmanager_vars.myPANID.panid[0]     = PANID_DEFINED & 0x00ff;
+   idmanager_vars.myPANID.panid[1]     =(PANID_DEFINED & 0xff00)>>8;
+#else
+   idmanager_vars.myPANID.panid[0]     = 0xca;
+   idmanager_vars.myPANID.panid[1]     = 0xfe;
+#endif
    // myPrefix
    idmanager_vars.myPrefix.type        = ADDR_PREFIX;
 #ifdef DAGROOT
@@ -68,9 +76,19 @@ void idmanager_setIsDAGroot(bool newRole) {
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    idmanager_vars.isDAGroot = newRole;
-   neighbors_updateMyDAGrankAndNeighborPreference();
+   icmpv6rpl_updateMyDAGrankAndParentSelection();
    schedule_startDAGroot();
    ENABLE_INTERRUPTS();
+}
+
+bool idmanager_getIsSlotSkip() {
+   bool res;
+   INTERRUPT_DECLARATION();
+   
+   DISABLE_INTERRUPTS();
+   res=idmanager_vars.slotSkip;
+   ENABLE_INTERRUPTS();
+   return res;
 }
 
 open_addr_t* idmanager_getMyID(uint8_t type) {
@@ -194,15 +212,19 @@ void idmanager_triggerAboutRoot() {
    switch (input_buffer[0]) {
      case ACTION_YES:
         idmanager_setIsDAGroot(TRUE);
+        idmanager_vars.slotSkip = FALSE;
         break;
      case ACTION_NO:
         idmanager_setIsDAGroot(FALSE);
+        idmanager_vars.slotSkip = TRUE;
         break;
      case ACTION_TOGGLE:
         if (idmanager_getIsDAGroot()) {
            idmanager_setIsDAGroot(FALSE);
+           idmanager_vars.slotSkip = TRUE;
         } else {
            idmanager_setIsDAGroot(TRUE);
+           idmanager_vars.slotSkip = FALSE;
         }
         break;
    }

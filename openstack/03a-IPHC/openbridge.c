@@ -19,7 +19,7 @@ void openbridge_triggerData() {
    OpenQueueEntry_t* pkt;
    uint8_t           numDataBytes;
   
-   numDataBytes = openserial_getNumDataBytes();
+   numDataBytes = openserial_getInputBufferFilllevel();
   
    //poipoi xv
    //this is a temporal workaround as we are never supposed to get chunks of data

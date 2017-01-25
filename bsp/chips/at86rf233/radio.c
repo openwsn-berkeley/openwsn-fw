@@ -171,7 +171,7 @@ void radio_rfOff() {
 
 //===== TX
 
-void radio_loadPacket(uint8_t* packet, uint8_t len) {
+void radio_loadPacket(uint8_t* packet, uint16_t len) {
    // change state
    radio_vars.state = RADIOSTATE_LOADING_PACKET;
    

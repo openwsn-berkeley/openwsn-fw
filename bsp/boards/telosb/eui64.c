@@ -83,7 +83,7 @@ void eui64_get(uint8_t* addressToWrite) {    // >= 6000us
             *(addressToWrite+0) = 0x14;
             *(addressToWrite+1) = 0x15;
             *(addressToWrite+2) = 0x92;
-            memcpy(addressToWrite+3,id+3,5);
+            memcpy(addressToWrite+3,id+2,5);
          }
       }
    }
