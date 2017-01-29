@@ -19,8 +19,8 @@
 
 //=========================== variables =======================================
 
-const uint8_t const *uid = (const uint8_t *const) UNIQUE_ID_BASE_ADDRESS;
-const uint8_t const *luid = (const uint8_t *const) UNIQUE_ID_LAST_ADDRESS;
+const uint8_t *uid = (const uint8_t *) UNIQUE_ID_BASE_ADDRESS;
+const uint8_t *luid = (const uint8_t *) UNIQUE_ID_LAST_ADDRESS;
 
 //=========================== prototypes ======================================
 
