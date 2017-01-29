@@ -1,7 +1,7 @@
 /**
-\brief openmoteSTM32 definition of the "radiotimer" bsp module.
+\brief iot-lab_A8-M3 definition of the "radiotimer" bsp module.
 
-On openmoteSTM32, we use RTC for the radiotimer module.
+On iot-lab_A8-M3, we use RTC for the radiotimer module.
 
 \author Chang Tengfei <tengfei.chang@gmail.com>,  July 2012.
 */
@@ -83,11 +83,11 @@ void radiotimer_start(PORT_RADIOTIMER_WIDTH period) {
     RTC_SetCounter(0);
     RTC_WaitForLastTask();
 
-    // Set the RTC time alarm(the length of slot)
-    RTC_SetAlarm(period);
-    RTC_WaitForLastTask();
-    
     radiotimer_vars.currentSlotPeriod = period >> 1;
+    
+    // Set the RTC time alarm(the length of slot)
+    RTC_SetAlarm(radiotimer_vars.currentSlotPeriod);
+    RTC_WaitForLastTask();
     
     //interrupt when reach alarm value
     RTC_ClearFlag(RTC_IT_ALR);
