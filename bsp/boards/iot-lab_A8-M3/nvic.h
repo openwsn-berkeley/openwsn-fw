@@ -1,5 +1,5 @@
 /**
-\brief openmoteSTM32 definition of the NVIC.
+\brief iot-lab_A8-M3 definition of the NVIC.
 
 \author Chang Tengfei <tengfei.chang@gmail.com>,  July 2012.
 */
@@ -23,7 +23,6 @@ void NVIC_Configuration(void);
 void NVIC_uart(void);
 void NVIC_spi(void);
 void NVIC_bsptimer(void);
-void NVIC_rtctimer(void);
 void NVIC_radiotimer(void);
 void NVIC_radio(void);
 

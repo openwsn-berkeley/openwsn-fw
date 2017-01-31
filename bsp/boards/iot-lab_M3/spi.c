@@ -1,11 +1,11 @@
 /**
-\brief iot-lab_A8-M3 definition of the "spi" bsp module (based on openmoteSTM32 code).
+\brief iot-lab_M3 definition of the "spi" bsp module (based on openmoteSTM32 code).
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 \author Chang Tengfei <tengfei.chang@gmail.com>,  July 2012.
 \author Alaeddine Weslati <alaeddine.weslati@inria.fr>, January 2014.
 */
-#include "stm32f10x_lib.h"
+#include "stm32f10x_conf.h"
 #include "stdio.h"
 #include "stdint.h"
 #include "string.h"
@@ -37,58 +37,60 @@ typedef struct {
 #endif
 } spi_vars_t;
 
-spi_vars_t spi_vars;
+volatile spi_vars_t spi_vars;
+
+//=========================== prototypes ======================================
 
 //=========================== public ==========================================
 
 void spi_init() {
  // clear variables
-  memset(&spi_vars,0,sizeof(spi_vars_t));
+  memset((void*)&spi_vars,0,sizeof(spi_vars_t));
  
   SPI_InitTypeDef  SPI_InitStructure;
 
-  //enable SPI2, GPIOA, GPIOB and GPIOC, Clock
-  RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
+  //enable SPI1, GPIOA, GPIOB and GPIOC, Clock
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE);
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
-  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
    
-  //Configure SPI-related pins: PB.13 as SCLK pin ,PB.14 as MISO pin, PB.15 as MOSI pin, PA.4 as /SEL pin
+  //Configure SPI-related pins: PA.5 as SCLK pin ,PA.6 as MISO pin, PA.7 as MOSI pin, PA.4 as /SEL pin, PA.2 as SLPR pin
   GPIO_InitTypeDef GPIO_InitStructure;
-  GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_13 | GPIO_Pin_15;
+  GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_5 | GPIO_Pin_7;
   GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_AF_PP;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_Init(GPIOB, &GPIO_InitStructure);
-
-  GPIO_InitStructure.GPIO_Pin    = GPIO_Pin_14;
-  GPIO_InitStructure.GPIO_Mode   = GPIO_Mode_IN_FLOATING;
-  GPIO_InitStructure.GPIO_Speed  = GPIO_Speed_50MHz;
-  GPIO_Init(GPIOB, &GPIO_InitStructure);
-
-  GPIO_InitStructure.GPIO_Pin     = GPIO_Pin_4;
-  GPIO_InitStructure.GPIO_Mode    = GPIO_Mode_Out_PP;
   GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-  GPIOA->ODR |= 0x0010;//set /SEL high
+  GPIO_InitStructure.GPIO_Pin    = GPIO_Pin_6;
+  GPIO_InitStructure.GPIO_Mode   = GPIO_Mode_IN_FLOATING;
+  GPIO_InitStructure.GPIO_Speed  = GPIO_Speed_50MHz;
+  GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+  GPIO_InitStructure.GPIO_Pin     = GPIO_Pin_4 | GPIO_Pin_2;
+  GPIO_InitStructure.GPIO_Mode    = GPIO_Mode_Out_PP;
+  GPIO_Init(GPIOA, &GPIO_InitStructure);
   
-  //Configure SPI2
+  GPIOA->ODR |= 0X1000;//set /SEL pin to high
+  
+  //Configure SPI1
   SPI_InitStructure.SPI_Direction         = SPI_Direction_2Lines_FullDuplex; //Full-duplex synchronous transfers on two lines
   SPI_InitStructure.SPI_Mode              = SPI_Mode_Master;//Master Mode
   SPI_InitStructure.SPI_DataSize          = SPI_DataSize_8b; //8-bit transfer frame format
   SPI_InitStructure.SPI_CPOL              = SPI_CPOL_Low;  //the SCK pin has a low-level idle state 
   SPI_InitStructure.SPI_CPHA              = SPI_CPHA_1Edge; //the first rising edge on the SCK pin is the MSBit capture strobe,
   SPI_InitStructure.SPI_NSS               = SPI_NSS_Soft;//Software NSS mode
-  SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_8;//BaudRate Prescaler = 8 
+  SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_16;//BaudRate Prescaler = 8 
   SPI_InitStructure.SPI_FirstBit          = SPI_FirstBit_MSB;//data order with MSB-first
   SPI_InitStructure.SPI_CRCPolynomial     = 7;//CRC Polynomial = 7
-  SPI_Init(SPI2, &SPI_InitStructure);
+  SPI_Init(SPI1, &SPI_InitStructure);
 
-  //enable SPI2
-  SPI_Cmd(SPI2, ENABLE);
+  //enable SPI1
+  SPI_Cmd(SPI1, ENABLE);
   
 #ifdef SPI_IN_INTERRUPT_MODE
   //Configure NVIC: Preemption Priority = 1 and Sub Priority = 1
   NVIC_InitTypeDef NVIC_InitStructure;
-  NVIC_InitStructure.NVIC_IRQChannel                    = SPI2_IRQChannel;
+  NVIC_InitStructure.NVIC_IRQChannel	                  = SPI1_IRQChannel;
   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority	= 1;
   NVIC_InitStructure.NVIC_IRQChannelSubPriority	        = 1;
   NVIC_InitStructure.NVIC_IRQChannelCmd	                = ENABLE;
@@ -128,17 +130,16 @@ void spi_txrx(uint8_t*     bufTx,
    // SPI is now busy
    spi_vars.busy             =  1;
    
-   
    // lower CS signal to have slave listening
    if (spi_vars.isFirst==SPI_FIRST) {
-   GPIO_ResetBits(GPIOA, GPIO_Pin_4);
+     GPIO_ResetBits(GPIOA, GPIO_Pin_4);
    }
    
 #ifdef SPI_IN_INTERRUPT_MODE
    // implementation 1. use a callback function when transaction finishes
    
    // write first byte to TX buffer
-   SPI_I2S_SendData(SPI2,*spi_vars.pNextTxByte);
+   SPI_I2S_SendData(SPI1,*spi_vars.pNextTxByte);
    
    // re-enable interrupts
    NVIC_SETPRIMASK();
@@ -147,26 +148,26 @@ void spi_txrx(uint8_t*     bufTx,
    // send all bytes
    while (spi_vars.txBytesLeft>0) {
       // write next byte to TX buffer
-   SPI_I2S_SendData(SPI2,*spi_vars.pNextTxByte);
+      SPI_I2S_SendData(SPI1,*spi_vars.pNextTxByte);
 
       // busy wait on the interrupt flag
-      while (SPI_I2S_GetFlagStatus(SPI2,SPI_I2S_FLAG_RXNE) == RESET);
+      while (SPI_I2S_GetFlagStatus(SPI1,SPI_I2S_FLAG_RXNE) == RESET);
       
       // clear the interrupt flag
-      SPI_I2S_ClearFlag(SPI2, SPI_I2S_FLAG_RXNE);
+      SPI_I2S_ClearFlag(SPI1, SPI_I2S_FLAG_RXNE);
       // save the byte just received in the RX buffer
       switch (spi_vars.returnType) {
          case SPI_FIRSTBYTE:
             if (spi_vars.numTxedBytes==0) {
-               *spi_vars.pNextRxByte   = SPI_I2S_ReceiveData(SPI2);
+               *spi_vars.pNextRxByte   = SPI_I2S_ReceiveData(SPI1);
             }
             break;
          case SPI_BUFFER:
-            *spi_vars.pNextRxByte      = SPI_I2S_ReceiveData(SPI2);
+            *spi_vars.pNextRxByte      = SPI_I2S_ReceiveData(SPI1);
             spi_vars.pNextRxByte++;
             break;
          case SPI_LASTBYTE:
-            *spi_vars.pNextRxByte      = SPI_I2S_ReceiveData(SPI2);
+            *spi_vars.pNextRxByte      = SPI_I2S_ReceiveData(SPI1);
             break;
       }
       // one byte less to go
@@ -177,7 +178,7 @@ void spi_txrx(uint8_t*     bufTx,
    
    // put CS signal high to signal end of transmission to slave
    if (spi_vars.isLast==SPI_LAST) {
-   GPIO_SetBits(GPIOA, GPIO_Pin_4);
+      GPIO_SetBits(GPIOA, GPIO_Pin_4);
    }
    
    // SPI is not busy anymore
@@ -195,15 +196,15 @@ kick_scheduler_t spi_isr() {
    switch (spi_vars.returnType) {
       case SPI_FIRSTBYTE:
          if (spi_vars.numTxedBytes==0) {
-            *spi_vars.pNextRxByte = SPI_I2S_ReceiveData(SPI2);
+            *spi_vars.pNextRxByte = SPI_I2S_ReceiveData(SPI1);
          }
          break;
       case SPI_BUFFER:
-         *spi_vars.pNextRxByte    = SPI_I2S_ReceiveData(SPI2);
+         *spi_vars.pNextRxByte    = SPI_I2S_ReceiveData(SPI1);
          spi_vars.pNextRxByte++;
          break;
       case SPI_LASTBYTE:
-         *spi_vars.pNextRxByte    = SPI_I2S_ReceiveData(SPI2);
+         *spi_vars.pNextRxByte    = SPI_I2S_ReceiveData(SPI1);
          break;
    }
    
@@ -214,11 +215,11 @@ kick_scheduler_t spi_isr() {
    
    if (spi_vars.txBytesLeft>0) {
       // write next byte to TX buffer
-   SPI_SendData(SPI2,*spi_vars.pNextTxByte);
+      SPI_SendData(SPI1,*spi_vars.pNextTxByte);
    } else {
       // put CS signal high to signal end of transmission to slave
       if (spi_vars.isLast==SPI_LAST) {
-   GPIO_SetBits(GPIOA, GPIO_Pin_4);
+         GPIO_SetBits(GPIOA, GPIO_Pin_4);
       }
       // SPI is not busy anymore
       spi_vars.busy          =  0;

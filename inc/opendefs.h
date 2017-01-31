@@ -91,7 +91,7 @@ enum {
    //UDP
    WKP_UDP_COAP                        =    5683,
    WKP_UDP_ECHO                        =       7,
-   WKP_UDP_INJECT                      =    2000,
+   WKP_UDP_INJECT                      =   61617,// 0xf0b1
    WKP_UDP_RINGMASTER                  =   15000,
    WKP_UDP_SERIALBRIDGE                =    2001,
 };
@@ -352,7 +352,7 @@ typedef struct {
    uint8_t          numWraps;//number of times the tx counter wraps. can be removed if memory is a restriction. also check openvisualizer then.
    asn_t            asn;
    uint8_t          joinPrio;
-   bool             isNoRes;
+   bool             f6PNORES;
 } neighborRow_t;
 END_PACK
 

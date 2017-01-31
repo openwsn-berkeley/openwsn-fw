@@ -198,7 +198,7 @@ void radio_rfOff(void) {
 
 //===== TX
 
-void radio_loadPacket(uint8_t* packet, uint8_t len) {
+void radio_loadPacket(uint8_t* packet, uint16_t len) {
    // change state
    radio_vars.state = RADIOSTATE_LOADING_PACKET;
    
@@ -235,26 +235,24 @@ void radio_txNow(void) {
 void radio_rxEnable(void) {
    // change state
    radio_vars.state = RADIOSTATE_ENABLING_RX;
-   
-   // put radio in reception mode
-   cc2420_spiStrobe(CC2420_SRXON, &radio_vars.radioStatusByte);
-   cc2420_spiStrobe(CC2420_SFLUSHRX, &radio_vars.radioStatusByte);
-   
+
    // wiggle debug pin
    debugpins_radio_set();
    leds_radio_on();
-   
-   // busy wait until radio really listening
-   while (radio_vars.radioStatusByte.rssi_valid==0) {
-      cc2420_spiStrobe(CC2420_SNOP, &radio_vars.radioStatusByte);
-   }
-   
-   // change state
-   radio_vars.state = RADIOSTATE_LISTENING;
 }
 
 void radio_rxNow(void) {
-   // nothing to do, the radio is already listening.
+  // change state
+  radio_vars.state = RADIOSTATE_LISTENING;
+
+  // put radio in reception mode
+  cc2420_spiStrobe(CC2420_SRXON, &radio_vars.radioStatusByte);
+  cc2420_spiStrobe(CC2420_SFLUSHRX, &radio_vars.radioStatusByte);
+
+  // busy wait until radio really listening
+  while (radio_vars.radioStatusByte.rssi_valid==0) {
+     cc2420_spiStrobe(CC2420_SNOP, &radio_vars.radioStatusByte);
+  }
 }
 
 void radio_getReceivedFrame(

@@ -88,9 +88,15 @@ owerror_t c6t_receive(
             coap_header->Code          = COAP_CODE_RESP_PRECONDFAILED;
             break;
          }
+         
          if (sixtop_setHandler(SIX_HANDLER_SF0)==FALSE){
-             // one sixtop transcation is happening, only one instance at one time 
-             break; 
+            // one sixtop transcation is happening, only one instance at one time
+            
+            // set the CoAP header
+            coap_header->Code             = COAP_CODE_RESP_CHANGED;
+           
+            outcome                       = E_FAIL;
+            break;
          }
          // call sixtop
          sixtop_request(
@@ -119,9 +125,15 @@ owerror_t c6t_receive(
             coap_header->Code          = COAP_CODE_RESP_PRECONDFAILED;
             break;
          }
+         
          if (sixtop_setHandler(SIX_HANDLER_SF0)==FALSE){
-             // one sixtop transcation is happening, only one instance at one time 
-             break; 
+            // one sixtop transcation is happening, only one instance at one time
+            
+            // set the CoAP header
+            coap_header->Code             = COAP_CODE_RESP_CHANGED;
+           
+            outcome                       = E_FAIL;
+            break;
          }
          // call sixtop
          sixtop_request(

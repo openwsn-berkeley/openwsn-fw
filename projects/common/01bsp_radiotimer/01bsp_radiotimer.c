@@ -34,8 +34,8 @@ Each time a radiotimer compare event happens:
 //=========================== variables =======================================
 
 typedef struct {
-   uint8_t  num_compares_left;
-   uint16_t last_compare_val;
+   uint8_t                  num_compares_left;
+   PORT_RADIOTIMER_WIDTH    last_compare_val;
 } app_vars_t;
 
 app_vars_t app_vars;
@@ -87,7 +87,7 @@ void cb_overflow(void) {
    // toggle pin
    debugpins_frame_toggle();
    
-   // switch radio LED on
+   // toggle error LED
    leds_error_toggle();
    
    // reset the counter for number of remaining compares

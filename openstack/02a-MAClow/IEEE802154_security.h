@@ -89,6 +89,7 @@ typedef struct{
    m_macSecurityLevelTable MacSecurityLevelTable;
    uint8_t                 Key_1[16];
    uint8_t                 Key_2[16];
+   uint8_t                 minimal;
 } ieee802154_security_vars_t;
 
 extern const struct ieee802154_security_driver IEEE802154_security;

@@ -16,7 +16,6 @@
 openqueue_vars_t openqueue_vars;
 
 //=========================== prototypes ======================================
-
 void openqueue_reset_entry(OpenQueueEntry_t* entry);
 
 //=========================== public ==========================================
@@ -409,6 +408,7 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry) {
    entry->length                       = 0;
    //l4
    entry->l4_protocol                  = IANA_UNDEFINED;
+   entry->l4_protocol_compressed       = FALSE;
    //l3
    entry->l3_destinationAdd.type       = ADDR_NONE;
    entry->l3_sourceAdd.type            = ADDR_NONE;

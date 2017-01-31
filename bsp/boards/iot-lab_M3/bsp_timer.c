@@ -5,7 +5,7 @@ TODO: On openmoteSTM32, we use TIM2 for the bsp_timer module.
 
 \author Chang Tengfei <tengfei.chang@gmail.com>,  July 2012.
 */
-#include "stm32f10x_lib.h"
+#include "stm32f10x_conf.h"
 #include "string.h"
 #include "bsp_timer.h"
 #include "board.h"

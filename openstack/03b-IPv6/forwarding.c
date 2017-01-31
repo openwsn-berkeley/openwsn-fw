@@ -74,6 +74,7 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
     uint8_t              sam;
     uint8_t              m;
     uint8_t              dam;
+    uint8_t              next_header;
 
     // take ownership over the packet
     msg->owner                = COMPONENT_FORWARDING;
@@ -138,11 +139,17 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
         }
     }
     //IPHC inner header and NHC IPv6 header will be added at here
+
+    if (msg->l4_protocol_compressed){
+        next_header = IPHC_NH_COMPRESSED;
+    }else{
+        next_header = IPHC_NH_INLINE;
+    }
     iphc_prependIPv6Header(msg,
                 IPHC_TF_ELIDED,
                 flow_label, // value_flowlabel
-                IPHC_NH_INLINE,
-                msg->l4_protocol, 
+                next_header,
+                msg->l4_protocol, // value nh. If compressed this is ignored as LOWPAN_NH is already there.
                 IPHC_HLIM_64,
                 ipv6_outer_header.hop_limit,
                 IPHC_CID_NO,
@@ -233,7 +240,8 @@ void forwarding_receive(
    
     // take ownership
     msg->owner                     = COMPONENT_FORWARDING;
-   
+
+
     // determine L4 protocol
     // get information from ipv6_header
     msg->l4_protocol            = ipv6_inner_header->next_header;
@@ -242,7 +250,7 @@ void forwarding_receive(
     // populate packets metadata with L3 information
     memcpy(&(msg->l3_destinationAdd),&ipv6_inner_header->dest, sizeof(open_addr_t));
     memcpy(&(msg->l3_sourceAdd),     &ipv6_inner_header->src,  sizeof(open_addr_t));
-   
+
     if (
         (
             idmanager_isMyAddress(&(msg->l3_destinationAdd))
