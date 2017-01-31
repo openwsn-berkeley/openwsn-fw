@@ -128,7 +128,7 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks)
    if (delayTicks < (TIM_GetCounter(TIM2)-temp_last_compare_value)) 
    {
       // setting the interrupt flag triggers an interrupt
-        TIM_GenerateEvent(TIM2,TIM_EventSource_CC1);
+        TIM2->SR |= (u16)TIM_FLAG_CC1;
    } 
    else
    {

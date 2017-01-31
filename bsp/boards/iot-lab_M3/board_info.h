@@ -24,9 +24,8 @@ to return the board's description.
 //#define PACK_END    _Pragma("pack()")
 
 #define INTERRUPT_DECLARATION(); //no declaration
-
-#define DISABLE_INTERRUPTS()    NVIC_SETPRIMASK();
-#define ENABLE_INTERRUPTS()     NVIC_RESETPRIMASK();
+#define DISABLE_INTERRUPTS()    __disable_irq();
+#define ENABLE_INTERRUPTS()     __enable_irq();
 
 //===== timer
 
@@ -47,6 +46,7 @@ to return the board's description.
 // radio /RST
 #define PORT_PIN_RADIO_RESET_HIGH()       //GPIOC->ODR |= 0X0040;// nothing
 #define PORT_PIN_RADIO_RESET_LOW()        //GPIOC->ODR &= ~0X0040;// nothing
+//#define PORT_PIN_RADIO_RESET_LOW()            GPIOC->ODR &= ~(1<<1);
 
 //===== IEEE802154E timing
 // time-slot related

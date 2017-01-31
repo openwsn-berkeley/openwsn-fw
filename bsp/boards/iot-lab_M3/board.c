@@ -16,23 +16,21 @@
 #include "rcc.h"
 #include "nvic.h"
 #include "debugpins.h"
-
-//=========================== variable ========================================
-
-//=========================== private =========================================
-
-//Configures the different GPIO ports as Analog Inputs.
-void GPIO_Config_ALL_AIN(void);
-// configure the hard fault exception
-void board_enableHardFaultExceptionHandler();
+#include "opentimers.h"
+#include "gpio.h"
 
 //=========================== main ============================================
 
-extern int mote_main();
+extern int mote_main(void);
 
-int main() {
+int main(void){
     return mote_main();
 }
+
+//=========================== private =========================================
+
+// configure the hard fault exception
+void board_enableHardFaultExceptionHandler();
 
 //=========================== public ==========================================
 
@@ -45,6 +43,8 @@ void board_init()
 
     //configure ALL GPIO to AIN to get lowest power
     GPIO_Config_ALL_AIN();
+    //configuration GPIO to measure the time from sleep to 72MHz
+    GPIO_Configuration();
 
     GPIO_InitTypeDef  GPIO_InitStructure;
 
@@ -71,8 +71,6 @@ void board_init()
     GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_4;
     GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_IN_FLOATING;
     GPIO_Init(GPIOC, &GPIO_InitStructure);
-    
-    GPIOC->ODR |= 0x0010;//set low
 
     GPIO_EXTILineConfig(GPIO_PortSourceGPIOC, GPIO_PinSource4);//Connect EXTI Line4 to PC.4
     EXTI_ClearITPendingBit(EXTI_Line4);
@@ -108,43 +106,10 @@ void board_sleep(){
 }
 
 void board_reset(){
-    NVIC_GenerateSystemReset();
+    NVIC_SystemReset();
 }
 
 //=========================== private =========================================
-
-
-/**
-  * @brief  Configures the different GPIO ports as Analog Inputs.
-  * @param  None
-  * @retval : None
-  */
-void GPIO_Config_ALL_AIN(void){
-    GPIO_InitTypeDef GPIO_InitStructure;
-
-    /* Enable GPIOD and GPIOE clock */
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB 
-                         | RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOD 
-                         | RCC_APB2Periph_AFIO, ENABLE);
-
-    /* PA  */
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_All;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
-    GPIO_Init(GPIOA, &GPIO_InitStructure);
-      /* PB  */
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_All;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
-    GPIO_Init(GPIOB, &GPIO_InitStructure);
-      /* PC  */
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_All;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
-    GPIO_Init(GPIOC, &GPIO_InitStructure);
-        /* PD  */
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_All;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
-    GPIO_Init(GPIOD, &GPIO_InitStructure);
-}
-
 
 void board_enableHardFaultExceptionHandler(){
     // Configures:
