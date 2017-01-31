@@ -949,42 +949,6 @@ port_INLINE void activity_ti1ORri1() {
                // look for an EB packet in the queue
                ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
             }
-#ifdef EB_DIO_PIGGYBACK
-            // send piggyback'ed EB_DIO on shared slot 0, send others packet on shared slot 1-3
-            // this is caused EB has a highest sending rate for fast joining when ChannelHopping is enabled.
-            // seperate the EB traffic from others
-            switch(ieee154e_vars.slotOffset){
-                case 0:
-                    // only send piggyback'ed EB_DIO 
-                    couldSendEB=TRUE;
-                    ieee154e_vars.dataToSend = openqueue_macGetDIOPacket();
-                    break;
-                case 1:
-                case 2:
-                case 3:
-                case 4:
-                case 5:
-                case 6:
-                case 7:
-                case 8:
-                case 9:
-                    couldSendEB=FALSE;
-                    // only send Unicast
-                    ieee154e_vars.dataToSend = openqueue_macGetUnicastPacket(&neighbor);
-                    // if I have Tx slot for the unicast packet, send it at that Tx slot
-                    if (ieee154e_vars.dataToSend!=NULL){
-                        if (schedule_getCellsCounts(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,CELLTYPE_TX,&(ieee154e_vars.dataToSend->l2_nextORpreviousHop))>0){
-                            ieee154e_vars.dataToSend = NULL;
-                        }
-                    }
-                    
-                    break;
-                default:
-                    couldSendEB=FALSE;
-                    ieee154e_vars.dataToSend = openqueue_macGetUnicastPacket(&neighbor);
-                    break;
-            }
-#else
             switch(ieee154e_vars.slotOffset){
                 case 0:
                     // only send EB
@@ -1015,7 +979,6 @@ port_INLINE void activity_ti1ORri1() {
                     ieee154e_vars.dataToSend = openqueue_macGetUnicastPacket(&neighbor);
                     break;
             }
-#endif
          }
          /*
          // don't send DAO or replying packet on shared slot(TxRx slot), 
