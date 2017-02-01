@@ -932,7 +932,7 @@ void schedule_housekeeping(){
 //            }
 //        }
         if(schedule_vars.scheduleBuf[i].type == CELLTYPE_TX){
-            // remove Tx cell if it's scheduled to non-perferred parent
+            // remove Tx cell if it's scheduled to non-preferred parent
             if (icmpv6rpl_getPreferredParentEui64(&neighbor)==TRUE) {
                 if(packetfunctions_sameAddress(&neighbor,&(schedule_vars.scheduleBuf[i].neighbor))==FALSE){
                     if (sixtop_setHandler(SIX_HANDLER_SFX)==FALSE){
