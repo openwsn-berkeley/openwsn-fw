@@ -195,7 +195,7 @@ elif env['toolchain']=='iar-proj':
     
 elif env['toolchain']=='armgcc':
     
-    if env['board'] not in ['openmote-cc2538','iot-lab_M3','iot-lab_A8-M3','openmotestm', 'samr21_xpro']:
+    if env['board'] not in ['silabs-ezr32wg','openmote-cc2538','iot-lab_M3','iot-lab_A8-M3','openmotestm', 'samr21_xpro']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     if   env['board']=='openmote-cc2538':
@@ -237,7 +237,55 @@ elif env['toolchain']=='armgcc':
         env.Replace(NM           = 'arm-none-eabi-nm')
         env.Replace(SIZE         = 'arm-none-eabi-size')
         
-    elif env['board'] in ['iot-lab_M3', 'iot-lab_A8-M3','openmotestm']:
+    elif env['board']=='silabs-ezr32wg':
+        # compiler (C)
+        env.Replace(CC           = 'arm-none-eabi-gcc')
+        env.Append(CCFLAGS       = '-O0')
+        env.Append(CCFLAGS       = '-Wall')
+        env.Append(CCFLAGS       = '-Wa,-adhlns=${TARGET.base}.lst')
+        env.Append(CCFLAGS       = '-c')
+        env.Append(CCFLAGS       = '-fmessage-length=0')
+        env.Append(CCFLAGS       = '-mcpu=cortex-m4')
+        env.Append(CCFLAGS       = '-mthumb')
+        env.Append(CCFLAGS       = '-g')
+        env.Append(CCFLAGS       = '-std=gnu99')
+        env.Append(CCFLAGS       = '-O0')
+        env.Append(CCFLAGS       = '-Wall')
+        env.Append(CCFLAGS       = '-Wstrict-prototypes')
+        env.Append(CCFLAGS       = '-ffunction-sections')
+        env.Append(CCFLAGS       = '-fdata-sections')
+        env.Append(CCFLAGS       = '-mfpu=fpv4-sp-d16')
+        env.Append(CCFLAGS       = '-mfloat-abi=softfp')
+        env.Append(CCFLAGS       = '-DEZR32WG330F256R60=1')
+
+        # assembler
+        env.Replace(AS           = 'arm-none-eabi-as')
+        env.Append(ASFLAGS       = '-g -gdwarf-2 -mcpu=cortex-m4 -mthumb -c -x assembler-with-cpp ')
+        env.Append(ASFLAGS       = '-DEZR32WG330F256R60=1')
+        
+        # linker
+        env.Append(LINKFLAGS     = '-g -gdwarf-2 -mcpu=cortex-m4 -mthumb -Tbsp/boards/silabs-ezr32wg/GCC/ezr32wg.ld')
+        env.Append(LINKFLAGS     = '-Xlinker --gc-sections -Xlinker')
+        env.Append(LINKFLAGS     = '-Map=${TARGET.base}.map')
+        
+        env.Append(LINKFLAGS     = '-mfpu=fpv4-sp-d16 -mfloat-abi=softfp  --specs=nosys.specs')
+        #--specs=nano.specs
+        #env.Append(LINKFLAGS     = '-lgcc -lc -lnosys')
+        env.Append(LINKFLAGS     = '-Wl,--start-group -lgcc -lc -lg -lm -lnosys -Wl,--end-group')
+        
+        # object manipulation
+        env.Replace(OBJCOPY      = 'arm-none-eabi-objcopy')
+        env.Replace(OBJDUMP      = 'arm-none-eabi-objdump')
+        # archiver
+        env.Replace(AR           = 'arm-none-eabi-ar')
+        env.Append(ARFLAGS       = '')
+        env.Replace(RANLIB       = 'arm-none-eabi-ranlib')
+        env.Append(RANLIBFLAGS   = '')
+        # misc
+        env.Replace(NM           = 'arm-none-eabi-nm')
+        env.Replace(SIZE         = 'arm-none-eabi-size')
+
+    elif env['board'] in ['openmotestm','iot-lab_M3', 'iot-lab_A8-M3']:
         
         # compiler (C)
         env.Replace(CC           = 'arm-none-eabi-gcc')
@@ -578,6 +626,48 @@ def OpenMoteCC2538_bootload(target, source, env):
     for t in bootloadThreads:
         countingSem.acquire()
 
+class openmotestm_bootloadThread(threading.Thread):
+    def __init__(self,comPort,binaryFile,countingSem):
+        
+        # store params
+        self.comPort         = comPort
+        self.binaryFile      = binaryFile
+        self.countingSem     = countingSem
+        
+        # initialize parent class
+        threading.Thread.__init__(self)
+        self.name            = 'openmotestm_bootloadThread_{0}'.format(self.comPort)
+    
+    def run(self):
+        print 'starting bootloading on {0}'.format(self.comPort)
+        subprocess.call(
+            'python '+ os.path.join('bootloader','openmotestm','bin.py' + ' -p {0} {1}'.format(self.comPort, self.binaryFile)),
+            shell=True
+        )
+        print 'done bootloading on {0}'.format(self.comPort)
+        
+        # indicate done
+        self.countingSem.release()
+        
+def openmotestm_bootload(target, source, env):
+    bootloadThreads = []
+    countingSem     = threading.Semaphore(0)
+    # create threads
+    for comPort in env['bootload'].split(','):
+        bootloadThreads += [
+            openmotestm_bootloadThread(
+                comPort      = comPort,
+                binaryFile   = source[0].path.split('.')[0]+'.bin',
+                countingSem  = countingSem,
+            )
+        ]
+    # start threads
+    for t in bootloadThreads:
+        t.start()
+    # wait for threads to finish
+    for t in bootloadThreads:
+        countingSem.acquire()
+        
 class IotLabM3_bootloadThread(threading.Thread):
     def __init__(self,comPort,binaryFile,countingSem):
         
@@ -614,48 +704,6 @@ def IotLabM3_bootload(target, source, env):
             IotLabM3_bootloadThread(
                 comPort      = comPort,
                 binaryFile   = source[0].path.split('.')[0]+suffix,
-                countingSem  = countingSem,
-            )
-        ]
-    # start threads
-    for t in bootloadThreads:
-        t.start()
-    # wait for threads to finish
-    for t in bootloadThreads:
-        countingSem.acquire()
-
-class openmotestm_bootloadThread(threading.Thread):
-    def __init__(self,comPort,binaryFile,countingSem):
-        
-        # store params
-        self.comPort         = comPort
-        self.binaryFile      = binaryFile
-        self.countingSem     = countingSem
-        
-        # initialize parent class
-        threading.Thread.__init__(self)
-        self.name            = 'openmotestm_bootloadThread_{0}'.format(self.comPort)
-    
-    def run(self):
-        print 'starting bootloading on {0}'.format(self.comPort)
-        subprocess.call(
-            'python '+ os.path.join('bootloader','openmotestm','bin.py' + ' -p {0} {1}'.format(self.comPort, self.binaryFile)),
-            shell=True
-        )
-        print 'done bootloading on {0}'.format(self.comPort)
-        
-        # indicate done
-        self.countingSem.release()
-        
-def openmotestm_bootload(target, source, env):
-    bootloadThreads = []
-    countingSem     = threading.Semaphore(0)
-    # create threads
-    for comPort in env['bootload'].split(','):
-        bootloadThreads += [
-            openmotestm_bootloadThread(
-                comPort      = comPort,
-                binaryFile   = source[0].path.split('.')[0]+'.bin',
                 countingSem  = countingSem,
             )
         ]
