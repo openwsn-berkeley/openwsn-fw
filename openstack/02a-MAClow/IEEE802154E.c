@@ -17,6 +17,7 @@
 #include "adaptive_sync.h"
 #include "processIE.h"
 #include "openrandom.h"
+#include "sfy_hashtable.h"
 
 //=========================== definition ======================================
 
@@ -960,47 +961,23 @@ port_INLINE void activity_ti1ORri1() {
                     couldSendEB=FALSE;
                     ieee154e_vars.dataToSend = openqueue_macGetDIOPacket();
                     break;
-                case 2:
-                case 3:
-                case 4:
+                default:
                     couldSendEB=FALSE;
                     // only send Unicast
                     ieee154e_vars.dataToSend = openqueue_macGetUnicastPacket(&neighbor);
                     // if I have Tx slot for the unicast packet, send it at that Tx slot
-                    if (ieee154e_vars.dataToSend!=NULL){
+                    if (
+                        ieee154e_vars.dataToSend != NULL                       &&
+                        ieee154e_vars.dataToSend->creator>COMPONENT_SIXTOP_RES && 
+                        ieee154e_vars.slotOffset == sfy_hashtable_getSharedSlotMe()
+                    ){
                         if (schedule_getCellsCounts(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,CELLTYPE_TX,&(ieee154e_vars.dataToSend->l2_nextORpreviousHop))>0){
                             ieee154e_vars.dataToSend = NULL;
                         }
                     }
-                    
-                    break;
-                default:
-                    couldSendEB=FALSE;
-                    ieee154e_vars.dataToSend = openqueue_macGetUnicastPacket(&neighbor);
                     break;
             }
          }
-         /*
-         // don't send DAO or replying packet on shared slot(TxRx slot), 
-         // but still record in as having packet to be sent (just done above).
-         // later sfx will reserve at least one cell for sending DAO, if there is no cell in schedule yet.
-         if (ieee154e_vars.dataToSend !=NULL) {
-             if (
-                 cellType==CELLTYPE_TXRX && 
-                 (  // rpl packet but not boardcast (DAO, not DIO)
-                    (
-                      ieee154e_vars.dataToSend->creator==COMPONENT_ICMPv6RPL &&
-                      packetfunctions_isBroadcastMulticast(&(ieee154e_vars.dataToSend->l2_nextORpreviousHop))==FALSE
-                    )||
-                    // packet requied to be replied
-                    ieee154e_vars.dataToSend->creator==COMPONENT_FORWARDING
-                 )
-             ) {
-                  // disselect the packet to change to Rx mode.
-                  ieee154e_vars.dataToSend=NULL;
-             }
-         }
-         */
          
          // udpate cell usgae bitmap, set as true if I have packet to send
          if (ieee154e_vars.dataToSend==NULL) {

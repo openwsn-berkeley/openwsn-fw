@@ -8,6 +8,7 @@
 #include "idmanager.h"
 #include "icmpv6rpl.h"
 #include "scheduler.h"
+#include "sfy_hashtable.h"
 
 //=========================== definition ======================================
 
@@ -124,6 +125,8 @@ void sfx_cellUsageCalculation_task(){
    if (foundNeighbor==FALSE) {
       return;
    }
+
+   sfy_hashtable_updateSharedslotParent(&neighbor);
    
    numberOfCells  = schedule_getCellsCounts(
             SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,

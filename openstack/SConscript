@@ -21,6 +21,7 @@ sources_c = [
     os.path.join('02b-MAChigh','processIE.c'),
     os.path.join('02b-MAChigh','schedule.c'),
     os.path.join('02b-MAChigh','sixtop.c'),
+    os.path.join('02b-MAChigh','sfy_hashtable.c'),
     #=== 03a-IPHC
     os.path.join('03a-IPHC','iphc.c'),
     os.path.join('03a-IPHC','openbridge.c'),
@@ -56,6 +57,7 @@ sources_h = [
     os.path.join('02b-MAChigh','processIE.h'),
     os.path.join('02b-MAChigh','schedule.h'),
     os.path.join('02b-MAChigh','sixtop.h'),
+    os.path.join('02b-MAChigh','sfy_hashtable.h'),
     #=== 03a-IPHC
     os.path.join('03a-IPHC','iphc.h'),
     os.path.join('03a-IPHC','openbridge.h'),

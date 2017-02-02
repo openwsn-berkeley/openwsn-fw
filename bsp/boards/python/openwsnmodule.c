@@ -66,6 +66,7 @@ static PyObject* OpenMote_getState(OpenMote* self) {
    PyObject* schedule_vars;
    PyObject* schedule_dbg;
    PyObject* sfx_vars;
+   PyObject* sfy_hashtable_vars;
    PyObject* ieee154e_vars;
    PyObject* ieee154e_stats;
    PyObject* ieee154e_dbg;
@@ -151,6 +152,11 @@ static PyObject* OpenMote_getState(OpenMote* self) {
    sfx_vars = PyDict_New();
    // TODO
    PyDict_SetItemString(returnVal, "sfx_vars", sfx_vars);
+   
+   // sfy_hashtable_vars
+   sfy_hashtable_vars = PyDict_New();
+   // TODO
+   PyDict_SetItemString(returnVal, "sfy_hashtable_vars", sfy_hashtable_vars);
    
    // schedule_dbg
    schedule_dbg = PyDict_New();
