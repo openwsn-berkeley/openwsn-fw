@@ -310,7 +310,7 @@ void  schedule_getSlotInfo(
 
 \param[pos] position of the slot
 */
-scheduleEntry_t *schedule_getCell(uint8_t pos){
+scheduleEntry_t* schedule_getCell(uint8_t pos){
 
    if (pos < schedule_getMaxActiveSlots())
       return(&(schedule_vars.scheduleBuf[pos]));
@@ -531,7 +531,7 @@ owerror_t schedule_removeActiveSlot(slotOffset_t slotOffset, open_addr_t* neighb
 
 
 
-owerror_t schedule_removeReservedCells(void){
+owerror_t schedule_removeReservedCells(){
    scheduleEntry_t* slotContainer;
    scheduleEntry_t* previousSlotWalker;
 
@@ -938,7 +938,7 @@ channelOffset_t schedule_getChannelOffset(void) {
 
 \returns The slot offset of the current schedule entry.
 */
-slotOffset_t schedule_getSlotOffset(void) {
+slotOffset_t schedule_getSlotOffset() {
    slotOffset_t returnVal;
 
    INTERRUPT_DECLARATION();

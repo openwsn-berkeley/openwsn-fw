@@ -197,6 +197,7 @@ bool packetfunctions_isAllHostsMulticast(open_addr_t* address) {
    return FALSE;
 }
 
+
 bool packetfunctions_sameAddress_debug(open_addr_t* address_1, open_addr_t* address_2, uint8_t component) {
    uint8_t address_length;
 

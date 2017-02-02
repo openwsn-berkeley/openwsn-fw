@@ -9,6 +9,7 @@
 #include "openbridge.h"
 #include "icmpv6rpl.h"
 
+
 //=========================== variables =======================================
 
 static const uint8_t dagroot_mac64b[]   = {0x02,

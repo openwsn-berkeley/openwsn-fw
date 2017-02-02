@@ -24,7 +24,6 @@
 #define DEFAULTDAGRANK            MAXDAGRANK
 #define MINHOPRANKINCREASE        256  //default value in RPL and Minimal 6TiSCH draft
 
-
 //=========================== typedef =========================================
 
 BEGIN_PACK
@@ -86,13 +85,9 @@ void          neighbors_indicateTx(
 );
 
 // get addresses
-
-void          neighbors_getNeighbor(open_addr_t* address,uint8_t addr_type,uint8_t index);
-//returns the whole entry concerning a neighbor
-neighborRow_t *neighbors_getNeighborInfo(open_addr_t* address);
+//void          neighbors_getNeighbor(open_addr_t* address,uint8_t addr_type,uint8_t index);
 // managing routing info
 void          neighbors_updateMyDAGrankAndNeighborPreference(void);
-
 bool          neighbors_getNeighborEui64(open_addr_t* address,uint8_t addr_type,uint8_t index);
 // maintenance
 void          neighbors_removeOld(void);

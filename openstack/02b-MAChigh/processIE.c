@@ -11,6 +11,7 @@
 #include "scheduler.h"
 #include "packetfunctions.h"
 
+
 //=========================== variables =======================================
 
 //=========================== public ==========================================
@@ -354,7 +355,6 @@ port_INLINE void processIE_retrieve_sixCelllist(
         cellList[i].linkoptions = CELLTYPE_TX;
         i++;
     }
-
 }
 
 

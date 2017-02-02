@@ -24,7 +24,6 @@
 #include "schedule.h"
 
 
-
 #define _DEBUG_SIXTOP_
 #define _DEBUG_SIXTOP_TIMEOUT_
 //#define _DEBUG_EB_
@@ -312,10 +311,9 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells, track
    }
 #endif
 
-
 #if (TRACK_MGMT == TRACK_MGMT_6P_ISOLATION)
    if ((track.instance != TRACK_PARENT_CONTROL) && (code == IANA_6TOP_CMD_ADD)){
-      pkt->l2_track = sixtop_get_trackcontrol();
+      sixtop_get_trackcontrol(&(pkt->l2_track));
  #ifdef _DEBUG_SIXTOP_
        strncat(str, ", via control track ", 150);
        openserial_ncat_uint32_t(str, (uint32_t)pkt->l2_track.instance, 150);
@@ -326,7 +324,7 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells, track
 
    }
    else if (code == IANA_6TOP_CMD_DELETE){
-      pkt->l2_track = sixtop_get_trackcontrol();
+      sixtop_get_trackcontrol(&(pkt->l2_track));
 
 #ifdef _DEBUG_SIXTOP_
        strncat(str, ", via control child track ", 150);
@@ -2222,47 +2220,6 @@ void sixtop_addCellsByDirection(
 
 }
 
-
-// searches for the track associated to this neighbor / slotinfos
-track_t sixtop_getTrackCellsByState(
-      uint8_t      slotframeID,
-      uint8_t      numOfLink,
-      cellInfo_ht* cellList,
-      open_addr_t* previousHop
-   ){
-   uint8_t              i;
-   slotinfo_element_t   info;
-   bool                 found = FALSE;
-   track_t              track = sixtop_get_trackbesteffort();
-
-   for(i=0;i<numOfLink;i++){
-      if(cellList[i].linkoptions == CELLTYPE_TX){
-
-         schedule_getSlotInfo(
-            cellList[i].tsNum,
-            previousHop,
-            &info
-         );
-
-         //all these cells MUST have the same track
-         if (found){
-            if (!sixtop_is_trackequal(track, info.track))
-               openserial_printError(
-                     COMPONENT_SIXTOP,
-                     ERR_SIXTOP_MULTIPLE_TRACKS,
-                     (errorparameter_t)0,
-                     (errorparameter_t)0
-               );
-         }
-         else{
-            track = info.track;
-            found = TRUE;
-         }
-      }
-   }
-   return(track);
-}
-
 void sixtop_removeCellsByState(
       uint8_t      slotframeID,
       cellInfo_ht* cellList,
@@ -2343,11 +2300,9 @@ bool sixtop_areAvailableCellsToBeScheduled(
 
 //======= helper functions
 
-
 //are these track equal?
 bool sixtop_is_trackequal(track_t track1, track_t track2){
-   return (packetfunctions_sameAddress_debug(&(track1.owner), &(track2.owner), COMPONENT_SIXTOP)
-         && track1.instance == track2.instance);
+   return (packetfunctions_sameAddress_debug(&(track1.owner), &(track2.owner), COMPONENT_SIXTOP)  && track1.instance == track2.instance);
 }
 
 //is this the best effort track?
@@ -2390,15 +2345,13 @@ track_t sixtop_get_trackcommon(void){
 }
 
 //return the common track (uses dedicated cells toward the parent, but NO traffic isolation)
-track_t sixtop_get_trackcontrol(void){
-   track_t        track;
+void sixtop_get_trackcontrol(track_t *track){
    uint8_t        dodagid[16];
 
    icmpv6rpl_getRPLDODAGid(dodagid);
-   track.owner.type = ADDR_64B;
-   memcpy(&(track.owner.addr_64b[0]), &(dodagid[8]), 8);
-   track.instance = TRACK_PARENT_CONTROL;
-   return(track);
+   track->owner.type = ADDR_64B;
+   memcpy(&(track->owner.addr_64b[0]), &(dodagid[8]), 8);
+   track->instance = TRACK_PARENT_CONTROL;
 }
 
 

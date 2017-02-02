@@ -47,6 +47,7 @@ typedef struct {
 
 //=========================== prototypes ======================================
 
+
 // admin
 void               openqueue_init(void);
 bool               debugPrint_queue(void);
@@ -74,7 +75,6 @@ OpenQueueEntry_t*  openqueue_macGetEBPacket(void);
 bool              openqueue_overflow_for_data(void);
 //for debug
 uint8_t openqueue_getPos(OpenQueueEntry_t* entry);
-
 
 /**
 \}

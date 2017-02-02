@@ -11,11 +11,10 @@
 #include "openqueue.h"
 #include "packetfunctions.h"
 
+
 //=========================== definition =====================================
 
-
 #define _DEBUG_SFLOC_       1
-
 
 //=========================== variables =======================================
 
@@ -23,7 +22,7 @@ sfloc_vars_t sfloc_vars;
 
 //=========================== prototypes ======================================
 
-void sfloc_verifSchedule_task(void);
+//void sfloc_verifSchedule_task(void);
 
 
 //=========================== public ==========================================
@@ -39,7 +38,6 @@ void sfloc_notif_addedCell(void) {
             ERR_GENERIC,
             (errorparameter_t)10,
             (errorparameter_t)1);
-
 }
 
 void sfloc_notif_removedCell(void) {
@@ -51,7 +49,7 @@ void sfloc_notif_removedCell(void) {
 }
 
 // this function is called once per slotframe. 
-void sfloc_notifyNewSlotframe(void) {
+void sfloc_notifyNewSlotframe() {
     scheduler_push_task(sfloc_verifSchedule_task, TASKPRIO_SF0);
 }
 
@@ -61,7 +59,7 @@ void sfloc_notifyNewSlotframe(void) {
 
 //to reserve one cell toward my parent (for control packets) if none exists
 //returns TRUE if a reservation was triggered, FALSE if nothing was required
-bool sfloc_reserveParentCells_controlTrack(void){
+bool sfloc_reserveParentCells_controlTrack(){
    open_addr_t parent;
    track_t      sixtopTrack;
    uint8_t      nbCells;
@@ -93,7 +91,7 @@ bool sfloc_reserveParentCells_controlTrack(void){
    neighbors_getNeighborEui64(&parent, ADDR_64B, i);
 
    //the specific track for 6P Link Requests
-   sixtopTrack = sixtop_get_trackcontrol();
+   sixtop_get_trackcontrol(&sixtopTrack);
 
    //how many cells for TRACK_PARENT_CONTROL?
    nbCells = schedule_getNbCellsWithTrack(sixtopTrack, &parent);
@@ -211,7 +209,7 @@ uint8_t sfloc_reserve_agressive_for(OpenQueueEntry_t* msg){
 
 
 //aggressive allocation: walks in openqueue and verifies enough cells are schedules to empty the queue during the slotframe
-void sfloc_addCells_agressive(void){
+void sfloc_addCells_agressive(){
    uint8_t  i;
    OpenQueueEntry_t* msg;
 
@@ -234,7 +232,7 @@ void sfloc_addCells_agressive(void){
 //======= TIMEOUTED (unused) Cells
 
 //verifies that all the neighbors in CELL_TX are my parents
-void sfloc_remove_obsolete_parents(void){
+void sfloc_remove_obsolete_parents(){
 #ifndef SFLOC_REMOVE_OBSOLETE_PARENTS
    return;
 #endif
@@ -282,7 +280,7 @@ void sfloc_remove_obsolete_parents(void){
    }
 }
 
-void sfloc_remove_unused_cells(void){
+void sfloc_remove_unused_cells(){
 
 #ifndef SFLOC_REMOVE_UNUSED_CELLS
    return;
@@ -394,7 +392,7 @@ void sfloc_remove_unused_cells(void){
 
 
 //can a linkReq be generated or should we wait some conditions?
-bool sfloc_verifPossible(void){
+bool sfloc_verifPossible(){
    uint8_t      i;
 
    //I MUST be idle
@@ -422,7 +420,7 @@ bool sfloc_verifPossible(void){
 
 
 //updates the schedule
-void sfloc_verifSchedule_task(void){
+void sfloc_verifSchedule_task(){
 
    //must some actions be triggered before reserving new cells?
    if (!sfloc_verifPossible())

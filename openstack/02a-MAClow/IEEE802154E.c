@@ -17,6 +17,7 @@
 #include "adaptive_sync.h"
 #include "processIE.h"
 
+
 //=========================== variables =======================================
 
 ieee154e_vars_t    ieee154e_vars;
@@ -2436,6 +2437,6 @@ bool ieee154e_is_ongoing(uint8_t creator){
 /*
  * brief: what is the packet currently transmitted (CANNOT be removed now from openqueue!)
  */
-OpenQueueEntry_t* ieee154e_getOngoingTx(void){
+OpenQueueEntry_t* ieee154e_getOngoingTx(){
    return(ieee154e_vars.dataToSend);
 }

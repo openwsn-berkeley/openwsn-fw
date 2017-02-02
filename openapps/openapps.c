@@ -19,6 +19,8 @@
 // UDP
 #include "uecho.h"
 #include "uinject.h"
+//appli (in hard to use the python sim)
+#include "cexample.h"
 
 //=========================== variables =======================================
 
@@ -43,4 +45,5 @@ void openapps_init(void) {
    techo_init();
    // UDP
 //   uecho_init();
+   cexample_init();
 }

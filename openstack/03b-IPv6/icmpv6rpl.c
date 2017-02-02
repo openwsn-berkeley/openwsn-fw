@@ -14,7 +14,6 @@
 
 
 
-
 //#define _DEBUG_DAO_
 //#define _DEBUG_DIO_
 
@@ -850,7 +849,7 @@ void sendDAO() {
 #endif
 
 #if (TRACK_MGMT == TRACK_MGMT_6P_ISOLATION)
-   msg->l2_track = sixtop_get_trackcontrol();
+   sixtop_get_trackcontrol(&(msg->l2_track));
 #endif
 
 #if (TRACK_MGMT != TRACK_MGMT_NO)  && (TRACK_MGMT != TRACK_MGMT_SHARED)  && (TRACK_MGMT != TRACK_MGMT_ISOLATION)  && (TRACK_MGMT != TRACK_MGMT_6P_ISOLATION)

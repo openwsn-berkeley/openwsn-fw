@@ -19,7 +19,6 @@
 #include <stdio.h>
 
 
-
 //=========================== defines =========================================
 
 /// info for traffic generation
@@ -119,7 +118,6 @@ owerror_t cexample_receive(OpenQueueEntry_t* msg,
    //nothing to respond
    return E_SUCCESS;
 }
-
 
 //starts generating the packet only once I am synchronized
 void cexample_timer_start(opentimer_id_t id){

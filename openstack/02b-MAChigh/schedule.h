@@ -193,7 +193,7 @@ slotOffset_t    schedule_getSlotOffset(void);
 uint16_t           schedule_getMaxActiveSlots(void);
 
 //returns the i^th entry in the schedule
-scheduleEntry_t *schedule_getCell(uint8_t i);
+scheduleEntry_t*  schedule_getCell(uint8_t i);
 
 
 owerror_t          schedule_removeActiveSlot(
@@ -237,9 +237,15 @@ void               schedule_indicateTx(
                         uint8_t   code
                    );
 
+bool              debugPrint_schedule_entry(uint8_t debugPrintRow);
+
+
+
+
 /**
 \}
 \}
 */
+
           
 #endif

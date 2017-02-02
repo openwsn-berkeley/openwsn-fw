@@ -8,7 +8,9 @@
 \{
 */
 #include "opencoap.h"
+
 //=========================== define ==========================================
+
 
 //=========================== typedef =========================================
 
@@ -30,7 +32,9 @@ static const uint8_t ipAddr_unistra[] = {0x7, 0xd1, 0x02, 0x94, 0x12, 0x5d, 0x03
 
 //=========================== prototypes ======================================
 
-void cexample_init(void);
+
+void cexample_init();
+void cexample_timer_start(opentimer_id_t id);
 
 /**
 \}

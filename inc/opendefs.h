@@ -430,6 +430,7 @@ typedef struct {
 } OpenQueueEntry_t;
 
 
+
 BEGIN_PACK
 typedef struct {
    bool             used;

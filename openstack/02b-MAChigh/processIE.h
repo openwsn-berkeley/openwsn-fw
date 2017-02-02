@@ -11,6 +11,7 @@
 // subIE shift
 #define MLME_IE_SUBID_SHIFT            8
 
+
 // subIEs identifier
 #define MLME_IE_SUBID_SYNC             0x1A
 #define MLME_IE_SUBID_SLOTFRAME_LINK   0x1B
@@ -192,5 +193,6 @@ void            processIE_retrieve_sixCelllist(
     uint8_t             length,
     cellInfo_ht*        cellList
 );
+
 
 #endif

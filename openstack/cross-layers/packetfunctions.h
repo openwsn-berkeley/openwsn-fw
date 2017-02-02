@@ -10,6 +10,7 @@
 
 #include "opendefs.h"
 
+
 //=========================== define ==========================================
 
 //=========================== typedef =========================================
@@ -30,7 +31,7 @@ bool     packetfunctions_isBroadcastMulticast_debug(open_addr_t* address, uint8_
 bool     packetfunctions_isAllRoutersMulticast(open_addr_t* address);
 bool     packetfunctions_isAllHostsMulticast(open_addr_t* address);
 bool     packetfunctions_sameAddress(open_addr_t* address_1, open_addr_t* address_2);
-bool packetfunctions_sameAddress_debug(open_addr_t* address_1, open_addr_t* address_2, uint8_t component);
+bool     packetfunctions_sameAddress_debug(open_addr_t* address_1, open_addr_t* address_2, uint8_t component);
 
 
 // read/write addresses to/from packets

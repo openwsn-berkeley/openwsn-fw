@@ -1264,7 +1264,6 @@ void openserial_statAckRx(void){
 
 
 
-
 //-------- FOR PKTS ------
 
 //info for a transmitted packet

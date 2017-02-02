@@ -26,6 +26,7 @@ bool isThisRowMatching(
         uint8_t      rowNumber
      );
 
+
 //=========================== public ==========================================
 
 /**
@@ -348,20 +349,6 @@ bool  neighbors_getNeighborEui64(open_addr_t* address, uint8_t addr_type, uint8_
          break; 
    }
    return ReturnVal;
-}
-
-
-//returns the whole entry concerning a neighbor
-neighborRow_t *neighbors_getNeighborInfo(open_addr_t* address){
-   uint8_t  i;
-
-   for (i=0;i<MAXNUMNEIGHBORS;i++)
-       if (neighbors_vars.neighbors[i].used==TRUE)
-          if (packetfunctions_sameAddress(&(neighbors_vars.neighbors[i].addr_64b), address))
-                return(&(neighbors_vars.neighbors[i]));
-
-   //unfound
-   return(NULL);
 }
 
 

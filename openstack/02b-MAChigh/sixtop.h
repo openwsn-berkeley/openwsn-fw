@@ -111,6 +111,7 @@ typedef struct {
 
 //=========================== prototypes ======================================
 
+
 // admin
 void      sixtop_init(void);
 void      sixtop_setKaPeriod(uint16_t kaPeriod);
@@ -118,10 +119,6 @@ void      sixtop_setEBPeriod(uint8_t ebPeriod);
 void      sixtop_setHandler(six2six_handler_t handler);
 // scheduling
 bool      sixtop_isIdle(void);
-//void      sixtop_addCells(open_addr_t* neighbor, uint16_t numCells, track_t track);
-//void      sixtop_removeCell(open_addr_t*  neighbor);
-//void      sixtop_removeCellByInfo(open_addr_t*  neighbor,cellInfo_ht* cellInfo);
-track_t   sixtop_getTrackCellsByState(uint8_t slotframeID, uint8_t numOfLink, cellInfo_ht* cellList, open_addr_t* previousHop);
 void      sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells, track_t track, scheduleEntry_t *cell);
 void      sixtop_addORremoveCellByInfo(uint8_t code,open_addr_t*  neighbor,cellInfo_ht* cellInfo);
 // maintaining
@@ -141,12 +138,10 @@ bool      sixtop_is_trackequal(track_t track1, track_t track2);
 bool      sixtop_is_trackbesteffort(track_t track);
 track_t   sixtop_get_trackbesteffort(void);
 track_t   sixtop_get_trackcommon(void);
-track_t   sixtop_get_trackcontrol(void);
-
+void      sixtop_get_trackcontrol(track_t *track);
 
 // control
 void      sixtop_setIsResponseEnabled(bool isEnabled);
-
 
 /**
 \}

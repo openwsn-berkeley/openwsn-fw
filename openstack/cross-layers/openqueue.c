@@ -18,7 +18,6 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry);
 
 
 
-
 //#define _DEBUG_OQ_MEM_
 
 
@@ -150,7 +149,7 @@ uint64_t openqueue_timeout_diff(timeout_t a, timeout_t b){
 
 
 //remove the packets which are timeouted in the queue
-void openqueue_timeout_drop(void){
+void openqueue_timeout_drop(){
 
    uint8_t     i;
    timeout_t   now;
