@@ -80,11 +80,8 @@ void cexample_init() {
 
    opencoap_register(&cexample_vars.desc);
 
-   //DAGroot: no packet is generated, only the reception part is activated
-   //if (idmanager_getIsDAGroot())
-   //   return;
 
-   //starts to generate packets when I am synchronized
+   //starts to generate packet at a random time in the future (async)
    uint64_t  next = openrandom_get16b();
    while (next > 2 * CEXAMPLE_PERIOD_)
       next -= CEXAMPLE_PERIOD_;
@@ -122,6 +119,13 @@ owerror_t cexample_receive(OpenQueueEntry_t* msg,
 
 //starts generating the packet only once I am synchronized
 void cexample_timer_start(opentimer_id_t id){
+
+   char        str[150];
+    sprintf(str, "PERIOD CEXAMPLE: ");
+    openserial_ncat_uint32_t(str, CEXAMPLE_PERIOD_, 150);
+    openserial_printf(COMPONENT_CEXAMPLE, str, strlen(str));
+
+
 
    cexample_vars.timerId    = opentimers_start(
          CEXAMPLE_PERIOD_,
