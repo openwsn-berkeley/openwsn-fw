@@ -233,7 +233,7 @@ void iphc_receive(OpenQueueEntry_t* msg) {
     memset(&rpl_option,0,sizeof(rpl_option_ht));
     
     //DAGROOT -> openbridge for debug (to openvizualizer)
-    //TODO-Fabrice: forwrd to openbridge
+    //TODO-Fabrice: forward to openbridge if I am the DAGRoot (whatever the packet is)
     if (idmanager_getIsDAGroot()){
        openbridge_receive(msg);
 

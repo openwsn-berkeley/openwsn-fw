@@ -150,7 +150,7 @@ command_line_options = {
     'rplmetric':        ['0','1'],		    # 1=ETX (default)
     'cex_period':       ['5000'],           # by default, 5 seconds
     'schedalgo':        ['1','2'],          # 1=random (default)
-    'sf':               ['1','2'],          # 1=SF0, 2=SFLOC
+    'sf':               ['0','1','2'],      # 0=NO, 1=SF0, 2=SFLOC
     'printf':           ['0','1'],          # 0=inactive (default), 1=active
     'ide':              ['none','qtcreator']
 }

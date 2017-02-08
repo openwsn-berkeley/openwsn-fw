@@ -18,6 +18,7 @@
 #include "icmpv6rpl.h"
 #include <stdio.h>
 
+#define CEXAMPLE_PERIOD_ 30000
 
 //=========================== defines =========================================
 
@@ -80,13 +81,13 @@ void cexample_init() {
    opencoap_register(&cexample_vars.desc);
 
    //DAGroot: no packet is generated, only the reception part is activated
-   if (idmanager_getIsDAGroot())
-      return;
+   //if (idmanager_getIsDAGroot())
+   //   return;
 
    //starts to generate packets when I am synchronized
    uint64_t  next = openrandom_get16b();
-   while (next > 2 * CEXAMPLE_PERIOD)
-      next -= CEXAMPLE_PERIOD;
+   while (next > 2 * CEXAMPLE_PERIOD_)
+      next -= CEXAMPLE_PERIOD_;
 
    cexample_vars.timerId    = opentimers_start(
          next,
@@ -122,13 +123,8 @@ owerror_t cexample_receive(OpenQueueEntry_t* msg,
 //starts generating the packet only once I am synchronized
 void cexample_timer_start(opentimer_id_t id){
 
-   // don't run on dagroot
-   if (idmanager_getIsDAGroot()) {
-       return;
-   }
-
    cexample_vars.timerId    = opentimers_start(
-         CEXAMPLE_PERIOD,
+         CEXAMPLE_PERIOD_,
          TIMER_PERIODIC,TIME_MS,
          cexample_timer_cb);
 
@@ -137,7 +133,10 @@ void cexample_timer_start(opentimer_id_t id){
 //timer fired, but we don't want to execute task in ISR mode
 //instead, push task to scheduler with COAP priority, and let scheduler take care of it
 void cexample_timer_cb(opentimer_id_t id){
-   scheduler_push_task(cexample_task_cb,TASKPRIO_COAP);
+
+   //a packet is really generated only if it is a dagroot!
+   if (!idmanager_getIsDAGroot())
+      scheduler_push_task(cexample_task_cb,TASKPRIO_COAP);
 }
 
 void cexample_task_cb() {

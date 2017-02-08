@@ -35,6 +35,7 @@
 //#define OPENSERIAL_STAT_OVERFLOW_       // should we send to openvisualizer the buffer overflow? // it consumes bandwidth through the serial line
 #define OPENSERIAL_STAT                   // push the statistics to openVisualizer
 
+//#define FASTSIM
 
 #ifdef _DEBUG_OPENSERIAL_
 uint8_t caller;
@@ -609,7 +610,8 @@ void openserial_stop(void) {
                 board_reset();
                 break;
             case SERFRAME_PC2MOTE_DATA:
-                openbridge_triggerData();
+
+               // openbridge_triggerData();
                 break;
             case SERFRAME_PC2MOTE_TRIGGERSERIALECHO:
                 openserial_handleEcho(&openserial_vars.inputBuf[1],inputBufFill-1);
@@ -836,6 +838,9 @@ void openserial_handleCommands(void){
 #endif
 #if (SFMETHOD == SFMETHOD_SFLOC)
             sixtop_setHandler(SIX_HANDLER_SFLOC);
+#endif
+#if (SFMETHOD == SFMETHOD_NO)
+            sixtop_setHandler(SIX_HANDLER_NONE);
 #endif
 
             if ( 

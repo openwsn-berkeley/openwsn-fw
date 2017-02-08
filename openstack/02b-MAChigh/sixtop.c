@@ -1637,6 +1637,7 @@ void sixtop_notifyReceiveCommand(
     memset(cellList,0,sizeof(cellList));
     uint8_t           blacklist = FALSE;
     
+
     // get a free packet buffer
     //timeout since we are stateless (teh packet MUST be dropped the queue after a while)
     response_pkt = openqueue_getFreePacketBuffer_with_timeout(COMPONENT_SIXTOP_RES, SIX2SIX_LINKREP_TIMEOUT_MS);
@@ -1667,6 +1668,16 @@ void sixtop_notifyReceiveCommand(
 #endif
 #if (SFMETHOD == SFMETHOD_SFLOC)
     if (version != IANA_6TOP_6P_VERSION || sfId != SFID_SFLOC){
+#endif
+#if (SFMETHOD == SFMETHOD_NO)
+       openserial_printError(
+                   COMPONENT_SIXTOP_RES,
+                   ERR_GENERIC,
+                   (errorparameter_t)84,
+                   (errorparameter_t)56
+               );
+       return;
+       if(0){
 #endif
 
         if (version != IANA_6TOP_6P_VERSION){

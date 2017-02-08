@@ -312,6 +312,7 @@ enum{
 };
 
 //Scheduling Functions
+#define SFMETHOD_NO     0
 #define SFMETHOD_SF0    1
 #define SFMETHOD_SFLOC  2
 
