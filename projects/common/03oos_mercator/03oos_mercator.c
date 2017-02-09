@@ -142,6 +142,7 @@ void serial_rx_REQ_IDLE(void) {
 }
 
 void serial_rx_REQ_TX(void) {
+   uint16_t transctr;
    uint16_t pkctr;
    REQ_TX_ht* req;
 
@@ -159,13 +160,14 @@ void serial_rx_REQ_TX(void) {
    mercator_vars.txpk_len           = req->txlength;
    mercator_vars.txpk_totalnumpk    = htons(req->txnumpk);
 
-   //prepare packet
+   // prepare packet
    memcpy(mercator_vars.rfbuftx, mercator_vars.mac, 8);
-   memcpy(&mercator_vars.rfbuftx[8], &req->transctr, 1);
+   transctr = htons(req->transctr);
+   memcpy(&mercator_vars.rfbuftx[8], &transctr, 2);
    pkctr = htons(mercator_vars.txpk_numpk);
-   memcpy(mercator_vars.rfbuftx + 9, &pkctr, 2);
-   memset(mercator_vars.rfbuftx + 11, req->txfillbyte, 
-          mercator_vars.txpk_len - 11 - LENGTH_CRC);
+   memcpy(mercator_vars.rfbuftx + 10, &pkctr, 2);
+   memset(mercator_vars.rfbuftx + 12, req->txfillbyte, 
+          mercator_vars.txpk_len - 12 - LENGTH_CRC);
 
    // prepare radio
    radio_rfOn();
@@ -193,7 +195,7 @@ void serial_rx_REQ_RX(void) {
    }
 
    req = (REQ_RX_ht*)mercator_vars.uartbufrx;
-   mercator_vars.rxpk_transctr = req->transctr;
+   mercator_vars.rxpk_transctr = htons(req->transctr);
    mercator_vars.rxpk_txfillbyte = req->txfillbyte;
    memcpy(mercator_vars.rxpk_srcmac, req->srcmac, 8);
 
@@ -397,7 +399,7 @@ void cb_startFrame(uint16_t timestamp){
 void cb_endFrame(uint16_t timestamp) {
    // local vars
       uint8_t  srcmac[8];
-      uint8_t  transctr;
+     uint16_t  transctr;
      uint16_t  pkctr;
       uint8_t  txfillbyte;
          bool  is_expected = TRUE;
@@ -418,9 +420,9 @@ void cb_endFrame(uint16_t timestamp) {
       );
 
       memcpy(srcmac,       mercator_vars.rxpk_buf     , 8);
-      memcpy(&transctr,    &mercator_vars.rxpk_buf[8] , 1);
-      memcpy(&pkctr,       mercator_vars.rxpk_buf + 9 , 2);
-      memcpy(&txfillbyte,  &mercator_vars.rxpk_buf[11], 1);
+      memcpy(&transctr,    &mercator_vars.rxpk_buf[8] , 2);
+      memcpy(&pkctr,       mercator_vars.rxpk_buf +10 , 2);
+      memcpy(&txfillbyte,  &mercator_vars.rxpk_buf[12], 1);
 
       // check srcmac
       if (memcmp(srcmac, mercator_vars.rxpk_srcmac, 8) != 0){
@@ -493,6 +495,6 @@ void cb_sendPacket(opentimer_id_t id){
    // update pkctr
    mercator_vars.txpk_numpk++;
    pkctr = htons(mercator_vars.txpk_numpk);
-   memcpy(mercator_vars.rfbuftx + 9, &pkctr, 2);
+   memcpy(mercator_vars.rfbuftx + 10, &pkctr, 2);
    return;
 }

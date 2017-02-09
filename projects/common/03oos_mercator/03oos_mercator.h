@@ -57,7 +57,7 @@ typedef struct {
    uint8_t         type;
    uint8_t         frequency;
     int8_t         txpower;
-   uint8_t         transctr;
+   uint16_t        transctr;
    uint16_t        txnumpk;
    uint16_t        txifdur;
    uint8_t         txlength;
@@ -76,7 +76,7 @@ typedef struct {
    uint8_t         type;
    uint8_t         frequency;
    uint8_t         srcmac[8];
-   uint8_t         transctr;
+   uint16_t        transctr;
    uint8_t         txlength;
    uint8_t         txfillbyte;
 } REQ_RX_ht;
@@ -148,8 +148,7 @@ typedef struct {
       bool         rxpk_crc;
    uint8_t         rxpk_txfillbyte;
    uint8_t         rxpk_srcmac[8];
-   uint8_t         rxpk_transctr;
-   
+   uint16_t        rxpk_transctr;   
 } mercator_vars_t;
 
 mercator_vars_t mercator_vars;
