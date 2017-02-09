@@ -22,7 +22,6 @@
 #include "radiotimer.h"
 #include "spi.h"
 #include "radio.h"
-#include "rtc_timer.h"
 #include "uart.h"
 #include "debugpins.h"
 #include "rcc.h"
@@ -32,36 +31,42 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
+
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
-
-/**
-  * @brief  This function handles NMI exception.
-  * @param  None
-  * @retval None
-  */
-void NMI_Handler(void)
+/*******************************************************************************
+* Function Name  : NMIException
+* Description    : This function handles NMI exception.
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void NMIException(void)
 {
 }
 
-/**
-  * @brief  This function handles Hard Fault exception.
-  * @param  None
-  * @retval None
-  */
-void HardFault_Handler(void)
+/*******************************************************************************
+* Function Name  : HardFaultException
+* Description    : This function handles Hard Fault exception.
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void HardFaultException(void)
 {
   /* reset when Hard Fault exception occurs */
   board_reset();
 }
 
-/**
-  * @brief  This function handles Memory Manage exception.
-  * @param  None
-  * @retval None
-  */
-void MemManage_Handler(void)
+/*******************************************************************************
+* Function Name  : MemManageException
+* Description    : This function handles Memory Manage exception.
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void MemManageException(void)
 {
   /* Go to infinite loop when Memory Manage exception occurs */
   while (1)
@@ -69,12 +74,14 @@ void MemManage_Handler(void)
   }
 }
 
-/**
-  * @brief  This function handles Bus Fault exception.
-  * @param  None
-  * @retval None
-  */
-void BusFault_Handler(void)
+/*******************************************************************************
+* Function Name  : BusFaultException
+* Description    : This function handles Bus Fault exception.
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void BusFaultException(void)
 {
   /* Go to infinite loop when Bus Fault exception occurs */
   while (1)
@@ -82,12 +89,14 @@ void BusFault_Handler(void)
   }
 }
 
-/**
-  * @brief  This function handles Usage Fault exception.
-  * @param  None
-  * @retval None
-  */
-void UsageFault_Handler(void)
+/*******************************************************************************
+* Function Name  : UsageFaultException
+* Description    : This function handles Usage Fault exception.
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void UsageFaultException(void)
 {
   /* Go to infinite loop when Usage Fault exception occurs */
   while (1)
@@ -95,39 +104,47 @@ void UsageFault_Handler(void)
   }
 }
 
-/**
-  * @brief  This function handles SVCall exception.
-  * @param  None
-  * @retval None
-  */
-void SVC_Handler(void)
+/*******************************************************************************
+* Function Name  : DebugMonitor
+* Description    : This function handles Debug Monitor exception.
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void DebugMonitor(void)
 {
 }
 
-/**
-  * @brief  This function handles Debug Monitor exception.
-  * @param  None
-  * @retval None
-  */
-void DebugMon_Handler(void)
+/*******************************************************************************
+* Function Name  : SVCHandler
+* Description    : This function handles SVCall exception.
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void SVCHandler(void)
 {
 }
 
-/**
-  * @brief  This function handles PendSVC exception.
-  * @param  None
-  * @retval None
-  */
-void PendSV_Handler(void)
+/*******************************************************************************
+* Function Name  : PendSVC
+* Description    : This function handles PendSVC exception.
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void PendSVC(void)
 {
 }
 
-/**
-  * @brief  This function handles SysTick Handler.
-  * @param  None
-  * @retval None
-  */
-void SysTick_Handler(void)
+/*******************************************************************************
+* Function Name  : SysTickHandler
+* Description    : This function handles SysTick Handler.
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void SysTickHandler(void)
 {
 }
 
@@ -178,6 +195,7 @@ void RTC_IRQHandler(void)
       RTC_ClearITPendingBit(RTC_IT_ALR);      //Clear RTC Alarm interrupt pending bit
       RTC_WaitForLastTask();                  //Wait until last write operation on RTC registers has finished
     }
+
 }
 
 /*******************************************************************************
@@ -256,17 +274,18 @@ void EXTI3_IRQHandler(void)
 *******************************************************************************/
 void EXTI4_IRQHandler(void)
 {
-  if(EXTI_GetITStatus(EXTI_Line4) != RESET){
     debugpins_isr_set();
+    if(EXTI_GetITStatus(EXTI_Line4) != RESET){
+
 
     //leds_error_toggle();
     EXTI_ClearITPendingBit(EXTI_Line4);
 
-    //RCC_Wakeup();
+    RCC_Wakeup();
     radio_isr();
 
+    }
     debugpins_isr_clr();
-  }
 }
 
 /*******************************************************************************
@@ -586,19 +605,19 @@ void SPI2_IRQHandler(void)
 *******************************************************************************/
 void USART1_IRQHandler(void)
 {  
-  debugpins_isr_set();
-  if(USART_GetFlagStatus(USART1, USART_FLAG_RXNE) != RESET)
-  {
-    USART_ClearFlag(USART1, USART_FLAG_RXNE);
-    
-    uart_rx_isr();
-  }
-
-  if(USART_GetFlagStatus(USART1, USART_FLAG_TXE) != RESET)
-  { 
-    uart_tx_isr(); 
-  }
-  debugpins_isr_clr();
+    debugpins_isr_set();
+    if(USART_GetFlagStatus(USART1,USART_FLAG_RXNE) != RESET)
+    {
+      USART_ClearFlag(USART1,USART_FLAG_RXNE);
+      
+        uart_rx_isr();
+    }
+  
+    if(USART_GetFlagStatus(USART1,USART_FLAG_TC) != RESET)
+    { 
+        uart_tx_isr(); 
+    }
+    debugpins_isr_clr();
 }
 
 /*******************************************************************************
@@ -632,6 +651,7 @@ void USART3_IRQHandler(void)
 *******************************************************************************/
 void EXTI15_10_IRQHandler(void)
 {
+
 }
 
 /*******************************************************************************

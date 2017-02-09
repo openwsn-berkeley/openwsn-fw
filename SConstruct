@@ -38,6 +38,8 @@ project:
     board          Board to build for. 'python' is for software simulation.
                    telosb, wsn430v14, wsn430v13b, gina, z1, python,
                    iot-lab_M3, iot-lab_A8-M3
+
+    version        Board version
         
     toolchain      Toolchain implementation. The 'python' board requires gcc
                    (MinGW on Windows build host).
@@ -105,7 +107,8 @@ command_line_options = {
         'wsn430v14',
         'z1',
         # Cortex-M3
-        'OpenMote-CC2538',
+        'openmote-cc2538',
+        'silabs-ezr32wg',
         'openmotestm',
         'iot-lab_M3',
         'iot-lab_A8-M3',
@@ -137,7 +140,8 @@ command_line_options = {
     'noadaptivesync':   ['0','1'],
     'cryptoengine':     ['', 'dummy_crypto_engine', 'firmware_crypto_engine', 'board_crypto_engine'],
     'l2_security':      ['0','1'],
-    'ide':              ['none','qtcreator']
+    'ide':              ['none','qtcreator'],
+    'revision':         ['']
 }
 
 def validate_option(key, value, env):
@@ -297,10 +301,17 @@ command_line_vars.AddVariables(
         None,                                              # converter
     ),
     (
-        'ide',                                            # key
-        'qtcreator by now',                               # help
-        command_line_options['ide'][0],                   # default
+        'ide',                                             # key
+        'qtcreator by now',                                # help
+        command_line_options['ide'][0],                    # default
         validate_option,                                   # validator
+        None,                                              # converter
+    ),
+    (
+        'revision',                                        # key
+        'board revision',                                  # help
+        command_line_options['revision'][0],               # default
+        None,                                              # validator
         None,                                              # converter
     ),
 )
