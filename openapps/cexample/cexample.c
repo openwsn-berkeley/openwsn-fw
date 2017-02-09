@@ -117,7 +117,7 @@ owerror_t cexample_receive(OpenQueueEntry_t* msg,
    return E_SUCCESS;
 }
 
-//starts generating the packet only once I am synchronized
+//starts generating the packets (will be actually generated if I am a mote and I am not synced)
 void cexample_timer_start(opentimer_id_t id){
 
    char        str[150];
@@ -137,6 +137,7 @@ void cexample_timer_start(opentimer_id_t id){
 //timer fired, but we don't want to execute task in ISR mode
 //instead, push task to scheduler with COAP priority, and let scheduler take care of it
 void cexample_timer_cb(opentimer_id_t id){
+
 
    //a packet is really generated only if it is a dagroot!
    if (!idmanager_getIsDAGroot())

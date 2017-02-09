@@ -749,19 +749,8 @@ void schedule_advanceSlot() {
    DISABLE_INTERRUPTS();
 
    do{
-   if (schedule_vars.currentScheduleEntry->slotOffset >= ((scheduleEntry_t*)schedule_vars.currentScheduleEntry->next)->slotOffset
-       ) {
-#if (SFMETHOD == SFMETHOD_SF0)
-       sf0_notifyNewSlotframe();
-#endif
-#if (SFMETHOD == SFMETHOD_SFLOC)
-       sfloc_notifyNewSlotframe();
-#endif
-
-   }   
-   schedule_vars.currentScheduleEntry = schedule_vars.currentScheduleEntry->next;
+      schedule_vars.currentScheduleEntry = schedule_vars.currentScheduleEntry->next;
    }while(!schedule_isSlotActive(schedule_vars.currentScheduleEntry));
-
 
    ENABLE_INTERRUPTS();
 }

@@ -1097,7 +1097,12 @@ port_INLINE void activity_ti1ORri1() {
          openserial_printf(COMPONENT_IEEE802154E, str, strlen(str));
 */
 
-
+#if (SFMETHOD == SFMETHOD_SF0)
+         sf0_notifyNewSlotframe();
+#endif
+#if (SFMETHOD == SFMETHOD_SFLOC)
+         sfloc_notifyNewSlotframe();
+#endif
 
          break;
       case CELLTYPE_MORESERIALRX:
@@ -2431,7 +2436,7 @@ bool ieee154e_isSynch(){
  * brief: is currently ieee154e transmitting a packet from the component creator?
  */
 bool ieee154e_is_ongoing(uint8_t creator){
-   return(ieee154e_vars.dataToSend->creator == creator);
+   return((ieee154e_vars.dataToSend != NULL) && (ieee154e_vars.dataToSend->creator == creator));
 }
 
 /*

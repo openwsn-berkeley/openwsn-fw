@@ -433,13 +433,7 @@ void sfloc_verifSchedule_task(){
 #endif
 }
 
-/*
 
-//task is added in the queue
-void sfloc_notif_pktTx(void) {
-    scheduler_push_task(sfloc_verifSchedule_task,TASKPRIO_SF0);
-}
-*/
 
 //period for the data packet generation
 void sfloc_appPktPeriod(uint8_t numAppPacketsPerSlotFrame){
