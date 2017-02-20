@@ -8,6 +8,7 @@
 #include "opencoap.h"
 #include "uecho.h"
 #include "uinject.h"
+#include "uinfo.h"
 #include "userialbridge.h"
 #include "rrt.h"
 
@@ -133,6 +134,9 @@ void openudp_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
       case WKP_UDP_INJECT:
          uinject_sendDone(msg,error);
          break;
+      case WKP_UDP_UINFO:
+         uinfo_sendDone(msg,error);
+         break;
       case WKP_UDP_SERIALBRIDGE:
          userialbridge_sendDone(msg,error);
          break;
@@ -209,6 +213,9 @@ void openudp_receive(OpenQueueEntry_t* msg) {
       case WKP_UDP_INJECT:
          uinject_receive(msg);
          break;
+      case WKP_UDP_UINFO:
+         uinfo_receive(msg);
+      break;
       default:
          openserial_printError(COMPONENT_OPENUDP,ERR_UNSUPPORTED_PORT_NUMBER,
                                (errorparameter_t)msg->l4_destination_port,

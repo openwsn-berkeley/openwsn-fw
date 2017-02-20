@@ -29,6 +29,7 @@ void openqueue_init() {
    for (i=0;i<QUEUELENGTH;i++){
       openqueue_reset_entry(&(openqueue_vars.queue[i]));
    }
+   openqueue_vars.inUse = 0;
 }
 
 /**
@@ -88,6 +89,7 @@ OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
       if (openqueue_vars.queue[i].owner==COMPONENT_NULL) {
          openqueue_vars.queue[i].creator=creator;
          openqueue_vars.queue[i].owner=COMPONENT_OPENQUEUE;
+         openqueue_vars.inUse++;
          ENABLE_INTERRUPTS(); 
          return &openqueue_vars.queue[i];
       }
@@ -118,6 +120,7 @@ owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
                                   (errorparameter_t)0);
          }
          openqueue_reset_entry(&(openqueue_vars.queue[i]));
+         openqueue_vars.inUse--;
          ENABLE_INTERRUPTS();
          return E_SUCCESS;
       }
@@ -142,6 +145,7 @@ void openqueue_removeAllCreatedBy(uint8_t creator) {
    for (i=0;i<QUEUELENGTH;i++){
       if (openqueue_vars.queue[i].creator==creator) {
          openqueue_reset_entry(&(openqueue_vars.queue[i]));
+         openqueue_vars.inUse--;
       }
    }
    ENABLE_INTERRUPTS();
@@ -159,6 +163,7 @@ void openqueue_removeAllOwnedBy(uint8_t owner) {
    for (i=0;i<QUEUELENGTH;i++){
       if (openqueue_vars.queue[i].owner==owner) {
          openqueue_reset_entry(&(openqueue_vars.queue[i]));
+         openqueue_vars.inUse--;
       }
    }
    ENABLE_INTERRUPTS();
@@ -251,7 +256,7 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
    return NULL;
 }
 
-bool openqueue_isHighPriorityEntryEnough(){
+bool openqueue_isHighPriorityEntryEnough(void){
     uint8_t i;
     uint8_t numberOfEntry;
     
@@ -284,6 +289,16 @@ OpenQueueEntry_t* openqueue_macGetEBPacket() {
    ENABLE_INTERRUPTS();
    return NULL;
 }
+
+uint8_t  openqueue_getQueueUsage(void){
+    uint8_t len = 0;
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+    len = openqueue_vars.inUse;
+    ENABLE_INTERRUPTS();
+    return len;
+}
+
 
 //=========================== private =========================================
 

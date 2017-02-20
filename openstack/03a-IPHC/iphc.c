@@ -190,7 +190,6 @@ owerror_t iphc_sendFromForwarding(
         packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
         *((uint8_t*)(msg->payload)) = PAGE_DISPATCH_NO_1;
     }
-    
     return sixtop_send(msg);
 }
 

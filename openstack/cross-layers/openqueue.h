@@ -26,6 +26,7 @@ typedef struct {
 
 typedef struct {
    OpenQueueEntry_t queue[QUEUELENGTH];
+   uint8_t inUse;
 } openqueue_vars_t;
 
 //=========================== prototypes ======================================
@@ -38,13 +39,14 @@ OpenQueueEntry_t*  openqueue_getFreePacketBuffer(uint8_t creator);
 owerror_t          openqueue_freePacketBuffer(OpenQueueEntry_t* pkt);
 void               openqueue_removeAllCreatedBy(uint8_t creator);
 void               openqueue_removeAllOwnedBy(uint8_t owner);
-bool               openqueue_isHighPriorityEntryEnough();
+bool               openqueue_isHighPriorityEntryEnough(void);
 // called by res
 OpenQueueEntry_t*  openqueue_sixtopGetSentPacket(void);
 OpenQueueEntry_t*  openqueue_sixtopGetReceivedPacket(void);
 // called by IEEE80215E
 OpenQueueEntry_t*  openqueue_macGetDataPacket(open_addr_t* toNeighbor);
 OpenQueueEntry_t*  openqueue_macGetEBPacket(void);
+uint8_t            openqueue_getQueueUsage(void);
 
 /**
 \}

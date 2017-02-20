@@ -15,6 +15,7 @@ defaultApps   = [
     'techo',
     'uecho',
     'uinject',
+    'uinfo',
     'userialbridge',
     'rrt',
 ]
@@ -22,6 +23,8 @@ if localEnv['board']=='python':
     defaultApps  += [
         'cexample',
         'cstorm',
+        'uinject',
+        'uinfo'
     ]
 
 # apps which should always be present
@@ -33,6 +36,8 @@ defaultAppsInit   = [
     'techo',
     'uecho',
     'rrt',
+    'uinject',
+    'uinfo',
 ]
 
 # additional apps the user wants to build

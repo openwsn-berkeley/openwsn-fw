@@ -588,7 +588,8 @@ void sendDIO() {
    msg->l4_protocol                         = IANA_ICMPv6;
    msg->l4_protocol_compressed              = FALSE;
    msg->l4_sourcePortORicmpv6Type           = IANA_ICMPv6_RPL;
-   
+   msg->l4_destination_port                 = 0;
+
    // set DIO destination
    memcpy(&(msg->l3_destinationAdd),&icmpv6rpl_vars.dioDestination,sizeof(open_addr_t));
    
@@ -709,6 +710,7 @@ void sendDAO() {
    // set transport information
    msg->l4_protocol                         = IANA_ICMPv6;
    msg->l4_sourcePortORicmpv6Type           = IANA_ICMPv6_RPL;
+   msg->l4_destination_port                 = 0;
    
    // set DAO destination
    msg->l3_destinationAdd.type=ADDR_128B;
@@ -807,7 +809,7 @@ void sendDAO() {
    ((ICMPv6_ht*)(msg->payload))->type       = msg->l4_sourcePortORicmpv6Type;
    ((ICMPv6_ht*)(msg->payload))->code       = IANA_ICMPv6_RPL_DAO;
    packetfunctions_calculateChecksum(msg,(uint8_t*)&(((ICMPv6_ht*)(msg->payload))->checksum)); //call last
-   
+
    //===== send
    if (icmpv6_send(msg)==E_SUCCESS) {
       icmpv6rpl_vars.busySendingDAO = TRUE;

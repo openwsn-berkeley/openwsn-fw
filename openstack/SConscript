@@ -37,6 +37,7 @@ sources_c = [
     os.path.join('cross-layers','openqueue.c'),
     os.path.join('cross-layers','openrandom.c'),
     os.path.join('cross-layers','packetfunctions.c'),
+    os.path.join('cross-layers','stats.c'),
 ]
 sources_h = [
     'openstack.h',
@@ -71,6 +72,7 @@ sources_h = [
     os.path.join('cross-layers','openqueue.h'),
     os.path.join('cross-layers','openrandom.h'),
     os.path.join('cross-layers','packetfunctions.h'),
+    os.path.join('cross-layers','stats.h'),
     #=== apps
     os.path.join('#','openapps','userialbridge','userialbridge.h'),
 ]
@@ -121,6 +123,7 @@ else:
             os.path.join('#','openapps','tohlone'),
             os.path.join('#','openapps','uecho'),
             os.path.join('#','openapps','uinject'),
+            os.path.join('#','openapps','uinfo'),
             os.path.join('#','openapps','userialbridge'),
         ],
     )

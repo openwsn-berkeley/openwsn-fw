@@ -10,7 +10,7 @@
 #include "c6t.h"
 #include "cinfo.h"
 #include "cleds.h"
-#include "cexample.h"
+//#include "cexample.h"
 #include "cstorm.h"
 #include "cwellknown.h"
 #include "rrt.h"
@@ -19,6 +19,8 @@
 // UDP
 #include "uecho.h"
 #include "uinject.h"
+#include "uinfo.h"
+
 
 //=========================== variables =======================================
 
@@ -40,5 +42,7 @@ void openapps_init(void) {
    // TCP
    techo_init();
    // UDP
-//   uecho_init();
+   uecho_init();
+   //uinject_init();
+   uinfo_init();
 }

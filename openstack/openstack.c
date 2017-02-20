@@ -14,6 +14,7 @@
 #include "openqueue.h"
 #include "openrandom.h"
 #include "opentimers.h"
+#include "stats.h"
 //-- 02a-TSCH
 #include "adaptive_sync.h"
 #include "IEEE802154E.h"
@@ -79,6 +80,7 @@ void openstack_init(void) {
    openudp_init();
    opencoap_init();     // initialize before any of the CoAP applications
    
+   stats_init();
    //===== applications
    openapps_init();
    
