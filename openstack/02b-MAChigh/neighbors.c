@@ -417,6 +417,25 @@ void  neighbors_removeOld() {
     bool       haveParent;
     uint8_t    neighborIndexWithLowestRank[3];
     dagrank_t  lowestRank;
+    PORT_RADIOTIMER_WIDTH timeSinceHeard;
+    
+    // remove old neighbor
+    for (i=0;i<MAXNUMNEIGHBORS;i++) {
+        if (neighbors_vars.neighbors[i].used==1) {
+            timeSinceHeard = ieee154e_asnDiff(&neighbors_vars.neighbors[i].asn);
+            if (timeSinceHeard>DESYNCTIMEOUT) {
+                haveParent = icmpv6rpl_getPreferredParentIndex(&j);
+                if (haveParent && (i==j)) { // this is our preferred parent, carefully!
+                    icmpv6rpl_killPreferredParent();
+                    removeNeighbor(i);
+                    icmpv6rpl_updateMyDAGrankAndParentSelection();
+                } else {
+                    removeNeighbor(i);
+                }
+            }
+        }
+    }
+    
     // neighbors marked as NO_RES will never removed.
     
     // first round
@@ -488,7 +507,7 @@ void  neighbors_removeOld() {
                 i!= neighborIndexWithLowestRank[2]
             ) {
                 haveParent = icmpv6rpl_getPreferredParentIndex(&j);
-                if (haveParent && (i==j)) { // this is our preferred parent, carefull!
+                if (haveParent && (i==j)) { // this is our preferred parent, carefully!
                     icmpv6rpl_killPreferredParent();
                     icmpv6rpl_updateMyDAGrankAndParentSelection();
                 }
