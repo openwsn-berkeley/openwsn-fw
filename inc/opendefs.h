@@ -298,7 +298,7 @@ enum {
 #define TRACK_MGMT_NO            0  // all the applications use the shared cells (TXRX, no dedicated cell, besteffort track)
 #define TRACK_MGMT_SHARED        1  // all the applications use the same track (with dedicated cells)
 #define TRACK_MGMT_ISOLATION     2  // each application may have its own dedicated track
-#define TRACK_MGMT_6P_ISOLATION  3   // one track for 6P requests and DAO + one shared track for each application
+#define TRACK_MGMT_6P_ISOLATION  3  // one track for 6P requests and DAO + one shared track for each application
 
 
 

@@ -20,7 +20,7 @@
 #include "uecho.h"
 #include "uinject.h"
 //appli (in hard to use the python sim)
-#include "cexample.h"
+//#include "cexample.h"
 
 //=========================== variables =======================================
 
@@ -44,5 +44,5 @@ void openapps_init(void) {
    // UDP
 //   uecho_init();
    //periodic coap application
-   cexample_init();
+   //cexample_init();
 }

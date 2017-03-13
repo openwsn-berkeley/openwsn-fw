@@ -121,9 +121,9 @@ owerror_t cexample_receive(OpenQueueEntry_t* msg,
 void cexample_timer_start(opentimer_id_t id){
 
    char        str[150];
-    sprintf(str, "PERIOD CEXAMPLE: ");
-    openserial_ncat_uint32_t(str, CEXAMPLE_PERIOD_, 150);
-    openserial_printf(COMPONENT_CEXAMPLE, str, strlen(str));
+   sprintf(str, "PERIOD CEXAMPLE: ");
+   openserial_ncat_uint32_t(str, CEXAMPLE_PERIOD_, 150);
+   openserial_printf(COMPONENT_CEXAMPLE, str, strlen(str));
 
 
 
