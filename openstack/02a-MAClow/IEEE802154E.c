@@ -761,7 +761,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
                
                case IEEE802154E_MLME_TIMESLOT_IE_SUBID:
                   if (idmanager_getIsDAGroot()==FALSE) {
-                      // timelsot template ID
+                      // timeslot template ID
                       timeslotTemplateIDStoreFromEB(*((uint8_t*)(pkt->payload)+ptr));
                       ptr = ptr + 1;
                       if (ieee154e_vars.tsTemplateId != TIMESLOT_TEMPLATE_ID){
@@ -775,7 +775,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
                   
                case IEEE802154E_MLME_CHANNELHOPPING_IE_SUBID:
                   if (idmanager_getIsDAGroot()==FALSE) {
-                      // timelsot template ID
+                      // channelhopping template ID
                       channelhoppingTemplateIDStoreFromEB(*((uint8_t*)(pkt->payload)+ptr));
                       ptr = ptr + 1;
                   }
