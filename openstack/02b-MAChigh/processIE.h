@@ -23,7 +23,7 @@
 #define MLME_IE_SUBID_SCHEDULE         0x44
 
 #define IANA_6TOP_SUBIE_ID             0x00
-#define SIXTOP_IE_GROUPID              0x03
+#define SIXTOP_IE_GROUPID              0x0e
 
 // ========================== typedef =========================================
 
