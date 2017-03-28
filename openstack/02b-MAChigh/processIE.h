@@ -22,8 +22,10 @@
 #define MLME_IE_SUBID_TRACKID          0x43
 #define MLME_IE_SUBID_SCHEDULE         0x44
 
-#define IANA_6TOP_SUBIE_ID             0x00
-#define SIXTOP_IE_GROUPID              0x0e
+// 0xc9 = 201 is the first available subIE ID for experimental use: 
+// https://tools.ietf.org/html/draft-kivinen-802-15-ie-06#section-7
+#define IANA_6TOP_SUBIE_ID             0xC9
+#define SIXTOP_IE_GROUPID              0x05
 
 // ========================== typedef =========================================
 
