@@ -390,7 +390,7 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells, track
 
        //these cells are reserved
        for(i=0; i<SCHEDULEIEMAXNUMCELLS; i++)
-          schedule_addActiveSlot(cellList[i].tsNum,CELLTYPE_RESERVED, FALSE, cellList[i].choffset, neighbor, pkt->l2_track);
+          schedule_addActiveSlot(cellList[i].tsNum,CELLTYPE_RESERVED, FALSE, cellList[i].choffset, neighbor, pkt->l2_sixtop_track);
 
        break;
     case IANA_6TOP_CMD_DELETE:
@@ -585,9 +585,11 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
 //may be called via task_sixtopNotifSendDone or directly by openqueue_timeout_drop (at the end of a slot)
 void sixtop_NotifSendDispatch(OpenQueueEntry_t* msg){
 //TODO
-   /*
+/*
    char str[150];
    sprintf(str, "sixtop_NotifSendDispatch()");
+   openserial_ncat_uint32_t(str, (uint32_t)msg->creator, 150);
+   strncat(str, " new=", 150);
    openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 */
 
@@ -695,11 +697,11 @@ void task_sixtopNotifReceive() {
    uint16_t          lenIE;
 
    //TODO
-/*
+
    char str[150];
-           sprintf(str, "RX pasrising");
-           openserial_printf(COMPONENT_SFLOC, str, strlen(str));
-*/
+   sprintf(str, "RX pasrising");
+   openserial_printf(COMPONENT_SFLOC, str, strlen(str));
+
 
 
    // get received packet from openqueue

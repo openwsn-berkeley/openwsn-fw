@@ -36,7 +36,7 @@ void      sfloc_init(void);
 void      sfloc_notif_addedCell(void);
 void      sfloc_notif_removedCell(void);
 // notification from schedule
-void      sfloc_notifyNewSlotframe();
+void      sfloc_notifyNewSlotframe(void);
 void      sfloc_appPktPeriod(uint8_t numAppPacketsPerSlotFrame);
 //to handle the schedule
 bool      sfloc_reserveParentCells_controlTrack(void);
