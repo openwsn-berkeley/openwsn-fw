@@ -418,19 +418,25 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
    prevRankIncrease     = icmpv6rpl_vars.rankIncrease;
    foundBetterParent    = FALSE;
    icmpv6rpl_vars.haveParent = FALSE;
+   icmpv6rpl_vars.myDAGrank = DEFAULTDAGRANK;
    
+   //debug
+   char str[150];
+   sprintf(str, "My dagrank=");
+   openserial_ncat_uint32_t(str, (uint32_t)icmpv6rpl_vars.myDAGrank, 150);
+   openserial_printf(COMPONENT_ICMPv6RPL, str, strlen(str));
+
    // loop through neighbor table, update myDAGrank
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
 
- /*     open_addr_t      NeighborAddress;
+      open_addr_t      NeighborAddress;
       neighbors_getNeighborEui64(&NeighborAddress, ADDR_64B, i); // this neighbor entry is in use
-      char str[150];
       sprintf(str, "RANK neigh ");
       openserial_ncat_uint8_t_hex(str, NeighborAddress.addr_64b[6], 150);
       openserial_ncat_uint8_t_hex(str, NeighborAddress.addr_64b[7], 150);
       strncat(str, ", stable= ", 150);
       openserial_ncat_uint32_t(str, (uint32_t)neighbors_isStableNeighborByIndex(i), 150);
-*/
+
 
       if (neighbors_isStableNeighborByIndex(i)) { // in use and link is stable
          // get link cost to this neighbor
@@ -440,11 +446,11 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
          // get this neighbor's advertized rank
          neighborRank=neighbors_getNeighborRank(i);
 
- /*        strncat(str, ", rank=", 150);
-         openserial_ncat_uint32_t(str, (uint32_t)neighbors_getNeighborRank(i), 150);
+         strncat(str, ", rank=", 150);
+         openserial_ncat_uint32_t(str, (uint32_t)neighborRank, 150);
          strncat(str, ", metric= ", 150);
          openserial_ncat_uint32_t(str, (uint32_t)neighbors_getLinkMetric(i), 150);
-*/
+
          // if this neighbor has unknown/infinite rank, pass on it
          if (neighborRank==DEFAULTDAGRANK) continue;
          // compute tentative cost of full path to root through this neighbor
@@ -460,11 +466,13 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
          foundBetterParent=TRUE;
          // select best candidate so far
          if (icmpv6rpl_vars.myDAGrank>tentativeDAGrank) {
+            strncat(str, ", better", 150);
+
             icmpv6rpl_vars.myDAGrank    = (uint16_t)tentativeDAGrank;
             icmpv6rpl_vars.ParentIndex  = i;
             icmpv6rpl_vars.rankIncrease = rankIncrease;
          }
- //        openserial_printf(COMPONENT_ICMPv6RPL, str, strlen(str));
+         openserial_printf(COMPONENT_ICMPv6RPL, str, strlen(str));
     }
    } 
    
