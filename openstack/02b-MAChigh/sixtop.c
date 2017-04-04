@@ -697,11 +697,10 @@ void task_sixtopNotifReceive() {
    uint16_t          lenIE;
 
    //TODO
-
-   char str[150];
-   sprintf(str, "RX pasrising");
-   openserial_printf(COMPONENT_SFLOC, str, strlen(str));
-
+/*   char str[150];
+   sprintf(str, "RX pasrising- sixtop");
+   openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+*/
 
 
    // get received packet from openqueue
