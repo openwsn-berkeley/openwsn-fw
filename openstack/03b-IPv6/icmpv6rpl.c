@@ -482,10 +482,27 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
          // only report on link creation
       } else {
          if (icmpv6rpl_vars.ParentIndex==prevParentIndex) {
+
             // report on the rank change if any, not on the deletion/creation of parent
                if (icmpv6rpl_vars.myDAGrank!=previousDAGrank) {
-               } else ;// same parent, same rank, nothing to report about 
+               } else ;// same parent, same rank, nothing to report about
          } else {
+            //update the next hops for my enqueued packets
+            open_addr_t      prevParent, newParent;
+            neighbors_getNeighborEui64(&prevParent, ADDR_64B, prevParentIndex); // this neighbor entry is in use
+            neighbors_getNeighborEui64(&newParent, ADDR_64B, icmpv6rpl_vars.ParentIndex); // this neighbor entry is in use
+            openqueue_replace_nexthop(&prevParent, &newParent);
+
+            char str[150];
+            sprintf(str, "RPL (parent update) replaces in the queue the nexthops ");
+            openserial_ncat_uint8_t_hex(str, prevParent.addr_64b[6], 150);
+            openserial_ncat_uint8_t_hex(str, prevParent.addr_64b[7], 150);
+            strncat(str, " by ", 150);
+            openserial_ncat_uint8_t_hex(str, newParent.addr_64b[6], 150);
+            openserial_ncat_uint8_t_hex(str, newParent.addr_64b[7], 150);
+            openserial_printf(COMPONENT_ICMPv6RPL, str, strlen(str));
+
+
             // report on deletion of parent
             // report on creation of new parent
          }

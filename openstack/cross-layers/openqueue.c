@@ -503,6 +503,23 @@ uint8_t openqueue_count_track(track_t track) {
    return(resVal);
 }
 
+/**
+\brief Replace the nexthop info for all the packets to a given address.
+
+\param address of the current next hop.
+\param new next hop.
+
+ */
+void openqueue_replace_nexthop(open_addr_t *prevNextHop, open_addr_t *newNextHop){
+   uint8_t i;
+
+   for (i=0;i<QUEUELENGTH;i++){
+      if(packetfunctions_sameAddress(&(openqueue_vars.queue[i].l2_nextORpreviousHop), prevNextHop))
+         memcpy(&(openqueue_vars.queue[i].l2_nextORpreviousHop),  newNextHop, sizeof(*newNextHop));
+   }
+}
+
+
 
 //======= called by RES
 

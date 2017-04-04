@@ -63,6 +63,7 @@ void               openqueue_removeFirstCreatedBy(uint8_t creator);
 void               openqueue_removeAllCreatedBy(uint8_t creator);
 void               openqueue_removeAllOwnedBy(uint8_t owner);
 uint8_t            openqueue_count_track(track_t track);
+void               openqueue_replace_nexthop(open_addr_t *prevNextHop, open_addr_t *newNextHop);
 // called by res
 OpenQueueEntry_t*  openqueue_sixtopGetSentPacket(void);
 OpenQueueEntry_t*  openqueue_sixtopGetReceivedPacket(void);
