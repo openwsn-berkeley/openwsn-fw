@@ -191,16 +191,16 @@ void radiotimer_cancel() {
 //===== capture
 
 port_INLINE PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime() {
-	 volatile PORT_RADIOTIMER_WIDTH value=0;
+    PORT_RADIOTIMER_WIDTH value=0;
 
-	 //select period register in the selector so it can be read
-	 HWREG(RFCORE_SFR_MTMSEL) = (0x00 << RFCORE_SFR_MTMSEL_MTMOVFSEL_S) & RFCORE_SFR_MTMSEL_MTMOVFSEL_M;
-	 // compute value by adding m0 and m1 registers
-	 value = HWREG(RFCORE_SFR_MTMOVF0);
-	 value+=(HWREG(RFCORE_SFR_MTMOVF1)<<8);
-     value+=(HWREG(RFCORE_SFR_MTMOVF2)<<16);
+    //select period register in the selector so it can be read
+    HWREG(RFCORE_SFR_MTMSEL) = (0x00 << RFCORE_SFR_MTMSEL_MTMOVFSEL_S) & RFCORE_SFR_MTMSEL_MTMOVFSEL_M;
+    // compute value by adding m0 and m1 registers
+    value = HWREG(RFCORE_SFR_MTMOVF0);
+    value = value + (HWREG(RFCORE_SFR_MTMOVF1)<<8);
+    value = value + (HWREG(RFCORE_SFR_MTMOVF2)<<16);
 
-     return value;
+    return value;
 }
 
 //=========================== private =========================================

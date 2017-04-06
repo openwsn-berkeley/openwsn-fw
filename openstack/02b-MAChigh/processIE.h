@@ -2,6 +2,7 @@
 #define __PROCESSIE_H
 
 #include "opendefs.h"
+#include "openqueue.h"
 
 //=========================== define ==========================================
 
@@ -184,5 +185,7 @@ void            processIE_retrieve_sixCelllist(
     uint8_t             length,
     cellInfo_ht*        cellList
 );
+
+bool processIE_EB_IE(OpenQueueEntry_t* pkt, uint16_t* lenIE);
 
 #endif

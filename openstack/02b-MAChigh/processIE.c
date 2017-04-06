@@ -455,3 +455,139 @@ port_INLINE void processIE_retrieve_sixCelllist(
         i++;
     }
 }
+
+port_INLINE bool processIE_EB_IE(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
+   uint8_t               ptr;
+   uint8_t               temp_8b;
+   uint8_t               gr_elem_id;
+   uint8_t               subid;
+   uint16_t              temp_16b;
+   uint16_t              len;
+   uint16_t              sublen;
+   // flag used for understanding if the slotoffset should be inferred from both ASN and slotframe length
+   bool                  f_asn2slotoffset;
+   
+   ptr=0;
+   
+   // payload IE header, header IE is processed before when retrieve header  
+   
+   //candidate IE header  if type ==0 header IE if type==1 payload IE
+   temp_8b    = *((uint8_t*)(pkt->payload)+ptr);
+   ptr++;
+   
+   temp_16b   = temp_8b + ((*((uint8_t*)(pkt->payload)+ptr)) << 8);
+   ptr++;
+   
+   *lenIE     = ptr;
+   
+   if ((temp_16b & IEEE802154E_DESC_TYPE_PAYLOAD_IE) == IEEE802154E_DESC_TYPE_PAYLOAD_IE){
+      // payload IE
+      
+      len          = temp_16b & IEEE802154E_DESC_LEN_PAYLOAD_IE_MASK;
+      gr_elem_id   = (temp_16b & IEEE802154E_DESC_GROUPID_PAYLOAD_IE_MASK)>>IEEE802154E_DESC_GROUPID_PAYLOAD_IE_SHIFT;
+   } else {
+      // header IE
+      
+      len          = temp_16b & IEEE802154E_DESC_LEN_HEADER_IE_MASK;
+      gr_elem_id   = (temp_16b & IEEE802154E_DESC_ELEMENTID_HEADER_IE_MASK)>>IEEE802154E_DESC_ELEMENTID_HEADER_IE_SHIFT; 
+   }
+   
+   *lenIE         += len;
+   
+   //===== sub-elements
+   
+   switch(gr_elem_id){
+      
+      case IEEE802154E_MLME_IE_GROUPID:
+         // MLME IE
+         f_asn2slotoffset = FALSE;
+         do {
+            
+            //read sub IE header
+            temp_8b     = *((uint8_t*)(pkt->payload)+ptr);
+            ptr         = ptr + 1;
+            temp_16b    = temp_8b  + ((*((uint8_t*)(pkt->payload)+ptr))<<8);
+            ptr         = ptr + 1;
+            
+            len         = len - 2; //remove header fields len
+            
+            if ((temp_16b & IEEE802154E_DESC_TYPE_LONG) == IEEE802154E_DESC_TYPE_LONG){
+               // long sub-IE
+               
+               sublen   = temp_16b & IEEE802154E_DESC_LEN_LONG_MLME_IE_MASK;
+               subid    = (temp_16b & IEEE802154E_DESC_SUBID_LONG_MLME_IE_MASK)>>IEEE802154E_DESC_SUBID_LONG_MLME_IE_SHIFT; 
+            } else {
+               // short sub-IE
+               
+               sublen   = temp_16b & IEEE802154E_DESC_LEN_SHORT_MLME_IE_MASK;
+               subid    = (temp_16b & IEEE802154E_DESC_SUBID_SHORT_MLME_IE_MASK)>>IEEE802154E_DESC_SUBID_SHORT_MLME_IE_SHIFT; 
+            }
+            
+            switch(subid){
+               
+               case IEEE802154E_MLME_SYNC_IE_SUBID:
+                  // Sync IE: ASN and Join Priority 
+                  
+                  if (idmanager_getIsDAGroot()==FALSE) {
+                     // ASN
+                     ieee154e_asnStoreFromEB((uint8_t*)(pkt->payload)+ptr);
+                     // ASN is known, but the frame length is not
+                     // frame length will be known after parsing the frame and link IE
+                     f_asn2slotoffset = TRUE;
+                     ptr = ptr + 5;
+                     // join priority
+                     ieee154e_joinPriorityStoreFromEB(*((uint8_t*)(pkt->payload)+ptr));
+                     ptr = ptr + 1;
+                  }
+                  break;
+               
+               case IEEE802154E_MLME_SLOTFRAME_LINK_IE_SUBID:
+                  if ((idmanager_getIsDAGroot()==FALSE) && (ieee154e_isSynch()==FALSE)) {
+                     processIE_retrieveSlotframeLinkIE(pkt,&ptr);
+                  }
+                  break;
+               
+               case IEEE802154E_MLME_TIMESLOT_IE_SUBID:
+                  if (idmanager_getIsDAGroot()==FALSE) {
+                      // timeslot template ID
+                      ieee154e_timeslotTemplateIDStoreFromEB((uint8_t*)(pkt->payload),&ptr);
+                  }
+                  break;
+                  
+               case IEEE802154E_MLME_CHANNELHOPPING_IE_SUBID:
+                  if (idmanager_getIsDAGroot()==FALSE) {
+                      // channelhopping template ID
+                      ieee154e_channelhoppingTemplateIDStoreFromEB(*((uint8_t*)(pkt->payload)+ptr));
+                      ptr = ptr + 1;
+                  }
+                  break;
+               default:
+                  return FALSE;
+                  break;
+            }
+            
+            len = len - sublen;
+         } while(len>0);
+         if (f_asn2slotoffset == TRUE) {
+            // at this point, ASN and frame length are known
+            // the current slotoffset can be inferred
+            ieee154e_syncSlotOffset();
+         }
+         break;
+         
+      default:
+         *lenIE = 0; //no header or not recognized.
+         return FALSE;
+   }
+   
+   if(*lenIE>127) {
+      // log the error
+      openserial_printError(
+         COMPONENT_IEEE802154E,
+         ERR_HEADER_TOO_LONG,
+         (errorparameter_t)*lenIE,
+         (errorparameter_t)1
+      );
+   }
+   return TRUE;
+}
