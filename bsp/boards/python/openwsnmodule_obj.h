@@ -25,7 +25,6 @@
 #include "icmpv6echo_obj.h"
 #include "icmpv6rpl_obj.h"
 #include "opencoap_obj.h"
-#include "opentcp_obj.h"
 #include "idmanager_obj.h"
 #include "openqueue_obj.h"
 #include "openrandom_obj.h"
@@ -37,9 +36,6 @@
 #include "cstorm_obj.h"
 #include "cwellknown_obj.h"
 #include "rrt_obj.h"
-#include "techo_obj.h"
-//#include "tohlone_obj.h"
-//#include "tohlone_obj.h"
 #include "uecho_obj.h"
 
 //=========================== prototypes ======================================
@@ -217,7 +213,6 @@ struct OpenMote {
    icmpv6echo_vars_t    icmpv6echo_vars;
    icmpv6rpl_vars_t     icmpv6rpl_vars;
    opencoap_vars_t      opencoap_vars;
-   tcp_vars_t           tcp_vars;
    // l3
    // l2b
    sixtop_vars_t        sixtop_vars;

@@ -32,7 +32,6 @@
 #include "icmpv6echo.h"
 #include "icmpv6rpl.h"
 //-- 04-TRAN
-#include "opentcp.h"
 #include "openudp.h"
 #include "opencoap.h"
 //===== applications
@@ -75,7 +74,6 @@ void openstack_init(void) {
    icmpv6echo_init();
    icmpv6rpl_init();
    //-- 04-TRAN
-   opentcp_init();
    openudp_init();
    opencoap_init();     // initialize before any of the CoAP applications
    

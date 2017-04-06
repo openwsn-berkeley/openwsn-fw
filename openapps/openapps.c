@@ -14,8 +14,6 @@
 #include "cstorm.h"
 #include "cwellknown.h"
 #include "rrt.h"
-// TCP
-#include "techo.h"
 // UDP
 #include "uecho.h"
 #include "uinject.h"
@@ -37,8 +35,6 @@ void openapps_init(void) {
    cstorm_init();
    cwellknown_init();
    rrt_init();
-   // TCP
-   techo_init();
    // UDP
 //   uecho_init();
 }

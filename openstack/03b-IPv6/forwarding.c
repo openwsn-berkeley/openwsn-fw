@@ -9,7 +9,6 @@
 #include "icmpv6.h"
 #include "icmpv6rpl.h"
 #include "openudp.h"
-#include "opentcp.h"
 #include "debugpins.h"
 #include "scheduler.h"
 
@@ -196,8 +195,6 @@ void forwarding_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
       
       // indicate sendDone to upper layer
       switch(msg->l4_protocol) {
-         case IANA_TCP:
-            opentcp_sendDone(msg,error);
             break;
          case IANA_UDP:
             openudp_sendDone(msg,error);
@@ -267,8 +264,6 @@ void forwarding_receive(
         packetfunctions_tossHeader(msg,ipv6_inner_header->header_length);
         // indicate received packet to upper layer
         switch(msg->l4_protocol) {
-        case IANA_TCP:
-            opentcp_receive(msg);
             break;
         case IANA_UDP:
             openudp_receive(msg);
