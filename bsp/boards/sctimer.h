@@ -24,11 +24,12 @@ typedef kick_scheduler_t (*sctimer_cbt)(void);
 
 //=========================== prototypes ======================================
 
-void sctimer_init(void);
-void sctimer_setCompare(uint32_t val);
+void     sctimer_init(void);
+void     sctimer_setCompare(uint32_t val);
+void     sctimer_setCb(sctimer_cbt cb);
 uint32_t sctimer_readCounter(void);
-void sctimer_enable(void);
-void sctimer_disable(void);
+void     sctimer_enable(void);
+void     sctimer_disable(void);
 
 /**
 \}

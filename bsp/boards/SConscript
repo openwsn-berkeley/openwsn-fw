@@ -15,6 +15,7 @@ sources_h = [
     'radio.h',
     'radiotimer.h',
     'uart.h',
+    'sctimer.h',
 ]
 
 #============================ SCons targets ===================================
