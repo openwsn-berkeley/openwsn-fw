@@ -11,11 +11,6 @@
 #include "debugpins.h"
 #include <headers/hw_ints.h>
 
-
-// ========================== define ==========================================
-
-static void sctimer_isr(void); 
-
 // ========================== variable ========================================
 
 typedef struct {
@@ -23,6 +18,11 @@ typedef struct {
 } sctimer_vars_t;
 
 sctimer_vars_t sctimer_vars;
+
+
+// ========================== private =========================================
+
+static void sctimer_isr(void); 
 
 // ========================== protocol =========================================
 
@@ -35,12 +35,12 @@ void sctimer_init(void){
     IntDisable(INT_SMTIM);
 }
 
-void sctimer_setCb(sctimer_cbt cb){
+void sctimer_set_callback(sctimer_cbt cb){
     sctimer_vars.sctimer_cb = cb;
 }
 
 /**
-\brief set compare 
+\brief set compare interrupt
 */
 void sctimer_setCompare(uint32_t val){
     IntEnable(INT_SMTIM);
@@ -63,6 +63,8 @@ void sctimer_enable(void){
 void sctimer_disable(void){
     IntDisable(INT_SMTIM);
 }
+
+// ========================== private =========================================
 
 void sctimer_isr(void) {
     debugpins_isr_set();
