@@ -17,7 +17,8 @@
 
 //=========================== typedef =========================================
 
-typedef kick_scheduler_t (*sctimer_cbt)(void);
+typedef void  (*sctimer_cbt)        (void);
+typedef void  (*sctimer_capture_cbt)(uint32_t timestamp);
 
 //=========================== variables =======================================
 
