@@ -20,7 +20,7 @@
 
 /// Maximum number of timers that can run concurrently
 #define MAX_NUM_TIMERS            10
-#define MAX_TICKS_IN_SINGLE_CLOCK ((PORT_TIMER_WIDTH)0xFFFFFFFF)
+#define MAX_TICKS_NUMBER          ((PORT_TIMER_WIDTH)0xFFFFFFFF)
 #define TOO_MANY_TIMERS_ERROR     255
 #define opentimer2_id_t uint8_t
 
@@ -35,11 +35,10 @@ typedef enum {
 } uint_type_t;
 
 typedef struct {
-   uint32_t             duration_ticks;     // total number of clock ticks
-   uint32_t             ticks_remaining;    // ticks remaining before elapses
+   uint32_t             currentCompareValue;// total number of clock ticks
+   uint32_t             lastCompareValue;   // the previous compare value
    bool                 isrunning;          // is running?
    opentimers2_cbt      callback;           // function to call when elapses
-   bool                 hasExpired;         // whether the callback has to be called
 } opentimers2_t;
 
 //=========================== module variables ================================
@@ -57,14 +56,14 @@ opentimer2_id_t opentimer2_create(void);
 void            opentimer2_scheduleRelative(opentimer2_id_t     id, 
                                             uint32_t            duration,
                                             uint_type_t         uint_type, 
-                                            opentimers2_cbt      cb);
+                                            opentimers2_cbt     cb);
 void            opentimer2_scheduleAbsolute(opentimer2_id_t     id, 
                                             uint32_t            duration, 
                                             uint32_t            reference , 
                                             uint_type_t         uint_type, 
-                                            opentimers2_cbt      cb);
+                                            opentimers2_cbt     cb);
 void            opentimer2_cancel(opentimer2_id_t id);
-void            opentimer2_destroy(opentimer2_id_t id);
+bool            opentimer2_destroy(opentimer2_id_t id);
 uint32_t        opentimer2_getValue(opentimer2_id_t id);
 
 /**
