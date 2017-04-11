@@ -91,6 +91,8 @@ typedef enum {
    COAP_OPTION_NUM_URIQUERY            = 15,
    COAP_OPTION_NUM_ACCEPT              = 16,
    COAP_OPTION_NUM_LOCATIONQUERY       = 20,
+   COAP_OPTION_NUM_BLOCK2              = 23,
+   COAP_OPTION_NUM_BLOCK1              = 27,
    COAP_OPTION_NUM_PROXYURI            = 35,
    COAP_OPTION_NUM_PROXYSCHEME         = 39,
 } coap_option_t;
