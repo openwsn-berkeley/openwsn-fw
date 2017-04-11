@@ -41,7 +41,7 @@ void    cjoin_timer_cb(opentimer_id_t id);
 void    cjoin_task_cb(void);
 void    cjoin_sendDone(OpenQueueEntry_t* msg,
                        owerror_t error);
-owerror_t cjoin_sendPut(uint8_t payload);
+owerror_t cjoin_sendJoinRequest(void);
 void cjoin_retransmission_cb(opentimer_id_t id);
 void cjoin_retransmission_task_cb(void);
 bool cjoin_getIsJoined(void);
@@ -59,7 +59,6 @@ void cjoin_init() {
    desc.discoverable                    = TRUE;
    desc.callbackRx                      = &cjoin_receive;
    desc.callbackSendDone                = &cjoin_sendDone;
-   cjoin_vars.lastPayload               = NUMBER_OF_EXCHANGES - 1;
    cjoin_vars.isJoined                  = FALSE;   
 
    memset(&cjoin_vars.joinAsn, 0x00, sizeof(asn_t));
@@ -92,26 +91,12 @@ owerror_t cjoin_receive(OpenQueueEntry_t* msg,
 
         opentimers_stop(cjoin_vars.retransmissionTimerId); // stop the timer
 
-        openserial_printError(COMPONENT_IEEE802154E,ERR_WDRADIO_OVERFLOWS,
-                             (errorparameter_t)0,
-                             (errorparameter_t)msg->payload[0]);
-        if (cjoin_getIsJoined() == FALSE) { 
-            if (msg->payload[0] == 0) {
-                cjoin_setIsJoined(TRUE);                  // declare join is over
-                ieee154e_getAsn(asn);
-                asnCropped = ((uint32_t) asn[3] << 24) | ((uint32_t) asn[2] << 16) | ((uint32_t) asn[1] << 8) | ((uint32_t) asn[0]);
-                printf("JOIN ASN: %u\n", asnCropped);
-            }
-            else if (msg->payload[0] == cjoin_vars.lastPayload - 1) {
-                cjoin_sendPut(msg->payload[0] - 1);
-            }
-            else {
-                openserial_printError(COMPONENT_IEEE802154E,ERR_WDDATADURATION_OVERFLOWS,
-                                      (errorparameter_t)0,
-                                      (errorparameter_t)0);
+        if (coap_header->Code == COAP_CODE_RESP_CONTENT) {
+            if (cjoin_getIsJoined() == FALSE) { 
+                    cjoin_setIsJoined(TRUE);                  // declare join is over
             }
         }
-    
+
     return E_SUCCESS;
 }
 
@@ -127,7 +112,7 @@ void cjoin_retransmission_cb(opentimer_id_t id) {
 }
 
 void cjoin_retransmission_task_cb() {
-   cjoin_sendPut(cjoin_vars.lastPayload);
+    cjoin_sendJoinRequest();
 }
 
 void cjoin_task_cb() {
@@ -151,7 +136,7 @@ void cjoin_task_cb() {
    }
     opentimers_stop(cjoin_vars.startupTimerId);
 
-    cjoin_sendPut(NUMBER_OF_EXCHANGES-1);
+    cjoin_sendJoinRequest();
 
    return;
 }
@@ -160,16 +145,16 @@ void cjoin_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }
 
-owerror_t cjoin_sendPut(uint8_t payload) {
+owerror_t cjoin_sendJoinRequest(void) {
    OpenQueueEntry_t*    pkt;
    owerror_t            outcome;
- 
-   cjoin_vars.lastPayload = payload;
 
-   openserial_printError(COMPONENT_IEEE802154E,ERR_MAXRXACKPREPARE_OVERFLOWS,
-                         (errorparameter_t)0,
-                         (errorparameter_t)payload);
- // create a CoAP RD packet
+   // immediately arm the retransmission timer
+   cjoin_vars.retransmissionTimerId    = opentimers_start((uint32_t) TIMEOUT,
+                                                 TIMER_ONESHOT,TIME_MS,
+                                                 cjoin_retransmission_cb);
+
+   // create a CoAP RD packet
    pkt = openqueue_getFreePacketBuffer(COMPONENT_CJOIN);
    if (pkt==NULL) {
       openserial_printError(
@@ -184,18 +169,7 @@ owerror_t cjoin_sendPut(uint8_t payload) {
    // take ownership over that packet
    pkt->creator                   = COMPONENT_CJOIN;
    pkt->owner                     = COMPONENT_CJOIN;
-   // CoAP payload
-   packetfunctions_reserveHeaderSize(pkt,1);
-   pkt->payload[0]             = payload;
 
-   packetfunctions_reserveHeaderSize(pkt,1);
-   pkt->payload[0] = COAP_PAYLOAD_MARKER;
-   
-   // content-type option
-   packetfunctions_reserveHeaderSize(pkt,2);
-   pkt->payload[0]                = (COAP_OPTION_NUM_CONTENTFORMAT - COAP_OPTION_NUM_URIPATH) << 4
-                                    | 1;
-   pkt->payload[1]                = COAP_MEDTYPE_APPOCTETSTREAM;
    // location-path option
    packetfunctions_reserveHeaderSize(pkt,sizeof(cjoin_path0)-1);
    memcpy(&pkt->payload[0],cjoin_path0,sizeof(cjoin_path0)-1);
@@ -210,8 +184,8 @@ owerror_t cjoin_sendPut(uint8_t payload) {
    // send
    outcome = opencoap_send(
       pkt,
-      COAP_TYPE_NON,
-      COAP_CODE_REQ_PUT,
+      COAP_TYPE_CON,
+      COAP_CODE_REQ_GET,
       1,
       &desc
    );
@@ -222,9 +196,6 @@ owerror_t cjoin_sendPut(uint8_t payload) {
       return E_FAIL;
    }
 
-   cjoin_vars.retransmissionTimerId    = opentimers_start((uint32_t) TIMEOUT,
-                                                 TIMER_ONESHOT,TIME_MS,
-                                                 cjoin_retransmission_cb);
   return E_SUCCESS;
 }
 

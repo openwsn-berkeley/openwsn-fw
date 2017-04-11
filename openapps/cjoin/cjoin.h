@@ -16,7 +16,6 @@
 typedef struct {
    opentimer_id_t       startupTimerId;
    opentimer_id_t       retransmissionTimerId;
-   uint8_t              lastPayload;
    bool                 isJoined;
    asn_t                joinAsn;
 } cjoin_vars_t;
