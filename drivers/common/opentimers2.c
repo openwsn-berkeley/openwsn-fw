@@ -151,7 +151,7 @@ void opentimer2_scheduleAbsolute(opentimer2_id_t     id,
     switch (uint_type){
     case TIME_MS:
         if (duration>MAX_TICKS_NUMBER/PORT_TICS_PER_MS){
-            // openserail_printError();
+            // openserail_printError("unsupported large duration");
             return;
         } else {
             durationTicks = duration*PORT_TICS_PER_MS;
@@ -232,5 +232,41 @@ whole timer buffer and find out the correct timer responding to the interrupt
 and call the callback recorded for that timer.
  */
 void opentimers2_timer_callback(void){
+    uint8_t i;
+    uint8_t id;
+    uint32_t timerGap=MAX_TICKS_NUMBER;
+    // 1. find the expired timer
+    for (i=0;i<MAX_NUM_TIMERS;i++){
+        if (opentimers2_vars.timersBuf[i].isrunning==TRUE){
+            if (opentimers2_vars.currentTimeout-opentimers2_vars.timersBuf[i].currentCompareValue < MAX_DURATION_ISR){
+                // this timer expired, break
+                id = i;
+                break;
+            }
+        }
+    }
     
+    // 2. call the callback of expired timer
+    if (i==MAX_NUM_TIMERS){
+        // openserail_printError("failed to find expired timer")
+        return;
+    }
+    opentimers2_vars.timersBuf[id].callback(id);
+    opentimers2_vars.timersBuf[id].isrunning = FALSE;
+    
+      
+    // 3. find the next timer to be fired
+    for (i=0;i<MAX_NUM_TIMERS;i++){
+        if (opentimers2_vars.timersBuf[i].isrunning==TRUE){
+            if (opentimers2_vars.timersBuf[i].currentCompareValue-opentimers2_vars.currentTimeout<timerGap){
+                timerGap = opentimers2_vars.timersBuf[i].currentCompareValue-opentimers2_vars.currentTimeout;
+                id = i;
+            }
+        }
+    }
+    
+    // 4. reschedule the timer
+    opentimers2_vars.currentTimeout = opentimers2_vars.timersBuf[id].currentCompareValue;
+    sctimer_setCompare(opentimers2_vars.currentTimeout);
+    opentimers2_vars.running        = TRUE;
 }

@@ -22,6 +22,7 @@
 #define MAX_NUM_TIMERS            10
 #define MAX_TICKS_NUMBER          ((PORT_TIMER_WIDTH)0xFFFFFFFF)
 #define TOO_MANY_TIMERS_ERROR     255
+#define MAX_DURATION_ISR          33 // 33@32768Hz = 1ms
 #define opentimer2_id_t uint8_t
 
 typedef void (*opentimers2_cbt)(opentimer2_id_t id);
