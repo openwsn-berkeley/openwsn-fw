@@ -54,6 +54,8 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    // local variables passed to the handlers (with msg)
    coap_header_iht           coap_header;
    coap_option_iht           coap_options[MAX_COAP_OPTIONS];
+   uint8_t                   uripath0_idx = MAX_COAP_OPTIONS;
+   uint8_t                   uripath1_idx = MAX_COAP_OPTIONS;
    
    // take ownership over the received packet
    msg->owner                = COMPONENT_OPENCOAP;
@@ -113,6 +115,18 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
       index++;
       coap_options[i].pValue      = &(msg->payload[index]);
       index                      += coap_options[i].length; //includes length as well
+
+      switch(coap_options[i]) {
+         case COAP_OPTION_NUM_URIPATH:
+            if (uripath0_idx == MAX_COAP_OPTIONS) {
+               uripath0_idx = i;
+            } else if (uripath1_idx == MAX_COAP_OPTIONS) {
+               uripath1_idx = i;
+            }
+            break;
+         default:
+            break;
+      }
    }
    
    // remove the CoAP header+options
@@ -136,8 +150,8 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
       // iterate until matching resource found, or no match
       while (found==FALSE) {
          if (
-               coap_options[0].type==COAP_OPTION_NUM_URIPATH    &&
-               coap_options[1].type==COAP_OPTION_NUM_URIPATH    &&
+               uripath0_idx != MAX_COAP_OPTIONS                 &&
+               uripath1_idx != MAX_COAP_OPTIONS                 &&
                temp_desc->path0len>0                            &&
                temp_desc->path0val!=NULL                        &&
                temp_desc->path1len>0                            &&
@@ -146,24 +160,24 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
             // resource has a path of form path0/path1
                
             if (
-                  coap_options[0].length==temp_desc->path0len                               &&
-                  memcmp(coap_options[0].pValue,temp_desc->path0val,temp_desc->path0len)==0 &&
-                  coap_options[1].length==temp_desc->path1len                               &&
-                  memcmp(coap_options[1].pValue,temp_desc->path1val,temp_desc->path1len)==0
+                  coap_options[uripath0_idx].length==temp_desc->path0len                               &&
+                  memcmp(coap_options[uripath0_idx].pValue,temp_desc->path0val,temp_desc->path0len)==0 &&
+                  coap_options[uripath1_idx].length==temp_desc->path1len                               &&
+                  memcmp(coap_options[uripath1_idx].pValue,temp_desc->path1val,temp_desc->path1len)==0
                ) {
                found = TRUE;
             };
          
          } else if (
-               coap_options[0].type==COAP_OPTION_NUM_URIPATH    &&
+               uripath0_idx != MAX_COAP_OPTIONS                 &&
                temp_desc->path0len>0                            &&
                temp_desc->path0val!=NULL
             ) {
             // resource has a path of form path0
                
             if (
-                  coap_options[0].length==temp_desc->path0len                               &&
-                  memcmp(coap_options[0].pValue,temp_desc->path0val,temp_desc->path0len)==0
+                  coap_options[uripath0_idx].length==temp_desc->path0len                               &&
+                  memcmp(coap_options[uripath0_idx].pValue,temp_desc->path0val,temp_desc->path0len)==0
                ) {
                found = TRUE;
             };
