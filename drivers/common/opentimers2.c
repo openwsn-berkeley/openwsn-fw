@@ -244,23 +244,20 @@ void opentimers2_timer_callback(void){
     for (i=0;i<MAX_NUM_TIMERS;i++){
         if (opentimers2_vars.timersBuf[i].isrunning==TRUE){
             if (opentimers2_vars.currentTimeout-opentimers2_vars.timersBuf[i].currentCompareValue < MAX_DURATION_ISR){
-                // this timer expired, break
-                id = i;
-                break;
+                // this timer expired, mark as expired
+                opentimers2_vars.timersBuf[i].hasExpired = TRUE;
             }
         }
     }
     
-    // 2. call the callback of expired timer
-    if (i==MAX_NUM_TIMERS){
-        // openserail_printError("failed to find expired timer")
-        return;
+    // 2. call the callback of expired timers
+    for (i=0;i<MAX_NUM_TIMERS;i++){
+        if (opentimers2_vars.timersBuf[i].hasExpired == TRUE){
+            opentimers2_vars.timersBuf[i].isrunning           = FALSE;
+            opentimers2_vars.timersBuf[i].lastCompareValue    = opentimers2_vars.timersBuf[i].currentCompareValue;
+            opentimers2_vars.timersBuf[i].callback(i);
+        }
     }
-    
-    opentimers2_vars.timersBuf[id].isrunning           = FALSE;
-    opentimers2_vars.timersBuf[i].lastCompareValue     = opentimers2_vars.timersBuf[i].currentCompareValue;
-    opentimers2_vars.timersBuf[id].callback(id);
-    
       
     // 3. find the next timer to be fired
     for (i=0;i<MAX_NUM_TIMERS;i++){

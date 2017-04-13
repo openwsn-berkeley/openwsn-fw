@@ -40,6 +40,7 @@ typedef struct {
    uint32_t             lastCompareValue;   // the previous compare value
    bool                 isrunning;          // is running?
    bool                 isUsed;             // true when this entry is occupied
+   bool                 hasExpired;         // in case there are more than one interrupt occur at same time
    opentimers2_cbt      callback;           // function to call when elapses
 } opentimers2_t;
 

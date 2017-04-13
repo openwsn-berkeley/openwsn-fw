@@ -96,7 +96,7 @@ void cb_timer0(opentimer2_id_t id) {
     // re-schedule refer to previous scheduled value
     opentimer2_scheduleRelative(
         app_vars.timer0,       // timerId
-        APP_DLY_TIMER2_ms,     // duration
+        APP_DLY_TIMER0_ms,     // duration
         TIME_MS,               // timetype
         cb_timer0              // callback
     );
@@ -107,7 +107,7 @@ void cb_timer1(opentimer2_id_t id) {
     // re-schedule refer to previous scheduled value
     opentimer2_scheduleRelative(
         app_vars.timer1,       // timerId
-        APP_DLY_TIMER2_ms,     // duration
+        APP_DLY_TIMER1_ms,     // duration
         TIME_MS,               // timetype
         cb_timer1              // callback
     );
