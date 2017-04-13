@@ -44,7 +44,8 @@ create a timer by reserving an Id for the timer.
 opentimer2_id_t opentimer2_create(void){
     uint8_t id;
     for (id=0;id<MAX_NUM_TIMERS;id++){
-        if (opentimers2_vars.timersBuf[id].isrunning==FALSE){
+        if (opentimers2_vars.timersBuf[id].isUsed==FALSE){
+            opentimers2_vars.timersBuf[id].isUsed = TRUE;
             return id;
         }
     }
@@ -75,7 +76,7 @@ void opentimer2_scheduleRelative(opentimer2_id_t     id,
     uint32_t timerGap;
     // 1. make sure the timer exist
     for (i=0;i<MAX_NUM_TIMERS;i++){
-        if (opentimers2_vars.timersBuf[i].isrunning && i == id){
+        if (opentimers2_vars.timersBuf[i].isUsed && i == id){
             break;
         }
     }
@@ -100,6 +101,8 @@ void opentimer2_scheduleRelative(opentimer2_id_t     id,
     }
     
     opentimers2_vars.timersBuf[id].currentCompareValue = durationTicks+opentimers2_vars.timersBuf[id].lastCompareValue;
+    opentimers2_vars.timersBuf[id].isrunning           = TRUE;
+    opentimers2_vars.timersBuf[id].callback            = cb;
     
     // 3. update the next timer to fire
     timerGap = opentimers2_vars.timersBuf[id].currentCompareValue-opentimers2_vars.currentTimeout;
@@ -138,7 +141,7 @@ void opentimer2_scheduleAbsolute(opentimer2_id_t     id,
     uint32_t timerGap;
     // 1. make sure the timer exist
     for (i=0;i<MAX_NUM_TIMERS;i++){
-        if (opentimers2_vars.timersBuf[i].isrunning && i == id){
+        if (opentimers2_vars.timersBuf[i].isUsed && i == id){
             break;
         }
     }
@@ -163,6 +166,8 @@ void opentimer2_scheduleAbsolute(opentimer2_id_t     id,
     }
     
     opentimers2_vars.timersBuf[id].currentCompareValue = durationTicks+reference;
+    opentimers2_vars.timersBuf[id].isrunning           = TRUE;
+    opentimers2_vars.timersBuf[id].callback            = cb;
     
     // 3. update the next timer to fire
     timerGap = opentimers2_vars.timersBuf[id].currentCompareValue-opentimers2_vars.currentTimeout;
@@ -251,8 +256,10 @@ void opentimers2_timer_callback(void){
         // openserail_printError("failed to find expired timer")
         return;
     }
+    
+    opentimers2_vars.timersBuf[id].isrunning           = FALSE;
+    opentimers2_vars.timersBuf[i].lastCompareValue     = opentimers2_vars.timersBuf[i].currentCompareValue;
     opentimers2_vars.timersBuf[id].callback(id);
-    opentimers2_vars.timersBuf[id].isrunning = FALSE;
     
       
     // 3. find the next timer to be fired

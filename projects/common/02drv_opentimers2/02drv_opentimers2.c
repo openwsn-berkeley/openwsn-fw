@@ -50,12 +50,13 @@ void cb_timer2(opentimer2_id_t id);
 \brief The program starts executing here.
 */
 int mote_main(void) {
-    uint32_t reference = sctimer_readCounter(); // reference
+    uint32_t reference; // reference
     
     memset(&app_vars,0,sizeof(app_vars_t));
     board_init();
     opentimer2_init();
    
+    reference       = sctimer_readCounter();
     app_vars.timer0 = opentimer2_create();
     opentimer2_scheduleAbsolute(
         app_vars.timer0,       // timerId

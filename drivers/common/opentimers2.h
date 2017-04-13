@@ -39,6 +39,7 @@ typedef struct {
    uint32_t             currentCompareValue;// total number of clock ticks
    uint32_t             lastCompareValue;   // the previous compare value
    bool                 isrunning;          // is running?
+   bool                 isUsed;             // true when this entry is occupied
    opentimers2_cbt      callback;           // function to call when elapses
 } opentimers2_t;
 
