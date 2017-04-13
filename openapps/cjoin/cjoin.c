@@ -46,6 +46,11 @@ void cjoin_retransmission_cb(opentimer_id_t id);
 void cjoin_retransmission_task_cb(void);
 bool cjoin_getIsJoined(void);
 void cjoin_setIsJoined(bool newValue);
+
+owerror_t cjoin_parse_join_response(join_response_t *, uint8_t *, uint8_t);
+owerror_t cjoin_parse_keyset(COSE_keyset_t *, uint8_t *, uint8_t);
+owerror_t cjoin_parse_short_address(short_address_t *, uint8_t *, uint8_t);
+
 //=========================== public ==========================================
 
 void cjoin_init() {
@@ -80,20 +85,38 @@ void cjoin_schedule() {
 }
 
 //=========================== private =========================================
-
 owerror_t cjoin_receive(OpenQueueEntry_t* msg,
                       coap_header_iht* coap_header,
                       coap_option_iht* coap_options) {
-
-    uint8_t asn[5];
-    uint32_t asnCropped;
-
+    uint8_t i;
+    join_response_t join_response;
+    COSE_keyset_t keyset;
+    short_address_t short_address;
 
         opentimers_stop(cjoin_vars.retransmissionTimerId); // stop the timer
 
         if (coap_header->Code == COAP_CODE_RESP_CONTENT) {
-            if (cjoin_getIsJoined() == FALSE) { 
-                    cjoin_setIsJoined(TRUE);                  // declare join is over
+            // loop through the options and look for content format
+            i = 0;
+            while(coap_options[i].type != COAP_OPTION_NONE) {
+                if (coap_options[i].type == COAP_OPTION_NUM_CONTENTFORMAT) {
+                    if (*(coap_options[i].pValue) == COAP_MEDTYPE_APPCBOR) {
+                        // parse join response
+                        printf_hex(msg->payload,msg->length);
+                        cjoin_parse_join_response(&join_response, msg->payload, 
+                                                                    msg->length);
+                        cjoin_parse_keyset(&keyset, join_response.COSE_keyset,
+                                                    join_response.COSE_keyset_len);
+                        
+                        cjoin_parse_short_address(&short_address, join_response.short_address,
+                                                                    join_response.short_address_len);
+
+                        // set the internal keys as per the parsed values
+                        cjoin_setIsJoined(TRUE); // declare join is over
+                    }
+                break;
+                }
+               i++; 
             }
         }
 
@@ -214,6 +237,11 @@ void cjoin_setIsJoined(bool newValue) {
    uint8_t array[5];
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
+
+   if (cjoin_vars.isJoined == newValue) {
+        ENABLE_INTERRUPTS();
+        return;
+   }
    
    cjoin_vars.isJoined = newValue;
 
@@ -253,3 +281,45 @@ bool debugPrint_joined() {
    openserial_printStatus(STATUS_JOINED,(uint8_t*)&output,sizeof(output));
    return TRUE;
 }
+
+/**
+\brief Parse the received join response.
+
+This function expects the join response structure from minimal-security-02 draft.
+
+\param[out] response The join_response_t structure containing parsed info.
+\param[in] buf The received join response.
+\param[in] len Length of the payload.
+*/
+owerror_t cjoin_parse_join_response(join_response_t *response, uint8_t *buf, uint8_t len) {
+    return E_SUCCESS;
+}
+
+/**
+\brief Parse the received COSE_Keyset.
+
+The function expects COSE_Keyset with symmetric keys as per minimal-security-02 draft
+and parses it into COSE_symmetric_key_t structure.
+
+\param[out] keyset The COSE_keyset_t structure containing parsed keys.
+\param[in] buf Input buffer.
+\param[in] len Length.
+*/
+owerror_t cjoin_parse_keyset(COSE_keyset_t *keyset, uint8_t *buf, uint8_t len) {
+    return E_SUCCESS;
+}
+
+/**
+\brief Parse the received short address.
+
+The function expects short_address as per minimal-security-02 draft
+and parses it into short_address_t structure.
+
+\param[out] address The short_address_t structure containing parsed short_address and lease time.
+\param[in] buf Input buffer.
+\param[in] len Length.
+*/
+owerror_t cjoin_parse_short_address(short_address_t *address, uint8_t *buf, uint8_t len) {
+    return E_SUCCESS;
+}
+

@@ -102,6 +102,7 @@ typedef enum {
    COAP_MEDTYPE_APPOCTETSTREAM         = 42,
    COAP_MEDTYPE_APPEXI                 = 47,
    COAP_MEDTYPE_APPJSON                = 50,
+   COAP_MEDTYPE_APPCBOR                = 60,
 } coap_media_type_t;
 
 //=========================== typedef =========================================
