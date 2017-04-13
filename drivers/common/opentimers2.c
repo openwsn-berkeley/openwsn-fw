@@ -72,6 +72,7 @@ void opentimer2_scheduleRelative(opentimer2_id_t     id,
                                  uint_type_t         uint_type, 
                                  opentimers2_cbt     cb){
     uint8_t  i;
+    uint8_t idToSchedule;
     uint32_t durationTicks;
     uint32_t timerGap;
     // 1. make sure the timer exist
@@ -104,18 +105,19 @@ void opentimer2_scheduleRelative(opentimer2_id_t     id,
     opentimers2_vars.timersBuf[id].isrunning           = TRUE;
     opentimers2_vars.timersBuf[id].callback            = cb;
     
-    // 3. update the next timer to fire
-    timerGap = opentimers2_vars.timersBuf[id].currentCompareValue-opentimers2_vars.currentTimeout;
+    // 3. find the next timer to fire
+    timerGap = MAX_TICKS_NUMBER;
     for (i=0;i<MAX_NUM_TIMERS;i++){
         if (opentimers2_vars.timersBuf[i].isrunning){
             if (opentimers2_vars.timersBuf[i].currentCompareValue - opentimers2_vars.currentTimeout < timerGap){
-                // there is one timer will fired before the given timer, needn't update
-                return;
+                timerGap     = opentimers2_vars.timersBuf[i].currentCompareValue-opentimers2_vars.currentTimeout;
+                idToSchedule = i;
             }
         }
     }
+    
     // if I got here, assign the next to be fired timer to given timer
-    opentimers2_vars.currentTimeout = opentimers2_vars.timersBuf[id].currentCompareValue;
+    opentimers2_vars.currentTimeout = opentimers2_vars.timersBuf[idToSchedule].currentCompareValue;
     sctimer_setCompare(opentimers2_vars.currentTimeout);
     opentimers2_vars.running        = TRUE;
 }
@@ -137,6 +139,7 @@ void opentimer2_scheduleAbsolute(opentimer2_id_t     id,
                                  uint_type_t         uint_type, 
                                  opentimers2_cbt     cb){
     uint8_t  i;
+    uint8_t idToSchedule;
     uint32_t durationTicks;
     uint32_t timerGap;
     // 1. make sure the timer exist
@@ -169,18 +172,19 @@ void opentimer2_scheduleAbsolute(opentimer2_id_t     id,
     opentimers2_vars.timersBuf[id].isrunning           = TRUE;
     opentimers2_vars.timersBuf[id].callback            = cb;
     
-    // 3. update the next timer to fire
-    timerGap = opentimers2_vars.timersBuf[id].currentCompareValue-opentimers2_vars.currentTimeout;
+    // 3. find the next timer to fire
+    timerGap = MAX_TICKS_NUMBER;
     for (i=0;i<MAX_NUM_TIMERS;i++){
         if (opentimers2_vars.timersBuf[i].isrunning){
             if (opentimers2_vars.timersBuf[i].currentCompareValue - opentimers2_vars.currentTimeout < timerGap){
-                // there is one timer will fired before the given timer, needn't update
-                return;
+                timerGap     = opentimers2_vars.timersBuf[i].currentCompareValue-opentimers2_vars.currentTimeout;
+                idToSchedule = i;
             }
         }
     }
+    
     // if I got here, assign the next to be fired timer to given timer
-    opentimers2_vars.currentTimeout = opentimers2_vars.timersBuf[id].currentCompareValue;
+    opentimers2_vars.currentTimeout = opentimers2_vars.timersBuf[idToSchedule].currentCompareValue;
     sctimer_setCompare(opentimers2_vars.currentTimeout);
     opentimers2_vars.running        = TRUE;
 }
@@ -238,7 +242,7 @@ and call the callback recorded for that timer.
  */
 void opentimers2_timer_callback(void){
     uint8_t i;
-    uint8_t id;
+    uint8_t idToSchedule;
     uint32_t timerGap=MAX_TICKS_NUMBER;
     // 1. find the expired timer
     for (i=0;i<MAX_NUM_TIMERS;i++){
@@ -255,6 +259,7 @@ void opentimers2_timer_callback(void){
         if (opentimers2_vars.timersBuf[i].hasExpired == TRUE){
             opentimers2_vars.timersBuf[i].isrunning           = FALSE;
             opentimers2_vars.timersBuf[i].lastCompareValue    = opentimers2_vars.timersBuf[i].currentCompareValue;
+            opentimers2_vars.timersBuf[i].hasExpired          = FALSE;
             opentimers2_vars.timersBuf[i].callback(i);
         }
     }
@@ -263,14 +268,14 @@ void opentimers2_timer_callback(void){
     for (i=0;i<MAX_NUM_TIMERS;i++){
         if (opentimers2_vars.timersBuf[i].isrunning==TRUE){
             if (opentimers2_vars.timersBuf[i].currentCompareValue-opentimers2_vars.currentTimeout<timerGap){
-                timerGap = opentimers2_vars.timersBuf[i].currentCompareValue-opentimers2_vars.currentTimeout;
-                id = i;
+                timerGap     = opentimers2_vars.timersBuf[i].currentCompareValue-opentimers2_vars.currentTimeout;
+                idToSchedule = i;
             }
         }
     }
     
     // 4. reschedule the timer
-    opentimers2_vars.currentTimeout = opentimers2_vars.timersBuf[id].currentCompareValue;
+    opentimers2_vars.currentTimeout = opentimers2_vars.timersBuf[idToSchedule].currentCompareValue;
     sctimer_setCompare(opentimers2_vars.currentTimeout);
     opentimers2_vars.running        = TRUE;
 }
