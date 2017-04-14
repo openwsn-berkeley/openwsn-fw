@@ -144,7 +144,7 @@ void ieee154e_init() {
    radio_setStartFrameCb(ieee154e_startOfFrame);
    radio_setEndFrameCb(ieee154e_endOfFrame);
    // have the radio start its timer
-   radio_startTimer(ieee154e_vars.slotDuration);
+   radiotimer_start(ieee154e_vars.slotDuration);
 }
 
 //=========================== public ==========================================
@@ -188,7 +188,7 @@ PORT_RADIOTIMER_WIDTH ieee154e_asnDiff(asn_t* someASN) {
 This function executes in ISR mode, when the new slot timer fires.
 */
 void isr_ieee154e_newSlot() {
-   radio_setTimerPeriod(ieee154e_vars.slotDuration);
+   radiotimer_setPeriod(ieee154e_vars.slotDuration);
    if (ieee154e_vars.isSync==FALSE) {
       if (idmanager_getIsDAGroot()==TRUE) {
          changeIsSync(TRUE);
@@ -444,7 +444,7 @@ port_INLINE void activity_synchronize_newSlot() {
       
       // switch on the radio in Rx mode.
       radio_rxEnable();
-      ieee154e_vars.radioOnInit=radio_getTimerValue();
+      ieee154e_vars.radioOnInit=radiotimer_getValue();
       ieee154e_vars.radioOnThisSlot=TRUE;
       radio_rxNow();
    }
@@ -464,7 +464,7 @@ port_INLINE void activity_synchronize_newSlot() {
       
       // switch on the radio in Rx mode.
       radio_rxEnable();
-      ieee154e_vars.radioOnInit=radio_getTimerValue();
+      ieee154e_vars.radioOnInit=radiotimer_getValue();
       ieee154e_vars.radioOnThisSlot=TRUE;
       radio_rxNow();
       ieee154e_vars.singleChannelChanged = FALSE;
@@ -627,7 +627,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       radio_rfOff();
       
       // compute radio duty cycle
-      ieee154e_vars.radioOnTics += (radio_getTimerValue()-ieee154e_vars.radioOnInit);
+      ieee154e_vars.radioOnTics += (radiotimer_getValue()-ieee154e_vars.radioOnInit);
 
       // toss the IEs
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,lenIE);
@@ -900,7 +900,7 @@ port_INLINE void activity_ti1ORri1() {
                ieee154e_vars.numOfSleepSlots = schedule_getFrameLength()+ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset; 
           }
           
-          radio_setTimerPeriod(TsSlotDuration*(ieee154e_vars.numOfSleepSlots));
+          radiotimer_setPeriod(TsSlotDuration*(ieee154e_vars.numOfSleepSlots));
            
           //increase ASN by numOfSleepSlots-1 slots as at this slot is already incremented by 1
           for (i=0;i<ieee154e_vars.numOfSleepSlots-1;i++){
@@ -1049,7 +1049,7 @@ port_INLINE void activity_ti1ORri1() {
              }
          }
          // set the timer based on calcualted number of slots to skip
-         radio_setTimerPeriod(TsSlotDuration*(ieee154e_vars.numOfSleepSlots));
+         radiotimer_setPeriod(TsSlotDuration*(ieee154e_vars.numOfSleepSlots));
          
 #ifdef ADAPTIVE_SYNC
          // deal with the case when schedule multi slots
@@ -1108,7 +1108,7 @@ port_INLINE void activity_ti2() {
     // enable the radio in Tx mode. This does not send the packet.
     radio_txEnable();
 
-    ieee154e_vars.radioOnInit=radio_getTimerValue();
+    ieee154e_vars.radioOnInit=radiotimer_getValue();
     ieee154e_vars.radioOnThisSlot=TRUE;
     // change state
     changeState(S_TXDATAREADY);
@@ -1197,7 +1197,7 @@ port_INLINE void activity_ti5(PORT_RADIOTIMER_WIDTH capturedTime) {
 #endif
     // turn off the radio
     radio_rfOff();
-    ieee154e_vars.radioOnTics+=(radio_getTimerValue()-ieee154e_vars.radioOnInit);
+    ieee154e_vars.radioOnTics+=(radiotimer_getValue()-ieee154e_vars.radioOnInit);
    
     // record the captured time
     ieee154e_vars.lastCapturedTime = capturedTime;
@@ -1257,7 +1257,7 @@ port_INLINE void activity_ti6() {
 #endif
    
     //caputre init of radio for duty cycle calculation
-    ieee154e_vars.radioOnInit=radio_getTimerValue();
+    ieee154e_vars.radioOnInit=radiotimer_getValue();
     ieee154e_vars.radioOnThisSlot=TRUE;
    
     // change state
@@ -1356,7 +1356,7 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
     // turn off the radio
     radio_rfOff();
     //compute tics radio on.
-    ieee154e_vars.radioOnTics+=(radio_getTimerValue()-ieee154e_vars.radioOnInit);
+    ieee154e_vars.radioOnTics+=(radiotimer_getValue()-ieee154e_vars.radioOnInit);
    
     // record the captured time
     ieee154e_vars.lastCapturedTime = capturedTime;
@@ -1492,7 +1492,7 @@ port_INLINE void activity_ri2() {
     // enable the radio in Rx mode. The radio does not actively listen yet.
     radio_rxEnable();
 #endif
-    ieee154e_vars.radioOnInit=radio_getTimerValue();
+    ieee154e_vars.radioOnInit=radiotimer_getValue();
     ieee154e_vars.radioOnThisSlot=TRUE;
        
     // change state
@@ -1578,7 +1578,7 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
 #endif
    // turn off the radio
    radio_rfOff();
-   ieee154e_vars.radioOnTics+=radio_getTimerValue()-ieee154e_vars.radioOnInit;
+   ieee154e_vars.radioOnTics+=radiotimer_getValue()-ieee154e_vars.radioOnInit;
    // get a buffer to put the (received) data in
    ieee154e_vars.dataReceived = openqueue_getFreePacketBuffer(COMPONENT_IEEE802154E);
    if (ieee154e_vars.dataReceived==NULL) {
@@ -1854,7 +1854,7 @@ port_INLINE void activity_ri6() {
    
     // enable the radio in Tx mode. This does not send that packet.
     radio_txEnable();
-    ieee154e_vars.radioOnInit=radio_getTimerValue();
+    ieee154e_vars.radioOnInit=radiotimer_getValue();
     ieee154e_vars.radioOnThisSlot=TRUE;
     // change state
     changeState(S_TXACKREADY);
@@ -2188,8 +2188,8 @@ void synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived) {
    PORT_RADIOTIMER_WIDTH currentValue;
    
    // record the current timer value and period
-   currentValue                   =  radio_getTimerValue();
-   currentPeriod                  =  radio_getTimerPeriod();
+   currentValue                   =  radiotimer_getValue();
+   currentPeriod                  =  radiotimer_getPeriod();
    
    // calculate new period
    timeCorrection                 =  (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)timeReceived - (PORT_SIGNED_INT_WIDTH)TsTxOffset);
@@ -2216,7 +2216,7 @@ void synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived) {
    }
    
    // resynchronize by applying the new period
-   radio_setTimerPeriod(newPeriod);
+   radiotimer_setPeriod(newPeriod);
 #ifdef ADAPTIVE_SYNC
    // indicate time correction to adaptive sync module
    adaptive_sync_indicateTimeCorrection(timeCorrection,ieee154e_vars.dataReceived->l2_nextORpreviousHop);
@@ -2252,11 +2252,11 @@ void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
    PORT_RADIOTIMER_WIDTH currentPeriod;
    
    // calculate new period
-   currentPeriod                  =  radio_getTimerPeriod();
+   currentPeriod                  =  radiotimer_getPeriod();
    newPeriod                      =  (PORT_RADIOTIMER_WIDTH)((PORT_SIGNED_INT_WIDTH)currentPeriod+timeCorrection);
 
    // resynchronize by applying the new period
-   radio_setTimerPeriod(newPeriod);
+   radiotimer_setPeriod(newPeriod);
    
    // reset the de-synchronization timeout
    ieee154e_vars.deSyncTimeout    = DESYNCTIMEOUT;
@@ -2448,7 +2448,7 @@ void endSlot() {
    
    // compute the duty cycle if radio has been turned on
    if (ieee154e_vars.radioOnThisSlot==TRUE){  
-      ieee154e_vars.radioOnTics+=(radio_getTimerValue()-ieee154e_vars.radioOnInit);
+      ieee154e_vars.radioOnTics+=(radiotimer_getValue()-ieee154e_vars.radioOnInit);
    }
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
    radiotimer_cancel(ACTION_ALL_RADIOTIMER_INTERRUPT);
@@ -2462,7 +2462,7 @@ void endSlot() {
    
    //computing duty cycle.
    ieee154e_stats.numTicsOn+=ieee154e_vars.radioOnTics;//accumulate and tics the radio is on for that window
-   ieee154e_stats.numTicsTotal+=radio_getTimerPeriod();//increment total tics by timer period.
+   ieee154e_stats.numTicsTotal+=radiotimer_getPeriod();//increment total tics by timer period.
 
    if (ieee154e_stats.numTicsTotal>DUTY_CYCLE_WINDOW_LIMIT){
       ieee154e_stats.numTicsTotal = ieee154e_stats.numTicsTotal>>1;
