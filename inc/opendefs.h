@@ -54,6 +54,12 @@ enum {
    ADDR_ANYCAST                        = 6,
 };
 
+// type of timer
+typedef enum {
+   TIME_MS,
+   TIME_TICS,
+} time_type_t;
+
 enum {
    OW_LITTLE_ENDIAN                    = TRUE,
    OW_BIG_ENDIAN                       = FALSE,

@@ -36,12 +36,6 @@ typedef enum {
    TIMER_ONESHOT,
 } timer_type_t;
 
-/*the time can be in tics or in ms*/
-typedef enum {
-   TIME_MS,
-   TIME_TICS,
-} time_type_t;
-
 typedef struct {
    uint32_t             period_ticks;       // total number of clock ticks
    PORT_TIMER_WIDTH     ticks_remaining;    // ticks remaining before elapses

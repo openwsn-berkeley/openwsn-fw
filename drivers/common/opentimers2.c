@@ -29,7 +29,7 @@ void opentimers2_timer_callback(void);
 
 Initializes data structures and hardware timer.
  */
-void opentimer2_init(){
+void opentimers2_init(){
     // initialize local variables
     memset(&opentimers2_vars,0,sizeof(opentimers2_vars_t));
     // set callback for sctimer module
@@ -41,7 +41,7 @@ void opentimer2_init(){
 
 create a timer by reserving an Id for the timer.
  */
-opentimer2_id_t opentimer2_create(void){
+opentimers2_id_t opentimers2_create(void){
     uint8_t id;
     for (id=0;id<MAX_NUM_TIMERS;id++){
         if (opentimers2_vars.timersBuf[id].isUsed==FALSE){
@@ -67,10 +67,10 @@ can't be called firstly after the timer is created.
 \param uint_type the unit type of this schedule: ticks or ms
 \param cb when this scheduled timer fired, call this callback function.
  */
-void opentimer2_scheduleRelative(opentimer2_id_t     id, 
-                                 uint32_t            duration,
-                                 uint_type_t         uint_type, 
-                                 opentimers2_cbt     cb){
+void opentimers2_scheduleRelative(opentimers2_id_t    id, 
+                                  uint32_t            duration,
+                                  time_type_t         uint_type, 
+                                  opentimers2_cbt     cb){
     uint8_t  i;
     uint8_t idToSchedule;
     uint32_t durationTicks;
@@ -133,11 +133,11 @@ to lastCompareValue + reference.
 \param uint_type the unit type of this schedule: ticks or ms
 \param cb when this scheduled timer fired, call this callback function.
  */
-void opentimer2_scheduleAbsolute(opentimer2_id_t     id, 
-                                 uint32_t            duration, 
-                                 uint32_t            reference , 
-                                 uint_type_t         uint_type, 
-                                 opentimers2_cbt     cb){
+void opentimers2_scheduleAbsolute(opentimers2_id_t    id, 
+                                  uint32_t            duration, 
+                                  uint32_t            reference , 
+                                  time_type_t         uint_type, 
+                                  opentimers2_cbt     cb){
     uint8_t  i;
     uint8_t idToSchedule;
     uint32_t durationTicks;
@@ -197,7 +197,7 @@ isrunning as false. The timer may be recover later.
 
 \param id the timer id
  */
-void opentimer2_cancel(opentimer2_id_t id){
+void opentimers2_cancel(opentimers2_id_t id){
     opentimers2_vars.timersBuf[id].isrunning = FALSE;
     opentimers2_vars.timersBuf[id].callback  = NULL;
 }
@@ -211,7 +211,7 @@ Reset the whole entry of given timer including the id.
 
 \returns False if the given can't be found or return Success
  */
-bool opentimer2_destroy(opentimer2_id_t id){
+bool opentimers2_destroy(opentimers2_id_t id){
     if (id<MAX_NUM_TIMERS){
         memset(&opentimers2_vars.timersBuf[id],0,sizeof(opentimers2_t));
         return TRUE;
@@ -227,8 +227,17 @@ bool opentimer2_destroy(opentimer2_id_t id){
 
 \returns the current counter value.
  */
-uint32_t opentimer2_getValue(opentimer2_id_t id){
+uint32_t opentimers2_getValue(opentimers2_id_t id){
     return sctimer_readCounter();
+}
+
+/**
+\brief get the currentTimeout variable of opentimer2.
+
+\returns currentTimeout.
+ */
+uint32_t opentimers2_getCurrentTimeout(){
+    return opentimers2_vars.currentTimeout;
 }
 
 // ========================== callback ========================================
@@ -260,7 +269,7 @@ void opentimers2_timer_callback(void){
             opentimers2_vars.timersBuf[i].isrunning           = FALSE;
             opentimers2_vars.timersBuf[i].lastCompareValue    = opentimers2_vars.timersBuf[i].currentCompareValue;
             opentimers2_vars.timersBuf[i].hasExpired          = FALSE;
-            opentimers2_vars.timersBuf[i].callback(i);
+            opentimers2_vars.timersBuf[i].callback();
         }
     }
       
