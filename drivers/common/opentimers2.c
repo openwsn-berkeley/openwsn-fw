@@ -240,6 +240,15 @@ uint32_t opentimers2_getCurrentTimeout(){
     return opentimers2_vars.currentTimeout;
 }
 
+/**
+\brief is the given timer running?
+
+\returns isRunning variable.
+ */
+bool opentimers2_isRunning(opentimers2_id_t id){
+    return opentimers2_vars.timersBuf[id].isrunning;
+}
+
 // ========================== callback ========================================
 
 /**

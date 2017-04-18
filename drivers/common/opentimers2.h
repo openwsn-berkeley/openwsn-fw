@@ -61,9 +61,10 @@ void             opentimers2_scheduleAbsolute(opentimers2_id_t    id,
                                               opentimers2_cbt     cb);
 void             opentimers2_cancel(opentimers2_id_t id);
 bool             opentimers2_destroy(opentimers2_id_t id);
+
 uint32_t         opentimers2_getValue(opentimers2_id_t id);
 uint32_t         opentimers2_getCurrentTimeout();
-
+bool             opentimers2_isRunning(opentimers2_id_t id);
 /**
 \}
 \}

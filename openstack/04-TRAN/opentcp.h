@@ -8,7 +8,7 @@
 \{
 */
 
-#include "opentimers.h"
+#include "opentimers2.h"
 
 //=========================== define ==========================================
 
@@ -112,7 +112,7 @@ typedef struct {
    OpenQueueEntry_t*    dataToSend;
    OpenQueueEntry_t*    dataReceived;
    bool                 timerStarted;
-   opentimer_id_t       timerId;
+   opentimers2_id_t     timerId;
 } tcp_vars_t;
 
 //=========================== prototypes ======================================

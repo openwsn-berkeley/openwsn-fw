@@ -8,7 +8,7 @@
 \{
 */
 
-#include "opentimers.h"
+#include "opentimers2.h"
 
 //=========================== define ==========================================
 
@@ -19,7 +19,7 @@
 //=========================== variables =======================================
 
 typedef struct {
-   opentimer_id_t       timerId;  ///< periodic timer which triggers transmission
+   opentimers2_id_t     timerId;  ///< periodic timer which triggers transmission
    uint16_t             counter;  ///< incrementing counter which is written into the packet
    uint16_t              period;  ///< uinject packet sending period>
 } uinject_vars_t;

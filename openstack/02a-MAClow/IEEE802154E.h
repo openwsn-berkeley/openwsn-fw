@@ -10,6 +10,7 @@
 
 #include "opendefs.h"
 #include "board.h"
+#include "opentimers2.h"
 #include "schedule.h"
 #include "processIE.h"
 
@@ -251,7 +252,9 @@ typedef struct {
    // time correction
    int16_t                   timeCorrection;          // store the timeCorrection, prepend and retrieve it inside of frame header
    
-   uint16_t                  slotDuration;            // 
+   uint16_t                  slotDuration;            // duration of slot
+   opentimers2_id_t          timerId;                 // id of timer used for implementing TSCH slot FSM 
+   uint32_t                  startOfSlotRerference;   // the time refer to the beginning of slot
 } ieee154e_vars_t;
 
 BEGIN_PACK
