@@ -44,6 +44,7 @@ typedef struct {
    opentimers2_t        timersBuf[MAX_NUM_TIMERS];
    bool                 running;
    uint32_t             currentTimeout; // current timeout, in ticks
+   uint32_t             lastTimeout;    // last timeout, in ticks. This is the reference time to calculate the next to be expired timer.
 } opentimers2_vars_t;
 
 //=========================== prototypes ======================================

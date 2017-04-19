@@ -176,8 +176,8 @@ void opentimers2_scheduleAbsolute(opentimers2_id_t    id,
     timerGap = MAX_TICKS_NUMBER;
     for (i=0;i<MAX_NUM_TIMERS;i++){
         if (opentimers2_vars.timersBuf[i].isrunning){
-            if (opentimers2_vars.timersBuf[i].currentCompareValue - opentimers2_vars.currentTimeout < timerGap){
-                timerGap     = opentimers2_vars.timersBuf[i].currentCompareValue-opentimers2_vars.currentTimeout;
+            if (opentimers2_vars.timersBuf[i].currentCompareValue - opentimers2_vars.lastTimeout < timerGap){
+                timerGap     = opentimers2_vars.timersBuf[i].currentCompareValue-opentimers2_vars.lastTimeout;
                 idToSchedule = i;
             }
         }
@@ -281,12 +281,14 @@ void opentimers2_timer_callback(void){
             opentimers2_vars.timersBuf[i].callback();
         }
     }
+    // update lastTimeout
+    opentimers2_vars.lastTimeout    = opentimers2_vars.currentTimeout;
       
     // 3. find the next timer to be fired
     for (i=0;i<MAX_NUM_TIMERS;i++){
         if (opentimers2_vars.timersBuf[i].isrunning==TRUE){
-            if (opentimers2_vars.timersBuf[i].currentCompareValue-opentimers2_vars.currentTimeout<timerGap){
-                timerGap     = opentimers2_vars.timersBuf[i].currentCompareValue-opentimers2_vars.currentTimeout;
+            if (opentimers2_vars.timersBuf[i].currentCompareValue-opentimers2_vars.lastTimeout<timerGap){
+                timerGap     = opentimers2_vars.timersBuf[i].currentCompareValue-opentimers2_vars.lastTimeout;
                 idToSchedule = i;
             }
         }
