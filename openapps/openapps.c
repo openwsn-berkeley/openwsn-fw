@@ -29,6 +29,9 @@
 //=========================== private =========================================
 
 void openapps_init(void) {
+   //-- 04-TRAN
+   opencoap_init();     // initialize before any of the CoAP applications
+
    // CoAP
    c6t_init();
    cinfo_init();
