@@ -237,7 +237,7 @@ owerror_t iphc_prependIPv6Header(
    OpenQueueEntry_t*    msg,
    uint8_t              tf,
    uint32_t             value_flowLabel,
-   bool                 nh,
+   uint8_t              nh,
    uint8_t              value_nextHeader,
    uint8_t              hlim,
    uint8_t              value_hopLimit,

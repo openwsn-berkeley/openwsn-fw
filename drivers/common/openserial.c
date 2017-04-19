@@ -58,6 +58,9 @@ void inputHdlcOpen(void);
 void inputHdlcWrite(uint8_t b);
 void inputHdlcClose(void);
 
+// sniffer
+void sniffer_setListeningChannel(uint8_t channel);
+
 //=========================== public ==========================================
 
 //===== admin
