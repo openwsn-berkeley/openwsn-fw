@@ -252,7 +252,7 @@ void  schedule_getSlotInfo(
 /**
 \brief Get the maximum number of active slots.
 
-\param[out] maximum number of active slots
+\returns maximum number of active slots
 */
 uint16_t  schedule_getMaxActiveSlots() {
    return schedule_vars.maxActiveSlots;

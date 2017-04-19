@@ -1026,7 +1026,6 @@ uint8_t iphc_retrieveIphcHeader(open_addr_t* temp_addr_16b,
 
 \param[in,out] msg             The message to prepend the header to.
 \param[in]     nextheader      The next header value to use.
-\param[in]     nh              Whether the next header is inline or compressed.
 \param[in]     rpl_option      The RPL option to include.
 */
 void iphc_prependIPv6HopByHopHeader(
@@ -1061,11 +1060,9 @@ void iphc_prependIPv6HopByHopHeader(
 /**
 \brief Retrieve an IPv6 hop-by-hop header from a message.
 
-\param[in,out] msg             The message to retrieve the header from.
-\param[out]    hopbyhop_header Pointer to the structure to hold the retrieved
-   hop-by-hop option.
-\param[out]    rpl_option      Pointer to the structure to hold the retrieved
-   RPL option.
+\param[in,out] msg        The message to retrieve the header from.
+\param[out]    rpl_option Pointer to the structure to hold the retrieved RPL option.
+\returns       the header length in bytes.
 */
 uint8_t iphc_retrieveIPv6HopByHopHeader(
       OpenQueueEntry_t*      msg,
