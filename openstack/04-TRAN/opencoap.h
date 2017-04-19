@@ -37,6 +37,9 @@ static const uint8_t ipAddr_ringmaster[] = {0xbb, 0xbb, 0x00, 0x00, 0x00, 0x00, 
 
 #define COAP_VERSION                   1
 
+// maximum number of parallel block transfers
+#define COAP_BLOCK_TRANSFERS            1
+
 typedef enum {
    COAP_TYPE_CON                       = 0,
    COAP_TYPE_NON                       = 1,
@@ -152,6 +155,18 @@ typedef struct {
    uint8_t               delayCounter;
    uint16_t              messageID;
 } opencoap_vars_t;
+
+// TODO: should we try to save computation time or memory?
+// save time: keep uris and clientAddr in block_transfers struct, compare each time a request comes in
+// save memory: keep hash of uris and clientAddr in block_transfers struct, hash uris and clientAddr of each request, and compare the hashes (uint32_t)
+typedef struct {
+   open_addr_t    clientAddr;
+   uint8_t        uriPath[32];
+   uint8_t        uriPathLen;
+   uint8_t*       data;
+   uint16_t       dataLen;
+   bool           ongoing;
+} opencoap_block_transfer_t;
 
 //=========================== prototypes ======================================
 

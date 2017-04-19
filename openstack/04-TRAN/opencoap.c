@@ -14,8 +14,13 @@
 //=========================== variables =======================================
 
 opencoap_vars_t opencoap_vars;
+opencoap_block_transfer_t opencoap_block_transfers[COAP_BLOCK_TRANSFERS];
 
 //=========================== prototype =======================================
+
+void opencoap_dropBlockTransfer(opencoap_block_transfer_t* bt_ptr);
+opencoap_block_transfer_t* opencoap_lookupBlockTransfer(OpenQueueEntry_t* msg, coap_option_iht* coap_options, uint8_t p0_idx, uint8_t p1_idx);
+opencoap_block_transfer_t* opencoap_createBlockTransfer(OpenQueueEntry_t* msg, coap_option_iht* coap_options, uint8_t p0_idx, uint8_t p1_idx);
 
 //=========================== public ==========================================
 
@@ -54,9 +59,18 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    // local variables passed to the handlers (with msg)
    coap_header_iht           coap_header;
    coap_option_iht           coap_options[MAX_COAP_OPTIONS];
+   uint8_t                   b2_idx = MAX_COAP_OPTIONS; // index of Block2 option in coap_options
    uint8_t                   uripath0_idx = MAX_COAP_OPTIONS;
    uint8_t                   uripath1_idx = MAX_COAP_OPTIONS;
-   
+   uint8_t                   uripath2_idx = MAX_COAP_OPTIONS;
+   opencoap_block_transfer_t* bt_ptr = NULL;
+   bool                      response_too_big = FALSE;
+   bool                      reused_packet = FALSE;
+   uint32_t                  b2_blockNumber = 0;
+   bool                      b2_moreBlocks;
+   uint16_t                  b2_blockSize;
+   uint8_t                   max_blockNumber;
+
    // take ownership over the received packet
    msg->owner                = COMPONENT_OPENCOAP;
    
@@ -116,12 +130,19 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
       coap_options[i].pValue      = &(msg->payload[index]);
       index                      += coap_options[i].length; //includes length as well
 
-      switch(coap_options[i]) {
+      switch(coap_options[i].type) {
          case COAP_OPTION_NUM_URIPATH:
             if (uripath0_idx == MAX_COAP_OPTIONS) {
                uripath0_idx = i;
             } else if (uripath1_idx == MAX_COAP_OPTIONS) {
                uripath1_idx = i;
+            } else if (uripath2_idx == MAX_COAP_OPTIONS) {
+               uripath2_idx = i;
+            }
+            break;
+         case COAP_OPTION_NUM_BLOCK2:
+            if (b2_idx == MAX_COAP_OPTIONS) {
+               b2_idx = i;
             }
             break;
          default:
@@ -243,9 +264,120 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    //=== step 3. ask the resource to prepare response
    
    if (found==TRUE) {
-      
-      // call the resource's callback
-      outcome = temp_desc->callbackRx(msg,&coap_header,&coap_options[0]);
+      response_too_big = FALSE;
+
+      // parse Block2 option
+      if ( b2_idx != MAX_COAP_OPTIONS ) {
+         if (coap_options[b2_idx].length == 0) {
+            b2_blockNumber = 0;
+         } else if (coap_options[b2_idx].length == 1) {
+            b2_blockNumber = (uint8_t)(coap_options[b2_idx].pValue[0]);
+         } else if (coap_options[b2_idx].length == 2) {
+            b2_blockNumber = (uint8_t)(coap_options[b2_idx].pValue[0]) << 8;
+            b2_blockNumber |= (uint8_t)(coap_options[b2_idx].pValue[1]);
+         } else if (coap_options[b2_idx].length == 3) {
+            b2_blockNumber = (uint8_t)(coap_options[b2_idx].pValue[0]) << 16;
+            b2_blockNumber |= (uint8_t)(coap_options[b2_idx].pValue[1]) << 8;
+            b2_blockNumber |= (uint8_t)(coap_options[b2_idx].pValue[2]);
+         }
+
+         b2_moreBlocks = (b2_blockNumber & 0x8) > 0;
+         b2_blockSize = 1 << ((b2_blockNumber & 0x7) + 4); // 16 B -- 1 kB, 0b111 is reserved
+         b2_blockSize = b2_blockSize>64 ? 64 : b2_blockSize;
+         b2_blockNumber = b2_blockNumber >> 4;
+      }
+
+      // lookup (client, URI) in block_transfer
+      bt_ptr = opencoap_lookupBlockTransfer(msg, coap_options, uripath0_idx, uripath1_idx);
+
+      // check if we should forget a previous block transfer
+      if ( b2_idx == MAX_COAP_OPTIONS && bt_ptr != NULL ) {
+         opencoap_dropBlockTransfer(bt_ptr);
+         bt_ptr = NULL;
+      }
+
+      // we need to generate data if we can't load it from bt_ptr
+      if ( bt_ptr == NULL ) {
+         // create response
+         outcome = temp_desc->callbackRx(msg,&coap_header,&coap_options[0]);
+
+         response_too_big = msg->length > b2_blockSize; // this could also be up to roughly 71 Bytes
+         reused_packet = (msg->payload >= &(msg->packet[0])) && (msg->payload - &(msg->packet[0]) < 127); //msg->payload points into msg->packet
+
+         if ( response_too_big ) {
+            // create block_transfer
+            bt_ptr = opencoap_createBlockTransfer(msg, &(coap_options[0]), uripath0_idx, uripath1_idx);
+            if (bt_ptr == NULL) {
+               // TODO: print error
+            }
+         }
+      } else {
+         msg->payload = bt_ptr->data;
+         msg->length = bt_ptr->dataLen;
+         response_too_big = TRUE; // TRUE, because the complete payload is bigger than a block
+         reused_packet = FALSE; // FALSE, because bt_ptr->data doesn't point to msg->packet
+      }
+
+      // assert: msg->payload points to the complete data that we want to send
+
+      // assert that we don't read past the generated data if the block number is too high
+      max_blockNumber = msg->length / b2_blockSize;
+      if ( b2_blockNumber > max_blockNumber ) {
+         // TODO: HTTP would respond with 416 Range Not Satisfiable
+         // TODO: change return type of coapApp_receive to coap_code_t
+         outcome = E_FAIL;
+         i=0;
+         b2_moreBlocks = FALSE;
+      } else if ( b2_blockNumber == max_blockNumber ) {
+         i = msg->length % b2_blockSize;
+         b2_moreBlocks = FALSE;
+      } else {
+         i = b2_blockSize;
+         b2_moreBlocks = TRUE;
+      }
+      // copy i bytes from msg->payload[blockNumber*blockSize] into msg->packet[127-i]
+      msg->payload = msg->payload + b2_blockNumber*b2_blockSize;
+      msg->length = i;
+      // if msg->payload does not point into the second half of msg->packet, copy the data there
+      if (msg->payload < &msg->packet[63] || msg->payload >= &msg->packet[127]) {
+         // like memcpy but handles overlapping memory
+         memmove(&msg->packet[127-i], msg->payload, msg->length);
+         msg->payload = &msg->packet[127-i];
+      }
+
+      packetfunctions_reserveHeaderSize(msg, 1);
+      msg->payload[0] = COAP_PAYLOAD_MARKER;
+
+      if ( b2_idx != MAX_COAP_OPTIONS || response_too_big ) {
+         // add block option to response
+         b2_blockNumber = b2_blockNumber << 4;
+         b2_blockNumber |= (b2_moreBlocks?1:0) << 3;
+         for (i=4; i<12; i++) {
+            if (b2_blockSize & (1<<i)) {
+               b2_blockNumber |= i-4;
+               break;
+            }
+         }
+         if (b2_blockNumber == 0) {
+            // empty option
+         } else if (b2_blockNumber <= 0xff) {
+            packetfunctions_reserveHeaderSize(msg, 1);
+            msg->payload[0] = b2_blockNumber;
+         } else if (b2_blockNumber <= 0xffff) {
+            packetfunctions_reserveHeaderSize(msg, 2);
+            msg->payload[0] = (b2_blockNumber & 0xff00) >> 8;
+            msg->payload[1] = b2_blockNumber & 0xff;
+         } else {
+            packetfunctions_reserveHeaderSize(msg, 3);
+            msg->payload[0] = (b2_blockNumber & 0xff0000) >> 16;
+            msg->payload[1] = (b2_blockNumber & 0xff00) >> 8;
+            msg->payload[2] = b2_blockNumber & 0xff;
+         }
+         packetfunctions_reserveHeaderSize(msg, 2);
+         msg->payload[0] = (13<<4) | (b2_blockNumber == 0 ? 0 : (b2_blockNumber <= 0xff ? 1 : (b2_blockNumber <= 0xffff ? 2 : 3))); // option delta, option length
+         msg->payload[1] = COAP_OPTION_NUM_BLOCK2 - 13;
+
+      }
    } else {
       // reset packet payload (DO NOT DELETE, we will reuse same buffer for response)
       msg->payload                     = &(msg->packet[127]);
@@ -504,3 +636,89 @@ owerror_t opencoap_send(
 }
 
 //=========================== private =========================================
+
+void opencoap_dropBlockTransfer(opencoap_block_transfer_t* bt_ptr) {
+   bt_ptr->uriPathLen = 0;
+   bt_ptr->data = NULL;
+   bt_ptr->dataLen = 0;
+   bt_ptr->ongoing = FALSE;
+}
+
+opencoap_block_transfer_t* opencoap_lookupBlockTransfer(OpenQueueEntry_t* msg, coap_option_iht* opt, uint8_t p0_idx, uint8_t p1_idx) {
+   uint8_t i;
+   opencoap_block_transfer_t* bt_ptr = NULL;
+
+   for (i=0; i<COAP_BLOCK_TRANSFERS; i++) {
+      bt_ptr = &opencoap_block_transfers[i];
+      if (
+            packetfunctions_sameAddress(&(bt_ptr->clientAddr),
+                                        &(msg->l3_sourceAdd))
+         ) {
+         // same address
+         if (
+               p0_idx != MAX_COAP_OPTIONS &&
+               bt_ptr->uriPathLen == 1+opt[p0_idx].length &&
+               memcmp(opt[p0_idx].pValue, &(bt_ptr->uriPath[1]), opt[p0_idx].length) == 0
+            ) {
+            // same uri (/foo)
+            return &(opencoap_block_transfers[i]);
+         } else if (
+               p0_idx != MAX_COAP_OPTIONS &&
+               p1_idx != MAX_COAP_OPTIONS &&
+               bt_ptr->uriPathLen == 1+opt[p0_idx].length+1+opt[p1_idx].length &&
+               memcmp(opt[p0_idx].pValue, &(bt_ptr->uriPath[1]), opt[p0_idx].length) == 0 &&
+               memcmp(opt[p1_idx].pValue, &(bt_ptr->uriPath[1+opt[p0_idx].length+1]), opt[p0_idx].length) == 0
+            )
+            // same uri (/foo/bar)
+            return &(opencoap_block_transfers[i]);
+      } 
+   }
+   return NULL;
+}
+
+// create an entry in the block transfer array from an incoming msg
+opencoap_block_transfer_t* opencoap_createBlockTransfer(OpenQueueEntry_t* msg, coap_option_iht* coap_options, uint8_t p0_idx, uint8_t p1_idx) {
+   uint8_t i;
+   uint8_t p0_len = 0;
+   uint8_t p1_len = 0;
+   opencoap_block_transfer_t* bt_ptr;
+
+   for (i=0; i<COAP_BLOCK_TRANSFERS; i++) {
+      bt_ptr = &(opencoap_block_transfers[i]);
+
+      if (bt_ptr->ongoing) {
+         continue;
+      }
+      // copy client address
+      bt_ptr->clientAddr.type = msg->l3_sourceAdd.type;
+      memcpy(&bt_ptr->clientAddr.addr_128b[0], &msg->l3_sourceAdd.addr_128b[0], LENGTH_ADDR128b);
+      if (p0_idx != MAX_COAP_OPTIONS) {
+         p0_len = coap_options[p0_idx].length;
+         bt_ptr->uriPath[0] = '/';
+         // copy first uri path segment
+         if (1+p0_len >= 32) {
+            return NULL;
+         }
+         memcpy(&(bt_ptr->uriPath[1]), coap_options[p0_idx].pValue, p0_len);
+         if (p1_idx != MAX_COAP_OPTIONS) {
+            p1_len = coap_options[p1_idx].length;
+            bt_ptr->uriPath[1+p0_len] = '/';
+            // copy second uri path segment if it exists
+            if (1+p0_len+1+p1_len > 32) {
+               return NULL;
+            }
+            memcpy(&(bt_ptr->uriPath[1+p0_len+1]), coap_options[p1_idx].pValue, p1_len);
+         }
+      }
+      bt_ptr->uriPathLen = 1 + p0_len + (p1_len > 0 ? 1 : 0) + p1_len;
+
+      bt_ptr->data = msg->payload;
+      bt_ptr->dataLen = msg->length;
+      bt_ptr->ongoing = TRUE;
+
+      return bt_ptr;
+   }
+   return NULL;
+}
+
+// vim: ts=3 sw=3
