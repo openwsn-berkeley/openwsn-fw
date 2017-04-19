@@ -13,11 +13,21 @@
 
 //=========================== variables =======================================
 
+openudp_vars_t openudp_vars;
+
 //=========================== prototypes ======================================
 
 //=========================== public ==========================================
 
 void openudp_init() {
+   // initialize the resource linked list
+   openudp_vars.resources = NULL;
+}
+
+void openudp_register(udp_resource_desc_t* desc) {
+   // chain the new resource to head of resource list
+   desc->next = openudp_vars.resources;
+   openudp_vars.resources = desc;
 }
 
 owerror_t openudp_send(OpenQueueEntry_t* msg) {
