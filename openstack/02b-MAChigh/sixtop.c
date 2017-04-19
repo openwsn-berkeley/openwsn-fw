@@ -144,13 +144,6 @@ void sixtop_init() {
     );
     
     sixtop_vars.timeoutTimerId      =  opentimers2_create();
-    opentimers2_scheduleAbsolute(
-        sixtop_vars.timeoutTimerId,
-        SIX2SIX_TIMEOUT_MS,
-        opentimers2_getValue(sixtop_vars.timeoutTimerId),
-        TIME_MS,
-        sixtop_timeout_timer_cb
-    );
 }
 
 void sixtop_setKaPeriod(uint16_t kaPeriod) {
@@ -459,12 +452,6 @@ void task_sixtopNotifSendDone() {
             // not busy sending EB anymore
             sixtop_vars.busySendingEB = FALSE;
             
-            opentimers2_scheduleRelative(
-                sixtop_vars.ebSendingTimerId,
-                (sixtop_vars.ebPeriod-EBPERIOD_RANDOM_RANG+(openrandom_get16b()%(2*EBPERIOD_RANDOM_RANG))),
-                TIME_MS,
-                sixtop_sendingEb_timer_cb
-            );
          } else {
             // this is a KA
             
@@ -474,15 +461,6 @@ void task_sixtopNotifSendDone() {
          // discard packets
          openqueue_freePacketBuffer(msg);
          
-         // restart a random timer
-         sixtop_vars.periodMaintenance = 872+(openrandom_get16b()&0xff);
-         opentimers2_scheduleAbsolute(
-             sixtop_vars.maintenanceTimerId,
-             sixtop_vars.periodMaintenance,
-             opentimers2_getValue(sixtop_vars.maintenanceTimerId),
-             TIME_MS,
-             sixtop_maintenance_timer_cb
-         );
          break;
       
       case COMPONENT_SIXTOP_RES:
@@ -690,6 +668,15 @@ has fired. This timer is set to fire every second, on average.
 The body of this function executes one of the MAC management task.
 */
 void timer_sixtop_management_fired(void) {
+  
+   sixtop_vars.periodMaintenance = 872+(openrandom_get16b()&0xff);
+   opentimers2_scheduleAbsolute(
+       sixtop_vars.maintenanceTimerId,
+       sixtop_vars.periodMaintenance,
+       opentimers2_getValue(sixtop_vars.maintenanceTimerId),
+       TIME_MS,
+       sixtop_maintenance_timer_cb
+   );
    
    sixtop_vars.mgtTaskCounter = (sixtop_vars.mgtTaskCounter+1)%MAINTENANCE_PERIOD;
    
