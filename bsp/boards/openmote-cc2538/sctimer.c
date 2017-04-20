@@ -12,6 +12,10 @@
 #include "debugpins.h"
 #include <headers/hw_ints.h>
 
+// ========================== define ==========================================
+
+#define TIMERLOOP_THRESHOLD 0xffffff     // 511 seconds @ 32768Hz clock
+
 // ========================== variable ========================================
 
 typedef struct {
@@ -45,7 +49,13 @@ void sctimer_set_callback(sctimer_cbt cb){
 */
 void sctimer_setCompare(uint32_t val){
     IntEnable(INT_SMTIM);
-    SleepModeTimerCompareSet(val);
+    if (SleepModeTimerCountGet() - val < TIMERLOOP_THRESHOLD){
+        // the timer is already late, schedule the ISR right now manually 
+        IntPendSet(INT_SMTIM);
+    } else {
+        // schedule the timer at val
+        SleepModeTimerCompareSet(val);
+    }
 }
 
 /**
