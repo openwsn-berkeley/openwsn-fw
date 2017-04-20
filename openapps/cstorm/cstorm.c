@@ -54,7 +54,7 @@ void cstorm_init(void) {
    //comment : not running by default
    cstorm_vars.period           = 6553; 
    
-   cstorm_vars.timerId          = opentimers2_create();
+   cstorm_vars.timerId          = opentimers2_create(0);
    opentimers2_scheduleAbsolute(
        cstorm_vars.timerId,
        cstorm_vars.period,

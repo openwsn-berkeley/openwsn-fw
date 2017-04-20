@@ -83,7 +83,7 @@ void icmpv6rpl_init() {
    
    icmpv6rpl_vars.dioPeriod                 = TIMER_DIO_TIMEOUT;
    dioPeriod                                = icmpv6rpl_vars.dioPeriod - 0x80 + (openrandom_get16b()&0xff);
-   icmpv6rpl_vars.timerIdDIO                = opentimers2_create();
+   icmpv6rpl_vars.timerIdDIO                = opentimers2_create(0);
    opentimers2_scheduleAbsolute(
        icmpv6rpl_vars.timerIdDIO,
        dioPeriod,
@@ -133,7 +133,7 @@ void icmpv6rpl_init() {
    
    icmpv6rpl_vars.daoPeriod                 = TIMER_DAO_TIMEOUT;
    daoPeriod                                = icmpv6rpl_vars.daoPeriod - 0x80 + (openrandom_get16b()&0xff);
-   icmpv6rpl_vars.timerIdDAO                = opentimers2_create();
+   icmpv6rpl_vars.timerIdDAO                = opentimers2_create(0);
    opentimers2_scheduleAbsolute(
        icmpv6rpl_vars.timerIdDAO,
        daoPeriod,

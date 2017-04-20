@@ -52,7 +52,7 @@ void cexample_init() {
    
    
    opencoap_register(&cexample_vars.desc);
-   cexample_vars.timerId    = opentimers2_create();
+   cexample_vars.timerId    = opentimers2_create(0);
    opentimers2_scheduleAbsolute(cexample_vars.timerId, 
                                 CEXAMPLEPERIOD, 
                                 opentimers2_getValue(cexample_vars.timerId), 

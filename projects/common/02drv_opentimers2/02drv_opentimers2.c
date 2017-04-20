@@ -24,9 +24,9 @@ radio and sync). When you run the application, you should see the LEDs
 
 //=========================== defines =========================================
 
-#define APP_DLY_TIMER0_ms   400
-#define APP_DLY_TIMER1_ms   800
-#define APP_DLY_TIMER2_ms  1600
+#define APP_DLY_TIMER0_ticks   16384    // half second @ 32kHz
+#define APP_DLY_TIMER1_ticks   16385    // a little bit more than half second @ 32kHz
+#define APP_DLY_TIMER2_ticks   32768    // one  second @ 32kHz
 
 //=========================== variables =======================================
 
@@ -57,30 +57,30 @@ int mote_main(void) {
     opentimers2_init();
    
     reference       = sctimer_readCounter();
-    app_vars.timer0 = opentimers2_create();
+    app_vars.timer0 = opentimers2_create(0);
     opentimers2_scheduleAbsolute(
         app_vars.timer0,       // timerId
-        APP_DLY_TIMER0_ms,     // duration
+        APP_DLY_TIMER0_ticks,     // duration
         reference,             // reference
-        TIME_MS,               // timetype
+        TIME_TICS,               // timetype
         cb_timer0              // callback
     );
    
-    app_vars.timer1 = opentimers2_create();
+    app_vars.timer1 = opentimers2_create(255);
     opentimers2_scheduleAbsolute(
         app_vars.timer1,       // timerId
-        APP_DLY_TIMER1_ms,     // duration
+        APP_DLY_TIMER1_ticks,     // duration
         reference,             // reference
-        TIME_MS,               // timetype
+        TIME_TICS,               // timetype
         cb_timer1              // callback
     );
    
-    app_vars.timer2 = opentimers2_create();
+    app_vars.timer2 = opentimers2_create(0);
     opentimers2_scheduleAbsolute(
         app_vars.timer2,       // timerId
-        APP_DLY_TIMER2_ms,     // duration
+        APP_DLY_TIMER2_ticks,     // duration
         reference,             // reference
-        TIME_MS,               // timetype
+        TIME_TICS,               // timetype
         cb_timer2              // callback
     );
    
@@ -96,8 +96,8 @@ void cb_timer0(void) {
     // re-schedule refer to previous scheduled value
     opentimers2_scheduleRelative(
         app_vars.timer0,       // timerId
-        APP_DLY_TIMER0_ms,     // duration
-        TIME_MS,               // timetype
+        APP_DLY_TIMER0_ticks,  // duration
+        TIME_TICS,             // timetype
         cb_timer0              // callback
     );
 }
@@ -107,8 +107,8 @@ void cb_timer1(void) {
     // re-schedule refer to previous scheduled value
     opentimers2_scheduleRelative(
         app_vars.timer1,       // timerId
-        APP_DLY_TIMER1_ms,     // duration
-        TIME_MS,               // timetype
+        APP_DLY_TIMER1_ticks,  // duration
+        TIME_TICS,             // timetype
         cb_timer1              // callback
     );
 }
@@ -118,8 +118,8 @@ void cb_timer2(void) {
     // re-schedule refer to previous scheduled value
     opentimers2_scheduleRelative(
         app_vars.timer2,       // timerId
-        APP_DLY_TIMER2_ms,     // duration
-        TIME_MS,               // timetype
+        APP_DLY_TIMER2_ticks,  // duration
+        TIME_TICS,             // timetype
         cb_timer2              // callback
     );
 }

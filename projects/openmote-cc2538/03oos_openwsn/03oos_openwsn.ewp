@@ -610,7 +610,7 @@
         <option>
           <name>OOCOutputFormat</name>
           <version>2</version>
-          <state>2</state>
+          <state>1</state>
         </option>
         <option>
           <name>OCOutputOverride</name>
@@ -618,7 +618,7 @@
         </option>
         <option>
           <name>OOCOutputFile</name>
-          <state>03oos_openwsn.bin</state>
+          <state>03oos_openwsn.hex</state>
         </option>
         <option>
           <name>OOCCommandLineProducer</name>
@@ -626,7 +626,7 @@
         </option>
         <option>
           <name>OOCObjCopyEnable</name>
-          <state>0</state>
+          <state>1</state>
         </option>
       </data>
     </settings>

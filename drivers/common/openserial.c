@@ -173,7 +173,7 @@ owerror_t openserial_printCritical(
     leds_error_blink();
     
     // schedule for the mote to reboot in 10s
-    id        = opentimers2_create();
+    id        = opentimers2_create(0);
     reference = opentimers2_getValue(id);
     opentimers2_scheduleAbsolute(
         id,                             // timerId

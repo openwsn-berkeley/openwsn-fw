@@ -35,6 +35,7 @@ typedef struct {
    bool                 isrunning;          // is running?
    bool                 isUsed;             // true when this entry is occupied
    bool                 hasExpired;         // in case there are more than one interrupt occur at same time
+   uint8_t              priority;           // high priority timer could take over the compare timer scheduled early than it for TIMERTHRESHOLD ticks.
    opentimers2_cbt      callback;           // function to call when elapses
 } opentimers2_t;
 
@@ -50,7 +51,7 @@ typedef struct {
 //=========================== prototypes ======================================
 
 void             opentimers2_init(void);
-opentimers2_id_t opentimers2_create(void);
+opentimers2_id_t opentimers2_create(uint8_t priority);
 void             opentimers2_scheduleRelative(opentimers2_id_t    id, 
                                               uint32_t            duration,
                                               time_type_t         uint_type, 
