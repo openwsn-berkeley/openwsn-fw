@@ -197,11 +197,11 @@ PORT_RADIOTIMER_WIDTH ieee154e_asnDiff(asn_t* someASN) {
 This function executes in ISR mode, when the new slot timer fires.
 */
 void isr_ieee154e_newSlot() {
-    ieee154e_vars.startOfSlotRerference = opentimers2_getCurrentTimeout();
+    ieee154e_vars.startOfSlotReference = opentimers2_getCurrentTimeout();
     opentimers2_scheduleAbsolute(
         ieee154e_vars.timerId,                  // timerId
         TsSlotDuration,                         // duration
-        ieee154e_vars.startOfSlotRerference,    // reference
+        ieee154e_vars.startOfSlotReference,     // reference
         TIME_TICS,                              // timetype
         isr_ieee154e_newSlot                    // callback
     );
@@ -310,7 +310,7 @@ void isr_ieee154e_timer() {
 This function executes in ISR mode.
 */
 void ieee154e_startOfFrame(PORT_RADIOTIMER_WIDTH capturedTime) {
-   uint32_t referenceTime = capturedTime - ieee154e_vars.startOfSlotRerference;
+   uint32_t referenceTime = capturedTime - ieee154e_vars.startOfSlotReference;
    if (ieee154e_vars.isSync==FALSE) {
      activity_synchronize_startOfFrame(referenceTime);
    } else {
@@ -359,7 +359,7 @@ void ieee154e_startOfFrame(PORT_RADIOTIMER_WIDTH capturedTime) {
 This function executes in ISR mode.
 */
 void ieee154e_endOfFrame(PORT_RADIOTIMER_WIDTH capturedTime) {
-   uint32_t referenceTime = capturedTime - ieee154e_vars.startOfSlotRerference;
+   uint32_t referenceTime = capturedTime - ieee154e_vars.startOfSlotReference;
    if (ieee154e_vars.isSync==FALSE) {
       activity_synchronize_endOfFrame(referenceTime);
    } else {
@@ -923,7 +923,7 @@ port_INLINE void activity_ti1ORri1() {
           opentimers2_scheduleAbsolute(
               ieee154e_vars.timerId,                            // timerId
               TsSlotDuration*(ieee154e_vars.numOfSleepSlots),   // duration
-              ieee154e_vars.startOfSlotRerference,              // reference
+              ieee154e_vars.startOfSlotReference,               // reference
               TIME_TICS,                                        // timetype
               isr_ieee154e_newSlot                              // callback
           );
@@ -1021,7 +1021,7 @@ port_INLINE void activity_ti1ORri1() {
             opentimers2_scheduleAbsolute(
                 ieee154e_vars.timerId,                            // timerId
                 DURATION_tt1,                                     // duration
-                ieee154e_vars.startOfSlotRerference,              // reference
+                ieee154e_vars.startOfSlotReference,               // reference
                 TIME_TICS,                                        // timetype
                 isr_ieee154e_timer                                // callback
             );
@@ -1050,7 +1050,7 @@ port_INLINE void activity_ti1ORri1() {
          opentimers2_scheduleAbsolute(
               ieee154e_vars.timerId,                            // timerId
               DURATION_rt1,                                     // duration
-              ieee154e_vars.startOfSlotRerference,              // reference
+              ieee154e_vars.startOfSlotReference,               // reference
               TIME_TICS,                                        // timetype
               isr_ieee154e_timer                                // callback
          );
@@ -1094,7 +1094,7 @@ port_INLINE void activity_ti1ORri1() {
          opentimers2_scheduleAbsolute(
               ieee154e_vars.timerId,                            // timerId
               TsSlotDuration*(ieee154e_vars.numOfSleepSlots),   // duration
-              ieee154e_vars.startOfSlotRerference,              // reference
+              ieee154e_vars.startOfSlotReference,               // reference
               TIME_TICS,                                        // timetype
               isr_ieee154e_newSlot                              // callback
          );
@@ -1133,7 +1133,7 @@ port_INLINE void activity_ti2() {
     opentimers2_scheduleAbsolute(
           ieee154e_vars.timerId,                            // timerId
           DURATION_tt2,                                     // duration
-          ieee154e_vars.startOfSlotRerference,              // reference
+          ieee154e_vars.startOfSlotReference,               // reference
           TIME_TICS,                                        // timetype
           isr_ieee154e_timer                                // callback
     );
@@ -1194,7 +1194,7 @@ port_INLINE void activity_ti3() {
     opentimers2_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         DURATION_tt3,                                     // duration
-        ieee154e_vars.startOfSlotRerference,              // reference
+        ieee154e_vars.startOfSlotReference,               // reference
         TIME_TICS,                                        // timetype
         isr_ieee154e_timer                                // callback
     );
@@ -1227,7 +1227,7 @@ port_INLINE void activity_ti4(PORT_RADIOTIMER_WIDTH capturedTime) {
     opentimers2_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         ieee154e_vars.slotDuration,                       // duration
-        ieee154e_vars.startOfSlotRerference,              // reference
+        ieee154e_vars.startOfSlotReference,               // reference
         TIME_TICS,                                        // timetype
         isr_ieee154e_newSlot                              // callback
     );
@@ -1243,7 +1243,7 @@ port_INLINE void activity_ti4(PORT_RADIOTIMER_WIDTH capturedTime) {
     opentimers2_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         DURATION_tt4,                                     // duration
-        ieee154e_vars.startOfSlotRerference,              // reference
+        ieee154e_vars.startOfSlotReference,               // reference
         TIME_TICS,                                        // timetype
         isr_ieee154e_timer                                // callback
     );
@@ -1274,7 +1274,7 @@ port_INLINE void activity_ti5(PORT_RADIOTIMER_WIDTH capturedTime) {
     opentimers2_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         ieee154e_vars.slotDuration,                       // duration
-        ieee154e_vars.startOfSlotRerference,              // reference
+        ieee154e_vars.startOfSlotReference,               // reference
         TIME_TICS,                                        // timetype
         isr_ieee154e_newSlot                              // callback
     );
@@ -1311,7 +1311,7 @@ port_INLINE void activity_ti5(PORT_RADIOTIMER_WIDTH capturedTime) {
         opentimers2_scheduleAbsolute(
             ieee154e_vars.timerId,                            // timerId
             DURATION_tt5,                                     // duration
-            ieee154e_vars.startOfSlotRerference,              // reference
+            ieee154e_vars.startOfSlotReference,               // reference
             TIME_TICS,                                        // timetype
             isr_ieee154e_timer                                // callback
         );
@@ -1338,7 +1338,7 @@ port_INLINE void activity_ti6() {
     opentimers2_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         DURATION_tt6,                                     // duration
-        ieee154e_vars.startOfSlotRerference,              // reference
+        ieee154e_vars.startOfSlotReference,               // reference
         TIME_TICS,                                        // timetype
         isr_ieee154e_timer                                // callback
     );
@@ -1387,7 +1387,7 @@ port_INLINE void activity_ti7() {
    opentimers2_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         DURATION_tt7,                                     // duration
-        ieee154e_vars.startOfSlotRerference,              // reference
+        ieee154e_vars.startOfSlotReference,               // reference
         TIME_TICS,                                        // timetype
         isr_ieee154e_timer                                // callback
     );
@@ -1428,7 +1428,7 @@ port_INLINE void activity_ti8(PORT_RADIOTIMER_WIDTH capturedTime) {
     opentimers2_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         ieee154e_vars.slotDuration,                       // duration
-        ieee154e_vars.startOfSlotRerference,              // reference
+        ieee154e_vars.startOfSlotReference,               // reference
         TIME_TICS,                                        // timetype
         isr_ieee154e_newSlot                              // callback
     );
@@ -1444,7 +1444,7 @@ port_INLINE void activity_ti8(PORT_RADIOTIMER_WIDTH capturedTime) {
    opentimers2_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         DURATION_tt8,                                     // duration
-        ieee154e_vars.startOfSlotRerference,              // reference
+        ieee154e_vars.startOfSlotReference,               // reference
         TIME_TICS,                                        // timetype
         isr_ieee154e_timer                                // callback
     );
@@ -1474,7 +1474,7 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
     opentimers2_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         ieee154e_vars.slotDuration,                       // duration
-        ieee154e_vars.startOfSlotRerference,              // reference
+        ieee154e_vars.startOfSlotReference,               // reference
         TIME_TICS,                                        // timetype
         isr_ieee154e_newSlot                              // callback
     );
@@ -1611,7 +1611,7 @@ port_INLINE void activity_ri2() {
    opentimers2_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         DURATION_rt2,                                     // duration
-        ieee154e_vars.startOfSlotRerference,              // reference
+        ieee154e_vars.startOfSlotReference,               // reference
         TIME_TICS,                                        // timetype
         isr_ieee154e_timer                                // callback
     );
@@ -1657,7 +1657,7 @@ port_INLINE void activity_ri3() {
     opentimers2_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         DURATION_rt3,                                     // duration
-        ieee154e_vars.startOfSlotRerference,              // reference
+        ieee154e_vars.startOfSlotReference,               // reference
         TIME_TICS,                                        // timetype
         isr_ieee154e_timer                                // callback
     );
@@ -1682,7 +1682,7 @@ port_INLINE void activity_ri4(PORT_RADIOTIMER_WIDTH capturedTime) {
     opentimers2_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         ieee154e_vars.slotDuration,                       // duration
-        ieee154e_vars.startOfSlotRerference,              // reference
+        ieee154e_vars.startOfSlotReference,               // reference
         TIME_TICS,                                        // timetype
         isr_ieee154e_newSlot                              // callback
     );
@@ -1699,7 +1699,7 @@ port_INLINE void activity_ri4(PORT_RADIOTIMER_WIDTH capturedTime) {
     opentimers2_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         DURATION_rt4,                                     // duration
-        ieee154e_vars.startOfSlotRerference,              // reference
+        ieee154e_vars.startOfSlotReference,               // reference
         TIME_TICS,                                        // timetype
         isr_ieee154e_timer                                // callback
     );
@@ -1732,7 +1732,7 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
     opentimers2_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         ieee154e_vars.slotDuration,                       // duration
-        ieee154e_vars.startOfSlotRerference,              // reference
+        ieee154e_vars.startOfSlotReference,               // reference
         TIME_TICS,                                        // timetype
         isr_ieee154e_newSlot                              // callback
     );
@@ -1917,7 +1917,7 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
         opentimers2_scheduleAbsolute(
             ieee154e_vars.timerId,                            // timerId
             DURATION_rt5,                                     // duration
-            ieee154e_vars.startOfSlotRerference,              // reference
+            ieee154e_vars.startOfSlotReference,               // reference
             TIME_TICS,                                        // timetype
             isr_ieee154e_timer                                // callback
         );
@@ -1961,7 +1961,7 @@ port_INLINE void activity_ri6() {
     opentimers2_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         DURATION_rt6,                                     // duration
-        ieee154e_vars.startOfSlotRerference,              // reference
+        ieee154e_vars.startOfSlotReference,               // reference
         TIME_TICS,                                        // timetype
         isr_ieee154e_timer                                // callback
     );
@@ -2058,7 +2058,7 @@ port_INLINE void activity_ri7() {
     opentimers2_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         DURATION_rt7,                                     // duration
-        ieee154e_vars.startOfSlotRerference,              // reference
+        ieee154e_vars.startOfSlotReference,               // reference
         TIME_TICS,                                        // timetype
         isr_ieee154e_timer                                // callback
     );
@@ -2090,7 +2090,7 @@ port_INLINE void activity_ri8(PORT_RADIOTIMER_WIDTH capturedTime) {
     opentimers2_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         ieee154e_vars.slotDuration,                       // duration
-        ieee154e_vars.startOfSlotRerference,              // reference
+        ieee154e_vars.startOfSlotReference,               // reference
         TIME_TICS,                                        // timetype
         isr_ieee154e_newSlot                              // callback
     );
@@ -2106,7 +2106,7 @@ port_INLINE void activity_ri8(PORT_RADIOTIMER_WIDTH capturedTime) {
     opentimers2_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         DURATION_rt8,                                     // duration
-        ieee154e_vars.startOfSlotRerference,              // reference
+        ieee154e_vars.startOfSlotReference,               // reference
         TIME_TICS,                                        // timetype
         isr_ieee154e_timer                                // callback
     );
@@ -2135,7 +2135,7 @@ port_INLINE void activity_ri9(PORT_RADIOTIMER_WIDTH capturedTime) {
     opentimers2_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         ieee154e_vars.slotDuration,                       // duration
-        ieee154e_vars.startOfSlotRerference,              // reference
+        ieee154e_vars.startOfSlotReference,               // reference
         TIME_TICS,                                        // timetype
         isr_ieee154e_newSlot                              // callback
     );
@@ -2392,7 +2392,7 @@ void synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived) {
    PORT_RADIOTIMER_WIDTH currentValue;
    
    // record the current timer value and period
-   currentValue                   =  opentimers2_getValue(ieee154e_vars.timerId)-ieee154e_vars.startOfSlotRerference;
+   currentValue                   =  opentimers2_getValue(ieee154e_vars.timerId)-ieee154e_vars.startOfSlotReference;
    currentPeriod                  =  ieee154e_vars.slotDuration;
    
    // calculate new period
@@ -2422,7 +2422,7 @@ void synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived) {
     opentimers2_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         newPeriod,                                        // duration
-        ieee154e_vars.startOfSlotRerference,              // reference
+        ieee154e_vars.startOfSlotReference,               // reference
         TIME_TICS,                                        // timetype
         isr_ieee154e_newSlot                              // callback
     );
@@ -2470,7 +2470,7 @@ void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
     opentimers2_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         newPeriod,                                        // duration
-        ieee154e_vars.startOfSlotRerference,              // reference
+        ieee154e_vars.startOfSlotReference,               // reference
         TIME_TICS,                                        // timetype
         isr_ieee154e_newSlot                              // callback
     );
@@ -2676,7 +2676,7 @@ void endSlot() {
     opentimers2_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         ieee154e_vars.slotDuration,                       // duration
-        ieee154e_vars.startOfSlotRerference,              // reference
+        ieee154e_vars.startOfSlotReference,               // reference
         TIME_TICS,                                        // timetype
         isr_ieee154e_newSlot                              // callback
     );
