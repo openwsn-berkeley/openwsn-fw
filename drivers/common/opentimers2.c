@@ -136,7 +136,7 @@ void opentimers2_scheduleRelative(opentimers2_id_t    id,
                 if (opentimers2_vars.timersBuf[i].priority > opentimers2_vars.timersBuf[idToSchedule].priority){
                     if (tempTimerGap - timerGap < TIMERTHRESHOLD){
                         timerGap     = tempTimerGap;
-                        idToSchedule = 1;
+                        idToSchedule = i;
                     }
                 }
             }
@@ -229,7 +229,7 @@ void opentimers2_scheduleAbsolute(opentimers2_id_t    id,
                 if (opentimers2_vars.timersBuf[i].priority > opentimers2_vars.timersBuf[idToSchedule].priority){
                     if (tempTimerGap - timerGap < TIMERTHRESHOLD){
                         timerGap     = tempTimerGap;
-                        idToSchedule = 1;
+                        idToSchedule = i;
                     }
                 }
             }
@@ -401,7 +401,7 @@ void opentimers2_timer_callback(void){
                 if (opentimers2_vars.timersBuf[i].priority > opentimers2_vars.timersBuf[idToSchedule].priority){
                     if (tempTimerGap - timerGap < TIMERTHRESHOLD){
                         timerGap     = tempTimerGap;
-                        idToSchedule = 1;
+                        idToSchedule = i;
                     }
                 }
             }
