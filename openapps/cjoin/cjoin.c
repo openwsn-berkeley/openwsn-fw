@@ -1,5 +1,5 @@
 /**
-\brief An example CoAP application.
+\brief CoAP application implementing Simple Join Protocol from minimal-security-02 draft.
 */
 
 #include "opendefs.h"
@@ -11,17 +11,16 @@
 #include "openserial.h"
 #include "openrandom.h"
 #include "scheduler.h"
-//#include "ADC_Channel.h"
 #include "idmanager.h"
 #include "IEEE802154E.h"
 #include "icmpv6rpl.h"
+#include "cbor.h"
 
 //=========================== defines =========================================
 
 /// inter-packet period (in ms)
 #define NUMBER_OF_EXCHANGES     6 
 #define TIMEOUT                 60000
-#define ASN_LENGTH              5
 
 const uint8_t cjoin_path0[] = "j";
 
@@ -47,12 +46,6 @@ void cjoin_retransmission_cb(opentimer_id_t id);
 void cjoin_retransmission_task_cb(void);
 bool cjoin_getIsJoined(void);
 void cjoin_setIsJoined(bool newValue);
-
-owerror_t cjoin_parse_join_response(join_response_t *, uint8_t *, uint8_t);
-owerror_t cjoin_parse_keyset(COSE_keyset_t *, uint8_t *, uint8_t *);
-owerror_t cjoin_parse_short_address(short_address_t *, uint8_t *, uint8_t *);
-owerror_t cjoin_parse_key(COSE_symmetric_key_t *, uint8_t *, uint8_t *);
-
 //=========================== public ==========================================
 
 void cjoin_init() {
@@ -277,237 +270,4 @@ bool debugPrint_joined() {
    return TRUE;
 }
 
-/**
-\brief Parse the received join response.
-
-This function expects the join response structure from minimal-security-02 draft.
-
-\param[out] response The join_response_t structure containing parsed info.
-\param[in] buf The received join response.
-\param[in] len Length of the payload.
-*/
-owerror_t cjoin_parse_join_response(join_response_t *response, uint8_t *buf, uint8_t len) {
-
-    cbor_majortype_t major_type;
-    uint8_t additional_info;
-    uint8_t ret;
-    uint8_t *tmp;
-
-    tmp = buf;
-    major_type = (cbor_majortype_t) *buf >> 5;
-    additional_info = *buf & CBOR_ADDINFO_MASK;
-        
-    if (major_type != CBOR_MAJORTYPE_ARRAY) {
-        return E_FAIL;
-    }
-
-    if (additional_info > 2 || additional_info == 0) {
-        return E_FAIL;  // unsupported join response structure
-    }
-
-    tmp++;
-
-    if (cjoin_parse_keyset(&(response->keyset), tmp, &ret) == E_FAIL) {
-        return E_FAIL;
-    }
-
-    tmp += ret;
-    
-    if (additional_info == 2) { // short address present
-        if (cjoin_parse_short_address(&(response->short_address), tmp, &ret) == E_FAIL) {
-            return E_FAIL;
-        }
-        tmp += ret;
-    }
-
-    if ( (uint8_t)(tmp - buf) != len) { // final check that everything has been parsed 
-        memset(response, 0x00, sizeof(join_response_t)); // invalidate join response
-        return E_FAIL;
-    }
-
-    return E_SUCCESS;
-}
-
-/**
-\brief Parse the received COSE_Keyset.
-
-The function expects COSE_Keyset with symmetric keys as per minimal-security-02 draft
-and parses it into COSE_symmetric_key_t structure.
-
-\param[out] keyset The COSE_keyset_t structure containing parsed keys.
-\param[in] buf Input buffer.
-\param[out] len Processed length.
-*/
-owerror_t cjoin_parse_keyset(COSE_keyset_t *keyset, uint8_t *buf, uint8_t* len) {
-
-    cbor_majortype_t major_type;
-    uint8_t additional_info;
-    uint8_t i;
-    uint8_t ret;
-    uint8_t *tmp;
-
-    tmp = buf;
-    major_type = (cbor_majortype_t) *buf >> 5;
-    additional_info = *buf & CBOR_ADDINFO_MASK;
-        
-    if (major_type != CBOR_MAJORTYPE_ARRAY) {
-        return E_FAIL;
-    }
-
-    if (additional_info > CJOIN_MAX_NUM_KEYS || additional_info == 0) {
-        return E_FAIL;  // unsupported join response structure
-    }
-
-    tmp++;
-
-    for(i = 0; i < additional_info; i++) {
-        // parse symmetric key map
-        if (cjoin_parse_key(&keyset->key[i], tmp, &ret) == E_FAIL) {
-            return E_FAIL;
-        }
-        tmp += ret;
-    }
-
-    *len = (uint8_t) (tmp - buf);
-    return E_SUCCESS;
-}
-
-/**
-\brief Parse a COSE symmetric key.
-
-The function expects COSE symmetric key as per minimal-security-02 draft
-and parses it into COSE_symmetric_key_t structure.
-
-\param[out] key The COSE_symmetric_ket_t structure containing parsed key.
-\param[in] buf Input buffer.
-\param[out] len Processed length.
-*/
-owerror_t cjoin_parse_key(COSE_symmetric_key_t *key, uint8_t* buf, uint8_t* len) {
-
-    cbor_majortype_t major_type;
-    uint8_t additional_info;
-    uint8_t i;
-    uint8_t *tmp;
-    uint8_t l;
-
-    tmp = buf;
-    major_type = (cbor_majortype_t) *buf >> 5;
-    additional_info = *buf & CBOR_ADDINFO_MASK;
-        
-    if (major_type != CBOR_MAJORTYPE_MAP) {
-        return E_FAIL;
-    }
-
-    if (additional_info > COSE_SYMKEY_MAXNUMPAIRS || additional_info == 0) {
-        return E_FAIL;  // unsupported join response structure
-    }
-
-    tmp++;
-
-    for (i = 0; i < additional_info; i++) {
-        switch((cose_key_label_t) *tmp) {
-            case COSE_KEY_LABEL_KTY:
-                tmp++;
-                key->kty = (cose_key_value_t) *tmp;
-                tmp++;
-                break;
-            case COSE_KEY_LABEL_ALG: // step by key alg
-                tmp++;
-                tmp++;
-                break;
-            case COSE_KEY_LABEL_KID:
-                tmp++;
-                l = *tmp & CBOR_ADDINFO_MASK;
-                tmp++;
-                key->kid = tmp;
-                key->kid_len = l;
-                tmp += l;
-                break;
-            case COSE_KEY_LABEL_K:
-                tmp++;
-                l = *tmp & CBOR_ADDINFO_MASK;
-                tmp++;
-                key->k = tmp;
-                key->k_len = l;
-                tmp += l;
-                break;
-            case COSE_KEY_LABEL_BASEIV:   // step by base iv
-                tmp++;
-                l = *tmp & CBOR_ADDINFO_MASK;
-                tmp++;
-                tmp += l;
-                break;
-            case COSE_KEY_LABEL_KEYOPS: // step by key ops
-                tmp++;
-                l = *tmp & CBOR_ADDINFO_MASK;
-                tmp++;
-                tmp += l;
-                break;
-            default:
-                return E_FAIL;
-        }
-    }
-
-    *len = (uint8_t) (tmp - buf);
-    return E_SUCCESS;
-}
-
-/**
-\brief Parse the received short address.
-
-The function expects short_address as per minimal-security-02 draft
-and parses it into short_address_t structure.
-
-\param[out] address The short_address_t structure containing parsed short_address and lease time.
-\param[in] buf Input buffer.
-\param[out] len Processed length.
-*/
-owerror_t cjoin_parse_short_address(short_address_t *short_address, uint8_t *buf, uint8_t* len) {
-    
-    cbor_majortype_t major_type;
-    uint8_t additional_info;
-    uint8_t *tmp;
-    uint8_t l;
-
-    tmp = buf;
-    major_type = (cbor_majortype_t) *buf >> 5;
-    additional_info = *buf & CBOR_ADDINFO_MASK;
-        
-    if (major_type != CBOR_MAJORTYPE_ARRAY) {
-        return E_FAIL;
-    }
-
-    if (additional_info > 2 || additional_info == 0) {
-        return E_FAIL;  // unsupported join response structure
-    }
-
-    tmp++;
-    l = *tmp & CBOR_ADDINFO_MASK;
-    
-    if (l != CJOIN_SHORT_ADDRESS_LENGTH) {
-        return E_FAIL;
-    }
-
-    tmp++;
-    short_address->address = tmp;
-
-    tmp += l;
-
-    if (additional_info == 2) { // lease time present
-        l = *tmp & CBOR_ADDINFO_MASK;
-        if (l != ASN_LENGTH) { // 5 byte ASN expected
-            return E_FAIL;
-        }
-        tmp++;
-
-        (short_address->lease_asn).bytes0and1           = ((uint16_t) tmp[1] << 8) | ((uint16_t) tmp[0]);
-        (short_address->lease_asn).bytes2and3           = ((uint16_t) tmp[3] << 8) | ((uint16_t) tmp[2]);
-        (short_address->lease_asn).byte4                = tmp[4]; 
-
-        tmp += ASN_LENGTH;
-    }
-
-    *len = (uint8_t) (tmp - buf);
-    return E_SUCCESS;
-}
 

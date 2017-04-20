@@ -37,6 +37,18 @@ defaultAppsInit   = [
     'cjoin',
 ]
 
+# source files that should be included in the build other than
+# those with default application name (application.c)
+additionalSourceFiles = [
+    'cjoin/cbor.c'
+]
+
+# header files that should be included in the build other than
+# those with default application name (application.h)
+additionalHeaderFiles = [
+    'cjoin/cbor.h'
+]
+
 # additional apps the user wants to build
 if localEnv['apps']:
     userApps  = localEnv['apps'].split(',')
@@ -104,6 +116,9 @@ sources_h         += ['openapps.h']
 for a in apps:
     sources_c     += [os.path.join(a,a+'.c')]
     sources_h     += [os.path.join(a,a+'.h')]
+
+sources_c += additionalSourceFiles
+sources_h += additionalHeaderFiles
 
 #===== build the openapps library
 
