@@ -54,7 +54,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    coap_option_t             last_option;
    coap_resource_desc_t*     temp_desc;
    bool                      found;
-   owerror_t                 outcome = 0;
+   owerror_t                 outcome = E_SUCCESS;
    coap_type_t               response_type;
    // local variables passed to the handlers (with msg)
    coap_header_iht           coap_header;
@@ -316,6 +316,8 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
          msg->length = bt_ptr->dataLen;
          response_too_big = TRUE; // TRUE, because the complete payload is bigger than a block
          reused_packet = FALSE; // FALSE, because bt_ptr->data doesn't point to msg->packet
+         coap_header.Code = COAP_CODE_RESP_CONTENT;
+         outcome = E_SUCCESS;
       }
 
       // assert: msg->payload points to the complete data that we want to send
@@ -323,9 +325,9 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
       // assert that we don't read past the generated data if the block number is too high
       max_blockNumber = msg->length / b2_blockSize;
       if ( b2_blockNumber > max_blockNumber ) {
-         // TODO: HTTP would respond with 416 Range Not Satisfiable
-         // TODO: change return type of coapApp_receive to coap_code_t
          outcome = E_FAIL;
+         // TODO: HTTP would respond with 416 Range Not Satisfiable
+         coap_header.Code = COAP_CODE_RESP_BADREQ;
          i=0;
          b2_moreBlocks = FALSE;
       } else if ( b2_blockNumber == max_blockNumber ) {
@@ -393,7 +395,13 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
       msg->length                      = 0;
       // set the CoAP header
       coap_header.TKL                  = 0;
-      coap_header.Code                 = COAP_CODE_RESP_METHODNOTALLOWED;
+      if (
+            coap_header.Code >= COAP_CODE_REQ_GET     &&
+            coap_header.Code <= COAP_CODE_REQ_DELETE
+         ) {
+         // only set the response code if it hasn't been set
+         coap_header.Code                 = COAP_CODE_RESP_METHODNOTALLOWED;
+      }
    }
 
    if (coap_header.T == COAP_TYPE_CON) {
