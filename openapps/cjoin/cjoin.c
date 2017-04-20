@@ -98,7 +98,7 @@ owerror_t cjoin_receive(OpenQueueEntry_t* msg,
     while(coap_options[i].type != COAP_OPTION_NONE) {
         if (coap_options[i].type == COAP_OPTION_NUM_CONTENTFORMAT && 
                         *(coap_options[i].pValue) == COAP_MEDTYPE_APPCBOR) {
-            ret = cjoin_parse_join_response(&join_response, msg->payload, msg->length);
+            ret = cbor_parse_join_response(&join_response, msg->payload, msg->length);
             if (ret == E_FAIL) { return E_FAIL; }
 
              // set the internal keys as per the parsed values

@@ -73,7 +73,7 @@ typedef struct {
 
 //=========================== prototypes ======================================
 
-owerror_t cjoin_parse_join_response(join_response_t *, uint8_t *, uint8_t);
+owerror_t cbor_parse_join_response(join_response_t *, uint8_t *, uint8_t);
 
 /**
 \}

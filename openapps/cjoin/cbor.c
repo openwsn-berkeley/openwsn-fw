@@ -9,9 +9,9 @@
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
-owerror_t cjoin_parse_keyset(COSE_keyset_t *, uint8_t *, uint8_t *);
-owerror_t cjoin_parse_short_address(short_address_t *, uint8_t *, uint8_t *);
-owerror_t cjoin_parse_key(COSE_symmetric_key_t *, uint8_t *, uint8_t *);
+owerror_t cbor_parse_keyset(COSE_keyset_t *, uint8_t *, uint8_t *);
+owerror_t cbor_parse_short_address(short_address_t *, uint8_t *, uint8_t *);
+owerror_t cbor_parse_key(COSE_symmetric_key_t *, uint8_t *, uint8_t *);
 
 
 //=========================== public ==========================================
@@ -25,7 +25,7 @@ This function expects the join response structure from minimal-security-02 draft
 \param[in] buf The received join response.
 \param[in] len Length of the payload.
 */
-owerror_t cjoin_parse_join_response(join_response_t *response, uint8_t *buf, uint8_t len) {
+owerror_t cbor_parse_join_response(join_response_t *response, uint8_t *buf, uint8_t len) {
 
     cbor_majortype_t major_type;
     uint8_t additional_info;
@@ -46,14 +46,14 @@ owerror_t cjoin_parse_join_response(join_response_t *response, uint8_t *buf, uin
 
     tmp++;
 
-    if (cjoin_parse_keyset(&(response->keyset), tmp, &ret) == E_FAIL) {
+    if (cbor_parse_keyset(&(response->keyset), tmp, &ret) == E_FAIL) {
         return E_FAIL;
     }
 
     tmp += ret;
     
     if (additional_info == 2) { // short address present
-        if (cjoin_parse_short_address(&(response->short_address), tmp, &ret) == E_FAIL) {
+        if (cbor_parse_short_address(&(response->short_address), tmp, &ret) == E_FAIL) {
             return E_FAIL;
         }
         tmp += ret;
@@ -80,7 +80,7 @@ and parses it into COSE_symmetric_key_t structure.
 \param[in] buf Input buffer.
 \param[out] len Processed length.
 */
-owerror_t cjoin_parse_keyset(COSE_keyset_t *keyset, uint8_t *buf, uint8_t* len) {
+owerror_t cbor_parse_keyset(COSE_keyset_t *keyset, uint8_t *buf, uint8_t* len) {
 
     cbor_majortype_t major_type;
     uint8_t additional_info;
@@ -104,7 +104,7 @@ owerror_t cjoin_parse_keyset(COSE_keyset_t *keyset, uint8_t *buf, uint8_t* len) 
 
     for(i = 0; i < additional_info; i++) {
         // parse symmetric key map
-        if (cjoin_parse_key(&keyset->key[i], tmp, &ret) == E_FAIL) {
+        if (cbor_parse_key(&keyset->key[i], tmp, &ret) == E_FAIL) {
             return E_FAIL;
         }
         tmp += ret;
@@ -124,7 +124,7 @@ and parses it into COSE_symmetric_key_t structure.
 \param[in] buf Input buffer.
 \param[out] len Processed length.
 */
-owerror_t cjoin_parse_key(COSE_symmetric_key_t *key, uint8_t* buf, uint8_t* len) {
+owerror_t cbor_parse_key(COSE_symmetric_key_t *key, uint8_t* buf, uint8_t* len) {
 
     cbor_majortype_t major_type;
     uint8_t additional_info;
@@ -204,7 +204,7 @@ and parses it into short_address_t structure.
 \param[in] buf Input buffer.
 \param[out] len Processed length.
 */
-owerror_t cjoin_parse_short_address(short_address_t *short_address, uint8_t *buf, uint8_t* len) {
+owerror_t cbor_parse_short_address(short_address_t *short_address, uint8_t *buf, uint8_t* len) {
     
     cbor_majortype_t major_type;
     uint8_t additional_info;
