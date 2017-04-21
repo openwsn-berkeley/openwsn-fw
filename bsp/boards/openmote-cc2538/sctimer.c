@@ -53,8 +53,14 @@ void sctimer_setCompare(uint32_t val){
         // the timer is already late, schedule the ISR right now manually 
         IntPendSet(INT_SMTIM);
     } else {
-        // schedule the timer at val
-        SleepModeTimerCompareSet(val);
+        if (val-SleepModeTimerCountGet()<TIMERTHRESHOLD){
+            // there is hardware limitation to schedule the timer within TIMERTHRESHOLD ticks
+            // schedule ISR right now manually
+            IntPendSet(INT_SMTIM);
+        } else {
+            // schedule the timer at val
+            SleepModeTimerCompareSet(val);
+        }
     }
 }
 
