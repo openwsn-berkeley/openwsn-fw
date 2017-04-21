@@ -324,7 +324,7 @@ void opentimers2_timer_callback(void){
         if (opentimers2_vars.timersBuf[i].isrunning==TRUE){
             // all timers in the past within TIMERTHRESHOLD ticks
             // (probably with low priority) will mared as Expired.
-            if (opentimers2_vars.currentTimeout-opentimers2_vars.timersBuf[i].currentCompareValue < TIMERTHRESHOLD){
+            if (opentimers2_vars.currentTimeout-opentimers2_vars.timersBuf[i].currentCompareValue <= TIMERTHRESHOLD){
                 // this timer expired, mark as expired
                 opentimers2_vars.timersBuf[i].hasExpired = TRUE;
                 // find the fired timer who has the smallest currentTimeout as last Timeout
