@@ -440,6 +440,8 @@ void radio_isr_internal(void) {
    volatile PORT_TIMER_WIDTH capturedTime;
    uint8_t  irq_status0,irq_status1;
    
+   debugpins_isr_set();
+   
    // capture the time
    capturedTime = sctimer_readCounter();
    
@@ -461,6 +463,7 @@ void radio_isr_internal(void) {
       if (radio_vars.startFrame_cb!=NULL) {
          // call the callback
          radio_vars.startFrame_cb(capturedTime);
+         debugpins_isr_clr();
          // kick the OS
          return;
       } else {
@@ -475,6 +478,7 @@ void radio_isr_internal(void) {
       if (radio_vars.endFrame_cb!=NULL) {
          // call the callback
          radio_vars.endFrame_cb(capturedTime);
+         debugpins_isr_clr();
          // kick the OS
          return;
       } else {
@@ -489,6 +493,7 @@ void radio_isr_internal(void) {
       if (radio_vars.endFrame_cb!=NULL) {
          // call the callback
          radio_vars.endFrame_cb(capturedTime);
+         debugpins_isr_clr();
          // kick the OS
          return;
       } else {
@@ -504,12 +509,14 @@ void radio_isr_internal(void) {
       if (radio_vars.endFrame_cb!=NULL) {
          // call the callback
          radio_vars.endFrame_cb(capturedTime);
+         debugpins_isr_clr();
          // kick the OS
          return;
       } else {
          while(1);
       }
    }
+   debugpins_isr_clr();
    
    return;
 }

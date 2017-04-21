@@ -520,6 +520,13 @@ void icmpv6rpl_killPreferredParent() {
 */
 void icmpv6rpl_timer_DIO_cb(void) {
    scheduler_push_task(icmpv6rpl_timer_DIO_task,TASKPRIO_RPL);
+   // arm the DIO timer with this new value
+   opentimers2_scheduleRelative(
+      icmpv6rpl_vars.timerIdDIO,
+      icmpv6rpl_vars.dioPeriod - 0x80 + (openrandom_get16b()&0xff),
+      TIME_MS,
+      icmpv6rpl_timer_DIO_cb
+   );
 }
 
 /**
@@ -528,18 +535,7 @@ void icmpv6rpl_timer_DIO_cb(void) {
 \note This function is executed in task context, called by the scheduler.
 */
 void icmpv6rpl_timer_DIO_task() {
-   uint32_t        dioPeriod;
-   // send DIO
-   sendDIO();
-   
-   // arm the DIO timer with this new value
-   dioPeriod = icmpv6rpl_vars.dioPeriod - 0x80 + (openrandom_get16b()&0xff);
-   opentimers2_scheduleRelative(
-      icmpv6rpl_vars.timerIdDIO,
-      dioPeriod,
-      TIME_MS,
-      icmpv6rpl_timer_DIO_task
-   );
+    sendDIO();
 }
 
 /**
@@ -634,6 +630,13 @@ void sendDIO() {
 */
 void icmpv6rpl_timer_DAO_cb(void) {
    scheduler_push_task(icmpv6rpl_timer_DAO_task,TASKPRIO_RPL);
+   // arm the DAO timer with this new value
+   opentimers2_scheduleRelative(
+       icmpv6rpl_vars.timerIdDAO,
+       icmpv6rpl_vars.daoPeriod - 0x80 + (openrandom_get16b()&0xff),
+       TIME_MS,
+       icmpv6rpl_timer_DAO_cb
+   );
 }
 
 /**
@@ -642,19 +645,7 @@ void icmpv6rpl_timer_DAO_cb(void) {
 \note This function is executed in task context, called by the scheduler.
 */
 void icmpv6rpl_timer_DAO_task() {
-   uint32_t        daoPeriod;
-   
-   // send DAO
-   sendDAO();
-   
-   // arm the DAO timer with this new value
-   daoPeriod = icmpv6rpl_vars.daoPeriod - 0x80 + (openrandom_get16b()&0xff);
-   opentimers2_scheduleRelative(
-       icmpv6rpl_vars.timerIdDAO,
-       daoPeriod,
-       TIME_MS,
-       icmpv6rpl_timer_DAO_task
-   );
+    sendDAO();
 }
 
 /**

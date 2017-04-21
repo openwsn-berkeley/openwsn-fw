@@ -643,10 +643,23 @@ owerror_t sixtop_send_internal(
 // timer interrupt callbacks
 void sixtop_sendingEb_timer_cb(void){
    scheduler_push_task(timer_sixtop_sendEb_fired,TASKPRIO_SIXTOP);
+   opentimers2_scheduleRelative(
+       sixtop_vars.ebSendingTimerId,
+       (sixtop_vars.ebPeriod-EBPERIOD_RANDOM_RANG+(openrandom_get16b()%(2*EBPERIOD_RANDOM_RANG))),
+       TIME_MS,
+       sixtop_sendingEb_timer_cb
+   );
 }
 
 void sixtop_maintenance_timer_cb(void) {
    scheduler_push_task(timer_sixtop_management_fired,TASKPRIO_SIXTOP);
+   sixtop_vars.periodMaintenance = 872+(openrandom_get16b()&0xff);
+   opentimers2_scheduleRelative(
+       sixtop_vars.maintenanceTimerId,
+       sixtop_vars.periodMaintenance,
+       TIME_MS,
+       sixtop_maintenance_timer_cb
+   );
 }
 
 void sixtop_timeout_timer_cb(void) {
@@ -668,15 +681,6 @@ has fired. This timer is set to fire every second, on average.
 The body of this function executes one of the MAC management task.
 */
 void timer_sixtop_management_fired(void) {
-  
-   sixtop_vars.periodMaintenance = 872+(openrandom_get16b()&0xff);
-   opentimers2_scheduleAbsolute(
-       sixtop_vars.maintenanceTimerId,
-       sixtop_vars.periodMaintenance,
-       opentimers2_getValue(sixtop_vars.maintenanceTimerId),
-       TIME_MS,
-       sixtop_maintenance_timer_cb
-   );
    
    sixtop_vars.mgtTaskCounter = (sixtop_vars.mgtTaskCounter+1)%MAINTENANCE_PERIOD;
    
@@ -703,13 +707,6 @@ readability of the code.
 port_INLINE void sixtop_sendEB() {
    OpenQueueEntry_t* eb;
    uint8_t len;
-   
-    opentimers2_scheduleRelative(
-        sixtop_vars.ebSendingTimerId,
-        (sixtop_vars.ebPeriod-EBPERIOD_RANDOM_RANG+(openrandom_get16b()%(2*EBPERIOD_RANDOM_RANG))),
-        TIME_MS,
-        sixtop_sendingEb_timer_cb
-    );
    
    len = 0;
    
