@@ -934,7 +934,7 @@ port_INLINE void activity_ti1ORri1() {
           for (i=0;i<ieee154e_vars.numOfSleepSlots-1;i++){
              incrementAsnOffset();
           }
-      }  
+      }
       ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();      
    } else {
       // this is NOT the next active slot, abort
@@ -1820,7 +1820,7 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
 
       // toss the IEEE802.15.4 header
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_header.headerLength);
-
+      
       // handle IEs xv poipoi
       // reset join priority 
       // retrieve IE in sixtop
@@ -1924,7 +1924,7 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
         // radiotimer_schedule(DURATION_rt5);
 #endif
       } else {
-         // synchronize to the received packet iif I'm not a DAGroot and this is my preferred parent
+         // synchronize to the received packet if I'm not a DAGroot and this is my preferred parent
          if (idmanager_getIsDAGroot()==FALSE && icmpv6rpl_isPreferredParent(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop))) {
             synchronizePacket(ieee154e_vars.syncCapturedTime);
          }
