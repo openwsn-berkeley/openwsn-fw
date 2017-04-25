@@ -241,10 +241,11 @@ owerror_t cbor_parse_short_address(short_address_t *short_address, uint8_t *buf,
             return E_FAIL;
         }
         tmp++;
-
-        (short_address->lease_asn).bytes0and1           = ((uint16_t) tmp[1] << 8) | ((uint16_t) tmp[0]);
-        (short_address->lease_asn).bytes2and3           = ((uint16_t) tmp[3] << 8) | ((uint16_t) tmp[2]);
-        (short_address->lease_asn).byte4                = tmp[4]; 
+        
+        // ASN is in network byte order
+        (short_address->lease_asn).byte4                = tmp[0]; 
+        (short_address->lease_asn).bytes2and3           = ((uint16_t) tmp[1] << 8) | ((uint16_t) tmp[2]);
+        (short_address->lease_asn).bytes0and1           = ((uint16_t) tmp[3] << 8) | ((uint16_t) tmp[4]);
 
         tmp += ASN_LENGTH;
     }
