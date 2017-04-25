@@ -29,40 +29,51 @@ owerror_t cbor_parse_join_response(join_response_t *response, uint8_t *buf, uint
     uint8_t additional_info;
     uint8_t ret;
     uint8_t *tmp;
+    owerror_t error;
 
+    error = E_SUCCESS;
     tmp = buf;
     major_type = (cbor_majortype_t) *buf >> 5;
     additional_info = *buf & CBOR_ADDINFO_MASK;
         
-    if (major_type != CBOR_MAJORTYPE_ARRAY) {
-        return E_FAIL;
-    }
-
-    if (additional_info > 2 || additional_info == 0) {
-        return E_FAIL;  // unsupported join response structure
-    }
-
-    tmp++;
-
-    if (cbor_parse_keyset(&(response->keyset), tmp, &ret) == E_FAIL) {
-        return E_FAIL;
-    }
-
-    tmp += ret;
-    
-    if (additional_info == 2) { // short address present
-        if (cbor_parse_short_address(&(response->short_address), tmp, &ret) == E_FAIL) {
-            return E_FAIL;
+    do {
+        if (major_type != CBOR_MAJORTYPE_ARRAY) {
+            error = E_FAIL;
+            break;
         }
+
+        if (additional_info > 2 || additional_info == 0) {
+            error = E_FAIL; // unsupported join response structure
+            break;
+        }
+
+        tmp++;
+
+        if (cbor_parse_keyset(&(response->keyset), tmp, &ret) == E_FAIL) {
+            error = E_FAIL;
+            break;
+        }
+
         tmp += ret;
-    }
+    
+        if (additional_info == 2) { // short address present
+            if (cbor_parse_short_address(&(response->short_address), tmp, &ret) == E_FAIL) {
+                error = E_FAIL;
+                break;
+            }
+            tmp += ret;
+        }
 
-    if ( (uint8_t)(tmp - buf) != len) { // final check that everything has been parsed 
+        if ( (uint8_t)(tmp - buf) != len) { // final check that everything has been parsed 
+            error = E_FAIL;
+            break;
+        }
+    } while(0); // while loop that gets executed only once
+
+    if (error == E_FAIL) {
         memset(response, 0x00, sizeof(join_response_t)); // invalidate join response
-        return E_FAIL;
     }
-
-    return E_SUCCESS;
+    return error;
 }
 
 
