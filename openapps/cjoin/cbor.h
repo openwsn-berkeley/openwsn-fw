@@ -16,7 +16,12 @@
 #define CBOR_ADDINFO_MASK                 0x1F
 // max number of pairs in COSE symmetric key struct
 #define COSE_SYMKEY_MAXNUMPAIRS           6    
-
+// 802.15.4 short address
+#define SHORT_ADDRESS_LENGTH              2
+// symmetric key length
+#define COSE_SYMKEY_LENGTH                16
+// key id length
+#define COSE_SYMKEY_KEYID_LENGTH          1
 //=========================== typedef =========================================
 
 // CBOR major types
@@ -47,16 +52,14 @@ typedef enum {
 } cose_key_value_t;
 
 typedef struct {
-    uint8_t*                address;
+    uint8_t                 address[SHORT_ADDRESS_LENGTH];
     asn_t                   lease_asn;
 } short_address_t;
 
 typedef struct {
     cose_key_value_t        kty;
-    uint8_t*                kid;
-    uint8_t                 kid_len;
-    uint8_t*                k;
-    uint8_t                 k_len;
+    uint8_t                 kid[COSE_SYMKEY_KEYID_LENGTH];
+    uint8_t                 k[COSE_SYMKEY_LENGTH];
 } COSE_symmetric_key_t;
 
 typedef struct {

@@ -4,7 +4,6 @@
 #include "cbor.h"
 //=========================== defines =========================================
 // number of bytes in 802.15.4 short address
-#define SHORT_ADDRESS_LENGTH    2
 #define ASN_LENGTH              5
 //=========================== variables =======================================
 
@@ -15,7 +14,6 @@ owerror_t cbor_parse_key(COSE_symmetric_key_t *, uint8_t *, uint8_t *);
 
 
 //=========================== public ==========================================
-
 /**
 \brief Parse the received join response.
 
@@ -160,17 +158,21 @@ owerror_t cbor_parse_key(COSE_symmetric_key_t *key, uint8_t* buf, uint8_t* len) 
             case COSE_KEY_LABEL_KID:
                 tmp++;
                 l = *tmp & CBOR_ADDINFO_MASK;
+                if (l != COSE_SYMKEY_KEYID_LENGTH) {
+                    return E_FAIL;
+                }
                 tmp++;
-                key->kid = tmp;
-                key->kid_len = l;
+                memcpy(key->kid, tmp, COSE_SYMKEY_KEYID_LENGTH);
                 tmp += l;
                 break;
             case COSE_KEY_LABEL_K:
                 tmp++;
                 l = *tmp & CBOR_ADDINFO_MASK;
+                if (l!= COSE_SYMKEY_LENGTH) {
+                    return E_FAIL;
+                }
                 tmp++;
-                key->k = tmp;
-                key->k_len = l;
+                memcpy(key->k, tmp, COSE_SYMKEY_LENGTH);
                 tmp += l;
                 break;
             case COSE_KEY_LABEL_BASEIV:   // step by base iv
@@ -231,7 +233,7 @@ owerror_t cbor_parse_short_address(short_address_t *short_address, uint8_t *buf,
     }
 
     tmp++;
-    short_address->address = tmp;
+    memcpy(short_address->address, tmp, SHORT_ADDRESS_LENGTH);
 
     tmp += l;
 
@@ -253,4 +255,5 @@ owerror_t cbor_parse_short_address(short_address_t *short_address, uint8_t *buf,
     *len = (uint8_t) (tmp - buf);
     return E_SUCCESS;
 }
+
 
