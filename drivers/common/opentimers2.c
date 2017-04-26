@@ -336,38 +336,35 @@ void opentimers2_timer_callback(void){
     }
     
     // update lastTimeout
-    opentimers2_vars.lastTimeout    = tempLastTimeout;
+    opentimers2_vars.lastTimeout                               = tempLastTimeout;
     
     // 2. call the callback of expired timers
-    for (i=0;i<MAX_NUM_TIMERS;i++){
-        idToCallCB = TOO_MANY_TIMERS_ERROR;
-        // find out the timer expired with highest priority 
-        for (j=0;j<MAX_NUM_TIMERS;j++){
-            if (opentimers2_vars.timersBuf[j].hasExpired == TRUE){
-                if (idToCallCB==TOO_MANY_TIMERS_ERROR){
+    idToCallCB = TOO_MANY_TIMERS_ERROR;
+    // find out the timer expired with highest priority 
+    for (j=0;j<MAX_NUM_TIMERS;j++){
+        if (opentimers2_vars.timersBuf[j].hasExpired == TRUE){
+            if (idToCallCB==TOO_MANY_TIMERS_ERROR){
+                idToCallCB = j;
+            } else {
+                if (opentimers2_vars.timersBuf[j].priority>opentimers2_vars.timersBuf[idToCallCB].priority){
                     idToCallCB = j;
-                } else {
-                    if (opentimers2_vars.timersBuf[j].priority>opentimers2_vars.timersBuf[idToCallCB].priority){
-                        idToCallCB = j;
-                    }
                 }
             }
         }
-        if (idToCallCB==TOO_MANY_TIMERS_ERROR){
-            // no more timer expired
-            break;
-        } else {
-            // call all timers expired having the same priority with timer idToCallCB
-            for (j=0;j<MAX_NUM_TIMERS;j++){
-                if (
-                    opentimers2_vars.timersBuf[j].hasExpired == TRUE &&
-                    opentimers2_vars.timersBuf[j].priority   == opentimers2_vars.timersBuf[idToCallCB].priority
-                ){
-                    opentimers2_vars.timersBuf[j].isrunning           = FALSE;
-                    opentimers2_vars.timersBuf[j].lastCompareValue    = opentimers2_vars.timersBuf[j].currentCompareValue;
-                    opentimers2_vars.timersBuf[j].hasExpired          = FALSE;
-                    opentimers2_vars.timersBuf[j].callback();
-                }
+    }
+    if (idToCallCB==TOO_MANY_TIMERS_ERROR){
+        // no more timer expired
+    } else {
+        // call all timers expired having the same priority with timer idToCallCB
+        for (j=0;j<MAX_NUM_TIMERS;j++){
+            if (
+                opentimers2_vars.timersBuf[j].hasExpired == TRUE &&
+                opentimers2_vars.timersBuf[j].priority   == opentimers2_vars.timersBuf[idToCallCB].priority
+            ){
+                opentimers2_vars.timersBuf[j].isrunning           = FALSE;
+                opentimers2_vars.timersBuf[j].lastCompareValue    = opentimers2_vars.timersBuf[j].currentCompareValue;
+                opentimers2_vars.timersBuf[j].hasExpired          = FALSE;
+                opentimers2_vars.timersBuf[j].callback();
             }
         }
     }
