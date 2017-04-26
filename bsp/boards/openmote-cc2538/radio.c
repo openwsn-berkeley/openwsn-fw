@@ -143,9 +143,6 @@ void radio_init() {
    IntRegister(INT_RFCORERTX, radio_isr_internal);
    IntRegister(INT_RFCOREERR, radio_error_isr);
    
-   IntPrioritySet(INT_RFCORERTX, HAL_INT_PRIOR_MAC);
-   IntPrioritySet(INT_RFCOREERR, HAL_INT_PRIOR_MAC);
-   
    IntEnable(INT_RFCORERTX);
    
    /* Enable all RF Error interrupts */
