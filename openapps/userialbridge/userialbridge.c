@@ -1,6 +1,5 @@
 #include "opendefs.h"
 #include "userialbridge.h"
-#include "openudp.h"
 #include "openqueue.h"
 #include "opentimers.h"
 #include "openserial.h"
@@ -34,14 +33,16 @@ void userialbridge_init() {
     userialbridge_vars.openserial_rsvp.cb    = userialbridge_triggerData;
     userialbridge_vars.openserial_rsvp.next  = NULL;
     openserial_register(&userialbridge_vars.openserial_rsvp);
+
+    // register at UDP stack
+    userialbridge_vars.desc.port              = WKP_UDP_SERIALBRIDGE;
+    userialbridge_vars.desc.callbackReceive   = NULL;
+    userialbridge_vars.desc.callbackSendDone  = &userialbridge_sendDone;
+    openudp_register(&userialbridge_vars.desc);
 }
 
 void userialbridge_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
     openqueue_freePacketBuffer(msg);
-}
-
-void userialbridge_receive(OpenQueueEntry_t* pkt) {
-    openqueue_freePacketBuffer(pkt);
 }
 
 //=========================== private =========================================

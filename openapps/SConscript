@@ -31,7 +31,6 @@ defaultAppsInit   = [
     'cleds',
     'cwellknown',
     'techo',
-    'uecho',
     'rrt',
 ]
 

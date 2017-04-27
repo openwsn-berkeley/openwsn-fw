@@ -23,8 +23,7 @@ Note that we are writing the field from the end of the header to the beginning.
 
 \param[in,out] msg              The message to append the header to.
 \param[in]     frameType        Type of IEEE802.15.4 frame.
-\param[in]     ielistpresent    Is the IE list present�
-\param[in]     frameVersion     IEEE802.15.4 frame version.
+\param[in]     payloadIEPresent Is the IE list present?
 \param[in]     sequenceNumber   Sequence number of this frame.
 \param[in]     nextHop          Address of the next hop
 */
