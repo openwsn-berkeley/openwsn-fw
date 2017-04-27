@@ -17,7 +17,7 @@
 #include "leds.h"
 #include "schedule.h"
 #include "uart.h"
-#include "opentimers2.h"
+#include "opentimers.h"
 #include "openhdlc.h"
 #include "schedule.h"
 #include "icmpv6rpl.h"
@@ -170,15 +170,15 @@ owerror_t openserial_printCritical(
     errorparameter_t    arg1,
     errorparameter_t    arg2
 ) {
-    opentimers2_id_t id; 
+    opentimers_id_t id; 
     uint32_t         reference;
     // blink error LED, this is serious
     leds_error_blink();
     
     // schedule for the mote to reboot in 10s
-    id        = opentimers2_create();
-    reference = opentimers2_getValue(id);
-    opentimers2_scheduleAbsolute(
+    id        = opentimers_create();
+    reference = opentimers_getValue(id);
+    opentimers_scheduleAbsolute(
         id,                             // timerId
         10000,                          // duration
         reference,                      // reference
@@ -899,3 +899,6 @@ void isr_openserial_rx() {
     
     openserial_vars.lastRxByte = rxbyte;
 }
+
+
+

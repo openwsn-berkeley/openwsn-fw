@@ -8,7 +8,7 @@
 \{
 */
 
-#include "opentimers2.h"
+#include "opentimers.h"
 #include "opendefs.h"
 #include "processIE.h"
 //=========================== define ==========================================
@@ -85,9 +85,9 @@ typedef struct {
    bool                 busySendingEB;           // TRUE when busy sending an enhanced beacon
    uint8_t              dsn;                     // current data sequence number
    uint8_t              mgtTaskCounter;          // counter to determine what management task to do
-   opentimers2_id_t     ebSendingTimerId;        // EB sending timer id
-   opentimers2_id_t     maintenanceTimerId;
-   opentimers2_id_t     timeoutTimerId;          // TimeOut timer id
+   opentimers_id_t     ebSendingTimerId;        // EB sending timer id
+   opentimers_id_t     maintenanceTimerId;
+   opentimers_id_t     timeoutTimerId;          // TimeOut timer id
    uint16_t             kaPeriod;                // period of sending KA
    uint16_t             ebPeriod;                // period of sending EB
    six2six_state_t      six2six_state;
@@ -123,3 +123,5 @@ void      sixtop_setIsResponseEnabled(bool isEnabled);
 */
 
 #endif
+
+

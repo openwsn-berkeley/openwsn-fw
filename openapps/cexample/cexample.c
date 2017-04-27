@@ -52,10 +52,10 @@ void cexample_init() {
    
    
    opencoap_register(&cexample_vars.desc);
-   cexample_vars.timerId    = opentimers2_create();
-   opentimers2_scheduleAbsolute(cexample_vars.timerId, 
+   cexample_vars.timerId    = opentimers_create();
+   opentimers_scheduleAbsolute(cexample_vars.timerId, 
                                 CEXAMPLEPERIOD, 
-                                opentimers2_getValue(cexample_vars.timerId), 
+                                opentimers_getValue(cexample_vars.timerId), 
                                 TIME_MS, 
                                 cexample_timer_cb);
 }
@@ -85,7 +85,7 @@ void cexample_task_cb() {
    uint8_t              N_avg       = 10;
    
    // reschedule next time to expire
-   opentimers2_scheduleRelative(cexample_vars.timerId, 
+   opentimers_scheduleRelative(cexample_vars.timerId, 
                                 CEXAMPLEPERIOD, 
                                 TIME_MS, 
                                 cexample_timer_cb);
@@ -95,7 +95,7 @@ void cexample_task_cb() {
    
    // don't run on dagroot
    if (idmanager_getIsDAGroot()) {
-      opentimers2_destroy(cexample_vars.timerId);
+      opentimers_destroy(cexample_vars.timerId);
       return;
    }
    
@@ -167,3 +167,6 @@ void cexample_task_cb() {
 void cexample_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
     openqueue_freePacketBuffer(msg);
 }
+
+
+

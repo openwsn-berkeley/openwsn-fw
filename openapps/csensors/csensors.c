@@ -283,7 +283,7 @@ void csensors_timer_cb(){
       if (csensors_vars.csensors_resource[i].timerId == i) {
          csensors_vars.cb_list[csensors_vars.cb_put] = i;
          csensors_vars.cb_put = (csensors_vars.cb_put+1)%CSENSORSTASKLIST;
-         opentimers2_scheduleRelative(
+         opentimers_scheduleRelative(
              csensors_vars.csensors_resource[i].timerId, 
              csensors_vars.csensors_resource[i].period,
              TIME_MS, 
@@ -379,36 +379,36 @@ void csensors_setPeriod(uint32_t period,
 
    if (period>0) {
       csensors_vars.csensors_resource[id].period = period;
-      if (opentimers2_isRunning(csensors_vars.csensors_resource[id].timerId)) {
-         opentimers2_scheduleRelative(
+      if (opentimers_isRunning(csensors_vars.csensors_resource[id].timerId)) {
+         opentimers_scheduleRelative(
              csensors_vars.csensors_resource[id].timerId, 
              (uint32_t)((period*openrandom_get16b())/0xffff),
              TIME_MS, 
              csensors_timer_cb
          );
          if (old_period==0) {
-             opentimers2_scheduleAbsolute(
+             opentimers_scheduleAbsolute(
                  csensors_vars.csensors_resource[id].timerId, 
                  (uint32_t)((period*openrandom_get16b())/0xffff), 
-                 opentimers2_getValue(csensors_vars.csensors_resource[id].timerId), 
+                 opentimers_getValue(csensors_vars.csensors_resource[id].timerId), 
                  TIME_MS, 
                  csensors_timer_cb
              );
          }
       } else {
-         csensors_vars.csensors_resource[id].timerId = opentimers2_create();
-         opentimers2_scheduleAbsolute(
+         csensors_vars.csensors_resource[id].timerId = opentimers_create();
+         opentimers_scheduleAbsolute(
              csensors_vars.csensors_resource[id].timerId, 
              (uint32_t)((period*openrandom_get16b())/0xffff), 
-             opentimers2_getValue(csensors_vars.csensors_resource[id].timerId), 
+             opentimers_getValue(csensors_vars.csensors_resource[id].timerId), 
              TIME_MS, 
              csensors_timer_cb
          );
       }
    } else {
-      if (opentimers2_isRunning(csensors_vars.csensors_resource[id].timerId) && (old_period != 0)) {
+      if (opentimers_isRunning(csensors_vars.csensors_resource[id].timerId) && (old_period != 0)) {
          csensors_vars.csensors_resource[id].period = period;
-         opentimers2_cancel(csensors_vars.csensors_resource[id].timerId);
+         opentimers_cancel(csensors_vars.csensors_resource[id].timerId);
       }
    }
 }
@@ -448,3 +448,8 @@ void csensors_fillpayload(OpenQueueEntry_t* msg,
 void csensors_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }
+
+
+
+
+

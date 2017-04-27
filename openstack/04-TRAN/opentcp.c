@@ -607,7 +607,7 @@ bool tcp_debugPrint(void) {
 //timer used to reset state when TCP state machine is stuck
 void timers_tcp_fired(void) {
    opentcp_reset();
-   opentimers2_scheduleRelative(
+   opentimers_scheduleRelative(
              tcp_vars.timerId,
              TCP_TIMEOUT,
              TIME_MS,
@@ -686,15 +686,15 @@ void tcp_change_state(uint8_t new_tcp_state) {
    tcp_vars.state = new_tcp_state;
    if (tcp_vars.state==TCP_STATE_CLOSED) {
       if (tcp_vars.timerStarted==TRUE) {
-         opentimers2_cancel(tcp_vars.timerId);
+         opentimers_cancel(tcp_vars.timerId);
       }
    } else {
       if (tcp_vars.timerStarted==FALSE) {
-         tcp_vars.timerId = opentimers2_create();
-         opentimers2_scheduleAbsolute(
+         tcp_vars.timerId = opentimers_create();
+         opentimers_scheduleAbsolute(
              tcp_vars.timerId,
              TCP_TIMEOUT,
-             opentimers2_getValue(tcp_vars.timerId),
+             opentimers_getValue(tcp_vars.timerId),
              TIME_MS,
              opentcp_timer_cb
          );
@@ -707,3 +707,6 @@ void tcp_change_state(uint8_t new_tcp_state) {
 void opentcp_timer_cb(void) {
    scheduler_push_task(timers_tcp_fired,TASKPRIO_TCP_TIMEOUT);
 }
+
+
+

@@ -145,10 +145,10 @@ void ieee154e_init() {
    radio_setStartFrameCb(ieee154e_startOfFrame);
    radio_setEndFrameCb(ieee154e_endOfFrame);
    // have the radio start its timer
-   ieee154e_vars.timerId = opentimers2_create();
+   ieee154e_vars.timerId = opentimers_create();
    // assign ieee802154e timer with highest priority
-   opentimers2_setPriority(ieee154e_vars.timerId,0);
-   opentimers2_scheduleAbsolute(
+   opentimers_setPriority(ieee154e_vars.timerId,0);
+   opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,          // timerId
         ieee154e_vars.slotDuration,     // duration
         sctimer_readCounter(),          // reference
@@ -199,8 +199,8 @@ PORT_RADIOTIMER_WIDTH ieee154e_asnDiff(asn_t* someASN) {
 This function executes in ISR mode, when the new slot timer fires.
 */
 void isr_ieee154e_newSlot() {
-    ieee154e_vars.startOfSlotReference = opentimers2_getCurrentTimeout();
-    opentimers2_scheduleAbsolute(
+    ieee154e_vars.startOfSlotReference = opentimers_getCurrentTimeout();
+    opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                  // timerId
         TsSlotDuration,                         // duration
         ieee154e_vars.startOfSlotReference,     // reference
@@ -922,7 +922,7 @@ port_INLINE void activity_ti1ORri1() {
                ieee154e_vars.numOfSleepSlots = schedule_getFrameLength()+ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset; 
           }
           
-          opentimers2_scheduleAbsolute(
+          opentimers_scheduleAbsolute(
               ieee154e_vars.timerId,                            // timerId
               TsSlotDuration*(ieee154e_vars.numOfSleepSlots),   // duration
               ieee154e_vars.startOfSlotReference,               // reference
@@ -1020,7 +1020,7 @@ port_INLINE void activity_ti1ORri1() {
             radiotimer_setCapture(ACTION_TX_SEND_DONE);
 #else
             // arm tt1
-            opentimers2_scheduleAbsolute(
+            opentimers_scheduleAbsolute(
                 ieee154e_vars.timerId,                            // timerId
                 DURATION_tt1,                                     // duration
                 ieee154e_vars.startOfSlotReference,               // reference
@@ -1049,7 +1049,7 @@ port_INLINE void activity_ti1ORri1() {
          radiotimer_setCapture(ACTION_RX_DONE);
 #else
          // arm rt1
-         opentimers2_scheduleAbsolute(
+         opentimers_scheduleAbsolute(
               ieee154e_vars.timerId,                            // timerId
               DURATION_rt1,                                     // duration
               ieee154e_vars.startOfSlotReference,               // reference
@@ -1093,7 +1093,7 @@ port_INLINE void activity_ti1ORri1() {
              }
          }
          // set the timer based on calcualted number of slots to skip
-         opentimers2_scheduleAbsolute(
+         opentimers_scheduleAbsolute(
               ieee154e_vars.timerId,                            // timerId
               TsSlotDuration*(ieee154e_vars.numOfSleepSlots),   // duration
               ieee154e_vars.startOfSlotReference,               // reference
@@ -1132,7 +1132,7 @@ port_INLINE void activity_ti2() {
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
 #else
     // arm tt2
-    opentimers2_scheduleAbsolute(
+    opentimers_scheduleAbsolute(
           ieee154e_vars.timerId,                            // timerId
           DURATION_tt2,                                     // duration
           ieee154e_vars.startOfSlotReference,               // reference
@@ -1193,7 +1193,7 @@ port_INLINE void activity_ti3() {
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
 #else
     // arm tt3
-    opentimers2_scheduleAbsolute(
+    opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         DURATION_tt3,                                     // duration
         ieee154e_vars.startOfSlotReference,               // reference
@@ -1226,7 +1226,7 @@ port_INLINE void activity_ti4(PORT_RADIOTIMER_WIDTH capturedTime) {
     radiotimer_cancel(ACTION_NORMAL_TIMER);
 #else
     // cancel tt3
-    opentimers2_scheduleAbsolute(
+    opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         ieee154e_vars.slotDuration,                       // duration
         ieee154e_vars.startOfSlotReference,               // reference
@@ -1242,7 +1242,7 @@ port_INLINE void activity_ti4(PORT_RADIOTIMER_WIDTH capturedTime) {
     radiotimer_schedule(ACTION_NORMAL_TIMER,DURATION_tt4);
 #else
     // arm tt4
-    opentimers2_scheduleAbsolute(
+    opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         DURATION_tt4,                                     // duration
         ieee154e_vars.startOfSlotReference,               // reference
@@ -1273,7 +1273,7 @@ port_INLINE void activity_ti5(PORT_RADIOTIMER_WIDTH capturedTime) {
     radiotimer_cancel(ACTION_NORMAL_TIMER);
 #else
     // cancel tt4
-    opentimers2_scheduleAbsolute(
+    opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         ieee154e_vars.slotDuration,                       // duration
         ieee154e_vars.startOfSlotReference,               // reference
@@ -1310,7 +1310,7 @@ port_INLINE void activity_ti5(PORT_RADIOTIMER_WIDTH capturedTime) {
         radiotimer_setCapture(ACTION_RX_DONE);
 #else
         // arm tt5
-        opentimers2_scheduleAbsolute(
+        opentimers_scheduleAbsolute(
             ieee154e_vars.timerId,                            // timerId
             DURATION_tt5,                                     // duration
             ieee154e_vars.startOfSlotReference,               // reference
@@ -1337,7 +1337,7 @@ port_INLINE void activity_ti6() {
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
 #else
     // arm tt6
-    opentimers2_scheduleAbsolute(
+    opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         DURATION_tt6,                                     // duration
         ieee154e_vars.startOfSlotReference,               // reference
@@ -1386,7 +1386,7 @@ port_INLINE void activity_ti7() {
    radiotimer_schedule(ACTION_NORMAL_TIMER,DURATION_tt7);
 #else
    // arm tt7
-   opentimers2_scheduleAbsolute(
+   opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         DURATION_tt7,                                     // duration
         ieee154e_vars.startOfSlotReference,               // reference
@@ -1427,7 +1427,7 @@ port_INLINE void activity_ti8(PORT_RADIOTIMER_WIDTH capturedTime) {
     radiotimer_cancel(ACTION_NORMAL_TIMER);
 #else
     // cancel tt7
-    opentimers2_scheduleAbsolute(
+    opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         ieee154e_vars.slotDuration,                       // duration
         ieee154e_vars.startOfSlotReference,               // reference
@@ -1443,7 +1443,7 @@ port_INLINE void activity_ti8(PORT_RADIOTIMER_WIDTH capturedTime) {
     radiotimer_schedule(ACTION_NORMAL_TIMER,DURATION_tt8);
 #else
     // arm tt8
-   opentimers2_scheduleAbsolute(
+   opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         DURATION_tt8,                                     // duration
         ieee154e_vars.startOfSlotReference,               // reference
@@ -1473,7 +1473,7 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
     radiotimer_cancel(ACTION_NORMAL_TIMER);
 #else
     // cancel tt8
-    opentimers2_scheduleAbsolute(
+    opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         ieee154e_vars.slotDuration,                       // duration
         ieee154e_vars.startOfSlotReference,               // reference
@@ -1610,7 +1610,7 @@ port_INLINE void activity_ri2() {
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
 #else
     // arm rt2
-   opentimers2_scheduleAbsolute(
+   opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         DURATION_rt2,                                     // duration
         ieee154e_vars.startOfSlotReference,               // reference
@@ -1656,7 +1656,7 @@ port_INLINE void activity_ri3() {
     radiotimer_schedule(ACTION_NORMAL_TIMER,DURATION_rt3);
 #else
     // arm rt3 
-    opentimers2_scheduleAbsolute(
+    opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         DURATION_rt3,                                     // duration
         ieee154e_vars.startOfSlotReference,               // reference
@@ -1681,7 +1681,7 @@ port_INLINE void activity_ri4(PORT_RADIOTIMER_WIDTH capturedTime) {
    radiotimer_cancel(ACTION_NORMAL_TIMER);
 #else
     // cancel rt3
-    opentimers2_scheduleAbsolute(
+    opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         ieee154e_vars.slotDuration,                       // duration
         ieee154e_vars.startOfSlotReference,               // reference
@@ -1698,7 +1698,7 @@ port_INLINE void activity_ri4(PORT_RADIOTIMER_WIDTH capturedTime) {
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
    radiotimer_schedule(ACTION_NORMAL_TIMER,DURATION_rt4);
 #else
-    opentimers2_scheduleAbsolute(
+    opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         DURATION_rt4,                                     // duration
         ieee154e_vars.startOfSlotReference,               // reference
@@ -1731,7 +1731,7 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
    radiotimer_cancel(ACTION_NORMAL_TIMER);
 #else
     // cancel rt4
-    opentimers2_scheduleAbsolute(
+    opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         ieee154e_vars.slotDuration,                       // duration
         ieee154e_vars.startOfSlotReference,               // reference
@@ -1916,7 +1916,7 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
             radiotimer_setCapture(ACTION_TX_SEND_DONE);
 #else
         // arm rt5
-        opentimers2_scheduleAbsolute(
+        opentimers_scheduleAbsolute(
             ieee154e_vars.timerId,                            // timerId
             DURATION_rt5,                                     // duration
             ieee154e_vars.startOfSlotReference,               // reference
@@ -1960,7 +1960,7 @@ port_INLINE void activity_ri6() {
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
 #else
     // arm rt6
-    opentimers2_scheduleAbsolute(
+    opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         DURATION_rt6,                                     // duration
         ieee154e_vars.startOfSlotReference,               // reference
@@ -2057,7 +2057,7 @@ port_INLINE void activity_ri7() {
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
 #else
     // arm rt7
-    opentimers2_scheduleAbsolute(
+    opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         DURATION_rt7,                                     // duration
         ieee154e_vars.startOfSlotReference,               // reference
@@ -2089,7 +2089,7 @@ port_INLINE void activity_ri8(PORT_RADIOTIMER_WIDTH capturedTime) {
     radiotimer_cancel(ACTION_NORMAL_TIMER);
 #else
     // cancel rt7
-    opentimers2_scheduleAbsolute(
+    opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         ieee154e_vars.slotDuration,                       // duration
         ieee154e_vars.startOfSlotReference,               // reference
@@ -2105,7 +2105,7 @@ port_INLINE void activity_ri8(PORT_RADIOTIMER_WIDTH capturedTime) {
     radiotimer_schedule(ACTION_NORMAL_TIMER,DURATION_rt8);
 #else
     // arm rt8
-    opentimers2_scheduleAbsolute(
+    opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         DURATION_rt8,                                     // duration
         ieee154e_vars.startOfSlotReference,               // reference
@@ -2134,7 +2134,7 @@ port_INLINE void activity_ri9(PORT_RADIOTIMER_WIDTH capturedTime) {
    radiotimer_cancel(ACTION_NORMAL_TIMER);
 #else
     // cancel rt8
-    opentimers2_scheduleAbsolute(
+    opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         ieee154e_vars.slotDuration,                       // duration
         ieee154e_vars.startOfSlotReference,               // reference
@@ -2394,7 +2394,7 @@ void synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived) {
    PORT_RADIOTIMER_WIDTH currentValue;
    
    // record the current timer value and period
-   currentValue                   =  opentimers2_getValue(ieee154e_vars.timerId)-ieee154e_vars.startOfSlotReference;
+   currentValue                   =  opentimers_getValue(ieee154e_vars.timerId)-ieee154e_vars.startOfSlotReference;
    currentPeriod                  =  ieee154e_vars.slotDuration;
    
    // calculate new period
@@ -2421,7 +2421,7 @@ void synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived) {
    }
    
     // resynchronize by applying the new period
-    opentimers2_scheduleAbsolute(
+    opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         newPeriod,                                        // duration
         ieee154e_vars.startOfSlotReference,               // reference
@@ -2469,7 +2469,7 @@ void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
    newPeriod                      =  (PORT_RADIOTIMER_WIDTH)((PORT_SIGNED_INT_WIDTH)currentPeriod+timeCorrection);
 
     // resynchronize by applying the new period
-    opentimers2_scheduleAbsolute(
+    opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         newPeriod,                                        // duration
         ieee154e_vars.startOfSlotReference,               // reference
@@ -2675,7 +2675,7 @@ void endSlot() {
    radiotimer_cancel(ACTION_ALL_RADIOTIMER_INTERRUPT);
 #else
     // clear any pending timer
-    opentimers2_scheduleAbsolute(
+    opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         ieee154e_vars.slotDuration,                       // duration
         ieee154e_vars.startOfSlotReference,               // reference
@@ -2758,3 +2758,21 @@ void endSlot() {
 bool ieee154e_isSynch(){
    return ieee154e_vars.isSync;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

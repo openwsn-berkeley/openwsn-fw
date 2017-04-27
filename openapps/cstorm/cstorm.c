@@ -54,17 +54,17 @@ void cstorm_init(void) {
    //comment : not running by default
    cstorm_vars.period           = 6553; 
    
-   cstorm_vars.timerId          = opentimers2_create();
-   opentimers2_scheduleAbsolute(
+   cstorm_vars.timerId          = opentimers_create();
+   opentimers_scheduleAbsolute(
        cstorm_vars.timerId,
        cstorm_vars.period,
-       opentimers2_getValue(),
+       opentimers_getValue(),
        TIME_MS,
        cstorm_timer_cb
    );
    
    //stop
-   //opentimers2_destroy(cstorm_vars.timerId);
+   //opentimers_destroy(cstorm_vars.timerId);
    */
 }
 
@@ -113,13 +113,13 @@ owerror_t cstorm_receive(
          
          /*
          // stop and start again only if period > 0
-         opentimers2_cancel(cstorm_vars.timerId);
+         opentimers_cancel(cstorm_vars.timerId);
          
          if(cstorm_vars.period > 0) {
-             opentimers2_scheduleAbsolute(
+             opentimers_scheduleAbsolute(
                  cstorm_vars.timerId,
                  cstorm_vars.period,
-                 opentimers2_getValue();
+                 opentimers_getValue();
                  TIME_MS,
                  cstorm_timer_cb
              );
@@ -157,7 +157,7 @@ void cstorm_task_cb() {
    owerror_t            outcome;
    uint8_t              numOptions;
    
-    opentimers2_scheduleRelative(
+    opentimers_scheduleRelative(
         cstorm_vars.timerId,
         cstorm_vars.period,
         TIME_MS,
@@ -169,13 +169,13 @@ void cstorm_task_cb() {
    
    // don't run on dagroot
    if (idmanager_getIsDAGroot()) {
-      opentimers2_destroy(cstorm_vars.timerId);
+      opentimers_destroy(cstorm_vars.timerId);
       return;
    }
    
    if(cstorm_vars.period == 0) {
       // stop the periodic timer
-      opentimers2_cancel(cstorm_vars.timerId);
+      opentimers_cancel(cstorm_vars.timerId);
       return;
    }
    
@@ -249,4 +249,9 @@ void cstorm_task_cb() {
 void cstorm_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }
+
+
+
+
+
 

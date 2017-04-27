@@ -1,5 +1,5 @@
 /**
-\brief Definition of the "opentimers2" driver.
+\brief Definition of the "opentimers" driver.
 
 This driver uses a single hardware timer, which it virtualizes to support
 at most MAX_NUM_TIMERS timers.
@@ -8,7 +8,7 @@ at most MAX_NUM_TIMERS timers.
  */
 
 #include "opendefs.h"
-#include "opentimers2.h"
+#include "opentimers.h"
 #include "sctimer.h"
 #include "leds.h"
 
@@ -16,11 +16,11 @@ at most MAX_NUM_TIMERS timers.
 
 //=========================== variables =======================================
 
-opentimers2_vars_t opentimers2_vars;
+opentimers_vars_t opentimers_vars;
 
 //=========================== prototypes ======================================
 
-void opentimers2_timer_callback(void);
+void opentimers_timer_callback(void);
 
 //=========================== public ==========================================
 
@@ -29,16 +29,16 @@ void opentimers2_timer_callback(void);
 
 Initializes data structures and hardware timer.
  */
-void opentimers2_init(void){
+void opentimers_init(void){
     uint8_t i;
     // initialize local variables
-    memset(&opentimers2_vars,0,sizeof(opentimers2_vars_t));
+    memset(&opentimers_vars,0,sizeof(opentimers_vars_t));
     for (i=0;i<MAX_NUM_TIMERS;i++){
         // by default, all timers have the priority of 0xff (lowest priority)
-        opentimers2_vars.timersBuf[i].priority = 0xff;
+        opentimers_vars.timersBuf[i].priority = 0xff;
     }
     // set callback for sctimer module
-    sctimer_set_callback(opentimers2_timer_callback);
+    sctimer_set_callback(opentimers_timer_callback);
 } 
 
 /**
@@ -48,11 +48,11 @@ create a timer by assigning an Id for the timer.
 
 \returns the id of the timer will be returned
  */
-opentimers2_id_t opentimers2_create(void){
+opentimers_id_t opentimers_create(void){
     uint8_t id;
     for (id=0;id<MAX_NUM_TIMERS;id++){
-        if (opentimers2_vars.timersBuf[id].isUsed  == FALSE){
-            opentimers2_vars.timersBuf[id].isUsed   = TRUE;
+        if (opentimers_vars.timersBuf[id].isUsed  == FALSE){
+            opentimers_vars.timersBuf[id].isUsed   = TRUE;
             return id;
         }
     }
@@ -74,10 +74,10 @@ can't be called firstly after the timer is created.
 \param[in] uint_type indicates the unit type of this schedule: ticks or ms
 \param[in] cb indicates when this scheduled timer fired, call this callback function.
  */
-void opentimers2_scheduleRelative(opentimers2_id_t    id, 
+void opentimers_scheduleRelative(opentimers_id_t    id, 
                                   uint32_t            duration,
                                   time_type_t         uint_type, 
-                                  opentimers2_cbt     cb){
+                                  opentimers_cbt     cb){
     uint8_t  i;
     uint8_t idToSchedule;
     uint32_t durationTicks;
@@ -85,7 +85,7 @@ void opentimers2_scheduleRelative(opentimers2_id_t    id,
     uint32_t tempTimerGap;
     // 1. make sure the timer exist
     for (i=0;i<MAX_NUM_TIMERS;i++){
-        if (opentimers2_vars.timersBuf[i].isUsed && i == id){
+        if (opentimers_vars.timersBuf[i].isUsed && i == id){
             break;
         }
     }
@@ -109,21 +109,21 @@ void opentimers2_scheduleRelative(opentimers2_id_t    id,
         break;
     }
     
-    opentimers2_vars.timersBuf[id].currentCompareValue = durationTicks+opentimers2_vars.timersBuf[id].lastCompareValue;
-    opentimers2_vars.timersBuf[id].isrunning           = TRUE;
-    opentimers2_vars.timersBuf[id].callback            = cb;
+    opentimers_vars.timersBuf[id].currentCompareValue = durationTicks+opentimers_vars.timersBuf[id].lastCompareValue;
+    opentimers_vars.timersBuf[id].isrunning           = TRUE;
+    opentimers_vars.timersBuf[id].callback            = cb;
     
     // 3. find the next timer to fire
-    timerGap     = opentimers2_vars.timersBuf[0].currentCompareValue-opentimers2_vars.lastTimeout;
+    timerGap     = opentimers_vars.timersBuf[0].currentCompareValue-opentimers_vars.lastTimeout;
     idToSchedule = 0;
     for (i=1;i<MAX_NUM_TIMERS;i++){
-        if (opentimers2_vars.timersBuf[i].isrunning){
-            tempTimerGap = opentimers2_vars.timersBuf[i].currentCompareValue - opentimers2_vars.lastTimeout;
+        if (opentimers_vars.timersBuf[i].isrunning){
+            tempTimerGap = opentimers_vars.timersBuf[i].currentCompareValue - opentimers_vars.lastTimeout;
             if (tempTimerGap < timerGap){
                 // if a timer "i" has low priority but has compare value less than 
                 // candidate timer "idToSchedule" more than TIMERTHRESHOLD ticks, 
                 // replace candidate timer by this timer "i".
-                if (opentimers2_vars.timersBuf[i].priority > opentimers2_vars.timersBuf[idToSchedule].priority){
+                if (opentimers_vars.timersBuf[i].priority > opentimers_vars.timersBuf[idToSchedule].priority){
                     if (timerGap-tempTimerGap > TIMERTHRESHOLD){
                         timerGap     = tempTimerGap;
                         idToSchedule = i;
@@ -139,7 +139,7 @@ void opentimers2_scheduleRelative(opentimers2_id_t    id,
                 // if a timer "i" has higher priority than candidate timer "idToSchedule" 
                 // and its compare value is larger than timer "i" no more than TIMERTHRESHOLD ticks,
                 // replace candidate timer by timer "i".
-                if (opentimers2_vars.timersBuf[i].priority < opentimers2_vars.timersBuf[idToSchedule].priority){
+                if (opentimers_vars.timersBuf[i].priority < opentimers_vars.timersBuf[idToSchedule].priority){
                     if (tempTimerGap - timerGap < TIMERTHRESHOLD){
                         timerGap     = tempTimerGap;
                         idToSchedule = i;
@@ -150,9 +150,9 @@ void opentimers2_scheduleRelative(opentimers2_id_t    id,
     }
     
     // if I got here, assign the next to be fired timer to given timer
-    opentimers2_vars.currentTimeout = opentimers2_vars.timersBuf[idToSchedule].currentCompareValue;
-    sctimer_setCompare(opentimers2_vars.currentTimeout);
-    opentimers2_vars.running        = TRUE;
+    opentimers_vars.currentTimeout = opentimers_vars.timersBuf[idToSchedule].currentCompareValue;
+    sctimer_setCompare(opentimers_vars.currentTimeout);
+    opentimers_vars.running        = TRUE;
 }
 
 /**
@@ -166,11 +166,11 @@ to lastCompareValue + reference.
 \param[in] uint_type indicates the unit type of this schedule: ticks or ms
 \param[in] cb indicates when this scheduled timer fired, call this callback function.
  */
-void opentimers2_scheduleAbsolute(opentimers2_id_t    id, 
+void opentimers_scheduleAbsolute(opentimers_id_t    id, 
                                   uint32_t            duration, 
                                   uint32_t            reference , 
                                   time_type_t         uint_type, 
-                                  opentimers2_cbt     cb){
+                                  opentimers_cbt     cb){
     uint8_t  i;
     uint8_t idToSchedule;
     uint32_t durationTicks;
@@ -178,7 +178,7 @@ void opentimers2_scheduleAbsolute(opentimers2_id_t    id,
     uint32_t tempTimerGap;
     // 1. make sure the timer exist
     for (i=0;i<MAX_NUM_TIMERS;i++){
-        if (opentimers2_vars.timersBuf[i].isUsed && i == id){
+        if (opentimers_vars.timersBuf[i].isUsed && i == id){
             break;
         }
     }
@@ -202,21 +202,21 @@ void opentimers2_scheduleAbsolute(opentimers2_id_t    id,
         break;
     }
     
-    opentimers2_vars.timersBuf[id].currentCompareValue = durationTicks+reference;
-    opentimers2_vars.timersBuf[id].isrunning           = TRUE;
-    opentimers2_vars.timersBuf[id].callback            = cb;
+    opentimers_vars.timersBuf[id].currentCompareValue = durationTicks+reference;
+    opentimers_vars.timersBuf[id].isrunning           = TRUE;
+    opentimers_vars.timersBuf[id].callback            = cb;
     
     // 3. find the next timer to fire
-    timerGap     = opentimers2_vars.timersBuf[0].currentCompareValue-opentimers2_vars.lastTimeout;
+    timerGap     = opentimers_vars.timersBuf[0].currentCompareValue-opentimers_vars.lastTimeout;
     idToSchedule = 0;
     for (i=1;i<MAX_NUM_TIMERS;i++){
-        if (opentimers2_vars.timersBuf[i].isrunning){
-            tempTimerGap = opentimers2_vars.timersBuf[i].currentCompareValue - opentimers2_vars.lastTimeout;
+        if (opentimers_vars.timersBuf[i].isrunning){
+            tempTimerGap = opentimers_vars.timersBuf[i].currentCompareValue - opentimers_vars.lastTimeout;
             if (tempTimerGap < timerGap){
                 // if a timer "i" has low priority but has compare value less than 
                 // candidate timer "idToSchedule" more than TIMERTHRESHOLD ticks, 
                 // replace candidate timer by this timer "i".
-                if (opentimers2_vars.timersBuf[i].priority > opentimers2_vars.timersBuf[idToSchedule].priority){
+                if (opentimers_vars.timersBuf[i].priority > opentimers_vars.timersBuf[idToSchedule].priority){
                     if (timerGap-tempTimerGap > TIMERTHRESHOLD){
                         timerGap     = tempTimerGap;
                         idToSchedule = i;
@@ -232,7 +232,7 @@ void opentimers2_scheduleAbsolute(opentimers2_id_t    id,
                 // if a timer "i" has higher priority than candidate timer "idToSchedule" 
                 // and its compare value is larger than timer "i" no more than TIMERTHRESHOLD ticks,
                 // replace candidate timer by timer "i".
-                if (opentimers2_vars.timersBuf[i].priority < opentimers2_vars.timersBuf[idToSchedule].priority){
+                if (opentimers_vars.timersBuf[i].priority < opentimers_vars.timersBuf[idToSchedule].priority){
                     if (tempTimerGap - timerGap < TIMERTHRESHOLD){
                         timerGap     = tempTimerGap;
                         idToSchedule = i;
@@ -243,9 +243,9 @@ void opentimers2_scheduleAbsolute(opentimers2_id_t    id,
     }
     
     // if I got here, assign the next to be fired timer to given timer
-    opentimers2_vars.currentTimeout = opentimers2_vars.timersBuf[idToSchedule].currentCompareValue;
-    sctimer_setCompare(opentimers2_vars.currentTimeout);
-    opentimers2_vars.running        = TRUE;
+    opentimers_vars.currentTimeout = opentimers_vars.timersBuf[idToSchedule].currentCompareValue;
+    sctimer_setCompare(opentimers_vars.currentTimeout);
+    opentimers_vars.running        = TRUE;
 }
 
 /**
@@ -256,9 +256,9 @@ isrunning as false. The timer may be recover later.
 
 \param[in] id the timer id
  */
-void opentimers2_cancel(opentimers2_id_t id){
-    opentimers2_vars.timersBuf[id].isrunning = FALSE;
-    opentimers2_vars.timersBuf[id].callback  = NULL;
+void opentimers_cancel(opentimers_id_t id){
+    opentimers_vars.timersBuf[id].isrunning = FALSE;
+    opentimers_vars.timersBuf[id].callback  = NULL;
 }
 
 /**
@@ -270,9 +270,9 @@ Reset the whole entry of given timer including the id.
 
 \returns False if the given can't be found or return Success
  */
-bool opentimers2_destroy(opentimers2_id_t id){
+bool opentimers_destroy(opentimers_id_t id){
     if (id<MAX_NUM_TIMERS){
-        memset(&opentimers2_vars.timersBuf[id],0,sizeof(opentimers2_t));
+        memset(&opentimers_vars.timersBuf[id],0,sizeof(opentimers_t));
         return TRUE;
     } else {
         return FALSE;
@@ -286,7 +286,7 @@ bool opentimers2_destroy(opentimers2_id_t id){
 
 \returns the current counter value.
  */
-uint32_t opentimers2_getValue(opentimers2_id_t id){
+uint32_t opentimers_getValue(opentimers_id_t id){
     return sctimer_readCounter();
 }
 
@@ -295,8 +295,8 @@ uint32_t opentimers2_getValue(opentimers2_id_t id){
 
 \returns currentTimeout.
  */
-uint32_t opentimers2_getCurrentTimeout(void){
-    return opentimers2_vars.currentTimeout;
+uint32_t opentimers_getCurrentTimeout(void){
+    return opentimers_vars.currentTimeout;
 }
 
 /**
@@ -304,8 +304,8 @@ uint32_t opentimers2_getCurrentTimeout(void){
 
 \returns isRunning variable.
  */
-bool opentimers2_isRunning(opentimers2_id_t id){
-    return opentimers2_vars.timersBuf[id].isrunning;
+bool opentimers_isRunning(opentimers_id_t id){
+    return opentimers_vars.timersBuf[id].isrunning;
 }
 
 
@@ -315,9 +315,9 @@ bool opentimers2_isRunning(opentimers2_id_t id){
 \param[in] id indicates the timer to be assigned.
 \param[in] priority indicates the priority of given timer.
  */
-void opentimers2_setPriority(opentimers2_id_t id, uint8_t priority){
-    if (opentimers2_vars.timersBuf[id].isUsed  == TRUE){
-        opentimers2_vars.timersBuf[id].priority = priority;
+void opentimers_setPriority(opentimers_id_t id, uint8_t priority){
+    if (opentimers_vars.timersBuf[id].isUsed  == TRUE){
+        opentimers_vars.timersBuf[id].priority = priority;
     } else {
         // the given timer is not used, do nothing.
     }
@@ -332,42 +332,42 @@ This function is called when sctimer interrupt happens. The function looks the
 whole timer buffer and find out the correct timer responding to the interrupt
 and call the callback recorded for that timer.
  */
-void opentimers2_timer_callback(void){
+void opentimers_timer_callback(void){
     uint8_t i;
     uint8_t j;
     uint8_t idToCallCB;
     uint8_t idToSchedule;
     uint32_t timerGap;
     uint32_t tempTimerGap;
-    uint32_t tempLastTimeout = opentimers2_vars.currentTimeout;
+    uint32_t tempLastTimeout = opentimers_vars.currentTimeout;
     // 1. find the expired timer
     for (i=0;i<MAX_NUM_TIMERS;i++){
-        if (opentimers2_vars.timersBuf[i].isrunning==TRUE){
+        if (opentimers_vars.timersBuf[i].isrunning==TRUE){
             // all timers in the past within TIMERTHRESHOLD ticks
             // (probably with low priority) will mared as Expired.
-            if (opentimers2_vars.currentTimeout-opentimers2_vars.timersBuf[i].currentCompareValue <= TIMERTHRESHOLD){
+            if (opentimers_vars.currentTimeout-opentimers_vars.timersBuf[i].currentCompareValue <= TIMERTHRESHOLD){
                 // this timer expired, mark as expired
-                opentimers2_vars.timersBuf[i].hasExpired = TRUE;
+                opentimers_vars.timersBuf[i].hasExpired = TRUE;
                 // find the fired timer who has the smallest currentTimeout as last Timeout
-                if (tempLastTimeout>opentimers2_vars.timersBuf[i].currentCompareValue){
-                    tempLastTimeout = opentimers2_vars.timersBuf[i].currentCompareValue;
+                if (tempLastTimeout>opentimers_vars.timersBuf[i].currentCompareValue){
+                    tempLastTimeout = opentimers_vars.timersBuf[i].currentCompareValue;
                 }
             }
         }
     }
     
     // update lastTimeout
-    opentimers2_vars.lastTimeout                               = tempLastTimeout;
+    opentimers_vars.lastTimeout                               = tempLastTimeout;
     
     // 2. call the callback of expired timers
     idToCallCB = TOO_MANY_TIMERS_ERROR;
     // find out the timer expired with highest priority 
     for (j=0;j<MAX_NUM_TIMERS;j++){
-        if (opentimers2_vars.timersBuf[j].hasExpired == TRUE){
+        if (opentimers_vars.timersBuf[j].hasExpired == TRUE){
             if (idToCallCB==TOO_MANY_TIMERS_ERROR){
                 idToCallCB = j;
             } else {
-                if (opentimers2_vars.timersBuf[j].priority<opentimers2_vars.timersBuf[idToCallCB].priority){
+                if (opentimers_vars.timersBuf[j].priority<opentimers_vars.timersBuf[idToCallCB].priority){
                     idToCallCB = j;
                 }
             }
@@ -379,28 +379,28 @@ void opentimers2_timer_callback(void){
         // call all timers expired having the same priority with timer idToCallCB
         for (j=0;j<MAX_NUM_TIMERS;j++){
             if (
-                opentimers2_vars.timersBuf[j].hasExpired == TRUE &&
-                opentimers2_vars.timersBuf[j].priority   == opentimers2_vars.timersBuf[idToCallCB].priority
+                opentimers_vars.timersBuf[j].hasExpired == TRUE &&
+                opentimers_vars.timersBuf[j].priority   == opentimers_vars.timersBuf[idToCallCB].priority
             ){
-                opentimers2_vars.timersBuf[j].isrunning           = FALSE;
-                opentimers2_vars.timersBuf[j].lastCompareValue    = opentimers2_vars.timersBuf[j].currentCompareValue;
-                opentimers2_vars.timersBuf[j].hasExpired          = FALSE;
-                opentimers2_vars.timersBuf[j].callback();
+                opentimers_vars.timersBuf[j].isrunning           = FALSE;
+                opentimers_vars.timersBuf[j].lastCompareValue    = opentimers_vars.timersBuf[j].currentCompareValue;
+                opentimers_vars.timersBuf[j].hasExpired          = FALSE;
+                opentimers_vars.timersBuf[j].callback();
             }
         }
     }
       
     // 3. find the next timer to be fired
-    timerGap     = opentimers2_vars.timersBuf[0].currentCompareValue-opentimers2_vars.lastTimeout;
+    timerGap     = opentimers_vars.timersBuf[0].currentCompareValue-opentimers_vars.lastTimeout;
     idToSchedule = 0;
     for (i=1;i<MAX_NUM_TIMERS;i++){
-        if (opentimers2_vars.timersBuf[i].isrunning){
-            tempTimerGap = opentimers2_vars.timersBuf[i].currentCompareValue - opentimers2_vars.lastTimeout;
+        if (opentimers_vars.timersBuf[i].isrunning){
+            tempTimerGap = opentimers_vars.timersBuf[i].currentCompareValue - opentimers_vars.lastTimeout;
             if (tempTimerGap < timerGap){
                 // if a timer "i" has low priority but has compare value less than 
                 // candidate timer "idToSchedule" more than TIMERTHRESHOLD ticks, 
                 // replace candidate timer by this timer "i".
-                if (opentimers2_vars.timersBuf[i].priority > opentimers2_vars.timersBuf[idToSchedule].priority){
+                if (opentimers_vars.timersBuf[i].priority > opentimers_vars.timersBuf[idToSchedule].priority){
                     if (timerGap-tempTimerGap > TIMERTHRESHOLD){
                         timerGap     = tempTimerGap;
                         idToSchedule = i;
@@ -416,7 +416,7 @@ void opentimers2_timer_callback(void){
                 // if a timer "i" has higher priority than candidate timer "idToSchedule" 
                 // and its compare value is larger than timer "i" no more than TIMERTHRESHOLD ticks,
                 // replace candidate timer by timer "i".
-                if (opentimers2_vars.timersBuf[i].priority < opentimers2_vars.timersBuf[idToSchedule].priority){
+                if (opentimers_vars.timersBuf[i].priority < opentimers_vars.timersBuf[idToSchedule].priority){
                     if (tempTimerGap - timerGap < TIMERTHRESHOLD){
                         timerGap     = tempTimerGap;
                         idToSchedule = i;
@@ -427,7 +427,61 @@ void opentimers2_timer_callback(void){
     }
     
     // 4. reschedule the timer
-    opentimers2_vars.currentTimeout = opentimers2_vars.timersBuf[idToSchedule].currentCompareValue;
-    sctimer_setCompare(opentimers2_vars.currentTimeout);
-    opentimers2_vars.running        = TRUE;
+    opentimers_vars.currentTimeout = opentimers_vars.timersBuf[idToSchedule].currentCompareValue;
+    sctimer_setCompare(opentimers_vars.currentTimeout);
+    opentimers_vars.running        = TRUE;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

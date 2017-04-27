@@ -125,25 +125,25 @@ void sixtop_init() {
     sixtop_vars.isResponseEnabled  = TRUE;
     sixtop_vars.handler            = SIX_HANDLER_NONE;
     
-    sixtop_vars.ebSendingTimerId   = opentimers2_create();
-    opentimers2_scheduleAbsolute(
+    sixtop_vars.ebSendingTimerId   = opentimers_create();
+    opentimers_scheduleAbsolute(
         sixtop_vars.ebSendingTimerId,
         (sixtop_vars.ebPeriod-EBPERIOD_RANDOM_RANG+(openrandom_get16b()%(2*EBPERIOD_RANDOM_RANG))),
-        opentimers2_getValue(sixtop_vars.ebSendingTimerId),
+        opentimers_getValue(sixtop_vars.ebSendingTimerId),
         TIME_MS,
         sixtop_sendingEb_timer_cb
     );
     
-    sixtop_vars.maintenanceTimerId   = opentimers2_create();
-    opentimers2_scheduleAbsolute(
+    sixtop_vars.maintenanceTimerId   = opentimers_create();
+    opentimers_scheduleAbsolute(
         sixtop_vars.maintenanceTimerId,
         sixtop_vars.periodMaintenance,
-        opentimers2_getValue(sixtop_vars.maintenanceTimerId),
+        opentimers_getValue(sixtop_vars.maintenanceTimerId),
         TIME_MS,
         sixtop_maintenance_timer_cb
     );
     
-    sixtop_vars.timeoutTimerId      =  opentimers2_create();
+    sixtop_vars.timeoutTimerId      =  opentimers_create();
 }
 
 void sixtop_setKaPeriod(uint16_t kaPeriod) {
@@ -642,7 +642,7 @@ owerror_t sixtop_send_internal(
 // timer interrupt callbacks
 void sixtop_sendingEb_timer_cb(void){
    scheduler_push_task(timer_sixtop_sendEb_fired,TASKPRIO_SIXTOP);
-   opentimers2_scheduleRelative(
+   opentimers_scheduleRelative(
        sixtop_vars.ebSendingTimerId,
        (sixtop_vars.ebPeriod-EBPERIOD_RANDOM_RANG+(openrandom_get16b()%(2*EBPERIOD_RANDOM_RANG))),
        TIME_MS,
@@ -653,7 +653,7 @@ void sixtop_sendingEb_timer_cb(void){
 void sixtop_maintenance_timer_cb(void) {
    scheduler_push_task(timer_sixtop_management_fired,TASKPRIO_SIXTOP);
    sixtop_vars.periodMaintenance = 872+(openrandom_get16b()&0xff);
-   opentimers2_scheduleRelative(
+   opentimers_scheduleRelative(
        sixtop_vars.maintenanceTimerId,
        sixtop_vars.periodMaintenance,
        TIME_MS,
@@ -852,7 +852,7 @@ void timer_sixtop_six2six_timeout_fired(void) {
    // timeout timer fired, reset the state of sixtop to idle
    sixtop_vars.six2six_state = SIX_STATE_IDLE;
    sixtop_vars.handler = SIX_HANDLER_NONE;
-   opentimers2_cancel(sixtop_vars.timeoutTimerId);
+   opentimers_cancel(sixtop_vars.timeoutTimerId);
 }
 
 void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
@@ -963,10 +963,10 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
         sixtop_vars.six2six_state == SIX_STATE_WAIT_CLEARRESPONSE
     ){
         // start timeout timer if I am waiting for a response
-        opentimers2_scheduleAbsolute(
+        opentimers_scheduleAbsolute(
             sixtop_vars.timeoutTimerId,
             SIX2SIX_TIMEOUT_MS,
-            opentimers2_getValue(sixtop_vars.timeoutTimerId),
+            opentimers_getValue(sixtop_vars.timeoutTimerId),
             TIME_MS,
             sixtop_timeout_timer_cb
         );
@@ -1269,7 +1269,7 @@ void sixtop_notifyReceiveCommand(
                            (errorparameter_t)sixtop_vars.six2six_state);
             sixtop_vars.six2six_state   = SIX_STATE_IDLE;
             sixtop_vars.handler         = SIX_HANDLER_NONE;
-            opentimers2_cancel(sixtop_vars.timeoutTimerId);
+            opentimers_cancel(sixtop_vars.timeoutTimerId);
         }
     }
 }
@@ -1525,3 +1525,10 @@ bool sixtop_areAvailableCellsToBeRemoved(
    
    return available;
 }
+
+
+
+
+
+
+

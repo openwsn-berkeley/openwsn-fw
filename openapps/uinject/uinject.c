@@ -36,11 +36,11 @@ void uinject_init() {
 
    uinject_vars.period = UINJECT_PERIOD_MS;
    // start periodic timer
-   uinject_vars.timerId = opentimers2_create();
-   opentimers2_scheduleAbsolute(
+   uinject_vars.timerId = opentimers_create();
+   opentimers_scheduleAbsolute(
        uinject_vars.period,
        UINJECT_PERIOD_MS,
-       opentimers2_getValue(uinject_vars.timerId),
+       opentimers_getValue(uinject_vars.timerId),
        TIME_MS,
        uinject_timer_cb
    );
@@ -77,7 +77,7 @@ void uinject_task_cb() {
    OpenQueueEntry_t*    pkt;
    uint8_t              asnArray[5];
    
-   opentimers2_scheduleRelative(
+   opentimers_scheduleRelative(
        uinject_vars.period,
        UINJECT_PERIOD_MS,
        TIME_MS,
@@ -89,7 +89,7 @@ void uinject_task_cb() {
    
    // don't run on dagroot
    if (idmanager_getIsDAGroot()) {
-      opentimers2_destroy(uinject_vars.timerId);
+      opentimers_destroy(uinject_vars.timerId);
       return;
    }
    
@@ -132,3 +132,6 @@ void uinject_task_cb() {
       openqueue_freePacketBuffer(pkt);
    }
 }
+
+
+

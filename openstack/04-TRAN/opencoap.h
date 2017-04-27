@@ -8,7 +8,7 @@
 \{
 */
 
-#include "opentimers2.h"
+#include "opentimers.h"
 #include "openudp.h"
 
 //=========================== define ==========================================
@@ -177,3 +177,4 @@ owerror_t     opencoap_send(
 */
 
 #endif
+

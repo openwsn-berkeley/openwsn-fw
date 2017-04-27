@@ -83,11 +83,11 @@ void icmpv6rpl_init() {
    
    icmpv6rpl_vars.dioPeriod                 = TIMER_DIO_TIMEOUT;
    dioPeriod                                = icmpv6rpl_vars.dioPeriod - 0x80 + (openrandom_get16b()&0xff);
-   icmpv6rpl_vars.timerIdDIO                = opentimers2_create();
-   opentimers2_scheduleAbsolute(
+   icmpv6rpl_vars.timerIdDIO                = opentimers_create();
+   opentimers_scheduleAbsolute(
        icmpv6rpl_vars.timerIdDIO,
        dioPeriod,
-       opentimers2_getValue(icmpv6rpl_vars.timerIdDIO),
+       opentimers_getValue(icmpv6rpl_vars.timerIdDIO),
        TIME_MS,
        icmpv6rpl_timer_DIO_cb
    );
@@ -133,11 +133,11 @@ void icmpv6rpl_init() {
    
    icmpv6rpl_vars.daoPeriod                 = TIMER_DAO_TIMEOUT;
    daoPeriod                                = icmpv6rpl_vars.daoPeriod - 0x80 + (openrandom_get16b()&0xff);
-   icmpv6rpl_vars.timerIdDAO                = opentimers2_create();
-   opentimers2_scheduleAbsolute(
+   icmpv6rpl_vars.timerIdDAO                = opentimers_create();
+   opentimers_scheduleAbsolute(
        icmpv6rpl_vars.timerIdDAO,
        daoPeriod,
-       opentimers2_getValue(icmpv6rpl_vars.timerIdDAO),
+       opentimers_getValue(icmpv6rpl_vars.timerIdDAO),
        TIME_MS,
        icmpv6rpl_timer_DAO_cb
    );
@@ -521,7 +521,7 @@ void icmpv6rpl_killPreferredParent() {
 void icmpv6rpl_timer_DIO_cb(void) {
    scheduler_push_task(icmpv6rpl_timer_DIO_task,TASKPRIO_RPL);
    // arm the DIO timer with this new value
-   opentimers2_scheduleRelative(
+   opentimers_scheduleRelative(
       icmpv6rpl_vars.timerIdDIO,
       icmpv6rpl_vars.dioPeriod - 0x80 + (openrandom_get16b()&0xff),
       TIME_MS,
@@ -631,7 +631,7 @@ void sendDIO() {
 void icmpv6rpl_timer_DAO_cb(void) {
    scheduler_push_task(icmpv6rpl_timer_DAO_task,TASKPRIO_RPL);
    // arm the DAO timer with this new value
-   opentimers2_scheduleRelative(
+   opentimers_scheduleRelative(
        icmpv6rpl_vars.timerIdDAO,
        icmpv6rpl_vars.daoPeriod - 0x80 + (openrandom_get16b()&0xff),
        TIME_MS,
@@ -817,7 +817,7 @@ void icmpv6rpl_setDIOPeriod(uint16_t dioPeriod){
    
    icmpv6rpl_vars.dioPeriod = dioPeriod;
    dioPeriodRandom = icmpv6rpl_vars.dioPeriod - 0x80 + (openrandom_get16b()&0xff);
-   opentimers2_scheduleRelative(
+   opentimers_scheduleRelative(
        icmpv6rpl_vars.timerIdDIO,
        dioPeriodRandom,
        TIME_MS,
@@ -830,10 +830,15 @@ void icmpv6rpl_setDAOPeriod(uint16_t daoPeriod){
    
    icmpv6rpl_vars.daoPeriod = daoPeriod;
    daoPeriodRandom = icmpv6rpl_vars.daoPeriod - 0x80 + (openrandom_get16b()&0xff);
-   opentimers2_scheduleRelative(
+   opentimers_scheduleRelative(
        icmpv6rpl_vars.timerIdDAO,
        daoPeriodRandom,
        TIME_MS,
        icmpv6rpl_timer_DAO_task
    );
 }
+
+
+
+
+

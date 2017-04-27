@@ -16,7 +16,7 @@
 
 typedef struct {
    coap_resource_desc_t   desc;
-   opentimers2_id_t       timerId;
+   opentimers_id_t       timerId;
 } cexample_vars_t;
 
 //=========================== variables =======================================
@@ -31,3 +31,4 @@ void cexample_init(void);
 */
 
 #endif
+
