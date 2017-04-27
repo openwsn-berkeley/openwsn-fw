@@ -41,11 +41,11 @@ void bsp_timer_init() {
     //Configure TIM2, Clock
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2 , ENABLE);
 
-    //Configure TIM2: Period = 0xffff, prescaler = 1023(32M/(1023+1) = 32.768KHz), CounterMode  = upCounting mode
+    //Configure TIM2: Period = 0xffff, prescaler = 2319 (76M/(2319+1) ~ 32.768KHz), CounterMode  = upCounting mode
     TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure ;
     TIM_TimeBaseStructure.TIM_Period        = 0xFFFF;
-    TIM_TimeBaseStructure.TIM_Prescaler     = 1023;;
-    TIM_TimeBaseStructure.TIM_ClockDivision = 0;
+    TIM_TimeBaseStructure.TIM_Prescaler     = 2197; // JMRubillon 2197 experimentally found to give 1 second pulse
+    TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
     TIM_TimeBaseStructure.TIM_CounterMode   = TIM_CounterMode_Up;
     TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
     

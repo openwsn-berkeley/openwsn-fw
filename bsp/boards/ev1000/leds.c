@@ -1,8 +1,10 @@
 /**
-\brief openmoteSTM32 definition of the "leds" bsp module.
+\brief ev1000 definition of the "leds" bsp module.
 
 \author Chang Tengfei <tengfei.chang@gmail.com>,  July 2012.
+\author Jean-Michel Rubillon <jmrubillon@theiet.org>, April 2017
 */
+
 #include "stm32f10x_lib.h"
 #include "leds.h"
 
@@ -22,7 +24,7 @@ void leds_init() {
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC , ENABLE);
 
     GPIO_InitTypeDef GPIO_InitStructure;
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_10 | GPIO_Pin_11;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOC, &GPIO_InitStructure);
@@ -94,23 +96,23 @@ uint8_t leds_radio_isOn() {
 // blue
 void leds_sync_on() {
     
-    GPIOC->ODR |= 0X0400;
+    GPIOC->ODR |= 0X0100;
 }
 
 void leds_sync_off() {
     
-    GPIOC->ODR &= ~0X0400;
+    GPIOC->ODR &= ~0X0100;
 }
 
 void leds_sync_toggle() {
     
-    GPIOC->ODR ^= 0X0400;
+    GPIOC->ODR ^= 0X0100;
 }
 
 uint8_t leds_sync_isOn() {
     
     u8 bitstatus = 0x00;
-    if ((GPIOC->ODR & 0X0400) != (u32)0){
+    if ((GPIOC->ODR & 0X0100) != (u32)0){
         bitstatus = 0x01;
     } else{
         bitstatus = 0x00;
@@ -121,23 +123,23 @@ uint8_t leds_sync_isOn() {
 // yellow
 void leds_debug_on() {
     
-    GPIOC->ODR |= 0X0800;  
+    GPIOC->ODR |= 0X0200;  
 }
 
 void leds_debug_off(){
     
-    GPIOC->ODR &= ~0X0800;  
+    GPIOC->ODR &= ~0X0200;  
 }
 
 void leds_debug_toggle(){
     
-    GPIOC->ODR ^= 0X0800;  
+    GPIOC->ODR ^= 0X0200;  
 }
 
 uint8_t leds_debug_isOn(){
     
     u8 bitstatus = 0x00;
-    if ((GPIOC->ODR & 0X0800) != (u32)0){
+    if ((GPIOC->ODR & 0X0200) != (u32)0){
         bitstatus = 0x01;
     } else{
         bitstatus = 0x00;
@@ -147,15 +149,15 @@ uint8_t leds_debug_isOn(){
 
 void leds_all_on() {
     
-    GPIOC->ODR |= 0X0CC0;
+    GPIOC->ODR |= 0X03C0;
 }
 
 void leds_all_off() {
-    GPIOC->ODR &= ~0X0CC0;
+    GPIOC->ODR &= ~0X03C0;
 }
 void leds_all_toggle() {
     
-    GPIOC->ODR ^= 0X0CC0;
+    GPIOC->ODR ^= 0X03C0;
 }
 
 void leds_circular_shift() {
@@ -168,13 +170,13 @@ void leds_circular_shift() {
     Delay();
     GPIOC->ODR ^= 0X0080;
     Delay();
-    GPIOC->ODR ^= 0X0400;
+    GPIOC->ODR ^= 0X0100;
     Delay();
-    GPIOC->ODR ^= 0X0400;
+    GPIOC->ODR ^= 0X0100;
     Delay();
-    GPIOC->ODR ^= 0X0800;
+    GPIOC->ODR ^= 0X0200;
     Delay();
-    GPIOC->ODR ^= 0X0800;
+    GPIOC->ODR ^= 0X0200;
     Delay();
 }
 

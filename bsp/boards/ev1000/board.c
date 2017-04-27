@@ -1,8 +1,9 @@
 /**
-\brief openmoteSTM32 definition of the "board" bsp module.
+\brief ev1000 definition of the "board" bsp module.
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 \author Chang Tengfei <tengfei.chang@gmail.com>,  July 2012.
+\author Jean-Michel Rubillon <jmrubillon@theiet.org>, April 2017
 */
 #include "stm32f10x_lib.h"
 #include "board.h"
@@ -51,37 +52,38 @@ void board_init(){
     
     GPIO_InitTypeDef  GPIO_InitStructure;
   
-    //enable GPIOB, Clock
+    //enable GPIOA,GPIOB,GPIOC,GPIOD Clock
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA , ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB , ENABLE);
     
-    //Configure PB.01 as SLP_TR pin of RF
-    GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_1;
+    //Configure PB.00 as DW_WUP pin of RF
+    GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_0;
     GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOB, &GPIO_InitStructure);
   
-    //Configure PB.11 as RST pin of RF
-    GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_11;
+    //Configure PA.00 as nRST pin of RF
+    GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_0;
     GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIOB, &GPIO_InitStructure);
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
     
     //set /RST pin high(never reset)
-    GPIO_SetBits(GPIOB, GPIO_Pin_11);
+    GPIO_SetBits(GPIOA, GPIO_Pin_0);
     
-    // Configure PB.10 as input floating (EXTI Line10)
-    GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_10;
+    // Configure PB.05 as input floating (EXTI Line10)
+    GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_5;
     GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_IN_FLOATING;
     GPIO_Init(GPIOB, &GPIO_InitStructure);
     
-    GPIOB->ODR |= 0X0400;//set low
+    GPIOB->ODR |= 0X0010;//set low
     
-    GPIO_EXTILineConfig(GPIO_PortSourceGPIOB, GPIO_PinSource10);//Connect EXTI Line10 to PB.10
-    EXTI_ClearITPendingBit(EXTI_Line10);
+    GPIO_EXTILineConfig(GPIO_PortSourceGPIOB, GPIO_PinSource5);//Connect EXTI Line10 to PB.05
+    EXTI_ClearITPendingBit(EXTI_Line5);
 
     //Configures EXTI line 10 to generate an interrupt on rising edge
     EXTI_InitTypeDef  EXTI_InitStructure; 
-    EXTI_InitStructure.EXTI_Line    = EXTI_Line10;
+    EXTI_InitStructure.EXTI_Line    = EXTI_Line5;
     EXTI_InitStructure.EXTI_Mode    = EXTI_Mode_Interrupt; 
     EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
     EXTI_InitStructure.EXTI_LineCmd = ENABLE; 
@@ -89,14 +91,14 @@ void board_init(){
     
     // initialize board
     leds_init();
-    uart_init();
+    debugpins_init();
+//    uart_init();
     spi_init();
     bsp_timer_init();
-    radio_init();
-    radiotimer_init();
-    debugpins_init();
+//    radio_init();
+//    radiotimer_init();
     //enable nvic for the radio
-    NVIC_radio();
+//    NVIC_radio();
 }
 
 void board_sleep() {
