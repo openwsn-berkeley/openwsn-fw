@@ -48,7 +48,7 @@ create a timer by assigning an Id for the timer.
 
 \returns the id of the timer will be returned
  */
-opentimers2_id_t opentimers2_create(){
+opentimers2_id_t opentimers2_create(void){
     uint8_t id;
     for (id=0;id<MAX_NUM_TIMERS;id++){
         if (opentimers2_vars.timersBuf[id].isUsed  == FALSE){

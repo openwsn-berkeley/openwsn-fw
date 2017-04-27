@@ -51,7 +51,7 @@ typedef struct {
 //=========================== prototypes ======================================
 
 void             opentimers2_init(void);
-opentimers2_id_t opentimers2_create();
+opentimers2_id_t opentimers2_create(void);
 void             opentimers2_scheduleRelative(opentimers2_id_t    id, 
                                               uint32_t            duration,
                                               time_type_t         uint_type, 
