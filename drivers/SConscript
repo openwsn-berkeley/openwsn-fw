@@ -10,13 +10,13 @@ sources_c = [
     os.path.join('common','openhdlc.c'),
     os.path.join('common','opensensors.c'),
     os.path.join('common','openserial.c'),
-    os.path.join('common','opentimers.c'),
+    os.path.join('common','opentimers2.c'),
 ]
 sources_h = [
     os.path.join('common','openhdlc.h'),
     os.path.join('common','opensensors.h'),
     os.path.join('common','openserial.h'),
-    os.path.join('common','opentimers.h'),
+    os.path.join('common','opentimers2.h'),
 ]
 
 if localEnv['board']=='python':

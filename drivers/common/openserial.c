@@ -44,7 +44,7 @@ void openserial_handleEcho(uint8_t* but, uint8_t bufLen);
 void openserial_handleCommands(void);
 
 // misc
-void openserial_board_reset_cb();
+void openserial_board_reset_cb(void);
 
 // HDLC output
 void outputHdlcOpen(void);
@@ -700,7 +700,7 @@ void openserial_handleCommands(void){
 
 //===== misc
 
-void openserial_board_reset_cb() {
+void openserial_board_reset_cb(void) {
     board_reset();
 }
 

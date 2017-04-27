@@ -29,7 +29,7 @@ void opentimers2_timer_callback(void);
 
 Initializes data structures and hardware timer.
  */
-void opentimers2_init(){
+void opentimers2_init(void){
     // initialize local variables
     memset(&opentimers2_vars,0,sizeof(opentimers2_vars_t));
     // set callback for sctimer module
@@ -289,7 +289,7 @@ uint32_t opentimers2_getValue(opentimers2_id_t id){
 
 \returns currentTimeout.
  */
-uint32_t opentimers2_getCurrentTimeout(){
+uint32_t opentimers2_getCurrentTimeout(void){
     return opentimers2_vars.currentTimeout;
 }
 

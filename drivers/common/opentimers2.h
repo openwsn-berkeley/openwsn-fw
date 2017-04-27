@@ -65,7 +65,7 @@ void             opentimers2_cancel(opentimers2_id_t id);
 bool             opentimers2_destroy(opentimers2_id_t id);
 
 uint32_t         opentimers2_getValue(opentimers2_id_t id);
-uint32_t         opentimers2_getCurrentTimeout();
+uint32_t         opentimers2_getCurrentTimeout(void);
 bool             opentimers2_isRunning(opentimers2_id_t id);
 /**
 \}
