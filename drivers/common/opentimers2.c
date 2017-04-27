@@ -30,8 +30,13 @@ void opentimers2_timer_callback(void);
 Initializes data structures and hardware timer.
  */
 void opentimers2_init(void){
+    uint8_t i;
     // initialize local variables
     memset(&opentimers2_vars,0,sizeof(opentimers2_vars_t));
+    for (i=0;i<MAX_NUM_TIMERS;i++){
+        // by default, all timers have the priority of 0xff (lowest priority)
+        opentimers2_vars.timersBuf[i].priority = 0xff;
+    }
     // set callback for sctimer module
     sctimer_set_callback(opentimers2_timer_callback);
 } 
@@ -39,14 +44,15 @@ void opentimers2_init(void){
 /**
 \brief create a timer by assigning an entry from timer buffer.
 
-create a timer by reserving an Id for the timer.
+create a timer by assigning an Id for the timer.
+
+\returns the id of the timer will be returned
  */
-opentimers2_id_t opentimers2_create(uint8_t priority){
+opentimers2_id_t opentimers2_create(){
     uint8_t id;
     for (id=0;id<MAX_NUM_TIMERS;id++){
         if (opentimers2_vars.timersBuf[id].isUsed  == FALSE){
             opentimers2_vars.timersBuf[id].isUsed   = TRUE;
-            opentimers2_vars.timersBuf[id].priority = priority;
             return id;
         }
     }
@@ -63,10 +69,10 @@ to lastCompareValue + duration.
 Note: as this function schedule time depending on last compare value. It 
 can't be called firstly after the timer is created.
 
-\param id the timer id
-\param duration the period asked for schedule since last comparing value
-\param uint_type the unit type of this schedule: ticks or ms
-\param cb when this scheduled timer fired, call this callback function.
+\param[in] id indicates the timer id
+\param[in] duration indicates the period asked for schedule since last comparing value
+\param[in] uint_type indicates the unit type of this schedule: ticks or ms
+\param[in] cb indicates when this scheduled timer fired, call this callback function.
  */
 void opentimers2_scheduleRelative(opentimers2_id_t    id, 
                                   uint32_t            duration,
@@ -117,7 +123,7 @@ void opentimers2_scheduleRelative(opentimers2_id_t    id,
                 // if a timer "i" has low priority but has compare value less than 
                 // candidate timer "idToSchedule" more than TIMERTHRESHOLD ticks, 
                 // replace candidate timer by this timer "i".
-                if (opentimers2_vars.timersBuf[i].priority < opentimers2_vars.timersBuf[idToSchedule].priority){
+                if (opentimers2_vars.timersBuf[i].priority > opentimers2_vars.timersBuf[idToSchedule].priority){
                     if (timerGap-tempTimerGap > TIMERTHRESHOLD){
                         timerGap     = tempTimerGap;
                         idToSchedule = i;
@@ -133,7 +139,7 @@ void opentimers2_scheduleRelative(opentimers2_id_t    id,
                 // if a timer "i" has higher priority than candidate timer "idToSchedule" 
                 // and its compare value is larger than timer "i" no more than TIMERTHRESHOLD ticks,
                 // replace candidate timer by timer "i".
-                if (opentimers2_vars.timersBuf[i].priority > opentimers2_vars.timersBuf[idToSchedule].priority){
+                if (opentimers2_vars.timersBuf[i].priority < opentimers2_vars.timersBuf[idToSchedule].priority){
                     if (tempTimerGap - timerGap < TIMERTHRESHOLD){
                         timerGap     = tempTimerGap;
                         idToSchedule = i;
@@ -155,10 +161,10 @@ void opentimers2_scheduleRelative(opentimers2_id_t    id,
 This function will schedule a timer which expires when the timer count reach 
 to lastCompareValue + reference.
 
-\param id the timer id
-\param duration the period asked for schedule after a given time indicated by reference parameter.
-\param uint_type the unit type of this schedule: ticks or ms
-\param cb when this scheduled timer fired, call this callback function.
+\param[in] id indicates the timer id
+\param[in] duration indicates the period asked for schedule after a given time indicated by reference parameter.
+\param[in] uint_type indicates the unit type of this schedule: ticks or ms
+\param[in] cb indicates when this scheduled timer fired, call this callback function.
  */
 void opentimers2_scheduleAbsolute(opentimers2_id_t    id, 
                                   uint32_t            duration, 
@@ -210,7 +216,7 @@ void opentimers2_scheduleAbsolute(opentimers2_id_t    id,
                 // if a timer "i" has low priority but has compare value less than 
                 // candidate timer "idToSchedule" more than TIMERTHRESHOLD ticks, 
                 // replace candidate timer by this timer "i".
-                if (opentimers2_vars.timersBuf[i].priority < opentimers2_vars.timersBuf[idToSchedule].priority){
+                if (opentimers2_vars.timersBuf[i].priority > opentimers2_vars.timersBuf[idToSchedule].priority){
                     if (timerGap-tempTimerGap > TIMERTHRESHOLD){
                         timerGap     = tempTimerGap;
                         idToSchedule = i;
@@ -226,7 +232,7 @@ void opentimers2_scheduleAbsolute(opentimers2_id_t    id,
                 // if a timer "i" has higher priority than candidate timer "idToSchedule" 
                 // and its compare value is larger than timer "i" no more than TIMERTHRESHOLD ticks,
                 // replace candidate timer by timer "i".
-                if (opentimers2_vars.timersBuf[i].priority > opentimers2_vars.timersBuf[idToSchedule].priority){
+                if (opentimers2_vars.timersBuf[i].priority < opentimers2_vars.timersBuf[idToSchedule].priority){
                     if (tempTimerGap - timerGap < TIMERTHRESHOLD){
                         timerGap     = tempTimerGap;
                         idToSchedule = i;
@@ -248,7 +254,7 @@ void opentimers2_scheduleAbsolute(opentimers2_id_t    id,
 This function disable the timer temperally by removing its callback and marking
 isrunning as false. The timer may be recover later.
 
-\param id the timer id
+\param[in] id the timer id
  */
 void opentimers2_cancel(opentimers2_id_t id){
     opentimers2_vars.timersBuf[id].isrunning = FALSE;
@@ -260,7 +266,7 @@ void opentimers2_cancel(opentimers2_id_t id){
 
 Reset the whole entry of given timer including the id.
 
-\param id the timer id
+\param[in] id the timer id
 
 \returns False if the given can't be found or return Success
  */
@@ -276,7 +282,7 @@ bool opentimers2_destroy(opentimers2_id_t id){
 /**
 \brief get the counter value of given timer.
 
-\param id the timer id
+\param[in] id the timer id
 
 \returns the current counter value.
  */
@@ -300,6 +306,21 @@ uint32_t opentimers2_getCurrentTimeout(void){
  */
 bool opentimers2_isRunning(opentimers2_id_t id){
     return opentimers2_vars.timersBuf[id].isrunning;
+}
+
+
+/**
+\brief set the priority of given timer
+
+\param[in] id indicates the timer to be assigned.
+\param[in] priority indicates the priority of given timer.
+ */
+void opentimers2_setPriority(opentimers2_id_t id, uint8_t priority){
+    if (opentimers2_vars.timersBuf[id].isUsed  == TRUE){
+        opentimers2_vars.timersBuf[id].priority = priority;
+    } else {
+        // the given timer is not used, do nothing.
+    }
 }
 
 // ========================== callback ========================================
@@ -346,7 +367,7 @@ void opentimers2_timer_callback(void){
             if (idToCallCB==TOO_MANY_TIMERS_ERROR){
                 idToCallCB = j;
             } else {
-                if (opentimers2_vars.timersBuf[j].priority>opentimers2_vars.timersBuf[idToCallCB].priority){
+                if (opentimers2_vars.timersBuf[j].priority<opentimers2_vars.timersBuf[idToCallCB].priority){
                     idToCallCB = j;
                 }
             }
@@ -379,7 +400,7 @@ void opentimers2_timer_callback(void){
                 // if a timer "i" has low priority but has compare value less than 
                 // candidate timer "idToSchedule" more than TIMERTHRESHOLD ticks, 
                 // replace candidate timer by this timer "i".
-                if (opentimers2_vars.timersBuf[i].priority < opentimers2_vars.timersBuf[idToSchedule].priority){
+                if (opentimers2_vars.timersBuf[i].priority > opentimers2_vars.timersBuf[idToSchedule].priority){
                     if (timerGap-tempTimerGap > TIMERTHRESHOLD){
                         timerGap     = tempTimerGap;
                         idToSchedule = i;
@@ -395,7 +416,7 @@ void opentimers2_timer_callback(void){
                 // if a timer "i" has higher priority than candidate timer "idToSchedule" 
                 // and its compare value is larger than timer "i" no more than TIMERTHRESHOLD ticks,
                 // replace candidate timer by timer "i".
-                if (opentimers2_vars.timersBuf[i].priority > opentimers2_vars.timersBuf[idToSchedule].priority){
+                if (opentimers2_vars.timersBuf[i].priority < opentimers2_vars.timersBuf[idToSchedule].priority){
                     if (tempTimerGap - timerGap < TIMERTHRESHOLD){
                         timerGap     = tempTimerGap;
                         idToSchedule = i;

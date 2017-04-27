@@ -396,7 +396,7 @@ void csensors_setPeriod(uint32_t period,
              );
          }
       } else {
-         csensors_vars.csensors_resource[id].timerId = opentimers2_create(0);
+         csensors_vars.csensors_resource[id].timerId = opentimers2_create();
          opentimers2_scheduleAbsolute(
              csensors_vars.csensors_resource[id].timerId, 
              (uint32_t)((period*openrandom_get16b())/0xffff), 

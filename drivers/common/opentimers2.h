@@ -51,7 +51,7 @@ typedef struct {
 //=========================== prototypes ======================================
 
 void             opentimers2_init(void);
-opentimers2_id_t opentimers2_create(uint8_t priority);
+opentimers2_id_t opentimers2_create();
 void             opentimers2_scheduleRelative(opentimers2_id_t    id, 
                                               uint32_t            duration,
                                               time_type_t         uint_type, 
@@ -67,6 +67,7 @@ bool             opentimers2_destroy(opentimers2_id_t id);
 uint32_t         opentimers2_getValue(opentimers2_id_t id);
 uint32_t         opentimers2_getCurrentTimeout(void);
 bool             opentimers2_isRunning(opentimers2_id_t id);
+void             opentimers2_setPriority(opentimers2_id_t id, uint8_t priority);
 /**
 \}
 \}

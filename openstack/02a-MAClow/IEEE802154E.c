@@ -145,7 +145,9 @@ void ieee154e_init() {
    radio_setStartFrameCb(ieee154e_startOfFrame);
    radio_setEndFrameCb(ieee154e_endOfFrame);
    // have the radio start its timer
-   ieee154e_vars.timerId = opentimers2_create(255);
+   ieee154e_vars.timerId = opentimers2_create();
+   // assign ieee802154e timer with highest priority
+   opentimers2_setPriority(ieee154e_vars.timerId,0);
    opentimers2_scheduleAbsolute(
         ieee154e_vars.timerId,          // timerId
         ieee154e_vars.slotDuration,     // duration

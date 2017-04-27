@@ -690,7 +690,7 @@ void tcp_change_state(uint8_t new_tcp_state) {
       }
    } else {
       if (tcp_vars.timerStarted==FALSE) {
-         tcp_vars.timerId = opentimers2_create(0);
+         tcp_vars.timerId = opentimers2_create();
          opentimers2_scheduleAbsolute(
              tcp_vars.timerId,
              TCP_TIMEOUT,

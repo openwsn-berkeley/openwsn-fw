@@ -125,7 +125,7 @@ void sixtop_init() {
     sixtop_vars.isResponseEnabled  = TRUE;
     sixtop_vars.handler            = SIX_HANDLER_NONE;
     
-    sixtop_vars.ebSendingTimerId   = opentimers2_create(0);
+    sixtop_vars.ebSendingTimerId   = opentimers2_create();
     opentimers2_scheduleAbsolute(
         sixtop_vars.ebSendingTimerId,
         (sixtop_vars.ebPeriod-EBPERIOD_RANDOM_RANG+(openrandom_get16b()%(2*EBPERIOD_RANDOM_RANG))),
@@ -134,7 +134,7 @@ void sixtop_init() {
         sixtop_sendingEb_timer_cb
     );
     
-    sixtop_vars.maintenanceTimerId   = opentimers2_create(0);
+    sixtop_vars.maintenanceTimerId   = opentimers2_create();
     opentimers2_scheduleAbsolute(
         sixtop_vars.maintenanceTimerId,
         sixtop_vars.periodMaintenance,
@@ -143,7 +143,7 @@ void sixtop_init() {
         sixtop_maintenance_timer_cb
     );
     
-    sixtop_vars.timeoutTimerId      =  opentimers2_create(0);
+    sixtop_vars.timeoutTimerId      =  opentimers2_create();
 }
 
 void sixtop_setKaPeriod(uint16_t kaPeriod) {
