@@ -74,6 +74,9 @@
 
 #define SYNC_ACCURACY                       1 // when using openmoteSTM, change to 2
 
+//===== sctimer scheduling
+#define TIMERTHRESHOLD                     10  
+
 //=========================== typedef  ========================================
 
 //=========================== variables =======================================
