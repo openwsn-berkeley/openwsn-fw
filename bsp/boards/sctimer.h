@@ -18,7 +18,6 @@
 //=========================== typedef =========================================
 
 typedef void  (*sctimer_cbt)        (void);
-typedef void  (*sctimer_capture_cbt)(uint32_t timestamp);
 
 //=========================== variables =======================================
 

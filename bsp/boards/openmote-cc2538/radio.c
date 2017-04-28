@@ -38,8 +38,8 @@
 //=========================== variables =======================================
 
 typedef struct {
-   sctimer_capture_cbt       startFrame_cb;
-   sctimer_capture_cbt       endFrame_cb;
+   radio_capture_cbt         startFrame_cb;
+   radio_capture_cbt         endFrame_cb;
    radio_state_t             state; 
 } radio_vars_t;
 
@@ -154,11 +154,11 @@ void radio_init() {
    radio_vars.state               = RADIOSTATE_RFOFF;
 }
 
-void radio_setStartFrameCb(sctimer_capture_cbt cb) {
+void radio_setStartFrameCb(radio_capture_cbt cb) {
    radio_vars.startFrame_cb  = cb;
 }
 
-void radio_setEndFrameCb(sctimer_capture_cbt cb) {
+void radio_setEndFrameCb(radio_capture_cbt cb) {
    radio_vars.endFrame_cb    = cb;
 }
 

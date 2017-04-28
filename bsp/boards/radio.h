@@ -44,14 +44,16 @@ typedef enum {
 
 //=========================== typedef =========================================
 
+typedef void  (*radio_capture_cbt)(uint32_t timestamp);
+
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
 
 // admin
 void                radio_init(void);
-void                radio_setStartFrameCb(sctimer_capture_cbt cb);
-void                radio_setEndFrameCb(sctimer_capture_cbt cb);
+void                radio_setStartFrameCb(radio_capture_cbt cb);
+void                radio_setEndFrameCb(radio_capture_cbt cb);
 // reset
 void                radio_reset(void);
 // RF admin
