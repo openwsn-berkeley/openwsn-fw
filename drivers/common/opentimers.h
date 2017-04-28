@@ -23,7 +23,7 @@
 #define MAX_TICKS_NUMBER          ((PORT_TIMER_WIDTH)0xFFFFFFFF)
 #define TOO_MANY_TIMERS_ERROR     255
 #define MAX_DURATION_ISR          33 // 33@32768Hz = 1ms
-#define opentimers_id_t uint8_t
+#define opentimers_id_t           uint8_t
 
 typedef void (*opentimers_cbt)(void);
 
@@ -47,7 +47,7 @@ typedef struct {
 //=========================== module variables ================================
 
 typedef struct {
-   opentimers_t        timersBuf[MAX_NUM_TIMERS];
+   opentimers_t         timersBuf[MAX_NUM_TIMERS];
    bool                 running;
    uint32_t             currentTimeout; // current timeout, in ticks
    uint32_t             lastTimeout;    // last timeout, in ticks. This is the reference time to calculate the next to be expired timer.
@@ -56,7 +56,7 @@ typedef struct {
 //=========================== prototypes ======================================
 
 void             opentimers_init(void);
-opentimers_id_t opentimers_create(void);
+opentimers_id_t  opentimers_create(void);
 void             opentimers_scheduleRelative(opentimers_id_t    id, 
                                               uint32_t            duration,
                                               time_type_t         uint_type, 
@@ -79,17 +79,3 @@ void             opentimers_setPriority(opentimers_id_t id, uint8_t priority);
 */
 
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -20,7 +20,7 @@ opentimers_vars_t opentimers_vars;
 
 //=========================== prototypes ======================================
 
-void opentimers_timer_callback(void);
+void  opentimers_timer_callback(void);
 
 //=========================== public ==========================================
 
@@ -431,57 +431,3 @@ void opentimers_timer_callback(void){
     sctimer_setCompare(opentimers_vars.currentTimeout);
     opentimers_vars.running        = TRUE;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

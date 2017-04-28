@@ -4,7 +4,6 @@
 #include "openqueue.h"
 #include "forwarding.h"
 #include "packetfunctions.h"
-#include "bsp_timer.h"
 #include "scheduler.h"
 // applications
 #include "techo.h"

@@ -1,7 +1,6 @@
 #include "opendefs.h"
 #include "IEEE802154E.h"
 #include "radio.h"
-#include "radiotimer.h"
 #include "IEEE802154.h"
 #include "ieee802154_security_driver.h"
 #include "openqueue.h"

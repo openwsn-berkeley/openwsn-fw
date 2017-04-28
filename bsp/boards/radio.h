@@ -12,7 +12,7 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 */
 
-#include "sctimer.h"
+#include "board.h"
 
 //=========================== define ==========================================
 
@@ -44,7 +44,7 @@ typedef enum {
 
 //=========================== typedef =========================================
 
-typedef void  (*radio_capture_cbt)(uint32_t timestamp);
+typedef void  (*radio_capture_cbt)(PORT_TIMER_WIDTH timestamp);
 
 //=========================== variables =======================================
 
