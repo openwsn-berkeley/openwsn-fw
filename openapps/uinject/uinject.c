@@ -1,6 +1,5 @@
 #include "opendefs.h"
 #include "uinject.h"
-#include "openudp.h"
 #include "openqueue.h"
 #include "opentimers.h"
 #include "openserial.h"
@@ -29,9 +28,14 @@ void uinject_init() {
    
    // clear local variables
    memset(&uinject_vars,0,sizeof(uinject_vars_t));
-   
+
+   // register at UDP stack
+   uinject_vars.desc.port              = WKP_UDP_INJECT;
+   uinject_vars.desc.callbackReceive   = &uinject_receive;
+   uinject_vars.desc.callbackSendDone  = &uinject_sendDone;
+   openudp_register(&uinject_vars.desc);
+
    uinject_vars.period = UINJECT_PERIOD_MS;
-   
    // start periodic timer
    uinject_vars.timerId                    = opentimers_start(
       uinject_vars.period,

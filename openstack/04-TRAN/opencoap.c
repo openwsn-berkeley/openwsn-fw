@@ -1,6 +1,5 @@
 #include "opendefs.h"
 #include "opencoap.h"
-#include "openudp.h"
 #include "openqueue.h"
 #include "openserial.h"
 #include "openrandom.h"
@@ -35,6 +34,12 @@ void opencoap_init() {
    
    // initialize the messageID
    opencoap_vars.messageID     = openrandom_get16b();
+
+   // register at UDP stack
+   opencoap_vars.desc.port              = WKP_UDP_COAP;
+   opencoap_vars.desc.callbackReceive   = &opencoap_receive;
+   opencoap_vars.desc.callbackSendDone  = opencoap_sendDone;
+   openudp_register(&opencoap_vars.desc);
 }
 
 /**
