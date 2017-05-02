@@ -65,17 +65,11 @@ PORT_RADIOTIMER_WIDTH sctimer_readCounter(OpenMote* self) {
       printf("[CRITICAL] sctimer_readCounter() returned NULL\r\n");
       return 0;
    }
-   if (!PyInt_Check(result)) {
-      printf("[CRITICAL] sctimer_readCounter() returned NULL\r\n");
-      return 0;
-   }
-   returnVal = PyInt_AsLong(result);
-   
-   // dispose of returned value
+   returnVal  = (PORT_TIMER_WIDTH)PyInt_AsLong(result);
    Py_DECREF(result);
    
 #ifdef TRACE_ON
-   printf("C@0x%x: ...got %d.\n",self,returnVal);
+   printf("returnVal=%d.\n",returnVal);
 #endif
    
    return returnVal;

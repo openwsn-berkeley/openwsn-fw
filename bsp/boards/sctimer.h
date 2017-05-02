@@ -9,7 +9,7 @@
 
 \brief A timer module with only a single compare value.
 
-\author Tengfei Chang <tengfei.chang@eecs.berkeley.edu>, April 2017.
+\author Tengfei Chang <tengfei.chang@inria.fr>, April 2017.
 */
 
 #include "stdint.h"

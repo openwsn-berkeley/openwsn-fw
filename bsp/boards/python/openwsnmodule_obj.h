@@ -46,8 +46,8 @@
 //=========================== prototypes ======================================
 
 // radio
-void radio_intr_startOfFrame(OpenMote* self, uint16_t capturedTime);
-void radio_intr_endOfFrame(OpenMote* self, uint16_t capturedTime);
+void radio_intr_startOfFrame(OpenMote* self, uint32_t capturedTime);
+void radio_intr_endOfFrame(OpenMote* self, uint32_t capturedTime);
 
 // sctimer
 void sctimer_intr_compare(OpenMote* self);

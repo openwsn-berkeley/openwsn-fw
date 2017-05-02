@@ -330,11 +330,11 @@ void radio_getReceivedFrame(OpenMote* self,
 
 //=========================== interrupts ======================================
 
-void radio_intr_startOfFrame(OpenMote* self, uint16_t capturedTime) {
+void radio_intr_startOfFrame(OpenMote* self, uint32_t capturedTime) {
    self->radio_icb.startFrame_cb(self, capturedTime);
 }
 
-void radio_intr_endOfFrame(OpenMote* self, uint16_t capturedTime) {
+void radio_intr_endOfFrame(OpenMote* self, uint32_t capturedTime) {
    self->radio_icb.endFrame_cb(self, capturedTime);
 }
 

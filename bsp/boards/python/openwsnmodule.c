@@ -203,8 +203,8 @@ static PyObject* OpenMote_radio_isr_startFrame(OpenMote* self, PyObject* args) {
    if (!PyArg_ParseTuple(args, "i", &capturedTime)) {
       return NULL;
    }
-   if (capturedTime>0xffff) {
-      fprintf(stderr,"[OpenMote_radio_isr_startFrame] FATAL: capturedTime larger than 0xffff\n");
+   if (capturedTime>0xffffffff) {
+      fprintf(stderr,"[OpenMote_radio_isr_startFrame] FATAL: capturedTime larger than 0xffffffff\n");
       // TODO raise exception
       return NULL;
    }
@@ -212,7 +212,7 @@ static PyObject* OpenMote_radio_isr_startFrame(OpenMote* self, PyObject* args) {
    // call the callback
    radio_intr_startOfFrame(
       self,
-      (uint16_t)capturedTime
+      (uint32_t)capturedTime
    );
    
    // return successfully
@@ -226,8 +226,8 @@ static PyObject* OpenMote_radio_isr_endFrame(OpenMote* self, PyObject* args) {
    if (!PyArg_ParseTuple(args, "i", &capturedTime)) {
       return NULL;
    }
-   if (capturedTime>0xffff) {
-      fprintf(stderr,"[OpenMote_radio_isr_startFrame] FATAL: capturedTime larger than 0xffff\n");
+   if (capturedTime>0xffffffff) {
+      fprintf(stderr,"[OpenMote_radio_isr_startFrame] FATAL: capturedTime larger than 0xffffffff\n");
       // TODO raise exception
       return NULL;
    }
@@ -235,14 +235,14 @@ static PyObject* OpenMote_radio_isr_endFrame(OpenMote* self, PyObject* args) {
    // call the callback
    radio_intr_endOfFrame(
       self,
-      (uint16_t)capturedTime
+      (uint32_t)capturedTime
    );
    
    // return successfully
    Py_RETURN_NONE;
 }
 
-static PyObject* OpenMote_sctimer_isr_compare(OpenMote* self) {
+static PyObject* OpenMote_sctimer_isr(OpenMote* self) {
    
    // no arguments
    
@@ -310,7 +310,7 @@ static PyMethodDef OpenMote_methods[] = {
    //=== BSP
    {  "radio_isr_startFrame",     (PyCFunction)OpenMote_radio_isr_startFrame,       METH_VARARGS,  ""},
    {  "radio_isr_endFrame",       (PyCFunction)OpenMote_radio_isr_endFrame,         METH_VARARGS,  ""},
-   {  "sctimer_isr_compare",      (PyCFunction)OpenMote_sctimer_isr_compare,        METH_NOARGS,   ""},
+   {  "sctimer_isr",              (PyCFunction)OpenMote_sctimer_isr,                METH_NOARGS,   ""},
    {  "uart_isr_tx",              (PyCFunction)OpenMote_uart_isr_tx,                METH_NOARGS,   ""},
    {  "uart_isr_rx",              (PyCFunction)OpenMote_uart_isr_rx,                METH_NOARGS,   ""},
    {  "supply_on",                (PyCFunction)OpenMote_supply_on,                  METH_NOARGS,   ""},
