@@ -25,8 +25,6 @@ sctimer_vars_t sctimer_vars;
 
 // ========================== private =========================================
 
-static void sctimer_isr(void); 
-
 // ========================== protocol =========================================
 
 /**
@@ -81,9 +79,15 @@ void sctimer_disable(void){
 
 // ========================== private =========================================
 
-void sctimer_isr(void) {
+kick_scheduler_t sctimer_isr(void)
     debugpins_isr_set();
-    IntPendClear(INT_SMTIM);
-    sctimer_vars.sctimer_cb();
+    if (sctimer_vars.sctimer_cb!=NULL) {
+        IntPendClear(INT_SMTIM);
+        sctimer_vars.sctimer_cb();
+        debugpins_isr_clr();
+        // kick the OS
+        return KICK_SCHEDULER;
+    }
     debugpins_isr_clr();
+    return DO_NOT_KICK_SCHEDULER;
 }
