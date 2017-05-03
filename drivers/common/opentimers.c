@@ -75,14 +75,14 @@ can't be called firstly after the timer is created.
 \param[in] cb indicates when this scheduled timer fired, call this callback function.
  */
 void opentimers_scheduleRelative(opentimers_id_t    id, 
-                                  uint32_t            duration,
+                                  PORT_TIMER_WIDTH            duration,
                                   time_type_t         uint_type, 
                                   opentimers_cbt     cb){
     uint8_t  i;
     uint8_t idToSchedule;
-    uint32_t durationTicks;
-    uint32_t timerGap;
-    uint32_t tempTimerGap;
+    PORT_TIMER_WIDTH durationTicks;
+    PORT_TIMER_WIDTH timerGap;
+    PORT_TIMER_WIDTH tempTimerGap;
     // 1. make sure the timer exist
     for (i=0;i<MAX_NUM_TIMERS;i++){
         if (opentimers_vars.timersBuf[i].isUsed && i == id){
@@ -167,15 +167,15 @@ to lastCompareValue + reference.
 \param[in] cb indicates when this scheduled timer fired, call this callback function.
  */
 void opentimers_scheduleAbsolute(opentimers_id_t    id, 
-                                  uint32_t            duration, 
-                                  uint32_t            reference , 
+                                  PORT_TIMER_WIDTH            duration, 
+                                  PORT_TIMER_WIDTH            reference , 
                                   time_type_t         uint_type, 
                                   opentimers_cbt     cb){
     uint8_t  i;
     uint8_t idToSchedule;
-    uint32_t durationTicks;
-    uint32_t timerGap;
-    uint32_t tempTimerGap;
+    PORT_TIMER_WIDTH durationTicks;
+    PORT_TIMER_WIDTH timerGap;
+    PORT_TIMER_WIDTH tempTimerGap;
     // 1. make sure the timer exist
     for (i=0;i<MAX_NUM_TIMERS;i++){
         if (opentimers_vars.timersBuf[i].isUsed && i == id){
@@ -286,7 +286,7 @@ bool opentimers_destroy(opentimers_id_t id){
 
 \returns the current counter value.
  */
-uint32_t opentimers_getValue(opentimers_id_t id){
+PORT_TIMER_WIDTH opentimers_getValue(opentimers_id_t id){
     return sctimer_readCounter();
 }
 
@@ -295,7 +295,7 @@ uint32_t opentimers_getValue(opentimers_id_t id){
 
 \returns currentTimeout.
  */
-uint32_t opentimers_getCurrentTimeout(void){
+PORT_TIMER_WIDTH opentimers_getCurrentTimeout(void){
     return opentimers_vars.currentTimeout;
 }
 
@@ -337,9 +337,9 @@ void opentimers_timer_callback(void){
     uint8_t j;
     uint8_t idToCallCB;
     uint8_t idToSchedule;
-    uint32_t timerGap;
-    uint32_t tempTimerGap;
-    uint32_t tempLastTimeout = opentimers_vars.currentTimeout;
+    PORT_TIMER_WIDTH timerGap;
+    PORT_TIMER_WIDTH tempTimerGap;
+    PORT_TIMER_WIDTH tempLastTimeout = opentimers_vars.currentTimeout;
     // 1. find the expired timer
     for (i=0;i<MAX_NUM_TIMERS;i++){
         if (opentimers_vars.timersBuf[i].isrunning==TRUE){

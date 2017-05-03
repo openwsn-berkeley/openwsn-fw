@@ -35,8 +35,8 @@ typedef enum {
 } time_type_t;
 
 typedef struct {
-   uint32_t             currentCompareValue;// total number of clock ticks
-   uint32_t             lastCompareValue;   // the previous compare value
+   PORT_TIMER_WIDTH     currentCompareValue;// total number of clock ticks
+   PORT_TIMER_WIDTH     lastCompareValue;   // the previous compare value
    bool                 isrunning;          // is running?
    bool                 isUsed;             // true when this entry is occupied
    bool                 hasExpired;         // in case there are more than one interrupt occur at same time
@@ -49,28 +49,28 @@ typedef struct {
 typedef struct {
    opentimers_t         timersBuf[MAX_NUM_TIMERS];
    bool                 running;
-   uint32_t             currentTimeout; // current timeout, in ticks
-   uint32_t             lastTimeout;    // last timeout, in ticks. This is the reference time to calculate the next to be expired timer.
+   PORT_TIMER_WIDTH     currentTimeout; // current timeout, in ticks
+   PORT_TIMER_WIDTH     lastTimeout;    // last timeout, in ticks. This is the reference time to calculate the next to be expired timer.
 } opentimers_vars_t;
 
 //=========================== prototypes ======================================
 
 void             opentimers_init(void);
 opentimers_id_t  opentimers_create(void);
-void             opentimers_scheduleRelative(opentimers_id_t    id, 
-                                              uint32_t            duration,
+void             opentimers_scheduleRelative(opentimers_id_t      id, 
+                                              PORT_TIMER_WIDTH    duration,
                                               time_type_t         uint_type, 
-                                              opentimers_cbt     cb);
-void             opentimers_scheduleAbsolute(opentimers_id_t    id, 
-                                              uint32_t            duration, 
-                                              uint32_t            reference , 
+                                              opentimers_cbt      cb);
+void             opentimers_scheduleAbsolute(opentimers_id_t      id, 
+                                              PORT_TIMER_WIDTH    duration, 
+                                              PORT_TIMER_WIDTH    reference , 
                                               time_type_t         uint_type, 
-                                              opentimers_cbt     cb);
+                                              opentimers_cbt      cb);
 void             opentimers_cancel(opentimers_id_t id);
 bool             opentimers_destroy(opentimers_id_t id);
 
-uint32_t         opentimers_getValue(opentimers_id_t id);
-uint32_t         opentimers_getCurrentTimeout(void);
+PORT_TIMER_WIDTH opentimers_getValue(opentimers_id_t id);
+PORT_TIMER_WIDTH opentimers_getCurrentTimeout(void);
 bool             opentimers_isRunning(opentimers_id_t id);
 void             opentimers_setPriority(opentimers_id_t id, uint8_t priority);
 /**
