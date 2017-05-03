@@ -2,7 +2,7 @@
 \brief iot-lab_M3 definition of the "board" bsp module.
 
 \author Alaeddine Weslati <alaeddine.weslati@inria.fr>, January 2014.
-\author Tengfei Chang <tengfei.chang@inria.fr>,         september 2016.
+\author Tengfei Chang <tengfei.chang@inria.fr>,         May 2017.
 */
 #include "stm32f10x_conf.h"
 #include "board.h"
@@ -10,9 +10,8 @@
 #include "leds.h"
 #include "uart.h"
 #include "spi.h"
-#include "bsp_timer.h"
+#include "sctimer.h"
 #include "radio.h"
-#include "radiotimer.h"
 #include "rcc.h"
 #include "nvic.h"
 #include "debugpins.h"
@@ -87,9 +86,8 @@ void board_init()
     leds_init();
     uart_init();
     spi_init();
-    bsp_timer_init();
+    sctimer_init();
     radio_init();
-    radiotimer_init();
     debugpins_init();
     //enable nvic for the radio
     NVIC_radio();
