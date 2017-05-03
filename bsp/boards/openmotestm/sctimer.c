@@ -121,7 +121,7 @@ convert is used for selecting which range mapping to.
 
 void sctimer_setCompare(PORT_TIMER_WIDTH val) {
     
-    // make sure convert flag conly toggle once within one overflow period
+    // make sure convert flag only toggle once within one overflow period
     if (val > OVERFLOW_THRESHOLD && sctimer_vars.convertUnlock){
         // toggle convert
         if (sctimer_vars.convert){

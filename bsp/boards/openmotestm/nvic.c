@@ -35,10 +35,10 @@ void NVIC_uart(void) {
 void NVIC_spi(void) {
     
 #ifdef SPI_IN_INTERRUPT_MODE
-    //Configure NVIC: Preemption Priority = 1 and Sub Priority = 1
+    //Configure NVIC: Preemption Priority = 2 and Sub Priority = 2
     NVIC_InitTypeDef NVIC_InitStructure;
     NVIC_InitStructure.NVIC_IRQChannel                      = SPI1_IRQChannel;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority    = 1;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority    = 2;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority           = 2;
     NVIC_InitStructure.NVIC_IRQChannelCmd                   = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
@@ -50,10 +50,10 @@ void NVIC_sctimer(void) {
     
     NVIC_InitTypeDef NVIC_InitStructure;
     //Configure RTC Alarm interrupt:
-    //Configure NVIC: Preemption Priority = 0 and Sub Priority = 1
+    //Configure NVIC: Preemption Priority = 1 and Sub Priority = 1
     NVIC_InitStructure.NVIC_IRQChannel                      = RTCAlarm_IRQChannel;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority    = 1;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority           = 0;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority           = 1;
     NVIC_InitStructure.NVIC_IRQChannelCmd                   = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
 }
@@ -61,11 +61,11 @@ void NVIC_sctimer(void) {
 //configuration radio interrput
 void NVIC_radio(void){
     
-     //Configure NVIC: Preemption Priority = 2 and Sub Priority = 0
+     //Configure NVIC: Preemption Priority = 0 and Sub Priority = 0
     NVIC_InitTypeDef  NVIC_InitStructure;
     NVIC_InitStructure.NVIC_IRQChannel                      = EXTI15_10_IRQChannel; 
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority    = 1;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority           = 1; 
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority    = 0;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority           = 0; 
     NVIC_InitStructure.NVIC_IRQChannelCmd                   = ENABLE; 
     NVIC_Init(&NVIC_InitStructure);
 }
