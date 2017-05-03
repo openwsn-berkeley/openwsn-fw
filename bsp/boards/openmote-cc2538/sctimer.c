@@ -79,7 +79,7 @@ void sctimer_disable(void){
 
 // ========================== private =========================================
 
-kick_scheduler_t sctimer_isr(void)
+kick_scheduler_t sctimer_isr(void){
     debugpins_isr_set();
     if (sctimer_vars.sctimer_cb!=NULL) {
         IntPendClear(INT_SMTIM);
