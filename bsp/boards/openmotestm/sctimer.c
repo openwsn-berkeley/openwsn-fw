@@ -27,7 +27,6 @@ typedef struct {
     sctimer_cbt sctimer_cb;
     bool        convert;
     bool        convertUnlock;
-    uint32_t    lastCompareValue;
 } sctimer_vars_t;
 
 sctimer_vars_t sctimer_vars;

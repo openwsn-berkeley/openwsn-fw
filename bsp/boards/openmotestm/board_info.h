@@ -68,11 +68,11 @@ to return the board's description.
 
 //===== adaptive_sync accuracy
 
-#define SYNC_ACCURACY                           2     // by ticks
+#define SYNC_ACCURACY                       2     // ticks
 
 //===== opentimers
 
-#define TIMERTHRESHOLD  10
+#define TIMERTHRESHOLD                      10    // ticks
 
 //=========================== typedef  ========================================
 
