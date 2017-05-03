@@ -1,8 +1,6 @@
 /**
 \brief A timer module with only a single compare value. 
 
-\author Xavier Vilajosana <xvilajosana@eecs.berkeley.edu>
-\author Christian Hopfner <christian.hopfner@pcm.endress.com>, September 2016
 \author Tengfei Chang     <tengfei.chang@inria.fr> April 2017
 */
 

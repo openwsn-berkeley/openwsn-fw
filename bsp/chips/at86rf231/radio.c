@@ -9,17 +9,17 @@
 #include "radio.h"
 #include "at86rf231.h"
 #include "spi.h"
-#include "radiotimer.h"
 #include "debugpins.h"
 #include "leds.h"
+#include "sctimer.h"
 
 //=========================== defines =========================================
 
 //=========================== variables =======================================
 
 typedef struct {
-   radiotimer_capture_cbt    startFrame_cb;
-   radiotimer_capture_cbt    endFrame_cb;
+   radio_capture_cbt         startFrame_cb;
+   radio_capture_cbt         endFrame_cb;
    radio_state_t             state; 
 } radio_vars_t;
 
@@ -70,19 +70,11 @@ void radio_init() {
    radio_vars.state          = RADIOSTATE_RFOFF;
 }
 
-void radio_setOverflowCb(radiotimer_compare_cbt cb) {
-   radiotimer_setOverflowCb(cb);
-}
-
-void radio_setCompareCb(radiotimer_compare_cbt cb) {
-   radiotimer_setCompareCb(cb);
-}
-
-void radio_setStartFrameCb(radiotimer_capture_cbt cb) {
+void radio_setStartFrameCb(radio_capture_cbt cb) {
    radio_vars.startFrame_cb  = cb;
 }
 
-void radio_setEndFrameCb(radiotimer_capture_cbt cb) {
+void radio_setEndFrameCb(radio_capture_cbt cb) {
    radio_vars.endFrame_cb    = cb;
 }
 
@@ -90,24 +82,6 @@ void radio_setEndFrameCb(radiotimer_capture_cbt cb) {
 
 void radio_reset() {
    PORT_PIN_RADIO_RESET_LOW();
-}
-
-//===== timer
-
-void radio_startTimer(PORT_TIMER_WIDTH period) {
-   radiotimer_start(period);
-}
-
-PORT_TIMER_WIDTH radio_getTimerValue() {
-   return radiotimer_getValue();
-}
-
-void radio_setTimerPeriod(PORT_TIMER_WIDTH period) {
-   radiotimer_setPeriod(period);
-}
-
-PORT_TIMER_WIDTH radio_getTimerPeriod() {
-   return radiotimer_getPeriod();
 }
 
 //===== RF admin
@@ -192,7 +166,7 @@ void radio_txNow() {
    // transmitted (I've never seen that).
    if (radio_vars.startFrame_cb!=NULL) {
       // call the callback
-      val=radiotimer_getCapturedTime();
+      val=sctimer_readCounter();
       radio_vars.startFrame_cb(val);
    }
 }
@@ -407,7 +381,7 @@ kick_scheduler_t radio_isr() {
    uint8_t  irq_status;
 
    // capture the time
-   capturedTime = radiotimer_getCapturedTime();
+   capturedTime = sctimer_readCounter();
 
    // reading IRQ_STATUS causes radio's IRQ pin to go low
    irq_status = radio_spiReadReg(RG_IRQ_STATUS);

@@ -31,6 +31,8 @@ PORT_TIMER_WIDTH sctimer_readCounter(void);
 void     sctimer_enable(void);
 void     sctimer_disable(void);
 
+kick_scheduler_t sctimer_isr(void);
+
 /**
 \}
 \}
