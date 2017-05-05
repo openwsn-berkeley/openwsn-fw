@@ -31,6 +31,8 @@ owerror_t cbor_parse_join_response(join_response_t *response, uint8_t *buf, uint
     uint8_t *tmp;
     owerror_t error;
 
+    memset(response, 0x00, sizeof(join_response_t)); 
+
     error = E_SUCCESS;
     tmp = buf;
     major_type = (cbor_majortype_t) *buf >> 5;
