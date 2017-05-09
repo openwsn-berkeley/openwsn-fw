@@ -1,5 +1,6 @@
 import ctypes
 import cbor
+import binascii
 
 import pytest
 
@@ -87,7 +88,7 @@ class join_response_t(CtStruct):
 
 CBORDUMPSANDPARSED = [
     (
-        '8281a301040241012050e6bf4287c2d7618d6a9687445ffd33e68142af93'.decode('hex'),
+        binascii.unhexlify('8281a301040241012050e6bf4287c2d7618d6a9687445ffd33e68142af93'),
         ( 0, # return from parsing (success)
             join_response_t( # parsed object
                 COSE_keyset_t( 
@@ -107,7 +108,7 @@ CBORDUMPSANDPARSED = [
         )
     ),
     (
-        '8181a301040241012050e6bf4287c2d7618d6a9687445ffd33e6'.decode('hex'),
+        binascii.unhexlify('8181a301040241012050e6bf4287c2d7618d6a9687445ffd33e6'),
         ( 0, # return from parsing (success)
             join_response_t( # parsed object
                 COSE_keyset_t( 
@@ -124,7 +125,7 @@ CBORDUMPSANDPARSED = [
         )
     ),
     (
-        '8181a60104024101030c04840304090a0550abcdabcdabcdabcdabcdabcdabcdabcd2050e6bf4287c2d7618d6a9687445ffd33e6'.decode('hex'), # key ops, alg and base iv present but ignored
+       binascii.unhexlify('8181a60104024101030c04840304090a0550abcdabcdabcdabcdabcdabcdabcdabcd2050e6bf4287c2d7618d6a9687445ffd33e6'), # key ops, alg and base iv present but ignored
         ( 0, # return from parsing (success)
             join_response_t( # parsed object
                 COSE_keyset_t( 
@@ -141,7 +142,7 @@ CBORDUMPSANDPARSED = [
         )
     ),
     (
-        '8182a301040241012050e6bf4287c2d7618d6a9687445ffd33e6a301040241022050deadbeefdeadbeefdeadbeefdeadbeef'.decode('hex'),
+        binascii.unhexlify('8182a301040241012050e6bf4287c2d7618d6a9687445ffd33e6a301040241022050deadbeefdeadbeefdeadbeefdeadbeef'),
         ( 0, # return from parsing (success)
             join_response_t( # parsed object
                 COSE_keyset_t( 
@@ -162,7 +163,7 @@ CBORDUMPSANDPARSED = [
         )
     ),
     (
-        '8282a301040241012050e6bf4287c2d7618d6a9687445ffd33e6a301040241022050deadbeefdeadbeefdeadbeefdeadbeef8142af93'.decode('hex'),
+        binascii.unhexlify('8282a301040241012050e6bf4287c2d7618d6a9687445ffd33e6a301040241022050deadbeefdeadbeefdeadbeefdeadbeef8142af93'),
         ( 0, # return from parsing (success)
             join_response_t( # parsed object
                 COSE_keyset_t( 
@@ -186,7 +187,7 @@ CBORDUMPSANDPARSED = [
         )
     ),
     (
-        '8282a301040241012050e6bf4287c2d7618d6a9687445ffd33e6a301040241022050deadbeefdeadbeefdeadbeefdeadbeef8242af9345deadbeefab'.decode('hex'),
+        binascii.unhexlify('8282a301040241012050e6bf4287c2d7618d6a9687445ffd33e6a301040241022050deadbeefdeadbeefdeadbeefdeadbeef8242af9345deadbeefab'),
         ( 0, # return from parsing (success)
             join_response_t( # parsed object
                 COSE_keyset_t( 
@@ -211,25 +212,25 @@ CBORDUMPSANDPARSED = [
         )
     ),
     (
-        '8281a301040241012050e6bf4287c2d7618d6a9687445ffd33e68142'.decode('hex'),
+        binascii.unhexlify('8281a301040241012050e6bf4287c2d7618d6a9687445ffd33e68142'),
         ( 1, # return from parsing (fail)
             join_response_t(), # parsed object (zeroed out)
         )
     ),
     (
-        '81a301040241012050e6bf4287c2d7618d6a9687445ffd33e68142af93'.decode('hex'),
+        binascii.unhexlify('81a301040241012050e6bf4287c2d7618d6a9687445ffd33e68142af93'),
         ( 1, # return from parsing (fail)
             join_response_t(), # parsed object (zeroed out)
         )
     ),
     (
-        '8281a3010402410120508142af93'.decode('hex'),
+        binascii.unhexlify('8281a3010402410120508142af93'),
         ( 1, # return from parsing (fail)
             join_response_t(), # parsed object (zeroed out)
         )
     ),
     (
-        '8281a3010402410120508142af93'.decode('hex'),
+        binascii.unhexlify('8281a3010402410120508142af93'),
         ( 1, # return from parsing (fail)
             join_response_t(), # parsed object (zeroed out)
         )
@@ -265,7 +266,7 @@ def main():
     lib = ctypes.cdll.LoadLibrary('libcbor.so')
     join_response_parsed = join_response_t()
 
-    join_response_serialized = '8281a3010402410120508142af93'.decode('hex')
+    join_response_serialized = binascii.unhexlify('8281a3010402410120508142af93')
 
     respPayload     = [ord(b) for b in join_response_serialized]
     arr = (ctypes.c_uint8 * len(respPayload))(*respPayload)
