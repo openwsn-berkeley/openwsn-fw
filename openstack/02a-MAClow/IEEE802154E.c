@@ -2393,7 +2393,7 @@ void synchronizePacket(PORT_TIMER_WIDTH timeReceived) {
    PORT_TIMER_WIDTH currentValue;
    
    // record the current timer value and period
-   currentValue                   =  opentimers_getValue(ieee154e_vars.timerId)-ieee154e_vars.startOfSlotReference;
+   currentValue                   =  opentimers_getValue()-ieee154e_vars.startOfSlotReference;
    currentPeriod                  =  ieee154e_vars.slotDuration;
    
    // calculate new period

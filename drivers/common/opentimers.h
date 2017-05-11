@@ -82,7 +82,7 @@ void             opentimers_scheduleAbsolute(opentimers_id_t      id,
 void             opentimers_cancel(opentimers_id_t id);
 bool             opentimers_destroy(opentimers_id_t id);
 
-PORT_TIMER_WIDTH opentimers_getValue(opentimers_id_t id);
+PORT_TIMER_WIDTH opentimers_getValue(void);
 PORT_TIMER_WIDTH opentimers_getCurrentTimeout(void);
 bool             opentimers_isRunning(opentimers_id_t id);
 void             opentimers_setPriority(opentimers_id_t id, uint8_t priority);

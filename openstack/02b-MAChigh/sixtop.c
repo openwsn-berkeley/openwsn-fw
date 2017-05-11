@@ -129,7 +129,7 @@ void sixtop_init() {
     opentimers_scheduleAbsolute(
         sixtop_vars.ebSendingTimerId,
         sixtop_vars.periodMaintenance,
-        opentimers_getValue(sixtop_vars.ebSendingTimerId),
+        opentimers_getValue(),
         TIME_MS,
         sixtop_sendingEb_timer_cb
     );
@@ -138,7 +138,7 @@ void sixtop_init() {
     opentimers_scheduleAbsolute(
         sixtop_vars.maintenanceTimerId,
         sixtop_vars.periodMaintenance,
-        opentimers_getValue(sixtop_vars.maintenanceTimerId),
+        opentimers_getValue(),
         TIME_MS,
         sixtop_maintenance_timer_cb
     );
@@ -974,7 +974,7 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
         opentimers_scheduleAbsolute(
             sixtop_vars.timeoutTimerId,
             SIX2SIX_TIMEOUT_MS,
-            opentimers_getValue(sixtop_vars.timeoutTimerId),
+            opentimers_getValue(),
             TIME_MS,
             sixtop_timeout_timer_cb
         );

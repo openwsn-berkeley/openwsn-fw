@@ -288,13 +288,11 @@ bool opentimers_destroy(opentimers_id_t id){
 }
 
 /**
-\brief get the counter value of given timer.
-
-\param[in] id the timer id
+\brief get the current counter value of sctimer.
 
 \returns the current counter value.
  */
-PORT_TIMER_WIDTH opentimers_getValue(opentimers_id_t id){
+PORT_TIMER_WIDTH opentimers_getValue(void){
     return sctimer_readCounter();
 }
 

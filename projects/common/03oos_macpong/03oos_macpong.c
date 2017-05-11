@@ -111,7 +111,7 @@ void macpong_send(uint8_t payloadCtr) {
 
 void iphc_init(void) {
     PORT_TIMER_WIDTH       reference;
-    reference            = opentimers_getValue(macpong_vars.timerId);
+    reference            = opentimers_getValue();
     macpong_vars.timerId = opentimers_create();
     opentimers_scheduleAbsolute(
         macpong_vars.timerId,  // timerId

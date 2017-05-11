@@ -693,7 +693,7 @@ void tcp_change_state(uint8_t new_tcp_state) {
          opentimers_scheduleAbsolute(
              tcp_vars.timerId,
              TCP_TIMEOUT,
-             opentimers_getValue(tcp_vars.timerId),
+             opentimers_getValue(),
              TIME_MS,
              opentcp_timer_cb
          );

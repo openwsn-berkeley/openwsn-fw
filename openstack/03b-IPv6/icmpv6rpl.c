@@ -84,7 +84,7 @@ void icmpv6rpl_init() {
    opentimers_scheduleAbsolute(
        icmpv6rpl_vars.timerIdDIO,
        872 +(openrandom_get16b()&0xff),
-       opentimers_getValue(icmpv6rpl_vars.timerIdDIO),
+       opentimers_getValue(),
        TIME_MS,
        icmpv6rpl_timer_DIO_cb
    );
@@ -133,7 +133,7 @@ void icmpv6rpl_init() {
    opentimers_scheduleAbsolute(
        icmpv6rpl_vars.timerIdDAO,
        872 +(openrandom_get16b()&0xff),
-       opentimers_getValue(icmpv6rpl_vars.timerIdDAO),
+       opentimers_getValue(),
        TIME_MS,
        icmpv6rpl_timer_DAO_cb
    );
