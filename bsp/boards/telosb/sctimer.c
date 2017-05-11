@@ -22,10 +22,6 @@ typedef struct {
     sctimer_capture_cbt startFrameCb;
     sctimer_capture_cbt endFrameCb;
     uint8_t             f_SFDreceived;
-    uint16_t            currentTBIV[8];
-    uint8_t             index;
-    uint8_t             triggerWay[8];
-    uint8_t             indexT;
 } sctimer_vars_t;
 
 sctimer_vars_t sctimer_vars;
@@ -39,8 +35,6 @@ sctimer_vars_t sctimer_vars;
 */
 void sctimer_init(void){
     memset(&sctimer_vars, 0, sizeof(sctimer_vars_t));
-    
-    sctimer_vars.indexT  = 0x07;
    
    // radio's SFD pin connected to P4.1
    P4DIR   &= ~0x02; // input
