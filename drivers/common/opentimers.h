@@ -41,7 +41,7 @@ typedef struct {
    bool                 isUsed;             // true when this entry is occupied
    bool                 hasExpired;         // in case there are more than one interrupt occur at same time
    uint8_t              priority;           // high priority timer could take over the compare timer scheduled early than it for TIMERTHRESHOLD ticks.
-   opentimers_cbt      callback;           // function to call when elapses
+   opentimers_cbt       callback;           // function to call when elapses
 } opentimers_t;
 
 //=========================== module variables ================================
@@ -49,8 +49,11 @@ typedef struct {
 typedef struct {
    opentimers_t         timersBuf[MAX_NUM_TIMERS];
    bool                 running;
-   PORT_TIMER_WIDTH     currentTimeout; // current timeout, in ticks
-   PORT_TIMER_WIDTH     lastTimeout;    // last timeout, in ticks. This is the reference time to calculate the next to be expired timer.
+   PORT_TIMER_WIDTH     currentTimeout;     // current timeout, in ticks
+   PORT_TIMER_WIDTH     lastTimeout;        // last timeout, in ticks. This is the reference time to calculate the next to be expired timer.
+   PORT_TIMER_WIDTH     lastCompare[16];    // for debugging purpose
+   uint8_t              index;              // index for lastCompare array
+   bool                 insideISR;          // whether the function of opentimer is called inside of ISR or not
 } opentimers_vars_t;
 
 //=========================== prototypes ======================================
