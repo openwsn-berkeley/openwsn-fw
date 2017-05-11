@@ -96,13 +96,6 @@
 
 #define NUMSENSORS      7
 
-//===== sctimer scheduling
-// If the timer compared value is to set to TIMERTHRESHOLD ticks (or less) later than 
-// current timer count, the compared interrupt will be missed.
-// The value for C2538 is 5 as datasheet indicate, in case the interrupt routine takes 
-// long (should avoid this case), set it larger than 5
-#define TIMERTHRESHOLD 10  
-
 //=========================== typedef  ========================================
 
 //=========================== variables =======================================

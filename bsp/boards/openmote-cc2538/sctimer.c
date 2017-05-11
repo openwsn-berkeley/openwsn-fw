@@ -25,6 +25,8 @@ sctimer_vars_t sctimer_vars;
 
 // ========================== private =========================================
 
+void sctimer_isr_internal(void);
+
 // ========================== protocol =========================================
 
 /**
@@ -32,7 +34,7 @@ sctimer_vars_t sctimer_vars;
 */
 void sctimer_init(void){
     memset(&sctimer_vars, 0, sizeof(sctimer_vars_t));
-    IntRegister(INT_SMTIM, sctimer_isr);
+    IntRegister(INT_SMTIM, sctimer_isr_internal);
     IntDisable(INT_SMTIM);
 }
 
@@ -79,15 +81,12 @@ void sctimer_disable(void){
 
 // ========================== private =========================================
 
-kick_scheduler_t sctimer_isr(void){
+void sctimer_isr_internal(void){
     debugpins_isr_set();
     if (sctimer_vars.sctimer_cb!=NULL) {
         IntPendClear(INT_SMTIM);
         sctimer_vars.sctimer_cb();
         debugpins_isr_clr();
-        // kick the OS
-        return KICK_SCHEDULER;
     }
     debugpins_isr_clr();
-    return DO_NOT_KICK_SCHEDULER;
 }
