@@ -220,18 +220,18 @@ typedef struct {
    asn_t                     asn;                     // current absolute slot number
    slotOffset_t              slotOffset;              // current slot offset
    slotOffset_t              nextActiveSlotOffset;    // next active slot offset
-   PORT_RADIOTIMER_WIDTH     deSyncTimeout;           // how many slots left before looses sync
+   PORT_TIMER_WIDTH          deSyncTimeout;           // how many slots left before looses sync
    bool                      isSync;                  // TRUE iff mote is synchronized to network
    OpenQueueEntry_t          localCopyForTransmission;// copy of the frame used for current TX
-   PORT_RADIOTIMER_WIDTH     numOfSleepSlots;         // number of slots to sleep between active slots
+   PORT_TIMER_WIDTH          numOfSleepSlots;         // number of slots to sleep between active slots
    // as shown on the chronogram
    ieee154e_state_t          state;                   // state of the FSM
    OpenQueueEntry_t*         dataToSend;              // pointer to the data to send
    OpenQueueEntry_t*         dataReceived;            // pointer to the data received
    OpenQueueEntry_t*         ackToSend;               // pointer to the ack to send
    OpenQueueEntry_t*         ackReceived;             // pointer to the ack received
-   PORT_RADIOTIMER_WIDTH     lastCapturedTime;        // last captured time
-   PORT_RADIOTIMER_WIDTH     syncCapturedTime;        // captured time used to sync
+   PORT_TIMER_WIDTH          lastCapturedTime;        // last captured time
+   PORT_TIMER_WIDTH          syncCapturedTime;        // captured time used to sync
    // channel hopping
    uint8_t                   freq;                    // frequency of the current slot
    uint8_t                   asnOffset;               // offset inside the frame
@@ -242,8 +242,8 @@ typedef struct {
    uint8_t                   tsTemplateId;            // timeslot template id
    uint8_t                   chTemplateId;            // channel hopping tempalte id
    
-   PORT_RADIOTIMER_WIDTH     radioOnInit;             // when within the slot the radio turns on
-   PORT_RADIOTIMER_WIDTH     radioOnTics;             // how many tics within the slot the radio is on
+   PORT_TIMER_WIDTH          radioOnInit;             // when within the slot the radio turns on
+   PORT_TIMER_WIDTH          radioOnTics;             // how many tics within the slot the radio is on
    bool                      radioOnThisSlot;         // to control if the radio has been turned on in a slot.
    
    //control
@@ -253,7 +253,7 @@ typedef struct {
    int16_t                   timeCorrection;          // store the timeCorrection, prepend and retrieve it inside of frame header
    
    uint16_t                  slotDuration;            // duration of slot
-   opentimers_id_t          timerId;                 // id of timer used for implementing TSCH slot FSM 
+   opentimers_id_t           timerId;                 // id of timer used for implementing TSCH slot FSM 
    uint32_t                  startOfSlotReference;    // the time refer to the beginning of slot
 } ieee154e_vars_t;
 
@@ -270,10 +270,10 @@ typedef struct {
 END_PACK
 
 typedef struct {
-   PORT_RADIOTIMER_WIDTH     num_newSlot;
-   PORT_RADIOTIMER_WIDTH     num_timer;
-   PORT_RADIOTIMER_WIDTH     num_startOfFrame;
-   PORT_RADIOTIMER_WIDTH     num_endOfFrame;
+   PORT_TIMER_WIDTH          num_newSlot;
+   PORT_TIMER_WIDTH          num_timer;
+   PORT_TIMER_WIDTH          num_startOfFrame;
+   PORT_TIMER_WIDTH          num_endOfFrame;
 } ieee154e_dbg_t;
 
 //=========================== prototypes ======================================
@@ -281,7 +281,7 @@ typedef struct {
 // admin
 void               ieee154e_init(void);
 // public
-PORT_RADIOTIMER_WIDTH   ieee154e_asnDiff(asn_t* someASN);
+PORT_TIMER_WIDTH   ieee154e_asnDiff(asn_t* someASN);
 bool               ieee154e_isSynch(void);
 void               ieee154e_getAsn(uint8_t* array);
 void               ieee154e_setIsAckEnabled(bool isEnabled);
@@ -292,8 +292,8 @@ uint16_t           ieee154e_getSlotDuration(void);
 
 uint16_t           ieee154e_getTimeCorrection(void);
 // events
-void               ieee154e_startOfFrame(PORT_RADIOTIMER_WIDTH capturedTime);
-void               ieee154e_endOfFrame(PORT_RADIOTIMER_WIDTH capturedTime);
+void               ieee154e_startOfFrame(PORT_TIMER_WIDTH capturedTime);
+void               ieee154e_endOfFrame(PORT_TIMER_WIDTH capturedTime);
 // misc
 bool               debugPrint_asn(void);
 bool               debugPrint_isSync(void);
