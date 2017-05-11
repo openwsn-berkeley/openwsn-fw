@@ -40,7 +40,7 @@ void uinject_init() {
    opentimers_scheduleAbsolute(
        uinject_vars.period,
        UINJECT_PERIOD_MS,
-       opentimers_getValue(uinject_vars.timerId),
+       opentimers_getValue(),
        TIME_MS,
        uinject_timer_cb
    );
