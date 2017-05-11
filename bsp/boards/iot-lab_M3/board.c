@@ -29,11 +29,11 @@ int main(void){
 //=========================== private =========================================
 
 // configure the hard fault exception
-void board_enableHardFaultExceptionHandler();
+void board_enableHardFaultExceptionHandler(void);
 
 //=========================== public ==========================================
 
-void board_init()
+void board_init(void)
 {
     RCC_Configuration();//Configure rcc
     NVIC_Configuration();//configure NVIC and Vector Table
@@ -109,7 +109,7 @@ void board_reset(){
 
 //=========================== private =========================================
 
-void board_enableHardFaultExceptionHandler(){
+void board_enableHardFaultExceptionHandler(void){
     // Configures:
     //    bit9. stack alignment on exception entry 
     //    bit4. enables faulting

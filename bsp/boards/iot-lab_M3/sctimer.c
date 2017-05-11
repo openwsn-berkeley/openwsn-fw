@@ -18,9 +18,9 @@ On Iot_Lab_M3, we use RTC for the sctimer module.
 
 // ========================== define ==========================================
 
-#define TIMERLOOP_THRESHOLD   0xffffff   // 511 seconds @ 32768Hz clock
-#define OVERFLOW_THRESHOLD  0x7fffffff   // as openmotestm32 uses 16kHz, the upper timer overflows when timer research to 0x7fffffff
-
+#define TIMERLOOP_THRESHOLD          0xffffff     // 511 seconds @ 32768Hz clock
+#define OVERFLOW_THRESHOLD           0x7fffffff   // as openmotestm32 uses 16kHz, the upper timer overflows when timer research to 0x7fffffff
+#define MINIMUM_COMPAREVALE_ADVANCE  10
 // ========================== variable ========================================
 
 typedef struct {
@@ -163,8 +163,7 @@ void sctimer_setCompare(PORT_TIMER_WIDTH val) {
         // the timer is already late, schedule the ISR right now manually 
         EXTI->SWIER |= EXTI_Line17;
     } else {
-        if (val-RTC_GetCounter()<TIMERTHRESHOLD){
-            // there is hardware limitation to schedule the timer within TIMERTHRESHOLD ticks
+        if (val-RTC_GetCounter()<MINIMUM_COMPAREVALE_ADVANCE){
             // schedule ISR right now manually
             EXTI->SWIER |= EXTI_Line17;
         } else {

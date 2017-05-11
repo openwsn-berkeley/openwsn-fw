@@ -23,19 +23,19 @@
 //Configures the different GPIO ports as Analog Inputs.
 void GPIO_Config_ALL_AIN(void);
 // configure the hard fault exception
-void board_enableHardFaultExceptionHandler();
+void board_enableHardFaultExceptionHandler(void);
 
 //=========================== main ============================================
 
-extern int mote_main();
+extern int mote_main(void);
 
-int main() {
+int main(void) {
     return mote_main();
 }
 
 //=========================== public ==========================================
 
-void board_init(){
+void board_init(void){
     
     //Configure rcc
     RCC_Configuration();
@@ -147,7 +147,7 @@ void GPIO_Config_ALL_AIN(void){
 }
 
 
-void board_enableHardFaultExceptionHandler(){
+void board_enableHardFaultExceptionHandler(void){
     // Configures:
     //    bit9. stack alignment on exception entry 
     //    bit4. enables faulting

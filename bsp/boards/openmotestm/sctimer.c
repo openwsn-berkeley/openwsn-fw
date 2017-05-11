@@ -18,7 +18,7 @@ On Iot_Lab_M3, we use RTC for the sctimer module.
 
 // ========================== define ==========================================
 
-#define TIMERLOOP_THRESHOLD          0xffffff   // 511 seconds @ 32768Hz clock
+#define TIMERLOOP_THRESHOLD          0xffffff     // 511 seconds @ 32768Hz clock
 #define OVERFLOW_THRESHOLD           0x7fffffff   // as openmotestm32 uses 16kHz, the upper timer overflows when timer research to 0x7fffffff
 #define MINIMUM_COMPAREVALE_ADVANCE  10
 
