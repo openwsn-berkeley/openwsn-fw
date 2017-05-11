@@ -128,7 +128,7 @@ void sixtop_init() {
     sixtop_vars.ebSendingTimerId   = opentimers_create();
     opentimers_scheduleAbsolute(
         sixtop_vars.ebSendingTimerId,
-        (sixtop_vars.ebPeriod-EBPERIOD_RANDOM_RANG+(openrandom_get16b()%(2*EBPERIOD_RANDOM_RANG))),
+        sixtop_vars.periodMaintenance,
         opentimers_getValue(sixtop_vars.ebSendingTimerId),
         TIME_MS,
         sixtop_sendingEb_timer_cb
@@ -644,7 +644,7 @@ void sixtop_sendingEb_timer_cb(void){
    scheduler_push_task(timer_sixtop_sendEb_fired,TASKPRIO_SIXTOP);
    opentimers_scheduleRelative(
        sixtop_vars.ebSendingTimerId,
-       (sixtop_vars.ebPeriod-EBPERIOD_RANDOM_RANG+(openrandom_get16b()%(2*EBPERIOD_RANDOM_RANG))),
+       872+(openrandom_get16b()&0xff),
        TIME_MS,
        sixtop_sendingEb_timer_cb
    );
@@ -668,7 +668,15 @@ void sixtop_timeout_timer_cb(void) {
 //======= EB/KA task
 
 void timer_sixtop_sendEb_fired(){
-    sixtop_sendEB();
+    sixtop_vars.ebCounter = (sixtop_vars.ebCounter+1)%EBPERIOD;
+    switch (sixtop_vars.ebCounter) {
+        case 0:
+            // called every EBPERIOD seconds
+            sixtop_sendEB();
+            break;
+        default:
+            break;
+   }
 }
 
 /**
