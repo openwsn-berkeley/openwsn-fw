@@ -55,7 +55,7 @@ void cexample_init() {
    cexample_vars.timerId    = opentimers_create();
    opentimers_scheduleAbsolute(cexample_vars.timerId, 
                                 CEXAMPLEPERIOD, 
-                                opentimers_getValue(cexample_vars.timerId), 
+                                opentimers_getValue(), 
                                 TIME_MS, 
                                 cexample_timer_cb);
 }
