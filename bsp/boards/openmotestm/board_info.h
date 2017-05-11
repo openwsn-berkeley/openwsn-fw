@@ -70,10 +70,6 @@ to return the board's description.
 
 #define SYNC_ACCURACY                       2     // ticks
 
-//===== opentimers
-
-#define TIMERTHRESHOLD                      10    // ticks
-
 //=========================== typedef  ========================================
 
 //=========================== variables =======================================
