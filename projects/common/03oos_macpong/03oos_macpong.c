@@ -18,7 +18,6 @@
 #include "sixtop.h"
 #include "idmanager.h"
 #include "neighbors.h"
-#include "sctimer.h"
 
 #define LEN_PAYLOAD 100
 
@@ -112,7 +111,7 @@ void macpong_send(uint8_t payloadCtr) {
 
 void iphc_init(void) {
     PORT_TIMER_WIDTH       reference;
-    reference            = sctimer_readCounter();
+    reference            = opentimers_getValue(macpong_vars.timerId);
     macpong_vars.timerId = opentimers_create();
     opentimers_scheduleAbsolute(
         macpong_vars.timerId,  // timerId
