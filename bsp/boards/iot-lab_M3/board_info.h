@@ -65,10 +65,6 @@ to return the board's description.
 
 #define SYNC_ACCURACY                       2     // ticks
 
-//===== opentimers
-
-#define TIMERTHRESHOLD                      10    // ticks
-
 //=========================== variables =======================================
 
 static const uint8_t rreg_uriquery[]        = "h=ucb";
