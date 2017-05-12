@@ -36,7 +36,7 @@ void opensensors_init(void) {
 
 /**
    \brief Return the number of registered OpenSensors
-   \param[out] the number of registered OpenSensors.
+   \returns the number of registered OpenSensors.
 */
 uint8_t opensensors_getNumSensors(void) {
    return opensensors_vars.numSensors;
@@ -45,7 +45,7 @@ uint8_t opensensors_getNumSensors(void) {
 /**
    \brief Return an OpenSensors resource structure
    \param[in] index Index of the OpenSensors resource within Opensensors vars.
-   \param[out] the OpenSensors resource within Opensensors vars.
+   \returns the OpenSensors resource within Opensensors vars.
 */
 opensensors_resource_desc_t* opensensors_getResource(uint8_t index) {
    return &(opensensors_vars.opensensors_resource[index]);
@@ -57,8 +57,6 @@ opensensors_resource_desc_t* opensensors_getResource(uint8_t index) {
    \brief Register a OpenSensors resource
 
    \param[in] sensorType the sensor type representation.
-   \param[in] callbackRead callback to read rough sensor data.
-   \param[in] callbackConvert callback to convert rough sensor data to human understandable.
 */
 void opensensors_register(uint8_t sensorType) {
    if (sensors_is_present(sensorType)) {

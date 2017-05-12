@@ -230,7 +230,7 @@ port_INLINE uint8_t processIE_prependChannelHoppingIE(OpenQueueEntry_t* pkt){
    
    len = 0;
 
-   // reserve space for timeslot template ID
+   // reserve space for channelhopping template ID
    packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
    // write header
    *((uint8_t*)(pkt->payload)) = CHANNELHOPPING_TEMPLATE_ID;

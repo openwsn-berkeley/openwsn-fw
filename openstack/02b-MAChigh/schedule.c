@@ -6,6 +6,7 @@
 #include "sixtop.h"
 #include "idmanager.h"
 #include "sf0.h"
+#include "icmpv6rpl.h"
 
 //=========================== variables =======================================
 
@@ -251,7 +252,7 @@ void  schedule_getSlotInfo(
 /**
 \brief Get the maximum number of active slots.
 
-\param[out] maximum number of active slots
+\returns maximum number of active slots
 */
 uint16_t  schedule_getMaxActiveSlots() {
    return schedule_vars.maxActiveSlots;
