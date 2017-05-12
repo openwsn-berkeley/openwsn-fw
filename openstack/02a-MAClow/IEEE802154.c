@@ -32,14 +32,13 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
                               bool              payloadIEPresent,
                               uint8_t           sequenceNumber,
                               open_addr_t*      nextHop) {
-   uint8_t      temp_8b;
-   uint8_t      ielistpresent = IEEE154_IELIST_NO;
-   bool         securityEnabled;
-   int16_t      timeCorrection;
-   uint16_t     timeSyncInfo;
+   uint8_t temp_8b;
+   uint8_t ielistpresent = IEEE154_IELIST_NO;
+   bool    securityEnabled;
+   int16_t timeCorrection;
    header_IE_ht header_desc;
-   bool         headerIEPresent = FALSE;
-   uint8_t      destAddrMode;
+   bool    headerIEPresent = FALSE;
+   uint8_t destAddrMode;
    
    securityEnabled = msg->l2_securityLevel == IEEE154_ASH_SLF_TYPE_NOSEC ? 0 : 1;
 
@@ -85,12 +84,8 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
        // add the payload to the ACK (i.e. the timeCorrection)
        packetfunctions_reserveHeaderSize(msg,sizeof(timecorrection_IE_ht));
        timeCorrection *= US_PER_TICK;
-       timeSyncInfo  = ((uint16_t)timeCorrection) & 0x0fff;
-       if (msg->l2_isNegativeACK){
-          timeSyncInfo |= 0x8000;
-       }
-       msg->payload[0] = (uint8_t)(((timeSyncInfo)   ) & 0xff);
-       msg->payload[1] = (uint8_t)(((timeSyncInfo)>>8) & 0xff);
+       msg->payload[0] = (uint8_t)((((uint16_t)timeCorrection)   ) & 0xff);
+       msg->payload[1] = (uint8_t)((((uint16_t)timeCorrection)>>8) & 0xff);
 
        // add header IE header -- xv poipoi -- pkt is filled in reverse order..
        packetfunctions_reserveHeaderSize(msg,sizeof(header_IE_ht));
@@ -202,7 +197,6 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
    uint8_t  byte0;
    uint8_t  byte1;
    int16_t  timeCorrection;
-   uint16_t timeSyncInfo;
    // by default, let's assume the header is not valid, in case we leave this
    // function because the packet ends up being shorter than the header.
    ieee802514_header->valid=FALSE;
@@ -367,20 +361,9 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
                        // timecorrection IE
                        byte0 = *((uint8_t*)(msg->payload)+ieee802514_header->headerLength);
                        byte1 = *((uint8_t*)(msg->payload)+ieee802514_header->headerLength+1);
-                       timeSyncInfo    = (uint16_t)byte1<<8 | (uint16_t)byte0;
-                       // negative ACK or not
-                       if (timeSyncInfo & 0x8000){
-                            msg->l2_isNegativeACK = TRUE;
-                       } else {
-                            msg->l2_isNegativeACK = FALSE;
-                       }
-                       // negative timeCorrection or not, cast from 12 to 16 bit signed integer
-                       if (timeSyncInfo & 0x0800){
-                           timeCorrection = timeSyncInfo | 0xf000;
-                       } else {
-                           timeCorrection = timeSyncInfo & 0x0fff;
-                       }
-                       timeCorrection  = ((int16_t)timeCorrection / (PORT_SIGNED_INT_WIDTH)US_PER_TICK);
+
+                       timeCorrection  = (int16_t)((uint16_t)byte1<<8 | (uint16_t)byte0);
+                       timeCorrection  = (timeCorrection / (PORT_SIGNED_INT_WIDTH)US_PER_TICK);
                        
                        ieee802514_header->timeCorrection = timeCorrection;
                        ieee802514_header->headerLength  += len;

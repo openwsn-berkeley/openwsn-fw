@@ -310,19 +310,18 @@ typedef struct {
    uint8_t       l2_sixtop_returnCode;           // return code in 6P
    uint8_t*      l2_ASNpayload;                  // pointer to the ASN in EB
    uint8_t       l2_joinPriority;                // the join priority received in EB
-   bool          l2_IEListPresent;               // did have IE field?
+   bool          l2_IEListPresent;               //did have IE field?
    bool          l2_payloadIEpresent;            // did I have payload IE field
    bool          l2_joinPriorityPresent;
-   bool          l2_isNegativeACK;               // is the negative ACK?
    int16_t       l2_timeCorrection;              // record the timeCorrection and print out at endOfslot
    //layer-2 security
-   uint8_t       l2_securityLevel;               // the security level specified for the current frame
-   uint8_t       l2_keyIdMode;                   // the key Identifier mode specified for the current frame
-   uint8_t       l2_keyIndex;                    // the key Index specified for the current frame
-   open_addr_t   l2_keySource;                   // the key Source specified for the current frame
-   uint8_t       l2_authenticationLength;        // the length of the authentication field
-   uint8_t       commandFrameIdentifier;         // used in case of Command Frames
-   uint8_t*      l2_FrameCounter;                // pointer to the FrameCounter in the MAC header
+   uint8_t       l2_securityLevel;               //the security level specified for the current frame
+   uint8_t       l2_keyIdMode;                   //the key Identifier mode specified for the current frame
+   uint8_t       l2_keyIndex;                    //the key Index specified for the current frame
+   open_addr_t   l2_keySource;                   //the key Source specified for the current frame
+   uint8_t       l2_authenticationLength;        //the length of the authentication field
+   uint8_t       commandFrameIdentifier;         //used in case of Command Frames
+   uint8_t*      l2_FrameCounter;                //pointer to the FrameCounter in the MAC header
    //l1 (drivers)
    uint8_t       l1_txPower;                     // power for packet to Tx at
    int8_t        l1_rssi;                        // RSSI of received packet
