@@ -650,7 +650,7 @@ void icmpv6rpl_timer_DAO_cb(void) {
 */
 void icmpv6rpl_timer_DAO_task() {
     icmpv6rpl_vars.daoTimerCounter = (icmpv6rpl_vars.daoTimerCounter+1)%icmpv6rpl_vars.daoPeriod;
-    switch (icmpv6rpl_vars.dioTimerCounter) {
+    switch (icmpv6rpl_vars.daoTimerCounter) {
         case 0:
             // called every TIMER_DAO_TIMEOUT seconds
             sendDAO();
