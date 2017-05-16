@@ -53,7 +53,7 @@ void NVIC_sctimer(void) {
     //Configure NVIC: Preemption Priority = 0 and Sub Priority = 1
     NVIC_InitStructure.NVIC_IRQChannel                      = RTCAlarm_IRQChannel;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority    = 1;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority           = 0;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority           = 1;
     NVIC_InitStructure.NVIC_IRQChannelCmd                   = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
 }
@@ -64,8 +64,8 @@ void NVIC_radio(void)
    //Configure NVIC: Preemption Priority = 2 and Sub Priority = 0
   NVIC_InitTypeDef  NVIC_InitStructure;
   NVIC_InitStructure.NVIC_IRQChannel                        = EXTI4_IRQChannel; 
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority    = 1;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority           = 1; 
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority      = 1;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority             = 0; 
   NVIC_InitStructure.NVIC_IRQChannelCmd                     = ENABLE; 
   NVIC_Init(&NVIC_InitStructure);
 }

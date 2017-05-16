@@ -64,7 +64,7 @@ void NVIC_radio(void){
      //Configure NVIC: Preemption Priority = 0 and Sub Priority = 0
     NVIC_InitTypeDef  NVIC_InitStructure;
     NVIC_InitStructure.NVIC_IRQChannel                      = EXTI15_10_IRQChannel; 
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority    = 0;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority    = 1;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority           = 0; 
     NVIC_InitStructure.NVIC_IRQChannelCmd                   = ENABLE; 
     NVIC_Init(&NVIC_InitStructure);
