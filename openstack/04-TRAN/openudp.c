@@ -227,10 +227,10 @@ void openudp_receive(OpenQueueEntry_t* msg) {
                             (errorparameter_t)msg->l4_destination_port,
                             (errorparameter_t)6);
       openqueue_freePacketBuffer(msg);
+   } else {
+      // forward message to resource
+      udp_receive_done_callback_ptr(msg);  
    }
-
-   // forward message to resource
-   udp_receive_done_callback_ptr(msg);
 }
 
 bool openudp_debugPrint() {
