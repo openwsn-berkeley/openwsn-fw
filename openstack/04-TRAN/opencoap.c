@@ -352,8 +352,10 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
          msg->payload = &msg->packet[127-i];
       }
 
-      packetfunctions_reserveHeaderSize(msg, 1);
-      msg->payload[0] = COAP_PAYLOAD_MARKER;
+      if (msg->length > 0) {
+         packetfunctions_reserveHeaderSize(msg, 1);
+         msg->payload[0] = COAP_PAYLOAD_MARKER;
+      }
 
       if ( b2_idx != MAX_COAP_OPTIONS || response_too_big ) {
          // add block option to response
