@@ -10,6 +10,8 @@
 
 //=========================== defines =========================================
 
+#define MAX_BLOCK_SIZE 64
+
 //=========================== variables =======================================
 
 opencoap_vars_t opencoap_vars;
@@ -270,6 +272,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    
    if (found==TRUE) {
       response_too_big = FALSE;
+      b2_blockSize = MAX_BLOCK_SIZE; //default maximum
 
       // parse Block2 option
       if ( b2_idx != MAX_COAP_OPTIONS ) {
@@ -288,7 +291,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
 
          b2_moreBlocks = (b2_blockNumber & 0x8) > 0;
          b2_blockSize = 1 << ((b2_blockNumber & 0x7) + 4); // 16 B -- 1 kB, 0b111 is reserved
-         b2_blockSize = b2_blockSize>64 ? 64 : b2_blockSize;
+         b2_blockSize = b2_blockSize>MAX_BLOCK_SIZE ? MAX_BLOCK_SIZE : b2_blockSize;
          b2_blockNumber = b2_blockNumber >> 4;
       }
 
@@ -312,6 +315,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
          if ( response_too_big && !reused_packet) {
             // create block_transfer
             bt_ptr = opencoap_createBlockTransfer(msg, &(coap_options[0]), uripath0_idx, uripath1_idx);
+            b2_blockNumber = 0;
             if (bt_ptr == NULL) {
                // TODO: print error
             }
@@ -348,8 +352,8 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
       // if msg->payload does not point into the second half of msg->packet, copy the data there
       if (msg->payload < &msg->packet[63] || msg->payload >= &msg->packet[127]) {
          // like memcpy but handles overlapping memory
-         memmove(&msg->packet[127-i], msg->payload, msg->length);
-         msg->payload = &msg->packet[127-i];
+         memmove(&msg->packet[127-msg->length], msg->payload, msg->length);
+         msg->payload = &msg->packet[127-msg->length];
       }
 
       if (msg->length > 0) {
