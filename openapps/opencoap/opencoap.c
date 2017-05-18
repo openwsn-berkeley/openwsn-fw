@@ -309,7 +309,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
          response_too_big = msg->length > b2_blockSize; // this could also be up to roughly 71 Bytes
          reused_packet = (msg->payload >= &(msg->packet[0])) && (msg->payload - &(msg->packet[0]) < 127); //msg->payload points into msg->packet
 
-         if ( response_too_big ) {
+         if ( response_too_big && !reused_packet) {
             // create block_transfer
             bt_ptr = opencoap_createBlockTransfer(msg, &(coap_options[0]), uripath0_idx, uripath1_idx);
             if (bt_ptr == NULL) {
