@@ -35,7 +35,6 @@
 //-- 04-TRAN
 #include "opentcp.h"
 #include "openudp.h"
-#include "opencoap.h"
 //===== applications
 #include "openapps.h"
 

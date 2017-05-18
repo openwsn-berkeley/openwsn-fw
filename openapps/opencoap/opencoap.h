@@ -177,4 +177,3 @@ owerror_t     opencoap_send(
 */
 
 #endif
-
