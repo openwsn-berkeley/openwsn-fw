@@ -7,6 +7,7 @@
 #include "opendefs.h"
 
 // CoAP
+#include "opencoap.h"
 #include "c6t.h"
 #include "cinfo.h"
 #include "cleds.h"
