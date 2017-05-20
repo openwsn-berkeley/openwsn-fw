@@ -20,8 +20,8 @@ opencoap_block_transfer_t opencoap_block_transfers[COAP_BLOCK_TRANSFERS];
 //=========================== prototype =======================================
 
 void opencoap_dropBlockTransfer(opencoap_block_transfer_t* bt_ptr);
-opencoap_block_transfer_t* opencoap_lookupBlockTransfer(OpenQueueEntry_t* msg, coap_option_iht* coap_options, uint8_t p0_idx, uint8_t p1_idx);
-opencoap_block_transfer_t* opencoap_createBlockTransfer(OpenQueueEntry_t* msg, coap_option_iht* coap_options, uint8_t p0_idx, uint8_t p1_idx);
+opencoap_block_transfer_t* opencoap_lookupBlockTransfer(OpenQueueEntry_t* msg, uint32_t hash);
+opencoap_block_transfer_t* opencoap_createBlockTransfer(OpenQueueEntry_t* msg, uint32_t hash);
 
 //=========================== public ==========================================
 
@@ -70,6 +70,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    uint8_t                   uripath0_idx = MAX_COAP_OPTIONS;
    uint8_t                   uripath1_idx = MAX_COAP_OPTIONS;
    uint8_t                   uripath2_idx = MAX_COAP_OPTIONS;
+   uint32_t                  hash = 0;
    opencoap_block_transfer_t* bt_ptr = NULL;
    bool                      response_too_big = FALSE;
    bool                      reused_packet = FALSE;
@@ -139,6 +140,8 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
 
       switch(coap_options[i].type) {
          case COAP_OPTION_NUM_URIPATH:
+            // hash the uri path elements using the previous hash as the seed
+            hash = opencoap_murmurhash3(coap_options[i].pValue, coap_options[i].length, hash);
             if (uripath0_idx == MAX_COAP_OPTIONS) {
                uripath0_idx = i;
             } else if (uripath1_idx == MAX_COAP_OPTIONS) {
@@ -296,7 +299,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
       }
 
       // lookup (client, URI) in block_transfer
-      bt_ptr = opencoap_lookupBlockTransfer(msg, coap_options, uripath0_idx, uripath1_idx);
+      bt_ptr = opencoap_lookupBlockTransfer(msg, hash);
 
       // check if we should forget a previous block transfer
       if ( b2_idx == MAX_COAP_OPTIONS && bt_ptr != NULL ) {
@@ -314,7 +317,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
 
          if ( response_too_big && !reused_packet) {
             // create block_transfer
-            bt_ptr = opencoap_createBlockTransfer(msg, &(coap_options[0]), uripath0_idx, uripath1_idx);
+            bt_ptr = opencoap_createBlockTransfer(msg, hash);
             b2_blockNumber = 0;
             if (bt_ptr == NULL) {
                // TODO: print error
@@ -657,13 +660,13 @@ owerror_t opencoap_send(
 //=========================== private =========================================
 
 void opencoap_dropBlockTransfer(opencoap_block_transfer_t* bt_ptr) {
-   bt_ptr->uriPathLen = 0;
+   bt_ptr->hash = 0;
    bt_ptr->data = NULL;
    bt_ptr->dataLen = 0;
    bt_ptr->ongoing = FALSE;
 }
 
-opencoap_block_transfer_t* opencoap_lookupBlockTransfer(OpenQueueEntry_t* msg, coap_option_iht* opt, uint8_t p0_idx, uint8_t p1_idx) {
+opencoap_block_transfer_t* opencoap_lookupBlockTransfer(OpenQueueEntry_t* msg, uint32_t hash) {
    uint8_t i;
    opencoap_block_transfer_t* bt_ptr = NULL;
 
@@ -671,36 +674,19 @@ opencoap_block_transfer_t* opencoap_lookupBlockTransfer(OpenQueueEntry_t* msg, c
       bt_ptr = &opencoap_block_transfers[i];
       if (
             bt_ptr->ongoing == TRUE                            &&
+            bt_ptr->hash == hash                               &&
             packetfunctions_sameAddress(&(bt_ptr->clientAddr),
                                         &(msg->l3_sourceAdd))
          ) {
-         // same address
-         if (
-               p0_idx != MAX_COAP_OPTIONS &&
-               bt_ptr->uriPathLen == 1+opt[p0_idx].length &&
-               memcmp(opt[p0_idx].pValue, &(bt_ptr->uriPath[1]), opt[p0_idx].length) == 0
-            ) {
-            // same uri (/foo)
-            return &(opencoap_block_transfers[i]);
-         } else if (
-               p0_idx != MAX_COAP_OPTIONS &&
-               p1_idx != MAX_COAP_OPTIONS &&
-               bt_ptr->uriPathLen == 1+opt[p0_idx].length+1+opt[p1_idx].length &&
-               memcmp(opt[p0_idx].pValue, &(bt_ptr->uriPath[1]), opt[p0_idx].length) == 0 &&
-               memcmp(opt[p1_idx].pValue, &(bt_ptr->uriPath[1+opt[p0_idx].length+1]), opt[p0_idx].length) == 0
-            )
-            // same uri (/foo/bar)
-            return &(opencoap_block_transfers[i]);
+         return &(opencoap_block_transfers[i]);
       } 
    }
    return NULL;
 }
 
 // create an entry in the block transfer array from an incoming msg
-opencoap_block_transfer_t* opencoap_createBlockTransfer(OpenQueueEntry_t* msg, coap_option_iht* coap_options, uint8_t p0_idx, uint8_t p1_idx) {
+opencoap_block_transfer_t* opencoap_createBlockTransfer(OpenQueueEntry_t* msg, uint32_t hash) {
    uint8_t i;
-   uint8_t p0_len = 0;
-   uint8_t p1_len = 0;
    opencoap_block_transfer_t* bt_ptr;
 
    for (i=0; i<COAP_BLOCK_TRANSFERS; i++) {
@@ -712,26 +698,8 @@ opencoap_block_transfer_t* opencoap_createBlockTransfer(OpenQueueEntry_t* msg, c
       // copy client address
       bt_ptr->clientAddr.type = msg->l3_sourceAdd.type;
       memcpy(&bt_ptr->clientAddr.addr_128b[0], &msg->l3_sourceAdd.addr_128b[0], LENGTH_ADDR128b);
-      if (p0_idx != MAX_COAP_OPTIONS) {
-         p0_len = coap_options[p0_idx].length;
-         bt_ptr->uriPath[0] = '/';
-         // copy first uri path segment
-         if (1+p0_len >= 32) {
-            return NULL;
-         }
-         memcpy(&(bt_ptr->uriPath[1]), coap_options[p0_idx].pValue, p0_len);
-         if (p1_idx != MAX_COAP_OPTIONS) {
-            p1_len = coap_options[p1_idx].length;
-            bt_ptr->uriPath[1+p0_len] = '/';
-            // copy second uri path segment if it exists
-            if (1+p0_len+1+p1_len > 32) {
-               return NULL;
-            }
-            memcpy(&(bt_ptr->uriPath[1+p0_len+1]), coap_options[p1_idx].pValue, p1_len);
-         }
-      }
-      bt_ptr->uriPathLen = 1 + p0_len + (p1_len > 0 ? 1 : 0) + p1_len;
 
+      bt_ptr->hash = hash;
       bt_ptr->data = msg->payload;
       bt_ptr->dataLen = msg->length;
       bt_ptr->ongoing = TRUE;
@@ -739,6 +707,69 @@ opencoap_block_transfer_t* opencoap_createBlockTransfer(OpenQueueEntry_t* msg, c
       return bt_ptr;
    }
    return NULL;
+}
+
+// MurmurHash3 was written by Austin Appleby, and is placed in the public
+// domain. The author hereby disclaims copyright to this source code.
+uint32_t opencoap_murmurhash3(const uint8_t * key, int len, uint32_t seed) {
+   const uint8_t * data = (const uint8_t*)key;
+   const int nblocks = len / 4;
+   int i;
+
+   uint32_t h1 = seed;
+
+   uint32_t c1 = 0xcc9e2d51;
+   uint32_t c2 = 0x1b873593;
+
+   //----------
+   // body
+
+   const uint32_t * blocks = (const uint32_t *)(data + nblocks*4);
+
+   for(i = -nblocks; i; i++)
+   {
+     uint32_t k1 = blocks[i];
+
+     k1 *= c1;
+     k1 = (k1 << 15) | (k1 >> (32-15));
+     k1 *= c2;
+
+     h1 ^= k1;
+     h1 = (h1 << 13) | (h1 >> (32-13));
+     h1 = h1*5+0xe6546b64;
+   }
+
+   //----------
+   // tail
+
+   const uint8_t * tail = (const uint8_t*)(data + nblocks*4);
+
+   uint32_t k1 = 0;
+
+   switch(len & 3)
+   {
+   case 3: k1 ^= tail[2] << 16;
+   case 2: k1 ^= tail[1] << 8;
+   case 1: k1 ^= tail[0];
+           k1 *= c1;
+           k1 = (k1 << 15) | (k1 >> (32-15));
+           k1 *= c2;
+           h1 ^= k1;
+   };
+
+   //----------
+   // finalization
+
+   h1 ^= len;
+
+   h1 ^= h1 >> 16;
+   h1 *= 0x85ebca6b;
+   h1 ^= h1 >> 13;
+   h1 *= 0xc2b2ae35;
+   h1 ^= h1 >> 16;
+
+
+   return h1;
 }
 
 // vim: ts=3 sw=3

@@ -163,8 +163,7 @@ typedef struct {
 // save memory: keep hash of uris and clientAddr in block_transfers struct, hash uris and clientAddr of each request, and compare the hashes (uint32_t)
 typedef struct {
    open_addr_t    clientAddr;
-   uint8_t        uriPath[32];
-   uint8_t        uriPathLen;
+   uint32_t       hash;
    uint8_t*       data;
    uint16_t       dataLen;
    bool           ongoing;
@@ -187,6 +186,9 @@ owerror_t     opencoap_send(
     uint8_t               numOptions,
     coap_resource_desc_t* descSender
 );
+
+uint32_t opencoap_murmurhash3(const uint8_t* key, int len, uint32_t seed);
+
 
 /**
 \}
