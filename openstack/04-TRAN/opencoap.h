@@ -9,6 +9,7 @@
 */
 
 #include "opentimers.h"
+#include "openudp.h"
 
 //=========================== define ==========================================
 
@@ -145,6 +146,7 @@ struct coap_resource_desc_t {
 //=========================== module variables ================================
 
 typedef struct {
+   udp_resource_desc_t   desc;
    coap_resource_desc_t* resources;
    bool                  busySending;
    uint8_t               delayCounter;

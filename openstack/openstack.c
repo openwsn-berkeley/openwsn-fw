@@ -77,7 +77,6 @@ void openstack_init(void) {
    //-- 04-TRAN
    opentcp_init();
    openudp_init();
-   opencoap_init();     // initialize before any of the CoAP applications
    
    //===== applications
    openapps_init();

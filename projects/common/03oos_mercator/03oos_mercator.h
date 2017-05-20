@@ -11,6 +11,7 @@
 
 #define UART_BUF_LEN         30
 #define RF_BUF_LEN           125+LENGTH_CRC // maximum length is 127 bytes
+#define MAC_LEN              8
 
 #define TASK_PRIO_SERIAL     TASKPRIO_MAX
 #define TASK_PRIO_WIRELESS   TASKPRIO_SIXTOP_TIMEOUT
@@ -42,7 +43,7 @@ typedef struct {
    uint8_t         type;
    uint8_t         status;
    uint16_t        numnotifications;
-   uint8_t         mac[8];
+   uint8_t         mac[MAC_LEN];
 } RESP_ST_ht;
 END_PACK
 
@@ -57,7 +58,7 @@ typedef struct {
    uint8_t         type;
    uint8_t         frequency;
     int8_t         txpower;
-   uint8_t         transctr;
+   uint16_t        transctr;
    uint16_t        txnumpk;
    uint16_t        txifdur;
    uint8_t         txlength;
@@ -75,8 +76,8 @@ BEGIN_PACK
 typedef struct {
    uint8_t         type;
    uint8_t         frequency;
-   uint8_t         srcmac[8];
-   uint8_t         transctr;
+   uint8_t         srcmac[MAC_LEN];
+   uint16_t        transctr;
    uint8_t         txlength;
    uint8_t         txfillbyte;
 } REQ_RX_ht;
@@ -96,6 +97,16 @@ BEGIN_PACK
 typedef struct {
    uint8_t         type;
 } IND_UP_ht;
+END_PACK
+
+BEGIN_PACK
+typedef struct {
+   uint8_t   srcmac[MAC_LEN];
+   uint16_t  transctr;
+   uint16_t  pkctr;
+   uint8_t   txfillbyte;
+   uint8_t   padding[RF_BUF_LEN-sizeof(uint8_t)-2*sizeof(uint16_t)];
+} RF_PACKET_ht;
 END_PACK
 
 //=========================== variables =======================================
@@ -138,7 +149,7 @@ typedef struct {
    uint16_t        txpk_numpk;
    uint8_t         txpk_len;
    uint16_t        txpk_totalnumpk;
-   uint8_t         mac[8];
+   uint8_t         mac[MAC_LEN];
    // rx
    uint8_t         rxpk_buf[RF_BUF_LEN];
    uint8_t         rxpk_len;
@@ -147,9 +158,8 @@ typedef struct {
    uint8_t         rxpk_lqi;
       bool         rxpk_crc;
    uint8_t         rxpk_txfillbyte;
-   uint8_t         rxpk_srcmac[8];
-   uint8_t         rxpk_transctr;
-   
+   uint8_t         rxpk_srcmac[MAC_LEN];
+   uint16_t        rxpk_transctr;   
 } mercator_vars_t;
 
 mercator_vars_t mercator_vars;

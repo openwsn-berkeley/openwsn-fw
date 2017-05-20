@@ -15,7 +15,7 @@
 /**
 \brief The length of the superframe, in slots.
 
-The superframe repears over time and can be arbitrarly long.
+The superframe reappears over time and can be arbitrarily long.
 */
 #define SLOTFRAME_LENGTH    11 //should be 101
 
@@ -36,7 +36,7 @@ The superframe repears over time and can be arbitrarly long.
         MAXACTIVESLOTS < SLOTFRAME_LENGTH 
         
   This would make sure number of slots are available (SLOTFRAME_LENGTH-MAXACTIVESLOTS) 
-  for seiral port to tranmit data to dagroot. 
+  for serial port to transmit data to dagroot.
 */
 
 #define NUMSLOTSOFF          5
@@ -184,7 +184,7 @@ void              schedule_removeAllCells(
 );
 scheduleEntry_t*  schedule_getCurrentScheduleEntry(void);
 uint8_t           schedule_getNumOfSlotsByType(cellType_t type);
-uint8_t           schedule_getNumberOfFreeEntries();
+uint8_t           schedule_getNumberOfFreeEntries(void);
 // from IEEE802154E
 void               schedule_syncSlotOffset(slotOffset_t targetSlotOffset);
 void               schedule_advanceSlot(void);
@@ -203,7 +203,7 @@ void               schedule_indicateTx(
                         bool      succesfullTx
                    );
 
-void               schedule_housekeeping();
+void               schedule_housekeeping(void);
 /**
 \}
 \}
