@@ -670,6 +670,7 @@ opencoap_block_transfer_t* opencoap_lookupBlockTransfer(OpenQueueEntry_t* msg, c
    for (i=0; i<COAP_BLOCK_TRANSFERS; i++) {
       bt_ptr = &opencoap_block_transfers[i];
       if (
+            bt_ptr->ongoing == TRUE                            &&
             packetfunctions_sameAddress(&(bt_ptr->clientAddr),
                                         &(msg->l3_sourceAdd))
          ) {
