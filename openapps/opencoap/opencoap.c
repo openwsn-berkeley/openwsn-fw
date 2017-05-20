@@ -16,6 +16,9 @@ opencoap_vars_t opencoap_vars;
 
 //=========================== prototype =======================================
 
+owerror_t opencoap_decodeOptions(OpenQueueEntry_t* msg, coap_option_iht* options, uint8_t* payload_index);
+owerror_t opencoap_encodeOptions(OpenQueueEntry_t* msg, coap_option_iht* options);
+
 //=========================== public ==========================================
 
 //===== from stack
@@ -51,7 +54,6 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    uint16_t                  temp_l4_destination_port;
    uint8_t                   i;
    uint8_t                   index;
-   coap_option_t             last_option;
    coap_resource_desc_t*     temp_desc;
    bool                      found;
    owerror_t                 outcome = 0;
@@ -59,8 +61,8 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    // local variables passed to the handlers (with msg)
    coap_header_iht           coap_header;
    coap_option_iht           coap_options[MAX_COAP_OPTIONS];
-   uint8_t                   uripath0_idx = MAX_COAP_OPTIONS;
-   uint8_t                   uripath1_idx = MAX_COAP_OPTIONS;
+   uint8_t                   option_count;
+   uint8_t                   option_index;
    
    // take ownership over the received packet
    msg->owner                = COMPONENT_OPENCOAP;
@@ -92,51 +94,10 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    // record the token
    memcpy(&coap_header.token[0], &msg->payload[index], coap_header.TKL);
    index += coap_header.TKL;
-   
-   // initialize the coap_options
-   for (i=0;i<MAX_COAP_OPTIONS;i++) {
-      coap_options[i].type = COAP_OPTION_NONE;
-   }
-   
-   // fill in the coap_options
-   last_option = COAP_OPTION_NONE;
-   for (i=0;i<MAX_COAP_OPTIONS;i++) {
-      
-      // detect when done parsing options
-      if (msg->payload[index]==COAP_PAYLOAD_MARKER) {
-         // found the payload marker, done parsing options.
-         index++; // skip marker and stop parsing options
-         break;
-      }
-      if (msg->length<=index) {
-         // end of message, no payload
-         break;
-      }
-      
-      // parse this option
-      coap_options[i].type        = (coap_option_t)((uint8_t)last_option+(uint8_t)((msg->payload[index] & 0xf0) >> 4));
-      last_option                 = coap_options[i].type;
-      coap_options[i].length      = (msg->payload[index] & 0x0f);
-      index++;
-      coap_options[i].pValue      = &(msg->payload[index]);
-      index                      += coap_options[i].length; //includes length as well
 
-      switch(coap_options[i]) {
-         case COAP_OPTION_NUM_URIPATH:
-            if (uripath0_idx == MAX_COAP_OPTIONS) {
-               uripath0_idx = i;
-            } else if (uripath1_idx == MAX_COAP_OPTIONS) {
-               uripath1_idx = i;
-            }
-            break;
-         default:
-            break;
-      }
-   }
-   
-   // remove the CoAP header+options
-   packetfunctions_tossHeader(msg,index);
-   
+   // parse options
+   opencoap_decodeOptions(msg, &coap_options[0], &index);
+
    //=== step 2. find the resource to handle the packet
    
    // find the resource this applies to
@@ -151,49 +112,33 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
       
       // start with the first resource in the linked list
       temp_desc = opencoap_vars.resources;
-      
+
+      option_count = opencoap_getOption(&coap_options[0], COAP_OPTION_NUM_URIPATH, &option_index);
       // iterate until matching resource found, or no match
-      while (found==FALSE) {
-         if (
-               uripath0_idx != MAX_COAP_OPTIONS                 &&
-               uripath1_idx != MAX_COAP_OPTIONS                 &&
-               temp_desc->path0len>0                            &&
-               temp_desc->path0val!=NULL                        &&
-               temp_desc->path1len>0                            &&
-               temp_desc->path1val!=NULL
-            ) {
-            // resource has a path of form path0/path1
-               
+      for (found=FALSE; found==FALSE && temp_desc!=NULL; temp_desc=temp_desc->next) {
+         if (temp_desc->path0len > 0 && temp_desc->path0val != NULL) {
+            // path0 needed
             if (
-                  coap_options[uripath0_idx].length==temp_desc->path0len                               &&
-                  memcmp(coap_options[uripath0_idx].pValue,temp_desc->path0val,temp_desc->path0len)==0 &&
-                  coap_options[uripath1_idx].length==temp_desc->path1len                               &&
-                  memcmp(coap_options[uripath1_idx].pValue,temp_desc->path1val,temp_desc->path1len)==0
-               ) {
-               found = TRUE;
-            };
-         
-         } else if (
-               uripath0_idx != MAX_COAP_OPTIONS                 &&
-               temp_desc->path0len>0                            &&
-               temp_desc->path0val!=NULL
+               option_count >= 1                                                                         &&
+               coap_options[option_index].length == temp_desc->path0len                                  &&
+               memcmp(coap_options[option_index].pValue, temp_desc->path0val, temp_desc->path0len) == 0
             ) {
-            // resource has a path of form path0
-               
-            if (
-                  coap_options[uripath0_idx].length==temp_desc->path0len                               &&
-                  memcmp(coap_options[uripath0_idx].pValue,temp_desc->path0val,temp_desc->path0len)==0
-               ) {
-               found = TRUE;
-            };
-         };
-         
-         // iterate to next resource, if not found
-         if (found==FALSE) {
-            if (temp_desc->next!=NULL) {
-               temp_desc = temp_desc->next;
-            } else {
-               break;
+               // path0 matches
+               if (temp_desc->path1len > 0 && temp_desc->path1val != NULL) {
+                  // path1 needed
+                  if (
+                     option_count >= 2                                                                          &&
+                     coap_options[option_index+1].length == temp_desc->path1len                                 &&
+                     memcmp(coap_options[option_index+1].pValue, temp_desc->path1val, temp_desc->path1len) == 0
+                  ) {
+                     // path1 matches
+                     found = TRUE;
+                     break;
+                  }
+               } else {
+                  found = TRUE;
+                  break;
+               }
             }
          }
       }
@@ -259,6 +204,9 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
       coap_header.TKL                  = 0;
       coap_header.Code                 = COAP_CODE_RESP_NOTFOUND;
    }
+
+   // add options to the response
+   opencoap_encodeOptions(msg, &coap_options[0]);
    
    if (outcome==E_FAIL) {
       // reset packet payload (DO NOT DELETE, we will reuse same buffer for response)
@@ -509,3 +457,200 @@ owerror_t opencoap_send(
 }
 
 //=========================== private =========================================
+
+owerror_t opencoap_decodeOptions(OpenQueueEntry_t* msg, coap_option_iht* options, uint8_t* payload_index) {
+   uint8_t       index = *payload_index;
+   uint8_t       skip_bytes;
+   uint8_t       i;
+   uint8_t       delta, length;
+   coap_option_t last_option;
+
+   // initialize the coap_options
+   for (i=0;i<MAX_COAP_OPTIONS;i++) {
+      options[i].type = COAP_OPTION_NONE;
+      options[i].inResponse = 0;
+   }
+
+   // fill in the coap_options
+   last_option = COAP_OPTION_NONE;
+   for (i=0;i<MAX_COAP_OPTIONS;i++) {
+
+      // detect when done parsing options
+      if (msg->payload[index] == COAP_PAYLOAD_MARKER) {
+         // found the payload marker, done parsing options.
+         index++; // skip marker and stop parsing options
+         break;
+      }
+      if (msg->length <= index) {
+         // end of message, no payload
+         break;
+      }
+
+      // parse this option
+      delta = (msg->payload[index] & 0xf0) >> 4;
+      skip_bytes = 0;
+      if (delta < 13) {
+         options[i].type = (coap_option_t)((uint8_t)last_option+delta);
+      } else if (delta == 13) {
+         options[i].type = (coap_option_t)(13+(uint8_t)last_option+(uint8_t)(msg->payload[index+1]));
+         skip_bytes += 1;
+      } else if (delta == 14) {
+         skip_bytes += 2;
+         // can't handle large option numbers
+      } else {
+         // error
+         return E_FAIL;
+      }
+      length = msg->payload[index] & 0x0f;
+      if (length < 13) {
+         options[i].length = length;
+      } else if (length == 13) {
+         options[i].length = msg->payload[index+skip_bytes+1] + 13;
+         skip_bytes += 1;
+      } else if (length == 14) {
+         skip_bytes += 2;
+         // can't handle large option lengths
+      } else {
+         // error
+         return E_FAIL;
+      }
+      index += skip_bytes;
+      index++;
+      options[i].pValue      = &(msg->payload[index]);
+      index                  += options[i].length; //includes length as well
+      last_option            = options[i].type;
+   }
+
+   // remove the CoAP header+options
+   packetfunctions_tossHeader(msg, index);
+
+   *payload_index = index;
+   return E_SUCCESS;
+}
+
+owerror_t opencoap_encodeOptions(OpenQueueEntry_t* msg, coap_option_iht* options) {
+   uint8_t i, found_index;
+   coap_option_t last_type = COAP_OPTION_NONE;
+   uint8_t found_type; // find the smallest type in the options
+   uint8_t byte_count = 0;
+   uint8_t* ptr;
+
+   // first calculate how many bytes we have to reserve for the options
+   while (1) {
+      found_type = 0xff;
+      for(i=0; i<MAX_COAP_OPTIONS; i++) {
+         if (
+               options[i].inResponse == 1              &&
+               (uint8_t)(options[i].type) < found_type
+          ) {
+            found_index = i;
+            found_type = (uint8_t)(options[i].type);
+         }
+      }
+      if (found_type == 0xff) {
+         break;
+      }
+      options[found_index].inResponse = 2;
+
+      byte_count++; // normal option delta and length field
+      if (found_type - last_type >= 13) {
+         byte_count++; // extended delta
+      }
+      if (options[found_index].length >= 13) {
+         byte_count++; // extended length
+      }
+
+      byte_count += options[found_index].length;
+      last_type = found_type;
+   }
+
+   packetfunctions_reserveHeaderSize(msg, byte_count);
+   ptr = msg->payload;
+
+   last_type = COAP_OPTION_NONE;
+   // now we can insert the options in increasing order
+   while (1) {
+      found_type = 0xff;
+      for (i=0; i<MAX_COAP_OPTIONS; i++) {
+         if (
+            options[i].inResponse == 2              &&
+            (uint8_t)(options[i].type) < found_type
+         ) {
+            found_index = i;
+            found_type = (uint8_t)(options[i].type);
+         }
+      }
+      if (found_type == 0xff) {
+         break;
+      }
+
+      byte_count = 0;
+      if (found_type - last_type < 13) {
+         ptr[0] = (found_type - last_type) << 4;
+      } else {
+         ptr[0] = 13 << 4;
+         ptr[1] = found_type - last_type - 13;
+         byte_count += 1;
+      }
+
+      if (options[found_index].length < 13) {
+         ptr[0] |= options[found_index].length & 0x0f;
+      } else {
+         ptr[0] |= 13;
+         ptr[byte_count+1] = options[found_index].length - 13;
+         byte_count += 1;
+      }
+
+      ptr++; // normal delta and length field
+      ptr += byte_count; // extended fields
+      if (options[found_index].pValue != NULL) {
+         memcpy(ptr, options[found_index].pValue, options[found_index].length);
+      }
+      ptr += options[found_index].length;
+
+      options[found_index].inResponse = 1; // don't find this again
+      last_type = found_type;
+   }
+   return E_SUCCESS;
+}
+
+// sets start_idx to the index of the first option of type key, returns the number of options of this type
+uint8_t opencoap_getOption(coap_option_iht* options, coap_option_t key, uint8_t* start_idx) {
+   uint8_t i, j;
+
+   for (i=0; i<MAX_COAP_OPTIONS; i++) {
+      if (options[i].type == key) {
+         // skip until different type
+         for (j=i; j<MAX_COAP_OPTIONS && options[j].type == key; j++) {}
+         if (start_idx != NULL) {
+            *start_idx = i;
+         }
+         return j-i;
+      }
+   }
+   if (start_idx != NULL) {
+      *start_idx = 0;
+   }
+   return 0;
+}
+
+// overwrites options from the beginning of the array, if the existing option
+// was set in the request
+// This function does *not* have to be called in the order of increasing option types
+owerror_t opencoap_setOption(coap_option_iht* options, coap_option_t type, uint8_t length, uint8_t* value) {
+   uint8_t i;
+   // skip existing response options
+   for (i=0; i<MAX_COAP_OPTIONS && options[i].inResponse; i++) {}
+   if (i >= MAX_COAP_OPTIONS) {
+      // error too many options
+      return E_FAIL;
+   }
+   options[i].type = type;
+   options[i].length = length;
+   options[i].pValue = value;
+   options[i].inResponse = 1;
+
+   return E_SUCCESS;
+}
+
+// vim: ts=3 sw=3

@@ -120,6 +120,7 @@ typedef struct {
    coap_option_t type;
    uint8_t       length;
    uint8_t*      pValue;
+   uint8_t       inResponse;
 } coap_option_iht;
 
 typedef owerror_t (*callbackRx_cbt)(OpenQueueEntry_t* msg,
@@ -169,6 +170,17 @@ owerror_t     opencoap_send(
     coap_code_t           code,
     uint8_t               numOptions,
     coap_resource_desc_t* descSender
+);
+uint8_t       opencoap_getOption(
+    coap_option_iht* options,
+    coap_option_t    key,
+    uint8_t*         start_idx
+);
+owerror_t     opencoap_setOption(
+    coap_option_iht* options,
+    coap_option_t    type,
+    uint8_t          length,
+    uint8_t*         value
 );
 
 /**
