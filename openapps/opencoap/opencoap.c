@@ -206,6 +206,11 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
       coap_header.Code                 = COAP_CODE_RESP_NOTFOUND;
    }
 
+   if (msg->length > 0) {
+      packetfunctions_reserveHeaderSize(msg, 1);
+      msg->payload[0] = COAP_PAYLOAD_MARKER;
+   }
+
    // add options to the response
    opencoap_encodeOptions(msg, &coap_options[0]);
    

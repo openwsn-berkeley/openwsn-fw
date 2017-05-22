@@ -64,13 +64,9 @@ owerror_t cwellknown_receive(
          // have CoAP module write links to all resources
          opencoap_writeLinks(msg,COMPONENT_CWELLKNOWN);
          
-         packetfunctions_reserveHeaderSize(msg,1);
-         msg->payload[0]     = COAP_PAYLOAD_MARKER;
-            
          // add return option
-         packetfunctions_reserveHeaderSize(msg,2);
-         msg->payload[0]     = COAP_OPTION_NUM_CONTENTFORMAT << 4 | 1;
-         msg->payload[1]     = COAP_MEDTYPE_APPLINKFORMAT;
+         response_options[0] = COAP_MEDTYPE_APPLINKFORMAT;
+         opencoap_setOption(coap_options, COAP_OPTION_NUM_CONTENTFORMAT, 1, response_options);
          
          // set the CoAP header
          coap_header->Code   = COAP_CODE_RESP_CONTENT;

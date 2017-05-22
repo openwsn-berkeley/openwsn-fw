@@ -113,10 +113,6 @@ owerror_t cinfo_receive(
          msg->payload[sizeof(infoStackName)-1+5-2] = '.';
          msg->payload[sizeof(infoStackName)-1+5-1] = '0'+OPENWSN_VERSION_PATCH;
          
-         // payload marker
-         packetfunctions_reserveHeaderSize(msg,1);
-         msg->payload[0] = COAP_PAYLOAD_MARKER;
-         
          // set the CoAP header
          coap_header->Code                = COAP_CODE_RESP_CONTENT;
          

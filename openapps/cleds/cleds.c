@@ -74,13 +74,12 @@ owerror_t cleds_receive(
          msg->length                      = 0;
          
          // add CoAP payload
-         packetfunctions_reserveHeaderSize(msg,2);
-         msg->payload[0]                  = COAP_PAYLOAD_MARKER;
+         packetfunctions_reserveHeaderSize(msg,1);
 
          if (leds_error_isOn()==1) {
-            msg->payload[1]               = '1';
+            msg->payload[0]               = '1';
          } else {
-            msg->payload[1]               = '0';
+            msg->payload[0]               = '0';
          }
             
          // set the CoAP header

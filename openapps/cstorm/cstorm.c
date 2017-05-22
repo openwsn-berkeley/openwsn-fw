@@ -86,12 +86,11 @@ owerror_t cstorm_receive(
          msg->length              = 0;
          
          // add CoAP payload
-         packetfunctions_reserveHeaderSize(msg, 3);
-         msg->payload[0]          = COAP_PAYLOAD_MARKER;
+         packetfunctions_reserveHeaderSize(msg, 2);
          
          // return as big endian
-         msg->payload[1]          = (uint8_t)(cstorm_vars.period >> 8);
-         msg->payload[2]          = (uint8_t)(cstorm_vars.period & 0xff);
+         msg->payload[0]          = (uint8_t)(cstorm_vars.period >> 8);
+         msg->payload[1]          = (uint8_t)(cstorm_vars.period & 0xff);
          
          // set the CoAP header
          coap_header->Code        = COAP_CODE_RESP_CONTENT;
