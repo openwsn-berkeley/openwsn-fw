@@ -43,7 +43,8 @@ void csensors_register(
 owerror_t csensors_receive(
    OpenQueueEntry_t* msg,
    coap_header_iht*  coap_header,
-   coap_option_iht*  coap_options
+   coap_option_iht*  coap_options,
+   uint8_t*          response_options
 );
 
 void csensors_timer_cb(opentimer_id_t id);
@@ -173,7 +174,8 @@ void csensors_register(
 owerror_t csensors_receive(
       OpenQueueEntry_t* msg,
       coap_header_iht*  coap_header,
-      coap_option_iht*  coap_options
+      coap_option_iht*  coap_options,
+      uint8_t*          response_options
    ) {
    owerror_t outcome;
    uint8_t   id;

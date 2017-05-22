@@ -61,6 +61,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    // local variables passed to the handlers (with msg)
    coap_header_iht           coap_header;
    coap_option_iht           coap_options[MAX_COAP_OPTIONS];
+   uint8_t                   response_options[COAP_RESPONSE_OPTION_SIZE];
    uint8_t                   option_count;
    uint8_t                   option_index;
    
@@ -169,7 +170,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
             
             // call the resource's callback
             if (found==TRUE && temp_desc->callbackRx!=NULL) {
-               temp_desc->callbackRx(msg,&coap_header,&coap_options[0]);
+               temp_desc->callbackRx(msg,&coap_header,&coap_options[0],&response_options[0]);
             }
          }
          
@@ -195,7 +196,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    if (found==TRUE) {
       
       // call the resource's callback
-      outcome = temp_desc->callbackRx(msg,&coap_header,&coap_options[0]);
+      outcome = temp_desc->callbackRx(msg,&coap_header,&coap_options[0],&response_options[0]);
    } else {
       // reset packet payload (DO NOT DELETE, we will reuse same buffer for response)
       msg->payload                     = &(msg->packet[127]);

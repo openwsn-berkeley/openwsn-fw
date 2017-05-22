@@ -29,7 +29,8 @@ cstorm_vars_t cstorm_vars;
 owerror_t cstorm_receive(
    OpenQueueEntry_t* msg,
    coap_header_iht*  coap_header,
-   coap_option_iht*  coap_options
+   coap_option_iht*  coap_options,
+   uint8_t*          response_options
 );
 void cstorm_timer_cb(void);
 void cstorm_task_cb(void);
@@ -71,7 +72,8 @@ void cstorm_init(void) {
 owerror_t cstorm_receive(
       OpenQueueEntry_t* msg,
       coap_header_iht*  coap_header,
-      coap_option_iht*  coap_options
+      coap_option_iht*  coap_options,
+      uint8_t*          response_options
    ) {
    owerror_t outcome;
    

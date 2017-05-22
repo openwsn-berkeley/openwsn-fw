@@ -25,7 +25,8 @@ c6t_vars_t c6t_vars;
 owerror_t c6t_receive(
    OpenQueueEntry_t* msg,
    coap_header_iht*  coap_header,
-   coap_option_iht*  coap_options
+   coap_option_iht*  coap_options,
+   uint8_t*          response_options
 );
 void    c6t_sendDone(
    OpenQueueEntry_t* msg,
@@ -65,7 +66,8 @@ void c6t_init() {
 owerror_t c6t_receive(
       OpenQueueEntry_t* msg,
       coap_header_iht*  coap_header,
-      coap_option_iht*  coap_options
+      coap_option_iht*  coap_options,
+      uint8_t*          response_options
    ) {
    
    owerror_t            outcome;

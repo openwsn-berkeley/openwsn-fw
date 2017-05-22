@@ -18,7 +18,8 @@ const uint8_t cwellknown_path1[]       = "core";
 owerror_t cwellknown_receive(
    OpenQueueEntry_t* msg,
    coap_header_iht*  coap_header,
-   coap_option_iht*  coap_options
+   coap_option_iht*  coap_options,
+   uint8_t*          response_options
 );
 
 void    cwellknown_sendDone(
@@ -49,7 +50,8 @@ void cwellknown_init() {
 owerror_t cwellknown_receive(
       OpenQueueEntry_t* msg,
       coap_header_iht*  coap_header,
-      coap_option_iht*  coap_options
+      coap_option_iht*  coap_options,
+      uint8_t*          response_options
    ) {
    owerror_t outcome;
    

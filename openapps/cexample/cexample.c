@@ -31,7 +31,8 @@ cexample_vars_t cexample_vars;
 
 owerror_t cexample_receive(OpenQueueEntry_t* msg,
                     coap_header_iht*  coap_header,
-                    coap_option_iht*  coap_options);
+                    coap_option_iht*  coap_options,
+                    uint8_t*          response_options);
 void    cexample_timer_cb(opentimer_id_t id);
 void    cexample_task_cb(void);
 void    cexample_sendDone(OpenQueueEntry_t* msg,
@@ -62,7 +63,8 @@ void cexample_init() {
 
 owerror_t cexample_receive(OpenQueueEntry_t* msg,
                       coap_header_iht* coap_header,
-                      coap_option_iht* coap_options) {
+                      coap_option_iht* coap_options,
+                      uint8_t*         response_options) {
    return E_FAIL;
 }
 

@@ -38,6 +38,8 @@ static const uint8_t ipAddr_ringmaster[] = {0xbb, 0xbb, 0x00, 0x00, 0x00, 0x00, 
 
 #define COAP_VERSION                   1
 
+#define COAP_RESPONSE_OPTION_SIZE      64
+
 typedef enum {
    COAP_TYPE_CON                       = 0,
    COAP_TYPE_NON                       = 1,
@@ -125,7 +127,8 @@ typedef struct {
 
 typedef owerror_t (*callbackRx_cbt)(OpenQueueEntry_t* msg,
                                 coap_header_iht*  coap_header,
-                                coap_option_iht*  coap_options);
+                                coap_option_iht*  coap_options,
+                                uint8_t* reponse_options);
 typedef void (*callbackSendDone_cbt)(OpenQueueEntry_t* msg,
                                       owerror_t error);
 

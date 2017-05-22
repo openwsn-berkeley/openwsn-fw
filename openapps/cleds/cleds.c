@@ -21,7 +21,8 @@ const uint8_t cleds_path0[]       = "l";
 owerror_t cleds_receive(
    OpenQueueEntry_t* msg,
    coap_header_iht*  coap_header,
-   coap_option_iht*  coap_options
+   coap_option_iht*  coap_options,
+   uint8_t*          response_options
 );
 void     cleds_sendDone(
    OpenQueueEntry_t* msg,
@@ -61,7 +62,8 @@ void cleds__init() {
 owerror_t cleds_receive(
       OpenQueueEntry_t* msg,
       coap_header_iht*  coap_header,
-      coap_option_iht*  coap_options
+      coap_option_iht*  coap_options,
+      uint8_t*          response_options
    ) {
    owerror_t outcome;
    
