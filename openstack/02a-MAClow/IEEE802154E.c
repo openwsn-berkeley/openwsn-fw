@@ -448,6 +448,9 @@ port_INLINE void activity_synchronize_newSlot() {
       return;
    }
    
+   ieee154e_vars.radioOnInit=sctimer_readCounter();
+   ieee154e_vars.radioOnThisSlot=TRUE;
+   
    // if this is the first time I call this function while not synchronized,
    // switch on the radio in Rx mode
    if (ieee154e_vars.state!=S_SYNCLISTEN) {
@@ -465,9 +468,11 @@ port_INLINE void activity_synchronize_newSlot() {
       
       // switch on the radio in Rx mode.
       radio_rxEnable();
-      ieee154e_vars.radioOnInit=sctimer_readCounter();
-      ieee154e_vars.radioOnThisSlot=TRUE;
       radio_rxNow();
+   } else {
+      // I'm listening last slot
+      ieee154e_stats.numTicsOn    += ieee154e_vars.slotDuration;
+      ieee154e_stats.numTicsTotal += ieee154e_vars.slotDuration;
    }
    
    // if I'm already in S_SYNCLISTEN, while not synchronized,
@@ -485,8 +490,6 @@ port_INLINE void activity_synchronize_newSlot() {
       
       // switch on the radio in Rx mode.
       radio_rxEnable();
-      ieee154e_vars.radioOnInit=sctimer_readCounter();
-      ieee154e_vars.radioOnThisSlot=TRUE;
       radio_rxNow();
       ieee154e_vars.singleChannelChanged = FALSE;
    }
