@@ -174,6 +174,15 @@ bool sixtop_isIdle(){
    return(sixtop_vars.six2six_state == SIX_IDLE);
 }
 
+// back to idle for sixtop
+void sixtop_setIdle(){
+   if (sixtop_vars.six2six_state != SIX_IDLE)
+      sixtop_setState(SIX_IDLE);
+}
+
+
+
+
 void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells, track_t track, scheduleEntry_t *cell){
     OpenQueueEntry_t* pkt;
     uint8_t           len;
@@ -1192,6 +1201,9 @@ void sixtop_setState(six2six_state_t state){
    }
 
 }
+
+
+
 
 /*
  * brief: the timer has been triggered. 6top has to come back to

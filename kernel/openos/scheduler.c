@@ -71,6 +71,16 @@ void scheduler_start() {
           taskContainer<=&scheduler_vars.taskBuf[TASK_LIST_DEPTH-1]) {
       taskContainer++;
    }
+   if (taskContainer>&scheduler_vars.taskBuf[TASK_LIST_DEPTH-2]){
+      openserial_printInfo(
+                COMPONENT_SIXTOP,
+                ERR_GENERIC,
+                (errorparameter_t)101,
+                (errorparameter_t)32
+          );
+   }
+
+
    if (taskContainer>&scheduler_vars.taskBuf[TASK_LIST_DEPTH-1]) {
       // task list has overflown. This should never happpen!
    

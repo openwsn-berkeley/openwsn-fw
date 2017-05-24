@@ -980,8 +980,12 @@ port_INLINE void activity_ti1ORri1() {
          }
 
          //TODO
-         /*char str[150];
-         if (0 && ieee154e_vars.dataToSend != NULL){
+         char str[150];
+         uint8_t  asn[5];
+         ieee154e_getAsn(asn);// byte01,byte23,byte4
+         uint32_t asn_d = asn[0] + 256*asn[1] + 256*256* asn[2] + 256*256*256*asn[3];
+
+         if ((asn_d % SLOTFRAME_LENGTH) != ieee154e_vars.slotOffset){ // && ieee154e_vars.dataToSend != NULL){
 
             snprintf(str, 150, "PKT GET, dest ");
             openserial_ncat_uint8_t_hex(str, ieee154e_vars.dataToSend->l2_nextORpreviousHop.addr_64b[6], 150);
@@ -995,11 +999,16 @@ port_INLINE void activity_ti1ORri1() {
             openserial_ncat_uint32_t(str, (uint32_t)openqueue_getPos(ieee154e_vars.dataToSend), 150);
             strncat(str, ", token=", 150);
             openserial_ncat_uint32_t(str, (uint32_t)schedule_getOkToSend(ieee154e_vars.dataToSend), 150);
-            scheduleEntry_t *entry = schedule_getCurrentScheduleEntry();
             strncat(str, ", slot=", 150);
-            openserial_ncat_uint8_t(str, (uint32_t)entry->slotOffset, 150);
-            openserial_printf(COMPONENT_, str, strlen(str));
-         }*/
+            openserial_ncat_uint8_t(str, (uint32_t)ieee154e_vars.slotOffset, 150);
+            strncat(str, ", asn=", 150);
+            openserial_ncat_uint8_t(str, (uint32_t)asn_d, 150);
+            strncat(str, ", remaining=", 150);
+            openserial_ncat_uint8_t(str, (uint32_t)asn_d % SLOTFRAME_LENGTH, 150);
+
+
+            openserial_printf(COMPONENT_IEEE802154E, str, strlen(str));
+         }
 
 
          // check whether we can send (Backoff or dedicated cell, other conditions)

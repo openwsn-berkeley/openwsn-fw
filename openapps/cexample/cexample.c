@@ -45,7 +45,7 @@ void    cexample_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 
 //=========================== public ==========================================
 
-void cexample_init() {
+void cexample_init(void) {
 
    // prepare the resource descriptor for the /ex path
    cexample_vars.desc.path0len             = sizeof(cexample_path0) - 1;

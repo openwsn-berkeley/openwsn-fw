@@ -87,7 +87,8 @@ typedef enum {
 #define SIXTOP_MINIMAL_EBPERIOD 5 // minist period of sending EB
 
 //TODO: fix a correct timeout
-#define SIX2SIX_TIMEOUT_MS ((uint32_t)(2 * MAXBE * TXRETRIES * SLOTFRAME_LENGTH * TSLOTDURATION_MS))
+//#define SIX2SIX_TIMEOUT_MS ((uint32_t)(2 * MAXBE * TXRETRIES * SLOTFRAME_LENGTH * TSLOTDURATION_MS))
+#define SIX2SIX_TIMEOUT_MS  20000
 #define SIX2SIX_LINKREP_TIMEOUT_MS  (SIX2SIX_TIMEOUT_MS / 2)
 
 
@@ -119,10 +120,12 @@ void      sixtop_setEBPeriod(uint8_t ebPeriod);
 void      sixtop_setHandler(six2six_handler_t handler);
 // scheduling
 bool      sixtop_isIdle(void);
+void      sixtop_setIdle(void);
 void      sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells, track_t track, scheduleEntry_t *cell);
 void      sixtop_addORremoveCellByInfo(uint8_t code,open_addr_t*  neighbor,cellInfo_ht* cellInfo);
 // maintaining
 void      sixtop_maintaining(uint16_t slotOffset,open_addr_t* neighbor);
+
 // from upper layer
 owerror_t sixtop_send(OpenQueueEntry_t *msg);
 // from lower layer

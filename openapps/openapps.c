@@ -44,5 +44,5 @@ void openapps_init(void) {
    // UDP
 //   uecho_init();
    //periodic coap application
-   //cexample_init();
+   cexample_init();
 }
