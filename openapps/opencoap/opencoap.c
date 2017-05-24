@@ -464,6 +464,17 @@ owerror_t opencoap_send(
 
 //=========================== private =========================================
 
+/**
+\brief Parse CoAP options in a request
+
+This function is called during the opencoap_receive function.
+
+\param[in]     msg           The incoming message
+\param[in,out] options       A pointer to the first element of the coap_options array, used to store the parsed options in
+\param[in,out] payload_index A pointer to the index insied msg->payload, updated throughout this function
+
+\return E_SUCCESS if parsing succeeded, E_FAIL otherwise
+*/
 owerror_t opencoap_decodeOptions(OpenQueueEntry_t* msg, coap_option_iht* options, uint8_t* payload_index) {
    uint8_t       index = *payload_index;
    uint8_t       skip_bytes;
@@ -534,6 +545,15 @@ owerror_t opencoap_decodeOptions(OpenQueueEntry_t* msg, coap_option_iht* options
    return E_SUCCESS;
 }
 
+/**
+\brief Encodes CoAP options into the response
+
+This function takes the CoAP options that are configured in the coap_options array for the response,
+encodes them and writes them into the response.
+
+\param[in,out] msg     The response with msg->payload pointing to the payload marker 
+\param[in]     options A pointer to the first element of the coap_options array
+*/ 
 owerror_t opencoap_encodeOptions(OpenQueueEntry_t* msg, coap_option_iht* options) {
    uint8_t i, found_index;
    coap_option_t last_type = COAP_OPTION_NONE;
@@ -620,7 +640,18 @@ owerror_t opencoap_encodeOptions(OpenQueueEntry_t* msg, coap_option_iht* options
    return E_SUCCESS;
 }
 
-// sets start_idx to the index of the first option of type key, returns the number of options of this type
+/**
+\brief Get the value of a specific CoAP option
+
+This function goes through the CoAP options and finds the values of the requested option type.
+Note: Options of the same type are adjacent in the coap_options array.
+
+\param[in]  options   A pointer to the first element in the coap_options array
+\param[in]  key       The option type that we are interested in
+\param[out] start_idx Used to store the index of the first option that has the requested type
+
+\return The number of options found with the requested type
+*/ 
 uint8_t opencoap_getOption(coap_option_iht* options, coap_option_t key, uint8_t* start_idx) {
    uint8_t i, j;
 
@@ -640,9 +671,23 @@ uint8_t opencoap_getOption(coap_option_iht* options, coap_option_t key, uint8_t*
    return 0;
 }
 
-// overwrites options from the beginning of the array, if the existing option
-// was set in the request
-// This function does *not* have to be called in the order of increasing option types
+/**
+\brief Set an Option in a CoAP response
+
+This function is called by a opencoap application or the opencoap module itself.
+It is used to set options that will be encoded into the response after the payload 
+has been created. The coap_options array from the incoming request is reused to store
+the options for the response. Therefore opencoap_getOption() might not return useful
+information after this function has been called.
+Note: This function does *not* have to be called in the order of increasing option types
+
+\param[in,out] options A pointer to the first element of the coap_options array.
+\param[in]     type    The option type (option number) of the option that we want to set
+\param[in]     length  The length of the option value in bytes
+\param[in]     value   A pointer to the option value
+
+\return E_FAIL if too many options are set, E_SUCCESS otherwise
+*/
 owerror_t opencoap_setOption(coap_option_iht* options, coap_option_t type, uint8_t length, uint8_t* value) {
    uint8_t i;
    // skip existing response options
