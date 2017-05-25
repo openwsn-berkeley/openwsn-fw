@@ -19,6 +19,15 @@
 
 //=========================== prototypes ======================================
 
+// these are part of the TelosB port only, so not present in debugpins.h, only
+// in debugpins.c. We therefore need to extern them.
+extern void debugpins_isruarttx_toggle(void);
+extern void debugpins_isruarttx_clr(void);
+extern void debugpins_isruarttx_set(void);
+extern void debugpins_isruartrx_toggle(void);
+extern void debugpins_isruartrx_clr(void);
+extern void debugpins_isruartrx_set(void);
+
 //=========================== main ============================================
 
 extern int mote_main(void);
@@ -72,19 +81,19 @@ void board_reset() {
 // PORT2_VECTOR
 
 ISR(USART1TX){
-   debugpins_isr_set();
+   debugpins_isruarttx_set();
    if (uart_tx_isr()==KICK_SCHEDULER) {          // UART; TX
       __bic_SR_register_on_exit(CPUOFF);
    }
-   debugpins_isr_clr();
+   debugpins_isruarttx_clr();
 }
 
 ISR(USART1RX) {
-   debugpins_isr_set();
+   debugpins_isruartrx_set();
    if (uart_rx_isr()==KICK_SCHEDULER) {          // UART: RX
       __bic_SR_register_on_exit(CPUOFF);
    }
-   debugpins_isr_clr();
+   debugpins_isruartrx_clr();
 }
 
 // PORT1_VECTOR

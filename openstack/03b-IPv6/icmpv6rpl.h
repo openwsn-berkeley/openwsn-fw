@@ -138,12 +138,13 @@ END_PACK
 
 typedef struct {
    // admin
-   bool                      busySending;             ///< currently sending DIO/DAO.
+   bool                      busySendingDIO;          ///< currently sending DIO.
+   bool                      busySendingDAO;          ///< currently sending DAO.
    uint8_t                   fDodagidWritten;         ///< is DODAGID already written to DIO/DAO?
    // DIO-related
    icmpv6rpl_dio_ht          dio;                     ///< pre-populated DIO packet.
    open_addr_t               dioDestination;          ///< IPv6 destination address for DIOs.
-   uint16_t                  dioPeriod;               ///< duration, in ms, of a timerIdDIO timeout.
+   uint32_t                  dioPeriod;               ///< duration, in ms, of a timerIdDIO timeout.
    opentimer_id_t            timerIdDIO;              ///< ID of the timer used to send DIOs.
    uint8_t                   delayDIO;                ///< number of timerIdDIO events before actually sending a DIO.
    // DAO-related
@@ -151,8 +152,15 @@ typedef struct {
    icmpv6rpl_dao_transit_ht  dao_transit;             ///< pre-populated DAO "Transit Info" option header.
    icmpv6rpl_dao_target_ht   dao_target;              ///< pre-populated DAO "Transit Info" option header.
    opentimer_id_t            timerIdDAO;              ///< ID of the timer used to send DAOs.
-   uint16_t                  daoPeriod;               ///< duration, in ms, of a timerIdDAO timeout.
+   uint32_t                  daoPeriod;               ///< duration, in ms, of a timerIdDAO timeout.
    uint8_t                   delayDAO;                ///< number of timerIdDIO events before actually sending a DAO.
+   // routing table
+   dagrank_t                 myDAGrank;               ///< rank of this router within DAG.
+   uint16_t                  rankIncrease;            ///< the cost of the link to the parent, in units of rank
+   bool                      haveParent;              ///< this router has a route to DAG root
+   uint8_t                   ParentIndex;             ///< index of Parent in neighbor table (iff haveParent==TRUE)
+   // actually only here for debug
+   icmpv6rpl_dio_ht*         incomingDio;             //keep it global to be able to debug correctly.
 } icmpv6rpl_vars_t;
 
 //=========================== prototypes ======================================
@@ -162,8 +170,19 @@ void     icmpv6rpl_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 void     icmpv6rpl_receive(OpenQueueEntry_t* msg);
 void     icmpv6rpl_writeDODAGid(uint8_t* dodagid);
 uint8_t  icmpv6rpl_getRPLIntanceID(void);
+void     icmpv6rpl_getRPLDODAGid(uint8_t* address_128b);
 void     icmpv6rpl_setDIOPeriod(uint16_t dioPeriod);
 void     icmpv6rpl_setDAOPeriod(uint16_t daoPeriod);
+bool     icmpv6rpl_getPreferredParentIndex(uint8_t* indexptr);           // new DB
+bool     icmpv6rpl_getPreferredParentEui64(open_addr_t* addressToWrite); // new DB
+bool     icmpv6rpl_isPreferredParent(open_addr_t* address);              // new DB
+dagrank_t icmpv6rpl_getMyDAGrank(void);                                  // new DB
+void     icmpv6rpl_setMyDAGrank(dagrank_t rank);                         // new DB
+void     icmpv6rpl_killPreferredParent(void);                            // new DB
+void     icmpv6rpl_updateMyDAGrankAndParentSelection(void);              // new DB
+void     icmpv6rpl_indicateRxDIO(OpenQueueEntry_t* msg);                 // new DB
+
+
 /**
 \}
 \}

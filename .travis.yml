@@ -1,6 +1,7 @@
 language: c
 
 before_script:
+- sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 6D1D8367A3421AFB
 - sudo add-apt-repository -y ppa:terry.guo/gcc-arm-embedded
 - sudo apt-get update
 - sudo apt-get install gcc-arm-none-eabi
@@ -13,24 +14,25 @@ before_script:
 script:
 - mkdir -p ./build/doc/
 - scons docs
-- scons board=telosb              toolchain=mspgcc                   verbose=1 oos_macpong
-- scons board=OpenMote-CC2538     toolchain=armgcc                   verbose=1 oos_macpong
-- scons board=wsn430v14           toolchain=mspgcc                   verbose=1 oos_macpong
-- scons board=wsn430v13b          toolchain=mspgcc                   verbose=1 oos_macpong
-- scons board=gina                toolchain=mspgcc                   verbose=1 oos_macpong
-- scons board=z1                  toolchain=mspgcc                   verbose=1 oos_macpong
-- scons board=iot-lab_M3          toolchain=armgcc                   verbose=1 oos_macpong
-- scons board=iot-lab_A8-M3       toolchain=armgcc                   verbose=1 oos_macpong
-- scons board=telosb              toolchain=mspgcc                   verbose=1 oos_openwsn
-- scons board=OpenMote-CC2538     toolchain=armgcc  kernel=openos    verbose=1 oos_openwsn
-- scons board=wsn430v14           toolchain=mspgcc                   verbose=1 oos_openwsn
-- scons board=wsn430v13b          toolchain=mspgcc                   verbose=1 oos_openwsn
-- scons board=gina                toolchain=mspgcc                   verbose=1 oos_openwsn
-- scons board=z1                  toolchain=mspgcc                   verbose=1 oos_openwsn
-- scons board=python              toolchain=gcc                      verbose=1 oos_openwsn
-- scons board=iot-lab_M3          toolchain=armgcc                   verbose=1 oos_openwsn
-- scons board=iot-lab_A8-M3       toolchain=armgcc                   verbose=1 oos_openwsn
-- scons board=OpenMote-CC2538     toolchain=armgcc kernel=freertos   verbose=1 oos_openwsn
+- scons board=telosb                                  toolchain=mspgcc verbose=1 oos_macpong
+- scons board=telosb              kernel=freertos     toolchain=mspgcc verbose=1 oos_macpong
+- scons board=openmote-cc2538                         toolchain=armgcc verbose=1 oos_macpong
+- scons board=wsn430v14                               toolchain=mspgcc verbose=1 oos_macpong
+- scons board=wsn430v13b                              toolchain=mspgcc verbose=1 oos_macpong
+- scons board=gina                                    toolchain=mspgcc verbose=1 oos_macpong
+- scons board=z1                                      toolchain=mspgcc verbose=1 oos_macpong
+- scons board=iot-lab_M3                              toolchain=armgcc verbose=1 oos_macpong
+- scons board=iot-lab_A8-M3                           toolchain=armgcc verbose=1 oos_macpong
+- scons board=telosb                                  toolchain=mspgcc verbose=1 oos_openwsn
+- scons board=telosb              kernel=freertos     toolchain=mspgcc verbose=1 oos_openwsn
+- scons board=openmote-cc2538                         toolchain=armgcc verbose=1 oos_openwsn
+- scons board=openmote-cc2538     goldenImage=sniffer toolchain=armgcc verbose=1 oos_sniffer
+- scons board=openmote-cc2538     goldenImage=root    toolchain=armgcc verbose=1 oos_openwsn
+- scons board=wsn430v14                               toolchain=mspgcc verbose=1 oos_openwsn
+- scons board=wsn430v13b                              toolchain=mspgcc verbose=1 oos_openwsn
+- scons board=gina                                    toolchain=mspgcc verbose=1 oos_openwsn
+- scons board=z1                                      toolchain=mspgcc verbose=1 oos_openwsn
 - scons board=python                                  toolchain=gcc    verbose=1 oos_openwsn
 - scons board=iot-lab_M3                              toolchain=armgcc verbose=1 oos_openwsn
 - scons board=iot-lab_A8-M3                           toolchain=armgcc verbose=1 oos_openwsn
+- scons board=samr21_xpro                             toolchain=armgcc verbose=1 oos_openwsn

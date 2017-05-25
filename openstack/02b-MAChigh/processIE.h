@@ -20,8 +20,13 @@
 #define MLME_IE_SUBID_OPCODE           0x41
 #define MLME_IE_SUBID_BANDWIDTH        0x42
 #define MLME_IE_SUBID_TRACKID          0x43
-#define MLME_IE_SUBID_SCHEDULE         0x44 // schedule IE subId is 44 when six request is otf
-#define MLME_IE_SUBID_SCHEDULE_MT      0x45 // schedule IE subId is 45 when six request is sixtop maintenance
+#define MLME_IE_SUBID_SCHEDULE         0x44
+
+// 0xc9 = 201 is the first available subIE ID for experimental use: 
+// https://tools.ietf.org/html/draft-kivinen-802-15-ie-06#section-7
+#define IANA_6TOP_SUBIE_ID             0xC9
+#define SIXTOP_IE_GROUPID              0x05
+
 // ========================== typedef =========================================
 
 BEGIN_PACK
@@ -133,37 +138,38 @@ void             processIE_prependMLMEIE(
    OpenQueueEntry_t*    pkt,
    uint8_t              len
 );
-
+void             processIE_prepend_sixtopIE(
+   OpenQueueEntry_t*    pkt, 
+   uint8_t              len
+);
 //===== prepend IEs
 
 uint8_t          processIE_prependSyncIE(
-   OpenQueueEntry_t*    pkt
+    OpenQueueEntry_t*    pkt
 );
 uint8_t          processIE_prependSlotframeLinkIE(
-   OpenQueueEntry_t*    pkt
+    OpenQueueEntry_t*    pkt
 );
 uint8_t          processIE_prependTSCHTimeslotIE(
-   OpenQueueEntry_t*    pkt
+    OpenQueueEntry_t*    pkt
 );
 uint8_t          processIE_prependChannelHoppingIE(
-   OpenQueueEntry_t*    pkt
+    OpenQueueEntry_t*    pkt
 );
-uint8_t          processIE_prependOpcodeIE(
-   OpenQueueEntry_t*    pkt,
-   uint8_t              uResCommandID
+uint8_t          processIE_prepend_sixSubIEHeader(
+    OpenQueueEntry_t*    pkt,
+    uint8_t len
 );
-uint8_t          processIE_prependBandwidthIE(
-   OpenQueueEntry_t*    pkt,
-   uint8_t              numOfLinks, 
-   uint8_t              slotframeID
+uint8_t           processIE_prepend_sixGeneralMessage(
+    OpenQueueEntry_t*    pkt,
+    uint8_t code
 );
-uint8_t          processIE_prependScheduleIE(
-   OpenQueueEntry_t*    pkt,
-   uint8_t              type,
-   uint8_t              frameID,
-   uint8_t              flag,
-   cellInfo_ht*         cellList,
-   uint8_t              subId 
+uint8_t           processIE_prepend_sixSubID(
+    OpenQueueEntry_t*    pkt
+);
+uint8_t           processIE_prepend_sixCelllist(
+    OpenQueueEntry_t*    pkt,
+    cellInfo_ht*         cellList
 );
 
 //===== retrieve IEs
@@ -172,20 +178,11 @@ void             processIE_retrieveSlotframeLinkIE(
    OpenQueueEntry_t*    pkt,
    uint8_t * ptr
 ); 
-void             processIE_retrieveOpcodeIE(
-   OpenQueueEntry_t*    pkt,
-   uint8_t*             ptr,
-   opcode_IE_ht*        opcodeIE
-); 
-void             processIE_retrieveBandwidthIE(
-   OpenQueueEntry_t*    pkt,
-   uint8_t *            ptr,
-   bandwidth_IE_ht*     bandwidthIE
-); 
-void             processIE_retrieveScheduleIE(
-   OpenQueueEntry_t*    pkt,
-   uint8_t *            ptr,
-   schedule_IE_ht*      schedule_ie
+void            processIE_retrieve_sixCelllist(
+    OpenQueueEntry_t*   pkt,
+    uint8_t             ptr,
+    uint8_t             length,
+    cellInfo_ht*        cellList
 );
 
 #endif

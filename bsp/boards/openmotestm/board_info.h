@@ -16,9 +16,6 @@ to return the board's description.
 #include "string.h"
 
 //=========================== defines =========================================
-//#define DEBUG_RUN_MODE
-#define DEBUG_SLEEP_MODE
-//#define DEBUG_STOP_MODE
 
 //TODO in case previous declaration fails in certain compilers. Remove this 
 //one if it works with GNU GCC
@@ -52,51 +49,22 @@ to return the board's description.
 #define PORT_PIN_RADIO_SLP_TR_CNTL_LOW()      GPIOB->ODR &= ~0X0002;
 // radio reset line
 // radio /RST
-#define PORT_PIN_RADIO_RESET_HIGH()       //GPIOC->ODR |= 0X0040;// nothing
-#define PORT_PIN_RADIO_RESET_LOW()        //GPIOC->ODR &= ~0X0040;// nothing
+#define PORT_PIN_RADIO_RESET_HIGH()       //GPIOC->ODR |= 0X0040;
+#define PORT_PIN_RADIO_RESET_LOW()        //GPIOC->ODR &= ~0X0040;
 
 //===== IEEE802154E timing
-#ifdef DEBUG_RUN_MODE
-    // time-slot related
-    #define PORT_TsSlotDuration                 491   // counter counts one extra count, see datasheet
-    // execution speed related
-    #define PORT_maxTxDataPrepare               66    // 2014us (measured 746us)
-    #define PORT_maxRxAckPrepare                20    //  305us (measured  83us)
-    #define PORT_maxRxDataPrepare               33    // 1007us (measured  84us)
-    #define PORT_maxTxAckPrepare                30    //  305us (measured 219us)
-    // radio speed related
-    #define PORT_delayTx                        10     //  214us (measured 219us)
-    #define PORT_delayRx                        0     //    0us (can not measure)
-    // radio watchdog
-#endif
 
-#ifdef DEBUG_SLEEP_MODE
-        // time-slot related
-    #define PORT_TsSlotDuration                 491   // counter counts one extra count, see datasheet
-    // execution speed related
-    #define PORT_maxTxDataPrepare               66    // 2014us (measured 746us)
-    #define PORT_maxRxAckPrepare                20    //  305us (measured  83us)
-    #define PORT_maxRxDataPrepare               33    // 1007us (measured  84us)
-    #define PORT_maxTxAckPrepare                30    //  305us (measured 219us)
-    // radio speed related
-    #define PORT_delayTx                        10     //  214us (measured 219us)
-    #define PORT_delayRx                        0     //    0us (can not measure)
-    // radio watchdog
-#endif
-
-#ifdef DEBUG_STOP_MODE
-    //// time-slot related
-    #define PORT_TsSlotDuration                 491   // counter counts one extra count, see datasheet
-    // execution speed related   (rcc configure need 235us)
-    #define PORT_maxTxDataPrepare               66    // 2014us (measured 812us+235) stm32
-    #define PORT_maxRxAckPrepare                20    //  900us (measured 171us+235) stm32
-    #define PORT_maxRxDataPrepare               33    //  976us (measured 170us+235) stm32
-    #define PORT_maxTxAckPrepare                30    //  900us (measured 323us+235) stm32
-    
-    // radio speed related
-    #define PORT_delayTx                        24    //  549us (measured 315us+235) .....
-    #define PORT_delayRx                        0     //    0us (can not measure)
-#endif
+// time-slot related
+#define PORT_TsSlotDuration                 491   // counter counts one extra count, see datasheet
+// execution speed related
+#define PORT_maxTxDataPrepare               66    // 2014us (measured 746us)
+#define PORT_maxRxAckPrepare                20    //  305us (measured  83us)
+#define PORT_maxRxDataPrepare               33    // 1007us (measured  84us)
+#define PORT_maxTxAckPrepare                30    //  305us (measured 219us)
+// radio speed related
+#define PORT_delayTx                        10     //  214us (measured 219us)
+#define PORT_delayRx                        0     //    0us (can not measure)
+// radio watchdog
 
 //===== adaptive_sync accuracy
 

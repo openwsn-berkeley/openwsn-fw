@@ -10,19 +10,6 @@
 
 //=========================== define ==========================================
 
-#define TerminationIE_Length           2
-// the header ternimation IE when payload IE follows header. 
-// length(b0~b6):0   ID(b7~b14):0x7E   type(b15): 0
-#define Header_PayloadIE_TerminationIE 0x3F00
-
-// the header ternimation IE when payload follows header.
-// length(b0~b6):0   ID(b7~b14):0x7F   type(b15): 0
-#define Header_Payload_TerminationIE   0x3F80
-
-// the payload ternimation IE when payload follows payloadIE.
-// length(b0~b10):0   ID(b11~b14):0x0F   type(b15): 1
-#define Payload_TerminationIE         0xF800
-
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
@@ -36,8 +23,7 @@ Note that we are writing the field from the end of the header to the beginning.
 
 \param[in,out] msg              The message to append the header to.
 \param[in]     frameType        Type of IEEE802.15.4 frame.
-\param[in]     ielistpresent    Is the IE list present�
-\param[in]     frameVersion     IEEE802.15.4 frame version.
+\param[in]     payloadIEPresent Is the IE list present?
 \param[in]     sequenceNumber   Sequence number of this frame.
 \param[in]     nextHop          Address of the next hop
 */
@@ -46,12 +32,14 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
                               bool              payloadIEPresent,
                               uint8_t           sequenceNumber,
                               open_addr_t*      nextHop) {
-   uint8_t temp_8b;
-   uint8_t ielistpresent = IEEE154_IELIST_NO;
-   bool    securityEnabled;
-   int16_t timeCorrection;
+   uint8_t      temp_8b;
+   uint8_t      ielistpresent = IEEE154_IELIST_NO;
+   bool         securityEnabled;
+   int16_t      timeCorrection;
+   uint16_t     timeSyncInfo;
    header_IE_ht header_desc;
-   bool    headerIEPresent = FALSE;
+   bool         headerIEPresent = FALSE;
+   uint8_t      destAddrMode;
    
    securityEnabled = msg->l2_securityLevel == IEEE154_ASH_SLF_TYPE_NOSEC ? 0 : 1;
 
@@ -62,9 +50,9 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    if (payloadIEPresent == TRUE) {
        ielistpresent = IEEE154_IELIST_YES; 
        //add header termination IE (id=0x7e)
-       packetfunctions_reserveHeaderSize(msg,TerminationIE_Length);
-       msg->payload[0] = Header_PayloadIE_TerminationIE         & 0xFF;
-       msg->payload[1] = (Header_PayloadIE_TerminationIE  >> 8) & 0xFF;
+       packetfunctions_reserveHeaderSize(msg,TERMINATIONIE_LEN);
+       msg->payload[0] = HEADER_TERMINATION_1_IE         & 0xFF;
+       msg->payload[1] = (HEADER_TERMINATION_1_IE  >> 8) & 0xFF;
        
        
    } else {
@@ -76,9 +64,9 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
            // no need for termination IE.
            if (headerIEPresent == TRUE){
                ielistpresent = IEEE154_IELIST_YES;
-               packetfunctions_reserveHeaderSize(msg,TerminationIE_Length);
-               msg->payload[0] = Header_Payload_TerminationIE        & 0xFF;
-               msg->payload[1] = (Header_Payload_TerminationIE >> 8) & 0xFF;
+               packetfunctions_reserveHeaderSize(msg,TERMINATIONIE_LEN);
+               msg->payload[0] = HEADER_TERMINATION_2_IE        & 0xFF;
+               msg->payload[1] = (HEADER_TERMINATION_2_IE >> 8) & 0xFF;
            } else {
                // no header IE present, no payload IE, no termination IE
            }
@@ -97,8 +85,12 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
        // add the payload to the ACK (i.e. the timeCorrection)
        packetfunctions_reserveHeaderSize(msg,sizeof(timecorrection_IE_ht));
        timeCorrection *= US_PER_TICK;
-       msg->payload[0] = (uint8_t)((((uint16_t)timeCorrection)   ) & 0xff);
-       msg->payload[1] = (uint8_t)((((uint16_t)timeCorrection)>>8) & 0xff);
+       timeSyncInfo  = ((uint16_t)timeCorrection) & 0x0fff;
+       if (msg->l2_isNegativeACK){
+          timeSyncInfo |= 0x8000;
+       }
+       msg->payload[0] = (uint8_t)(((timeSyncInfo)   ) & 0xff);
+       msg->payload[1] = (uint8_t)(((timeSyncInfo)>>8) & 0xff);
 
        // add header IE header -- xv poipoi -- pkt is filled in reverse order..
        packetfunctions_reserveHeaderSize(msg,sizeof(header_IE_ht));
@@ -149,13 +141,16 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    temp_8b              = 0;
    if (packetfunctions_isBroadcastMulticast(nextHop)) {
       temp_8b          |= IEEE154_ADDR_SHORT              << IEEE154_FCF_DEST_ADDR_MODE;
+      destAddrMode      = IEEE154_ADDR_SHORT;
    } else {
       switch (nextHop->type) {
          case ADDR_16B:
             temp_8b    |= IEEE154_ADDR_SHORT              << IEEE154_FCF_DEST_ADDR_MODE;
+            destAddrMode= IEEE154_ADDR_SHORT;
             break;
          case ADDR_64B:
             temp_8b    |= IEEE154_ADDR_EXT                << IEEE154_FCF_DEST_ADDR_MODE;
+            destAddrMode= IEEE154_ADDR_EXT;
             break;
          // no need for a default, since it would have been caught above.
       }
@@ -178,7 +173,15 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    } else {
       temp_8b          |= IEEE154_ACK_YES_ACK_REQ         << IEEE154_FCF_ACK_REQ;
    }
-   temp_8b             |= IEEE154_PANID_UNCOMPRESSED      << IEEE154_FCF_INTRAPAN;
+   if (destAddrMode == IEEE154_ADDR_SHORT) {
+       temp_8b         |= IEEE154_PANID_COMPRESSED        << IEEE154_FCF_INTRAPAN;
+   } else {
+       if (destAddrMode == IEEE154_ADDR_EXT) {
+           temp_8b     |= IEEE154_PANID_UNCOMPRESSED      << IEEE154_FCF_INTRAPAN;
+       } else {
+           // never happens 
+       }
+   }
    *((uint8_t*)(msg->payload)) = temp_8b;
 }
 
@@ -199,6 +202,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
    uint8_t  byte0;
    uint8_t  byte1;
    int16_t  timeCorrection;
+   uint16_t timeSyncInfo;
    // by default, let's assume the header is not valid, in case we leave this
    // function because the packet ends up being shorter than the header.
    ieee802514_header->valid=FALSE;
@@ -343,12 +347,12 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
            temp_16b = temp_8b | (*((uint8_t*)(msg->payload)+ieee802514_header->headerLength) << 8);
            ieee802514_header->headerLength += 1;
            // stop when I got a header termination IE
-           if (temp_16b == Header_PayloadIE_TerminationIE) {
+           if (temp_16b == HEADER_TERMINATION_1_IE) {
                // I have payloadIE following
                msg->l2_payloadIEpresent = TRUE;
                break;
            }
-           if (temp_16b == Header_Payload_TerminationIE) {
+           if (temp_16b == HEADER_TERMINATION_2_IE) {
                // I have payload following
                msg->l2_payloadIEpresent = FALSE;
                break;
@@ -363,9 +367,20 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
                        // timecorrection IE
                        byte0 = *((uint8_t*)(msg->payload)+ieee802514_header->headerLength);
                        byte1 = *((uint8_t*)(msg->payload)+ieee802514_header->headerLength+1);
-
-                       timeCorrection  = (int16_t)((uint16_t)byte1<<8 | (uint16_t)byte0);
-                       timeCorrection  = (timeCorrection / (PORT_SIGNED_INT_WIDTH)US_PER_TICK);
+                       timeSyncInfo    = (uint16_t)byte1<<8 | (uint16_t)byte0;
+                       // negative ACK or not
+                       if (timeSyncInfo & 0x8000){
+                            msg->l2_isNegativeACK = TRUE;
+                       } else {
+                            msg->l2_isNegativeACK = FALSE;
+                       }
+                       // negative timeCorrection or not, cast from 12 to 16 bit signed integer
+                       if (timeSyncInfo & 0x0800){
+                           timeCorrection = timeSyncInfo | 0xf000;
+                       } else {
+                           timeCorrection = timeSyncInfo & 0x0fff;
+                       }
+                       timeCorrection  = ((int16_t)timeCorrection / (PORT_SIGNED_INT_WIDTH)US_PER_TICK);
                        
                        ieee802514_header->timeCorrection = timeCorrection;
                        ieee802514_header->headerLength  += len;

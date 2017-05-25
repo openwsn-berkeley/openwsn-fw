@@ -1,6 +1,5 @@
 #include "opendefs.h"
 #include "uinject.h"
-#include "openudp.h"
 #include "openqueue.h"
 #include "opentimers.h"
 #include "openserial.h"
@@ -26,15 +25,20 @@ void uinject_task_cb(void);
 //=========================== public ==========================================
 
 void uinject_init() {
-
-	return;
    
    // clear local variables
    memset(&uinject_vars,0,sizeof(uinject_vars_t));
-   
+
+   // register at UDP stack
+   uinject_vars.desc.port              = WKP_UDP_INJECT;
+   uinject_vars.desc.callbackReceive   = &uinject_receive;
+   uinject_vars.desc.callbackSendDone  = &uinject_sendDone;
+   openudp_register(&uinject_vars.desc);
+
+   uinject_vars.period = UINJECT_PERIOD_MS;
    // start periodic timer
    uinject_vars.timerId                    = opentimers_start(
-      UINJECT_PERIOD_MS,
+      uinject_vars.period,
       TIMER_PERIODIC,TIME_MS,
       uinject_timer_cb
    );
@@ -64,11 +68,12 @@ void uinject_receive(OpenQueueEntry_t* pkt) {
 */
 void uinject_timer_cb(opentimer_id_t id){
    
-//   scheduler_push_task(uinject_task_cb,TASKPRIO_COAP);
+   scheduler_push_task(uinject_task_cb,TASKPRIO_COAP);
 }
 
 void uinject_task_cb() {
    OpenQueueEntry_t*    pkt;
+   uint8_t              asnArray[5];
    
    // don't run if not synch
    if (ieee154e_isSynch() == FALSE) return;
@@ -102,7 +107,17 @@ void uinject_task_cb() {
    memcpy(&pkt->l3_destinationAdd.addr_128b[0],uinject_dst_addr,16);
    
    packetfunctions_reserveHeaderSize(pkt,sizeof(uint16_t));
-   *((uint16_t*)&pkt->payload[0]) = uinject_vars.counter++;
+   pkt->payload[1] = (uint8_t)((uinject_vars.counter & 0xff00)>>8);
+   pkt->payload[0] = (uint8_t)(uinject_vars.counter & 0x00ff);
+   uinject_vars.counter++;
+   
+   packetfunctions_reserveHeaderSize(pkt,sizeof(asn_t));
+   ieee154e_getAsn(asnArray);
+   pkt->payload[0] = asnArray[0];
+   pkt->payload[1] = asnArray[1];
+   pkt->payload[2] = asnArray[2];
+   pkt->payload[3] = asnArray[3];
+   pkt->payload[4] = asnArray[4];
    
    if ((openudp_send(pkt))==E_FAIL) {
       openqueue_freePacketBuffer(pkt);

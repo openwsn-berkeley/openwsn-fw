@@ -57,6 +57,11 @@ void radio_init() {
    radio_spiWriteReg(RG_ANT_DIV, RADIO_CHIP_ANTENNA);     // use chip antenna
 #define RG_TRX_CTRL_1 0x04
    radio_spiWriteReg(RG_TRX_CTRL_1, 0x20);                // have the radio calculate CRC
+#define INIT_TX_POWER 0x0                                 // potentially set TX_POWER to other than power-on default (0x0)
+                                                          // 0x0 = +3dBm, 0x6 = 0dBm, 0x9 = -3dBm,
+                                                          // 0xC = -7dBm, 0xE = -12dBm, 0xF = -17dBm
+   radio_spiWriteReg(RG_PHY_TX_PWR, (0x3<<6)|INIT_TX_POWER);
+
    //busy wait until radio status is TRX_OFF
   
    while((radio_spiReadReg(RG_TRX_STATUS) & 0x1F) != TRX_OFF);
@@ -120,6 +125,7 @@ void radio_setFrequency(uint8_t frequency) {
 
 void radio_rfOn() {
    PORT_PIN_RADIO_RESET_LOW();
+   PORT_PIN_RADIO_RESET_HIGH();
 }
 
 void radio_rfOff() {
@@ -141,7 +147,7 @@ void radio_rfOff() {
 
 //===== TX
 
-void radio_loadPacket(uint8_t* packet, uint8_t len) {
+void radio_loadPacket(uint8_t* packet, uint16_t len) {
    // change state
    radio_vars.state = RADIOSTATE_LOADING_PACKET;
    

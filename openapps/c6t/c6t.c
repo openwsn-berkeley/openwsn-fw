@@ -82,16 +82,25 @@ owerror_t c6t_receive(
          msg->length                   = 0;
          
          // get preferred parent
-         foundNeighbor = neighbors_getPreferredParentEui64(&neighbor);
+         foundNeighbor = icmpv6rpl_getPreferredParentEui64(&neighbor);
          if (foundNeighbor==FALSE) {
             outcome                    = E_FAIL;
             coap_header->Code          = COAP_CODE_RESP_PRECONDFAILED;
             break;
          }
          
-         sixtop_setHandler(SIX_HANDLER_OTF);
+         if (sixtop_setHandler(SIX_HANDLER_SF0)==FALSE){
+            // one sixtop transcation is happening, only one instance at one time
+            
+            // set the CoAP header
+            coap_header->Code             = COAP_CODE_RESP_CHANGED;
+           
+            outcome                       = E_FAIL;
+            break;
+         }
          // call sixtop
-         sixtop_addCells(
+         sixtop_request(
+            IANA_6TOP_CMD_ADD,
             &neighbor,
             1
          );
@@ -110,17 +119,27 @@ owerror_t c6t_receive(
          msg->length                   = 0;
          
          // get preferred parent
-         foundNeighbor = neighbors_getPreferredParentEui64(&neighbor);
+         foundNeighbor = icmpv6rpl_getPreferredParentEui64(&neighbor);
          if (foundNeighbor==FALSE) {
             outcome                    = E_FAIL;
             coap_header->Code          = COAP_CODE_RESP_PRECONDFAILED;
             break;
          }
          
-         sixtop_setHandler(SIX_HANDLER_OTF);
+         if (sixtop_setHandler(SIX_HANDLER_SF0)==FALSE){
+            // one sixtop transcation is happening, only one instance at one time
+            
+            // set the CoAP header
+            coap_header->Code             = COAP_CODE_RESP_CHANGED;
+           
+            outcome                       = E_FAIL;
+            break;
+         }
          // call sixtop
-         sixtop_removeCell(
-            &neighbor
+         sixtop_request(
+            IANA_6TOP_CMD_DELETE,
+            &neighbor,
+            1
          );
          
          // set the CoAP header

@@ -695,5 +695,5 @@ void tcp_change_state(uint8_t new_tcp_state) {
 }
 
 void opentcp_timer_cb(opentimer_id_t id) {
-   scheduler_push_task(timers_tcp_fired,TASKPRIO_SENDDONE_TIMERS_TRANSPORT);
+   scheduler_push_task(timers_tcp_fired,TASKPRIO_TCP_TIMEOUT);
 }

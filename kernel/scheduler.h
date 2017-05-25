@@ -12,7 +12,7 @@
 
 //=========================== define ==========================================
 
-/*typedef enum {
+typedef enum {
    TASKPRIO_NONE                  = 0x00,
    // tasks trigger by radio
    TASKPRIO_SIXTOP_NOTIF_RX       = 0x01,
@@ -23,38 +23,14 @@
    TASKPRIO_TCP_TIMEOUT           = 0x05,
    TASKPRIO_COAP                  = 0x06,
    TASKPRIO_ADAPTIVE_SYNC         = 0x07, 
-   TASKPRIO_OTF                   = 0x08,
+   TASKPRIO_SF0                   = 0x08,
    // tasks trigger by other interrupts
    TASKPRIO_BUTTON                = 0x09,
    TASKPRIO_SIXTOP_TIMEOUT        = 0x0a,
    TASKPRIO_SNIFFER               = 0x0b,
    TASKPRIO_MAX                   = 0x0c,
 } task_prio_t;
-*/
-typedef enum {
-   TASKPRIO_NONE                  = 0x00,
-   // tasks trigger by the stack rx
-   TASKPRIO_STACK_LOWMAC          = 0x01,
-   TASKPRIO_STACK_HIGHMAC         = 0x02,
-   TASKPRIO_STACK_6TOP            = 0x03,
-   TASKPRIO_STACK_IP              = 0x04,
-   TASKPRIO_STACK_ROUTING         = 0x05,
-   TASKPRIO_STACK_TRANSPORT       = 0x06,
 
-   // tasks going up the stack - sendone and timers
-   TASKPRIO_SENDDONE_TIMERS_MAC          = 0x07,
-   TASKPRIO_SENDDONE_TIMERS_6TOP         = 0x08,
-   TASKPRIO_SENDDONE_TIMERS_IP           = 0x09,
-   TASKPRIO_SENDDONE_TIMERS_ROUTING      = 0x0a,
-   TASKPRIO_SENDDONE_TIMERS_TRANSPORT    = 0x0b,
-
-   //app tasks - down the stack
-   TASKPRIO_APP_HIGH              = 0x0c,
-   TASKPRIO_APP_MED               = 0x0d,
-   TASKPRIO_APP_LOW               = 0x0e,
-
-   TASKPRIO_MAX                   = 0x0f,
-} task_prio_t;
 
 #define TASK_LIST_DEPTH           10
 

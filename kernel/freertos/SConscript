@@ -8,7 +8,7 @@ FREERTOS_VERSION = 'FreeRTOSV8.1.2'
 
 target    =  'libkernel'
 
-if localEnv['board'] not in ['OpenMote-CC2538']:
+if localEnv['board'] not in ['openmote-cc2538']:
     
     raise SystemError('kernel {0} can not be used for board {1}'.format(localEnv['kernel'],localEnv['board']))		
 	

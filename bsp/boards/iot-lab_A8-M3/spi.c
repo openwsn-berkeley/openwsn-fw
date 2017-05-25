@@ -37,14 +37,7 @@ typedef struct {
 #endif
 } spi_vars_t;
 
-volatile spi_vars_t spi_vars;
-
-//=========================== prototypes ======================================
-inline static void RESET_CLR(void) { GPIOC->BRR = 1<<1; }
-inline static void RESET_SET(void) { GPIOC->BSRR = 1<<1; }
-inline static void CSn_SET(void) { GPIOA->BSRR = 1<<4; }
-inline static void CSn_CLR(void) { GPIOA->BRR = 1<<4; }
-inline static void SLEEP_CLR(void) { GPIOA->BRR = 1<<2; }
+spi_vars_t spi_vars;
 
 //=========================== public ==========================================
 
@@ -58,7 +51,6 @@ void spi_init() {
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
-  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
    
   //Configure SPI-related pins: PB.13 as SCLK pin ,PB.14 as MISO pin, PB.15 as MOSI pin, PA.4 as /SEL pin
   GPIO_InitTypeDef GPIO_InitStructure;
@@ -72,22 +64,11 @@ void spi_init() {
   GPIO_InitStructure.GPIO_Speed  = GPIO_Speed_50MHz;
   GPIO_Init(GPIOB, &GPIO_InitStructure);
 
-  GPIO_InitStructure.GPIO_Pin     = GPIO_Pin_4 | GPIO_Pin_2;
+  GPIO_InitStructure.GPIO_Pin     = GPIO_Pin_4;
   GPIO_InitStructure.GPIO_Mode    = GPIO_Mode_Out_PP;
   GPIO_Init(GPIOA, &GPIO_InitStructure);
-  
-  GPIO_InitStructure.GPIO_Pin     = GPIO_Pin_1;
-  GPIO_InitStructure.GPIO_Mode    = GPIO_Mode_Out_PP;
-  GPIO_Init(GPIOC, &GPIO_InitStructure);
 
-  // force reset
-  RESET_CLR();
-  CSn_SET();
-  SLEEP_CLR();
-
-  for (uint16_t j=0;j<0xFFFF;j++); //small wait
-
-  RESET_SET();
+  GPIOA->ODR |= 0x0010;//set /SEL high
   
   //Configure SPI2
   SPI_InitStructure.SPI_Direction         = SPI_Direction_2Lines_FullDuplex; //Full-duplex synchronous transfers on two lines
@@ -96,7 +77,7 @@ void spi_init() {
   SPI_InitStructure.SPI_CPOL              = SPI_CPOL_Low;  //the SCK pin has a low-level idle state 
   SPI_InitStructure.SPI_CPHA              = SPI_CPHA_1Edge; //the first rising edge on the SCK pin is the MSBit capture strobe,
   SPI_InitStructure.SPI_NSS               = SPI_NSS_Soft;//Software NSS mode
-  SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_16;//BaudRate Prescaler = 8 
+  SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_8;//BaudRate Prescaler = 8 
   SPI_InitStructure.SPI_FirstBit          = SPI_FirstBit_MSB;//data order with MSB-first
   SPI_InitStructure.SPI_CRCPolynomial     = 7;//CRC Polynomial = 7
   SPI_Init(SPI2, &SPI_InitStructure);
@@ -107,7 +88,7 @@ void spi_init() {
 #ifdef SPI_IN_INTERRUPT_MODE
   //Configure NVIC: Preemption Priority = 1 and Sub Priority = 1
   NVIC_InitTypeDef NVIC_InitStructure;
-  NVIC_InitStructure.NVIC_IRQChannel	                  = SPI2_IRQChannel;
+  NVIC_InitStructure.NVIC_IRQChannel                    = SPI2_IRQChannel;
   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority	= 1;
   NVIC_InitStructure.NVIC_IRQChannelSubPriority	        = 1;
   NVIC_InitStructure.NVIC_IRQChannelCmd	                = ENABLE;

@@ -63,7 +63,7 @@ void vApplicationIdleHook( void ) {
 //=========================== private =========================================
 
 void cb_errorLedTimer(void) {
-   scheduler_push_task(task_blink_errorLed,TASKPRIO_STACK_6TOP);
+   scheduler_push_task(task_blink_errorLed,TASKPRIO_SIXTOP);
 }
 
 void task_blink_errorLed(void) {

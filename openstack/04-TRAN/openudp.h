@@ -37,15 +37,35 @@ enum UDP_PORTS_enums {
 typedef struct {
    uint16_t port_src;
    uint16_t port_dest;
-   uint16_t length;
+   uint16_t length; // this should not be here. See RFC6282 section 4.3.3.
    uint16_t checksum;
 } udp_ht;
 
+
+typedef void (*udp_callbackReceive_cbt)(OpenQueueEntry_t* msg);
+typedef void (*udp_callbackSendDone_cbt)(OpenQueueEntry_t* msg, owerror_t error);
+
+typedef struct udp_resource_desc_t udp_resource_desc_t;
+
+struct udp_resource_desc_t {
+   uint16_t                 port;             ///< UDP port that is associated with the resource
+   udp_callbackReceive_cbt  callbackReceive;  ///< receive callback,
+                                              ///< if NULL, all message received for port will be discarded
+   udp_callbackSendDone_cbt callbackSendDone; ///< send completion callback,
+                                              ///< if NULL, the associated message will be release without notification
+   udp_resource_desc_t*     next;
+};
+
 //=========================== variables =======================================
+
+typedef struct {
+   udp_resource_desc_t* resources;
+} openudp_vars_t;
 
 //=========================== prototypes ======================================
 
 void    openudp_init(void);
+void    openudp_register(udp_resource_desc_t* desc);
 owerror_t openudp_send(OpenQueueEntry_t* msg);
 void    openudp_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 void    openudp_receive(OpenQueueEntry_t* msg);

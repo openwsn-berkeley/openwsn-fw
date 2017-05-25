@@ -22,6 +22,7 @@
 #include "schedule.h"
 #include "sixtop.h"
 #include "neighbors.h"
+#include "sf0.h"
 //-- 03a-IPHC
 #include "openbridge.h"
 #include "iphc.h"
@@ -33,7 +34,6 @@
 //-- 04-TRAN
 #include "opentcp.h"
 #include "openudp.h"
-#include "opencoap.h"
 //===== applications
 #include "openapps.h"
 
@@ -64,6 +64,7 @@ void openstack_init(void) {
    schedule_init();
    sixtop_init();
    neighbors_init();
+   sf0_init();
    //-- 03a-IPHC
    openbridge_init();
    iphc_init();
@@ -75,7 +76,6 @@ void openstack_init(void) {
    //-- 04-TRAN
    opentcp_init();
    openudp_init();
-   opencoap_init();     // initialize before any of the CoAP applications
    
    //===== applications
    openapps_init();
