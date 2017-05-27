@@ -78,6 +78,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    bool                      b2_moreBlocks;
    uint16_t                  b2_blockSize;
    uint8_t                   max_blockNumber;
+   uint8_t                   tmp_length;
 
    // take ownership over the received packet
    msg->owner                = COMPONENT_OPENCOAP;
@@ -340,18 +341,18 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
          outcome = E_FAIL;
          // TODO: HTTP would respond with 416 Range Not Satisfiable
          coap_header.Code = COAP_CODE_RESP_BADREQ;
-         i=0;
+         tmp_length=0;
          b2_moreBlocks = FALSE;
       } else if ( b2_blockNumber == max_blockNumber ) {
-         i = msg->length % b2_blockSize;
+         tmp_length = msg->length % b2_blockSize;
          b2_moreBlocks = FALSE;
       } else {
-         i = b2_blockSize;
+         tmp_length = b2_blockSize;
          b2_moreBlocks = TRUE;
       }
       // copy i bytes from msg->payload[blockNumber*blockSize] into msg->packet[127-i]
       msg->payload = msg->payload + b2_blockNumber*b2_blockSize;
-      msg->length = i;
+      msg->length = tmp_length;
       // if msg->payload does not point into the second half of msg->packet, copy the data there
       if (msg->payload < &msg->packet[63] || msg->payload >= &msg->packet[127]) {
          // like memcpy but handles overlapping memory

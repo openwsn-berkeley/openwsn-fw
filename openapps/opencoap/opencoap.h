@@ -158,9 +158,6 @@ typedef struct {
    uint16_t              messageID;
 } opencoap_vars_t;
 
-// TODO: should we try to save computation time or memory?
-// save time: keep uris and clientAddr in block_transfers struct, compare each time a request comes in
-// save memory: keep hash of uris and clientAddr in block_transfers struct, hash uris and clientAddr of each request, and compare the hashes (uint32_t)
 typedef struct {
    open_addr_t    clientAddr;
    uint32_t       hash;
