@@ -2441,11 +2441,7 @@ void synchronizePacket(PORT_TIMER_WIDTH timeReceived) {
    
    // log a large timeCorrection
    if (
-         ieee154e_vars.isSync==TRUE &&
-         (
-            timeCorrection<-LIMITLARGETIMECORRECTION ||
-            timeCorrection> LIMITLARGETIMECORRECTION
-         )
+         ieee154e_vars.isSync==TRUE
       ) {
       openserial_printError(COMPONENT_IEEE802154E,ERR_LARGE_TIMECORRECTION,
                             (errorparameter_t)timeCorrection,
@@ -2489,11 +2485,7 @@ void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
 #endif
    // log a large timeCorrection
    if (
-         ieee154e_vars.isSync==TRUE &&
-         (
-            timeCorrection<-LIMITLARGETIMECORRECTION ||
-            timeCorrection> LIMITLARGETIMECORRECTION
-         )
+         ieee154e_vars.isSync==TRUE
       ) {
       openserial_printError(COMPONENT_IEEE802154E,ERR_LARGE_TIMECORRECTION,
                             (errorparameter_t)timeCorrection,
