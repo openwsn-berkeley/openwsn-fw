@@ -249,7 +249,7 @@ void adaptive_sync_countCompensationTimeout_compoundSlots(uint16_t compoundSlots
          adaptive_sync_vars.compensateTicks += compensateTicks*SYNC_ACCURACY;
       } else { // clock is fast
          newSlotDuration                    += compensateTicks*SYNC_ACCURACY;
-         adaptive_sync_vars.compensateTicks += compensateTicks * SYNC_ACCURACY;
+         adaptive_sync_vars.compensateTicks += compensateTicks*SYNC_ACCURACY;
       }
       radio_setTimerPeriod(newSlotDuration);
 #ifdef OPENSIM

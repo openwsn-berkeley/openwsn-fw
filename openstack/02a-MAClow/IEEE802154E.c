@@ -198,7 +198,7 @@ void isr_ieee154e_newSlot() {
          activity_synchronize_newSlot();
       }
    } else {
-#ifdef ADAPTIVE_SYNC
+#ifndef NOADAPTIVESYNC
      // adaptive synchronization
       adaptive_sync_countCompensationTimeout();
 #endif
@@ -906,8 +906,11 @@ port_INLINE void activity_ti1ORri1() {
           for (i=0;i<ieee154e_vars.numOfSleepSlots-1;i++){
              incrementAsnOffset();
           }
-      }  
-      ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();      
+#ifndef NOADAPTIVESYNC
+         // deal with the case when schedule multi slots
+         adaptive_sync_countCompensationTimeout_compoundSlots(ieee154e_vars.numOfSleepSlots-1);
+#endif
+      }
    } else {
       // this is NOT the next active slot, abort
       // stop using serial
@@ -1051,9 +1054,9 @@ port_INLINE void activity_ti1ORri1() {
          // set the timer based on calcualted number of slots to skip
          radio_setTimerPeriod(TsSlotDuration*(ieee154e_vars.numOfSleepSlots));
          
-#ifdef ADAPTIVE_SYNC
+#ifndef NOADAPTIVESYNC
          // deal with the case when schedule multi slots
-         adaptive_sync_countCompensationTimeout_compoundSlots(NUMSERIALRX-1);
+         adaptive_sync_countCompensationTimeout_compoundSlots(ieee154e_vars.numOfSleepSlots-1);
 #endif
          break;
       case CELLTYPE_MORESERIALRX:
@@ -2217,7 +2220,7 @@ void synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived) {
    
    // resynchronize by applying the new period
    radio_setTimerPeriod(newPeriod);
-#ifdef ADAPTIVE_SYNC
+#ifndef NOADAPTIVESYNC
    // indicate time correction to adaptive sync module
    adaptive_sync_indicateTimeCorrection(timeCorrection,ieee154e_vars.dataReceived->l2_nextORpreviousHop);
 #endif
@@ -2256,7 +2259,7 @@ void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
    
    // reset the de-synchronization timeout
    ieee154e_vars.deSyncTimeout    = DESYNCTIMEOUT;
-#ifdef ADAPTIVE_SYNC
+#ifndef NOADAPTIVESYNC
    // indicate time correction to adaptive sync module
    adaptive_sync_indicateTimeCorrection((-timeCorrection),ieee154e_vars.ackReceived->l2_nextORpreviousHop);
 #endif
