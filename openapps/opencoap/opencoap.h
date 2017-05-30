@@ -62,6 +62,7 @@ typedef enum {
    COAP_CODE_RESP_VALID                = 67,
    COAP_CODE_RESP_CHANGED              = 68,
    COAP_CODE_RESP_CONTENT              = 69,
+   COAP_CODE_RESP_CONTINUE             = 95,
    // - not OK
    COAP_CODE_RESP_BADREQ               = 128,
    COAP_CODE_RESP_UNAUTHORIZED         = 129,
@@ -69,6 +70,7 @@ typedef enum {
    COAP_CODE_RESP_FORBIDDEN            = 131,
    COAP_CODE_RESP_NOTFOUND             = 132,
    COAP_CODE_RESP_METHODNOTALLOWED     = 133,
+   COAP_CODE_RESP_REQINCOMPLETE        = 136,
    COAP_CODE_RESP_PRECONDFAILED        = 140,
    COAP_CODE_RESP_REQTOOLARGE          = 141,
    COAP_CODE_RESP_UNSUPPMEDIATYPE      = 143,
@@ -145,6 +147,7 @@ struct coap_resource_desc_t {
    callbackRx_cbt        callbackRx;
    callbackSendDone_cbt  callbackSendDone;
    coap_header_iht       last_request;
+   uint8_t*              block1_buffer;
    coap_resource_desc_t* next;
 };
 

@@ -21,7 +21,7 @@ opencoap_block_transfer_t opencoap_block_transfers[COAP_BLOCK_TRANSFERS];
 
 void opencoap_dropBlockTransfer(opencoap_block_transfer_t* bt_ptr);
 opencoap_block_transfer_t* opencoap_lookupBlockTransfer(OpenQueueEntry_t* msg, uint32_t hash);
-opencoap_block_transfer_t* opencoap_createBlockTransfer(OpenQueueEntry_t* msg, uint32_t hash);
+opencoap_block_transfer_t* opencoap_createBlockTransfer(OpenQueueEntry_t* msg, uint8_t* buffer, uint32_t hash);
 
 //=========================== public ==========================================
 
@@ -79,6 +79,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    uint16_t                  bx_blockSize;
    uint8_t                   max_blockNumber;
    uint8_t                   tmp_length;
+   bool                      block1_request = FALSE;
 
    // take ownership over the received packet
    msg->owner                = COMPONENT_OPENCOAP;
@@ -157,9 +158,16 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
                uripath2_idx = i;
             }
             break;
-         case COAP_OPTION_NUM_BLOCK2:
+         case COAP_OPTION_NUM_BLOCK1:
             if (bx_idx == MAX_COAP_OPTIONS) {
                bx_idx = i;
+               block1_request = TRUE;
+            }
+            break;
+         case COAP_OPTION_NUM_BLOCK2:
+            if (bx_idx == MAX_COAP_OPTIONS) {
+               bx_idx = i; // mutually exclusive with Block1
+               block1_request = FALSE;
             }
             break;
          default:
@@ -314,9 +322,53 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
          bt_ptr = NULL;
       }
 
-      // we need to generate data if we can't load it from bt_ptr
-      if (bt_ptr == NULL) {
-         // create response
+      if (msg->length > bx_blockSize) {
+         // error, request too large
+         coap_header.Code = COAP_CODE_RESP_REQTOOLARGE;
+         // TODO: set Block1 option in response?
+      }
+
+      if (block1_request) {
+         if (temp_desc->block1_buffer == NULL) {
+            // resource does not support Block1 requests
+            coap_header.Code = COAP_CODE_RESP_BADOPTION;
+         } else {
+            if (bt_ptr == NULL) {
+               // create B1 block transfer with temp_desc->block1_buffer
+               bt_ptr = opencoap_createBlockTransfer(msg, temp_desc->block1_buffer, hash);
+               bt_ptr->dataLen = 0;
+            }
+            // copy msg->payload to buffer
+            memcpy(&(bt_ptr->data[bx_blockNumber*bx_blockSize]), msg->payload, msg->length);
+            if (bx_blockNumber*bx_blockSize != bt_ptr->dataLen) {
+               // request blocks not in the right order/size
+               coap_header.Code = COAP_CODE_RESP_REQINCOMPLETE;
+            }
+            bt_ptr->dataLen += msg->length;
+
+            msg->payload = bt_ptr->data;
+            msg->length = bt_ptr->dataLen;
+
+            if (bx_moreBlocks) {
+               coap_header.Code = COAP_CODE_RESP_CONTINUE;
+            } else {
+               // Block1 request is complete
+               opencoap_dropBlockTransfer(bt_ptr);
+               bt_ptr = NULL;
+            }
+         }
+      }
+
+      // build the response
+      if (
+         coap_header.Code < COAP_CODE_REQ_GET ||
+         coap_header.Code > COAP_CODE_REQ_DELETE
+      ) {
+         // 2.31, 4.02, 4.08, 4.13
+         msg->payload = &(msg->packet[127]);
+         msg->length = 0;
+      } else if (bt_ptr == NULL) {
+         // ask resource to create response
          outcome = temp_desc->callbackRx(msg,&coap_header,&coap_options[0]);
 
          response_too_big = msg->length > bx_blockSize; // this could also be up to roughly 71 Bytes
@@ -324,13 +376,14 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
 
          if ( response_too_big && !reused_packet) {
             // create block_transfer
-            bt_ptr = opencoap_createBlockTransfer(msg, hash);
+            bt_ptr = opencoap_createBlockTransfer(msg, msg->payload, hash);
             bx_blockNumber = 0;
             if (bt_ptr == NULL) {
                // TODO: print error
             }
          }
       } else {
+         // lookup response in block transfer
          msg->payload = bt_ptr->data;
          msg->length = bt_ptr->dataLen;
          response_too_big = TRUE; // TRUE, because the complete payload is bigger than a block
@@ -343,7 +396,12 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
 
       // assert that we don't read past the generated data if the block number is too high
       max_blockNumber = msg->length / bx_blockSize;
-      if (bx_blockNumber > max_blockNumber) {
+      if (block1_request) {
+         tmp_length = msg->length;
+         if (bx_moreBlocks) {
+            tmp_length = 0;
+         }
+      } else if (bx_blockNumber > max_blockNumber) {
          outcome = E_FAIL;
          // TODO: HTTP would respond with 416 Range Not Satisfiable
          coap_header.Code = COAP_CODE_RESP_BADREQ;
@@ -356,11 +414,14 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
          tmp_length = bx_blockSize;
          bx_moreBlocks = TRUE;
       }
-      // copy i bytes from msg->payload[blockNumber*blockSize] into msg->packet[127-i]
-      msg->payload = msg->payload + bx_blockNumber*bx_blockSize;
+
+      if (!block1_request) {
+         // select the correct payload offset
+         msg->payload = msg->payload + bx_blockNumber*bx_blockSize;
+      }
       msg->length = tmp_length;
       // if msg->payload does not point into the second half of msg->packet, copy the data there
-      if (msg->payload < &msg->packet[63] || msg->payload >= &msg->packet[127]) {
+      if (msg->payload < &msg->packet[64] || msg->payload > &msg->packet[127]) {
          // like memcpy but handles overlapping memory
          memmove(&msg->packet[127-msg->length], msg->payload, msg->length);
          msg->payload = &msg->packet[127-msg->length];
@@ -398,7 +459,11 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
          }
          packetfunctions_reserveHeaderSize(msg, 2);
          msg->payload[0] = (13<<4) | (bx_blockNumber == 0 ? 0 : (bx_blockNumber <= 0xff ? 1 : (bx_blockNumber <= 0xffff ? 2 : 3))); // option delta, option length
-         msg->payload[1] = COAP_OPTION_NUM_BLOCK2 - 13;
+         if (block1_request) {
+            msg->payload[1] = COAP_OPTION_NUM_BLOCK1 - 13;
+         } else {
+            msg->payload[1] = COAP_OPTION_NUM_BLOCK2 - 13;
+         }
 
       }
    } else {
@@ -667,6 +732,9 @@ owerror_t opencoap_send(
 //=========================== private =========================================
 
 void opencoap_dropBlockTransfer(opencoap_block_transfer_t* bt_ptr) {
+   if (bt_ptr == NULL) {
+      return;
+   }
    bt_ptr->hash = 0;
    bt_ptr->data = NULL;
    bt_ptr->dataLen = 0;
@@ -692,7 +760,7 @@ opencoap_block_transfer_t* opencoap_lookupBlockTransfer(OpenQueueEntry_t* msg, u
 }
 
 // create an entry in the block transfer array from an incoming msg
-opencoap_block_transfer_t* opencoap_createBlockTransfer(OpenQueueEntry_t* msg, uint32_t hash) {
+opencoap_block_transfer_t* opencoap_createBlockTransfer(OpenQueueEntry_t* msg, uint8_t* buffer, uint32_t hash) {
    uint8_t i;
    opencoap_block_transfer_t* bt_ptr;
 
@@ -707,7 +775,7 @@ opencoap_block_transfer_t* opencoap_createBlockTransfer(OpenQueueEntry_t* msg, u
       memcpy(&bt_ptr->clientAddr.addr_128b[0], &msg->l3_sourceAdd.addr_128b[0], LENGTH_ADDR128b);
 
       bt_ptr->hash = hash;
-      bt_ptr->data = msg->payload;
+      bt_ptr->data = buffer;
       bt_ptr->dataLen = msg->length;
       bt_ptr->ongoing = TRUE;
 
