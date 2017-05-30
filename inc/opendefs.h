@@ -283,7 +283,7 @@ typedef struct {
    uint8_t       creator;                        // the component which called getFreePacketBuffer()
    uint8_t       owner;                          // the component which currently owns the entry
    uint8_t*      payload;                        // pointer to the start of the payload within 'packet'
-   uint8_t       length;                         // length in bytes of the payload
+   uint16_t      length;                         // length in bytes of the payload
    //l4
    uint8_t       l4_protocol;                    // l4 protocol to be used
    bool          l4_protocol_compressed;         // is the l4 protocol header compressed?
