@@ -132,9 +132,15 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
       }
       
       // parse this option
-      coap_options[i].type        = (coap_option_t)((uint8_t)last_option+(uint8_t)((msg->payload[index] & 0xf0) >> 4));
+      coap_options[i].length   = (msg->payload[index] & 0x0f);
+      if ((msg->payload[index] & 0xf0) >> 4 == 13) {
+         // extended option delta
+         coap_options[i].type     = (coap_option_t)((uint8_t)last_option+13+msg->payload[index+1]);
+         index++;
+      } else {
+         coap_options[i].type     = (coap_option_t)((uint8_t)last_option+(uint8_t)((msg->payload[index] & 0xf0) >> 4));
+      }
       last_option                 = coap_options[i].type;
-      coap_options[i].length      = (msg->payload[index] & 0x0f);
       index++;
       coap_options[i].pValue      = &(msg->payload[index]);
       index                      += coap_options[i].length; //includes length as well
