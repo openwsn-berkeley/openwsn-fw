@@ -88,6 +88,8 @@ void csensors_init() {
    csensors_vars.desc.discoverable           = TRUE;
    csensors_vars.desc.callbackRx             = &csensors_receive;
    csensors_vars.desc.callbackSendDone       = &csensors_sendDone;
+   csensors_vars.desc.block1_buffer          = NULL;
+   csensors_vars.desc.buffer_length          = 0;
    // register with the CoAP module
    opencoap_register(&csensors_vars.desc);
 
@@ -155,6 +157,8 @@ void csensors_register(
    csensors_resource->desc.discoverable     = TRUE;
    csensors_resource->desc.callbackRx       = &csensors_receive;
    csensors_resource->desc.callbackSendDone = &csensors_sendDone;
+   csensors_resource->desc.block1_buffer    = NULL;
+   csensors_resource->desc.buffer_length    = 0;
 
    // register with the CoAP module
    opencoap_register(&csensors_resource->desc);

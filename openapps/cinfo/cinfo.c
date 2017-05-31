@@ -50,6 +50,8 @@ void cinfo_init() {
    cinfo_vars.desc.discoverable         = TRUE;
    cinfo_vars.desc.callbackRx           = &cinfo_receive;
    cinfo_vars.desc.callbackSendDone     = &cinfo_sendDone;
+   cinfo_vars.desc.block1_buffer        = NULL;
+   cinfo_vars.desc.buffer_length        = 0;
    
    // register with the CoAP module
    opencoap_register(&cinfo_vars.desc);

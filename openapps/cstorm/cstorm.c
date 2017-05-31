@@ -48,6 +48,8 @@ void cstorm_init(void) {
    cstorm_vars.desc.discoverable          = TRUE;
    cstorm_vars.desc.callbackRx            = &cstorm_receive;
    cstorm_vars.desc.callbackSendDone      = &cstorm_sendDone;
+   cstorm_vars.desc.block1_buffer         = NULL;
+   cstorm_vars.desc.buffer_length         = 0;
    opencoap_register(&cstorm_vars.desc);
    
    /*

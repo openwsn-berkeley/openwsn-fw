@@ -41,6 +41,8 @@ void cleds__init() {
    cleds_vars.desc.discoverable        = TRUE;
    cleds_vars.desc.callbackRx          = &cleds_receive;
    cleds_vars.desc.callbackSendDone    = &cleds_sendDone;
+   cleds_vars.desc.block1_buffer       = NULL;
+   cleds_vars.desc.buffer_length       = 0;
    
    // register with the CoAP module
    opencoap_register(&cleds_vars.desc);

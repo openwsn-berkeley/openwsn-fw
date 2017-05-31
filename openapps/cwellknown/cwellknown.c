@@ -40,6 +40,8 @@ void cwellknown_init() {
    cwellknown_vars.desc.discoverable        = FALSE;
    cwellknown_vars.desc.callbackRx          = &cwellknown_receive;
    cwellknown_vars.desc.callbackSendDone    = &cwellknown_sendDone;
+   cwellknown_vars.desc.block1_buffer       = NULL;
+   cwellknown_vars.desc.buffer_length       = 0;
    
    opencoap_register(&cwellknown_vars.desc);
 }

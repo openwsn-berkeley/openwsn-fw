@@ -26,6 +26,8 @@ const uint8_t cexample_path0[] = "ex";
 //=========================== variables =======================================
 
 cexample_vars_t cexample_vars;
+uint8_t cexample_buffer[128];
+uint8_t cexample_state;
 
 //=========================== prototypes ======================================
 
@@ -50,6 +52,8 @@ void cexample_init() {
    cexample_vars.desc.discoverable         = TRUE;
    cexample_vars.desc.callbackRx           = &cexample_receive;
    cexample_vars.desc.callbackSendDone     = &cexample_sendDone;
+   cexample_vars.desc.block1_buffer        = cexample_buffer;
+   cexample_vars.desc.buffer_length        = 128;
    
    
    opencoap_register(&cexample_vars.desc);
@@ -63,7 +67,58 @@ void cexample_init() {
 owerror_t cexample_receive(OpenQueueEntry_t* msg,
                       coap_header_iht* coap_header,
                       coap_option_iht* coap_options) {
-   return E_FAIL;
+   owerror_t outcome;
+   uint8_t i;
+
+   switch(coap_header->Code) {
+      case COAP_CODE_REQ_GET:
+         if (cexample_state < 10) {
+            // reuse msg->payload from the request
+            packetfunctions_reserveHeaderSize(msg, 3);
+            msg->payload[0] = '#';
+            msg->payload[1] = cexample_state+'0';
+            msg->payload[2] = '#';
+            msg->length = 3;
+         } else {
+            for (i=0; i<128; i++) {
+               cexample_buffer[i] = i;
+               if (i == cexample_state) {
+                  cexample_buffer[i] ^= 0xff;
+                  cexample_buffer[i] += 1;
+                  break;
+               }
+            }
+            // the response might be too big to reuse msg->payload from the request
+            // use cexample_buffer for a Block2 response
+            msg->payload = cexample_buffer;
+            msg->length = i;
+         }
+         coap_header->Code = COAP_CODE_RESP_CONTENT;
+         outcome = E_SUCCESS;
+         break;
+      case COAP_CODE_REQ_PUT:
+         // msg->payload could point into cexample_buffer right now
+         if (msg->payload[0] == '^' && msg->payload[msg->length-1] == '$') {
+            // expect a string "^...@...@...$"
+            cexample_state = 0;
+            for (i=0; i<msg->length; i++) {
+               if (msg->payload[i] == '@') {
+                  cexample_state++;
+               }
+            }
+            coap_header->Code = COAP_CODE_RESP_CHANGED;
+            outcome = E_SUCCESS;
+         } else {
+            coap_header->Code = COAP_CODE_RESP_BADREQ;
+            outcome = E_FAIL;
+         }
+         msg->length = 0;
+         break;
+      default:
+         outcome = E_FAIL;
+         break;
+   }
+   return outcome;
 }
 
 //timer fired, but we don't want to execute task in ISR mode

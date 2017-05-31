@@ -46,6 +46,8 @@ void c6t_init() {
    c6t_vars.desc.discoverable        = TRUE;
    c6t_vars.desc.callbackRx          = &c6t_receive;
    c6t_vars.desc.callbackSendDone    = &c6t_sendDone;
+   c6t_vars.desc.block1_buffer       = NULL;
+   c6t_vars.desc.buffer_length       = 0;
    
    opencoap_register(&c6t_vars.desc);
 }
