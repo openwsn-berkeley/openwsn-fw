@@ -349,7 +349,9 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
             msg->payload = bt_ptr->data;
             msg->length = bt_ptr->dataLen;
 
-            if (bx_moreBlocks) {
+            if (bt_ptr->dataLen > temp_desc->buffer_length) {
+               coap_header.Code = COAP_CODE_RESP_REQTOOLARGE;
+            } else if (bx_moreBlocks) {
                coap_header.Code = COAP_CODE_RESP_CONTINUE;
             } else {
                // Block1 request is complete

@@ -148,6 +148,7 @@ struct coap_resource_desc_t {
    callbackSendDone_cbt  callbackSendDone;
    coap_header_iht       last_request;
    uint8_t*              block1_buffer;
+   uint16_t              buffer_length;
    coap_resource_desc_t* next;
 };
 
