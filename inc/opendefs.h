@@ -32,11 +32,14 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 #define FALSE 0
 #endif
 
-#define LENGTH_ADDR16b  2
-#define LENGTH_ADDR64b  8
-#define LENGTH_ADDR128b 16
+#define LENGTH_ADDR16b   2
+#define LENGTH_ADDR64b   8
+#define LENGTH_ADDR128b  16
 
-#define MAXNUMNEIGHBORS 10
+#define MAXNUMNEIGHBORS  10
+
+// maximum celllist length
+#define CELLLIST_MAX_LEN 3
 
 enum {
    E_SUCCESS                           = 0,
@@ -246,6 +249,8 @@ enum {
    ERR_SIXTOP_COUNT                    = 0x3d, // there are {0} cells to request mote
    ERR_SIXTOP_LIST                     = 0x3e, // the cells reserved to request mote contains slot {0} and slot {1}
    ERR_SCHEDULE_ADDDUPLICATESLOT       = 0x3f, // the slot {0} to be added is already in schedule
+   ERR_UNSUPPORTED_FORMAT              = 0x40, // the received packet format is not supported {code location {0}}
+   ERR_UNSUPPORTED_METADATA            = 0x41, // the metadata type is not suppored
 };
 
 //=========================== typedef =========================================
@@ -266,6 +271,13 @@ END_PACK
 typedef asn_t  macFrameCounter_t;
 
 BEGIN_PACK
+
+typedef struct {
+    bool      isUsed;
+    uint16_t  slotoffset;
+    uint16_t  channeloffset;
+} cellInfo_ht;
+
 typedef struct {                                 // always written big endian, i.e. MSB in addr[0]
    uint8_t type;
    union {
@@ -280,56 +292,58 @@ END_PACK
 
 typedef struct {
    //admin
-   uint8_t       creator;                        // the component which called getFreePacketBuffer()
-   uint8_t       owner;                          // the component which currently owns the entry
-   uint8_t*      payload;                        // pointer to the start of the payload within 'packet'
-   uint8_t       length;                         // length in bytes of the payload
+   uint8_t       creator;                                       // the component which called getFreePacketBuffer()
+   uint8_t       owner;                                         // the component which currently owns the entry
+   uint8_t*      payload;                                       // pointer to the start of the payload within 'packet'
+   uint8_t       length;                                        // length in bytes of the payload
    //l4
-   uint8_t       l4_protocol;                    // l4 protocol to be used
-   bool          l4_protocol_compressed;         // is the l4 protocol header compressed?
-   uint16_t      l4_sourcePortORicmpv6Type;      // l4 source port
-   uint16_t      l4_destination_port;            // l4 destination port
-   uint8_t*      l4_payload;                     // pointer to the start of the payload of l4 (used for retransmits)
-   uint8_t       l4_length;                      // length of the payload of l4 (used for retransmits)
+   uint8_t       l4_protocol;                                   // l4 protocol to be used
+   bool          l4_protocol_compressed;                        // is the l4 protocol header compressed?
+   uint16_t      l4_sourcePortORicmpv6Type;                     // l4 source port
+   uint16_t      l4_destination_port;                           // l4 destination port
+   uint8_t*      l4_payload;                                    // pointer to the start of the payload of l4 (used for retransmits)
+   uint8_t       l4_length;                                     // length of the payload of l4 (used for retransmits)
    //l3
-   open_addr_t   l3_destinationAdd;              // 128b IPv6 destination (down stack) 
-   open_addr_t   l3_sourceAdd;                   // 128b IPv6 source address 
+   open_addr_t   l3_destinationAdd;                             // 128b IPv6 destination (down stack) 
+   open_addr_t   l3_sourceAdd;                                  // 128b IPv6 source address 
    //l2
-   owerror_t     l2_sendDoneError;               // outcome of trying to send this packet
-   open_addr_t   l2_nextORpreviousHop;           // 64b IEEE802.15.4 next (down stack) or previous (up) hop address
-   uint8_t       l2_frameType;                   // beacon, data, ack, cmd
-   uint8_t       l2_dsn;                         // sequence number of the received frame
-   uint8_t       l2_retriesLeft;                 // number Tx retries left before packet dropped (dropped when hits 0)
-   uint8_t       l2_numTxAttempts;               // number Tx attempts
-   asn_t         l2_asn;                         // at what ASN the packet was Tx'ed or Rx'ed
-   uint8_t*      l2_payload;                     // pointer to the start of the payload of l2 (used for MAC to fill in ASN in ADV)
-   uint8_t*      l2_sixtop_cellObjects;          // pointer to the start of cell Objects in 6P
-   uint8_t       l2_sixtop_numOfCells;           // number of cells were going to be scheduled or removed.
-   uint8_t       l2_sixtop_frameID;              // frameID in 6P
-   uint8_t       l2_sixtop_requestCommand;       // request Command in 6P
-   uint8_t       l2_sixtop_returnCode;           // return code in 6P
-   uint8_t*      l2_ASNpayload;                  // pointer to the ASN in EB
-   uint8_t       l2_joinPriority;                // the join priority received in EB
-   bool          l2_IEListPresent;               // did have IE field?
-   bool          l2_payloadIEpresent;            // did I have payload IE field
+   owerror_t     l2_sendDoneError;                              // outcome of trying to send this packet
+   open_addr_t   l2_nextORpreviousHop;                          // 64b IEEE802.15.4 next (down stack) or previous (up) hop address
+   uint8_t       l2_frameType;                                  // beacon, data, ack, cmd
+   uint8_t       l2_dsn;                                        // sequence number of the received frame
+   uint8_t       l2_retriesLeft;                                // number Tx retries left before packet dropped (dropped when hits 0)
+   uint8_t       l2_numTxAttempts;                              // number Tx attempts
+   asn_t         l2_asn;                                        // at what ASN the packet was Tx'ed or Rx'ed
+   uint8_t*      l2_payload;                                    // pointer to the start of the payload of l2 (used for MAC to fill in ASN in ADV)
+   cellInfo_ht   l2_sixtop_celllist_add[CELLLIST_MAX_LEN];      // record celllist to be added and will be added when 6P response sendDone
+   cellInfo_ht   l2_sixtop_celllist_delete[CELLLIST_MAX_LEN];   // record celllist to be removed and will be removed when 6P response sendDone
+   uint16_t      l2_sixtop_frameID;                             // frameID in 6P message
+   uint8_t       l2_sixtop_messageType;                         // indicating the sixtop message type
+   uint8_t       l2_sixtop_command;                             // command of the received 6p request, recorded in 6p response
+   uint8_t       l2_sixtop_cellOptions;                         // celloptions, used when 6p response senddone. (it's the same with cellOptions in 6p request but with TX and RX bits have been flipped)
+   uint8_t       l2_sixtop_returnCode;                          // return code in 6P response
+   uint8_t*      l2_ASNpayload;                                 // pointer to the ASN in EB
+   uint8_t       l2_joinPriority;                               // the join priority received in EB
+   bool          l2_IEListPresent;                              // did have IE field?
+   bool          l2_payloadIEpresent;                           // did I have payload IE field
    bool          l2_joinPriorityPresent;
-   bool          l2_isNegativeACK;               // is the negative ACK?
-   int16_t       l2_timeCorrection;              // record the timeCorrection and print out at endOfslot
+   bool          l2_isNegativeACK;                              // is the negative ACK?
+   int16_t       l2_timeCorrection;                             // record the timeCorrection and print out at endOfslot
    //layer-2 security
-   uint8_t       l2_securityLevel;               // the security level specified for the current frame
-   uint8_t       l2_keyIdMode;                   // the key Identifier mode specified for the current frame
-   uint8_t       l2_keyIndex;                    // the key Index specified for the current frame
-   open_addr_t   l2_keySource;                   // the key Source specified for the current frame
-   uint8_t       l2_authenticationLength;        // the length of the authentication field
-   uint8_t       commandFrameIdentifier;         // used in case of Command Frames
-   uint8_t*      l2_FrameCounter;                // pointer to the FrameCounter in the MAC header
+   uint8_t       l2_securityLevel;                              // the security level specified for the current frame
+   uint8_t       l2_keyIdMode;                                  // the key Identifier mode specified for the current frame
+   uint8_t       l2_keyIndex;                                   // the key Index specified for the current frame
+   open_addr_t   l2_keySource;                                  // the key Source specified for the current frame
+   uint8_t       l2_authenticationLength;                       // the length of the authentication field
+   uint8_t       commandFrameIdentifier;                        // used in case of Command Frames
+   uint8_t*      l2_FrameCounter;                               // pointer to the FrameCounter in the MAC header
    //l1 (drivers)
-   uint8_t       l1_txPower;                     // power for packet to Tx at
-   int8_t        l1_rssi;                        // RSSI of received packet
-   uint8_t       l1_lqi;                         // LQI of received packet
-   bool          l1_crc;                         // did received packet pass CRC check?
+   uint8_t       l1_txPower;                                    // power for packet to Tx at
+   int8_t        l1_rssi;                                       // RSSI of received packet
+   uint8_t       l1_lqi;                                        // LQI of received packet
+   bool          l1_crc;                                        // did received packet pass CRC check?
    //the packet
-   uint8_t       packet[1+1+125+2+1];            // 1B spi address, 1B length, 125B data, 2B CRC, 1B LQI
+   uint8_t       packet[1+1+125+2+1];                           // 1B spi address, 1B length, 125B data, 2B CRC, 1B LQI
 } OpenQueueEntry_t;
 
 

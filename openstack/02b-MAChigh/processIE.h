@@ -5,9 +5,6 @@
 
 //=========================== define ==========================================
 
-// maximum of cells in a Schedule IE
-#define SCHEDULEIEMAXNUMCELLS 3
-
 // subIE shift
 #define MLME_IE_SUBID_SHIFT            8
 
@@ -22,21 +19,16 @@
 #define MLME_IE_SUBID_TRACKID          0x43
 #define MLME_IE_SUBID_SCHEDULE         0x44
 
-// 0xc9 = 201 is the first available subIE ID for experimental use: 
+// 201 is the first available subIE ID for experimental use: 
 // https://tools.ietf.org/html/draft-kivinen-802-15-ie-06#section-7
-#define IANA_6TOP_SUBIE_ID             0xC9
+#define IANA_6TOP_SUBIE_ID             201
+// 05 indicates IETF IE ID
+// https://mentor.ieee.org/802.15/documents?is_dcn=257&is_group=0000
 #define SIXTOP_IE_GROUPID              0x05
 
 // ========================== typedef =========================================
 
 BEGIN_PACK
-
-typedef struct {
-   uint16_t        tsNum;
-   uint16_t        choffset;
-   uint8_t         linkoptions;
-} cellInfo_ht;
-
 
 /**
 \brief Header of header IEs.
@@ -125,7 +117,7 @@ typedef struct{
    uint8_t         frameID;
    uint8_t         numberOfcells;
    bool            flag;
-   cellInfo_ht     cellList[SCHEDULEIEMAXNUMCELLS];
+   cellInfo_ht     cellList[CELLLIST_MAX_LEN];
 } schedule_IE_ht;
 
 END_PACK

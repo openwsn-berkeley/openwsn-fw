@@ -52,7 +52,7 @@ port_INLINE void processIE_prepend_sixtopIE(
    // prepare header
    payload_IE_desc.length_groupid_type = len;
    payload_IE_desc.length_groupid_type |= 
-      (IANA_6TOP_IE_GROUP_ID  | IANA_6TOP_IE_GROUP_ID_TYPE); 
+      (IANA_IETF_IE_GROUP_ID  | IANA_IETF_IE_TYPE); 
    
    // copy header
    pkt->payload[0] = payload_IE_desc.length_groupid_type        & 0xFF;
@@ -327,7 +327,7 @@ port_INLINE uint8_t processIE_prepend_sixCelllist(
    
     //===== cell list
    
-    for(i=0;i<SCHEDULEIEMAXNUMCELLS;i++) {
+    for(i=0;i<CELLLIST_MAX_LEN;i++) {
         if(cellList[i].linkoptions != CELLTYPE_OFF){
             // cellobjects:
             // - [2B] slotOffset

@@ -13,22 +13,34 @@
 #include "processIE.h"
 //=========================== define ==========================================
 // 6P version 
-#define IANA_6TOP_6P_VERSION   0x01 
+#define IANA_6TOP_6P_VERSION        0x00
+#define IANA_6TOP_VESION_MASK       0x0F
+// 6p type
+#define IANA_6TOP_TYPE_SHIFT        4
+#define IANA_6TOP_TYPE_REQUEST      0<<IANA_6TOP_TYPE_SHIFT
+#define IANA_6TOP_TYPE_RESPONSE     1<<IANA_6TOP_TYPE_SHIFT
+#define IANA_6TOP_TYPE_CONFIRMATION 2<<IANA_6TOP_TYPE_SHIFT
+// 6p schedule generation shift
+#define IANA_6TOP_GEN_SHIFT         4
 // 6P command Id
-#define IANA_6TOP_CMD_NONE     0x00
-#define IANA_6TOP_CMD_ADD      0x01 // CMD_ADD          | add one or more cells     
-#define IANA_6TOP_CMD_DELETE   0x02 // CMD_DELETE       | delete one or more cells  
-#define IANA_6TOP_CMD_COUNT    0x03 // CMD_COUNT        | count scheduled cells     
-#define IANA_6TOP_CMD_LIST     0x04 // CMD_LIST         | list the scheduled cells  
-#define IANA_6TOP_CMD_CLEAR    0x05 // CMD_CLEAR        | clear all cells
+#define IANA_6TOP_CMD_NONE          0x00
+#define IANA_6TOP_CMD_ADD           0x01 // CMD_ADD          | add one or more cells     
+#define IANA_6TOP_CMD_DELETE        0x02 // CMD_DELETE       | delete one or more cells  
+#define IANA_6TOP_CMD_RELOCATE      0x03 // CMD_RELOCATE     | relocate one or more cells  
+#define IANA_6TOP_CMD_COUNT         0x04 // CMD_COUNT        | count scheduled cells     
+#define IANA_6TOP_CMD_LIST          0x05 // CMD_LIST         | list the scheduled cells  
+#define IANA_6TOP_CMD_CLEAR         0x06 // CMD_CLEAR        | clear all cells
 // 6P return code
-#define IANA_6TOP_RC_SUCCESS   0x06 // RC_SUCCESS       | operation succeeded      
-#define IANA_6TOP_RC_ERR_VER   0x07 // RC_ERR_VER       | unsupported 6P version   
-#define IANA_6TOP_RC_ERR_SFID  0x08 // RC_ERR_SFID      | unsupported SFID         
-#define IANA_6TOP_RC_ERR_BUSY  0x09 // RC_ERR_BUSY      | handling previous request
-#define IANA_6TOP_RC_ERR_NORES 0x0a // RC_ERROR_NORES   | not enough resources
-#define IANA_6TOP_RC_ERR_RESET 0x0b // RC_ERR_RESET     | abort 6P transaction     
-#define IANA_6TOP_RC_ERR       0x0c // RC_ERR           | operation failed         
+#define IANA_6TOP_RC_SUCCESS        0x00 // RC_SUCCESS       | operation succeeded
+#define IANA_6TOP_RC_ERROR          0x01 // RC_ERROR         | generic error
+#define IANA_6TOP_RC_EOL            0x02 // RC_EOL           | end of list
+#define IANA_6TOP_RC_RESET          0x03 // RC_RESET         | critical error, reset
+#define IANA_6TOP_RC_VER_ERR        0x04 // RC_VER_ERR       | unsupported 6P version   
+#define IANA_6TOP_RC_SFID_ERR       0x05 // RC_SFID_ERR      | unsupported SFID         
+#define IANA_6TOP_RC_GEN_ERR        0x06 // RC_GEN_ERR       | wrong schedule generation       
+#define IANA_6TOP_RC_BUSY           0x07 // RC_BUSY          | busy
+#define IANA_6TOP_RC_NORES          0x08 // RC_NORES         | not enough resources      
+#define IANA_6TOP_RC_CELLLIST_ERR   0x09 // RC_CELLLIST_ERR  | cellList error      
 
 // SF ID
 #define SFID_SF0  0
@@ -36,11 +48,11 @@
 // Default Ch. ID
 #define DEFAULT_CHANNEL_OFFSET 2
 
-enum sixtop_CommandID_num{
-    SIXTOP_SOFT_CELL_REQ                        = 0x00,
-    SIXTOP_SOFT_CELL_RESPONSE                   = 0x01,
-    SIXTOP_REMOVE_SOFT_CELL_REQUEST             = 0x02,
-};
+typedef enum {
+    SIXTOP_CELL_REQUEST       = 0x00,
+    SIXTOP_CELL_RESPONSE      = 0x01,
+    SIXTOP_CELL_CONFIRMATION  = 0x02,
+}sixtop_message_t;
 
 // states of the sixtop-to-sixtop state machine
 typedef enum {
@@ -57,9 +69,10 @@ typedef enum {
     // waiting for response from the neighbor
     SIX_STATE_WAIT_ADDRESPONSE                  = 0x07, 
     SIX_STATE_WAIT_DELETERESPONSE               = 0x08,
-    SIX_STATE_WAIT_COUNTRESPONSE                = 0x09,
-    SIX_STATE_WAIT_LISTRESPONSE                 = 0x0a,
-    SIX_STATE_WAIT_CLEARRESPONSE                = 0x0b,
+    SIX_STATE_WAIT_RELOCATERESPONSE             = 0x09,
+    SIX_STATE_WAIT_COUNTRESPONSE                = 0x0a,
+    SIX_STATE_WAIT_LISTRESPONSE                 = 0x0b,
+    SIX_STATE_WAIT_CLEARRESPONSE                = 0x0c,
 } six2six_state_t;
 
 // before sixtop protocol is called, sixtop handler must be set
@@ -100,8 +113,18 @@ void      sixtop_setKaPeriod(uint16_t kaPeriod);
 void      sixtop_setEBPeriod(uint8_t ebPeriod);
 bool      sixtop_setHandler(six2six_handler_t handler);
 // scheduling
-void      sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells);
-void      sixtop_addORremoveCellByInfo(uint8_t code,open_addr_t*  neighbor,cellInfo_ht* cellInfo);
+void sixtop_request(
+    uint8_t      code, 
+    open_addr_t* neighbor, 
+    uint8_t      numCells, 
+    uint8_t      cellOptions, 
+    cellInfo_ht* celllist_toBeAdded, 
+    cellInfo_ht* celllist_toBeRemoved, 
+    uint8_t      sfid,
+    uint16_t     listingOffset,
+    uint16_t     listingMaxNumCells
+);
+void      sixtop_addORremoveCellByInfo(uint8_t command,open_addr_t*  neighbor,cellInfo_ht* cellInfo);
 // from upper layer
 owerror_t sixtop_send(OpenQueueEntry_t *msg);
 // from lower layer

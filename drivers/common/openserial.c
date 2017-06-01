@@ -544,7 +544,7 @@ void openserial_handleCommands(void){
    uint8_t  commandLen;
    uint8_t  comandParam_8;
    uint16_t comandParam_16;
-   cellInfo_ht cellList[SCHEDULEIEMAXNUMCELLS];
+   cellInfo_ht cellList[CELLLIST_MAX_LEN];
    uint8_t  i;
    
    open_addr_t neighbor;

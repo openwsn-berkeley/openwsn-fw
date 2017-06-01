@@ -45,6 +45,38 @@ void sf0_setBackoff(uint8_t value){
     sf0_vars.backoff = value;
 }
 
+void sf0_handleRCError(uint8_t code){
+    if (code==IANA_6TOP_RC_BUSY){
+        // disable sf0 for [0...2^4] slotframe long time
+        sf0_setBackoff(openrandom_get16b()%(1<<4));
+    }
+    
+    if (code==IANA_6TOP_RC_NORES){
+        // mark this neighbor as no resource for future processing
+        neighbors_setNeighborNoResource(&(pkt->l2_nextORpreviousHop));
+    }
+    
+    if (code==IANA_6TOP_RC_RESET){
+        // TBD: the neighbor can't statisfy the 6p request with given cells, call sf0 to make a decision 
+        // (e.g. issue another 6p request with different cell list)
+    }
+    
+    if (code==IANA_6TOP_RC_ERROR){
+        // TBD: the neighbor can't statisfy the 6p request, call sf0 to make a decision
+    }
+    
+    if (code==IANA_6TOP_RC_VER_ERR){
+        // TBD: the 6p verion does not match
+    }
+    
+    if (code==IANA_6TOP_RC_SFID_ERR){
+        // TBD: the sfId does not match
+    } 
+    
+    // something wrong happens if I rearch here
+    openserial_printErrorInfo();
+}
+
 //=========================== private =========================================
 
 void sf0_addCell_task(void) {
