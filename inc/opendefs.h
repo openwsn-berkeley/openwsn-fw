@@ -363,6 +363,8 @@ typedef struct {
    asn_t            asn;
    uint8_t          joinPrio;
    bool             f6PNORES;
+   uint8_t          generation;
+   uint8_t          sequenceNumber;
 } neighborRow_t;
 END_PACK
 

@@ -6,9 +6,11 @@
 #include "schedule.h"
 #include "idmanager.h"
 #include "openapps.h"
+#include "openrandom.h"
 
 //=========================== definition =====================================
 
+#define SF0_ID            0
 #define SF0THRESHOLD      2
 
 //=========================== variables =======================================
@@ -20,12 +22,18 @@ sf0_vars_t sf0_vars;
 void sf0_addCell_task(void);
 void sf0_removeCell_task(void);
 void sf0_bandwidthEstimate_task(void);
+// sixtop callback 
+uint8_t sf0_getsfid(void);
+uint16_t sf0_getMetadata(void);
+metadata_t sf0_translateMetadata(void);
+void sf0_handleRCError(uint8_t code);
 
 //=========================== public ==========================================
 
 void sf0_init(void) {
     memset(&sf0_vars,0,sizeof(sf0_vars_t));
     sf0_vars.numAppPacketsPerSlotFrame = 0;
+    sixtop_setSFcallback(sf0_getsfid,sf0_getMetadata,sf0_translateMetadata,sf0_handleRCError);
 }
 
 void sf0_notif_addedCell(void) {
@@ -45,15 +53,26 @@ void sf0_setBackoff(uint8_t value){
     sf0_vars.backoff = value;
 }
 
+
+
+//=========================== callback =========================================
+
+uint8_t sf0_getsfid(void){
+    return SF0_ID;
+}
+
+uint16_t sf0_getMetadata(void){
+    return SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;
+}
+
+metadata_t sf0_translateMetadata(void){
+    return METADATA_TYPE_FRAMEID;
+}
+
 void sf0_handleRCError(uint8_t code){
     if (code==IANA_6TOP_RC_BUSY){
         // disable sf0 for [0...2^4] slotframe long time
         sf0_setBackoff(openrandom_get16b()%(1<<4));
-    }
-    
-    if (code==IANA_6TOP_RC_NORES){
-        // mark this neighbor as no resource for future processing
-        neighbors_setNeighborNoResource(&(pkt->l2_nextORpreviousHop));
     }
     
     if (code==IANA_6TOP_RC_RESET){

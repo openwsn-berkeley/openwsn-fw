@@ -82,27 +82,40 @@ typedef enum {
     SIX_HANDLER_SF0                             = 0x02  // the handler is otf
 } six2six_handler_t;
 
+typedef enum {
+    METADATA_TYPE_FRAMEID                       = 0
+}metadata_t;
 //=========================== typedef =========================================
 
 #define SIX2SIX_TIMEOUT_MS 4000
+typedef uint8_t                 (*sixtop_sf_getsfid)(void);
+typedef uint16_t                (*sixtop_sf_getmetadata)(void);
+typedef metadata_t              (*sixtop_sf_translatemetadata)(void);
+typedef void (*sixtop_sf_handle_callback)(uint8_t arg);
 
 //=========================== module variables ================================
 
 typedef struct {
-   uint16_t             periodMaintenance;
-   bool                 busySendingKA;           // TRUE when busy sending a keep-alive
-   bool                 busySendingEB;           // TRUE when busy sending an enhanced beacon
-   uint8_t              dsn;                     // current data sequence number
-   uint8_t              mgtTaskCounter;          // counter to determine what management task to do
-   opentimer_id_t       ebSendingTimerId;        // EB sending timer id
-   opentimer_id_t       maintenanceTimerId;
-   opentimer_id_t       timeoutTimerId;          // TimeOut timer id
-   uint16_t             kaPeriod;                // period of sending KA
-   uint16_t             ebPeriod;                // period of sending EB
-   six2six_state_t      six2six_state;
-   uint8_t              commandID;
-   six2six_handler_t    handler;
-   bool                 isResponseEnabled;
+   uint16_t                     periodMaintenance;
+   bool                         busySendingKA;           // TRUE when busy sending a keep-alive
+   bool                         busySendingEB;           // TRUE when busy sending an enhanced beacon
+   uint8_t                      dsn;                     // current data sequence number
+   uint8_t                      mgtTaskCounter;          // counter to determine what management task to do
+   opentimer_id_t               ebSendingTimerId;        // EB sending timer id
+   opentimer_id_t               maintenanceTimerId;
+   opentimer_id_t               timeoutTimerId;          // TimeOut timer id
+   uint16_t                     kaPeriod;                // period of sending KA
+   uint16_t                     ebPeriod;                // period of sending EB
+   six2six_state_t              six2six_state;
+   uint8_t                      commandID;
+   six2six_handler_t            handler;
+   bool                         isResponseEnabled;
+   uint8_t                      cellOptions;
+   cellInfo_ht                  celllist_toDelete[CELLLIST_MAX_LEN];
+   sixtop_sf_getsfid            cb_sf_getsfid;
+   sixtop_sf_getmetadata        cb_sf_getMetadata;
+   sixtop_sf_translatemetadata  cb_sf_translateMetadata;
+   sixtop_sf_handle_callback    cb_sf_handleRCError;
 } sixtop_vars_t;
 
 //=========================== prototypes ======================================
@@ -112,6 +125,12 @@ void      sixtop_init(void);
 void      sixtop_setKaPeriod(uint16_t kaPeriod);
 void      sixtop_setEBPeriod(uint8_t ebPeriod);
 bool      sixtop_setHandler(six2six_handler_t handler);
+void      sixtop_setSFcallback(
+    sixtop_sf_getsfid     cb0,
+    sixtop_sf_getmetadata cb1, 
+    sixtop_sf_translatemetadata cb2, 
+    sixtop_sf_handle_callback cb3
+);
 // scheduling
 void sixtop_request(
     uint8_t      code, 

@@ -853,6 +853,40 @@ void schedule_housekeeping(){
     ENABLE_INTERRUPTS();
 }
 
+bool schedule_getOneCellAfterOffset(uint8_t metadata,uint8_t offset,open_addr_t* neighbor, uint8_t cellOptions, uint16_t* slotoffset, uint16_t* channeloffset){
+   bool returnVal;
+   scheduleEntry_t* scheduleWalker;
+   cellType_t type;
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   
+   // translate cellOptions to cell type 
+   if (cellOptions == LINKOPTIONS_TX){
+      type = CELLTYPE_TX;
+   }
+   if (cellOptions == LINKOPTIONS_RX){
+      type = CELLTYPE_RX;
+   }
+   if (cellOptions == LINKOPTIONS_TX | LINKOPTIONS_RX | LINKOPTIONS_SHARED){
+      type = CELLTYPE_TXRX;
+   }
+   
+   scheduleWalker = &schedule_vars.scheduleBuf[0]; // fisrt entry record slotoffset 0
+   do {
+      if(type == scheduleWalker->type && scheduleWalker->slotOffset >= offset){
+         *slotoffset    = scheduleWalker->slotOffset;
+         *channeloffset = scheduleWalker->channelOffset;
+         returnVal      = TRUE;
+         break;
+      }
+      scheduleWalker = scheduleWalker->next;
+   }while(scheduleWalker!=schedule_vars.scheduleBuf[0]);
+   
+   ENABLE_INTERRUPTS();
+   
+   return returnVal;
+}
+
 //=========================== private =========================================
 
 /**

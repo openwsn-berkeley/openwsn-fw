@@ -91,13 +91,13 @@ bool          sixtop_candidateRemoveCellList(
    open_addr_t*         neighbor,
    uint8_t              requiredCells
 );
-void          sixtop_addCellsByState(
+void          sixtop_addCells(
    uint8_t              slotframeID,
    cellInfo_ht*         cellList,
    open_addr_t*         previousHop,
-   uint8_t              state
+   uint8_t              cellOptions
 );
-void          sixtop_removeCellsByState(
+void          sixtop_removeCells(
    uint8_t              slotframeID,
    cellInfo_ht*         cellList,
    open_addr_t*         previousHop
@@ -180,6 +180,16 @@ bool sixtop_setHandler(six2six_handler_t handler) {
     }
 }
 
+void sixtop_setSFcallback(
+    sixtop_sf_get_callback cb1, 
+    sixtop_sf_get_callback cb2, 
+    sixtop_sf_handle_callback cb3
+){
+   sixtop_vars.cb_sf_getMetadata        = cb1;
+   sixtop_vars.cb_sf_translateMetadata  = cb2;
+   sixtop_vars.cb_sf_handleRCError      = cb3
+}
+
 //======= scheduling
 
 void sixtop_request(
@@ -231,7 +241,7 @@ void sixtop_request(
     pkt->owner   = COMPONENT_SIXTOP_RES;
    
     memcpy(&(pkt->l2_nextORpreviousHop),neighbor,sizeof(open_addr_t));
-    memcpy(sixtop_vars.celllist_toRemove,celllist_toBeRemoved,sizeof(celllist_toBeRemoved));
+    memcpy(sixtop_vars.celllist_toDelete,celllist_toDelete,sizeof(celllist_toDelete));
     sixtop_vars.cellOptions = cellOptions;
     
     len  = 0;
@@ -306,14 +316,14 @@ void sixtop_request(
     
     // append 6p metadata
     packetfunctions_reserveHeaderSize(pkt,sizeof(uint16_t));
-    *((uint8_t*)(pkt->payload)) = sixtop_getMetadata(sfid);
+    *((uint8_t*)(pkt->payload)) = sixtop_vars.cb_sf_getMetadata();
     len += 2;
     
     // append 6p Seqnum and schedule Generation
     packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
-    scheduleGeneration = schedule_getGeneration();
+    scheduleGeneration = neighbors_getGeneration(neighbor);
     sequenceNumber     = neighbors_getSequenceNumber(neighbor);
-    *((uint8_t*)(pkt->payload)) = sequenceNumber | scheduleGeneration<<IANA_6TOP_GEN_SHIFT;
+    *((uint8_t*)(pkt->payload)) = sequenceNumber | (scheduleGeneration<<IANA_6TOP_GEN_SHIFT);
     len += 1;
     
     // append 6p sfid
@@ -352,6 +362,7 @@ void sixtop_request(
     
     // send packet
     sixtop_send(pkt);
+    neighbors_updateSequenceNumber(neighbor);
     
     //update states
     switch(code){
@@ -369,90 +380,6 @@ void sixtop_request(
         break;
     case IANA_6TOP_CMD_CLEAR:
         sixtop_vars.six2six_state = SIX_STATE_WAIT_CLEARREQUEST_SENDDONE;
-        break;
-    }
-}
-
-void sixtop_addORremoveCellByInfo(uint8_t code,open_addr_t* neighbor,cellInfo_ht* cellInfo){
-    OpenQueueEntry_t* pkt;
-    uint8_t           len;
-    uint8_t           frameID;
-    uint8_t           container;
-    cellInfo_ht       cellList[CELLLIST_MAX_LEN];
-   
-    memset(cellList,0,sizeof(cellList));
-   
-    // filter parameters: handler, status and neighbor
-    if(
-        sixtop_vars.handler       == SIX_HANDLER_NONE ||
-        sixtop_vars.six2six_state != SIX_STATE_IDLE   ||
-        neighbor                  == NULL
-    ){
-        // parameters are wrong
-        // DONOT change sixtop status for the new transaction
-        return;
-    }
-      
-    // new transaction parameter checking passed.
-   
-    // set cell list (only first one is to be removed)
-    frameID        = SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;
-    container      = frameID;
-    memcpy(&(cellList[0]),cellInfo,sizeof(cellList));
-   
-   
-    // get a free packet buffer
-    pkt = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP_RES);
-    if(pkt==NULL) {
-        sixtop_vars.handler = SIX_HANDLER_NONE;
-        openserial_printError(
-            COMPONENT_SIXTOP_RES,
-            ERR_NO_FREE_PACKET_BUFFER,
-            (errorparameter_t)0,
-            (errorparameter_t)0
-        );
-        return;
-    }
-   
-    // update state
-    sixtop_vars.six2six_state = SIX_STATE_SENDING_REQUEST;
-   
-    // declare ownership over that packet
-    pkt->creator = COMPONENT_SIXTOP_RES;
-    pkt->owner   = COMPONENT_SIXTOP_RES;
-      
-    memcpy(&(pkt->l2_nextORpreviousHop),neighbor,sizeof(open_addr_t));
-    
-    len  = 0;
-    len += processIE_prepend_sixCelllist(pkt,cellList);
-    // reserve space for container
-    packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
-    // write header
-    *((uint8_t*)(pkt->payload)) = container;
-    len+=1;
-    // reserve space for numCells
-    packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
-    // write header
-    *((uint8_t*)(pkt->payload)) = 1;
-    len+=1;
-    
-    len += processIE_prepend_sixGeneralMessage(pkt,code);
-    len += processIE_prepend_sixSubID(pkt);
-    processIE_prepend_sixtopIE(pkt,len);
-   
-    // indicate IEs present
-    pkt->l2_payloadIEpresent = TRUE;
-   
-    // send packet
-    sixtop_send(pkt);
-   
-    //update states
-    switch(code){
-    case IANA_6TOP_CMD_ADD:
-        sixtop_vars.six2six_state = SIX_STATE_WAIT_ADDREQUEST_SENDDONE;
-        break;
-    case IANA_6TOP_CMD_DELETE:
-        sixtop_vars.six2six_state = SIX_STATE_WAIT_DELETEREQUEST_SENDDONE;
         break;
     }
 }
@@ -981,36 +908,37 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
             // in case a response is sent out, check the return code
             if (msg->l2_sixtop_returnCode == IANA_6TOP_RC_SUCCESS){
                 if (msg->l2_sixtop_command == IANA_6TOP_CMD_ADD){
-                    sixtop_addCellsByState(
+                    sixtop_addCells(
                           msg->l2_sixtop_frameID,
                           msg->l2_sixtop_cellList_add,
                           &(msg->l2_nextORpreviousHop),
                           msg->l2_sixtop_cellOptions
                     );
+                    neighbors_updateGeneration(&(msg->l2_nextORpreviousHop));
                 }
                 
                 if (msg->l2_sixtop_command == IANA_6TOP_CMD_DELETE){
-                    sixtop_removeCellsByState(
+                    sixtop_removeCells(
                         msg->l2_sixtop_frameID,
                         msg->l2_sixtop_cellList_delete,
-                        &(msg->l2_nextORpreviousHop),
-                        msg->l2_sixtop_cellOptions
+                        &(msg->l2_nextORpreviousHop)
                     );
+                    neighbors_updateGeneration(&(msg->l2_nextORpreviousHop));
                 }
               
                 if ( msg->l2_sixtop_command == IANA_6TOP_CMD_RELOCATE){
-                    sixtop_removeCellsByState(
+                    sixtop_removeCells(
                         msg->l2_sixtop_frameID,
                         msg->l2_sixtop_cellList_delete,
-                        &(msg->l2_nextORpreviousHop),
-                        msg->l2_sixtop_cellOptions
+                        &(msg->l2_nextORpreviousHop)
                     );
-                    sixtop_addCellsByState(
+                    sixtop_addCells(
                         msg->l2_sixtop_frameID,
                         msg->l2_sixtop_cellList_add,
                         &(msg->l2_nextORpreviousHop),
                         msg->l2_sixtop_cellOptions
                     );
+                    neighbors_updateGeneration(&(msg->l2_nextORpreviousHop));
                 }
                 
                 if ( msg->l2_sixtop_command == IANA_6TOP_CMD_CLEAR){
@@ -1018,13 +946,20 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
                         msg->l2_sixtop_frameID, 
                         &(msg->l2_nextORpreviousHop)
                     );
+                    neighbors_resetGeneration(&(msg->l2_nextORpreviousHop));
                 }
             } else {
                 // the return code is not SUCCESS, nothing require to do on response side
             }
         } else {
-            // the 6p response failed to send out, should inform sf0
-            sixtop_vars.sf_response_failure();
+                
+            if (code==IANA_6TOP_RC_NORES){
+                // mark this neighbor as no resource for future processing
+                neighbors_setNeighborNoResource(&(pkt->l2_nextORpreviousHop));
+            } else {
+                // the 6p response failed to send out, should inform sf0
+                sixtop_vars.sf_response_failure();
+            }
         }
     }
     // free the buffer
@@ -1113,7 +1048,8 @@ void sixtop_six2six_notifyReceive(
     uint16_t          count;
     uint16_t          metadata;
     uint8_t           cellOptions;
-    uint8_t           offset;
+    uint16_t          offset;
+    uint16_t          startingOffset;          
     uint8_t           maxNumCells;
     uint16_t          i;
     uint16_t          slotoffset;
@@ -1157,7 +1093,7 @@ void sixtop_six2six_notifyReceive(
                 break;
             }
             // sfid check
-            if (sfId != sixtop_vars.registeredSFID){
+            if (sfId != sixtop_vars.sixtop_sf_getsfid()){
                 returnCode = IANA_6TOP_RC_SFID_ERR;
                 break;
             }
@@ -1212,15 +1148,25 @@ void sixtop_six2six_notifyReceive(
                 ptr += 2;
                 
                 returnCode = IANA_6TOP_RC_SUCCESS;
+                startingOffset = offset;
                 for(i=0; i<maxNumCells; i++) {
-                    if (schedule_getOneCellAfterOffset(metadata,offset+i,&(pkt->l2_nextORpreviousHop),&slotoffset,&channeloffset)){
-                        // found one cell after slot:  offset+i
+                    if (
+                        schedule_getOneCellAfterOffset(
+                            metadata,
+                            startingOffset,
+                            &(pkt->l2_nextORpreviousHop),
+                            cellOptions ^ (LINKOPTIONS_TX | LINKOPTIONS_RX),
+                            &slotoffset,
+                            &channeloffset)
+                    ){
+                        // found one cell after slot offset+i
                         packetfunctions_reserveHeaderSize(response_pkt,4); 
                         response_pkt->payload[0] = slotoffset     & 0x00FF;
                         response_pkt->payload[1] = (slotoffset    & 0xFF00)>>8);
                         response_pkt->payload[2] = channeloffset  & 0x00FF;
                         response_pkt->payload[3] = (channeloffset & 0xFF00)>>8);
                         response_pktLen         += 4;
+                        startingOffset           = slotoffset+1;
                     } else {
                         // no more cell after offset
                         returnCode = IANA_6TOP_RC_EOL;
@@ -1233,10 +1179,20 @@ void sixtop_six2six_notifyReceive(
             // count command
             if (code == IANA_6TOP_CMD_LIST){
                 numCells = 0;
+                startingOffset = 0;
                 for(i=0; i<schedule_getFrameLength(); i++) {
-                    if (schedule_getOneCellAfterOffset(metadata,i,&(pkt->l2_nextORpreviousHop),&slotoffset,&channeloffset)){
-                        // found one cell after slot:  offset+i
+                    if (
+                        schedule_getOneCellAfterOffset(
+                            metadata,
+                            startingOffset,
+                            &(pkt->l2_nextORpreviousHop),
+                            cellOptions ^ (LINKOPTIONS_TX | LINKOPTIONS_RX),
+                            &slotoffset,
+                            &channeloffset)
+                    )){
+                        // found one cell after slot i
                         numCells++;
+                        startingOffset = slotoffset+1;
                     }
                 }
                 returnCode = IANA_6TOP_RC_SUCCESS;
@@ -1270,7 +1226,7 @@ void sixtop_six2six_notifyReceive(
                     pktLen -= 4;
                     i++;
                 }
-                if (sixtop_areAvailableCellsToBeScheduled(metadata,numCells,response_pkt->l2_sixtop_cellList_add[i])){
+                if (sixtop_areAvailableCellsToBeScheduled(metadata,numCells,response_pkt->l2_sixtop_cellList_add)){
                     returnCode = IANA_6TOP_RC_SUCCESS;
                     for(i=0;i<CELLLIST_MAX_LEN;i++) {
                         if(response_pkt->l2_sixtop_cellList_add[i].isUsed){
@@ -1301,7 +1257,7 @@ void sixtop_six2six_notifyReceive(
                     pktLen -= 4;
                     i++;
                 }
-                if (sixtop_areAvailableCellsToBeRemoved(metadata,numCells,response_pkt->l2_sixtop_cellList_delete,&(pkt->l2_nextORpreviousHop))){
+                if (sixtop_areAvailableCellsToBeRemoved(metadata,numCells,response_pkt->l2_sixtop_cellList_delete,&(pkt->l2_nextORpreviousHop),cellOptions)){
                     returnCode = IANA_6TOP_RC_SUCCESS;
                     for(i=0;i<CELLLIST_MAX_LEN;i++) {
                         if(response_pkt->l2_sixtop_cellList_delete[i].isUsed){
@@ -1366,14 +1322,14 @@ void sixtop_six2six_notifyReceive(
         
         // append 6p Seqnum and schedule Generation
         packetfunctions_reserveHeaderSize(response_pkt,sizeof(uint8_t));
-        scheduleGeneration = schedule_getGeneration();
-        sequenceNumber     = neighbors_getSequenceNumber(neighbor);
+        scheduleGeneration = gen;
+        sequenceNumber     = seqNum;
         *((uint8_t*)(response_pkt->payload)) = sequenceNumber | scheduleGeneration<<IANA_6TOP_GEN_SHIFT;
         response_pktLen += 1;
         
         // append 6p sfid
         packetfunctions_reserveHeaderSize(response_pkt,sizeof(uint8_t));
-        *((uint8_t*)(response_pkt->payload)) = sixtop_vars.registeredSFID;
+        *((uint8_t*)(response_pkt->payload)) = sixtop_vars.sixtop_sf_getsfid();
         response_pktLen += 1;
           
         // append 6p code
@@ -1429,17 +1385,19 @@ void sixtop_six2six_notifyReceive(
                     pktLen -= 4;
                     i++;
                 }
-                sixtop_addCellsByState(
+                sixtop_addCells(
                     sixtop_getMetadata(sfId),     // frame id 
                     pkt->l2_sixtop_cellList_add,  // celllist to be added
                     &(pkt->l2_nextORpreviousHop), // neighbor that cells to be added to
                     sixtop_vars.cellOptions       // cell options
                 );
+                neighbors_updateGeneration(&(msg->l2_nextORpreviousHop));
             case SIX_STATE_WAIT_DELETERESPONSE:
-                sixtop_removeCellsByState(
+                sixtop_removeCells(
                       sixtop_getMetadata(sfId),
                       sixtop_vars.celllist,
                       &(pkt->l2_nextORpreviousHop));
+                neighbors_updateGeneration(&(msg->l2_nextORpreviousHop));
                 break;
             case SIX_STATE_WAIT_RELOCATERESPONSE:
                 memset(pkt->l2_sixtop_cellList_add,0,sizeof(pkt->l2_sixtop_cellList_add));
@@ -1453,17 +1411,18 @@ void sixtop_six2six_notifyReceive(
                     pktLen -= 4;
                     i++;
                 }
-                sixtop_removeCellsByState(
+                sixtop_removeCells(
                       sixtop_getMetadata(sfId),
                       sixtop_vars.celllist,
                       &(pkt->l2_nextORpreviousHop)
                 );
-                sixtop_addCellsByState(
+                sixtop_addCells(
                     sixtop_getMetadata(sfId),     // frame id 
                     pkt->l2_sixtop_cellList_add,  // celllist to be added
                     &(pkt->l2_nextORpreviousHop), // neighbor that cells to be added to
                     sixtop_vars.cellOptions       // cell options
                 );
+                neighbors_updateGeneration(&(msg->l2_nextORpreviousHop));
                 break;
             case SIX_STATE_WAIT_COUNTRESPONSE:
                 numCells  = *((uint8_t*)(pkt->payload)+ptr);
@@ -1495,6 +1454,7 @@ void sixtop_six2six_notifyReceive(
                     sixtop_getMetadata(sfId),
                     &(pkt->l2_nextORpreviousHop)
                 );
+                neighbors_resetGeneration(&(msg->l2_nextORpreviousHop));
                 break;
             default:
                 // should neven happen
@@ -1536,8 +1496,8 @@ uint8_t sixtop_getCelllist(
     currentEntry   = scheduleWalker;
     do {
        if(packetfunctions_sameAddress(&(scheduleWalker->neighbor),neighbor)){
-           cellList[i].tsNum        = scheduleWalker->slotOffset;
-           cellList[i].choffset     = scheduleWalker->channelOffset;
+           cellList[i].slotoffset        = scheduleWalker->slotOffset;
+           cellList[i].channeloffset     = scheduleWalker->channelOffset;
            cellList[i].linkoptions  = scheduleWalker->type;
            i++;
        }
@@ -1565,8 +1525,8 @@ bool sixtop_candidateAddCellList(
    for(counter=0;counter<CELLLIST_MAX_LEN;counter++){
       i = openrandom_get16b()%schedule_getFrameLength();
       if(schedule_isSlotOffsetAvailable(i)==TRUE){
-         cellList[numCandCells].tsNum       = i;
-         cellList[numCandCells].choffset    = openrandom_get16b()%16;
+         cellList[numCandCells].slotoffset       = i;
+         cellList[numCandCells].channeloffset    = openrandom_get16b()%16;
          cellList[numCandCells].linkoptions = CELLTYPE_TX;
          numCandCells++;
       }
@@ -1595,8 +1555,8 @@ bool sixtop_candidateRemoveCellList(
    for(i=0;i<schedule_getFrameLength();i++){
       schedule_getSlotInfo(i,neighbor,&info);
       if(info.link_type == CELLTYPE_TX){
-         cellList[numCandCells].tsNum       = i;
-         cellList[numCandCells].choffset    = info.channelOffset;
+         cellList[numCandCells].slotoffset       = i;
+         cellList[numCandCells].channeloffset    = info.channelOffset;
          cellList[numCandCells].linkoptions = CELLTYPE_TX;
          numCandCells++;
          if (numCandCells==CELLLIST_MAX_LEN){
@@ -1612,47 +1572,61 @@ bool sixtop_candidateRemoveCellList(
    }
 }
 
-void sixtop_addCellsByState(
-      uint8_t      slotframeID,
-      cellInfo_ht* cellList,
-      open_addr_t* previousHop,
-      uint8_t      state
-   ){
-   uint8_t     i;
-   open_addr_t temp_neighbor;
-  
-   //set schedule according links
-   
-   for(i = 0;i<CELLLIST_MAX_LEN;i++){
-      if(cellList[i].linkoptions != CELLTYPE_OFF){
-          memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
-          //add a RX link
-          schedule_addActiveSlot(
-              cellList[i].tsNum,
-              cellList[i].linkoptions,
-              FALSE,
-              cellList[i].choffset,
-              &temp_neighbor
-          );
-      }
-   }
+void sixtop_addCells(
+    uint8_t      slotframeID,
+    cellInfo_ht* cellList,
+    open_addr_t* previousHop,
+    uint8_t      cellOptions
+){
+    uint8_t     i;
+    bool        isShared;
+    open_addr_t temp_neighbor;
+    
+    // translate cellOptions to cell type 
+    if (cellOptions == LINKOPTIONS_TX){
+        type     = CELLTYPE_TX;
+        isShared = FALSE;
+    }
+    if (cellOptions == LINKOPTIONS_RX){
+        type     = CELLTYPE_RX;  
+        isShared = FALSE;
+    }
+    if (cellOptions == LINKOPTIONS_TX | LINKOPTIONS_RX | LINKOPTIONS_SHARED){
+        type     = CELLTYPE_TXRX;  
+        isShared = TRUE;
+    }
+    
+    // add cells to schedule
+    for(i = 0;i<CELLLIST_MAX_LEN;i++){
+        if (isShared){
+            memset(&temp_neighbor,0,sizeof(temp_neighbor));
+            temp_neighbor.type             = ADDR_ANYCAST;
+        } else {
+            memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
+        }
+        schedule_addActiveSlot(
+            cellList[i].slotoffset,
+            type,
+            isShared,
+            cellList[i].channeloffset,
+            &temp_neighbor
+        );
+    }
 }
 
-void sixtop_removeCellsByState(
-      uint8_t      slotframeID,
-      cellInfo_ht* cellList,
-      open_addr_t* previousHop
-   ){
-   uint8_t i;
-   
-   for(i=0;i<CELLLIST_MAX_LEN;i++){   
-      if(cellList[i].linkoptions != CELLTYPE_OFF){
-         schedule_removeActiveSlot(
-            cellList[i].tsNum,
+void sixtop_removeCells(
+    uint8_t      slotframeID,
+    cellInfo_ht* cellList,
+    open_addr_t* previousHop
+){
+    uint8_t i;
+    // delete cells from schedule
+    for(i=0;i<CELLLIST_MAX_LEN;i++){   
+        schedule_removeActiveSlot(
+            cellList[i].slotoffset,
             previousHop
-         );
-      }
-   }
+        );
+    }
 }
 
 bool sixtop_areAvailableCellsToBeScheduled(
@@ -1661,37 +1635,38 @@ bool sixtop_areAvailableCellsToBeScheduled(
       cellInfo_ht* cellList
    ){
    uint8_t i;
-   uint8_t bw;
+   uint8_t numbOfavailableCells;
    bool    available;
    
-   i          = 0;
-   bw         = numOfCells;
-   available  = FALSE;
+   i                    = 0;
+   numbOfavailableCells = 0;
+   available            = FALSE;
   
-   if(bw == 0 || bw>CELLLIST_MAX_LEN){
+   if(numOfCells == 0 || numOfCells>CELLLIST_MAX_LEN){
       // log wrong parameter error TODO
     
       available = FALSE;
    } else {
       do {
-         if(schedule_isSlotOffsetAvailable(cellList[i].tsNum) == TRUE){
-            bw--;
+         if(schedule_isSlotOffsetAvailable(cellList[i].slotffset) == TRUE){
+            numbOfavailableCells++;
          } else {
-            cellList[i].linkoptions = CELLTYPE_OFF;
+            // mark the cell
+            cellList[i].isUsed = FALSE;
          }
          i++;
-      }while(i<CELLLIST_MAX_LEN && bw>0);
+      }while(i<CELLLIST_MAX_LEN && numbOfavailableCells!=numOfCells);
       
-      if(bw==0){
-         //the rest link will not be scheduled, mark them as off type
+      if(numbOfavailableCells>0){
+         // there are more than one cell can be added.
+         // the rest cells in the list will not be used
          while(i<CELLLIST_MAX_LEN){
-            cellList[i].linkoptions = CELLTYPE_OFF;
+            cellList[i].isUsed = FALSE;
             i++;
-         }
-         // local schedule can statisfy the bandwidth of cell request. 
+         } 
          available = TRUE;
       } else {
-         // local schedule can't statisfy the bandwidth of cell request
+         // No cell in the list is able to be added
          available = FALSE;
       }
    }
@@ -1700,38 +1675,53 @@ bool sixtop_areAvailableCellsToBeScheduled(
 }
 
 bool sixtop_areAvailableCellsToBeRemoved(      
-        uint8_t      frameID, 
-        uint8_t      numOfCells, 
-        cellInfo_ht* cellList,
-        open_addr_t* neighbor
+    uint8_t      frameID, 
+    uint8_t      numOfCells, 
+    cellInfo_ht* cellList,
+    open_addr_t* neighbor,
+    uint8_t      cellOptions
     ){
-   uint8_t              i;
-   uint8_t              bw;
-   bool                 available;
-   slotinfo_element_t   info;
+    uint8_t              i;
+    uint8_t              numOfavailableCells;
+    bool                 available;
+    slotinfo_element_t   info;
    
-   i          = 0;
-   bw         = numOfCells;
-   available  = FALSE;
-  
-   if(bw == 0 || bw>CELLLIST_MAX_LEN){
-      // log wrong parameter error TODO
-      available = FALSE;
-   } else {
-      do {
-          schedule_getSlotInfo(cellList[i].tsNum,neighbor,&info);
-          if(info.link_type == CELLTYPE_RX){
-              bw--;
-          } else {
-              cellList[i].linkoptions = CELLTYPE_OFF;
-          }
-          i++;
-        }while(i<CELLLIST_MAX_LEN && bw>0);
+    i                   = 0;
+    numOfavailableCells = 0;
+    available           = FALSE;
+    
+    // translate cellOptions to cell type 
+    if (cellOptions == LINKOPTIONS_TX){
+        type = CELLTYPE_TX;
+    }
+    if (cellOptions == LINKOPTIONS_RX){
+        type = CELLTYPE_RX;
+    }
+    if (cellOptions == LINKOPTIONS_TX | LINKOPTIONS_RX | LINKOPTIONS_SHARED){
+        type = CELLTYPE_TXRX;
+    }
+    
+    if(numOfCells == 0 || numOfCells>CELLLIST_MAX_LEN){
+        // log wrong parameter error TODO
+        available = FALSE;
+    } else {
+        do {
+            if (cellList[i].isUsed){
+                schedule_getSlotInfo(cellList[i].slotoffset,neighbor,&info);
+                if(info.link_type != type){
+                    available = FALSE;
+                    break;
+                } else {
+                    numOfavailableCells++;
+                }
+            }
+            i++;
+        }while(i<CELLLIST_MAX_LEN && numOfavailableCells<numOfCells);
       
-        if(bw==0){
+        if(numOfavailableCells>0){
             //the rest link will not be scheduled, mark them as off type
             while(i<CELLLIST_MAX_LEN){
-                cellList[i].linkoptions = CELLTYPE_OFF;
+                cellList[i].isUsed = FALSE;
                 i++;
             }
             // local schedule can statisfy the bandwidth of cell request. 
@@ -1740,7 +1730,7 @@ bool sixtop_areAvailableCellsToBeRemoved(
             // local schedule can't statisfy the bandwidth of cell request
             available = FALSE;
         }
-   }
+    }
    
-   return available;
+    return available;
 }

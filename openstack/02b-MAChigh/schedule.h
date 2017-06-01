@@ -76,11 +76,11 @@ See MINBE for an explanation of backoff.
 #define MIN_NUMTX_FOR_PDR  50 // don't calculate PDR when numTx is lower than this value
 
 typedef enum{
-    LINKOPTIONS_TX              = 1<<0;
-    LINKOPTIONS_RX              = 1<<1;
-    LINKOPTIONS_SHARED          = 1<<2;
-    LINKOPTIONS_TIMEKEPPING     = 1<<3;
-    LINKOPTIONS_PRIORITY        = 1<<4;
+    LINKOPTIONS_TX              = 1<<0,
+    LINKOPTIONS_RX              = 1<<1,
+    LINKOPTIONS_SHARED          = 1<<2,
+    LINKOPTIONS_TIMEKEPPING     = 1<<3,
+    LINKOPTIONS_PRIORITY        = 1<<4
 }linkOptions_t;
 
 //=========================== typedef =========================================
@@ -210,8 +210,16 @@ void               schedule_indicateTx(
                         asn_t*    asnTimestamp,
                         bool      succesfullTx
                    );
-
+// from sixtop
 void               schedule_housekeeping(void);
+bool               schedule_getOneCellAfterOffset(
+    uint8_t metadata,
+    uint8_t offset,
+    open_addr_t* neighbor, 
+    uint8_t cellOptions, 
+    uint16_t* slotoffset, 
+    uint16_t* channeloffset
+);
 /**
 \}
 \}
