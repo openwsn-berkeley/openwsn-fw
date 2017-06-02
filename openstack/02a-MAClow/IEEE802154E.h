@@ -26,8 +26,8 @@ static const uint8_t ebIEsBytestream[] = {
     0x00,0x3F,0x1A,0x88,0x06,0x1A,0x00,0x00,0x00,0x00,0x00,0x00,0x01,0x1C,0x00,
     0x01,0xC8,0x00,0x0A,0x1B,0x01,0x00,SLOTFRAME_LENGTH,0x00,0x01,0x00,0x00,0x00,0x00,0x0F
 };
-#define EB_ASN0_OFFSET                  6
-#define EB_JP_OFFSET                    11
+#define EB_ASN0_OFFSET               6
+#define EB_JP_OFFSET                11
 
 //=========================== define ==========================================
 
@@ -56,7 +56,7 @@ static const uint8_t ebIEsBytestream[] = {
 // GROUP_ID changed to 5 (IETF IE) https://openwsn.atlassian.net/browse/FW-569
 #define IANA_IETF_IE_GROUP_ID                              (5<<11)
 #define IANA_IETF_IE_TYPE                                  (1<<15)
-#define IEEE802154E_DESC_LEN_PAYLOAD_ID_TYPE_MASK          0xF100
+#define IEEE802154E_DESC_LEN_PAYLOAD_ID_TYPE_MASK          0xF800
 
 #define IEEE802154E_DESC_TYPE_HEADER_IE                    0x0000
 #define IEEE802154E_DESC_TYPE_PAYLOAD_IE                   0x8000

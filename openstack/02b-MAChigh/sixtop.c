@@ -164,7 +164,7 @@ bool sixtop_setHandler(six2six_handler_t handler) {
     }
 }
 
-void      sixtop_setSFcallback(
+void  sixtop_setSFcallback(
     sixtop_sf_getsfid           cb0,
     sixtop_sf_getmetadata       cb1, 
     sixtop_sf_translatemetadata cb2, 
@@ -495,6 +495,15 @@ void task_sixtopNotifReceive() {
     // take ownership
     msg->owner = COMPONENT_SIXTOP;
    
+    // update neighbor statistics
+    neighbors_indicateRx(
+        &(msg->l2_nextORpreviousHop),
+        msg->l1_rssi,
+        &msg->l2_asn,
+        msg->l2_joinPriorityPresent,
+        msg->l2_joinPriority
+    );
+    
     // process the header IEs
     lenIE=0;
     if(
@@ -510,15 +519,6 @@ void task_sixtopNotifReceive() {
    
     // toss the header IEs
     packetfunctions_tossHeader(msg,lenIE);
-   
-    // update neighbor statistics
-    neighbors_indicateRx(
-        &(msg->l2_nextORpreviousHop),
-        msg->l1_rssi,
-        &msg->l2_asn,
-        msg->l2_joinPriorityPresent,
-        msg->l2_joinPriority
-    );
    
     // reset it to avoid race conditions with this var.
     msg->l2_joinPriorityPresent = FALSE; 
@@ -965,7 +965,7 @@ port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE) {
     ptr++;
     *lenIE +=2;
     // check ietf ie group id, type
-    if (temp_16b & IEEE802154E_DESC_LEN_PAYLOAD_ID_TYPE_MASK != (IANA_IETF_IE_GROUP_ID | IANA_IETF_IE_TYPE)){
+    if ((temp_16b & IEEE802154E_DESC_LEN_PAYLOAD_ID_TYPE_MASK) != (IANA_IETF_IE_GROUP_ID | IANA_IETF_IE_TYPE)){
         // wrong IE ID or type, record and drop the packet
         openserial_printError(COMPONENT_SIXTOP,ERR_UNSUPPORTED_FORMAT,0,0);
         return FALSE;
@@ -1160,7 +1160,7 @@ void sixtop_six2six_notifyReceive(
             }
             
             // count command
-            if (code == IANA_6TOP_CMD_LIST){
+            if (code == IANA_6TOP_CMD_COUNT){
                 numCells = 0;
                 startingOffset = 0;
                 for(i=0; i<schedule_getFrameLength(); i++) {
