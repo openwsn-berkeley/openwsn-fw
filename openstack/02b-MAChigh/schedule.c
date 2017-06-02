@@ -843,7 +843,17 @@ void schedule_housekeeping(){
                        // one sixtop transcation is happening, only one instance at one time
                        continue;
                     }
-                    sixtop_request(IANA_6TOP_CMD_CLEAR,&(schedule_vars.scheduleBuf[i].neighbor),1);
+                    sixtop_request(
+                       IANA_6TOP_CMD_CLEAR,                             // code
+                       &(schedule_vars.scheduleBuf[i].neighbor),        // neighbor
+                       0,                                               // numCells (not used)
+                       LINKOPTIONS_TX,                                  // cellOptions
+                       NULL,                                            // celllist to add (not used)
+                       NULL,                                            // celllist to add (not used)
+                       sf0_getsfid(),                                   // sfid
+                       0,                                               // list command offset (not used)
+                       0                                                // list command maximum list of cells(not used)
+                    );
                     break;
                 }
             }
@@ -880,7 +890,7 @@ bool schedule_getOneCellAfterOffset(uint8_t metadata,uint8_t offset,open_addr_t*
          break;
       }
       scheduleWalker = scheduleWalker->next;
-   }while(scheduleWalker!=schedule_vars.scheduleBuf[0]);
+   }while(scheduleWalker!=&schedule_vars.scheduleBuf[0]);
    
    ENABLE_INTERRUPTS();
    

@@ -105,9 +105,7 @@ uint8_t neighbors_getGeneration(open_addr_t* address){
             break;
         }
     }
-    if (i!=MAXNUMNEIGHBORS){
-        return neighbors_vars.neighbors[i].generation;
-    }
+    return neighbors_vars.neighbors[i].generation;
 }
 
 uint8_t neighbors_getSequenceNumber(open_addr_t* address){
@@ -117,9 +115,8 @@ uint8_t neighbors_getSequenceNumber(open_addr_t* address){
             break;
         }
     }
-    if (i!=MAXNUMNEIGHBORS){
-        return neighbors_vars.neighbors[i].sequenceNumber;
-    }
+    return neighbors_vars.neighbors[i].sequenceNumber;
+
 }
 
 //===== interrogators

@@ -649,14 +649,14 @@ void openserial_handleCommands(void){
                 ) 
             ){
                 // randomly select cell
-                sixtop_request(commandId-8,&neighbor,1);
+//                sixtop_request(commandId-8,&neighbor,1);
             } else {
-                for (i=0;i<commandLen;i++){
-                    cellList[i].tsNum           = openserial_vars.inputBuf[3+i];
-                    cellList[i].choffset        = DEFAULT_CHANNEL_OFFSET;
-                    cellList[i].linkoptions     = CELLTYPE_TX;
-                }
-                sixtop_addORremoveCellByInfo(commandId-8,&neighbor,cellList);
+//                for (i=0;i<commandLen;i++){
+//                    cellList[i].tsNum           = openserial_vars.inputBuf[3+i];
+//                    cellList[i].choffset        = DEFAULT_CHANNEL_OFFSET;
+//                    cellList[i].linkoptions     = CELLTYPE_TX;
+//                }
+//                sixtop_addORremoveCellByInfo(commandId-8,&neighbor,cellList);
             }
             break;
        case COMMAND_SET_SLOTDURATION:
