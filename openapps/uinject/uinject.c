@@ -1,7 +1,6 @@
 #include "opendefs.h"
 #include "uinject.h"
 #include "openqueue.h"
-#include "opentimers.h"
 #include "openserial.h"
 #include "packetfunctions.h"
 #include "scheduler.h"
@@ -19,7 +18,7 @@ static const uint8_t uinject_dst_addr[]   = {
 
 //=========================== prototypes ======================================
 
-void uinject_timer_cb(opentimer_id_t id);
+void uinject_timer_cb(void);
 void uinject_task_cb(void);
 
 //=========================== public ==========================================
@@ -37,10 +36,13 @@ void uinject_init() {
 
    uinject_vars.period = UINJECT_PERIOD_MS;
    // start periodic timer
-   uinject_vars.timerId                    = opentimers_start(
-      uinject_vars.period,
-      TIMER_PERIODIC,TIME_MS,
-      uinject_timer_cb
+   uinject_vars.timerId = opentimers_create();
+   opentimers_scheduleAbsolute(
+       uinject_vars.period,
+       UINJECT_PERIOD_MS,
+       opentimers_getValue(),
+       TIME_MS,
+       uinject_timer_cb
    );
 }
 
@@ -66,7 +68,7 @@ void uinject_receive(OpenQueueEntry_t* pkt) {
 \note timer fired, but we don't want to execute task in ISR mode instead, push
    task to scheduler with CoAP priority, and let scheduler take care of it.
 */
-void uinject_timer_cb(opentimer_id_t id){
+void uinject_timer_cb(void){
    
    scheduler_push_task(uinject_task_cb,TASKPRIO_COAP);
 }
@@ -75,12 +77,19 @@ void uinject_task_cb() {
    OpenQueueEntry_t*    pkt;
    uint8_t              asnArray[5];
    
+   opentimers_scheduleRelative(
+       uinject_vars.period,
+       UINJECT_PERIOD_MS,
+       TIME_MS,
+       uinject_timer_cb
+   );
+   
    // don't run if not synch
    if (ieee154e_isSynch() == FALSE) return;
    
    // don't run on dagroot
    if (idmanager_getIsDAGroot()) {
-      opentimers_stop(uinject_vars.timerId);
+      opentimers_destroy(uinject_vars.timerId);
       return;
    }
    
@@ -123,3 +132,6 @@ void uinject_task_cb() {
       openqueue_freePacketBuffer(pkt);
    }
 }
+
+
+

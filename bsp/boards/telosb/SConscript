@@ -24,22 +24,21 @@ sht11 = localEnv.SConscript(
 
 source = [
     'board.c',
-    'bsp_timer.c',
+    'sctimer.c',
     'debugpins.c',
     'eui64.c',
     'leds.c',
-    'radiotimer.c',
     'spi.c',
     'uart.c',
     'board_crypto_engine.c',
-	'adc_sensor.c',
-	'sensors.c'	
+    'adc_sensor.c',
+    'sensors.c'
 ]
 
 localEnv.Append(
         CPPPATH =  [
             os.path.join('#','bsp','chips','cc2420'),
-			os.path.join('#','bsp','chips','sht11'),			
+            os.path.join('#','bsp','chips','sht11'),            
         ],
 )
 
