@@ -390,7 +390,7 @@ void csensors_setPeriod(uint32_t period,
              opentimers_scheduleAbsolute(
                  csensors_vars.csensors_resource[id].timerId, 
                  (uint32_t)((period*openrandom_get16b())/0xffff), 
-                 opentimers_getValue(csensors_vars.csensors_resource[id].timerId), 
+                 opentimers_getValue(), 
                  TIME_MS, 
                  csensors_timer_cb
              );
@@ -400,7 +400,7 @@ void csensors_setPeriod(uint32_t period,
          opentimers_scheduleAbsolute(
              csensors_vars.csensors_resource[id].timerId, 
              (uint32_t)((period*openrandom_get16b())/0xffff), 
-             opentimers_getValue(csensors_vars.csensors_resource[id].timerId), 
+             opentimers_getValue(), 
              TIME_MS, 
              csensors_timer_cb
          );
