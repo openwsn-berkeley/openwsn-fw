@@ -80,7 +80,8 @@ enum {
     COMMAND_SET_6PRESPONSE        = 15,
     COMMAND_SET_UINJECTPERIOD     = 16,
     COMMAND_SET_ECHO_REPLY_STATUS = 17,
-    COMMAND_MAX                   = 18,
+    COMMAND_SET_JOIN_KEY          = 18,
+    COMMAND_MAX                   = 19,
 };
 
 //=========================== variables =======================================

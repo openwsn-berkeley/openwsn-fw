@@ -47,7 +47,15 @@ void cjoin_retransmission_task_cb(void);
 bool cjoin_getIsJoined(void);
 void cjoin_setIsJoined(bool newValue);
 //=========================== public ==========================================
-
+/* Below is debug functions */
+void printf_hex(unsigned char *data, unsigned int len){
+	unsigned int i=0;
+	for(i=0; i<len; i++)
+	{
+		printf("%02x ",data[i]);
+	}
+	printf("\n");
+}
 void cjoin_init() {
    
    // prepare the resource descriptor for the /j path
@@ -66,6 +74,13 @@ void cjoin_init() {
    opencoap_register(&desc);
 
    cjoin_schedule();
+}
+
+
+
+void cjoin_setJoinKey(uint8_t *key, uint8_t len) {
+   memcpy(cjoin_vars.joinKey, key, len);
+   printf_hex(cjoin_vars.joinKey, len);
 }
 
 void cjoin_schedule() {

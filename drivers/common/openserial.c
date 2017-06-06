@@ -540,12 +540,13 @@ void openserial_handleEcho(uint8_t* buf, uint8_t bufLen){
 }
 
 void openserial_handleCommands(void){
-   uint8_t  input_buffer[10];
+   uint8_t  input_buffer[20];
    uint8_t  numDataBytes;
    uint8_t  commandId;
    uint8_t  commandLen;
    uint8_t  comandParam_8;
    uint16_t comandParam_16;
+   uint8_t* commandPayload;
    cellInfo_ht cellList[SCHEDULEIEMAXNUMCELLS];
    uint8_t  i;
    
@@ -561,8 +562,7 @@ void openserial_handleCommands(void){
    commandLen = openserial_vars.inputBuf[2];
    
    if (commandLen>3) {
-       // the max command Len is 2, except ping commands
-       return;
+       commandPayload = &openserial_vars.inputBuf[3];
    } else {
        if (commandLen == 1) {
            comandParam_8 = openserial_vars.inputBuf[3];
@@ -690,6 +690,9 @@ void openserial_handleCommands(void){
                     break;
                 }
             }
+            break;
+        case COMMAND_SET_JOIN_KEY:
+            cjoin_setJoinKey(commandPayload, commandLen);
             break;
        default:
            // wrong command ID

@@ -17,6 +17,7 @@ typedef struct {
    opentimer_id_t           retransmissionTimerId;
    bool                     isJoined;
    asn_t                    joinAsn;
+   uint8_t                  joinKey[16];
 } cjoin_vars_t;
 
 //=========================== variables =======================================
@@ -27,7 +28,10 @@ void cjoin_init(void);
 void cjoin_schedule(void);
 bool cjoin_getIsJoined(void);
 void cjoin_setIsJoined(bool newValue);
+void cjoin_setJoinKey(uint8_t *key, uint8_t len);
 bool debugPrint_joined(void);
+
+
 
 /**
 \}
