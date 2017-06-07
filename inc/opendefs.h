@@ -288,8 +288,10 @@ enum {
    ERR_INVALID_COMPONENT               = 0x50, // The component {0} cannot trigger this command (location {1})
    ERR_SIXTOP_NOCELL                   = 0x51, // Sixtop cannot remove any cell to the parent {0}{1} (none existing)
    ERR_SIXTOP_WRONGPARAM               = 0x52, // sixtop cannot handle here this argument {0} location {1}
-   ERR_GENERIC                         = 0x53, // generic error {0} {1}
-   ERR_UNKNOWN                         = 0x54, // unknown error, location {0}, arg {1}
+   ERR_SCHEDULER                       = 0x53, // too many tasks {0}, new type {1}
+   ERR_INVALIDSIXSTATE                 = 0x54, // invalid sixtop state ({0}) when receiving a request
+   ERR_GENERIC                         = 0x55, // generic error {0} {1}
+   ERR_UNKNOWN                         = 0x56, // unknown error, location {0}, arg {1}
 };
 
 

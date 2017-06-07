@@ -172,6 +172,7 @@ uint8_t sfloc_reserve_agressive_for(OpenQueueEntry_t* msg){
    openserial_printf(COMPONENT_SFLOC, str, strlen(str));
 #endif
 
+   //should never happen -> different way to reserve the cells for the control track
    if (msg->l2_track.instance == TRACK_PARENT_CONTROL){
       openserial_printError(
                COMPONENT_SFLOC,

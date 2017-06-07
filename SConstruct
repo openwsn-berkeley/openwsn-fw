@@ -88,6 +88,7 @@ project:
                    2=random_contiguous)
     sf             scheduling function executed to allocate bandwidth on demand
     printf         Prints the string message for debug (0=inactive, 1=active)
+    panid          PANID of the mote (discards all the packets with a different PANID)
     
     ide           qtcreator
 
@@ -152,6 +153,7 @@ command_line_options = {
     'schedalgo':        ['1','2'],          # 1=random (default)
     'sf':               ['0','1','2'],      # 0=NO, 1=SF0, 2=SFLOC
     'printf':           ['0','1'],          # 0=inactive (default), 1=active
+    'panid':            ['1'],              # default PANID
     'ide':              ['none','qtcreator']
 }
 
@@ -343,6 +345,13 @@ command_line_vars.AddVariables(
         'printf',                                          # key
         '',                                                # help
         command_line_options['schedalgo'][0],              # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
+        'panid',                                           # key
+        '',                                                # help
+        command_line_options['panid'][0],                  # default
         validate_option,                                   # validator
         int,                                               # converter
     ),

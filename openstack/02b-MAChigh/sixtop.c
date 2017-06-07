@@ -889,7 +889,7 @@ owerror_t sixtop_send_internal(
 // timer interrupt callbacks
 
 void sixtop_maintenance_timer_cb(opentimer_id_t id) {
-   scheduler_push_task(timer_sixtop_management_fired,TASKPRIO_SIXTOP);
+   scheduler_push_task(timer_sixtop_management_fired,TASKPRIO_SIXTOP_MAINTENANCE);
 }
 
 void sixtop_timeout_timer_cb(opentimer_id_t id) {
@@ -1485,7 +1485,7 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
       default:
          openserial_printInfo(
                COMPONENT_SIXTOP,
-               ERR_GENERIC,
+               ERR_INVALIDSIXSTATE,
                (errorparameter_t)111,
                (errorparameter_t)sixtop_vars.six2six_state
          );

@@ -10,6 +10,7 @@
 
 #include "opendefs.h"
 
+
 //=========================== define ==========================================
 
 typedef enum {
@@ -27,11 +28,12 @@ typedef enum {
    // tasks trigger by other interrupts
    TASKPRIO_BUTTON                = 0x09,
    TASKPRIO_SIXTOP_TIMEOUT        = 0x0a,
-   TASKPRIO_SNIFFER               = 0x0b,
-   TASKPRIO_MAX                   = 0x0c,
+   TASKPRIO_SIXTOP_MAINTENANCE    = 0x0b,
+   TASKPRIO_SNIFFER               = 0x0c,
+   TASKPRIO_MAX                   = 0x0d,
 } task_prio_t;
 
-#define TASK_LIST_DEPTH           10
+#define TASK_LIST_DEPTH           40
 
 //=========================== typedef =========================================
 

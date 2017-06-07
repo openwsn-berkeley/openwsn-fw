@@ -10,6 +10,7 @@
 #include "debugpins.h"
 #include "leds.h"
 
+
 //=========================== variables =======================================
 
 scheduler_vars_t scheduler_vars;
@@ -46,11 +47,21 @@ void scheduler_start() {
          // execute the current task
          pThisTask->cb();
          
+ /*        openserial_printInfo(
+                COMPONENT_OPENWSN,
+                           ERR_SCHEDULER,
+                           (errorparameter_t)scheduler_dbg.numTasksCur,
+                           (errorparameter_t)pThisTask->prio
+                     );
+*/
+
          // free up this task container
          pThisTask->cb            = NULL;
          pThisTask->prio          = TASKPRIO_NONE;
          pThisTask->next          = NULL;
          scheduler_dbg.numTasksCur--;
+
+
       }
       debugpins_task_clr();
       board_sleep();
@@ -58,9 +69,13 @@ void scheduler_start() {
    }
 }
 
- void scheduler_push_task(task_cbt cb, task_prio_t prio) {
+
+
+void scheduler_push_task(task_cbt cb, task_prio_t prio) {
    taskList_item_t*  taskContainer;
    taskList_item_t** taskListWalker;
+   uint8_t     size=0;
+
    INTERRUPT_DECLARATION();
    
    DISABLE_INTERRUPTS();
@@ -70,14 +85,7 @@ void scheduler_start() {
    while (taskContainer->cb!=NULL &&
           taskContainer<=&scheduler_vars.taskBuf[TASK_LIST_DEPTH-1]) {
       taskContainer++;
-   }
-   if (taskContainer>&scheduler_vars.taskBuf[TASK_LIST_DEPTH-2]){
-      openserial_printInfo(
-                COMPONENT_SIXTOP,
-                ERR_GENERIC,
-                (errorparameter_t)101,
-                (errorparameter_t)32
-          );
+      size++;
    }
 
 
@@ -89,6 +97,8 @@ void scheduler_start() {
       leds_error_blink();
       // reset the board
       board_reset();
+      ENABLE_INTERRUPTS();
+      return;
    }
    // fill that task container with this task
    taskContainer->cb              = cb;
@@ -110,6 +120,15 @@ void scheduler_start() {
    }
    
    ENABLE_INTERRUPTS();
+
+ /*  //debug
+   openserial_printInfo(
+                  COMPONENT_SIXTOP,
+                  ERR_SCHEDULER,
+                  (errorparameter_t)size,
+                  (errorparameter_t)prio
+            );
+*/
 }
 
 //=========================== private =========================================

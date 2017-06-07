@@ -54,12 +54,11 @@ if env['rplmetric']>=0:
     env.Append(CPPDEFINES    = {'RPL_METRIC':env['rplmetric']})
 if env['cex_period']>=1:
     env.Append(CPPDEFINES    = {'CEXAMPLE_PERIOD':env['cex_period']})
-#if env['schedalgo']>=0:
-    env.Append(CPPDEFINES    = {'SCHEDULING_ALGO':env['schedalgo']})
-#if env['sf']>=0:
-    env.Append(CPPDEFINES    = {'SFMETHOD':env['sf']})
+env.Append(CPPDEFINES    	 = {'SCHEDULING_ALGO':env['schedalgo']})
+env.Append(CPPDEFINES    	 = {'SFMETHOD':env['sf']})
 if env['printf']==1:
     env.Append(CPPDEFINES    = 'OPENSERIAL_PRINTF')
+env.Append(CPPDEFINES    	 = {'PANID_':env['panid']})
         
 
 if env['toolchain']=='mspgcc':
