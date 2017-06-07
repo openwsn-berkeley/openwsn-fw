@@ -731,7 +731,7 @@ bool schedule_getOkToSend() {
       
       returnVal = TRUE;
    } else {
-      // non-shared slot: check backoff before answering
+      // shared slot: check backoff before answering
       
       // decrement backoff
       if (schedule_vars.backoff>0) {

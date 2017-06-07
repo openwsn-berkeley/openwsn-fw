@@ -11,15 +11,14 @@
 #include "leds.h"
 #include "uart.h"
 #include "spi.h"
-#include "bsp_timer.h"
 #include "radio.h"
-#include "radiotimer.h"
+#include "sctimer.h"
 
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
 
-kick_scheduler_t radiotimer_isr_sfd(void);
+kick_scheduler_t sctimer_isr_sfd(void);
 
 //=========================== main ============================================
 
@@ -72,9 +71,8 @@ void board_init(void) {
    leds_init();
    uart_init();
    spi_init();
-   bsp_timer_init();
    radio_init();
-   radiotimer_init();
+   sctimer_init();
    
    //===== enable interrupts
    
@@ -117,7 +115,7 @@ ISR(PORT1) {
    debugpins_isr_set();
    if (P1IFG & 0x20) {
       P1IFG &= ~0x20;
-      if (radiotimer_isr_sfd()==KICK_SCHEDULER){ // radio:  SFD pin [P1.6]
+      if (sctimer_isr_sfd()==KICK_SCHEDULER){ // radio:  SFD pin [P1.6]
          __bic_SR_register_on_exit(CPUOFF);
       }
    } else {
@@ -128,13 +126,7 @@ ISR(PORT1) {
 
 // TIMERA0_VECTOR
 
-ISR(TIMERA1) {
-   debugpins_isr_set();
-   if (radiotimer_isr()==KICK_SCHEDULER) {       // radiotimer
-      __bic_SR_register_on_exit(CPUOFF);
-   }
-   debugpins_isr_clr();
-}
+// TIMERA1_VECTOR
 
 // ADC12_VECTOR
 
@@ -158,15 +150,15 @@ ISR(COMPARATORA) {
    debugpins_isr_clr();
 }
 
-ISR(TIMERB0) {
+// TIMERB0_VECTOR
+
+ISR(TIMERB1) {
    debugpins_isr_set();
-   if (bsp_timer_isr()==KICK_SCHEDULER) {        // timer: 0
+   if (sctimer_isr()==KICK_SCHEDULER) {          // sctimer
       __bic_SR_register_on_exit(CPUOFF);
    }
    debugpins_isr_clr();
 }
-
-// TIMERB1_VECTOR
 
 // NMI_VECTOR
 

@@ -18,11 +18,10 @@ cc2420 = localEnv.SConscript(
 
 source = [
     'board.c',
-    'bsp_timer.c',
+    'sctimer.c',
     'debugpins.c',
     'eui64.c',
     'leds.c',
-    'radiotimer.c',
     'spi.c',
     'uart.c',
 ]
