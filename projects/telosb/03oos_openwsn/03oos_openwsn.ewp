@@ -730,7 +730,7 @@
         </option>
         <option>
           <name>XList</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>SegmentMap</name>
@@ -890,12 +890,12 @@
         </option>
         <option>
           <name>ExtraOutputFile</name>
-          <state>03oos_openwsn.a43</state>
+          <state>03oos_openwsn.s19</state>
         </option>
         <option>
           <name>ExtraOutputFormat</name>
           <version>11</version>
-          <state>23</state>
+          <state>37</state>
         </option>
         <option>
           <name>ExtraFormatVariant</name>
@@ -2118,9 +2118,6 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\board_info.h</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\bsp_timer.c</name>
-        </file>
-        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\debugpins.c</name>
         </file>
         <file>
@@ -2130,7 +2127,7 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\leds.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\radiotimer.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\sctimer.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\sensors.c</name>
@@ -2144,9 +2141,6 @@
       </group>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\board.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\crypto_engine.h</name>
@@ -2165,9 +2159,6 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\sctimer.h</name>
@@ -2402,9 +2393,15 @@
       <name>02a-MAClow</name>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\adaptive_sync.c</name>
+        <excluded>
+          <configuration>Debug</configuration>
+        </excluded>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\adaptive_sync.h</name>
+        <excluded>
+          <configuration>Debug</configuration>
+        </excluded>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154.c</name>

@@ -19,13 +19,12 @@
 #include <source/sys_ctrl.h>
 
 #include "board.h"
-#include "bsp_timer.h"
 #include "debugpins.h"
 #include "i2c.h"
 #include "leds.h"
 #include "radio.h"
-#include "radiotimer.h"
 #include "sensors.h"
+#include "sctimer.h"
 #include "uart.h"
 
 //=========================== variables =======================================
@@ -71,8 +70,7 @@ void board_init(void) {
    leds_init();
    debugpins_init();
    button_init();
-   bsp_timer_init();
-   radiotimer_init();
+   sctimer_init();
    uart_init();
    radio_init();
    i2c_init();

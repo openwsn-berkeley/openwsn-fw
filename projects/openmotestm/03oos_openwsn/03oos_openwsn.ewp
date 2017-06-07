@@ -2015,9 +2015,6 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\board_info.h</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\bsp_timer.c</name>
-        </file>
-        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\debugpins.c</name>
         </file>
         <file>
@@ -2042,13 +2039,13 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\nvic.h</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\radiotimer.c</name>
-        </file>
-        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\rcc.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\rcc.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\sctimer.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\spi.c</name>
@@ -2061,9 +2058,6 @@
         <name>$PROJ_DIR$\..\..\..\bsp\boards\board.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\debugpins.h</name>
       </file>
       <file>
@@ -2074,9 +2068,6 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\sctimer.h</name>
@@ -2269,9 +2260,15 @@
       <name>02a-MAClow</name>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\adaptive_sync.c</name>
+        <excluded>
+          <configuration>Debug</configuration>
+        </excluded>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\adaptive_sync.h</name>
+        <excluded>
+          <configuration>Debug</configuration>
+        </excluded>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154.c</name>

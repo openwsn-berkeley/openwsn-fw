@@ -7,14 +7,13 @@ localEnv = env.Clone()
 
 sources_h = [
     'board.h',
-    'bsp_timer.h',
     'crypto_engine.h',
     'debugpins.h',
     'eui64.h',
     'leds.h',
     'radio.h',
-    'radiotimer.h',
     'uart.h',
+    'sctimer.h',
 ]
 
 #============================ SCons targets ===================================

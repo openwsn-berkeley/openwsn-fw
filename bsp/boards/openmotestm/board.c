@@ -10,9 +10,8 @@
 #include "leds.h"
 #include "uart.h"
 #include "spi.h"
-#include "bsp_timer.h"
+#include "sctimer.h"
 #include "radio.h"
-#include "radiotimer.h"
 #include "rcc.h"
 #include "nvic.h"
 #include "debugpins.h"
@@ -24,19 +23,19 @@
 //Configures the different GPIO ports as Analog Inputs.
 void GPIO_Config_ALL_AIN(void);
 // configure the hard fault exception
-void board_enableHardFaultExceptionHandler();
+void board_enableHardFaultExceptionHandler(void);
 
 //=========================== main ============================================
 
-extern int mote_main();
+extern int mote_main(void);
 
-int main() {
+int main(void) {
     return mote_main();
 }
 
 //=========================== public ==========================================
 
-void board_init(){
+void board_init(void){
     
     //Configure rcc
     RCC_Configuration();
@@ -91,15 +90,14 @@ void board_init(){
     leds_init();
     uart_init();
     spi_init();
-    bsp_timer_init();
+    sctimer_init();
     radio_init();
-    radiotimer_init();
     debugpins_init();
     //enable nvic for the radio
     NVIC_radio();
 }
 
-void board_sleep() {
+void board_sleep(void) {
     DBGMCU_Config(DBGMCU_SLEEP, ENABLE);
     // Enable PWR and BKP clock
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE);
@@ -111,7 +109,7 @@ void board_sleep() {
 
 
 
-void board_reset(){
+void board_reset(void){
     NVIC_GenerateSystemReset();
 }
 
@@ -148,7 +146,7 @@ void GPIO_Config_ALL_AIN(void){
     GPIO_Init(GPIOD, &GPIO_InitStructure);
 }
 
-void board_enableHardFaultExceptionHandler(){
+void board_enableHardFaultExceptionHandler(void){
     // Configures:
     //    bit9. stack alignment on exception entry 
     //    bit4. enables faulting

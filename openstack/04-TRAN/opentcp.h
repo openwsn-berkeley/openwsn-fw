@@ -112,7 +112,7 @@ typedef struct {
    OpenQueueEntry_t*    dataToSend;
    OpenQueueEntry_t*    dataReceived;
    bool                 timerStarted;
-   opentimer_id_t       timerId;
+   opentimers_id_t     timerId;
 } tcp_vars_t;
 
 //=========================== prototypes ======================================
@@ -131,3 +131,4 @@ bool     opentcp_debugPrint(void);
 */
 
 #endif
+
