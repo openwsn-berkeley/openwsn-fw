@@ -36,7 +36,7 @@
 #define OPENSERIAL_STAT                   // push the statistics to openVisualizer
 
 //#define FASTSIM
-
+#define _DEBUG_OPENSERIAL_
 #ifdef _DEBUG_OPENSERIAL_
 uint8_t caller;
 
@@ -987,7 +987,6 @@ port_INLINE void outputHdlcOpen(uint8_t bufindex) {
 port_INLINE void outputHdlcWrite(uint8_t bufindex, uint8_t b) {
     //buffer overflow: the last cell overwrites the first one!
     if (((uint8_t) openserial_vars.outputBufIdxW[bufindex] + 1) == openserial_vars.outputBufIdxR[bufindex]){
-
 
 
 #ifdef _DEBUG_OPENSERIAL_

@@ -84,7 +84,7 @@ typedef enum {
 
 #define SIXTOP_NBCELLS_INREQ     1     //nb cells in the 6top IE (request / reply)
 
-#define SIXTOP_MINIMAL_EBPERIOD 5 // minist period of sending EB
+#define SIXTOP_MINIMAL_EBPERIOD  30 // minist period of sending EB
 
 //TODO: fix a correct timeout
 //#define SIX2SIX_TIMEOUT_MS ((uint32_t)(2 * MAXBE * TXRETRIES * SLOTFRAME_LENGTH * TSLOTDURATION_MS))

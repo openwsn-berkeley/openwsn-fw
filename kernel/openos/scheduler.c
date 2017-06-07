@@ -46,14 +46,14 @@ void scheduler_start() {
          
          // execute the current task
          pThisTask->cb();
-         
- /*        openserial_printInfo(
+
+         openserial_printInfo(
                 COMPONENT_OPENWSN,
                            ERR_SCHEDULER,
                            (errorparameter_t)scheduler_dbg.numTasksCur,
                            (errorparameter_t)pThisTask->prio
                      );
-*/
+
 
          // free up this task container
          pThisTask->cb            = NULL;
