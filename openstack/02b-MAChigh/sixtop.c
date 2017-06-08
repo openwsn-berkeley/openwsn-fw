@@ -228,7 +228,7 @@ void sixtop_request(
     pkt->owner   = COMPONENT_SIXTOP_RES;
    
     memcpy(&(pkt->l2_nextORpreviousHop),neighbor,sizeof(open_addr_t));
-    memcpy(sixtop_vars.celllist_toDelete,celllist_toBeDeleted,sizeof(celllist_toBeDeleted));
+    memcpy(sixtop_vars.celllist_toDelete,celllist_toBeDeleted,CELLLIST_MAX_LEN*sizeof(cellInfo_ht));
     sixtop_vars.cellOptions = cellOptions;
     
     len  = 0;
@@ -238,7 +238,7 @@ void sixtop_request(
         code == IANA_6TOP_CMD_RELOCATE
     ){
         // append 6p celllists
-        if (code == IANA_6TOP_CMD_ADD){
+        if (code == IANA_6TOP_CMD_ADD || code == IANA_6TOP_CMD_RELOCATE){
             for(i=0;i<CELLLIST_MAX_LEN;i++) {
                 if(celllist_toBeAdded[i].isUsed){
                     packetfunctions_reserveHeaderSize(pkt,4); 
@@ -249,7 +249,8 @@ void sixtop_request(
                     len += 4;
                 }
             }
-        } else {
+        }
+        if (code == IANA_6TOP_CMD_DELETE || code == IANA_6TOP_CMD_RELOCATE){
             for(i=0;i<CELLLIST_MAX_LEN;i++) {
                 if(celllist_toBeDeleted[i].isUsed){
                     packetfunctions_reserveHeaderSize(pkt,4); 
@@ -260,18 +261,6 @@ void sixtop_request(
                     len += 4;
                 }
             }
-            if (code == IANA_6TOP_CMD_RELOCATE){
-                for(i=0;i<CELLLIST_MAX_LEN;i++) {
-                    if(celllist_toBeAdded[i].isUsed){
-                        packetfunctions_reserveHeaderSize(pkt,4); 
-                        pkt->payload[0] = (uint8_t)(celllist_toBeAdded[i].slotoffset     & 0x00FF);
-                        pkt->payload[1] = (uint8_t)((celllist_toBeAdded[i].slotoffset    & 0xFF00)>>8);
-                        pkt->payload[2] = (uint8_t)(celllist_toBeAdded[i].channeloffset  & 0x00FF);
-                        pkt->payload[3] = (uint8_t)((celllist_toBeAdded[i].channeloffset & 0xFF00)>>8);
-                        len += 4;
-                    }
-                }
-            }
         }
         // append 6p numberCells
         packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
@@ -280,18 +269,18 @@ void sixtop_request(
     }
     
     if (code == IANA_6TOP_CMD_LIST){
-        // append 6p Reserved field
-        packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
-        *((uint8_t*)(pkt->payload)) = 0;
-        len +=1;
-        // append 6p listing offset
-        packetfunctions_reserveHeaderSize(pkt,sizeof(uint16_t));
-        *((uint8_t*)(pkt->payload)) = listingOffset;
-        len +=2;
         // append 6p max number of cells
         packetfunctions_reserveHeaderSize(pkt,sizeof(uint16_t));
         *((uint8_t*)(pkt->payload)) = listingMaxNumCells;
         len +=2;
+        // append 6p listing offset
+        packetfunctions_reserveHeaderSize(pkt,sizeof(uint16_t));
+        *((uint8_t*)(pkt->payload)) = listingOffset;
+        len +=2;
+        // append 6p Reserved field
+        packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
+        *((uint8_t*)(pkt->payload)) = 0;
+        len +=1;
     }
     
     if (code != IANA_6TOP_CMD_CLEAR){
@@ -358,6 +347,9 @@ void sixtop_request(
         break;
     case IANA_6TOP_CMD_DELETE:
         sixtop_vars.six2six_state = SIX_STATE_WAIT_DELETEREQUEST_SENDDONE;
+        break;
+    case IANA_6TOP_CMD_RELOCATE:
+        sixtop_vars.six2six_state = SIX_STATE_WAIT_RELOCATEREQUEST_SENDDONE;
         break;
     case IANA_6TOP_CMD_COUNT:
         sixtop_vars.six2six_state = SIX_STATE_WAIT_COUNTREQUEST_SENDDONE;
@@ -862,6 +854,9 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
             case SIX_STATE_WAIT_DELETEREQUEST_SENDDONE:
                 sixtop_vars.six2six_state = SIX_STATE_WAIT_DELETERESPONSE;
                 break;
+            case SIX_STATE_WAIT_RELOCATEREQUEST_SENDDONE:
+                sixtop_vars.six2six_state = SIX_STATE_WAIT_RELOCATERESPONSE;
+                break;
             case SIX_STATE_WAIT_LISTREQUEST_SENDDONE:
                 sixtop_vars.six2six_state = SIX_STATE_WAIT_LISTRESPONSE;
                 break;
@@ -1133,12 +1128,12 @@ void sixtop_six2six_notifyReceive(
                 
                 returnCode = IANA_6TOP_RC_SUCCESS;
                 startingOffset = offset;
+                if ((cellOptions & (LINKOPTIONS_TX | LINKOPTIONS_RX)) != (LINKOPTIONS_TX | LINKOPTIONS_RX)){
+                    cellOptions_transformed = cellOptions ^ (LINKOPTIONS_TX | LINKOPTIONS_RX);
+                } else {
+                    cellOptions_transformed = cellOptions;
+                }
                 for(i=0; i<maxNumCells; i++) {
-                    if ((cellOptions & (LINKOPTIONS_TX | LINKOPTIONS_RX)) != (LINKOPTIONS_TX | LINKOPTIONS_RX)){
-                        cellOptions_transformed = cellOptions ^ (LINKOPTIONS_TX | LINKOPTIONS_RX);
-                    } else {
-                        cellOptions_transformed = cellOptions;
-                    }
                     if (
                         schedule_getOneCellAfterOffset(
                             metadata,
@@ -1169,12 +1164,12 @@ void sixtop_six2six_notifyReceive(
             if (code == IANA_6TOP_CMD_COUNT){
                 numCells = 0;
                 startingOffset = 0;
+                if ((cellOptions & (LINKOPTIONS_TX | LINKOPTIONS_RX)) != (LINKOPTIONS_TX | LINKOPTIONS_RX)){
+                    cellOptions_transformed = cellOptions ^ (LINKOPTIONS_TX | LINKOPTIONS_RX);
+                } else {
+                    cellOptions_transformed = cellOptions;
+                }
                 for(i=0; i<schedule_getFrameLength(); i++) {
-                    if ((cellOptions & (LINKOPTIONS_TX | LINKOPTIONS_RX)) != (LINKOPTIONS_TX | LINKOPTIONS_RX)){
-                        cellOptions_transformed = cellOptions ^ (LINKOPTIONS_TX | LINKOPTIONS_RX);
-                    } else {
-                        cellOptions_transformed = cellOptions;
-                    }
                     if (
                         schedule_getOneCellAfterOffset(
                             metadata,
@@ -1251,7 +1246,12 @@ void sixtop_six2six_notifyReceive(
                     pktLen -= 4;
                     i++;
                 }
-                if (sixtop_areAvailableCellsToBeRemoved(metadata,numCells,response_pkt->l2_sixtop_celllist_delete,&(pkt->l2_nextORpreviousHop),cellOptions)){
+                if ((cellOptions & (LINKOPTIONS_TX | LINKOPTIONS_RX)) != (LINKOPTIONS_TX | LINKOPTIONS_RX)){
+                    cellOptions_transformed = cellOptions ^ (LINKOPTIONS_TX | LINKOPTIONS_RX);
+                } else {
+                    cellOptions_transformed = cellOptions;
+                }
+                if (sixtop_areAvailableCellsToBeRemoved(metadata,numCells,response_pkt->l2_sixtop_celllist_delete,&(pkt->l2_nextORpreviousHop),cellOptions_transformed)){
                     returnCode = IANA_6TOP_RC_SUCCESS;
                     for(i=0;i<CELLLIST_MAX_LEN;i++) {
                         if(response_pkt->l2_sixtop_celllist_delete[i].isUsed){
@@ -1286,7 +1286,12 @@ void sixtop_six2six_notifyReceive(
                     temp16--;
                     i++;
                 }
-                if (sixtop_areAvailableCellsToBeRemoved(metadata,numCells,response_pkt->l2_sixtop_celllist_delete,&(pkt->l2_nextORpreviousHop),cellOptions)==FALSE){
+                if ((cellOptions & (LINKOPTIONS_TX | LINKOPTIONS_RX)) != (LINKOPTIONS_TX | LINKOPTIONS_RX)){
+                    cellOptions_transformed = cellOptions ^ (LINKOPTIONS_TX | LINKOPTIONS_RX);
+                } else {
+                    cellOptions_transformed = cellOptions;
+                }
+                if (sixtop_areAvailableCellsToBeRemoved(metadata,numCells,response_pkt->l2_sixtop_celllist_delete,&(pkt->l2_nextORpreviousHop),cellOptions_transformed)==FALSE){
                     returnCode = IANA_6TOP_RC_CELLLIST_ERR;
                     break;
                 }
@@ -1382,7 +1387,7 @@ void sixtop_six2six_notifyReceive(
         // this is a 6p response message
       
         // if the code is SUCCESS
-        if (code == IANA_6TOP_RC_SUCCESS){
+        if (code == IANA_6TOP_RC_SUCCESS || code == IANA_6TOP_RC_EOL){
             switch(sixtop_vars.six2six_state){
             case SIX_STATE_WAIT_ADDRESPONSE:
                 memset(pkt->l2_sixtop_celllist_add,0,sizeof(pkt->l2_sixtop_celllist_add));
@@ -1438,14 +1443,14 @@ void sixtop_six2six_notifyReceive(
                 break;
             case SIX_STATE_WAIT_COUNTRESPONSE:
                 numCells  = *((uint8_t*)(pkt->payload)+ptr);
-                numCells |= (*((uint8_t*)(pkt->payload)+ptr))<<8;
+                numCells |= (*((uint8_t*)(pkt->payload)+ptr+1))<<8;
                 ptr += 2;
                 openserial_printInfo(COMPONENT_SIXTOP,ERR_SIXTOP_COUNT,
                        (errorparameter_t)numCells,
                        (errorparameter_t)sixtop_vars.six2six_state);
                 break;
             case SIX_STATE_WAIT_LISTRESPONSE:
-                memset(celllist_list,0,sizeof(celllist_list));
+                memset(celllist_list,0,CELLLIST_MAX_LEN*sizeof(cellInfo_ht));
                 while(pktLen>0){
                     celllist_list[i].slotoffset     =  *((uint8_t*)(pkt->payload)+ptr);
                     celllist_list[i].slotoffset    |= (*((uint8_t*)(pkt->payload)+ptr+1))<<8;
@@ -1539,11 +1544,13 @@ void sixtop_removeCells(
 ){
     uint8_t i;
     // delete cells from schedule
-    for(i=0;i<CELLLIST_MAX_LEN;i++){   
-        schedule_removeActiveSlot(
-            cellList[i].slotoffset,
-            previousHop
-        );
+    for(i=0;i<CELLLIST_MAX_LEN;i++){
+        if (cellList[i].isUsed){
+            schedule_removeActiveSlot(
+                cellList[i].slotoffset,
+                previousHop
+            );
+        }
     }
 }
 
@@ -1616,7 +1623,7 @@ bool sixtop_areAvailableCellsToBeRemoved(
     if (cellOptions == LINKOPTIONS_RX){
         type = CELLTYPE_RX;
     }
-    if (cellOptions == LINKOPTIONS_TX | LINKOPTIONS_RX | LINKOPTIONS_SHARED){
+    if (cellOptions == (LINKOPTIONS_TX | LINKOPTIONS_RX | LINKOPTIONS_SHARED)){
         type = CELLTYPE_TXRX;
     }
     

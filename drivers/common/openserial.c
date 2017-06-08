@@ -41,7 +41,7 @@ owerror_t openserial_printInfoErrorCritical(
 
 // command handlers
 void openserial_handleEcho(uint8_t* but, uint8_t bufLen);
-void openserial_get6pInfo(uint8_t commandId, uint8_t* code,uint8_t* slotframeId,uint8_t* cellOptions,uint8_t* numCells,cellInfo_ht* celllist_add,cellInfo_ht* celllist_delete,uint8_t* listOffset,uint8_t* maxListLen,uint8_t ptr, uint8_t commandLen);
+void openserial_get6pInfo(uint8_t commandId, uint8_t* code,uint8_t* cellOptions,uint8_t* numCells,cellInfo_ht* celllist_add,cellInfo_ht* celllist_delete,uint8_t* listOffset,uint8_t* maxListLen,uint8_t ptr, uint8_t commandLen);
 void openserial_handleCommands(void);
 
 // misc
@@ -537,13 +537,8 @@ void openserial_handleEcho(uint8_t* buf, uint8_t bufLen){
     );
 }
 
-void openserial_get6pInfo(uint8_t commandId, uint8_t* code,uint8_t* slotframeId,uint8_t* cellOptions,uint8_t* numCells,cellInfo_ht* celllist_add,cellInfo_ht* celllist_delete,uint8_t* listOffset,uint8_t* maxListLen,uint8_t ptr, uint8_t commandLen){
+void openserial_get6pInfo(uint8_t commandId, uint8_t* code,uint8_t* cellOptions,uint8_t* numCells,cellInfo_ht* celllist_add,cellInfo_ht* celllist_delete,uint8_t* listOffset,uint8_t* maxListLen,uint8_t ptr, uint8_t commandLen){
     uint8_t i; 
-    // get metadata, metadata indicates frame id 
-    *slotframeId     = openserial_vars.inputBuf[ptr];
-    *slotframeId    |= openserial_vars.inputBuf[ptr+1]<<8;
-    ptr             += 2;
-    commandLen      -= 2;
     
     // clear command
     if (commandId == COMMAND_SET_6P_CLEAR){
@@ -559,11 +554,9 @@ void openserial_get6pInfo(uint8_t commandId, uint8_t* code,uint8_t* slotframeId,
     if (commandId == COMMAND_SET_6P_LIST){
         *code = IANA_6TOP_CMD_LIST;
         *listOffset   = openserial_vars.inputBuf[ptr];
-        *listOffset  |= openserial_vars.inputBuf[ptr+1]<<8;
-        ptr += 2;
+        ptr += 1;
         *maxListLen   = openserial_vars.inputBuf[ptr];
-        *maxListLen  |= openserial_vars.inputBuf[ptr+1]<<8;
-        ptr += 2;
+        ptr += 1;
         return;
     }
     
@@ -584,12 +577,10 @@ void openserial_get6pInfo(uint8_t commandId, uint8_t* code,uint8_t* slotframeId,
         i = 0;
         while(commandLen>0){
             celllist_add[i].slotoffset     = openserial_vars.inputBuf[ptr];
-            celllist_add[i].slotoffset    |= openserial_vars.inputBuf[ptr+1]<<8;
-            celllist_add[i].channeloffset  = openserial_vars.inputBuf[ptr+2];
-            celllist_add[i].channeloffset |= openserial_vars.inputBuf[ptr+3]<<8;
+            celllist_add[i].channeloffset  = DEFAULT_CHANNEL_OFFSET;
             celllist_add[i].isUsed         = TRUE;
-            ptr         += 4;
-            commandLen  -= 4;
+            ptr         += 1;
+            commandLen  -= 1;
             i++;
         }
         return;
@@ -601,12 +592,10 @@ void openserial_get6pInfo(uint8_t commandId, uint8_t* code,uint8_t* slotframeId,
         i = 0;
         while(commandLen>0){
             celllist_delete[i].slotoffset     = openserial_vars.inputBuf[ptr];
-            celllist_delete[i].slotoffset    |= openserial_vars.inputBuf[ptr+1]<<8;
-            celllist_delete[i].channeloffset  = openserial_vars.inputBuf[ptr+2];
-            celllist_delete[i].channeloffset |= openserial_vars.inputBuf[ptr+3]<<8;
+            celllist_delete[i].channeloffset  = DEFAULT_CHANNEL_OFFSET;
             celllist_delete[i].isUsed         = TRUE;
-            ptr         += 4;
-            commandLen  -= 4;
+            ptr         += 1;
+            commandLen  -= 1;
             i++;
         }
         return;
@@ -617,26 +606,22 @@ void openserial_get6pInfo(uint8_t commandId, uint8_t* code,uint8_t* slotframeId,
         *code = IANA_6TOP_CMD_RELOCATE;
         // retrieve cell list to be relocated
         i = 0;
-        while(commandLen>0){
+        while(i<*numCells){
             celllist_delete[i].slotoffset     = openserial_vars.inputBuf[ptr];
-            celllist_delete[i].slotoffset    |= openserial_vars.inputBuf[ptr+1]<<8;
-            celllist_delete[i].channeloffset  = openserial_vars.inputBuf[ptr+2];
-            celllist_delete[i].channeloffset |= openserial_vars.inputBuf[ptr+3]<<8;
+            celllist_delete[i].channeloffset  = DEFAULT_CHANNEL_OFFSET;
             celllist_delete[i].isUsed         = TRUE;
-            ptr         += 4;
-            commandLen  -= 4;
+            ptr         += 1;
+            commandLen  -= 1;
             i++;
         }
         // retrieve cell list to be relocated
         i = 0;
         while(commandLen>0){
             celllist_add[i].slotoffset     = openserial_vars.inputBuf[ptr];
-            celllist_add[i].slotoffset    |= openserial_vars.inputBuf[ptr+1]<<8;
-            celllist_add[i].channeloffset  = openserial_vars.inputBuf[ptr+2];
-            celllist_add[i].channeloffset |= openserial_vars.inputBuf[ptr+3]<<8;
+            celllist_add[i].channeloffset  = DEFAULT_CHANNEL_OFFSET;
             celllist_add[i].isUsed         = TRUE;
-            ptr         += 4;
-            commandLen  -= 4;
+            ptr         += 1;
+            commandLen  -= 1;
             i++;
         }
         return;
@@ -651,7 +636,7 @@ void openserial_handleCommands(void){
    uint8_t  comandParam_8;
    uint16_t comandParam_16;
    
-   uint8_t  code,slotframeId,cellOptions,numCell,listOffset,maxListLen;
+   uint8_t  code,cellOptions,numCell,listOffset,maxListLen;
    uint8_t  ptr;
    cellInfo_ht celllist_add[CELLLIST_MAX_LEN];
    cellInfo_ht celllist_delete[CELLLIST_MAX_LEN];
@@ -660,8 +645,8 @@ void openserial_handleCommands(void){
    bool        foundNeighbor;
    
    ptr = 0;
-   memset(celllist_add,0,sizeof(celllist_add));
-   memset(celllist_delete,0,sizeof(celllist_delete));
+   memset(celllist_add,0,CELLLIST_MAX_LEN*sizeof(cellInfo_ht));
+   memset(celllist_delete,0,CELLLIST_MAX_LEN*sizeof(cellInfo_ht));
    
    numDataBytes = openserial_getInputBufferFilllevel();
    //copying the buffer
@@ -717,6 +702,7 @@ void openserial_handleCommands(void){
            break;
        case COMMAND_SET_6P_ADD:
        case COMMAND_SET_6P_DELETE:
+       case COMMAND_SET_6P_RELOCATE:
        case COMMAND_SET_6P_COUNT:
        case COMMAND_SET_6P_LIST:
        case COMMAND_SET_6P_CLEAR:
@@ -730,7 +716,7 @@ void openserial_handleCommands(void){
                return;
            }
            // the following sequence of bytes are, slotframe, cellOption, numCell, celllist
-           openserial_get6pInfo(commandId,&code,&slotframeId,&cellOptions,&numCell,celllist_add,celllist_delete,&listOffset,&maxListLen,ptr,commandLen);
+           openserial_get6pInfo(commandId,&code,&cellOptions,&numCell,celllist_add,celllist_delete,&listOffset,&maxListLen,ptr,commandLen);
            sixtop_request(
               code,              // code
               &neighbor,         // neighbor

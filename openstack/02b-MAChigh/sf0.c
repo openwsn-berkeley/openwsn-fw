@@ -184,7 +184,7 @@ bool sf0_candidateAddCellList(
     frameLength_t slotoffset;
     uint8_t numCandCells;
     
-    memset(cellList,0,sizeof(cellList));
+    memset(cellList,0,CELLLIST_MAX_LEN*sizeof(cellInfo_ht));
     numCandCells=0;
     for(i=0;i<CELLLIST_MAX_LEN;i++){
         slotoffset = openrandom_get16b()%schedule_getFrameLength();
@@ -212,7 +212,7 @@ bool sf0_candidateRemoveCellList(
    uint8_t              numCandCells;
    slotinfo_element_t   info;
    
-   memset(cellList,0,sizeof(cellList));
+   memset(cellList,0,CELLLIST_MAX_LEN*sizeof(cellInfo_ht));
    numCandCells    = 0;
    for(i=0;i<schedule_getFrameLength();i++){
       schedule_getSlotInfo(i,neighbor,&info);

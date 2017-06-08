@@ -872,10 +872,11 @@ bool schedule_getOneCellAfterOffset(uint8_t metadata,uint8_t offset,open_addr_t*
    if (cellOptions == LINKOPTIONS_RX){
       type = CELLTYPE_RX;
    }
-   if (cellOptions == LINKOPTIONS_TX | LINKOPTIONS_RX | LINKOPTIONS_SHARED){
+   if (cellOptions == (LINKOPTIONS_TX | LINKOPTIONS_RX | LINKOPTIONS_SHARED)){
       type = CELLTYPE_TXRX;
    }
    
+   returnVal      = FALSE;
    scheduleWalker = &schedule_vars.scheduleBuf[0]; // fisrt entry record slotoffset 0
    do {
       if(type == scheduleWalker->type && scheduleWalker->slotOffset >= offset){
