@@ -1238,6 +1238,7 @@ void sixtop_six2six_notifyReceive(
             
             // delete command
             if (code == IANA_6TOP_CMD_DELETE){
+                i = 0;
                 memset(response_pkt->l2_sixtop_celllist_delete,0,sizeof(response_pkt->l2_sixtop_celllist_delete));
                 while(pktLen>0){
                     response_pkt->l2_sixtop_celllist_delete[i].slotoffset     =  *((uint8_t*)(pkt->payload)+ptr);
@@ -1393,6 +1394,7 @@ void sixtop_six2six_notifyReceive(
         if (code == IANA_6TOP_RC_SUCCESS || code == IANA_6TOP_RC_EOL){
             switch(sixtop_vars.six2six_state){
             case SIX_STATE_WAIT_ADDRESPONSE:
+                i = 0;
                 memset(pkt->l2_sixtop_celllist_add,0,sizeof(pkt->l2_sixtop_celllist_add));
                 while(pktLen>0){
                     pkt->l2_sixtop_celllist_add[i].slotoffset     =  *((uint8_t*)(pkt->payload)+ptr);
@@ -1421,6 +1423,7 @@ void sixtop_six2six_notifyReceive(
                 neighbors_updateGeneration(&(pkt->l2_nextORpreviousHop));
                 break;
             case SIX_STATE_WAIT_RELOCATERESPONSE:
+                i = 0;
                 memset(pkt->l2_sixtop_celllist_add,0,sizeof(pkt->l2_sixtop_celllist_add));
                 while(pktLen>0){
                     pkt->l2_sixtop_celllist_add[i].slotoffset     =  *((uint8_t*)(pkt->payload)+ptr);
@@ -1455,6 +1458,7 @@ void sixtop_six2six_notifyReceive(
                        (errorparameter_t)sixtop_vars.six2six_state);
                 break;
             case SIX_STATE_WAIT_LISTRESPONSE:
+                i = 0;
                 memset(celllist_list,0,CELLLIST_MAX_LEN*sizeof(cellInfo_ht));
                 while(pktLen>0){
                     celllist_list[i].slotoffset     =  *((uint8_t*)(pkt->payload)+ptr);

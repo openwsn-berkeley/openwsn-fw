@@ -144,7 +144,6 @@ void sixtop_request(
     uint16_t     listingOffset,
     uint16_t     listingMaxNumCells
 );
-void      sixtop_addORremoveCellByInfo(uint8_t command,open_addr_t*  neighbor,cellInfo_ht* cellInfo);
 // from upper layer
 owerror_t sixtop_send(OpenQueueEntry_t *msg);
 // from lower layer
