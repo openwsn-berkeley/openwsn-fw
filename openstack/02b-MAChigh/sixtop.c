@@ -38,9 +38,9 @@ owerror_t     sixtop_send_internal(
 );
 
 // timer interrupt callbacks
-void          sixtop_maintenance_timer_cb(opentimer_id_t id);
-void          sixtop_timeout_timer_cb(opentimer_id_t id);
-void          sixtop_sendingEb_timer_cb(opentimer_id_t id);
+void          sixtop_maintenance_timer_cb(void);
+void          sixtop_timeout_timer_cb(void);
+void          sixtop_sendingEb_timer_cb(void);
 
 //=== EB/KA task
 
@@ -114,26 +114,25 @@ void sixtop_init() {
     sixtop_vars.handler            = SIX_HANDLER_NONE;
     sixtop_vars.six2six_state      = SIX_STATE_IDLE;
     
-    sixtop_vars.ebSendingTimerId   = opentimers_start(
-        (sixtop_vars.ebPeriod-EBPERIOD_RANDOM_RANG+(openrandom_get16b()%(2*EBPERIOD_RANDOM_RANG))),
-        TIMER_PERIODIC,
+    sixtop_vars.ebSendingTimerId   = opentimers_create();
+    opentimers_scheduleAbsolute(
+        sixtop_vars.ebSendingTimerId,
+        sixtop_vars.periodMaintenance,
+        opentimers_getValue(),
         TIME_MS,
         sixtop_sendingEb_timer_cb
     );
     
-    sixtop_vars.maintenanceTimerId  = opentimers_start(
+    sixtop_vars.maintenanceTimerId   = opentimers_create();
+    opentimers_scheduleAbsolute(
+        sixtop_vars.maintenanceTimerId,
         sixtop_vars.periodMaintenance,
-        TIMER_PERIODIC,
+        opentimers_getValue(),
         TIME_MS,
         sixtop_maintenance_timer_cb
     );
     
-    sixtop_vars.timeoutTimerId      = opentimers_start(
-        SIX2SIX_TIMEOUT_MS,
-        TIMER_ONESHOT,
-        TIME_MS,
-        sixtop_timeout_timer_cb
-    );
+    sixtop_vars.timeoutTimerId      =  opentimers_create();
 }
 
 void sixtop_setKaPeriod(uint16_t kaPeriod) {
@@ -207,7 +206,7 @@ void sixtop_request(
         // DONOT change sixtop status for the new transaction
         return;
     }
-        
+   
     // get a free packet buffer
     pkt = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP_RES);
     if (pkt==NULL) {
@@ -436,11 +435,7 @@ void task_sixtopNotifSendDone() {
             
             // not busy sending EB anymore
             sixtop_vars.busySendingEB = FALSE;
-            opentimers_setPeriod(
-                sixtop_vars.ebSendingTimerId,
-                TIME_MS,
-                (sixtop_vars.ebPeriod-EBPERIOD_RANDOM_RANG+(openrandom_get16b()%(2*EBPERIOD_RANDOM_RANG)))
-            );
+            
          } else {
             // this is a KA
             
@@ -450,13 +445,6 @@ void task_sixtopNotifSendDone() {
          // discard packets
          openqueue_freePacketBuffer(msg);
          
-         // restart a random timer
-         sixtop_vars.periodMaintenance = 872+(openrandom_get16b()&0xff);
-         opentimers_setPeriod(
-            sixtop_vars.maintenanceTimerId,
-            TIME_MS,
-            sixtop_vars.periodMaintenance
-         );
          break;
       
       case COMPONENT_SIXTOP_RES:
@@ -636,22 +624,43 @@ owerror_t sixtop_send_internal(
 }
 
 // timer interrupt callbacks
-void sixtop_sendingEb_timer_cb(opentimer_id_t id){
+void sixtop_sendingEb_timer_cb(void){
    scheduler_push_task(timer_sixtop_sendEb_fired,TASKPRIO_SIXTOP);
+   opentimers_scheduleRelative(
+       sixtop_vars.ebSendingTimerId,
+       872+(openrandom_get16b()&0xff),
+       TIME_MS,
+       sixtop_sendingEb_timer_cb
+   );
 }
 
-void sixtop_maintenance_timer_cb(opentimer_id_t id) {
+void sixtop_maintenance_timer_cb(void) {
    scheduler_push_task(timer_sixtop_management_fired,TASKPRIO_SIXTOP);
+   sixtop_vars.periodMaintenance = 872+(openrandom_get16b()&0xff);
+   opentimers_scheduleRelative(
+       sixtop_vars.maintenanceTimerId,
+       sixtop_vars.periodMaintenance,
+       TIME_MS,
+       sixtop_maintenance_timer_cb
+   );
 }
 
-void sixtop_timeout_timer_cb(opentimer_id_t id) {
+void sixtop_timeout_timer_cb(void) {
    scheduler_push_task(timer_sixtop_six2six_timeout_fired,TASKPRIO_SIXTOP_TIMEOUT);
 }
 
 //======= EB/KA task
 
 void timer_sixtop_sendEb_fired(){
+    sixtop_vars.ebCounter = (sixtop_vars.ebCounter+1)%EBPERIOD;
+    switch (sixtop_vars.ebCounter) {
+        case 0:
+            // called every EBPERIOD seconds
     sixtop_sendEB();
+            break;
+        default:
+            break;
+}
 }
 
 /**
@@ -833,7 +842,7 @@ void timer_sixtop_six2six_timeout_fired(void) {
    // timeout timer fired, reset the state of sixtop to idle
    sixtop_vars.six2six_state = SIX_STATE_IDLE;
    sixtop_vars.handler = SIX_HANDLER_NONE;
-   opentimers_stop(sixtop_vars.timeoutTimerId);
+   opentimers_cancel(sixtop_vars.timeoutTimerId);
 }
 
 void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
@@ -1494,7 +1503,7 @@ void sixtop_six2six_notifyReceive(
                        (errorparameter_t)sixtop_vars.six2six_state);
         sixtop_vars.six2six_state   = SIX_STATE_IDLE;
         sixtop_vars.handler         = SIX_HANDLER_NONE;
-        opentimers_stop(sixtop_vars.timeoutTimerId);
+            opentimers_cancel(sixtop_vars.timeoutTimerId);
     }
 }
 

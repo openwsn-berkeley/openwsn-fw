@@ -7,7 +7,7 @@
 #include "board.h"
 #include "radio.h"
 #include "leds.h"
-#include "bsp_timer.h"
+#include "opentimers.h"
 #include "scheduler.h"
 #include "03oos_sniffer.h"
 #include "openserial.h"
@@ -43,11 +43,12 @@ typedef struct {
    uint8_t              flag;
    uint8_t              packet[LENGTH_PACKET];
    uint8_t              packet_len;
-    int8_t              rxpk_rssi;
+   int8_t               rxpk_rssi;
    uint8_t              rxpk_lqi;
    bool                 rxpk_crc;
    uint8_t              channel;
    uint8_t              outputOrInput;
+   opentimers_id_t      timerId;
 } app_vars_t;
 
 app_vars_t app_vars;
@@ -66,6 +67,7 @@ void     task_uploadPacket(void);
 */
 int mote_main(void) {
    
+   PORT_TIMER_WIDTH       reference;
    // clear local variables
    memset(&app_vars,0,sizeof(app_vars_t));
    
@@ -80,9 +82,16 @@ int mote_main(void) {
    radio_setStartFrameCb(cb_startFrame);
    radio_setEndFrameCb(cb_endFrame);
    
-   // start bsp timer
-   bsp_timer_set_callback(cb_timer);
-   bsp_timer_scheduleIn(TIMER_PERIOD);
+   // start timer
+   app_vars.timerId = opentimers_create();
+   reference        = opentimers_getValue();
+   opentimers_scheduleAbsolute(
+        app_vars.timerId,      // timerId
+        TIMER_PERIOD,          // duration
+        reference,             // reference
+        TIME_TICS,            // timetype
+        cb_timer               // callback
+   );
    
    // prepare radio
    radio_rfOn();
@@ -144,6 +153,13 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
 
 void cb_timer(void) {
     
+   // schedule again
+   opentimers_scheduleRelative(
+        app_vars.timerId,     // timerId
+        TIMER_PERIOD,         // duration
+        TIME_TICS,            // timetype
+        cb_timer              // callback
+   );
    app_vars.outputOrInput = (app_vars.outputOrInput+1)%2;
    if (app_vars.outputOrInput == 1) {
        openserial_stop();
@@ -152,8 +168,6 @@ void cb_timer(void) {
        openserial_stop();
        openserial_startInput();
    }
-   // schedule again
-   bsp_timer_scheduleIn(TIMER_PERIOD);
 }
 
 // ================================ task =======================================

@@ -45,9 +45,7 @@ void openserial_get6pInfo(uint8_t commandId, uint8_t* code,uint8_t* cellOptions,
 void openserial_handleCommands(void);
 
 // misc
-void openserial_board_reset_cb(
-    opentimer_id_t id
-);
+void openserial_board_reset_cb(void);
 
 // HDLC output
 void outputHdlcOpen(void);
@@ -173,15 +171,20 @@ owerror_t openserial_printCritical(
     errorparameter_t    arg1,
     errorparameter_t    arg2
 ) {
+    opentimers_id_t id; 
+    uint32_t         reference;
     // blink error LED, this is serious
     leds_error_blink();
     
     // schedule for the mote to reboot in 10s
-    opentimers_start(
-        10000,
-        TIMER_ONESHOT,
-        TIME_MS,
-        openserial_board_reset_cb
+    id        = opentimers_create();
+    reference = opentimers_getValue();
+    opentimers_scheduleAbsolute(
+        id,                             // timerId
+        10000,                          // duration
+        reference,                      // reference
+        TIME_MS,                        // timetype
+        openserial_board_reset_cb       // callback
     );
     
     return openserial_printInfoErrorCritical(
@@ -767,7 +770,7 @@ void openserial_handleCommands(void){
 
 //===== misc
 
-void openserial_board_reset_cb(opentimer_id_t id) {
+void openserial_board_reset_cb(void) {
     board_reset();
 }
 
@@ -966,3 +969,6 @@ void isr_openserial_rx() {
     
     openserial_vars.lastRxByte = rxbyte;
 }
+
+
+

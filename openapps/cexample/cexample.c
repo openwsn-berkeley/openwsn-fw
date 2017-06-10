@@ -5,7 +5,6 @@
 #include "opendefs.h"
 #include "cexample.h"
 #include "opencoap.h"
-#include "opentimers.h"
 #include "openqueue.h"
 #include "packetfunctions.h"
 #include "openserial.h"
@@ -32,7 +31,7 @@ cexample_vars_t cexample_vars;
 owerror_t cexample_receive(OpenQueueEntry_t* msg,
                     coap_header_iht*  coap_header,
                     coap_option_iht*  coap_options);
-void    cexample_timer_cb(opentimer_id_t id);
+void    cexample_timer_cb(void);
 void    cexample_task_cb(void);
 void    cexample_sendDone(OpenQueueEntry_t* msg,
                        owerror_t error);
@@ -53,9 +52,12 @@ void cexample_init() {
    
    
    opencoap_register(&cexample_vars.desc);
-   cexample_vars.timerId    = opentimers_start(CEXAMPLEPERIOD,
-                                                TIMER_PERIODIC,TIME_MS,
-                                                cexample_timer_cb);
+   cexample_vars.timerId    = opentimers_create();
+   opentimers_scheduleAbsolute(cexample_vars.timerId, 
+                                CEXAMPLEPERIOD, 
+                                opentimers_getValue(), 
+                                TIME_MS, 
+                                cexample_timer_cb);
 }
 
 //=========================== private =========================================
@@ -68,7 +70,7 @@ owerror_t cexample_receive(OpenQueueEntry_t* msg,
 
 //timer fired, but we don't want to execute task in ISR mode
 //instead, push task to scheduler with COAP priority, and let scheduler take care of it
-void cexample_timer_cb(opentimer_id_t id){
+void cexample_timer_cb(){
    scheduler_push_task(cexample_task_cb,TASKPRIO_COAP);
 }
 
@@ -82,12 +84,18 @@ void cexample_task_cb() {
    uint16_t             avg         = 0;
    uint8_t              N_avg       = 10;
    
+   // reschedule next time to expire
+   opentimers_scheduleRelative(cexample_vars.timerId, 
+                                CEXAMPLEPERIOD, 
+                                TIME_MS, 
+                                cexample_timer_cb);
+   
    // don't run if not synch
    if (ieee154e_isSynch() == FALSE) return;
    
    // don't run on dagroot
    if (idmanager_getIsDAGroot()) {
-      opentimers_stop(cexample_vars.timerId);
+      opentimers_destroy(cexample_vars.timerId);
       return;
    }
    
@@ -157,5 +165,8 @@ void cexample_task_cb() {
 }
 
 void cexample_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
-   openqueue_freePacketBuffer(msg);
+    openqueue_freePacketBuffer(msg);
 }
+
+
+

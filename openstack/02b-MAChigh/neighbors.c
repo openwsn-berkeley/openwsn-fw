@@ -468,7 +468,7 @@ void  neighbors_removeOld() {
     bool       haveParent;
     uint8_t    neighborIndexWithLowestRank[3];
     dagrank_t  lowestRank;
-    PORT_RADIOTIMER_WIDTH timeSinceHeard;
+    PORT_TIMER_WIDTH timeSinceHeard;
     
     // remove old neighbor
     for (i=0;i<MAXNUMNEIGHBORS;i++) {

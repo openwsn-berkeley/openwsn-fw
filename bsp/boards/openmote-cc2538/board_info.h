@@ -94,7 +94,7 @@
 
 //===== per-board number of sensors
 
-#define NUMSENSORS 7
+#define NUMSENSORS      7
 
 //=========================== typedef  ========================================
 

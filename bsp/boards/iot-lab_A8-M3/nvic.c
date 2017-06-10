@@ -1,8 +1,9 @@
 /**
 \brief iot-lab_A8-M3 definition of the "nvic" bsp module.
 
-\author Alaeddine Weslati <alaeddine.weslati@inria.fr>, January 2014.
+\author Chang Tengfei <tengfei.chang@inria.fr>,  May 2017.
 */
+
 #include "stm32f10x_lib.h"
 //=========================== defines =========================================
 
@@ -12,15 +13,14 @@
 
 //=========================== public ==========================================
 
-void NVIC_init(void)
-{   
+void NVIC_init(void) {
+    
     // Set the Vector Table base location at 0x08000000
-    NVIC_SetVectorTable(NVIC_VectTab_FLASH, 0x0);  
+    NVIC_SetVectorTable(NVIC_VectTab_FLASH, 0x0);   
 }
 
 //configuration uart interrput
-void NVIC_uart(void)
-{
+void NVIC_uart(void) {
     
     //Configure NVIC: Preemption Priority = 3 and Sub Priority = 3
     NVIC_InitTypeDef NVIC_InitStructure;
@@ -45,29 +45,15 @@ void NVIC_spi(void)
 #endif
 }
 
-//configuration bsptimer interrput
-void NVIC_bsptimer(void)
-{
-    
-    //Configure NVIC: Preemption Priority = 2 and Sub Priority = 1
-    NVIC_InitTypeDef NVIC_InitStructure;
-    NVIC_InitStructure.NVIC_IRQChannel                      = TIM2_IRQChannel;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority    = 2;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority           = 1;
-    NVIC_InitStructure.NVIC_IRQChannelCmd                   = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
-}
-
 //configuration radiotimer interrput
-void NVIC_radiotimer(void)
-{
+void NVIC_sctimer(void) {
     
     NVIC_InitTypeDef NVIC_InitStructure;
     //Configure RTC Alarm interrupt:
     //Configure NVIC: Preemption Priority = 0 and Sub Priority = 1
     NVIC_InitStructure.NVIC_IRQChannel                      = RTCAlarm_IRQChannel;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority    = 1;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority           = 0;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority           = 1;
     NVIC_InitStructure.NVIC_IRQChannelCmd                   = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
 }
@@ -78,19 +64,18 @@ void NVIC_radio(void)
    //Configure NVIC: Preemption Priority = 2 and Sub Priority = 0
   NVIC_InitTypeDef  NVIC_InitStructure;
   NVIC_InitStructure.NVIC_IRQChannel                        = EXTI4_IRQChannel; 
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority    = 1;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority           = 1; 
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority      = 1;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority             = 0; 
   NVIC_InitStructure.NVIC_IRQChannelCmd                     = ENABLE; 
   NVIC_Init(&NVIC_InitStructure);
 }
 
-//configuration of interrupt
-void NVIC_Configuration(void)
-{
-  //Set the Vector Table base location
-  NVIC_init();
-
-  //2 bits for Preemption Priority and 2 bits for Sub Priority
-  NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+//configuration of interrupt on openmotestm32
+void NVIC_Configuration(void){
+    
+    //Set the Vector Table base location
+    NVIC_init();
+  
+    //2 bits for Preemption Priority and 2 bits for Sub Priority
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
 }
-

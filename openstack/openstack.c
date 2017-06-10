@@ -14,6 +14,7 @@
 #include "openqueue.h"
 #include "openrandom.h"
 #include "opentimers.h"
+#include "opentimers.h"
 //-- 02a-TSCH
 #include "adaptive_sync.h"
 #include "IEEE802154E.h"
@@ -57,7 +58,7 @@ void openstack_init(void) {
    openrandom_init();
    opentimers_init();
    //-- 02a-TSCH
-   adaptive_sync_init();
+//   adaptive_sync_init();
    ieee154e_init();
    IEEE802154_SECURITY.init();
    //-- 02b-RES
@@ -86,3 +87,4 @@ void openstack_init(void) {
       (errorparameter_t)0
    );
 }
+
