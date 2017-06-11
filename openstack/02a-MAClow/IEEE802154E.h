@@ -24,13 +24,14 @@ static const uint8_t chTemplate_default[] = {
 // refer to RFC8180: https://tools.ietf.org/html/rfc8180#appendix-A.1
 // ASN and join Metric are replaced later when sending an EB
 static const uint8_t ebIEsBytestream[] = {
-    0x00,0x3F,0x1A,0x88,0x06,0x1A,0x00,0x00,0x00,0x00,0x00,0x00,0x01,0x1C,0x00,
+    0x1A,0x88,0x06,0x1A,0x00,0x00,0x00,0x00,0x00,0x00,0x01,0x1C,0x00,
     0x01,0xC8,0x00,0x0A,0x1B,0x01,0x00,SLOTFRAME_LENGTH,0x00,0x01,0x00,0x00,0x00,0x00,0x0F
 };
-#define EB_ASN0_OFFSET               6
-#define EB_JP_OFFSET                11
-
 //=========================== define ==========================================
+
+#define EB_ASN0_OFFSET               4
+#define EB_JP_OFFSET                 9
+#define EB_IE_LEN                   28
 
 #define SYNCHRONIZING_CHANNEL       20 // channel the mote listens on to synchronize
 #define TXRETRIES                    3 // number of MAC retries before declaring failed
@@ -43,9 +44,6 @@ static const uint8_t ebIEsBytestream[] = {
 #define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"
 #define LENGTH_IEEE154_MAX         128 // max length of a valid radio packet  
 #define DUTY_CYCLE_WINDOW_LIMIT    (0xFFFFFFFF>>1) // limit of the dutycycle window
-
-// asdf
-#define EB_IE_LEN 30
 
 //15.4e information elements related
 #define IEEE802154E_PAYLOAD_DESC_LEN_SHIFT                 0x04
