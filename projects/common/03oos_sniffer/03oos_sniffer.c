@@ -13,7 +13,6 @@
 #include "openserial.h"
 #include "idmanager.h"
 #include "sixtop.h"
-#include "processIE.h"
 #include "neighbors.h"
 #include "sf0.h"
 #include "openrandom.h"
