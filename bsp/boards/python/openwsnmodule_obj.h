@@ -18,7 +18,6 @@
 #include "IEEE802154_security_obj.h"
 #include "adaptive_sync_obj.h"
 #include "neighbors_obj.h"
-#include "processIE_obj.h"
 #include "sixtop_obj.h"
 #include "sf0_obj.h"
 #include "schedule_obj.h"

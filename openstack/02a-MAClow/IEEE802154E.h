@@ -12,7 +12,6 @@
 #include "board.h"
 #include "opentimers.h"
 #include "schedule.h"
-#include "processIE.h"
 
 //=========================== debug define ====================================
 
@@ -218,11 +217,6 @@ enum ieee154e_linkOption_enum {
 typedef struct {
    PORT_SIGNED_INT_WIDTH timeCorrection;
 } IEEE802154E_ACK_ht;
-
-// includes payload header IE short + MLME short Header + Sync IE
-#define EB_PAYLOAD_LENGTH sizeof(payload_IE_ht) + \
-                           sizeof(mlme_IE_ht)     + \
-                           sizeof(sync_IE_ht)
 
 //=========================== module variables ================================
 

@@ -10,8 +10,11 @@
 
 #include "opentimers.h"
 #include "opendefs.h"
-#include "processIE.h"
+
 //=========================== define ==========================================
+// 201 is the first available subIE ID for experimental use: 
+// https://tools.ietf.org/html/draft-kivinen-802-15-ie-06#section-7
+#define IANA_6TOP_SUBIE_ID          201
 // 6P version 
 #define IANA_6TOP_6P_VERSION        0x00
 #define IANA_6TOP_VESION_MASK       0x0F

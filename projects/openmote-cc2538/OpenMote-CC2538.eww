@@ -5,9 +5,6 @@
     <path>$WS_DIR$\01bsp_sctimer\01bsp_sctimer.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\01bsp_uart\01bsp_uart.ewp</path>
-  </project>
-  <project>
     <path>$WS_DIR$\02drv_opentimers2\02drv_opentimers2.ewp</path>
   </project>
   <project>

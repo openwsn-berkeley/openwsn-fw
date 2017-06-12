@@ -12,7 +12,6 @@
 #include "opentimers.h"
 #include "debugpins.h"
 #include "leds.h"
-#include "processIE.h"
 #include "IEEE802154.h"
 #include "IEEE802154_security.h"
 #include "idmanager.h"

@@ -14,7 +14,6 @@
 #include "debugpins.h"
 #include "sixtop.h"
 #include "adaptive_sync.h"
-#include "processIE.h"
 #include "sctimer.h"
 
 //=========================== variables =======================================
@@ -746,7 +745,8 @@ port_INLINE void activity_ti1ORri1() {
    cellType_t  cellType;
    open_addr_t neighbor;
    uint8_t     i;
-   sync_IE_ht  sync_IE;
+   uint8_t     asn[5];
+   uint8_t     join_priority;
    bool        changeToRX=FALSE;
    bool        couldSendEB=FALSE;
 
@@ -879,9 +879,10 @@ port_INLINE void activity_ti1ORri1() {
             if (couldSendEB==TRUE) {        // I will be sending an EB
                //copy synch IE  -- should be Little endian???
                // fill in the ASN field of the EB
-               ieee154e_getAsn(sync_IE.asn);
-               sync_IE.join_priority = (icmpv6rpl_getMyDAGrank()/MINHOPRANKINCREASE)-1; //poipoi -- use dagrank(rank)-1
-               memcpy(ieee154e_vars.dataToSend->l2_ASNpayload,&sync_IE,sizeof(sync_IE_ht));
+               ieee154e_getAsn(asn);
+               join_priority = (icmpv6rpl_getMyDAGrank()/MINHOPRANKINCREASE)-1; //poipoi -- use dagrank(rank)-1
+               memcpy(ieee154e_vars.dataToSend->l2_ASNpayload,&asn[0],sizeof(asn_t));
+               memcpy(ieee154e_vars.dataToSend->l2_ASNpayload+sizeof(asn_t),&join_priority,sizeof(uint8_t));
             }
             // record that I attempt to transmit this packet
             ieee154e_vars.dataToSend->l2_numTxAttempts++;
