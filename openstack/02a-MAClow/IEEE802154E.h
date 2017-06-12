@@ -21,7 +21,17 @@ static const uint8_t chTemplate_default[] = {
    5,6,12,7,15,4,14,11,8,0,1,2,13,3,9,10
 };
 
+// refer to RFC8180: https://tools.ietf.org/html/rfc8180#appendix-A.1
+// ASN and join Metric are replaced later when sending an EB
+static const uint8_t ebIEsBytestream[] = {
+    0x1A,0x88,0x06,0x1A,0x00,0x00,0x00,0x00,0x00,0x00,0x01,0x1C,0x00,
+    0x01,0xC8,0x00,0x0A,0x1B,0x01,0x00,SLOTFRAME_LENGTH,0x00,0x01,0x00,0x00,0x00,0x00,0x0F
+};
 //=========================== define ==========================================
+
+#define EB_ASN0_OFFSET               4
+#define EB_JP_OFFSET                 9
+#define EB_IE_LEN                   28
 
 #define SYNCHRONIZING_CHANNEL       20 // channel the mote listens on to synchronize
 #define TXRETRIES                    3 // number of MAC retries before declaring failed
@@ -42,9 +52,10 @@ static const uint8_t chTemplate_default[] = {
 #define IEEE802154E_DESC_TYPE_LONG                         ((uint16_t)(1<<15))
 #define IEEE802154E_DESC_TYPE_SHORT                        ((uint16_t)(0<<15))
 
-// GROUP_ID changed to 5 https://openwsn.atlassian.net/browse/FW-569
-#define IANA_6TOP_IE_GROUP_ID                              (5<<11)
-#define IANA_6TOP_IE_GROUP_ID_TYPE                         (1<<15)
+// GROUP_ID changed to 5 (IETF IE) https://openwsn.atlassian.net/browse/FW-569
+#define IANA_IETF_IE_GROUP_ID                              (5<<11)
+#define IANA_IETF_IE_TYPE                                  (1<<15)
+#define IEEE802154E_DESC_LEN_PAYLOAD_ID_TYPE_MASK          0xF800
 
 #define IEEE802154E_DESC_TYPE_HEADER_IE                    0x0000
 #define IEEE802154E_DESC_TYPE_PAYLOAD_IE                   0x8000

@@ -58,7 +58,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    } else {
        // check whether I have payload, if yes, add header termination IE (0x7F)
        // or ternimation IE will be omitted. For example, Keep alive doesn't have
-      // any payload, so there is no ternimation IE for it.
+       // any payload, so there is no ternimation IE for it.
        if (msg->length != 0) {
            //add header termination IE (id=0x7f)if I have header IE list, OR 
            // no need for termination IE.
