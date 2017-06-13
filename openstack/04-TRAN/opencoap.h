@@ -93,6 +93,7 @@ typedef enum {
    COAP_OPTION_NUM_LOCATIONQUERY       = 20,
    COAP_OPTION_NUM_PROXYURI            = 35,
    COAP_OPTION_NUM_PROXYSCHEME         = 39,
+   COAP_OPTION_NUM_OBJECTSECURITY      = 21,
 } coap_option_t;
 
 typedef enum {
