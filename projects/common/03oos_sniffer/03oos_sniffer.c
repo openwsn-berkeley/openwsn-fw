@@ -76,6 +76,7 @@ int mote_main(void) {
    openserial_init();
    idmanager_init();
    openrandom_init();
+   opentimers_init();
  
    // add callback functions radio
    radio_setStartFrameCb(cb_startFrame);
