@@ -17,7 +17,7 @@ tests passed. If there was an error, we use the Error LED to signal.
 #include "board.h"
 #include "cryptoengine.h"
 #include "leds.h"
-#include "bsp_timer.h"
+#include "sctimer.h"
 
 #define TEST_AES_ECB                   1
 #define TEST_AES_CCMS_ENC              1
@@ -389,7 +389,7 @@ int mote_main(void) {
    PORT_TIMER_WIDTH enc = 0;
    PORT_TIMER_WIDTH dec = 0;
 
-   time1 = bsp_timer_get_currentValue();
+   time1 = sctimer_readCounter();
    ret = cryptoengine_aes_ccms_enc(a,
            A_LEN,
            m,
@@ -398,7 +398,7 @@ int mote_main(void) {
            L,
            key,
            TAG_LEN);
-   time2 = bsp_timer_get_currentValue();
+   time2 = sctimer_readCounter();
 
    if (ret == E_SUCCESS) {
       enc = time2 - time1;
@@ -407,7 +407,7 @@ int mote_main(void) {
       fail++;
    }
 
-   time1 = bsp_timer_get_currentValue();
+   time1 = sctimer_readCounter();
    ret = cryptoengine_aes_ccms_dec(a,
            A_LEN,
            m,
@@ -416,7 +416,7 @@ int mote_main(void) {
            L,
            key,
            TAG_LEN);
-   time2 = bsp_timer_get_currentValue();
+   time2 = sctimer_readCounter();
 
    if (ret == E_SUCCESS) {
       dec = time2 - time1;
