@@ -14,6 +14,10 @@
 
 #define RPL_HOPBYHOP_HEADER_OPTION_TYPE  0x63
 
+#if DEADLINE_OPTION_ENABLED
+#define DEADLINE_HOPBYHOP_HEADER_OPTION_TYPE  0xAB 
+#endif
+
 enum {
    PCKTFORWARD     = 1, // used by the node to indicate is forwarding a packet  -- either upstream or downstream
    PCKTSEND        = 2, // used by the node to indicate is sending a packet
@@ -58,6 +62,9 @@ void      forwarding_receive(
    OpenQueueEntry_t*    msg,
    ipv6_header_iht*     ipv6_outer_header,
    ipv6_header_iht*     ipv6_inner_header,
+#if DEADLINE_OPTION_ENABLED
+   deadline_option_ht*	 	 deadline_option,
+#endif   
    rpl_option_ht*       rpl_option
 );
 

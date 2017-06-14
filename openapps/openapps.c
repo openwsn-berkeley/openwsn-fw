@@ -21,6 +21,9 @@
 #include "uecho.h"
 #include "uinject.h"
 
+#include "uexpiration.h"
+#include "uexpiration_monitor.h"
+
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
@@ -43,4 +46,8 @@ void openapps_init(void) {
    rrt_init();
    // TCP
    techo_init();
+   
+   // Deadline
+   uexpiration_init(); 
+   umonitor_init();
 }
