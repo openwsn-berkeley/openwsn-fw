@@ -20,6 +20,7 @@
 
 #include "opendefs.h"
 #include "neighbors.h"
+#include "IEEE802154.h"
 
 //=========================== define ==========================================
 

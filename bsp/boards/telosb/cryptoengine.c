@@ -8,9 +8,9 @@
 #include "board.h"
 #include "radio.h"
 #include "cc2420.h"
-#include "cc2420_crypto.h"
 #include "spi.h"
 #include "debugpins.h"
+#include "cryptoengine.h"
 
 
 //=========================== defines =========================================
