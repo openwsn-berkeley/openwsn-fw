@@ -21,8 +21,6 @@
 
 // in seconds: sixtop maintaince is called every 30 seconds
 #define MAINTENANCE_PERIOD        30
-// in miliseconds: the real EBPERIOD will be randomized chosen between {EBPERIOD-EBPERIOD_RANDOM_RANG, EBPERIOD+EBPERIOD_RANDOM_RANG}
-#define EBPERIOD_RANDOM_RANG     500
 
 //=========================== variables =======================================
 
@@ -114,20 +112,20 @@ void sixtop_init() {
     sixtop_vars.six2six_state      = SIX_STATE_IDLE;
     
     sixtop_vars.ebSendingTimerId   = opentimers_create();
-    opentimers_scheduleAbsolute(
+    opentimers_scheduleIn(
         sixtop_vars.ebSendingTimerId,
         sixtop_vars.periodMaintenance,
-        opentimers_getValue(),
         TIME_MS,
+        TIMER_ONESHOT,
         sixtop_sendingEb_timer_cb
     );
     
     sixtop_vars.maintenanceTimerId   = opentimers_create();
-    opentimers_scheduleAbsolute(
+    opentimers_scheduleIn(
         sixtop_vars.maintenanceTimerId,
         sixtop_vars.periodMaintenance,
-        opentimers_getValue(),
         TIME_MS,
+        TIMER_PERIODIC,
         sixtop_maintenance_timer_cb
     );
     
@@ -145,7 +143,7 @@ void sixtop_setKaPeriod(uint16_t kaPeriod) {
 void sixtop_setEBPeriod(uint8_t ebPeriod) {
     if(ebPeriod != 0) {
         // convert parameter to miliseconds
-        sixtop_vars.ebPeriod = ebPeriod*1000;
+        sixtop_vars.ebPeriod = ebPeriod;
     }
 }
 
@@ -619,23 +617,19 @@ owerror_t sixtop_send_internal(
 // timer interrupt callbacks
 void sixtop_sendingEb_timer_cb(void){
     scheduler_push_task(timer_sixtop_sendEb_fired,TASKPRIO_SIXTOP);
-    opentimers_scheduleRelative(
+    // update the period
+    sixtop_vars.periodMaintenance  = 872 +(openrandom_get16b()&0xff);
+    opentimers_scheduleIn(
         sixtop_vars.ebSendingTimerId,
-        872+(openrandom_get16b()&0xff),
+        sixtop_vars.periodMaintenance,
         TIME_MS,
+        TIMER_ONESHOT,
         sixtop_sendingEb_timer_cb
     );
 }
 
 void sixtop_maintenance_timer_cb(void) {
     scheduler_push_task(timer_sixtop_management_fired,TASKPRIO_SIXTOP);
-    sixtop_vars.periodMaintenance = 872+(openrandom_get16b()&0xff);
-    opentimers_scheduleRelative(
-        sixtop_vars.maintenanceTimerId,
-        sixtop_vars.periodMaintenance,
-        TIME_MS,
-        sixtop_maintenance_timer_cb
-    );
 }
 
 void sixtop_timeout_timer_cb(void) {
@@ -645,7 +639,7 @@ void sixtop_timeout_timer_cb(void) {
 //======= EB/KA task
 
 void timer_sixtop_sendEb_fired(){
-    sixtop_vars.ebCounter = (sixtop_vars.ebCounter+1)%EBPERIOD;
+    sixtop_vars.ebCounter = (sixtop_vars.ebCounter+1)%sixtop_vars.ebPeriod;
     switch (sixtop_vars.ebCounter) {
     case 0:
         // called every EBPERIOD seconds
