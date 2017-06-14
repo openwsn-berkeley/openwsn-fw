@@ -28,7 +28,7 @@
 \param[in] key Buffer containing the secret key (16 octets).
 \param[in] len_mac Length of the authentication tag.
 */
-owerror_t aes_ccms_enc(uint8_t* a,
+owerror_t cryptoengine_aes_ccms_enc(uint8_t* a,
       uint8_t len_a,
       uint8_t* m,
       uint8_t* len_m,
@@ -52,7 +52,7 @@ owerror_t aes_ccms_enc(uint8_t* a,
 \param[in] key Buffer containing the secret key (16 octets).
 \param[in] len_mac Length of the authentication tag.
 */
-owerror_t aes_ccms_dec(uint8_t* a,
+owerror_t cryptoengine_aes_ccms_dec(uint8_t* a,
       uint8_t len_a,
       uint8_t* m,
       uint8_t* len_m,
@@ -66,10 +66,10 @@ owerror_t aes_ccms_dec(uint8_t* a,
 \param[in,out] buffer Single block plaintext (16 octets). Will be overwritten by ciphertext.
 \param[in] key Buffer containing the secret key (16 octets).
  */
-owerror_t aes_ecb_enc(uint8_t buffer[16], uint8_t key[16]);
+owerror_t cryptoengine_aes_ecb_enc(uint8_t buffer[16], uint8_t key[16]);
     
 /**
-\brief Initialization of the crypto_engine driver.
+\brief Initialization of the cryptoengine module.
 */
 owerror_t cryptoengine_init(void);
 

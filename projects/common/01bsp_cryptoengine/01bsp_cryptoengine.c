@@ -86,7 +86,7 @@ static owerror_t run_aes_ecb_suite(aes_ecb_suite_t* suite, uint8_t test_suite_le
    uint8_t success = 0;
    
    for(i = 0; i < test_suite_len; i++) {
-      if(aes_ecb_enc(suite[i].buffer, suite[i].key) == E_SUCCESS) {
+      if(cryptoengine_aes_ecb_enc(suite[i].buffer, suite[i].key) == E_SUCCESS) {
          if (memcmp(suite[i].buffer, suite[i].expected_ciphertext, 16) == 0) {
             success++;
          }
@@ -103,7 +103,7 @@ static owerror_t run_aes_ccms_enc_suite(aes_ccms_enc_suite_t* suite, uint8_t tes
    uint8_t success = 0;
 
    for(i = 0; i < test_suite_len; i++) {
-      if(aes_ccms_enc(suite[i].a,
+      if(cryptoengine_aes_ccms_enc(suite[i].a,
                   suite[i].len_a,
                   suite[i].m,
                   &suite[i].len_m,
@@ -128,7 +128,7 @@ static owerror_t run_aes_ccms_dec_suite(aes_ccms_dec_suite_t* suite, uint8_t tes
 
    for(i = 0; i < test_suite_len; i++) {
 
-	   if(aes_ccms_dec(suite[i].a,
+	   if(cryptoengine_aes_ccms_dec(suite[i].a,
                        suite[i].len_a,
                        suite[i].c,
                        &suite[i].len_c,
@@ -153,7 +153,7 @@ static owerror_t run_aes_ccms_auth_forward_suite(aes_ccms_auth_forward_suite_t* 
    uint8_t success = 0;
 
    for(i = 0; i < test_suite_len; i++) {
-      if(aes_ccms_enc(suite[i].a,
+      if(cryptoengine_aes_ccms_enc(suite[i].a,
                   suite[i].len_a,
                   suite[i].m,
                   &suite[i].len_m,
@@ -179,7 +179,7 @@ static owerror_t run_aes_ccms_auth_inverse_suite(aes_ccms_auth_forward_suite_t* 
 
    for(i = 0; i < test_suite_len; i++) {
 
-	   if(aes_ccms_dec(suite[i].a,
+	   if(cryptoengine_aes_ccms_dec(suite[i].a,
                        suite[i].len_a,
                        suite[i].m,
                        &suite[i].len_m,
@@ -390,7 +390,7 @@ int mote_main(void) {
    PORT_TIMER_WIDTH dec = 0;
 
    time1 = bsp_timer_get_currentValue();
-   ret = aes_ccms_enc(a,
+   ret = cryptoengine_aes_ccms_enc(a,
            A_LEN,
            m,
            &len_m,
@@ -408,7 +408,7 @@ int mote_main(void) {
    }
 
    time1 = bsp_timer_get_currentValue();
-   ret = aes_ccms_dec(a,
+   ret = cryptoengine_aes_ccms_dec(a,
            A_LEN,
            m,
            &len_m,

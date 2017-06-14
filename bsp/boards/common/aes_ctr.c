@@ -42,7 +42,7 @@ owerror_t aes_ctr_enc_raw(uint8_t* buffer, uint8_t len, uint8_t key[16], uint8_t
    for (n = 0; n < nb; n++) {
       pbuf = &buffer[16 * n];
       memcpy(eiv, iv, 16);
-      aes_ecb_enc(eiv, key); 
+      cryptoengine_aes_ecb_enc(eiv, key); 
       // may be faster if vector are aligned to 4 bytes (use long instead char in xor)
       for (k = 0; k < 16; k++) {
          pbuf[k] ^= eiv[k];

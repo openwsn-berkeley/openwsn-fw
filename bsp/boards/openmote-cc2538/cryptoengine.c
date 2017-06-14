@@ -32,7 +32,7 @@ owerror_t cryptoengine_init(void) {
    return E_SUCCESS;
 }
 
-owerror_t aes_ccms_enc(uint8_t* a,
+owerror_t cryptoengine_aes_ccms_enc(uint8_t* a,
          uint8_t len_a,
          uint8_t* m,
          uint8_t* len_m,
@@ -76,7 +76,7 @@ owerror_t aes_ccms_enc(uint8_t* a,
    return E_FAIL;
 }
 
-owerror_t aes_ccms_dec(uint8_t* a,
+owerror_t cryptoengine_aes_ccms_dec(uint8_t* a,
          uint8_t len_a,
          uint8_t* m,
          uint8_t* len_m,
@@ -121,7 +121,7 @@ owerror_t aes_ccms_dec(uint8_t* a,
    return E_FAIL;
 }
 
-owerror_t aes_ecb_enc(uint8_t* buffer, uint8_t* key) {
+owerror_t cryptoengine_aes_ecb_enc(uint8_t* buffer, uint8_t* key) {
    uint8_t key_location;
    if(load_key(key, &key_location) == E_SUCCESS) {
       // Polling
