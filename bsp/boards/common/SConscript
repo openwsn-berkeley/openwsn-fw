@@ -9,8 +9,6 @@ source = [
     'aes_ccms.c',
     'aes_ctr.c',
     'aes_ecb.c',
-    'firmware_crypto_engine.c',
-    'dummy_crypto_engine.c',
 ]
 
 localEnv.Append(

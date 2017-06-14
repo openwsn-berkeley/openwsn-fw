@@ -11,31 +11,19 @@
 #include <source/aes.h>
 #include <source/ccm.h>
 
-#include "cc2538_crypto_engine.h"
-
-#include "aes_ctr.h"
-#include "aes_cbc.h"
+#include "cryptoengine.h"
 
 #define DEFAULT_KEY_AREA KEY_AREA_0
-/**
-\brief On success, returns by reference the location in key RAM where the 
-   new/existing key is stored.
-*/
-static owerror_t load_key(uint8_t key[16], uint8_t* /* out */ key_location) {
-   static uint8_t loaded_key[16];
-   
-   if(memcmp(loaded_key, key, 16) != 0) {
-      memcpy(loaded_key, key, 16);
-      // Load the key in key RAM
-      if(AESLoadKey(loaded_key, DEFAULT_KEY_AREA) != AES_SUCCESS) {
-         return E_FAIL;
-      }
-   }
-   *key_location = DEFAULT_KEY_AREA;
-   return E_SUCCESS;
-}
 
-static owerror_t init(void) {
+
+//=========================== prototypes ======================================
+
+static owerror_t load_key(uint8_t key[16], uint8_t* /* out */ key_location);
+
+
+//=========================== public ==========================================
+
+owerror_t cryptoengine_init(void) {
    //
    // Enable AES peripheral
    //
@@ -44,7 +32,7 @@ static owerror_t init(void) {
    return E_SUCCESS;
 }
 
-static owerror_t aes_ccms_enc_cc2538(uint8_t* a,
+owerror_t aes_ccms_enc(uint8_t* a,
          uint8_t len_a,
          uint8_t* m,
          uint8_t* len_m,
@@ -88,7 +76,7 @@ static owerror_t aes_ccms_enc_cc2538(uint8_t* a,
    return E_FAIL;
 }
 
-static owerror_t aes_ccms_dec_cc2538(uint8_t* a,
+owerror_t aes_ccms_dec(uint8_t* a,
          uint8_t len_a,
          uint8_t* m,
          uint8_t* len_m,
@@ -133,7 +121,7 @@ static owerror_t aes_ccms_dec_cc2538(uint8_t* a,
    return E_FAIL;
 }
 
-static owerror_t aes_ecb_enc_cc2538(uint8_t* buffer, uint8_t* key) {
+owerror_t aes_ecb_enc(uint8_t* buffer, uint8_t* key) {
    uint8_t key_location;
    if(load_key(key, &key_location) == E_SUCCESS) {
       // Polling
@@ -149,14 +137,23 @@ static owerror_t aes_ecb_enc_cc2538(uint8_t* buffer, uint8_t* key) {
    }
    return E_FAIL;
 }
-/*---------------------------------------------------------------------------*/
-const struct crypto_engine board_crypto_engine = {
-   aes_ccms_enc_cc2538,
-   aes_ccms_dec_cc2538,
-   aes_cbc_enc_raw,
-   aes_ctr_enc_raw,
-   aes_ecb_enc_cc2538,      // AES stand-alone encryption
-   init,
-};
-/*---------------------------------------------------------------------------*/
 
+//=========================== private ==========================================
+
+/**
+\brief On success, returns by reference the location in key RAM where the 
+   new/existing key is stored.
+*/
+static owerror_t load_key(uint8_t key[16], uint8_t* /* out */ key_location) {
+   static uint8_t loaded_key[16];
+   
+   if(memcmp(loaded_key, key, 16) != 0) {
+      memcpy(loaded_key, key, 16);
+      // Load the key in key RAM
+      if(AESLoadKey(loaded_key, DEFAULT_KEY_AREA) != AES_SUCCESS) {
+         return E_FAIL;
+      }
+   }
+   *key_location = DEFAULT_KEY_AREA;
+   return E_SUCCESS;
+}

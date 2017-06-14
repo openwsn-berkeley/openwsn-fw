@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include "opendefs.h"
 #include "aes_ctr.h"
-#include "crypto_engine.h"
+#include "cryptoengine.h"
 
 static void inc_counter(uint8_t* counter) {
    // from openssl
@@ -42,7 +42,7 @@ owerror_t aes_ctr_enc_raw(uint8_t* buffer, uint8_t len, uint8_t key[16], uint8_t
    for (n = 0; n < nb; n++) {
       pbuf = &buffer[16 * n];
       memcpy(eiv, iv, 16);
-      CRYPTO_ENGINE.aes_ecb_enc(eiv, key); 
+      aes_ecb_enc(eiv, key); 
       // may be faster if vector are aligned to 4 bytes (use long instead char in xor)
       for (k = 0; k < 16; k++) {
          pbuf[k] ^= eiv[k];

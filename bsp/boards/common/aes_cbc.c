@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include "opendefs.h"
 #include "aes_cbc.h"
-#include "crypto_engine.h"
+#include "cryptoengine.h"
 
 /**
 \brief Raw AES-CBC encryption.
@@ -34,7 +34,7 @@ owerror_t aes_cbc_enc_raw(uint8_t* buffer, uint8_t len, uint8_t key[16], uint8_t
       for (k = 0; k < 16; k++) {
             pbuf[k] ^= pxor[k];
       }
-      CRYPTO_ENGINE.aes_ecb_enc(pbuf,key);
+      aes_ecb_enc(pbuf,key);
       pxor = pbuf;
    }
    return E_SUCCESS;

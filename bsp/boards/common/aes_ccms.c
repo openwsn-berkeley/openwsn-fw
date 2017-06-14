@@ -7,8 +7,10 @@
 #include <string.h>
 #include <stdint.h>
 #include "opendefs.h"
+#include "aes_ctr.h"
+#include "aes_cbc.h"
 #include "aes_ccms.h"
-#include "crypto_engine.h"
+#include "cryptoengine.h"
 
 static owerror_t aes_cbc_mac(uint8_t* a, uint8_t len_a, uint8_t* m, uint8_t len_m, uint8_t* nonce, uint8_t key[16], uint8_t* mac, uint8_t len_mac, uint8_t l);
 
@@ -190,7 +192,7 @@ static owerror_t aes_cbc_mac(uint8_t* a,
    memset(&buffer[len], 0, pad_len);
    len += pad_len;
 
-   CRYPTO_ENGINE.aes_cbc_enc_raw(buffer, len, key, cbc_mac_iv);
+   aes_cbc_enc_raw(buffer, len, key, cbc_mac_iv);
 
    // copy MAC
    memcpy(mac, &buffer[len - 16], len_mac);
@@ -257,7 +259,7 @@ static owerror_t aes_ctr_enc(uint8_t* m,
    memset(&buffer[len], 0, pad_len);
    len += pad_len;
 
-   CRYPTO_ENGINE.aes_ctr_enc_raw(buffer, len, key, iv);
+   aes_ctr_enc_raw(buffer, len, key, iv);
 
    memcpy(m, &buffer[16], len_m);
    memcpy(mac, buffer, len_mac);

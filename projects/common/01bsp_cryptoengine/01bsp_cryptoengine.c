@@ -1,9 +1,9 @@
 /**
-\brief This is a program which shows how to use the CRYPTO_ENGINE driver
+\brief This is a program which shows how to use the cryptoengine interface
        and runs some tests in order to verify different crypto implementations.
 
-\note: You can use this project with any platform but be careful to declare the
-       CRYPTO_ENGINE implementation for the board that you want to test.
+\note: You can use this project with any platform but be careful to implement the
+       the necessary functions for the board that you want to test.
 
 Load this program on your boards. Radio LED will stay on indefinitely if all
 tests passed. If there was an error, we use the Error LED to signal.
@@ -15,7 +15,7 @@ tests passed. If there was an error, we use the Error LED to signal.
 #include "stdio.h"
 // bsp modules required
 #include "board.h"
-#include "crypto_engine.h"
+#include "cryptoengine.h"
 #include "leds.h"
 #include "bsp_timer.h"
 
@@ -24,8 +24,6 @@ tests passed. If there was an error, we use the Error LED to signal.
 #define TEST_AES_CCMS_DEC              1
 #define TEST_AES_CCMS_AUTH_FORWARD     1
 #define TEST_AES_CCMS_AUTH_INVERSE     1
-#define TEST_AES_CTR                   1
-#define TEST_AES_CBC                   1
 #define TEST_BENCHMARK_CCMS            1
 
 typedef struct {
@@ -73,24 +71,6 @@ typedef struct
     uint8_t expected_ciphertext[8];
 } aes_ccms_auth_forward_suite_t;
 
-typedef struct
-{
-   uint8_t key[16];
-   uint8_t iv[16];
-   uint8_t m[4 * 16];
-   uint8_t len_m;
-   uint8_t expected_ciphertext[4 * 16];
-} aes_ctr_suite_t;
-
-typedef struct
-{
-   uint8_t key[16];
-   uint8_t iv[16];
-   uint8_t m[16]; // message
-   uint8_t len_m;
-   uint8_t expected_ciphertext[16];
-} aes_cbc_suite_t;
-
 static int hang(uint8_t error_code) {
 
    error_code ? leds_error_on() : leds_radio_on();
@@ -106,7 +86,7 @@ static owerror_t run_aes_ecb_suite(aes_ecb_suite_t* suite, uint8_t test_suite_le
    uint8_t success = 0;
    
    for(i = 0; i < test_suite_len; i++) {
-      if(CRYPTO_ENGINE.aes_ecb_enc(suite[i].buffer, suite[i].key) == E_SUCCESS) {
+      if(aes_ecb_enc(suite[i].buffer, suite[i].key) == E_SUCCESS) {
          if (memcmp(suite[i].buffer, suite[i].expected_ciphertext, 16) == 0) {
             success++;
          }
@@ -123,14 +103,14 @@ static owerror_t run_aes_ccms_enc_suite(aes_ccms_enc_suite_t* suite, uint8_t tes
    uint8_t success = 0;
 
    for(i = 0; i < test_suite_len; i++) {
-      if(CRYPTO_ENGINE.aes_ccms_enc(suite[i].a,
-                                       suite[i].len_a,
-                                       suite[i].m,
-                                       &suite[i].len_m,
-                                       suite[i].nonce,
-                                       suite[i].l,
-                                       suite[i].key,
-                                       suite[i].len_tag) == E_SUCCESS) {
+      if(aes_ccms_enc(suite[i].a,
+                  suite[i].len_a,
+                  suite[i].m,
+                  &suite[i].len_m,
+                  suite[i].nonce,
+                  suite[i].l,
+                  suite[i].key,
+                  suite[i].len_tag) == E_SUCCESS) {
          
          if(memcmp(suite[i].m, suite[i].expected_ciphertext, suite[i].len_m) == 0) {
             success++;
@@ -148,14 +128,14 @@ static owerror_t run_aes_ccms_dec_suite(aes_ccms_dec_suite_t* suite, uint8_t tes
 
    for(i = 0; i < test_suite_len; i++) {
 
-	   if(CRYPTO_ENGINE.aes_ccms_dec(suite[i].a,
-                                       suite[i].len_a,
-                                       suite[i].c,
-                                       &suite[i].len_c,
-                                       suite[i].nonce,
-                                       suite[i].l,
-                                       suite[i].key,
-                                       suite[i].len_tag) == E_SUCCESS) {
+	   if(aes_ccms_dec(suite[i].a,
+                       suite[i].len_a,
+                       suite[i].c,
+                       &suite[i].len_c,
+                       suite[i].nonce,
+                       suite[i].l,
+                       suite[i].key,
+                       suite[i].len_tag) == E_SUCCESS) {
          
          if(memcmp(suite[i].c, suite[i].expected_plaintext, suite[i].len_c) == 0) {
             success++;
@@ -173,14 +153,14 @@ static owerror_t run_aes_ccms_auth_forward_suite(aes_ccms_auth_forward_suite_t* 
    uint8_t success = 0;
 
    for(i = 0; i < test_suite_len; i++) {
-      if(CRYPTO_ENGINE.aes_ccms_enc(suite[i].a,
-                                       suite[i].len_a,
-                                       suite[i].m,
-                                       &suite[i].len_m,
-                                       suite[i].nonce,
-                                       suite[i].l,
-                                       suite[i].key,
-                                       suite[i].len_tag) == E_SUCCESS) {
+      if(aes_ccms_enc(suite[i].a,
+                  suite[i].len_a,
+                  suite[i].m,
+                  &suite[i].len_m,
+                  suite[i].nonce,
+                  suite[i].l,
+                  suite[i].key,
+                  suite[i].len_tag) == E_SUCCESS) {
          
          if(memcmp(suite[i].m, suite[i].expected_ciphertext, suite[i].len_m) == 0) {
             success++;
@@ -199,14 +179,14 @@ static owerror_t run_aes_ccms_auth_inverse_suite(aes_ccms_auth_forward_suite_t* 
 
    for(i = 0; i < test_suite_len; i++) {
 
-	   if(CRYPTO_ENGINE.aes_ccms_dec(suite[i].a,
-                                       suite[i].len_a,
-                                       suite[i].m,
-                                       &suite[i].len_m,
-                                       suite[i].nonce,
-                                       suite[i].l,
-                                       suite[i].key,
-                                       suite[i].len_tag) == E_SUCCESS) {
+	   if(aes_ccms_dec(suite[i].a,
+                       suite[i].len_a,
+                       suite[i].m,
+                       &suite[i].len_m,
+                       suite[i].nonce,
+                       suite[i].l,
+                       suite[i].key,
+                       suite[i].len_tag) == E_SUCCESS) {
          
          if(memcmp(suite[i].m, suite[i].expected_ciphertext, suite[i].len_m) == 0) {
             success++;
@@ -216,46 +196,6 @@ static owerror_t run_aes_ccms_auth_inverse_suite(aes_ccms_auth_forward_suite_t* 
    return success == test_suite_len ? E_SUCCESS : E_FAIL; 
 }
 #endif /* TEST_AES_CCMS_AUTH_INVERSE */
-
-#if TEST_AES_CTR
-static owerror_t run_aes_ctr_suite(aes_ctr_suite_t* suite, uint8_t test_suite_len) {
-   uint8_t i = 0;
-   uint8_t success = 0;
-
-   for(i = 0; i < test_suite_len; i++) {
-	   if(CRYPTO_ENGINE.aes_ctr_enc_raw(suite[i].m,
-                                       suite[i].len_m,
-                                       suite[i].key,
-                                       suite[i].iv) == E_SUCCESS) {
-         
-         if(memcmp(suite[i].m, suite[i].expected_ciphertext, suite[i].len_m) == 0) {
-            success++;
-         }
-      }
-   }
-   return success == test_suite_len ? E_SUCCESS : E_FAIL; 
-}
-#endif /* TEST_AES_CTR */
-
-#if TEST_AES_CBC
-static owerror_t run_aes_cbc_suite(aes_cbc_suite_t* suite, uint8_t test_suite_len) {
-   uint8_t i = 0;
-   uint8_t success = 0;
-
-   for(i = 0; i < test_suite_len; i++) {
-	   if(CRYPTO_ENGINE.aes_cbc_enc_raw(suite[i].m,
-                                       suite[i].len_m,
-                                       suite[i].key,
-                                       suite[i].iv) == E_SUCCESS) {
-         
-         if(memcmp(suite[i].m, suite[i].expected_ciphertext, suite[i].len_m) == 0) {
-            success++;
-         }
-      }
-   }
-   return success == test_suite_len ? E_SUCCESS : E_FAIL; 
-}
-#endif /* TEST_AES_CBC */
 
 /**
 \brief The program starts executing here.
@@ -393,63 +333,8 @@ int mote_main(void) {
 };
 #endif /* TEST_AES_CCMS_AUTH_INVERSE */
 
-#if TEST_AES_CTR
-   aes_ctr_suite_t aes_ctr_suite[] = {
-   {
-      { 0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c },
-      { 0xf0, 0xf1, 0xf2, 0xf3, 0xf4, 0xf5, 0xf6, 0xf7, 0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff },
-      { 0x6b, 0xc1, 0xbe, 0xe2, 0x2e, 0x40, 0x9f, 0x96, 0xe9, 0x3d, 0x7e, 0x11, 0x73, 0x93, 0x17, 0x2a,
-         0xae, 0x2d, 0x8a, 0x57, 0x1e, 0x03, 0xac, 0x9c, 0x9e, 0xb7, 0x6f, 0xac, 0x45, 0xaf, 0x8e, 0x51,
-         0x30, 0xc8, 0x1c, 0x46, 0xa3, 0x5c, 0xe4, 0x11, 0xe5, 0xfb, 0xc1, 0x19, 0x1a, 0x0a, 0x52, 0xef,
-         0xf6, 0x9f, 0x24, 0x45, 0xdf, 0x4f, 0x9b, 0x17, 0xad, 0x2b, 0x41, 0x7b, 0xe6, 0x6c, 0x37, 0x10
-      },
-      4 * 16,
-      { 0x87, 0x4d, 0x61, 0x91, 0xb6, 0x20, 0xe3, 0x26, 0x1b, 0xef, 0x68, 0x64, 0x99, 0x0d, 0xb6, 0xce,
-         0x98, 0x06, 0xf6, 0x6b, 0x79, 0x70, 0xfd, 0xff, 0x86, 0x17, 0x18, 0x7b, 0xb9, 0xff, 0xfd, 0xff,
-         0x5a, 0xe4, 0xdf, 0x3e, 0xdb, 0xd5, 0xd3, 0x5e, 0x5b, 0x4f, 0x09, 0x02, 0x0d, 0xb0, 0x3e, 0xab,
-         0x1e, 0x03, 0x1d, 0xda, 0x2f, 0xbe, 0x03, 0xd1, 0x79, 0x21, 0x70, 0xa0, 0xf3, 0x00, 0x9c, 0xee
-      },
-   }
-};
-#endif /* TEST_AES_CTR */
-
-#if TEST_AES_CBC
-   aes_cbc_suite_t aes_cbc_suite[] = {
-   {
-      { 0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c },
-      { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F }, // IV
-      { 0x6b, 0xc1, 0xbe, 0xe2, 0x2e, 0x40, 0x9f, 0x96, 0xe9, 0x3d, 0x7e, 0x11, 0x73, 0x93, 0x17, 0x2a },
-      16,
-      { 0x76, 0x49, 0xab, 0xac, 0x81, 0x19, 0xb2, 0x46, 0xce, 0xe9, 0x8e, 0x9b, 0x12, 0xe9, 0x19, 0x7d }
-   },
-   {
-      { 0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c },
-      { 0x76, 0x49, 0xAB, 0xAC, 0x81, 0x19, 0xB2, 0x46, 0xCE, 0xE9, 0x8E, 0x9B, 0x12, 0xE9, 0x19, 0x7D }, // IV
-      { 0xae, 0x2d, 0x8a, 0x57, 0x1e, 0x03, 0xac, 0x9c, 0x9e, 0xb7, 0x6f, 0xac, 0x45, 0xaf, 0x8e, 0x51 },
-      16,
-      { 0x50, 0x86, 0xcb, 0x9b, 0x50, 0x72, 0x19, 0xee, 0x95, 0xdb, 0x11, 0x3a, 0x91, 0x76, 0x78, 0xb2 }
-   },
-   {
-      { 0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c },
-      { 0x50, 0x86, 0xCB, 0x9B, 0x50, 0x72, 0x19, 0xEE, 0x95, 0xDB, 0x11, 0x3A, 0x91, 0x76, 0x78, 0xB2 }, // IV
-      { 0x30, 0xc8, 0x1c, 0x46, 0xa3, 0x5c, 0xe4, 0x11, 0xe5, 0xfb, 0xc1, 0x19, 0x1a, 0x0a, 0x52, 0xef },
-      16,
-      { 0x73, 0xbe, 0xd6, 0xb8, 0xe3, 0xc1, 0x74, 0x3b, 0x71, 0x16, 0xe6, 0x9e, 0x22, 0x22, 0x95, 0x16 }
-   },
-   {
-      { 0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c },
-      { 0x73, 0xBE, 0xD6, 0xB8, 0xE3, 0xC1, 0x74, 0x3B, 0x71, 0x16, 0xE6, 0x9E, 0x22, 0x22, 0x95, 0x16 }, // IV
-      { 0xf6, 0x9f, 0x24, 0x45, 0xdf, 0x4f, 0x9b, 0x17, 0xad, 0x2b, 0x41, 0x7b, 0xe6, 0x6c, 0x37, 0x10 },
-      16,
-      { 0x3f, 0xf1, 0xca, 0xa1, 0x68, 0x1f, 0xac, 0x09, 0x12, 0x0e, 0xca, 0x30, 0x75, 0x86, 0xe1, 0xa7 }
-   },
-};
-#endif /* TEST_AES_CBC */
-
    board_init();
    
-   // Init the CRYPTO_ENGINE driver
-   CRYPTO_ENGINE.init();
 #if TEST_AES_ECB
    if (run_aes_ecb_suite(aes_ecb_suite, sizeof(aes_ecb_suite)/sizeof(aes_ecb_suite[0])) == E_FAIL) {
       fail++;
@@ -482,18 +367,6 @@ int mote_main(void) {
    }
 #endif /* TEST_AES_CCMS_AUTH_INVERSE */
 
-#if TEST_AES_CTR
-   if (run_aes_ctr_suite(aes_ctr_suite, sizeof(aes_ctr_suite)/sizeof(aes_ctr_suite[0])) == E_FAIL) {
-      fail++;
-   }
-#endif /* TEST_AES_CTR*/
-
-#if TEST_AES_CBC
-   if (run_aes_cbc_suite(aes_cbc_suite, sizeof(aes_cbc_suite)/sizeof(aes_cbc_suite[0])) == E_FAIL) {
-      fail++;
-   }
-#endif /* TEST_AES_CBC */
-
 #if TEST_BENCHMARK_CCMS
 
 #define A_LEN 30
@@ -517,14 +390,14 @@ int mote_main(void) {
    PORT_TIMER_WIDTH dec = 0;
 
    time1 = bsp_timer_get_currentValue();
-   ret = CRYPTO_ENGINE.aes_ccms_enc(a,
-                                       A_LEN,
-                                       m,
-                                       &len_m,
-                                       nonce,
-                                       L,
-                                       key,
-                                       TAG_LEN);
+   ret = aes_ccms_enc(a,
+           A_LEN,
+           m,
+           &len_m,
+           nonce,
+           L,
+           key,
+           TAG_LEN);
    time2 = bsp_timer_get_currentValue();
 
    if (ret == E_SUCCESS) {
@@ -535,14 +408,14 @@ int mote_main(void) {
    }
 
    time1 = bsp_timer_get_currentValue();
-   ret = CRYPTO_ENGINE.aes_ccms_dec(a,
-                                       A_LEN,
-                                       m,
-                                       &len_m,
-                                       nonce,
-                                       L,
-                                       key,
-                                       TAG_LEN);
+   ret = aes_ccms_dec(a,
+           A_LEN,
+           m,
+           &len_m,
+           nonce,
+           L,
+           key,
+           TAG_LEN);
    time2 = bsp_timer_get_currentValue();
 
    if (ret == E_SUCCESS) {
