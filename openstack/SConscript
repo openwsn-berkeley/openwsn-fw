@@ -13,7 +13,6 @@ sources_c = [
     os.path.join('02a-MAClow','IEEE802154E.c'),
 #    os.path.join('02a-MAClow','adaptive_sync.c'),
     os.path.join('02a-MAClow','IEEE802154_security.c'),
-    os.path.join('02a-MAClow','IEEE802154_dummy_security.c'),
     #=== 02b-MAChigh
     os.path.join('02b-MAChigh','neighbors.c'),
     os.path.join('02b-MAChigh','sf0.c'),
@@ -42,9 +41,7 @@ sources_h = [
     os.path.join('02a-MAClow','IEEE802154.h'),
     os.path.join('02a-MAClow','IEEE802154E.h'),
     os.path.join('02a-MAClow','adaptive_sync.h'),
-    os.path.join('02a-MAClow','ieee802154_security_driver.h'),
     os.path.join('02a-MAClow','IEEE802154_security.h'),
-    os.path.join('02a-MAClow','IEEE802154_dummy_security.h'),
     #=== 02b-MAChigh
     os.path.join('02b-MAChigh','neighbors.h'),
     os.path.join('02b-MAChigh','sf0.h'),

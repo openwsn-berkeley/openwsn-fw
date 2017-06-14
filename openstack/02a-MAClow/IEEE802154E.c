@@ -2,7 +2,7 @@
 #include "IEEE802154E.h"
 #include "radio.h"
 #include "IEEE802154.h"
-#include "ieee802154_security_driver.h"
+#include "IEEE802154_security.h"
 #include "openqueue.h"
 #include "idmanager.h"
 #include "openserial.h"
@@ -152,6 +152,8 @@ void ieee154e_init() {
         isr_ieee154e_newSlot            // callback
    );
    // radiotimer_start(ieee154e_vars.slotDuration);
+   //
+   IEEE802154_security_init();
 }
 
 //=========================== public ==========================================
@@ -893,7 +895,7 @@ port_INLINE void activity_ti1ORri1() {
             // check if packet needs to be encrypted/authenticated before transmission 
             if (ieee154e_vars.localCopyForTransmission.l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) { // security enabled
                 // encrypt in a local copy
-                if (IEEE802154_SECURITY.outgoingFrame(&ieee154e_vars.localCopyForTransmission) != E_SUCCESS) {
+                if (IEEE802154_security_outgoingFrameSecurity(&ieee154e_vars.localCopyForTransmission) != E_SUCCESS) {
                     // keep the frame in the OpenQueue in order to retry later
                     endSlot(); // abort
                     return;
@@ -1040,7 +1042,7 @@ port_INLINE void activity_ti2() {
     // check if packet needs to be encrypted/authenticated before transmission 
     if (ieee154e_vars.localCopyForTransmission.l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) { // security enabled
         // encrypt in a local copy
-        if (IEEE802154_SECURITY.outgoingFrame(&ieee154e_vars.localCopyForTransmission) != E_SUCCESS) {
+        if (IEEE802154_security_outgoingFrameSecurity(&ieee154e_vars.localCopyForTransmission) != E_SUCCESS) {
             // keep the frame in the OpenQueue in order to retry later
             endSlot(); // abort
             return;
@@ -1454,7 +1456,7 @@ port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
       
         // check the security level of the ACK frame and decrypt/authenticate
         if (ieee154e_vars.ackReceived->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
-            if (IEEE802154_SECURITY.incomingFrame(ieee154e_vars.ackReceived) != E_SUCCESS) {
+            if (IEEE802154_security_incomingFrame(ieee154e_vars.ackReceived) != E_SUCCESS) {
                 break;
             }
         } // checked if unsecured frame should pass during header retrieval
@@ -1708,7 +1710,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
 
       // if security is enabled, decrypt/authenticate the frame.
       if (ieee154e_vars.dataReceived->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
-         if (IEEE802154_SECURITY.incomingFrame(ieee154e_vars.dataReceived) != E_SUCCESS) {
+         if (IEEE802154_security_incomingFrame(ieee154e_vars.dataReceived) != E_SUCCESS) {
             break;
          }
       } // checked if unsecured frame should pass during header retrieval
@@ -1790,7 +1792,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
            
            // if security is enabled, encrypt directly in OpenQueue as there are no retransmissions for ACKs
            if (ieee154e_vars.ackToSend->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
-                if (IEEE802154_SECURITY.outgoingFrame(ieee154e_vars.ackToSend) != E_SUCCESS) {
+                if (IEEE802154_security_outgoingFrameSecurity(ieee154e_vars.ackToSend) != E_SUCCESS) {
                     openqueue_freePacketBuffer(ieee154e_vars.ackToSend);
                     endSlot();
                     return;
@@ -1907,7 +1909,7 @@ port_INLINE void activity_ri6() {
    
     // if security is enabled, encrypt directly in OpenQueue as there are no retransmissions for ACKs
     if (ieee154e_vars.ackToSend->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
-        if (IEEE802154_SECURITY.outgoingFrame(ieee154e_vars.ackToSend) != E_SUCCESS) {
+        if (IEEE802154_security_outgoingFrameSecurity(ieee154e_vars.ackToSend) != E_SUCCESS) {
             openqueue_freePacketBuffer(ieee154e_vars.ackToSend);
             endSlot();
             return;
@@ -2205,7 +2207,7 @@ bool isValidJoin(OpenQueueEntry_t* eb, ieee802154_header_iht *parsedHeader) {
    packetfunctions_reserveHeaderSize(eb, parsedHeader->headerLength);
 
    // verify EB's authentication tag
-   if (IEEE802154_SECURITY.incomingFrame(eb) == E_SUCCESS) {
+   if (IEEE802154_security_incomingFrame(eb) == E_SUCCESS) {
       return TRUE;
    }
 
