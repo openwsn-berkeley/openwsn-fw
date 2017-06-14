@@ -7,7 +7,7 @@ Import('env')
 
 localEnv = env.Clone()
 
-source = ['radio.c', 'cc2420.c', 'cc2420_crypto.c']
+source = ['radio.c', 'cc2420.c', 'cryptoengine.c']
 cc2420 = localEnv.Object(
    source=source,
 )
