@@ -9,7 +9,7 @@
 */
 
 #include "packetfunctions.h"
-#include "crypto_engine.h"
+#include "cryptoengine.h"
 #include "IEEE802154.h"
 #include "IEEE802154E.h"
 #include "idmanager.h"
@@ -375,15 +375,15 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
    }
 
    //Encryption and/or authentication
-   // CRYPTO_ENGINE overwrites m[] with ciphertext and appends the MIC
-   outStatus = CRYPTO_ENGINE.aes_ccms_enc(a,
-                                          len_a,
-                                          m,
-                                          &len_m,
-                                          nonce,
-                                          2, // L=2 in 15.4 std
-                                          key,
-                                          msg->l2_authenticationLength);
+   // cryptoengine overwrites m[] with ciphertext and appends the MIC
+   outStatus = cryptoengine_aes_ccms_enc(a,
+                                    len_a,
+                                    m,
+                                    &len_m,
+                                    nonce,
+                                    2, // L=2 in 15.4 std
+                                    key,
+                                    msg->l2_authenticationLength);
 
    //verify that no errors occurred
    if (outStatus != E_SUCCESS) {
@@ -622,14 +622,14 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t* msg){
    }
 
    //decrypt and/or verify authenticity of the frame
-   outStatus = CRYPTO_ENGINE.aes_ccms_dec(a,
-                                          len_a,
-                                          c,
-                                          &len_c,
-                                          nonce,
-                                          2,
-                                          key,
-                                          msg->l2_authenticationLength);
+   outStatus = cryptoengine_aes_ccms_dec(a,
+                                    len_a,
+                                    c,
+                                    &len_c,
+                                    nonce,
+                                    2,
+                                    key,
+                                    msg->l2_authenticationLength);
 
    //verify if any error occurs
    if (outStatus != E_SUCCESS){
