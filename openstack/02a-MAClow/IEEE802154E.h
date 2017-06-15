@@ -294,17 +294,8 @@ void               ieee154e_setSingleChannel(uint8_t channel);
 void               ieee154e_setIsSecurityEnabled(bool isEnabled);
 void               ieee154e_setSlotDuration(uint16_t duration);
 uint16_t           ieee154e_getSlotDuration(void);
-void               ieee154e_syncSlotOffset(void);
 
 uint16_t           ieee154e_getTimeCorrection(void);
-
-void               ieee154e_asnStoreFromEB(uint8_t* asn);
-void               ieee154e_joinPriorityStoreFromEB(uint8_t jp);
-
-// timeslot template handling
-void               ieee154e_timeslotTemplateIDStoreFromEB(uint8_t* pkt,uint8_t* ptr);
-// channelhopping template handling
-void               ieee154e_channelhoppingTemplateIDStoreFromEB(uint8_t id);
 // events
 void               ieee154e_startOfFrame(PORT_TIMER_WIDTH capturedTime);
 void               ieee154e_endOfFrame(PORT_TIMER_WIDTH capturedTime);

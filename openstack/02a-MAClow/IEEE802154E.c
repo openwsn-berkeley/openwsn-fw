@@ -68,9 +68,14 @@ bool     isValidJoin(OpenQueueEntry_t* eb, ieee802154_header_iht *parsedHeader);
 bool     isValidEbFormat(OpenQueueEntry_t* pkt);
 // IEs Handling
 bool     ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE);
+void     timeslotTemplateIDStoreFromEB(uint8_t id);
+void     channelhoppingTemplateIDStoreFromEB(uint8_t id);
 // ASN handling
 void     incrementAsnOffset(void);
 void     ieee154e_resetAsn(void);
+void     ieee154e_syncSlotOffset(void);
+void     asnStoreFromEB(uint8_t* asn);
+void     joinPriorityStoreFromEB(uint8_t jp);
 // synchronization
 void     synchronizePacket(PORT_TIMER_WIDTH timeReceived);
 void     synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection);
@@ -2296,19 +2301,12 @@ uint16_t ieee154e_getSlotDuration(){
 }
 
 // timeslot template handling
-port_INLINE void ieee154e_timeslotTemplateIDStoreFromEB(uint8_t* pkt,uint8_t* ptr){
-    ieee154e_vars.tsTemplateId = *pkt;
-    *ptr = *ptr+1;
-    if (ieee154e_vars.tsTemplateId != TIMESLOT_TEMPLATE_ID){
-        ieee154e_vars.slotDuration  = (uint16_t)(*((pkt)+*ptr));
-        *ptr = *ptr+1;
-        ieee154e_vars.slotDuration |= (uint16_t)(((*((pkt)+*ptr))<<8) & 0xff00);
-        *ptr = *ptr+1;
-    }
+port_INLINE void timeslotTemplateIDStoreFromEB(uint8_t id){
+    ieee154e_vars.tsTemplateId = id;
 }
 
 // channelhopping template handling
-port_INLINE void ieee154e_channelhoppingTemplateIDStoreFromEB(uint8_t id){
+port_INLINE void channelhoppingTemplateIDStoreFromEB(uint8_t id){
     ieee154e_vars.chTemplateId = id;
 }
 //======= synchronization
