@@ -320,9 +320,6 @@ void packetfunctions_duplicatePacket(OpenQueueEntry_t* dst, OpenQueueEntry_t* sr
    // update l2_ASNpayload pointer
    dst->l2_ASNpayload = dst->payload + (src->l2_ASNpayload - src->payload);
 
-   // update l2_scheduleIE_cellObjects pointer
-   dst->l2_sixtop_cellObjects = dst->payload + (src->l2_sixtop_cellObjects - src->payload);
-
    // update l2_payload pointer
    dst->l2_payload = dst->payload + (src->l2_payload - src->payload);
 

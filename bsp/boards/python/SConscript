@@ -8,14 +8,13 @@ localEnv = env.Clone()
 target =  'libbsp'
 sources_c = [
     'board_obj.c',
-    'bsp_timer_obj.c',
     'debugpins_obj.c',
     'eui64_obj.c',
     'leds_obj.c',
     #'openwsnmodule.c', # Note: added to main build target
+    'uart_obj.c',    
     'radio_obj.c',
-    'radiotimer_obj.c',
-    'uart_obj.c',
+    'sctimer_obj.c',
     'supply_obj.c',
 ]
 

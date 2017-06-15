@@ -252,7 +252,7 @@ void  schedule_getSlotInfo(
 /**
 \brief Get the maximum number of active slots.
 
-\param[out] maximum number of active slots
+\returns maximum number of active slots
 */
 uint16_t  schedule_getMaxActiveSlots() {
    return schedule_vars.maxActiveSlots;
@@ -577,12 +577,7 @@ void schedule_syncSlotOffset(slotOffset_t targetSlotOffset) {
 void schedule_advanceSlot() {
    
    INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
-   if (schedule_vars.currentScheduleEntry->slotOffset >= ((scheduleEntry_t*)schedule_vars.currentScheduleEntry->next)->slotOffset
-       ) {
-       // one slotframe has elapsed
-       sf0_notifyNewSlotframe();
-   }   
+   DISABLE_INTERRUPTS();  
    schedule_vars.currentScheduleEntry = schedule_vars.currentScheduleEntry->next;
    
    ENABLE_INTERRUPTS();
@@ -731,7 +726,7 @@ bool schedule_getOkToSend() {
       
       returnVal = TRUE;
    } else {
-      // non-shared slot: check backoff before answering
+      // shared slot: check backoff before answering
       
       // decrement backoff
       if (schedule_vars.backoff>0) {
@@ -843,7 +838,17 @@ void schedule_housekeeping(){
                        // one sixtop transcation is happening, only one instance at one time
                        continue;
                     }
-                    sixtop_request(IANA_6TOP_CMD_CLEAR,&(schedule_vars.scheduleBuf[i].neighbor),1);
+                    sixtop_request(
+                       IANA_6TOP_CMD_CLEAR,                             // code
+                       &(schedule_vars.scheduleBuf[i].neighbor),        // neighbor
+                       0,                                               // numCells (not used)
+                       LINKOPTIONS_TX,                                  // cellOptions
+                       NULL,                                            // celllist to add (not used)
+                       NULL,                                            // celllist to add (not used)
+                       sf0_getsfid(),                                   // sfid
+                       0,                                               // list command offset (not used)
+                       0                                                // list command maximum list of cells(not used)
+                    );
                     break;
                 }
             }
@@ -851,6 +856,41 @@ void schedule_housekeeping(){
     }
    
     ENABLE_INTERRUPTS();
+}
+
+bool schedule_getOneCellAfterOffset(uint8_t metadata,uint8_t offset,open_addr_t* neighbor, uint8_t cellOptions, uint16_t* slotoffset, uint16_t* channeloffset){
+   bool returnVal;
+   scheduleEntry_t* scheduleWalker;
+   cellType_t type;
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   
+   // translate cellOptions to cell type 
+   if (cellOptions == LINKOPTIONS_TX){
+      type = CELLTYPE_TX;
+   }
+   if (cellOptions == LINKOPTIONS_RX){
+      type = CELLTYPE_RX;
+   }
+   if (cellOptions == (LINKOPTIONS_TX | LINKOPTIONS_RX | LINKOPTIONS_SHARED)){
+      type = CELLTYPE_TXRX;
+   }
+   
+   returnVal      = FALSE;
+   scheduleWalker = &schedule_vars.scheduleBuf[0]; // fisrt entry record slotoffset 0
+   do {
+      if(type == scheduleWalker->type && scheduleWalker->slotOffset >= offset){
+         *slotoffset    = scheduleWalker->slotOffset;
+         *channeloffset = scheduleWalker->channelOffset;
+         returnVal      = TRUE;
+         break;
+      }
+      scheduleWalker = scheduleWalker->next;
+   }while(scheduleWalker!=&schedule_vars.scheduleBuf[0]);
+   
+   ENABLE_INTERRUPTS();
+   
+   return returnVal;
 }
 
 //=========================== private =========================================

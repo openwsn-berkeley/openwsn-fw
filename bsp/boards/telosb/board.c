@@ -11,9 +11,8 @@
 #include "leds.h"
 #include "uart.h"
 #include "spi.h"
-#include "bsp_timer.h"
+#include "sctimer.h"
 #include "radio.h"
-#include "radiotimer.h"
 
 //=========================== variables =======================================
 
@@ -21,12 +20,12 @@
 
 // these are part of the TelosB port only, so not present in debugpins.h, only
 // in debugpins.c. We therefore need to extern them.
-extern void debugpins_isruarttx_toggle();
-extern void debugpins_isruarttx_clr();
-extern void debugpins_isruarttx_set();
-extern void debugpins_isruartrx_toggle();
-extern void debugpins_isruartrx_clr();
-extern void debugpins_isruartrx_set();
+extern void debugpins_isruarttx_toggle(void);
+extern void debugpins_isruarttx_clr(void);
+extern void debugpins_isruarttx_set(void);
+extern void debugpins_isruartrx_toggle(void);
+extern void debugpins_isruartrx_clr(void);
+extern void debugpins_isruartrx_set(void);
 
 //=========================== main ============================================
 
@@ -56,9 +55,8 @@ void board_init() {
    leds_init();
    uart_init();
    spi_init();
-   bsp_timer_init();
    radio_init();
-   radiotimer_init();
+   sctimer_init();
    
    // enable interrupts
    __bis_SR_register(GIE);
@@ -70,6 +68,19 @@ void board_sleep() {
 
 void board_reset() {
    WDTCTL = (WDTPW+0x1200) + WDTHOLD; // writing a wrong watchdog password to causes handler to reset
+}
+
+// during startup process before executing main function, 
+// all variables need to be initialized, which may take long time
+// and watchdog may be triggered during this period. 
+// Using __low_level_init to disable the watchdog to avoid this situation.
+int __low_level_init(void)
+{
+  // stop WDT
+  WDTCTL = WDTPW + WDTHOLD;
+ 
+  // Perform data segment initialization
+  return 1;
 }
 
 //=========================== private =========================================
@@ -100,14 +111,6 @@ ISR(USART1RX) {
 
 // TIMERA1_VECTOR
 
-ISR(TIMERA0) {
-   debugpins_isr_set();
-   if (bsp_timer_isr()==KICK_SCHEDULER) {        // timer: 0
-      __bic_SR_register_on_exit(CPUOFF);
-   }
-   debugpins_isr_clr();
-}
-
 // ADC12_VECTOR
 
 // USART0TX_VECTOR
@@ -130,7 +133,7 @@ ISR(COMPARATORA) {
 
 ISR(TIMERB1) {
    debugpins_isr_set();
-   if (radiotimer_isr()==KICK_SCHEDULER) {       // radiotimer
+   if (sctimer_isr()==KICK_SCHEDULER) {          // sctimer
       __bic_SR_register_on_exit(CPUOFF);
    }
    debugpins_isr_clr();

@@ -30,8 +30,6 @@ void idmanager_init() {
    
    // myPANID
    idmanager_vars.myPANID.type         = ADDR_PANID;
-   idmanager_vars.myPANID.panid[0]     = 0xca;
-   idmanager_vars.myPANID.panid[1]     = 0xfe;
 #ifdef PANID_DEFINED 
    idmanager_vars.myPANID.panid[0]     = PANID_DEFINED & 0x00ff;
    idmanager_vars.myPANID.panid[1]     =(PANID_DEFINED & 0xff00)>>8;

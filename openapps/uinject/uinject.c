@@ -1,8 +1,6 @@
 #include "opendefs.h"
 #include "uinject.h"
-#include "openudp.h"
 #include "openqueue.h"
-#include "opentimers.h"
 #include "openserial.h"
 #include "packetfunctions.h"
 #include "scheduler.h"
@@ -20,24 +18,32 @@ static const uint8_t uinject_dst_addr[]   = {
 
 //=========================== prototypes ======================================
 
-void uinject_timer_cb(opentimer_id_t id);
+void uinject_timer_cb(void);
 void uinject_task_cb(void);
 
 //=========================== public ==========================================
 
 void uinject_init() {
    
-   // clear local variables
-   memset(&uinject_vars,0,sizeof(uinject_vars_t));
-   
-   uinject_vars.period = UINJECT_PERIOD_MS;
-   
-   // start periodic timer
-   uinject_vars.timerId                    = opentimers_start(
-      uinject_vars.period,
-      TIMER_PERIODIC,TIME_MS,
-      uinject_timer_cb
-   );
+    // clear local variables
+    memset(&uinject_vars,0,sizeof(uinject_vars_t));
+
+    // register at UDP stack
+    uinject_vars.desc.port              = WKP_UDP_INJECT;
+    uinject_vars.desc.callbackReceive   = &uinject_receive;
+    uinject_vars.desc.callbackSendDone  = &uinject_sendDone;
+    openudp_register(&uinject_vars.desc);
+
+    uinject_vars.period = UINJECT_PERIOD_MS;
+    // start periodic timer
+    uinject_vars.timerId = opentimers_create();
+    opentimers_scheduleIn(
+        uinject_vars.period,
+        UINJECT_PERIOD_MS,
+        TIME_MS,
+        TIMER_PERIODIC,
+        uinject_timer_cb
+    );
 }
 
 void uinject_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
@@ -62,7 +68,7 @@ void uinject_receive(OpenQueueEntry_t* pkt) {
 \note timer fired, but we don't want to execute task in ISR mode instead, push
    task to scheduler with CoAP priority, and let scheduler take care of it.
 */
-void uinject_timer_cb(opentimer_id_t id){
+void uinject_timer_cb(void){
    
    scheduler_push_task(uinject_task_cb,TASKPRIO_COAP);
 }
@@ -76,7 +82,7 @@ void uinject_task_cb() {
    
    // don't run on dagroot
    if (idmanager_getIsDAGroot()) {
-      opentimers_stop(uinject_vars.timerId);
+      opentimers_destroy(uinject_vars.timerId);
       return;
    }
    
@@ -119,3 +125,6 @@ void uinject_task_cb() {
       openqueue_freePacketBuffer(pkt);
    }
 }
+
+
+

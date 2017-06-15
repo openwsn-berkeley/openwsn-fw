@@ -24,14 +24,15 @@
 //=========================== variables =======================================
 
 typedef struct {
-   opentimer_id_t  timerId;
+   opentimers_id_t timerId;
+   uint8_t         macpongCounter;
 } macpong_vars_t;
 
 macpong_vars_t macpong_vars;
 
 //=========================== prototypes ======================================
 
-void macpong_initSend(opentimer_id_t id);
+void macpong_initSend(void);
 void macpong_send(uint8_t payloadCtr);
 
 //=========================== initialization ==================================
@@ -40,22 +41,42 @@ int mote_main(void) {
    board_init();
    scheduler_init();
    openstack_init();
-   if (idmanager_getMyID(ADDR_64B)->addr_64b[7]==0x03) {
+   if (idmanager_getMyID(ADDR_64B)->addr_64b[7]==0x16) {
       idmanager_setIsDAGroot(TRUE);
    }
    scheduler_start();
    return 0; // this line should never be reached
 }
 
-void macpong_initSend(opentimer_id_t id) {
+void macpong_initSend() {
+    bool timeToSend = FALSE;
+    macpong_vars.macpongCounter = (macpong_vars.macpongCounter+1)%5;
+    switch (macpong_vars.macpongCounter) {
+        case 0:
+            timeToSend = TRUE;
+            break;
+        default:
+            break;
+   }
+   opentimers_scheduleIn(
+        macpong_vars.timerId, // timerId
+        1000,                 // duration
+        TIME_MS,              // timetype
+        TIMER_ONESHOT,
+        macpong_initSend      // callback
+   );
+  
+  
    if (idmanager_getIsDAGroot()==TRUE) {
       return;
    }
    if (ieee154e_isSynch()==TRUE && neighbors_getNumNeighbors()==1) {
-      // send packet
-      macpong_send(0);   
-      // cancel timer
-      opentimers_stop(macpong_vars.timerId);
+      if (timeToSend){
+          // send packet
+           macpong_send(0);   
+          // cancel timer
+          opentimers_cancel(macpong_vars.timerId);
+      }
    }
 }
 
@@ -90,11 +111,16 @@ void macpong_send(uint8_t payloadCtr) {
 //===== IPHC
 
 void iphc_init(void) {
-   macpong_vars.timerId    = opentimers_start(
-      5000,
-      TIMER_PERIODIC,TIME_MS,
-      macpong_initSend
-   );
+    PORT_TIMER_WIDTH       reference;
+    reference            = opentimers_getValue();
+    macpong_vars.timerId = opentimers_create();
+    opentimers_scheduleAbsolute(
+        macpong_vars.timerId,  // timerId
+        1000,                  // duration
+        reference,             // reference
+        TIME_MS,               // timetype
+        macpong_initSend      // callback
+    );
 }
 
 void iphc_sendDone(OpenQueueEntry_t* msg, owerror_t error) {

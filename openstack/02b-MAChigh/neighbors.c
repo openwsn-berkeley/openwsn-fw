@@ -98,6 +98,27 @@ bool neighbors_getNeighborNoResource(uint8_t index){
     return neighbors_vars.neighbors[index].f6PNORES;
 }
 
+uint8_t neighbors_getGeneration(open_addr_t* address){
+    uint8_t i;
+    for (i=0;i<MAXNUMNEIGHBORS;i++){
+        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b)){
+            break;
+        }
+    }
+    return neighbors_vars.neighbors[i].generation;
+}
+
+uint8_t neighbors_getSequenceNumber(open_addr_t* address){
+    uint8_t i;
+    for (i=0;i<MAXNUMNEIGHBORS;i++){
+        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b)){
+            break;
+        }
+    }
+    return neighbors_vars.neighbors[i].sequenceNumber;
+
+}
+
 //===== interrogators
 
 /**
@@ -331,6 +352,36 @@ void neighbors_indicateTx(open_addr_t* l2_dest,
    }
 }
 
+void neighbors_updateSequenceNumber(open_addr_t* address){
+    uint8_t i;
+    for (i=0;i<MAXNUMNEIGHBORS;i++){
+        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b)){
+            neighbors_vars.neighbors[i].sequenceNumber = (neighbors_vars.neighbors[i].sequenceNumber+1) & 0x0F;
+            break;
+        }
+    }
+}
+
+void neighbors_updateGeneration(open_addr_t* address){
+    uint8_t i;
+    for (i=0;i<MAXNUMNEIGHBORS;i++){
+        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b)){
+            neighbors_vars.neighbors[i].generation = (neighbors_vars.neighbors[i].generation+1)%9;
+            break;
+        }
+    }
+}
+
+void neighbors_resetGeneration(open_addr_t* address){
+    uint8_t i;
+    for (i=0;i<MAXNUMNEIGHBORS;i++){
+        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b)){
+            neighbors_vars.neighbors[i].generation = 0;
+            break;
+        }
+    }
+}
+
 //===== write addresses
 
 /**
@@ -392,7 +443,7 @@ uint16_t neighbors_getLinkMetric(uint8_t index) {
    // we assume that this neighbor has already been checked for being in use         
    // calculate link cost to this neighbor
    if (neighbors_vars.neighbors[index].numTxACK==0) {
-      rankIncrease = DEFAULTLINKCOST*2*MINHOPRANKINCREASE;
+      rankIncrease = (3*DEFAULTLINKCOST-2)*MINHOPRANKINCREASE;
    } else {
       //6TiSCH minimal draft using OF0 for rank computation: ((3*numTx/numTxAck)-2)*minHopRankIncrease
       // numTx is on 8 bits, so scaling up 10 bits won't lead to saturation
@@ -417,7 +468,7 @@ void  neighbors_removeOld() {
     bool       haveParent;
     uint8_t    neighborIndexWithLowestRank[3];
     dagrank_t  lowestRank;
-    PORT_RADIOTIMER_WIDTH timeSinceHeard;
+    PORT_TIMER_WIDTH timeSinceHeard;
     
     // remove old neighbor
     for (i=0;i<MAXNUMNEIGHBORS;i++) {

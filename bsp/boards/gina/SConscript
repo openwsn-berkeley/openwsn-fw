@@ -18,11 +18,10 @@ rf231 = localEnv.SConscript(
 
 source = [
     'board.c',
-    'bsp_timer.c',
     'debugpins.c',
+    'sctimer.c',
     'eui64.c',
     'leds.c',
-    'radiotimer.c',
     'spi.c',
     'uart.c',
     'i2c.c',
