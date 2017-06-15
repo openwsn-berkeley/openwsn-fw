@@ -64,14 +64,12 @@ opentimers_id_t opentimers_create(void){
 \brief schedule a period refer to comparing value set last time.
 
 This function will schedule a timer which expires when the timer count reach 
-to lastCompareValue + duration.
-
-Note: as this function schedule time depending on last compare value. It 
-can't be called firstly after the timer is created.
+to current counter + duration.
 
 \param[in] id indicates the timer id
 \param[in] duration indicates the period asked for schedule since last comparing value
 \param[in] uint_type indicates the unit type of this schedule: ticks or ms
+\param[in] timer_type indicates the timer type of this schedule: oneshot or periodic
 \param[in] cb indicates when this scheduled timer fired, call this callback function.
  */
 void opentimers_scheduleIn(opentimers_id_t    id, 
@@ -167,7 +165,8 @@ void opentimers_scheduleIn(opentimers_id_t    id,
 \brief schedule a period refer to given reference.
 
 This function will schedule a timer which expires when the timer count reach 
-to lastCompareValue + reference.
+to duration + reference. This function will be used in the implementation of slot FSM.
+All timers use this function are ONE_SHOT type timer.
 
 \param[in] id indicates the timer id
 \param[in] duration indicates the period asked for schedule after a given time indicated by reference parameter.
