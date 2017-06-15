@@ -1,6 +1,7 @@
 import sys
 import time
 import socket
+import datetime
 
 myAddress  = '' #means 'all'
 myPort     = 21568
@@ -60,9 +61,15 @@ if len(sys.argv) == 6:
                 var += 1
                 print "\nno reply"        
             else:
+                payload = map(ord,reply)
+                seq_num =	payload[1] << 8 | payload[0]
+                now = datetime.datetime.now()
+                curr_time = now.strftime("%H:%M:%S")
                 output     = []
-                output    += ['Received data packet [{0}]:{1}->[{2}]:{3}'.format(dist_addr[0],dist_addr[1],myAddress,myPort)]
-                output     = '\n'.join(output)
+                output    += ['{0}'.format(curr_time)]
+                output    += ['Received data packet [{0}]:{1}->[{2}]:{3}'.format(dist_addr[0],dist_addr[1],myAddress,myPort)]                
+                output    += ['Seq no: {0} '.format(seq_num)]
+                output     = '\t'.join(output)
                 print output
             
     # close socket

@@ -26,7 +26,7 @@ else:
     output         = []
     output        += ['[{0}]:{1}->[{2}]:{3}'.format(myAddress,myPort,hisAddress,hisPort)]
     output        += ['\nMonitoring node IP        : {0} '.format(hisAddress)]
-    output        += ['Probe interval              : {0} sec '.format(monitor_interval)]
+    output        += ['Probe interval            : {0} sec '.format(monitor_interval)]
     output         = '\n'.join(output)
     print output
     print "\n"     
@@ -57,10 +57,11 @@ else:
             time_left = n[3] << 8 | n[2]
             time_left_ms = time_left * 14
                         
-            output         = []
+            
             if(time_elapsed != 0):
-                output        += ['Delay Experienced : {:<3} ({:<5} ms) \t\tTime Left : {:<3} ({:<5} ms)'.format(time_elapsed,time_elapsed_ms,time_left,time_left_ms)]
-                output         = '\n'.join(output)
+                output         = []
+                output        += ['Delay Experienced : {:<3} ({:<5} ms)\tTime Left : {:<3} ({:<5} ms)'.format(time_elapsed,time_elapsed_ms,time_left,time_left_ms)]
+                output         = '\t'.join(output)
                 print output       
         
     # close socket

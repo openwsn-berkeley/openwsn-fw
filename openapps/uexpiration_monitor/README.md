@@ -21,10 +21,9 @@ delay experienced by the packet and the remaining time before its expiry.
 
 Usage : python uexpiration_monitor.py <dest_ip> <probe_interval(sec)>
 
-#python uexpiration_monitor.py bbbb::1415:92cc:0:2 1 
+#python uexpiration_monitor.py bbbb::1415:92cc:0:2 1
 
 Typical output looks like this.
-
 
 Starting monitoring delay application...
 []:21569->[bbbb::1415:92cc:0:2]:3
@@ -32,14 +31,18 @@ Starting monitoring delay application...
 Monitoring node IP        : bbbb::1415:92cc:0:2 
 Probe interval            : 1 sec 
 
-Delay Experienced : 19  (266   ms) 		Time Left : 12  (168   ms)
-Delay Experienced : 48  (672   ms) 		Time Left : 52  (728   ms)
-Delay Experienced : 19  (266   ms) 		Time Left : 12  (168   ms)
-Delay Experienced : 13  (182   ms) 		Time Left : 87  (1218  ms)
-Delay Experienced : 18  (252   ms) 		Time Left : 82  (1148  ms)
-Delay Experienced : 122 (1708  ms) 		Time Left : 0   (0     ms)
-Delay Experienced : 17  (238   ms) 		Time Left : 83  (1162  ms)
-Delay Experienced : 55  (770   ms) 		Time Left : 45  (630   ms)
+
+Delay Experienced : 5   (70    ms)	Time Left : 66  (924   ms)
+Delay Experienced : 4   (56    ms)	Time Left : 67  (938   ms)
+Delay Experienced : 63  (882   ms)	Time Left : 0   (0     ms)
+Delay Experienced : 2   (28    ms)	Time Left : 69  (966   ms)
+Delay Experienced : 84  (1176  ms)	Time Left : 0   (0     ms)
+Delay Experienced : 1   (14    ms)	Time Left : 70  (980   ms)
+Delay Experienced : 6   (84    ms)	Time Left : 65  (910   ms)
+Delay Experienced : 11  (154   ms)	Time Left : 60  (840   ms)
+Delay Experienced : 38  (532   ms)	Time Left : 33  (462   ms)
+Delay Experienced : 8   (112   ms)	Time Left : 14  (196   ms)
+
 ...
 
 no reply

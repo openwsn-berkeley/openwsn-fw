@@ -9,7 +9,8 @@
 //=========================== variables =======================================
 
 uexpiration_vars_t uexpiration_vars;
-static uint16_t seqno = 0, d_flag = 0, delay = 0,max_num_pkts = 0,pkt_interval = 0;
+uint16_t seqno = 0;
+static uint16_t d_flag = 0, delay = 0,max_num_pkts = 0,pkt_interval = 0;
 OpenQueueEntry_t req;
 
 //=========================== prototypes ======================================
@@ -31,7 +32,6 @@ void uexpiration_init() {
 }
 
 void uexpiration_receive(OpenQueueEntry_t* request) {
-   uint16_t          temp_l4_destination_port;
    char buffer[5];
    char clr_buffer[5]= "     ";
    uint8_t    index = 0, len = 0, arg_num = 0; 
@@ -66,7 +66,7 @@ void uexpiration_receive(OpenQueueEntry_t* request) {
    memcpy(&buffer[5-arg_len[3]],&request->payload[arg_len[0]+arg_len[1]+arg_len[2]+3],arg_len[3]);   
    d_flag =   atoi(buffer);  
    
-   seqno = 1;
+   seqno = 0; // Reinitialize on next trigger 
 	
 	 uexpiration_vars.period = pkt_interval;	  
 	 // start periodic timer
@@ -113,11 +113,15 @@ void uexpiration_task_cb() {
    reply->l4_destination_port           = req.l4_sourcePortORicmpv6Type;
    reply->l4_sourcePortORicmpv6Type     = temp_l4_destination_port;
    reply->l3_destinationAdd.type        = ADDR_128B;
-   memcpy(&reply->l3_destinationAdd.addr_128b[0],&req.l3_sourceAdd.addr_128b[0],16); 
+   memcpy(&reply->l3_destinationAdd.addr_128b[0],&req.l3_sourceAdd.addr_128b[0],16);  
    
-   seqno++;
+   // Seq number in payload
+   packetfunctions_reserveHeaderSize(reply,sizeof(uint16_t));
+   reply->payload[1] = (uint8_t)((seqno & 0xff00)>>8);
+   reply->payload[0] = (uint8_t)(seqno & 0x00ff); 
+       
    //To stop periodic txn of data
-   if(seqno >= max_num_pkts) {
+   if(++seqno > max_num_pkts) {
    		opentimers_destroy(uexpiration_vars.timerId);
    } else {
       opentimers_scheduleAbsolute(
