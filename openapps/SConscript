@@ -17,6 +17,8 @@ defaultApps   = [
     'uinject',
     'userialbridge',
     'rrt',
+    'uexpiration',
+    'uexpiration_monitor',
 ]
 if localEnv['board']=='python':
     defaultApps  += [
