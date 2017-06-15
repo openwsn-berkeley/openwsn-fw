@@ -7,14 +7,14 @@
 #include <string.h>
 #include <stdint.h>
 #include "opendefs.h"
-#include "aes_ctr.h"
-#include "aes_cbc.h"
-#include "aes_ccms.h"
+#include "firmware_aes_ctr.h"
+#include "firmware_aes_cbc.h"
+#include "firmware_aes_ccms.h"
 #include "cryptoengine.h"
 
-static owerror_t aes_cbc_mac(uint8_t* a, uint8_t len_a, uint8_t* m, uint8_t len_m, uint8_t* nonce, uint8_t key[16], uint8_t* mac, uint8_t len_mac, uint8_t l);
+static owerror_t firmware_aes_cbc_mac(uint8_t* a, uint8_t len_a, uint8_t* m, uint8_t len_m, uint8_t* nonce, uint8_t key[16], uint8_t* mac, uint8_t len_mac, uint8_t l);
 
-static owerror_t aes_ctr_enc(uint8_t* m, uint8_t len_m, uint8_t* nonce, uint8_t key[16], uint8_t* mac, uint8_t len_mac, uint8_t l);
+static owerror_t firmware_aes_ctr_enc(uint8_t* m, uint8_t len_m, uint8_t* nonce, uint8_t key[16], uint8_t* mac, uint8_t len_mac, uint8_t l);
 
 /**
 \brief CCM* forward transformation (i.e. encryption + authentication).
@@ -32,7 +32,7 @@ static owerror_t aes_ctr_enc(uint8_t* m, uint8_t len_m, uint8_t* nonce, uint8_t 
 
 \returns E_SUCCESS when the generation was successful, E_FAIL otherwise. 
 */
-owerror_t aes_ccms_enc(uint8_t* a,
+owerror_t firmware_aes_ccms_enc(uint8_t* a,
          uint8_t len_a,
          uint8_t* m,
          uint8_t* len_m,
@@ -47,8 +47,8 @@ owerror_t aes_ccms_enc(uint8_t* a,
       return E_FAIL;
    }
 
-   if (aes_cbc_mac(a, len_a, m, *len_m, nonce, key, mac, len_mac, l) == E_SUCCESS) {
-      if (aes_ctr_enc(m, *len_m, nonce, key, mac, len_mac, l) == E_SUCCESS) {
+   if (firmware_aes_cbc_mac(a, len_a, m, *len_m, nonce, key, mac, len_mac, l) == E_SUCCESS) {
+      if (firmware_aes_ctr_enc(m, *len_m, nonce, key, mac, len_mac, l) == E_SUCCESS) {
          memcpy(&m[*len_m], mac, len_mac);
          *len_m += len_mac;
 
@@ -76,7 +76,7 @@ owerror_t aes_ccms_enc(uint8_t* a,
 
 \returns E_SUCCESS when decryption and verification were successful, E_FAIL otherwise. 
 */
-owerror_t aes_ccms_dec(uint8_t* a,
+owerror_t firmware_aes_ccms_dec(uint8_t* a,
          uint8_t len_a,
          uint8_t* m,
          uint8_t* len_m,
@@ -95,8 +95,8 @@ owerror_t aes_ccms_dec(uint8_t* a,
    *len_m -= len_mac;
    memcpy(mac, &m[*len_m], len_mac);
 
-   if (aes_ctr_enc(m, *len_m, nonce, key, mac, len_mac, l) == E_SUCCESS) {
-      if (aes_cbc_mac(a, len_a, m, *len_m, nonce, key, orig_mac, len_mac, l) == E_SUCCESS) {
+   if (firmware_aes_ctr_enc(m, *len_m, nonce, key, mac, len_mac, l) == E_SUCCESS) {
+      if (firmware_aes_cbc_mac(a, len_a, m, *len_m, nonce, key, orig_mac, len_mac, l) == E_SUCCESS) {
          if (memcmp(mac, orig_mac, len_mac) == 0) {
             return E_SUCCESS;
          }
@@ -120,7 +120,7 @@ owerror_t aes_ccms_dec(uint8_t* a,
 
 \returns E_SUCCESS when the generation was successful, E_FAIL otherwise. 
 */
-static owerror_t aes_cbc_mac(uint8_t* a,
+static owerror_t firmware_aes_cbc_mac(uint8_t* a,
          uint8_t len_a,
          uint8_t* m,
          uint8_t len_m,
@@ -192,7 +192,7 @@ static owerror_t aes_cbc_mac(uint8_t* a,
    memset(&buffer[len], 0, pad_len);
    len += pad_len;
 
-   aes_cbc_enc_raw(buffer, len, key, cbc_mac_iv);
+   firmware_aes_cbc_enc_raw(buffer, len, key, cbc_mac_iv);
 
    // copy MAC
    memcpy(mac, &buffer[len - 16], len_mac);
@@ -215,7 +215,7 @@ static owerror_t aes_cbc_mac(uint8_t* a,
 
 \returns E_SUCCESS when the encryption was successful, E_FAIL otherwise. 
 */
-static owerror_t aes_ctr_enc(uint8_t* m,
+static owerror_t firmware_aes_ctr_enc(uint8_t* m,
          uint8_t len_m,
          uint8_t* nonce,
          uint8_t key[16],
@@ -259,7 +259,7 @@ static owerror_t aes_ctr_enc(uint8_t* m,
    memset(&buffer[len], 0, pad_len);
    len += pad_len;
 
-   aes_ctr_enc_raw(buffer, len, key, iv);
+   firmware_aes_ctr_enc_raw(buffer, len, key, iv);
 
    memcpy(m, &buffer[16], len_m);
    memcpy(mac, buffer, len_mac);

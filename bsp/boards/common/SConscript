@@ -5,10 +5,10 @@ Import('env')
 localEnv = env.Clone()
 
 source = [
-    'aes_cbc.c',
-    'aes_ccms.c',
-    'aes_ctr.c',
-    'aes_ecb.c',
+    'firmware_aes_cbc.c',
+    'firmware_aes_ccms.c',
+    'firmware_aes_ctr.c',
+    'firmware_aes_ecb.c',
 ]
 
 localEnv.Append(

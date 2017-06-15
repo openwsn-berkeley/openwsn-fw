@@ -7,7 +7,7 @@
 #include <string.h>
 #include <stdint.h>
 #include "opendefs.h"
-#include "aes_cbc.h"
+#include "firmware_aes_cbc.h"
 #include "cryptoengine.h"
 
 /**
@@ -19,7 +19,7 @@
 
 \returns E_SUCCESS when the encryption was successful. 
 */
-owerror_t aes_cbc_enc_raw(uint8_t* buffer, uint8_t len, uint8_t key[16], uint8_t iv[16]) {
+owerror_t firmware_aes_cbc_enc_raw(uint8_t* buffer, uint8_t len, uint8_t key[16], uint8_t iv[16]) {
    uint8_t  n;
    uint8_t  k;
    uint8_t  nb;

@@ -16,7 +16,7 @@ extern "C" {
 
 //=========================== prototypes ======================================
 
-owerror_t aes_ecb_enc(uint8_t* buffer, uint8_t* key);
+owerror_t firmware_aes_ecb_enc(uint8_t* buffer, uint8_t* key);
 
 #ifdef  __cplusplus
 }

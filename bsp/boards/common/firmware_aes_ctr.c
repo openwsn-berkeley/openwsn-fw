@@ -6,10 +6,10 @@
 #include <string.h>
 #include <stdint.h>
 #include "opendefs.h"
-#include "aes_ctr.h"
+#include "firmware_aes_ctr.h"
 #include "cryptoengine.h"
 
-static void inc_counter(uint8_t* counter) {
+static void firmware_inc_counter(uint8_t* counter) {
    // from openssl
    uint32_t n = 16;
    uint8_t  c;
@@ -31,7 +31,7 @@ static void inc_counter(uint8_t* counter) {
 
 \returns E_SUCCESS when the encryption was successful. 
 */
-owerror_t aes_ctr_enc_raw(uint8_t* buffer, uint8_t len, uint8_t key[16], uint8_t iv[16]) {
+owerror_t firmware_aes_ctr_enc_raw(uint8_t* buffer, uint8_t len, uint8_t key[16], uint8_t iv[16]) {
    uint8_t n;
    uint8_t k;
    uint8_t nb;
@@ -47,7 +47,7 @@ owerror_t aes_ctr_enc_raw(uint8_t* buffer, uint8_t len, uint8_t key[16], uint8_t
       for (k = 0; k < 16; k++) {
          pbuf[k] ^= eiv[k];
       }
-      inc_counter(iv);
+      firmware_inc_counter(iv);
    }
 
    return E_SUCCESS;

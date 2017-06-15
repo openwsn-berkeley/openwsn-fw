@@ -12,7 +12,7 @@ extern "C" {
 
 //=========================== prototypes ======================================
 
-owerror_t aes_ctr_enc_raw(uint8_t* buffer, uint8_t len, uint8_t key[16], uint8_t iv[16]);
+owerror_t firmware_aes_ctr_enc_raw(uint8_t* buffer, uint8_t len, uint8_t key[16], uint8_t iv[16]);
 
 #ifdef  __cplusplus
 }
