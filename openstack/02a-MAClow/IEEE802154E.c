@@ -68,17 +68,14 @@ bool     isValidJoin(OpenQueueEntry_t* eb, ieee802154_header_iht *parsedHeader);
 bool     isValidEbFormat(OpenQueueEntry_t* pkt);
 // IEs Handling
 bool     ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE);
+void     timeslotTemplateIDStoreFromEB(uint8_t id);
+void     channelhoppingTemplateIDStoreFromEB(uint8_t id);
 // ASN handling
 void     incrementAsnOffset(void);
 void     ieee154e_resetAsn(void);
 void     ieee154e_syncSlotOffset(void);
 void     asnStoreFromEB(uint8_t* asn);
 void     joinPriorityStoreFromEB(uint8_t jp);
-
-// timeslot template handling
-void     timeslotTemplateIDStoreFromEB(uint8_t id);
-// channelhopping template handling
-void     channelhoppingTemplateIDStoreFromEB(uint8_t id);
 // synchronization
 void     synchronizePacket(PORT_TIMER_WIDTH timeReceived);
 void     synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection);
@@ -113,7 +110,7 @@ void ieee154e_init() {
    memset(&ieee154e_vars,0,sizeof(ieee154e_vars_t));
    memset(&ieee154e_dbg,0,sizeof(ieee154e_dbg_t));
    
-   ieee154e_vars.singleChannel     = 26; // 0 means channel hopping
+   ieee154e_vars.singleChannel     = 0; // 0 means channel hopping
    ieee154e_vars.isAckEnabled      = TRUE;
    ieee154e_vars.isSecurityEnabled = FALSE;
    ieee154e_vars.slotDuration      = TsSlotDuration;
@@ -208,22 +205,22 @@ void isr_ieee154e_newSlot() {
     );
     ieee154e_vars.slotDuration          = TsSlotDuration;
     // radiotimer_setPeriod(ieee154e_vars.slotDuration);
-    if (ieee154e_vars.isSync==FALSE) {
-       if (idmanager_getIsDAGroot()==TRUE) {
-           changeIsSync(TRUE);
-           ieee154e_resetAsn();
-           ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
-       } else {
-           activity_synchronize_newSlot();
-       }
-    } else {
+   if (ieee154e_vars.isSync==FALSE) {
+      if (idmanager_getIsDAGroot()==TRUE) {
+         changeIsSync(TRUE);
+         ieee154e_resetAsn();
+         ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
+      } else {
+         activity_synchronize_newSlot();
+      }
+   } else {
 #ifdef ADAPTIVE_SYNC
-        // adaptive synchronization
-        adaptive_sync_countCompensationTimeout();
+     // adaptive synchronization
+      adaptive_sync_countCompensationTimeout();
 #endif
-        activity_ti1ORri1();
-    }
-    ieee154e_dbg.num_newSlot++;
+      activity_ti1ORri1();
+   }
+   ieee154e_dbg.num_newSlot++;
 }
 
 /**
@@ -831,7 +828,7 @@ port_INLINE void activity_ti1ORri1() {
           for (i=0;i<ieee154e_vars.numOfSleepSlots-1;i++){
              incrementAsnOffset();
           }
-      }
+      }  
       ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();      
    } else {
       // this is NOT the next active slot, abort
@@ -1576,7 +1573,7 @@ port_INLINE void activity_ri4(PORT_TIMER_WIDTH capturedTime) {
    // cancel rt3
    radiotimer_cancel(ACTION_NORMAL_TIMER);
 #else
-    // cancel rt3
+   // cancel rt3
     opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         ieee154e_vars.slotDuration,                       // duration
@@ -1626,7 +1623,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
    // cancel rt4
    radiotimer_cancel(ACTION_NORMAL_TIMER);
 #else
-    // cancel rt4
+   // cancel rt4
     opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         ieee154e_vars.slotDuration,                       // duration
@@ -1718,7 +1715,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
 
       // toss the IEEE802.15.4 header
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_header.headerLength);
-      
+
       // handle IEs xv poipoi
       // reset join priority 
       // retrieve IE in sixtop
@@ -1811,7 +1808,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
             radiotimer_setCapture(ACTION_TX_SFD_DONE);
             radiotimer_setCapture(ACTION_TX_SEND_DONE);
 #else
-        // arm rt5
+         // arm rt5
         opentimers_scheduleAbsolute(
             ieee154e_vars.timerId,                            // timerId
             DURATION_rt5,                                     // duration
@@ -2029,7 +2026,7 @@ port_INLINE void activity_ri9(PORT_TIMER_WIDTH capturedTime) {
    // cancel rt8
    radiotimer_cancel(ACTION_NORMAL_TIMER);
 #else
-    // cancel rt8
+   // cancel rt8
     opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         ieee154e_vars.slotDuration,                       // duration
@@ -2243,22 +2240,36 @@ port_INLINE void asnStoreFromEB(uint8_t* asn) {
 }
 
 port_INLINE void ieee154e_syncSlotOffset() {
-   frameLength_t frameLength;
-   uint32_t slotOffset;
+    frameLength_t frameLength;
+    uint32_t slotOffset;
+    uint8_t i;
    
-   frameLength = schedule_getFrameLength();
+    frameLength = schedule_getFrameLength();
    
-   // determine the current slotOffset
-   slotOffset = ieee154e_vars.asn.byte4;
-   slotOffset = slotOffset % frameLength;
-   slotOffset = slotOffset << 16;
-   slotOffset = slotOffset + ieee154e_vars.asn.bytes2and3;
-   slotOffset = slotOffset % frameLength;
-   slotOffset = slotOffset << 16;
-   slotOffset = slotOffset + ieee154e_vars.asn.bytes0and1;
-   slotOffset = slotOffset % frameLength;
+    // determine the current slotOffset
+    slotOffset = ieee154e_vars.asn.byte4;
+    slotOffset = slotOffset % frameLength;
+    slotOffset = slotOffset << 16;
+    slotOffset = slotOffset + ieee154e_vars.asn.bytes2and3;
+    slotOffset = slotOffset % frameLength;
+    slotOffset = slotOffset << 16;
+    slotOffset = slotOffset + ieee154e_vars.asn.bytes0and1;
+    slotOffset = slotOffset % frameLength;
    
-   ieee154e_vars.slotOffset       = (slotOffset_t) slotOffset;
+    ieee154e_vars.slotOffset       = (slotOffset_t) slotOffset;
+   
+    schedule_syncSlotOffset(ieee154e_vars.slotOffset);
+    ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
+    /* 
+    infer the asnOffset based on the fact that
+    ieee154e_vars.freq = 11 + (asnOffset + channelOffset)%16 
+    */
+    for (i=0;i<16;i++){
+        if ((ieee154e_vars.freq - 11)==ieee154e_vars.chTemplate[i]){
+            break;
+        }
+    }
+    ieee154e_vars.asnOffset = i - schedule_getChannelOffset();
 }
 
 void ieee154e_setIsAckEnabled(bool isEnabled){
@@ -2333,7 +2344,7 @@ void synchronizePacket(PORT_TIMER_WIDTH timeReceived) {
       incrementAsnOffset();
    }
    
-    // resynchronize by applying the new period
+   // resynchronize by applying the new period
     opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         newPeriod,                                        // duration
@@ -2377,7 +2388,7 @@ void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
    currentPeriod                  =  ieee154e_vars.slotDuration;
    newPeriod                      =  (PORT_TIMER_WIDTH)((PORT_SIGNED_INT_WIDTH)currentPeriod+timeCorrection);
 
-    // resynchronize by applying the new period
+   // resynchronize by applying the new period
     opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         newPeriod,                                        // duration
@@ -2573,13 +2584,13 @@ void endSlot() {
    radio_rfOff();
    
    // compute the duty cycle if radio has been turned on
-   if (ieee154e_vars.radioOnThisSlot==TRUE){
+   if (ieee154e_vars.radioOnThisSlot==TRUE){  
       ieee154e_vars.radioOnTics+=(sctimer_readCounter()-ieee154e_vars.radioOnInit);
    }
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
    radiotimer_cancel(ACTION_ALL_RADIOTIMER_INTERRUPT);
 #else
-    // clear any pending timer
+   // clear any pending timer
     opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         ieee154e_vars.slotDuration,                       // duration
@@ -2663,21 +2674,3 @@ void endSlot() {
 bool ieee154e_isSynch(){
    return ieee154e_vars.isSync;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

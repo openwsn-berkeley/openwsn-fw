@@ -709,7 +709,7 @@
         </option>
         <option>
           <name>IlinkMapFile</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>IlinkLogFile</name>
@@ -2429,24 +2429,6 @@
       </file>
     </group>
     <group>
-      <name>techo</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\techo\techo.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\techo\techo.h</name>
-      </file>
-    </group>
-    <group>
-      <name>tohlone</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\tohlone\tohlone.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\tohlone\tohlone.h</name>
-      </file>
-    </group>
-    <group>
       <name>uecho</name>
       <file>
         <name>$PROJ_DIR$\..\..\..\openapps\uecho\uecho.c</name>
@@ -2601,12 +2583,6 @@
     </group>
     <group>
       <name>04-TRAN</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\opentcp.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\opentcp.h</name>
-      </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\openudp.c</name>
       </file>

@@ -50,12 +50,9 @@ static PyObject* OpenMote_getState(OpenMote* self) {
    PyObject* radio_icb_startFrame_cb;
    PyObject* radio_icb_endFrame_cb;
    PyObject* sctimer_icb_compare_cb;
-   //PyObject* ohlone_vars;
-   PyObject* tcpinject_vars;
    PyObject* icmpv6echo_vars;
    PyObject* icmpv6rpl_vars;
    PyObject* opencoap_vars;
-   PyObject* tcp_vars;
    PyObject* neighbors_vars;
    PyObject* sixtop_vars;
    PyObject* sf0_vars;
@@ -86,18 +83,6 @@ static PyObject* OpenMote_getState(OpenMote* self) {
    sctimer_icb_compare_cb         = PyInt_FromLong((intptr_t)self->sctimer_icb.compare_cb);
    PyDict_SetItemString(returnVal, "sctimer_icb_compare_cb", sctimer_icb_compare_cb);
    
-   // ohlone_vars
-   /*
-   ohlone_vars = PyDict_New();
-   // TODO
-   PyDict_SetItemString(returnVal, "ohlone_vars", ohlone_vars);
-   */
-   
-   // tcpinject_vars
-   tcpinject_vars = PyDict_New();
-   // TODO
-   PyDict_SetItemString(returnVal, "tcpinject_vars", tcpinject_vars);
-   
    // icmpv6echo_vars
    icmpv6echo_vars = PyDict_New();
    // TODO
@@ -112,11 +97,6 @@ static PyObject* OpenMote_getState(OpenMote* self) {
    opencoap_vars = PyDict_New();
    // TODO
    PyDict_SetItemString(returnVal, "opencoap_vars", opencoap_vars);
-   
-   // tcp_vars
-   tcp_vars = PyDict_New();
-   // TODO
-   PyDict_SetItemString(returnVal, "tcp_vars", tcp_vars);
    
    // neighbors_vars
    neighbors_vars = PyDict_New();
