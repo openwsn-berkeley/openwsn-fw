@@ -101,10 +101,10 @@ help-option:
 command_line_options = {
     'board':       [
         # MSP430
-        #'telosb',
+        'telosb',
         'gina',
-        #'wsn430v13b',
-        #'wsn430v14',
+        'wsn430v13b',
+        'wsn430v14',
         'z1',
         # Cortex-M3
         'openmote-cc2538',
