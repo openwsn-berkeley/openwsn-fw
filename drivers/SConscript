@@ -11,12 +11,20 @@ sources_c = [
     os.path.join('common','opensensors.c'),
     os.path.join('common','openserial.c'),
     os.path.join('common','opentimers.c'),
+    os.path.join('common','firmware_aes_cbc.c'),
+    os.path.join('common','firmware_aes_ccms.c'),
+    os.path.join('common','firmware_aes_ctr.c'),
+    os.path.join('common','firmware_aes_ecb.c'),
 ]
 sources_h = [
     os.path.join('common','openhdlc.h'),
     os.path.join('common','opensensors.h'),
     os.path.join('common','openserial.h'),
     os.path.join('common','opentimers.h'),
+    os.path.join('common','firmware_aes_cbc.h'),
+    os.path.join('common','firmware_aes_ccms.h'),
+    os.path.join('common','firmware_aes_ctr.h'),
+    os.path.join('common','firmware_aes_ecb.h'),
 ]
 
 if localEnv['board']=='python':
