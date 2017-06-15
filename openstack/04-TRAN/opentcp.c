@@ -606,10 +606,11 @@ bool tcp_debugPrint(void) {
 //timer used to reset state when TCP state machine is stuck
 void timers_tcp_fired(void) {
    opentcp_reset();
-   opentimers_scheduleRelative(
+   opentimers_scheduleIn(
              tcp_vars.timerId,
              TCP_TIMEOUT,
              TIME_MS,
+             TIMER_PERIODIC,
              opentcp_timer_cb
    );
 }

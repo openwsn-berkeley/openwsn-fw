@@ -32,7 +32,7 @@ static const uint8_t ebIEsBytestream[] = {
 #define EB_JP_OFFSET                 9
 #define EB_IE_LEN                   28
 
-#define SYNCHRONIZING_CHANNEL       20 // channel the mote listens on to synchronize
+#define SYNCHRONIZING_CHANNEL       26 // channel the mote listens on to synchronize
 #define TXRETRIES                    3 // number of MAC retries before declaring failed
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to successfully synchronize

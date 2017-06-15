@@ -341,6 +341,7 @@
           <state>$PROJ_DIR$\..\..\..\openapps\csensors\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\cstorm\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\cwellknown\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\opencoap\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\rrt\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\techo\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\tohlone\</state>
@@ -2321,6 +2322,15 @@
       </file>
     </group>
     <group>
+      <name>opencoap</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\opencoap\opencoap.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\opencoap\opencoap.h</name>
+      </file>
+    </group>
+    <group>
       <name>rrt</name>
       <file>
         <name>$PROJ_DIR$\..\..\..\openapps\rrt\rrt.c</name>
@@ -2446,12 +2456,6 @@
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\neighbors.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\processIE.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\processIE.h</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\schedule.c</name>
       </file>
       <file>
@@ -2514,12 +2518,6 @@
     </group>
     <group>
       <name>04-TRAN</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\opencoap.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\opencoap.h</name>
-      </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\opentcp.c</name>
       </file>

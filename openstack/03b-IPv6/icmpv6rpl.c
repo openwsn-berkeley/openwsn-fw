@@ -81,11 +81,11 @@ void icmpv6rpl_init() {
    
    icmpv6rpl_vars.dioPeriod                 = TIMER_DIO_TIMEOUT;
    icmpv6rpl_vars.timerIdDIO                = opentimers_create();
-   opentimers_scheduleAbsolute(
+   opentimers_scheduleIn(
        icmpv6rpl_vars.timerIdDIO,
-       872 +(openrandom_get16b()&0xff),
-       opentimers_getValue(),
+       icmpv6rpl_vars.dioPeriod,
        TIME_MS,
+       TIMER_PERIODIC,
        icmpv6rpl_timer_DIO_cb
    );
 
@@ -130,11 +130,11 @@ void icmpv6rpl_init() {
    
    icmpv6rpl_vars.daoPeriod                 = TIMER_DAO_TIMEOUT;
    icmpv6rpl_vars.timerIdDAO                = opentimers_create();
-   opentimers_scheduleAbsolute(
+   opentimers_scheduleIn(
        icmpv6rpl_vars.timerIdDAO,
-       872 +(openrandom_get16b()&0xff),
-       opentimers_getValue(),
+       icmpv6rpl_vars.daoPeriod,
        TIME_MS,
+       TIMER_PERIODIC,
        icmpv6rpl_timer_DAO_cb
    );
 }
@@ -516,13 +516,6 @@ void icmpv6rpl_killPreferredParent() {
 */
 void icmpv6rpl_timer_DIO_cb(void) {
    scheduler_push_task(icmpv6rpl_timer_DIO_task,TASKPRIO_RPL);
-   // arm the DIO timer with this new value
-   opentimers_scheduleRelative(
-      icmpv6rpl_vars.timerIdDIO,
-      872 +(openrandom_get16b()&0xff),
-      TIME_MS,
-      icmpv6rpl_timer_DIO_cb
-   );
 }
 
 /**
@@ -531,15 +524,7 @@ void icmpv6rpl_timer_DIO_cb(void) {
 \note This function is executed in task context, called by the scheduler.
 */
 void icmpv6rpl_timer_DIO_task() {
-    icmpv6rpl_vars.dioTimerCounter = (icmpv6rpl_vars.dioTimerCounter+1)%icmpv6rpl_vars.dioPeriod;
-    switch (icmpv6rpl_vars.dioTimerCounter) {
-        case 0:
-            // called every TIMER_DIO_TIMEOUT seconds
-            sendDIO();
-            break;
-        default:
-            break;
-    }
+    sendDIO();
 }
 
 /**
@@ -634,13 +619,6 @@ void sendDIO() {
 */
 void icmpv6rpl_timer_DAO_cb(void) {
    scheduler_push_task(icmpv6rpl_timer_DAO_task,TASKPRIO_RPL);
-   // arm the DAO timer with this new value
-   opentimers_scheduleRelative(
-       icmpv6rpl_vars.timerIdDAO,
-       872 +(openrandom_get16b()&0xff),
-       TIME_MS,
-       icmpv6rpl_timer_DAO_cb
-   );
 }
 
 /**
@@ -649,15 +627,7 @@ void icmpv6rpl_timer_DAO_cb(void) {
 \note This function is executed in task context, called by the scheduler.
 */
 void icmpv6rpl_timer_DAO_task() {
-    icmpv6rpl_vars.daoTimerCounter = (icmpv6rpl_vars.daoTimerCounter+1)%icmpv6rpl_vars.daoPeriod;
-    switch (icmpv6rpl_vars.daoTimerCounter) {
-        case 0:
-            // called every TIMER_DAO_TIMEOUT seconds
-            sendDAO();
-            break;
-        default:
-            break;
-    }
+    sendDAO();
 }
 
 /**

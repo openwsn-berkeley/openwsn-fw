@@ -58,10 +58,11 @@ void macpong_initSend() {
         default:
             break;
    }
-   opentimers_scheduleRelative(
+   opentimers_scheduleIn(
         macpong_vars.timerId, // timerId
         1000,                 // duration
         TIME_MS,              // timetype
+        TIMER_ONESHOT,
         macpong_initSend      // callback
    );
   
