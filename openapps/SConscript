@@ -137,6 +137,7 @@ else:
             os.path.join('#','openstack','cross-layers'),
             os.path.join('#','openstack','02a-MAClow'),
             os.path.join('#','openstack','02b-MAChigh'),
+            os.path.join('#','openstack','03a-IPHC'),
             os.path.join('#','openstack','03b-IPv6'),
             # openapps
             os.path.join('#','openapps'),
