@@ -4,7 +4,6 @@
 #include "openserial.h"
 #include "packetfunctions.h"
 #include "scheduler.h"
-#include "iphc.h"
 
 //=========================== variables =======================================
 

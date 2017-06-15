@@ -3,7 +3,9 @@
 #include "openqueue.h"
 #include "openserial.h"
 #include "packetfunctions.h"
+#if DEADLINE_OPTION_ENABLED 
 #include "iphc.h"
+#endif
 
 //=========================== variables =======================================
 umonitor_vars_t umonitor_vars;
