@@ -203,7 +203,7 @@ int16_t ieee154e_computeAsnDiff(asn_t* h_asn, asn_t* l_asn) {
    int16_t diff;
 
    if (h_asn->byte4 != l_asn->byte4) {
-      return (PORT_RADIOTIMER_WIDTH)0xFFFFFFFF;
+      return (int16_t)0xFFFFFFFF;
    }
    
    diff = 0;
@@ -214,7 +214,7 @@ int16_t ieee154e_computeAsnDiff(asn_t* h_asn, asn_t* l_asn) {
       diff += 0xffff-l_asn->bytes0and1;
       diff += 1;
    } else {
-      diff = (PORT_RADIOTIMER_WIDTH)0xFFFFFFFF;
+      diff = (int16_t)0xFFFFFFFF;
    }
    return diff;
 }
