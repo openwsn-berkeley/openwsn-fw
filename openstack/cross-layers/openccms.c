@@ -2,12 +2,13 @@
 \brief AES CCMS implementation
   
 \author Marcelo Barros de Almeida <marcelobarrosalmeida@gmail.com>, March 2015.
-\author Malisa Vucinic <malishav@gmail.com>, March 2015.
+\author Malisa Vucinic <malishav@gmail.com>, June 2017.
 */
 #include <string.h>
 #include <stdint.h>
 #include "opendefs.h"
 #include "openccms.h"
+#include "openaes.h"
 #include "cryptoengine.h"
 
 //=========================== defines =========================================
@@ -300,7 +301,7 @@ owerror_t aes_cbc_enc_raw(uint8_t* buffer, uint8_t len, uint8_t key[16], uint8_t
       for (k = 0; k < 16; k++) {
             pbuf[k] ^= pxor[k];
       }
-      cryptoengine_aes_ecb_enc(pbuf,key);
+      openaes_enc(pbuf,key);
       pxor = pbuf;
    }
    return E_SUCCESS;
@@ -326,7 +327,7 @@ owerror_t aes_ctr_enc_raw(uint8_t* buffer, uint8_t len, uint8_t key[16], uint8_t
    for (n = 0; n < nb; n++) {
       pbuf = &buffer[16 * n];
       memcpy(eiv, iv, 16);
-      cryptoengine_aes_ecb_enc(eiv, key); 
+      openaes_enc(eiv, key); 
       // may be faster if vector are aligned to 4 bytes (use long instead char in xor)
       for (k = 0; k < 16; k++) {
          pbuf[k] ^= eiv[k];
