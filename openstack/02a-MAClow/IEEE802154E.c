@@ -618,8 +618,6 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
          // before authenticating the beacon, because nonce is created from the ASN
          if (!ieee154e_vars.isSync && ieee802514_header.frameType == IEEE154_TYPE_BEACON) {
             if (!isValidJoin(ieee154e_vars.dataReceived, &ieee802514_header)) {
-               // invalidate variables
-               memset(&ieee154e_vars, 0, sizeof(ieee154e_vars_t));
                break;
             }
          }
@@ -1837,7 +1835,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
       return;
       
    } while(0);
-   
+    
    // free the (invalid) received data so RAM memory can be recycled
    openqueue_freePacketBuffer(ieee154e_vars.dataReceived);
    
