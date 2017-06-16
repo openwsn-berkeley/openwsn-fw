@@ -68,7 +68,7 @@
 #define PORT_maxTxAckPrepare                10    //  122us (measured  94us)
 // radio speed related
 #ifdef L2_SECURITY_ACTIVE
-#define PORT_delayTx                         7    //  366us (measured xxxus)
+#define PORT_delayTx                        14    //  366us (measured xxxus)
 #else
 #define PORT_delayTx                        12    //  366us (measured xxxus)
 #endif
