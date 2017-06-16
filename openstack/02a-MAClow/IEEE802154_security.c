@@ -334,6 +334,7 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
 
    // Fill last 5 bytes with the ASN part of the nonce
    ieee154e_getAsn(&nonce[8]);
+   packetfunctions_reverseArrayByteOrder(&nonce[8], 5);  // reverse ASN bytes to big endian 
 
    //identify data to be authenticated and data to be encrypted
    switch (msg->l2_securityLevel) {
@@ -586,6 +587,7 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t* msg){
    memcpy(&nonce[0],msg->l2_nextORpreviousHop.addr_64b, 8);
    // Fill last 5 bytes with ASN part of the nonce
    ieee154e_getAsn(&nonce[8]);
+   packetfunctions_reverseArrayByteOrder(&nonce[8], 5);  // reverse ASN bytes to big endian 
 
    //identify data to be authenticated and data to be decrypted
    switch (msg->l2_securityLevel) {
