@@ -25,7 +25,7 @@ static void inc_counter(uint8_t* counter);
 //=========================== public ==========================================
 
 /**
-\brief CCM* forward transformation (i.e. encryption + authentication).
+\brief CCM* forward transformation (i.e. encryption + authentication) implemented in software. Invokes software implementation of AES.
 \param[in] a Pointer to the authentication only data.
 \param[in] len_a Length of authentication only data.
 \param[in,out] m Pointer to the data that is both authenticated and encrypted. Overwritten by
@@ -68,7 +68,7 @@ owerror_t openccms_enc(uint8_t* a,
 }
 
 /**
-\brief CCM* inverse transformation (i.e. decryption + tag verification).
+\brief CCM* inverse transformation (i.e. decryption + tag verification) implemented in software. Invokes software implementation of AES.
 \param[in] a Pointer to the authentication only data.
 \param[in] len_a Length of authentication only data.
 \param[in,out] m Pointer to the data that is both authenticated and encrypted. Overwritten by
