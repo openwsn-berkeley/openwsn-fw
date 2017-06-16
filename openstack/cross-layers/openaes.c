@@ -9,7 +9,9 @@ Source: http://is.gd/o9RSPq
 **************************************************************/
 #include <stdint.h>
 #include "opendefs.h"
-#include "firmware_aes_ecb.h"
+#include "openaes.h"
+
+//=========================== variables =======================================
 
 // foreward sbox
 const unsigned char sbox[256] = {
@@ -34,9 +36,35 @@ const unsigned char sbox[256] = {
 const unsigned char Rcon[11] = {
     0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36 };
 
+//=========================== prototypes ======================================
+
+void expandKey(unsigned char *expandedKey,unsigned char *key);
+unsigned char galois_mul2(unsigned char value);
+void aes_encr(unsigned char *state, unsigned char *expandedKey);
+
+//=========================== public ==========================================
+
+/**
+\brief Basic AES encryption of a single 16-octet block.
+\param[in,out] buffer Single block plaintext. Will be overwritten by ciphertext.
+\param[in] key Buffer containing the secret key (16 octets).
+
+\returns E_SUCCESS when the encryption was successful. 
+*/
+owerror_t openaes_enc(uint8_t buffer[16], uint8_t key[16])
+{
+    uint8_t expandedKey[176];
+
+    expandKey(expandedKey, key);       // expand the key into 176 bytes
+    aes_encr(buffer, expandedKey);
+
+    return E_SUCCESS;
+}
+
+//=========================== private =========================================
 
 // expand the key
-void firmware_expandKey(unsigned char *expandedKey,
+void expandKey(unsigned char *expandedKey,
     unsigned char *key)
 {
     unsigned short ii, buf1;
@@ -87,7 +115,7 @@ unsigned char galois_mul2(unsigned char value)
 //   after that the 10th round without mixcolums
 //   no further subfunctions to save cycles for function calls
 //   no structuring with "for (....)" to save cycles
-void firmware_aes_encr(unsigned char *state, unsigned char *expandedKey)
+void aes_encr(unsigned char *state, unsigned char *expandedKey)
 {
     unsigned char buf1, buf2, buf3, round;
 
@@ -193,20 +221,4 @@ void firmware_aes_encr(unsigned char *state, unsigned char *expandedKey)
     state[15] ^= expandedKey[175];
 }
 
-/**
-\brief Basic AES encryption of a single 16-octet block.
-\param[in,out] buffer Single block plaintext. Will be overwritten by ciphertext.
-\param[in] key Buffer containing the secret key (16 octets).
-
-\returns E_SUCCESS when the encryption was successful. 
-*/
-owerror_t firmware_aes_ecb_enc(uint8_t buffer[16], uint8_t key[16])
-{
-    uint8_t expandedKey[176];
-
-    firmware_expandKey(expandedKey, key);       // expand the key into 176 bytes
-    firmware_aes_encr(buffer, expandedKey);
-
-    return E_SUCCESS;
-}
 
