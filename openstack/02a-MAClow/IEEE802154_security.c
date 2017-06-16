@@ -17,7 +17,7 @@
 #include "IEEE802154_security.h"
 
 //=============================define==========================================
-
+#ifdef L2_SECURITY_ACTIVE
 //=========================== variables =======================================
 
 ieee802154_security_vars_t ieee802154_security_vars;
@@ -910,4 +910,36 @@ void IEEE802154_security_getFrameCounter(macFrameCounter_t reference,
    array[3] = (reference.bytes2and3/256 & 0xff);
    array[4] =  reference.byte4;
 }
+
+#else /* L2_SECURITY_ACTIVE */
+
+void IEEE802154_security_init(void) {
+    return;
+}
+
+void IEEE802154_security_prependAuxiliarySecurityHeader(OpenQueueEntry_t* msg){
+    return;
+}
+
+void IEEE802154_security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t* msg, ieee802154_header_iht* tempheader) {
+    return;
+}
+
+owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t* msg) {
+    return E_SUCCESS;
+}
+
+owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t* msg) {
+    return E_SUCCESS;
+}
+
+uint8_t IEEE802154_security_authLengthChecking(uint8_t sec_level) {
+    return (uint8_t) 0;
+}
+
+uint8_t IEEE802154_security_auxLengthChecking(uint8_t kid, uint8_t sup, uint8_t size) {
+    return (uint8_t) 0;
+}
+
+#endif /* L2_SECURITY_ACTIVE */
 
