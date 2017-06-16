@@ -26,6 +26,7 @@
 #include "sensors.h"
 #include "sctimer.h"
 #include "uart.h"
+#include "cryptoengine.h"
 
 //=========================== variables =======================================
 
@@ -75,6 +76,7 @@ void board_init(void) {
    radio_init();
    i2c_init();
    sensors_init();
+   cryptoengine_init();
 }
 
 /**

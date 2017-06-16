@@ -9,7 +9,7 @@
 */
 
 #include "packetfunctions.h"
-#include "crypto_engine.h"
+#include "cryptoengine.h"
 #include "IEEE802154.h"
 #include "IEEE802154E.h"
 #include "idmanager.h"
@@ -17,7 +17,7 @@
 #include "IEEE802154_security.h"
 
 //=============================define==========================================
-
+#ifdef L2_SECURITY_ACTIVE
 //=========================== variables =======================================
 
 ieee802154_security_vars_t ieee802154_security_vars;
@@ -375,15 +375,15 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
    }
 
    //Encryption and/or authentication
-   // CRYPTO_ENGINE overwrites m[] with ciphertext and appends the MIC
-   outStatus = CRYPTO_ENGINE.aes_ccms_enc(a,
-                                          len_a,
-                                          m,
-                                          &len_m,
-                                          nonce,
-                                          2, // L=2 in 15.4 std
-                                          key,
-                                          msg->l2_authenticationLength);
+   // cryptoengine overwrites m[] with ciphertext and appends the MIC
+   outStatus = cryptoengine_aes_ccms_enc(a,
+                                    len_a,
+                                    m,
+                                    &len_m,
+                                    nonce,
+                                    2, // L=2 in 15.4 std
+                                    key,
+                                    msg->l2_authenticationLength);
 
    //verify that no errors occurred
    if (outStatus != E_SUCCESS) {
@@ -622,14 +622,14 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t* msg){
    }
 
    //decrypt and/or verify authenticity of the frame
-   outStatus = CRYPTO_ENGINE.aes_ccms_dec(a,
-                                          len_a,
-                                          c,
-                                          &len_c,
-                                          nonce,
-                                          2,
-                                          key,
-                                          msg->l2_authenticationLength);
+   outStatus = cryptoengine_aes_ccms_dec(a,
+                                    len_a,
+                                    c,
+                                    &len_c,
+                                    nonce,
+                                    2,
+                                    key,
+                                    msg->l2_authenticationLength);
 
    //verify if any error occurs
    if (outStatus != E_SUCCESS){
@@ -911,15 +911,35 @@ void IEEE802154_security_getFrameCounter(macFrameCounter_t reference,
    array[4] =  reference.byte4;
 }
 
-/*---------------------------------------------------------------------------*/
-const struct ieee802154_security_driver IEEE802154_security = {
-   IEEE802154_security_init,
-   IEEE802154_security_prependAuxiliarySecurityHeader,
-   IEEE802154_security_retrieveAuxiliarySecurityHeader,
-   IEEE802154_security_outgoingFrameSecurity,
-   IEEE802154_security_incomingFrame,
-   IEEE802154_security_authLengthChecking,
-   IEEE802154_security_auxLengthChecking,
-};
-/*---------------------------------------------------------------------------*/
+#else /* L2_SECURITY_ACTIVE */
+
+void IEEE802154_security_init(void) {
+    return;
+}
+
+void IEEE802154_security_prependAuxiliarySecurityHeader(OpenQueueEntry_t* msg){
+    return;
+}
+
+void IEEE802154_security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t* msg, ieee802154_header_iht* tempheader) {
+    return;
+}
+
+owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t* msg) {
+    return E_SUCCESS;
+}
+
+owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t* msg) {
+    return E_SUCCESS;
+}
+
+uint8_t IEEE802154_security_authLengthChecking(uint8_t sec_level) {
+    return (uint8_t) 0;
+}
+
+uint8_t IEEE802154_security_auxLengthChecking(uint8_t kid, uint8_t sup, uint8_t size) {
+    return (uint8_t) 0;
+}
+
+#endif /* L2_SECURITY_ACTIVE */
 

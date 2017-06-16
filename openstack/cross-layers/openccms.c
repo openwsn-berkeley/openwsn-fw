@@ -2,20 +2,30 @@
 \brief AES CCMS implementation
   
 \author Marcelo Barros de Almeida <marcelobarrosalmeida@gmail.com>, March 2015.
-\author Malisa Vucinic <malishav@gmail.com>, March 2015.
+\author Malisa Vucinic <malishav@gmail.com>, June 2017.
 */
 #include <string.h>
 #include <stdint.h>
 #include "opendefs.h"
-#include "aes_ccms.h"
-#include "crypto_engine.h"
+#include "openccms.h"
+#include "openaes.h"
+#include "cryptoengine.h"
+
+//=========================== defines =========================================
+
+
+//=========================== prototypes ======================================
 
 static owerror_t aes_cbc_mac(uint8_t* a, uint8_t len_a, uint8_t* m, uint8_t len_m, uint8_t* nonce, uint8_t key[16], uint8_t* mac, uint8_t len_mac, uint8_t l);
-
 static owerror_t aes_ctr_enc(uint8_t* m, uint8_t len_m, uint8_t* nonce, uint8_t key[16], uint8_t* mac, uint8_t len_mac, uint8_t l);
+owerror_t aes_cbc_enc_raw(uint8_t* buffer, uint8_t len, uint8_t key[16], uint8_t iv[16]); 
+owerror_t aes_ctr_enc_raw(uint8_t* buffer, uint8_t len, uint8_t key[16], uint8_t iv[16]);
+static void inc_counter(uint8_t* counter); 
+
+//=========================== public ==========================================
 
 /**
-\brief CCM* forward transformation (i.e. encryption + authentication).
+\brief CCM* forward transformation (i.e. encryption + authentication) implemented in software. Invokes software implementation of AES.
 \param[in] a Pointer to the authentication only data.
 \param[in] len_a Length of authentication only data.
 \param[in,out] m Pointer to the data that is both authenticated and encrypted. Overwritten by
@@ -30,7 +40,7 @@ static owerror_t aes_ctr_enc(uint8_t* m, uint8_t len_m, uint8_t* nonce, uint8_t 
 
 \returns E_SUCCESS when the generation was successful, E_FAIL otherwise. 
 */
-owerror_t aes_ccms_enc(uint8_t* a,
+owerror_t openccms_enc(uint8_t* a,
          uint8_t len_a,
          uint8_t* m,
          uint8_t* len_m,
@@ -58,7 +68,7 @@ owerror_t aes_ccms_enc(uint8_t* a,
 }
 
 /**
-\brief CCM* inverse transformation (i.e. decryption + tag verification).
+\brief CCM* inverse transformation (i.e. decryption + tag verification) implemented in software. Invokes software implementation of AES.
 \param[in] a Pointer to the authentication only data.
 \param[in] len_a Length of authentication only data.
 \param[in,out] m Pointer to the data that is both authenticated and encrypted. Overwritten by
@@ -74,7 +84,7 @@ owerror_t aes_ccms_enc(uint8_t* a,
 
 \returns E_SUCCESS when decryption and verification were successful, E_FAIL otherwise. 
 */
-owerror_t aes_ccms_dec(uint8_t* a,
+owerror_t openccms_dec(uint8_t* a,
          uint8_t len_a,
          uint8_t* m,
          uint8_t* len_m,
@@ -103,6 +113,8 @@ owerror_t aes_ccms_dec(uint8_t* a,
 
    return E_FAIL;
 }
+
+//=========================== private =========================================
 
 /**
 \brief CBC-MAC generation specific to CCM*.
@@ -190,7 +202,7 @@ static owerror_t aes_cbc_mac(uint8_t* a,
    memset(&buffer[len], 0, pad_len);
    len += pad_len;
 
-   CRYPTO_ENGINE.aes_cbc_enc_raw(buffer, len, key, cbc_mac_iv);
+   aes_cbc_enc_raw(buffer, len, key, cbc_mac_iv);
 
    // copy MAC
    memcpy(mac, &buffer[len - 16], len_mac);
@@ -257,11 +269,86 @@ static owerror_t aes_ctr_enc(uint8_t* m,
    memset(&buffer[len], 0, pad_len);
    len += pad_len;
 
-   CRYPTO_ENGINE.aes_ctr_enc_raw(buffer, len, key, iv);
+   aes_ctr_enc_raw(buffer, len, key, iv);
 
    memcpy(m, &buffer[16], len_m);
    memcpy(mac, buffer, len_mac);
 
    return E_SUCCESS;
 }
+
+/**
+\brief Raw AES-CBC encryption.
+\param[in,out] buffer Message to be encrypted. Will be overwritten by ciphertext.
+\param[in] len Message length. Must be multiple of 16 octets.
+\param[in] key Buffer containing the secret key (16 octets).
+\param[in] iv Buffer containing the Initialization Vector (16 octets).
+
+\returns E_SUCCESS when the encryption was successful. 
+*/
+owerror_t aes_cbc_enc_raw(uint8_t* buffer, uint8_t len, uint8_t key[16], uint8_t iv[16]) {
+   uint8_t  n;
+   uint8_t  k;
+   uint8_t  nb;
+   uint8_t* pbuf;
+   uint8_t* pxor;
+
+   nb = len >> 4;
+   pxor = iv;
+   for (n = 0; n < nb; n++) {
+      pbuf = &buffer[16 * n];
+      // may be faster if vector are aligned to 4 bytes (use long instead char in xor)
+      for (k = 0; k < 16; k++) {
+            pbuf[k] ^= pxor[k];
+      }
+      openaes_enc(pbuf,key);
+      pxor = pbuf;
+   }
+   return E_SUCCESS;
+}
+
+/**
+\brief Raw AES-CTR encryption.
+\param[in,out] buffer Message to be encrypted. Will be overwritten by ciphertext.
+\param[in] len Message length. Must be multiple of 16 octets.
+\param[in] key Buffer containing the secret key (16 octets).
+\param[in] iv Buffer containing the Initialization Vector (16 octets).
+
+\returns E_SUCCESS when the encryption was successful. 
+*/
+owerror_t aes_ctr_enc_raw(uint8_t* buffer, uint8_t len, uint8_t key[16], uint8_t iv[16]) {
+   uint8_t n;
+   uint8_t k;
+   uint8_t nb;
+   uint8_t* pbuf;
+   uint8_t eiv[16];
+
+   nb = len >> 4;
+   for (n = 0; n < nb; n++) {
+      pbuf = &buffer[16 * n];
+      memcpy(eiv, iv, 16);
+      openaes_enc(eiv, key); 
+      // may be faster if vector are aligned to 4 bytes (use long instead char in xor)
+      for (k = 0; k < 16; k++) {
+         pbuf[k] ^= eiv[k];
+      }
+      inc_counter(iv);
+   }
+
+   return E_SUCCESS;
+}
+
+static void inc_counter(uint8_t* counter) {
+   // from openssl
+   uint32_t n = 16;
+   uint8_t  c;
+   do {
+      --n;
+      c = counter[n];
+      ++c;
+      counter[n] = c;
+      if (c) return;
+   } while (n);
+}
+
 

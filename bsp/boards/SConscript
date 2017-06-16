@@ -7,7 +7,7 @@ localEnv = env.Clone()
 
 sources_h = [
     'board.h',
-    'crypto_engine.h',
+    'cryptoengine.h',
     'debugpins.h',
     'eui64.h',
     'leds.h',

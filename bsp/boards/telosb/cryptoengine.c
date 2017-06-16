@@ -8,14 +8,25 @@
 #include "board.h"
 #include "radio.h"
 #include "cc2420.h"
-#include "cc2420_crypto.h"
 #include "spi.h"
 #include "debugpins.h"
+#include "cryptoengine.h"
+
+
+//=========================== defines =========================================
 
 #define CC2420_KEY_LEN           16
 
 #define CC2420_FLAG_MIC_SUCCESS       0x00
 #define CC2420_FLAG_MIC_FAIL          0xFF
+
+//=========================== SECCTRL0 values =================================
+// SEC_MODE[1:0]
+#define CC2420_SECCTRL0_SEC_MODE_DISABLE     0
+#define CC2420_SECCTRL0_SEC_MODE_CBC_MAC     1
+#define CC2420_SECCTRL0_SEC_MODE_CTR         2
+#define CC2420_SECCTRL0_SEC_MODE_CCM         3
+
 
 // type of operation
 #define CC2420_SEC_STANDALONE    CC2420_SECCTRL0_SEC_MODE_DISABLE
@@ -27,6 +38,7 @@
 #define CC2420_SEC_SA_ENC        0
 #define CC2420_SEC_ENC           1
 #define CC2420_SEC_DEC           2
+
 
 //=========================== prototypes ======================================
 static owerror_t cc2420_crypto_load_key(uint8_t key[16], uint8_t* /* out */ key_index);
@@ -47,8 +59,13 @@ static void create_cc2420_nonce(uint8_t l,
 static void reverse(uint8_t* in, uint8_t len);
 
 //=========================== public ==========================================
+owerror_t cryptoengine_init(void) {
+   radio_rfOn();  // turn the crystal oscillator on in order to access CC2420 RAM
+   return E_SUCCESS;
+}
 
-owerror_t cc2420_crypto_aes_ecb_enc(uint8_t* buffer, uint8_t* key) {
+
+owerror_t cryptoengine_aes_ecb_enc(uint8_t* buffer, uint8_t* key) {
    cc2420_status_t status;
    uint8_t key_index;
 
@@ -73,7 +90,7 @@ owerror_t cc2420_crypto_aes_ecb_enc(uint8_t* buffer, uint8_t* key) {
    return E_FAIL;
 }
 
-owerror_t cc2420_crypto_ccms_dec(uint8_t* a,
+owerror_t cryptoengine_aes_ccms_dec(uint8_t* a,
                         uint8_t len_a,
                         uint8_t* m,
                         uint8_t* len_m,
@@ -148,7 +165,7 @@ owerror_t cc2420_crypto_ccms_dec(uint8_t* a,
 }
 
 
-owerror_t cc2420_crypto_ccms_enc(uint8_t* a,
+owerror_t cryptoengine_aes_ccms_enc(uint8_t* a,
                         uint8_t len_a,
                         uint8_t* m,
                         uint8_t* len_m,
