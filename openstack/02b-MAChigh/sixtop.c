@@ -71,13 +71,13 @@ void sixtop_six2six_notifyReceive(
 
 //=== helper functions
 
-void          sixtop_addCells(
+bool          sixtop_addCells(
    uint8_t              slotframeID,
    cellInfo_ht*         cellList,
    open_addr_t*         previousHop,
    uint8_t              cellOptions
 );
-void          sixtop_removeCells(
+bool          sixtop_removeCells(
    uint8_t              slotframeID,
    cellInfo_ht*         cellList,
    open_addr_t*         previousHop,
@@ -840,6 +840,7 @@ void timer_sixtop_six2six_timeout_fired(void) {
 
 void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
     
+    bool scheduleChanged;
     msg->owner = COMPONENT_SIXTOP_RES;
     
     // if this is a request send done
@@ -890,39 +891,47 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
             // in case a response is sent out, check the return code
             if (msg->l2_sixtop_returnCode == IANA_6TOP_RC_SUCCESS){
                 if (msg->l2_sixtop_command == IANA_6TOP_CMD_ADD){
-                    sixtop_addCells(
-                        msg->l2_sixtop_frameID,
-                        msg->l2_sixtop_celllist_add,
-                        &(msg->l2_nextORpreviousHop),
-                        msg->l2_sixtop_cellOptions
-                    );
-                    neighbors_updateGeneration(&(msg->l2_nextORpreviousHop));
+                    if (
+                        sixtop_addCells(
+                            msg->l2_sixtop_frameID,
+                            msg->l2_sixtop_celllist_add,
+                            &(msg->l2_nextORpreviousHop),
+                            msg->l2_sixtop_cellOptions
+                        ) == TRUE
+                    ) {
+                        neighbors_updateGeneration(&(msg->l2_nextORpreviousHop));
+                    }
                 }
                 
                 if (msg->l2_sixtop_command == IANA_6TOP_CMD_DELETE){
-                    sixtop_removeCells(
-                        msg->l2_sixtop_frameID,
-                        msg->l2_sixtop_celllist_delete,
-                        &(msg->l2_nextORpreviousHop),
-                        msg->l2_sixtop_cellOptions
-                    );
-                    neighbors_updateGeneration(&(msg->l2_nextORpreviousHop));
+                    if (
+                        sixtop_removeCells(
+                            msg->l2_sixtop_frameID,
+                            msg->l2_sixtop_celllist_delete,
+                            &(msg->l2_nextORpreviousHop),
+                            msg->l2_sixtop_cellOptions
+                        ) == TRUE
+                    ){
+                        neighbors_updateGeneration(&(msg->l2_nextORpreviousHop));
+                    }
                 }
               
                 if ( msg->l2_sixtop_command == IANA_6TOP_CMD_RELOCATE){
-                    sixtop_removeCells(
-                        msg->l2_sixtop_frameID,
-                        msg->l2_sixtop_celllist_delete,
-                        &(msg->l2_nextORpreviousHop),
-                        msg->l2_sixtop_cellOptions
-                    );
-                    sixtop_addCells(
-                        msg->l2_sixtop_frameID,
-                        msg->l2_sixtop_celllist_add,
-                        &(msg->l2_nextORpreviousHop),
-                        msg->l2_sixtop_cellOptions
-                    );
-                    neighbors_updateGeneration(&(msg->l2_nextORpreviousHop));
+                    scheduleChanged = sixtop_removeCells(
+                                          msg->l2_sixtop_frameID,
+                                          msg->l2_sixtop_celllist_delete,
+                                          &(msg->l2_nextORpreviousHop),
+                                          msg->l2_sixtop_cellOptions
+                                      );
+                    scheduleChanged |=  sixtop_addCells(
+                                            msg->l2_sixtop_frameID,
+                                            msg->l2_sixtop_celllist_add,
+                                            &(msg->l2_nextORpreviousHop),
+                                            msg->l2_sixtop_cellOptions
+                                        );
+                    if (scheduleChanged){
+                        neighbors_updateGeneration(&(msg->l2_nextORpreviousHop));
+                    }
                 }
                 
                 if ( msg->l2_sixtop_command == IANA_6TOP_CMD_CLEAR){
@@ -1040,6 +1049,7 @@ void sixtop_six2six_notifyReceive(
     uint8_t           pktLen            = length;
     uint8_t           response_pktLen   = 0;
     cellInfo_ht       celllist_list[CELLLIST_MAX_LEN];
+    bool              scheduleChanged;
     
     if (type == SIXTOP_CELL_REQUEST){
         // if this is a 6p request message
@@ -1219,7 +1229,6 @@ void sixtop_six2six_notifyReceive(
                     i++;
                 }
                 if (sixtop_areAvailableCellsToBeScheduled(metadata,numCells,response_pkt->l2_sixtop_celllist_add)){
-                    returnCode = IANA_6TOP_RC_SUCCESS;
                     for(i=0;i<CELLLIST_MAX_LEN;i++) {
                         if(response_pkt->l2_sixtop_celllist_add[i].isUsed){
                             packetfunctions_reserveHeaderSize(response_pkt,4); 
@@ -1230,9 +1239,8 @@ void sixtop_six2six_notifyReceive(
                             response_pktLen += 4;
                         }
                     }
-                } else {
-                    returnCode = IANA_6TOP_RC_RESET;
                 }
+                returnCode = IANA_6TOP_RC_SUCCESS;
                 break;
             }
             
@@ -1313,7 +1321,6 @@ void sixtop_six2six_notifyReceive(
                     i++;
                 }
                 if (sixtop_areAvailableCellsToBeScheduled(metadata,numCells,response_pkt->l2_sixtop_celllist_add)){
-                    returnCode = IANA_6TOP_RC_SUCCESS;
                     for(i=0;i<CELLLIST_MAX_LEN;i++) {
                         if(response_pkt->l2_sixtop_celllist_add[i].isUsed){
                             packetfunctions_reserveHeaderSize(response_pkt,4); 
@@ -1324,9 +1331,8 @@ void sixtop_six2six_notifyReceive(
                             response_pktLen += 4;
                         }
                     }
-                } else {
-                    returnCode = IANA_6TOP_RC_RESET;
                 }
+                returnCode = IANA_6TOP_RC_SUCCESS;
                 break;
             }
         } while(0);
@@ -1406,22 +1412,28 @@ void sixtop_six2six_notifyReceive(
                     pktLen -= 4;
                     i++;
                 }
-                sixtop_addCells(
-                    sixtop_vars.cb_sf_getMetadata(),     // frame id 
-                    pkt->l2_sixtop_celllist_add,  // celllist to be added
-                    &(pkt->l2_nextORpreviousHop), // neighbor that cells to be added to
-                    sixtop_vars.cellOptions       // cell options
-                );
-                neighbors_updateGeneration(&(pkt->l2_nextORpreviousHop));
+                if (
+                    sixtop_addCells(
+                        sixtop_vars.cb_sf_getMetadata(),     // frame id 
+                        pkt->l2_sixtop_celllist_add,  // celllist to be added
+                        &(pkt->l2_nextORpreviousHop), // neighbor that cells to be added to
+                        sixtop_vars.cellOptions       // cell options
+                    ) == TRUE
+                ) { 
+                    neighbors_updateGeneration(&(pkt->l2_nextORpreviousHop));
+                }
                 break;
             case SIX_STATE_WAIT_DELETERESPONSE:
-                sixtop_removeCells(
-                    sixtop_vars.cb_sf_getMetadata(),
-                    sixtop_vars.celllist_toDelete,
-                    &(pkt->l2_nextORpreviousHop),
-                    sixtop_vars.cellOptions
-                );
-                neighbors_updateGeneration(&(pkt->l2_nextORpreviousHop));
+                if (
+                    sixtop_removeCells(
+                        sixtop_vars.cb_sf_getMetadata(),
+                        sixtop_vars.celllist_toDelete,
+                        &(pkt->l2_nextORpreviousHop),
+                        sixtop_vars.cellOptions
+                    ) == TRUE
+                ) {
+                    neighbors_updateGeneration(&(pkt->l2_nextORpreviousHop));
+                }
                 break;
             case SIX_STATE_WAIT_RELOCATERESPONSE:
                 i = 0;
@@ -1436,19 +1448,21 @@ void sixtop_six2six_notifyReceive(
                     pktLen -= 4;
                     i++;
                 }
-                sixtop_removeCells(
-                    sixtop_vars.cb_sf_getMetadata(),
-                    sixtop_vars.celllist_toDelete,
-                    &(pkt->l2_nextORpreviousHop),
-                    sixtop_vars.cellOptions
-                );
-                sixtop_addCells(
-                    sixtop_vars.cb_sf_getMetadata(),     // frame id 
-                    pkt->l2_sixtop_celllist_add,  // celllist to be added
-                    &(pkt->l2_nextORpreviousHop), // neighbor that cells to be added to
-                    sixtop_vars.cellOptions       // cell options
-                );
-                neighbors_updateGeneration(&(pkt->l2_nextORpreviousHop));
+                scheduleChanged  = sixtop_removeCells(
+                                        sixtop_vars.cb_sf_getMetadata(),
+                                        sixtop_vars.celllist_toDelete,
+                                        &(pkt->l2_nextORpreviousHop),
+                                        sixtop_vars.cellOptions
+                                   );
+                scheduleChanged |= sixtop_addCells(
+                                        sixtop_vars.cb_sf_getMetadata(),     // frame id 
+                                        pkt->l2_sixtop_celllist_add,  // celllist to be added
+                                        &(pkt->l2_nextORpreviousHop), // neighbor that cells to be added to
+                                        sixtop_vars.cellOptions       // cell options
+                                   );
+                if (scheduleChanged) {
+                    neighbors_updateGeneration(&(pkt->l2_nextORpreviousHop));
+                }
                 break;
             case SIX_STATE_WAIT_COUNTRESPONSE:
                 numCells  = *((uint8_t*)(pkt->payload)+ptr);
@@ -1510,7 +1524,7 @@ void sixtop_six2six_notifyReceive(
 
 //======= helper functions
 
-void sixtop_addCells(
+bool sixtop_addCells(
     uint8_t      slotframeID,
     cellInfo_ht* cellList,
     open_addr_t* previousHop,
@@ -1520,6 +1534,7 @@ void sixtop_addCells(
     bool        isShared;
     open_addr_t temp_neighbor;
     cellType_t  type;
+    bool        hasCellsAdded;
     
     // translate cellOptions to cell type 
     if (cellOptions == LINKOPTIONS_TX){
@@ -1542,9 +1557,11 @@ void sixtop_addCells(
         memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
     }
     
+    hasCellsAdded = FALSE;
     // add cells to schedule
     for(i = 0;i<CELLLIST_MAX_LEN;i++){
         if (cellList[i].isUsed){
+            hasCellsAdded = TRUE;
             schedule_addActiveSlot(
                 cellList[i].slotoffset,
                 type,
@@ -1554,9 +1571,11 @@ void sixtop_addCells(
             );
         }
     }
+    
+    return hasCellsAdded;
 }
 
-void sixtop_removeCells(
+bool sixtop_removeCells(
     uint8_t      slotframeID,
     cellInfo_ht* cellList,
     open_addr_t* previousHop,
@@ -1565,6 +1584,8 @@ void sixtop_removeCells(
     uint8_t i;
     bool        isShared;
     open_addr_t temp_neighbor;
+    bool        hasCellsRemoved;
+    
     // translate cellOptions to cell type 
     if (cellOptions == LINKOPTIONS_TX){
         isShared = FALSE;
@@ -1582,15 +1603,20 @@ void sixtop_removeCells(
     } else {
         memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
     }
+    
+    hasCellsRemoved = FALSE;
     // delete cells from schedule
     for(i=0;i<CELLLIST_MAX_LEN;i++){
         if (cellList[i].isUsed){
+            hasCellsRemoved = TRUE;
             schedule_removeActiveSlot(
                 cellList[i].slotoffset,
                 &temp_neighbor
             );
         }
     }
+    
+    return hasCellsRemoved;
 }
 
 bool sixtop_areAvailableCellsToBeScheduled(
