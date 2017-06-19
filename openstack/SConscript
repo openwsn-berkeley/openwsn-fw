@@ -27,7 +27,6 @@ sources_c = [
     os.path.join('03b-IPv6','icmpv6echo.c'),
     os.path.join('03b-IPv6','icmpv6rpl.c'),
     #=== 04-TRAN
-    os.path.join('04-TRAN','opencoap.c'),
     os.path.join('04-TRAN','oscoap.c'),
     os.path.join('04-TRAN','openudp.c'),
     #=== cross-layers
@@ -60,7 +59,6 @@ sources_h = [
     os.path.join('03b-IPv6','icmpv6echo.h'),
     os.path.join('03b-IPv6','icmpv6rpl.h'),
     #=== 04-TRAN
-    os.path.join('04-TRAN','opencoap.h'),
     os.path.join('04-TRAN','oscoap.h'),
     os.path.join('04-TRAN','openudp.h'),
     #=== cross-layers

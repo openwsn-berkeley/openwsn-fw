@@ -8,14 +8,14 @@
 \{
 */
 #include "opendefs.h"
+#include "opencoap.h"
 //=========================== define ==========================================
 
 //=========================== typedef =========================================
 
 typedef struct {
-    coap_resource_desc_t desc;
-    opentimer_id_t           startupTimerId;
-    opentimer_id_t           retransmissionTimerId;
+    coap_resource_desc_t     desc;
+    opentimers_id_t          timerId;
     bool                     isJoined;
     asn_t                    joinAsn;
     uint8_t                  joinKey[16];

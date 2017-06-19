@@ -36,12 +36,12 @@ cjoin_vars_t cjoin_vars;
 owerror_t cjoin_receive(OpenQueueEntry_t* msg,
                     coap_header_iht*  coap_header,
                     coap_option_iht*  coap_options);
-void    cjoin_timer_cb(opentimer_id_t id);
+void    cjoin_timer_cb(void);
 void    cjoin_task_cb(void);
 void    cjoin_sendDone(OpenQueueEntry_t* msg,
                        owerror_t error);
 owerror_t cjoin_sendJoinRequest(void);
-void cjoin_retransmission_cb(opentimer_id_t id);
+void cjoin_retransmission_cb(void);
 void cjoin_retransmission_task_cb(void);
 bool cjoin_getIsJoined(void);
 void cjoin_setIsJoined(bool newValue);
@@ -66,11 +66,14 @@ void cjoin_init() {
    cjoin_vars.desc.discoverable                    = TRUE;
    cjoin_vars.desc.callbackRx                      = &cjoin_receive;
    cjoin_vars.desc.callbackSendDone                = &cjoin_sendDone;
-   cjoin_vars.isJoined                  = FALSE;   
+  
+   cjoin_vars.isJoined                             = FALSE;   
 
    memset(&cjoin_vars.joinAsn, 0x00, sizeof(asn_t));
 
    opencoap_register(&cjoin_vars.desc);
+
+   cjoin_vars.timerId = opentimers_create();
 
    cjoin_schedule();
 }
@@ -87,10 +90,15 @@ void cjoin_schedule() {
     
     if (cjoin_getIsJoined() == FALSE) {
         delay = openrandom_get16b();
-        cjoin_vars.startupTimerId    = opentimers_start((uint32_t) delay,        // random wait from 0 to 65535ms
-                                                    TIMER_PERIODIC,TIME_MS,
-                                                    cjoin_timer_cb);
+        
+        opentimers_scheduleIn(cjoin_vars.timerId,
+                (uint32_t) delay, // random wait from 0 to 65535ms
+                TIME_MS, 
+                TIMER_PERIODIC,
+                cjoin_timer_cb
+        );
     }
+
 }
 
 //=========================== private =========================================
@@ -101,7 +109,7 @@ owerror_t cjoin_receive(OpenQueueEntry_t* msg,
     join_response_t join_response;
     owerror_t ret;
 
-    opentimers_stop(cjoin_vars.retransmissionTimerId); // stop the timer
+    opentimers_cancel(cjoin_vars.timerId); // cancel the retransmission timer
 
     if (coap_header->Code != COAP_CODE_RESP_CONTENT) {
         return E_FAIL;        
@@ -127,11 +135,11 @@ owerror_t cjoin_receive(OpenQueueEntry_t* msg,
 
 //timer fired, but we don't want to execute task in ISR mode
 //instead, push task to scheduler with COAP priority, and let scheduler take care of it
-void cjoin_timer_cb(opentimer_id_t id){
+void cjoin_timer_cb(void){
    scheduler_push_task(cjoin_task_cb,TASKPRIO_COAP);
 }
 
-void cjoin_retransmission_cb(opentimer_id_t id) {
+void cjoin_retransmission_cb(void) {
 
     scheduler_push_task(cjoin_retransmission_task_cb, TASKPRIO_COAP);
 }
@@ -143,27 +151,30 @@ void cjoin_retransmission_task_cb() {
 void cjoin_task_cb() {
     uint8_t temp;
   
-   // don't run if not synch
-   if (ieee154e_isSynch() == FALSE) return;
+    // don't run if not synch
+    if (ieee154e_isSynch() == FALSE) return;
 
-   // don't run if DAG root
-   if (idmanager_getIsDAGroot() == TRUE) {
+    // don't run if DAG root
+    if (idmanager_getIsDAGroot() == TRUE) {
+        opentimers_destroy(cjoin_vars.timerId);
         return;
-   }
+    }
 
-   // don't run if no route to DAG root
-   if (icmpv6rpl_getPreferredParentIndex(&temp) == FALSE) { 
+    // don't run if no route to DAG root
+    if (icmpv6rpl_getPreferredParentIndex(&temp) == FALSE) { 
         return;
-   }
+    }
 
-   if (icmpv6rpl_daoSent() == FALSE) {
+    if (icmpv6rpl_daoSent() == FALSE) {
         return;
-   }
-    opentimers_stop(cjoin_vars.startupTimerId);
+    }
+    
+    // cancel the startup timer but do not destroy it as we reuse it for retransmissions
+    opentimers_cancel(cjoin_vars.timerId);
 
     cjoin_sendJoinRequest();
 
-   return;
+    return;
 }
 
 void cjoin_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
@@ -174,10 +185,13 @@ owerror_t cjoin_sendJoinRequest(void) {
    OpenQueueEntry_t*    pkt;
    owerror_t            outcome;
 
-   // immediately arm the retransmission timer
-   cjoin_vars.retransmissionTimerId    = opentimers_start((uint32_t) TIMEOUT,
-                                                 TIMER_ONESHOT,TIME_MS,
-                                                 cjoin_retransmission_cb);
+    // immediately arm the retransmission timer
+    opentimers_scheduleIn(cjoin_vars.timerId,
+            (uint32_t) TIMEOUT,
+            TIME_MS, 
+            TIMER_ONESHOT,
+            cjoin_retransmission_cb
+    );
 
    // create a CoAP RD packet
    pkt = openqueue_getFreePacketBuffer(COMPONENT_CJOIN);
