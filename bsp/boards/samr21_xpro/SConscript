@@ -18,15 +18,15 @@ rf231 = localEnv.SConscript(
 
 source = [
     'board.c',
-    'bsp_timer.c',
+    'sctimer.c',
     'debug_pins.c',
     'eui64.c',
     'flash.c',
     'gpio.c',
     'leds.c',
-    'radio_timer.c',
     'spi_drv.c',
     'uart.c',
+    'cryptoengine.c',
     'drivers/src/cm0_handler.c',
     'drivers/src/cm0plus_interrupt.c',
     'drivers/src/samr21_extint.c',

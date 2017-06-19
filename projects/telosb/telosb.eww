@@ -14,9 +14,6 @@
     <path>$WS_DIR$\00std_eui64\00std_eui64.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\00std_eui64_uart\00std_eui64_uart.ewp</path>
-  </project>
-  <project>
     <path>$WS_DIR$\00std_i2c\00std_i2c.ewp</path>
   </project>
   <project>

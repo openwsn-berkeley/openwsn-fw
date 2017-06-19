@@ -12,7 +12,6 @@ defaultApps   = [
     'cinfo',
     'cleds',
     'cwellknown',
-    'techo',
     'uecho',
     'uinject',
     'userialbridge',
@@ -31,8 +30,6 @@ defaultAppsInit   = [
     'cinfo',
     'cleds',
     'cwellknown',
-    'techo',
-    'uecho',
     'rrt',
     'cjoin',
 ]
@@ -56,8 +53,10 @@ else:
     userApps  = []
 
 # union of default and additional apps (without duplicates)
-apps = sorted(list(set(defaultApps+userApps)))
-appsInit = sorted(list(set(defaultAppsInit+userApps)))
+apps      = ['opencoap']
+apps     += sorted(list(set(defaultApps+userApps)))
+appsInit  = ['opencoap'] # make sure opencoap is initialized first
+appsInit += sorted(list(set(defaultAppsInit+userApps)))
 
 #===== rule to create a (temporary) openapps_dyn.c file
 

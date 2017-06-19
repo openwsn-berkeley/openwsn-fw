@@ -1,7 +1,6 @@
 #include "opendefs.h"
 #include "cstorm.h"
 #include "opencoap.h"
-#include "opentimers.h"
 #include "openqueue.h"
 #include "packetfunctions.h"
 #include "openserial.h"
@@ -15,7 +14,7 @@
 
 const uint8_t cstorm_path0[]    = "storm";
 const uint8_t cstorm_payload[]  = "OpenWSN";
-static const uint8_t dst_addr[]   = {
+static const uint8_t dst_addr[] = {
    0xbb, 0xbb, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01
 }; 
@@ -55,14 +54,17 @@ void cstorm_init(void) {
    //comment : not running by default
    cstorm_vars.period           = 6553; 
    
-   cstorm_vars.timerId                    = opentimers_start(
-      cstorm_vars.period,
-      TIMER_PERIODIC,TIME_MS,
-      cstorm_timer_cb
+   cstorm_vars.timerId          = opentimers_create();
+   opentimers_scheduleIn(
+       cstorm_vars.timerId,
+       cstorm_vars.period,
+       TIME_MS,
+       TIMER_PERIODIC,
+       cstorm_timer_cb
    );
    
-   //stop 
-   //opentimers_stop(cstorm_vars.timerId);
+   //stop
+   //opentimers_destroy(cstorm_vars.timerId);
    */
 }
 
@@ -111,11 +113,16 @@ owerror_t cstorm_receive(
          
          /*
          // stop and start again only if period > 0
-         opentimers_stop(cstorm_vars.timerId);
+         opentimers_cancel(cstorm_vars.timerId);
          
          if(cstorm_vars.period > 0) {
-            opentimers_setPeriod(cstorm_vars.timerId,TIME_MS,cstorm_vars.period);
-            opentimers_restart(cstorm_vars.timerId);
+               opentimers_scheduleIn(
+                   cstorm_vars.timerId,
+                   cstorm_vars.period,
+                   TIME_MS,
+                   TIMER_PERIODIC,
+                   cstorm_timer_cb
+               );
          }
          */
          
@@ -155,13 +162,13 @@ void cstorm_task_cb() {
    
    // don't run on dagroot
    if (idmanager_getIsDAGroot()) {
-      opentimers_stop(cstorm_vars.timerId);
+      opentimers_destroy(cstorm_vars.timerId);
       return;
    }
    
    if(cstorm_vars.period == 0) {
       // stop the periodic timer
-      opentimers_stop(cstorm_vars.timerId);
+      opentimers_cancel(cstorm_vars.timerId);
       return;
    }
    
@@ -235,4 +242,9 @@ void cstorm_task_cb() {
 void cstorm_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }
+
+
+
+
+
 
