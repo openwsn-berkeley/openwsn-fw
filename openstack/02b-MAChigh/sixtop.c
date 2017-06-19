@@ -684,7 +684,9 @@ readability of the code.
 */
 port_INLINE void sixtop_sendEB() {
     OpenQueueEntry_t* eb;
-    uint8_t i;
+    uint8_t     i;
+    uint8_t     eb_len;
+    uint16_t    temp16b;
    
     if ((ieee154e_isSynch()==FALSE) || (icmpv6rpl_getMyDAGrank()==DEFAULTDAGRANK)){
         // I'm not sync'ed or I did not acquire a DAGrank
@@ -722,12 +724,33 @@ port_INLINE void sixtop_sendEB() {
     // declare ownership over that packet
     eb->creator = COMPONENT_SIXTOP;
     eb->owner   = COMPONENT_SIXTOP;
-   
+    
+    // in case we none default number of shared cells defined in minimal configuration
+    if (ebIEsBytestream[EB_SLOTFRAME_NUMLINK_OFFSET]>1){
+        for (i=ebIEsBytestream[EB_SLOTFRAME_NUMLINK_OFFSET]-1;i>0;i--){
+            packetfunctions_reserveHeaderSize(eb,5);
+            eb->payload[0]   = i;    // slot offset
+            eb->payload[1]   = 0x00;
+            eb->payload[2]   = 0x00; // channel offset
+            eb->payload[3]   = 0x00;
+            eb->payload[4]   = 0x0F; // link options
+        }
+    }
+    
     // reserve space for EB IEs
     packetfunctions_reserveHeaderSize(eb,EB_IE_LEN);
     for (i=0;i<EB_IE_LEN;i++){
         eb->payload[i]   = ebIEsBytestream[i];
     }
+    
+    if (ebIEsBytestream[EB_SLOTFRAME_NUMLINK_OFFSET]>1){
+        // reconstruct the MLME IE header since length changed 
+        eb_len = EB_IE_LEN-2+5*(ebIEsBytestream[EB_SLOTFRAME_NUMLINK_OFFSET]-1);
+        temp16b = eb_len | IEEE802154E_PAYLOAD_DESC_GROUP_ID_MLME | IEEE802154E_PAYLOAD_DESC_TYPE_MLME;
+        eb->payload[0] = (uint8_t)(temp16b & 0x00ff);
+        eb->payload[1] = (uint8_t)((temp16b & 0xff00)>>8);
+    }
+    
     // Keep a pointer to where the ASN will be
     // Note: the actual value of the current ASN and JP will be written by the
     //    IEEE802.15.4e when transmitting

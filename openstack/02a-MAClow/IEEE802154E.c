@@ -693,26 +693,28 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
     uint16_t oldFrameLength;
     open_addr_t temp_neighbor;
     if (isValidEbFormat(pkt)==TRUE){
-        *lenIE = sizeof(ebIEsBytestream);
+        *lenIE = sizeof(ebIEsBytestream)+5*(*((uint8_t*)(pkt->payload)+EB_SLOTFRAME_NUMLINK_OFFSET)-1);
         asnStoreFromEB((uint8_t*)(pkt->payload)+EB_ASN0_OFFSET);
         joinPriorityStoreFromEB(*((uint8_t*)(pkt->payload)+EB_JP_OFFSET));
         schedule_setFrameNumber(1);
         oldFrameLength = schedule_getFrameLength();
         if (oldFrameLength==0){
-            schedule_setFrameLength(SLOTFRAME_LENGTH);
+            schedule_setFrameLength(*((uint8_t*)(pkt->payload)+EB_SLOTFRAME_LEN_OFFSET));
             // shared TXRX anycast slot(s)
             memset(&temp_neighbor,0,sizeof(temp_neighbor));
             temp_neighbor.type             = ADDR_ANYCAST;
-            schedule_addActiveSlot(
-                0,             // slot offset
-                CELLTYPE_TXRX, // type of slot
-                TRUE,          // shared?
-                0,             // channel offset
-                &temp_neighbor // neighbor
-            );
+            for (i=0;i<*((uint8_t*)(pkt->payload)+EB_SLOTFRAME_NUMLINK_OFFSET);i++){
+                schedule_addActiveSlot(
+                    i,             // slot offset
+                    CELLTYPE_TXRX, // type of slot
+                    TRUE,          // shared?
+                    0,             // channel offset
+                    &temp_neighbor // neighbor
+                );
+            }
         }
-        timeslotTemplateIDStoreFromEB(0);
-        channelhoppingTemplateIDStoreFromEB(0);
+        timeslotTemplateIDStoreFromEB(*((uint8_t*)(pkt->payload)+EB_SLOTFRAME_TS_ID_OFFSET));
+        channelhoppingTemplateIDStoreFromEB(*((uint8_t*)(pkt->payload)+EB_SLOTFRAME_CH_ID_OFFSET));
         // at this point, ASN and frame length are known
         // the current slotoffset can be inferred
         ieee154e_syncSlotOffset();
@@ -2217,8 +2219,8 @@ bool isValidEbFormat(OpenQueueEntry_t* pkt){
     if (pkt->length<EB_IE_LEN){
         return FALSE;
     }
-    for (i=0;i<EB_IE_LEN;i++){
-        if (i>=EB_ASN0_OFFSET && i<=EB_JP_OFFSET){
+    for (i=2;i<EB_IE_LEN;i++){
+        if ((i>=EB_ASN0_OFFSET && i<=EB_JP_OFFSET) || i==EB_SLOTFRAME_LEN_OFFSET || i==EB_SLOTFRAME_NUMLINK_OFFSET){
             continue;
         } else {
             if (ebIEsBytestream[i]!=pkt->payload[i]){
