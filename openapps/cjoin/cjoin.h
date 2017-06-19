@@ -13,11 +13,12 @@
 //=========================== typedef =========================================
 
 typedef struct {
-   opentimer_id_t           startupTimerId;
-   opentimer_id_t           retransmissionTimerId;
-   bool                     isJoined;
-   asn_t                    joinAsn;
-   uint8_t                  joinKey[16];
+    coap_resource_desc_t desc;
+    opentimer_id_t           startupTimerId;
+    opentimer_id_t           retransmissionTimerId;
+    bool                     isJoined;
+    asn_t                    joinAsn;
+    uint8_t                  joinKey[16];
 } cjoin_vars_t;
 
 //=========================== variables =======================================
