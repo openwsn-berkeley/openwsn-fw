@@ -7,6 +7,7 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, June 2014.
 */
 
+#include <stdint.h>
 //===== types
 
 #ifndef bool

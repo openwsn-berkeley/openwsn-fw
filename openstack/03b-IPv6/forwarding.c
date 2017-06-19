@@ -9,7 +9,6 @@
 #include "icmpv6.h"
 #include "icmpv6rpl.h"
 #include "openudp.h"
-#include "opentcp.h"
 #include "debugpins.h"
 #include "scheduler.h"
 
@@ -74,6 +73,7 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
     uint8_t              sam;
     uint8_t              m;
     uint8_t              dam;
+    uint8_t              next_header;
 
     // take ownership over the packet
     msg->owner                = COMPONENT_FORWARDING;
@@ -138,11 +138,17 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
         }
     }
     //IPHC inner header and NHC IPv6 header will be added at here
+
+    if (msg->l4_protocol_compressed){
+        next_header = IPHC_NH_COMPRESSED;
+    }else{
+        next_header = IPHC_NH_INLINE;
+    }
     iphc_prependIPv6Header(msg,
                 IPHC_TF_ELIDED,
                 flow_label, // value_flowlabel
-                IPHC_NH_INLINE,
-                msg->l4_protocol, 
+                next_header,
+                msg->l4_protocol, // value nh. If compressed this is ignored as LOWPAN_NH is already there.
                 IPHC_HLIM_64,
                 ipv6_outer_header.hop_limit,
                 IPHC_CID_NO,
@@ -189,8 +195,6 @@ void forwarding_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
       
       // indicate sendDone to upper layer
       switch(msg->l4_protocol) {
-         case IANA_TCP:
-            opentcp_sendDone(msg,error);
             break;
          case IANA_UDP:
             openudp_sendDone(msg,error);
@@ -218,8 +222,8 @@ void forwarding_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 \brief Indicates a packet was received.
 
 \param[in,out] msg               The packet just sent.
-\param[in]     ipv6_header       The information contained in the IPv6 header.
-\param[in]     ipv6_hop_header   The hop-by-hop header present in the packet.
+\param[in]     ipv6_outer_header The information contained in the IPv6 header.
+\param[in]     ipv6_inner_header The hop-by-hop header present in the packet.
 \param[in]     rpl_option        The hop-by-hop options present in the packet.
 */
 void forwarding_receive(
@@ -233,7 +237,8 @@ void forwarding_receive(
    
     // take ownership
     msg->owner                     = COMPONENT_FORWARDING;
-   
+
+
     // determine L4 protocol
     // get information from ipv6_header
     msg->l4_protocol            = ipv6_inner_header->next_header;
@@ -242,7 +247,7 @@ void forwarding_receive(
     // populate packets metadata with L3 information
     memcpy(&(msg->l3_destinationAdd),&ipv6_inner_header->dest, sizeof(open_addr_t));
     memcpy(&(msg->l3_sourceAdd),     &ipv6_inner_header->src,  sizeof(open_addr_t));
-   
+
     if (
         (
             idmanager_isMyAddress(&(msg->l3_destinationAdd))
@@ -259,8 +264,6 @@ void forwarding_receive(
         packetfunctions_tossHeader(msg,ipv6_inner_header->header_length);
         // indicate received packet to upper layer
         switch(msg->l4_protocol) {
-        case IANA_TCP:
-            opentcp_receive(msg);
             break;
         case IANA_UDP:
             openudp_receive(msg);
@@ -284,6 +287,14 @@ void forwarding_receive(
       
         // change the creator of the packet
         msg->creator = COMPONENT_FORWARDING;
+        
+        if(openqueue_isHighPriorityEntryEnough()==FALSE){
+          // after change the creator to COMPONENT_FORWARDING,
+          // there is no space for high priority packet, drop this message
+          // by free the buffer.
+          openqueue_freePacketBuffer(msg);
+          return;
+        }
       
         if (ipv6_outer_header->next_header!=IANA_IPv6ROUTE) {
             flags = rpl_option->flags;
@@ -298,7 +309,7 @@ void forwarding_receive(
                     (errorparameter_t)senderRank
                 );
             }
-            if (senderRank < neighbors_getMyDAGrank()){
+            if (senderRank < icmpv6rpl_getMyDAGrank()){
                 // loop detected
                 // set flag
                 rpl_option->flags |= R_FLAG;
@@ -307,7 +318,7 @@ void forwarding_receive(
                     COMPONENT_FORWARDING,
                     ERR_LOOP_DETECTED,
                     (errorparameter_t) senderRank,
-                    (errorparameter_t) neighbors_getMyDAGrank()
+                    (errorparameter_t) icmpv6rpl_getMyDAGrank()
                 );
             }
             forwarding_createRplOption(rpl_option, rpl_option->flags);
@@ -369,18 +380,19 @@ void forwarding_getNextHop(open_addr_t* destination128b, open_addr_t* addressToW
       packetfunctions_ip128bToMac64b(destination128b,&temp_prefix64btoWrite,addressToWrite64b);
    } else {
       // destination is remote, send to preferred parent
-      neighbors_getPreferredParentEui64(addressToWrite64b);
+      icmpv6rpl_getPreferredParentEui64(addressToWrite64b);
    }
 }
 
 /**
 \brief Send a packet using the routing table to find the next hop.
 
-\param[in,out] msg             The packet to send.
-\param[in]     ipv6_header     The packet's IPv6 header.
-\param[in]     rpl_option      The hop-by-hop option to add in this packet.
-\param[in]     flow_label      The flowlabel to add in the 6LoWPAN header.
-\param[in]     fw_SendOrfw_Rcv The packet is originating from this mote
+\param[in,out] msg               The packet to send.
+\param[in]     ipv6_outer_header The packet's IPv6 outer header.
+\param[in]     ipv6_inner_header The packet's IPv6 inner header.
+\param[in]     rpl_option        The hop-by-hop option to add in this packet.
+\param[in]     flow_label        The flowlabel to add in the 6LoWPAN header.
+\param[in]     fw_SendOrfw_Rcv   The packet is originating from this mote
    (PCKTSEND), or forwarded (PCKTFORWARD).
 */
 owerror_t forwarding_send_internal_RoutingTable(
@@ -429,8 +441,10 @@ owerror_t forwarding_send_internal_RoutingTable(
 How to process the routing header is detailed in
 http://tools.ietf.org/html/rfc6554#page-9.
 
-\param[in,out] msg             The packet to send.
-\param[in]     ipv6_header     The packet's IPv6 header.
+\param[in,out] msg               The packet to send.
+\param[in]     ipv6_outer_header The packet's IPv6 outer header.
+\param[in]     ipv6_inner_header The packet's IPv6 inner header.
+\param[in]     rpl_option        The hop-by-hop option to add in this packet.
 */
 owerror_t forwarding_send_internal_SourceRouting(
     OpenQueueEntry_t* msg,
@@ -703,7 +717,7 @@ owerror_t forwarding_send_internal_SourceRouting(
                 (errorparameter_t)senderRank
             );
         }
-        if (senderRank > neighbors_getMyDAGrank()){
+        if (senderRank > icmpv6rpl_getMyDAGrank()){
             // loop detected
             // set flag
             rpl_option->flags |= R_FLAG;
@@ -712,7 +726,7 @@ owerror_t forwarding_send_internal_SourceRouting(
                 COMPONENT_FORWARDING,
                 ERR_LOOP_DETECTED,
                 (errorparameter_t) senderRank,
-                (errorparameter_t) neighbors_getMyDAGrank()
+                (errorparameter_t) icmpv6rpl_getMyDAGrank()
             );
         }
         forwarding_createRplOption(rpl_option, rpl_option->flags);
@@ -746,7 +760,7 @@ void forwarding_createRplOption(rpl_option_ht* rpl_option, uint8_t flags) {
     uint8_t I,K;
     rpl_option->optionType         = RPL_HOPBYHOP_HEADER_OPTION_TYPE;
     rpl_option->rplInstanceID      = icmpv6rpl_getRPLIntanceID();
-    rpl_option->senderRank         = neighbors_getMyDAGrank();
+    rpl_option->senderRank         = icmpv6rpl_getMyDAGrank();
    
     if (rpl_option->rplInstanceID == 0){
        I = 1;

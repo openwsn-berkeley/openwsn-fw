@@ -25,9 +25,9 @@ def findPattern(pattern, path):
 
     :returns: List of the files found
     '''
-    result = []
-    for root, dirs, files in os.walk(path):
-        for name in files:
-            if fnmatch.fnmatch(name, pattern):
-                result.append(os.path.join(root, name))
-    return result
+    returnVal = []
+    for (dirpath,dirnames,filenames) in os.walk(path):
+        for filename in filenames:
+            if fnmatch.fnmatch(filename,pattern):
+                returnVal += [os.path.join(dirpath,filename)]
+    return returnVal

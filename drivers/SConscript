@@ -50,8 +50,7 @@ else:
             os.path.join('#','openstack','07-App','udpinject'),
             os.path.join('#','openstack','cross-layers'),
             # openapps
-            os.path.join('#','openapps','tcpinject'),
-            os.path.join('#','openapps','udpinject'),
+            os.path.join('#','openapps','userialbridge'),
         ],
     )
     

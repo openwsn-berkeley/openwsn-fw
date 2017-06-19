@@ -12,9 +12,9 @@ defaultApps   = [
     'cinfo',
     'cleds',
     'cwellknown',
-    'techo',
     'uecho',
     'uinject',
+    'userialbridge',
     'rrt',
 ]
 if localEnv['board']=='python':
@@ -29,8 +29,6 @@ defaultAppsInit   = [
     'cinfo',
     'cleds',
     'cwellknown',
-    'techo',
-    'uecho',
     'rrt',
 ]
 
@@ -41,8 +39,10 @@ else:
     userApps  = []
 
 # union of default and additional apps (without duplicates)
-apps = sorted(list(set(defaultApps+userApps)))
-appsInit = sorted(list(set(defaultAppsInit+userApps)))
+apps      = ['opencoap']
+apps     += sorted(list(set(defaultApps+userApps)))
+appsInit  = ['opencoap'] # make sure opencoap is initialized first
+appsInit += sorted(list(set(defaultAppsInit+userApps)))
 
 #===== rule to create a (temporary) openapps_dyn.c file
 

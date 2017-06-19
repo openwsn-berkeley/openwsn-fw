@@ -53,6 +53,8 @@ int mote_main(void) {
    
    // clear local variable
    memset(&app_vars,0,sizeof(app_vars_t));
+    
+   app_vars.uartSendNow = 1;
    
    // initialize the board
    board_init();

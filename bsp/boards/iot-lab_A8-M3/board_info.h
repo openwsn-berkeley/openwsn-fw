@@ -5,8 +5,9 @@ This module simply defines some strings describing the board, which CoAP uses
 to return the board's description.
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
-\author Tengfei Chang <tengfei.chang@gmail.com>,  July 2012.
+
 \author Alaeddine Weslati <alaeddine.weslati@inria.fr>,  January 2014.
+\author Tengfei Chang <tengfei.chang@inria.fr>,  May 2017.
 */
 
 #ifndef __BOARD_INFO_H
@@ -24,15 +25,16 @@ to return the board's description.
 //#define PACK_END    _Pragma("pack()")
 
 #define INTERRUPT_DECLARATION(); //no declaration
-#define DISABLE_INTERRUPTS()    __disable_irq();
-#define ENABLE_INTERRUPTS()     __enable_irq();
+
+#define DISABLE_INTERRUPTS()    NVIC_SETPRIMASK();
+#define ENABLE_INTERRUPTS()     NVIC_RESETPRIMASK();
 
 //===== timer
 
-#define PORT_TIMER_WIDTH                    uint16_t
-#define PORT_RADIOTIMER_WIDTH               uint16_t
+#define PORT_TIMER_WIDTH                    uint32_t
+#define PORT_RADIOTIMER_WIDTH               uint32_t
 
-#define PORT_SIGNED_INT_WIDTH               int16_t
+#define PORT_SIGNED_INT_WIDTH               int32_t
 #define PORT_TICS_PER_MS                    32
 #define SCHEDULER_WAKEUP()                  EXTI->SWIER |= EXTI_Line1;
 #define SCHEDULER_ENABLE_INTERRUPT()        //enable in board use EXTI_Line1
@@ -46,7 +48,6 @@ to return the board's description.
 // radio /RST
 #define PORT_PIN_RADIO_RESET_HIGH()       //GPIOC->ODR |= 0X0040;// nothing
 #define PORT_PIN_RADIO_RESET_LOW()        //GPIOC->ODR &= ~0X0040;// nothing
-//#define PORT_PIN_RADIO_RESET_LOW()            GPIOC->ODR &= ~(1<<1);
 
 //===== IEEE802154E timing
 // time-slot related
@@ -65,10 +66,16 @@ to return the board's description.
 
 #define SYNC_ACCURACY                       2     // ticks
 
+//===== opentimers
+
+#define TIMERTHRESHOLD                      10    // ticks
+
+//=========================== typedef  ========================================
+
 //=========================== variables =======================================
 
 static const uint8_t rreg_uriquery[]        = "h=ucb";
-static const uint8_t infoBoardname[]        = "IOT-LAB_M3";
+static const uint8_t infoBoardname[]        = "IOT-LAB_A8-M3";
 static const uint8_t infouCName[]           = "STM32F103";
 static const uint8_t infoRadioName[]        = "AT86RF231";
 

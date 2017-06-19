@@ -34,8 +34,8 @@ def eui64_get():
    print "P: eui64_get()"
    return range(8)
 
-def bsp_timer_scheduleIn(delay):
-   print "P: bsp_timer_scheduleIn({0})".format(delay)
+def sctimer_setCompare(delay):
+   print "P: sctimer_setCompare({0})".format(delay)
    
 # create instance
 mote = oos_openwsn.OpenMote()
@@ -48,7 +48,7 @@ for i in range(len(notifString)-1):
 
 # overwrite some callbacks
 mote.set_callback(notifId('eui64_get'),           eui64_get)
-mote.set_callback(notifId('bsp_timer_scheduleIn'),bsp_timer_scheduleIn)
+mote.set_callback(notifId('sctimer_setCompare'),sctimer_setCompare)
 
 # start the mote
 mote.supply_on()

@@ -16,56 +16,48 @@
 
 //=========================== public ==========================================
 
-void flash_init()
-{   
+void flash_init(void) {   
     FLASH_Unlock(); 
     FLASH_ClearFlag(FLASH_FLAG_BSY | FLASH_FLAG_EOP|FLASH_FLAG_PGERR |FLASH_FLAG_WRPRTERR);
 }
 
-uint8_t flash_erasePage(uint32_t address)
-{
-  uint8_t status;
-  status = FLASH_ErasePage(address);
-  return status;
+uint8_t flash_erasePage(uint32_t address) {
+    uint8_t status;
+    status = FLASH_ErasePage(address);
+    return status;
 }
 
-uint8_t  flash_erase_optByte()
-{
-  uint8_t status;
-  status = FLASH_EraseOptionBytes();
-  return status;
+uint8_t  flash_erase_optByte(void) {
+    uint8_t status;
+    status = FLASH_EraseOptionBytes();
+    return status;
 }
 
-uint8_t flash_write(uint32_t address,uint16_t data)
-{
-  uint8_t status;
-  status = FLASH_ProgramHalfWord(address,data);
-  return status;
+uint8_t flash_write(uint32_t address,uint16_t data) {
+    uint8_t status;
+    status = FLASH_ProgramHalfWord(address,data);
+    return status;
 }
 
-uint8_t flash_write_optByte(uint32_t address,uint8_t data)
-{
-  uint8_t status;
-  status = FLASH_ProgramOptionByteData(address,data);
-  return status;
+uint8_t flash_write_optByte(uint32_t address,uint8_t data){
+    uint8_t status;
+    status = FLASH_ProgramOptionByteData(address,data);
+    return status;
 }
 
-uint16_t flash_read(uint32_t address)
-{
-  uint16_t temp = 0x00;
-  temp = *(uint32_t*)address;
-  return temp;
+uint16_t flash_read(uint32_t address){
+    uint16_t temp = 0x00;
+    temp = *(uint32_t*)address;
+    return temp;
 }
 
-uint16_t flash_read_optByte(uint32_t address)
-{
-  uint16_t temp = 0x00;
-  temp = *(uint32_t*)address;
-  return temp;
+uint16_t flash_read_optByte(uint32_t address){
+    uint16_t temp = 0x00;
+    temp = *(uint32_t*)address;
+    return temp;
 }
 
-void flash_getID(uint32_t address)
-{
-  
+void flash_getID(uint32_t address){
+    
 }
 //=========================== private =========================================

@@ -7,6 +7,7 @@
 #include "opendefs.h"
 
 // CoAP
+#include "opencoap.h"
 #include "c6t.h"
 #include "cinfo.h"
 #include "cleds.h"
@@ -14,8 +15,6 @@
 #include "cstorm.h"
 #include "cwellknown.h"
 #include "rrt.h"
-// TCP
-#include "techo.h"
 // UDP
 #include "uecho.h"
 #include "uinject.h"
@@ -29,6 +28,9 @@
 //=========================== private =========================================
 
 void openapps_init(void) {
+   //-- 04-TRAN
+   opencoap_init();     // initialize before any of the CoAP applications
+
    // CoAP
    c6t_init();
    cinfo_init();
@@ -37,9 +39,4 @@ void openapps_init(void) {
    cstorm_init();
    cwellknown_init();
    rrt_init();
-   // TCP
-   techo_init();
-   // UDP
-   uecho_init();
-   //uinject_init();
 }

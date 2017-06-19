@@ -75,7 +75,7 @@ enum NHC_UDP_enums {
 enum NHC_UDP_PORTS_enums {
    NHC_UDP_PORTS_INLINE      = 0,
    NHC_UDP_PORTS_16S_8D      = 1,
-   NHC_UDP_PORTS_8S_8D       = 2,
+   NHC_UDP_PORTS_8S_16D      = 2,
    NHC_UDP_PORTS_4S_4D       = 3,
 };
 
@@ -237,7 +237,7 @@ owerror_t iphc_prependIPv6Header(
    OpenQueueEntry_t*    msg,
    uint8_t              tf,
    uint32_t             value_flowLabel,
-   bool                 nh,
+   uint8_t              nh,
    uint8_t              value_nextHeader,
    uint8_t              hlim,
    uint8_t              value_hopLimit,

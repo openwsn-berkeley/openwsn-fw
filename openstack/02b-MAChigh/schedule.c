@@ -5,6 +5,8 @@
 #include "packetfunctions.h"
 #include "sixtop.h"
 #include "idmanager.h"
+#include "sf0.h"
+#include "icmpv6rpl.h"
 
 //=========================== variables =======================================
 
@@ -250,7 +252,7 @@ void  schedule_getSlotInfo(
 /**
 \brief Get the maximum number of active slots.
 
-\param[out] maximum number of active slots
+\returns maximum number of active slots
 */
 uint16_t  schedule_getMaxActiveSlots() {
    return schedule_vars.maxActiveSlots;
@@ -292,7 +294,7 @@ owerror_t schedule_addActiveSlot(
    // abort it schedule overflow
    if (slotContainer>&schedule_vars.scheduleBuf[schedule_vars.maxActiveSlots-1]) {
       ENABLE_INTERRUPTS();
-      openserial_printCritical(
+      openserial_printError(
          COMPONENT_SCHEDULE,ERR_SCHEDULE_OVERFLOWN,
          (errorparameter_t)0,
          (errorparameter_t)0
@@ -348,6 +350,12 @@ owerror_t schedule_addActiveSlot(
                (errorparameter_t)slotContainer->slotOffset,
                (errorparameter_t)0
             );
+            // reset the entry
+            slotContainer->slotOffset                = 0;
+            slotContainer->type                      = CELLTYPE_OFF;
+            slotContainer->shared                    = FALSE;
+            slotContainer->channelOffset             = 0;
+            memset(&slotContainer->neighbor,0,sizeof(open_addr_t));
             ENABLE_INTERRUPTS();
             return E_FAIL;
          }
@@ -461,32 +469,6 @@ bool schedule_isSlotOffsetAvailable(uint16_t slotOffset){
    return TRUE;
 }
 
-scheduleEntry_t* schedule_statistic_poorLinkQuality(){
-   scheduleEntry_t* scheduleWalker;
-   
-   INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
-   
-   scheduleWalker = schedule_vars.currentScheduleEntry;
-   do {
-      if(
-         scheduleWalker->numTx > MIN_NUMTX_FOR_PDR                     &&\
-         PDR_THRESHOLD > 100*scheduleWalker->numTxACK/scheduleWalker->numTx
-      ){
-         break;
-      }
-      scheduleWalker = scheduleWalker->next;
-   }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
-   
-   if (scheduleWalker == schedule_vars.currentScheduleEntry){
-       ENABLE_INTERRUPTS();
-       return NULL;
-   } else {
-       ENABLE_INTERRUPTS();
-       return scheduleWalker;
-   }
-}
-
 uint16_t  schedule_getCellsCounts(uint8_t frameID,cellType_t type, open_addr_t* neighbor){
     uint16_t         count = 0;
     scheduleEntry_t* scheduleWalker;
@@ -534,6 +516,47 @@ scheduleEntry_t* schedule_getCurrentScheduleEntry(){
     return schedule_vars.currentScheduleEntry;
 }
 
+//=== from otf
+uint8_t schedule_getNumOfSlotsByType(cellType_t type){
+   uint8_t returnVal;
+   scheduleEntry_t* scheduleWalker;
+   
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   
+   returnVal = 0;
+   scheduleWalker = schedule_vars.currentScheduleEntry;
+   do {
+      if(type == scheduleWalker->type){
+          returnVal += 1;
+      }
+      scheduleWalker = scheduleWalker->next;
+   }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
+   
+   ENABLE_INTERRUPTS();
+   
+   return returnVal;
+}
+
+uint8_t schedule_getNumberOfFreeEntries(){
+   uint8_t i; 
+   uint8_t counter;
+   
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   
+   counter = 0;
+   for(i=0;i<MAXACTIVESLOTS;i++) {
+      if(schedule_vars.scheduleBuf[i].type == CELLTYPE_OFF){
+         counter++;
+      }
+   }
+   
+   ENABLE_INTERRUPTS();
+   
+   return counter;
+}
+
 //=== from IEEE802154E: reading the schedule and updating statistics
 
 void schedule_syncSlotOffset(slotOffset_t targetSlotOffset) {
@@ -554,8 +577,7 @@ void schedule_syncSlotOffset(slotOffset_t targetSlotOffset) {
 void schedule_advanceSlot() {
    
    INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
-   
+   DISABLE_INTERRUPTS();  
    schedule_vars.currentScheduleEntry = schedule_vars.currentScheduleEntry->next;
    
    ENABLE_INTERRUPTS();
@@ -704,7 +726,7 @@ bool schedule_getOkToSend() {
       
       returnVal = TRUE;
    } else {
-      // non-shared slot: check backoff before answering
+      // shared slot: check backoff before answering
       
       // decrement backoff
       if (schedule_vars.backoff>0) {
@@ -796,6 +818,79 @@ void schedule_indicateTx(asn_t* asnTimestamp, bool succesfullTx) {
    }
    
    ENABLE_INTERRUPTS();
+}
+
+
+void schedule_housekeeping(){
+    uint8_t     i;
+    open_addr_t neighbor;
+    
+    
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+
+    for(i=0;i<MAXACTIVESLOTS;i++) {
+        if(schedule_vars.scheduleBuf[i].type == CELLTYPE_TX){
+            // remove Tx cell if it's scheduled to non-preferred parent
+            if (icmpv6rpl_getPreferredParentEui64(&neighbor)==TRUE) {
+                if(packetfunctions_sameAddress(&neighbor,&(schedule_vars.scheduleBuf[i].neighbor))==FALSE){
+                    if (sixtop_setHandler(SIX_HANDLER_SF0)==FALSE){
+                       // one sixtop transcation is happening, only one instance at one time
+                       continue;
+                    }
+                    sixtop_request(
+                       IANA_6TOP_CMD_CLEAR,                             // code
+                       &(schedule_vars.scheduleBuf[i].neighbor),        // neighbor
+                       0,                                               // numCells (not used)
+                       LINKOPTIONS_TX,                                  // cellOptions
+                       NULL,                                            // celllist to add (not used)
+                       NULL,                                            // celllist to add (not used)
+                       sf0_getsfid(),                                   // sfid
+                       0,                                               // list command offset (not used)
+                       0                                                // list command maximum list of cells(not used)
+                    );
+                    break;
+                }
+            }
+        }
+    }
+   
+    ENABLE_INTERRUPTS();
+}
+
+bool schedule_getOneCellAfterOffset(uint8_t metadata,uint8_t offset,open_addr_t* neighbor, uint8_t cellOptions, uint16_t* slotoffset, uint16_t* channeloffset){
+   bool returnVal;
+   scheduleEntry_t* scheduleWalker;
+   cellType_t type;
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   
+   // translate cellOptions to cell type 
+   if (cellOptions == LINKOPTIONS_TX){
+      type = CELLTYPE_TX;
+   }
+   if (cellOptions == LINKOPTIONS_RX){
+      type = CELLTYPE_RX;
+   }
+   if (cellOptions == (LINKOPTIONS_TX | LINKOPTIONS_RX | LINKOPTIONS_SHARED)){
+      type = CELLTYPE_TXRX;
+   }
+   
+   returnVal      = FALSE;
+   scheduleWalker = &schedule_vars.scheduleBuf[0]; // fisrt entry record slotoffset 0
+   do {
+      if(type == scheduleWalker->type && scheduleWalker->slotOffset >= offset){
+         *slotoffset    = scheduleWalker->slotOffset;
+         *channeloffset = scheduleWalker->channelOffset;
+         returnVal      = TRUE;
+         break;
+      }
+      scheduleWalker = scheduleWalker->next;
+   }while(scheduleWalker!=&schedule_vars.scheduleBuf[0]);
+   
+   ENABLE_INTERRUPTS();
+   
+   return returnVal;
 }
 
 //=========================== private =========================================

@@ -18,13 +18,13 @@
 #include "IEEE802154_security_obj.h"
 #include "adaptive_sync_obj.h"
 #include "neighbors_obj.h"
-#include "processIE_obj.h"
 #include "sixtop_obj.h"
+#include "sf0_obj.h"
 #include "schedule_obj.h"
 #include "icmpv6echo_obj.h"
 #include "icmpv6rpl_obj.h"
 #include "opencoap_obj.h"
-#include "opentcp_obj.h"
+#include "openudp_obj.h"
 #include "idmanager_obj.h"
 #include "openqueue_obj.h"
 #include "openrandom_obj.h"
@@ -36,20 +36,16 @@
 #include "cstorm_obj.h"
 #include "cwellknown_obj.h"
 #include "rrt_obj.h"
-#include "techo_obj.h"
-//#include "tohlone_obj.h"
-//#include "tohlone_obj.h"
 #include "uecho_obj.h"
 
 //=========================== prototypes ======================================
 
 // radio
-void radio_intr_startOfFrame(OpenMote* self, uint16_t capturedTime);
-void radio_intr_endOfFrame(OpenMote* self, uint16_t capturedTime);
+void radio_intr_startOfFrame(OpenMote* self, uint32_t capturedTime);
+void radio_intr_endOfFrame(OpenMote* self, uint32_t capturedTime);
 
-// radiotimer
-void radiotimer_intr_compare(OpenMote* self);
-void radiotimer_intr_overflow(OpenMote* self);
+// sctimer
+void sctimer_intr_compare(OpenMote* self);
 
 // uart
 void uart_intr_tx(OpenMote* self);
@@ -68,12 +64,13 @@ enum {
    MOTE_NOTIF_board_init = 0,
    MOTE_NOTIF_board_sleep,
    MOTE_NOTIF_board_reset,
-   // bsp_timer
-   MOTE_NOTIF_bsp_timer_init,
-   MOTE_NOTIF_bsp_timer_reset,
-   MOTE_NOTIF_bsp_timer_scheduleIn,
-   MOTE_NOTIF_bsp_timer_cancel_schedule,
-   MOTE_NOTIF_bsp_timer_get_currentValue,
+   // sctimer
+   MOTE_NOTIF_sctimer_init,
+   MOTE_NOTIF_sctimer_setCompare,
+   MOTE_NOTIF_sctimer_set_callback,
+   MOTE_NOTIF_sctimer_readCounter,
+   MOTE_NOTIF_sctimer_enable,
+   MOTE_NOTIF_sctimer_disable,
    // debugpins
    MOTE_NOTIF_debugpins_init,
    MOTE_NOTIF_debugpins_frame_toggle,
@@ -131,10 +128,6 @@ enum {
    // radio
    MOTE_NOTIF_radio_init,
    MOTE_NOTIF_radio_reset,
-   MOTE_NOTIF_radio_startTimer,
-   MOTE_NOTIF_radio_getTimerValue,
-   MOTE_NOTIF_radio_setTimerPeriod,
-   MOTE_NOTIF_radio_getTimerPeriod,
    MOTE_NOTIF_radio_setFrequency,
    MOTE_NOTIF_radio_rfOn,
    MOTE_NOTIF_radio_rfOff,
@@ -144,15 +137,6 @@ enum {
    MOTE_NOTIF_radio_rxEnable,
    MOTE_NOTIF_radio_rxNow,
    MOTE_NOTIF_radio_getReceivedFrame,
-   // radiotimer
-   MOTE_NOTIF_radiotimer_init,
-   MOTE_NOTIF_radiotimer_start,
-   MOTE_NOTIF_radiotimer_getValue,
-   MOTE_NOTIF_radiotimer_setPeriod,
-   MOTE_NOTIF_radiotimer_getPeriod,
-   MOTE_NOTIF_radiotimer_schedule,
-   MOTE_NOTIF_radiotimer_cancel,
-   MOTE_NOTIF_radiotimer_getCapturedTime,
    // uart
    MOTE_NOTIF_uart_init,
    MOTE_NOTIF_uart_enableInterrupts,
@@ -177,25 +161,19 @@ typedef struct {
    uart_rx_cbt     rxCb;
 } uart_icb_t;
 
-typedef void (*bsp_timer_cbt)(OpenMote* self);
+typedef void (*radio_capture_cbt)(OpenMote* self, PORT_TIMER_WIDTH timestamp);
 
 typedef struct {
-   bsp_timer_cbt   cb;
-} bsp_timer_icb_t;
-
-typedef void (*radiotimer_capture_cbt)(OpenMote* self, PORT_TIMER_WIDTH timestamp);
-
-typedef struct {
-   radiotimer_capture_cbt    startFrame_cb;
-   radiotimer_capture_cbt    endFrame_cb;
+   radio_capture_cbt      startFrame_cb;
+   radio_capture_cbt      endFrame_cb;
 } radio_icb_t;
 
-typedef void (*radiotimer_compare_cbt)(OpenMote* self);
+typedef void (*sctimer_cbt)(OpenMote* self);
 
 typedef struct {
-   radiotimer_compare_cbt    overflow_cb;
-   radiotimer_compare_cbt    compare_cb;
-} radiotimer_icb_t;
+   sctimer_cbt      compare_cb;
+} sctimer_icb_t;
+
 
 //=========================== struct ==========================================
 
@@ -208,20 +186,20 @@ struct OpenMote {
    PyObject*            callback[MOTE_NOTIF_LAST];
    //===== internal C callbacks
    uart_icb_t           uart_icb;
-   bsp_timer_icb_t      bsp_timer_icb;
+   sctimer_icb_t        sctimer_icb;
    radio_icb_t          radio_icb;
-   radiotimer_icb_t     radiotimer_icb;
    //===== openstack
    // l4
    icmpv6echo_vars_t    icmpv6echo_vars;
    icmpv6rpl_vars_t     icmpv6rpl_vars;
    opencoap_vars_t      opencoap_vars;
-   tcp_vars_t           tcp_vars;
+   openudp_vars_t       openudp_vars;
    // l3
    // l2b
    sixtop_vars_t        sixtop_vars;
    neighbors_vars_t     neighbors_vars;
    schedule_vars_t      schedule_vars;
+   sf0_vars_t           sf0_vars;
    // l2a
    adaptive_sync_vars_t adaptive_sync_vars;
    ieee802154_security_vars_t ieee802154_security_vars;

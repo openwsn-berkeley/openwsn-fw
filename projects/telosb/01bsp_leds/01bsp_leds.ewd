@@ -10,9 +10,9 @@
     <debug>1</debug>
     <settings>
       <name>C-SPY</name>
-      <archiveVersion>5</archiveVersion>
+      <archiveVersion>4</archiveVersion>
       <data>
-        <version>27</version>
+        <version>26</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>1</debug>
         <option>
@@ -143,17 +143,13 @@
           <name>ENERGYTRACE</name>
           <state>1</state>
         </option>
-        <option>
-          <name>FETIPE</name>
-          <state>1</state>
-        </option>
       </data>
     </settings>
     <settings>
       <name>430FET</name>
       <archiveVersion>1</archiveVersion>
       <data>
-        <version>29</version>
+        <version>25</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>1</debug>
         <option>
@@ -162,7 +158,7 @@
         </option>
         <option>
           <name>Erase</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>EMUVerifyDownloadP7</name>
@@ -235,12 +231,12 @@
         </option>
         <option>
           <name>FetConnection</name>
-          <version>4</version>
+          <version>2</version>
           <state>0</state>
         </option>
         <option>
           <name>SoftwareBreakpointEnable</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>RadioSoftwareBreakpointType</name>
@@ -298,26 +294,6 @@
           <name>RadioJtagSpeedType</name>
           <state>1</state>
         </option>
-        <option>
-          <name>memoryTypeSlave</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>fuseBlowDisabledSlave</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>eraseTypeSlave</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>DataSampleBpReservation</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>cycleCounterLevel</name>
-          <state>0</state>
-        </option>
       </data>
     </settings>
     <settings>
@@ -355,15 +331,15 @@
     </settings>
     <debuggerPlugins>
       <plugin>
-        <file>$TOOLKIT_DIR$\plugins\lcd\lcd.ewplugin</file>
+        <file>$TOOLKIT_DIR$\plugins\Lcd\lcd.ewplugin</file>
         <loadFlag>1</loadFlag>
       </plugin>
       <plugin>
-        <file>$TOOLKIT_DIR$\plugins\rtos\CMX\CmxPlugin.ENU.ewplugin</file>
+        <file>$TOOLKIT_DIR$\plugins\rtos\CMX\CmxArmPlugin.ENU.ewplugin</file>
         <loadFlag>0</loadFlag>
       </plugin>
       <plugin>
-        <file>$TOOLKIT_DIR$\plugins\rtos\CMX\CmxTinyPlugin.ENU.ewplugin</file>
+        <file>$TOOLKIT_DIR$\plugins\rtos\CMX\CmxTinyArmPlugin.ENU.ewplugin</file>
         <loadFlag>0</loadFlag>
       </plugin>
       <plugin>
@@ -375,11 +351,11 @@
         <loadFlag>0</loadFlag>
       </plugin>
       <plugin>
-        <file>$TOOLKIT_DIR$\plugins\rtos\SafeRTOS\SafeRTOSPlugin.ewplugin</file>
+        <file>$TOOLKIT_DIR$\plugins\rtos\PowerPac\PowerPacRTOS.ewplugin</file>
         <loadFlag>0</loadFlag>
       </plugin>
       <plugin>
-        <file>$TOOLKIT_DIR$\plugins\rtos\TI-RTOS\tirtosplugin.ewplugin</file>
+        <file>$TOOLKIT_DIR$\plugins\rtos\SafeRTOS\SafeRTOSPlugin.ewplugin</file>
         <loadFlag>0</loadFlag>
       </plugin>
       <plugin>
@@ -388,10 +364,6 @@
       </plugin>
       <plugin>
         <file>$TOOLKIT_DIR$\plugins\rtos\uCOS-II\uCOS-II-KA-CSpy.ewplugin</file>
-        <loadFlag>0</loadFlag>
-      </plugin>
-      <plugin>
-        <file>$TOOLKIT_DIR$\plugins\rtos\uCOS-III\uCOS-III-KA-CSpy.ewplugin</file>
         <loadFlag>0</loadFlag>
       </plugin>
       <plugin>
@@ -420,9 +392,9 @@
     <debug>0</debug>
     <settings>
       <name>C-SPY</name>
-      <archiveVersion>5</archiveVersion>
+      <archiveVersion>4</archiveVersion>
       <data>
-        <version>27</version>
+        <version>26</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>0</debug>
         <option>
@@ -553,17 +525,13 @@
           <name>ENERGYTRACE</name>
           <state>1</state>
         </option>
-        <option>
-          <name>FETIPE</name>
-          <state>1</state>
-        </option>
       </data>
     </settings>
     <settings>
       <name>430FET</name>
       <archiveVersion>1</archiveVersion>
       <data>
-        <version>29</version>
+        <version>25</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>0</debug>
         <option>
@@ -572,7 +540,7 @@
         </option>
         <option>
           <name>Erase</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>EMUVerifyDownloadP7</name>
@@ -645,7 +613,7 @@
         </option>
         <option>
           <name>FetConnection</name>
-          <version>4</version>
+          <version>2</version>
           <state>0</state>
         </option>
         <option>
@@ -708,26 +676,6 @@
           <name>RadioJtagSpeedType</name>
           <state>1</state>
         </option>
-        <option>
-          <name>memoryTypeSlave</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>fuseBlowDisabledSlave</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>eraseTypeSlave</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>DataSampleBpReservation</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>cycleCounterLevel</name>
-          <state>0</state>
-        </option>
       </data>
     </settings>
     <settings>
@@ -765,15 +713,15 @@
     </settings>
     <debuggerPlugins>
       <plugin>
-        <file>$TOOLKIT_DIR$\plugins\lcd\lcd.ewplugin</file>
+        <file>$TOOLKIT_DIR$\plugins\Lcd\lcd.ewplugin</file>
         <loadFlag>1</loadFlag>
       </plugin>
       <plugin>
-        <file>$TOOLKIT_DIR$\plugins\rtos\CMX\CmxPlugin.ENU.ewplugin</file>
+        <file>$TOOLKIT_DIR$\plugins\rtos\CMX\CmxArmPlugin.ENU.ewplugin</file>
         <loadFlag>0</loadFlag>
       </plugin>
       <plugin>
-        <file>$TOOLKIT_DIR$\plugins\rtos\CMX\CmxTinyPlugin.ENU.ewplugin</file>
+        <file>$TOOLKIT_DIR$\plugins\rtos\CMX\CmxTinyArmPlugin.ENU.ewplugin</file>
         <loadFlag>0</loadFlag>
       </plugin>
       <plugin>
@@ -785,11 +733,11 @@
         <loadFlag>0</loadFlag>
       </plugin>
       <plugin>
-        <file>$TOOLKIT_DIR$\plugins\rtos\SafeRTOS\SafeRTOSPlugin.ewplugin</file>
+        <file>$TOOLKIT_DIR$\plugins\rtos\PowerPac\PowerPacRTOS.ewplugin</file>
         <loadFlag>0</loadFlag>
       </plugin>
       <plugin>
-        <file>$TOOLKIT_DIR$\plugins\rtos\TI-RTOS\tirtosplugin.ewplugin</file>
+        <file>$TOOLKIT_DIR$\plugins\rtos\SafeRTOS\SafeRTOSPlugin.ewplugin</file>
         <loadFlag>0</loadFlag>
       </plugin>
       <plugin>
@@ -798,10 +746,6 @@
       </plugin>
       <plugin>
         <file>$TOOLKIT_DIR$\plugins\rtos\uCOS-II\uCOS-II-KA-CSpy.ewplugin</file>
-        <loadFlag>0</loadFlag>
-      </plugin>
-      <plugin>
-        <file>$TOOLKIT_DIR$\plugins\rtos\uCOS-III\uCOS-III-KA-CSpy.ewplugin</file>
         <loadFlag>0</loadFlag>
       </plugin>
       <plugin>

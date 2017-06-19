@@ -10,9 +10,9 @@
     <debug>1</debug>
     <settings>
       <name>General</name>
-      <archiveVersion>17</archiveVersion>
+      <archiveVersion>13</archiveVersion>
       <data>
-        <version>33</version>
+        <version>30</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>1</debug>
         <option>
@@ -101,15 +101,15 @@
         </option>
         <option>
           <name>GStackHeapOverride</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>GStackSize2</name>
-          <state>200</state>
+          <state>80</state>
         </option>
         <option>
           <name>GHeapSize2</name>
-          <state>200</state>
+          <state>80</state>
         </option>
         <option>
           <name>RadioDataModelType</name>
@@ -161,78 +161,13 @@
           <name>MathLib</name>
           <state>0</state>
         </option>
-        <option>
-          <name>RadioCodeModelType</name>
-          <state>1</state>
-        </option>
-        <option>
-          <name>GEnableMpu</name>
-          <state>1</state>
-        </option>
-        <option>
-          <name>GESupportMpu</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>GELockMpu</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>GENMIViolationMpu</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>GEAssertMpu</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>GEInfoReadMpu</name>
-          <state>1</state>
-        </option>
-        <option>
-          <name>GEInfoWriteMpu</name>
-          <state>1</state>
-        </option>
-        <option>
-          <name>GEInfoExecuteMpu</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>GEInfoAssertMpu</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>GEnableIpe</name>
-          <state>1</state>
-        </option>
-        <option>
-          <name>GESupportIpe</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>GAssertIpe</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>GLockIpe</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>Math variant</name>
-          <version>0</version>
-          <state>0</state>
-        </option>
-        <option>
-          <name>Math description</name>
-          <state></state>
-        </option>
       </data>
     </settings>
     <settings>
       <name>ICC430</name>
       <archiveVersion>4</archiveVersion>
       <data>
-        <version>37</version>
+        <version>36</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>1</debug>
         <option>
@@ -253,7 +188,7 @@
         </option>
         <option>
           <name>CCListCFile</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>CCListCMnemonics</name>
@@ -342,7 +277,7 @@
         </option>
         <option>
           <name>CCCompilerRuntimeInfo</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>IDoubleSize</name>
@@ -353,16 +288,16 @@
           <state>$FILE_BNAME$.r43</state>
         </option>
         <option>
+          <name>CCLibConfigHeader</name>
+          <state>1</state>
+        </option>
+        <option>
           <name>OCCR4Utilize</name>
           <state>0</state>
         </option>
         <option>
           <name>OCCR5Utilize</name>
           <state>0</state>
-        </option>
-        <option>
-          <name>CCLibConfigHeader</name>
-          <state>1</state>
         </option>
         <option>
           <name>IExtraOptionsCheck</name>
@@ -390,50 +325,27 @@
         </option>
         <option>
           <name>newCCIncludePaths</name>
-          <state>$PROJ_DIR$</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\chips\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\boards\telosb\</state>
-          <state>$PROJ_DIR$\..\..\..\drivers\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\common\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\chips\sht11\</state>
           <state>$PROJ_DIR$\..\..\..\drivers\common\</state>
-          <state>$PROJ_DIR$\..\..\..\drivers\telosb\</state>
           <state>$PROJ_DIR$\..\..\..\inc\</state>
           <state>$PROJ_DIR$\..\..\..\kernel\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\rrt\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\techo\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\uecho\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\uinject\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\userialbridge\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\04-TRAN\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\heli\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\imu\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\layerdebug\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\r6t\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\rleds\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\rreg\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\rwellknown\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\rt\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\rrt\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\rex\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\rinfo\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\rheli\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\rxl1\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\rsched\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\rrube\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\ohlone\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\tcpecho\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\tcpinject\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\tcpprint\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\udpecho\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\udpinject\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\udpprint\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\udprand\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\udpstorm\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\udplatency\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\cross-layers\</state>
-          <state>$PROJ_DIR$\..\..\..\drivers\common</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -512,11 +424,11 @@
         </option>
         <option>
           <name>CCData16</name>
-          <state>DATA</state>
+          <state>DATA16</state>
         </option>
         <option>
           <name>CCData20</name>
-          <state>DATA</state>
+          <state>DATA20</state>
         </option>
         <option>
           <name>CCIntvec</name>
@@ -572,10 +484,6 @@
         </option>
         <option>
           <name>OCGuardCallsSlave</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>CompilerCodeModel</name>
           <state>1</state>
         </option>
       </data>
@@ -752,7 +660,6 @@
       <data>
         <extensions></extensions>
         <cmdline></cmdline>
-        <hasPrio>0</hasPrio>
       </data>
     </settings>
     <settings>
@@ -772,7 +679,7 @@
       <name>XLINK</name>
       <archiveVersion>4</archiveVersion>
       <data>
-        <version>29</version>
+        <version>25</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>1</debug>
         <option>
@@ -815,7 +722,7 @@
         </option>
         <option>
           <name>XList</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>SegmentMap</name>
@@ -823,7 +730,7 @@
         </option>
         <option>
           <name>ListSymbols</name>
-          <state>0</state>
+          <state>2</state>
         </option>
         <option>
           <name>PageLengthCheck</name>
@@ -923,7 +830,7 @@
         </option>
         <option>
           <name>ModuleSummary</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>XlinkStackSize</name>
@@ -997,7 +904,7 @@
         </option>
         <option>
           <name>ListOutputFormat</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>BufferedTermOutput</name>
@@ -1054,59 +961,11 @@
         </option>
         <option>
           <name>LinkMathLib</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>IlinkThreadsSlave</name>
           <state>1</state>
-        </option>
-        <option>
-          <name>XlinkMPU</name>
-          <state>1</state>
-        </option>
-        <option>
-          <name>XlinkIPE</name>
-          <state>1</state>
-        </option>
-        <option>
-          <name>XlinkLogEnable</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>XlinkLogInputFiles</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>XlinkLogModuleSelection</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>XlinkLogPrintfScanf</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>XlinkLogSegmentSelection</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>XlinkLogStackDepth</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>XlinkStackUsageEnable</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>XlinkControlFiles</name>
-          <state></state>
-        </option>
-        <option>
-          <name>XlinkCallGraphFileEnable</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>XlinkCallGraphFileName</name>
-          <state>$LIST_DIR$\$PROJ_FNAME$.call_graph.cgx</state>
         </option>
       </data>
     </settings>
@@ -1179,9 +1038,9 @@
     <debug>0</debug>
     <settings>
       <name>General</name>
-      <archiveVersion>17</archiveVersion>
+      <archiveVersion>13</archiveVersion>
       <data>
-        <version>33</version>
+        <version>30</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>0</debug>
         <option>
@@ -1330,83 +1189,18 @@
           <name>MathLib</name>
           <state>0</state>
         </option>
-        <option>
-          <name>RadioCodeModelType</name>
-          <state>1</state>
-        </option>
-        <option>
-          <name>GEnableMpu</name>
-          <state>1</state>
-        </option>
-        <option>
-          <name>GESupportMpu</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>GELockMpu</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>GENMIViolationMpu</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>GEAssertMpu</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>GEInfoReadMpu</name>
-          <state>1</state>
-        </option>
-        <option>
-          <name>GEInfoWriteMpu</name>
-          <state>1</state>
-        </option>
-        <option>
-          <name>GEInfoExecuteMpu</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>GEInfoAssertMpu</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>GEnableIpe</name>
-          <state>1</state>
-        </option>
-        <option>
-          <name>GESupportIpe</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>GAssertIpe</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>GLockIpe</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>Math variant</name>
-          <version>0</version>
-          <state>0</state>
-        </option>
-        <option>
-          <name>Math description</name>
-          <state></state>
-        </option>
       </data>
     </settings>
     <settings>
       <name>ICC430</name>
       <archiveVersion>4</archiveVersion>
       <data>
-        <version>37</version>
+        <version>36</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>0</debug>
         <option>
           <name>CCDefines</name>
-          <state></state>
+          <state>NDEBUG</state>
         </option>
         <option>
           <name>CCPreprocFile</name>
@@ -1511,7 +1305,7 @@
         </option>
         <option>
           <name>CCCompilerRuntimeInfo</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>IDoubleSize</name>
@@ -1519,7 +1313,11 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state>$FILE_BNAME$.r43</state>
+          <state></state>
+        </option>
+        <option>
+          <name>CCLibConfigHeader</name>
+          <state>1</state>
         </option>
         <option>
           <name>OCCR4Utilize</name>
@@ -1528,10 +1326,6 @@
         <option>
           <name>OCCR5Utilize</name>
           <state>0</state>
-        </option>
-        <option>
-          <name>CCLibConfigHeader</name>
-          <state>1</state>
         </option>
         <option>
           <name>IExtraOptionsCheck</name>
@@ -1592,11 +1386,11 @@
         <option>
           <name>CCOptStrategy</name>
           <version>0</version>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>CCOptLevelSlave</name>
-          <state>3</state>
+          <state>1</state>
         </option>
         <option>
           <name>CInput</name>
@@ -1638,11 +1432,11 @@
         </option>
         <option>
           <name>CCData16</name>
-          <state>DATA</state>
+          <state>DATA16</state>
         </option>
         <option>
           <name>CCData20</name>
-          <state>DATA</state>
+          <state>DATA20</state>
         </option>
         <option>
           <name>CCIntvec</name>
@@ -1698,10 +1492,6 @@
         </option>
         <option>
           <name>OCGuardCallsSlave</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>CompilerCodeModel</name>
           <state>1</state>
         </option>
       </data>
@@ -1878,7 +1668,6 @@
       <data>
         <extensions></extensions>
         <cmdline></cmdline>
-        <hasPrio>0</hasPrio>
       </data>
     </settings>
     <settings>
@@ -1898,7 +1687,7 @@
       <name>XLINK</name>
       <archiveVersion>4</archiveVersion>
       <data>
-        <version>29</version>
+        <version>25</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>0</debug>
         <option>
@@ -2180,59 +1969,11 @@
         </option>
         <option>
           <name>LinkMathLib</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>IlinkThreadsSlave</name>
           <state>1</state>
-        </option>
-        <option>
-          <name>XlinkMPU</name>
-          <state>1</state>
-        </option>
-        <option>
-          <name>XlinkIPE</name>
-          <state>1</state>
-        </option>
-        <option>
-          <name>XlinkLogEnable</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>XlinkLogInputFiles</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>XlinkLogModuleSelection</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>XlinkLogPrintfScanf</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>XlinkLogSegmentSelection</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>XlinkLogStackDepth</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>XlinkStackUsageEnable</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>XlinkControlFiles</name>
-          <state></state>
-        </option>
-        <option>
-          <name>XlinkCallGraphFileEnable</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>XlinkCallGraphFileName</name>
-          <state>$LIST_DIR$\$PROJ_FNAME$.call_graph.cgx</state>
         </option>
       </data>
     </settings>
@@ -2294,28 +2035,79 @@
     </settings>
   </configuration>
   <group>
-    <name>application</name>
-    <file>
-      <name>$PROJ_DIR$\..\..\common\03oos_macpong\03oos_macpong.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\common\03oos_macpong\03oos_macpong.h</name>
-    </file>
-  </group>
-  <group>
     <name>bsp</name>
     <group>
       <name>boards</name>
       <group>
+        <name>common</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\abstimer.c</name>
+          <excluded>
+            <configuration>Debug</configuration>
+          </excluded>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\abstimers2.c</name>
+          <excluded>
+            <configuration>Debug</configuration>
+          </excluded>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_cbc.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_cbc.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_ccms.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_ccms.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_ctr.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_ctr.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_ecb.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_ecb.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\dummy_crypto_engine.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\dummy_crypto_engine.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\firmware_crypto_engine.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\firmware_crypto_engine.h</name>
+        </file>
+      </group>
+      <group>
         <name>telosb</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\adc_sensor.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\adc_sensor.h</name>
+        </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\board.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\board_info.h</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\board_crypto_engine.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\bsp_timer.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\board_crypto_engine.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\board_info.h</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\debugpins.c</name>
@@ -2327,7 +2119,10 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\leds.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\radiotimer.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\sctimer.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\sensors.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\spi.c</name>
@@ -2343,10 +2138,16 @@
         <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\crypto_engine.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\debugpins.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\eui64.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\i2c.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</name>
@@ -2358,6 +2159,18 @@
         <name>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\sctimer.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\sensors.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\spi.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\toolchain_defs.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\uart.h</name>
       </file>
     </group>
@@ -2366,40 +2179,61 @@
       <group>
         <name>cc2420</name>
         <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\cc2420.c</name>
+        </file>
+        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\cc2420.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\cc2420_crypto.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\cc2420_crypto.h</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\radio.c</name>
         </file>
       </group>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\chips\i2c.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\chips\spi.h</name>
-      </file>
+      <group>
+        <name>sht11</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\chips\sht11\sht11.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\chips\sht11\sht11.h</name>
+        </file>
+      </group>
     </group>
   </group>
   <group>
     <name>drivers</name>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\drivers\common\openhdlc.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\drivers\common\openhdlc.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\drivers\common\openserial.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\drivers\common\openserial.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.h</name>
-    </file>
+    <group>
+      <name>common</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\drivers\common\openhdlc.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\drivers\common\openhdlc.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\drivers\common\opensensors.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\drivers\common\opensensors.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\drivers\common\openserial.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\drivers\common\openserial.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.h</name>
+      </file>
+    </group>
   </group>
   <group>
     <name>inc</name>
@@ -2409,9 +2243,12 @@
   </group>
   <group>
     <name>kernel</name>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\kernel\openos\scheduler.c</name>
-    </file>
+    <group>
+      <name>openos</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\kernel\openos\scheduler.c</name>
+      </file>
+    </group>
     <file>
       <name>$PROJ_DIR$\..\..\..\kernel\scheduler.h</name>
     </file>
@@ -2422,15 +2259,36 @@
       <name>02a-MAClow</name>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\adaptive_sync.c</name>
+        <excluded>
+          <configuration>Debug</configuration>
+        </excluded>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\adaptive_sync.h</name>
+        <excluded>
+          <configuration>Debug</configuration>
+        </excluded>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154.c</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154_dummy_security.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154_dummy_security.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154_security.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154_security.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\ieee802154_security_driver.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154E.c</name>
@@ -2454,12 +2312,6 @@
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\neighbors.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\otf.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\otf.h</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\processIE.c</name>
       </file>
       <file>
@@ -2472,10 +2324,88 @@
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\schedule.h</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sf0.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sf0.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sixtop.c</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sixtop.h</name>
+      </file>
+    </group>
+    <group>
+      <name>03a-IPHC</name>
+      <excluded>
+        <configuration>Debug</configuration>
+      </excluded>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\iphc.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\iphc.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\openbridge.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\openbridge.h</name>
+      </file>
+    </group>
+    <group>
+      <name>03b-IPv6</name>
+      <excluded>
+        <configuration>Debug</configuration>
+      </excluded>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\forwarding.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\forwarding.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\icmpv6.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\icmpv6.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\icmpv6echo.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\icmpv6echo.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\icmpv6rpl.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\icmpv6rpl.h</name>
+      </file>
+    </group>
+    <group>
+      <name>04-TRAN</name>
+      <excluded>
+        <configuration>Debug</configuration>
+      </excluded>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\opencoap.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\opencoap.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\opentcp.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\opentcp.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\openudp.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\openudp.h</name>
       </file>
     </group>
     <group>
@@ -2511,6 +2441,21 @@
     <file>
       <name>$PROJ_DIR$\..\..\..\openstack\openstack.h</name>
     </file>
+  </group>
+  <group>
+    <name>projects</name>
+    <group>
+      <name>common</name>
+      <group>
+        <name>03oos_macpong</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\common\03oos_macpong\03oos_macpong.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\common\03oos_macpong\03oos_macpong.h</name>
+        </file>
+      </group>
+    </group>
   </group>
 </project>
 

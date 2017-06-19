@@ -9,7 +9,7 @@
 */
 
 #include "packetfunctions.h"
-#include "crypto_engine.h"
+#include "cryptoengine.h"
 #include "IEEE802154.h"
 #include "IEEE802154E.h"
 #include "idmanager.h"
@@ -17,8 +17,18 @@
 #include "IEEE802154_security.h"
 
 //=============================define==========================================
-
+#ifdef L2_SECURITY_ACTIVE
 //=========================== variables =======================================
+
+static const uint8_t key1[] = {
+    0x11,0x11,0x11,0x11,0x11,0x11,0x11,0x11,
+    0x11,0x11,0x11,0x11,0x11,0x11,0x11,0x11
+};
+
+static const uint8_t key2[] = {
+    0x22,0x22,0x22,0x22,0x22,0x22,0x22,0x22,
+    0x22,0x22,0x22,0x22,0x22,0x22,0x22,0x22
+};
 
 ieee802154_security_vars_t ieee802154_security_vars;
 
@@ -64,24 +74,9 @@ void IEEE802154_security_init(void) {
 
    //Setting UP Phase
 
-   //KEY 1: '6TiSCH minimal15' - used to authenticate beacon frames
-   memset(&ieee802154_security_vars.Key_1[0], 0, 16);
-   ieee802154_security_vars.Key_1[0] = 0x36;
-   ieee802154_security_vars.Key_1[1] = 0x54;
-   ieee802154_security_vars.Key_1[2] = 0x69;
-   ieee802154_security_vars.Key_1[3] = 0x53;
-   ieee802154_security_vars.Key_1[4] = 0x43;
-   ieee802154_security_vars.Key_1[5] = 0x48;
-   ieee802154_security_vars.Key_1[6] = 0x20;
-   ieee802154_security_vars.Key_1[7] = 0x6d;
-   ieee802154_security_vars.Key_1[8] = 0x69;
-   ieee802154_security_vars.Key_1[9] = 0x6e;
-   ieee802154_security_vars.Key_1[10] = 0x69;
-   ieee802154_security_vars.Key_1[11] = 0x6d;
-   ieee802154_security_vars.Key_1[12] = 0x61;
-   ieee802154_security_vars.Key_1[13] = 0x6c;
-   ieee802154_security_vars.Key_1[14] = 0x31;
-   ieee802154_security_vars.Key_1[15] = 0x35;
+   // copy key1
+   memset(&ieee802154_security_vars.Key_1[0], 0,        16);
+   memcpy(&ieee802154_security_vars.Key_1[0], &key1[0], 16);
 
    //Initialization of the MAC Security Level Table
    for (i = 0; i < IEEE154_TYPE_UNDEFINED; i++) { // iterate through all frame types
@@ -143,25 +138,10 @@ void IEEE802154_security_init(void) {
    ieee802154_security_vars.MacDeviceTable.DeviceDescriptorEntry[0].deviceAddress = ieee802154_security_vars.m_macDefaultKeySource;
    ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[0].DeviceTable = &ieee802154_security_vars.MacDeviceTable;
 
-   //KEY 2: 'deadbeeffacecafedeadbeeffacecafe'
-   memset(&ieee802154_security_vars.Key_2[0], 0, 16);
-   ieee802154_security_vars.Key_2[0] = 0xde;
-   ieee802154_security_vars.Key_2[1] = 0xad;
-   ieee802154_security_vars.Key_2[2] = 0xbe;
-   ieee802154_security_vars.Key_2[3] = 0xef;
-   ieee802154_security_vars.Key_2[4] = 0xfa;
-   ieee802154_security_vars.Key_2[5] = 0xce;
-   ieee802154_security_vars.Key_2[6] = 0xca;
-   ieee802154_security_vars.Key_2[7] = 0xfe;
-   ieee802154_security_vars.Key_2[8] = 0xde;
-   ieee802154_security_vars.Key_2[9] = 0xad;
-   ieee802154_security_vars.Key_2[10] = 0xbe;
-   ieee802154_security_vars.Key_2[11] = 0xef;
-   ieee802154_security_vars.Key_2[12] = 0xfa;
-   ieee802154_security_vars.Key_2[13] = 0xce;
-   ieee802154_security_vars.Key_2[14] = 0xca;
-   ieee802154_security_vars.Key_2[15] = 0xfe;
-
+   //copy key2
+   memset(&ieee802154_security_vars.Key_2[0], 0,        16);
+   memset(&ieee802154_security_vars.Key_2[0], &key2[0], 16);
+   
    //store the key 2 and related attributes
    //Creation of the KeyDescriptor - Key 2 should be used to encrypt and authenticate data, command and ack frames
    ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.KeyIdMode = IEEE154_ASH_KEYIDMODE_DEFAULTKEYSOURCE;
@@ -181,6 +161,8 @@ void IEEE802154_security_init(void) {
 
    ieee802154_security_vars.MacDeviceTable.DeviceDescriptorEntry[1].deviceAddress = ieee802154_security_vars.m_macDefaultKeySource;
    ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[1].DeviceTable = &ieee802154_security_vars.MacDeviceTable;
+
+   ieee802154_security_vars.minimal = IEEE802154_SECURITY_MINIMAL_PROC;
 }
 
 //=========================== public ==========================================
@@ -282,60 +264,57 @@ void IEEE802154_security_prependAuxiliarySecurityHeader(OpenQueueEntry_t* msg){
 owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
    uint8_t frameCounterSuppression;
    m_keyDescriptor* keyDescriptor;
-   uint8_t i;
-   uint8_t j;
    uint8_t nonce[13];
-   uint8_t key[16];
+   uint8_t *key;
    owerror_t outStatus;
    uint8_t* a;
    uint8_t len_a;
    uint8_t* m;
    uint8_t len_m;
-
-   //the frame counter is carried in the frame, otherwise 1;
-   frameCounterSuppression = IEEE154_ASH_FRAMECOUNTER_SUPPRESSED;
-
-   //search for a key
-   keyDescriptor = IEEE802154_security_keyDescriptorLookup(msg->l2_keyIdMode,
-                                                           &msg->l2_keySource,
-                                                           msg->l2_keyIndex,
-                                                           &msg->l2_keySource,
-                                                           (idmanager_getMyID(ADDR_PANID)),
-                                                           msg->l2_frameType);
-
-   if (keyDescriptor==NULL){//key not found
-      openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
-                           (errorparameter_t)msg->l2_frameType,
-                           (errorparameter_t)1);
-      return E_FAIL;
-   }
-
-   for (j=0;j<16;j++){
-      key[j] = keyDescriptor->key[j];
-   }
-
    uint8_t vectASN[5];
    macFrameCounter_t l2_frameCounter;
-   ieee154e_getAsn(vectASN);//gets asn from mac layer.
-   if (frameCounterSuppression == IEEE154_ASH_FRAMECOUNTER_PRESENT){//the frame Counter is carried in the frame
-      //save the frame counter of the current frame
-      l2_frameCounter.bytes0and1 = vectASN[0]+256*vectASN[1];
-      l2_frameCounter.bytes2and3 = vectASN[2]+256*vectASN[3];
-      l2_frameCounter.byte4 = vectASN[4];
 
-      IEEE802154_security_getFrameCounter(l2_frameCounter,
-                                         msg->l2_FrameCounter);
-   } //otherwise the frame counter is not in the frame
+   if (ieee802154_security_vars.minimal == 0) {
+      //the frame counter is carried in the frame, otherwise 1;
+      frameCounterSuppression = IEEE154_ASH_FRAMECOUNTER_SUPPRESSED;
 
-   //nonce creation
-   memset(&nonce[0], 0, 13);
-   //first 8 bytes of the nonce are always the source address of the frame
+      //search for a key
+      keyDescriptor = IEEE802154_security_keyDescriptorLookup(msg->l2_keyIdMode,
+                                                              &msg->l2_keySource,
+                                                              msg->l2_keyIndex,
+                                                              &msg->l2_keySource,
+                                                              (idmanager_getMyID(ADDR_PANID)),
+                                                              msg->l2_frameType);
+
+      if (keyDescriptor==NULL){ //key not found
+         openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
+                              (errorparameter_t)msg->l2_frameType,
+                              (errorparameter_t)1);
+         return E_FAIL;
+      }
+
+      key = keyDescriptor->key;
+
+      if (frameCounterSuppression == IEEE154_ASH_FRAMECOUNTER_PRESENT){//the frame Counter is carried in the frame
+         ieee154e_getAsn(vectASN);//gets asn from mac layer.
+         // save the frame counter of the current frame
+         l2_frameCounter.bytes0and1 = vectASN[0]+256*vectASN[1];
+         l2_frameCounter.bytes2and3 = vectASN[2]+256*vectASN[3];
+         l2_frameCounter.byte4 = vectASN[4];
+
+         IEEE802154_security_getFrameCounter(l2_frameCounter,
+                                            msg->l2_FrameCounter);
+      } //otherwise the frame counter is not in the frame
+   } else { // minimal processing for efficiency
+      key = msg->l2_frameType == IEEE154_TYPE_BEACON ? ieee802154_security_vars.Key_1 : ieee802154_security_vars.Key_2;
+   }
+
+   // First 8 bytes of the nonce are always the source address of the frame
    memcpy(&nonce[0],idmanager_getMyID(ADDR_64B)->addr_64b,8);
 
-   //Frame Counter (ASN)
-   for (i=0;i<5;i++){
-      nonce[8+i] = vectASN[i];
-   }
+   // Fill last 5 bytes with the ASN part of the nonce
+   ieee154e_getAsn(&nonce[8]);
+   packetfunctions_reverseArrayByteOrder(&nonce[8], 5);  // reverse ASN bytes to big endian 
 
    //identify data to be authenticated and data to be encrypted
    switch (msg->l2_securityLevel) {
@@ -377,15 +356,15 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
    }
 
    //Encryption and/or authentication
-   // CRYPTO_ENGINE overwrites m[] with ciphertext and appends the MIC
-   outStatus = CRYPTO_ENGINE.aes_ccms_enc(a,
-                                          len_a,
-                                          m,
-                                          &len_m,
-                                          nonce,
-                                          2, // L=2 in 15.4 std
-                                          key,
-                                          msg->l2_authenticationLength);
+   // cryptoengine overwrites m[] with ciphertext and appends the MIC
+   outStatus = cryptoengine_aes_ccms_enc(a,
+                                    len_a,
+                                    m,
+                                    &len_m,
+                                    nonce,
+                                    2, // L=2 in 15.4 std
+                                    key,
+                                    msg->l2_authenticationLength);
 
    //verify that no errors occurred
    if (outStatus != E_SUCCESS) {
@@ -393,7 +372,7 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
       (errorparameter_t)msg->l2_frameType,
       (errorparameter_t)3);
    }
-
+   
    return outStatus;
 }
 
@@ -510,85 +489,85 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t* msg){
    m_keyDescriptor*           keyDescriptor;
    m_securityLevelDescriptor* securityLevelDescriptor;
    uint8_t nonce[13];
-   uint8_t i;
-   uint8_t myASN[5];
    owerror_t outStatus;
    uint8_t* a;
    uint8_t len_a;
    uint8_t* c;
    uint8_t len_c;
+   uint8_t *key;
+   
+   if (ieee802154_security_vars.minimal == 0) {
+      //key descriptor lookup procedure
+      keyDescriptor = IEEE802154_security_keyDescriptorLookup(msg->l2_keyIdMode,
+                                                             &msg->l2_keySource,
+                                                             msg->l2_keyIndex,
+                                                             &msg->l2_keySource,
+                                                             idmanager_getMyID(ADDR_PANID),
+                                                             msg->l2_frameType);
 
-   //key descriptor lookup procedure
-   keyDescriptor = IEEE802154_security_keyDescriptorLookup(msg->l2_keyIdMode,
-                                                          &msg->l2_keySource,
-                                                          msg->l2_keyIndex,
-                                                          &msg->l2_keySource,
-                                                          idmanager_getMyID(ADDR_PANID),
-                                                          msg->l2_frameType);
+      if (keyDescriptor==NULL){ // can't find the key
+         openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
+                              (errorparameter_t)msg->l2_frameType,
+                              (errorparameter_t)6);
+         return E_FAIL;
+      }
 
-   if (keyDescriptor==NULL){//can't find the key
-      openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
-                           (errorparameter_t)msg->l2_frameType,
-                           (errorparameter_t)6);
+      // device descriptor lookup
+      deviceDescriptor = IEEE802154_security_deviceDescriptorLookup(&msg->l2_keySource,
+                                                                   idmanager_getMyID(ADDR_PANID),
+                                                                   keyDescriptor);
+   
+      if (deviceDescriptor==NULL){ // can't find the device in the list of authorized neighbors
+         openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
+                              (errorparameter_t)msg->l2_frameType,
+                              (errorparameter_t)7);
+         return E_FAIL;
+      }
+
+      // Security Level Descriptorlookup
+      securityLevelDescriptor = IEEE802154_security_securityLevelDescriptorLookup(msg->l2_frameType,
+                                                                                 msg->commandFrameIdentifier);
+   
+      if (securityLevelDescriptor == NULL){ // can't find the frame type in the list of allowed frame types
+         openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
+                              (errorparameter_t)msg->l2_frameType,
+                              (errorparameter_t)8);
+         return E_FAIL;
+      }
+
+      // incoming security level checking
+      outStatus = IEEE802154_security_incomingSecurityLevelChecking(securityLevelDescriptor,
+                                                                    msg->l2_securityLevel,
+                                                                    deviceDescriptor->Exempt);
+
+      if(outStatus == FALSE) { // security level not allowed according to local security policies
+         openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
+                              (errorparameter_t)msg->l2_frameType,
+                              (errorparameter_t)9);
+         return E_FAIL;
+      }
+
+      // incoming key usage policy checking
+      outStatus = IEEE802154_security_incomingKeyUsagePolicyChecking(keyDescriptor,
+                                                                     msg->l2_frameType,
+                                                                     0);
+      if(outStatus == FALSE){ // improper use of the key, according to local security policies
+         openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
+                             (errorparameter_t)msg->l2_frameType,
+                             (errorparameter_t)10);
       return E_FAIL;
+      }
+
+      key = keyDescriptor->key;
+   } else { // minimal processing for efficiency
+      key = msg->l2_frameType == IEEE154_TYPE_BEACON ? ieee802154_security_vars.Key_1 : ieee802154_security_vars.Key_2;
    }
 
-   //device descriptor lookup
-   deviceDescriptor = IEEE802154_security_deviceDescriptorLookup(&msg->l2_keySource,
-                                                                idmanager_getMyID(ADDR_PANID),
-                                                                keyDescriptor);
-
-   if (deviceDescriptor==NULL){//can't find the device in the list of authorized neighbors
-      openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
-                           (errorparameter_t)msg->l2_frameType,
-                           (errorparameter_t)7);
-      return E_FAIL;
-   }
-
-   //Security Level Descriptorlookup
-   securityLevelDescriptor = IEEE802154_security_securityLevelDescriptorLookup(msg->l2_frameType,
-                                                                              msg->commandFrameIdentifier);
-
-   if (securityLevelDescriptor == NULL){//can't find the frame type in the list of allowed frame types
-      openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
-                           (errorparameter_t)msg->l2_frameType,
-                           (errorparameter_t)8);
-      return E_FAIL;
-   }
-
-   //incoming security level checking
-   outStatus = IEEE802154_security_incomingSecurityLevelChecking(securityLevelDescriptor,
-                                                                 msg->l2_securityLevel,
-                                                                 deviceDescriptor->Exempt);
-
-   if(outStatus == FALSE) {//security level not allowed according to local security policies
-      openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
-                           (errorparameter_t)msg->l2_frameType,
-                           (errorparameter_t)9);
-      return E_FAIL;
-   }
-
-   //incoming key usage policy checking
-   outStatus = IEEE802154_security_incomingKeyUsagePolicyChecking(keyDescriptor,
-                                                                  msg->l2_frameType,
-                                                                  0);
-   if(outStatus == FALSE){// improper use of the key, according to local security policies
-     openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
-                          (errorparameter_t)msg->l2_frameType,
-                          (errorparameter_t)10);
-     return E_FAIL;
-   }
-
-   //create nonce
-   memset(&nonce[0], 0, 13);
-   //first 8 bytes of the nonce are always the source address of the frame
-   memcpy(&nonce[0],msg->l2_nextORpreviousHop.addr_64b,8);
-
-   //Frame Counter (ASN)
-   ieee154e_getAsn(myASN);
-   for (i=0;i<5;i++){
-      nonce[8+i] = myASN[i];
-   }
+   // First 8 bytes of the nonce are always the source address of the frame
+   memcpy(&nonce[0],msg->l2_nextORpreviousHop.addr_64b, 8);
+   // Fill last 5 bytes with ASN part of the nonce
+   ieee154e_getAsn(&nonce[8]);
+   packetfunctions_reverseArrayByteOrder(&nonce[8], 5);  // reverse ASN bytes to big endian 
 
    //identify data to be authenticated and data to be decrypted
    switch (msg->l2_securityLevel) {
@@ -625,14 +604,14 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t* msg){
    }
 
    //decrypt and/or verify authenticity of the frame
-   outStatus = CRYPTO_ENGINE.aes_ccms_dec(a,
-                                          len_a,
-                                          c,
-                                          &len_c,
-                                          nonce,
-                                          2,
-                                          keyDescriptor->key,
-                                          msg->l2_authenticationLength);
+   outStatus = cryptoengine_aes_ccms_dec(a,
+                                    len_a,
+                                    c,
+                                    &len_c,
+                                    nonce,
+                                    2,
+                                    key,
+                                    msg->l2_authenticationLength);
 
    //verify if any error occurs
    if (outStatus != E_SUCCESS){
@@ -642,6 +621,7 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t* msg){
    }
 
    packetfunctions_tossFooter(msg,msg->l2_authenticationLength);
+   
    return outStatus;
 }
 
@@ -913,15 +893,35 @@ void IEEE802154_security_getFrameCounter(macFrameCounter_t reference,
    array[4] =  reference.byte4;
 }
 
-/*---------------------------------------------------------------------------*/
-const struct ieee802154_security_driver IEEE802154_security = {
-   IEEE802154_security_init,
-   IEEE802154_security_prependAuxiliarySecurityHeader,
-   IEEE802154_security_retrieveAuxiliarySecurityHeader,
-   IEEE802154_security_outgoingFrameSecurity,
-   IEEE802154_security_incomingFrame,
-   IEEE802154_security_authLengthChecking,
-   IEEE802154_security_auxLengthChecking,
-};
-/*---------------------------------------------------------------------------*/
+#else /* L2_SECURITY_ACTIVE */
+
+void IEEE802154_security_init(void) {
+    return;
+}
+
+void IEEE802154_security_prependAuxiliarySecurityHeader(OpenQueueEntry_t* msg){
+    return;
+}
+
+void IEEE802154_security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t* msg, ieee802154_header_iht* tempheader) {
+    return;
+}
+
+owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t* msg) {
+    return E_SUCCESS;
+}
+
+owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t* msg) {
+    return E_SUCCESS;
+}
+
+uint8_t IEEE802154_security_authLengthChecking(uint8_t sec_level) {
+    return (uint8_t) 0;
+}
+
+uint8_t IEEE802154_security_auxLengthChecking(uint8_t kid, uint8_t sup, uint8_t size) {
+    return (uint8_t) 0;
+}
+
+#endif /* L2_SECURITY_ACTIVE */
 

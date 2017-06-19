@@ -5,7 +5,6 @@
 */
 
 #include "board.h"
-#include "crypto_engine.h"
 #include "scheduler.h"
 #include "openstack.h"
 #include "opendefs.h"
@@ -14,7 +13,6 @@ int mote_main(void) {
    
    // initialize
    board_init();
-   CRYPTO_ENGINE.init();
    scheduler_init();
    openstack_init();
    
@@ -24,3 +22,5 @@ int mote_main(void) {
    scheduler_start();
    return 0; // this line should never be reached
 }
+
+void sniffer_setListeningChannel(uint8_t channel){return;}

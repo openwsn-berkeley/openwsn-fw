@@ -5,176 +5,8 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, November 2014.
 */
 
-#include "board.h"
-#include "scheduler.h"
-#include "opentimers.h"
-#include "openhdlc.h"
-#include "leds.h"
-#include "uart.h"
-#include "radio.h"
-#include "eui64.h"
-
-//=========================== defines ==========================================
-
-#define UART_BUF_LEN         30
-#define RF_BUF_LEN           128
-
-#define TASK_PRIO_SERIAL     TASKPRIO_MAX
-#define TASK_PRIO_WIRELESS   TASKPRIO_SIXTOP_TIMEOUT
-
-#define TYPE_REQ_ST          1
-#define TYPE_RESP_ST         2
-#define TYPE_REQ_IDLE        3
-#define TYPE_REQ_TX          4
-#define TYPE_IND_TXDONE      5
-#define TYPE_REQ_RX          6 
-#define TYPE_IND_RX          7
-
-#define ST_IDLE              1
-#define ST_TX                2
-#define ST_TXDONE            3
-#define ST_RX                4
-
-//=========================== frame formats ===================================
-
-BEGIN_PACK
-typedef struct {
-   uint8_t         type;
-} REQ_ST_ht;
-END_PACK
-
-BEGIN_PACK
-typedef struct {
-   uint8_t         type;
-   uint8_t         status;
-   uint16_t        numnotifications;
-   uint8_t         mac[8];
-} RESP_ST_ht;
-END_PACK
-
-BEGIN_PACK
-typedef struct {
-   uint8_t         type;
-} REQ_IDLE_ht;
-END_PACK
-
-BEGIN_PACK
-typedef struct {
-   uint8_t         type;
-   uint8_t         frequency;
-    int8_t         txpower;
-   uint8_t         transctr;
-   uint16_t        txnumpk;
-   uint16_t        txifdur;
-   uint8_t         txlength;
-   uint8_t         txfillbyte;
-} REQ_TX_ht;
-END_PACK
-
-BEGIN_PACK
-typedef struct {
-   uint8_t         type;
-} IND_TXDONE_ht;
-END_PACK
-
-BEGIN_PACK
-typedef struct {
-   uint8_t         type;
-   uint8_t         frequency;
-   uint8_t         srcmac[8];
-   uint8_t         transctr;
-   uint8_t         txlength;
-   uint8_t         txfillbyte;
-} REQ_RX_ht;
-END_PACK
-
-BEGIN_PACK
-typedef struct {
-   uint8_t         type;
-   uint8_t         length;
-   int8_t          rssi;
-   uint8_t         flags;
-   uint16_t        pkctr;
-} IND_RX_ht;
-END_PACK
-
-//=========================== variables =======================================
-
-typedef struct {
-   opentimer_id_t  sendTimerId;             ///< Each time expires, a packet is sent.
-   
-   //=== state machine
-   uint8_t         status;
-   uint16_t        numnotifications;
-   
-   //=== UART
-   // tx
-   uint8_t         uartbuftx[UART_BUF_LEN];
-   uint8_t         uartbufrdidx;
-   uint8_t         uartbuftxfill;
-   uint8_t         uarttxescape;
-   uint16_t        uarttxcrc;
-   uint8_t         uarttxcrcAdded;
-   uint8_t         uarttxclosingSent;
-   // rx
-   uint8_t         uartbufrx[UART_BUF_LEN];
-   uint8_t         uartbufrxfill;
-   uint8_t         uartlastRxByte;
-   uint8_t         uartrxescaping;
-   uint16_t        uartrxcrc;
-   uint8_t         uartrxbusy;
-   
-   //=== stats
-   uint16_t        uartNumRxCrcOk;
-   uint16_t        uartNumRxCrcWrong;
-   uint16_t        uartNumTx;
-   uint16_t        serialNumRxOk;
-   uint16_t        serialNumRxWrongLength;
-   uint16_t        serialNumRxUnknownRequest;
-   
-   //=== RF
-   // tx
-   uint8_t         rfbuftx[RF_BUF_LEN];
-   uint16_t        txpk_numpk;
-   uint8_t         txpk_len;
-   uint8_t         txpk_totalnumpk;
-   uint8_t         mac[8];
-   // rx
-   uint8_t         rxpk_buf[RF_BUF_LEN];
-   uint8_t         rxpk_len;
-   uint8_t         rxpk_num;
-    int8_t         rxpk_rssi;
-   uint8_t         rxpk_lqi;
-      bool         rxpk_crc;
-   uint8_t         rxpk_txfillbyte;
-   uint8_t         rxpk_srcmac[8];
-   uint8_t         rxpk_transctr;
-   
-} mercator_vars_t;
-
-mercator_vars_t mercator_vars;
-
-//=========================== prototypes ======================================
-
-void serial_enable(void);
-void serial_disable(void);
-void serial_flushtx(void);
-
-void serial_rx_all(void);
-void serial_rx_REQ_ST(void);
-void serial_tx_RESP_ST(void);
-void serial_rx_REQ_IDLE(void);
-void serial_rx_REQ_TX(void);
-void serial_rx_REQ_RX(void);
-
-void isr_openserial_tx_mod(void);
-void isr_openserial_rx_mod(void);
-
-uint16_t htons(uint16_t val);
-
-void cb_endFrame(uint16_t timestamp);
-void cb_sendPacket(void);
-void cb_finishTx(void);
+#include "03oos_mercator.h"
+#include <stddef.h>
 
 //=========================== initialization ==================================
 
@@ -186,13 +18,16 @@ int mote_main(void) {
    board_init();
    scheduler_init();
    opentimers_init();
-   radio_init();
-   leds_init();
 
+   leds_all_off();
+   radiotimer_start(0xffff);
+   radiotimer_cancel();
+   
    // get mac
    eui64_get(mercator_vars.mac);
    
    // initial radio
+   radio_setStartFrameCb(cb_startFrame);
    radio_setEndFrameCb(cb_endFrame);
 
    // initial UART
@@ -201,6 +36,7 @@ int mote_main(void) {
       isr_openserial_rx_mod
    );
    serial_enable();
+   scheduler_push_task(serial_tx_IND_UP,TASK_PRIO_SERIAL);
    
    scheduler_start();
    return 0; // this line should never be reached
@@ -211,13 +47,9 @@ int mote_main(void) {
 //===== serial
 
 void serial_enable(void) {
-   uart_clearTxInterrupts();
-   uart_clearRxInterrupts();      // clear possible pending interrupts
+   uart_disableInterrupts();      // clear possible pending interrupts
    uart_enableInterrupts();       // Enable USCI_A1 TX & RX interrupt
-}
-
-void serial_disable(void) {
-   uart_disableInterrupts();      // disable USCI_A1 TX & RX interrupt
+   mercator_vars.uartlastRxByte = 0x00;
 }
 
 void serial_flushtx(void) {
@@ -241,13 +73,11 @@ void serial_flushtx(void) {
 }
 
 void serial_rx_all(void) {
-   do {
-      if (mercator_vars.uartbufrxfill<1){
-         // update stats
-         mercator_vars.serialNumRxWrongLength++;
-         break;
-      }
-      
+
+    if (mercator_vars.uartbufrxindex<1){
+       // update stats
+       mercator_vars.serialNumRxWrongLength++;
+    } else {    
       switch(mercator_vars.uartbufrx[0]) {
          case TYPE_REQ_ST:
             serial_rx_REQ_ST();
@@ -266,14 +96,12 @@ void serial_rx_all(void) {
             mercator_vars.serialNumRxUnknownRequest++;
             break;
       }
-      
-   } while(0);
-   
-   serial_enable();
+    }
+    serial_enable();
 }
 
 void serial_rx_REQ_ST(void) {
-   if (mercator_vars.uartbufrxfill!=sizeof(REQ_ST_ht)){
+   if (mercator_vars.uartbufrxindex!=sizeof(REQ_ST_ht)){
       // update stats
       mercator_vars.serialNumRxWrongLength++;
       return;
@@ -292,7 +120,7 @@ void serial_tx_RESP_ST(void) {
    resp->status                   = mercator_vars.status;
    resp->numnotifications         = htons(mercator_vars.numnotifications);
 
-   memcpy(resp->mac, mercator_vars.mac, 8);
+   memcpy(resp->mac, mercator_vars.mac, MAC_LEN);
 
    mercator_vars.uartbuftxfill    = sizeof(RESP_ST_ht);
    
@@ -300,7 +128,7 @@ void serial_tx_RESP_ST(void) {
 }
 
 void serial_rx_REQ_IDLE(void) {
-   if (mercator_vars.uartbufrxfill!=sizeof(REQ_IDLE_ht)){
+   if (mercator_vars.uartbufrxindex!=sizeof(REQ_IDLE_ht)){
       // update stats
       mercator_vars.serialNumRxWrongLength++;
       return;
@@ -315,10 +143,11 @@ void serial_rx_REQ_IDLE(void) {
 }
 
 void serial_rx_REQ_TX(void) {
+   uint16_t transctr;
    uint16_t pkctr;
    REQ_TX_ht* req;
 
-   if (mercator_vars.uartbufrxfill!=sizeof(REQ_TX_ht)){
+   if (mercator_vars.uartbufrxindex!=sizeof(REQ_TX_ht)){
       // update stats
       mercator_vars.serialNumRxWrongLength++;
       return;
@@ -332,12 +161,20 @@ void serial_rx_REQ_TX(void) {
    mercator_vars.txpk_len           = req->txlength;
    mercator_vars.txpk_totalnumpk    = htons(req->txnumpk);
 
-   //prepare packet
-   memcpy(mercator_vars.rfbuftx, mercator_vars.mac, 8);
-   memcpy(&mercator_vars.rfbuftx[8], &req->transctr, 1);
+   // prepare packet
+   memcpy(mercator_vars.rfbuftx, mercator_vars.mac, MAC_LEN);
+   transctr = htons(req->transctr);
+   memcpy(&mercator_vars.rfbuftx[offsetof(RF_PACKET_ht, transctr)],
+          &transctr,
+          sizeof(((REQ_TX_ht){0}).transctr)
+   );
    pkctr = htons(mercator_vars.txpk_numpk);
-   memcpy(mercator_vars.rfbuftx + 9, &pkctr, 2);
-   memset(mercator_vars.rfbuftx + 11, req->txfillbyte, mercator_vars.txpk_len - 11);
+   memcpy(&mercator_vars.rfbuftx[offsetof(RF_PACKET_ht, pkctr)],
+          &pkctr, sizeof(((mercator_vars_t){0}).txpk_numpk));
+  
+   // fill remaining packet space
+   memset(&mercator_vars.rfbuftx[offsetof(RF_PACKET_ht, txfillbyte)], req->txfillbyte, 
+          mercator_vars.txpk_len - offsetof(RF_PACKET_ht, txfillbyte) - LENGTH_CRC);
 
    // prepare radio
    radio_rfOn();
@@ -358,14 +195,14 @@ void serial_rx_REQ_TX(void) {
 
 void serial_rx_REQ_RX(void) {
    REQ_RX_ht* req;
-   if (mercator_vars.uartbufrxfill!=sizeof(REQ_RX_ht)){
+   if (mercator_vars.uartbufrxindex!=sizeof(REQ_RX_ht)){
       // update stats
       mercator_vars.serialNumRxWrongLength++;
       return;
    }
 
    req = (REQ_RX_ht*)mercator_vars.uartbufrx;
-   mercator_vars.rxpk_transctr = req->transctr;
+   mercator_vars.rxpk_transctr = htons(req->transctr);
    mercator_vars.rxpk_txfillbyte = req->txfillbyte;
    memcpy(mercator_vars.rxpk_srcmac, req->srcmac, 8);
 
@@ -387,6 +224,18 @@ void serial_rx_REQ_RX(void) {
    mercator_vars.status = ST_RX;
 
    return;
+}
+
+void serial_tx_IND_UP(void) {
+   IND_UP_ht* resp;
+   
+   resp = (IND_UP_ht*)mercator_vars.uartbuftx;
+   
+   resp->type                     = TYPE_IND_UP;
+
+   mercator_vars.uartbuftxfill    = sizeof(IND_UP_ht);
+   
+   serial_flushtx();
 }
 
 //===== helpers
@@ -453,8 +302,8 @@ void inputHdlcWriteMod(uint8_t b) {
       }
       
       // add byte to input buffer
-      mercator_vars.uartbufrx[mercator_vars.uartbufrxfill] = b;
-      mercator_vars.uartbufrxfill++;
+      mercator_vars.uartbufrx[mercator_vars.uartbufrxindex] = b;
+      mercator_vars.uartbufrxindex++;
       
       // iterate through CRC calculator
       mercator_vars.uartrxcrc = crcIteration(mercator_vars.uartrxcrc,b);
@@ -483,7 +332,7 @@ void isr_openserial_rx_mod(void) {
       mercator_vars.uartrxbusy           = TRUE;
       
       // reset the input buffer index
-      mercator_vars.uartbufrxfill            = 0;
+      mercator_vars.uartbufrxindex            = 0;
       
       // initialize the value of the CRC
       mercator_vars.uartrxcrc                = HDLC_CRCINIT;
@@ -498,8 +347,10 @@ void isr_openserial_rx_mod(void) {
       
       // add the byte just received
       inputHdlcWriteMod(rxbyte);
-      if (mercator_vars.uartbufrxfill+1>UART_BUF_LEN){
-         mercator_vars.uartbufrxfill         = 0;
+      
+      // reset buffer if frame too long
+      if (mercator_vars.uartbufrxindex+1>UART_BUF_LEN){
+         mercator_vars.uartbufrxindex         = 0;
          mercator_vars.uartrxbusy        = FALSE;
       }
    } else if (
@@ -516,11 +367,8 @@ void isr_openserial_rx_mod(void) {
             mercator_vars.uartNumRxCrcOk++;
             
             // remove the CRC from the input buffer
-            mercator_vars.uartbufrxfill    -= 2;
-            
-            // stop receiving (until frame handled)
-            serial_disable();
-            
+            mercator_vars.uartbufrxindex    -= 2;
+                        
             // schedule task to handle frame
             scheduler_push_task(serial_rx_all,TASK_PRIO_SERIAL);
             
@@ -551,14 +399,17 @@ void isr_openserial_rx_mod(void) {
 
 //===== radiotimer
 
+void cb_startFrame(uint16_t timestamp){
+    // nothing
+}
+
 void cb_endFrame(uint16_t timestamp) {
    // local vars
-      uint8_t  srcmac[8];
-      uint8_t  transctr;
-     uint16_t  pkctr;
-      uint8_t  txfillbyte;
-         bool  is_expected = TRUE;
-   IND_RX_ht*  resp;
+   RF_PACKET_ht* rx_temp;
+   bool         is_expected = TRUE;
+   IND_RX_ht*   resp;
+   
+   radio_rfOff();
    
    if (mercator_vars.status == ST_RX){
       
@@ -572,46 +423,50 @@ void cb_endFrame(uint16_t timestamp) {
          &mercator_vars.rxpk_crc
       );
 
-      memcpy(srcmac,       mercator_vars.rxpk_buf     , 8);
-      memcpy(&transctr,    &mercator_vars.rxpk_buf[8] , 1);
-      memcpy(&pkctr,       mercator_vars.rxpk_buf + 9 , 2);
-      pkctr = htons(pkctr);
-      memcpy(&txfillbyte,  &mercator_vars.rxpk_buf[11], 1);
+      // unpack rx buffer
+      rx_temp = (RF_PACKET_ht *)mercator_vars.rxpk_buf;
 
       // check srcmac
-      if (memcmp(srcmac, mercator_vars.rxpk_srcmac, 8) != 0){
+      if (memcmp(rx_temp->srcmac, mercator_vars.rxpk_srcmac, MAC_LEN) != 0){
          is_expected = FALSE;
       }
 
       // check transctr
-      if (transctr != mercator_vars.rxpk_transctr){
+      if (rx_temp->transctr != mercator_vars.rxpk_transctr){
          is_expected = FALSE;
       }
 
       // check txfillbyte
-      if (txfillbyte != mercator_vars.rxpk_txfillbyte){
+      if (rx_temp->txfillbyte != mercator_vars.rxpk_txfillbyte){
          is_expected = FALSE;
       }
 
-      resp = (IND_RX_ht*)mercator_vars.uartbuftx;
+      if (is_expected == TRUE){
+        resp = (IND_RX_ht*)mercator_vars.uartbuftx;
 
-      resp->type     =  TYPE_IND_RX;
-      resp->length   =  mercator_vars.rxpk_len;
-      resp->rssi     =  mercator_vars.rxpk_rssi;
-      resp->flags    =  mercator_vars.rxpk_crc << 7 | is_expected << 6;
-      resp->pkctr    =  htons(pkctr);
+        resp->type     =  TYPE_IND_RX;
+        resp->length   =  mercator_vars.rxpk_len;
+        resp->rssi     =  mercator_vars.rxpk_rssi;
+        resp->flags    =  mercator_vars.rxpk_crc << 7 | is_expected << 6;
+        resp->pkctr    =  rx_temp->pkctr;
 
-      mercator_vars.uartbuftxfill = sizeof(IND_RX_ht);
+        mercator_vars.uartbuftxfill = sizeof(IND_RX_ht);
 
-      serial_flushtx();
+        serial_flushtx();
+      }
 
       mercator_vars.numnotifications++;
+
+      radio_rfOn();
+      radio_rxEnable();
    }
 }
 
-void cb_sendPacket(void){
+void cb_sendPacket(opentimer_id_t id){
    IND_TXDONE_ht* resp;
    uint16_t pkctr;
+   uint8_t pkctr_offset = 10; // srcmac[8] + transctr[2]
+   
    // send packet
    leds_error_on();
 
@@ -644,6 +499,6 @@ void cb_sendPacket(void){
    // update pkctr
    mercator_vars.txpk_numpk++;
    pkctr = htons(mercator_vars.txpk_numpk);
-   memcpy(mercator_vars.rfbuftx + 9, &pkctr, 2);
+   memcpy(mercator_vars.rfbuftx + pkctr_offset, &pkctr, sizeof(pkctr));
    return;
 }

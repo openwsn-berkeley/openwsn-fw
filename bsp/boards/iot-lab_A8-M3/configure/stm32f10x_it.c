@@ -18,19 +18,19 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
 #include "leds.h"
-#include "bsp_timer.h"
-#include "radiotimer.h"
+#include "sctimer.h"
 #include "spi.h"
 #include "radio.h"
-#include "rtc_timer.h"
 #include "uart.h"
 #include "debugpins.h"
 #include "rcc.h"
+#include "board.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
+
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
@@ -54,10 +54,8 @@ void NMIException(void)
 *******************************************************************************/
 void HardFaultException(void)
 {
-  /* Go to infinite loop when Hard Fault exception occurs */
-  while (1)
-  {
-  }
+  /* reset when Hard Fault exception occurs */
+  board_reset();
 }
 
 /*******************************************************************************
@@ -196,6 +194,7 @@ void RTC_IRQHandler(void)
       RTC_ClearITPendingBit(RTC_IT_ALR);      //Clear RTC Alarm interrupt pending bit
       RTC_WaitForLastTask();                  //Wait until last write operation on RTC registers has finished
     }
+
 }
 
 /*******************************************************************************
@@ -274,17 +273,18 @@ void EXTI3_IRQHandler(void)
 *******************************************************************************/
 void EXTI4_IRQHandler(void)
 {
-  if(EXTI_GetITStatus(EXTI_Line4) != RESET){
     debugpins_isr_set();
+    if(EXTI_GetITStatus(EXTI_Line4) != RESET){
+
 
     //leds_error_toggle();
     EXTI_ClearITPendingBit(EXTI_Line4);
 
-    //RCC_Wakeup();
+    RCC_Wakeup();
     radio_isr();
 
+    }
     debugpins_isr_clr();
-  }
 }
 
 /*******************************************************************************
@@ -487,14 +487,6 @@ void TIM1_CC_IRQHandler(void)
 *******************************************************************************/
 void TIM2_IRQHandler(void)
 {
-  debugpins_isr_set();
-  if(TIM_GetFlagStatus(TIM2,TIM_FLAG_CC1) != RESET)
-  {
-    TIM_ClearFlag(TIM2,TIM_FLAG_CC1);
-    //leds_error_toggle();
-    bsp_timer_isr();
-  }
-  debugpins_isr_clr();
 }
 
 /*******************************************************************************
@@ -604,19 +596,19 @@ void SPI2_IRQHandler(void)
 *******************************************************************************/
 void USART1_IRQHandler(void)
 {  
-  debugpins_isr_set();
-  if(USART_GetFlagStatus(USART1, USART_FLAG_RXNE) != RESET)
-  {
-    USART_ClearFlag(USART1, USART_FLAG_RXNE);
-    
-    uart_rx_isr();
-  }
-
-  if(USART_GetFlagStatus(USART1, USART_FLAG_TXE) != RESET)
-  { 
-    uart_tx_isr(); 
-  }
-  debugpins_isr_clr();
+    debugpins_isr_set();
+    if(USART_GetFlagStatus(USART1,USART_FLAG_RXNE) != RESET)
+    {
+      USART_ClearFlag(USART1,USART_FLAG_RXNE);
+      
+        uart_rx_isr();
+    }
+  
+    if(USART_GetFlagStatus(USART1,USART_FLAG_TC) != RESET)
+    { 
+        uart_tx_isr(); 
+    }
+    debugpins_isr_clr();
 }
 
 /*******************************************************************************
@@ -650,6 +642,7 @@ void USART3_IRQHandler(void)
 *******************************************************************************/
 void EXTI15_10_IRQHandler(void)
 {
+
 }
 
 /*******************************************************************************
@@ -664,8 +657,8 @@ void RTCAlarm_IRQHandler(void)
   debugpins_isr_set();
   if(EXTI_GetITStatus(EXTI_Line17) != RESET)
   {
-	EXTI_ClearITPendingBit(EXTI_Line17);
-        radiotimer_isr();
+    EXTI_ClearITPendingBit(EXTI_Line17);
+        sctimer_isr();
   }
   debugpins_isr_clr();
 }

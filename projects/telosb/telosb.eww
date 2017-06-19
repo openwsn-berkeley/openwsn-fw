@@ -26,10 +26,25 @@
     <path>$WS_DIR$\00std_uart\00std_uart.ewp</path>
   </project>
   <project>
+    <path>$WS_DIR$\00std_uart0\00std_uart0.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\00std_xon_xoff\00std_xon_xoff.ewp</path>
+  </project>
+  <project>
     <path>$WS_DIR$\01bsp_bothtimers\01bsp_bothtimers.ewp</path>
   </project>
   <project>
     <path>$WS_DIR$\01bsp_bsp_timer\01bsp_bsp_timer.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\01bsp_closetimers\01bsp_closetimers.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\01bsp_debugpins\01bsp_debugpins.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\01bsp_eui64\01bsp_eui64.ewp</path>
   </project>
   <project>
     <path>$WS_DIR$\01bsp_leds\01bsp_leds.ewp</path>
@@ -45,12 +60,6 @@
   </project>
   <project>
     <path>$WS_DIR$\01bsp_radiotimer\01bsp_radiotimer.ewp</path>
-  </project>
-  <project>
-    <path>$WS_DIR$\01bsp_closetimers\01bsp_closetimers.ewp</path>
-  </project>
-  <project>
-    <path>$WS_DIR$\01bsp_debugpins\01bsp_debugpins.ewp</path>
   </project>
   <project>
     <path>$WS_DIR$\01bsp_spi\01bsp_spi.ewp</path>
@@ -75,7 +84,7 @@
   </project>
   <batchBuild>
     <batchDefinition>
-      <name>all</name>
+      <name>all_debugs</name>
       <member>
         <project>00std_button</project>
         <configuration>Debug</configuration>
@@ -109,11 +118,35 @@
         <configuration>Debug</configuration>
       </member>
       <member>
-        <project>01bsp_bothtimers</project>
+        <project>00std_uart0</project>
         <configuration>Debug</configuration>
       </member>
       <member>
-        <project>01bsp_bsp_timer</project>
+        <project>01bsp_uart</project>
+        <configuration>Debug</configuration>
+      </member>
+      <member>
+        <project>01bsp_spi</project>
+        <configuration>Debug</configuration>
+      </member>
+      <member>
+        <project>01bsp_radiotimer</project>
+        <configuration>Debug</configuration>
+      </member>
+      <member>
+        <project>01bsp_radio_tx</project>
+        <configuration>Debug</configuration>
+      </member>
+      <member>
+        <project>01bsp_radio_rx</project>
+        <configuration>Debug</configuration>
+      </member>
+      <member>
+        <project>01bsp_radio</project>
+        <configuration>Debug</configuration>
+      </member>
+      <member>
+        <project>01bsp_leds</project>
         <configuration>Debug</configuration>
       </member>
       <member>
@@ -125,43 +158,15 @@
         <configuration>Debug</configuration>
       </member>
       <member>
-        <project>01bsp_leds</project>
+        <project>01bsp_bsp_timer</project>
         <configuration>Debug</configuration>
       </member>
       <member>
-        <project>01bsp_radio</project>
+        <project>01bsp_bothtimers</project>
         <configuration>Debug</configuration>
       </member>
       <member>
-        <project>01bsp_radio_rx</project>
-        <configuration>Debug</configuration>
-      </member>
-      <member>
-        <project>01bsp_radio_tx</project>
-        <configuration>Debug</configuration>
-      </member>
-      <member>
-        <project>01bsp_radiotimer</project>
-        <configuration>Debug</configuration>
-      </member>
-      <member>
-        <project>01bsp_spi</project>
-        <configuration>Debug</configuration>
-      </member>
-      <member>
-        <project>01bsp_uart</project>
-        <configuration>Debug</configuration>
-      </member>
-      <member>
-        <project>02drv_openserial</project>
-        <configuration>Debug</configuration>
-      </member>
-      <member>
-        <project>02drv_opentimers</project>
-        <configuration>Debug</configuration>
-      </member>
-      <member>
-        <project>03oos_macpong</project>
+        <project>03oos_openwsn</project>
         <configuration>Debug</configuration>
       </member>
       <member>
@@ -169,7 +174,15 @@
         <configuration>Debug</configuration>
       </member>
       <member>
-        <project>03oos_openwsn</project>
+        <project>03oos_macpong</project>
+        <configuration>Debug</configuration>
+      </member>
+      <member>
+        <project>02drv_opentimers</project>
+        <configuration>Debug</configuration>
+      </member>
+      <member>
+        <project>02drv_openserial</project>
         <configuration>Debug</configuration>
       </member>
     </batchDefinition>

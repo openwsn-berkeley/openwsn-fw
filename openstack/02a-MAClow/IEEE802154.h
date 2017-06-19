@@ -25,7 +25,6 @@ enum IEEE802154_fcf_enums {
    IEEE154_FCF_DSN_SUPPRESSION         = 0,
 };
 
-
 enum IEEE802154_fcf_frameversion_enums {
    IEEE154_FRAMEVERSION_2003           = 0, //ieee154-2003
    IEEE154_FRAMEVERSION_2006           = 1, //ieee154-2006
@@ -110,6 +109,18 @@ enum IEEE802154_ash_FrameCounterSize_enums { // Frame Counter Size Field
 	IEEE154_ASH_FRAMECOUNTER_COUNTER    = 0,
 	IEEE154_ASH_FRAMECOUNTER_ASN        = 1,
 };
+
+
+#define TERMINATIONIE_LEN                   2 ///< length of a termination IE
+
+// length(b0~b6):0   ID(b7~b14):0x7E   type(b15): 0
+#define HEADER_TERMINATION_1_IE             0x3F00 ///< payload IE is present
+
+// length(b0~b6):0   ID(b7~b14):0x7F   type(b15): 0
+#define HEADER_TERMINATION_2_IE             0x3F80 ///< payload IE is NOT present
+
+// length(b0~b10):0   ID(b11~b14):0x0F   type(b15): 1
+#define PAYLOAD_TERMINATION_IE              0xF800 ///< MAC payload follows
 
 //=========================== typedef =========================================
 

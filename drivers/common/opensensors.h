@@ -41,4 +41,9 @@ opensensors_resource_desc_t* opensensors_getResource(
     uint8_t index
 );
 
+/**
+\}
+\}
+*/
+
 #endif // __OPENSENSORS_H__

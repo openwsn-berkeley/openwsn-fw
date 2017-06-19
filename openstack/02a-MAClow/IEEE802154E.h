@@ -10,8 +10,8 @@
 
 #include "opendefs.h"
 #include "board.h"
+#include "opentimers.h"
 #include "schedule.h"
-#include "processIE.h"
 
 //=========================== debug define ====================================
 
@@ -20,14 +20,29 @@ static const uint8_t chTemplate_default[] = {
    5,6,12,7,15,4,14,11,8,0,1,2,13,3,9,10
 };
 
+// refer to RFC8180: https://tools.ietf.org/html/rfc8180#appendix-A.1
+// ASN and join Metric are replaced later when sending an EB
+static const uint8_t ebIEsBytestream[] = {
+    0x1A,0x88,0x06,0x1A,0x00,0x00,            0x00,0x00,                                0x00,0x00,0x01,0x1C,0x00,0x01,
+    0xC8,0x00,0x0A,0x1B,0x01,0x00,SLOTFRAME_LENGTH,0x00,SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS,0x00,0x00,0x00,0x00,0x0F
+};
 //=========================== define ==========================================
 
-#define SYNCHRONIZING_CHANNEL       20 // channel the mote listens on to synchronize
+#define EB_ASN0_OFFSET               4
+#define EB_JP_OFFSET                 9
+#define EB_SLOTFRAME_TS_ID_OFFSET   12
+#define EB_SLOTFRAME_CH_ID_OFFSET   15
+#define EB_SLOTFRAME_LEN_OFFSET     20
+#define EB_SLOTFRAME_NUMLINK_OFFSET 22
+
+#define EB_IE_LEN                   28
+
+#define SYNCHRONIZING_CHANNEL       26 // channel the mote listens on to synchronize
 #define TXRETRIES                    3 // number of MAC retries before declaring failed
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to successfully synchronize
 #define US_PER_TICK                 30 // number of us per 32kHz clock tick
-#define EBPERIOD                    30 // in seconds: sending EB every 30 seconds
+#define EBPERIOD                     2 // in seconds: 2 -> EB every 2 seconds
 #define MAXKAPERIOD               2000 // in slots: @15ms per slot -> ~30 seconds. Max value used by adaptive synchronization.
 #define DESYNCTIMEOUT             2333 // in slots: @15ms per slot -> ~35 seconds. A larger DESYNCTIMEOUT is needed if using a larger KATIMEOUT.
 #define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"
@@ -38,11 +53,13 @@ static const uint8_t chTemplate_default[] = {
 #define IEEE802154E_PAYLOAD_DESC_LEN_SHIFT                 0x04
 #define IEEE802154E_PAYLOAD_DESC_GROUP_ID_MLME             (1<<11)
 #define IEEE802154E_PAYLOAD_DESC_TYPE_MLME                 (1<<15)
-#define IEEE802154E_DESC_TYPE_LONG                         (1<<15)
-#define IEEE802154E_DESC_TYPE_SHORT                        (0<<15)
+#define IEEE802154E_DESC_TYPE_LONG                         ((uint16_t)(1<<15))
+#define IEEE802154E_DESC_TYPE_SHORT                        ((uint16_t)(0<<15))
 
-#define IANA_6TOP_IE_GROUP_ID                              (2<<11)
-#define IANA_6TOP_IE_GROUP_ID_TYPE                         (1<<15)
+// GROUP_ID changed to 5 (IETF IE) https://openwsn.atlassian.net/browse/FW-569
+#define IANA_IETF_IE_GROUP_ID                              (5<<11)
+#define IANA_IETF_IE_TYPE                                  (1<<15)
+#define IEEE802154E_DESC_LEN_PAYLOAD_ID_TYPE_MASK          0xF800
 
 #define IEEE802154E_DESC_TYPE_HEADER_IE                    0x0000
 #define IEEE802154E_DESC_TYPE_PAYLOAD_IE                   0x8000
@@ -141,7 +158,7 @@ typedef enum {
 //    - duration_in_seconds = ticks / 32768
 enum ieee154e_atomicdurations_enum {
    // time-slot related
-#ifdef GOLDEN_IMAGE_ROOT
+#ifdef SLOTDURATION_10MS
    TsTxOffset                =   70,                  //  2120us
    TsLongGT                  =   36,                  //  1100us
    TsTxAckDelay              =   33,                  //  1000us
@@ -162,13 +179,11 @@ enum ieee154e_atomicdurations_enum {
    delayTx                   =  PORT_delayTx,         // between GO signal and SFD
    delayRx                   =  PORT_delayRx,         // between GO signal and start listening
    // radio watchdog
-#ifdef GOLDEN_IMAGE_ROOT
    wdRadioTx                 =   33,                  //  1000us (needs to be >delayTx)
    wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
+#ifdef SLOTDURATION_10MS
    wdAckDuration             =   80,                  //  2400us (measured 1000us)
 #else
-   wdRadioTx                 =   33,                  //  1000us (needs to be >delayTx)
-   wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
    wdAckDuration             =   98,                  //  3000us (measured 1000us)
 #endif
 };
@@ -208,11 +223,6 @@ typedef struct {
    PORT_SIGNED_INT_WIDTH timeCorrection;
 } IEEE802154E_ACK_ht;
 
-// includes payload header IE short + MLME short Header + Sync IE
-#define EB_PAYLOAD_LENGTH sizeof(payload_IE_ht) + \
-                           sizeof(mlme_IE_ht)     + \
-                           sizeof(sync_IE_ht)
-
 //=========================== module variables ================================
 
 typedef struct {
@@ -220,18 +230,18 @@ typedef struct {
    asn_t                     asn;                     // current absolute slot number
    slotOffset_t              slotOffset;              // current slot offset
    slotOffset_t              nextActiveSlotOffset;    // next active slot offset
-   PORT_RADIOTIMER_WIDTH     deSyncTimeout;           // how many slots left before looses sync
+   PORT_TIMER_WIDTH          deSyncTimeout;           // how many slots left before looses sync
    bool                      isSync;                  // TRUE iff mote is synchronized to network
    OpenQueueEntry_t          localCopyForTransmission;// copy of the frame used for current TX
-   PORT_RADIOTIMER_WIDTH     numOfSleepSlots;         // number of slots to sleep between active slots
+   PORT_TIMER_WIDTH          numOfSleepSlots;         // number of slots to sleep between active slots
    // as shown on the chronogram
    ieee154e_state_t          state;                   // state of the FSM
    OpenQueueEntry_t*         dataToSend;              // pointer to the data to send
    OpenQueueEntry_t*         dataReceived;            // pointer to the data received
    OpenQueueEntry_t*         ackToSend;               // pointer to the ack to send
    OpenQueueEntry_t*         ackReceived;             // pointer to the ack received
-   PORT_RADIOTIMER_WIDTH     lastCapturedTime;        // last captured time
-   PORT_RADIOTIMER_WIDTH     syncCapturedTime;        // captured time used to sync
+   PORT_TIMER_WIDTH          lastCapturedTime;        // last captured time
+   PORT_TIMER_WIDTH          syncCapturedTime;        // captured time used to sync
    // channel hopping
    uint8_t                   freq;                    // frequency of the current slot
    uint8_t                   asnOffset;               // offset inside the frame
@@ -242,8 +252,8 @@ typedef struct {
    uint8_t                   tsTemplateId;            // timeslot template id
    uint8_t                   chTemplateId;            // channel hopping tempalte id
    
-   PORT_RADIOTIMER_WIDTH     radioOnInit;             // when within the slot the radio turns on
-   PORT_RADIOTIMER_WIDTH     radioOnTics;             // how many tics within the slot the radio is on
+   PORT_TIMER_WIDTH          radioOnInit;             // when within the slot the radio turns on
+   PORT_TIMER_WIDTH          radioOnTics;             // how many tics within the slot the radio is on
    bool                      radioOnThisSlot;         // to control if the radio has been turned on in a slot.
    
    //control
@@ -252,7 +262,9 @@ typedef struct {
    // time correction
    int16_t                   timeCorrection;          // store the timeCorrection, prepend and retrieve it inside of frame header
    
-   uint16_t                  slotDuration;            // 
+   uint16_t                  slotDuration;            // duration of slot
+   opentimers_id_t           timerId;                 // id of timer used for implementing TSCH slot FSM 
+   uint32_t                  startOfSlotReference;    // the time refer to the beginning of slot
 } ieee154e_vars_t;
 
 BEGIN_PACK
@@ -268,10 +280,10 @@ typedef struct {
 END_PACK
 
 typedef struct {
-   PORT_RADIOTIMER_WIDTH     num_newSlot;
-   PORT_RADIOTIMER_WIDTH     num_timer;
-   PORT_RADIOTIMER_WIDTH     num_startOfFrame;
-   PORT_RADIOTIMER_WIDTH     num_endOfFrame;
+   PORT_TIMER_WIDTH          num_newSlot;
+   PORT_TIMER_WIDTH          num_timer;
+   PORT_TIMER_WIDTH          num_startOfFrame;
+   PORT_TIMER_WIDTH          num_endOfFrame;
 } ieee154e_dbg_t;
 
 //=========================== prototypes ======================================
@@ -279,7 +291,7 @@ typedef struct {
 // admin
 void               ieee154e_init(void);
 // public
-PORT_RADIOTIMER_WIDTH   ieee154e_asnDiff(asn_t* someASN);
+PORT_TIMER_WIDTH   ieee154e_asnDiff(asn_t* someASN);
 bool               ieee154e_isSynch(void);
 void               ieee154e_getAsn(uint8_t* array);
 void               ieee154e_setIsAckEnabled(bool isEnabled);
@@ -290,8 +302,8 @@ uint16_t           ieee154e_getSlotDuration(void);
 
 uint16_t           ieee154e_getTimeCorrection(void);
 // events
-void               ieee154e_startOfFrame(PORT_RADIOTIMER_WIDTH capturedTime);
-void               ieee154e_endOfFrame(PORT_RADIOTIMER_WIDTH capturedTime);
+void               ieee154e_startOfFrame(PORT_TIMER_WIDTH capturedTime);
+void               ieee154e_endOfFrame(PORT_TIMER_WIDTH capturedTime);
 // misc
 bool               debugPrint_asn(void);
 bool               debugPrint_isSync(void);
@@ -303,3 +315,4 @@ bool               debugPrint_macStats(void);
 */
 
 #endif
+

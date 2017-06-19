@@ -39,9 +39,9 @@ app_vars_t app_vars;
 
 //=========================== prototypes ======================================
 
-void cb_timer0(void);
-void cb_timer1(void);
-void cb_timer2(void);
+void cb_timer0(opentimer_id_t id);
+void cb_timer1(opentimer_id_t id);
+void cb_timer2(opentimer_id_t id);
 
 //=========================== main ============================================
 
@@ -80,14 +80,18 @@ int mote_main(void) {
 
 //=========================== callbacks =======================================
 
-void cb_timer0(void) {
+void cb_timer0(opentimer_id_t id) {
    leds_error_toggle();
 }
 
-void cb_timer1(void) {
+void cb_timer1(opentimer_id_t id) {
    leds_radio_toggle();
 }
 
-void cb_timer2(void) {
+void cb_timer2(opentimer_id_t id) {
    leds_sync_toggle();
 }
+
+//=========================== stub functions ==================================
+
+void sniffer_setListeningChannel(void){}
