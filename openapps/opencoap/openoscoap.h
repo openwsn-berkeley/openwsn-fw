@@ -26,6 +26,11 @@
 #define AES_CCM_16_64_128_TAG_LEN      8
 
 //=========================== typedef =========================================
+typedef enum {
+   OSCOAP_DERIVATION_TYPE_KEY           = 0,
+   OSCOAP_DERIVATION_TYPE_IV            = 1,
+} oscoap_derivation_t;
+
 typedef struct {
    uint32_t              bitArray;
    uint16_t              base;
@@ -43,8 +48,8 @@ typedef struct {
    // recipient context 
    uint8_t               recipientID[OSCOAP_MAX_ID_LEN];
    uint8_t               recipientIDLen;
-   uint8_t*              recipientKey[AES_CCM_16_64_128_KEY_LEN];
-   uint8_t*              recipientIV[AES_CCM_16_64_128_IV_LEN];
+   uint8_t               recipientKey[AES_CCM_16_64_128_KEY_LEN];
+   uint8_t               recipientIV[AES_CCM_16_64_128_IV_LEN];
    replay_window_t       window; 
 } oscoap_security_context_t;
 
