@@ -35,6 +35,11 @@ sources_c = [
     os.path.join('cross-layers','packetfunctions.c'),
     os.path.join('cross-layers','openaes.c'),
     os.path.join('cross-layers','openccms.c'),
+    os.path.join('cross-layers','usha.c'),
+    os.path.join('cross-layers','hkdf.c'),
+    os.path.join('cross-layers','hmac.c'),
+    os.path.join('cross-layers','sha224-256.c'),
+    os.path.join('cross-layers','cborencoder.c'),
 ]
 sources_h = [
     'openstack.h',
@@ -66,6 +71,8 @@ sources_h = [
     os.path.join('cross-layers','packetfunctions.h'),
     os.path.join('cross-layers','openaes.h'),
     os.path.join('cross-layers','openccms.h'),
+    os.path.join('cross-layers','sha.h'),
+    os.path.join('cross-layers','cborencoder.h'),
     #=== apps
     os.path.join('#','openapps','userialbridge','userialbridge.h'),
 ]
