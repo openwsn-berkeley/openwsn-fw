@@ -64,23 +64,21 @@ opentimers_id_t opentimers_create(void){
 \brief schedule a period refer to comparing value set last time.
 
 This function will schedule a timer which expires when the timer count reach 
-to lastCompareValue + duration.
-
-Note: as this function schedule time depending on last compare value. It 
-can't be called firstly after the timer is created.
+to current counter + duration.
 
 \param[in] id indicates the timer id
 \param[in] duration indicates the period asked for schedule since last comparing value
 \param[in] uint_type indicates the unit type of this schedule: ticks or ms
+\param[in] timer_type indicates the timer type of this schedule: oneshot or periodic
 \param[in] cb indicates when this scheduled timer fired, call this callback function.
  */
-void opentimers_scheduleRelative(opentimers_id_t    id, 
-                                 PORT_TIMER_WIDTH   duration,
-                                 time_type_t        uint_type, 
-                                 opentimers_cbt     cb){
+void opentimers_scheduleIn(opentimers_id_t    id, 
+                           uint32_t           duration,
+                           time_type_t        uint_type, 
+                           timer_type_t       timer_type, 
+                           opentimers_cbt     cb){
     uint8_t  i;
-    uint8_t idToSchedule;
-    PORT_TIMER_WIDTH durationTicks;
+    uint8_t  idToSchedule;
     PORT_TIMER_WIDTH timerGap;
     PORT_TIMER_WIDTH tempTimerGap;
     // 1. make sure the timer exist
@@ -94,22 +92,26 @@ void opentimers_scheduleRelative(opentimers_id_t    id,
         return;
     }
     
+    opentimers_vars.timersBuf[id].timerType = timer_type;
+    
     // 2. updat the timer content
     switch (uint_type){
     case TIME_MS:
-        if (duration>MAX_TICKS_NUMBER/PORT_TICS_PER_MS){
-            // openserail_printError();
-            return;
-        } else {
-            durationTicks = duration*PORT_TICS_PER_MS;
-        }
+        opentimers_vars.timersBuf[id].totalTimerPeriod = duration*PORT_TICS_PER_MS;
+        opentimers_vars.timersBuf[id].wraps_remaining  = (uint32_t)(duration*PORT_TICS_PER_MS)/MAX_TICKS_IN_SINGLE_CLOCK;
         break;
     case TIME_TICS:
-        durationTicks = duration;
+        opentimers_vars.timersBuf[id].totalTimerPeriod = duration;
+        opentimers_vars.timersBuf[id].wraps_remaining  = (uint32_t)(duration)/MAX_TICKS_IN_SINGLE_CLOCK;
         break;
     }
     
-    opentimers_vars.timersBuf[id].currentCompareValue = durationTicks+opentimers_vars.timersBuf[id].lastCompareValue;
+    if (opentimers_vars.timersBuf[id].wraps_remaining==0){
+        opentimers_vars.timersBuf[id].currentCompareValue = opentimers_vars.timersBuf[id].totalTimerPeriod+sctimer_readCounter();
+    } else {
+        opentimers_vars.timersBuf[id].currentCompareValue = MAX_TICKS_IN_SINGLE_CLOCK+sctimer_readCounter();
+    }
+    
     opentimers_vars.timersBuf[id].isrunning           = TRUE;
     opentimers_vars.timersBuf[id].callback            = cb;
     
@@ -121,7 +123,7 @@ void opentimers_scheduleRelative(opentimers_id_t    id,
         idToSchedule = 0;
         for (i=1;i<MAX_NUM_TIMERS;i++){
             if (opentimers_vars.timersBuf[i].isrunning){
-                tempTimerGap = opentimers_vars.timersBuf[i].currentCompareValue - opentimers_vars.lastTimeout;
+                tempTimerGap = opentimers_vars.timersBuf[i].currentCompareValue-opentimers_vars.lastTimeout;
                 if (tempTimerGap < timerGap){
                     // if a timer "i" has low priority but has compare value less than 
                     // candidate timer "idToSchedule" more than TIMERTHRESHOLD ticks, 
@@ -163,7 +165,8 @@ void opentimers_scheduleRelative(opentimers_id_t    id,
 \brief schedule a period refer to given reference.
 
 This function will schedule a timer which expires when the timer count reach 
-to lastCompareValue + reference.
+to duration + reference. This function will be used in the implementation of slot FSM.
+All timers use this function are ONE_SHOT type timer.
 
 \param[in] id indicates the timer id
 \param[in] duration indicates the period asked for schedule after a given time indicated by reference parameter.
@@ -171,13 +174,12 @@ to lastCompareValue + reference.
 \param[in] cb indicates when this scheduled timer fired, call this callback function.
  */
 void opentimers_scheduleAbsolute(opentimers_id_t    id, 
-                                 PORT_TIMER_WIDTH   duration, 
+                                 uint32_t           duration, 
                                  PORT_TIMER_WIDTH   reference , 
                                  time_type_t        uint_type, 
                                  opentimers_cbt     cb){
     uint8_t  i;
     uint8_t idToSchedule;
-    PORT_TIMER_WIDTH durationTicks;
     PORT_TIMER_WIDTH timerGap;
     PORT_TIMER_WIDTH tempTimerGap;
     // 1. make sure the timer exist
@@ -191,22 +193,27 @@ void opentimers_scheduleAbsolute(opentimers_id_t    id,
         return;
     }
     
+    // absolute scheduling is for one shot timer
+    opentimers_vars.timersBuf[id].timerType = TIMER_ONESHOT;
+    
     // 2. updat the timer content
     switch (uint_type){
     case TIME_MS:
-        if (duration>MAX_TICKS_NUMBER/PORT_TICS_PER_MS){
-            // openserail_printError("unsupported large duration");
-            return;
-        } else {
-            durationTicks = duration*PORT_TICS_PER_MS;
-        }
+        opentimers_vars.timersBuf[id].totalTimerPeriod = duration*PORT_TICS_PER_MS;
+        opentimers_vars.timersBuf[id].wraps_remaining  = (uint32_t)(duration*PORT_TICS_PER_MS)/MAX_TICKS_IN_SINGLE_CLOCK;;
         break;
     case TIME_TICS:
-        durationTicks = duration;
+        opentimers_vars.timersBuf[id].totalTimerPeriod = duration;
+        opentimers_vars.timersBuf[id].wraps_remaining  = (uint32_t)duration/MAX_TICKS_IN_SINGLE_CLOCK;
         break;
     }
     
-    opentimers_vars.timersBuf[id].currentCompareValue = durationTicks+reference;
+    if (opentimers_vars.timersBuf[id].wraps_remaining==0){
+        opentimers_vars.timersBuf[id].currentCompareValue = opentimers_vars.timersBuf[id].totalTimerPeriod+reference;
+    } else {
+        opentimers_vars.timersBuf[id].currentCompareValue = MAX_TICKS_IN_SINGLE_CLOCK+reference;
+    }
+
     opentimers_vars.timersBuf[id].isrunning           = TRUE;
     opentimers_vars.timersBuf[id].callback            = cb;
     
@@ -218,7 +225,7 @@ void opentimers_scheduleAbsolute(opentimers_id_t    id,
         idToSchedule = 0;
         for (i=1;i<MAX_NUM_TIMERS;i++){
             if (opentimers_vars.timersBuf[i].isrunning){
-                tempTimerGap = opentimers_vars.timersBuf[i].currentCompareValue - opentimers_vars.lastTimeout;
+                tempTimerGap = opentimers_vars.timersBuf[i].currentCompareValue-opentimers_vars.lastTimeout;
                 if (tempTimerGap < timerGap){
                     // if a timer "i" has low priority but has compare value less than 
                     // candidate timer "idToSchedule" more than TIMERTHRESHOLD ticks, 
@@ -390,21 +397,39 @@ void opentimers_timer_callback(void){
                 opentimers_vars.timersBuf[j].hasExpired == TRUE &&
                 opentimers_vars.timersBuf[j].priority   == opentimers_vars.timersBuf[idToCallCB].priority
             ){
-                opentimers_vars.timersBuf[j].isrunning           = FALSE;
                 opentimers_vars.timersBuf[j].lastCompareValue    = opentimers_vars.timersBuf[j].currentCompareValue;
-                opentimers_vars.timersBuf[j].hasExpired          = FALSE;
-                opentimers_vars.timersBuf[j].callback();
+                if (opentimers_vars.timersBuf[j].wraps_remaining==0){
+                    opentimers_vars.timersBuf[j].isrunning           = FALSE;
+                    opentimers_vars.timersBuf[j].hasExpired          = FALSE;
+                    opentimers_vars.timersBuf[j].callback();
+                    if (opentimers_vars.timersBuf[j].timerType==TIMER_PERIODIC){
+                        opentimers_scheduleIn(j,
+                                              opentimers_vars.timersBuf[j].totalTimerPeriod,
+                                              TIME_TICS,
+                                              TIMER_PERIODIC,
+                                              opentimers_vars.timersBuf[j].callback
+                        );
+                    }
+                } else {
+                    opentimers_vars.timersBuf[j].wraps_remaining--;
+                    if (opentimers_vars.timersBuf[j].wraps_remaining == 0){
+                        opentimers_vars.timersBuf[j].currentCompareValue = (opentimers_vars.timersBuf[j].totalTimerPeriod+opentimers_vars.timersBuf[j].lastCompareValue) & MAX_TICKS_IN_SINGLE_CLOCK;
+                    } else {
+                        opentimers_vars.timersBuf[j].currentCompareValue = opentimers_vars.timersBuf[j].lastCompareValue + MAX_TICKS_IN_SINGLE_CLOCK;
+                    }
+                    opentimers_vars.timersBuf[j].hasExpired          = FALSE;
+                }
             }
         }
     }
     opentimers_vars.insideISR = FALSE;
       
     // 3. find the next timer to be fired
-    timerGap     = opentimers_vars.timersBuf[0].currentCompareValue-opentimers_vars.lastTimeout;
+    timerGap     = opentimers_vars.timersBuf[0].currentCompareValue+opentimers_vars.timersBuf[0].wraps_remaining*MAX_TICKS_IN_SINGLE_CLOCK-opentimers_vars.lastTimeout;
     idToSchedule = 0;
     for (i=1;i<MAX_NUM_TIMERS;i++){
         if (opentimers_vars.timersBuf[i].isrunning){
-            tempTimerGap = opentimers_vars.timersBuf[i].currentCompareValue - opentimers_vars.lastTimeout;
+            tempTimerGap = opentimers_vars.timersBuf[i].currentCompareValue-opentimers_vars.lastTimeout;
             if (tempTimerGap < timerGap){
                 // if a timer "i" has low priority but has compare value less than 
                 // candidate timer "idToSchedule" more than TIMERTHRESHOLD ticks, 

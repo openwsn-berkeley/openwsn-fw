@@ -12,7 +12,6 @@ defaultApps   = [
     'cinfo',
     'cleds',
     'cwellknown',
-    'techo',
     'uecho',
     'uinject',
     'userialbridge',
@@ -32,7 +31,6 @@ defaultAppsInit   = [
     'cinfo',
     'cleds',
     'cwellknown',
-    'techo',
     'rrt',
 ]
 

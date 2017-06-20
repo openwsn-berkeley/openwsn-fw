@@ -76,6 +76,7 @@ int mote_main(void) {
    openserial_init();
    idmanager_init();
    openrandom_init();
+   opentimers_init();
  
    // add callback functions radio
    radio_setStartFrameCb(cb_startFrame);
@@ -153,10 +154,11 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
 void cb_timer(void) {
     
    // schedule again
-   opentimers_scheduleRelative(
+   opentimers_scheduleIn(
         app_vars.timerId,     // timerId
         TIMER_PERIOD,         // duration
         TIME_TICS,            // timetype
+        TIMER_ONESHOT,        // timertype
         cb_timer              // callback
    );
    app_vars.outputOrInput = (app_vars.outputOrInput+1)%2;

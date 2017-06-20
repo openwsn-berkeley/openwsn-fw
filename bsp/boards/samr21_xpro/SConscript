@@ -26,6 +26,7 @@ source = [
     'leds.c',
     'spi_drv.c',
     'uart.c',
+    'cryptoengine.c',
     'drivers/src/cm0_handler.c',
     'drivers/src/cm0plus_interrupt.c',
     'drivers/src/samr21_extint.c',

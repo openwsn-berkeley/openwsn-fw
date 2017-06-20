@@ -30,9 +30,9 @@ source = [
     'leds.c',
     'spi.c',
     'uart.c',
-    'board_crypto_engine.c',
     'adc_sensor.c',
-    'sensors.c'
+    'sensors.c',
+    'cryptoengine.c'
 ]
 
 localEnv.Append(

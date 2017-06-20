@@ -3,8 +3,7 @@
 #include "openserial.h"
 #include "packetfunctions.h"
 #include "IEEE802154E.h"
-#include "ieee802154_security_driver.h"
-
+#include "IEEE802154_security.h"
 
 //=========================== defination =====================================
 

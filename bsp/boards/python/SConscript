@@ -16,6 +16,7 @@ sources_c = [
     'radio_obj.c',
     'sctimer_obj.c',
     'supply_obj.c',
+    'cryptoengine.c',
 ]
 
 #============================ SCons targets ===================================

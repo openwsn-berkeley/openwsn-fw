@@ -2,7 +2,7 @@
 #include "IEEE802154E.h"
 #include "radio.h"
 #include "IEEE802154.h"
-#include "ieee802154_security_driver.h"
+#include "IEEE802154_security.h"
 #include "openqueue.h"
 #include "idmanager.h"
 #include "openserial.h"
@@ -68,17 +68,14 @@ bool     isValidJoin(OpenQueueEntry_t* eb, ieee802154_header_iht *parsedHeader);
 bool     isValidEbFormat(OpenQueueEntry_t* pkt);
 // IEs Handling
 bool     ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE);
+void     timeslotTemplateIDStoreFromEB(uint8_t id);
+void     channelhoppingTemplateIDStoreFromEB(uint8_t id);
 // ASN handling
 void     incrementAsnOffset(void);
 void     ieee154e_resetAsn(void);
 void     ieee154e_syncSlotOffset(void);
 void     asnStoreFromEB(uint8_t* asn);
 void     joinPriorityStoreFromEB(uint8_t jp);
-
-// timeslot template handling
-void     timeslotTemplateIDStoreFromEB(uint8_t id);
-// channelhopping template handling
-void     channelhoppingTemplateIDStoreFromEB(uint8_t id);
 // synchronization
 void     synchronizePacket(PORT_TIMER_WIDTH timeReceived);
 void     synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection);
@@ -155,6 +152,8 @@ void ieee154e_init() {
         isr_ieee154e_newSlot            // callback
    );
    // radiotimer_start(ieee154e_vars.slotDuration);
+   //
+   IEEE802154_security_init();
 }
 
 //=========================== public ==========================================
@@ -278,22 +277,22 @@ void isr_ieee154e_newSlot() {
     );
     ieee154e_vars.slotDuration          = TsSlotDuration;
     // radiotimer_setPeriod(ieee154e_vars.slotDuration);
-    if (ieee154e_vars.isSync==FALSE) {
-       if (idmanager_getIsDAGroot()==TRUE) {
-           changeIsSync(TRUE);
-           ieee154e_resetAsn();
-           ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
-       } else {
-           activity_synchronize_newSlot();
-       }
-    } else {
+   if (ieee154e_vars.isSync==FALSE) {
+      if (idmanager_getIsDAGroot()==TRUE) {
+         changeIsSync(TRUE);
+         ieee154e_resetAsn();
+         ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
+      } else {
+         activity_synchronize_newSlot();
+      }
+   } else {
 #ifdef ADAPTIVE_SYNC
-        // adaptive synchronization
-        adaptive_sync_countCompensationTimeout();
+     // adaptive synchronization
+      adaptive_sync_countCompensationTimeout();
 #endif
-        activity_ti1ORri1();
-    }
-    ieee154e_dbg.num_newSlot++;
+      activity_ti1ORri1();
+   }
+   ieee154e_dbg.num_newSlot++;
 }
 
 /**
@@ -689,8 +688,6 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
          // before authenticating the beacon, because nonce is created from the ASN
          if (!ieee154e_vars.isSync && ieee802514_header.frameType == IEEE154_TYPE_BEACON) {
             if (!isValidJoin(ieee154e_vars.dataReceived, &ieee802514_header)) {
-               // invalidate variables
-               memset(&ieee154e_vars, 0, sizeof(ieee154e_vars_t));
                break;
             }
          }
@@ -766,26 +763,28 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
     uint16_t oldFrameLength;
     open_addr_t temp_neighbor;
     if (isValidEbFormat(pkt)==TRUE){
-        *lenIE = sizeof(ebIEsBytestream);
+        *lenIE = sizeof(ebIEsBytestream)+5*(*((uint8_t*)(pkt->payload)+EB_SLOTFRAME_NUMLINK_OFFSET)-1);
         asnStoreFromEB((uint8_t*)(pkt->payload)+EB_ASN0_OFFSET);
         joinPriorityStoreFromEB(*((uint8_t*)(pkt->payload)+EB_JP_OFFSET));
         schedule_setFrameNumber(1);
         oldFrameLength = schedule_getFrameLength();
         if (oldFrameLength==0){
-            schedule_setFrameLength(SLOTFRAME_LENGTH);
+            schedule_setFrameLength(*((uint8_t*)(pkt->payload)+EB_SLOTFRAME_LEN_OFFSET));
             // shared TXRX anycast slot(s)
             memset(&temp_neighbor,0,sizeof(temp_neighbor));
             temp_neighbor.type             = ADDR_ANYCAST;
-            schedule_addActiveSlot(
-                0,             // slot offset
-                CELLTYPE_TXRX, // type of slot
-                TRUE,          // shared?
-                0,             // channel offset
-                &temp_neighbor // neighbor
-            );
+            for (i=0;i<*((uint8_t*)(pkt->payload)+EB_SLOTFRAME_NUMLINK_OFFSET);i++){
+                schedule_addActiveSlot(
+                    i,             // slot offset
+                    CELLTYPE_TXRX, // type of slot
+                    TRUE,          // shared?
+                    0,             // channel offset
+                    &temp_neighbor // neighbor
+                );
+            }
         }
-        timeslotTemplateIDStoreFromEB(0);
-        channelhoppingTemplateIDStoreFromEB(0);
+        timeslotTemplateIDStoreFromEB(*((uint8_t*)(pkt->payload)+EB_SLOTFRAME_TS_ID_OFFSET));
+        channelhoppingTemplateIDStoreFromEB(*((uint8_t*)(pkt->payload)+EB_SLOTFRAME_CH_ID_OFFSET));
         // at this point, ASN and frame length are known
         // the current slotoffset can be inferred
         ieee154e_syncSlotOffset();
@@ -901,7 +900,7 @@ port_INLINE void activity_ti1ORri1() {
           for (i=0;i<ieee154e_vars.numOfSleepSlots-1;i++){
              incrementAsnOffset();
           }
-      }
+      }  
       ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();      
    } else {
       // this is NOT the next active slot, abort
@@ -966,7 +965,7 @@ port_INLINE void activity_ti1ORri1() {
             // check if packet needs to be encrypted/authenticated before transmission 
             if (ieee154e_vars.localCopyForTransmission.l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) { // security enabled
                 // encrypt in a local copy
-                if (IEEE802154_SECURITY.outgoingFrame(&ieee154e_vars.localCopyForTransmission) != E_SUCCESS) {
+                if (IEEE802154_security_outgoingFrameSecurity(&ieee154e_vars.localCopyForTransmission) != E_SUCCESS) {
                     // keep the frame in the OpenQueue in order to retry later
                     endSlot(); // abort
                     return;
@@ -1113,7 +1112,7 @@ port_INLINE void activity_ti2() {
     // check if packet needs to be encrypted/authenticated before transmission 
     if (ieee154e_vars.localCopyForTransmission.l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) { // security enabled
         // encrypt in a local copy
-        if (IEEE802154_SECURITY.outgoingFrame(&ieee154e_vars.localCopyForTransmission) != E_SUCCESS) {
+        if (IEEE802154_security_outgoingFrameSecurity(&ieee154e_vars.localCopyForTransmission) != E_SUCCESS) {
             // keep the frame in the OpenQueue in order to retry later
             endSlot(); // abort
             return;
@@ -1527,7 +1526,7 @@ port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
       
         // check the security level of the ACK frame and decrypt/authenticate
         if (ieee154e_vars.ackReceived->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
-            if (IEEE802154_SECURITY.incomingFrame(ieee154e_vars.ackReceived) != E_SUCCESS) {
+            if (IEEE802154_security_incomingFrame(ieee154e_vars.ackReceived) != E_SUCCESS) {
                 break;
             }
         } // checked if unsecured frame should pass during header retrieval
@@ -1646,7 +1645,7 @@ port_INLINE void activity_ri4(PORT_TIMER_WIDTH capturedTime) {
    // cancel rt3
    radiotimer_cancel(ACTION_NORMAL_TIMER);
 #else
-    // cancel rt3
+   // cancel rt3
     opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         ieee154e_vars.slotDuration,                       // duration
@@ -1696,7 +1695,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
    // cancel rt4
    radiotimer_cancel(ACTION_NORMAL_TIMER);
 #else
-    // cancel rt4
+   // cancel rt4
     opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         ieee154e_vars.slotDuration,                       // duration
@@ -1781,14 +1780,14 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
 
       // if security is enabled, decrypt/authenticate the frame.
       if (ieee154e_vars.dataReceived->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
-         if (IEEE802154_SECURITY.incomingFrame(ieee154e_vars.dataReceived) != E_SUCCESS) {
+         if (IEEE802154_security_incomingFrame(ieee154e_vars.dataReceived) != E_SUCCESS) {
             break;
          }
       } // checked if unsecured frame should pass during header retrieval
 
       // toss the IEEE802.15.4 header
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_header.headerLength);
-      
+
       // handle IEs xv poipoi
       // reset join priority 
       // retrieve IE in sixtop
@@ -1863,7 +1862,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
            
            // if security is enabled, encrypt directly in OpenQueue as there are no retransmissions for ACKs
            if (ieee154e_vars.ackToSend->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
-                if (IEEE802154_SECURITY.outgoingFrame(ieee154e_vars.ackToSend) != E_SUCCESS) {
+                if (IEEE802154_security_outgoingFrameSecurity(ieee154e_vars.ackToSend) != E_SUCCESS) {
                     openqueue_freePacketBuffer(ieee154e_vars.ackToSend);
                     endSlot();
                     return;
@@ -1881,7 +1880,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
             radiotimer_setCapture(ACTION_TX_SFD_DONE);
             radiotimer_setCapture(ACTION_TX_SEND_DONE);
 #else
-        // arm rt5
+         // arm rt5
         opentimers_scheduleAbsolute(
             ieee154e_vars.timerId,                            // timerId
             DURATION_rt5,                                     // duration
@@ -1908,7 +1907,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
       return;
       
    } while(0);
-   
+    
    // free the (invalid) received data so RAM memory can be recycled
    openqueue_freePacketBuffer(ieee154e_vars.dataReceived);
    
@@ -1980,7 +1979,7 @@ port_INLINE void activity_ri6() {
    
     // if security is enabled, encrypt directly in OpenQueue as there are no retransmissions for ACKs
     if (ieee154e_vars.ackToSend->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
-        if (IEEE802154_SECURITY.outgoingFrame(ieee154e_vars.ackToSend) != E_SUCCESS) {
+        if (IEEE802154_security_outgoingFrameSecurity(ieee154e_vars.ackToSend) != E_SUCCESS) {
             openqueue_freePacketBuffer(ieee154e_vars.ackToSend);
             endSlot();
             return;
@@ -2099,7 +2098,7 @@ port_INLINE void activity_ri9(PORT_TIMER_WIDTH capturedTime) {
    // cancel rt8
    radiotimer_cancel(ACTION_NORMAL_TIMER);
 #else
-    // cancel rt8
+   // cancel rt8
     opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         ieee154e_vars.slotDuration,                       // duration
@@ -2278,7 +2277,7 @@ bool isValidJoin(OpenQueueEntry_t* eb, ieee802154_header_iht *parsedHeader) {
    packetfunctions_reserveHeaderSize(eb, parsedHeader->headerLength);
 
    // verify EB's authentication tag
-   if (IEEE802154_SECURITY.incomingFrame(eb) == E_SUCCESS) {
+   if (IEEE802154_security_incomingFrame(eb) == E_SUCCESS) {
       return TRUE;
    }
 
@@ -2290,8 +2289,8 @@ bool isValidEbFormat(OpenQueueEntry_t* pkt){
     if (pkt->length<EB_IE_LEN){
         return FALSE;
     }
-    for (i=0;i<EB_IE_LEN;i++){
-        if (i>=EB_ASN0_OFFSET && i<=EB_JP_OFFSET){
+    for (i=2;i<EB_IE_LEN;i++){
+        if ((i>=EB_ASN0_OFFSET && i<=EB_JP_OFFSET) || i==EB_SLOTFRAME_LEN_OFFSET || i==EB_SLOTFRAME_NUMLINK_OFFSET){
             continue;
         } else {
             if (ebIEsBytestream[i]!=pkt->payload[i]){
@@ -2313,22 +2312,36 @@ port_INLINE void asnStoreFromEB(uint8_t* asn) {
 }
 
 port_INLINE void ieee154e_syncSlotOffset() {
-   frameLength_t frameLength;
-   uint32_t slotOffset;
+    frameLength_t frameLength;
+    uint32_t slotOffset;
+    uint8_t i;
    
-   frameLength = schedule_getFrameLength();
+    frameLength = schedule_getFrameLength();
    
-   // determine the current slotOffset
-   slotOffset = ieee154e_vars.asn.byte4;
-   slotOffset = slotOffset % frameLength;
-   slotOffset = slotOffset << 16;
-   slotOffset = slotOffset + ieee154e_vars.asn.bytes2and3;
-   slotOffset = slotOffset % frameLength;
-   slotOffset = slotOffset << 16;
-   slotOffset = slotOffset + ieee154e_vars.asn.bytes0and1;
-   slotOffset = slotOffset % frameLength;
+    // determine the current slotOffset
+    slotOffset = ieee154e_vars.asn.byte4;
+    slotOffset = slotOffset % frameLength;
+    slotOffset = slotOffset << 16;
+    slotOffset = slotOffset + ieee154e_vars.asn.bytes2and3;
+    slotOffset = slotOffset % frameLength;
+    slotOffset = slotOffset << 16;
+    slotOffset = slotOffset + ieee154e_vars.asn.bytes0and1;
+    slotOffset = slotOffset % frameLength;
    
-   ieee154e_vars.slotOffset       = (slotOffset_t) slotOffset;
+    ieee154e_vars.slotOffset       = (slotOffset_t) slotOffset;
+   
+    schedule_syncSlotOffset(ieee154e_vars.slotOffset);
+    ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
+    /* 
+    infer the asnOffset based on the fact that
+    ieee154e_vars.freq = 11 + (asnOffset + channelOffset)%16 
+    */
+    for (i=0;i<16;i++){
+        if ((ieee154e_vars.freq - 11)==ieee154e_vars.chTemplate[i]){
+            break;
+        }
+    }
+    ieee154e_vars.asnOffset = i - schedule_getChannelOffset();
 }
 
 void ieee154e_setIsAckEnabled(bool isEnabled){
@@ -2403,7 +2416,7 @@ void synchronizePacket(PORT_TIMER_WIDTH timeReceived) {
       incrementAsnOffset();
    }
    
-    // resynchronize by applying the new period
+   // resynchronize by applying the new period
     opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         newPeriod,                                        // duration
@@ -2447,7 +2460,7 @@ void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
    currentPeriod                  =  ieee154e_vars.slotDuration;
    newPeriod                      =  (PORT_TIMER_WIDTH)((PORT_SIGNED_INT_WIDTH)currentPeriod+timeCorrection);
 
-    // resynchronize by applying the new period
+   // resynchronize by applying the new period
     opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         newPeriod,                                        // duration
@@ -2643,13 +2656,13 @@ void endSlot() {
    radio_rfOff();
    
    // compute the duty cycle if radio has been turned on
-   if (ieee154e_vars.radioOnThisSlot==TRUE){
+   if (ieee154e_vars.radioOnThisSlot==TRUE){  
       ieee154e_vars.radioOnTics+=(sctimer_readCounter()-ieee154e_vars.radioOnInit);
    }
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
    radiotimer_cancel(ACTION_ALL_RADIOTIMER_INTERRUPT);
 #else
-    // clear any pending timer
+   // clear any pending timer
     opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         ieee154e_vars.slotDuration,                       // duration
@@ -2733,21 +2746,3 @@ void endSlot() {
 bool ieee154e_isSynch(){
    return ieee154e_vars.isSync;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

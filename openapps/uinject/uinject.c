@@ -25,25 +25,25 @@ void uinject_task_cb(void);
 
 void uinject_init() {
    
-   // clear local variables
-   memset(&uinject_vars,0,sizeof(uinject_vars_t));
+    // clear local variables
+    memset(&uinject_vars,0,sizeof(uinject_vars_t));
 
-   // register at UDP stack
-   uinject_vars.desc.port              = WKP_UDP_INJECT;
-   uinject_vars.desc.callbackReceive   = &uinject_receive;
-   uinject_vars.desc.callbackSendDone  = &uinject_sendDone;
-   openudp_register(&uinject_vars.desc);
+    // register at UDP stack
+    uinject_vars.desc.port              = WKP_UDP_INJECT;
+    uinject_vars.desc.callbackReceive   = &uinject_receive;
+    uinject_vars.desc.callbackSendDone  = &uinject_sendDone;
+    openudp_register(&uinject_vars.desc);
 
-   uinject_vars.period = UINJECT_PERIOD_MS;
-   // start periodic timer
-   uinject_vars.timerId = opentimers_create();
-   opentimers_scheduleAbsolute(
-       uinject_vars.period,
-       UINJECT_PERIOD_MS,
-       opentimers_getValue(),
-       TIME_MS,
-       uinject_timer_cb
-   );
+    uinject_vars.period = UINJECT_PERIOD_MS;
+    // start periodic timer
+    uinject_vars.timerId = opentimers_create();
+    opentimers_scheduleIn(
+        uinject_vars.period,
+        UINJECT_PERIOD_MS,
+        TIME_MS,
+        TIMER_PERIODIC,
+        uinject_timer_cb
+    );
 }
 
 void uinject_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
@@ -76,13 +76,6 @@ void uinject_timer_cb(void){
 void uinject_task_cb() {
    OpenQueueEntry_t*    pkt;
    uint8_t              asnArray[5];
-   
-   opentimers_scheduleRelative(
-       uinject_vars.period,
-       UINJECT_PERIOD_MS,
-       TIME_MS,
-       uinject_timer_cb
-   );
    
    // don't run if not synch
    if (ieee154e_isSynch() == FALSE) return;

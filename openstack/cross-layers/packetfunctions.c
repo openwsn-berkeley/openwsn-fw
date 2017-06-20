@@ -465,4 +465,16 @@ uint32_t packetfunctions_ntohl( uint8_t* src ) {
       );
 }
 
+// reverse byte order in the array
+void packetfunctions_reverseArrayByteOrder(uint8_t* start, uint8_t len) {
+   uint8_t *lo = start;
+   uint8_t *hi = start + len - 1;
+   uint8_t swap;
+   while (lo < hi) {
+      swap = *lo;
+      *lo++ = *hi;
+      *hi-- = swap;
+   }
+}
+
 //=========================== private =========================================
