@@ -6,31 +6,20 @@ localEnv      = env.Clone()
 
 #===== retrieve the list of apps to build
 
-# apps which should always be built
-defaultApps   = [
-    'c6t',
-    'cinfo',
-    'cleds',
-    'cwellknown',
-    'uecho',
-    'uinject',
-    'userialbridge',
-    'rrt',
-]
+defaultApps   = []
 if localEnv['board']=='python':
     defaultApps  += [
+        'c6t',
+        'cinfo',
+        'cleds',
+        'cwellknown',
+        'uecho',
+        'uinject',
+        'userialbridge',
+        'rrt',
         'cexample',
         'cstorm',
     ]
-
-# apps which should always be present
-defaultAppsInit   = [
-    'c6t',
-    'cinfo',
-    'cleds',
-    'cwellknown',
-    'rrt',
-]
 
 # additional apps the user wants to build
 if localEnv['apps']:
@@ -42,7 +31,7 @@ else:
 apps      = ['opencoap']
 apps     += sorted(list(set(defaultApps+userApps)))
 appsInit  = ['opencoap'] # make sure opencoap is initialized first
-appsInit += sorted(list(set(defaultAppsInit+userApps)))
+appsInit += sorted(list(set(userApps)))
 
 #===== rule to create a (temporary) openapps_dyn.c file
 
@@ -133,6 +122,7 @@ else:
             os.path.join('#','openstack','cross-layers'),
             os.path.join('#','openstack','02a-MAClow'),
             os.path.join('#','openstack','02b-MAChigh'),
+            os.path.join('#','openstack','03a-IPHC'),
             os.path.join('#','openstack','03b-IPv6'),
             # openapps
             os.path.join('#','openapps'),
