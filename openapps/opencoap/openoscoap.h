@@ -1,6 +1,6 @@
 
-#ifndef __OSCOAP_H
-#define __OSCOAP_H
+#ifndef __OPENOSCOAP_H
+#define __OPENOSCOAP_H
 
 /**
 \addtogroup Transport
@@ -48,9 +48,15 @@ typedef struct {
    replay_window_t       window; 
 } oscoap_security_context_t;
 
+
+//=========================== module variables ================================
+
+typedef struct {
+} openoscoap_vars_t;
+
 //=========================== prototypes ======================================
 
-void oscoap_init_security_context(oscoap_security_context_t *ctx, 
+void openoscoap_init_security_context(oscoap_security_context_t *ctx, 
                                 uint8_t* senderID, 
                                 uint8_t senderIDLen,
                                 uint8_t* recipientID,

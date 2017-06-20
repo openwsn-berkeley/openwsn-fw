@@ -37,12 +37,14 @@ defaultAppsInit   = [
 # source files that should be included in the build other than
 # those with default application name (application.c)
 additionalSourceFiles = [
+    os.path.join('opencoap','openoscoap.c'),
     os.path.join('cjoin','cbor.c'),
 ]
 
 # header files that should be included in the build other than
 # those with default application name (application.h)
 additionalHeaderFiles = [
+    os.path.join('opencoap','openoscoap.h'),
     os.path.join('cjoin','cbor.h'),
 ]
 

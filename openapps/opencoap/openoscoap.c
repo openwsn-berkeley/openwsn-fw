@@ -1,5 +1,17 @@
 #include "opendefs.h"
-#include "oscoap.h"
+#include "openoscoap.h"
+
+
+//=========================== defines =========================================
+
+//=========================== variables =======================================
+
+openoscoap_vars_t openoscoap_vars;
+
+//=========================== prototype =======================================
+
+//=========================== public ==========================================
+
 
 /**
 \brief Initialize OSCOAP security context.
@@ -18,7 +30,8 @@ security context.
 \param[in] Length of the Master Salt byte array in bytes.
 */
 
-void oscoap_init_security_context(oscoap_security_context_t *ctx, 
+void openoscoap_init_security_context(oscoap_security_context_t *ctx, 
+
                                 uint8_t* senderID, 
                                 uint8_t senderIDLen,
                                 uint8_t* recipientID,
