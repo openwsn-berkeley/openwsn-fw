@@ -9,7 +9,11 @@
 #include "leds.h"
 
 //=========================== defines =========================================
-
+#define LED_ERROR GPIO_Pin_7
+#define LED_DEBUG GPIO_Pin_9
+#define LED_SYNC  GPIO_Pin_8
+#define LED_RADIO GPIO_Pin_6
+#define LED_ALL (LED_RADIO | LED_DEBUG | LED_ERROR | LED_SYNC)
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
@@ -24,32 +28,36 @@ void leds_init() {
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC , ENABLE);
 
     GPIO_InitTypeDef GPIO_InitStructure;
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9;
+    GPIO_InitStructure.GPIO_Pin = LED_ALL;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOC, &GPIO_InitStructure);
 }
 
-// red
+// red LED6
 void leds_error_on() {
-    
-    GPIOC->ODR |= 0X0040;
+
+    GPIO_SetBits(GPIOC, LED_ERROR);
 }
 
 void leds_error_off() {
-    
-    GPIOC->ODR &= ~0X0040;
+
+    GPIO_ResetBits(GPIOC, LED_ERROR);
 }
 
 void leds_error_toggle() {
-    
-   GPIOC->ODR ^= 0X0040;
+
+	if( GPIO_ReadOutputDataBit(GPIOC, LED_ERROR) ){
+		leds_error_off();
+	} else {
+		leds_error_on();
+	}
 }
 
 uint8_t leds_error_isOn(){
-    
-    u8 bitstatus = 0x00;
-    if ((GPIOC->ODR & 0X0040) != (u32)0) {
+
+    uint8_t bitstatus = 0x00;
+    if(GPIO_ReadOutputDataBit(GPIOC, LED_ERROR)) {
         bitstatus = 0x01;
     } else {
         bitstatus = 0x00;
@@ -58,34 +66,37 @@ uint8_t leds_error_isOn(){
 }
 
 void leds_error_blink(){
-    
+
     for(int i=0;i<16;i++) {
         leds_error_toggle();
         Delay();
     }
-  
 }
 
-// green
+// Yellow LED5
 void leds_radio_on() {
     
-    GPIOC->ODR |= 0X0080;
+    GPIO_SetBits(GPIOC, LED_RADIO);
 }
 
 void leds_radio_off() {
     
-    GPIOC->ODR &= ~0X0080;
+    GPIO_ResetBits(GPIOC, LED_RADIO);
 }
 
 void leds_radio_toggle() {
     
-    GPIOC->ODR ^= 0X0080;
+	if( GPIO_ReadOutputDataBit(GPIOC, LED_RADIO) ){
+		leds_radio_off();
+	} else {
+		leds_radio_on();
+	}
 }
 
 uint8_t leds_radio_isOn() {
     
-    u8 bitstatus = 0x00;
-    if ((GPIOC->ODR & 0X0080) != (u32)0) {
+    uint8_t bitstatus = 0x00;
+    if(GPIO_ReadOutputDataBit(GPIOC, LED_RADIO)) {
         bitstatus = 0x01;
     } else {
         bitstatus = 0x00;
@@ -93,55 +104,63 @@ uint8_t leds_radio_isOn() {
     return bitstatus;
 }
 
-// blue
+// Yellow LED7
 void leds_sync_on() {
     
-    GPIOC->ODR |= 0X0100;
+    GPIO_SetBits(GPIOC, LED_SYNC);
 }
 
 void leds_sync_off() {
     
-    GPIOC->ODR &= ~0X0100;
+    GPIO_ResetBits(GPIOC, LED_SYNC);
 }
 
 void leds_sync_toggle() {
     
-    GPIOC->ODR ^= 0X0100;
+	if( GPIO_ReadOutputDataBit(GPIOC, LED_SYNC) ){
+		leds_sync_off();
+	} else {
+		leds_sync_on();
+	}
 }
 
 uint8_t leds_sync_isOn() {
     
-    u8 bitstatus = 0x00;
-    if ((GPIOC->ODR & 0X0100) != (u32)0){
+    uint8_t bitstatus = 0x00;
+    if(GPIO_ReadOutputDataBit(GPIOC, LED_SYNC)) {
         bitstatus = 0x01;
-    } else{
+    } else {
         bitstatus = 0x00;
     }
     return bitstatus;
 }
 
-// yellow
+// red LED8
 void leds_debug_on() {
     
-    GPIOC->ODR |= 0X0200;  
+    GPIO_SetBits(GPIOC, LED_DEBUG);
 }
 
 void leds_debug_off(){
     
-    GPIOC->ODR &= ~0X0200;  
+    GPIO_ResetBits(GPIOC, LED_DEBUG);
 }
 
 void leds_debug_toggle(){
     
-    GPIOC->ODR ^= 0X0200;  
+	if( GPIO_ReadOutputDataBit(GPIOC, LED_DEBUG) ){
+		leds_debug_off();
+	} else {
+		leds_debug_on();
+	}
 }
 
 uint8_t leds_debug_isOn(){
     
-    u8 bitstatus = 0x00;
-    if ((GPIOC->ODR & 0X0200) != (u32)0){
+    uint8_t bitstatus = 0x00;
+    if(GPIO_ReadOutputDataBit(GPIOC, LED_DEBUG)) {
         bitstatus = 0x01;
-    } else{
+    } else {
         bitstatus = 0x00;
     }
     return bitstatus;
@@ -149,39 +168,37 @@ uint8_t leds_debug_isOn(){
 
 void leds_all_on() {
     
-    GPIOC->ODR |= 0X03C0;
+    GPIO_SetBits(GPIOC, LED_ALL);
 }
 
 void leds_all_off() {
-    GPIOC->ODR &= ~0X03C0;
+    GPIO_ResetBits(GPIOC, LED_ALL);
 }
 void leds_all_toggle() {
-    
-    GPIOC->ODR ^= 0X03C0;
+	
+    uint16_t state = GPIO_ReadOutputData(GPIOC);
+    state ^= LED_ALL;
+	GPIO_Write(GPIOC, state);
 }
 
 void leds_circular_shift() {
-    
-    GPIOC->ODR ^= 0X0040;
-    Delay();
-    GPIOC->ODR ^= 0X0040;
-    Delay();
-    GPIOC->ODR ^= 0X0080;
-    Delay();
-    GPIOC->ODR ^= 0X0080;
-    Delay();
-    GPIOC->ODR ^= 0X0100;
-    Delay();
-    GPIOC->ODR ^= 0X0100;
-    Delay();
-    GPIOC->ODR ^= 0X0200;
-    Delay();
-    GPIOC->ODR ^= 0X0200;
+
+	volatile uint16_t leds_state = 0;
+	leds_state = GPIO_ReadOutputData(GPIOC);
+	leds_state <<= 1;
+	leds_state &= LED_ALL;
+	GPIO_Write(GPIOC, leds_state);
     Delay();
 }
 
 void leds_increment() {
-    
+
+	volatile uint16_t leds_state = 0;
+	leds_state = GPIO_ReadOutputData(GPIOC);
+	leds_state += GPIO_Pin_6;
+	leds_state &= LED_ALL;
+	GPIO_Write(GPIOC, leds_state);
+	Delay();
 }
 
 //=========================== private =========================================

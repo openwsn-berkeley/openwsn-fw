@@ -54,6 +54,7 @@ int mote_main(void) {uint8_t i;
    
    // LED increment function
    leds_all_off();           some_delay();
+   leds_error_on();			 some_delay();
    for (i=0;i<9;i++) {
       leds_increment();      some_delay();
    }
