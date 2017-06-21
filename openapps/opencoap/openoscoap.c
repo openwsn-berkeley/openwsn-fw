@@ -142,12 +142,12 @@ owerror_t hkdf_derive_parameter(uint8_t* buffer,
     infoLen += cborencoder_put_array(&temp, 4);
     infoLen += cborencoder_put_bytes(&temp, identifierLen, identifier);
     infoLen += cborencoder_put_unsigned(&temp, algorithm);
-    
+
     if (type == OSCOAP_DERIVATION_TYPE_KEY) {
-        infoLen += cborencoder_put_text(&temp, (char *)&key, sizeof(key)-1);
+        infoLen += cborencoder_put_text(&temp, (char *) key, sizeof(key)-1);
     } 
     else if (type == OSCOAP_DERIVATION_TYPE_IV) {
-        infoLen += cborencoder_put_text(&temp, (char *) &iv, sizeof(iv)-1);
+        infoLen += cborencoder_put_text(&temp, (char *) iv, sizeof(iv)-1);
     }
     else {
         return E_FAIL;
