@@ -227,12 +227,14 @@ int16_t ieee154e_computeAsnDiff(asn_t* h_asn, asn_t* l_asn) {
 \param[out] et_asn bigger ASN value
 */
 void ieee154e_calculateExpTime(uint16_t max_delay, uint8_t* et_asn) {
-   uint8_t delay_array[5] = {};
+   uint8_t delay_array[5];
    uint8_t i =0, carry = 0,slot_time = 0;
    uint16_t sum = 0, delay_in_asn =0;
 	
+   memset(&delay_array[0],0,5);
+   
    //Slot time = (Duration in ticks * Time equivalent ticks w.r.t 32kHz) in ms
-   slot_time = (ieee154e_getSlotDuration()*30.5)/1000;  
+   slot_time = (ieee154e_getSlotDuration()*305)/10000;  
    delay_in_asn = max_delay / slot_time; 
 		
    delay_array[0]         = (delay_in_asn     & 0xff);
