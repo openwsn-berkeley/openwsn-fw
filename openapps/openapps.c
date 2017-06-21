@@ -8,6 +8,20 @@
 
 // CoAP
 #include "opencoap.h"
+#include "c6t.h"
+#include "cinfo.h"
+#include "cleds.h"
+#include "cwellknown.h"
+#include "rrt.h"
+#include "cexample.h"
+#include "cstorm.h"
+
+// UDP
+#include "uecho.h"
+#include "uinject.h"
+#include "userialbridge.h"
+#include "uexpiration.h"
+#include "uexpiration_monitor.h"
 
 //=========================== variables =======================================
 
@@ -20,4 +34,18 @@
 void openapps_init(void) {
    //-- 04-TRAN
    opencoap_init();     // initialize before any of the CoAP applications
+   
+   // CoAP
+   c6t_init();
+   cinfo_init();
+   cleds__init();
+   cwellknown_init();
+   rrt_init();
+   
+   // UDP
+   uecho_init();
+   uinject_init();
+   userialbridge_init();
+   uexpiration_init();
+   umonitor_init();
 }

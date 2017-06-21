@@ -16,6 +16,8 @@ if localEnv['board']=='python':
         'uecho',
         'uinject',
         'userialbridge',
+        'uexpiration',
+        'uexpiration_monitor',
         'rrt',
         'cexample',
         'cstorm',
