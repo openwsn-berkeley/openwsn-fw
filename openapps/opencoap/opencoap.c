@@ -484,6 +484,11 @@ owerror_t opencoap_send(
        memcpy(&request->token[tokenPos],&token,2);
        tokenPos+=2;
    }
+
+   if (msg->length > 0 ) { // contains payload, add payload marker
+      packetfunctions_reserveHeaderSize(msg,1);
+      msg->payload[0] = COAP_PAYLOAD_MARKER;
+   }
       
    // fake run of opencoap_options_encode in order to get the necessary length
    packetfunctions_reserveHeaderSize(msg, opencoap_options_encode(NULL, options, optionsLen, TRUE));
