@@ -169,7 +169,9 @@ owerror_t     opencoap_send(
     OpenQueueEntry_t*     msg,
     coap_type_t           type,
     coap_code_t           code,
-    uint8_t               numOptions,
+    uint8_t               TKL,
+    coap_option_iht*      options,
+    uint8_t               optionsLen,
     coap_resource_desc_t* descSender
 );
 

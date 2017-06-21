@@ -15,6 +15,7 @@
 opencoap_vars_t opencoap_vars;
 
 //=========================== prototype =======================================
+uint8_t opencoap_options_encode(uint8_t* buffer,coap_option_iht* options, uint8_t optionsLen, bool fake);
 
 //=========================== public ==========================================
 
@@ -437,6 +438,8 @@ This function is NOT called for a response.
 \param[in] type The CoAP type of the message.
 \param[in] code The CoAP code of the message.
 \param[in] TKL  The Token Length of the message, sanitized to a max of COAP_MAX_TKL (8).
+\param[in] options An array of sorted CoAP options.
+\param[in] optionsLen The length of the options array.
 \param[out] descSender A pointer to the description of the calling CoAP
    resource.
 
@@ -450,6 +453,8 @@ owerror_t opencoap_send(
       coap_type_t            type,
       coap_code_t            code,
       uint8_t                TKL,
+      coap_option_iht*       options,
+      uint8_t                optionsLen,
       coap_resource_desc_t*  descSender
    ) {
    uint16_t token;
@@ -479,7 +484,13 @@ owerror_t opencoap_send(
        memcpy(&request->token[tokenPos],&token,2);
        tokenPos+=2;
    }
-   
+      
+   // fake run of opencoap_options_encode in order to get the necessary length
+   packetfunctions_reserveHeaderSize(msg, opencoap_options_encode(NULL, options, optionsLen, TRUE));
+
+   // once header is reserved, encode the options to the openqueue payload buffer
+   opencoap_options_encode(msg->payload, options, optionsLen, FALSE);
+
    // pre-pend CoAP header (version,type,TKL,code,messageID,Token)
    packetfunctions_reserveHeaderSize(msg,4+request->TKL);
    msg->payload[0]                  = (COAP_VERSION   << 6) |
@@ -495,3 +506,88 @@ owerror_t opencoap_send(
 }
 
 //=========================== private =========================================
+
+uint8_t opencoap_options_encode(
+        uint8_t*                buffer,
+        coap_option_iht*        options,
+        uint8_t                 optionsLen,
+        bool                    fake
+        ) {
+
+    uint8_t i;
+    uint32_t delta;
+    uint8_t optionDelta;
+    uint8_t optionDeltaExt[2];
+    uint8_t optionDeltaExtLen;
+    uint8_t optionLength;
+    uint8_t optionLengthExt[2];
+    uint8_t optionLengthExtLen;
+    uint8_t index;
+    coap_option_t lastOptionNum;
+
+    // encode options
+    i = 0;
+    index = 0;
+    lastOptionNum = COAP_OPTION_NONE;
+    if (options != NULL) {
+        for (i = 0; i < optionsLen; i++) {
+            if (options[i].type < lastOptionNum) {
+                return 0; // we require the options to be sorted
+            }
+            delta = options[i].type - lastOptionNum;
+
+            if (delta <= 12) {
+                optionDelta = (uint8_t) delta;
+                optionDeltaExtLen = 0; 
+            }
+            else if (delta <= 0xff + 13) {
+                optionDelta = 13;
+                optionDeltaExt[0] = (uint8_t) delta - 13;
+                optionDeltaExtLen = 1;
+            }
+            else if (delta <= 0xffff + 269) {
+                optionDelta = 14;
+                packetfunctions_htons((uint16_t) delta - 269, optionDeltaExt); 
+                optionDeltaExtLen = 2;
+            }
+            else {
+                return 0;
+            }
+
+            if (options[i].length <= 12) {
+                optionLength = options[i].length;
+                optionLengthExtLen = 0;
+            }
+            else { 
+                // we do not support fragmentation so option length cannot be larger
+                // than 0xff. therefore, we default to the case where optionLength = 13.
+                // see RFC7252 Section 3.1 for more details.
+                optionLength = 13;
+                optionLengthExt[0] = options[i].length - 13;
+                optionLengthExtLen = 1;
+            }
+            
+            // write to buffer if fake is set to FALSE
+            // otherwise just return the necesasry length
+            if (fake == FALSE) {
+                buffer[index] = (optionDelta << 4) | optionLength;
+            }
+            index++;
+            if (fake == FALSE) {
+                memcpy(&buffer[index], optionDeltaExt, optionDeltaExtLen);
+            }
+            index += optionDeltaExtLen;
+            if (fake == FALSE) {
+                memcpy(&buffer[index], optionLengthExt, optionLengthExtLen);
+            }
+            index += optionLengthExtLen;
+            if (fake == FALSE) {
+                memcpy(&buffer[index], options[i].pValue, options[i].length);
+            }
+            index += options[i].length;
+
+            lastOptionNum = options[i].type;
+        }
+    }
+    return index;
+}
