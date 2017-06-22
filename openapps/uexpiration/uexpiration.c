@@ -71,11 +71,11 @@ void uexpiration_receive(OpenQueueEntry_t* request) {
 	 uexpiration_vars.period = pkt_interval;	  
 	 // start periodic timer
    uexpiration_vars.timerId = opentimers_create();
-   opentimers_scheduleAbsolute(
+   opentimers_scheduleIn(
        uexpiration_vars.timerId,
        uexpiration_vars.period,
-       opentimers_getValue(),
        TIME_MS,
+       TIMER_ONESHOT,
        uexpiration_timer_cb
    );
 }
@@ -122,15 +122,15 @@ void uexpiration_task_cb() {
        
    //To stop periodic txn of data
    if(++seqno > max_num_pkts) {
-   		opentimers_destroy(uexpiration_vars.timerId);
+      opentimers_destroy(uexpiration_vars.timerId);
    } else {
-      opentimers_scheduleAbsolute(
-         uexpiration_vars.timerId,
-         uexpiration_vars.period,
-         opentimers_getValue(),
-         TIME_MS,
-         uexpiration_timer_cb
-     );
+      opentimers_scheduleIn(
+           uexpiration_vars.timerId,
+           uexpiration_vars.period,
+           TIME_MS,
+           TIMER_ONESHOT,
+           uexpiration_timer_cb
+      );
    }
    
    if ((openudp_send(reply))==E_FAIL) {
