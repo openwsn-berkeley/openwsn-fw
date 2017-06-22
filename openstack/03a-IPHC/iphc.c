@@ -16,7 +16,7 @@ static const uint8_t dagroot_mac64b[]   = {0x02,
    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01
 }; 
 
-#if DEADLINE_OPTION_ENABLED
+#ifdef DEADLINE_OPTION_ENABLED
     static monitor_expiration_vars_t  monitor_expiration_vars;
 #endif
 
@@ -49,7 +49,7 @@ void iphc_prependIPv6HopByHopHeader(
    rpl_option_ht*       rpl_option
 );
 
-#if DEADLINE_OPTION_ENABLED
+#ifdef DEADLINE_OPTION_ENABLED
 // IPv6 Deadline hop-by-hop header
 void iphc_prependIPv6DeadlineHeader(
    OpenQueueEntry_t* msg
@@ -71,7 +71,7 @@ owerror_t iphc_sendFromForwarding(
     ipv6_header_iht*  ipv6_outer_header,
     ipv6_header_iht*  ipv6_inner_header,
     rpl_option_ht*    rpl_option,
-#if DEADLINE_OPTION_ENABLED
+#ifdef DEADLINE_OPTION_ENABLED
     deadline_option_ht*	deadline_option,
 #endif    
     uint32_t*         flow_label,
@@ -186,7 +186,7 @@ owerror_t iphc_sendFromForwarding(
         }
     }
     
-#if DEADLINE_OPTION_ENABLED
+#ifdef DEADLINE_OPTION_ENABLED
     if ( (msg->creator == COMPONENT_UEXPIRATION) && (deadline_option != NULL) ) { 
         if (
             deadline_option->optionType==DEADLINE_HOPBYHOP_HEADER_OPTION_TYPE && 
@@ -252,7 +252,7 @@ void iphc_receive(OpenQueueEntry_t* msg) {
     uint8_t              page_length;
     rpl_option_ht        rpl_option;
     uint8_t              rpi_length;
-#if DEADLINE_OPTION_ENABLED    
+#ifdef DEADLINE_OPTION_ENABLED    
     deadline_option_ht*  deadline_ptr = NULL; 
     deadline_option_ht   curr_deadline_option;
 #endif    
@@ -263,7 +263,7 @@ void iphc_receive(OpenQueueEntry_t* msg) {
     memset(&ipv6_inner_header,0,sizeof(ipv6_header_iht));
     memset(&rpl_option,0,sizeof(rpl_option_ht));
 
-#if DEADLINE_OPTION_ENABLED    
+#ifdef DEADLINE_OPTION_ENABLED    
     ipv6_outer_header.deadline_option = NULL;
 #endif    
     					    
@@ -286,7 +286,7 @@ void iphc_receive(OpenQueueEntry_t* msg) {
                               &rpl_option
                          );
                
-#if DEADLINE_OPTION_ENABLED              
+#ifdef DEADLINE_OPTION_ENABLED              
             if(ipv6_outer_header.deadline_option){  
                 
                 memset(&curr_deadline_option,0,sizeof(curr_deadline_option));     
@@ -311,7 +311,7 @@ void iphc_receive(OpenQueueEntry_t* msg) {
             msg,
             &ipv6_outer_header,
             &ipv6_inner_header,
-#if DEADLINE_OPTION_ENABLED   
+#ifdef DEADLINE_OPTION_ENABLED   
             deadline_ptr,
 #endif            
             &rpl_option
@@ -739,7 +739,7 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_outer_
     					}
     				}
     			}
-#if DEADLINE_OPTION_ENABLED    			
+#ifdef DEADLINE_OPTION_ENABLED    			
     			else if (lorh_type == DEADLINE_6LOTH_TYPE){
     						ipv6_outer_header->deadline_option = (uint8_t*)(msg->payload) + \
     							*page_length + \
@@ -1120,7 +1120,7 @@ void iphc_prependIPv6HopByHopHeader(
    *((uint8_t*)(msg->payload)) = temp_8b;
 }
 
-#if DEADLINE_OPTION_ENABLED
+#ifdef DEADLINE_OPTION_ENABLED
 //===== IPv6 Deadline hop-by-hop header
 /**
 \brief Prepend an IPv6 Deadline hop-by-hop header to a message.
@@ -1252,7 +1252,7 @@ uint8_t iphc_retrieveIPv6HopByHopHeader(
    return length;
 }
 
-#if DEADLINE_OPTION_ENABLED
+#ifdef DEADLINE_OPTION_ENABLED
 /**
 \brief Retrieve a Deadline hop-by-hop header from a message.
 

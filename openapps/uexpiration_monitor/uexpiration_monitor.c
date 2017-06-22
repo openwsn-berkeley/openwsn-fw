@@ -3,7 +3,7 @@
 #include "openqueue.h"
 #include "openserial.h"
 #include "packetfunctions.h"
-#if DEADLINE_OPTION_ENABLED 
+#ifdef DEADLINE_OPTION_ENABLED 
 #include "iphc.h"
 #endif
 
@@ -28,7 +28,7 @@ void umonitor_init() {
 void umonitor_receive(OpenQueueEntry_t* request) {
    uint16_t          temp_l4_destination_port;
    OpenQueueEntry_t* reply;
-#if DEADLINE_OPTION_ENABLED  
+#ifdef DEADLINE_OPTION_ENABLED  
    monitor_expiration_vars_t	deadline;
 #endif
    
@@ -56,7 +56,7 @@ void umonitor_receive(OpenQueueEntry_t* request) {
    /*************** Packet Payload  ********************/
    // [Expiration time, Delay]   
    packetfunctions_reserveHeaderSize(reply,(2*sizeof(uint16_t)));
-#if DEADLINE_OPTION_ENABLED  
+#ifdef DEADLINE_OPTION_ENABLED  
    memset(&deadline, 0, sizeof(monitor_expiration_vars_t));
    iphc_getDeadlineInfo(&deadline);
    memcpy(&reply->payload[0],&deadline.time_elapsed,sizeof(uint16_t));

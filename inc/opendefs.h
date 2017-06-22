@@ -38,8 +38,6 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 
 #define MAXNUMNEIGHBORS  10
 
-#define DEADLINE_OPTION_ENABLED   1
-
 // maximum celllist length
 #define CELLLIST_MAX_LEN 3
 

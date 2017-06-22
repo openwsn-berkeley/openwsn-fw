@@ -292,7 +292,7 @@ typedef struct {
 void               ieee154e_init(void);
 // public
 PORT_TIMER_WIDTH   ieee154e_asnDiff(asn_t* someASN);
-#if DEADLINE_OPTION_ENABLED
+#ifdef DEADLINE_OPTION_ENABLED
 int16_t            ieee154e_computeAsnDiff(asn_t* h_asn, asn_t* l_asn);
 void               ieee154e_calculateExpTime(uint16_t max_delay, uint8_t* et_asn);
 void               ieee154e_orderToASNStructure(uint8_t* in,asn_t* val_asn);

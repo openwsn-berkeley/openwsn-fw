@@ -25,7 +25,7 @@ owerror_t forwarding_send_internal_RoutingTable(
    ipv6_header_iht*     ipv6_outer_header,
    ipv6_header_iht*     ipv6_inner_header,
    rpl_option_ht*       rpl_option,
-#if DEADLINE_OPTION_ENABLED
+#ifdef DEADLINE_OPTION_ENABLED
    deadline_option_ht*	deadline_option,
 #endif   
    uint32_t*             flow_label,
@@ -35,7 +35,7 @@ owerror_t forwarding_send_internal_SourceRouting(
    OpenQueueEntry_t*    msg,
    ipv6_header_iht*     ipv6_outer_header,
    ipv6_header_iht*     ipv6_inner_header,
-#if DEADLINE_OPTION_ENABLED
+#ifdef DEADLINE_OPTION_ENABLED
    deadline_option_ht*	deadline_option,
 #endif   
    rpl_option_ht*       rpl_option
@@ -45,7 +45,7 @@ void      forwarding_createRplOption(
    uint8_t              flags
 );
 
-#if DEADLINE_OPTION_ENABLED
+#ifdef DEADLINE_OPTION_ENABLED
 void forwarding_createDeadlineOption(
    deadline_option_ht*   deadline_option
 );
@@ -71,7 +71,7 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
     ipv6_header_iht      ipv6_outer_header;
     ipv6_header_iht      ipv6_inner_header;
     rpl_option_ht        rpl_option;
-#if DEADLINE_OPTION_ENABLED
+#ifdef DEADLINE_OPTION_ENABLED
     deadline_option_ht   deadline_option;
 #endif    
     open_addr_t*         myprefix;
@@ -120,7 +120,7 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
       0x00              // flags
     );
     
-#if DEADLINE_OPTION_ENABLED
+#ifdef DEADLINE_OPTION_ENABLED
     forwarding_createDeadlineOption(
       &deadline_option
     );
@@ -189,7 +189,7 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
         &ipv6_outer_header,
         &ipv6_inner_header,
         &rpl_option,
-#if DEADLINE_OPTION_ENABLED
+#ifdef DEADLINE_OPTION_ENABLED
         &deadline_option,
 #endif        
         &flow_label,
@@ -253,7 +253,7 @@ void forwarding_receive(
       OpenQueueEntry_t*      msg,
       ipv6_header_iht*       ipv6_outer_header,
       ipv6_header_iht*       ipv6_inner_header,
-#if DEADLINE_OPTION_ENABLED      
+#ifdef DEADLINE_OPTION_ENABLED      
       deadline_option_ht*	 	 deadline_option,
 #endif      
       rpl_option_ht*         rpl_option
@@ -314,7 +314,7 @@ void forwarding_receive(
         // change the creator of the packet
         msg->creator = COMPONENT_FORWARDING;
         
-#if DEADLINE_OPTION_ENABLED
+#ifdef DEADLINE_OPTION_ENABLED
         if (deadline_option != NULL) {       
             // Deadline Option : Drop 
             if( (deadline_option->time_left <= 0) && (deadline_option->d_flag == 1) ) { // packet expired  
@@ -366,7 +366,7 @@ void forwarding_receive(
             }
             forwarding_createRplOption(rpl_option, rpl_option->flags);
             
-#if DEADLINE_OPTION_ENABLED
+#ifdef DEADLINE_OPTION_ENABLED
             if (deadline_option != NULL)
                 forwarding_createDeadlineOption(deadline_option);
 #endif
@@ -378,7 +378,7 @@ void forwarding_receive(
                     ipv6_outer_header,
                     ipv6_inner_header,
                     rpl_option,
-#if DEADLINE_OPTION_ENABLED
+#ifdef DEADLINE_OPTION_ENABLED
                     deadline_option,
 #endif                    
                     &(ipv6_outer_header->flow_label),
@@ -394,7 +394,7 @@ void forwarding_receive(
                     msg,
                     ipv6_outer_header,
                     ipv6_inner_header,
-#if DEADLINE_OPTION_ENABLED
+#ifdef DEADLINE_OPTION_ENABLED
                     deadline_option,
 #endif                    
                     rpl_option
@@ -455,7 +455,7 @@ owerror_t forwarding_send_internal_RoutingTable(
       ipv6_header_iht*       ipv6_outer_header,
       ipv6_header_iht*       ipv6_inner_header,
       rpl_option_ht*         rpl_option,
-#if DEADLINE_OPTION_ENABLED
+#ifdef DEADLINE_OPTION_ENABLED
       deadline_option_ht*    deadline_option,
 #endif      
       uint32_t*              flow_label,
@@ -484,7 +484,7 @@ owerror_t forwarding_send_internal_RoutingTable(
       ipv6_outer_header,
       ipv6_inner_header,
       rpl_option,
-#if DEADLINE_OPTION_ENABLED
+#ifdef DEADLINE_OPTION_ENABLED
       deadline_option,
 #endif      
       flow_label,
@@ -511,7 +511,7 @@ owerror_t forwarding_send_internal_SourceRouting(
     OpenQueueEntry_t* msg,
     ipv6_header_iht*  ipv6_outer_header,
     ipv6_header_iht*  ipv6_inner_header,
-#if DEADLINE_OPTION_ENABLED
+#ifdef DEADLINE_OPTION_ENABLED
     deadline_option_ht*	 	 deadline_option,
 #endif    
     rpl_option_ht*    rpl_option
@@ -795,7 +795,7 @@ owerror_t forwarding_send_internal_SourceRouting(
         }
         forwarding_createRplOption(rpl_option, rpl_option->flags);
         
-#if DEADLINE_OPTION_ENABLED
+#ifdef DEADLINE_OPTION_ENABLED
         if (deadline_option != NULL)
             forwarding_createDeadlineOption(deadline_option);
 #endif
@@ -812,7 +812,7 @@ owerror_t forwarding_send_internal_SourceRouting(
         ipv6_outer_header,
         ipv6_inner_header,
         rpl_option,
-#if DEADLINE_OPTION_ENABLED
+#ifdef DEADLINE_OPTION_ENABLED
         deadline_option,
 #endif        
         &ipv6_outer_header->flow_label,
@@ -850,7 +850,7 @@ void forwarding_createRplOption(rpl_option_ht* rpl_option, uint8_t flags) {
     rpl_option->flags = (flags & ~I_FLAG & ~K_FLAG) | (I<<1) | K;
 }
 
-#if DEADLINE_OPTION_ENABLED
+#ifdef DEADLINE_OPTION_ENABLED
 /**
 \brief Create a Deadline-6LoRH .
 
