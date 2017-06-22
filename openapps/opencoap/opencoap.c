@@ -16,6 +16,7 @@ opencoap_vars_t opencoap_vars;
 
 //=========================== prototype =======================================
 uint8_t opencoap_options_encode(uint8_t* buffer,coap_option_iht* options, uint8_t optionsLen, bool fake);
+uint8_t opencoap_options_parse(OpenQueueEntry_t* msg, coap_option_iht* options, uint8_t optionsLen);
 
 //=========================== public ==========================================
 
@@ -50,9 +51,7 @@ received packetbuffer is reused to contain the response (or error code).
 */
 void opencoap_receive(OpenQueueEntry_t* msg) {
    uint16_t                  temp_l4_destination_port;
-   uint8_t                   i;
    uint8_t                   index;
-   coap_option_t             last_option;
    coap_resource_desc_t*     temp_desc;
    bool                      found;
    owerror_t                 outcome = 0;
@@ -96,39 +95,16 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    // record the token
    memcpy(&coap_header.token[0], &msg->payload[index], coap_header.TKL);
    index += coap_header.TKL;
-   
-   // initialize the coap_incomingOptions
-   for (i=0;i<MAX_COAP_OPTIONS;i++) {
-      coap_incomingOptions[i].type = COAP_OPTION_NONE;
-   }
-   
-   // fill in the coap_incomingOptions
-   last_option = COAP_OPTION_NONE;
-   for (i=0;i<MAX_COAP_OPTIONS;i++) {
-      
-      // detect when done parsing options
-      if (msg->payload[index]==COAP_PAYLOAD_MARKER) {
-         // found the payload marker, done parsing options.
-         index++; // skip marker and stop parsing options
-         break;
-      }
-      if (msg->length<=index) {
-         // end of message, no payload
-         break;
-      }
-      
-      // parse this option
-      coap_incomingOptions[i].type        = (coap_option_t)((uint8_t)last_option+(uint8_t)((msg->payload[index] & 0xf0) >> 4));
-      last_option                 = coap_incomingOptions[i].type;
-      coap_incomingOptions[i].length      = (msg->payload[index] & 0x0f);
-      index++;
-      coap_incomingOptions[i].pValue      = &(msg->payload[index]);
-      index                      += coap_incomingOptions[i].length; //includes length as well
-   }
-   
-   // remove the CoAP header+options
+
+   // remove the CoAP header
    packetfunctions_tossHeader(msg,index);
-   
+    
+   // parse options and toss header
+   index = opencoap_options_parse(msg, coap_incomingOptions, MAX_COAP_OPTIONS);
+
+   // toss options
+   packetfunctions_tossHeader(msg,index);
+
    //=== step 2. find the resource to handle the packet
    
    // find the resource this applies to
@@ -615,3 +591,83 @@ uint8_t opencoap_options_encode(
     }
     return index;
 }
+
+uint8_t opencoap_options_parse(
+        OpenQueueEntry_t*       msg,
+        coap_option_iht*        options,
+        uint8_t                 optionsLen
+        ) {
+
+    uint8_t index;
+    uint8_t i;
+    coap_option_t lastOption;
+    coap_option_t optionDelta;
+    uint8_t optionLength;
+
+    index = 0;
+
+    // initialize the coap_incomingOptions
+    for (i=0;i<optionsLen;i++) {
+        options[i].type = COAP_OPTION_NONE;
+    }
+   
+    lastOption = COAP_OPTION_NONE;
+    for (i = 0; i < optionsLen; i++) {
+      
+        // detect when done parsing options
+        if (msg->payload[index]==COAP_PAYLOAD_MARKER) {
+            // found the payload marker, done parsing options.
+            index++; // skip marker and stop parsing options
+            break;
+        }
+        if (msg->length<=index) {
+             // end of message, no payload
+            break;
+        }
+
+        optionDelta = ((msg->payload[index] & 0xf0) >> 4);
+        optionLength = (msg->payload[index] & 0x0f);
+
+        index++;
+
+        if (optionDelta <= 12) {
+        }
+        else if (optionDelta == 13) {
+            optionDelta = msg->payload[index] + 13;
+            index++;
+        }
+        else if (optionDelta == 14) {
+            optionDelta = (coap_option_t) (packetfunctions_ntohs(&msg->payload[index]) + 269);
+            index += 2;
+        }
+        else {
+            break;
+        }
+
+        if (optionLength <= 12) {
+
+        }
+        else if (optionLength == 13) {
+            optionLength = msg->payload[index] + 13;
+            index++;
+        }
+        else {
+            // case 14 not supported
+            break;
+        }
+
+        if (msg->length <= index) {
+            break;
+        }
+         
+        // create new option
+        options[i].type = lastOption + optionDelta;
+        options[i].length = optionLength;
+        options[i].pValue = &(msg->payload[index]);
+        index += optionLength;
+        lastOption = options[i].type;
+    }
+    return index;
+}
+
+
