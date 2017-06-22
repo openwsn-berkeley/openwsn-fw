@@ -19,6 +19,8 @@ The uexpiration_monitor.c responds by sending back the time information of the
 most recent packet that the mote has forwarded. The time information comprises
 delay experienced by the packet and the remaining time before its expiry.
 
+Note : Enable the flag 'DEADLINE_OPTION_ENABLED' in opendefs.h.
+
 Usage : python uexpiration_monitor.py <dest_ip> <probe_interval(sec)>
 
 #python uexpiration_monitor.py bbbb::1415:92cc:0:2 1

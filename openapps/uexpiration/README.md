@@ -19,6 +19,8 @@ If the drop flag is set to 1, the packet will be dropped in the network if
 the packet expiration time is reached. Otherwise, the packet will be forwarded
 to the application.
 
+Note : Enable the flag 'DEADLINE_OPTION_ENABLED' in opendefs.h.
+
 Usage : python uexpiration.py <dest_ip> <pkt_interval> <no_of_pkts>
                               <delay_in_ms> <drop_flag>
 
