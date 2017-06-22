@@ -137,6 +137,7 @@ command_line_options = {
     'debug':            ['0','1'],
     'noadaptivesync':   ['0','1'],
     'l2_security':      ['0','1'],
+    'deadline_option':  ['0','1'],
     'ide':              ['none','qtcreator'],
     'revision':         ['']
 }
@@ -280,6 +281,13 @@ command_line_vars.AddVariables(
         'l2_security',                                     # key
         '',                                                # help
         command_line_options['l2_security'][0],            # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
+        'deadline_option',                                     # key
+        '',                                                # help
+        command_line_options['deadline_option'][1],            # default
         validate_option,                                   # validator
         int,                                               # converter
     ),

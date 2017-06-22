@@ -46,6 +46,8 @@ if env['noadaptivesync']==1:
     env.Append(CPPDEFINES    = 'NOADAPTIVESYNC')
 if env['l2_security']==1:
     env.Append(CPPDEFINES    = 'L2_SECURITY_ACTIVE')
+if env['deadline_option']==1:
+    env.Append(CPPDEFINES    = 'DEADLINE_OPTION_ENABLED')
 
 if env['toolchain']=='mspgcc':
     

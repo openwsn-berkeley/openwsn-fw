@@ -91,6 +91,8 @@ enum {
    //UDP
    WKP_UDP_COAP                        =    5683,
    WKP_UDP_ECHO                        =       7,
+   WKP_UDP_EXPIRATION                  =       5,
+   WKP_UDP_MONITOR                     =       3,
    WKP_UDP_INJECT                      =   61617,// 0xf0b1
    WKP_UDP_RINGMASTER                  =   15000,
    WKP_UDP_SERIALBRIDGE                =    2001,
@@ -170,6 +172,8 @@ enum {
    COMPONENT_RRT                       = 0x26,
    COMPONENT_SECURITY                  = 0x27,
    COMPONENT_USERIALBRIDGE             = 0x28,
+   COMPONENT_UEXPIRATION               = 0x29,
+   COMPONENT_UMONITOR                  = 0x2a,
 };
 
 /**
@@ -251,6 +255,9 @@ enum {
    ERR_SCHEDULE_ADDDUPLICATESLOT       = 0x3f, // the slot {0} to be added is already in schedule
    ERR_UNSUPPORTED_FORMAT              = 0x40, // the received packet format is not supported {code location {0}}
    ERR_UNSUPPORTED_METADATA            = 0x41, // the metadata type is not suppored
+   //l3
+   ERR_6LORH_DEADLINE_EXPIRED		       = 0x42, // the received packet has expired
+   ERR_6LORH_DEADLINE_DROPPED          = 0x43, // packet expiry time reached, dropped
 };
 
 //=========================== typedef =========================================
@@ -296,6 +303,10 @@ typedef struct {
    uint8_t       owner;                                         // the component which currently owns the entry
    uint8_t*      payload;                                       // pointer to the start of the payload within 'packet'
    uint8_t       length;                                        // length in bytes of the payload
+   //l7
+   uint16_t      max_delay;                      // Max delay in milliseconds before which the packet should be delivered to the receiver
+   bool					 orgination_time_flag;
+   bool 				 drop_flag;
    //l4
    uint8_t       l4_protocol;                                   // l4 protocol to be used
    bool          l4_protocol_compressed;                        // is the l4 protocol header compressed?
