@@ -8,6 +8,7 @@ myPort     = 21569
 hisAddress = ''
 hisPort    = 3
 monitor_interval  = 0
+slotDuration      = 15 # miliseconds
 
 if len(sys.argv) == 2:
     # log
@@ -27,6 +28,7 @@ else:
     output        += ['[{0}]:{1}->[{2}]:{3}'.format(myAddress,myPort,hisAddress,hisPort)]
     output        += ['\nMonitoring node IP        : {0} '.format(hisAddress)]
     output        += ['Probe interval            : {0} sec '.format(monitor_interval)]
+    output        += ['Slot duration             : {0} miliseconds '.format(slotDuration)]
     output         = '\n'.join(output)
     print output
     print "\n"     
@@ -53,9 +55,9 @@ else:
         else:         
             n = map(ord,reply)
             time_elapsed =	n[1] << 8 | n[0]
-            time_elapsed_ms = time_elapsed * 14            
+            time_elapsed_ms = time_elapsed * slotDuration            
             time_left = n[3] << 8 | n[2]
-            time_left_ms = time_left * 14
+            time_left_ms = time_left * slotDuration
                         
             
             if(time_elapsed != 0):
