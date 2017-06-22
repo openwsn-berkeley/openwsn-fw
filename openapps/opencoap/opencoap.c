@@ -59,8 +59,13 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    coap_type_t               response_type;
    // local variables passed to the handlers (with msg)
    coap_header_iht           coap_header;
-   coap_option_iht           coap_options[MAX_COAP_OPTIONS];
+   coap_option_iht           coap_incomingOptions[MAX_COAP_OPTIONS];
+   coap_option_iht           coap_outgoingOptions[MAX_COAP_OPTIONS];
+   uint8_t                   coap_outgoingOptionsLen;
    
+   // init response options len
+   coap_outgoingOptionsLen = 0;
+
    // take ownership over the received packet
    msg->owner                = COMPONENT_OPENCOAP;
    
@@ -92,12 +97,12 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    memcpy(&coap_header.token[0], &msg->payload[index], coap_header.TKL);
    index += coap_header.TKL;
    
-   // initialize the coap_options
+   // initialize the coap_incomingOptions
    for (i=0;i<MAX_COAP_OPTIONS;i++) {
-      coap_options[i].type = COAP_OPTION_NONE;
+      coap_incomingOptions[i].type = COAP_OPTION_NONE;
    }
    
-   // fill in the coap_options
+   // fill in the coap_incomingOptions
    last_option = COAP_OPTION_NONE;
    for (i=0;i<MAX_COAP_OPTIONS;i++) {
       
@@ -113,12 +118,12 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
       }
       
       // parse this option
-      coap_options[i].type        = (coap_option_t)((uint8_t)last_option+(uint8_t)((msg->payload[index] & 0xf0) >> 4));
-      last_option                 = coap_options[i].type;
-      coap_options[i].length      = (msg->payload[index] & 0x0f);
+      coap_incomingOptions[i].type        = (coap_option_t)((uint8_t)last_option+(uint8_t)((msg->payload[index] & 0xf0) >> 4));
+      last_option                 = coap_incomingOptions[i].type;
+      coap_incomingOptions[i].length      = (msg->payload[index] & 0x0f);
       index++;
-      coap_options[i].pValue      = &(msg->payload[index]);
-      index                      += coap_options[i].length; //includes length as well
+      coap_incomingOptions[i].pValue      = &(msg->payload[index]);
+      index                      += coap_incomingOptions[i].length; //includes length as well
    }
    
    // remove the CoAP header+options
@@ -142,34 +147,34 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
       // iterate until matching resource found, or no match
       while (found==FALSE) {
          if (
-               coap_options[0].type==COAP_OPTION_NUM_URIPATH    &&
-               coap_options[1].type==COAP_OPTION_NUM_URIPATH    &&
-               temp_desc->path0len>0                            &&
-               temp_desc->path0val!=NULL                        &&
-               temp_desc->path1len>0                            &&
+               coap_incomingOptions[0].type==COAP_OPTION_NUM_URIPATH    &&
+               coap_incomingOptions[1].type==COAP_OPTION_NUM_URIPATH    &&
+               temp_desc->path0len>0                                   &&
+               temp_desc->path0val!=NULL                               &&
+               temp_desc->path1len>0                                   &&
                temp_desc->path1val!=NULL
             ) {
             // resource has a path of form path0/path1
                
             if (
-                  coap_options[0].length==temp_desc->path0len                               &&
-                  memcmp(coap_options[0].pValue,temp_desc->path0val,temp_desc->path0len)==0 &&
-                  coap_options[1].length==temp_desc->path1len                               &&
-                  memcmp(coap_options[1].pValue,temp_desc->path1val,temp_desc->path1len)==0
+                  coap_incomingOptions[0].length==temp_desc->path0len                               &&
+                  memcmp(coap_incomingOptions[0].pValue,temp_desc->path0val,temp_desc->path0len)==0 &&
+                  coap_incomingOptions[1].length==temp_desc->path1len                               &&
+                  memcmp(coap_incomingOptions[1].pValue,temp_desc->path1val,temp_desc->path1len)==0
                ) {
                found = TRUE;
             };
          
          } else if (
-               coap_options[0].type==COAP_OPTION_NUM_URIPATH    &&
+               coap_incomingOptions[0].type==COAP_OPTION_NUM_URIPATH    &&
                temp_desc->path0len>0                            &&
                temp_desc->path0val!=NULL
             ) {
             // resource has a path of form path0
                
             if (
-                  coap_options[0].length==temp_desc->path0len                               &&
-                  memcmp(coap_options[0].pValue,temp_desc->path0val,temp_desc->path0len)==0
+                  coap_incomingOptions[0].length==temp_desc->path0len                               &&
+                  memcmp(coap_incomingOptions[0].pValue,temp_desc->path0val,temp_desc->path0len)==0
                ) {
                found = TRUE;
             };
@@ -211,7 +216,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
             
             // call the resource's callback
             if (found==TRUE && temp_desc->callbackRx!=NULL) {
-               temp_desc->callbackRx(msg,&coap_header,&coap_options[0]);
+               temp_desc->callbackRx(msg,&coap_header,&coap_incomingOptions[0], NULL, NULL);
             }
          }
          
@@ -237,7 +242,8 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    if (found==TRUE) {
       
       // call the resource's callback
-      outcome = temp_desc->callbackRx(msg,&coap_header,&coap_options[0]);
+      outcome = temp_desc->callbackRx(msg,&coap_header,&coap_incomingOptions[0], coap_outgoingOptions, &coap_outgoingOptionsLen);
+
    } else {
       // reset packet payload (DO NOT DELETE, we will reuse same buffer for response)
       msg->payload                     = &(msg->packet[127]);
@@ -261,8 +267,21 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    } else {
        response_type = COAP_TYPE_NON;
    }
-   
-   //=== step 4. send that packet back
+
+   //=== step 4. add the payload marker and encode options
+
+   if (msg->length > 0 ) { // contains payload, add payload marker
+      packetfunctions_reserveHeaderSize(msg,1);
+      msg->payload[0] = COAP_PAYLOAD_MARKER;
+   }
+      
+   // fake run of opencoap_options_encode in order to get the necessary length
+   packetfunctions_reserveHeaderSize(msg, opencoap_options_encode(NULL, coap_outgoingOptions, coap_outgoingOptionsLen, TRUE));
+
+   // once header is reserved, encode the options to the openqueue payload buffer
+   opencoap_options_encode(msg->payload, coap_outgoingOptions, coap_outgoingOptionsLen, FALSE);
+
+   //=== step 5. send that packet back
    
    // fill in packet metadata
    if (found==TRUE) {
