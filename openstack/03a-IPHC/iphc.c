@@ -3,6 +3,7 @@
 #include "packetfunctions.h"
 #include "idmanager.h"
 #include "openserial.h"
+#include "IEEE802154e.h"
 #include "sixtop.h"
 #include "forwarding.h"
 #include "neighbors.h"

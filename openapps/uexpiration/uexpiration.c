@@ -1,3 +1,4 @@
+#include "stdlib.h"
 #include "opendefs.h"
 #include "uexpiration.h"
 #include "openqueue.h"
