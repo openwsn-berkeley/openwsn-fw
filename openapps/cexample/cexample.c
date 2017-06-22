@@ -28,9 +28,12 @@ cexample_vars_t cexample_vars;
 
 //=========================== prototypes ======================================
 
-owerror_t cexample_receive(OpenQueueEntry_t* msg,
-                    coap_header_iht*  coap_header,
-                    coap_option_iht*  coap_options);
+owerror_t cexample_receive( OpenQueueEntry_t* msg,
+        coap_header_iht*  coap_header,
+        coap_option_iht*  coap_incomingOptions,
+        coap_option_iht*  coap_outgoingOptions,
+        uint8_t*          coap_outgoingOptionsLen);
+
 void    cexample_timer_cb(void);
 void    cexample_task_cb(void);
 void    cexample_sendDone(OpenQueueEntry_t* msg,
@@ -64,9 +67,12 @@ void cexample_init() {
 
 //=========================== private =========================================
 
-owerror_t cexample_receive(OpenQueueEntry_t* msg,
-                      coap_header_iht* coap_header,
-                      coap_option_iht* coap_options) {
+owerror_t cexample_receive( OpenQueueEntry_t* msg,
+        coap_header_iht*  coap_header,
+        coap_option_iht*  coap_incomingOptions,
+        coap_option_iht*  coap_outgoingOptions,
+        uint8_t*          coap_outgoingOptionsLen) {
+
    return E_FAIL;
 }
 

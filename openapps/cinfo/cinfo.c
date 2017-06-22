@@ -23,9 +23,11 @@ cinfo_vars_t cinfo_vars;
 //=========================== prototypes ======================================
 
 owerror_t     cinfo_receive(
-   OpenQueueEntry_t* msg,
-   coap_header_iht*  coap_header,
-   coap_option_iht*  coap_options
+        OpenQueueEntry_t* msg,
+        coap_header_iht*  coap_header,
+        coap_option_iht*  coap_incomingOptions,
+        coap_option_iht*  coap_outgoingOptions,
+        uint8_t*          coap_outgoingOptionsLen
 );
 void          cinfo_sendDone(
    OpenQueueEntry_t* msg,
@@ -68,16 +70,16 @@ void cinfo_init() {
 \return Whether the response is prepared successfully.
 */
 owerror_t cinfo_receive(
-      OpenQueueEntry_t* msg,
-      coap_header_iht* coap_header,
-      coap_option_iht* coap_options
-   ) {
-   
+        OpenQueueEntry_t* msg,
+        coap_header_iht*  coap_header,
+        coap_option_iht*  coap_incomingOptions,
+        coap_option_iht*  coap_outgoingOptions,
+        uint8_t*          coap_outgoingOptionsLen
+) {
    owerror_t outcome;
    
    switch (coap_header->Code) {
       case COAP_CODE_REQ_GET:
-         
          //=== reset packet payload (we will reuse this packetBuffer)
          msg->payload                     = &(msg->packet[127]);
          msg->length                      = 0;
@@ -110,10 +112,6 @@ owerror_t cinfo_receive(
          msg->payload[sizeof(infoStackName)-1+5-3] = '0'+OPENWSN_VERSION_MINOR;
          msg->payload[sizeof(infoStackName)-1+5-2] = '.';
          msg->payload[sizeof(infoStackName)-1+5-1] = '0'+OPENWSN_VERSION_PATCH;
-         
-         // payload marker
-         packetfunctions_reserveHeaderSize(msg,1);
-         msg->payload[0] = COAP_PAYLOAD_MARKER;
          
          // set the CoAP header
          coap_header->Code                = COAP_CODE_RESP_CONTENT;

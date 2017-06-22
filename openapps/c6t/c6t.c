@@ -23,10 +23,11 @@ c6t_vars_t c6t_vars;
 
 //=========================== prototypes ======================================
 
-owerror_t c6t_receive(
-   OpenQueueEntry_t* msg,
-   coap_header_iht*  coap_header,
-   coap_option_iht*  coap_options
+owerror_t c6t_receive(OpenQueueEntry_t* msg,
+        coap_header_iht*  coap_header,
+        coap_option_iht*  coap_incomingOptions,
+        coap_option_iht*  coap_outgoingOptions,
+        uint8_t*          coap_outgoingOptionsLen
 );
 void    c6t_sendDone(
    OpenQueueEntry_t* msg,
@@ -63,12 +64,12 @@ void c6t_init() {
 
 \return Whether the response is prepared successfully.
 */
-owerror_t c6t_receive(
-      OpenQueueEntry_t* msg,
-      coap_header_iht*  coap_header,
-      coap_option_iht*  coap_options
-   ) {
-   
+owerror_t c6t_receive(OpenQueueEntry_t* msg,
+        coap_header_iht*  coap_header,
+        coap_option_iht*  coap_incomingOptions,
+        coap_option_iht*  coap_outgoingOptions,
+        uint8_t*          coap_outgoingOptionsLen
+) {
    owerror_t            outcome;
    open_addr_t          neighbor;
    bool                 foundNeighbor;

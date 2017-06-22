@@ -24,9 +24,11 @@ rrt_vars_t rrt_vars;
 //=========================== prototypes ======================================
 
 owerror_t     rrt_receive(
-   OpenQueueEntry_t* msg,
-   coap_header_iht*  coap_header,
-   coap_option_iht*  coap_options
+        OpenQueueEntry_t* msg,
+        coap_header_iht*  coap_header,
+        coap_option_iht*  coap_incomingOptions,
+        coap_option_iht*  coap_outgoingOptions,
+        uint8_t*          coap_outgoingOptionsLen
 );
 void          rrt_sendDone(
    OpenQueueEntry_t* msg,
@@ -77,12 +79,13 @@ void rrt_init() {
 
 \return Whether the response is prepared successfully.
 */
-owerror_t rrt_receive(
-      OpenQueueEntry_t* msg,
-      coap_header_iht* coap_header,
-      coap_option_iht* coap_options
-   ) {
-   
+owerror_t     rrt_receive(
+        OpenQueueEntry_t* msg,
+        coap_header_iht*  coap_header,
+        coap_option_iht*  coap_incomingOptions,
+        coap_option_iht*  coap_outgoingOptions,
+        uint8_t*          coap_outgoingOptionsLen
+) {
    owerror_t outcome;
    uint8_t mssgRecvd;
    uint8_t moteToSendTo[16];
@@ -97,11 +100,6 @@ owerror_t rrt_receive(
          
          //=== prepare  CoAP response
          rrt_setGETRespMsg(msg, rrt_vars.discovered);
-         
-         
-         // payload marker
-         packetfunctions_reserveHeaderSize(msg,1);
-         msg->payload[0] = COAP_PAYLOAD_MARKER;
          
          // set the CoAP header
          coap_header->Code                = COAP_CODE_RESP_CONTENT;
@@ -130,9 +128,6 @@ owerror_t rrt_receive(
          msg->payload                     = &(msg->packet[127]);
          msg->length                      = 0;
 
-         packetfunctions_reserveHeaderSize(msg, 1);
-         msg->payload[0] = COAP_PAYLOAD_MARKER;
-
          //set the CoAP header
          coap_header->Code                = COAP_CODE_RESP_CONTENT;
 
@@ -145,10 +140,6 @@ owerror_t rrt_receive(
          
          //unregister the current mote as 'discovered' by ringmaster
          rrt_vars.discovered = 0; 
-         
-         // payload marker
-         packetfunctions_reserveHeaderSize(msg,1);
-         msg->payload[0] = COAP_PAYLOAD_MARKER;
          
          // set the CoAP header
          coap_header->Code                = COAP_CODE_RESP_CONTENT;
