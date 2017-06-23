@@ -172,6 +172,7 @@ enum {
    COMPONENT_SECURITY                  = 0x27,
    COMPONENT_USERIALBRIDGE             = 0x28,
    COMPONENT_CJOIN                     = 0x29,
+   COMPONENT_OPENOSCOAP                = 0x30,
 };
 
 /**
@@ -254,6 +255,7 @@ enum {
    ERR_UNSUPPORTED_FORMAT              = 0x40, // the received packet format is not supported {code location {0}}
    ERR_UNSUPPORTED_METADATA            = 0x41, // the metadata type is not suppored
    ERR_JOINED                          = 0x42, // node joined
+   ERR_SEQUENCE_NUMBER_OVERFLOW        = 0x43, // OSCOAP sequence number reached maximum value
 };
 
 //=========================== typedef =========================================

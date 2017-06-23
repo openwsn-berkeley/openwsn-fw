@@ -98,6 +98,12 @@ typedef enum {
 } coap_option_t;
 
 typedef enum {
+   COAP_OPTION_CLASS_E                 = 0,
+   COAP_OPTION_CLASS_I                 = 1,
+   COAP_OPTION_CLASS_U                 = 2,
+} coap_option_class_t;
+
+typedef enum {
    COAP_MEDTYPE_TEXTPLAIN              =  0,
    COAP_MEDTYPE_APPLINKFORMAT          = 40,
    COAP_MEDTYPE_APPXML                 = 41,
@@ -116,6 +122,7 @@ typedef struct {
    coap_code_t   Code;
    uint16_t      messageID;
    uint8_t       token[COAP_MAX_TKL];
+   uint16_t      oscoapSeqNum;
 } coap_header_iht;
 
 typedef struct {
@@ -135,16 +142,17 @@ typedef void (*callbackSendDone_cbt)(OpenQueueEntry_t* msg,
 typedef struct coap_resource_desc_t coap_resource_desc_t;
 
 struct coap_resource_desc_t {
-   uint8_t               path0len;
-   uint8_t*              path0val;
-   uint8_t               path1len;
-   uint8_t*              path1val;
-   uint8_t               componentID;
-   bool                  discoverable;
-   callbackRx_cbt        callbackRx;
-   callbackSendDone_cbt  callbackSendDone;
-   coap_header_iht       last_request;
-   coap_resource_desc_t* next;
+   uint8_t                      path0len;
+   uint8_t*                     path0val;
+   uint8_t                      path1len;
+   uint8_t*                     path1val;
+   uint8_t                      componentID;
+   void*                        securityContext;     
+   bool                         discoverable;
+   callbackRx_cbt               callbackRx;
+   callbackSendDone_cbt         callbackSendDone;
+   coap_header_iht              last_request;
+   coap_resource_desc_t*        next;
 };
 
 //=========================== module variables ================================
@@ -176,6 +184,9 @@ owerror_t     opencoap_send(
     uint8_t               optionsLen,
     coap_resource_desc_t* descSender
 );
+
+// option handling
+coap_option_class_t opencoap_get_option_class(coap_option_t type);
 
 /**
 \}

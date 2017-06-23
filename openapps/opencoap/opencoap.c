@@ -17,7 +17,7 @@ opencoap_vars_t opencoap_vars;
 //=========================== prototype =======================================
 uint8_t opencoap_options_encode(uint8_t* buffer,coap_option_iht* options, uint8_t optionsLen, bool fake);
 uint8_t opencoap_options_parse(OpenQueueEntry_t* msg, coap_option_iht* options, uint8_t optionsLen);
-
+coap_option_iht* opencoap_find_object_security_option(coap_option_iht* array, uint8_t arrayLen);
 //=========================== public ==========================================
 
 //===== from stack
@@ -455,6 +455,20 @@ owerror_t opencoap_send(
    uint16_t token;
    uint8_t tokenPos=0;
    coap_header_iht* request;
+   coap_option_iht* objectSecurity;
+   bool securityActivated;
+   owerror_t ret;
+
+   if (descSender->securityContext != NULL) { // security activated for the resource
+        securityActivated = TRUE;
+        objectSecurity = opencoap_find_object_security_option(options, optionsLen);
+        if (objectSecurity == NULL) { // objectSecurity option should be set by the application
+            return E_FAIL;
+        }
+   }
+   else {
+        securityActivated = FALSE;
+   }
    
    // increment the (global) messageID
    if (opencoap_vars.messageID++ == 0xffff) {
@@ -484,6 +498,24 @@ owerror_t opencoap_send(
       packetfunctions_reserveHeaderSize(msg,1);
       msg->payload[0] = COAP_PAYLOAD_MARKER;
    }
+
+   if (securityActivated) {
+      // get new sequence number and save it
+      request->oscoapSeqNum = openoscoap_get_sequence_number(descSender->securityContext);
+      // protect the message in the openqueue buffer
+      ret = openoscoap_protect_message(
+              descSender->securityContext,
+              COAP_VERSION,
+              code,
+              options,
+              optionsLen,
+              msg,
+              request->oscoapSeqNum);
+
+      if (ret != E_SUCCESS) {
+         return E_FAIL;
+      }
+   }
       
    // fake run of opencoap_options_encode in order to get the necessary length
    packetfunctions_reserveHeaderSize(msg, opencoap_options_encode(NULL, options, optionsLen, TRUE));
@@ -505,6 +537,42 @@ owerror_t opencoap_send(
    return openudp_send(msg);
 }
 
+/**
+\brief Lookup the OSCOAP class for a given option.
+
+This function is called to resolve the OSCOAP class of the passed option.
+CLASS_E options get encrypted, CLASS_I options are integrity protected,
+and CLASS_U options are unprotected by OSCOAP, if security is activated.
+
+\param[in] type The CoAP option type that needs to be resolved.
+*/
+coap_option_class_t opencoap_get_option_class(coap_option_t type) {
+    switch(type) {
+        // class E options
+        case COAP_OPTION_NUM_IFMATCH:
+        case COAP_OPTION_NUM_ETAG:
+        case COAP_OPTION_NUM_IFNONEMATCH:
+        case COAP_OPTION_NUM_LOCATIONPATH:
+        case COAP_OPTION_NUM_URIPATH:
+        case COAP_OPTION_NUM_CONTENTFORMAT:
+        case COAP_OPTION_NUM_MAXAGE:
+        case COAP_OPTION_NUM_URIQUERY:
+        case COAP_OPTION_NUM_ACCEPT:
+        case COAP_OPTION_NUM_LOCATIONQUERY:
+            return COAP_OPTION_CLASS_E;
+        // class I options none supported
+        
+        //class U options
+        case COAP_OPTION_NUM_URIHOST:
+        case COAP_OPTION_NUM_URIPORT:
+        case COAP_OPTION_NUM_PROXYURI:
+        case COAP_OPTION_NUM_PROXYSCHEME:
+        case COAP_OPTION_NUM_OBJECTSECURITY:
+            return COAP_OPTION_CLASS_U;
+        default:
+            return COAP_OPTION_CLASS_U;    
+    }
+}
 //=========================== private =========================================
 
 uint8_t opencoap_options_encode(
@@ -668,6 +736,21 @@ uint8_t opencoap_options_parse(
         lastOption = options[i].type;
     }
     return index;
+}
+
+coap_option_iht* opencoap_find_object_security_option(coap_option_iht* array, uint8_t arrayLen) {
+    uint8_t i;
+
+    if (array == NULL || arrayLen == 0) {
+        return NULL;
+    }
+
+    for (i = 0; i < arrayLen; i++) {
+        if (array[i].type == COAP_OPTION_NUM_OBJECTSECURITY) {
+            return &array[i];
+        }
+    }
+    return NULL;
 }
 
 

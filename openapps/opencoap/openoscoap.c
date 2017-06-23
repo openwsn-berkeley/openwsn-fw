@@ -1,5 +1,6 @@
 #include "opendefs.h"
-#include "openoscoap.h"
+#include "openserial.h"
+#include "opencoap.h"
 #include "cborencoder.h"
 #include "sha.h"
 
@@ -22,6 +23,8 @@ owerror_t hkdf_derive_parameter(uint8_t* buffer,
         oscoap_derivation_t type,
         uint8_t length
         );
+
+bool is_request(uint8_t code);
 
 //=========================== public ==========================================
 
@@ -115,6 +118,32 @@ void openoscoap_init_security_context(oscoap_security_context_t *ctx,
 
 }
 
+owerror_t openoscoap_protect_message(
+        oscoap_security_context_t *context, 
+        uint8_t version, 
+        uint8_t code,
+        coap_option_iht* options,
+        uint8_t optionsLen,
+        OpenQueueEntry_t* msg,
+        uint16_t sequenceNumer) {
+
+    return E_SUCCESS;
+}
+
+uint16_t openoscoap_get_sequence_number(oscoap_security_context_t *context) {
+    if (context->sequenceNumber == 0xffff) {
+        openserial_printError(
+                COMPONENT_OPENOSCOAP,ERR_SEQUENCE_NUMBER_OVERFLOW,
+                (errorparameter_t)0,
+                (errorparameter_t)0
+      );
+    } else {
+        context->sequenceNumber++;
+    }
+    return context->sequenceNumber;
+}
+
+
 //=========================== private =========================================
 
 owerror_t hkdf_derive_parameter(uint8_t* buffer,
@@ -163,3 +192,14 @@ owerror_t hkdf_derive_parameter(uint8_t* buffer,
     return E_FAIL;
 }
 
+bool is_request(uint8_t code) {
+   if ( code == (uint8_t) COAP_CODE_REQ_GET     ||
+        code == (uint8_t) COAP_CODE_REQ_POST    ||
+        code == (uint8_t) COAP_CODE_REQ_PUT     ||
+        code == (uint8_t) COAP_CODE_REQ_DELETE) {
+        return TRUE;
+   }
+   else {
+        return FALSE;
+   }
+}
