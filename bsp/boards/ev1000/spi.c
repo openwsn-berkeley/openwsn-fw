@@ -21,12 +21,13 @@ typedef struct {
    // information about the current transaction
    uint8_t*        pNextTxByte;
    uint8_t         numTxedBytes;
-   uint8_t         txBytesLeft;
+   uint8_t 		   maxTxBytes;
    spi_return_t    returnType;
    uint8_t*        pNextRxByte;
    uint8_t         maxRxBytes;
    spi_first_t     isFirst;
    spi_last_t      isLast;
+   uint8_t		   txrx_bytes_togo;
    // state of the module
    uint8_t         busy;
 #ifdef SPI_IN_INTERRUPT_MODE
@@ -47,12 +48,21 @@ void spi_init() {
    
     SPI_InitTypeDef  SPI_InitStructure;
 
-    //enable SPI2 and GPIOB, Clock
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB,ENABLE);
-     
-    //Configure SPI-related pins: PA.5 as SCLK pin ,PA.7 as MISO pin, PA.6 as MOSI pin, PA.4 as /SEL pin
-    GPIO_InitTypeDef GPIO_InitStructure;
+    //enable SPI1 and GPIOA clock
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA , ENABLE);
+  
+	GPIO_InitTypeDef GPIO_InitStructure;
+    
+    //Configure SPI-related pins: PA.5 as SCLK pin ,PA.7 as MOSI pin, PA.6 as MISO pin, PA.4 as /SEL pin
+	GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);   
+    GPIO_InitStructure.GPIO_Pin             = GPIO_Pin_4;
+    GPIO_InitStructure.GPIO_Mode            = GPIO_Mode_Out_PP;
+    GPIO_InitStructure.GPIO_Speed           = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+	GPIO_WriteBit(GPIOA, GPIO_Pin_4, Bit_SET);   
+    //GPIO_SetBits(GPIOA, GPIO_Pin_4);
+
     GPIO_InitStructure.GPIO_Pin             = GPIO_Pin_5 | GPIO_Pin_7;
     GPIO_InitStructure.GPIO_Mode            = GPIO_Mode_AF_PP;
     GPIO_InitStructure.GPIO_Speed           = GPIO_Speed_50MHz;
@@ -61,13 +71,8 @@ void spi_init() {
     GPIO_InitStructure.GPIO_Pin             = GPIO_Pin_6;
     GPIO_InitStructure.GPIO_Mode            = GPIO_Mode_IPU;
     GPIO_InitStructure.GPIO_Speed           = GPIO_Speed_50MHz;
-    GPIO_Init(GPIOB, &GPIO_InitStructure);
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
   
-    GPIO_InitStructure.GPIO_Pin             = GPIO_Pin_4;
-    GPIO_InitStructure.GPIO_Mode            = GPIO_Mode_Out_PP;
-    GPIO_Init(GPIOB, &GPIO_InitStructure);
-    
-    GPIOA->ODR |= 0X0010;//set /SEL high
   
     //Configure SPI1
     SPI_InitStructure.SPI_Direction         = SPI_Direction_2Lines_FullDuplex; //Full-duplex synchronous transfers on two lines
@@ -78,7 +83,7 @@ void spi_init() {
     SPI_InitStructure.SPI_NSS               = SPI_NSS_Soft;//Software NSS mode
     SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_32;//BaudRate Prescaler = 8
     SPI_InitStructure.SPI_FirstBit          = SPI_FirstBit_MSB;//data order with MSB-first
-    SPI_InitStructure.SPI_CRCPolynomial     = 10;//CRC Polynomial = 10
+    SPI_InitStructure.SPI_CRCPolynomial     = 7;//CRC Polynomial = 7
     SPI_Init(SPI1, &SPI_InitStructure);
   
     //enable SPI1
@@ -113,16 +118,17 @@ void spi_txrx(uint8_t*     bufTx,
     // disable interrupts
     NVIC_RESETPRIMASK();
 #endif
-   
+	uint8_t snop_byte = 0;
     // register spi frame to send
     spi_vars.pNextTxByte      =  bufTx;
     spi_vars.numTxedBytes     =  0;
-    spi_vars.txBytesLeft      =  lenbufTx;
+    spi_vars.maxTxBytes       =  lenbufTx;
     spi_vars.returnType       =  returnType;
     spi_vars.pNextRxByte      =  bufRx;
     spi_vars.maxRxBytes       =  maxLenBufRx;
     spi_vars.isFirst          =  isFirst;
     spi_vars.isLast           =  isLast;
+	spi_vars.txrx_bytes_togo  =  0;
    
     // SPI is now busy
     spi_vars.busy             =  1;
@@ -144,10 +150,16 @@ void spi_txrx(uint8_t*     bufTx,
     NVIC_SETPRIMASK();
 #else
     // implementation 2. busy wait for each byte to be sent
+	// determine how many bytes are to be exchanged in the transaction
+	spi_vars.txrx_bytes_togo = spi_vars.maxTxBytes + spi_vars.maxRxBytes;
     // send all bytes
-    while (spi_vars.txBytesLeft>0) {
+    while (spi_vars.txrx_bytes_togo>0) {
         // write next byte to TX buffer
-        SPI_I2S_SendData(SPI1,*spi_vars.pNextTxByte);
+		if( spi_vars.numTxedBytes < spi_vars.maxTxBytes){
+			SPI_I2S_SendData(SPI1,*spi_vars.pNextTxByte);
+		} else {
+			SPI_I2S_SendData(SPI1,snop_byte);
+		}
 
         // busy wait on the interrupt flag
         while (SPI_I2S_GetFlagStatus(SPI1,SPI_I2S_FLAG_RXNE) == RESET);
@@ -157,22 +169,26 @@ void spi_txrx(uint8_t*     bufTx,
         // save the byte just received in the RX buffer
         switch (spi_vars.returnType) {
             case SPI_FIRSTBYTE:
-                if (spi_vars.numTxedBytes==0) {
+                if (spi_vars.numTxedBytes==spi_vars.maxTxBytes) {
                     *spi_vars.pNextRxByte   = SPI_I2S_ReceiveData(SPI1);
                 }
                 break;
             case SPI_BUFFER:
-                *spi_vars.pNextRxByte       = SPI_I2S_ReceiveData(SPI1);
-                spi_vars.pNextRxByte++;
+				if(spi_vars.numTxedBytes > spi_vars.maxTxBytes){
+					*spi_vars.pNextRxByte       = SPI_I2S_ReceiveData(SPI1);
+					spi_vars.pNextRxByte++;
+				}
                 break;
             case SPI_LASTBYTE:
                 *spi_vars.pNextRxByte       = SPI_I2S_ReceiveData(SPI1);
                 break;
         }
         // one byte less to go
-        spi_vars.pNextTxByte++;
+		if( spi_vars.numTxedBytes < spi_vars.maxTxBytes){
+			spi_vars.pNextTxByte++;
+		}
         spi_vars.numTxedBytes++;
-        spi_vars.txBytesLeft--;
+        spi_vars.txrx_bytes_togo--;
     }
    
     // put CS signal high to signal end of transmission to slave
@@ -191,26 +207,31 @@ void spi_txrx(uint8_t*     bufTx,
 
 kick_scheduler_t spi_isr() {
 #ifdef SPI_IN_INTERRUPT_MODE
+// TODO: fix isr as per spi_txrx code above
     // save the byte just received in the RX buffer
-    switch (spi_vars.returnType) {
-        case SPI_FIRSTBYTE:
-            if (spi_vars.numTxedBytes==0) {
-                *spi_vars.pNextRxByte   = SPI_I2S_ReceiveData(SPI1);
-            }
-            break;
-        case SPI_BUFFER:
-            *spi_vars.pNextRxByte       = SPI_I2S_ReceiveData(SPI1);
-            spi_vars.pNextRxByte++;
-            break;
-        case SPI_LASTBYTE:
-            *spi_vars.pNextRxByte       = SPI_I2S_ReceiveData(SPI1);
-            break;
-    }
+	switch (spi_vars.returnType) {
+		case SPI_FIRSTBYTE:
+			if (spi_vars.numTxedBytes==0) {
+				*spi_vars.pNextRxByte   = SPI_I2S_ReceiveData(SPI1);
+			}
+			break;
+		case SPI_BUFFER:
+			if( spi_vars.txrx_bytes_togo <= spi_vars.maxRxBytes){
+				*spi_vars.pNextRxByte       = SPI_I2S_ReceiveData(SPI1);
+				spi_vars.pNextRxByte++;
+			} else {
+				SPI_I2S_ReceiveData(SPI1);
+			}
+			break;
+		case SPI_LASTBYTE:
+			*spi_vars.pNextRxByte       = SPI_I2S_ReceiveData(SPI1);
+			break;
+	}
    
     // one byte less to go
     spi_vars.pNextTxByte++;
     spi_vars.numTxedBytes++;
-    spi_vars.txBytesLeft--;
+    spi_vars.txrx_bytes_togo--;
    
     if (spi_vars.txBytesLeft>0) {
         // write next byte to TX buffer
