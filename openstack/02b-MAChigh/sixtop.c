@@ -1299,7 +1299,7 @@ void sixtop_six2six_notifyReceive(
                         }
                     }
                 } else {
-                    returnCode = IANA_6TOP_RC_CELLLIST_ERR;
+                    returnCode = IANA_6TOP_RC_RESET;
                 }
                 break;
             }
