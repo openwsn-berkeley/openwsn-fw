@@ -170,17 +170,17 @@ void spi_txrx(uint8_t*     bufTx,
         switch (spi_vars.returnType) {
             case SPI_FIRSTBYTE:
                 if (spi_vars.numTxedBytes==spi_vars.maxTxBytes) {
-                    *spi_vars.pNextRxByte   = SPI_I2S_ReceiveData(SPI1);
+                    *spi_vars.pNextRxByte = SPI_I2S_ReceiveData(SPI1);
                 }
                 break;
             case SPI_BUFFER:
-				if(spi_vars.numTxedBytes > spi_vars.maxTxBytes){
-					*spi_vars.pNextRxByte       = SPI_I2S_ReceiveData(SPI1);
+				*spi_vars.pNextRxByte = SPI_I2S_ReceiveData(SPI1);
+				if(spi_vars.numTxedBytes >= spi_vars.maxTxBytes){
 					spi_vars.pNextRxByte++;
 				}
                 break;
             case SPI_LASTBYTE:
-                *spi_vars.pNextRxByte       = SPI_I2S_ReceiveData(SPI1);
+                *spi_vars.pNextRxByte = SPI_I2S_ReceiveData(SPI1);
                 break;
         }
         // one byte less to go
