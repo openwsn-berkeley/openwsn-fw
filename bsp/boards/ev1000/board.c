@@ -101,7 +101,7 @@ void board_init(){
 //    uart_init();
     spi_init();
     bsp_timer_init();
-    //radio_init();
+    radio_init();
 //    radiotimer_init();
     //enable nvic for the radio
 //    NVIC_radio();
