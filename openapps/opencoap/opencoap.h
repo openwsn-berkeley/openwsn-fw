@@ -101,6 +101,7 @@ typedef enum {
    COAP_OPTION_CLASS_E                 = 0,
    COAP_OPTION_CLASS_I                 = 1,
    COAP_OPTION_CLASS_U                 = 2,
+   COAP_OPTION_CLASS_ALL               = 3,
 } coap_option_class_t;
 
 typedef enum {
@@ -187,6 +188,12 @@ owerror_t     opencoap_send(
 
 // option handling
 coap_option_class_t opencoap_get_option_class(coap_option_t type);
+uint8_t opencoap_options_encode(uint8_t* buffer,
+    coap_option_iht* options, 
+    uint8_t optionsLen, 
+    coap_option_class_t class, 
+    bool fake);
+
 
 /**
 \}

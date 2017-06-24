@@ -15,8 +15,10 @@
 opencoap_vars_t opencoap_vars;
 
 //=========================== prototype =======================================
-uint8_t opencoap_options_encode(uint8_t* buffer,coap_option_iht* options, uint8_t optionsLen, bool fake);
-uint8_t opencoap_options_parse(OpenQueueEntry_t* msg, coap_option_iht* options, uint8_t optionsLen);
+uint8_t opencoap_options_parse(OpenQueueEntry_t* msg,
+        coap_option_iht* options,
+        uint8_t optionsLen);
+
 coap_option_iht* opencoap_find_object_security_option(coap_option_iht* array, uint8_t arrayLen);
 //=========================== public ==========================================
 
@@ -252,10 +254,14 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    }
       
    // fake run of opencoap_options_encode in order to get the necessary length
-   packetfunctions_reserveHeaderSize(msg, opencoap_options_encode(NULL, coap_outgoingOptions, coap_outgoingOptionsLen, TRUE));
+   packetfunctions_reserveHeaderSize(msg, opencoap_options_encode(NULL, 
+                                                coap_outgoingOptions, 
+                                                coap_outgoingOptionsLen,
+                                                COAP_OPTION_CLASS_ALL,
+                                                TRUE));
 
    // once header is reserved, encode the options to the openqueue payload buffer
-   opencoap_options_encode(msg->payload, coap_outgoingOptions, coap_outgoingOptionsLen, FALSE);
+   opencoap_options_encode(msg->payload, coap_outgoingOptions, coap_outgoingOptionsLen, COAP_OPTION_CLASS_ALL, FALSE);
 
    //=== step 5. send that packet back
    
@@ -458,6 +464,9 @@ owerror_t opencoap_send(
    coap_option_iht* objectSecurity;
    bool securityActivated;
    owerror_t ret;
+   coap_option_class_t class;
+
+   class = COAP_OPTION_CLASS_ALL;
 
    if (descSender->securityContext != NULL) { // security activated for the resource
         securityActivated = TRUE;
@@ -515,13 +524,23 @@ owerror_t opencoap_send(
       if (ret != E_SUCCESS) {
          return E_FAIL;
       }
+
+      class = COAP_OPTION_CLASS_U;
    }
       
    // fake run of opencoap_options_encode in order to get the necessary length
-   packetfunctions_reserveHeaderSize(msg, opencoap_options_encode(NULL, options, optionsLen, TRUE));
+   packetfunctions_reserveHeaderSize(msg, opencoap_options_encode(NULL, 
+                                                    options,
+                                                    optionsLen, 
+                                                    class, 
+                                                    TRUE));
 
    // once header is reserved, encode the options to the openqueue payload buffer
-   opencoap_options_encode(msg->payload, options, optionsLen, FALSE);
+   opencoap_options_encode(msg->payload, 
+           options, 
+           optionsLen, 
+           class, 
+           FALSE);
 
    // pre-pend CoAP header (version,type,TKL,code,messageID,Token)
    packetfunctions_reserveHeaderSize(msg,4+request->TKL);
@@ -579,6 +598,7 @@ uint8_t opencoap_options_encode(
         uint8_t*                buffer,
         coap_option_iht*        options,
         uint8_t                 optionsLen,
+        coap_option_class_t     class,
         bool                    fake
         ) {
 
@@ -599,6 +619,11 @@ uint8_t opencoap_options_encode(
     lastOptionNum = COAP_OPTION_NONE;
     if (options != NULL) {
         for (i = 0; i < optionsLen; i++) {
+            if (class != opencoap_get_option_class(options[i].type) && 
+                class != COAP_OPTION_CLASS_ALL) {
+                continue;
+            }
+
             if (options[i].type < lastOptionNum) {
                 return 0; // we require the options to be sorted
             }
