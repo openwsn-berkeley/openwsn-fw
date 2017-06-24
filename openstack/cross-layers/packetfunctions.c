@@ -276,9 +276,10 @@ void packetfunctions_reserveHeaderSize(OpenQueueEntry_t* pkt, uint8_t header_len
 }
 
 void packetfunctions_tossHeader(OpenQueueEntry_t* pkt, uint8_t header_length) {
+
    pkt->payload += header_length;
    pkt->length  -= header_length;
-   if ( (uint8_t*)(pkt->payload) > (uint8_t*)(pkt->packet+126) ) {
+   if ( (uint8_t*)(pkt->payload) > (uint8_t*)(pkt->packet+127) ) {
       openserial_printError(COMPONENT_PACKETFUNCTIONS,ERR_HEADER_TOO_LONG,
                             (errorparameter_t)1,
                             (errorparameter_t)pkt->length);
