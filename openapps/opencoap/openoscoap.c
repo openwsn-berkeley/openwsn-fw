@@ -8,7 +8,7 @@
 
 
 //=========================== defines =========================================
-
+#define AAD_CONST_LEN       19
 //=========================== variables =======================================
 
 openoscoap_vars_t openoscoap_vars;
@@ -73,6 +73,12 @@ void openoscoap_init_security_context(oscoap_security_context_t *ctx,
                                 uint8_t masterSecretLen,
                                 uint8_t* masterSalt,
                                 uint8_t masterSaltLen) {
+    
+    if (senderIDLen > OSCOAP_MAX_ID_LEN || 
+            recipientIDLen > OSCOAP_MAX_ID_LEN) {
+        return;
+    }
+
     // common context
     ctx->aeadAlgorithm = AES_CCM_16_64_128; 
 
@@ -147,7 +153,7 @@ owerror_t openoscoap_protect_message(
 
     uint8_t* payload;
     uint8_t payloadLen;
-    uint8_t* aad;
+    uint8_t aad[AAD_CONST_LEN + OSCOAP_MAX_ID_LEN]; // assumes no CLASS I options
     uint8_t aadLen;
     uint8_t nonce[AES_CCM_16_64_128_IV_LEN];
     uint8_t partialIV[AES_CCM_16_64_128_IV_LEN];
@@ -167,6 +173,11 @@ owerror_t openoscoap_protect_message(
         requestSeqLen = 2;
     }
 
+    if (msg->length > 0 ) { // contains payload, add payload marker
+        packetfunctions_reserveHeaderSize(msg,1);
+        msg->payload[0] = COAP_PAYLOAD_MARKER;
+    }
+
     // fake run of opencoap_options_encode in order to get the necessary length
     packetfunctions_reserveHeaderSize(msg, opencoap_options_encode(NULL, 
                                                     options,
@@ -183,27 +194,24 @@ owerror_t openoscoap_protect_message(
 
     payload = &msg->payload[0];
     payloadLen = msg->length;
-    // shift payload to the left to leave space for authentication tag
+    // shift payload to leave space for authentication tag
     packetfunctions_reserveHeaderSize(msg, AES_CCM_16_64_128_TAG_LEN);
     memcpy(&msg->payload[0], payload, payloadLen);
     // update payload pointer but leave length intact
     payload = &msg->payload[0];
 
-    packetfunctions_reserveHeaderSize(msg, 125 - payloadLen - AES_CCM_16_64_128_TAG_LEN);
-    aad = &msg->payload[0];
-
     aadLen = construct_aad(aad,
             version,
             code,
             NULL,
-            0, // TODO do not support Class I options at the moment
+            0, // do not support Class I options at the moment
             AES_CCM_16_64_128,
             context->senderID,
             context->senderIDLen,
             requestSeq,
             requestSeqLen);
 
-    if (aad + aadLen > payload) {
+    if (aadLen > AAD_CONST_LEN + OSCOAP_MAX_ID_LEN) {
         // corruption
         openserial_printError(
                 COMPONENT_OPENOSCOAP,ERR_BUFFER_OVERFLOW,
@@ -232,18 +240,6 @@ owerror_t openoscoap_protect_message(
                                         AES_CCM_16_64_128_TAG_LEN);
 
      if (encStatus != E_SUCCESS) {
-        return E_FAIL;
-     }
-
-     packetfunctions_tossHeader(msg, 125 - payloadLen - AES_CCM_16_64_128_TAG_LEN);
-
-     if (payload != &msg->payload[0]) {
-        // corruption
-        openserial_printError(
-                COMPONENT_OPENOSCOAP,ERR_BUFFER_OVERFLOW,
-                (errorparameter_t)0,
-                (errorparameter_t)1
-        );
         return E_FAIL;
      }
 

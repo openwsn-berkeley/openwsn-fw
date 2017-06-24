@@ -463,10 +463,12 @@ owerror_t opencoap_send(
    coap_header_iht* request;
    coap_option_iht* objectSecurity;
    bool securityActivated;
+   bool payloadPresent;
    owerror_t ret;
    coap_option_class_t class;
 
    class = COAP_OPTION_CLASS_ALL;
+   payloadPresent = FALSE;
 
    if (descSender->securityContext != NULL) { // security activated for the resource
         securityActivated = TRUE;
@@ -503,9 +505,8 @@ owerror_t opencoap_send(
        tokenPos+=2;
    }
 
-   if (msg->length > 0 ) { // contains payload, add payload marker
-      packetfunctions_reserveHeaderSize(msg,1);
-      msg->payload[0] = COAP_PAYLOAD_MARKER;
+   if (msg->length > 0 ) { // contains payload
+      payloadPresent = TRUE;
    }
 
    if (securityActivated) {
@@ -526,6 +527,18 @@ owerror_t opencoap_send(
       }
 
       class = COAP_OPTION_CLASS_U;
+
+      if (payloadPresent) {
+        objectSecurity->length = 0;
+        objectSecurity->pValue = NULL;
+      }
+      else {
+          objectSecurity->length = msg->length;
+          // FIXME use the upper bytes in the msg->packet buffer to avoid huge allocation on stack
+          memcpy(&msg->packet[0], &msg->payload[0], msg->length);
+          objectSecurity->pValue = &msg->packet[0];
+          packetfunctions_tossHeader(msg, msg->length); // reset packet to zero as objectSecurity option will cary payload
+      }
    }
       
    // fake run of opencoap_options_encode in order to get the necessary length
