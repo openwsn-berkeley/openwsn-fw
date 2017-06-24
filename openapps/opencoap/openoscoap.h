@@ -79,7 +79,9 @@ owerror_t openoscoap_protect_message(
         coap_option_iht* options,
         uint8_t optionsLen,
         OpenQueueEntry_t* msg,
-        uint16_t sequenceNumer);
+        uint16_t sequenceNumber);
+
+
 
 uint16_t openoscoap_get_sequence_number(oscoap_security_context_t *context);
 
