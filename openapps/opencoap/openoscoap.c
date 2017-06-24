@@ -1,7 +1,9 @@
 #include "opendefs.h"
 #include "openserial.h"
+#include "packetfunctions.h"
 #include "opencoap.h"
 #include "cborencoder.h"
+#include "cryptoengine.h"
 #include "sha.h"
 
 
@@ -25,6 +27,22 @@ owerror_t hkdf_derive_parameter(uint8_t* buffer,
         );
 
 bool is_request(uint8_t code);
+
+uint8_t construct_aad(uint8_t* buffer, 
+        uint8_t version, 
+        uint8_t code,
+        uint8_t* optionsSerialized,
+        uint8_t optionsSerializedLen,
+        uint8_t aeadAlgorithm,
+        uint8_t* requestKid,
+        uint8_t requestKidLen,
+        uint8_t* requestSeq,
+        uint8_t requestSeqLen
+        );
+
+void xor_arrays(uint8_t* s1, uint8_t* s2, uint8_t* dst, uint8_t len);
+
+void flip_first_bit(uint8_t* source, uint8_t* dst, uint8_t len);
 
 //=========================== public ==========================================
 
@@ -202,4 +220,51 @@ bool is_request(uint8_t code) {
    else {
         return FALSE;
    }
+}
+
+uint8_t construct_aad(uint8_t* buffer, 
+        uint8_t version, 
+        uint8_t code,
+        uint8_t* optionsSerialized,
+        uint8_t optionsSerializedLen,
+        uint8_t aeadAlgorithm,
+        uint8_t* requestKid,
+        uint8_t requestKidLen,
+        uint8_t* requestSeq,
+        uint8_t requestSeqLen
+        ) {
+    uint8_t* ptr;
+    ptr = buffer;
+    uint8_t ret;
+    const uint8_t encrypt0[] = "Encrypt0";
+
+    ret = 0;
+
+    ret += cborencoder_put_array(&ptr, 3); // COSE Encrypt0 structure with 3 elements
+    // first element: "Encrypt0"
+    ret += cborencoder_put_text(&ptr, (char *) encrypt0, sizeof(encrypt0) - 1); 
+    // second element: empty byte string
+    ret += cborencoder_put_bytes(&ptr, 0, NULL); 
+    // third element: external AAD from OSCOAP
+    ret += cborencoder_put_array(&ptr, 6);
+    ret += cborencoder_put_unsigned(&ptr, version);
+    ret += cborencoder_put_unsigned(&ptr, code);
+    ret += cborencoder_put_bytes(&ptr, optionsSerializedLen, optionsSerialized);
+    ret += cborencoder_put_unsigned(&ptr, aeadAlgorithm);
+    ret += cborencoder_put_bytes(&ptr, requestKidLen, requestKid);
+    ret += cborencoder_put_bytes(&ptr, requestSeqLen, requestSeq);
+
+    return ret;
+}
+
+void xor_arrays(uint8_t* s1, uint8_t* s2, uint8_t* dst, uint8_t len) {
+    uint8_t i;
+    for (i = 0; i < len; i++) {
+        dst[i] = s1[i] ^ s2[i];
+    }
+}
+
+void flip_first_bit(uint8_t* source, uint8_t* dst, uint8_t len){
+    memcpy(dst, source, len);
+    dst[0] = dst[0] ^ 0x80;
 }
