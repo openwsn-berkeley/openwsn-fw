@@ -8,7 +8,10 @@
 
 
 //=========================== defines =========================================
-#define AAD_CONST_LEN       19
+
+#define EAAD_MAX_LEN            9 + OSCOAP_MAX_ID_LEN // assumes no Class I options
+#define AAD_MAX_LEN            12 + EAAD_MAX_LEN
+
 //=========================== variables =======================================
 
 openoscoap_vars_t openoscoap_vars;
@@ -158,7 +161,7 @@ owerror_t openoscoap_protect_message(
 
     uint8_t* payload;
     uint8_t payloadLen;
-    uint8_t aad[AAD_CONST_LEN + OSCOAP_MAX_ID_LEN]; // assumes no CLASS I options
+    uint8_t aad[AAD_MAX_LEN];
     uint8_t aadLen;
     uint8_t nonce[AES_CCM_16_64_128_IV_LEN];
     uint8_t partialIV[AES_CCM_16_64_128_IV_LEN];
@@ -221,7 +224,7 @@ owerror_t openoscoap_protect_message(
             requestSeq,
             requestSeqLen);
 
-    if (aadLen > AAD_CONST_LEN + OSCOAP_MAX_ID_LEN) {
+    if (aadLen > AAD_MAX_LEN) {
         // corruption
         openserial_printError(
                 COMPONENT_OPENOSCOAP,ERR_BUFFER_OVERFLOW,
@@ -350,26 +353,42 @@ uint8_t construct_aad(uint8_t* buffer,
         uint8_t requestSeqLen
         ) {
     uint8_t* ptr;
-    ptr = buffer;
+    uint8_t externalAAD[EAAD_MAX_LEN];
+    uint8_t externalAADLen;
     uint8_t ret;
     const uint8_t encrypt0[] = "Encrypt0";
 
     ret = 0;
+    externalAADLen = 0;
 
+    ptr = externalAAD;
+    externalAADLen += cborencoder_put_array(&ptr, 6);
+    externalAADLen += cborencoder_put_unsigned(&ptr, version);
+    externalAADLen += cborencoder_put_unsigned(&ptr, code);
+    externalAADLen += cborencoder_put_bytes(&ptr, optionsSerializedLen, optionsSerialized);
+    externalAADLen += cborencoder_put_unsigned(&ptr, aeadAlgorithm);
+    externalAADLen += cborencoder_put_bytes(&ptr, requestKidLen, requestKid);
+    externalAADLen += cborencoder_put_bytes(&ptr, requestSeqLen, requestSeq);
+
+    if (externalAADLen > EAAD_MAX_LEN) {
+        // corruption
+        openserial_printError(
+                COMPONENT_OPENOSCOAP,ERR_BUFFER_OVERFLOW,
+                (errorparameter_t)0,
+                (errorparameter_t)0
+        );
+        return 0;
+    }
+
+    ptr = buffer;
     ret += cborencoder_put_array(&ptr, 3); // COSE Encrypt0 structure with 3 elements
     // first element: "Encrypt0"
     ret += cborencoder_put_text(&ptr, (char *) encrypt0, sizeof(encrypt0) - 1); 
     // second element: empty byte string
     ret += cborencoder_put_bytes(&ptr, 0, NULL); 
     // third element: external AAD from OSCOAP
-    ret += cborencoder_put_array(&ptr, 6);
-    ret += cborencoder_put_unsigned(&ptr, version);
-    ret += cborencoder_put_unsigned(&ptr, code);
-    ret += cborencoder_put_bytes(&ptr, optionsSerializedLen, optionsSerialized);
-    ret += cborencoder_put_unsigned(&ptr, aeadAlgorithm);
-    ret += cborencoder_put_bytes(&ptr, requestKidLen, requestKid);
-    ret += cborencoder_put_bytes(&ptr, requestSeqLen, requestSeq);
-
+    ret += cborencoder_put_bytes(&ptr, externalAADLen, externalAAD);
+    
     return ret;
 }
 
