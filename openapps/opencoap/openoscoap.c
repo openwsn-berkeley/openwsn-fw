@@ -40,6 +40,11 @@ uint8_t construct_aad(uint8_t* buffer,
         uint8_t requestSeqLen
         );
 
+void openoscoap_encode_compressed_COSE(OpenQueueEntry_t* msg, 
+        uint8_t* requestSeq, uint8_t requestSeqLen, 
+        uint8_t* requestKid, 
+        uint8_t requestKidLen);
+
 void xor_arrays(uint8_t* s1, uint8_t* s2, uint8_t* dst, uint8_t len);
 
 void flip_first_bit(uint8_t* source, uint8_t* dst, uint8_t len);
@@ -159,6 +164,8 @@ owerror_t openoscoap_protect_message(
     uint8_t partialIV[AES_CCM_16_64_128_IV_LEN];
     uint8_t* requestSeq;
     uint8_t requestSeqLen;
+    uint8_t *requestKid;
+    uint8_t requestKidLen;
     owerror_t encStatus;
 
     // convert sequence number to array and strip leading zeros
@@ -172,6 +179,9 @@ owerror_t openoscoap_protect_message(
         requestSeq = &partialIV[AES_CCM_16_64_128_IV_LEN - 2];
         requestSeqLen = 2;
     }
+
+    requestKid = context->senderID;
+    requestKidLen = context->senderIDLen;
 
     if (msg->length > 0 ) { // contains payload, add payload marker
         packetfunctions_reserveHeaderSize(msg,1);
@@ -206,8 +216,8 @@ owerror_t openoscoap_protect_message(
             NULL,
             0, // do not support Class I options at the moment
             AES_CCM_16_64_128,
-            context->senderID,
-            context->senderIDLen,
+            requestKid,
+            requestKidLen,
             requestSeq,
             requestSeqLen);
 
@@ -228,6 +238,11 @@ owerror_t openoscoap_protect_message(
     else {
         flip_first_bit(context->senderIV, nonce, AES_CCM_16_64_128_IV_LEN);
         xor_arrays(nonce, partialIV, nonce, AES_CCM_16_64_128_IV_LEN);
+        // do not encode sequence number and ID in the response
+        requestSeq = NULL;
+        requestSeq = 0;
+        requestKid = NULL;
+        requestKidLen = 0;
     }
 
      encStatus = cryptoengine_aes_ccms_enc(aad,
@@ -244,6 +259,7 @@ owerror_t openoscoap_protect_message(
      }
 
      // TODO encode compressed COSE
+     openoscoap_encode_compressed_COSE(msg, requestSeq, requestSeqLen, requestKid, requestKidLen);
 
     return E_SUCCESS;
 }
@@ -356,6 +372,36 @@ uint8_t construct_aad(uint8_t* buffer,
 
     return ret;
 }
+
+void openoscoap_encode_compressed_COSE(OpenQueueEntry_t* msg, 
+        uint8_t* partialIV, uint8_t partialIVLen, 
+        uint8_t* kid, 
+        uint8_t kidLen) {
+    // ciphertext is already encoded and of length msg->length
+    uint8_t kidFlag;
+
+    if (kidLen != 0) {
+        kidFlag = 1;
+    }
+    else {
+        kidFlag = 0;
+    }
+
+    if (kidFlag) {
+        packetfunctions_reserveHeaderSize(msg, kidLen + 1);
+        msg->payload[0] = kidLen;
+        memcpy(&msg->payload[1], kid, kidLen);
+    }
+
+    if (partialIVLen) {
+        packetfunctions_reserveHeaderSize(msg, partialIVLen);
+        memcpy(&msg->payload[0], partialIV, partialIVLen);
+    }
+    // flag byte
+    packetfunctions_reserveHeaderSize(msg, 1);
+    msg->payload[0] = ((kidFlag << 3) | partialIVLen);
+}
+
 
 void xor_arrays(uint8_t* s1, uint8_t* s2, uint8_t* dst, uint8_t len) {
     uint8_t i;
