@@ -53,6 +53,7 @@ static PyObject* OpenMote_getState(OpenMote* self) {
    PyObject* icmpv6echo_vars;
    PyObject* icmpv6rpl_vars;
    PyObject* opencoap_vars;
+   PyObject* monitor_expiration_vars;
    PyObject* neighbors_vars;
    PyObject* sixtop_vars;
    PyObject* sf0_vars;
@@ -98,6 +99,11 @@ static PyObject* OpenMote_getState(OpenMote* self) {
    // TODO
    PyDict_SetItemString(returnVal, "opencoap_vars", opencoap_vars);
    
+   // monitor_expiration_vars
+   monitor_expiration_vars = PyDict_New();
+   // TODO
+   PyDict_SetItemString(returnVal, "monitor_expiration_vars", monitor_expiration_vars);
+
    // neighbors_vars
    neighbors_vars = PyDict_New();
    // TODO
