@@ -31,7 +31,7 @@
 
 
 //#define _DEBUG_OPENSERIAL_              // debug variables to verify that openstat works properly
-//#define OPENSERIAL_STAT_FALSECRC_       // should we send to openvisualizer the CRC failed frames? // it consumes bandwidth through the serial line
+#define OPENSERIAL_STAT_FALSECRC_       // should we send to openvisualizer the CRC failed frames? // it consumes bandwidth through the serial line
 //#define OPENSERIAL_STAT_OVERFLOW_       // should we send to openvisualizer the buffer overflow? // it consumes bandwidth through the serial line
 #define OPENSERIAL_STAT                   // push the statistics to openVisualizer
 
