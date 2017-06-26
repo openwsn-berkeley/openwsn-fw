@@ -256,7 +256,9 @@ enum {
    ERR_UNSUPPORTED_METADATA            = 0x41, // the metadata type is not suppored
    ERR_JOINED                          = 0x42, // node joined
    ERR_SEQUENCE_NUMBER_OVERFLOW        = 0x43, // OSCOAP sequence number reached maximum value
-   ERR_BUFFER_OVERFLOW                 = 0x44, // OSCOAP buffer overflow detected
+   ERR_BUFFER_OVERFLOW                 = 0x44, // OSCOAP buffer overflow detected {code location {0}}
+   ERR_REPLAY_FAILED                   = 0x45, // OSCOAP replay protection failed
+   ERR_DECRYPTION_FAILED               = 0x46, // OSCOAP decryption and tag verification failed
 };
 
 //=========================== typedef =========================================
