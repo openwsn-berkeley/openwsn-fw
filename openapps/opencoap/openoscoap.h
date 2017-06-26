@@ -86,7 +86,7 @@ owerror_t openoscoap_unprotect_message(
         uint8_t version, 
         uint8_t code,
         coap_option_iht* options,
-        uint8_t optionsLen,
+        uint8_t* optionsLen,
         OpenQueueEntry_t* msg,
         uint16_t sequenceNumber);
 

@@ -287,7 +287,7 @@ owerror_t openoscoap_unprotect_message(
         uint8_t version, 
         uint8_t code,
         coap_option_iht* options,
-        uint8_t optionsLen,
+        uint8_t* optionsLen,
         OpenQueueEntry_t* msg,
         uint16_t sequenceNumber) {
  
@@ -301,21 +301,22 @@ owerror_t openoscoap_unprotect_message(
     owerror_t decStatus;
     uint8_t* ciphertext;
     uint8_t ciphertextLen;
-    bool tossFooter;
+    bool payloadInObjSec;
+    uint8_t index;
 
     // find object security option in the list of passed options
-    objectSecurity = opencoap_find_object_security_option(options, optionsLen);
+    objectSecurity = opencoap_find_object_security_option(options, *optionsLen);
     if (objectSecurity == NULL) { // return FAIL if object security option is not present
         return E_FAIL;
     }
 
     if (objectSecurity->length != 0) {
         ciphertext = objectSecurity->pValue; 
-        tossFooter = FALSE;
+        payloadInObjSec = TRUE;
     }
     else {
         ciphertext = &msg->payload[0];
-        tossFooter = TRUE;
+        payloadInObjSec = FALSE;
     }
 
     if (is_request(code)) {
@@ -383,8 +384,13 @@ owerror_t openoscoap_unprotect_message(
         return E_FAIL;
     }
 
-    if (tossFooter) {
+    if (payloadInObjSec) {
+        opencoap_options_parse(objectSecurity->pValue, objectSecurity->length, options, optionsLen);
+    }
+    else {
         packetfunctions_tossFooter(msg, AES_CCM_16_64_128_TAG_LEN);
+        index = opencoap_options_parse(&msg->payload[0], msg->length, options, optionsLen);
+        packetfunctions_tossHeader(msg, index);
     }
 
     return E_SUCCESS;
