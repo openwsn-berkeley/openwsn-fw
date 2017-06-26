@@ -247,7 +247,7 @@ owerror_t openoscoap_protect_message(
         xor_arrays(nonce, partialIV, nonce, AES_CCM_16_64_128_IV_LEN);
         // do not encode sequence number and ID in the response
         requestSeq = NULL;
-        requestSeq = 0;
+        requestSeqLen = 0;
         requestKid = NULL;
         requestKidLen = 0;
     }
