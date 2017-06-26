@@ -15,9 +15,6 @@
 opencoap_vars_t opencoap_vars;
 
 //=========================== prototype =======================================
-uint8_t opencoap_options_parse(OpenQueueEntry_t* msg,
-        coap_option_iht* options,
-        uint8_t* optionsLen);
 //=========================== public ==========================================
 
 //===== from stack
@@ -107,7 +104,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    packetfunctions_tossHeader(msg,index);
     
    // parse options and toss header
-   index = opencoap_options_parse(msg, coap_incomingOptions, &coap_incomingOptionsLen);
+   index = opencoap_options_parse(&msg->payload[0], msg->length, coap_incomingOptions, &coap_incomingOptionsLen);
 
    // toss options
    packetfunctions_tossHeader(msg,index);
@@ -237,11 +234,12 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
             // resource found, verify if it needs to be decrypted
             if (found==TRUE && temp_desc->callbackRx!=NULL) {
                 if (temp_desc->securityContext != NULL) {
+                    coap_incomingOptionsLen = MAX_COAP_OPTIONS;
                     decStatus = openoscoap_unprotect_message(temp_desc->securityContext,
                             coap_header.Ver,
                             coap_header.Code,
                             coap_incomingOptions,
-                            coap_incomingOptionsLen,
+                            &coap_incomingOptionsLen,
                             msg,
                             temp_desc->last_request.oscoapSeqNum
                     );
@@ -718,7 +716,8 @@ coap_option_iht* opencoap_find_object_security_option(coap_option_iht* array, ui
 //=========================== private =========================================
 
 uint8_t opencoap_options_parse(
-        OpenQueueEntry_t*       msg,
+        uint8_t*                buffer,
+        uint8_t                 bufferLen,
         coap_option_iht*        options,
         uint8_t*                optionsLen
         ) {
@@ -744,29 +743,29 @@ uint8_t opencoap_options_parse(
     for (i = 0; i < *optionsLen; i++) {
       
         // detect when done parsing options
-        if (msg->payload[index]==COAP_PAYLOAD_MARKER) {
+        if (buffer[index]==COAP_PAYLOAD_MARKER) {
             // found the payload marker, done parsing options.
             index++; // skip marker and stop parsing options
             break;
         }
-        if (msg->length<=index) {
+        if (bufferLen<=index) {
              // end of message, no payload
             break;
         }
 
-        optionDelta = ((msg->payload[index] & 0xf0) >> 4);
-        optionLength = (msg->payload[index] & 0x0f);
+        optionDelta = ((buffer[index] & 0xf0) >> 4);
+        optionLength = (buffer[index] & 0x0f);
 
         index++;
 
         if (optionDelta <= 12) {
         }
         else if (optionDelta == 13) {
-            optionDelta = msg->payload[index] + 13;
+            optionDelta = buffer[index] + 13;
             index++;
         }
         else if (optionDelta == 14) {
-            optionDelta = (coap_option_t) (packetfunctions_ntohs(&msg->payload[index]) + 269);
+            optionDelta = (coap_option_t) (packetfunctions_ntohs(&buffer[index]) + 269);
             index += 2;
         }
         else {
@@ -777,7 +776,7 @@ uint8_t opencoap_options_parse(
 
         }
         else if (optionLength == 13) {
-            optionLength = msg->payload[index] + 13;
+            optionLength = buffer[index] + 13;
             index++;
         }
         else {
@@ -785,7 +784,7 @@ uint8_t opencoap_options_parse(
             break;
         }
 
-        if (msg->length <= index) {
+        if (bufferLen <= index) {
             break;
         }
          
@@ -793,7 +792,7 @@ uint8_t opencoap_options_parse(
         options[i].type = lastOption + optionDelta;
         options[i].length = optionLength;
         if (optionLength) {
-            options[i].pValue = &(msg->payload[index]);
+            options[i].pValue = &(buffer[index]);
         }
         index += optionLength;
         lastOption = options[i].type;
