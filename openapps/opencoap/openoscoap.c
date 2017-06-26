@@ -299,12 +299,23 @@ owerror_t openoscoap_unprotect_message(
     uint8_t aadLen;
     coap_option_iht* objectSecurity;
     owerror_t decStatus;
+    uint8_t* ciphertext;
     uint8_t ciphertextLen;
+    bool tossFooter;
 
     // find object security option in the list of passed options
     objectSecurity = opencoap_find_object_security_option(options, optionsLen);
     if (objectSecurity == NULL) { // return FAIL if object security option is not present
         return E_FAIL;
+    }
+
+    if (objectSecurity->length != 0) {
+        ciphertext = objectSecurity->pValue; 
+        tossFooter = FALSE;
+    }
+    else {
+        ciphertext = &msg->payload[0];
+        tossFooter = TRUE;
     }
 
     if (is_request(code)) {
@@ -356,8 +367,8 @@ owerror_t openoscoap_unprotect_message(
     ciphertextLen = msg->length;
     decStatus = cryptoengine_aes_ccms_dec(aad,
                                     aadLen,
-                                    &msg->payload[0],  //FIXME
-                                    &ciphertextLen, // FIXME
+                                    ciphertext,
+                                    &ciphertextLen,
                                     nonce,
                                     2,
                                     context->recipientKey,
@@ -372,7 +383,9 @@ owerror_t openoscoap_unprotect_message(
         return E_FAIL;
     }
 
-    packetfunctions_tossFooter(msg, AES_CCM_16_64_128_TAG_LEN);
+    if (tossFooter) {
+        packetfunctions_tossFooter(msg, AES_CCM_16_64_128_TAG_LEN);
+    }
 
     return E_SUCCESS;
 }
@@ -388,6 +401,54 @@ uint16_t openoscoap_get_sequence_number(oscoap_security_context_t *context) {
         context->sequenceNumber++;
     }
     return context->sequenceNumber;
+}
+
+uint8_t openoscoap_parse_compressed_COSE(uint8_t *buffer,
+        uint8_t bufferLen,
+        uint16_t* sequenceNumber,
+        uint8_t** kid,
+        uint8_t* kidLen
+        ) {
+    uint8_t index;
+    uint8_t pivsz;
+    uint8_t k;
+    uint8_t reserved;
+
+    index = 0;
+    pivsz = (buffer[index] >> 0) & 0x07;
+    k = (buffer[index] >> 3) & 0x01;
+    reserved = (buffer[index] >> 4) & 0x0f;
+
+    if (reserved) {
+        return 0;
+    }
+
+    index++;
+
+    if (pivsz > 2) {
+        return 0;
+    }
+    else if (pivsz == 1) {
+        *sequenceNumber = buffer[index];
+        index++;
+    }
+    else if (pivsz == 2) {
+        *sequenceNumber = packetfunctions_ntohs(&buffer[index]);
+        index += 2;
+    }
+
+    if (k) {
+        *kidLen = buffer[index];
+        index++;
+        *kid = &buffer[index];
+        index += *kidLen;
+    }
+
+    if (index > bufferLen) {
+        return 0; 
+    }
+
+    return index;
 }
 
 

@@ -63,7 +63,10 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    uint8_t                   coap_incomingOptionsLen;
    uint8_t                   coap_outgoingOptionsLen;
    owerror_t                 decStatus;
-  
+   coap_option_iht*          objectSecurity;
+   uint16_t                  rcvdSequenceNumber;
+   uint8_t*                  rcvdKid;
+   uint8_t                   rcvdKidLen;
     
    // init options len
    coap_incomingOptionsLen = MAX_COAP_OPTIONS;
@@ -108,6 +111,43 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
 
    // toss options
    packetfunctions_tossHeader(msg,index);
+
+   // process handled options
+
+   //== Object Security Option
+   objectSecurity = opencoap_find_object_security_option(coap_incomingOptions, coap_incomingOptionsLen);
+   if (objectSecurity) {
+       if ((objectSecurity->length == 0 && msg->length == 0) ||
+               (objectSecurity->length != 0 && msg->length != 0)) {
+            // malformated object security message
+            return;
+       }
+       
+       if (objectSecurity->length == 0) {
+           index = openoscoap_parse_compressed_COSE(&msg->payload[0], 
+                   msg->length, 
+                   &rcvdSequenceNumber,
+                   &rcvdKid,
+                   &rcvdKidLen);
+           if (index == 0) {
+               return;
+           }
+           packetfunctions_tossHeader(msg, index);
+       }
+       else {
+           index = openoscoap_parse_compressed_COSE(objectSecurity->pValue,
+                   objectSecurity->length,
+                   &rcvdSequenceNumber,
+                   &rcvdKid,
+                   &rcvdKidLen);
+           
+           if (index == 0) {
+               return;
+           }
+           objectSecurity->length -= index;
+           objectSecurity->pValue += index;
+       }
+   }
 
    //=== step 2. find the resource to handle the packet
    

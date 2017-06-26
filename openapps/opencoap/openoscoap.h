@@ -92,6 +92,11 @@ owerror_t openoscoap_unprotect_message(
 
 uint16_t openoscoap_get_sequence_number(oscoap_security_context_t *context);
 
+uint8_t openoscoap_parse_compressed_COSE(uint8_t *buffer,
+        uint8_t bufferLen,
+        uint16_t* sequenceNumber,
+        uint8_t** kid,
+        uint8_t* kidLen);
 /**
 \}
 \}
