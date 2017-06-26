@@ -558,7 +558,6 @@ coap_option_class_t opencoap_get_option_class(coap_option_t type) {
             return COAP_OPTION_CLASS_U;    
     }
 }
-//=========================== private =========================================
 
 owerror_t opencoap_options_encode(
         OpenQueueEntry_t*       msg,
@@ -644,6 +643,23 @@ owerror_t opencoap_options_encode(
     return E_SUCCESS;
 }
 
+coap_option_iht* opencoap_find_object_security_option(coap_option_iht* array, uint8_t arrayLen) {
+    uint8_t i;
+
+    if (array == NULL || arrayLen == 0) {
+        return NULL;
+    }
+
+    for (i = 0; i < arrayLen; i++) {
+        if (array[i].type == COAP_OPTION_NUM_OBJECTSECURITY) {
+            return &array[i];
+        }
+    }
+    return NULL;
+}
+
+//=========================== private =========================================
+
 uint8_t opencoap_options_parse(
         OpenQueueEntry_t*       msg,
         coap_option_iht*        options,
@@ -720,21 +736,6 @@ uint8_t opencoap_options_parse(
         lastOption = options[i].type;
     }
     return index;
-}
-
-coap_option_iht* opencoap_find_object_security_option(coap_option_iht* array, uint8_t arrayLen) {
-    uint8_t i;
-
-    if (array == NULL || arrayLen == 0) {
-        return NULL;
-    }
-
-    for (i = 0; i < arrayLen; i++) {
-        if (array[i].type == COAP_OPTION_NUM_OBJECTSECURITY) {
-            return &array[i];
-        }
-    }
-    return NULL;
 }
 
 
