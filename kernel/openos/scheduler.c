@@ -66,7 +66,6 @@ void scheduler_start() {
 void scheduler_push_task(task_cbt cb, task_prio_t prio) {
    taskList_item_t*  taskContainer;
    taskList_item_t** taskListWalker;
-   uint8_t     size=0;
 
    INTERRUPT_DECLARATION();
    
@@ -75,10 +74,8 @@ void scheduler_push_task(task_cbt cb, task_prio_t prio) {
    // find an empty task container
    taskContainer = &scheduler_vars.taskBuf[0];
    while (taskContainer->cb!=NULL &&
-          taskContainer<=&scheduler_vars.taskBuf[TASK_LIST_DEPTH-1]) {
+          taskContainer<=&scheduler_vars.taskBuf[TASK_LIST_DEPTH-1])
       taskContainer++;
-      size++;
-   }
 
 
    if (taskContainer>&scheduler_vars.taskBuf[TASK_LIST_DEPTH-1]) {
