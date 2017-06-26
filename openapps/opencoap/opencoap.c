@@ -18,8 +18,6 @@ opencoap_vars_t opencoap_vars;
 uint8_t opencoap_options_parse(OpenQueueEntry_t* msg,
         coap_option_iht* options,
         uint8_t optionsLen);
-
-coap_option_iht* opencoap_find_object_security_option(coap_option_iht* array, uint8_t arrayLen);
 //=========================== public ==========================================
 
 //===== from stack
