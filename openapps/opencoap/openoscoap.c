@@ -203,19 +203,11 @@ owerror_t openoscoap_protect_message(
         payloadPresent = FALSE;
     }
 
-    // fake run of opencoap_options_encode in order to get the necessary length
-    packetfunctions_reserveHeaderSize(msg, opencoap_options_encode(NULL, 
-                                                    options,
-                                                    optionsLen, 
-                                                    COAP_OPTION_CLASS_E, 
-                                                    TRUE));
-
-    // once header is reserved, encode the options to the openqueue payload buffer
-    opencoap_options_encode(msg->payload, 
+    // encode the options to the openqueue payload buffer
+    opencoap_options_encode(msg, 
             options, 
             optionsLen, 
-            COAP_OPTION_CLASS_E, 
-            FALSE);
+            COAP_OPTION_CLASS_E);
 
     payload = &msg->payload[0];
     payloadLen = msg->length;

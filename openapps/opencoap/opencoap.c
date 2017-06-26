@@ -253,15 +253,8 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
       msg->payload[0] = COAP_PAYLOAD_MARKER;
    }
       
-   // fake run of opencoap_options_encode in order to get the necessary length
-   packetfunctions_reserveHeaderSize(msg, opencoap_options_encode(NULL, 
-                                                coap_outgoingOptions, 
-                                                coap_outgoingOptionsLen,
-                                                COAP_OPTION_CLASS_ALL,
-                                                TRUE));
-
    // once header is reserved, encode the options to the openqueue payload buffer
-   opencoap_options_encode(msg->payload, coap_outgoingOptions, coap_outgoingOptionsLen, COAP_OPTION_CLASS_ALL, FALSE);
+   opencoap_options_encode(msg, coap_outgoingOptions, coap_outgoingOptionsLen, COAP_OPTION_CLASS_ALL);
 
    //=== step 5. send that packet back
    
@@ -509,19 +502,11 @@ owerror_t opencoap_send(
       class = COAP_OPTION_CLASS_U;
    }
       
-   // fake run of opencoap_options_encode in order to get the necessary length
-   packetfunctions_reserveHeaderSize(msg, opencoap_options_encode(NULL, 
-                                                    options,
-                                                    optionsLen, 
-                                                    class, 
-                                                    TRUE));
-
    // once header is reserved, encode the options to the openqueue payload buffer
-   opencoap_options_encode(msg->payload, 
+   opencoap_options_encode(msg, 
            options, 
            optionsLen, 
-           class, 
-           FALSE);
+           class);
 
    // pre-pend CoAP header (version,type,TKL,code,messageID,Token)
    packetfunctions_reserveHeaderSize(msg,4+request->TKL);
@@ -575,12 +560,11 @@ coap_option_class_t opencoap_get_option_class(coap_option_t type) {
 }
 //=========================== private =========================================
 
-uint8_t opencoap_options_encode(
-        uint8_t*                buffer,
+owerror_t opencoap_options_encode(
+        OpenQueueEntry_t*       msg,
         coap_option_iht*        options,
         uint8_t                 optionsLen,
-        coap_option_class_t     class,
-        bool                    fake
+        coap_option_class_t     class
         ) {
 
     uint8_t i;
@@ -606,7 +590,7 @@ uint8_t opencoap_options_encode(
             }
 
             if (options[i].type < lastOptionNum) {
-                return 0; // we require the options to be sorted
+                return E_FAIL; // we require the options to be sorted
             }
             delta = options[i].type - lastOptionNum;
 
@@ -625,7 +609,7 @@ uint8_t opencoap_options_encode(
                 optionDeltaExtLen = 2;
             }
             else {
-                return 0;
+                return E_FAIL;
             }
 
             if (options[i].length <= 12) {
@@ -641,29 +625,23 @@ uint8_t opencoap_options_encode(
                 optionLengthExtLen = 1;
             }
             
-            // write to buffer if fake is set to FALSE
-            // otherwise just return the necesasry length
-            if (fake == FALSE) {
-                buffer[index] = (optionDelta << 4) | optionLength;
-            }
-            index++;
-            if (fake == FALSE) {
-                memcpy(&buffer[index], optionDeltaExt, optionDeltaExtLen);
-            }
-            index += optionDeltaExtLen;
-            if (fake == FALSE) {
-                memcpy(&buffer[index], optionLengthExt, optionLengthExtLen);
-            }
-            index += optionLengthExtLen;
-            if (fake == FALSE) {
-                memcpy(&buffer[index], options[i].pValue, options[i].length);
-            }
-            index += options[i].length;
+            // write to packet in reversed order
+            packetfunctions_reserveHeaderSize(msg, options[i].length);
+            memcpy(&msg->payload[0], options[i].pValue, options[i].length);
+            
+            packetfunctions_reserveHeaderSize(msg, optionLengthExtLen);
+            memcpy(&msg->payload[0], optionLengthExt, optionLengthExtLen);
+
+            packetfunctions_reserveHeaderSize(msg, optionDeltaExtLen);
+            memcpy(&msg->payload[0], optionDeltaExt, optionDeltaExtLen);
+
+            packetfunctions_reserveHeaderSize(msg, 1);
+            msg->payload[0] = (optionDelta << 4) | optionLength;
 
             lastOptionNum = options[i].type;
         }
     }
-    return index;
+    return E_SUCCESS;
 }
 
 uint8_t opencoap_options_parse(

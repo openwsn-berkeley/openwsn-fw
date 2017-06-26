@@ -188,11 +188,10 @@ owerror_t     opencoap_send(
 
 // option handling
 coap_option_class_t opencoap_get_option_class(coap_option_t type);
-uint8_t opencoap_options_encode(uint8_t* buffer,
+uint8_t opencoap_options_encode(OpenQueueEntry_t* msg,
     coap_option_iht* options, 
     uint8_t optionsLen, 
-    coap_option_class_t class, 
-    bool fake);
+    coap_option_class_t class);
 coap_option_iht* opencoap_find_object_security_option(coap_option_iht* array, uint8_t arrayLen); 
 
 /**
