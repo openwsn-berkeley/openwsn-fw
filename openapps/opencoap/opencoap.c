@@ -696,6 +696,8 @@ uint8_t opencoap_options_parse(
     // initialize the coap_incomingOptions
     for (i=0;i<*optionsLen;i++) {
         options[i].type = COAP_OPTION_NONE;
+        options[i].length = 0;
+        options[i].pValue = NULL;
     }
    
     lastOption = COAP_OPTION_NONE;
@@ -750,7 +752,9 @@ uint8_t opencoap_options_parse(
         // create new option
         options[i].type = lastOption + optionDelta;
         options[i].length = optionLength;
-        options[i].pValue = &(msg->payload[index]);
+        if (optionLength) {
+            options[i].pValue = &(msg->payload[index]);
+        }
         index += optionLength;
         lastOption = options[i].type;
         numOptions++;
