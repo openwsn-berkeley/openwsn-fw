@@ -193,7 +193,7 @@ uint8_t opencoap_options_encode(uint8_t* buffer,
     uint8_t optionsLen, 
     coap_option_class_t class, 
     bool fake);
-
+coap_option_iht* opencoap_find_object_security_option(coap_option_iht* array, uint8_t arrayLen); 
 
 /**
 \}

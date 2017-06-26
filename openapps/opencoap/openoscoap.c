@@ -170,6 +170,14 @@ owerror_t openoscoap_protect_message(
     uint8_t *requestKid;
     uint8_t requestKidLen;
     owerror_t encStatus;
+    coap_option_iht* objectSecurity;
+    bool payloadPresent;
+
+    // find object security option in the list of passed options
+    objectSecurity = opencoap_find_object_security_option(options, optionsLen);
+    if (objectSecurity == NULL) { // objectSecurity option should be set by the application
+        return E_FAIL;
+    }
 
     // convert sequence number to array and strip leading zeros
     memset(partialIV, 0x00, AES_CCM_16_64_128_IV_LEN);
@@ -187,8 +195,12 @@ owerror_t openoscoap_protect_message(
     requestKidLen = context->senderIDLen;
 
     if (msg->length > 0 ) { // contains payload, add payload marker
+        payloadPresent = TRUE;
         packetfunctions_reserveHeaderSize(msg,1);
         msg->payload[0] = COAP_PAYLOAD_MARKER;
+    }
+    else {
+        payloadPresent = FALSE;
     }
 
     // fake run of opencoap_options_encode in order to get the necessary length
@@ -261,8 +273,23 @@ owerror_t openoscoap_protect_message(
         return E_FAIL;
      }
 
-     // TODO encode compressed COSE
+     // encode compressed COSE
      openoscoap_encode_compressed_COSE(msg, requestSeq, requestSeqLen, requestKid, requestKidLen);
+
+
+    if (payloadPresent) {
+        // set the object security option to 0 length
+        // as the value will be carried in message payload
+        objectSecurity->length = 0;
+        objectSecurity->pValue = NULL;
+    }
+    else {
+        objectSecurity->length = msg->length;
+        // FIXME use the upper bytes in the msg->packet buffer
+        memcpy(&msg->packet[0], &msg->payload[0], msg->length);
+        objectSecurity->pValue = &msg->packet[0];
+        packetfunctions_tossHeader(msg, msg->length); // reset packet to zero as objectSecurity option will cary payload
+    }
 
     return E_SUCCESS;
 }

@@ -461,26 +461,11 @@ owerror_t opencoap_send(
    uint16_t token;
    uint8_t tokenPos=0;
    coap_header_iht* request;
-   coap_option_iht* objectSecurity;
-   bool securityActivated;
-   bool payloadPresent;
    owerror_t ret;
    coap_option_class_t class;
 
    class = COAP_OPTION_CLASS_ALL;
-   payloadPresent = FALSE;
 
-   if (descSender->securityContext != NULL) { // security activated for the resource
-        securityActivated = TRUE;
-        objectSecurity = opencoap_find_object_security_option(options, optionsLen);
-        if (objectSecurity == NULL) { // objectSecurity option should be set by the application
-            return E_FAIL;
-        }
-   }
-   else {
-        securityActivated = FALSE;
-   }
-   
    // increment the (global) messageID
    if (opencoap_vars.messageID++ == 0xffff) {
       opencoap_vars.messageID = 0;
@@ -505,11 +490,7 @@ owerror_t opencoap_send(
        tokenPos+=2;
    }
 
-   if (msg->length > 0 ) { // contains payload
-      payloadPresent = TRUE;
-   }
-
-   if (securityActivated) {
+   if (descSender->securityContext != NULL) { // security activated for the resource
       // get new sequence number and save it
       request->oscoapSeqNum = openoscoap_get_sequence_number(descSender->securityContext);
       // protect the message in the openqueue buffer
@@ -525,20 +506,7 @@ owerror_t opencoap_send(
       if (ret != E_SUCCESS) {
          return E_FAIL;
       }
-
       class = COAP_OPTION_CLASS_U;
-
-      if (payloadPresent) {
-        objectSecurity->length = 0;
-        objectSecurity->pValue = NULL;
-      }
-      else {
-          objectSecurity->length = msg->length;
-          // FIXME use the upper bytes in the msg->packet buffer to avoid huge allocation on stack
-          memcpy(&msg->packet[0], &msg->payload[0], msg->length);
-          objectSecurity->pValue = &msg->packet[0];
-          packetfunctions_tossHeader(msg, msg->length); // reset packet to zero as objectSecurity option will cary payload
-      }
    }
       
    // fake run of opencoap_options_encode in order to get the necessary length
