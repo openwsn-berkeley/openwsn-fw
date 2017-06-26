@@ -17,7 +17,7 @@ opencoap_vars_t opencoap_vars;
 //=========================== prototype =======================================
 uint8_t opencoap_options_parse(OpenQueueEntry_t* msg,
         coap_option_iht* options,
-        uint8_t optionsLen);
+        uint8_t* optionsLen);
 //=========================== public ==========================================
 
 //===== from stack
@@ -60,9 +60,13 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    coap_header_iht           coap_header;
    coap_option_iht           coap_incomingOptions[MAX_COAP_OPTIONS];
    coap_option_iht           coap_outgoingOptions[MAX_COAP_OPTIONS];
+   uint8_t                   coap_incomingOptionsLen;
    uint8_t                   coap_outgoingOptionsLen;
-   
-   // init response options len
+   owerror_t                 decStatus;
+  
+    
+   // init options len
+   coap_incomingOptionsLen = MAX_COAP_OPTIONS;
    coap_outgoingOptionsLen = 0;
 
    // take ownership over the received packet
@@ -100,7 +104,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    packetfunctions_tossHeader(msg,index);
     
    // parse options and toss header
-   index = opencoap_options_parse(msg, coap_incomingOptions, MAX_COAP_OPTIONS);
+   index = opencoap_options_parse(msg, coap_incomingOptions, &coap_incomingOptionsLen);
 
    // toss options
    packetfunctions_tossHeader(msg,index);
@@ -190,8 +194,23 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
                 found=TRUE;
             }
             
-            // call the resource's callback
+            // resource found, verify if it needs to be decrypted
             if (found==TRUE && temp_desc->callbackRx!=NULL) {
+                if (temp_desc->securityContext != NULL) {
+                    decStatus = openoscoap_unprotect_message(temp_desc->securityContext,
+                            coap_header.Ver,
+                            coap_header.Code,
+                            coap_incomingOptions,
+                            coap_incomingOptionsLen,
+                            msg,
+                            temp_desc->last_request.oscoapSeqNum
+                    );
+
+                    if (decStatus != E_SUCCESS) {
+                        return;
+                    }
+                }
+
                temp_desc->callbackRx(msg,&coap_header,&coap_incomingOptions[0], NULL, NULL);
             }
          }
@@ -661,7 +680,7 @@ coap_option_iht* opencoap_find_object_security_option(coap_option_iht* array, ui
 uint8_t opencoap_options_parse(
         OpenQueueEntry_t*       msg,
         coap_option_iht*        options,
-        uint8_t                 optionsLen
+        uint8_t*                optionsLen
         ) {
 
     uint8_t index;
@@ -669,16 +688,18 @@ uint8_t opencoap_options_parse(
     coap_option_t lastOption;
     coap_option_t optionDelta;
     uint8_t optionLength;
+    uint8_t numOptions;
 
     index = 0;
+    numOptions = 0;
 
     // initialize the coap_incomingOptions
-    for (i=0;i<optionsLen;i++) {
+    for (i=0;i<*optionsLen;i++) {
         options[i].type = COAP_OPTION_NONE;
     }
    
     lastOption = COAP_OPTION_NONE;
-    for (i = 0; i < optionsLen; i++) {
+    for (i = 0; i < *optionsLen; i++) {
       
         // detect when done parsing options
         if (msg->payload[index]==COAP_PAYLOAD_MARKER) {
@@ -732,7 +753,9 @@ uint8_t opencoap_options_parse(
         options[i].pValue = &(msg->payload[index]);
         index += optionLength;
         lastOption = options[i].type;
+        numOptions++;
     }
+    *optionsLen = numOptions;
     return index;
 }
 

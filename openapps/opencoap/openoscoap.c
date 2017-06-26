@@ -31,7 +31,7 @@ owerror_t hkdf_derive_parameter(uint8_t* buffer,
 
 bool is_request(uint8_t code);
 
-uint8_t construct_aad(uint8_t* buffer, 
+uint8_t openoscoap_construct_aad(uint8_t* buffer, 
         uint8_t version, 
         uint8_t code,
         uint8_t* optionsSerialized,
@@ -52,6 +52,9 @@ void xor_arrays(uint8_t* s1, uint8_t* s2, uint8_t* dst, uint8_t len);
 
 void flip_first_bit(uint8_t* source, uint8_t* dst, uint8_t len);
 
+bool replay_window_check(oscoap_security_context_t *context, uint16_t sequenceNumber);
+
+uint8_t openoscoap_convert_sequence_number(uint16_t sequenceNumber, uint8_t** buffer); 
 //=========================== public ==========================================
 
 
@@ -181,15 +184,8 @@ owerror_t openoscoap_protect_message(
 
     // convert sequence number to array and strip leading zeros
     memset(partialIV, 0x00, AES_CCM_16_64_128_IV_LEN);
-    packetfunctions_htons(sequenceNumber, &partialIV[AES_CCM_16_64_128_IV_LEN - 2]);
-    if (partialIV[AES_CCM_16_64_128_IV_LEN - 2] == 0x00) {
-        requestSeq = &partialIV[AES_CCM_16_64_128_IV_LEN - 1];
-        requestSeqLen = 1;
-    }
-    else {
-        requestSeq = &partialIV[AES_CCM_16_64_128_IV_LEN - 2];
-        requestSeqLen = 2;
-    }
+    requestSeq = &partialIV[AES_CCM_16_64_128_IV_LEN - 2];
+    requestSeqLen = openoscoap_convert_sequence_number(sequenceNumber, &requestSeq);
 
     requestKid = context->senderID;
     requestKidLen = context->senderIDLen;
@@ -217,7 +213,7 @@ owerror_t openoscoap_protect_message(
     // update payload pointer but leave length intact
     payload = &msg->payload[0];
 
-    aadLen = construct_aad(aad,
+    aadLen = openoscoap_construct_aad(aad,
             version,
             code,
             NULL,
@@ -282,6 +278,101 @@ owerror_t openoscoap_protect_message(
         objectSecurity->pValue = &msg->packet[0];
         packetfunctions_tossHeader(msg, msg->length); // reset packet to zero as objectSecurity option will cary payload
     }
+
+    return E_SUCCESS;
+}
+
+owerror_t openoscoap_unprotect_message(
+        oscoap_security_context_t *context, 
+        uint8_t version, 
+        uint8_t code,
+        coap_option_iht* options,
+        uint8_t optionsLen,
+        OpenQueueEntry_t* msg,
+        uint16_t sequenceNumber) {
+ 
+    uint8_t nonce[AES_CCM_16_64_128_IV_LEN];
+    uint8_t partialIV[AES_CCM_16_64_128_IV_LEN];
+    uint8_t* requestSeq;
+    uint8_t requestSeqLen;
+    uint8_t aad[AAD_MAX_LEN];
+    uint8_t aadLen;
+    coap_option_iht* objectSecurity;
+    owerror_t decStatus;
+    uint8_t ciphertextLen;
+
+    // find object security option in the list of passed options
+    objectSecurity = opencoap_find_object_security_option(options, optionsLen);
+    if (objectSecurity == NULL) { // return FAIL if object security option is not present
+        return E_FAIL;
+    }
+
+    if (is_request(code)) {
+        if (replay_window_check(context, sequenceNumber) == FALSE) {
+            openserial_printError(
+                COMPONENT_OPENOSCOAP,ERR_REPLAY_FAILED,
+                (errorparameter_t)0,
+                (errorparameter_t)0
+            );
+            return E_FAIL;
+        }
+    }
+
+    // convert sequence number to array and strip leading zeros
+    memset(partialIV, 0x00, AES_CCM_16_64_128_IV_LEN);
+    requestSeq = &partialIV[AES_CCM_16_64_128_IV_LEN - 2];
+    requestSeqLen = openoscoap_convert_sequence_number(sequenceNumber, &requestSeq);
+
+    aadLen = openoscoap_construct_aad(aad,
+            version,
+            code,
+            NULL,
+            0, // do not support Class I options at the moment
+            AES_CCM_16_64_128,
+            context->recipientID,
+            context->recipientIDLen,
+            requestSeq,
+            requestSeqLen);
+
+    if (aadLen > AAD_MAX_LEN) {
+        // corruption
+        openserial_printError(
+                COMPONENT_OPENOSCOAP,ERR_BUFFER_OVERFLOW,
+                (errorparameter_t)0,
+                (errorparameter_t)0
+        );
+        return E_FAIL;
+    }
+ 
+    // construct nonce 
+    if (is_request(code)) {
+        xor_arrays(context->recipientIV, partialIV, nonce, AES_CCM_16_64_128_IV_LEN); 
+    }
+    else {
+        flip_first_bit(context->recipientIV, nonce, AES_CCM_16_64_128_IV_LEN);
+        xor_arrays(nonce, partialIV, nonce, AES_CCM_16_64_128_IV_LEN);
+    }
+
+    ciphertextLen = msg->length;
+    decStatus = cryptoengine_aes_ccms_dec(aad,
+                                    aadLen,
+                                    &msg->payload[0],  //FIXME
+                                    &ciphertextLen, // FIXME
+                                    nonce,
+                                    2,
+                                    context->recipientKey,
+                                    AES_CCM_16_64_128_TAG_LEN);
+
+    if (decStatus != E_SUCCESS) {
+        openserial_printError(
+                COMPONENT_OPENOSCOAP,ERR_DECRYPTION_FAILED,
+                (errorparameter_t)0,
+                (errorparameter_t)0
+        );
+        return E_FAIL;
+    }
+
+    packetfunctions_tossFooter(msg, AES_CCM_16_64_128_TAG_LEN);
 
     return E_SUCCESS;
 }
@@ -360,7 +451,7 @@ bool is_request(uint8_t code) {
    }
 }
 
-uint8_t construct_aad(uint8_t* buffer, 
+uint8_t openoscoap_construct_aad(uint8_t* buffer, 
         uint8_t version, 
         uint8_t code,
         uint8_t* optionsSerialized,
@@ -451,4 +542,19 @@ void xor_arrays(uint8_t* s1, uint8_t* s2, uint8_t* dst, uint8_t len) {
 void flip_first_bit(uint8_t* source, uint8_t* dst, uint8_t len){
     memcpy(dst, source, len);
     dst[0] = dst[0] ^ 0x80;
+}
+
+bool replay_window_check(oscoap_security_context_t *context, uint16_t sequenceNumber) {
+    return TRUE;
+}
+
+uint8_t openoscoap_convert_sequence_number(uint16_t sequenceNumber, uint8_t** buffer) {
+    packetfunctions_htons(sequenceNumber, *buffer);
+    if (**buffer == 0x00) {
+        (*buffer)++;
+        return 1;
+    }
+    else {
+        return 2;
+    }
 }
