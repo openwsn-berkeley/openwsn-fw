@@ -1,5 +1,6 @@
 #include "opendefs.h"
 #include "opencoap.h"
+#include "openoscoap.h"
 #include "openqueue.h"
 #include "openserial.h"
 #include "openrandom.h"
@@ -64,10 +65,15 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    uint16_t                  rcvdSequenceNumber;
    uint8_t*                  rcvdKid;
    uint8_t                   rcvdKidLen;
+   oscoap_security_context_t* blindContext;
+   coap_code_t               securityReturnCode;
     
    // init options len
    coap_incomingOptionsLen = MAX_COAP_OPTIONS;
    coap_outgoingOptionsLen = 0;
+
+   // init returnCode
+   securityReturnCode = 0;
 
    // take ownership over the received packet
    msg->owner                = COMPONENT_OPENCOAP;
@@ -156,13 +162,53 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
          coap_header.Code<=COAP_CODE_REQ_DELETE
       ) {
       // this is a request: target resource is indicated as COAP_OPTION_LOCATIONPATH option(s)
+      
+      // first, we need to decrypt the request and to do so find the right security context
+      if (objectSecurity) {
+            temp_desc = opencoap_vars.resources;
+            blindContext = NULL;
+            // loop through all resources and compare recipient context
+            do {
+                if (temp_desc->securityContext != NULL && 
+                    temp_desc->securityContext->recipientIDLen == rcvdKidLen &&
+                    memcmp(rcvdKid, temp_desc->securityContext->recipientID, rcvdKidLen) == 0) {
+                    
+                    blindContext = temp_desc->securityContext;
+                    break;
+                }
+                temp_desc = temp_desc->next;
+            }
+            while (temp_desc->next!=NULL);
+
+            if (blindContext) {
+                    coap_incomingOptionsLen = MAX_COAP_OPTIONS;
+                    decStatus = openoscoap_unprotect_message(blindContext,
+                            coap_header.Ver,
+                            coap_header.Code,
+                            coap_incomingOptions,
+                            &coap_incomingOptionsLen,
+                            msg,
+                            rcvdSequenceNumber
+                    );
+
+                    if (decStatus != E_SUCCESS) {
+                        securityReturnCode = COAP_CODE_RESP_BADREQ;
+                    }
+                
+            }
+            else {
+                securityReturnCode = COAP_CODE_RESP_UNAUTHORIZED;
+            }
+      }
+
+
       // find the resource which matches
       
       // start with the first resource in the linked list
       temp_desc = opencoap_vars.resources;
       
       // iterate until matching resource found, or no match
-      while (found==FALSE) {
+      while (found==FALSE && securityReturnCode==0) {
          if (
                coap_incomingOptions[0].type==COAP_OPTION_NUM_URIPATH    &&
                coap_incomingOptions[1].type==COAP_OPTION_NUM_URIPATH    &&
@@ -179,7 +225,11 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
                   coap_incomingOptions[1].length==temp_desc->path1len                               &&
                   memcmp(coap_incomingOptions[1].pValue,temp_desc->path1val,temp_desc->path1len)==0
                ) {
-               found = TRUE;
+               if (temp_desc->securityContext != NULL && 
+                   blindContext != temp_desc->securityContext) {
+                   securityReturnCode = COAP_CODE_RESP_UNAUTHORIZED;
+               }
+                found = TRUE;
             };
          
          } else if (
@@ -193,6 +243,10 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
                   coap_incomingOptions[0].length==temp_desc->path0len                               &&
                   memcmp(coap_incomingOptions[0].pValue,temp_desc->path0val,temp_desc->path0len)==0
                ) {
+               if (temp_desc->securityContext != NULL && 
+                   blindContext != temp_desc->securityContext) {
+                   securityReturnCode = COAP_CODE_RESP_UNAUTHORIZED;
+               }
                found = TRUE;
             };
          };
@@ -272,7 +326,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    
    //=== step 3. ask the resource to prepare response
    
-   if (found==TRUE) {
+   if (found==TRUE && securityReturnCode==0) {
       
       // call the resource's callback
       outcome = temp_desc->callbackRx(msg,&coap_header,&coap_incomingOptions[0], coap_outgoingOptions, &coap_outgoingOptionsLen);
@@ -283,7 +337,12 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
       msg->length                      = 0;
       // set the CoAP header
       coap_header.TKL                  = 0;
-      coap_header.Code                 = COAP_CODE_RESP_NOTFOUND;
+      if (securityReturnCode) {
+         coap_header.Code              = securityReturnCode;
+      }
+      else {
+         coap_header.Code              = COAP_CODE_RESP_NOTFOUND;
+      }
    }
    
    if (outcome==E_FAIL) {
