@@ -622,6 +622,7 @@ owerror_t opencoap_options_encode(
         ) {
 
     uint8_t i;
+    uint8_t ii;
     uint32_t delta;
     uint8_t optionDelta;
     uint8_t optionDeltaExt[2];
@@ -629,24 +630,34 @@ owerror_t opencoap_options_encode(
     uint8_t optionLength;
     uint8_t optionLengthExt[2];
     uint8_t optionLengthExtLen;
-    uint8_t index;
-    coap_option_t lastOptionNum;
+    coap_option_t previousOptionNum;
 
-    // encode options
-    i = 0;
-    index = 0;
-    lastOptionNum = COAP_OPTION_NONE;
-    if (options != NULL) {
-        for (i = 0; i < optionsLen; i++) {
+    // encode options in reversed order
+    if (options != NULL && optionsLen != 0) {
+        for (i = optionsLen ; i-- > 0 ; ) {
+            // skip option if inappropriate class
             if (class != opencoap_get_option_class(options[i].type) && 
                 class != COAP_OPTION_CLASS_ALL) {
                 continue;
             }
+            
+            // loop to find the previous option to which delta should be calculated
+            previousOptionNum = COAP_OPTION_NONE;
+            for (ii = i ; ii-- > 0 ; ) {
+                if (class != opencoap_get_option_class(options[ii].type) && 
+                    class != COAP_OPTION_CLASS_ALL) {
+                    continue;
+                }
+                else {
+                    previousOptionNum = options[ii].type;
+                    break;
+                }
+            }
 
-            if (options[i].type < lastOptionNum) {
+            if (previousOptionNum > options[i].type) {
                 return E_FAIL; // we require the options to be sorted
             }
-            delta = options[i].type - lastOptionNum;
+            delta = options[i].type - previousOptionNum;
 
             if (delta <= 12) {
                 optionDelta = (uint8_t) delta;
@@ -691,8 +702,6 @@ owerror_t opencoap_options_encode(
 
             packetfunctions_reserveHeaderSize(msg, 1);
             msg->payload[0] = (optionDelta << 4) | optionLength;
-
-            lastOptionNum = options[i].type;
         }
     }
     return E_SUCCESS;
