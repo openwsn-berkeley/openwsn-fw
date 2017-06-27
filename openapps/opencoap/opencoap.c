@@ -67,10 +67,12 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    uint8_t                   rcvdKidLen;
    oscoap_security_context_t* blindContext;
    coap_code_t               securityReturnCode;
-    
+   coap_option_class_t       class;
+
    // init options len
    coap_incomingOptionsLen = MAX_COAP_OPTIONS;
    coap_outgoingOptionsLen = 0;
+   class = COAP_OPTION_CLASS_ALL;
 
    // init returnCode
    securityReturnCode = 0;
@@ -330,6 +332,27 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
       
       // call the resource's callback
       outcome = temp_desc->callbackRx(msg,&coap_header,&coap_incomingOptions[0], coap_outgoingOptions, &coap_outgoingOptionsLen);
+      if (outcome == E_FAIL) {
+            securityReturnCode = COAP_CODE_RESP_METHODNOTALLOWED;
+      }
+    if (temp_desc->securityContext != NULL) {
+        coap_outgoingOptions[coap_outgoingOptionsLen++].type = COAP_OPTION_NUM_OBJECTSECURITY;
+        if (coap_outgoingOptionsLen > MAX_COAP_OPTIONS) { 
+            securityReturnCode = COAP_CODE_RESP_SERVERERROR; // no space for object security option      
+        }
+        // protect the message in the openqueue buffer
+        openoscoap_protect_message(
+                  temp_desc->securityContext,
+                  COAP_VERSION,
+                  coap_header.Code,
+                  coap_outgoingOptions,
+                  coap_outgoingOptionsLen,
+                  msg,
+                  rcvdSequenceNumber);
+        class = COAP_OPTION_CLASS_U;
+    } else {
+        class = COAP_OPTION_CLASS_ALL;
+    }
 
    } else {
       // reset packet payload (DO NOT DELETE, we will reuse same buffer for response)
@@ -351,7 +374,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
       msg->length                      = 0;
       // set the CoAP header
       coap_header.TKL                  = 0;
-      coap_header.Code                 = COAP_CODE_RESP_METHODNOTALLOWED;
+      coap_header.Code                 = securityReturnCode;
    }
 
    if (coap_header.T == COAP_TYPE_CON) {
@@ -368,7 +391,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    }
       
    // once header is reserved, encode the options to the openqueue payload buffer
-   opencoap_options_encode(msg, coap_outgoingOptions, coap_outgoingOptionsLen, COAP_OPTION_CLASS_ALL);
+   opencoap_options_encode(msg, coap_outgoingOptions, coap_outgoingOptionsLen, class);
 
    //=== step 5. send that packet back
    
