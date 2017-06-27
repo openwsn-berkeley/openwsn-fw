@@ -1,7 +1,7 @@
 #include "opendefs.h"
 #include "openserial.h"
 #include "packetfunctions.h"
-#include "opencoap.h"
+#include "openoscoap.h"
 #include "cborencoder.h"
 #include "cryptoengine.h"
 #include "sha.h"
@@ -311,11 +311,13 @@ owerror_t openoscoap_unprotect_message(
     }
 
     if (objectSecurity->length != 0) {
-        ciphertext = objectSecurity->pValue; 
+        ciphertext = objectSecurity->pValue;
+        ciphertextLen = objectSecurity->length;
         payloadInObjSec = TRUE;
     }
     else {
         ciphertext = &msg->payload[0];
+        ciphertextLen = msg->length;
         payloadInObjSec = FALSE;
     }
 
@@ -364,8 +366,7 @@ owerror_t openoscoap_unprotect_message(
         flip_first_bit(context->recipientIV, nonce, AES_CCM_16_64_128_IV_LEN);
         xor_arrays(nonce, partialIV, nonce, AES_CCM_16_64_128_IV_LEN);
     }
-
-    ciphertextLen = msg->length;
+    
     decStatus = cryptoengine_aes_ccms_dec(aad,
                                     aadLen,
                                     ciphertext,
