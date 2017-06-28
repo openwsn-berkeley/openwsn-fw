@@ -93,8 +93,8 @@ void     endSlot(void);
 bool     debugPrint_asn(void);
 bool     debugPrint_isSync(void);
 // interrupts
-void     isr_ieee154e_newSlot(void);
-void     isr_ieee154e_timer(void);
+void     isr_ieee154e_newSlot(opentimers_id_t id);
+void     isr_ieee154e_timer(opentimers_id_t id);
 
 //=========================== admin ===========================================
 
@@ -268,7 +268,7 @@ void ieee154e_orderToASNStructure(uint8_t* in,asn_t* val_asn) {
 
 This function executes in ISR mode, when the new slot timer fires.
 */
-void isr_ieee154e_newSlot() {
+void isr_ieee154e_newSlot(opentimers_id_t id) {
     ieee154e_vars.startOfSlotReference = opentimers_getCurrentTimeout();
     opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                  // timerId
@@ -302,7 +302,7 @@ void isr_ieee154e_newSlot() {
 
 This function executes in ISR mode, when the FSM timer fires.
 */
-void isr_ieee154e_timer() {
+void isr_ieee154e_timer(opentimers_id_t id) {
    switch (ieee154e_vars.state) {
       case S_TXDATAOFFSET:
          activity_ti2();

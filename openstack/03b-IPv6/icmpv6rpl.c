@@ -18,11 +18,11 @@ icmpv6rpl_vars_t             icmpv6rpl_vars;
 //=========================== prototypes ======================================
 
 // DIO-related
-void icmpv6rpl_timer_DIO_cb(void);
+void icmpv6rpl_timer_DIO_cb(opentimers_id_t id);
 void icmpv6rpl_timer_DIO_task(void);
 void sendDIO(void);
 // DAO-related
-void icmpv6rpl_timer_DAO_cb(void);
+void icmpv6rpl_timer_DAO_cb(opentimers_id_t id);
 void icmpv6rpl_timer_DAO_task(void);
 void sendDAO(void);
 
@@ -514,7 +514,7 @@ void icmpv6rpl_killPreferredParent() {
 \note This function is executed in interrupt context, and should only push a 
    task.
 */
-void icmpv6rpl_timer_DIO_cb(void) {
+void icmpv6rpl_timer_DIO_cb(opentimers_id_t id) {
    scheduler_push_task(icmpv6rpl_timer_DIO_task,TASKPRIO_RPL);
 }
 
@@ -617,7 +617,7 @@ void sendDIO() {
 \note This function is executed in interrupt context, and should only push a
    task.
 */
-void icmpv6rpl_timer_DAO_cb(void) {
+void icmpv6rpl_timer_DAO_cb(opentimers_id_t id) {
    scheduler_push_task(icmpv6rpl_timer_DAO_task,TASKPRIO_RPL);
 }
 
