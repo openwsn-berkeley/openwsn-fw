@@ -9,6 +9,7 @@
 */
 #include "opendefs.h"
 #include "opencoap.h"
+#include "openoscoap.h"
 //=========================== define ==========================================
 
 //=========================== typedef =========================================
@@ -19,6 +20,7 @@ typedef struct {
     bool                     isJoined;
     asn_t                    joinAsn;
     uint8_t                  joinKey[16];
+    oscoap_security_context_t context;
 } cjoin_vars_t;
 
 //=========================== variables =======================================

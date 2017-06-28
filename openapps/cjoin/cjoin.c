@@ -15,6 +15,7 @@
 #include "IEEE802154E.h"
 #include "icmpv6rpl.h"
 #include "cbor.h"
+#include "eui64.h"
 
 //=========================== defines =========================================
 
@@ -26,6 +27,9 @@ const uint8_t cjoin_path0[] = "j";
 static const uint8_t ipAddr_jce[] = {0xbb, 0xbb, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, \
                                      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01};
 
+static const uint8_t masterSecret[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, \
+                                     0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
+
 //=========================== variables =======================================
 
 cjoin_vars_t cjoin_vars;
@@ -33,8 +37,11 @@ cjoin_vars_t cjoin_vars;
 //=========================== prototypes ======================================
 
 owerror_t cjoin_receive(OpenQueueEntry_t* msg,
-                    coap_header_iht*  coap_header,
-                    coap_option_iht*  coap_options);
+        coap_header_iht*  coap_header,
+        coap_option_iht*  coap_incomingOptions,
+        coap_option_iht*  coap_outgoingOptions,
+        uint8_t*          coap_outgoingOptionsLen);
+
 void    cjoin_timer_cb(void);
 void    cjoin_task_cb(void);
 void    cjoin_sendDone(OpenQueueEntry_t* msg,
@@ -45,16 +52,11 @@ void cjoin_retransmission_task_cb(void);
 bool cjoin_getIsJoined(void);
 void cjoin_setIsJoined(bool newValue);
 //=========================== public ==========================================
-/* Below is debug functions */
-void printf_hex(unsigned char *data, unsigned int len){
-	unsigned int i=0;
-	for(i=0; i<len; i++)
-	{
-		printf("%02x ",data[i]);
-	}
-	printf("\n");
-}
+
 void cjoin_init() {
+   
+   uint8_t senderID[9];     // needs to hold EUI-64 + 1 byte
+   uint8_t recipientID[9];  // needs to hold EUI-64 + 1 byte
    
    // prepare the resource descriptor for the /j path
    cjoin_vars.desc.path0len                        = sizeof(cjoin_path0)-1;
@@ -62,6 +64,7 @@ void cjoin_init() {
    cjoin_vars.desc.path1len                        = 0;
    cjoin_vars.desc.path1val                        = NULL;
    cjoin_vars.desc.componentID                     = COMPONENT_CJOIN;
+   cjoin_vars.desc.securityContext                 = &cjoin_vars.context;
    cjoin_vars.desc.discoverable                    = TRUE;
    cjoin_vars.desc.callbackRx                      = &cjoin_receive;
    cjoin_vars.desc.callbackSendDone                = &cjoin_sendDone;
@@ -74,6 +77,20 @@ void cjoin_init() {
 
    cjoin_vars.timerId = opentimers_create();
 
+   eui64_get(senderID);
+   senderID[8] = 0x00;      // construct sender ID according to the minimal-security-03 draft
+   eui64_get(recipientID);
+   recipientID[8] = 0x01; // construct recipient ID according to the minimal-security-03 draft
+   
+   openoscoap_init_security_context(&cjoin_vars.context, 
+                                (uint8_t*) senderID, 
+                                sizeof(senderID),
+                                (uint8_t*) recipientID,
+                                sizeof(recipientID),
+                                (uint8_t*) masterSecret,
+                                sizeof(masterSecret),
+                                NULL,
+                                0);
    cjoin_schedule();
 }
 
@@ -81,7 +98,6 @@ void cjoin_init() {
 
 void cjoin_setJoinKey(uint8_t *key, uint8_t len) {
    memcpy(cjoin_vars.joinKey, key, len);
-   printf_hex(cjoin_vars.joinKey, len);
 }
 
 void cjoin_schedule() {
@@ -102,8 +118,11 @@ void cjoin_schedule() {
 
 //=========================== private =========================================
 owerror_t cjoin_receive(OpenQueueEntry_t* msg,
-                      coap_header_iht* coap_header,
-                      coap_option_iht* coap_options) {
+        coap_header_iht*  coap_header,
+        coap_option_iht*  coap_incomingOptions,
+        coap_option_iht*  coap_outgoingOptions,
+        uint8_t*          coap_outgoingOptionsLen) {
+
     uint8_t i;
     join_response_t join_response;
     owerror_t ret;
@@ -116,9 +135,9 @@ owerror_t cjoin_receive(OpenQueueEntry_t* msg,
 
     // loop through the options and look for content format
     i = 0;
-    while(coap_options[i].type != COAP_OPTION_NONE) {
-        if (coap_options[i].type == COAP_OPTION_NUM_CONTENTFORMAT && 
-                        *(coap_options[i].pValue) == COAP_MEDTYPE_APPCBOR) {
+    while(coap_incomingOptions[i].type != COAP_OPTION_NONE) {
+        if (coap_incomingOptions[i].type == COAP_OPTION_NUM_CONTENTFORMAT && 
+                        *(coap_incomingOptions[i].pValue) == COAP_MEDTYPE_APPCBOR) {
             ret = cbor_parse_join_response(&join_response, msg->payload, msg->length);
             if (ret == E_FAIL) { return E_FAIL; }
 
@@ -183,6 +202,7 @@ void cjoin_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 owerror_t cjoin_sendJoinRequest(void) {
    OpenQueueEntry_t*    pkt;
    owerror_t            outcome;
+   coap_option_iht      options[5];
 
     // immediately arm the retransmission timer
     opentimers_scheduleIn(cjoin_vars.timerId,
@@ -209,11 +229,14 @@ owerror_t cjoin_sendJoinRequest(void) {
    pkt->owner                     = COMPONENT_CJOIN;
 
    // location-path option
-   packetfunctions_reserveHeaderSize(pkt,sizeof(cjoin_path0)-1);
-   memcpy(&pkt->payload[0],cjoin_path0,sizeof(cjoin_path0)-1);
-   packetfunctions_reserveHeaderSize(pkt,1);
-   pkt->payload[0]                = ((COAP_OPTION_NUM_URIPATH) << 4) | (sizeof(cjoin_path0)-1);
-   
+   options[0].type = COAP_OPTION_NUM_URIPATH;
+   options[0].length = sizeof(cjoin_path0)-1;
+   options[0].pValue = (uint8_t *)cjoin_path0;
+
+   // object security option
+   // length and value are set by the CoAP library
+   options[1].type = COAP_OPTION_NUM_OBJECTSECURITY;
+
    // metadata
    pkt->l4_destination_port       = WKP_UDP_COAP;
    pkt->l3_destinationAdd.type    = ADDR_128B;
@@ -224,7 +247,9 @@ owerror_t cjoin_sendJoinRequest(void) {
       pkt,
       COAP_TYPE_CON,
       COAP_CODE_REQ_GET,
-      1,
+      1, // token len
+      options,
+      2, // options len
       &cjoin_vars.desc
    );
    
