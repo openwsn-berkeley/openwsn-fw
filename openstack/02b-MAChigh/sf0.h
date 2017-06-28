@@ -16,6 +16,7 @@
 
 typedef struct {
    uint8_t numAppPacketsPerSlotFrame;
+   uint8_t backoff;
 } sf0_vars_t;
 
 //=========================== module variables ================================
@@ -24,12 +25,22 @@ typedef struct {
 
 // admin
 void      sf0_init(void);
-// notification from sixtop
-void      sf0_notif_addedCell(void);
-void      sf0_notif_removedCell(void);
 // notification from schedule
 void      sf0_notifyNewSlotframe(void);
 void      sf0_appPktPeriod(uint8_t numAppPacketsPerSlotFrame);
+
+void      sf0_setBackoff(uint8_t value);
+uint8_t   sf0_getsfid(void);
+
+bool sf0_candidateAddCellList(
+   cellInfo_ht*         cellList,
+   uint8_t              requiredCells
+);
+bool sf0_candidateRemoveCellList(
+   cellInfo_ht*         cellList,
+   open_addr_t*         neighbor,
+   uint8_t              requiredCells
+);
 /**
 \}
 \}

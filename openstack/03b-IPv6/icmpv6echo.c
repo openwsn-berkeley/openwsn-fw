@@ -15,8 +15,9 @@ icmpv6echo_vars_t icmpv6echo_vars;
 //=========================== public ==========================================
 
 void icmpv6echo_init() {
-   icmpv6echo_vars.busySending = FALSE;
-   icmpv6echo_vars.seq         = 0;
+   icmpv6echo_vars.busySending    = FALSE;
+   icmpv6echo_vars.seq            = 0;
+   icmpv6echo_vars.isReplyEnabled = TRUE;
 }
 
 void icmpv6echo_trigger() {
@@ -99,35 +100,40 @@ void icmpv6echo_receive(OpenQueueEntry_t* msg) {
          openserial_printInfo(COMPONENT_ICMPv6ECHO,ERR_RCVD_ECHO_REQUEST,
                                (errorparameter_t)0,
                                (errorparameter_t)0);
-         // get a new openqueuEntry_t for the echo reply
-         reply = openqueue_getFreePacketBuffer(COMPONENT_ICMPv6ECHO);
-         if (reply==NULL) {
-            openserial_printError(COMPONENT_ICMPv6ECHO,ERR_NO_FREE_PACKET_BUFFER,
-                                  (errorparameter_t)1,
-                                  (errorparameter_t)0);
-            openqueue_freePacketBuffer(msg);
-            return;
-         }
-         // take ownership over reply
-         reply->creator = COMPONENT_ICMPv6ECHO;
-         reply->owner   = COMPONENT_ICMPv6ECHO;
-         // copy payload from msg to (end of) reply
-         packetfunctions_reserveHeaderSize(reply,msg->length);
-         memcpy(reply->payload,msg->payload,msg->length);
-         // copy source of msg in destination of reply
-         memcpy(&(reply->l3_destinationAdd),&(msg->l3_sourceAdd),sizeof(open_addr_t));
-         // free up msg
-         openqueue_freePacketBuffer(msg);
-         msg = NULL;
-         // administrative information for reply
-         reply->l4_protocol                   = IANA_ICMPv6;
-         reply->l4_sourcePortORicmpv6Type     = IANA_ICMPv6_ECHO_REPLY;
-         ((ICMPv6_ht*)(reply->payload))->type = reply->l4_sourcePortORicmpv6Type;
-         packetfunctions_calculateChecksum(reply,(uint8_t*)&(((ICMPv6_ht*)(reply->payload))->checksum));//do last
-         icmpv6echo_vars.busySending = TRUE;
-         if (icmpv6_send(reply)!=E_SUCCESS) {
-            icmpv6echo_vars.busySending = FALSE;
-            openqueue_freePacketBuffer(reply);
+         if (icmpv6echo_vars.isReplyEnabled){
+             // get a new openqueuEntry_t for the echo reply
+             reply = openqueue_getFreePacketBuffer(COMPONENT_ICMPv6ECHO);
+             if (reply==NULL) {
+                openserial_printError(COMPONENT_ICMPv6ECHO,ERR_NO_FREE_PACKET_BUFFER,
+                                      (errorparameter_t)1,
+                                      (errorparameter_t)0);
+                openqueue_freePacketBuffer(msg);
+                return;
+             }
+             // take ownership over reply
+             reply->creator = COMPONENT_ICMPv6ECHO;
+             reply->owner   = COMPONENT_ICMPv6ECHO;
+             // copy payload from msg to (end of) reply
+             packetfunctions_reserveHeaderSize(reply,msg->length);
+             memcpy(reply->payload,msg->payload,msg->length);
+             // copy source of msg in destination of reply
+             memcpy(&(reply->l3_destinationAdd),&(msg->l3_sourceAdd),sizeof(open_addr_t));
+             // free up msg
+             openqueue_freePacketBuffer(msg);
+             msg = NULL;
+             // administrative information for reply
+             reply->l4_protocol                   = IANA_ICMPv6;
+             reply->l4_sourcePortORicmpv6Type     = IANA_ICMPv6_ECHO_REPLY;
+             ((ICMPv6_ht*)(reply->payload))->type = reply->l4_sourcePortORicmpv6Type;
+             packetfunctions_calculateChecksum(reply,(uint8_t*)&(((ICMPv6_ht*)(reply->payload))->checksum));//do last
+             icmpv6echo_vars.busySending = TRUE;
+             if (icmpv6_send(reply)!=E_SUCCESS) {
+                icmpv6echo_vars.busySending = FALSE;
+                openqueue_freePacketBuffer(reply);
+             }
+         } else {
+             // free up msg
+             openqueue_freePacketBuffer(msg);
          }
          break;
       case IANA_ICMPv6_ECHO_REPLY:
@@ -143,6 +149,10 @@ void icmpv6echo_receive(OpenQueueEntry_t* msg) {
          openqueue_freePacketBuffer(msg);
          break;
    }
+}
+
+void icmpv6echo_setIsReplyEnabled(bool isEnabled){
+    icmpv6echo_vars.isReplyEnabled = isEnabled;
 }
 
 //=========================== private =========================================

@@ -1,31 +1,40 @@
-/******************** (C) COPYRIGHT 2008 STMicroelectronics ********************
-* File Name          : stm32f10x_it.c
-* Author             : MCD Application Team
-* Version            : V2.0.3
-* Date               : 09/22/2008
-* Description        : Main Interrupt Service Routines.
-*                      This file provides template for all exceptions handler
-*                      and peripherals interrupt service routine.
-********************************************************************************
-* THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
-* WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE TIME.
-* AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY DIRECT,
-* INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING FROM THE
-* CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE CODING
-* INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
-*******************************************************************************/
+/**
+  ******************************************************************************
+  * @file    Project/STM32F10x_StdPeriph_Template/stm32f10x_it.c 
+  * @author  MCD Application Team, modified by Keoma Brun (november 2016)
+  * @version V3.5.0
+  * @date    08-April-2011
+  * @brief   Main Interrupt Service Routines.
+  *          This file provides template for all exceptions handler and 
+  *          peripherals interrupt service routine.
+  ******************************************************************************
+  * @attention
+  *
+  * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
+  * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
+  * TIME. AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY
+  * DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
+  * FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
+  * CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
+  *
+  * <h2><center>&copy; COPYRIGHT 2011 STMicroelectronics</center></h2>
+  ******************************************************************************
+  */
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
 #include "leds.h"
-#include "bsp_timer.h"
-#include "radiotimer.h"
+#include "sctimer.h"
 #include "spi.h"
 #include "radio.h"
-#include "rtc_timer.h"
 #include "uart.h"
 #include "debugpins.h"
 #include "rcc.h"
+#include "board.h"
+
+/** @addtogroup STM32F10x_StdPeriph_Template
+  * @{
+  */
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -34,40 +43,32 @@
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
-/*******************************************************************************
-* Function Name  : NMIException
-* Description    : This function handles NMI exception.
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void NMIException(void)
+/**
+  * @brief  This function handles NMI exception.
+  * @param  None
+  * @retval None
+  */
+void NMI_Handler(void)
 {
 }
 
-/*******************************************************************************
-* Function Name  : HardFaultException
-* Description    : This function handles Hard Fault exception.
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void HardFaultException(void)
+/**
+  * @brief  This function handles Hard Fault exception.
+  * @param  None
+  * @retval None
+  */
+void HardFault_Handler(void)
 {
-  /* Go to infinite loop when Hard Fault exception occurs */
-  while (1)
-  {
-  }
+  /* reset when Hard Fault exception occurs */
+  board_reset();
 }
 
-/*******************************************************************************
-* Function Name  : MemManageException
-* Description    : This function handles Memory Manage exception.
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void MemManageException(void)
+/**
+  * @brief  This function handles Memory Manage exception.
+  * @param  None
+  * @retval None
+  */
+void MemManage_Handler(void)
 {
   /* Go to infinite loop when Memory Manage exception occurs */
   while (1)
@@ -75,14 +76,12 @@ void MemManageException(void)
   }
 }
 
-/*******************************************************************************
-* Function Name  : BusFaultException
-* Description    : This function handles Bus Fault exception.
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void BusFaultException(void)
+/**
+  * @brief  This function handles Bus Fault exception.
+  * @param  None
+  * @retval None
+  */
+void BusFault_Handler(void)
 {
   /* Go to infinite loop when Bus Fault exception occurs */
   while (1)
@@ -90,14 +89,12 @@ void BusFaultException(void)
   }
 }
 
-/*******************************************************************************
-* Function Name  : UsageFaultException
-* Description    : This function handles Usage Fault exception.
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void UsageFaultException(void)
+/**
+  * @brief  This function handles Usage Fault exception.
+  * @param  None
+  * @retval None
+  */
+void UsageFault_Handler(void)
 {
   /* Go to infinite loop when Usage Fault exception occurs */
   while (1)
@@ -105,47 +102,39 @@ void UsageFaultException(void)
   }
 }
 
-/*******************************************************************************
-* Function Name  : DebugMonitor
-* Description    : This function handles Debug Monitor exception.
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void DebugMonitor(void)
+/**
+  * @brief  This function handles SVCall exception.
+  * @param  None
+  * @retval None
+  */
+void SVC_Handler(void)
 {
 }
 
-/*******************************************************************************
-* Function Name  : SVCHandler
-* Description    : This function handles SVCall exception.
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void SVCHandler(void)
+/**
+  * @brief  This function handles Debug Monitor exception.
+  * @param  None
+  * @retval None
+  */
+void DebugMon_Handler(void)
 {
 }
 
-/*******************************************************************************
-* Function Name  : PendSVC
-* Description    : This function handles PendSVC exception.
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void PendSVC(void)
+/**
+  * @brief  This function handles PendSVC exception.
+  * @param  None
+  * @retval None
+  */
+void PendSV_Handler(void)
 {
 }
 
-/*******************************************************************************
-* Function Name  : SysTickHandler
-* Description    : This function handles SysTick Handler.
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void SysTickHandler(void)
+/**
+  * @brief  This function handles SysTick Handler.
+  * @param  None
+  * @retval None
+  */
+void SysTick_Handler(void)
 {
 }
 
@@ -275,15 +264,11 @@ void EXTI3_IRQHandler(void)
 void EXTI4_IRQHandler(void)
 {
   if(EXTI_GetITStatus(EXTI_Line4) != RESET){
-    debugpins_isr_set();
-
     //leds_error_toggle();
     EXTI_ClearITPendingBit(EXTI_Line4);
 
     //RCC_Wakeup();
     radio_isr();
-
-    debugpins_isr_clr();
   }
 }
 
@@ -487,14 +472,6 @@ void TIM1_CC_IRQHandler(void)
 *******************************************************************************/
 void TIM2_IRQHandler(void)
 {
-  debugpins_isr_set();
-  if(TIM_GetFlagStatus(TIM2,TIM_FLAG_CC1) != RESET)
-  {
-    TIM_ClearFlag(TIM2,TIM_FLAG_CC1);
-    //leds_error_toggle();
-    bsp_timer_isr();
-  }
-  debugpins_isr_clr();
 }
 
 /*******************************************************************************
@@ -508,7 +485,7 @@ void TIM3_IRQHandler(void)
 {
   if(TIM_GetFlagStatus(TIM3,TIM_FLAG_CC1) != RESET)
   {
-    TIM_ClearFlag(TIM3,TIM_FLAG_CC1);
+    //TIM_ClearFlag(TIM3,TIM_FLAG_CC1);
   }
 }
 
@@ -576,12 +553,10 @@ void I2C2_ER_IRQHandler(void)
 *******************************************************************************/
 void SPI1_IRQHandler(void)
 {
-  debugpins_isr_set();
   if(SPI_I2S_GetFlagStatus(SPI1,SPI_I2S_FLAG_RXNE) != RESET)
   {
     spi_isr();
   }
-  debugpins_isr_clr();
 }
 
 /*******************************************************************************
@@ -604,19 +579,15 @@ void SPI2_IRQHandler(void)
 *******************************************************************************/
 void USART1_IRQHandler(void)
 {  
-  debugpins_isr_set();
   if(USART_GetFlagStatus(USART1, USART_FLAG_RXNE) != RESET)
-  {
-    USART_ClearFlag(USART1, USART_FLAG_RXNE);
-    
+  {    
     uart_rx_isr();
   }
 
-  if(USART_GetFlagStatus(USART1, USART_FLAG_TXE) != RESET)
+  if(USART_GetFlagStatus(USART1, USART_FLAG_TC) != RESET)
   { 
     uart_tx_isr(); 
   }
-  debugpins_isr_clr();
 }
 
 /*******************************************************************************
@@ -661,13 +632,11 @@ void EXTI15_10_IRQHandler(void)
 *******************************************************************************/
 void RTCAlarm_IRQHandler(void)
 {
-  debugpins_isr_set();
   if(EXTI_GetITStatus(EXTI_Line17) != RESET)
   {
-	EXTI_ClearITPendingBit(EXTI_Line17);
-        radiotimer_isr();
+    EXTI_ClearITPendingBit(EXTI_Line17);
+        sctimer_isr();
   }
-  debugpins_isr_clr();
 }
 
 /*******************************************************************************
@@ -871,4 +840,4 @@ void DMA2_Channel4_5_IRQHandler(void)
 {
 }
 
-/******************* (C) COPYRIGHT 2008 STMicroelectronics *****END OF FILE****/
+/******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/

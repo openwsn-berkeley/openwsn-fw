@@ -12,7 +12,6 @@
 #include "idmanager.h"
 #include "opensensors.h"
 #include "sensors.h"
-#include "opentimers.h"
 #include "scheduler.h"
 #include "openserial.h"
 #include "IEEE802154E.h"
@@ -46,7 +45,7 @@ owerror_t csensors_receive(
    coap_option_iht*  coap_options
 );
 
-void csensors_timer_cb(opentimer_id_t id);
+void csensors_timer_cb(opentimers_id_t id);
 
 void csensors_task_cb(void);
 
@@ -277,17 +276,19 @@ owerror_t csensors_receive(
    \param[in] id The opentimer identifier used to resolve the csensor resource associated
       parsed.
 */
-void csensors_timer_cb(opentimer_id_t id){
+void csensors_timer_cb(opentimers_id_t id){
    uint8_t i;
    
    for(i=0;i<csensors_vars.numCsensors;i++) {
-      if (csensors_vars.csensors_resource[i].timerId == id) {
+      if (csensors_vars.csensors_resource[i].timerId == i) {
          csensors_vars.cb_list[csensors_vars.cb_put] = i;
          csensors_vars.cb_put = (csensors_vars.cb_put+1)%CSENSORSTASKLIST;
-         opentimers_setPeriod(
-            csensors_vars.csensors_resource[i].timerId,
-            TIME_MS,
-            csensors_vars.csensors_resource[i].period
+         opentimers_scheduleIn(
+             csensors_vars.csensors_resource[i].timerId, 
+             csensors_vars.csensors_resource[i].period,
+             TIME_MS, 
+             TIMER_ONESHOT,
+             csensors_timer_cb
          );
          break;
       }
@@ -379,24 +380,37 @@ void csensors_setPeriod(uint32_t period,
 
    if (period>0) {
       csensors_vars.csensors_resource[id].period = period;
-      if (csensors_vars.csensors_resource[id].timerId != MAX_NUM_TIMERS) {
-         opentimers_setPeriod(
-            csensors_vars.csensors_resource[id].timerId,
-            TIME_MS,
-            (uint32_t)((period*openrandom_get16b())/0xffff));
+      if (opentimers_isRunning(csensors_vars.csensors_resource[id].timerId)) {
+         opentimers_scheduleIn(
+             csensors_vars.csensors_resource[id].timerId, 
+             (uint32_t)((period*openrandom_get16b())/0xffff),
+             TIME_MS, 
+             TIMER_ONESHOT,
+             csensors_timer_cb
+         );
          if (old_period==0) {
-            opentimers_restart(csensors_vars.csensors_resource[id].timerId);
+             opentimers_scheduleIn(
+                 csensors_vars.csensors_resource[id].timerId, 
+                 (uint32_t)((period*openrandom_get16b())/0xffff),
+                 TIME_MS, 
+                 TIMER_ONESHOT,
+                 csensors_timer_cb
+             );
          }
       } else {
-         csensors_vars.csensors_resource[id].timerId = opentimers_start(
-            (uint32_t)((period*openrandom_get16b())/0xffff),
-            TIMER_PERIODIC,TIME_MS,
-            csensors_timer_cb);
+         csensors_vars.csensors_resource[id].timerId = opentimers_create();
+         opentimers_scheduleIn(
+             csensors_vars.csensors_resource[id].timerId, 
+             (uint32_t)((period*openrandom_get16b())/0xffff),
+             TIME_MS, 
+             TIMER_ONESHOT,
+             csensors_timer_cb
+         );
       }
    } else {
-      if ((csensors_vars.csensors_resource[id].timerId != MAX_NUM_TIMERS) && (old_period != 0)) {
+      if (opentimers_isRunning(csensors_vars.csensors_resource[id].timerId) && (old_period != 0)) {
          csensors_vars.csensors_resource[id].period = period;
-         opentimers_stop(csensors_vars.csensors_resource[id].timerId);
+         opentimers_cancel(csensors_vars.csensors_resource[id].timerId);
       }
    }
 }
@@ -436,3 +450,8 @@ void csensors_fillpayload(OpenQueueEntry_t* msg,
 void csensors_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }
+
+
+
+
+

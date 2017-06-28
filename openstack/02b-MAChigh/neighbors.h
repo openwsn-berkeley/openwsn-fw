@@ -59,9 +59,13 @@ dagrank_t     neighbors_getNeighborRank(uint8_t index);
 uint8_t       neighbors_getNumNeighbors(void);
 uint16_t      neighbors_getLinkMetric(uint8_t index);
 open_addr_t*  neighbors_getKANeighbor(uint16_t kaPeriod);
+bool          neighbors_getNeighborNoResource(uint8_t index);
+uint8_t       neighbors_getGeneration(open_addr_t* address);
+uint8_t       neighbors_getSequenceNumber(open_addr_t* address);
 // setters
 void          neighbors_setNeighborRank(uint8_t index, dagrank_t rank);
-
+void          neighbors_setNeighborNoResource(open_addr_t* address);
+void          neighbors_setPreferredParent(uint8_t index, bool isPreferred);
 // interrogators
 bool          neighbors_isStableNeighbor(open_addr_t* address);
 bool          neighbors_isStableNeighborByIndex(uint8_t index);
@@ -82,6 +86,9 @@ void          neighbors_indicateTx(
    bool                 was_finally_acked,
    asn_t*               asnTimestamp
 );
+void          neighbors_updateSequenceNumber(open_addr_t* address);
+void          neighbors_updateGeneration(open_addr_t* address);
+void          neighbors_resetGeneration(open_addr_t* address);
 
 // get addresses
 bool          neighbors_getNeighborEui64(open_addr_t* address,uint8_t addr_type,uint8_t index);

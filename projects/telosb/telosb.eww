@@ -44,6 +44,9 @@
     <path>$WS_DIR$\01bsp_debugpins\01bsp_debugpins.ewp</path>
   </project>
   <project>
+    <path>$WS_DIR$\01bsp_eui64\01bsp_eui64.ewp</path>
+  </project>
+  <project>
     <path>$WS_DIR$\01bsp_leds\01bsp_leds.ewp</path>
   </project>
   <project>

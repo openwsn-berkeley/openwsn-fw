@@ -31,8 +31,9 @@ available in the OpenOCD installation (see [tutorial](https://github.com/hikob/o
 1. To reprogram the mote, use the usual OpenWSN build scripts. Navigate to the `openwsn-fw/` directory and type `scons board=iot-lab_M3 toolchain=armgcc bootload=0`
 
 
-NOTE: openocd does not support flashing using typical `/dev/ttyUSB*` or `COMX` interfaces. The Python script will flash the first IoT-lab_M3 node connected to the PC, independent from the `bootload=` argument value.  
+NOTE 1: openocd does not support flashing using typical `/dev/ttyUSB*` or `COMX` interfaces. The Python script will flash the first IoT-lab_M3 node connected to the PC, independent from the `bootload=` argument value.  
 
+NOTE 2: As several version of [OpenOCD binary](http://www.freddiechopin.info/en/download/category/4-openocd) were teseted locally, the latest two version of OpenOCD (0.9.0 and 0.8.0) doesn't work with iot-lab_M3. Version 0.6.1 and 0.7.0 works well.
 
 Program the IoT-lab_M3 in Linux
 -------------------------------

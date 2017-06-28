@@ -21,6 +21,7 @@
 #include "openhdlc.h"
 #include "schedule.h"
 #include "icmpv6rpl.h"
+#include "icmpv6echo.h"
 #include "sf0.h"
 #include "debugpins.h"
 
@@ -44,12 +45,11 @@ owerror_t openserial_printInfoErrorCritical(
 // command handlers
 void openserial_handleRxFrame(void);
 void openserial_handleEcho(uint8_t* but, uint8_t bufLen);
+void openserial_get6pInfo(uint8_t commandId, uint8_t* code,uint8_t* cellOptions,uint8_t* numCells,cellInfo_ht* celllist_add,cellInfo_ht* celllist_delete,uint8_t* listOffset,uint8_t* maxListLen,uint8_t ptr, uint8_t commandLen);
 void openserial_handleCommands(void);
 
 // misc
-void openserial_board_reset_cb(
-    opentimer_id_t id
-);
+void openserial_board_reset_cb(opentimers_id_t id);
 
 // HDLC output
 void outputHdlcOpen(void);
@@ -60,6 +60,9 @@ void outputHdlcClose(void);
 void inputHdlcOpen(void);
 void inputHdlcWrite(uint8_t b);
 void inputHdlcClose(void);
+
+// sniffer
+void sniffer_setListeningChannel(uint8_t channel);
 
 //=========================== public ==========================================
 
@@ -166,15 +169,20 @@ owerror_t openserial_printCritical(
     errorparameter_t    arg1,
     errorparameter_t    arg2
 ) {
+    opentimers_id_t id; 
+    uint32_t         reference;
     // blink error LED, this is serious
     leds_error_blink();
     
     // schedule for the mote to reboot in 10s
-    opentimers_start(
-        10000,
-        TIMER_ONESHOT,
-        TIME_MS,
-        openserial_board_reset_cb
+    id        = opentimers_create();
+    reference = opentimers_getValue();
+    opentimers_scheduleAbsolute(
+        id,                             // timerId
+        10000,                          // duration
+        reference,                      // reference
+        TIME_MS,                        // timetype
+        openserial_board_reset_cb       // callback
     );
     
     return openserial_printInfoErrorCritical(
@@ -523,12 +531,102 @@ void openserial_handleRxFrame() {
 }
 
 void openserial_handleEcho(uint8_t* buf, uint8_t bufLen){
-    
     // echo back what you received
     openserial_printData(
         buf,
         bufLen
     );
+}
+
+void openserial_get6pInfo(uint8_t commandId, uint8_t* code,uint8_t* cellOptions,uint8_t* numCells,cellInfo_ht* celllist_add,cellInfo_ht* celllist_delete,uint8_t* listOffset,uint8_t* maxListLen,uint8_t ptr, uint8_t commandLen){
+    uint8_t i; 
+    
+    // clear command
+    if (commandId == COMMAND_SET_6P_CLEAR){
+        *code = IANA_6TOP_CMD_CLEAR;
+        return;
+    }
+    
+    *cellOptions  = openserial_vars.inputBuf[ptr];
+    ptr          += 1;
+    commandLen   -= 1;
+    
+    // list command
+    if (commandId == COMMAND_SET_6P_LIST){
+        *code = IANA_6TOP_CMD_LIST;
+        *listOffset   = openserial_vars.inputBuf[ptr];
+        ptr += 1;
+        *maxListLen   = openserial_vars.inputBuf[ptr];
+        ptr += 1;
+        return;
+    }
+    
+    // count command
+    if (commandId == COMMAND_SET_6P_COUNT){
+        *code = IANA_6TOP_CMD_COUNT;
+        return;
+    }
+    
+    *numCells   = openserial_vars.inputBuf[ptr];
+    ptr        += 1;
+    commandLen -= 1;
+    
+    // add command
+    if (commandId == COMMAND_SET_6P_ADD){
+        *code = IANA_6TOP_CMD_ADD;
+        // retrieve cell list
+        i = 0;
+        while(commandLen>0){
+            celllist_add[i].slotoffset     = openserial_vars.inputBuf[ptr];
+            celllist_add[i].channeloffset  = DEFAULT_CHANNEL_OFFSET;
+            celllist_add[i].isUsed         = TRUE;
+            ptr         += 1;
+            commandLen  -= 1;
+            i++;
+        }
+        return;
+    }
+    
+    // delete command
+    if (commandId == COMMAND_SET_6P_DELETE){
+        *code = IANA_6TOP_CMD_DELETE;
+        i = 0;
+        while(commandLen>0){
+            celllist_delete[i].slotoffset     = openserial_vars.inputBuf[ptr];
+            celllist_delete[i].channeloffset  = DEFAULT_CHANNEL_OFFSET;
+            celllist_delete[i].isUsed         = TRUE;
+            ptr         += 1;
+            commandLen  -= 1;
+            i++;
+        }
+        return;
+    }
+    
+    // relocate command
+    if (commandId == COMMAND_SET_6P_RELOCATE){
+        *code = IANA_6TOP_CMD_RELOCATE;
+        // retrieve cell list to be relocated
+        i = 0;
+        while(i<*numCells){
+            celllist_delete[i].slotoffset     = openserial_vars.inputBuf[ptr];
+            celllist_delete[i].channeloffset  = DEFAULT_CHANNEL_OFFSET;
+            celllist_delete[i].isUsed         = TRUE;
+            ptr         += 1;
+            commandLen  -= 1;
+            i++;
+        }
+        // retrieve cell list to be relocated
+        i = 0;
+        while(commandLen>0){
+            celllist_add[i].slotoffset     = openserial_vars.inputBuf[ptr];
+            celllist_add[i].channeloffset  = DEFAULT_CHANNEL_OFFSET;
+            celllist_add[i].isUsed         = TRUE;
+            ptr         += 1;
+            commandLen  -= 1;
+            i++;
+        }
+        return;
+    }
 }
 
 void openserial_handleCommands(void){
@@ -540,84 +638,76 @@ void openserial_handleCommands(void){
    uint8_t  commandLen;
    uint8_t  comandParam_8;
    uint16_t comandParam_16;
-   cellInfo_ht cellList[SCHEDULEIEMAXNUMCELLS];
-   uint8_t  i;
+   
+    uint8_t  code,cellOptions,numCell,listOffset,maxListLen;
+    uint8_t  ptr;
+    cellInfo_ht celllist_add[CELLLIST_MAX_LEN];
+    cellInfo_ht celllist_delete[CELLLIST_MAX_LEN];
    
    open_addr_t neighbor;
    bool        foundNeighbor;
    
-   memset(cellList,0,sizeof(cellList));
+    ptr = 0;
+    memset(celllist_add,0,CELLLIST_MAX_LEN*sizeof(cellInfo_ht));
+    memset(celllist_delete,0,CELLLIST_MAX_LEN*sizeof(cellInfo_ht));
    
    numDataBytes = openserial_getInputBufferFillLevel();
    //copying the buffer
-   openserial_getInputBuffer(&(input_buffer[0]),numDataBytes);
-   commandId  = openserial_vars.inputBuf[1];
-   commandLen = openserial_vars.inputBuf[2];
-   
-   if (commandLen>3) {
-       // the max command Len is 2, except ping commands
-       return;
-   } else {
-       if (commandLen == 1) {
-           comandParam_8 = openserial_vars.inputBuf[3];
-       } else {
-           // commandLen == 2
-           comandParam_16 = (openserial_vars.inputBuf[3]      & 0x00ff) | \
-                            ((openserial_vars.inputBuf[4]<<8) & 0xff00); 
-       }
-   }
+    openserial_getInputBuffer(&(input_buffer[ptr]),numDataBytes);
+    ptr++;
+    commandId  = openserial_vars.inputBuf[ptr];
+    ptr++;
+    commandLen = openserial_vars.inputBuf[ptr];
+    ptr++;
    
    switch(commandId) {
        case COMMAND_SET_EBPERIOD:
+            comandParam_8 = openserial_vars.inputBuf[ptr];
            sixtop_setEBPeriod(comandParam_8); // one byte, in seconds
            break;
        case COMMAND_SET_CHANNEL:
+           comandParam_8 = openserial_vars.inputBuf[ptr];
            // set communication channel for protocol stack
            ieee154e_setSingleChannel(comandParam_8); // one byte
            // set listening channel for sniffer
            sniffer_setListeningChannel(comandParam_8); // one byte
            break;
        case COMMAND_SET_KAPERIOD: // two bytes, in slots
+            comandParam_16 = (openserial_vars.inputBuf[ptr] & 0x00ff) | \
+                ((openserial_vars.inputBuf[ptr+1]<<8) & 0xff00); 
            sixtop_setKaPeriod(comandParam_16);
            break;
        case COMMAND_SET_DIOPERIOD: // two bytes, in mili-seconds
+            comandParam_16 = (openserial_vars.inputBuf[ptr] & 0x00ff) | \
+                ((openserial_vars.inputBuf[ptr+1]<<8) & 0xff00); 
            icmpv6rpl_setDIOPeriod(comandParam_16);
            break;
        case COMMAND_SET_DAOPERIOD: // two bytes, in mili-seconds
+            comandParam_16 = (openserial_vars.inputBuf[ptr] & 0x00ff) | \
+                ((openserial_vars.inputBuf[ptr+1]<<8) & 0xff00); 
            icmpv6rpl_setDAOPeriod(comandParam_16);
            break;
        case COMMAND_SET_DAGRANK: // two bytes
+            comandParam_16 = (openserial_vars.inputBuf[ptr] & 0x00ff) | \
+                ((openserial_vars.inputBuf[ptr+1]<<8) & 0xff00); 
            icmpv6rpl_setMyDAGrank(comandParam_16);
            break;
        case COMMAND_SET_SECURITY_STATUS: // one byte
-           if (comandParam_8 ==1) {
-               ieee154e_setIsSecurityEnabled(TRUE);
-           } else {
-               if (comandParam_8 == 0) {
-                  ieee154e_setIsSecurityEnabled(FALSE);
-               } else {
-                   // security only can be 1 or 0 
+            comandParam_8 = openserial_vars.inputBuf[ptr];
+            ieee154e_setIsSecurityEnabled(comandParam_8);
                    break;
-               }
-           }
-           break;
        case COMMAND_SET_SLOTFRAMELENGTH: // two bytes
+            comandParam_16 = (openserial_vars.inputBuf[ptr] & 0x00ff) | \
+                ((openserial_vars.inputBuf[ptr+1]<<8) & 0xff00); 
            schedule_setFrameLength(comandParam_16);
            break;
        case COMMAND_SET_ACK_STATUS:
-           if (comandParam_8 == 1) {
-               ieee154e_setIsAckEnabled(TRUE);
-           } else {
-               if (comandParam_8 == 0) {
-                   ieee154e_setIsAckEnabled(FALSE);
-               } else {
-                   // ack reply
+            comandParam_8 = openserial_vars.inputBuf[ptr];
+            ieee154e_setIsAckEnabled(comandParam_8);
                    break;
-               }
-           }
-           break;
         case COMMAND_SET_6P_ADD:
         case COMMAND_SET_6P_DELETE:
+        case COMMAND_SET_6P_RELOCATE:
         case COMMAND_SET_6P_COUNT:
         case COMMAND_SET_6P_LIST:
         case COMMAND_SET_6P_CLEAR:
@@ -626,36 +716,31 @@ void openserial_handleCommands(void){
             if (foundNeighbor==FALSE) {
                 break;
             }
-             
-            sixtop_setHandler(SIX_HANDLER_SF0);
-            if ( 
-                (
-                  commandId != COMMAND_SET_6P_ADD &&
-                  commandId != COMMAND_SET_6P_DELETE
-                ) ||
-                (
-                    ( 
-                      commandId == COMMAND_SET_6P_ADD ||
-                      commandId == COMMAND_SET_6P_DELETE
-                    ) && 
-                    commandLen == 0
-                ) 
-            ){
-                // randomly select cell
-                sixtop_request(commandId-8,&neighbor,1);
-            } else {
-                for (i=0;i<commandLen;i++){
-                    cellList[i].tsNum           = openserial_vars.inputBuf[3+i];
-                    cellList[i].choffset        = DEFAULT_CHANNEL_OFFSET;
-                    cellList[i].linkoptions     = CELLTYPE_TX;
+            if (sixtop_setHandler(SIX_HANDLER_SF0)==FALSE){
+                // one sixtop transcation is happening, only one instance at one time
+                return;
                 }
-                sixtop_addORremoveCellByInfo(commandId-8,&neighbor,cellList);
-            }
+            // the following sequence of bytes are, slotframe, cellOption, numCell, celllist
+            openserial_get6pInfo(commandId,&code,&cellOptions,&numCell,celllist_add,celllist_delete,&listOffset,&maxListLen,ptr,commandLen);
+            sixtop_request(
+                code,              // code
+                &neighbor,         // neighbor
+                numCell,           // number cells
+                cellOptions,       // cellOptions
+                celllist_add,      // celllist to add
+                celllist_delete,   // celllist to delete (not used)
+                sf0_getsfid(),     // sfid
+                listOffset,        // list command offset (not used)
+                maxListLen         // list command maximum celllist (not used)
+            );
             break;
        case COMMAND_SET_SLOTDURATION:
+            comandParam_16 = (openserial_vars.inputBuf[ptr] & 0x00ff) | \
+                ((openserial_vars.inputBuf[ptr+1]<<8) & 0xff00); 
             ieee154e_setSlotDuration(comandParam_16);
             break;
        case COMMAND_SET_6PRESPONSE:
+            comandParam_8 = openserial_vars.inputBuf[ptr];
             if (comandParam_8 ==1) {
                sixtop_setIsResponseEnabled(TRUE);
             } else {
@@ -668,7 +753,21 @@ void openserial_handleCommands(void){
             }
             break;
        case COMMAND_SET_UINJECTPERIOD:
+            comandParam_8 = openserial_vars.inputBuf[ptr];
             sf0_appPktPeriod(comandParam_8);
+            break;
+        case COMMAND_SET_ECHO_REPLY_STATUS:
+            comandParam_8 = openserial_vars.inputBuf[ptr];
+            if (comandParam_8 == 1) {
+                icmpv6echo_setIsReplyEnabled(TRUE);
+            } else {
+                if (comandParam_8 == 0) {
+                    icmpv6echo_setIsReplyEnabled(FALSE);
+                } else {
+                    // ack reply
+                    break;
+                }
+            }
             break;
        default:
            // wrong command ID
@@ -679,7 +778,7 @@ void openserial_handleCommands(void){
 
 //===== misc
 
-void openserial_board_reset_cb(opentimer_id_t id) {
+void openserial_board_reset_cb(opentimers_id_t id) {
     board_reset();
 }
 
@@ -912,3 +1011,6 @@ uint8_t isr_openserial_rx() {
     
     return returnVal;
 }
+
+
+

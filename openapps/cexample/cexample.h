@@ -7,14 +7,16 @@
 \addtogroup cexample
 \{
 */
+
 #include "opencoap.h"
+
 //=========================== define ==========================================
 
 //=========================== typedef =========================================
 
 typedef struct {
-   coap_resource_desc_t desc;
-   opentimer_id_t       timerId;
+   coap_resource_desc_t   desc;
+   opentimers_id_t       timerId;
 } cexample_vars_t;
 
 //=========================== variables =======================================
@@ -29,3 +31,4 @@ void cexample_init(void);
 */
 
 #endif
+

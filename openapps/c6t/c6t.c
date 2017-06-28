@@ -11,6 +11,7 @@
 #include "idmanager.h"
 #include "openqueue.h"
 #include "neighbors.h"
+#include "sf0.h"
 
 //=========================== defines =========================================
 
@@ -71,6 +72,8 @@ owerror_t c6t_receive(
    owerror_t            outcome;
    open_addr_t          neighbor;
    bool                 foundNeighbor;
+   cellInfo_ht          celllist_add[CELLLIST_MAX_LEN];
+   cellInfo_ht          celllist_delete[CELLLIST_MAX_LEN];
    
    switch (coap_header->Code) {
       
@@ -89,12 +92,31 @@ owerror_t c6t_receive(
             break;
          }
          
-         sixtop_setHandler(SIX_HANDLER_SF0);
+         if (sixtop_setHandler(SIX_HANDLER_SF0)==FALSE){
+            // one sixtop transcation is happening, only one instance at one time
+            
+            // set the CoAP header
+            outcome                       = E_FAIL;
+            coap_header->Code             = COAP_CODE_RESP_CHANGED;
+            break;
+         }
+         if (sf0_candidateAddCellList(celllist_add,1)==FALSE){
+            // set the CoAP header
+            outcome                       = E_FAIL;
+            coap_header->Code             = COAP_CODE_RESP_CHANGED;
+            break;
+         }
          // call sixtop
          sixtop_request(
-            IANA_6TOP_CMD_ADD,
-            &neighbor,
-            1
+            IANA_6TOP_CMD_ADD,                  // code
+            &neighbor,                          // neighbor
+            1,                                  // number cells
+            LINKOPTIONS_TX,                     // cellOptions
+            celllist_add,                       // celllist to add
+            NULL,                               // celllist to delete (not used)
+            sf0_getsfid(),                      // sfid
+            0,                                  // list command offset (not used)
+            0                                   // list command maximum celllist (not used)
          );
          
          // set the CoAP header
@@ -118,12 +140,33 @@ owerror_t c6t_receive(
             break;
          }
          
-         sixtop_setHandler(SIX_HANDLER_SF0);
+         if (sixtop_setHandler(SIX_HANDLER_SF0)==FALSE){
+            // one sixtop transcation is happening, only one instance at one time
+            
+            // set the CoAP header
+            coap_header->Code             = COAP_CODE_RESP_CHANGED;
+           
+            outcome                       = E_FAIL;
+            break;
+         }
+         // call sixtop
+         if (sf0_candidateRemoveCellList(celllist_delete,&neighbor,1)==FALSE){
+            // set the CoAP header
+            outcome                       = E_FAIL;
+            coap_header->Code             = COAP_CODE_RESP_CHANGED;
+            break;
+         }
          // call sixtop
          sixtop_request(
-            IANA_6TOP_CMD_DELETE,
-            &neighbor,
-            1
+            IANA_6TOP_CMD_ADD,                  // code
+            &neighbor,                          // neighbor
+            1,                                  // number cells
+            LINKOPTIONS_TX,                     // cellOptions
+            celllist_add,                       // celllist to add
+            NULL,                               // celllist to delete (not used)
+            sf0_getsfid(),                      // sfid
+            0,                                  // list command offset (not used)
+            0                                   // list command maximum celllist (not used)
          );
          
          // set the CoAP header

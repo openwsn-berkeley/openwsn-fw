@@ -12,35 +12,8 @@
 
 //=========================== prototypes ======================================
 
-//=========================== callbacks =======================================
 
-void radio_setOverflowCb(OpenMote* self, radiotimer_compare_cbt cb) {
-   
-#ifdef TRACE_ON
-   printf("C@0x%x: radio_setOverflowCb(cb=0x%x)... \n",self,cb);
-#endif
-   
-   radiotimer_setOverflowCb(self, cb);
-   
-#ifdef TRACE_ON
-   printf("C@0x%x: ...done.\n",self);
-#endif
-}
-
-void radio_setCompareCb(OpenMote* self, radiotimer_compare_cbt cb) {
-   
-#ifdef TRACE_ON
-   printf("C@0x%x: radio_setCompareCb(cb=0x%x)... \n",self,cb);
-#endif
-   
-   radiotimer_setCompareCb(self, cb);
-   
-#ifdef TRACE_ON
-   printf("C@0x%x: ...done.\n",self);
-#endif
-}
-
-void radio_setStartFrameCb(OpenMote* self, radiotimer_capture_cbt cb) {
+void radio_setStartFrameCb(OpenMote* self, radio_capture_cbt cb) {
    
 #ifdef TRACE_ON
    printf("C@0x%x: radio_setStartFrameCb(cb=0x%x)... \n",self,cb);
@@ -53,7 +26,7 @@ void radio_setStartFrameCb(OpenMote* self, radiotimer_capture_cbt cb) {
 #endif
 }
 
-void radio_setEndFrameCb(OpenMote* self, radiotimer_capture_cbt cb) {
+void radio_setEndFrameCb(OpenMote* self, radio_capture_cbt cb) {
    
 #ifdef TRACE_ON
    printf("C@0x%x: radio_setEndFrameCb(cb=0x%x)... \n",self,cb);
@@ -110,114 +83,6 @@ void radio_reset(OpenMote* self) {
 #ifdef TRACE_ON
    printf("C@0x%x: ...done.\n",self);
 #endif
-}
-
-//===== timer
-
-void radio_startTimer(OpenMote* self, PORT_TIMER_WIDTH period) {
-   PyObject*   result;
-   PyObject*   arglist;
-   
-#ifdef TRACE_ON
-   printf("C@0x%x: radio_startTimer(period=%d)... \n",self,period);
-#endif
-   
-   // forward to Python
-   arglist    = Py_BuildValue("(i)",period);
-   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radio_startTimer],arglist);
-   if (result == NULL) {
-      printf("[CRITICAL] radio_startTimer() returned NULL\r\n");
-      return;
-   }
-   Py_DECREF(result);
-   Py_DECREF(arglist);
-   
-#ifdef TRACE_ON
-   printf("C@0x%x: ...done.\n",self);
-#endif
-}
-
-PORT_TIMER_WIDTH radio_getTimerValue(OpenMote* self) {
-   PyObject*            result;
-   PORT_TIMER_WIDTH     returnVal;
-   
-#ifdef TRACE_ON
-   printf("C@0x%x: radio_getTimerValue()... \n",self);
-#endif
-   
-   // forward to Python
-   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radio_getTimerValue],NULL);
-   if (result == NULL) {
-      printf("[CRITICAL] radio_getTimerValue() returned NULL\r\n");
-      return 0;
-   }
-   if (!PyInt_Check(result)) {
-      printf("[CRITICAL] radio_getTimerValue() returned NULL\r\n");
-      return 0;
-   }
-   returnVal = PyInt_AsLong(result);
-   
-   // dispose of returned value
-   Py_DECREF(result);
-   
-#ifdef TRACE_ON
-   printf("C@0x%x: ...got %d.\n",self,returnVal);
-#endif
-   
-   return returnVal;
-}
-
-void radio_setTimerPeriod(OpenMote* self, PORT_TIMER_WIDTH period) {
-   PyObject*   result;
-   PyObject*   arglist;
-   
-#ifdef TRACE_ON
-   printf("C@0x%x: radio_setTimerPeriod(period=%d)... \n",self,period);
-#endif
-   
-   // forward to Python
-   arglist    = Py_BuildValue("(i)",period);
-   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radio_setTimerPeriod],arglist);
-   if (result == NULL) {
-      printf("[CRITICAL] radio_setTimerPeriod() returned NULL\r\n");
-      return;
-   }
-   Py_DECREF(result);
-   Py_DECREF(arglist);
-   
-#ifdef TRACE_ON
-   printf("C@0x%x: ...done.\n",self);
-#endif
-}
-
-PORT_TIMER_WIDTH radio_getTimerPeriod(OpenMote* self) {
-   PyObject*            result;
-   PORT_TIMER_WIDTH     returnVal;
-   
-#ifdef TRACE_ON
-   printf("C@0x%x: radio_getTimerPeriod()... \n",self);
-#endif
-   
-   // forward to Python
-   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radio_getTimerPeriod],NULL);
-   if (result == NULL) {
-      printf("[CRITICAL] radio_getTimerPeriod() returned NULL\r\n");
-      return 0;
-   }
-   if (!PyInt_Check(result)) {
-      printf("[CRITICAL] radio_getTimerPeriod() returned something which is not an int\r\n");
-      return 0;
-   }
-   returnVal = PyInt_AsLong(result);
-   
-   // dispose of returned value
-   Py_DECREF(result);
-   
-#ifdef TRACE_ON
-   printf("C@0x%x: ...got %d.\n",self,returnVal);
-#endif
-   
-   return returnVal;
 }
 
 //===== RF admin
@@ -287,7 +152,7 @@ void radio_rfOff(OpenMote* self) {
 
 //===== TX
 
-void radio_loadPacket(OpenMote* self, uint8_t* packet, uint8_t len) {
+void radio_loadPacket(OpenMote* self, uint8_t* packet, uint16_t len) {
    PyObject*   pkt;
    PyObject*   arglist;
    PyObject*   result;
@@ -465,11 +330,11 @@ void radio_getReceivedFrame(OpenMote* self,
 
 //=========================== interrupts ======================================
 
-void radio_intr_startOfFrame(OpenMote* self, uint16_t capturedTime) {
+void radio_intr_startOfFrame(OpenMote* self, uint32_t capturedTime) {
    self->radio_icb.startFrame_cb(self, capturedTime);
 }
 
-void radio_intr_endOfFrame(OpenMote* self, uint16_t capturedTime) {
+void radio_intr_endOfFrame(OpenMote* self, uint32_t capturedTime) {
    self->radio_icb.endFrame_cb(self, capturedTime);
 }
 

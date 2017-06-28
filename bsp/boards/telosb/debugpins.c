@@ -92,23 +92,23 @@ void debugpins_isr_set() {
 }
 
 // isruarttx   [P3.5]
-void debugpins_isruarttx_toggle() {
+void debugpins_isruarttx_toggle(void) {
    P3OUT ^=  0x20;
 }
-void debugpins_isruarttx_clr() {
+void debugpins_isruarttx_clr(void) {
    P3OUT &= ~0x20;
 }
-void debugpins_isruarttx_set() {
+void debugpins_isruarttx_set(void) {
    P3OUT |=  0x20;
 }
 // isruartrx   [P3.4]
-void debugpins_isruartrx_toggle() {
+void debugpins_isruartrx_toggle(void) {
    P3OUT ^=  0x10;
 }
-void debugpins_isruartrx_clr() {
+void debugpins_isruartrx_clr(void) {
    P3OUT &= ~0x10;
 }
-void debugpins_isruartrx_set() {
+void debugpins_isruartrx_set(void) {
    P3OUT |=  0x10;
 }
 // intdisabled [P6.3]

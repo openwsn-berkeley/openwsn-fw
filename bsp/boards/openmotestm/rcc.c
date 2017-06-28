@@ -12,8 +12,7 @@
 
 //=========================== public ==========================================
 
-void RCC_Configuration(void)
-{
+void RCC_Configuration(void){
     // RCC system reset(for debug purpose)
     RCC_DeInit();
     
@@ -39,36 +38,29 @@ void RCC_Configuration(void)
     RCC_PLLCmd(ENABLE);
     
     // Wait till PLL is ready 
-    while(RCC_GetFlagStatus(RCC_FLAG_PLLRDY) == RESET)
-    {}
+    while(RCC_GetFlagStatus(RCC_FLAG_PLLRDY) == RESET);
   
     // Select PLL as system clock source 
     RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
   
     // Wait till PLL is used as system clock source 
-    while(RCC_GetSYSCLKSource() != 0x08)
-    {}
+    while(RCC_GetSYSCLKSource() != 0x08);
     
     //enable AFIO 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
 }
 
 //when wakeup by alarm, configure rcc
-void RCC_Wakeup(void)
-{
-    GPIOC->ODR ^= 0X0010;
+void RCC_Wakeup(void){
     //enable PLL
     RCC_PLLCmd(ENABLE);
 
     // Wait till PLL is ready 
-    while(RCC_GetFlagStatus(RCC_FLAG_PLLRDY) == RESET)
-    {}
+    while(RCC_GetFlagStatus(RCC_FLAG_PLLRDY) == RESET);
 
     // Select PLL as system clock source 
     RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
   
     // Wait till PLL is used as system clock source 
-    while(RCC_GetSYSCLKSource() != 0x08)
-    {}
-    GPIOC->ODR ^= 0X0010;
+    while(RCC_GetSYSCLKSource() != 0x08);
 }

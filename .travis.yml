@@ -16,7 +16,7 @@ script:
 - scons docs
 - scons board=telosb                                  toolchain=mspgcc verbose=1 oos_macpong
 - scons board=telosb              kernel=freertos     toolchain=mspgcc verbose=1 oos_macpong
-- scons board=OpenMote-CC2538                         toolchain=armgcc verbose=1 oos_macpong
+- scons board=openmote-cc2538                         toolchain=armgcc verbose=1 oos_macpong
 - scons board=wsn430v14                               toolchain=mspgcc verbose=1 oos_macpong
 - scons board=wsn430v13b                              toolchain=mspgcc verbose=1 oos_macpong
 - scons board=gina                                    toolchain=mspgcc verbose=1 oos_macpong
@@ -25,9 +25,9 @@ script:
 - scons board=iot-lab_A8-M3                           toolchain=armgcc verbose=1 oos_macpong
 - scons board=telosb                                  toolchain=mspgcc verbose=1 oos_openwsn
 - scons board=telosb              kernel=freertos     toolchain=mspgcc verbose=1 oos_openwsn
-- scons board=OpenMote-CC2538                         toolchain=armgcc verbose=1 oos_openwsn
-- scons board=OpenMote-CC2538     goldenImage=sniffer toolchain=armgcc verbose=1 oos_sniffer
-- scons board=OpenMote-CC2538     goldenImage=root    toolchain=armgcc verbose=1 oos_openwsn
+- scons board=openmote-cc2538                         toolchain=armgcc verbose=1 oos_openwsn
+- scons board=openmote-cc2538     goldenImage=sniffer toolchain=armgcc verbose=1 oos_sniffer
+- scons board=openmote-cc2538     goldenImage=root    toolchain=armgcc verbose=1 oos_openwsn
 - scons board=wsn430v14                               toolchain=mspgcc verbose=1 oos_openwsn
 - scons board=wsn430v13b                              toolchain=mspgcc verbose=1 oos_openwsn
 - scons board=gina                                    toolchain=mspgcc verbose=1 oos_openwsn
@@ -35,3 +35,4 @@ script:
 - scons board=python                                  toolchain=gcc    verbose=1 oos_openwsn
 - scons board=iot-lab_M3                              toolchain=armgcc verbose=1 oos_openwsn
 - scons board=iot-lab_A8-M3                           toolchain=armgcc verbose=1 oos_openwsn
+- scons board=samr21_xpro                             toolchain=armgcc verbose=1 oos_openwsn

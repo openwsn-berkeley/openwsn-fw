@@ -7,12 +7,12 @@
 #include "board.h"
 #include "radio.h"
 #include "leds.h"
+#include "opentimers.h"
 #include "scheduler.h"
 #include "03oos_sniffer.h"
 #include "openserial.h"
 #include "idmanager.h"
 #include "sixtop.h"
-#include "processIE.h"
 #include "neighbors.h"
 #include "sf0.h"
 #include "openrandom.h"
@@ -46,6 +46,7 @@ typedef struct {
    bool                 rxpk_crc;
    uint8_t              channel;
    uint8_t              outputOrInput;
+   opentimers_id_t      timerId;
 } app_vars_t;
 
 app_vars_t app_vars;
@@ -63,6 +64,7 @@ void     task_uploadPacket(void);
 */
 int mote_main(void) {
    
+   PORT_TIMER_WIDTH       reference;
    // clear local variables
    memset(&app_vars,0,sizeof(app_vars_t));
    
@@ -72,10 +74,22 @@ int mote_main(void) {
    openserial_init();
    idmanager_init();
    openrandom_init();
+   opentimers_init();
  
    // add callback functions radio
    radio_setStartFrameCb(cb_startFrame);
    radio_setEndFrameCb(cb_endFrame);
+   
+   // start timer
+   app_vars.timerId = opentimers_create();
+   reference        = opentimers_getValue();
+   opentimers_scheduleAbsolute(
+        app_vars.timerId,      // timerId
+        TIMER_PERIOD,          // duration
+        reference,             // reference
+        TIME_TICS,            // timetype
+        cb_timer               // callback
+   );
    
    // prepare radio
    radio_rfOn();
@@ -136,6 +150,24 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
 }
 
 
+   // schedule again
+   opentimers_scheduleIn(
+        app_vars.timerId,     // timerId
+        TIMER_PERIOD,         // duration
+        TIME_TICS,            // timetype
+        TIMER_ONESHOT,        // timertype
+        cb_timer              // callback
+   );
+   app_vars.outputOrInput = (app_vars.outputOrInput+1)%2;
+   if (app_vars.outputOrInput == 1) {
+       openserial_stop();
+       openserial_startOutput();
+   } else {
+       openserial_stop();
+       openserial_startInput();
+   }
+}
+
 // ================================ task =======================================
 void task_uploadPacket(){
     openserial_printSniffedPacket(
@@ -146,28 +178,42 @@ void task_uploadPacket(){
 }
 // ================================= stubbing ==================================
 
-void openbridge_triggerData(void){return;}
+void ieee154e_setSingleChannel(uint8_t channel)         {return;}
+void ieee154e_setIsSecurityEnabled(bool isEnabled)      {return;}
+void ieee154e_setSlotDuration(uint16_t duration)        {return;}
+void ieee154e_setIsAckEnabled(bool isEnabled)           {return;}
+void ieee154e_getAsn(uint8_t* array)                    {return;}
+
+void schedule_startDAGroot(void)                        {return;}
+void schedule_setFrameLength(uint16_t frameLength)      {return;}
 
 void sixtop_setEBPeriod(uint8_t ebPeriod){return;}
-void sixtop_addORremoveCellByInfo(uint8_t code,open_addr_t* neighbor,cellInfo_ht* cellInfo){return;}
-void sixtop_request(uint8_t code,open_addr_t* neighbor, uint8_t numCells){return;}
-void sixtop_setHandler(six2six_handler_t handler){return;}
+void sixtop_request(
+    uint8_t      code, 
+    open_addr_t* neighbor, 
+    uint8_t      numCells, 
+    uint8_t      cellOptions, 
+    cellInfo_ht* celllist_toBeAdded, 
+    cellInfo_ht* celllist_toBeRemoved, 
+    uint8_t      sfid,
+    uint16_t     listingOffset,
+    uint16_t     listingMaxNumCells
+)                                                                           {return;}
+bool sixtop_setHandler(six2six_handler_t handler)                           {return TRUE;}
 void sixtop_setIsResponseEnabled(bool isEnabled){return;}
-void ieee154e_setSingleChannel(uint8_t channel){return;}
+void sixtop_setKaPeriod(uint16_t kaPeriod)                                  {return;}
+void sf0_appPktPeriod(uint8_t numAppPacketsPerSlotFrame)                    {return;}
+uint8_t  sf0_getsfid(void)                                                  {return 0;}
+
+void openbridge_triggerData(void)                                           {return;}
+
 void icmpv6rpl_setDIOPeriod(uint16_t dioPeriod) {return;}
 void icmpv6rpl_setDAOPeriod(uint16_t daoPeriod) {return;}
 void icmpv6rpl_setMyDAGrank(uint16_t rank) {return;}
-void sixtop_setKaPeriod(uint16_t kaPeriod) {return;}
-void ieee154e_setIsSecurityEnabled(bool isEnabled) {return;}
-void ieee154e_setSlotDuration(uint16_t duration) {return;}
-void schedule_setFrameLength(uint16_t frameLength) {return;}
 void icmpv6rpl_writeDODAGid(uint8_t* dodagid) {return;}
-void ieee154e_setIsAckEnabled(bool isEnabled) {return;}
-void ieee154e_getAsn(uint8_t* array) {return;}
 void icmpv6rpl_updateMyDAGrankAndParentSelection(void) {return;}
 bool icmpv6rpl_getPreferredParentEui64(open_addr_t* neighbor){return TRUE;}
-void schedule_startDAGroot(void) {return;}
-void sf0_appPktPeriod(uint8_t numAppPacketsPerSlotFrame){return;}
+void icmpv6echo_setIsReplyEnabled(bool isEnabled)                           {return;}
 
 bool debugPrint_asn(void)       {return TRUE;}
 bool debugPrint_isSync(void)    {return TRUE;}

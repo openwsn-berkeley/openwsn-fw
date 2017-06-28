@@ -5,7 +5,7 @@
 \author Chang Tengfei <tengfei.chang@gmail.com>,  July 2012.
 \author Alaeddine Weslati <alaeddine.weslati@inria.fr>, January 2014.
 */
-#include "stm32f10x_lib.h"
+#include "stm32f10x_conf.h"
 #include "stdio.h"
 #include "stdint.h"
 #include "string.h"
@@ -40,17 +40,12 @@ typedef struct {
 volatile spi_vars_t spi_vars;
 
 //=========================== prototypes ======================================
-inline static void RESET_CLR(void) { GPIOC->BRR = 1<<1; }
-inline static void RESET_SET(void) { GPIOC->BSRR = 1<<1; }
-inline static void CSn_SET(void) { GPIOA->BSRR = 1<<4; }
-inline static void CSn_CLR(void) { GPIOA->BRR = 1<<4; }
-inline static void SLEEP_CLR(void) { GPIOA->BRR = 1<<2; }
 
 //=========================== public ==========================================
 
 void spi_init() {
  // clear variables
-  memset(&spi_vars,0,sizeof(spi_vars_t));
+  memset((void*)&spi_vars,0,sizeof(spi_vars_t));
  
   SPI_InitTypeDef  SPI_InitStructure;
 
@@ -59,7 +54,7 @@ void spi_init() {
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
    
-  //Configure SPI-related pins: PA.5 as SCLK pin ,PA.6 as MISO pin, PA.7 as MOSI pin, PA.4 as /SEL pin
+  //Configure SPI-related pins: PA.5 as SCLK pin ,PA.6 as MISO pin, PA.7 as MOSI pin, PA.4 as /SEL pin, PA.2 as SLPR pin
   GPIO_InitTypeDef GPIO_InitStructure;
   GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_5 | GPIO_Pin_7;
   GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_AF_PP;
@@ -75,18 +70,7 @@ void spi_init() {
   GPIO_InitStructure.GPIO_Mode    = GPIO_Mode_Out_PP;
   GPIO_Init(GPIOA, &GPIO_InitStructure);
   
-  GPIO_InitStructure.GPIO_Pin     = GPIO_Pin_1;
-  GPIO_InitStructure.GPIO_Mode    = GPIO_Mode_Out_PP;
-  GPIO_Init(GPIOC, &GPIO_InitStructure);
-
-  // force reset
-  RESET_CLR();
-  CSn_SET();
-  SLEEP_CLR();
-
-  for (uint16_t j=0;j<0xFFFF;j++); //small wait
-
-  RESET_SET();
+  GPIOA->ODR |= 0X1000;//set /SEL pin to high
   
   //Configure SPI1
   SPI_InitStructure.SPI_Direction         = SPI_Direction_2Lines_FullDuplex; //Full-duplex synchronous transfers on two lines
@@ -146,10 +130,9 @@ void spi_txrx(uint8_t*     bufTx,
    // SPI is now busy
    spi_vars.busy             =  1;
    
-   
    // lower CS signal to have slave listening
    if (spi_vars.isFirst==SPI_FIRST) {
-   GPIO_ResetBits(GPIOA, GPIO_Pin_4);
+     GPIO_ResetBits(GPIOA, GPIO_Pin_4);
    }
    
 #ifdef SPI_IN_INTERRUPT_MODE
@@ -165,7 +148,7 @@ void spi_txrx(uint8_t*     bufTx,
    // send all bytes
    while (spi_vars.txBytesLeft>0) {
       // write next byte to TX buffer
-   SPI_I2S_SendData(SPI1,*spi_vars.pNextTxByte);
+      SPI_I2S_SendData(SPI1,*spi_vars.pNextTxByte);
 
       // busy wait on the interrupt flag
       while (SPI_I2S_GetFlagStatus(SPI1,SPI_I2S_FLAG_RXNE) == RESET);
@@ -195,7 +178,7 @@ void spi_txrx(uint8_t*     bufTx,
    
    // put CS signal high to signal end of transmission to slave
    if (spi_vars.isLast==SPI_LAST) {
-   GPIO_SetBits(GPIOA, GPIO_Pin_4);
+      GPIO_SetBits(GPIOA, GPIO_Pin_4);
    }
    
    // SPI is not busy anymore
@@ -232,11 +215,11 @@ kick_scheduler_t spi_isr() {
    
    if (spi_vars.txBytesLeft>0) {
       // write next byte to TX buffer
-   SPI_SendData(SPI1,*spi_vars.pNextTxByte);
+      SPI_SendData(SPI1,*spi_vars.pNextTxByte);
    } else {
       // put CS signal high to signal end of transmission to slave
       if (spi_vars.isLast==SPI_LAST) {
-   GPIO_SetBits(GPIOA, GPIO_Pin_4);
+         GPIO_SetBits(GPIOA, GPIO_Pin_4);
       }
       // SPI is not busy anymore
       spi_vars.busy          =  0;

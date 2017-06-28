@@ -108,6 +108,7 @@ void udpinject_trigger(void) {}
 void icmpv6echo_trigger(void) {}
 void icmpv6rpl_setDIOPeriod(void){}
 void icmpv6rpl_setDAOPeriod(void){}
+void icmpv6echo_setIsReplyEnabled(bool isEnabled){}
 void sixtop_setEBPeriod(void){}
 void sixtop_setKaPeriod(void){}
 void sixtop_setHandler(void){}

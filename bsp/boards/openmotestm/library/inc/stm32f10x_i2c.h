@@ -205,7 +205,7 @@ typedef struct
 #define  I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED           ((u32)0x00030002)  /* BUSY, MSL and ADDR flags */
 
 /* EV7 */
-#define  I2C_EVENT_MASTER_BYTE_RECEIVED                    ((u32)0x00030040)  /* BUSY, MSL and RXNE flags */
+#define  I2C_EVENT_MASTER_BYTE_RECEIVED                    ((u32)0x00030044)  /* BUSY, MSL and RXNE flags */
 
 /* EV8 */
 #define I2C_EVENT_MASTER_BYTE_TRANSMITTING                 ((u32)0x00070080) /* TRA, BUSY, MSL, TXE flags */

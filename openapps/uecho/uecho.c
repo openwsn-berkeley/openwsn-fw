@@ -1,17 +1,26 @@
 #include "opendefs.h"
 #include "uecho.h"
-#include "openudp.h"
 #include "openqueue.h"
 #include "openserial.h"
 #include "packetfunctions.h"
 
 //=========================== variables =======================================
 
+uecho_vars_t uecho_vars;
+
 //=========================== prototypes ======================================
 
 //=========================== public ==========================================
 
 void uecho_init() {
+   // clear local variables
+   memset(&uecho_vars,0,sizeof(uecho_vars_t));
+
+   // register at UDP stack
+   uecho_vars.desc.port              = WKP_UDP_ECHO;
+   uecho_vars.desc.callbackReceive   = &uecho_receive;
+   uecho_vars.desc.callbackSendDone  = &uecho_sendDone;
+   openudp_register(&uecho_vars.desc);
 }
 
 void uecho_receive(OpenQueueEntry_t* request) {

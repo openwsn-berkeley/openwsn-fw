@@ -17,14 +17,12 @@ icmpv6rpl_vars_t             icmpv6rpl_vars;
 
 //=========================== prototypes ======================================
 
-// routing-related
-void icmpv6rpl_updateMyDAGrankAndParentSelection(void);
 // DIO-related
-void icmpv6rpl_timer_DIO_cb(opentimer_id_t id);
+void icmpv6rpl_timer_DIO_cb(opentimers_id_t id);
 void icmpv6rpl_timer_DIO_task(void);
 void sendDIO(void);
 // DAO-related
-void icmpv6rpl_timer_DAO_cb(opentimer_id_t id);
+void icmpv6rpl_timer_DAO_cb(opentimers_id_t id);
 void icmpv6rpl_timer_DAO_task(void);
 void sendDAO(void);
 
@@ -35,8 +33,6 @@ void sendDAO(void);
 */
 void icmpv6rpl_init() {
    uint8_t         dodagid[16];
-   uint32_t        dioPeriod;
-   uint32_t        daoPeriod;
    
    // retrieve my prefix and EUI64
    memcpy(&dodagid[0],idmanager_getMyID(ADDR_PREFIX)->prefix,8); // prefix
@@ -55,7 +51,8 @@ void icmpv6rpl_init() {
 
    //=== admin
    
-   icmpv6rpl_vars.busySending               = FALSE;
+   icmpv6rpl_vars.busySendingDIO            = FALSE;
+   icmpv6rpl_vars.busySendingDAO            = FALSE;
    icmpv6rpl_vars.fDodagidWritten           = 0;
    
    //=== DIO
@@ -83,14 +80,15 @@ void icmpv6rpl_init() {
    memcpy(&icmpv6rpl_vars.dioDestination.addr_128b[0],all_routers_multicast,sizeof(all_routers_multicast));
    
    icmpv6rpl_vars.dioPeriod                 = TIMER_DIO_TIMEOUT;
-   dioPeriod                                = icmpv6rpl_vars.dioPeriod - 0x80 + (openrandom_get16b()&0xff);
-   icmpv6rpl_vars.timerIdDIO                = opentimers_start(
-                                                dioPeriod,
-                                                TIMER_PERIODIC,
-                                                TIME_MS,
-                                                icmpv6rpl_timer_DIO_cb
-                                             );
-   
+   icmpv6rpl_vars.timerIdDIO                = opentimers_create();
+   opentimers_scheduleIn(
+       icmpv6rpl_vars.timerIdDIO,
+       icmpv6rpl_vars.dioPeriod,
+       TIME_MS,
+       TIMER_PERIODIC,
+       icmpv6rpl_timer_DIO_cb
+   );
+
    //=== DAO
    
    icmpv6rpl_vars.dao.rplinstanceId         = 0x00;        ///< TODO: put correct value
@@ -131,14 +129,14 @@ void icmpv6rpl_init() {
    icmpv6rpl_vars.dao_target.prefixLength = 0;
    
    icmpv6rpl_vars.daoPeriod                 = TIMER_DAO_TIMEOUT;
-   daoPeriod                                = icmpv6rpl_vars.daoPeriod - 0x80 + (openrandom_get16b()&0xff);
-   icmpv6rpl_vars.timerIdDAO                = opentimers_start(
-                                                daoPeriod,
-                                                TIMER_PERIODIC,
-                                                TIME_MS,
-                                                icmpv6rpl_timer_DAO_cb
-                                             );
-   
+   icmpv6rpl_vars.timerIdDAO                = opentimers_create();
+   opentimers_scheduleIn(
+       icmpv6rpl_vars.timerIdDAO,
+       icmpv6rpl_vars.daoPeriod,
+       TIME_MS,
+       TIMER_PERIODIC,
+       icmpv6rpl_timer_DAO_cb
+   );
 }
 
 void  icmpv6rpl_writeDODAGid(uint8_t* dodagid) {
@@ -185,11 +183,15 @@ void icmpv6rpl_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
                             (errorparameter_t)0);
    }
    
+   // I'm not busy sending DIO/DAO anymore
+   if (packetfunctions_isBroadcastMulticast(&(msg->l2_nextORpreviousHop))){
+        icmpv6rpl_vars.busySendingDIO = FALSE;
+   } else {
+        icmpv6rpl_vars.busySendingDAO = FALSE;
+   }
+   
    // free packet
    openqueue_freePacketBuffer(msg);
-   
-   // I'm not busy sending anymore
-   icmpv6rpl_vars.busySending = FALSE;
 }
 
 /**
@@ -278,10 +280,14 @@ bool icmpv6rpl_getPreferredParentIndex(uint8_t* indexptr) {
 \param[out] addressToWrite Where to copy the preferred parent's address to.
 */
 bool icmpv6rpl_getPreferredParentEui64(open_addr_t* addressToWrite) {
-   if (icmpv6rpl_vars.haveParent){
-       return neighbors_getNeighborEui64(addressToWrite,ADDR_64B,icmpv6rpl_vars.ParentIndex);
-   }
-   else return FALSE;
+    if (
+        icmpv6rpl_vars.haveParent && 
+        neighbors_getNeighborNoResource(icmpv6rpl_vars.ParentIndex)==FALSE
+    ){
+        return neighbors_getNeighborEui64(addressToWrite,ADDR_64B,icmpv6rpl_vars.ParentIndex);
+    } else {
+        return FALSE;
+    }
 }
 
 /**
@@ -334,75 +340,98 @@ void icmpv6rpl_setMyDAGrank(dagrank_t rank){
 \brief Routing algorithm
 */
 void icmpv6rpl_updateMyDAGrankAndParentSelection() {
-   uint8_t   i;
-   uint16_t  previousDAGrank;
-   uint16_t  prevRankIncrease;
-   uint8_t   prevParentIndex;
-   bool      prevHadParent;
-   bool      foundBetterParent;
-   // temporaries
-   uint16_t  rankIncrease;
-   dagrank_t neighborRank;
-   uint32_t  tentativeDAGrank;
+    uint8_t   i;
+    uint16_t  previousDAGrank;
+    uint16_t  prevRankIncrease;
+    uint8_t   prevParentIndex;
+    bool      prevHadParent;
+    bool      foundBetterParent;
+    // temporaries
+    uint16_t  rankIncrease;
+    dagrank_t neighborRank;
+    uint32_t  tentativeDAGrank;
    
-   // if I'm a DAGroot, my DAGrank is always MINHOPRANKINCREASE
-   if ((idmanager_getIsDAGroot())==TRUE) {
-       // the dagrank is not set through setting command, set rank to MINHOPRANKINCREASE here 
-       if (icmpv6rpl_vars.myDAGrank!=MINHOPRANKINCREASE) { // test for change so as not to report unchanged value when root
-           icmpv6rpl_vars.myDAGrank=MINHOPRANKINCREASE;
-           return;
-       }
-   }
-
-   // prep for loop, remember state before neighbor table scanning
-   previousDAGrank      = icmpv6rpl_vars.myDAGrank;
-   prevParentIndex      = icmpv6rpl_vars.ParentIndex;
-   prevHadParent        = icmpv6rpl_vars.haveParent;
-   prevRankIncrease     = icmpv6rpl_vars.rankIncrease;
-   foundBetterParent    = FALSE;
-   icmpv6rpl_vars.haveParent = FALSE;
-   
-   // loop through neighbor table, update myDAGrank
-   for (i=0;i<MAXNUMNEIGHBORS;i++) {
-      if (neighbors_isStableNeighborByIndex(i)) { // in use and link is stable
-         // get link cost to this neighbor
-         rankIncrease=neighbors_getLinkMetric(i);
-         // if this link cost is too high, pass on this neighbor
-         // TODO
-         // get this neighbor's advertized rank
-         neighborRank=neighbors_getNeighborRank(i);
-         // if this neighbor has unknown/infinite rank, pass on it
-         if (neighborRank==DEFAULTDAGRANK) continue;
-         // compute tentative cost of full path to root through this neighbor
-         tentativeDAGrank = (uint32_t)neighborRank+rankIncrease;
-         if (tentativeDAGrank > 65535) {tentativeDAGrank = 65535;}
-         // if not low enough to justify switch, pass (i.e. hysterisis)
-         //if ((previousDAGrank<tentativeDAGrank) ||
-         // next line is wrong, difference can be negative
-         //    (tentativeDAGrank-previousDAGrank < 2*MINHOPRANKINCREASE)) continue;
-         // remember that we have at least one valid candidate parent
-         foundBetterParent=TRUE;
-         // select best candidate so far
-         if (icmpv6rpl_vars.myDAGrank>tentativeDAGrank) {
-            icmpv6rpl_vars.myDAGrank    = (uint16_t)tentativeDAGrank;
-            icmpv6rpl_vars.ParentIndex  = i;
-            icmpv6rpl_vars.rankIncrease = rankIncrease;
-         }
-      }
-   } 
+    // if I'm a DAGroot, my DAGrank is always MINHOPRANKINCREASE
+    if ((idmanager_getIsDAGroot())==TRUE) {
+        // the dagrank is not set through setting command, set rank to MINHOPRANKINCREASE here 
+        if (icmpv6rpl_vars.myDAGrank!=MINHOPRANKINCREASE) { // test for change so as not to report unchanged value when root
+            icmpv6rpl_vars.myDAGrank=MINHOPRANKINCREASE;
+            return;
+        }
+    }
+    
+    // prep for loop, remember state before neighbor table scanning
+    prevParentIndex      = icmpv6rpl_vars.ParentIndex;
+    prevHadParent        = icmpv6rpl_vars.haveParent;
+    prevRankIncrease     = icmpv6rpl_vars.rankIncrease;
+    // update my rank to current parent first
+    if (icmpv6rpl_vars.haveParent==TRUE){
+        rankIncrease     = neighbors_getLinkMetric(icmpv6rpl_vars.ParentIndex);
+        neighborRank     = neighbors_getNeighborRank(icmpv6rpl_vars.ParentIndex);
+        tentativeDAGrank = (uint32_t)neighborRank+rankIncrease;
+        if (tentativeDAGrank>65535) {
+            icmpv6rpl_vars.myDAGrank = 65535;
+        } else {
+            icmpv6rpl_vars.myDAGrank = (uint16_t)tentativeDAGrank;
+        }
+    }
+    previousDAGrank      = icmpv6rpl_vars.myDAGrank;
+    foundBetterParent    = FALSE;
+    icmpv6rpl_vars.haveParent = FALSE;
+    
+    // loop through neighbor table, update myDAGrank
+    for (i=0;i<MAXNUMNEIGHBORS;i++) {
+        if (neighbors_isStableNeighborByIndex(i)) { // in use and link is stable
+            // neighbor marked as NORES can't be parent
+            if (neighbors_getNeighborNoResource(i)==TRUE) {
+                continue;
+            }
+            // get link cost to this neighbor
+            rankIncrease=neighbors_getLinkMetric(i);
+            // get this neighbor's advertized rank
+            neighborRank=neighbors_getNeighborRank(i);
+            // if this neighbor has unknown/infinite rank, pass on it
+            if (neighborRank==DEFAULTDAGRANK) continue;
+            // compute tentative cost of full path to root through this neighbor
+            tentativeDAGrank = (uint32_t)neighborRank+rankIncrease;
+            if (tentativeDAGrank > 65535) {tentativeDAGrank = 65535;}
+            // if not low enough to justify switch, pass (i.e. hysterisis)
+            if (
+                (previousDAGrank<tentativeDAGrank) ||
+                (previousDAGrank-tentativeDAGrank < 2*MINHOPRANKINCREASE)
+            ) {
+                  continue;
+            }
+            // remember that we have at least one valid candidate parent
+            foundBetterParent=TRUE;
+            // select best candidate so far
+            if (icmpv6rpl_vars.myDAGrank>tentativeDAGrank) {
+                icmpv6rpl_vars.myDAGrank    = (uint16_t)tentativeDAGrank;
+                icmpv6rpl_vars.ParentIndex  = i;
+                icmpv6rpl_vars.rankIncrease = rankIncrease;
+            }
+        }
+    }
    
    if (foundBetterParent) {
       icmpv6rpl_vars.haveParent=TRUE;
       if (!prevHadParent) {
-         // only report on link creation
+         // in case preParent is killed before calling this function, clear the preferredParent flag
+         neighbors_setPreferredParent(prevParentIndex, FALSE);
+         // set neighbors as preferred parent
+         neighbors_setPreferredParent(icmpv6rpl_vars.ParentIndex, TRUE);
       } else {
          if (icmpv6rpl_vars.ParentIndex==prevParentIndex) {
-            // report on the rank change if any, not on the deletion/creation of parent
-               if (icmpv6rpl_vars.myDAGrank!=previousDAGrank) {
-               } else ;// same parent, same rank, nothing to report about 
+             // report on the rank change if any, not on the deletion/creation of parent
+             if (icmpv6rpl_vars.myDAGrank!=previousDAGrank) {
+             } else {
+                 // same parent, same rank, nothing to report about 
+             }
          } else {
-            // report on deletion of parent
-            // report on creation of new parent
+             // clear neighbors preferredParent flag
+             neighbors_setPreferredParent(prevParentIndex, FALSE);
+             // set neighbors as preferred parent
+             neighbors_setPreferredParent(icmpv6rpl_vars.ParentIndex, TRUE);
          }
       }
    } else {
@@ -485,7 +514,7 @@ void icmpv6rpl_killPreferredParent() {
 \note This function is executed in interrupt context, and should only push a 
    task.
 */
-void icmpv6rpl_timer_DIO_cb(opentimer_id_t id) {
+void icmpv6rpl_timer_DIO_cb(opentimers_id_t id) {
    scheduler_push_task(icmpv6rpl_timer_DIO_task,TASKPRIO_RPL);
 }
 
@@ -495,17 +524,7 @@ void icmpv6rpl_timer_DIO_cb(opentimer_id_t id) {
 \note This function is executed in task context, called by the scheduler.
 */
 void icmpv6rpl_timer_DIO_task() {
-   uint32_t        dioPeriod;
-   // send DIO
-   sendDIO();
-   
-   // arm the DIO timer with this new value
-   dioPeriod = icmpv6rpl_vars.dioPeriod - 0x80 + (openrandom_get16b()&0xff);
-   opentimers_setPeriod(
-      icmpv6rpl_vars.timerIdDIO,
-      TIME_MS,
-      dioPeriod
-   );
+    sendDIO();
 }
 
 /**
@@ -521,7 +540,8 @@ void sendDIO() {
       openqueue_removeAllCreatedBy(COMPONENT_ICMPv6RPL);
       
       // I'm not busy sending a DIO/DAO
-      icmpv6rpl_vars.busySending  = FALSE;
+      icmpv6rpl_vars.busySendingDIO  = FALSE;
+      icmpv6rpl_vars.busySendingDAO  = FALSE;
       
       // stop here
       return;
@@ -533,14 +553,11 @@ void sendDIO() {
    }
    
    // do not send DIO if I'm already busy sending
-   if (icmpv6rpl_vars.busySending==TRUE) {
+   if (icmpv6rpl_vars.busySendingDIO==TRUE) {
       return;
    }
    
    // if you get here, all good to send a DIO
-   
-   // I'm now busy sending
-   icmpv6rpl_vars.busySending = TRUE;
    
    // reserve a free packet buffer for DIO
    msg = openqueue_getFreePacketBuffer(COMPONENT_ICMPv6RPL);
@@ -548,7 +565,6 @@ void sendDIO() {
       openserial_printError(COMPONENT_ICMPv6RPL,ERR_NO_FREE_PACKET_BUFFER,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
-      icmpv6rpl_vars.busySending = FALSE;
       
       return;
    }
@@ -559,6 +575,7 @@ void sendDIO() {
    
    // set transport information
    msg->l4_protocol                         = IANA_ICMPv6;
+   msg->l4_protocol_compressed              = FALSE;
    msg->l4_sourcePortORicmpv6Type           = IANA_ICMPv6_RPL;
    
    // set DIO destination
@@ -584,13 +601,12 @@ void sendDIO() {
    ((ICMPv6_ht*)(msg->payload))->code       = IANA_ICMPv6_RPL_DIO;
    packetfunctions_calculateChecksum(msg,(uint8_t*)&(((ICMPv6_ht*)(msg->payload))->checksum));//call last
    
-   //send
-   if (icmpv6_send(msg)!=E_SUCCESS) {
-      icmpv6rpl_vars.busySending = FALSE;
-      openqueue_freePacketBuffer(msg);
-   } else {
-      icmpv6rpl_vars.busySending = FALSE; 
-   }
+    //send
+    if (icmpv6_send(msg)==E_SUCCESS) {
+        icmpv6rpl_vars.busySendingDIO = TRUE; 
+    } else {
+        openqueue_freePacketBuffer(msg);
+    }
 }
 
 //===== DAO-related
@@ -601,7 +617,7 @@ void sendDIO() {
 \note This function is executed in interrupt context, and should only push a
    task.
 */
-void icmpv6rpl_timer_DAO_cb(opentimer_id_t id) {
+void icmpv6rpl_timer_DAO_cb(opentimers_id_t id) {
    scheduler_push_task(icmpv6rpl_timer_DAO_task,TASKPRIO_RPL);
 }
 
@@ -611,18 +627,7 @@ void icmpv6rpl_timer_DAO_cb(opentimer_id_t id) {
 \note This function is executed in task context, called by the scheduler.
 */
 void icmpv6rpl_timer_DAO_task() {
-   uint32_t        daoPeriod;
-   
-   // send DAO
-   sendDAO();
-   
-   // arm the DAO timer with this new value
-   daoPeriod = icmpv6rpl_vars.daoPeriod - 0x80 + (openrandom_get16b()&0xff);
-   opentimers_setPeriod(
-      icmpv6rpl_vars.timerIdDAO,
-      TIME_MS,
-      daoPeriod
-   );
+    sendDAO();
 }
 
 /**
@@ -642,7 +647,8 @@ void sendDAO() {
       openqueue_removeAllCreatedBy(COMPONENT_ICMPv6RPL);
       
       // I'm not busy sending a DIO/DAO
-      icmpv6rpl_vars.busySending = FALSE;
+      icmpv6rpl_vars.busySendingDAO = FALSE;
+      icmpv6rpl_vars.busySendingDIO = FALSE;
       
       // stop here
       return;
@@ -659,7 +665,7 @@ void sendDAO() {
    }
    
    // dont' send a DAO if you're still busy sending the previous one
-   if (icmpv6rpl_vars.busySending==TRUE) {
+   if (icmpv6rpl_vars.busySendingDAO==TRUE) {
       return;
    }
    
@@ -782,32 +788,21 @@ void sendDAO() {
    
    //===== send
    if (icmpv6_send(msg)==E_SUCCESS) {
-      icmpv6rpl_vars.busySending = TRUE;
+      icmpv6rpl_vars.busySendingDAO = TRUE;
    } else {
       openqueue_freePacketBuffer(msg);
    }
 }
 
 void icmpv6rpl_setDIOPeriod(uint16_t dioPeriod){
-   uint32_t        dioPeriodRandom;
-   
-   icmpv6rpl_vars.dioPeriod = dioPeriod;
-   dioPeriodRandom = icmpv6rpl_vars.dioPeriod - 0x80 + (openrandom_get16b()&0xff);
-   opentimers_setPeriod(
-       icmpv6rpl_vars.timerIdDIO,
-       TIME_MS,
-       dioPeriodRandom
-   );
+    icmpv6rpl_vars.dioPeriod = dioPeriod;
 }
 
 void icmpv6rpl_setDAOPeriod(uint16_t daoPeriod){
-   uint32_t        daoPeriodRandom;
-   
-   icmpv6rpl_vars.daoPeriod = daoPeriod;
-   daoPeriodRandom = icmpv6rpl_vars.daoPeriod - 0x80 + (openrandom_get16b()&0xff);
-   opentimers_setPeriod(
-       icmpv6rpl_vars.timerIdDAO,
-       TIME_MS,
-       daoPeriodRandom
-   );
+    icmpv6rpl_vars.daoPeriod = daoPeriod;
 }
+
+
+
+
+

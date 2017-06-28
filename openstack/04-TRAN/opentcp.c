@@ -4,9 +4,7 @@
 #include "openqueue.h"
 #include "forwarding.h"
 #include "packetfunctions.h"
-#include "bsp_timer.h"
 #include "scheduler.h"
-#include "opentimers.h"
 // applications
 #include "techo.h"
 
@@ -20,7 +18,7 @@ void prependTCPHeader(OpenQueueEntry_t* msg, bool ack, bool push, bool rst, bool
 bool containsControlBits(OpenQueueEntry_t* msg, uint8_t ack, uint8_t rst, uint8_t syn, uint8_t fin);
 void tcp_change_state(uint8_t new_state);
 void opentcp_reset(void);
-void opentcp_timer_cb(opentimer_id_t id);
+void opentcp_timer_cb(void);
 
 //=========================== public ==========================================
 
@@ -608,6 +606,13 @@ bool tcp_debugPrint(void) {
 //timer used to reset state when TCP state machine is stuck
 void timers_tcp_fired(void) {
    opentcp_reset();
+   opentimers_scheduleIn(
+             tcp_vars.timerId,
+             TCP_TIMEOUT,
+             TIME_MS,
+             TIMER_PERIODIC,
+             opentcp_timer_cb
+   );
 }
 
 //=========================== private =========================================
@@ -681,19 +686,27 @@ void tcp_change_state(uint8_t new_tcp_state) {
    tcp_vars.state = new_tcp_state;
    if (tcp_vars.state==TCP_STATE_CLOSED) {
       if (tcp_vars.timerStarted==TRUE) {
-         opentimers_stop(tcp_vars.timerId);
+         opentimers_cancel(tcp_vars.timerId);
       }
    } else {
       if (tcp_vars.timerStarted==FALSE) {
-         tcp_vars.timerId = opentimers_start(TCP_TIMEOUT,
-                                             TIMER_ONESHOT,TIME_MS,
-                                             opentcp_timer_cb);
+         tcp_vars.timerId = opentimers_create();
+         opentimers_scheduleAbsolute(
+             tcp_vars.timerId,
+             TCP_TIMEOUT,
+             opentimers_getValue(),
+             TIME_MS,
+             opentcp_timer_cb
+         );
          tcp_vars.timerStarted=TRUE;
       }
       
    }
 }
 
-void opentcp_timer_cb(opentimer_id_t id) {
+void opentcp_timer_cb(void) {
    scheduler_push_task(timers_tcp_fired,TASKPRIO_TCP_TIMEOUT);
 }
+
+
+
