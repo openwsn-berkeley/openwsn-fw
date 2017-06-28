@@ -45,6 +45,7 @@ void c6t_init() {
    c6t_vars.desc.path1len            = 0;
    c6t_vars.desc.path1val            = NULL;
    c6t_vars.desc.componentID         = COMPONENT_C6T;
+   c6t_vars.desc.securityContext     = NULL;
    c6t_vars.desc.discoverable        = TRUE;
    c6t_vars.desc.callbackRx          = &c6t_receive;
    c6t_vars.desc.callbackSendDone    = &c6t_sendDone;

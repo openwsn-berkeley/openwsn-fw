@@ -49,6 +49,7 @@ void cinfo_init() {
    cinfo_vars.desc.path1len             = 0;
    cinfo_vars.desc.path1val             = NULL;
    cinfo_vars.desc.componentID          = COMPONENT_CINFO;
+   cinfo_vars.desc.securityContext      = NULL;
    cinfo_vars.desc.discoverable         = TRUE;
    cinfo_vars.desc.callbackRx           = &cinfo_receive;
    cinfo_vars.desc.callbackSendDone     = &cinfo_sendDone;

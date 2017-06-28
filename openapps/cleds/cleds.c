@@ -39,6 +39,7 @@ void cleds__init() {
    cleds_vars.desc.path1len            = 0;
    cleds_vars.desc.path1val            = NULL;
    cleds_vars.desc.componentID         = COMPONENT_CLEDS;
+   cleds_vars.desc.securityContext     = NULL;
    cleds_vars.desc.discoverable        = TRUE;
    cleds_vars.desc.callbackRx          = &cleds_receive;
    cleds_vars.desc.callbackSendDone    = &cleds_sendDone;

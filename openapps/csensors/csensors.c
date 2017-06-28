@@ -86,6 +86,7 @@ void csensors_init() {
    csensors_vars.desc.path1len               = 0;
    csensors_vars.desc.path1val               = NULL;
    csensors_vars.desc.componentID            = COMPONENT_CSENSORS;
+   csensors_vars.desc.securityContext        = NULL;
    csensors_vars.desc.discoverable           = TRUE;
    csensors_vars.desc.callbackRx             = &csensors_receive;
    csensors_vars.desc.callbackSendDone       = &csensors_sendDone;

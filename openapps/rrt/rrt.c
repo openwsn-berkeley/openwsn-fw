@@ -57,6 +57,7 @@ void rrt_init() {
    rrt_vars.desc.path1len             = 0;
    rrt_vars.desc.path1val             = NULL;
    rrt_vars.desc.componentID          = COMPONENT_RRT;
+   rrt_vars.desc.securityContext      = NULL;
    rrt_vars.desc.discoverable         = TRUE;
    rrt_vars.desc.callbackRx           = &rrt_receive;
    rrt_vars.desc.callbackSendDone     = &rrt_sendDone;

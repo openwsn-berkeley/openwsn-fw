@@ -46,6 +46,7 @@ void cstorm_init(void) {
    cstorm_vars.desc.path1len              = 0;
    cstorm_vars.desc.path1val              = NULL;
    cstorm_vars.desc.componentID           = COMPONENT_CSTORM;
+   cstorm_vars.desc.securityContext       = NULL;
    cstorm_vars.desc.discoverable          = TRUE;
    cstorm_vars.desc.callbackRx            = &cstorm_receive;
    cstorm_vars.desc.callbackSendDone      = &cstorm_sendDone;
