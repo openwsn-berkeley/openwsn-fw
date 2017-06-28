@@ -75,19 +75,6 @@ void board_reset() {
    WDTCTL = (WDTPW+0x1200) + WDTHOLD; // writing a wrong watchdog password to causes handler to reset
 }
 
-// during startup process before executing main function, 
-// all variables need to be initialized, which may take long time
-// and watchdog may be triggered during this period. 
-// Using __low_level_init to disable the watchdog to avoid this situation.
-int __low_level_init(void)
-{
-  // stop WDT
-  WDTCTL = WDTPW + WDTHOLD;
- 
-  // Perform data segment initialization
-  return 1;
-}
-
 //=========================== private =========================================
 
 //=========================== interrupt handlers ==============================

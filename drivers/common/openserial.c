@@ -630,22 +630,21 @@ void openserial_get6pInfo(uint8_t commandId, uint8_t* code,uint8_t* cellOptions,
 }
 
 void openserial_handleCommands(void){
-    return;
-    /*
-   uint8_t  input_buffer[10];
-   uint8_t  numDataBytes;
-   uint8_t  commandId;
-   uint8_t  commandLen;
-   uint8_t  comandParam_8;
-   uint16_t comandParam_16;
+
+    uint8_t  input_buffer[10];
+    uint8_t  numDataBytes;
+    uint8_t  commandId;
+    uint8_t  commandLen;
+    uint8_t  comandParam_8;
+    uint16_t comandParam_16;
    
     uint8_t  code,cellOptions,numCell,listOffset,maxListLen;
     uint8_t  ptr;
     cellInfo_ht celllist_add[CELLLIST_MAX_LEN];
     cellInfo_ht celllist_delete[CELLLIST_MAX_LEN];
    
-   open_addr_t neighbor;
-   bool        foundNeighbor;
+    open_addr_t neighbor;
+    bool        foundNeighbor;
    
     ptr = 0;
     memset(celllist_add,0,CELLLIST_MAX_LEN*sizeof(cellInfo_ht));
@@ -660,48 +659,48 @@ void openserial_handleCommands(void){
     commandLen = openserial_vars.inputBuf[ptr];
     ptr++;
    
-   switch(commandId) {
-       case COMMAND_SET_EBPERIOD:
+    switch(commandId) {
+        case COMMAND_SET_EBPERIOD:
             comandParam_8 = openserial_vars.inputBuf[ptr];
-           sixtop_setEBPeriod(comandParam_8); // one byte, in seconds
-           break;
-       case COMMAND_SET_CHANNEL:
-           comandParam_8 = openserial_vars.inputBuf[ptr];
-           // set communication channel for protocol stack
-           ieee154e_setSingleChannel(comandParam_8); // one byte
-           // set listening channel for sniffer
-           sniffer_setListeningChannel(comandParam_8); // one byte
-           break;
-       case COMMAND_SET_KAPERIOD: // two bytes, in slots
+            sixtop_setEBPeriod(comandParam_8); // one byte, in seconds
+            break;
+        case COMMAND_SET_CHANNEL:
+            comandParam_8 = openserial_vars.inputBuf[ptr];
+            // set communication channel for protocol stack
+            ieee154e_setSingleChannel(comandParam_8); // one byte
+            // set listening channel for sniffer
+            sniffer_setListeningChannel(comandParam_8); // one byte
+            break;
+        case COMMAND_SET_KAPERIOD: // two bytes, in slots
             comandParam_16 = (openserial_vars.inputBuf[ptr] & 0x00ff) | \
                 ((openserial_vars.inputBuf[ptr+1]<<8) & 0xff00); 
-           sixtop_setKaPeriod(comandParam_16);
-           break;
-       case COMMAND_SET_DIOPERIOD: // two bytes, in mili-seconds
+            sixtop_setKaPeriod(comandParam_16);
+            break;
+        case COMMAND_SET_DIOPERIOD: // two bytes, in mili-seconds
             comandParam_16 = (openserial_vars.inputBuf[ptr] & 0x00ff) | \
                 ((openserial_vars.inputBuf[ptr+1]<<8) & 0xff00); 
-           icmpv6rpl_setDIOPeriod(comandParam_16);
-           break;
-       case COMMAND_SET_DAOPERIOD: // two bytes, in mili-seconds
+            icmpv6rpl_setDIOPeriod(comandParam_16);
+            break;
+        case COMMAND_SET_DAOPERIOD: // two bytes, in mili-seconds
             comandParam_16 = (openserial_vars.inputBuf[ptr] & 0x00ff) | \
                 ((openserial_vars.inputBuf[ptr+1]<<8) & 0xff00); 
-           icmpv6rpl_setDAOPeriod(comandParam_16);
-           break;
-       case COMMAND_SET_DAGRANK: // two bytes
+            icmpv6rpl_setDAOPeriod(comandParam_16);
+            break;
+        case COMMAND_SET_DAGRANK: // two bytes
             comandParam_16 = (openserial_vars.inputBuf[ptr] & 0x00ff) | \
                 ((openserial_vars.inputBuf[ptr+1]<<8) & 0xff00); 
-           icmpv6rpl_setMyDAGrank(comandParam_16);
-           break;
-       case COMMAND_SET_SECURITY_STATUS: // one byte
+            icmpv6rpl_setMyDAGrank(comandParam_16);
+            break;
+        case COMMAND_SET_SECURITY_STATUS: // one byte
             comandParam_8 = openserial_vars.inputBuf[ptr];
             ieee154e_setIsSecurityEnabled(comandParam_8);
                    break;
-       case COMMAND_SET_SLOTFRAMELENGTH: // two bytes
+        case COMMAND_SET_SLOTFRAMELENGTH: // two bytes
             comandParam_16 = (openserial_vars.inputBuf[ptr] & 0x00ff) | \
                 ((openserial_vars.inputBuf[ptr+1]<<8) & 0xff00); 
-           schedule_setFrameLength(comandParam_16);
-           break;
-       case COMMAND_SET_ACK_STATUS:
+            schedule_setFrameLength(comandParam_16);
+            break;
+        case COMMAND_SET_ACK_STATUS:
             comandParam_8 = openserial_vars.inputBuf[ptr];
             ieee154e_setIsAckEnabled(comandParam_8);
                    break;
@@ -734,12 +733,12 @@ void openserial_handleCommands(void){
                 maxListLen         // list command maximum celllist (not used)
             );
             break;
-       case COMMAND_SET_SLOTDURATION:
+        case COMMAND_SET_SLOTDURATION:
             comandParam_16 = (openserial_vars.inputBuf[ptr] & 0x00ff) | \
                 ((openserial_vars.inputBuf[ptr+1]<<8) & 0xff00); 
             ieee154e_setSlotDuration(comandParam_16);
             break;
-       case COMMAND_SET_6PRESPONSE:
+        case COMMAND_SET_6PRESPONSE:
             comandParam_8 = openserial_vars.inputBuf[ptr];
             if (comandParam_8 ==1) {
                sixtop_setIsResponseEnabled(TRUE);
@@ -752,7 +751,7 @@ void openserial_handleCommands(void){
                 }
             }
             break;
-       case COMMAND_SET_UINJECTPERIOD:
+        case COMMAND_SET_UINJECTPERIOD:
             comandParam_8 = openserial_vars.inputBuf[ptr];
             sf0_appPktPeriod(comandParam_8);
             break;
@@ -769,11 +768,10 @@ void openserial_handleCommands(void){
                 }
             }
             break;
-       default:
-           // wrong command ID
-           break;
+        default:
+            // wrong command ID
+            break;
    }
-    */
 }
 
 //===== misc

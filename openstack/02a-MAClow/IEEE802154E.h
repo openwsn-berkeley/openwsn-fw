@@ -217,7 +217,7 @@ enum ieee154e_linkOption_enum {
 #define DURATION_rt7 ieee154e_vars.lastCapturedTime+TsTxAckDelay-delayTx+wdRadioTx
 #define DURATION_rt8 ieee154e_vars.lastCapturedTime+wdAckDuration
 // serialInhibit
-#define DURATION_si  ieee154e_vars.lastCapturedTime+radio_getTimerPeriod()-SERIALINHIBITGUARD
+#define DURATION_si  ieee154e_vars.lastCapturedTime+ieee154e_vars.slotDuration-SERIALINHIBITGUARD
 
 //=========================== typedef =========================================
 

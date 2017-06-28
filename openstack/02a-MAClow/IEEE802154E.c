@@ -2658,17 +2658,17 @@ function should already have been done. If this is not the case, this function
 will do that for you, but assume that something went wrong.
 */
 void endSlot() {
-   // turn off the radio
-   radio_rfOff();
+    // turn off the radio
+    radio_rfOff();
    
-   // compute the duty cycle if radio has been turned on
-   if (ieee154e_vars.radioOnThisSlot==TRUE){  
-      ieee154e_vars.radioOnTics+=(sctimer_readCounter()-ieee154e_vars.radioOnInit);
-   }
+    // compute the duty cycle if radio has been turned on
+    if (ieee154e_vars.radioOnThisSlot==TRUE){  
+        ieee154e_vars.radioOnTics+=(sctimer_readCounter()-ieee154e_vars.radioOnInit);
+    }
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
-   radiotimer_cancel(ACTION_ALL_RADIOTIMER_INTERRUPT);
+    radiotimer_cancel(ACTION_ALL_RADIOTIMER_INTERRUPT);
 #else
-   // clear any pending timer
+    // clear any pending timer
     opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         ieee154e_vars.slotDuration,                       // duration
@@ -2678,84 +2678,90 @@ void endSlot() {
     );
     // radiotimer_cancel();
 #endif
-   // reset capturedTimes
-   ieee154e_vars.lastCapturedTime = 0;
-   ieee154e_vars.syncCapturedTime = 0;
+    // reset capturedTimes
+    ieee154e_vars.lastCapturedTime = 0;
+    ieee154e_vars.syncCapturedTime = 0;
    
-   // compute duty cycle.
-   ieee154e_stats.numTicsOn+=ieee154e_vars.radioOnTics;//accumulate and tics the radio is on for that window
-   ieee154e_stats.numTicsTotal+=ieee154e_vars.slotDuration;//increment total tics by timer period.
+    // compute duty cycle.
+    ieee154e_stats.numTicsOn+=ieee154e_vars.radioOnTics;//accumulate and tics the radio is on for that window
+    ieee154e_stats.numTicsTotal+=ieee154e_vars.slotDuration;//increment total tics by timer period.
 
-   if (ieee154e_stats.numTicsTotal>DUTY_CYCLE_WINDOW_LIMIT){
-      ieee154e_stats.numTicsTotal = ieee154e_stats.numTicsTotal>>1;
-      ieee154e_stats.numTicsOn    = ieee154e_stats.numTicsOn>>1;
-   }
+    if (ieee154e_stats.numTicsTotal>DUTY_CYCLE_WINDOW_LIMIT){
+        ieee154e_stats.numTicsTotal = ieee154e_stats.numTicsTotal>>1;
+        ieee154e_stats.numTicsOn    = ieee154e_stats.numTicsOn>>1;
+    }
    
-   // clear vars for duty cycle on this slot   
-   ieee154e_vars.radioOnTics=0;
-   ieee154e_vars.radioOnThisSlot=FALSE;
+    // clear vars for duty cycle on this slot   
+    ieee154e_vars.radioOnTics=0;
+    ieee154e_vars.radioOnThisSlot=FALSE;
    
-   // clean up dataToSend
-   if (ieee154e_vars.dataToSend!=NULL) {
-      // if everything went well, dataToSend was set to NULL in ti9
-      // getting here means transmit failed
+    // clean up dataToSend
+    if (ieee154e_vars.dataToSend!=NULL) {
+        // if everything went well, dataToSend was set to NULL in ti9
+        // getting here means transmit failed
       
-      // indicate Tx fail to schedule to update stats
-      schedule_indicateTx(&ieee154e_vars.asn,FALSE);
+        // indicate Tx fail to schedule to update stats
+        schedule_indicateTx(&ieee154e_vars.asn,FALSE);
       
-      //decrement transmits left counter
-      ieee154e_vars.dataToSend->l2_retriesLeft--;
+        //decrement transmits left counter
+        ieee154e_vars.dataToSend->l2_retriesLeft--;
       
-      if (ieee154e_vars.dataToSend->l2_retriesLeft==0) {
-         // indicate tx fail if no more retries left
-         notif_sendDone(ieee154e_vars.dataToSend,E_FAIL);
-      } else {
-         // return packet to the virtual COMPONENT_SIXTOP_TO_IEEE802154E component
-         ieee154e_vars.dataToSend->owner = COMPONENT_SIXTOP_TO_IEEE802154E;
-      }
+        if (ieee154e_vars.dataToSend->l2_retriesLeft==0) {
+            // indicate tx fail if no more retries left
+            notif_sendDone(ieee154e_vars.dataToSend,E_FAIL);
+        } else {
+            // return packet to the virtual COMPONENT_SIXTOP_TO_IEEE802154E component
+            ieee154e_vars.dataToSend->owner = COMPONENT_SIXTOP_TO_IEEE802154E;
+        }
       
-      // reset local variable
-      ieee154e_vars.dataToSend = NULL;
-   }
+        // reset local variable
+        ieee154e_vars.dataToSend = NULL;
+    }
    
-   // clean up dataReceived
-   if (ieee154e_vars.dataReceived!=NULL) {
-      // assume something went wrong. If everything went well, dataReceived
-      // would have been set to NULL in ri9.
-      // indicate  "received packet" to upper layer since we don't want to loose packets
-      notif_receive(ieee154e_vars.dataReceived);
-      // reset local variable
-      ieee154e_vars.dataReceived = NULL;
-   }
+    // clean up dataReceived
+    if (ieee154e_vars.dataReceived!=NULL) {
+        // assume something went wrong. If everything went well, dataReceived
+        // would have been set to NULL in ri9.
+        // indicate  "received packet" to upper layer since we don't want to loose packets
+        notif_receive(ieee154e_vars.dataReceived);
+        // reset local variable
+        ieee154e_vars.dataReceived = NULL;
+    }
    
-   // clean up ackToSend
-   if (ieee154e_vars.ackToSend!=NULL) {
-      // free ackToSend so corresponding RAM memory can be recycled
-      openqueue_freePacketBuffer(ieee154e_vars.ackToSend);
-      // reset local variable
-      ieee154e_vars.ackToSend = NULL;
-   }
+    // clean up ackToSend
+    if (ieee154e_vars.ackToSend!=NULL) {
+        // free ackToSend so corresponding RAM memory can be recycled
+        openqueue_freePacketBuffer(ieee154e_vars.ackToSend);
+        // reset local variable
+        ieee154e_vars.ackToSend = NULL;
+    }
    
-   // clean up ackReceived
-   if (ieee154e_vars.ackReceived!=NULL) {
-      // free ackReceived so corresponding RAM memory can be recycled
-      openqueue_freePacketBuffer(ieee154e_vars.ackReceived);
-      // reset local variable
-      ieee154e_vars.ackReceived = NULL;
-   }
+    // clean up ackReceived
+    if (ieee154e_vars.ackReceived!=NULL) {
+        // free ackReceived so corresponding RAM memory can be recycled
+        openqueue_freePacketBuffer(ieee154e_vars.ackReceived);
+        // reset local variable
+        ieee154e_vars.ackReceived = NULL;
+    }
    
-   // change state
-   changeState(S_SLEEP);
+    // change state
+    changeState(S_SLEEP);
    
-   // arm serialInhibit timer (if we are still BEFORE DURATION_si)
-   if (ieee154e_vars.isSync==TRUE) {
-       radiotimer_schedule(DURATION_si);
-   }
+    // arm serialInhibit timer (if we are still BEFORE DURATION_si)
+    if (ieee154e_vars.isSync==TRUE) {
+        opentimers_scheduleAbsolute(
+            ieee154e_vars.timerId,                  // timerId
+            DURATION_si,                            // duration
+            ieee154e_vars.startOfSlotReference,     // reference
+            TIME_TICS,                              // timetype
+            isr_ieee154e_timer                      // callback
+        );
+    }
    
-   // resume serial activity (if we are still BEFORE DURATION_si)
-   if (radio_getTimerValue()<DURATION_si) {
-      openserial_inhibitStop(); // end of slot
-   }
+    // resume serial activity (if we are still BEFORE DURATION_si)
+    if (opentimers_getValue()<DURATION_si) {
+        openserial_inhibitStop(); // end of slot
+    }
 }
 
 bool ieee154e_isSynch(){
