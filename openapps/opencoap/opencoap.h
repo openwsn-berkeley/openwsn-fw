@@ -150,7 +150,7 @@ typedef struct {
 
 typedef struct {
    uint32_t              bitArray;
-   uint16_t              base;
+   uint16_t              rightEdge;
 } replay_window_t;
 
 typedef struct {

@@ -53,6 +53,7 @@ void xor_arrays(uint8_t* s1, uint8_t* s2, uint8_t* dst, uint8_t len);
 void flip_first_bit(uint8_t* source, uint8_t* dst, uint8_t len);
 
 bool replay_window_check(oscoap_security_context_t *context, uint16_t sequenceNumber);
+void replay_window_update(oscoap_security_context_t *context, uint16_t sequenceNumber);
 
 uint8_t openoscoap_convert_sequence_number(uint16_t sequenceNumber, uint8_t** buffer); 
 //=========================== public ==========================================
@@ -148,8 +149,8 @@ void openoscoap_init_security_context(oscoap_security_context_t *ctx,
             OSCOAP_DERIVATION_TYPE_IV,
             AES_CCM_16_64_128_IV_LEN);
  
-    ctx->window.bitArray = 0;
-    ctx->window.base = 0;
+    ctx->window.bitArray = 0x01; // LSB set
+    ctx->window.rightEdge = 0;
 
 }
 
@@ -385,6 +386,10 @@ owerror_t openoscoap_unprotect_message(
         return E_FAIL;
     }
 
+    if (is_request(code)) {
+        replay_window_update(context, sequenceNumber);
+    }
+
     if (payloadInObjSec) {
         opencoap_options_parse(objectSecurity->pValue, objectSecurity->length, options, optionsLen);
     }
@@ -613,7 +618,51 @@ void flip_first_bit(uint8_t* source, uint8_t* dst, uint8_t len){
 }
 
 bool replay_window_check(oscoap_security_context_t *context, uint16_t sequenceNumber) {
+    uint16_t delta;
+    
+    // packets lower than the left edge are rejected
+    if ((int)sequenceNumber < (int)(context->window.rightEdge - 31)) {
+        return FALSE;
+    }
+ 
+    // packets higher than the right edge are accepted
+    if (sequenceNumber > context->window.rightEdge) {
+        return TRUE;
+    }
+
+    // packet falls within the window, check if appropriate bit is set
+    delta = context->window.rightEdge - sequenceNumber;
+    if ((uint32_t)(1 << delta) & context->window.bitArray) {
+        return FALSE;
+    }
+
     return TRUE;
+}
+
+void replay_window_update(oscoap_security_context_t *context, uint16_t sequenceNumber) {
+    uint16_t delta;
+
+    if (replay_window_check(context, sequenceNumber) == FALSE) {
+        return;
+    }
+    
+    if (sequenceNumber > context->window.rightEdge) {
+        delta = sequenceNumber - context->window.rightEdge;
+        context->window.rightEdge = sequenceNumber;
+        if (delta < 32) {
+            context->window.bitArray = context->window.bitArray << delta;
+        }
+        else {
+            context->window.bitArray = 0x00;
+        }
+        context->window.bitArray |= 1; // update the right edge bit
+    }
+    else {
+        delta = context->window.rightEdge - sequenceNumber;
+        if (delta < 32) {
+            context->window.bitArray |= 1 << delta;
+        }
+    }
 }
 
 uint8_t openoscoap_convert_sequence_number(uint16_t sequenceNumber, uint8_t** buffer) {
