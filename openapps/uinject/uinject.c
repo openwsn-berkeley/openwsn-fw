@@ -19,7 +19,7 @@ static const uint8_t uinject_dst_addr[]   = {
 
 //=========================== prototypes ======================================
 
-void uinject_timer_cb(void);
+void uinject_timer_cb(opentimers_id_t id);
 void uinject_task_cb(void);
 
 //=========================== public ==========================================
@@ -69,7 +69,7 @@ void uinject_receive(OpenQueueEntry_t* pkt) {
 \note timer fired, but we don't want to execute task in ISR mode instead, push
    task to scheduler with CoAP priority, and let scheduler take care of it.
 */
-void uinject_timer_cb(void){
+void uinject_timer_cb(opentimers_id_t id){
    
    scheduler_push_task(uinject_task_cb,TASKPRIO_COAP);
 }

@@ -36,7 +36,7 @@
 #define MAX_DURATION_ISR           33 // 33@32768Hz = 1ms
 #define opentimers_id_t            uint8_t
 
-typedef void (*opentimers_cbt)(void);
+typedef void (*opentimers_cbt)(opentimers_id_t id);
 
 //=========================== typedef =========================================
 

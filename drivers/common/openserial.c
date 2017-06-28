@@ -45,7 +45,7 @@ void openserial_get6pInfo(uint8_t commandId, uint8_t* code,uint8_t* cellOptions,
 void openserial_handleCommands(void);
 
 // misc
-void openserial_board_reset_cb(void);
+void openserial_board_reset_cb(opentimers_id_t id);
 
 // HDLC output
 void outputHdlcOpen(void);
@@ -777,7 +777,7 @@ void openserial_handleCommands(void){
 
 //===== misc
 
-void openserial_board_reset_cb(void) {
+void openserial_board_reset_cb(opentimers_id_t id) {
     board_reset();
 }
 
