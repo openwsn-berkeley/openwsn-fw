@@ -24,6 +24,11 @@ void opencoap_header_encode(OpenQueueEntry_t *msg,
         uint16_t messageID, 
         uint8_t *token); 
 
+void opencoap_handle_proxy_scheme(OpenQueueEntry_t *msg,
+        coap_header_iht* header,
+        coap_option_iht* incomingOptions, 
+        uint8_t incomingOptionsLen); 
+
 //=========================== public ==========================================
 
 //===== from stack
@@ -70,6 +75,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    uint8_t                   coap_outgoingOptionsLen;
    owerror_t                 decStatus;
    coap_option_iht*          objectSecurity;
+   coap_option_iht*          proxyScheme;
    uint16_t                  rcvdSequenceNumber;
    uint8_t*                  rcvdKid;
    uint8_t                   rcvdKidLen;
@@ -126,6 +132,13 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    packetfunctions_tossHeader(msg,index);
 
    // process handled options
+   //== Proxy Scheme option
+   proxyScheme = opencoap_find_option(coap_incomingOptions, coap_incomingOptionsLen, COAP_OPTION_NUM_PROXYSCHEME);
+   if (proxyScheme) {
+        opencoap_handle_proxy_scheme(msg, &coap_header, coap_incomingOptions, coap_incomingOptionsLen);
+        return;
+   }
+
 
    //== Object Security Option
    objectSecurity = opencoap_find_option(coap_incomingOptions, coap_incomingOptionsLen, COAP_OPTION_NUM_OBJECTSECURITY);
@@ -890,6 +903,101 @@ uint8_t opencoap_options_parse(
     }
     *optionsLen = numOptions;
     return index;
+}
+
+void opencoap_handle_proxy_scheme(OpenQueueEntry_t *msg,
+        coap_header_iht* header,
+        coap_option_iht* incomingOptions, 
+        uint8_t incomingOptionsLen) {
+   
+    uint8_t i;
+    OpenQueueEntry_t* outgoingPacket;
+    coap_option_iht outgoingOptions[MAX_COAP_OPTIONS];
+    uint8_t outgoingOptionsLen;
+    coap_option_iht *uriHost;
+    coap_option_iht *proxyScheme;
+    const uint8_t proxySchemeCoap[] = "coap";
+    const uint8_t uriHost6tisch[] = "6tisch.arpa";
+
+    // verify that Proxy Scheme is set to coap
+    proxyScheme = opencoap_find_option(incomingOptions, incomingOptionsLen, COAP_OPTION_NUM_PROXYSCHEME);
+    if (memcmp(proxySchemeCoap, proxyScheme->pValue, sizeof(proxySchemeCoap)-1) != 0) {
+        openqueue_freePacketBuffer(msg);
+        return;
+    }
+
+    // verify that UriHost is set to "6tisch.arpa"
+    uriHost = opencoap_find_option(incomingOptions, incomingOptionsLen, COAP_OPTION_NUM_URIHOST);
+    if (uriHost) {
+        if (memcmp(uriHost6tisch, uriHost->pValue, sizeof(uriHost6tisch)-1) != 0) {
+            openqueue_freePacketBuffer(msg);
+            return;
+        }
+    }
+    else {
+        openqueue_freePacketBuffer(msg);
+        return;
+    }
+
+    outgoingOptionsLen = 0;
+   
+    outgoingPacket = openqueue_getFreePacketBuffer(COMPONENT_OPENCOAP);
+    if (outgoingPacket==NULL) {
+        openserial_printError(
+                COMPONENT_OPENCOAP,
+                ERR_NO_FREE_PACKET_BUFFER,
+                (errorparameter_t)0,
+                (errorparameter_t)0
+        );
+      openqueue_freePacketBuffer(outgoingPacket);
+      openqueue_freePacketBuffer(msg);
+      return;
+    }
+
+    // take ownership over that packet and set destination IP and port
+    outgoingPacket->creator                   = COMPONENT_OPENCOAP;
+    outgoingPacket->owner                     = COMPONENT_OPENCOAP;
+    outgoingPacket->l4_destination_port       = WKP_UDP_COAP;
+    outgoingPacket->l3_destinationAdd.type    = ADDR_128B;
+    memcpy(&outgoingPacket->l3_destinationAdd.addr_128b[0],ipAddr_jce,16);
+
+   // fill in packet metadata
+   outgoingPacket->l4_sourcePortORicmpv6Type   = WKP_UDP_COAP;
+ 
+
+    // fill payload
+    packetfunctions_reserveHeaderSize(outgoingPacket,msg->length);
+    memcpy(outgoingPacket->payload, msg->payload, msg->length);
+
+    // process options
+    for (i = 0; i < incomingOptionsLen; i++) {
+        if (incomingOptions[i].type == COAP_OPTION_NUM_PROXYSCHEME ||
+                incomingOptions[i].type == COAP_OPTION_NUM_URIHOST) {
+            continue;
+        }
+        outgoingOptions[outgoingOptionsLen].type = incomingOptions[i].type;
+        outgoingOptions[outgoingOptionsLen].length = incomingOptions[i].length;
+        outgoingOptions[outgoingOptionsLen].pValue = incomingOptions[i].pValue;
+        outgoingOptionsLen++;
+    }
+
+    // encode options
+    opencoap_options_encode(outgoingPacket, outgoingOptions, outgoingOptionsLen, COAP_OPTION_CLASS_ALL);
+  
+    // encode CoAP header
+    opencoap_header_encode(outgoingPacket,
+            header->Ver,
+            header->T,
+            header->TKL,
+            header->Code,
+            header->messageID,
+            header->token);
+   
+     openqueue_freePacketBuffer(msg);
+    
+    if ((openudp_send(outgoingPacket))==E_FAIL) {
+      openqueue_freePacketBuffer(outgoingPacket);
+    }
 }
 
 void opencoap_header_encode(OpenQueueEntry_t *msg, 
