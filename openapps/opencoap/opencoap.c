@@ -16,6 +16,14 @@
 opencoap_vars_t opencoap_vars;
 
 //=========================== prototype =======================================
+void opencoap_header_encode(OpenQueueEntry_t *msg, 
+        uint8_t version, 
+        coap_type_t type, 
+        uint8_t TKL, 
+        coap_code_t code, 
+        uint16_t messageID, 
+        uint8_t *token); 
+
 //=========================== public ==========================================
 
 //===== from stack
@@ -411,14 +419,13 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    memcpy(&msg->l3_destinationAdd.addr_128b[0],&msg->l3_sourceAdd.addr_128b[0],LENGTH_ADDR128b);
    
    // fill in CoAP header
-   packetfunctions_reserveHeaderSize(msg,4+coap_header.TKL);
-   msg->payload[0]                  = (COAP_VERSION    << 6) |
-                                      (response_type   << 4) |
-                                      (coap_header.TKL << 0);
-   msg->payload[1]                  = coap_header.Code;
-   msg->payload[2]                  = coap_header.messageID/256;
-   msg->payload[3]                  = coap_header.messageID%256;
-   memcpy(&msg->payload[4], &coap_header.token[0], coap_header.TKL);
+   opencoap_header_encode(msg, 
+           COAP_VERSION, 
+           response_type, 
+           coap_header.TKL, 
+           coap_header.Code, 
+           coap_header.messageID, 
+           &coap_header.token[0]);
    
    if ((openudp_send(msg))==E_FAIL) {
       openqueue_freePacketBuffer(msg);
@@ -646,16 +653,8 @@ owerror_t opencoap_send(
            class);
 
    // pre-pend CoAP header (version,type,TKL,code,messageID,Token)
-   packetfunctions_reserveHeaderSize(msg,4+request->TKL);
-   msg->payload[0]                  = (COAP_VERSION   << 6) |
-                                      (type           << 4) |
-                                      (request->TKL   << 0);
-   msg->payload[1]                  = code;
-   msg->payload[2]                  = (request->messageID>>8) & 0xff;
-   msg->payload[3]                  = (request->messageID>>0) & 0xff;
+   opencoap_header_encode(msg, COAP_VERSION, type, request->TKL, code, request->messageID, request->token);
 
-   memcpy(&msg->payload[4],&token,request->TKL);
-   
    return openudp_send(msg);
 }
 
@@ -893,4 +892,22 @@ uint8_t opencoap_options_parse(
     return index;
 }
 
+void opencoap_header_encode(OpenQueueEntry_t *msg, 
+        uint8_t version, 
+        coap_type_t type, 
+        uint8_t TKL, 
+        coap_code_t code, 
+        uint16_t messageID, 
+        uint8_t *token) {
+   // pre-pend CoAP header (version,type,TKL,code,messageID,Token)
+   packetfunctions_reserveHeaderSize(msg,4+TKL);
+   msg->payload[0]                  = (version        << 6) |
+                                      (type           << 4) |
+                                      (TKL            << 0);
+   msg->payload[1]                  = code;
+   msg->payload[2]                  = (messageID>>8) & 0xff;
+   msg->payload[3]                  = (messageID>>0) & 0xff;
+
+   memcpy(&msg->payload[4],token,TKL);
+}
 
