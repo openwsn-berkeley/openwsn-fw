@@ -54,6 +54,9 @@ static const uint8_t ipAddr_ringmaster[] = {0xbb, 0xbb, 0x00, 0x00, 0x00, 0x00, 
 
 #define AES_CCM_16_64_128_TAG_LEN      8
 
+#define STATELESS_PROXY_STATE_LEN      1 + 16 + 2 // seq no, ipv6 address, port number
+#define STATELESS_PROXY_TAG_LEN        4
+
 typedef enum {
    COAP_TYPE_CON                       = 0,
    COAP_TYPE_NON                       = 1,
@@ -111,6 +114,7 @@ typedef enum {
    COAP_OPTION_NUM_PROXYURI            = 35,
    COAP_OPTION_NUM_PROXYSCHEME         = 39,
    COAP_OPTION_NUM_OBJECTSECURITY      = 21,
+   COAP_OPTION_NUM_STATELESSPROXY      = 40,
 } coap_option_t;
 
 typedef enum {
@@ -194,14 +198,22 @@ struct coap_resource_desc_t {
    coap_resource_desc_t*        next;
 };
 
+typedef struct { 
+   uint8_t               key[16];
+   uint8_t               buffer[STATELESS_PROXY_STATE_LEN + STATELESS_PROXY_TAG_LEN];
+   uint8_t               sequenceNumber;
+} coap_statelessproxy_vars_t;
+
 //=========================== module variables ================================
 
 typedef struct {
-   udp_resource_desc_t   desc;
-   coap_resource_desc_t* resources;
-   bool                  busySending;
-   uint8_t               delayCounter;
-   uint16_t              messageID;
+   udp_resource_desc_t          desc;
+   coap_resource_desc_t*        resources;
+   bool                         busySending;
+   uint8_t                      delayCounter;
+   uint16_t                     messageID;
+   open_addr_t                  JRCaddress;
+   coap_statelessproxy_vars_t   statelessProxy;
 } opencoap_vars_t;
 
 //=========================== prototypes ======================================

@@ -8,6 +8,7 @@
 #include "idmanager.h"
 #include "opentimers.h"
 #include "scheduler.h"
+#include "cryptoengine.h"
 
 //=========================== defines =========================================
 
@@ -29,6 +30,10 @@ void opencoap_handle_proxy_scheme(OpenQueueEntry_t *msg,
         coap_option_iht* incomingOptions, 
         uint8_t incomingOptionsLen); 
 
+void opencoap_add_stateless_proxy_option(coap_option_iht* option, 
+        uint8_t* address, 
+        uint8_t addressLen, 
+        uint16_t portNumber);
 //=========================== public ==========================================
 
 //===== from stack
@@ -37,11 +42,31 @@ void opencoap_handle_proxy_scheme(OpenQueueEntry_t *msg,
 \brief Initialize this module.
 */
 void opencoap_init() {
+   uint16_t rand;
+   uint8_t pos;
+
+   pos = 0;
+
    // initialize the resource linked list
    opencoap_vars.resources     = NULL;
    
    // initialize the messageID
    opencoap_vars.messageID     = openrandom_get16b();
+
+   // initialize the JRC address
+   opencoap_vars.JRCaddress.type = ADDR_128B;
+   memcpy(opencoap_vars.JRCaddress.addr_128b, ipAddr_jce, 16);
+
+   // stateless proxy vars
+   
+   //generate a key at random
+   while (pos<16) {
+       rand = openrandom_get16b();
+       memcpy(&opencoap_vars.statelessProxy.key[pos],&rand,2);
+       pos+=2;
+   }
+   // init sequence number to zero
+   opencoap_vars.statelessProxy.sequenceNumber = 0;
 
    // register at UDP stack
    opencoap_vars.desc.port              = WKP_UDP_COAP;
@@ -959,11 +984,10 @@ void opencoap_handle_proxy_scheme(OpenQueueEntry_t *msg,
     outgoingPacket->owner                     = COMPONENT_OPENCOAP;
     outgoingPacket->l4_destination_port       = WKP_UDP_COAP;
     outgoingPacket->l3_destinationAdd.type    = ADDR_128B;
-    memcpy(&outgoingPacket->l3_destinationAdd.addr_128b[0],ipAddr_jce,16);
+    memcpy(outgoingPacket->l3_destinationAdd.addr_128b,opencoap_vars.JRCaddress.addr_128b,16);
 
-   // fill in packet metadata
-   outgoingPacket->l4_sourcePortORicmpv6Type   = WKP_UDP_COAP;
- 
+    // fill in source port number
+    outgoingPacket->l4_sourcePortORicmpv6Type = WKP_UDP_COAP;
 
     // fill payload
     packetfunctions_reserveHeaderSize(outgoingPacket,msg->length);
@@ -980,6 +1004,11 @@ void opencoap_handle_proxy_scheme(OpenQueueEntry_t *msg,
         outgoingOptions[outgoingOptionsLen].pValue = incomingOptions[i].pValue;
         outgoingOptionsLen++;
     }
+
+    opencoap_add_stateless_proxy_option(&outgoingOptions[outgoingOptionsLen++], 
+        msg->l3_sourceAdd.addr_128b,
+        16, 
+        msg->l4_sourcePortORicmpv6Type); 
 
     // encode options
     opencoap_options_encode(outgoingPacket, outgoingOptions, outgoingOptionsLen, COAP_OPTION_CLASS_ALL);
@@ -1019,3 +1048,44 @@ void opencoap_header_encode(OpenQueueEntry_t *msg,
    memcpy(&msg->payload[4],token,TKL);
 }
 
+void opencoap_add_stateless_proxy_option(coap_option_iht* option, 
+        uint8_t* address, 
+        uint8_t addressLen, 
+        uint16_t portNumber) {
+    uint8_t lenm;
+    uint8_t nonce[13];
+    owerror_t outStatus;
+    
+    lenm = 0;
+    opencoap_vars.statelessProxy.sequenceNumber++;
+    
+    // first byte is sequence number, authenticated but not encrypted
+    opencoap_vars.statelessProxy.buffer[0] = opencoap_vars.statelessProxy.sequenceNumber;
+
+    // next bytes are address
+    memcpy(&opencoap_vars.statelessProxy.buffer[1], address, addressLen);
+    lenm += addressLen;
+    memcpy(&opencoap_vars.statelessProxy.buffer[lenm+1], &portNumber, 2);
+    lenm += 2;
+
+    memset(nonce, 0x00, 13);
+    nonce[12] = opencoap_vars.statelessProxy.sequenceNumber;
+    outStatus = cryptoengine_aes_ccms_enc(&opencoap_vars.statelessProxy.buffer[0],
+                                            1,
+                                            &opencoap_vars.statelessProxy.buffer[1],
+                                            &lenm,
+                                            nonce,
+                                            2, // L=2 -> 13 byte nonce
+                                            opencoap_vars.statelessProxy.key,
+                                            STATELESS_PROXY_TAG_LEN);
+    if (outStatus != E_SUCCESS) {
+        option->type = COAP_OPTION_NONE;
+        option->length = 0;
+        option->pValue = NULL;
+        return;
+    }
+
+    option->type = COAP_OPTION_NUM_STATELESSPROXY;
+    option->length = lenm+1; // +1 for sequence number, includes the authentication tag
+    option->pValue = opencoap_vars.statelessProxy.buffer;
+}
