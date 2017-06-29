@@ -39,6 +39,7 @@ static const uint8_t proxyScheme[] = "coap";
 cjoin_vars_t cjoin_vars;
 
 //=========================== prototypes ======================================
+void cjoin_init_security_context();
 
 owerror_t cjoin_receive(OpenQueueEntry_t* msg,
         coap_header_iht*  coap_header,
@@ -58,10 +59,6 @@ void cjoin_setIsJoined(bool newValue);
 //=========================== public ==========================================
 
 void cjoin_init() {
-   
-   uint8_t senderID[9];     // needs to hold EUI-64 + 1 byte
-   uint8_t recipientID[9];  // needs to hold EUI-64 + 1 byte
-   
    // prepare the resource descriptor for the /j path
    cjoin_vars.desc.path0len                        = sizeof(cjoin_path0)-1;
    cjoin_vars.desc.path0val                        = (uint8_t*)(&cjoin_path0);
@@ -81,27 +78,35 @@ void cjoin_init() {
 
    cjoin_vars.timerId = opentimers_create();
 
+   memcpy(cjoin_vars.joinKey, masterSecret, sizeof(cjoin_vars.joinKey));
+   cjoin_init_security_context();
+
+   cjoin_schedule();
+}
+
+void cjoin_init_security_context() {
+   uint8_t senderID[9];     // needs to hold EUI-64 + 1 byte
+   uint8_t recipientID[9];  // needs to hold EUI-64 + 1 byte
+
    eui64_get(senderID);
    senderID[8] = 0x00;      // construct sender ID according to the minimal-security-03 draft
    eui64_get(recipientID);
    recipientID[8] = 0x01; // construct recipient ID according to the minimal-security-03 draft
    
    openoscoap_init_security_context(&cjoin_vars.context, 
-                                (uint8_t*) senderID, 
+                                senderID, 
                                 sizeof(senderID),
-                                (uint8_t*) recipientID,
+                                recipientID,
                                 sizeof(recipientID),
-                                (uint8_t*) masterSecret,
-                                sizeof(masterSecret),
+                                cjoin_vars.joinKey,
+                                sizeof(cjoin_vars.joinKey),
                                 NULL,
                                 0);
-   cjoin_schedule();
 }
-
-
 
 void cjoin_setJoinKey(uint8_t *key, uint8_t len) {
    memcpy(cjoin_vars.joinKey, key, len);
+   cjoin_init_security_context();
 }
 
 void cjoin_schedule() {
