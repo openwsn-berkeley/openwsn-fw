@@ -15,7 +15,7 @@ OpenQueueEntry_t req;
 
 //=========================== prototypes ======================================
 
-void uexpiration_timer_cb(void);
+void uexpiration_timer_cb(opentimers_id_t id);
 void uexpiration_task_cb(void);
 
 //=========================== public ==========================================
@@ -80,7 +80,7 @@ void uexpiration_receive(OpenQueueEntry_t* request) {
    );
 }
 
-void uexpiration_timer_cb(void){   
+void uexpiration_timer_cb(opentimers_id_t id){   
    scheduler_push_task(uexpiration_task_cb,TASKPRIO_COAP);
 }
 

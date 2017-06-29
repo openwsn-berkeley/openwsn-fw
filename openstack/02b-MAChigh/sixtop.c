@@ -35,9 +35,9 @@ owerror_t     sixtop_send_internal(
 );
 
 // timer interrupt callbacks
-void          sixtop_maintenance_timer_cb(void);
-void          sixtop_timeout_timer_cb(void);
-void          sixtop_sendingEb_timer_cb(void);
+void          sixtop_maintenance_timer_cb(opentimers_id_t id);
+void          sixtop_timeout_timer_cb(opentimers_id_t id);
+void          sixtop_sendingEb_timer_cb(opentimers_id_t id);
 
 //=== EB/KA task
 
@@ -615,7 +615,7 @@ owerror_t sixtop_send_internal(
 }
 
 // timer interrupt callbacks
-void sixtop_sendingEb_timer_cb(void){
+void sixtop_sendingEb_timer_cb(opentimers_id_t id){
     scheduler_push_task(timer_sixtop_sendEb_fired,TASKPRIO_SIXTOP);
     // update the period
     sixtop_vars.periodMaintenance  = 872 +(openrandom_get16b()&0xff);
@@ -628,11 +628,11 @@ void sixtop_sendingEb_timer_cb(void){
     );
 }
 
-void sixtop_maintenance_timer_cb(void) {
+void sixtop_maintenance_timer_cb(opentimers_id_t id) {
     scheduler_push_task(timer_sixtop_management_fired,TASKPRIO_SIXTOP);
 }
 
-void sixtop_timeout_timer_cb(void) {
+void sixtop_timeout_timer_cb(opentimers_id_t id) {
     scheduler_push_task(timer_sixtop_six2six_timeout_fired,TASKPRIO_SIXTOP_TIMEOUT);
 }
 
@@ -903,7 +903,7 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
                 SIX2SIX_TIMEOUT_MS,
                 opentimers_getValue(),
                 TIME_MS,
-                timer_sixtop_six2six_timeout_fired
+                sixtop_timeout_timer_cb
             );
         }
     }
@@ -1299,7 +1299,7 @@ void sixtop_six2six_notifyReceive(
                         }
                     }
                 } else {
-                    returnCode = IANA_6TOP_RC_RESET;
+                    returnCode = IANA_6TOP_RC_CELLLIST_ERR;
                 }
                 break;
             }
