@@ -120,7 +120,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    // process handled options
 
    //== Object Security Option
-   objectSecurity = opencoap_find_object_security_option(coap_incomingOptions, coap_incomingOptionsLen);
+   objectSecurity = opencoap_find_option(coap_incomingOptions, coap_incomingOptionsLen, COAP_OPTION_NUM_OBJECTSECURITY);
    if (objectSecurity) {
        if ((objectSecurity->length == 0 && msg->length == 0) ||
                (objectSecurity->length != 0 && msg->length != 0)) {
@@ -789,7 +789,7 @@ owerror_t opencoap_options_encode(
     return E_SUCCESS;
 }
 
-coap_option_iht* opencoap_find_object_security_option(coap_option_iht* array, uint8_t arrayLen) {
+coap_option_iht* opencoap_find_option(coap_option_iht* array, uint8_t arrayLen, coap_option_t option) {
     uint8_t i;
 
     if (array == NULL || arrayLen == 0) {
@@ -797,7 +797,7 @@ coap_option_iht* opencoap_find_object_security_option(coap_option_iht* array, ui
     }
 
     for (i = 0; i < arrayLen; i++) {
-        if (array[i].type == COAP_OPTION_NUM_OBJECTSECURITY) {
+        if (array[i].type == option) {
             return &array[i];
         }
     }

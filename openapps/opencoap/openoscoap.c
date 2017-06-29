@@ -178,7 +178,7 @@ owerror_t openoscoap_protect_message(
     bool payloadPresent;
 
     // find object security option in the list of passed options
-    objectSecurity = opencoap_find_object_security_option(options, optionsLen);
+    objectSecurity = opencoap_find_option(options, optionsLen, COAP_OPTION_NUM_OBJECTSECURITY);
     if (objectSecurity == NULL) { // objectSecurity option should be set by the application
         return E_FAIL;
     }
@@ -306,7 +306,7 @@ owerror_t openoscoap_unprotect_message(
     uint8_t index;
 
     // find object security option in the list of passed options
-    objectSecurity = opencoap_find_object_security_option(options, *optionsLen);
+    objectSecurity = opencoap_find_option(options, *optionsLen, COAP_OPTION_NUM_OBJECTSECURITY);
     if (objectSecurity == NULL) { // return FAIL if object security option is not present
         return E_FAIL;
     }

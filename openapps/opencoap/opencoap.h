@@ -234,7 +234,7 @@ uint8_t opencoap_options_parse(uint8_t* buffer,
     uint8_t bufferLen,
     coap_option_iht* options,
     uint8_t* optionsLen);
-coap_option_iht* opencoap_find_object_security_option(coap_option_iht* array, uint8_t arrayLen); 
+coap_option_iht* opencoap_find_option(coap_option_iht* array, uint8_t arrayLen, coap_option_t option); 
 
 /**
 \}
