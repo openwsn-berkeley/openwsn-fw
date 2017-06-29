@@ -30,6 +30,10 @@ static const uint8_t ipAddr_jce[] = {0xbb, 0xbb, 0x00, 0x00, 0x00, 0x00, 0x00, 0
 static const uint8_t masterSecret[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, \
                                      0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
 
+static const uint8_t jrcHostName[] = "6tisch.arpa";
+
+static const uint8_t proxyScheme[] = "coap";
+
 //=========================== variables =======================================
 
 cjoin_vars_t cjoin_vars;
@@ -228,15 +232,25 @@ owerror_t cjoin_sendJoinRequest(void) {
    pkt->creator                   = COMPONENT_CJOIN;
    pkt->owner                     = COMPONENT_CJOIN;
 
+   // uri-host set to 6tisch.arpa
+   options[0].type = COAP_OPTION_NUM_URIHOST;
+   options[0].length = sizeof(jrcHostName)-1;
+   options[0].pValue = (uint8_t *)jrcHostName;
+   
    // location-path option
-   options[0].type = COAP_OPTION_NUM_URIPATH;
-   options[0].length = sizeof(cjoin_path0)-1;
-   options[0].pValue = (uint8_t *)cjoin_path0;
+   options[1].type = COAP_OPTION_NUM_URIPATH;
+   options[1].length = sizeof(cjoin_path0)-1;
+   options[1].pValue = (uint8_t *)cjoin_path0;
 
    // object security option
    // length and value are set by the CoAP library
-   options[1].type = COAP_OPTION_NUM_OBJECTSECURITY;
+   options[2].type = COAP_OPTION_NUM_OBJECTSECURITY;
 
+   // ProxyScheme set to "coap"
+   options[3].type = COAP_OPTION_NUM_PROXYSCHEME;
+   options[3].length = sizeof(proxyScheme)-1;
+   options[3].pValue = (uint8_t *)proxyScheme;
+ 
    // metadata
    pkt->l4_destination_port       = WKP_UDP_COAP;
    pkt->l3_destinationAdd.type    = ADDR_128B;
@@ -249,7 +263,7 @@ owerror_t cjoin_sendJoinRequest(void) {
       COAP_CODE_REQ_GET,
       1, // token len
       options,
-      2, // options len
+      4, // options len
       &cjoin_vars.desc
    );
    
