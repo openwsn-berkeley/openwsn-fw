@@ -1008,50 +1008,6 @@ void opencoap_handle_proxy_scheme(OpenQueueEntry_t *msg,
     opencoap_forward_message(msg, header, outgoingOptions, outgoingOptionsLen, &opencoap_vars.JRCaddress, WKP_UDP_COAP);  
 }
 
-void opencoap_header_encode(OpenQueueEntry_t *msg, 
-        uint8_t version, 
-        coap_type_t type, 
-        uint8_t TKL, 
-        coap_code_t code, 
-        uint16_t messageID, 
-        uint8_t *token) {
-   // pre-pend CoAP header (version,type,TKL,code,messageID,Token)
-   packetfunctions_reserveHeaderSize(msg,4+TKL);
-   msg->payload[0]                  = (version        << 6) |
-                                      (type           << 4) |
-                                      (TKL            << 0);
-   msg->payload[1]                  = code;
-   msg->payload[2]                  = (messageID>>8) & 0xff;
-   msg->payload[3]                  = (messageID>>0) & 0xff;
-
-   memcpy(&msg->payload[4],token,TKL);
-}
-
-void opencoap_add_stateless_proxy_option(coap_option_iht* option, 
-        uint8_t* address, 
-        uint8_t addressLen, 
-        uint16_t portNumber) {
-    uint8_t len;
-
-    // FIXME due to the lack of space in the 802.15.4 frame
-    // we do not encrypt and authenticate the Stateless-Proxy state
-    
-    len = 0;
-    
-    // next bytes are address
-    memcpy(&opencoap_vars.statelessProxy.buffer[len], address, addressLen);
-    len += addressLen;
-
-    if (portNumber != WKP_UDP_COAP) {
-        packetfunctions_htons(portNumber, &opencoap_vars.statelessProxy.buffer[len]);
-        len += 2;
-    }
-
-    option->type = COAP_OPTION_NUM_STATELESSPROXY;
-    option->length = len;
-    option->pValue = opencoap_vars.statelessProxy.buffer;
-}
-
 void opencoap_handle_stateless_proxy(OpenQueueEntry_t *msg,
         coap_header_iht* header,
         coap_option_iht* incomingOptions, 
@@ -1104,6 +1060,50 @@ void opencoap_handle_stateless_proxy(OpenQueueEntry_t *msg,
     }
 
     opencoap_forward_message(msg, header, outgoingOptions, outgoingOptionsLen, &destIP, portNumber);  
+}
+
+void opencoap_header_encode(OpenQueueEntry_t *msg, 
+        uint8_t version, 
+        coap_type_t type, 
+        uint8_t TKL, 
+        coap_code_t code, 
+        uint16_t messageID, 
+        uint8_t *token) {
+   // pre-pend CoAP header (version,type,TKL,code,messageID,Token)
+   packetfunctions_reserveHeaderSize(msg,4+TKL);
+   msg->payload[0]                  = (version        << 6) |
+                                      (type           << 4) |
+                                      (TKL            << 0);
+   msg->payload[1]                  = code;
+   msg->payload[2]                  = (messageID>>8) & 0xff;
+   msg->payload[3]                  = (messageID>>0) & 0xff;
+
+   memcpy(&msg->payload[4],token,TKL);
+}
+
+void opencoap_add_stateless_proxy_option(coap_option_iht* option, 
+        uint8_t* address, 
+        uint8_t addressLen, 
+        uint16_t portNumber) {
+    uint8_t len;
+
+    // FIXME due to the lack of space in the 802.15.4 frame
+    // we do not encrypt and authenticate the Stateless-Proxy state
+    
+    len = 0;
+    
+    // next bytes are address
+    memcpy(&opencoap_vars.statelessProxy.buffer[len], address, addressLen);
+    len += addressLen;
+
+    if (portNumber != WKP_UDP_COAP) {
+        packetfunctions_htons(portNumber, &opencoap_vars.statelessProxy.buffer[len]);
+        len += 2;
+    }
+
+    option->type = COAP_OPTION_NUM_STATELESSPROXY;
+    option->length = len;
+    option->pValue = opencoap_vars.statelessProxy.buffer;
 }
 
 void opencoap_forward_message(OpenQueueEntry_t *msg,
