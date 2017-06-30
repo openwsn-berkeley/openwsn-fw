@@ -42,6 +42,14 @@ void opencoap_add_stateless_proxy_option(coap_option_iht* option,
         uint8_t* address, 
         uint8_t addressLen, 
         uint16_t portNumber);
+
+void opencoap_forward_message(OpenQueueEntry_t *msg,
+        coap_header_iht* header,
+        coap_option_iht* outgoinOptions, 
+        uint8_t outgoingOptionsLen,
+        open_addr_t* destIP,
+        uint16_t destPortNumber);
+
 //=========================== public ==========================================
 
 //===== from stack
@@ -954,7 +962,6 @@ void opencoap_handle_proxy_scheme(OpenQueueEntry_t *msg,
         uint8_t incomingOptionsLen) {
    
     uint8_t i;
-    OpenQueueEntry_t* outgoingPacket;
     coap_option_iht outgoingOptions[MAX_COAP_OPTIONS];
     uint8_t outgoingOptionsLen;
     coap_option_iht *uriHost;
@@ -980,36 +987,6 @@ void opencoap_handle_proxy_scheme(OpenQueueEntry_t *msg,
     }
 
     outgoingOptionsLen = 0;
-   
-    outgoingPacket = openqueue_getFreePacketBuffer(COMPONENT_OPENCOAP);
-    if (outgoingPacket==NULL) {
-        openserial_printError(
-                COMPONENT_OPENCOAP,
-                ERR_NO_FREE_PACKET_BUFFER,
-                (errorparameter_t)0,
-                (errorparameter_t)0
-        );
-      openqueue_freePacketBuffer(outgoingPacket);
-      return;
-    }
-
-    // take ownership over that packet and set destination IP and port
-    outgoingPacket->creator                   = COMPONENT_OPENCOAP;
-    outgoingPacket->owner                     = COMPONENT_OPENCOAP;
-    outgoingPacket->l4_destination_port       = WKP_UDP_COAP;
-    outgoingPacket->l3_destinationAdd.type    = ADDR_128B;
-    memcpy(outgoingPacket->l3_destinationAdd.addr_128b,opencoap_vars.JRCaddress.addr_128b,16);
-
-    // fill in source port number
-    outgoingPacket->l4_sourcePortORicmpv6Type = WKP_UDP_COAP;
-
-    // fill payload
-    if (msg->length) {
-        packetfunctions_reserveHeaderSize(outgoingPacket,msg->length);
-        memcpy(outgoingPacket->payload, msg->payload, msg->length);
-        packetfunctions_reserveHeaderSize(outgoingPacket, 1);
-        outgoingPacket->payload[0] = COAP_PAYLOAD_MARKER;
-    }
 
     // process options
     for (i = 0; i < incomingOptionsLen; i++) {
@@ -1028,21 +1005,7 @@ void opencoap_handle_proxy_scheme(OpenQueueEntry_t *msg,
         8, 
         msg->l4_sourcePortORicmpv6Type); 
 
-    // encode options
-    opencoap_options_encode(outgoingPacket, outgoingOptions, outgoingOptionsLen, COAP_OPTION_CLASS_ALL);
-  
-    // encode CoAP header
-    opencoap_header_encode(outgoingPacket,
-            header->Ver,
-            header->T,
-            header->TKL,
-            header->Code,
-            header->messageID,
-            header->token);
-   
-    if ((openudp_send(outgoingPacket))==E_FAIL) {
-      openqueue_freePacketBuffer(outgoingPacket);
-    }
+    opencoap_forward_message(msg, header, outgoingOptions, outgoingOptionsLen, &opencoap_vars.JRCaddress, WKP_UDP_COAP);  
 }
 
 void opencoap_header_encode(OpenQueueEntry_t *msg, 
@@ -1096,7 +1059,6 @@ void opencoap_handle_stateless_proxy(OpenQueueEntry_t *msg,
     uint16_t portNumber;
     coap_option_iht* statelessProxy;
     uint8_t i;
-    OpenQueueEntry_t* outgoingPacket;
     coap_option_iht outgoingOptions[MAX_COAP_OPTIONS];
     uint8_t outgoingOptionsLen;
     open_addr_t eui64;
@@ -1129,7 +1091,30 @@ void opencoap_handle_stateless_proxy(OpenQueueEntry_t *msg,
     }
 
     outgoingOptionsLen = 0;
+ 
+    // process options
+    for (i = 0; i < incomingOptionsLen; i++) {
+        if (incomingOptions[i].type == COAP_OPTION_NUM_STATELESSPROXY) {
+            continue;
+        }
+        outgoingOptions[outgoingOptionsLen].type = incomingOptions[i].type;
+        outgoingOptions[outgoingOptionsLen].length = incomingOptions[i].length;
+        outgoingOptions[outgoingOptionsLen].pValue = incomingOptions[i].pValue;
+        outgoingOptionsLen++;
+    }
+
+    opencoap_forward_message(msg, header, outgoingOptions, outgoingOptionsLen, &destIP, portNumber);  
+}
+
+void opencoap_forward_message(OpenQueueEntry_t *msg,
+        coap_header_iht* header,
+        coap_option_iht* outgoingOptions, 
+        uint8_t outgoingOptionsLen,
+        open_addr_t* destIP,
+        uint16_t destPortNumber) {
    
+    OpenQueueEntry_t* outgoingPacket;
+
     outgoingPacket = openqueue_getFreePacketBuffer(COMPONENT_OPENCOAP);
     if (outgoingPacket==NULL) {
         openserial_printError(
@@ -1145,9 +1130,9 @@ void opencoap_handle_stateless_proxy(OpenQueueEntry_t *msg,
     // take ownership over that packet and set destination IP and port
     outgoingPacket->creator                   = COMPONENT_OPENCOAP;
     outgoingPacket->owner                     = COMPONENT_OPENCOAP;
-    outgoingPacket->l4_destination_port       = portNumber;
+    outgoingPacket->l4_destination_port       = destPortNumber;
     outgoingPacket->l3_destinationAdd.type    = ADDR_128B;
-    memcpy(outgoingPacket->l3_destinationAdd.addr_128b,destIP.addr_128b,16);
+    memcpy(outgoingPacket->l3_destinationAdd.addr_128b,destIP->addr_128b,16);
 
     // fill in source port number
     outgoingPacket->l4_sourcePortORicmpv6Type = WKP_UDP_COAP;
@@ -1158,17 +1143,6 @@ void opencoap_handle_stateless_proxy(OpenQueueEntry_t *msg,
         memcpy(outgoingPacket->payload, msg->payload, msg->length);
         packetfunctions_reserveHeaderSize(outgoingPacket, 1);
         outgoingPacket->payload[0] = COAP_PAYLOAD_MARKER;
-    }
-
-    // process options
-    for (i = 0; i < incomingOptionsLen; i++) {
-        if (incomingOptions[i].type == COAP_OPTION_NUM_STATELESSPROXY) {
-            continue;
-        }
-        outgoingOptions[outgoingOptionsLen].type = incomingOptions[i].type;
-        outgoingOptions[outgoingOptionsLen].length = incomingOptions[i].length;
-        outgoingOptions[outgoingOptionsLen].pValue = incomingOptions[i].pValue;
-        outgoingOptionsLen++;
     }
 
     // encode options
@@ -1187,4 +1161,3 @@ void opencoap_handle_stateless_proxy(OpenQueueEntry_t *msg,
       openqueue_freePacketBuffer(outgoingPacket);
     }
 }
-
