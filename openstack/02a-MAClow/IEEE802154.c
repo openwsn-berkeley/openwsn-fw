@@ -1,12 +1,11 @@
 #include "opendefs.h"
 #include "IEEE802154.h"
 #include "IEEE802154E.h"
-#include "processIE.h" 
 #include "packetfunctions.h"
 #include "idmanager.h"
 #include "openserial.h"
 #include "topology.h"
-#include "ieee802154_security_driver.h"
+#include "IEEE802154_security.h"
 
 //=========================== define ==========================================
 
@@ -37,7 +36,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    bool         securityEnabled;
    int16_t      timeCorrection;
    uint16_t     timeSyncInfo;
-   header_IE_ht header_desc;
+   uint16_t     length_elementid_type;
    bool         headerIEPresent = FALSE;
    uint8_t      destAddrMode;
    
@@ -58,7 +57,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    } else {
        // check whether I have payload, if yes, add header termination IE (0x7F)
        // or ternimation IE will be omitted. For example, Keep alive doesn't have
-      // any payload, so there is no ternimation IE for it.
+       // any payload, so there is no ternimation IE for it.
        if (msg->length != 0) {
            //add header termination IE (id=0x7f)if I have header IE list, OR 
            // no need for termination IE.
@@ -83,7 +82,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    if (frameType == IEEE154_TYPE_ACK) {
        timeCorrection = (int16_t)(ieee154e_getTimeCorrection());
        // add the payload to the ACK (i.e. the timeCorrection)
-       packetfunctions_reserveHeaderSize(msg,sizeof(timecorrection_IE_ht));
+       packetfunctions_reserveHeaderSize(msg,sizeof(uint16_t));
        timeCorrection *= US_PER_TICK;
        timeSyncInfo  = ((uint16_t)timeCorrection) & 0x0fff;
        if (msg->l2_isNegativeACK){
@@ -93,18 +92,18 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
        msg->payload[1] = (uint8_t)(((timeSyncInfo)>>8) & 0xff);
 
        // add header IE header -- xv poipoi -- pkt is filled in reverse order..
-       packetfunctions_reserveHeaderSize(msg,sizeof(header_IE_ht));
+       packetfunctions_reserveHeaderSize(msg,sizeof(uint16_t));
        //create the header for ack IE
-       header_desc.length_elementid_type=sizeof(timecorrection_IE_ht)|
-                                         (IEEE802154E_ACK_NACK_TIMECORRECTION_ELEMENTID << IEEE802154E_DESC_ELEMENTID_HEADER_IE_SHIFT)|
-                                         (IEEE802154E_DESC_TYPE_SHORT << IEEE802154E_DESC_TYPE_IE_SHIFT); 
-       msg->payload[0] = (header_desc.length_elementid_type)        & 0xFF;
-       msg->payload[1] = ((header_desc.length_elementid_type) >> 8) & 0xFF;
+       length_elementid_type=sizeof(uint16_t)|
+                             (IEEE802154E_ACK_NACK_TIMECORRECTION_ELEMENTID << IEEE802154E_DESC_ELEMENTID_HEADER_IE_SHIFT)|
+                             (IEEE802154E_DESC_TYPE_SHORT << IEEE802154E_DESC_TYPE_IE_SHIFT); 
+       msg->payload[0] = (length_elementid_type)        & 0xFF;
+       msg->payload[1] = ((length_elementid_type) >> 8) & 0xFF;
    }
    
    //if security is enabled, the Auxiliary Security Header need to be added to the IEEE802.15.4 MAC header
    if(securityEnabled){
-      IEEE802154_SECURITY.prependAuxiliarySecurityHeader(msg);
+      IEEE802154_security_prependAuxiliarySecurityHeader(msg);
    }
 
    // previousHop address (always 64-bit)
@@ -334,7 +333,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
    // - received unsecured frame and security disabled locally
    // - received secured frame and security is enabled locally
    if (ieee802514_header->securityEnabled && IEEE802154_SECURITY_SUPPORTED) {
-       IEEE802154_SECURITY.retrieveAuxiliarySecurityHeader(msg,ieee802514_header);
+       IEEE802154_security_retrieveAuxiliarySecurityHeader(msg,ieee802514_header);
    }
    else if (ieee802514_header->securityEnabled != IEEE802154_SECURITY_SUPPORTED) { return; }
 

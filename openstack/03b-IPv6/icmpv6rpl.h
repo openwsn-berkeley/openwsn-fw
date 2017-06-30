@@ -147,7 +147,6 @@ typedef struct {
    uint16_t                  dioTimerCounter;         ///< counter to determine when to send DIO.
    opentimers_id_t           timerIdDIO;              ///< ID of the timer used to send DIOs.
    uint16_t                  dioPeriod;               ///< dio period in seconds.
-   uint8_t                   delayDIO;                ///< number of timerIdDIO events before actually sending a DIO.
    // DAO-related
    icmpv6rpl_dao_ht          dao;                     ///< pre-populated DAO packet.
    icmpv6rpl_dao_transit_ht  dao_transit;             ///< pre-populated DAO "Transit Info" option header.
@@ -155,7 +154,6 @@ typedef struct {
    opentimers_id_t           timerIdDAO;              ///< ID of the timer used to send DAOs.
    uint16_t                  daoTimerCounter;         ///< counter to determine when to send DAO.
    uint16_t                  daoPeriod;               ///< dao period in seconds.
-   uint8_t                   delayDAO;                ///< number of timerIdDIO events before actually sending a DAO.
    // routing table
    dagrank_t                 myDAGrank;               ///< rank of this router within DAG.
    uint16_t                  rankIncrease;            ///< the cost of the link to the parent, in units of rank
