@@ -213,7 +213,7 @@ static PyObject* OpenMote_radio_isr_endFrame(OpenMote* self, PyObject* args) {
       return NULL;
    }
    if (capturedTime>0xffffffff) {
-      fprintf(stderr,"[OpenMote_radio_isr_startFrame] FATAL: capturedTime larger than 0xffffffff\n");
+      fprintf(stderr,"[OpenMote_radio_isr_endFrame] FATAL: capturedTime larger than 0xffffffff\n");
       // TODO raise exception
       return NULL;
    }
