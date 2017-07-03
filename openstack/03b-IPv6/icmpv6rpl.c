@@ -162,8 +162,12 @@ uint8_t icmpv6rpl_getRPLIntanceID(){
    return icmpv6rpl_vars.dao.rplinstanceId;
 }
                                                 
-void    icmpv6rpl_getRPLDODAGid(uint8_t* address_128b){
-    memcpy(address_128b,icmpv6rpl_vars.dao.DODAGID,16);
+owerror_t icmpv6rpl_getRPLDODAGid(uint8_t* address_128b){
+   if (icmpv6rpl_vars.fDodagidWritten) {
+       memcpy(address_128b,icmpv6rpl_vars.dao.DODAGID,16);
+       return E_SUCCESS;
+   }
+   return E_FAIL;
 }
 
 /**

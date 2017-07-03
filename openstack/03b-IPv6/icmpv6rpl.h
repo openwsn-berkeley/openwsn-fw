@@ -171,7 +171,7 @@ void     icmpv6rpl_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 void     icmpv6rpl_receive(OpenQueueEntry_t* msg);
 void     icmpv6rpl_writeDODAGid(uint8_t* dodagid);
 uint8_t  icmpv6rpl_getRPLIntanceID(void);
-void     icmpv6rpl_getRPLDODAGid(uint8_t* address_128b);
+owerror_t icmpv6rpl_getRPLDODAGid(uint8_t* address_128b);
 void     icmpv6rpl_setDIOPeriod(uint16_t dioPeriod);
 void     icmpv6rpl_setDAOPeriod(uint16_t daoPeriod);
 bool     icmpv6rpl_getPreferredParentIndex(uint8_t* indexptr);           // new DB

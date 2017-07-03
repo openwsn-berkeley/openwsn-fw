@@ -9,15 +9,13 @@
 #include "opentimers.h"
 #include "scheduler.h"
 #include "cryptoengine.h"
+#include "icmpv6rpl.h"
 
 //=========================== defines =========================================
 
 //=========================== variables =======================================
 
 opencoap_vars_t opencoap_vars;
-
-static const uint8_t ipAddr_jce[] = {0xbb, 0xbb, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, \
-                                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01};
 
 //=========================== prototype =======================================
 void opencoap_header_encode(OpenQueueEntry_t *msg, 
@@ -68,10 +66,6 @@ void opencoap_init() {
    
    // initialize the messageID
    opencoap_vars.messageID     = openrandom_get16b();
-
-   // initialize the JRC address
-   opencoap_vars.JRCaddress.type = ADDR_128B;
-   memcpy(opencoap_vars.JRCaddress.addr_128b, ipAddr_jce, 16);
 
    // stateless proxy vars
    
@@ -968,6 +962,7 @@ void opencoap_handle_proxy_scheme(OpenQueueEntry_t *msg,
     coap_option_iht *proxyScheme;
     const uint8_t proxySchemeCoap[] = "coap";
     const uint8_t uriHost6tisch[] = "6tisch.arpa";
+    open_addr_t JRCaddress;
 
     // verify that Proxy Scheme is set to coap
     proxyScheme = opencoap_find_option(incomingOptions, incomingOptionsLen, COAP_OPTION_NUM_PROXYSCHEME);
@@ -1005,7 +1000,12 @@ void opencoap_handle_proxy_scheme(OpenQueueEntry_t *msg,
         8, 
         msg->l4_sourcePortORicmpv6Type); 
 
-    opencoap_forward_message(msg, header, outgoingOptions, outgoingOptionsLen, &opencoap_vars.JRCaddress, WKP_UDP_COAP);  
+    // the JRC is co-located with DAG root, get the address from RPL module
+    JRCaddress.type = ADDR_128B;
+    if (icmpv6rpl_getRPLDODAGid(JRCaddress.addr_128b) == E_SUCCESS) {
+        opencoap_forward_message(msg, header, outgoingOptions, outgoingOptionsLen, &JRCaddress, WKP_UDP_COAP);
+    }
+    return;
 }
 
 void opencoap_handle_stateless_proxy(OpenQueueEntry_t *msg,

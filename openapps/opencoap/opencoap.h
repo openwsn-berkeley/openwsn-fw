@@ -212,7 +212,6 @@ typedef struct {
    bool                         busySending;
    uint8_t                      delayCounter;
    uint16_t                     messageID;
-   open_addr_t                  JRCaddress;
    coap_statelessproxy_vars_t   statelessProxy;
 } opencoap_vars_t;
 
