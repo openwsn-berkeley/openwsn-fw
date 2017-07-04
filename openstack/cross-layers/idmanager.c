@@ -193,9 +193,11 @@ bool idmanager_isMyAddress(open_addr_t* addr) {
 
 void idmanager_triggerAboutRoot() {
    uint8_t         number_bytes_from_input_buffer;
-   uint8_t         input_buffer[9];
+   uint8_t         input_buffer[1+8+1+16];
    open_addr_t     myPrefix;
    uint8_t         dodagid[16];
+   uint8_t         keyIndex;
+   uint8_t*        keyValue;
    
    //=== get command from OpenSerial
    number_bytes_from_input_buffer = openserial_getInputBuffer(input_buffer,sizeof(input_buffer));
@@ -237,12 +239,19 @@ void idmanager_triggerAboutRoot() {
       sizeof(myPrefix.prefix)
    );
    idmanager_setMyID(&myPrefix);
-   
+  
    // indicate DODAGid to RPL
    memcpy(&dodagid[0],idmanager_vars.myPrefix.prefix,8);  // prefix
    memcpy(&dodagid[8],idmanager_vars.my64bID.addr_64b,8); // eui64
    icmpv6rpl_writeDODAGid(dodagid);
-   
+
+   // store L2 security key index and key value
+   // for the moment, keys K1 and K2 are the same
+   keyIndex = input_buffer[9];
+   keyValue = &input_buffer[10];
+   IEEE802154_security_setBeaconKey(keyIndex, keyValue);
+   IEEE802154_security_setDataKey(keyIndex, keyValue);
+
    return;
 }
 

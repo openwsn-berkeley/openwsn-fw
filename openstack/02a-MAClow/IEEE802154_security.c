@@ -20,16 +20,6 @@
 #ifdef L2_SECURITY_ACTIVE
 //=========================== variables =======================================
 
-static const uint8_t key1[] = {
-    0x11,0x11,0x11,0x11,0x11,0x11,0x11,0x11,
-    0x11,0x11,0x11,0x11,0x11,0x11,0x11,0x11
-};
-
-static const uint8_t key2[] = {
-    0x22,0x22,0x22,0x22,0x22,0x22,0x22,0x22,
-    0x22,0x22,0x22,0x22,0x22,0x22,0x22,0x22
-};
-
 ieee802154_security_vars_t ieee802154_security_vars;
 
 //=========================== prototypes ======================================
@@ -41,11 +31,13 @@ ieee802154_security_vars_t ieee802154_security_vars;
 */
 void IEEE802154_security_init(void) {
 
-   // copy beacon key (key 1)
-   memcpy(&ieee802154_security_vars.Key_1[0], &key1[0], 16);
+   // invalidate beacon key (key 1)
+   ieee802154_security_vars.k1.index = IEEE802154_SECURITY_KEYINDEX_INVALID;
+   memset(&ieee802154_security_vars.k1.value[0], 0x00, 16);
 
-   // copy data key (key 2)
-   memcpy(&ieee802154_security_vars.Key_2[0], &key2[0], 16);
+   // invalidate data key (key 2)
+   ieee802154_security_vars.k2.index = IEEE802154_SECURITY_KEYINDEX_INVALID;
+   memset(&ieee802154_security_vars.k2.value[0], 0x00, 16);
 }
 
 //=========================== public ==========================================
@@ -131,7 +123,7 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
    uint8_t* m;
    uint8_t len_m;
 
-   key = msg->l2_frameType == IEEE154_TYPE_BEACON ? ieee802154_security_vars.Key_1 : ieee802154_security_vars.Key_2;
+   key = msg->l2_frameType == IEEE154_TYPE_BEACON ? ieee802154_security_vars.k1.value : ieee802154_security_vars.k2.value;
 
    // First 8 bytes of the nonce are always the source address of the frame
    memcpy(&nonce[0],idmanager_getMyID(ADDR_64B)->addr_64b,8);
@@ -311,7 +303,7 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t* msg){
    uint8_t len_c;
    uint8_t *key;
    
-   key = msg->l2_frameType == IEEE154_TYPE_BEACON ? ieee802154_security_vars.Key_1 : ieee802154_security_vars.Key_2;
+   key = msg->l2_frameType == IEEE154_TYPE_BEACON ? ieee802154_security_vars.k1.value : ieee802154_security_vars.k2.value;
 
    // First 8 bytes of the nonce are always the source address of the frame
    memcpy(&nonce[0],msg->l2_nextORpreviousHop.addr_64b, 8);
@@ -444,6 +436,31 @@ uint8_t IEEE802154_security_auxLengthChecking(uint8_t KeyIdMode,
    return auxilary_len;
 }
 
+uint8_t IEEE802154_security_getBeaconKeyIndex(void) {
+    return ieee802154_security_vars.k1.index;
+}
+uint8_t IEEE802154_security_getDataKeyIndex(void) {
+    return ieee802154_security_vars.k2.index;
+}
+
+void IEEE802154_security_setBeaconKey(uint8_t index, uint8_t* value) {
+    ieee802154_security_vars.k1.index = index;
+    memcpy(ieee802154_security_vars.k1.value, value, 16);
+}
+
+void IEEE802154_security_setDataKey(uint8_t index, uint8_t* value) {
+    ieee802154_security_vars.k2.index = index;
+    memcpy(ieee802154_security_vars.k2.value, value, 16);
+}
+
+bool IEEE802154_security_isConfigured() {
+    if (ieee802154_security_vars.k1.index != IEEE802154_SECURITY_KEYINDEX_INVALID &&
+         ieee802154_security_vars.k2.index != IEEE802154_SECURITY_KEYINDEX_INVALID) {
+        return TRUE;
+    }
+    return FALSE;
+}
+
 #else /* L2_SECURITY_ACTIVE */
 
 void IEEE802154_security_init(void) {
@@ -473,6 +490,26 @@ uint8_t IEEE802154_security_authLengthChecking(uint8_t sec_level) {
 uint8_t IEEE802154_security_auxLengthChecking(uint8_t kid, uint8_t sup, uint8_t size) {
     return (uint8_t) 0;
 }
+
+uint8_t IEEE802154_security_getBeaconKeyIndex(void) {
+    return (uint8_t) 0;
+}
+uint8_t IEEE802154_security_getDataKeyIndex(void) {
+    return (uint8_t) 0;
+}
+
+void IEEE802154_security_setBeaconKey(uint8_t index, uint8_t* value) {
+    return;
+}
+
+void IEEE802154_security_setDataKey(uint8_t index, uint8_t* value) {
+    return;
+}
+
+bool IEEE802154_security_isConfigured() {
+    return TRUE;
+}
+
 
 #endif /* L2_SECURITY_ACTIVE */
 
