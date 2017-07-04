@@ -59,6 +59,7 @@ dagrank_t     neighbors_getNeighborRank(uint8_t index);
 uint8_t       neighbors_getNumNeighbors(void);
 uint16_t      neighbors_getLinkMetric(uint8_t index);
 open_addr_t*  neighbors_getKANeighbor(uint16_t kaPeriod);
+open_addr_t*  neighbors_getJoinProxy(void);
 bool          neighbors_getNeighborNoResource(uint8_t index);
 uint8_t       neighbors_getGeneration(open_addr_t* address);
 uint8_t       neighbors_getSequenceNumber(open_addr_t* address);

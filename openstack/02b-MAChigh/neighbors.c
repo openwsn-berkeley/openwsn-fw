@@ -94,6 +94,31 @@ open_addr_t* neighbors_getKANeighbor(uint16_t kaPeriod) {
    return NULL;
 }
 
+/**
+\brief Find neighbor which should act as a Join Proxy during the join process.
+
+This function iterates through the neighbor table and identifies the neighbor
+with lowest join priority metric to send join traffic through. 
+
+\returns A pointer to the neighbor's address, or NULL if no join proxy is found.
+*/
+open_addr_t* neighbors_getJoinProxy() {
+   uint8_t i;
+   uint8_t joinPrioMinimum;
+   open_addr_t* joinProxy;
+
+   joinPrioMinimum = 0xff;
+   joinProxy = NULL;
+   for (i=0;i<MAXNUMNEIGHBORS;i++) {
+      if (neighbors_vars.neighbors[i].used==TRUE && 
+              neighbors_vars.neighbors[i].joinPrio <= joinPrioMinimum) {
+          joinProxy = &(neighbors_vars.neighbors[i].addr_64b);
+          joinPrioMinimum = neighbors_vars.neighbors[i].joinPrio;
+      }
+   }
+   return joinProxy;
+}
+
 bool neighbors_getNeighborNoResource(uint8_t index){
     return neighbors_vars.neighbors[index].f6PNORES;
 }
