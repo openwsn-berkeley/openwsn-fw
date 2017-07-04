@@ -56,11 +56,11 @@ void cstorm_init(void) {
    cstorm_vars.period           = 6553; 
    
    cstorm_vars.timerId          = opentimers_create();
-   opentimers_scheduleAbsolute(
+   opentimers_scheduleIn(
        cstorm_vars.timerId,
        cstorm_vars.period,
-       opentimers_getValue(),
        TIME_MS,
+       TIMER_PERIODIC,
        cstorm_timer_cb
    );
    
@@ -117,13 +117,13 @@ owerror_t cstorm_receive(
          opentimers_cancel(cstorm_vars.timerId);
          
          if(cstorm_vars.period > 0) {
-             opentimers_scheduleAbsolute(
-                 cstorm_vars.timerId,
-                 cstorm_vars.period,
-                 opentimers_getValue();
-                 TIME_MS,
-                 cstorm_timer_cb
-             );
+               opentimers_scheduleIn(
+                   cstorm_vars.timerId,
+                   cstorm_vars.period,
+                   TIME_MS,
+                   TIMER_PERIODIC,
+                   cstorm_timer_cb
+               );
          }
          */
          
@@ -157,13 +157,6 @@ void cstorm_task_cb() {
    OpenQueueEntry_t*    pkt;
    owerror_t            outcome;
    uint8_t              numOptions;
-   
-    opentimers_scheduleRelative(
-        cstorm_vars.timerId,
-        cstorm_vars.period,
-        TIME_MS,
-        cstorm_timer_cb
-    );
    
    // don't run if not synch
    if (ieee154e_isSynch() == FALSE) return;

@@ -32,7 +32,7 @@ owerror_t cexample_receive(OpenQueueEntry_t* msg,
                     coap_header_iht*  coap_header,
                     coap_option_iht*  coap_options,
                     uint8_t*          response_options);
-void    cexample_timer_cb(void);
+void    cexample_timer_cb(opentimers_id_t id);
 void    cexample_task_cb(void);
 void    cexample_sendDone(OpenQueueEntry_t* msg,
                        owerror_t error);
@@ -41,24 +41,26 @@ void    cexample_sendDone(OpenQueueEntry_t* msg,
 
 void cexample_init() {
    
-   // prepare the resource descriptor for the /ex path
-   cexample_vars.desc.path0len             = sizeof(cexample_path0)-1;
-   cexample_vars.desc.path0val             = (uint8_t*)(&cexample_path0);
-   cexample_vars.desc.path1len             = 0;
-   cexample_vars.desc.path1val             = NULL;
-   cexample_vars.desc.componentID          = COMPONENT_CEXAMPLE;
-   cexample_vars.desc.discoverable         = TRUE;
-   cexample_vars.desc.callbackRx           = &cexample_receive;
-   cexample_vars.desc.callbackSendDone     = &cexample_sendDone;
-   
-   
-   opencoap_register(&cexample_vars.desc);
-   cexample_vars.timerId    = opentimers_create();
-   opentimers_scheduleAbsolute(cexample_vars.timerId, 
-                                CEXAMPLEPERIOD, 
-                                opentimers_getValue(), 
-                                TIME_MS, 
-                                cexample_timer_cb);
+    // prepare the resource descriptor for the /ex path
+    cexample_vars.desc.path0len             = sizeof(cexample_path0)-1;
+    cexample_vars.desc.path0val             = (uint8_t*)(&cexample_path0);
+    cexample_vars.desc.path1len             = 0;
+    cexample_vars.desc.path1val             = NULL;
+    cexample_vars.desc.componentID          = COMPONENT_CEXAMPLE;
+    cexample_vars.desc.discoverable         = TRUE;
+    cexample_vars.desc.callbackRx           = &cexample_receive;
+    cexample_vars.desc.callbackSendDone     = &cexample_sendDone;
+    
+    
+    opencoap_register(&cexample_vars.desc);
+    cexample_vars.timerId    = opentimers_create();
+    opentimers_scheduleIn(
+        cexample_vars.timerId, 
+        CEXAMPLEPERIOD, 
+        TIME_MS, 
+        TIMER_PERIODIC,
+        cexample_timer_cb
+    );
 }
 
 //=========================== private =========================================
@@ -72,7 +74,7 @@ owerror_t cexample_receive(OpenQueueEntry_t* msg,
 
 //timer fired, but we don't want to execute task in ISR mode
 //instead, push task to scheduler with COAP priority, and let scheduler take care of it
-void cexample_timer_cb(){
+void cexample_timer_cb(opentimers_id_t id){
    scheduler_push_task(cexample_task_cb,TASKPRIO_COAP);
 }
 
@@ -85,12 +87,6 @@ void cexample_task_cb() {
    uint16_t             sum         = 0;
    uint16_t             avg         = 0;
    uint8_t              N_avg       = 10;
-   
-   // reschedule next time to expire
-   opentimers_scheduleRelative(cexample_vars.timerId, 
-                                CEXAMPLEPERIOD, 
-                                TIME_MS, 
-                                cexample_timer_cb);
    
    // don't run if not synch
    if (ieee154e_isSynch() == FALSE) return;

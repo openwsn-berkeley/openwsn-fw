@@ -12,7 +12,6 @@
 #include "board.h"
 #include "opentimers.h"
 #include "schedule.h"
-#include "processIE.h"
 
 //=========================== debug define ====================================
 
@@ -21,9 +20,24 @@ static const uint8_t chTemplate_default[] = {
    5,6,12,7,15,4,14,11,8,0,1,2,13,3,9,10
 };
 
+// refer to RFC8180: https://tools.ietf.org/html/rfc8180#appendix-A.1
+// ASN and join Metric are replaced later when sending an EB
+static const uint8_t ebIEsBytestream[] = {
+    0x1A,0x88,0x06,0x1A,0x00,0x00,            0x00,0x00,                                0x00,0x00,0x01,0x1C,0x00,0x01,
+    0xC8,0x00,0x0A,0x1B,0x01,0x00,SLOTFRAME_LENGTH,0x00,SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS,0x00,0x00,0x00,0x00,0x0F
+};
 //=========================== define ==========================================
 
-#define SYNCHRONIZING_CHANNEL       20 // channel the mote listens on to synchronize
+#define EB_ASN0_OFFSET               4
+#define EB_JP_OFFSET                 9
+#define EB_SLOTFRAME_TS_ID_OFFSET   12
+#define EB_SLOTFRAME_CH_ID_OFFSET   15
+#define EB_SLOTFRAME_LEN_OFFSET     20
+#define EB_SLOTFRAME_NUMLINK_OFFSET 22
+
+#define EB_IE_LEN                   28
+
+#define SYNCHRONIZING_CHANNEL       26 // channel the mote listens on to synchronize
 #define TXRETRIES                    3 // number of MAC retries before declaring failed
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to successfully synchronize
@@ -42,9 +56,10 @@ static const uint8_t chTemplate_default[] = {
 #define IEEE802154E_DESC_TYPE_LONG                         ((uint16_t)(1<<15))
 #define IEEE802154E_DESC_TYPE_SHORT                        ((uint16_t)(0<<15))
 
-// GROUP_ID changed to 5 https://openwsn.atlassian.net/browse/FW-569
-#define IANA_6TOP_IE_GROUP_ID                              (5<<11)
-#define IANA_6TOP_IE_GROUP_ID_TYPE                         (1<<15)
+// GROUP_ID changed to 5 (IETF IE) https://openwsn.atlassian.net/browse/FW-569
+#define IANA_IETF_IE_GROUP_ID                              (5<<11)
+#define IANA_IETF_IE_TYPE                                  (1<<15)
+#define IEEE802154E_DESC_LEN_PAYLOAD_ID_TYPE_MASK          0xF800
 
 #define IEEE802154E_DESC_TYPE_HEADER_IE                    0x0000
 #define IEEE802154E_DESC_TYPE_PAYLOAD_IE                   0x8000
@@ -208,11 +223,6 @@ typedef struct {
    PORT_SIGNED_INT_WIDTH timeCorrection;
 } IEEE802154E_ACK_ht;
 
-// includes payload header IE short + MLME short Header + Sync IE
-#define EB_PAYLOAD_LENGTH sizeof(payload_IE_ht) + \
-                           sizeof(mlme_IE_ht)     + \
-                           sizeof(sync_IE_ht)
-
 //=========================== module variables ================================
 
 typedef struct {
@@ -282,6 +292,11 @@ typedef struct {
 void               ieee154e_init(void);
 // public
 PORT_TIMER_WIDTH   ieee154e_asnDiff(asn_t* someASN);
+#ifdef DEADLINE_OPTION_ENABLED
+int16_t            ieee154e_computeAsnDiff(asn_t* h_asn, asn_t* l_asn);
+void               ieee154e_calculateExpTime(uint16_t max_delay, uint8_t* et_asn);
+void               ieee154e_orderToASNStructure(uint8_t* in,asn_t* val_asn);
+#endif
 bool               ieee154e_isSynch(void);
 void               ieee154e_getAsn(uint8_t* array);
 void               ieee154e_setIsAckEnabled(bool isEnabled);

@@ -24,6 +24,7 @@ source = [
     'leds.c',
     'spi.c',
     'uart.c',
+    'cryptoengine.c',
 ]
 
 board  = localEnv.Object(source=source) + cc2420

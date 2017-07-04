@@ -11,6 +11,7 @@
 
 uinject_vars_t uinject_vars;
 
+static const uint8_t uinject_payload[]    = "uinject";
 static const uint8_t uinject_dst_addr[]   = {
    0xbb, 0xbb, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01
@@ -18,32 +19,32 @@ static const uint8_t uinject_dst_addr[]   = {
 
 //=========================== prototypes ======================================
 
-void uinject_timer_cb(void);
+void uinject_timer_cb(opentimers_id_t id);
 void uinject_task_cb(void);
 
 //=========================== public ==========================================
 
 void uinject_init() {
    
-   // clear local variables
-   memset(&uinject_vars,0,sizeof(uinject_vars_t));
+    // clear local variables
+    memset(&uinject_vars,0,sizeof(uinject_vars_t));
 
-   // register at UDP stack
-   uinject_vars.desc.port              = WKP_UDP_INJECT;
-   uinject_vars.desc.callbackReceive   = &uinject_receive;
-   uinject_vars.desc.callbackSendDone  = &uinject_sendDone;
-   openudp_register(&uinject_vars.desc);
+    // register at UDP stack
+    uinject_vars.desc.port              = WKP_UDP_INJECT;
+    uinject_vars.desc.callbackReceive   = &uinject_receive;
+    uinject_vars.desc.callbackSendDone  = &uinject_sendDone;
+    openudp_register(&uinject_vars.desc);
 
-   uinject_vars.period = UINJECT_PERIOD_MS;
-   // start periodic timer
-   uinject_vars.timerId = opentimers_create();
-   opentimers_scheduleAbsolute(
-       uinject_vars.period,
-       UINJECT_PERIOD_MS,
-       opentimers_getValue(),
-       TIME_MS,
-       uinject_timer_cb
-   );
+    uinject_vars.period = UINJECT_PERIOD_MS;
+    // start periodic timer
+    uinject_vars.timerId = opentimers_create();
+    opentimers_scheduleIn(
+        uinject_vars.timerId,
+        UINJECT_PERIOD_MS,
+        TIME_MS,
+        TIMER_PERIODIC,
+        uinject_timer_cb
+    );
 }
 
 void uinject_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
@@ -68,7 +69,7 @@ void uinject_receive(OpenQueueEntry_t* pkt) {
 \note timer fired, but we don't want to execute task in ISR mode instead, push
    task to scheduler with CoAP priority, and let scheduler take care of it.
 */
-void uinject_timer_cb(void){
+void uinject_timer_cb(opentimers_id_t id){
    
    scheduler_push_task(uinject_task_cb,TASKPRIO_COAP);
 }
@@ -76,13 +77,6 @@ void uinject_timer_cb(void){
 void uinject_task_cb() {
    OpenQueueEntry_t*    pkt;
    uint8_t              asnArray[5];
-   
-   opentimers_scheduleRelative(
-       uinject_vars.period,
-       UINJECT_PERIOD_MS,
-       TIME_MS,
-       uinject_timer_cb
-   );
    
    // don't run if not synch
    if (ieee154e_isSynch() == FALSE) return;
@@ -114,6 +108,10 @@ void uinject_task_cb() {
    pkt->l4_sourcePortORicmpv6Type     = WKP_UDP_INJECT;
    pkt->l3_destinationAdd.type        = ADDR_128B;
    memcpy(&pkt->l3_destinationAdd.addr_128b[0],uinject_dst_addr,16);
+   
+   // add payload
+   packetfunctions_reserveHeaderSize(pkt,sizeof(uinject_payload)-1);
+   memcpy(&pkt->payload[0],uinject_payload,sizeof(uinject_payload)-1);
    
    packetfunctions_reserveHeaderSize(pkt,sizeof(uint16_t));
    pkt->payload[1] = (uint8_t)((uinject_vars.counter & 0xff00)>>8);

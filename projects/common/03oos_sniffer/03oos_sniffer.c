@@ -13,7 +13,6 @@
 #include "openserial.h"
 #include "idmanager.h"
 #include "sixtop.h"
-#include "processIE.h"
 #include "neighbors.h"
 #include "sf0.h"
 #include "openrandom.h"
@@ -77,6 +76,7 @@ int mote_main(void) {
    openserial_init();
    idmanager_init();
    openrandom_init();
+   opentimers_init();
  
    // add callback functions radio
    radio_setStartFrameCb(cb_startFrame);
@@ -154,10 +154,11 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
 void cb_timer(void) {
     
    // schedule again
-   opentimers_scheduleRelative(
+   opentimers_scheduleIn(
         app_vars.timerId,     // timerId
         TIMER_PERIOD,         // duration
         TIME_TICS,            // timetype
+        TIMER_ONESHOT,        // timertype
         cb_timer              // callback
    );
    app_vars.outputOrInput = (app_vars.outputOrInput+1)%2;
@@ -190,12 +191,22 @@ void schedule_startDAGroot(void)                        {return;}
 void schedule_setFrameLength(uint16_t frameLength)      {return;}
 
 void sixtop_setEBPeriod(uint8_t ebPeriod)               {return;}
-void sixtop_addORremoveCellByInfo(uint8_t code,open_addr_t* neighbor,cellInfo_ht* cellInfo){return;}
-void sixtop_request(uint8_t code,open_addr_t* neighbor, uint8_t numCells)   {return;}
+void sixtop_request(
+    uint8_t      code, 
+    open_addr_t* neighbor, 
+    uint8_t      numCells, 
+    uint8_t      cellOptions, 
+    cellInfo_ht* celllist_toBeAdded, 
+    cellInfo_ht* celllist_toBeRemoved, 
+    uint8_t      sfid,
+    uint16_t     listingOffset,
+    uint16_t     listingMaxNumCells
+)                                                                           {return;}
 bool sixtop_setHandler(six2six_handler_t handler)                           {return TRUE;}
 void sixtop_setIsResponseEnabled(bool isEnabled)                            {return;}
 void sixtop_setKaPeriod(uint16_t kaPeriod)                                  {return;}
 void sf0_appPktPeriod(uint8_t numAppPacketsPerSlotFrame)                    {return;}
+uint8_t  sf0_getsfid(void)                                                  {return 0;}
 
 void openbridge_triggerData(void)                                           {return;}
 

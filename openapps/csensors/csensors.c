@@ -46,7 +46,7 @@ owerror_t csensors_receive(
    uint8_t*          response_options
 );
 
-void csensors_timer_cb(void);
+void csensors_timer_cb(opentimers_id_t id);
 
 void csensors_task_cb(void);
 
@@ -276,17 +276,18 @@ owerror_t csensors_receive(
    \param[in] id The opentimer identifier used to resolve the csensor resource associated
       parsed.
 */
-void csensors_timer_cb(){
+void csensors_timer_cb(opentimers_id_t id){
    uint8_t i;
    
    for(i=0;i<csensors_vars.numCsensors;i++) {
       if (csensors_vars.csensors_resource[i].timerId == i) {
          csensors_vars.cb_list[csensors_vars.cb_put] = i;
          csensors_vars.cb_put = (csensors_vars.cb_put+1)%CSENSORSTASKLIST;
-         opentimers_scheduleRelative(
+         opentimers_scheduleIn(
              csensors_vars.csensors_resource[i].timerId, 
              csensors_vars.csensors_resource[i].period,
              TIME_MS, 
+             TIMER_ONESHOT,
              csensors_timer_cb
          );
          break;
@@ -383,28 +384,29 @@ void csensors_setPeriod(uint32_t period,
    if (period>0) {
       csensors_vars.csensors_resource[id].period = period;
       if (opentimers_isRunning(csensors_vars.csensors_resource[id].timerId)) {
-         opentimers_scheduleRelative(
+         opentimers_scheduleIn(
              csensors_vars.csensors_resource[id].timerId, 
              (uint32_t)((period*openrandom_get16b())/0xffff),
              TIME_MS, 
+             TIMER_ONESHOT,
              csensors_timer_cb
          );
          if (old_period==0) {
-             opentimers_scheduleAbsolute(
+             opentimers_scheduleIn(
                  csensors_vars.csensors_resource[id].timerId, 
-                 (uint32_t)((period*openrandom_get16b())/0xffff), 
-                 opentimers_getValue(), 
+                 (uint32_t)((period*openrandom_get16b())/0xffff),
                  TIME_MS, 
+                 TIMER_ONESHOT,
                  csensors_timer_cb
              );
          }
       } else {
          csensors_vars.csensors_resource[id].timerId = opentimers_create();
-         opentimers_scheduleAbsolute(
+         opentimers_scheduleIn(
              csensors_vars.csensors_resource[id].timerId, 
-             (uint32_t)((period*openrandom_get16b())/0xffff), 
-             opentimers_getValue(), 
+             (uint32_t)((period*openrandom_get16b())/0xffff),
              TIME_MS, 
+             TIMER_ONESHOT,
              csensors_timer_cb
          );
       }
