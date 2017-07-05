@@ -58,6 +58,9 @@
 #define PORT_PIN_RADIO_RESET_LOW()     // nothing
 
 //===== IEEE802154E timing
+
+#define SLOTDURATION_10MS // by default, we use 10ms time slot
+
 #ifdef SLOTDURATION_10MS
 // time-slot related
 #define PORT_TsSlotDuration                 328   // counter counts one extra count, see datasheet
