@@ -71,8 +71,10 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
     open_addr_t*         p_src;  
     open_addr_t          temp_src_prefix;
     open_addr_t          temp_src_mac64b;
+    bool                 sac;
     uint8_t              sam;
     uint8_t              m;
+    bool                 dac;
     uint8_t              dam;
     uint8_t              next_header;
 
@@ -94,8 +96,12 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
         link_local_prefix.prefix[0] = 0xfe;
         link_local_prefix.prefix[1] = 0x80;
         myprefix = &link_local_prefix;
+        sac = IPHC_SAC_STATELESS;
+        dac = IPHC_DAC_STATELESS;
     } else {
-        myprefix                  = idmanager_getMyID(ADDR_PREFIX);
+        myprefix = idmanager_getMyID(ADDR_PREFIX);
+        sac = IPHC_SAC_STATEFUL;
+        dac = IPHC_DAC_STATEFUL;
     }
     memcpy(&(msg->l3_sourceAdd.addr_128b[0]),myprefix->prefix,8);
     memcpy(&(msg->l3_sourceAdd.addr_128b[8]),myadd64->addr_64b,8);
@@ -163,10 +169,10 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
                 IPHC_HLIM_64,
                 ipv6_outer_header.hop_limit,
                 IPHC_CID_NO,
-                IPHC_SAC_STATELESS,
+                sac,
                 sam,
                 m,
-                IPHC_DAC_STATELESS,
+                dac,
                 dam,
                 p_dest,
                 p_src,            
