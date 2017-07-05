@@ -14,6 +14,7 @@
 #include "IEEE802154E.h"
 #include "idmanager.h"
 #include "openserial.h"
+#include "neighbors.h"
 #include "IEEE802154_security.h"
 
 //=============================define==========================================
@@ -461,9 +462,14 @@ bool IEEE802154_security_isConfigured() {
     return FALSE;
 }
 
-uint8_t IEEE802154_security_getSecurityLevel() {
+uint8_t IEEE802154_security_getSecurityLevel(OpenQueueEntry_t *msg) {
     if (IEEE802154_security_isConfigured()) {
-        return IEEE802154_SECURITY_LEVEL;
+        if(neighbors_isInsecureNeighbor(&msg->l2_nextORpreviousHop)) {
+           return IEEE154_ASH_SLF_TYPE_NOSEC;
+        }
+        else {
+            return IEEE802154_SECURITY_LEVEL;
+        }
     }
     return IEEE154_ASH_SLF_TYPE_NOSEC;
 }
@@ -517,7 +523,7 @@ bool IEEE802154_security_isConfigured() {
     return TRUE;
 }
 
-uint8_t IEEE802154_security_getSecurityLevel() {
+uint8_t IEEE802154_security_getSecurityLevel(OpenQueueEntry_t *msg) {
     return IEEE154_ASH_SLF_TYPE_NOSEC;
 }
 #endif /* L2_SECURITY_ACTIVE */

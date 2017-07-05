@@ -370,7 +370,7 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
     msg->l2_frameType = IEEE154_TYPE_DATA;
 
     // set l2-security attributes
-    msg->l2_securityLevel   = IEEE802154_security_getSecurityLevel();
+    msg->l2_securityLevel   = IEEE802154_security_getSecurityLevel(msg);
     msg->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE; 
     msg->l2_keyIndex        = IEEE802154_security_getDataKeyIndex();
   
@@ -475,7 +475,8 @@ void task_sixtopNotifReceive() {
         msg->l1_rssi,
         &msg->l2_asn,
         msg->l2_joinPriorityPresent,
-        msg->l2_joinPriority
+        msg->l2_joinPriority,
+        msg->l2_securityLevel == IEEE154_ASH_SLF_TYPE_NOSEC ? TRUE : FALSE
     );
     
     // process the header IEs
@@ -814,7 +815,7 @@ port_INLINE void sixtop_sendKA() {
     memcpy(&(kaPkt->l2_nextORpreviousHop),kaNeighAddr,sizeof(open_addr_t));
    
     // set l2-security attributes
-    kaPkt->l2_securityLevel   = IEEE802154_security_getSecurityLevel();
+    kaPkt->l2_securityLevel   = IEEE802154_SECURITY_LEVEL; // do not exchange KAs with 
     kaPkt->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE;
     kaPkt->l2_keyIndex        = IEEE802154_security_getDataKeyIndex();
 
