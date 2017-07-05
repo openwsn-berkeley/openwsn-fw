@@ -259,6 +259,7 @@ enum {
    ERR_BUFFER_OVERFLOW                 = 0x44, // OSCOAP buffer overflow detected {code location {0}}
    ERR_REPLAY_FAILED                   = 0x45, // OSCOAP replay protection failed
    ERR_DECRYPTION_FAILED               = 0x46, // OSCOAP decryption and tag verification failed
+   ERR_ABORT_JOIN_PROCESS              = 0x47, // Aborted join process {code location {0}}
 };
 
 //=========================== typedef =========================================
@@ -358,6 +359,7 @@ typedef struct {
 BEGIN_PACK
 typedef struct {
    bool             used;
+   bool             insecure;
    uint8_t          parentPreference;
    bool             stableNeighbor;
    uint8_t          switchStabilityCounter;
