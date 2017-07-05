@@ -461,6 +461,13 @@ bool IEEE802154_security_isConfigured() {
     return FALSE;
 }
 
+uint8_t IEEE802154_security_getSecurityLevel() {
+    if (IEEE802154_security_isConfigured()) {
+        return IEEE802154_SECURITY_LEVEL;
+    }
+    return IEEE154_ASH_SLF_TYPE_NOSEC;
+}
+
 #else /* L2_SECURITY_ACTIVE */
 
 void IEEE802154_security_init(void) {
@@ -510,6 +517,8 @@ bool IEEE802154_security_isConfigured() {
     return TRUE;
 }
 
-
+uint8_t IEEE802154_security_getSecurityLevel() {
+    return IEEE154_ASH_SLF_TYPE_NOSEC;
+}
 #endif /* L2_SECURITY_ACTIVE */
 

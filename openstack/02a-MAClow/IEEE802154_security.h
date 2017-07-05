@@ -69,6 +69,7 @@ uint8_t     IEEE802154_security_getBeaconKeyIndex(void);
 uint8_t     IEEE802154_security_getDataKeyIndex(void);
 void        IEEE802154_security_setBeaconKey(uint8_t index, uint8_t* value);
 void        IEEE802154_security_setDataKey(uint8_t index, uint8_t* value);
+uint8_t     IEEE802154_security_getSecurityLevel(void);
 bool        IEEE802154_security_isConfigured(void);
 
 
