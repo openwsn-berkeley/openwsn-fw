@@ -13,9 +13,11 @@
 #include "scheduler.h"
 #include "idmanager.h"
 #include "IEEE802154E.h"
+#include "IEEE802154_security.h"
 #include "icmpv6rpl.h"
 #include "cbor.h"
 #include "eui64.h"
+#include "neighbors.h"
 
 //=========================== defines =========================================
 
@@ -23,9 +25,6 @@
 #define TIMEOUT                 60000
 
 const uint8_t cjoin_path0[] = "j";
-
-static const uint8_t ipAddr_jce[] = {0xbb, 0xbb, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, \
-                                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01};
 
 static const uint8_t masterSecret[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, \
                                      0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
@@ -51,7 +50,7 @@ void    cjoin_timer_cb(void);
 void    cjoin_task_cb(void);
 void    cjoin_sendDone(OpenQueueEntry_t* msg,
                        owerror_t error);
-owerror_t cjoin_sendJoinRequest(void);
+owerror_t cjoin_sendJoinRequest(open_addr_t *joinProxy);
 void cjoin_retransmission_cb(void);
 void cjoin_retransmission_task_cb(void);
 bool cjoin_getIsJoined(void);
@@ -132,7 +131,6 @@ owerror_t cjoin_receive(OpenQueueEntry_t* msg,
         coap_option_iht*  coap_outgoingOptions,
         uint8_t*          coap_outgoingOptionsLen) {
 
-    uint8_t i;
     join_response_t join_response;
     owerror_t ret;
 
@@ -142,20 +140,14 @@ owerror_t cjoin_receive(OpenQueueEntry_t* msg,
         return E_FAIL;        
     }
 
-    // loop through the options and look for content format
-    i = 0;
-    while(coap_incomingOptions[i].type != COAP_OPTION_NONE) {
-        if (coap_incomingOptions[i].type == COAP_OPTION_NUM_CONTENTFORMAT && 
-                        *(coap_incomingOptions[i].pValue) == COAP_MEDTYPE_APPCBOR) {
-            ret = cbor_parse_join_response(&join_response, msg->payload, msg->length);
-            if (ret == E_FAIL) { return E_FAIL; }
+    ret = cbor_parse_join_response(&join_response, msg->payload, msg->length);
+    if (ret == E_FAIL) { return E_FAIL; }
 
-             // set the internal keys as per the parsed values
-            cjoin_setIsJoined(TRUE); // declare join is over
-            break;
-        }
-        i++; 
-    }
+    // set the L2 keys as per the parsed value
+    IEEE802154_security_setBeaconKey(join_response.keyset.key[0].kid[0], join_response.keyset.key[0].k);
+    IEEE802154_security_setDataKey(join_response.keyset.key[0].kid[0], join_response.keyset.key[0].k);
+
+    cjoin_setIsJoined(TRUE); // declare join is over
 
     return E_SUCCESS;
 }
@@ -172,11 +164,24 @@ void cjoin_retransmission_cb(void) {
 }
 
 void cjoin_retransmission_task_cb() {
-    cjoin_sendJoinRequest();
+    open_addr_t* joinProxy;
+
+    joinProxy = neighbors_getJoinProxy();
+    if(joinProxy == NULL) {
+      openserial_printError(
+         COMPONENT_CJOIN,
+         ERR_ABORT_JOIN_PROCESS,
+         (errorparameter_t)0,
+         (errorparameter_t)0
+      );
+        return;
+    }
+ 
+    cjoin_sendJoinRequest(joinProxy);
 }
 
 void cjoin_task_cb() {
-    uint8_t temp;
+    open_addr_t *joinProxy;
   
     // don't run if not synch
     if (ieee154e_isSynch() == FALSE) return;
@@ -187,19 +192,15 @@ void cjoin_task_cb() {
         return;
     }
 
-    // don't run if no route to DAG root
-    if (icmpv6rpl_getPreferredParentIndex(&temp) == FALSE) { 
-        return;
-    }
-
-    if (icmpv6rpl_daoSent() == FALSE) {
+    joinProxy = neighbors_getJoinProxy();
+    if(joinProxy == NULL) {
         return;
     }
     
     // cancel the startup timer but do not destroy it as we reuse it for retransmissions
     opentimers_cancel(cjoin_vars.timerId);
 
-    cjoin_sendJoinRequest();
+    cjoin_sendJoinRequest(joinProxy);
 
     return;
 }
@@ -208,8 +209,9 @@ void cjoin_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }
 
-owerror_t cjoin_sendJoinRequest(void) {
+owerror_t cjoin_sendJoinRequest(open_addr_t* joinProxy) {
    OpenQueueEntry_t*    pkt;
+   open_addr_t*         prefix;
    owerror_t            outcome;
    coap_option_iht      options[5];
 
@@ -259,14 +261,16 @@ owerror_t cjoin_sendJoinRequest(void) {
    // metadata
    pkt->l4_destination_port       = WKP_UDP_COAP;
    pkt->l3_destinationAdd.type    = ADDR_128B;
-   memcpy(&pkt->l3_destinationAdd.addr_128b[0],&ipAddr_jce,16);
-   
+   prefix = idmanager_getMyID(ADDR_PREFIX); // at this point, this is link-local prefix
+   memcpy(&pkt->l3_destinationAdd.addr_128b[0],prefix->prefix,8);
+   memcpy(&pkt->l3_destinationAdd.addr_128b[8],joinProxy->addr_64b,8); // set host to eui-64 of the join proxy
+ 
    // send
    outcome = opencoap_send(
       pkt,
       COAP_TYPE_CON,
       COAP_CODE_REQ_GET,
-      1, // token len
+      0, // token len
       options,
       4, // options len
       &cjoin_vars.desc
