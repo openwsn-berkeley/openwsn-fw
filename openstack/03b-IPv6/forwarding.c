@@ -60,6 +60,7 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
     ipv6_header_iht      ipv6_outer_header;
     ipv6_header_iht      ipv6_inner_header;
     rpl_option_ht        rpl_option;
+    open_addr_t          link_local_prefix;
     open_addr_t*         myprefix;
     open_addr_t*         myadd64;
     uint32_t             flow_label = 0;
@@ -69,7 +70,7 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
     open_addr_t*         p_dest;
     open_addr_t*         p_src;  
     open_addr_t          temp_src_prefix;
-    open_addr_t          temp_src_mac64b; 
+    open_addr_t          temp_src_mac64b;
     uint8_t              sam;
     uint8_t              m;
     uint8_t              dam;
@@ -81,11 +82,21 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
     m   = IPHC_M_NO;
 
     // retrieve my prefix and EUI64
-    myprefix                  = idmanager_getMyID(ADDR_PREFIX);
     myadd64                   = idmanager_getMyID(ADDR_64B);
 
     // set source address (me)
     msg->l3_sourceAdd.type=ADDR_128B;
+
+    // if we are sending to a link-local address set the source prefix to link-local
+    if (packetfunctions_isLinkLocal(&msg->l3_destinationAdd)) {
+        memset(&link_local_prefix, 0x00, sizeof(open_addr_t));
+        link_local_prefix.type = ADDR_PREFIX;
+        link_local_prefix.prefix[0] = 0xfe;
+        link_local_prefix.prefix[1] = 0x80;
+        myprefix = &link_local_prefix;
+    } else {
+        myprefix                  = idmanager_getMyID(ADDR_PREFIX);
+    }
     memcpy(&(msg->l3_sourceAdd.addr_128b[0]),myprefix->prefix,8);
     memcpy(&(msg->l3_sourceAdd.addr_128b[8]),myadd64->addr_64b,8);
 

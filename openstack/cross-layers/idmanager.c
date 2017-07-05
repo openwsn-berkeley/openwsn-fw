@@ -50,7 +50,15 @@ void idmanager_init() {
    idmanager_vars.myPrefix.prefix[6]   = 0x00;
    idmanager_vars.myPrefix.prefix[7]   = 0x00;
 #else
-   memset(&idmanager_vars.myPrefix.prefix[0], 0x00, sizeof(idmanager_vars.myPrefix.prefix));
+   // set prefix to link-local
+   idmanager_vars.myPrefix.prefix[0]   = 0xfe;
+   idmanager_vars.myPrefix.prefix[1]   = 0x80;
+   idmanager_vars.myPrefix.prefix[2]   = 0x00;
+   idmanager_vars.myPrefix.prefix[3]   = 0x00;
+   idmanager_vars.myPrefix.prefix[4]   = 0x00;
+   idmanager_vars.myPrefix.prefix[5]   = 0x00;
+   idmanager_vars.myPrefix.prefix[6]   = 0x00;
+   idmanager_vars.myPrefix.prefix[7]   = 0x00;
 #endif
    
    // my64bID
