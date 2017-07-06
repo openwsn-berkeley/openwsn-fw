@@ -67,21 +67,9 @@ int USHAInput(USHAContext *context,
 {
   if (!context) return shaNull;
   switch (context->whichSha) {
- /*   case SHA1:
-      return SHA1Input((SHA1Context*)&context->ctx, bytes,
-                       bytecount);
-    case SHA224:
-      return SHA224Input((SHA224Context*)&context->ctx, bytes,
-          bytecount); */
     case SHA256:
       return SHA256Input((SHA256Context*)&context->ctx, bytes,
           bytecount);
- /*   case SHA384:
-      return SHA384Input((SHA384Context*)&context->ctx, bytes,
-          bytecount);
-    case SHA512:
-      return SHA512Input((SHA512Context*)&context->ctx, bytes,
-          bytecount); */
     default: return shaBadParam;
   }
 }
@@ -110,21 +98,9 @@ int USHAFinalBits(USHAContext *context,
 {
   if (!context) return shaNull;
   switch (context->whichSha) {
- /*   case SHA1:
-      return SHA1FinalBits((SHA1Context*)&context->ctx, bits,
-                           bit_count);
-    case SHA224:
-      return SHA224FinalBits((SHA224Context*)&context->ctx, bits,
-          bit_count); */
     case SHA256:
       return SHA256FinalBits((SHA256Context*)&context->ctx, bits,
           bit_count);
- /*   case SHA384:
-      return SHA384FinalBits((SHA384Context*)&context->ctx, bits,
-          bit_count);
-    case SHA512:
-      return SHA512FinalBits((SHA512Context*)&context->ctx, bits,
-          bit_count); */
     default: return shaBadParam;
   }
 }
@@ -153,20 +129,9 @@ int USHAResult(USHAContext *context,
 {
   if (!context) return shaNull;
   switch (context->whichSha) {
-/*    case SHA1:
-      return SHA1Result((SHA1Context*)&context->ctx, Message_Digest);
-    case SHA224:
-      return SHA224Result((SHA224Context*)&context->ctx,
-                          Message_Digest); */
     case SHA256:
       return SHA256Result((SHA256Context*)&context->ctx,
                           Message_Digest);
- /*   case SHA384:
-      return SHA384Result((SHA384Context*)&context->ctx,
-                          Message_Digest);
-    case SHA512:
-      return SHA512Result((SHA512Context*)&context->ctx,
-                          Message_Digest); */
     default: return shaBadParam;
   }
 }
@@ -189,12 +154,8 @@ int USHAResult(USHAContext *context,
 int USHABlockSize(enum SHAversion whichSha)
 {
   switch (whichSha) {
-/*    case SHA1:   return SHA1_Message_Block_Size;
-    case SHA224: return SHA224_Message_Block_Size; */
     case SHA256: return SHA256_Message_Block_Size;
-/*    case SHA384: return SHA384_Message_Block_Size; 
-    default:
-    case SHA512: return SHA512_Message_Block_Size; */
+    default: return 0;
   }
 }
 
@@ -216,12 +177,8 @@ int USHABlockSize(enum SHAversion whichSha)
 int USHAHashSize(enum SHAversion whichSha)
 {
   switch (whichSha) {
- /*   case SHA1:   return SHA1HashSize;
-    case SHA224: return SHA224HashSize; */
     case SHA256: return SHA256HashSize;
-  /*  case SHA384: return SHA384HashSize;
-    default:
-    case SHA512: return SHA512HashSize; */
+    default: return 0;
   }
 }
 
@@ -243,12 +200,8 @@ int USHAHashSize(enum SHAversion whichSha)
 int USHAHashSizeBits(enum SHAversion whichSha)
 {
   switch (whichSha) {
-  /*  case SHA1:   return SHA1HashSizeBits;
-    case SHA224: return SHA224HashSizeBits; */
     case SHA256: return SHA256HashSizeBits;
- /*   case SHA384: return SHA384HashSizeBits;
-    default:
-    case SHA512: return SHA512HashSizeBits; */
+    default: return 0;
   }
 }
 
@@ -270,12 +223,8 @@ int USHAHashSizeBits(enum SHAversion whichSha)
 const char *USHAHashName(enum SHAversion whichSha)
 {
   switch (whichSha) {
- /*   case SHA1:   return "SHA1";
-    case SHA224: return "SHA224"; */
     case SHA256: return "SHA256";
-  /*  case SHA384: return "SHA384";
-    default:
-    case SHA512: return "SHA512"; */
+    default: return 0;
   }
 }
 
