@@ -47,14 +47,14 @@
 typedef struct{
     uint8_t index;
     uint8_t value[16];
-} key_t;
+} symmetric_key_802154_t;
 
 //=========================== variables =======================================
 
 typedef struct {
    bool                    joinPermitted;
-   key_t                   k1;
-   key_t                   k2;
+   symmetric_key_802154_t  k1;
+   symmetric_key_802154_t  k2;
 } ieee802154_security_vars_t;
 
 //=========================== prototypes ======================================
