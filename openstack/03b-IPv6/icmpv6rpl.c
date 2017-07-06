@@ -809,6 +809,9 @@ void icmpv6rpl_setDAOPeriod(uint16_t daoPeriod){
 }
 
 bool icmpv6rpl_daoSent(void) {
+    if (idmanager_getIsDAGroot()==TRUE) {
+        return TRUE;
+    }
     return icmpv6rpl_vars.daoSent;
 }
 

@@ -688,8 +688,13 @@ port_INLINE void sixtop_sendEB() {
     OpenQueueEntry_t* eb;
     uint8_t i;
    
-    if ((ieee154e_isSynch()==FALSE) || (icmpv6rpl_getMyDAGrank()==DEFAULTDAGRANK) || (cjoin_getIsJoined()==FALSE)){
-        // I'm not sync'ed or I did not acquire a DAGrank or I did not join yet
+    if ((ieee154e_isSynch()==FALSE)                     ||
+        (IEEE802154_security_isConfigured()==FALSE)     ||
+        (icmpv6rpl_getMyDAGrank()==DEFAULTDAGRANK)      ||
+        icmpv6rpl_daoSent()==FALSE) {
+        // I'm not sync'ed, or did not join, or did not acquire a DAGrank or did not send out a DAO
+        // before starting to advertize the network, we need to make sure that we are reachable downwards,
+        // thus, the condition if DAO was sent
       
         // delete packets genereted by this module (EB and KA) from openqueue
         openqueue_removeAllCreatedBy(COMPONENT_SIXTOP);
