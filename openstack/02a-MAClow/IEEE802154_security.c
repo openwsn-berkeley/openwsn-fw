@@ -32,6 +32,10 @@ ieee802154_security_vars_t ieee802154_security_vars;
 */
 void IEEE802154_security_init(void) {
 
+    // TODO joinPermitted flag should be set dynamically upon a button press
+    // and propagated through the network via EBs
+    ieee802154_security_vars.joinPermitted = TRUE;
+
    // invalidate beacon key (key 1)
    ieee802154_security_vars.k1.index = IEEE802154_SECURITY_KEYINDEX_INVALID;
    memset(&ieee802154_security_vars.k1.value[0], 0x00, 16);
@@ -463,15 +467,61 @@ bool IEEE802154_security_isConfigured() {
 }
 
 uint8_t IEEE802154_security_getSecurityLevel(OpenQueueEntry_t *msg) {
-    if (IEEE802154_security_isConfigured()) {
-        if(neighbors_isInsecureNeighbor(&msg->l2_nextORpreviousHop)) {
-           return IEEE154_ASH_SLF_TYPE_NOSEC;
-        }
-        else {
-            return IEEE802154_SECURITY_LEVEL;
-        }
+    if (IEEE802154_security_isConfigured() == FALSE) {
+        return IEEE154_ASH_SLF_TYPE_NOSEC;
     }
-    return IEEE154_ASH_SLF_TYPE_NOSEC;
+    
+    if (packetfunctions_isBroadcastMulticast(&msg->l2_nextORpreviousHop)) {
+        return IEEE802154_SECURITY_LEVEL;
+    }
+
+    if(neighbors_isInsecureNeighbor(&msg->l2_nextORpreviousHop) &&
+       ieee802154_security_vars.joinPermitted == TRUE) {
+        return IEEE154_ASH_SLF_TYPE_NOSEC;
+    }
+    
+    return IEEE802154_SECURITY_LEVEL;
+}
+
+bool IEEE802154_security_acceptableLevel(OpenQueueEntry_t* msg, ieee802154_header_iht* parsedHeader) {
+    if (IEEE802154_security_isConfigured() == FALSE     &&
+        msg->l2_securityLevel == IEEE154_ASH_SLF_TYPE_NOSEC) {
+        return TRUE;
+    }
+
+    if (IEEE802154_security_isConfigured() == FALSE             &&
+        msg->l2_frameType == IEEE154_TYPE_BEACON                &&
+        (msg->l2_securityLevel == IEEE154_ASH_SLF_TYPE_MIC_32   ||
+         msg->l2_securityLevel == IEEE154_ASH_SLF_TYPE_MIC_64   ||
+         msg->l2_securityLevel == IEEE154_ASH_SLF_TYPE_MIC_128)) {
+        return TRUE;
+    }
+    
+    if (IEEE802154_security_isConfigured()               == TRUE &&
+        msg->l2_securityLevel == IEEE154_ASH_SLF_TYPE_NOSEC      &&
+        ieee802154_security_vars.joinPermitted           == TRUE &&
+        neighbors_isInsecureNeighbor(&parsedHeader->src) == TRUE) {
+        return TRUE;
+    }
+
+    if (IEEE802154_security_isConfigured() == TRUE              &&
+        msg->l2_frameType == IEEE154_TYPE_BEACON                &&
+        (msg->l2_securityLevel == IEEE154_ASH_SLF_TYPE_MIC_32   ||
+         msg->l2_securityLevel == IEEE154_ASH_SLF_TYPE_MIC_64   ||
+         msg->l2_securityLevel == IEEE154_ASH_SLF_TYPE_MIC_128)) {
+        return TRUE;
+    }
+ 
+    if (IEEE802154_security_isConfigured() == TRUE                  &&
+        (msg->l2_frameType == IEEE154_TYPE_DATA                     ||
+         msg->l2_frameType == IEEE154_TYPE_ACK                      ||
+         msg->l2_frameType == IEEE154_TYPE_CMD)                     &&
+        (msg->l2_securityLevel == IEEE154_ASH_SLF_TYPE_ENC_MIC_32   ||
+         msg->l2_securityLevel == IEEE154_ASH_SLF_TYPE_ENC_MIC_64   ||
+         msg->l2_securityLevel == IEEE154_ASH_SLF_TYPE_ENC_MIC_128)) {
+        return TRUE;
+    }
+    return FALSE;
 }
 
 #else /* L2_SECURITY_ACTIVE */
@@ -526,5 +576,10 @@ bool IEEE802154_security_isConfigured() {
 uint8_t IEEE802154_security_getSecurityLevel(OpenQueueEntry_t *msg) {
     return IEEE154_ASH_SLF_TYPE_NOSEC;
 }
+
+bool IEEE802154_security_acceptableLevel(OpenQueueEntry_t* msg, ieee802154_header_iht* parsedheader) {
+    return TRUE;
+}
+
 #endif /* L2_SECURITY_ACTIVE */
 

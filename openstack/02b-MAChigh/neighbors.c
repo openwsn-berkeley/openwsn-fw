@@ -209,8 +209,8 @@ bool neighbors_isInsecureNeighbor(open_addr_t* address) {
    uint8_t     i;
    bool        returnVal;
    
-   // if not found, not insecure
-   returnVal  = FALSE;
+   // if not found, insecure
+   returnVal  = TRUE;
    
    switch (address->type) {
       case ADDR_64B:
@@ -224,8 +224,8 @@ bool neighbors_isInsecureNeighbor(open_addr_t* address) {
    
    // iterate through neighbor table
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
-      if (isThisRowMatching(address,i) && neighbors_vars.neighbors[i].insecure==TRUE) {
-         returnVal  = TRUE;
+      if (isThisRowMatching(address,i)) {
+         returnVal  = neighbors_vars.neighbors[i].insecure;
          break;
       }
    }
