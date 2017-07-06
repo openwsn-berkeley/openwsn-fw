@@ -38,23 +38,22 @@ static const uint8_t proxyScheme[] = "coap";
 cjoin_vars_t cjoin_vars;
 
 //=========================== prototypes ======================================
-void cjoin_init_security_context();
+void        cjoin_init_security_context();
 
-owerror_t cjoin_receive(OpenQueueEntry_t* msg,
-        coap_header_iht*  coap_header,
-        coap_option_iht*  coap_incomingOptions,
-        coap_option_iht*  coap_outgoingOptions,
-        uint8_t*          coap_outgoingOptionsLen);
-
-void    cjoin_timer_cb(void);
-void    cjoin_task_cb(void);
-void    cjoin_sendDone(OpenQueueEntry_t* msg,
+owerror_t   cjoin_receive(OpenQueueEntry_t* msg,
+                          coap_header_iht*  coap_header,
+                          coap_option_iht*  coap_incomingOptions,
+                          coap_option_iht*  coap_outgoingOptions,
+                          uint8_t*          coap_outgoingOptionsLen);
+void        cjoin_timer_cb(opentimers_id_t id);
+void        cjoin_task_cb(void);
+void        cjoin_sendDone(OpenQueueEntry_t* msg,
                        owerror_t error);
-owerror_t cjoin_sendJoinRequest(open_addr_t *joinProxy);
-void cjoin_retransmission_cb(void);
-void cjoin_retransmission_task_cb(void);
-bool cjoin_getIsJoined(void);
-void cjoin_setIsJoined(bool newValue);
+owerror_t   cjoin_sendJoinRequest(open_addr_t *joinProxy);
+void        cjoin_retransmission_cb(opentimers_id_t id);
+void        cjoin_retransmission_task_cb(void);
+bool        cjoin_getIsJoined(void);
+void        cjoin_setIsJoined(bool newValue);
 //=========================== public ==========================================
 
 void cjoin_init() {
@@ -154,12 +153,11 @@ owerror_t cjoin_receive(OpenQueueEntry_t* msg,
 
 //timer fired, but we don't want to execute task in ISR mode
 //instead, push task to scheduler with COAP priority, and let scheduler take care of it
-void cjoin_timer_cb(void){
+void cjoin_timer_cb(opentimers_id_t id){
    scheduler_push_task(cjoin_task_cb,TASKPRIO_COAP);
 }
 
-void cjoin_retransmission_cb(void) {
-
+void cjoin_retransmission_cb(opentimers_id_t id) {
     scheduler_push_task(cjoin_retransmission_task_cb, TASKPRIO_COAP);
 }
 

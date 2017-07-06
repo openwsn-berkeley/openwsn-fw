@@ -34,8 +34,6 @@ void cjoin_setIsJoined(bool newValue);
 void cjoin_setJoinKey(uint8_t *key, uint8_t len);
 bool debugPrint_joined(void);
 
-
-
 /**
 \}
 \}
