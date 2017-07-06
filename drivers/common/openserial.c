@@ -23,7 +23,6 @@
 #include "icmpv6rpl.h"
 #include "icmpv6echo.h"
 #include "sf0.h"
-#include "cjoin.h"
 
 //=========================== variables =======================================
 
@@ -775,7 +774,8 @@ void openserial_handleCommands(void){
             }
             break;
         case COMMAND_SET_JOIN_KEY:
-            cjoin_setJoinKey(&openserial_vars.inputBuf[ptr], commandLen);
+            if (commandLen != 16) { break; }
+            idmanager_setJoinKey(&openserial_vars.inputBuf[ptr]);
             break;
         default:
            // wrong command ID

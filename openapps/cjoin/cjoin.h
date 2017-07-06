@@ -18,8 +18,6 @@ typedef struct {
     coap_resource_desc_t     desc;
     opentimers_id_t          timerId;
     bool                     isJoined;
-    asn_t                    joinAsn;
-    uint8_t                  joinKey[16];
     oscoap_security_context_t context;
 } cjoin_vars_t;
 
@@ -32,7 +30,6 @@ void cjoin_schedule(void);
 bool cjoin_getIsJoined(void);
 void cjoin_setIsJoined(bool newValue);
 void cjoin_setJoinKey(uint8_t *key, uint8_t len);
-bool debugPrint_joined(void);
 
 /**
 \}

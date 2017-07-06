@@ -261,6 +261,19 @@ void idmanager_triggerAboutRoot() {
    return;
 }
 
+void idmanager_setJoinKey(uint8_t *key) {
+    memcpy(idmanager_vars.joinKey, key, 16);
+}
+
+void idmanager_getJoinKey(uint8_t **pKey) {
+    *pKey = idmanager_vars.joinKey;
+    return; 
+}
+
+void idmanager_setJoinAsn(asn_t* asn) {
+    memcpy(&idmanager_vars.joinAsn, asn, sizeof(asn_t));
+}
+
 /**
 \brief Trigger this module to print status information, over serial.
 
@@ -282,5 +295,13 @@ bool debugPrint_id() {
    return TRUE;
 }
 
+bool debugPrint_joined() {
+   asn_t output;
+   output.byte4         =  idmanager_vars.joinAsn.byte4;
+   output.bytes2and3    =  idmanager_vars.joinAsn.bytes2and3;
+   output.bytes0and1    =  idmanager_vars.joinAsn.bytes0and1;
+   openserial_printStatus(STATUS_JOINED,(uint8_t*)&output,sizeof(output));
+   return TRUE;
+}
 
 //=========================== private =========================================

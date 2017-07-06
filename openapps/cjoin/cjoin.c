@@ -70,13 +70,11 @@ void cjoin_init() {
   
    cjoin_vars.isJoined                             = FALSE;   
 
-   memset(&cjoin_vars.joinAsn, 0x00, sizeof(asn_t));
-
    opencoap_register(&cjoin_vars.desc);
 
    cjoin_vars.timerId = opentimers_create();
 
-   memcpy(cjoin_vars.joinKey, masterSecret, sizeof(cjoin_vars.joinKey));
+   idmanager_setJoinKey(masterSecret);
    cjoin_init_security_context();
 
    cjoin_schedule();
@@ -85,26 +83,23 @@ void cjoin_init() {
 void cjoin_init_security_context() {
    uint8_t senderID[9];     // needs to hold EUI-64 + 1 byte
    uint8_t recipientID[9];  // needs to hold EUI-64 + 1 byte
-
+   uint8_t* joinKey;
    eui64_get(senderID);
    senderID[8] = 0x00;      // construct sender ID according to the minimal-security-03 draft
    eui64_get(recipientID);
    recipientID[8] = 0x01; // construct recipient ID according to the minimal-security-03 draft
+
+   idmanager_getJoinKey(&joinKey);
    
    openoscoap_init_security_context(&cjoin_vars.context, 
                                 senderID, 
                                 sizeof(senderID),
                                 recipientID,
                                 sizeof(recipientID),
-                                cjoin_vars.joinKey,
-                                sizeof(cjoin_vars.joinKey),
+                                joinKey,
+                                16,
                                 NULL,
                                 0);
-}
-
-void cjoin_setJoinKey(uint8_t *key, uint8_t len) {
-   memcpy(cjoin_vars.joinKey, key, len);
-   cjoin_init_security_context();
 }
 
 void cjoin_schedule() {
@@ -295,52 +290,24 @@ bool cjoin_getIsJoined() {
 }
 
 void cjoin_setIsJoined(bool newValue) {
-   uint8_t array[5];
-   INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
+    uint8_t array[5];
+    asn_t joinAsn;
 
-   if (cjoin_vars.isJoined == newValue) {
-        ENABLE_INTERRUPTS();
-        return;
-   }
-   
-   cjoin_vars.isJoined = newValue;
+    cjoin_vars.isJoined = newValue;
 
-   // Update Join ASN value
-   if (idmanager_getIsDAGroot() == FALSE) {
-        ieee154e_getAsn(array);
-        cjoin_vars.joinAsn.bytes0and1           = ((uint16_t) array[1] << 8) | ((uint16_t) array[0]);
-        cjoin_vars.joinAsn.bytes2and3           = ((uint16_t) array[3] << 8) | ((uint16_t) array[2]);
-        cjoin_vars.joinAsn.byte4                = array[4]; 
-    } else {
-        // Dag root resets the ASN value to zero
-        memset(&cjoin_vars.joinAsn, 0x00, sizeof(asn_t));
-    }
-   ENABLE_INTERRUPTS();
+    // Update Join ASN value
+    ieee154e_getAsn(array);
+    joinAsn.bytes0and1           = ((uint16_t) array[1] << 8) | ((uint16_t) array[0]);
+    joinAsn.bytes2and3           = ((uint16_t) array[3] << 8) | ((uint16_t) array[2]);
+    joinAsn.byte4                = array[4];
 
-   if (newValue == TRUE) {
+    idmanager_setJoinAsn(&joinAsn);
+
+    if (newValue == TRUE) {
         // log the info
         openserial_printInfo(COMPONENT_CJOIN, ERR_JOINED,
                              (errorparameter_t)0,
                              (errorparameter_t)0);
-   }
+    }
 }
-
-/**
-\brief Trigger this module to print status information, over serial.
-
-debugPrint_* functions are used by the openserial module to continuously print
-status information about several modules in the OpenWSN stack.
-
-\returns TRUE if this function printed something, FALSE otherwise.
-*/
-bool debugPrint_joined() {
-   asn_t output;
-   output.byte4         =  cjoin_vars.joinAsn.byte4;
-   output.bytes2and3    =  cjoin_vars.joinAsn.bytes2and3;
-   output.bytes0and1    =  cjoin_vars.joinAsn.bytes0and1;
-   openserial_printStatus(STATUS_JOINED,(uint8_t*)&output,sizeof(output));
-   return TRUE;
-}
-
 
