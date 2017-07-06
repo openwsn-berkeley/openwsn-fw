@@ -12,8 +12,8 @@
 
 //=========================== define ==========================================
 
-#define TIMER_DIO_TIMEOUT         10000  // miliseconds
-#define TIMER_DAO_TIMEOUT         60000  // miliseconds
+#define TIMER_DIO_TIMEOUT         10  // seconds
+#define TIMER_DAO_TIMEOUT         60  // seconds
 
 // Non-Storing Mode of Operation (1)
 #define MOP_DIO_A                 0<<5
@@ -144,7 +144,7 @@ typedef struct {
    // DIO-related
    icmpv6rpl_dio_ht          dio;                     ///< pre-populated DIO packet.
    open_addr_t               dioDestination;          ///< IPv6 destination address for DIOs.
-//   uint16_t                  dioTimerCounter;         ///< counter to determine when to send DIO.
+   uint16_t                  dioTimerCounter;         ///< counter to determine when to send DIO.
    opentimers_id_t           timerIdDIO;              ///< ID of the timer used to send DIOs.
    uint16_t                  dioPeriod;               ///< dio period in seconds.
    // DAO-related
@@ -152,7 +152,7 @@ typedef struct {
    icmpv6rpl_dao_transit_ht  dao_transit;             ///< pre-populated DAO "Transit Info" option header.
    icmpv6rpl_dao_target_ht   dao_target;              ///< pre-populated DAO "Transit Info" option header.
    opentimers_id_t           timerIdDAO;              ///< ID of the timer used to send DAOs.
-//   uint16_t                  daoTimerCounter;         ///< counter to determine when to send DAO.
+   uint16_t                  daoTimerCounter;         ///< counter to determine when to send DAO.
    uint16_t                  daoPeriod;               ///< dao period in seconds.
    // routing table
    dagrank_t                 myDAGrank;               ///< rank of this router within DAG.

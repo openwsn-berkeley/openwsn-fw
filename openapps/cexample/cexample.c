@@ -34,7 +34,7 @@ owerror_t cexample_receive( OpenQueueEntry_t* msg,
         coap_option_iht*  coap_outgoingOptions,
         uint8_t*          coap_outgoingOptionsLen);
 
-void    cexample_timer_cb(void);
+void    cexample_timer_cb(opentimers_id_t id);
 void    cexample_task_cb(void);
 void    cexample_sendDone(OpenQueueEntry_t* msg,
                        owerror_t error);
@@ -79,7 +79,7 @@ owerror_t cexample_receive( OpenQueueEntry_t* msg,
 
 //timer fired, but we don't want to execute task in ISR mode
 //instead, push task to scheduler with COAP priority, and let scheduler take care of it
-void cexample_timer_cb(){
+void cexample_timer_cb(opentimers_id_t id){
    scheduler_push_task(cexample_task_cb,TASKPRIO_COAP);
 }
 

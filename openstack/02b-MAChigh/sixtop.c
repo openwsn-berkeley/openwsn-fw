@@ -36,9 +36,9 @@ owerror_t     sixtop_send_internal(
 );
 
 // timer interrupt callbacks
-void          sixtop_maintenance_timer_cb(void);
-void          sixtop_timeout_timer_cb(void);
-void          sixtop_sendingEb_timer_cb(void);
+void          sixtop_maintenance_timer_cb(opentimers_id_t id);
+void          sixtop_timeout_timer_cb(opentimers_id_t id);
+void          sixtop_sendingEb_timer_cb(opentimers_id_t id);
 
 //=== EB/KA task
 
@@ -290,7 +290,8 @@ void sixtop_request(
     
     // append 6p metadata
     packetfunctions_reserveHeaderSize(pkt,sizeof(uint16_t));
-    *((uint8_t*)(pkt->payload)) = sixtop_vars.cb_sf_getMetadata();
+    pkt->payload[0] = (uint8_t)( sixtop_vars.cb_sf_getMetadata() & 0x00FF);
+    pkt->payload[1] = (uint8_t)((sixtop_vars.cb_sf_getMetadata() & 0xFF00)>>8);
     len += 2;
     
     // append 6p Seqnum and schedule Generation
@@ -617,7 +618,7 @@ owerror_t sixtop_send_internal(
 }
 
 // timer interrupt callbacks
-void sixtop_sendingEb_timer_cb(void){
+void sixtop_sendingEb_timer_cb(opentimers_id_t id){
     scheduler_push_task(timer_sixtop_sendEb_fired,TASKPRIO_SIXTOP);
     // update the period
     sixtop_vars.periodMaintenance  = 872 +(openrandom_get16b()&0xff);
@@ -630,11 +631,11 @@ void sixtop_sendingEb_timer_cb(void){
     );
 }
 
-void sixtop_maintenance_timer_cb(void) {
+void sixtop_maintenance_timer_cb(opentimers_id_t id) {
     scheduler_push_task(timer_sixtop_management_fired,TASKPRIO_SIXTOP);
 }
 
-void sixtop_timeout_timer_cb(void) {
+void sixtop_timeout_timer_cb(opentimers_id_t id) {
     scheduler_push_task(timer_sixtop_six2six_timeout_fired,TASKPRIO_SIXTOP_TIMEOUT);
 }
 
@@ -686,7 +687,9 @@ readability of the code.
 */
 port_INLINE void sixtop_sendEB() {
     OpenQueueEntry_t* eb;
-    uint8_t i;
+    uint8_t     i;
+    uint8_t     eb_len;
+    uint16_t    temp16b;
    
     if ((ieee154e_isSynch()==FALSE)                     ||
         (IEEE802154_security_isConfigured()==FALSE)     ||
@@ -729,12 +732,33 @@ port_INLINE void sixtop_sendEB() {
     // declare ownership over that packet
     eb->creator = COMPONENT_SIXTOP;
     eb->owner   = COMPONENT_SIXTOP;
-   
+    
+    // in case we none default number of shared cells defined in minimal configuration
+    if (ebIEsBytestream[EB_SLOTFRAME_NUMLINK_OFFSET]>1){
+        for (i=ebIEsBytestream[EB_SLOTFRAME_NUMLINK_OFFSET]-1;i>0;i--){
+            packetfunctions_reserveHeaderSize(eb,5);
+            eb->payload[0]   = i;    // slot offset
+            eb->payload[1]   = 0x00;
+            eb->payload[2]   = 0x00; // channel offset
+            eb->payload[3]   = 0x00;
+            eb->payload[4]   = 0x0F; // link options
+        }
+    }
+    
     // reserve space for EB IEs
     packetfunctions_reserveHeaderSize(eb,EB_IE_LEN);
     for (i=0;i<EB_IE_LEN;i++){
         eb->payload[i]   = ebIEsBytestream[i];
     }
+    
+    if (ebIEsBytestream[EB_SLOTFRAME_NUMLINK_OFFSET]>1){
+        // reconstruct the MLME IE header since length changed 
+        eb_len = EB_IE_LEN-2+5*(ebIEsBytestream[EB_SLOTFRAME_NUMLINK_OFFSET]-1);
+        temp16b = eb_len | IEEE802154E_PAYLOAD_DESC_GROUP_ID_MLME | IEEE802154E_PAYLOAD_DESC_TYPE_MLME;
+        eb->payload[0] = (uint8_t)(temp16b & 0x00ff);
+        eb->payload[1] = (uint8_t)((temp16b & 0xff00)>>8);
+    }
+    
     // Keep a pointer to where the ASN will be
     // Note: the actual value of the current ASN and JP will be written by the
     //    IEEE802.15.4e when transmitting
@@ -887,7 +911,7 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
                 SIX2SIX_TIMEOUT_MS,
                 opentimers_getValue(),
                 TIME_MS,
-                timer_sixtop_six2six_timeout_fired
+                sixtop_timeout_timer_cb
             );
         }
     }
@@ -1283,7 +1307,7 @@ void sixtop_six2six_notifyReceive(
                         }
                     }
                 } else {
-                    returnCode = IANA_6TOP_RC_RESET;
+                    returnCode = IANA_6TOP_RC_CELLLIST_ERR;
                 }
                 break;
             }

@@ -401,7 +401,7 @@ void opentimers_timer_callback(void){
                 if (opentimers_vars.timersBuf[j].wraps_remaining==0){
                     opentimers_vars.timersBuf[j].isrunning           = FALSE;
                     opentimers_vars.timersBuf[j].hasExpired          = FALSE;
-                    opentimers_vars.timersBuf[j].callback();
+                    opentimers_vars.timersBuf[j].callback(j);
                     if (opentimers_vars.timersBuf[j].timerType==TIMER_PERIODIC){
                         opentimers_scheduleIn(j,
                                               opentimers_vars.timersBuf[j].totalTimerPeriod,

@@ -93,8 +93,8 @@ void     endSlot(void);
 bool     debugPrint_asn(void);
 bool     debugPrint_isSync(void);
 // interrupts
-void     isr_ieee154e_newSlot(void);
-void     isr_ieee154e_timer(void);
+void     isr_ieee154e_newSlot(opentimers_id_t id);
+void     isr_ieee154e_timer(opentimers_id_t id);
 
 //=========================== admin ===========================================
 
@@ -189,6 +189,78 @@ PORT_TIMER_WIDTH ieee154e_asnDiff(asn_t* someASN) {
    return diff;
 }
 
+#ifdef DEADLINE_OPTION_ENABLED
+/**
+/brief Difference between two ASN values
+
+\param[in] h_asn bigger ASN value
+\param[in] l_asn smaller ASN value
+
+\returns The ASN difference, or 0xffff if more than 65535 different
+*/
+int16_t ieee154e_computeAsnDiff(asn_t* h_asn, asn_t* l_asn) {
+   int16_t diff;
+
+   if (h_asn->byte4 != l_asn->byte4) {
+      return (int16_t)0xFFFFFFFF;
+   }
+   
+   diff = 0;
+   if (h_asn->bytes2and3 == l_asn->bytes2and3) {
+      return h_asn->bytes0and1-l_asn->bytes0and1;
+   } else if (h_asn->bytes2and3-l_asn->bytes2and3==1) {
+      diff  = h_asn->bytes0and1;
+      diff += 0xffff-l_asn->bytes0and1;
+      diff += 1;
+   } else {
+      diff = (int16_t)0xFFFFFFFF;
+   }
+   return diff;
+}
+
+/**
+/brief Determine Expiration Time in ASN
+
+\param[in]  max_delay Maximum permissible delay before which 
+            packet is expected to reach destination
+
+\param[out] et_asn bigger ASN value
+*/
+void ieee154e_calculateExpTime(uint16_t max_delay, uint8_t* et_asn) {
+   uint8_t delay_array[5];
+   uint8_t i =0, carry = 0,slot_time = 0;
+   uint16_t sum = 0, delay_in_asn =0;
+	
+   memset(&delay_array[0],0,5);
+   
+   //Slot time = (Duration in ticks * Time equivalent ticks w.r.t 32kHz) in ms
+   slot_time = (ieee154e_getSlotDuration()*305)/10000;  
+   delay_in_asn = max_delay / slot_time; 
+		
+   delay_array[0]         = (delay_in_asn     & 0xff);
+   delay_array[1]         = (delay_in_asn/256 & 0xff);
+   
+   ieee154e_getAsn(&et_asn[0]);
+   for(i=0; i<5; i++) {
+      sum = et_asn[i] + delay_array[i] + carry;  
+      et_asn[i] = sum & 0xFF; 
+      carry = ((sum >> 8) & 0xFF);
+   }
+}
+
+/**
+/brief Format asn to asn_t structure
+
+\param[in]  in  asn value represented in array format
+
+\param[out] val_asn   asn value represented in asn_t format
+*/
+void ieee154e_orderToASNStructure(uint8_t* in,asn_t* val_asn) {
+   val_asn->bytes0and1   =     in[0] + 256*in[1];
+   val_asn->bytes2and3   =     in[2] + 256*in[3];
+   val_asn->byte4        =     in[4];
+}
+#endif
 //======= events
 
 /**
@@ -196,7 +268,7 @@ PORT_TIMER_WIDTH ieee154e_asnDiff(asn_t* someASN) {
 
 This function executes in ISR mode, when the new slot timer fires.
 */
-void isr_ieee154e_newSlot() {
+void isr_ieee154e_newSlot(opentimers_id_t id) {
     ieee154e_vars.startOfSlotReference = opentimers_getCurrentTimeout();
     opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                  // timerId
@@ -230,7 +302,7 @@ void isr_ieee154e_newSlot() {
 
 This function executes in ISR mode, when the FSM timer fires.
 */
-void isr_ieee154e_timer() {
+void isr_ieee154e_timer(opentimers_id_t id) {
    switch (ieee154e_vars.state) {
       case S_TXDATAOFFSET:
          activity_ti2();
@@ -697,26 +769,28 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
     uint16_t oldFrameLength;
     open_addr_t temp_neighbor;
     if (isValidEbFormat(pkt)==TRUE){
-        *lenIE = sizeof(ebIEsBytestream);
+        *lenIE = sizeof(ebIEsBytestream)+5*(*((uint8_t*)(pkt->payload)+EB_SLOTFRAME_NUMLINK_OFFSET)-1);
         asnStoreFromEB((uint8_t*)(pkt->payload)+EB_ASN0_OFFSET);
         joinPriorityStoreFromEB(*((uint8_t*)(pkt->payload)+EB_JP_OFFSET));
         schedule_setFrameNumber(1);
         oldFrameLength = schedule_getFrameLength();
         if (oldFrameLength==0){
-            schedule_setFrameLength(SLOTFRAME_LENGTH);
+            schedule_setFrameLength(*((uint8_t*)(pkt->payload)+EB_SLOTFRAME_LEN_OFFSET));
             // shared TXRX anycast slot(s)
             memset(&temp_neighbor,0,sizeof(temp_neighbor));
             temp_neighbor.type             = ADDR_ANYCAST;
-            schedule_addActiveSlot(
-                0,             // slot offset
-                CELLTYPE_TXRX, // type of slot
-                TRUE,          // shared?
-                0,             // channel offset
-                &temp_neighbor // neighbor
-            );
+            for (i=0;i<*((uint8_t*)(pkt->payload)+EB_SLOTFRAME_NUMLINK_OFFSET);i++){
+                schedule_addActiveSlot(
+                    i,             // slot offset
+                    CELLTYPE_TXRX, // type of slot
+                    TRUE,          // shared?
+                    0,             // channel offset
+                    &temp_neighbor // neighbor
+                );
+            }
         }
-        timeslotTemplateIDStoreFromEB(0);
-        channelhoppingTemplateIDStoreFromEB(0);
+        timeslotTemplateIDStoreFromEB(*((uint8_t*)(pkt->payload)+EB_SLOTFRAME_TS_ID_OFFSET));
+        channelhoppingTemplateIDStoreFromEB(*((uint8_t*)(pkt->payload)+EB_SLOTFRAME_CH_ID_OFFSET));
         // at this point, ASN and frame length are known
         // the current slotoffset can be inferred
         ieee154e_syncSlotOffset();
@@ -2250,8 +2324,8 @@ bool isValidEbFormat(OpenQueueEntry_t* pkt){
     if (pkt->length<EB_IE_LEN){
         return FALSE;
     }
-    for (i=0;i<EB_IE_LEN;i++){
-        if (i>=EB_ASN0_OFFSET && i<=EB_JP_OFFSET){
+    for (i=2;i<EB_IE_LEN;i++){
+        if ((i>=EB_ASN0_OFFSET && i<=EB_JP_OFFSET) || i==EB_SLOTFRAME_LEN_OFFSET || i==EB_SLOTFRAME_NUMLINK_OFFSET){
             continue;
         } else {
             if (ebIEsBytestream[i]!=pkt->payload[i]){

@@ -23,7 +23,7 @@ The superframe reappears over time and can be arbitrarily long.
 #define SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS                      1
 #define SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET                        0
 #define SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET                     0
-#define SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE          1 //id of slotframe
+#define SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE          0 //id of slotframe
 #define SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_NUMBER          1 //1 slotframe by default.
 
 #define NUMSERIALRX          3

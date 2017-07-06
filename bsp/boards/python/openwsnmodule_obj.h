@@ -17,6 +17,7 @@
 #include "IEEE802154E_obj.h"
 #include "IEEE802154_security_obj.h"
 #include "adaptive_sync_obj.h"
+#include "iphc_obj.h"
 #include "neighbors_obj.h"
 #include "sixtop_obj.h"
 #include "sf0_obj.h"
@@ -198,6 +199,7 @@ struct OpenMote {
    icmpv6rpl_vars_t     icmpv6rpl_vars;
    openudp_vars_t       openudp_vars;
    // l3
+   monitor_expiration_vars_t        monitor_expiration_vars;
    // l2b
    sixtop_vars_t        sixtop_vars;
    neighbors_vars_t     neighbors_vars;

@@ -47,7 +47,7 @@ owerror_t csensors_receive(
    uint8_t*          coap_outgoingOptionsLen
 );
 
-void csensors_timer_cb(void);
+void csensors_timer_cb(opentimers_id_t id);
 
 void csensors_task_cb(void);
 
@@ -282,7 +282,7 @@ owerror_t csensors_receive(
    \param[in] id The opentimer identifier used to resolve the csensor resource associated
       parsed.
 */
-void csensors_timer_cb(){
+void csensors_timer_cb(opentimers_id_t id){
    uint8_t i;
    
    for(i=0;i<csensors_vars.numCsensors;i++) {
