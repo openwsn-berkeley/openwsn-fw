@@ -5,6 +5,7 @@
 #include "openserial.h"
 #include "neighbors.h"
 #include "schedule.h"
+#include "IEEE802154_security.h"
 
 //=========================== variables =======================================
 
