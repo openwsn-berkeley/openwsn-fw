@@ -16,7 +16,6 @@
 #include "IEEE802154_security.h"
 #include "idmanager.h"
 #include "schedule.h"
-#include "cjoin.h"
 
 //=========================== define ==========================================
 
