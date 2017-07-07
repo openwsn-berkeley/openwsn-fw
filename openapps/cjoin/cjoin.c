@@ -14,7 +14,6 @@
 #include "idmanager.h"
 #include "IEEE802154E.h"
 #include "IEEE802154_security.h"
-#include "icmpv6rpl.h"
 #include "cbor.h"
 #include "eui64.h"
 #include "neighbors.h"
