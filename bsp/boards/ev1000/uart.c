@@ -36,7 +36,7 @@ void uart_init() {
     
     // reset local variables
     memset(&uart_vars,0,sizeof(uart_vars_t));
-    
+#ifndef BOARD_EV1000 // The EV1000 board does not have a serial port available. Could use USB instead.
     //when this value is 0, we are send the first data
     uart_vars.startOrend = 0;
     //flag byte for start byte and end byte
@@ -72,6 +72,7 @@ void uart_init() {
     GPIO_InitStructure.GPIO_Speed   = GPIO_Speed_2MHz;
     GPIO_InitStructure.GPIO_Mode    = GPIO_Mode_IN_FLOATING;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
+#endif
 }
 
 void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb) {
@@ -79,33 +80,44 @@ void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb) {
     uart_vars.txCb = txCb;
     uart_vars.rxCb = rxCb;
     
+#ifndef BOARD_EV1000
     //enable nvic uart.
      NVIC_uart();
+#endif
 }
 
 void uart_enableInterrupts(){
     
+#ifndef BOARD_EV1000
     USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
+#endif
 }
 
 void uart_disableInterrupts(){
     
+#ifndef BOARD_EV1000
     USART_ITConfig(USART1, USART_IT_TXE, DISABLE);
     USART_ITConfig(USART1, USART_IT_RXNE, DISABLE);
+#endif
 }
 
 void uart_clearRxInterrupts(){
     
+#ifndef BOARD_EV1000
     USART_ClearFlag(USART1,USART_FLAG_RXNE);
+#endif
 }
 
 void uart_clearTxInterrupts(){
     
+#ifndef BOARD_EV1000
     USART_ClearFlag(USART1,USART_FLAG_TXE);
+#endif
 }
 
 void uart_writeByte(uint8_t byteToWrite) {
     
+#ifndef BOARD_EV1000
     USART_SendData(USART1,(uint16_t)byteToWrite);
     while(USART_GetFlagStatus(USART1,USART_FLAG_TXE) == RESET);
     //start or end byte?
@@ -118,12 +130,15 @@ void uart_writeByte(uint8_t byteToWrite) {
             USART_ITConfig(USART1, USART_IT_TXE, DISABLE);
         }
     }
+#endif
 }
 
 uint8_t uart_readByte() {
     
     uint16_t temp;
+#ifndef BOARD_EV1000
     temp = USART_ReceiveData(USART1);
+#endif
     return (uint8_t)temp;
 }
 

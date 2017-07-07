@@ -419,6 +419,17 @@ void CAN_SCE_IRQHandler(void)
 *******************************************************************************/
 void EXTI9_5_IRQHandler(void)
 {
+    debugpins_isr_set();
+    if(EXTI_GetITStatus(EXTI_Line5) != RESET)
+    {
+      //leds_sync_toggle();
+      EXTI_ClearITPendingBit(EXTI_Line5);
+      //call RCC wake up here as we cannot include rcc at radio.c 
+      //as brakes compatibility with other boards using atmel radio
+      RCC_Wakeup();
+      radio_isr();
+    }
+    debugpins_isr_clr();
 }
 
 /*******************************************************************************
@@ -639,17 +650,6 @@ void USART3_IRQHandler(void)
 *******************************************************************************/
 void EXTI15_10_IRQHandler(void)
 {
-    debugpins_isr_set();
-    if(EXTI_GetITStatus(EXTI_Line10) != RESET)
-    {
-      //leds_sync_toggle();
-      EXTI_ClearITPendingBit(EXTI_Line10);
-      //call RCC wake up here as we cannot include rcc at radio.c 
-      //as brakes compatibility with other boards using atmel radio
-      RCC_Wakeup();
-      radio_isr();
-    }
-    debugpins_isr_clr();
 }
 
 /*******************************************************************************

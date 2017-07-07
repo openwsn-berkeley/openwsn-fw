@@ -98,13 +98,13 @@ void board_init(){
     // initialize board
     leds_init();
     debugpins_init();
-//    uart_init();
+    uart_init();
     spi_init();
     bsp_timer_init();
     radio_init();
-//    radiotimer_init();
+    radiotimer_init();
     //enable nvic for the radio
-//    NVIC_radio();
+    NVIC_radio();
 }
 
 void board_sleep() {

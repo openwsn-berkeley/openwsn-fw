@@ -22,6 +22,8 @@ to return the board's description.
 //#define PACK_START  _Pragma("pack(1)")
 //#define PACK_END    _Pragma("pack()")
 
+#define BOARD_EV1000 1
+
 #define INTERRUPT_DECLARATION(); //no declaration
 
 #define DISABLE_INTERRUPTS()    NVIC_SETPRIMASK();
@@ -45,8 +47,8 @@ to return the board's description.
 //===== pinout
 
 // [P4.7] radio SLP_TR_CNTL
-#define PORT_PIN_RADIO_SLP_TR_CNTL_HIGH()     GPIOB->ODR |= 0X0002;
-#define PORT_PIN_RADIO_SLP_TR_CNTL_LOW()      GPIOB->ODR &= ~0X0002;
+#define PORT_PIN_RADIO_SLP_TR_CNTL_HIGH()//     GPIOB->ODR |= 0X0002;
+#define PORT_PIN_RADIO_SLP_TR_CNTL_LOW()//      GPIOB->ODR &= ~0X0002;
 // radio reset line
 // radio /RST
 #define PORT_PIN_RADIO_RESET_HIGH()       //GPIOC->ODR |= 0X0040;
