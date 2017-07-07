@@ -65,7 +65,7 @@ bool     isValidRxFrame(ieee802154_header_iht* ieee802514_header);
 bool     isValidAck(ieee802154_header_iht*     ieee802514_header,
                     OpenQueueEntry_t*          packetSent);
 bool     isValidJoin(OpenQueueEntry_t* eb, ieee802154_header_iht *parsedHeader); 
-bool     isValidEbFormat(OpenQueueEntry_t* pkt);
+bool     isValidEbFormat(OpenQueueEntry_t* pkt, uint16_t* lenIE);
 // IEs Handling
 bool     ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE);
 void     timeslotTemplateIDStoreFromEB(uint8_t id);
@@ -762,31 +762,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
 
 port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
     uint8_t i;
-    uint16_t oldFrameLength;
-    open_addr_t temp_neighbor;
-    if (isValidEbFormat(pkt)==TRUE){
-        *lenIE = sizeof(ebIEsBytestream)+5*(*((uint8_t*)(pkt->payload)+EB_SLOTFRAME_NUMLINK_OFFSET)-1);
-        asnStoreFromEB((uint8_t*)(pkt->payload)+EB_ASN0_OFFSET);
-        joinPriorityStoreFromEB(*((uint8_t*)(pkt->payload)+EB_JP_OFFSET));
-        schedule_setFrameNumber(1);
-        oldFrameLength = schedule_getFrameLength();
-        if (oldFrameLength==0){
-            schedule_setFrameLength(*((uint8_t*)(pkt->payload)+EB_SLOTFRAME_LEN_OFFSET));
-            // shared TXRX anycast slot(s)
-            memset(&temp_neighbor,0,sizeof(temp_neighbor));
-            temp_neighbor.type             = ADDR_ANYCAST;
-            for (i=0;i<*((uint8_t*)(pkt->payload)+EB_SLOTFRAME_NUMLINK_OFFSET);i++){
-                schedule_addActiveSlot(
-                    i,             // slot offset
-                    CELLTYPE_TXRX, // type of slot
-                    TRUE,          // shared?
-                    0,             // channel offset
-                    &temp_neighbor // neighbor
-                );
-            }
-        }
-        timeslotTemplateIDStoreFromEB(*((uint8_t*)(pkt->payload)+EB_SLOTFRAME_TS_ID_OFFSET));
-        channelhoppingTemplateIDStoreFromEB(*((uint8_t*)(pkt->payload)+EB_SLOTFRAME_CH_ID_OFFSET));
+    if (isValidEbFormat(pkt,lenIE)==TRUE){
         // at this point, ASN and frame length are known
         // the current slotoffset can be inferred
         ieee154e_syncSlotOffset();
@@ -1793,12 +1769,15 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
       // handle IEs xv poipoi
       // reset join priority 
       // retrieve IE in sixtop
-      if ((ieee802514_header.valid==TRUE &&
+      if (
+          (ieee802514_header.valid==TRUE &&
           ieee802514_header.ieListPresent==TRUE && 
           ieee802514_header.frameType==IEEE154_TYPE_BEACON && // if it is not a beacon and have ie, the ie will be processed in sixtop
           packetfunctions_sameAddress(&ieee802514_header.panid,idmanager_getMyID(ADDR_PANID)) && 
-          ieee154e_processIEs(ieee154e_vars.dataReceived,&lenIE))==FALSE) {
+          ieee154e_processIEs(ieee154e_vars.dataReceived,&lenIE))==FALSE
+      ) {
           //log  that the packet is not carrying IEs
+          break;
       }
       
      // toss the IEs including Synch
@@ -2286,21 +2265,154 @@ bool isValidJoin(OpenQueueEntry_t* eb, ieee802154_header_iht *parsedHeader) {
    return FALSE;
 }
 
-bool isValidEbFormat(OpenQueueEntry_t* pkt){
-    uint8_t i;
-    if (pkt->length<EB_IE_LEN){
-        return FALSE;
-    }
-    for (i=2;i<EB_IE_LEN;i++){
-        if ((i>=EB_ASN0_OFFSET && i<=EB_JP_OFFSET) || i==EB_SLOTFRAME_LEN_OFFSET || i==EB_SLOTFRAME_NUMLINK_OFFSET){
-            continue;
+bool isValidEbFormat(OpenQueueEntry_t* pkt, uint16_t* lenIE){
+    
+    bool    chTemplate_checkPass;
+    bool    tsTemplate_checkpass;
+    bool    sync_ie_checkPass;
+    bool    slotframelink_ie_checkPass;
+    
+    uint8_t ptr;
+    uint8_t temp16b;
+    bool    mlme_ie_found;
+    uint8_t mlme_ie_content_offset;
+    uint8_t ielen;
+    
+    uint8_t subtype;
+    uint8_t sublen;
+    uint8_t subid;
+    
+    uint8_t  i;
+    uint8_t  oldFrameLength;
+    uint8_t  numlinks;
+    open_addr_t temp_neighbor;
+    uint16_t slotoffset;
+    uint16_t channeloffset;
+    
+    chTemplate_checkPass        = FALSE;
+    tsTemplate_checkpass        = FALSE;
+    sync_ie_checkPass           = FALSE;
+    slotframelink_ie_checkPass  = FALSE; 
+    
+    ptr = 0;
+    mlme_ie_found = FALSE;
+    
+    while (ptr<pkt->length){
+    
+        temp16b  = (uint16_t)(*((uint8_t*)(pkt->payload+ptr)));
+        temp16b |= (uint16_t)(*((uint8_t*)(pkt->payload+ptr+1)))>>8;
+        ptr += 2;
+        
+        ielen = temp16b & 0x07FF;
+        
+        if ((temp16b & 0x7800)>>11 != 0x01 || (temp16b & 0x8000)>>15 != 0x01){
+            // this is not MLME IE
+            ptr += ielen;
         } else {
-            if (ebIEsBytestream[i]!=pkt->payload[i]){
-                return FALSE;
-            }
+            // found the MLME payload IE
+            mlme_ie_found = TRUE;
+            mlme_ie_content_offset = ptr;
+            break;
         }
     }
-    return TRUE;
+    
+    if (mlme_ie_found==FALSE){
+        // didn't find the MLME payload IE
+        return FALSE;
+    }
+    
+    while(
+        ptr<mlme_ie_content_offset+ielen &&
+        (
+            chTemplate_checkPass        == FALSE || 
+            tsTemplate_checkpass        == FALSE ||
+            sync_ie_checkPass           == FALSE ||
+            slotframelink_ie_checkPass  == FALSE 
+        )
+    ){
+        // subID
+        temp16b  = (uint16_t)(*((uint8_t*)(pkt->payload+ptr)));
+        temp16b |= (uint16_t)(*((uint8_t*)(pkt->payload+ptr+1)))>>8;
+        ptr += 2;
+        
+        subtype = (temp16b & 0x8000)>>15;
+        if (subtype == 1) {
+            // this is long type subID
+            subid  = (temp16b & 0x7800)>>11;
+            sublen = (temp16b & 0x07FF);
+            switch(subid){
+            case 0xC8: // channel hopping template IE
+                channelhoppingTemplateIDStoreFromEB(*((uint8_t*)(pkt->payload+ptr)));
+                chTemplate_checkPass = TRUE;
+                break;
+            default:
+                // unsupported IE type, skip the ie
+              break;
+            }
+        } else {
+            // this is short type subID
+            subid  = (temp16b & 0x7F00)>>8;
+            sublen = (temp16b & 0x00FF);
+            switch(subid){
+            case 0x1A: // sync IE
+                asnStoreFromEB(((uint8_t*)(pkt->payload+ptr)));
+                joinPriorityStoreFromEB(*((uint8_t*)(pkt->payload)+ptr+5));
+                sync_ie_checkPass    = TRUE;
+                break;
+            case 0x1C: // timeslot template IE
+                timeslotTemplateIDStoreFromEB(*((uint8_t*)(pkt->payload)+ptr));
+                tsTemplate_checkpass = TRUE;
+                break;
+            case 0x1B: // slotframe link IE
+                schedule_setFrameNumber(*((uint8_t*)(pkt->payload)+ptr));       // number of slotframes
+                schedule_setFrameHandle(*((uint8_t*)(pkt->payload)+ptr+1));     // slotframe id
+                oldFrameLength = schedule_getFrameLength();
+                if (oldFrameLength==0){
+                    temp16b  = (uint16_t)(*((uint8_t*)(pkt->payload+ptr+2)));   // slotframes length
+                    temp16b |= (uint16_t)(*((uint8_t*)(pkt->payload+ptr+3)))>>8;
+                    schedule_setFrameLength(temp16b);
+                    numlinks = *((uint8_t*)(pkt->payload+ptr+4));               // number of links
+                    // shared TXRX anycast slot(s)
+                    memset(&temp_neighbor,0,sizeof(temp_neighbor));
+                    temp_neighbor.type             = ADDR_ANYCAST;
+                    
+                    for (i=0;i<numlinks;i++){
+                        slotoffset     = (uint16_t)(*((uint8_t*)(pkt->payload+ptr+5+5*i)));   // slotframes length
+                        slotoffset    |= (uint16_t)(*((uint8_t*)(pkt->payload+ptr+5+5*i+1)))>>8;
+                        
+                        channeloffset  = (uint16_t)(*((uint8_t*)(pkt->payload+ptr+5+5*i+2)));   // slotframes length
+                        channeloffset |= (uint16_t)(*((uint8_t*)(pkt->payload+ptr+5+5*i+3)))>>8;
+                        
+                        schedule_addActiveSlot(
+                            slotoffset,    // slot offset
+                            CELLTYPE_TXRX, // type of slot
+                            TRUE,          // shared?
+                            channeloffset, // channel offset
+                            &temp_neighbor // neighbor
+                        );
+                    }
+                }
+                slotframelink_ie_checkPass = TRUE;
+                break;
+            default:
+                // unsupported IE type, skip the ie
+                break;
+            }
+        }
+        ptr += sublen;
+    }
+    
+    if (
+        chTemplate_checkPass     && 
+        tsTemplate_checkpass     && 
+        sync_ie_checkPass        && 
+        slotframelink_ie_checkPass
+    ) {
+        *lenIE = pkt->length;
+        return TRUE;
+    } else {
+        return FALSE;
+    }
 }
 
 port_INLINE void asnStoreFromEB(uint8_t* asn) {
