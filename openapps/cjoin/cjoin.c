@@ -73,7 +73,7 @@ void cjoin_init() {
 
    cjoin_vars.timerId = opentimers_create();
 
-   idmanager_setJoinKey(masterSecret);
+   idmanager_setJoinKey((uint8_t *) masterSecret);
    cjoin_init_security_context();
 
    cjoin_schedule();
