@@ -47,8 +47,11 @@ else:
 # union of default and additional apps (without duplicates)
 apps      = ['opencoap']
 apps     += sorted(list(set(defaultApps+userApps)))
-appsInit  = ['opencoap'] # make sure opencoap is initialized first
-appsInit += sorted(list(set(userApps)))
+if userApps:
+    appsInit  = ['opencoap'] # make sure opencoap is initialized first
+    appsInit += sorted(list(set(userApps)))
+else:
+    appsInit = []
 
 #===== rule to create a (temporary) openapps_dyn.c file
 
