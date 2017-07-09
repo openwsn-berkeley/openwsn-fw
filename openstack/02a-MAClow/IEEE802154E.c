@@ -2273,7 +2273,7 @@ bool isValidEbFormat(OpenQueueEntry_t* pkt, uint16_t* lenIE){
     bool    slotframelink_ie_checkPass;
     
     uint8_t ptr;
-    uint8_t temp16b;
+    uint16_t temp16b;
     bool    mlme_ie_found;
     uint8_t mlme_ie_content_offset;
     uint8_t ielen;
@@ -2299,8 +2299,8 @@ bool isValidEbFormat(OpenQueueEntry_t* pkt, uint16_t* lenIE){
     
     while (ptr<pkt->length){
     
-        temp16b  = (uint16_t)(*((uint8_t*)(pkt->payload+ptr)));
-        temp16b |= (uint16_t)(*((uint8_t*)(pkt->payload+ptr+1)))>>8;
+        temp16b  = *((uint8_t*)(pkt->payload)+ptr);
+        temp16b |= (*((uint8_t*)(pkt->payload)+ptr+1))<<8;
         ptr += 2;
         
         ielen = temp16b & 0x07FF;
@@ -2331,8 +2331,8 @@ bool isValidEbFormat(OpenQueueEntry_t* pkt, uint16_t* lenIE){
         )
     ){
         // subID
-        temp16b  = (uint16_t)(*((uint8_t*)(pkt->payload+ptr)));
-        temp16b |= (uint16_t)(*((uint8_t*)(pkt->payload+ptr+1)))>>8;
+        temp16b  = *((uint8_t*)(pkt->payload)+ptr);
+        temp16b |= (*((uint8_t*)(pkt->payload)+ptr+1))<<8;
         ptr += 2;
         
         subtype = (temp16b & 0x8000)>>15;
@@ -2341,7 +2341,7 @@ bool isValidEbFormat(OpenQueueEntry_t* pkt, uint16_t* lenIE){
             subid  = (temp16b & 0x7800)>>11;
             sublen = (temp16b & 0x07FF);
             switch(subid){
-            case 0xC8: // channel hopping template IE
+            case 0x09: // channel hopping template IE
                 channelhoppingTemplateIDStoreFromEB(*((uint8_t*)(pkt->payload+ptr)));
                 chTemplate_checkPass = TRUE;
                 break;
@@ -2355,7 +2355,7 @@ bool isValidEbFormat(OpenQueueEntry_t* pkt, uint16_t* lenIE){
             sublen = (temp16b & 0x00FF);
             switch(subid){
             case 0x1A: // sync IE
-                asnStoreFromEB(((uint8_t*)(pkt->payload+ptr)));
+                asnStoreFromEB((uint8_t*)(pkt->payload+ptr));
                 joinPriorityStoreFromEB(*((uint8_t*)(pkt->payload)+ptr+5));
                 sync_ie_checkPass    = TRUE;
                 break;
@@ -2368,20 +2368,21 @@ bool isValidEbFormat(OpenQueueEntry_t* pkt, uint16_t* lenIE){
                 schedule_setFrameHandle(*((uint8_t*)(pkt->payload)+ptr+1));     // slotframe id
                 oldFrameLength = schedule_getFrameLength();
                 if (oldFrameLength==0){
-                    temp16b  = (uint16_t)(*((uint8_t*)(pkt->payload+ptr+2)));   // slotframes length
-                    temp16b |= (uint16_t)(*((uint8_t*)(pkt->payload+ptr+3)))>>8;
+                    temp16b  = *((uint8_t*)(pkt->payload+ptr+2));               // slotframes length
+                    temp16b |= *((uint8_t*)(pkt->payload+ptr+3))<<8;
                     schedule_setFrameLength(temp16b);
                     numlinks = *((uint8_t*)(pkt->payload+ptr+4));               // number of links
+
                     // shared TXRX anycast slot(s)
                     memset(&temp_neighbor,0,sizeof(temp_neighbor));
                     temp_neighbor.type             = ADDR_ANYCAST;
                     
                     for (i=0;i<numlinks;i++){
-                        slotoffset     = (uint16_t)(*((uint8_t*)(pkt->payload+ptr+5+5*i)));   // slotframes length
-                        slotoffset    |= (uint16_t)(*((uint8_t*)(pkt->payload+ptr+5+5*i+1)))>>8;
+                        slotoffset     = *((uint8_t*)(pkt->payload+ptr+5+5*i));   // slotframes length
+                        slotoffset    |= *((uint8_t*)(pkt->payload+ptr+5+5*i+1))<<8;
                         
-                        channeloffset  = (uint16_t)(*((uint8_t*)(pkt->payload+ptr+5+5*i+2)));   // slotframes length
-                        channeloffset |= (uint16_t)(*((uint8_t*)(pkt->payload+ptr+5+5*i+3)))>>8;
+                        channeloffset  = *((uint8_t*)(pkt->payload+ptr+5+5*i+2));   // slotframes length
+                        channeloffset |= *((uint8_t*)(pkt->payload+ptr+5+5*i+3))<<8;
                         
                         schedule_addActiveSlot(
                             slotoffset,    // slot offset
