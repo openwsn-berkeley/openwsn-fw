@@ -1653,27 +1653,26 @@ port_INLINE void activity_ri4(PORT_TIMER_WIDTH capturedTime) {
 }
 
 port_INLINE void activity_rie3() {
-     
-   // log the error
-   openserial_printError(COMPONENT_IEEE802154E,ERR_WDDATADURATION_OVERFLOWS,
+    // log the error
+    openserial_printError(COMPONENT_IEEE802154E,ERR_WDDATADURATION_OVERFLOWS,
                          (errorparameter_t)ieee154e_vars.state,
                          (errorparameter_t)ieee154e_vars.slotOffset);
    
-   // abort
-   endSlot();
+    // abort
+    endSlot();
 }
 
 port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
-   ieee802154_header_iht ieee802514_header;
-   uint16_t lenIE=0;
+    ieee802154_header_iht ieee802514_header;
+    uint16_t lenIE=0;
    
-   // change state
-   changeState(S_TXACKOFFSET);
+    // change state
+    changeState(S_TXACKOFFSET);
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
-   // cancel rt4
-   radiotimer_cancel(ACTION_NORMAL_TIMER);
+    // cancel rt4
+    radiotimer_cancel(ACTION_NORMAL_TIMER);
 #else
-   // cancel rt4
+    // cancel rt4
     opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         ieee154e_vars.slotDuration,                       // duration
@@ -1683,166 +1682,169 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
     );
     // radiotimer_cancel();
 #endif
-   // turn off the radio
-   radio_rfOff();
-   ieee154e_vars.radioOnTics+=sctimer_readCounter()-ieee154e_vars.radioOnInit;
-   // get a buffer to put the (received) data in
-   ieee154e_vars.dataReceived = openqueue_getFreePacketBuffer(COMPONENT_IEEE802154E);
-   if (ieee154e_vars.dataReceived==NULL) {
-      // log the error
-      openserial_printError(COMPONENT_IEEE802154E,ERR_NO_FREE_PACKET_BUFFER,
+    // turn off the radio
+    radio_rfOff();
+    ieee154e_vars.radioOnTics+=sctimer_readCounter()-ieee154e_vars.radioOnInit;
+    // get a buffer to put the (received) data in
+    ieee154e_vars.dataReceived = openqueue_getFreePacketBuffer(COMPONENT_IEEE802154E);
+    if (ieee154e_vars.dataReceived==NULL) {
+        // log the error
+        openserial_printError(COMPONENT_IEEE802154E,ERR_NO_FREE_PACKET_BUFFER,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
-      // abort
-      endSlot();
-      return;
-   }
+        // abort
+        endSlot();
+        return;
+    }
    
-   // declare ownership over that packet
-   ieee154e_vars.dataReceived->creator = COMPONENT_IEEE802154E;
-   ieee154e_vars.dataReceived->owner   = COMPONENT_IEEE802154E;
+    // declare ownership over that packet
+    ieee154e_vars.dataReceived->creator = COMPONENT_IEEE802154E;
+    ieee154e_vars.dataReceived->owner   = COMPONENT_IEEE802154E;
 
-   /*
-   The do-while loop that follows is a little parsing trick.
-   Because it contains a while(0) condition, it gets executed only once.
-   The behavior is:
-   - if a break occurs inside the do{} body, the error code below the loop
-     gets executed. This indicates something is wrong with the packet being 
-     parsed.
-   - if a return occurs inside the do{} body, the error code below the loop
-     does not get executed. This indicates the received packet is correct.
-   */
-   do { // this "loop" is only executed once
+    /*
+    The do-while loop that follows is a little parsing trick.
+    Because it contains a while(0) condition, it gets executed only once.
+    The behavior is:
+    - if a break occurs inside the do{} body, the error code below the loop
+        gets executed. This indicates something is wrong with the packet being 
+        parsed.
+    - if a return occurs inside the do{} body, the error code below the loop
+        does not get executed. This indicates the received packet is correct.
+    */
+    do { // this "loop" is only executed once
       
-      // retrieve the received data frame from the radio's Rx buffer
-      ieee154e_vars.dataReceived->payload = &(ieee154e_vars.dataReceived->packet[FIRST_FRAME_BYTE]);
-      radio_getReceivedFrame(       ieee154e_vars.dataReceived->payload,
-                                   &ieee154e_vars.dataReceived->length,
-                             sizeof(ieee154e_vars.dataReceived->packet),
-                                   &ieee154e_vars.dataReceived->l1_rssi,
-                                   &ieee154e_vars.dataReceived->l1_lqi,
-                                   &ieee154e_vars.dataReceived->l1_crc);
+        // retrieve the received data frame from the radio's Rx buffer
+        ieee154e_vars.dataReceived->payload = &(ieee154e_vars.dataReceived->packet[FIRST_FRAME_BYTE]);
+        radio_getReceivedFrame(
+            ieee154e_vars.dataReceived->payload,
+            &ieee154e_vars.dataReceived->length,
+            sizeof(ieee154e_vars.dataReceived->packet),
+            &ieee154e_vars.dataReceived->l1_rssi,
+            &ieee154e_vars.dataReceived->l1_lqi,
+            &ieee154e_vars.dataReceived->l1_crc
+        );
       
-      // break if wrong length
-      if (ieee154e_vars.dataReceived->length<LENGTH_CRC || ieee154e_vars.dataReceived->length>LENGTH_IEEE154_MAX ) {
-         // jump to the error code below this do-while loop
-        openserial_printError(COMPONENT_IEEE802154E,ERR_INVALIDPACKETFROMRADIO,
+        // break if wrong length
+        if (ieee154e_vars.dataReceived->length<LENGTH_CRC || ieee154e_vars.dataReceived->length>LENGTH_IEEE154_MAX ) {
+            // jump to the error code below this do-while loop
+            openserial_printError(COMPONENT_IEEE802154E,ERR_INVALIDPACKETFROMRADIO,
                             (errorparameter_t)2,
                             ieee154e_vars.dataReceived->length);
-         break;
-      }
-      
-      // toss CRC (2 last bytes)
-      packetfunctions_tossFooter(   ieee154e_vars.dataReceived, LENGTH_CRC);
-      
-      // if CRC doesn't check, stop
-      if (ieee154e_vars.dataReceived->l1_crc==FALSE) {
-         // jump to the error code below this do-while loop
-         break;
-      }
-      
-      // parse the IEEE802.15.4 header (RX DATA)
-      ieee802154_retrieveHeader(ieee154e_vars.dataReceived,&ieee802514_header);
-      
-      // break if invalid IEEE802.15.4 header
-      if (ieee802514_header.valid==FALSE) {
-         // break from the do-while loop and execute the clean-up code below
-         break;
-      }
-
-      // store header details in packet buffer
-      ieee154e_vars.dataReceived->l2_frameType      = ieee802514_header.frameType;
-      ieee154e_vars.dataReceived->l2_dsn            = ieee802514_header.dsn;
-      ieee154e_vars.dataReceived->l2_IEListPresent  = ieee802514_header.ieListPresent;
-      memcpy(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop),&(ieee802514_header.src),sizeof(open_addr_t));
-
-      // if security is enabled, decrypt/authenticate the frame.
-      if (ieee154e_vars.dataReceived->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
-         if (IEEE802154_security_incomingFrame(ieee154e_vars.dataReceived) != E_SUCCESS) {
             break;
-         }
-      } // checked if unsecured frame should pass during header retrieval
-
-      // toss the IEEE802.15.4 header
-      packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_header.headerLength);
-
-      // handle IEs xv poipoi
-      // reset join priority 
-      // retrieve IE in sixtop
-      if (
-          (ieee802514_header.valid==TRUE &&
-          ieee802514_header.ieListPresent==TRUE && 
-          ieee802514_header.frameType==IEEE154_TYPE_BEACON && // if it is not a beacon and have ie, the ie will be processed in sixtop
-          packetfunctions_sameAddress(&ieee802514_header.panid,idmanager_getMyID(ADDR_PANID)) && 
-          ieee154e_processIEs(ieee154e_vars.dataReceived,&lenIE))==FALSE
-      ) {
-          //log  that the packet is not carrying IEs
-          break;
-      }
+        }
       
-     // toss the IEs including Synch
-      packetfunctions_tossHeader(ieee154e_vars.dataReceived,lenIE);
+        // toss CRC (2 last bytes)
+        packetfunctions_tossFooter(ieee154e_vars.dataReceived, LENGTH_CRC);
+      
+        // if CRC doesn't check, stop
+        if (ieee154e_vars.dataReceived->l1_crc==FALSE) {
+            // jump to the error code below this do-while loop
+            break;
+        }
+      
+        // parse the IEEE802.15.4 header (RX DATA)
+        ieee802154_retrieveHeader(ieee154e_vars.dataReceived,&ieee802514_header);
+      
+        // break if invalid IEEE802.15.4 header
+        if (ieee802514_header.valid==FALSE) {
+            // break from the do-while loop and execute the clean-up code below
+            break;
+        }
+
+        // store header details in packet buffer
+        ieee154e_vars.dataReceived->l2_frameType      = ieee802514_header.frameType;
+        ieee154e_vars.dataReceived->l2_dsn            = ieee802514_header.dsn;
+        ieee154e_vars.dataReceived->l2_IEListPresent  = ieee802514_header.ieListPresent;
+        memcpy(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop),&(ieee802514_header.src),sizeof(open_addr_t));
+
+        // if security is enabled, decrypt/authenticate the frame.
+        if (ieee154e_vars.dataReceived->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
+            if (IEEE802154_security_incomingFrame(ieee154e_vars.dataReceived) != E_SUCCESS) {
+                break;
+            }
+        } // checked if unsecured frame should pass during header retrieval
+
+        // toss the IEEE802.15.4 header
+        packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_header.headerLength);
+      
+      
+        if (
+            ieee802514_header.frameType       == IEEE154_TYPE_BEACON                             && // if it is not a beacon and have ie, the ie will be processed in sixtop
+            ieee802514_header.ieListPresent   == TRUE                                            && 
+            packetfunctions_sameAddress(&ieee802514_header.panid,idmanager_getMyID(ADDR_PANID))
+        ) {
+            if (ieee154e_processIEs(ieee154e_vars.dataReceived,&lenIE)==FALSE){
+                // retrieve EB IE failed, break the do-while loop and execute the clean up code below
+                break;
+            }
+        }
+      
+        // toss the IEs including Synch
+        packetfunctions_tossHeader(ieee154e_vars.dataReceived,lenIE);
             
-      // record the captured time
-      ieee154e_vars.lastCapturedTime = capturedTime;
+        // record the captured time
+        ieee154e_vars.lastCapturedTime = capturedTime;
       
-      // if I just received an invalid frame, stop
-      if (isValidRxFrame(&ieee802514_header)==FALSE) {
-         // jump to the error code below this do-while loop
-         break;
-      }
+        // if I just received an invalid frame, stop
+        if (isValidRxFrame(&ieee802514_header)==FALSE) {
+            // jump to the error code below this do-while loop
+            break;
+        }
       
-      // record the timeCorrection and print out at end of slot
-      ieee154e_vars.dataReceived->l2_timeCorrection = (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)TsTxOffset-(PORT_SIGNED_INT_WIDTH)ieee154e_vars.syncCapturedTime);
+        // record the timeCorrection and print out at end of slot
+        ieee154e_vars.dataReceived->l2_timeCorrection = (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)TsTxOffset-(PORT_SIGNED_INT_WIDTH)ieee154e_vars.syncCapturedTime);
       
-      // check if ack requested
-      if (ieee802514_header.ackRequested==1 && ieee154e_vars.isAckEnabled == TRUE) {
+        // check if ack requested
+        if (ieee802514_header.ackRequested==1 && ieee154e_vars.isAckEnabled == TRUE) {
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
             // 1. schedule timer for loading packet
             radiotimer_schedule(ACTION_LOAD_PACKET,DURATION_rt5);
             // get a buffer to put the ack to send in
-           ieee154e_vars.ackToSend = openqueue_getFreePacketBuffer(COMPONENT_IEEE802154E);
-           if (ieee154e_vars.ackToSend==NULL) {
-              // log the error
-              openserial_printError(COMPONENT_IEEE802154E,ERR_NO_FREE_PACKET_BUFFER,
-                                    (errorparameter_t)0,
-                                    (errorparameter_t)0);
-              // indicate we received a packet anyway (we don't want to loose any)
-              notif_receive(ieee154e_vars.dataReceived);
-              // free local variable
-              ieee154e_vars.dataReceived = NULL;
-              // abort
-              endSlot();
-              return;
-           }
+            ieee154e_vars.ackToSend = openqueue_getFreePacketBuffer(COMPONENT_IEEE802154E);
+            if (ieee154e_vars.ackToSend==NULL) {
+                // log the error
+                openserial_printError(
+                    COMPONENT_IEEE802154E,ERR_NO_FREE_PACKET_BUFFER,
+                    (errorparameter_t)0,
+                    (errorparameter_t)0
+                );
+                // indicate we received a packet anyway (we don't want to loose any)
+                notif_receive(ieee154e_vars.dataReceived);
+                // free local variable
+                ieee154e_vars.dataReceived = NULL;
+                // abort
+                endSlot();
+                return;
+            }
            
-           // declare ownership over that packet
-           ieee154e_vars.ackToSend->creator = COMPONENT_IEEE802154E;
-           ieee154e_vars.ackToSend->owner   = COMPONENT_IEEE802154E;
+            // declare ownership over that packet
+            ieee154e_vars.ackToSend->creator = COMPONENT_IEEE802154E;
+            ieee154e_vars.ackToSend->owner   = COMPONENT_IEEE802154E;
+            
+            // calculate the time timeCorrection (this is the time the sender is off w.r.t to this node. A negative number means
+            // the sender is too late.
+            ieee154e_vars.timeCorrection = (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)TsTxOffset-(PORT_SIGNED_INT_WIDTH)ieee154e_vars.syncCapturedTime);
            
-           // calculate the time timeCorrection (this is the time the sender is off w.r.t to this node. A negative number means
-           // the sender is too late.
-           ieee154e_vars.timeCorrection = (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)TsTxOffset-(PORT_SIGNED_INT_WIDTH)ieee154e_vars.syncCapturedTime);
-           
-           // prepend the IEEE802.15.4 header to the ACK
-           ieee154e_vars.ackToSend->l2_frameType = IEEE154_TYPE_ACK;
-           ieee154e_vars.ackToSend->l2_dsn       = ieee154e_vars.dataReceived->l2_dsn;
+            // prepend the IEEE802.15.4 header to the ACK
+            ieee154e_vars.ackToSend->l2_frameType = IEEE154_TYPE_ACK;
+            ieee154e_vars.ackToSend->l2_dsn       = ieee154e_vars.dataReceived->l2_dsn;
 
-           // To send ACK, we use the same security level (including NOSEC) and keys
-           // that were present in the DATA packet.
-           ieee154e_vars.ackToSend->l2_securityLevel = ieee154e_vars.dataReceived->l2_securityLevel;
-           ieee154e_vars.ackToSend->l2_keyIdMode     = ieee154e_vars.dataReceived->l2_keyIdMode;
-           ieee154e_vars.ackToSend->l2_keyIndex      = ieee154e_vars.dataReceived->l2_keyIndex;
+            // To send ACK, we use the same security level (including NOSEC) and keys
+            // that were present in the DATA packet.
+            ieee154e_vars.ackToSend->l2_securityLevel = ieee154e_vars.dataReceived->l2_securityLevel;
+            ieee154e_vars.ackToSend->l2_keyIdMode     = ieee154e_vars.dataReceived->l2_keyIdMode;
+            ieee154e_vars.ackToSend->l2_keyIndex      = ieee154e_vars.dataReceived->l2_keyIndex;
 
-           ieee802154_prependHeader(ieee154e_vars.ackToSend,
-                                    ieee154e_vars.ackToSend->l2_frameType,
-                                    FALSE,//no payloadIE in ack
-                                    ieee154e_vars.dataReceived->l2_dsn,
-                                    &(ieee154e_vars.dataReceived->l2_nextORpreviousHop)
-                                    );
+            ieee802154_prependHeader(
+                ieee154e_vars.ackToSend,
+                ieee154e_vars.ackToSend->l2_frameType,
+                FALSE,//no payloadIE in ack
+                ieee154e_vars.dataReceived->l2_dsn,
+                &(ieee154e_vars.dataReceived->l2_nextORpreviousHop)
+            );
            
-           // if security is enabled, encrypt directly in OpenQueue as there are no retransmissions for ACKs
-           if (ieee154e_vars.ackToSend->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
+            // if security is enabled, encrypt directly in OpenQueue as there are no retransmissions for ACKs
+            if (ieee154e_vars.ackToSend->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
                 if (IEEE802154_security_outgoingFrameSecurity(ieee154e_vars.ackToSend) != E_SUCCESS) {
                     openqueue_freePacketBuffer(ieee154e_vars.ackToSend);
                     endSlot();
@@ -1861,42 +1863,42 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
             radiotimer_setCapture(ACTION_TX_SFD_DONE);
             radiotimer_setCapture(ACTION_TX_SEND_DONE);
 #else
-         // arm rt5
-        opentimers_scheduleAbsolute(
-            ieee154e_vars.timerId,                            // timerId
-            DURATION_rt5,                                     // duration
-            ieee154e_vars.startOfSlotReference,               // reference
-            TIME_TICS,                                        // timetype
-            isr_ieee154e_timer                                // callback
-        );
-        // radiotimer_schedule(DURATION_rt5);
+            // arm rt5
+            opentimers_scheduleAbsolute(
+                ieee154e_vars.timerId,                            // timerId
+                DURATION_rt5,                                     // duration
+                ieee154e_vars.startOfSlotReference,               // reference
+                TIME_TICS,                                        // timetype
+                isr_ieee154e_timer                                // callback
+            );
+            // radiotimer_schedule(DURATION_rt5);
 #endif
-      } else {
-         // synchronize to the received packet if I'm not a DAGroot and this is my preferred parent
-         if (idmanager_getIsDAGroot()==FALSE && icmpv6rpl_isPreferredParent(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop))) {
-            synchronizePacket(ieee154e_vars.syncCapturedTime);
-         }
-         // indicate reception to upper layer (no ACK asked)
-         notif_receive(ieee154e_vars.dataReceived);
-         // reset local variable
-         ieee154e_vars.dataReceived = NULL;
-         // abort
-         endSlot();
-      }
+        } else {
+            // synchronize to the received packet if I'm not a DAGroot and this is my preferred parent
+            if (idmanager_getIsDAGroot()==FALSE && icmpv6rpl_isPreferredParent(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop))) {
+                synchronizePacket(ieee154e_vars.syncCapturedTime);
+            }
+            // indicate reception to upper layer (no ACK asked)
+            notif_receive(ieee154e_vars.dataReceived);
+            // reset local variable
+            ieee154e_vars.dataReceived = NULL;
+            // abort
+            endSlot();
+        }
       
-      // everything went well, return here not to execute the error code below
-      return;
+        // everything went well, return here not to execute the error code below
+        return;
       
-   } while(0);
+    } while(0);
     
-   // free the (invalid) received data so RAM memory can be recycled
-   openqueue_freePacketBuffer(ieee154e_vars.dataReceived);
+    // free the (invalid) received data so RAM memory can be recycled
+    openqueue_freePacketBuffer(ieee154e_vars.dataReceived);
    
-   // clear local variable
-   ieee154e_vars.dataReceived = NULL;
+    // clear local variable
+    ieee154e_vars.dataReceived = NULL;
    
-   // abort
-   endSlot();
+    // abort
+    endSlot();
 }
 
 port_INLINE void activity_ri6() {
