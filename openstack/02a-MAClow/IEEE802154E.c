@@ -2305,9 +2305,12 @@ bool isValidEbFormat(OpenQueueEntry_t* pkt, uint16_t* lenIE){
         temp16b |= (*((uint8_t*)(pkt->payload)+ptr+1))<<8;
         ptr += 2;
         
-        ielen = temp16b & 0x07FF;
+        ielen = temp16b & IEEE802154E_DESC_LEN_PAYLOAD_IE_MASK;
         
-        if ((temp16b & 0x7800)>>11 != 0x01 || (temp16b & 0x8000)>>15 != 0x01){
+        if (
+            (temp16b & IEEE802154E_DESC_GROUPID_PAYLOAD_IE_MASK)>>IEEE802154E_DESC_GROUPID_PAYLOAD_IE_SHIFT != IEEE802154E_MLME_IE_GROUPID || 
+            (temp16b & IEEE802154E_DESC_TYPE_LONG) == 0
+        ){
             // this is not MLME IE
             ptr += ielen;
         } else {
@@ -2337,13 +2340,13 @@ bool isValidEbFormat(OpenQueueEntry_t* pkt, uint16_t* lenIE){
         temp16b |= (*((uint8_t*)(pkt->payload)+ptr+1))<<8;
         ptr += 2;
         
-        subtype = (temp16b & 0x8000)>>15;
+        subtype = (temp16b & IEEE802154E_DESC_TYPE_IE_MASK)>>IEEE802154E_DESC_TYPE_IE_SHIFT;
         if (subtype == 1) {
             // this is long type subID
-            subid  = (temp16b & 0x7800)>>11;
-            sublen = (temp16b & 0x07FF);
+            subid  = (temp16b & IEEE802154E_DESC_SUBID_LONG_MLME_IE_MASK)>>IEEE802154E_DESC_SUBID_LONG_MLME_IE_SHIFT;
+            sublen = (temp16b & IEEE802154E_DESC_LEN_LONG_MLME_IE_MASK);
             switch(subid){
-            case 0x09: // channel hopping template IE
+            case IEEE802154E_MLME_CHANNELHOPPING_IE_SUBID:
                 channelhoppingTemplateIDStoreFromEB(*((uint8_t*)(pkt->payload+ptr)));
                 chTemplate_checkPass = TRUE;
                 break;
@@ -2353,19 +2356,19 @@ bool isValidEbFormat(OpenQueueEntry_t* pkt, uint16_t* lenIE){
             }
         } else {
             // this is short type subID
-            subid  = (temp16b & 0x7F00)>>8;
-            sublen = (temp16b & 0x00FF);
+            subid  = (temp16b & IEEE802154E_DESC_SUBID_SHORT_MLME_IE_MASK)>>IEEE802154E_DESC_SUBID_SHORT_MLME_IE_SHIFT;
+            sublen = (temp16b & IEEE802154E_DESC_LEN_SHORT_MLME_IE_MASK);
             switch(subid){
-            case 0x1A: // sync IE
+            case IEEE802154E_MLME_SYNC_IE_SUBID:
                 asnStoreFromEB((uint8_t*)(pkt->payload+ptr));
                 joinPriorityStoreFromEB(*((uint8_t*)(pkt->payload)+ptr+5));
                 sync_ie_checkPass    = TRUE;
                 break;
-            case 0x1C: // timeslot template IE
+            case IEEE802154E_MLME_TIMESLOT_IE_SUBID:
                 timeslotTemplateIDStoreFromEB(*((uint8_t*)(pkt->payload)+ptr));
                 tsTemplate_checkpass = TRUE;
                 break;
-            case 0x1B: // slotframe link IE
+            case IEEE802154E_MLME_SLOTFRAME_LINK_IE_SUBID:
                 schedule_setFrameNumber(*((uint8_t*)(pkt->payload)+ptr));       // number of slotframes
                 schedule_setFrameHandle(*((uint8_t*)(pkt->payload)+ptr+1));     // slotframe id
                 oldFrameLength = schedule_getFrameLength();
