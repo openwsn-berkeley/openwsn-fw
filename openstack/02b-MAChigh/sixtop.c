@@ -225,7 +225,9 @@ void sixtop_request(
     pkt->owner   = COMPONENT_SIXTOP_RES;
    
     memcpy(&(pkt->l2_nextORpreviousHop),neighbor,sizeof(open_addr_t));
-    memcpy(sixtop_vars.celllist_toDelete,celllist_toBeDeleted,CELLLIST_MAX_LEN*sizeof(cellInfo_ht));
+    if (celllist_toBeDeleted != NULL){
+        memcpy(sixtop_vars.celllist_toDelete,celllist_toBeDeleted,CELLLIST_MAX_LEN*sizeof(cellInfo_ht));
+    }
     sixtop_vars.cellOptions = cellOptions;
     
     len  = 0;
@@ -667,7 +669,6 @@ void timer_sixtop_management_fired(void) {
     case 0:
         // called every MAINTENANCE_PERIOD seconds
         neighbors_removeOld();
-        schedule_housekeeping();
         break;
     default:
         // called every second, except once every MAINTENANCE_PERIOD seconds
