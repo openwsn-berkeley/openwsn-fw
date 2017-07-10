@@ -22,6 +22,7 @@
 #define LENGTH_PACKET   125+LENGTH_CRC ///< maximum length is 127 bytes
 #define CHANNEL         20             ///< 20=2.450GHz
 #define ID              0x99           ///< byte sent in the packets
+#define TIMER_PERIOD    0x1fff  
 
 //=========================== variables =======================================
 
@@ -55,6 +56,7 @@ app_vars_t app_vars;
 
 void     cb_startFrame(PORT_TIMER_WIDTH timestamp);
 void     cb_endFrame(PORT_TIMER_WIDTH timestamp);
+void     cb_timer(opentimers_id_t id);
 void     task_uploadPacket(void);
 
 //=========================== main ============================================
@@ -149,7 +151,8 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
    leds_error_off();
 }
 
-
+void cb_timer(opentimers_id_t id) {
+  
    // schedule again
    opentimers_scheduleIn(
         app_vars.timerId,     // timerId
@@ -159,13 +162,7 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
         cb_timer              // callback
    );
    app_vars.outputOrInput = (app_vars.outputOrInput+1)%2;
-   if (app_vars.outputOrInput == 1) {
-       openserial_stop();
-       openserial_startOutput();
-   } else {
-       openserial_stop();
-       openserial_startInput();
-   }
+   openserial_triggerDebugprint(); // FIXME: replace by task
 }
 
 // ================================ task =======================================
