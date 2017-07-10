@@ -140,7 +140,7 @@ void IEEE802154_security_init(void) {
 
    //copy key2
    memset(&ieee802154_security_vars.Key_2[0], 0, 16);
-   memset(&ieee802154_security_vars.Key_2[0], &key2[0], 16);
+   memcpy(&ieee802154_security_vars.Key_2[0], &key2[0], 16);
 
    //store the key 2 and related attributes
    //Creation of the KeyDescriptor - Key 2 should be used to encrypt and authenticate data, command and ack frames

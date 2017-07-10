@@ -289,7 +289,8 @@ void sixtop_request(
     
     // append 6p metadata
     packetfunctions_reserveHeaderSize(pkt,sizeof(uint16_t));
-    *((uint8_t*)(pkt->payload)) = sixtop_vars.cb_sf_getMetadata();
+    pkt->payload[0] = (uint8_t)( sixtop_vars.cb_sf_getMetadata() & 0x00FF);
+    pkt->payload[1] = (uint8_t)((sixtop_vars.cb_sf_getMetadata() & 0xFF00)>>8);
     len += 2;
     
     // append 6p Seqnum and schedule Generation
