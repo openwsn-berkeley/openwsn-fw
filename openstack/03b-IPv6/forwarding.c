@@ -104,7 +104,9 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
     msg->l3_sourceAdd.type=ADDR_128B;
 
     // if we are sending to a link-local address set the source prefix to link-local
-    if (packetfunctions_isLinkLocal(&msg->l3_destinationAdd)) {
+    if (packetfunctions_isLinkLocal(&msg->l3_destinationAdd)                ||
+            packetfunctions_isAllRoutersMulticast(&msg->l3_destinationAdd)  ||
+            packetfunctions_isAllHostsMulticast(&msg->l3_destinationAdd)) {
         memset(&link_local_prefix, 0x00, sizeof(open_addr_t));
         link_local_prefix.type = ADDR_PREFIX;
         link_local_prefix.prefix[0] = 0xfe;
