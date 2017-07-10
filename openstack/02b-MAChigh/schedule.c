@@ -64,7 +64,6 @@ void schedule_startDAGroot() {
    memset(&temp_neighbor,0,sizeof(temp_neighbor));
    temp_neighbor.type             = ADDR_ANYCAST;
    for (running_slotOffset=start_slotOffset;running_slotOffset<start_slotOffset+SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;running_slotOffset++) {
-      /* pendulum
       schedule_addActiveSlot(
          running_slotOffset,                     // slot offset
          CELLTYPE_TXRX,                          // type of slot
@@ -72,7 +71,6 @@ void schedule_startDAGroot() {
          SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET,  // channel offset
          &temp_neighbor                          // neighbor
       );
-      */
    }
 }
 
