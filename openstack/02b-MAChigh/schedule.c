@@ -825,44 +825,6 @@ void schedule_indicateTx(asn_t* asnTimestamp, bool succesfullTx) {
    ENABLE_INTERRUPTS();
 }
 
-
-void schedule_housekeeping(){
-    uint8_t     i;
-    open_addr_t neighbor;
-    
-    
-    INTERRUPT_DECLARATION();
-    DISABLE_INTERRUPTS();
-
-    for(i=0;i<MAXACTIVESLOTS;i++) {
-        if(schedule_vars.scheduleBuf[i].type == CELLTYPE_TX){
-            // remove Tx cell if it's scheduled to non-preferred parent
-            if (icmpv6rpl_getPreferredParentEui64(&neighbor)==TRUE) {
-                if(packetfunctions_sameAddress(&neighbor,&(schedule_vars.scheduleBuf[i].neighbor))==FALSE){
-                    if (sixtop_setHandler(SIX_HANDLER_SF0)==FALSE){
-                       // one sixtop transcation is happening, only one instance at one time
-                       continue;
-                    }
-                    sixtop_request(
-                       IANA_6TOP_CMD_CLEAR,                             // code
-                       &(schedule_vars.scheduleBuf[i].neighbor),        // neighbor
-                       0,                                               // numCells (not used)
-                       LINKOPTIONS_TX,                                  // cellOptions
-                       NULL,                                            // celllist to add (not used)
-                       NULL,                                            // celllist to add (not used)
-                       sf0_getsfid(),                                   // sfid
-                       0,                                               // list command offset (not used)
-                       0                                                // list command maximum list of cells(not used)
-                    );
-                    break;
-                }
-            }
-        }
-    }
-   
-    ENABLE_INTERRUPTS();
-}
-
 bool schedule_getOneCellAfterOffset(uint8_t metadata,uint8_t offset,open_addr_t* neighbor, uint8_t cellOptions, uint16_t* slotoffset, uint16_t* channeloffset){
    bool returnVal;
    scheduleEntry_t* scheduleWalker;
