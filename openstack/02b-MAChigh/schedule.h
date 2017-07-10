@@ -211,7 +211,6 @@ void               schedule_indicateTx(
                         bool      succesfullTx
                    );
 // from sixtop
-void               schedule_housekeeping(void);
 bool               schedule_getOneCellAfterOffset(
     uint8_t metadata,
     uint8_t offset,
