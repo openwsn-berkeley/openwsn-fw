@@ -900,11 +900,11 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
                 break;
             }
             // start timeout timer if I am waiting for a response
-            opentimers_scheduleAbsolute(
+            opentimers_scheduleIn(
                 sixtop_vars.timeoutTimerId,
                 SIX2SIX_TIMEOUT_MS,
-                opentimers_getValue(),
                 TIME_MS,
+                TIMER_ONESHOT,
                 sixtop_timeout_timer_cb
             );
         }
