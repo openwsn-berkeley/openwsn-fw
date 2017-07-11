@@ -292,6 +292,10 @@ void cjoin_setIsJoined(bool newValue) {
     uint8_t array[5];
     asn_t joinAsn;
 
+    if (cjoin_vars.isJoined == newValue) {
+        return;
+    }
+
     cjoin_vars.isJoined = newValue;
 
     // Update Join ASN value
