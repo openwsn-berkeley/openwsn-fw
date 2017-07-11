@@ -28,6 +28,11 @@ if localEnv['board']=='python':
 # those with default application name (application.c)
 additionalSourceFiles = [
     os.path.join('opencoap','openoscoap.c'),
+    os.path.join('opencoap','usha.c'),
+    os.path.join('opencoap','hkdf.c'),
+    os.path.join('opencoap','hmac.c'),
+    os.path.join('opencoap','sha224-256.c'),
+    os.path.join('opencoap','cborencoder.c'),
     os.path.join('cjoin','cbor.c'),
 ]
 
@@ -35,6 +40,8 @@ additionalSourceFiles = [
 # those with default application name (application.h)
 additionalHeaderFiles = [
     os.path.join('opencoap','openoscoap.h'),
+    os.path.join('opencoap','sha.h'),
+    os.path.join('opencoap','cborencoder.h'),
     os.path.join('cjoin','cbor.h'),
 ]
 
