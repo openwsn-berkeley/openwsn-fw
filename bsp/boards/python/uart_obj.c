@@ -287,10 +287,10 @@ uint8_t uart_readByte(OpenMote* self) {
 
 #ifdef FASTSIM
 void uart_setCTS(OpenMote* self, bool state) {
-   printf("[CRITICAL] uart_writeByte() should not be called\r\n");
+   printf("[CRITICAL] uart_setCTS() should not be called\r\n");
 }
 #else
-void uart_writeByte(OpenMote* self, bool state) {
+void uart_setCTS(OpenMote* self, bool state) {
    PyObject*   result;
    PyObject*   arglist;
    
@@ -299,7 +299,7 @@ void uart_writeByte(OpenMote* self, bool state) {
 #endif
    
    // forward to Python
-   arglist    = Py_BuildValue("(i)",byteToWrite);
+   arglist    = Py_BuildValue("(i)",state);
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_uart_setCTS],arglist);
    if (result == NULL) {
       printf("[CRITICAL] uart_setCTS() returned NULL\r\n");

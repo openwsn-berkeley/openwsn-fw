@@ -374,32 +374,34 @@ void openserial_flush(void) {
     if (openserial_vars.fBusyFlushing==FALSE) {
         if (openserial_vars.ctsStateChanged==TRUE) {
             // send CTS
-            
+#ifdef FASTSIM
+#else
             if (openserial_vars.fInhibited==TRUE) {
                 uart_setCTS(FALSE);
             } else {
                 uart_setCTS(TRUE);
             }
-            openserial_vars.ctsStateChanged = FALSE;
-        } else if (openserial_vars.fInhibited==TRUE) {
-            // currently inhibited
-            
-        } else {
-            // not inhibited
-            
-            if (openserial_vars.outputBufIdxW!=openserial_vars.outputBufIdxR) {
-            // I have some bytes to transmit
-        
-#ifdef FASTSIM
-                uart_writeCircularBuffer_FASTSIM(
-                    openserial_vars.outputBuf,
-                    &openserial_vars.outputBufIdxR,
-                    &openserial_vars.outputBufIdxW
-                );
-#else
-                uart_writeByte(openserial_vars.outputBuf[openserial_vars.outputBufIdxR++]);
-                openserial_vars.fBusyFlushing = TRUE;
 #endif
+            openserial_vars.ctsStateChanged = FALSE;
+        } else {
+            if (openserial_vars.fInhibited==TRUE) {
+                // currently inhibited
+            } else {
+                // not inhibited
+                if (openserial_vars.outputBufIdxW!=openserial_vars.outputBufIdxR) {
+                    // I have some bytes to transmit
+            
+#ifdef FASTSIM
+                    uart_writeCircularBuffer_FASTSIM(
+                        openserial_vars.outputBuf,
+                        &openserial_vars.outputBufIdxR,
+                        &openserial_vars.outputBufIdxW
+                    );
+#else
+                    uart_writeByte(openserial_vars.outputBuf[openserial_vars.outputBufIdxR++]);
+                    openserial_vars.fBusyFlushing = TRUE;
+#endif
+                }
             }
         }
     }
@@ -413,7 +415,10 @@ void openserial_inhibitStart(void) {
     //<<<<<<<<<<<<<<<<<<<<<<<
     DISABLE_INTERRUPTS();
     openserial_vars.fInhibited      = TRUE;
+#ifdef FASTSIM
+#else
     openserial_vars.ctsStateChanged = TRUE;
+#endif
     ENABLE_INTERRUPTS();
     //>>>>>>>>>>>>>>>>>>>>>>>
     
@@ -427,7 +432,10 @@ void openserial_inhibitStop(void) {
     //<<<<<<<<<<<<<<<<<<<<<<<
     DISABLE_INTERRUPTS();
     openserial_vars.fInhibited      = FALSE;
+#ifdef FASTSIM
+#else
     openserial_vars.ctsStateChanged = TRUE;
+#endif
     ENABLE_INTERRUPTS();
     //>>>>>>>>>>>>>>>>>>>>>>>
     
