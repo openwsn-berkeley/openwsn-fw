@@ -1019,7 +1019,7 @@ void opencoap_handle_stateless_proxy(OpenQueueEntry_t *msg,
     uint8_t outgoingOptionsLen;
     open_addr_t eui64;
     open_addr_t destIP;
-    open_addr_t* prefix;
+    open_addr_t link_local_prefix;
 
     statelessProxy = opencoap_find_option(incomingOptions, incomingOptionsLen, COAP_OPTION_NUM_STATELESSPROXY);
     if (statelessProxy == NULL) {    
@@ -1032,8 +1032,13 @@ void opencoap_handle_stateless_proxy(OpenQueueEntry_t *msg,
     eui64.type = ADDR_64B;
     memcpy(eui64.addr_64b, statelessProxy->pValue, 8);
 
-    prefix = idmanager_getMyID(ADDR_PREFIX);
-    packetfunctions_mac64bToIp128b(prefix, &eui64, &destIP);
+    // use link-local prefix to forward the response
+    memset(&link_local_prefix, 0x00, sizeof(open_addr_t));
+    link_local_prefix.type = ADDR_PREFIX;
+    link_local_prefix.prefix[0] = 0xfe;
+    link_local_prefix.prefix[1] = 0x80;
+
+    packetfunctions_mac64bToIp128b(&link_local_prefix, &eui64, &destIP);
 
     if (statelessProxy->length == 10) {
         portNumber = packetfunctions_ntohs(&statelessProxy->pValue[8]);
