@@ -268,6 +268,7 @@ typedef struct {
    uint16_t                  slotDuration;            // duration of slot
    opentimers_id_t           timerId;                 // id of timer used for implementing TSCH slot FSM 
    uint32_t                  startOfSlotReference;    // the time refer to the beginning of slot
+   opentimers_id_t           serialInhibitTimerId;    // id of serial inhibit timer used for scheduling serial output
 } ieee154e_vars_t;
 
 BEGIN_PACK

@@ -156,6 +156,7 @@ void ieee154e_init() {
    // radiotimer_start(ieee154e_vars.slotDuration);
    //
    IEEE802154_security_init();
+   ieee154e_vars.serialInhibitTimerId = opentimers_create();
 }
 
 //=========================== public ==========================================
@@ -2868,7 +2869,7 @@ void endSlot() {
     // arm serialInhibit timer (if we are still BEFORE DURATION_si)
     if (ieee154e_vars.isSync==TRUE) {
         opentimers_scheduleAbsolute(
-            ieee154e_vars.timerId,                  // timerId
+            ieee154e_vars.serialInhibitTimerId,     // timerId
             DURATION_si,                            // duration
             ieee154e_vars.startOfSlotReference,     // reference
             TIME_TICS,                              // timetype
@@ -2877,7 +2878,7 @@ void endSlot() {
     }
    
     // resume serial activity (if we are still BEFORE DURATION_si)
-    if (opentimers_getValue()<DURATION_si) {
+    if (DURATION_si+ieee154e_vars.startOfSlotReference-opentimers_getValue()<ieee154e_vars.slotDuration) {
         openserial_inhibitStop(); // end of slot
     }
 }
