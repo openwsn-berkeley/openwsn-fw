@@ -55,6 +55,8 @@ static void SysCtrlWakeupSetting(void);
 
 static void GPIO_C_Handler(void);
 
+bool user_button_initialized;
+
 //=========================== main ============================================
 
 extern int mote_main(void);
@@ -66,6 +68,8 @@ int main(void) {
 //=========================== public ==========================================
 
 void board_init(void) {
+   user_button_initialized = FALSE;
+   
    gpio_init();
    clock_init();
    board_timer_init();
@@ -198,6 +202,9 @@ static void button_init(void) {
     /* Delay to avoid pin floating problems */
     for (i = 0xFFFF; i != 0; i--);
 
+    GPIOPinIntDisable(BSP_BUTTON_BASE, BSP_BUTTON_USER);
+    GPIOPinIntClear(BSP_BUTTON_BASE, BSP_BUTTON_USER);
+
     /* The button is an input GPIO on falling edge */
     GPIOPinTypeGPIOInput(BSP_BUTTON_BASE, BSP_BUTTON_USER);
     GPIOIntTypeSet(BSP_BUTTON_BASE, BSP_BUTTON_USER, GPIO_FALLING_EDGE);
@@ -208,6 +215,7 @@ static void button_init(void) {
     /* Clear and enable the interrupt */
     GPIOPinIntClear(BSP_BUTTON_BASE, BSP_BUTTON_USER);
     GPIOPinIntEnable(BSP_BUTTON_BASE, BSP_BUTTON_USER);
+    user_button_initialized = TRUE;
 }
 
 static void SysCtrlRunSetting(void) {
@@ -292,6 +300,7 @@ static void SysCtrlWakeupSetting(void) {
  * Erases a Flash sector to trigger the bootloader backdoor
  */
 static void GPIO_C_Handler(void) {
+    if (!user_button_initialized) return;
     /* Disable the interrupts */
     IntMasterDisable();
     leds_all_off();
