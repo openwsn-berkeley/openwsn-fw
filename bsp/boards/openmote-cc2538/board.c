@@ -33,8 +33,11 @@
 #define BSP_BUTTON_BASE                 ( GPIO_C_BASE )
 #define BSP_BUTTON_USER                 ( GPIO_PIN_3 )
 
-#define CC2538_FLASH_ADDRESS            ( 0x0027F800 )
-
+#ifdef REVA1 //Rev.A1 uses SF23 cc2538 which start at diffferent location
+    #define CC2538_FLASH_ADDRESS            ( 0x0023F800 )
+#else
+    #define CC2538_FLASH_ADDRESS            ( 0x0027F800 )
+#endif
 //=========================== prototypes ======================================
 
 void board_timer_init(void);
@@ -65,9 +68,7 @@ int main(void) {
 void board_init(void) {
    gpio_init();
    clock_init();
-
    board_timer_init();
-
    leds_init();
    debugpins_init();
    button_init();
@@ -293,10 +294,13 @@ static void SysCtrlWakeupSetting(void) {
 static void GPIO_C_Handler(void) {
     /* Disable the interrupts */
     IntMasterDisable();
+    leds_all_off();
 
     /* Eras the CCA flash page */
     FlashMainPageErase(CC2538_FLASH_ADDRESS);
 
+    leds_circular_shift();
+    
     /* Reset the board */
     SysCtrlReset();
 }
