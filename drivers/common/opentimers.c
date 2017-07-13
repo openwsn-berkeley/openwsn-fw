@@ -170,6 +170,7 @@ All timers use this function are ONE_SHOT type timer.
 
 \param[in] id indicates the timer id
 \param[in] duration indicates the period asked for schedule after a given time indicated by reference parameter.
+\param[in] reference indicates the reference for duration. The timer will be fired at reference+duration.
 \param[in] uint_type indicates the unit type of this schedule: ticks or ms
 \param[in] cb indicates when this scheduled timer fired, call this callback function.
  */

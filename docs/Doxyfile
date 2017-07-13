@@ -749,12 +749,10 @@ INPUT                  = . \
                          ../kernel/openos \
                          ../drivers/common \
                          ../bsp/boards/board.h \
-                         ../bsp/boards/bsp_timer.h \
                          ../bsp/boards/debugpins.h \
                          ../bsp/boards/eui64.h \
                          ../bsp/boards/leds.h \
                          ../bsp/boards/radio.h \
-                         ../bsp/boards/radiotimer.h \
                          ../bsp/boards/sctimer.h \
                          ../bsp/boards/uart.h \
 
