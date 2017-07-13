@@ -13,8 +13,10 @@
 //=========================== variables =======================================
 
 typedef struct {
-   uart_tx_cbt txCb;
-   uart_rx_cbt rxCb;
+    uart_tx_cbt txCb;
+    uart_rx_cbt rxCb;
+    bool        fXonXoffEscaping;
+    uint8_t     xonXoffEscapedByte;
 } uart_vars_t;
 
 uart_vars_t uart_vars;
@@ -24,48 +26,62 @@ uart_vars_t uart_vars;
 //=========================== public ==========================================
 
 void uart_init(void) {
-   
-   P3SEL      =  0x30;                           // P3.4,5 = UTXD0/URXD0
-   ME1       |=  UTXE0 + URXE0;                  // enable UART0 TX/RX
-   U0CTL     |=  CHAR;                           // 8-bit character
-   U0TCTL    |=  SSEL1;                          // clocking from SMCLK
-   U0BR0      =  0x08;                           // 115200 baud, using 1MHz SMCLK
-   U0BR1      =  0x00;
-   UMCTL0     =  0x5B;
-   U0CTL     &= ~SWRST;                          // clear UART0 reset bit
-   
-   // clear possible pending interrupts
-   uart_clearTxInterrupts();
-   uart_clearRxInterrupts();
+    
+    P3SEL      =  0x30;                           // P3.4,5 = UTXD0/URXD0
+    ME1       |=  UTXE0 + URXE0;                  // enable UART0 TX/RX
+    U0CTL     |=  CHAR;                           // 8-bit character
+    U0TCTL    |=  SSEL1;                          // clocking from SMCLK
+    U0BR0      =  0x08;                           // 115200 baud, using 1MHz SMCLK
+    U0BR1      =  0x00;
+    UMCTL0     =  0x5B;
+    U0CTL     &= ~SWRST;                          // clear UART0 reset bit
+    
+    // clear possible pending interrupts
+    uart_clearTxInterrupts();
+    uart_clearRxInterrupts();
 }
 
 void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb) {
-   uart_vars.txCb = txCb;
-   uart_vars.rxCb = rxCb;
+    uart_vars.txCb = txCb;
+    uart_vars.rxCb = rxCb;
 }
 
 void    uart_enableInterrupts(void){
-   IE1       |=  (URXIE0 | UTXIE0);
+    IE1       |=  (URXIE0 | UTXIE0);
 }
 
 void    uart_disableInterrupts(void){
-   IE1       &= ~(URXIE0 | UTXIE0);
+    IE1       &= ~(URXIE0 | UTXIE0);
 }
 
 void    uart_clearRxInterrupts(void){
-   IFG1      &= ~URXIFG0;
+    IFG1      &= ~URXIFG0;
 }
 
 void    uart_clearTxInterrupts(void){
-   IFG1      &= ~UTXIFG0;
+    IFG1      &= ~UTXIFG0;
+}
+
+void uart_setCTS(bool state) {
+    if (state==0x01) {
+        U0TXBUF = XON;
+    } else {
+        U0TXBUF = XOFF;
+    }
 }
 
 void    uart_writeByte(uint8_t byteToWrite){
-   U0TXBUF    =  byteToWrite;
+    if (byteToWrite==XON || byteToWrite==XOFF || byteToWrite==XONXOFF_ESCAPE) {
+        uart_vars.fXonXoffEscaping     = 0x01;
+        uart_vars.xonXoffEscapedByte   = byteToWrite;
+        U0TXBUF = XONXOFF_ESCAPE;
+    } else {
+        U0TXBUF = byteToWrite;
+    }
 }
 
 uint8_t uart_readByte(void){
-  return U0RXBUF;
+    return U0RXBUF;
 }
 
 //=========================== private =========================================
@@ -73,13 +89,18 @@ uint8_t uart_readByte(void){
 //=========================== interrupt handlers ==============================
 
 kick_scheduler_t uart_tx_isr(void) {
-   uart_clearTxInterrupts(); // TODO: do not clear, but disable when done
-   uart_vars.txCb();
-   return DO_NOT_KICK_SCHEDULER;
+    uart_clearTxInterrupts(); // TODO: do not clear, but disable when done
+    if (uart_vars.fXonXoffEscaping==0x01) {
+        uart_vars.fXonXoffEscaping = 0x00;
+        U0TXBUF = uart_vars.xonXoffEscapedByte^XONXOFF_MASK;
+    } else {
+        uart_vars.txCb();
+    }
+    return DO_NOT_KICK_SCHEDULER;
 }
 
 kick_scheduler_t uart_rx_isr(void) {
-   uart_clearRxInterrupts(); // TODO: do not clear, but disable when done
-   uart_vars.rxCb();
-   return DO_NOT_KICK_SCHEDULER;
+    uart_clearRxInterrupts(); // TODO: do not clear, but disable when done
+    uart_vars.rxCb();
+    return DO_NOT_KICK_SCHEDULER;
 }
