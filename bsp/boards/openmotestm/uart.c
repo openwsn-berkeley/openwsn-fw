@@ -21,6 +21,8 @@
 typedef struct {
     uart_tx_cbt txCb;
     uart_rx_cbt rxCb;
+    bool        fXonXoffEscaping;
+    uint8_t     xonXoffEscapedByte;
     uint8_t     startOrend;
     uint8_t     flagByte;
     bool        flag;
@@ -104,10 +106,27 @@ void uart_clearTxInterrupts(){
     USART_ClearFlag(USART1,USART_FLAG_TXE);
 }
 
+void    uart_setCTS(bool state) {
+    
+    if (state==0x01) {
+        USART_SendData(USART1,(uint16_t)XON);
+    } else {
+        USART_SendData(USART1,(uint16_t)XOFF);
+    }
+    while(USART_GetFlagStatus(USART1,USART_FLAG_TXE) == RESET);
+}
+
 void uart_writeByte(uint8_t byteToWrite) {
     
-    USART_SendData(USART1,(uint16_t)byteToWrite);
+    if (byteToWrite==XON || byteToWrite==XOFF || byteToWrite==XONXOFF_ESCAPE) {
+        uart_vars.fXonXoffEscaping     = 0x01;
+        uart_vars.xonXoffEscapedByte   = byteToWrite;
+        USART_SendData(USART1,(uint16_t)XONXOFF_ESCAPE);
+    } else {
+        USART_SendData(USART1,(uint16_t)byteToWrite);
+    }
     while(USART_GetFlagStatus(USART1,USART_FLAG_TXE) == RESET);
+    
     //start or end byte?
     if(byteToWrite == uart_vars.flagByte){
         uart_vars.startOrend = (uart_vars.startOrend == 0)?1:0;
@@ -132,6 +151,13 @@ uint8_t uart_readByte() {
 kick_scheduler_t uart_tx_isr() {
     
     uart_vars.txCb();
+    if (uart_vars.fXonXoffEscaping==0x01) {
+        uart_vars.fXonXoffEscaping = 0x00;
+        USART_SendData(USART1,(uint16_t)uart_vars.xonXoffEscapedByte^XONXOFF_MASK);
+        while(USART_GetFlagStatus(USART1,USART_FLAG_TXE) == RESET);
+    } else {
+        uart_vars.txCb();
+    }
     return DO_NOT_KICK_SCHEDULER;
 }
 
