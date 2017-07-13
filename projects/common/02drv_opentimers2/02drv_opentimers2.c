@@ -40,9 +40,9 @@ app_vars_t app_vars;
 
 //=========================== prototypes ======================================
 
-void cb_timer0(void);
-void cb_timer1(void);
-void cb_timer2(void);
+void cb_timer0(opentimers_id_t id);
+void cb_timer1(opentimers_id_t id);
+void cb_timer2(opentimers_id_t id);
 
 //=========================== main ============================================
 
@@ -91,35 +91,38 @@ int mote_main(void) {
 
 //=========================== callbacks =======================================
 
-void cb_timer0(void) {
+void cb_timer0(opentimers_id_t id) {
     leds_error_toggle();
     // re-schedule refer to previous scheduled value
-    opentimers_scheduleRelative(
+    opentimers_scheduleIn(
         app_vars.timer0,       // timerId
         APP_DLY_TIMER0_ticks,  // duration
         TIME_TICS,             // timetype
+        TIMER_ONESHOT,         // timertype
         cb_timer0              // callback
     );
 }
 
-void cb_timer1(void) {
+void cb_timer1(opentimers_id_t id) {
     leds_radio_toggle();
     // re-schedule refer to previous scheduled value
-    opentimers_scheduleRelative(
+    opentimers_scheduleIn(
         app_vars.timer1,       // timerId
         APP_DLY_TIMER1_ticks,  // duration
         TIME_TICS,             // timetype
+        TIMER_ONESHOT,         // timertype
         cb_timer1              // callback
     );
 }
 
-void cb_timer2(void) {
+void cb_timer2(opentimers_id_t id) {
     leds_sync_toggle();
     // re-schedule refer to previous scheduled value
-    opentimers_scheduleRelative(
+    opentimers_scheduleIn(
         app_vars.timer2,       // timerId
         APP_DLY_TIMER2_ticks,  // duration
         TIME_TICS,             // timetype
+        TIMER_ONESHOT,         // timertype
         cb_timer2              // callback
     );
 }

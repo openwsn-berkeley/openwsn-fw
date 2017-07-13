@@ -32,7 +32,7 @@ macpong_vars_t macpong_vars;
 
 //=========================== prototypes ======================================
 
-void macpong_initSend(void);
+void macpong_initSend(opentimers_id_t id);
 void macpong_send(uint8_t payloadCtr);
 
 //=========================== initialization ==================================
@@ -48,7 +48,7 @@ int mote_main(void) {
    return 0; // this line should never be reached
 }
 
-void macpong_initSend() {
+void macpong_initSend(opentimers_id_t id) {
     bool timeToSend = FALSE;
     macpong_vars.macpongCounter = (macpong_vars.macpongCounter+1)%5;
     switch (macpong_vars.macpongCounter) {
@@ -111,15 +111,13 @@ void macpong_send(uint8_t payloadCtr) {
 //===== IPHC
 
 void iphc_init(void) {
-    PORT_TIMER_WIDTH       reference;
-    reference            = opentimers_getValue();
     macpong_vars.timerId = opentimers_create();
-    opentimers_scheduleAbsolute(
-        macpong_vars.timerId,  // timerId
-        1000,                  // duration
-        reference,             // reference
-        TIME_MS,               // timetype
-        macpong_initSend      // callback
+    opentimers_scheduleIn(
+        macpong_vars.timerId,   // timerId
+        1000,                   // duration
+        TIME_MS,                // timetype
+        TIMER_ONESHOT,          // timertype
+        macpong_initSend        // callback
     );
 }
 
