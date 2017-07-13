@@ -43,10 +43,12 @@
 
 /* === GLOBALS ============================================================= */
 typedef struct {
-	uart_tx_cbt txCb;
-	uart_rx_cbt rxCb;
-	uint8_t     startOrend;
-	uint8_t     flagByte;
+    uart_tx_cbt txCb;
+    uart_rx_cbt rxCb;
+    bool        fXonXoffEscaping;
+    uint8_t     xonXoffEscapedByte;
+    uint8_t     startOrend;
+    uint8_t     flagByte;
 } uart_vars_t;
 
 uart_vars_t uart_vars;
@@ -62,9 +64,8 @@ void usart_read_callback(void);
  * @param None
  *
  */
-void uart_init(void)
-{
-  usart_init(USART_HOST_BAUDRATE);
+void uart_init(void){
+    usart_init(USART_HOST_BAUDRATE);
 }
 
 /*
@@ -74,12 +75,11 @@ void uart_init(void)
  *
  *
  */
-void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb)
-{
-	/* Register Callbacks */
-	uart_vars.txCb = txCb;
-	uart_vars.rxCb = rxCb;
-	uart_irq_enable();
+void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb){
+    /* Register Callbacks */
+    uart_vars.txCb = txCb;
+    uart_vars.rxCb = rxCb;
+    uart_irq_enable();
 }
 
 /*
@@ -89,9 +89,8 @@ void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb)
  * @param None
  *
  */
-void usart_write_callback(void)
-{
-	uart_tx_isr();
+void usart_write_callback(void){
+    uart_tx_isr();
 }
 
 /*
@@ -101,9 +100,8 @@ void usart_write_callback(void)
  * @param None
  *
  */
-void usart_read_callback(void)
-{
-   uart_rx_isr();
+void usart_read_callback(void){
+    uart_rx_isr();
 }
 
 /*
@@ -113,9 +111,8 @@ void usart_read_callback(void)
  * @param None
  *
  */
-void uart_enableInterrupts(void)
-{
-  usart_enable_txrx_isr();
+void uart_enableInterrupts(void){
+    usart_enable_txrx_isr();
 }
 
 /*
@@ -125,9 +122,17 @@ void uart_enableInterrupts(void)
  * @param None
  *
  */
-void uart_disableInterrupts(void)
-{
-  usart_disable_txrx_isr();
+void uart_disableInterrupts(void){
+    usart_disable_txrx_isr();
+}
+
+void uart_setCTS(bool state) {
+    
+    if (state==0x01) {
+        uart_write_byte(XON);
+    } else {
+        uart_write_byte(XOFF);
+    }
 }
 
 /*
@@ -137,9 +142,14 @@ void uart_disableInterrupts(void)
  * @param None
  *
  */
-void uart_writeByte(uint8_t byteToWrite)
-{  
-  uart_write_byte(byteToWrite);
+void uart_writeByte(uint8_t byteToWrite){
+    if (byteToWrite==XON || byteToWrite==XOFF || byteToWrite==XONXOFF_ESCAPE) {
+        uart_vars.fXonXoffEscaping     = 0x01;
+        uart_vars.xonXoffEscapedByte   = byteToWrite;
+        uart_write_byte(XONXOFF_ESCAPE);
+    } else {
+        uart_write_byte(byteToWrite);
+    }
 }
 
 /*
@@ -162,9 +172,8 @@ uint8_t uart_readByte(void)
  * @param None
  *
  */
-void uart_clearTxInterrupts(void)
-{
-  uart_clear_tx_flag();
+void uart_clearTxInterrupts(void){
+    uart_clear_tx_flag();
 }
 
 /*
@@ -174,9 +183,8 @@ void uart_clearTxInterrupts(void)
  * @param None
  *
  */
-void uart_clearRxInterrupts(void)
-{
-  uart_clear_rx_flag();	
+void uart_clearRxInterrupts(void){
+    uart_clear_rx_flag();    
 }
 
 /*
@@ -186,14 +194,17 @@ void uart_clearRxInterrupts(void)
  * @param return kick_scheduler_t
  *
  */
-kick_scheduler_t uart_tx_isr(void) 
-{
-  uart_clearTxInterrupts();
-  if(uart_vars.txCb != NULL)
-  {
-	uart_vars.txCb();    
-  } 
- return DO_NOT_KICK_SCHEDULER;  
+kick_scheduler_t uart_tx_isr(void) {
+    uart_clearTxInterrupts();
+    if(uart_vars.txCb != NULL){
+        if (uart_vars.fXonXoffEscaping==0x01) {
+            uart_vars.fXonXoffEscaping = 0x00;
+            uart_write_byte(uart_vars.xonXoffEscapedByte^XONXOFF_MASK);
+        } else {
+            uart_vars.txCb();
+        }
+    }
+    return DO_NOT_KICK_SCHEDULER;  
 }
 
 /*
@@ -203,12 +214,10 @@ kick_scheduler_t uart_tx_isr(void)
  * @param return kick_scheduler_t
  *
  */
-kick_scheduler_t uart_rx_isr(void)
-{
-	uart_clearRxInterrupts();
-	if (uart_vars.rxCb != NULL)
-	{
-		uart_vars.rxCb();  
-	}
-  return DO_NOT_KICK_SCHEDULER;  
+kick_scheduler_t uart_rx_isr(void){
+    uart_clearRxInterrupts();
+    if (uart_vars.rxCb != NULL){
+        uart_vars.rxCb();  
+    }
+    return DO_NOT_KICK_SCHEDULER;  
 }
