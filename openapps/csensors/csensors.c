@@ -42,7 +42,9 @@ void csensors_register(
 owerror_t csensors_receive(
    OpenQueueEntry_t* msg,
    coap_header_iht*  coap_header,
-   coap_option_iht*  coap_options
+   coap_option_iht*  coap_incomingOptions,
+   coap_option_iht*  coap_outgoingOptions,
+   uint8_t*          coap_outgoingOptionsLen
 );
 
 void csensors_timer_cb(opentimers_id_t id);
@@ -84,6 +86,7 @@ void csensors_init() {
    csensors_vars.desc.path1len               = 0;
    csensors_vars.desc.path1val               = NULL;
    csensors_vars.desc.componentID            = COMPONENT_CSENSORS;
+   csensors_vars.desc.securityContext        = NULL;
    csensors_vars.desc.discoverable           = TRUE;
    csensors_vars.desc.callbackRx             = &csensors_receive;
    csensors_vars.desc.callbackSendDone       = &csensors_sendDone;
@@ -165,14 +168,16 @@ void csensors_register(
 \param[in] msg          The received message. CoAP header and options already
    parsed.
 \param[in] coap_header  The CoAP header contained in the message.
-\param[in] coap_options The CoAP options contained in the message.
+\param[in] coap_incomingOptions The CoAP options contained in the message.
 
 \return Whether the response is prepared successfully.
 */
 owerror_t csensors_receive(
-      OpenQueueEntry_t* msg,
-      coap_header_iht*  coap_header,
-      coap_option_iht*  coap_options
+        OpenQueueEntry_t* msg,
+        coap_header_iht*  coap_header,
+        coap_option_iht*  coap_incomingOptions,
+        coap_option_iht*  coap_outgoingOptions,
+        uint8_t*          coap_outgoingOptionsLen
    ) {
    owerror_t outcome;
    uint8_t   id;
@@ -186,24 +191,22 @@ owerror_t csensors_receive(
          msg->payload                     = &(msg->packet[127]);
          msg->length                      = 0;
 
-         if (coap_options[1].type != COAP_OPTION_NUM_URIPATH) {
+         if (coap_incomingOptions[1].type != COAP_OPTION_NUM_URIPATH) {
 
             // have CoAP module write links to csensors resources
             opencoap_writeLinks(msg,COMPONENT_CSENSORS);
 
-            packetfunctions_reserveHeaderSize(msg,1);
-            msg->payload[0]     = COAP_PAYLOAD_MARKER;
-
             // add return option
-            packetfunctions_reserveHeaderSize(msg,2);
-            msg->payload[0]     = COAP_OPTION_NUM_CONTENTFORMAT << 4 | 1;
-            msg->payload[1]     = COAP_MEDTYPE_APPLINKFORMAT;
-
+            csensors_vars.medType = COAP_MEDTYPE_APPLINKFORMAT;
+            coap_outgoingOptions[0].type = COAP_OPTION_NUM_CONTENTFORMAT;
+            coap_outgoingOptions[0].length = 1;
+            coap_outgoingOptions[0].pValue = &csensors_vars.medType;
+            *coap_outgoingOptionsLen = 1;
          } else {
             for(id=0;id<csensors_vars.numCsensors;id++) {
                if (
                   memcmp(
-                     coap_options[1].pValue,
+                     coap_incomingOptions[1].pValue,
                      csensors_vars.csensors_resource[id].desc.path1val,
                      csensors_vars.csensors_resource[id].desc.path1len
                   )==0
@@ -211,10 +214,13 @@ owerror_t csensors_receive(
                   break;
                }
             }
-            csensors_fillpayload(msg,id);
-            packetfunctions_reserveHeaderSize(msg,2);
-            msg->payload[0] = (COAP_OPTION_NUM_CONTENTFORMAT << 4) | 1;
-            msg->payload[1] = COAP_MEDTYPE_APPOCTETSTREAM;
+              csensors_fillpayload(msg,id);
+              // add return option
+              csensors_vars.medType = COAP_MEDTYPE_APPOCTETSTREAM;
+              coap_outgoingOptions[0].type = COAP_OPTION_NUM_CONTENTFORMAT;
+              coap_outgoingOptions[0].length = 1;
+              coap_outgoingOptions[0].pValue = &csensors_vars.medType;
+              *coap_outgoingOptionsLen = 1;
          }
          // set the CoAP header
          coap_header->Code                = COAP_CODE_RESP_CONTENT;
@@ -233,11 +239,11 @@ owerror_t csensors_receive(
                break;
             }
          }
-         if (coap_options[1].type == COAP_OPTION_NUM_URIPATH) {
+         if (coap_incomingOptions[1].type == COAP_OPTION_NUM_URIPATH) {
             for(id=0;id<csensors_vars.numCsensors;id++) {
                if (
                   memcmp(
-                     coap_options[1].pValue,
+                     coap_incomingOptions[1].pValue,
                      csensors_vars.csensors_resource[id].desc.path1val,
                      csensors_vars.csensors_resource[id].desc.path1len
                   )==0
@@ -303,6 +309,7 @@ void csensors_task_cb() {
    OpenQueueEntry_t*          pkt;
    owerror_t                  outcome;
    uint8_t                    id;
+   coap_option_iht            options[3];
 
    id = csensors_vars.cb_list[csensors_vars.cb_get];
 
@@ -326,19 +333,21 @@ void csensors_task_cb() {
    // CoAP payload
    csensors_fillpayload(pkt,id);
 
-   packetfunctions_reserveHeaderSize(pkt,2);
-   pkt->payload[0]                = (COAP_OPTION_NUM_CONTENTFORMAT - COAP_OPTION_NUM_URIPATH) << 4
-                                       | 1;
-   pkt->payload[1]                = COAP_MEDTYPE_APPOCTETSTREAM;
+   // location-path0 option
+   options[0].type = COAP_OPTION_NUM_URIPATH;
+   options[0].length = sizeof(csensors_path0) - 1;
+   options[0].pValue = (uint8_t*)csensors_path0;
 
    // location-path1 option
-   packetfunctions_reserveHeaderSize(pkt,1+csensors_vars.csensors_resource[id].desc.path1len);
-   memcpy(&pkt->payload[1],csensors_vars.csensors_resource[id].desc.path1val,csensors_vars.csensors_resource[id].desc.path1len);
-   pkt->payload[0]                =  sizeof(csensors_path0)-1;
-   // location-path0 option
-   packetfunctions_reserveHeaderSize(pkt,sizeof(csensors_path0));
-   memcpy(&pkt->payload[1],csensors_path0,sizeof(csensors_path0)-1);
-   pkt->payload[0]                = ((COAP_OPTION_NUM_URIPATH) << 4) | (sizeof(csensors_path0)-1);
+   options[1].type = COAP_OPTION_NUM_URIPATH;
+   options[1].length = csensors_vars.csensors_resource[id].desc.path1len;
+   options[1].pValue = csensors_vars.csensors_resource[id].desc.path1val;
+
+   // content format option
+   csensors_vars.medType = COAP_MEDTYPE_APPOCTETSTREAM;
+   options[2].type = COAP_OPTION_NUM_CONTENTFORMAT;
+   options[2].length = 1;
+   options[2].pValue = &csensors_vars.medType;
 
    // metadata
    pkt->l4_destination_port       = WKP_UDP_COAP;
@@ -350,7 +359,9 @@ void csensors_task_cb() {
       pkt,
       COAP_TYPE_NON,
       COAP_CODE_REQ_PUT,
-      2,
+      2, // token len
+      options,
+      3, // options len
       &csensors_vars.csensors_resource[id].desc
    );
 
@@ -428,14 +439,11 @@ void csensors_fillpayload(OpenQueueEntry_t* msg,
    uint16_t              value;
 
    value=csensors_vars.csensors_resource[id].opensensors_resource->callbackRead();
-   packetfunctions_reserveHeaderSize(msg,3);
-   
-   // add CoAP payload
-   msg->payload[0]                  = COAP_PAYLOAD_MARKER;
+   packetfunctions_reserveHeaderSize(msg,2);
    
    // add value
-   msg->payload[1]                  = (value>>8) & 0x00ff;
-   msg->payload[2]                  = value & 0x00ff;
+   msg->payload[0]                  = (value>>8) & 0x00ff;
+   msg->payload[1]                  = value & 0x00ff;
 
 
 }

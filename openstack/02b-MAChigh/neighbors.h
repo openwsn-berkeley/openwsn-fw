@@ -59,6 +59,7 @@ dagrank_t     neighbors_getNeighborRank(uint8_t index);
 uint8_t       neighbors_getNumNeighbors(void);
 uint16_t      neighbors_getLinkMetric(uint8_t index);
 open_addr_t*  neighbors_getKANeighbor(uint16_t kaPeriod);
+open_addr_t*  neighbors_getJoinProxy(void);
 bool          neighbors_getNeighborNoResource(uint8_t index);
 uint8_t       neighbors_getGeneration(open_addr_t* address);
 uint8_t       neighbors_getSequenceNumber(open_addr_t* address);
@@ -69,6 +70,7 @@ void          neighbors_setPreferredParent(uint8_t index, bool isPreferred);
 // interrogators
 bool          neighbors_isStableNeighbor(open_addr_t* address);
 bool          neighbors_isStableNeighborByIndex(uint8_t index);
+bool          neighbors_isInsecureNeighbor(open_addr_t* address);
 bool          neighbors_isNeighborWithLowerDAGrank(uint8_t index);
 bool          neighbors_isNeighborWithHigherDAGrank(uint8_t index);
 
@@ -78,7 +80,8 @@ void          neighbors_indicateRx(
    int8_t               rssi,
    asn_t*               asnTimestamp,
    bool                 joinPrioPresent,
-   uint8_t              joinPrio
+   uint8_t              joinPrio,
+   bool                 insecure
 );
 void          neighbors_indicateTx(
    open_addr_t*         dest,
@@ -101,5 +104,7 @@ bool          debugPrint_neighbors(void);
 \}
 \}
 */
+
+
 
 #endif

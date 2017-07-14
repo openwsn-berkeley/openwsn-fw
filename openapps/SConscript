@@ -21,7 +21,29 @@ if localEnv['board']=='python':
         'rrt',
         'cexample',
         'cstorm',
+        'cjoin',
     ]
+
+# source files that should be included in the build other than
+# those with default application name (application.c)
+additionalSourceFiles = [
+    os.path.join('opencoap','openoscoap.c'),
+    os.path.join('opencoap','usha.c'),
+    os.path.join('opencoap','hkdf.c'),
+    os.path.join('opencoap','hmac.c'),
+    os.path.join('opencoap','sha224-256.c'),
+    os.path.join('opencoap','cborencoder.c'),
+    os.path.join('cjoin','cbor.c'),
+]
+
+# header files that should be included in the build other than
+# those with default application name (application.h)
+additionalHeaderFiles = [
+    os.path.join('opencoap','openoscoap.h'),
+    os.path.join('opencoap','sha.h'),
+    os.path.join('opencoap','cborencoder.h'),
+    os.path.join('cjoin','cbor.h'),
+]
 
 # additional apps the user wants to build
 if localEnv['apps']:
@@ -32,8 +54,11 @@ else:
 # union of default and additional apps (without duplicates)
 apps      = ['opencoap']
 apps     += sorted(list(set(defaultApps+userApps)))
-appsInit  = ['opencoap'] # make sure opencoap is initialized first
-appsInit += sorted(list(set(userApps)))
+if userApps:
+    appsInit  = ['opencoap'] # make sure opencoap is initialized first
+    appsInit += sorted(list(set(userApps)))
+else:
+    appsInit = []
 
 #===== rule to create a (temporary) openapps_dyn.c file
 
@@ -92,6 +117,9 @@ sources_h         += ['openapps.h']
 for a in apps:
     sources_c     += [os.path.join(a,a+'.c')]
     sources_h     += [os.path.join(a,a+'.h')]
+
+sources_c += additionalSourceFiles
+sources_h += additionalHeaderFiles
 
 #===== build the openapps library
 
