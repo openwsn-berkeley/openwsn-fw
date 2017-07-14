@@ -21,6 +21,7 @@ typedef enum {
 //=========================== module variables ================================
 
 typedef struct {
+    uint8_t dummy; // needed for compilation, not used
 } openoscoap_vars_t;
 
 //=========================== prototypes ======================================

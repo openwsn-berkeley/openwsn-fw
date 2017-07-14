@@ -319,6 +319,7 @@
           <state>$PROJ_DIR$\..\..\..\openapps\c6t\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\cexample\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\cinfo\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\cjoin\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\cleds\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\csensors\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\cwellknown\</state>
@@ -1973,7 +1974,7 @@
             <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_smwdthrosc.h</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\headers\hw_soc_adc.h</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_soc_adc.h</name>
           </file>
           <file>
             <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_ssi.h</name>
@@ -2339,6 +2340,21 @@
       </file>
     </group>
     <group>
+      <name>cjoin</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cbor.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cbor.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cjoin.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cjoin.h</name>
+      </file>
+    </group>
+    <group>
       <name>cleds</name>
       <file>
         <name>$PROJ_DIR$\..\..\..\openapps\cleds\cleds.c</name>
@@ -2377,10 +2393,40 @@
     <group>
       <name>opencoap</name>
       <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\opencoap\cborencoder.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\opencoap\cborencoder.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\opencoap\hkdf.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\opencoap\hmac.c</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\openapps\opencoap\opencoap.c</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openapps\opencoap\opencoap.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\opencoap\openoscoap.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\opencoap\openoscoap.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\opencoap\sha-private.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\opencoap\sha.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\opencoap\sha224-256.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\opencoap\usha.c</name>
       </file>
     </group>
     <group>

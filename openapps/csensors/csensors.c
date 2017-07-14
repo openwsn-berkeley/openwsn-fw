@@ -216,7 +216,7 @@ owerror_t csensors_receive(
             }
               csensors_fillpayload(msg,id);
               // add return option
-              csensor_vars.medType = COAP_MEDTYPE_APPOCTETSTREM;
+              csensors_vars.medType = COAP_MEDTYPE_APPOCTETSTREAM;
               coap_outgoingOptions[0].type = COAP_OPTION_NUM_CONTENTFORMAT;
               coap_outgoingOptions[0].length = 1;
               coap_outgoingOptions[0].pValue = &csensors_vars.medType;
@@ -336,7 +336,7 @@ void csensors_task_cb() {
    // location-path0 option
    options[0].type = COAP_OPTION_NUM_URIPATH;
    options[0].length = sizeof(csensors_path0) - 1;
-   options[0].pValue = csensors_path0;
+   options[0].pValue = (uint8_t*)csensors_path0;
 
    // location-path1 option
    options[1].type = COAP_OPTION_NUM_URIPATH;
@@ -344,7 +344,7 @@ void csensors_task_cb() {
    options[1].pValue = csensors_vars.csensors_resource[id].desc.path1val;
 
    // content format option
-   csensors_vars.medType = COAP_MEDTYPE_APPOCTETSTREM;
+   csensors_vars.medType = COAP_MEDTYPE_APPOCTETSTREAM;
    options[2].type = COAP_OPTION_NUM_CONTENTFORMAT;
    options[2].length = 1;
    options[2].pValue = &csensors_vars.medType;
