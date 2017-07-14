@@ -188,8 +188,14 @@ owerror_t openoscoap_protect_message(
     requestSeq = &partialIV[AES_CCM_16_64_128_IV_LEN - 2];
     requestSeqLen = openoscoap_convert_sequence_number(sequenceNumber, &requestSeq);
 
-    requestKid = context->senderID;
-    requestKidLen = context->senderIDLen;
+    if (is_request(code)) {
+        requestKid = context->senderID;
+        requestKidLen = context->senderIDLen;
+    }
+    else {
+        requestKid = context->recipientID;
+        requestKidLen = context->recipientIDLen;
+    }
 
     if (msg->length > 0 ) { // contains payload, add payload marker
         payloadPresent = TRUE;
@@ -294,6 +300,8 @@ owerror_t openoscoap_unprotect_message(
  
     uint8_t nonce[AES_CCM_16_64_128_IV_LEN];
     uint8_t partialIV[AES_CCM_16_64_128_IV_LEN];
+    uint8_t *requestKid;
+    uint8_t requestKidLen;
     uint8_t* requestSeq;
     uint8_t requestSeqLen;
     uint8_t aad[AAD_MAX_LEN];
@@ -331,6 +339,12 @@ owerror_t openoscoap_unprotect_message(
             );
             return E_FAIL;
         }
+        requestKid = context->recipientID;
+        requestKidLen = context->recipientIDLen;
+    }
+    else {
+        requestKid = context->senderID;
+        requestKidLen = context->senderIDLen;
     }
 
     // convert sequence number to array and strip leading zeros
@@ -344,8 +358,8 @@ owerror_t openoscoap_unprotect_message(
             NULL,
             0, // do not support Class I options at the moment
             AES_CCM_16_64_128,
-            context->recipientID,
-            context->recipientIDLen,
+            requestKid,
+            requestKidLen,
             requestSeq,
             requestSeqLen);
 
