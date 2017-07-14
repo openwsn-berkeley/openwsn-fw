@@ -28,8 +28,10 @@ cstorm_vars_t cstorm_vars;
 owerror_t cstorm_receive(
    OpenQueueEntry_t* msg,
    coap_header_iht*  coap_header,
-   coap_option_iht*  coap_options
-);
+   coap_option_iht*  coap_incomingOptions,
+   coap_option_iht*  coap_outgoingOptions,
+   uint8_t*          coap_outgoingOptionsLen);
+
 void cstorm_timer_cb(void);
 void cstorm_task_cb(void);
 void cstorm_sendDone(OpenQueueEntry_t* msg, owerror_t error);
@@ -44,6 +46,7 @@ void cstorm_init(void) {
    cstorm_vars.desc.path1len              = 0;
    cstorm_vars.desc.path1val              = NULL;
    cstorm_vars.desc.componentID           = COMPONENT_CSTORM;
+   cstorm_vars.desc.securityContext       = NULL;
    cstorm_vars.desc.discoverable          = TRUE;
    cstorm_vars.desc.callbackRx            = &cstorm_receive;
    cstorm_vars.desc.callbackSendDone      = &cstorm_sendDone;
@@ -71,9 +74,11 @@ void cstorm_init(void) {
 //=========================== private =========================================
 
 owerror_t cstorm_receive(
-      OpenQueueEntry_t* msg,
-      coap_header_iht*  coap_header,
-      coap_option_iht*  coap_options
+        OpenQueueEntry_t* msg,
+        coap_header_iht*  coap_header,
+        coap_option_iht*  coap_incomingOptions,
+        coap_option_iht*  coap_outgoingOptions,
+        uint8_t*          coap_outgoingOptionsLen
    ) {
    owerror_t outcome;
    
@@ -86,12 +91,10 @@ owerror_t cstorm_receive(
          msg->length              = 0;
          
          // add CoAP payload
-         packetfunctions_reserveHeaderSize(msg, 3);
-         msg->payload[0]          = COAP_PAYLOAD_MARKER;
-         
+         packetfunctions_reserveHeaderSize(msg, 2);
          // return as big endian
-         msg->payload[1]          = (uint8_t)(cstorm_vars.period >> 8);
-         msg->payload[2]          = (uint8_t)(cstorm_vars.period & 0xff);
+         msg->payload[0]          = (uint8_t)(cstorm_vars.period >> 8);
+         msg->payload[1]          = (uint8_t)(cstorm_vars.period & 0xff);
          
          // set the CoAP header
          coap_header->Code        = COAP_CODE_RESP_CONTENT;
@@ -155,7 +158,8 @@ void cstorm_timer_cb(){
 void cstorm_task_cb() {
    OpenQueueEntry_t*    pkt;
    owerror_t            outcome;
-   uint8_t              numOptions;
+   coap_option_iht      options[2];
+   uint8_t              medType;
    
    // don't run if not synch
    if (ieee154e_isSynch() == FALSE) return;
@@ -195,29 +199,17 @@ void cstorm_task_cb() {
    packetfunctions_reserveHeaderSize(pkt,sizeof(cstorm_payload)-1);
    memcpy(&pkt->payload[0],cstorm_payload,sizeof(cstorm_payload)-1);
    
-   //set the TKL byte as a counter of Options
-   //TODO: This is not conform with RFC7252, but yes with current dissector WS v1.10.6
-   numOptions = 0;
-   
-   //Bigger Options last in message, first in the code (as it is in reverse order) 
-   //Deltas are calculated between too consecutive lengthes.
-   
+    // location-path option
+   options[0].type = COAP_OPTION_NUM_URIPATH;
+   options[0].length = sizeof(cstorm_path0) - 1;
+   options[0].pValue = (uint8_t *) cstorm_path0;
+
+  
    // content-type option
-   packetfunctions_reserveHeaderSize(pkt,2);
-   pkt->payload[0] = (COAP_OPTION_NUM_CONTENTFORMAT-COAP_OPTION_NUM_URIPATH) << 4 | 1; 
-   pkt->payload[1] = COAP_MEDTYPE_APPOCTETSTREAM;
-   numOptions++;
-   
-   // location-path option
-   packetfunctions_reserveHeaderSize(pkt,sizeof(cstorm_path0)-1);
-   memcpy(&pkt->payload[0],cstorm_path0,sizeof(cstorm_path0)-1);
-   packetfunctions_reserveHeaderSize(pkt,1);
-   pkt->payload[0] = (COAP_OPTION_NUM_URIPATH-7) << 4 | (sizeof(cstorm_path0)-1);
-   numOptions++;
-   
-   // length of uri-port option added directly by opencoap_send
-   packetfunctions_reserveHeaderSize(pkt,11);
-   numOptions++;
+   medType = COAP_MEDTYPE_APPOCTETSTREAM;
+   options[1].type = COAP_OPTION_NUM_CONTENTFORMAT;
+   options[1].length = 1;
+   options[1].pValue = &medType; 
    
    // metadata
    pkt->l4_destination_port = WKP_UDP_COAP;
@@ -229,7 +221,9 @@ void cstorm_task_cb() {
       pkt,
       COAP_TYPE_NON,
       COAP_CODE_REQ_PUT,
-      numOptions,
+      1, // token len
+      options,
+      2, // options len
       &cstorm_vars.desc
    );
    

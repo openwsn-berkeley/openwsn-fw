@@ -162,6 +162,23 @@ bool packetfunctions_isAllHostsMulticast(open_addr_t* address) {
    return FALSE;
 }
 
+bool packetfunctions_isLinkLocal(open_addr_t* address) {
+    if (
+      address->type          == ADDR_128B &&
+      address->addr_128b[0]  == 0xfe &&
+      address->addr_128b[1]  == 0x80 &&
+      address->addr_128b[2]  == 0x00 &&
+      address->addr_128b[3]  == 0x00 &&
+      address->addr_128b[4]  == 0x00 &&
+      address->addr_128b[5]  == 0x00 &&
+      address->addr_128b[6]  == 0x00 &&
+      address->addr_128b[7]  == 0x00 
+   ) {
+      return TRUE;
+   }
+   return FALSE;
+}
+
 bool packetfunctions_sameAddress(open_addr_t* address_1, open_addr_t* address_2) {
    uint8_t address_length;
    
@@ -276,9 +293,10 @@ void packetfunctions_reserveHeaderSize(OpenQueueEntry_t* pkt, uint8_t header_len
 }
 
 void packetfunctions_tossHeader(OpenQueueEntry_t* pkt, uint8_t header_length) {
+
    pkt->payload += header_length;
    pkt->length  -= header_length;
-   if ( (uint8_t*)(pkt->payload) > (uint8_t*)(pkt->packet+126) ) {
+   if ( (uint8_t*)(pkt->payload) > (uint8_t*)(pkt->packet+127) ) {
       openserial_printError(COMPONENT_PACKETFUNCTIONS,ERR_HEADER_TOO_LONG,
                             (errorparameter_t)1,
                             (errorparameter_t)pkt->length);

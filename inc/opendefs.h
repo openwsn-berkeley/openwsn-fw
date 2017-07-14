@@ -111,7 +111,8 @@ enum {
    STATUS_QUEUE                        =  8,
    STATUS_NEIGHBORS                    =  9,
    STATUS_KAPERIOD                     = 10,
-   STATUS_MAX                          = 11,
+   STATUS_JOINED                       = 11,
+   STATUS_MAX                          = 12,
 };
 
 //component identifiers
@@ -174,6 +175,8 @@ enum {
    COMPONENT_USERIALBRIDGE             = 0x28,
    COMPONENT_UEXPIRATION               = 0x29,
    COMPONENT_UMONITOR                  = 0x2a,
+   COMPONENT_CJOIN                     = 0x2b,
+   COMPONENT_OPENOSCOAP                = 0x2c,
 };
 
 /**
@@ -256,8 +259,15 @@ enum {
    ERR_UNSUPPORTED_FORMAT              = 0x40, // the received packet format is not supported {code location {0}}
    ERR_UNSUPPORTED_METADATA            = 0x41, // the metadata type is not suppored
    //l3
-   ERR_6LORH_DEADLINE_EXPIRED		       = 0x42, // the received packet has expired
+   ERR_6LORH_DEADLINE_EXPIRED	       = 0x42, // the received packet has expired
    ERR_6LORH_DEADLINE_DROPPED          = 0x43, // packet expiry time reached, dropped
+   // join and OSCOAP
+   ERR_JOINED                          = 0x44, // node joined
+   ERR_SEQUENCE_NUMBER_OVERFLOW        = 0x45, // OSCOAP sequence number reached maximum value
+   ERR_BUFFER_OVERFLOW                 = 0x46, // OSCOAP buffer overflow detected {code location {0}}
+   ERR_REPLAY_FAILED                   = 0x47, // OSCOAP replay protection failed
+   ERR_DECRYPTION_FAILED               = 0x48, // OSCOAP decryption and tag verification failed
+   ERR_ABORT_JOIN_PROCESS              = 0x49, // Aborted join process {code location {0}}
 };
 
 //=========================== typedef =========================================
@@ -361,6 +371,7 @@ typedef struct {
 BEGIN_PACK
 typedef struct {
    bool             used;
+   bool             insecure;
    uint8_t          parentPreference;
    bool             stableNeighbor;
    uint8_t          switchStabilityCounter;

@@ -41,6 +41,7 @@ typedef struct {
    uint8_t                      cb_list[CSENSORSTASKLIST];
    uint8_t                      cb_put;
    uint8_t                      cb_get;
+   uint8_t                      medType;
 } csensors_vars_t;
 
 //=========================== variables =======================================

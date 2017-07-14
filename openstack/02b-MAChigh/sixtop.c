@@ -372,9 +372,9 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
     msg->l2_frameType = IEEE154_TYPE_DATA;
 
     // set l2-security attributes
-    msg->l2_securityLevel   = IEEE802154_SECURITY_LEVEL;
+    msg->l2_securityLevel   = IEEE802154_security_getSecurityLevel(msg);
     msg->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE; 
-    msg->l2_keyIndex        = IEEE802154_SECURITY_K2_KEY_INDEX;
+    msg->l2_keyIndex        = IEEE802154_security_getDataKeyIndex();
   
     if (msg->l2_payloadIEpresent == FALSE) {
         return sixtop_send_internal(
@@ -467,7 +467,7 @@ void task_sixtopNotifReceive() {
         );
         return;
     }
-   
+    
     // take ownership
     msg->owner = COMPONENT_SIXTOP;
    
@@ -477,7 +477,8 @@ void task_sixtopNotifReceive() {
         msg->l1_rssi,
         &msg->l2_asn,
         msg->l2_joinPriorityPresent,
-        msg->l2_joinPriority
+        msg->l2_joinPriority,
+        msg->l2_securityLevel == IEEE154_ASH_SLF_TYPE_NOSEC ? TRUE : FALSE
     );
     
     // process the header IEs
@@ -690,8 +691,13 @@ port_INLINE void sixtop_sendEB() {
     uint8_t     eb_len;
     uint16_t    temp16b;
    
-    if ((ieee154e_isSynch()==FALSE) || (icmpv6rpl_getMyDAGrank()==DEFAULTDAGRANK)){
-        // I'm not sync'ed or I did not acquire a DAGrank
+    if ((ieee154e_isSynch()==FALSE)                     ||
+        (IEEE802154_security_isConfigured()==FALSE)     ||
+        (icmpv6rpl_getMyDAGrank()==DEFAULTDAGRANK)      ||
+        icmpv6rpl_daoSent()==FALSE) {
+        // I'm not sync'ed, or did not join, or did not acquire a DAGrank or did not send out a DAO
+        // before starting to advertize the network, we need to make sure that we are reachable downwards,
+        // thus, the condition if DAO was sent
       
         // delete packets genereted by this module (EB and KA) from openqueue
         openqueue_removeAllCreatedBy(COMPONENT_SIXTOP);
@@ -770,7 +776,7 @@ port_INLINE void sixtop_sendEB() {
     // set l2-security attributes
     eb->l2_securityLevel   = IEEE802154_SECURITY_LEVEL_BEACON;
     eb->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE;
-    eb->l2_keyIndex        = IEEE802154_SECURITY_K1_KEY_INDEX;
+    eb->l2_keyIndex        = IEEE802154_security_getBeaconKeyIndex();
 
     // put in queue for MAC to handle
     sixtop_send_internal(eb,eb->l2_payloadIEpresent);
@@ -838,9 +844,9 @@ port_INLINE void sixtop_sendKA() {
     memcpy(&(kaPkt->l2_nextORpreviousHop),kaNeighAddr,sizeof(open_addr_t));
    
     // set l2-security attributes
-    kaPkt->l2_securityLevel   = IEEE802154_SECURITY_LEVEL;
+    kaPkt->l2_securityLevel   = IEEE802154_SECURITY_LEVEL; // do not exchange KAs with 
     kaPkt->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE;
-    kaPkt->l2_keyIndex        = IEEE802154_SECURITY_K2_KEY_INDEX;
+    kaPkt->l2_keyIndex        = IEEE802154_security_getDataKeyIndex();
 
     // put in queue for MAC to handle
     sixtop_send_internal(kaPkt,FALSE);

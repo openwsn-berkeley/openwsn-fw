@@ -11,11 +11,9 @@
 #include "c6t.h"
 #include "cinfo.h"
 #include "cleds.h"
+#include "cjoin.h"
 #include "cwellknown.h"
 #include "rrt.h"
-#include "cexample.h"
-#include "cstorm.h"
-
 // UDP
 #include "uecho.h"
 #include "uinject.h"
@@ -39,6 +37,7 @@ void openapps_init(void) {
    c6t_init();
    cinfo_init();
    cleds__init();
+   cjoin_init();
    cwellknown_init();
    rrt_init();
    
