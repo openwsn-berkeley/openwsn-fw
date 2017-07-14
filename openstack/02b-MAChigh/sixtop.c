@@ -270,11 +270,13 @@ void sixtop_request(
     if (code == IANA_6TOP_CMD_LIST){
         // append 6p max number of cells
         packetfunctions_reserveHeaderSize(pkt,sizeof(uint16_t));
-        *((uint8_t*)(pkt->payload)) = listingMaxNumCells;
+        *((uint8_t*)(pkt->payload))   = (uint8_t)(listingMaxNumCells & 0x00FF);
+        *((uint8_t*)(pkt->payload+1)) = (uint8_t)(listingMaxNumCells & 0xFF00)>>8;
         len +=2;
         // append 6p listing offset
         packetfunctions_reserveHeaderSize(pkt,sizeof(uint16_t));
-        *((uint8_t*)(pkt->payload)) = listingOffset;
+        *((uint8_t*)(pkt->payload))   = (uint8_t)(listingOffset & 0x00FF);
+        *((uint8_t*)(pkt->payload+1)) = (uint8_t)(listingOffset & 0xFF00)>>8;
         len +=2;
         // append 6p Reserved field
         packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
