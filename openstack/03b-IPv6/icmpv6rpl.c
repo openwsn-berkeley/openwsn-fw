@@ -82,6 +82,20 @@ void icmpv6rpl_init() {
    
    icmpv6rpl_vars.dioPeriod                 = TIMER_DIO_TIMEOUT;
    icmpv6rpl_vars.timerIdDIO                = opentimers_create();
+
+   //initialize PIO -> move this to dagroot code
+   icmpv6rpl_vars.pio.type                  = 0x08;
+   icmpv6rpl_vars.pio.optLen                = 30;
+   icmpv6rpl_vars.pio.prefLen               = 64;
+   icmpv6rpl_vars.pio.flags                 = 96;
+   icmpv6rpl_vars.pio.plifetime             = 0xFFFFFFFF;
+   icmpv6rpl_vars.pio.vlifetime             = 0xFFFFFFFF;
+   memcpy(
+      &(icmpv6rpl_vars.pio.prefix[0]),
+      idmanager_getMyID(ADDR_128B)->addr_128b,
+      sizeof(icmpv6rpl_vars.pio.prefix)
+   );
+
    opentimers_scheduleIn(
        icmpv6rpl_vars.timerIdDIO,
        872 +(openrandom_get16b()&0xff),
@@ -233,6 +247,7 @@ void icmpv6rpl_receive(OpenQueueEntry_t* msg) {
             (icmpv6rpl_dio_ht*)(msg->payload),
             sizeof(icmpv6rpl_dio_ht)
          );
+
          
          // write DODAGID in DIO and DAO
          icmpv6rpl_writeDODAGid(&(((icmpv6rpl_dio_ht*)(msg->payload))->DODAGID[0]));
@@ -245,7 +260,7 @@ void icmpv6rpl_receive(OpenQueueEntry_t* msg) {
             sizeof(myPrefix.prefix)
          );
          idmanager_setMyID(&myPrefix);
-         
+
          // update routing info for that neighbor
          icmpv6rpl_indicateRxDIO(msg);
          
@@ -472,6 +487,11 @@ void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t* msg) {
    
    // save pointer to incoming DIO header in global structure for simplfying debug.
    icmpv6rpl_vars.incomingDio = (icmpv6rpl_dio_ht*)(msg->payload);
+   icmpv6rpl_vars.incomingPio = (icmpv6rpl_pio_t*) (msg->payload + sizeof(icmpv6rpl_dio_ht));
+
+   // update pio with the received one.
+   memcpy(&icmpv6rpl_vars.pio,icmpv6rpl_vars.incomingPio, sizeof(icmpv6rpl_pio_t));
+
    // quick fix: rank is two bytes in network order: need to swap bytes
    temp_8b            = *(msg->payload+2);
    icmpv6rpl_vars.incomingDio->rank = (temp_8b << 8) + *(msg->payload+3);
@@ -602,6 +622,24 @@ void sendDIO() {
    // set DIO destination
    memcpy(&(msg->l3_destinationAdd),&icmpv6rpl_vars.dioDestination,sizeof(open_addr_t));
    
+   //===== PIO payload
+
+   packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_pio_t));
+
+   // copy my prefix into the PIO
+   memcpy(
+      &(icmpv6rpl_vars.pio.prefix[0]),
+      idmanager_getMyID(ADDR_128B)->addr_128b,
+      sizeof(icmpv6rpl_vars.pio.prefix)
+   );
+   //copy the PIO in the packet
+   memcpy(
+      ((icmpv6rpl_pio_t*)(msg->payload)),
+      &(icmpv6rpl_vars.pio),
+      sizeof(icmpv6rpl_pio_t)
+   );
+
+
    //===== DIO payload
    // note: DIO is already mostly populated
    icmpv6rpl_vars.dio.rank                  = icmpv6rpl_getMyDAGrank();
