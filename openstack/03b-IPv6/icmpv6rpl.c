@@ -90,11 +90,20 @@ void icmpv6rpl_init() {
    icmpv6rpl_vars.pio.flags                 = 96;
    icmpv6rpl_vars.pio.plifetime             = 0xFFFFFFFF;
    icmpv6rpl_vars.pio.vlifetime             = 0xFFFFFFFF;
-   memcpy(
-      &(icmpv6rpl_vars.pio.prefix[0]),
-      idmanager_getMyID(ADDR_128B)->addr_128b,
-      sizeof(icmpv6rpl_vars.pio.prefix)
-   );
+   // if not dagroot then do not initialize, will receive PIO and update fields
+   // later
+   if (idmanager_getIsDAGroot()){
+     memcpy(
+        &(icmpv6rpl_vars.pio.prefix[0]),
+        idmanager_getMyID(ADDR_PREFIX)->prefix,
+        sizeof(idmanager_getMyID(ADDR_PREFIX)->prefix)
+     );
+      memcpy(
+        &(icmpv6rpl_vars.pio.prefix[8]),
+        idmanager_getMyID(ADDR_64B)->addr_64b,
+        sizeof(idmanager_getMyID(ADDR_64B)->addr_64b)
+     );
+   }
 
    opentimers_scheduleIn(
        icmpv6rpl_vars.timerIdDIO,
@@ -627,11 +636,18 @@ void sendDIO() {
    packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_pio_t));
 
    // copy my prefix into the PIO
+   
    memcpy(
       &(icmpv6rpl_vars.pio.prefix[0]),
-      idmanager_getMyID(ADDR_128B)->addr_128b,
-      sizeof(icmpv6rpl_vars.pio.prefix)
+      idmanager_getMyID(ADDR_PREFIX)->prefix,
+      sizeof(idmanager_getMyID(ADDR_PREFIX)->prefix)
    );
+    memcpy(
+      &(icmpv6rpl_vars.pio.prefix[8]),
+      idmanager_getMyID(ADDR_64B)->addr_64b,
+      sizeof(idmanager_getMyID(ADDR_64B)->addr_64b)
+   );
+   
    //copy the PIO in the packet
    memcpy(
       ((icmpv6rpl_pio_t*)(msg->payload)),
