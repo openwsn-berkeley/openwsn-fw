@@ -1203,6 +1203,18 @@ void sixtop_six2six_notifyReceive(
                         break;
                     }
                 }
+                if (
+                    schedule_getOneCellAfterOffset(
+                        metadata,
+                        startingOffset,
+                        &(pkt->l2_nextORpreviousHop),
+                        cellOptions_transformed,
+                        &slotoffset,
+                        &channeloffset) == FALSE
+                ){
+                    returnCode = IANA_6TOP_RC_EOL;
+                }
+                
                 break;
             }
             
