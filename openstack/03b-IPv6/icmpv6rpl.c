@@ -82,6 +82,29 @@ void icmpv6rpl_init() {
    
    icmpv6rpl_vars.dioPeriod                 = TIMER_DIO_TIMEOUT;
    icmpv6rpl_vars.timerIdDIO                = opentimers_create();
+
+   //initialize PIO -> move this to dagroot code
+   icmpv6rpl_vars.pio.type                  = 0x08;
+   icmpv6rpl_vars.pio.optLen                = 30;
+   icmpv6rpl_vars.pio.prefLen               = 64;
+   icmpv6rpl_vars.pio.flags                 = 96;
+   icmpv6rpl_vars.pio.plifetime             = 0xFFFFFFFF;
+   icmpv6rpl_vars.pio.vlifetime             = 0xFFFFFFFF;
+   // if not dagroot then do not initialize, will receive PIO and update fields
+   // later
+   if (idmanager_getIsDAGroot()){
+     memcpy(
+        &(icmpv6rpl_vars.pio.prefix[0]),
+        idmanager_getMyID(ADDR_PREFIX)->prefix,
+        sizeof(idmanager_getMyID(ADDR_PREFIX)->prefix)
+     );
+      memcpy(
+        &(icmpv6rpl_vars.pio.prefix[8]),
+        idmanager_getMyID(ADDR_64B)->addr_64b,
+        sizeof(idmanager_getMyID(ADDR_64B)->addr_64b)
+     );
+   }
+
    opentimers_scheduleIn(
        icmpv6rpl_vars.timerIdDIO,
        872 +(openrandom_get16b()&0xff),
@@ -206,7 +229,6 @@ void icmpv6rpl_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 */
 void icmpv6rpl_receive(OpenQueueEntry_t* msg) {
    uint8_t      icmpv6code;
-   open_addr_t  myPrefix;
    
    // take ownership
    msg->owner      = COMPONENT_ICMPv6RPL;
@@ -227,25 +249,6 @@ void icmpv6rpl_receive(OpenQueueEntry_t* msg) {
             // stop here if I'm in the DAG root
             break; // break, don't return
          }
-                  
-         memcpy(
-            &(icmpv6rpl_vars.dio),
-            (icmpv6rpl_dio_ht*)(msg->payload),
-            sizeof(icmpv6rpl_dio_ht)
-         );
-         
-         // write DODAGID in DIO and DAO
-         icmpv6rpl_writeDODAGid(&(((icmpv6rpl_dio_ht*)(msg->payload))->DODAGID[0]));
-         
-         // update my prefix // looks like we adopt the prefix from any DIO without a question about this node being our parent??
-         myPrefix.type = ADDR_PREFIX;
-         memcpy(
-            myPrefix.prefix,
-            &((icmpv6rpl_dio_ht*)(msg->payload))->DODAGID[0],
-            sizeof(myPrefix.prefix)
-         );
-         idmanager_setMyID(&myPrefix);
-         
          // update routing info for that neighbor
          icmpv6rpl_indicateRxDIO(msg);
          
@@ -466,12 +469,38 @@ void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t* msg) {
    uint8_t          temp_8b;
    dagrank_t        neighborRank;
    open_addr_t      NeighborAddress;
-  
+   open_addr_t      myPrefix;
+
    // take ownership over the packet
    msg->owner = COMPONENT_NEIGHBORS;
    
+   // copy to our DIO 
+   memcpy(
+      &(icmpv6rpl_vars.dio),
+      (icmpv6rpl_dio_ht*)(msg->payload),
+      sizeof(icmpv6rpl_dio_ht)
+   );
+
+   // write DODAGID in DIO and DAO
+   icmpv6rpl_writeDODAGid(&(((icmpv6rpl_dio_ht*)(msg->payload))->DODAGID[0]));
+   
    // save pointer to incoming DIO header in global structure for simplfying debug.
    icmpv6rpl_vars.incomingDio = (icmpv6rpl_dio_ht*)(msg->payload);
+   icmpv6rpl_vars.incomingPio = (icmpv6rpl_pio_t*) (msg->payload + sizeof(icmpv6rpl_dio_ht));
+
+   // update PIO with the received one.
+   memcpy(&icmpv6rpl_vars.pio,icmpv6rpl_vars.incomingPio, sizeof(icmpv6rpl_pio_t));
+
+   // update my prefix from PIO 
+   // looks like we adopt the prefix from any PIO without a question about this node being our parent??
+   myPrefix.type = ADDR_PREFIX;
+   memcpy(
+      myPrefix.prefix,
+      icmpv6rpl_vars.incomingPio->prefix,
+      sizeof(myPrefix.prefix)
+   );
+   idmanager_setMyID(&myPrefix);
+   
    // quick fix: rank is two bytes in network order: need to swap bytes
    temp_8b            = *(msg->payload+2);
    icmpv6rpl_vars.incomingDio->rank = (temp_8b << 8) + *(msg->payload+3);
@@ -602,6 +631,31 @@ void sendDIO() {
    // set DIO destination
    memcpy(&(msg->l3_destinationAdd),&icmpv6rpl_vars.dioDestination,sizeof(open_addr_t));
    
+   //===== PIO payload
+
+   packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_pio_t));
+
+   // copy my prefix into the PIO
+   
+   memcpy(
+      &(icmpv6rpl_vars.pio.prefix[0]),
+      idmanager_getMyID(ADDR_PREFIX)->prefix,
+      sizeof(idmanager_getMyID(ADDR_PREFIX)->prefix)
+   );
+    memcpy(
+      &(icmpv6rpl_vars.pio.prefix[8]),
+      idmanager_getMyID(ADDR_64B)->addr_64b,
+      sizeof(idmanager_getMyID(ADDR_64B)->addr_64b)
+   );
+   
+   //copy the PIO in the packet
+   memcpy(
+      ((icmpv6rpl_pio_t*)(msg->payload)),
+      &(icmpv6rpl_vars.pio),
+      sizeof(icmpv6rpl_pio_t)
+   );
+
+
    //===== DIO payload
    // note: DIO is already mostly populated
    icmpv6rpl_vars.dio.rank                  = icmpv6rpl_getMyDAGrank();
