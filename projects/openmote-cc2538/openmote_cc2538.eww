@@ -16,7 +16,31 @@
   <project>
     <path>$WS_DIR$\03oos_sniffer\03oos_sniffer.ewp</path>
   </project>
-  <batchBuild/>
+  <batchBuild>
+    <batchDefinition>
+      <name>all_debug</name>
+      <member>
+        <project>01bsp_sctimer</project>
+        <configuration>Debug</configuration>
+      </member>
+      <member>
+        <project>02drv_opentimers</project>
+        <configuration>Debug</configuration>
+      </member>
+      <member>
+        <project>03oos_macpong</project>
+        <configuration>Debug</configuration>
+      </member>
+      <member>
+        <project>03oos_openwsn</project>
+        <configuration>Debug</configuration>
+      </member>
+      <member>
+        <project>03oos_sniffer</project>
+        <configuration>Debug</configuration>
+      </member>
+    </batchDefinition>
+  </batchBuild>
 </workspace>
 
 
