@@ -367,7 +367,6 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
             return;
         }
     }
-    
     // prep for loop, remember state before neighbor table scanning
     prevParentIndex      = icmpv6rpl_vars.ParentIndex;
     prevHadParent        = icmpv6rpl_vars.haveParent;
@@ -470,17 +469,18 @@ void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t* msg) {
    dagrank_t        neighborRank;
    open_addr_t      NeighborAddress;
    open_addr_t      myPrefix;
+   uint8_t          tempRank[2];
 
    // take ownership over the packet
    msg->owner = COMPONENT_NEIGHBORS;
    
-   // copy to our DIO 
+   // update some fields of our DIO 
    memcpy(
       &(icmpv6rpl_vars.dio),
       (icmpv6rpl_dio_ht*)(msg->payload),
       sizeof(icmpv6rpl_dio_ht)
    );
-
+   
    // write DODAGID in DIO and DAO
    icmpv6rpl_writeDODAGid(&(((icmpv6rpl_dio_ht*)(msg->payload))->DODAGID[0]));
    
@@ -504,6 +504,10 @@ void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t* msg) {
    // quick fix: rank is two bytes in network order: need to swap bytes
    temp_8b            = *(msg->payload+2);
    icmpv6rpl_vars.incomingDio->rank = (temp_8b << 8) + *(msg->payload+3);
+   
+   //update rank in DIO as well (which will be overwritten with my rank when send).
+   icmpv6rpl_vars.dio.rank = icmpv6rpl_vars.incomingDio->rank;
+
    // update rank of that neighbor in table
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
       if (neighbors_getNeighborEui64(&NeighborAddress, ADDR_64B, i)) { // this neighbor entry is in use
