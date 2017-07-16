@@ -52,6 +52,11 @@
 #define Prf_A_dio_options         0<<4
 #define Prf_B_dio_options         0<<3
 
+#define DEFAULT_PATH_CONTROL_SIZE 0
+
+#define RPL_OPTION_PIO 0x8
+#define RPL_OPTION_CONFIG 0x4
+
 // max number of parents and children to send in DAO
 //section 8.2.1 pag 67 RFC6550 -- using a subset
 #define MAX_TARGET_PARENTS        0x01
@@ -91,6 +96,37 @@ typedef struct {
    uint8_t         reserved;
    uint8_t         DODAGID[16];    
 } icmpv6rpl_dio_ht;
+END_PACK
+
+
+BEGIN_PACK
+typedef struct {
+   uint8_t type; // 0x08
+   uint8_t optLen; // 30d
+   uint8_t prefLen;//64
+   uint8_t flags; //96 L=0,A=1,R=1,00000
+   uint32_t vlifetime; //0xFFFFFFFF infinity
+   uint32_t plifetime; //0xFFFFFFFF infinity
+   uint32_t reserved;
+   uint8_t  prefix[16]; // myaddress
+}icmpv6rpl_pio_t;
+END_PACK
+
+BEGIN_PACK
+typedef struct {
+   uint8_t type; // 0x04
+   uint8_t optLen; // 14d
+   uint8_t flagsAPCS;
+   uint8_t DIOIntDoubl; //8 -> trickle period - max times it will double ~20min
+   uint8_t DIOIntMin; // 12 ->  min trickle period -> 16s
+   uint8_t DIORedun; // 0
+   uint16_t maxRankIncrease; //  2048
+   uint16_t minHopRankIncrease; //256
+   uint16_t OCP; // 0 OF0
+   uint8_t reserved;
+   uint8_t defLifetime; // limit for DAO period  -> 0xff 
+   uint16_t lifetimeUnit; // 0xffff
+}icmpv6rpl_config_ht;
 END_PACK
 
 //===== DAO
@@ -135,18 +171,8 @@ typedef struct {
 END_PACK
 
 //=========================== module variables ================================
-BEGIN_PACK
-typedef struct {
-   uint8_t type; // 0x08
-   uint8_t optLen; // 30d
-   uint8_t prefLen;//64
-   uint8_t flags; //96 L=0,A=1,R=1,00000
-   uint32_t vlifetime; //0xFFFFFFFF infinity
-   uint32_t plifetime; //0xFFFFFFFF infinity
-   uint32_t reserved;
-   uint8_t  prefix[16]; // myaddress
-}icmpv6rpl_pio_t;
-END_PACK
+
+
 
 typedef struct {
    // admin
@@ -156,6 +182,7 @@ typedef struct {
    // DIO-related
    icmpv6rpl_dio_ht          dio;                     ///< pre-populated DIO packet.
    icmpv6rpl_pio_t           pio;                     ///< pre-populated PIO com
+   icmpv6rpl_config_ht       conf;
    open_addr_t               dioDestination;          ///< IPv6 destination address for DIOs.
    uint16_t                  dioTimerCounter;         ///< counter to determine when to send DIO.
    opentimers_id_t           timerIdDIO;              ///< ID of the timer used to send DIOs.
@@ -175,6 +202,7 @@ typedef struct {
    // actually only here for debug
    icmpv6rpl_dio_ht*         incomingDio;             //keep it global to be able to debug correctly.
    icmpv6rpl_pio_t*          incomingPio;             //pio structure incoming
+   icmpv6rpl_config_ht*      incomingConf;            //configuration incoming
    bool                      daoSent;
 } icmpv6rpl_vars_t;
 
