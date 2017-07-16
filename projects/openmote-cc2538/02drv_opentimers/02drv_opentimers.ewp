@@ -650,7 +650,7 @@
         </option>
         <option>
           <name>IlinkOutputFile</name>
-          <state>02drv_opentimers2.out</state>
+          <state>02drv_opentimers.out</state>
         </option>
         <option>
           <name>IlinkDebugInfoEnable</name>
@@ -2282,10 +2282,10 @@
         </excluded>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers2.c</name>
+        <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers2.h</name>
+        <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.h</name>
       </file>
     </group>
   </group>
@@ -2300,9 +2300,9 @@
     <group>
       <name>common</name>
       <group>
-        <name>02drv_opentimers2</name>
+        <name>02drv_opentimers</name>
         <file>
-          <name>$PROJ_DIR$\..\..\common\02drv_opentimers2\02drv_opentimers2.c</name>
+          <name>$PROJ_DIR$\..\..\common\02drv_opentimers\02drv_opentimers.c</name>
         </file>
       </group>
     </group>
