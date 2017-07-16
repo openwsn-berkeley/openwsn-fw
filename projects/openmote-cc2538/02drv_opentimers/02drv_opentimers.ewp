@@ -2113,13 +2113,10 @@
           </excluded>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\cc2538_crypto_engine.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\cc2538_crypto_engine.h</name>
-        </file>
-        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\cc2538rf.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\cryptoengine.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\debugpins.c</name>
@@ -2265,18 +2262,6 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\drivers\common\openserial.h</name>
-        <excluded>
-          <configuration>Debug</configuration>
-        </excluded>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.c</name>
-        <excluded>
-          <configuration>Debug</configuration>
-        </excluded>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.h</name>
         <excluded>
           <configuration>Debug</configuration>
         </excluded>
