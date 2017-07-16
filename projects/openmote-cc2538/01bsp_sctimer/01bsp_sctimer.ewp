@@ -1884,95 +1884,80 @@
     <group>
       <name>boards</name>
       <group>
-        <name>common</name>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\openaes.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\openaes.h</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\openccms.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\openccms.h</name>
-        </file>
-      </group>
-      <group>
         <name>openmote-cc2538</name>
         <group>
           <name>headers</name>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\headers\hw_aes.h</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_aes.h</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\headers\hw_ana_regs.h</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_ana_regs.h</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\headers\hw_cctest.h</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_cctest.h</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\headers\hw_flash_ctrl.h</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_flash_ctrl.h</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\headers\hw_gpio.h</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_gpio.h</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\headers\hw_gptimer.h</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_gptimer.h</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\headers\hw_i2cm.h</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_i2cm.h</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\headers\hw_i2cs.h</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_i2cs.h</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\headers\hw_ints.h</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_ints.h</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\headers\hw_ioc.h</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_ioc.h</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\headers\hw_memmap.h</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_memmap.h</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\headers\hw_nvic.h</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_nvic.h</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\headers\hw_pka.h</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_pka.h</name>
           </file>
           <file>
             <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_rfcore_ffsm.h</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\headers\hw_rfcore_sfr.h</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_rfcore_sfr.h</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\headers\hw_rfcore_xreg.h</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_rfcore_xreg.h</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\headers\hw_smwdthrosc.h</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_smwdthrosc.h</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\headers\hw_soc_adc.h</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_soc_adc.h</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\headers\hw_ssi.h</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_ssi.h</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\headers\hw_sys_ctrl.h</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_sys_ctrl.h</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\headers\hw_types.h</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_types.h</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\headers\hw_uart.h</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_uart.h</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\headers\hw_udma.h</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_udma.h</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\headers\hw_udmachctl.h</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_udmachctl.h</name>
           </file>
           <file>
             <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_usb.h</name>
@@ -1984,7 +1969,7 @@
             <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\adc.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\source\adc.h</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\adc.h</name>
           </file>
           <file>
             <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\aes.c</name>
@@ -2005,7 +1990,7 @@
             <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\cpu.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\source\cpu.h</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\cpu.h</name>
           </file>
           <file>
             <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\debug.c</name>
@@ -2026,7 +2011,7 @@
             <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\gpio.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\source\gpio.h</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\gpio.h</name>
           </file>
           <file>
             <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\gptimer.c</name>
@@ -2050,7 +2035,7 @@
             <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\ioc.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\source\ioc.h</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\ioc.h</name>
           </file>
           <file>
             <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\pka.c</name>
@@ -2083,7 +2068,7 @@
             <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\sys_ctrl.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\source\sys_ctrl.h</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\sys_ctrl.h</name>
           </file>
           <file>
             <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\systick.c</name>
@@ -2129,13 +2114,10 @@
           </excluded>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\cc2538_crypto_engine.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\cc2538_crypto_engine.h</name>
-        </file>
-        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\cc2538rf.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\cryptoengine.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\debugpins.c</name>
