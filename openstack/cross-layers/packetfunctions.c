@@ -43,7 +43,6 @@ void packetfunctions_mac64bToIp128b(
    ip128bToWrite->type=ADDR_128B;
    memcpy(&(ip128bToWrite->addr_128b[0]), &(prefix64b->prefix[0]), 8);
    memcpy(&(ip128bToWrite->addr_128b[8]), &(mac64b->addr_64b[0]),  8);
-   ip128bToWrite->addr_128b[8] ^= 0x02;
 }
 
 //assuming an mac16b is lower 2B of mac64b
@@ -399,12 +398,6 @@ bool packetfunctions_checkCRC(OpenQueueEntry_t* msg) {
 void packetfunctions_calculateChecksum(OpenQueueEntry_t* msg, uint8_t* checksum_ptr) {
    uint8_t temp_checksum[2];
    uint8_t little_helper[2];
-   open_addr_t linklocalPrefix;
-   open_addr_t sourceAddr;
-   linklocalPrefix.type = ADDR_PREFIX;
-   uint8_t linklocal_addr[8] = {0xfe,0x80,0x0,0x0,0x0,0x0,0x0,0x0};
-   
-   memcpy(linklocalPrefix.addr_64b,linklocal_addr,8);
    
    // initialize running checksum
    temp_checksum[0]  = 0;
@@ -412,15 +405,9 @@ void packetfunctions_calculateChecksum(OpenQueueEntry_t* msg, uint8_t* checksum_
    
    //===== IPv6 pseudo header
    
-   packetfunctions_mac64bToIp128b(&linklocalPrefix, idmanager_getMyID(ADDR_64B), &sourceAddr);
-   
    // source address (prefix and EUI64)
-   if (packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))){
-        onesComplementSum(temp_checksum, sourceAddr.addr_128b,16);
-   } else {
-        onesComplementSum(temp_checksum,(idmanager_getMyID(ADDR_PREFIX))->prefix,8);
-        onesComplementSum(temp_checksum,(idmanager_getMyID(ADDR_64B))->addr_64b,8);
-   }
+   onesComplementSum(temp_checksum,(idmanager_getMyID(ADDR_PREFIX))->prefix,8);
+   onesComplementSum(temp_checksum,(idmanager_getMyID(ADDR_64B))->addr_64b,8);
    
    // destination address
    onesComplementSum(temp_checksum,msg->l3_destinationAdd.addr_128b,16);
