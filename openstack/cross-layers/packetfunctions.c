@@ -162,6 +162,23 @@ bool packetfunctions_isAllHostsMulticast(open_addr_t* address) {
    return FALSE;
 }
 
+bool packetfunctions_isLinkLocal(open_addr_t* address) {
+    if (
+      address->type          == ADDR_128B &&
+      address->addr_128b[0]  == 0xfe &&
+      address->addr_128b[1]  == 0x80 &&
+      address->addr_128b[2]  == 0x00 &&
+      address->addr_128b[3]  == 0x00 &&
+      address->addr_128b[4]  == 0x00 &&
+      address->addr_128b[5]  == 0x00 &&
+      address->addr_128b[6]  == 0x00 &&
+      address->addr_128b[7]  == 0x00 
+   ) {
+      return TRUE;
+   }
+   return FALSE;
+}
+
 bool packetfunctions_sameAddress(open_addr_t* address_1, open_addr_t* address_2) {
    uint8_t address_length;
    
@@ -276,9 +293,10 @@ void packetfunctions_reserveHeaderSize(OpenQueueEntry_t* pkt, uint8_t header_len
 }
 
 void packetfunctions_tossHeader(OpenQueueEntry_t* pkt, uint8_t header_length) {
+
    pkt->payload += header_length;
    pkt->length  -= header_length;
-   if ( (uint8_t*)(pkt->payload) > (uint8_t*)(pkt->packet+126) ) {
+   if ( (uint8_t*)(pkt->payload) > (uint8_t*)(pkt->packet+127) ) {
       openserial_printError(COMPONENT_PACKETFUNCTIONS,ERR_HEADER_TOO_LONG,
                             (errorparameter_t)1,
                             (errorparameter_t)pkt->length);
@@ -319,9 +337,6 @@ void packetfunctions_duplicatePacket(OpenQueueEntry_t* dst, OpenQueueEntry_t* sr
 
    // update l2_ASNpayload pointer
    dst->l2_ASNpayload = dst->payload + (src->l2_ASNpayload - src->payload);
-
-   // update l2_scheduleIE_cellObjects pointer
-   dst->l2_sixtop_cellObjects = dst->payload + (src->l2_sixtop_cellObjects - src->payload);
 
    // update l2_payload pointer
    dst->l2_payload = dst->payload + (src->l2_payload - src->payload);
@@ -466,6 +481,18 @@ uint32_t packetfunctions_ntohl( uint8_t* src ) {
       (((uint32_t) src[2]) << 8)      |
       (((uint32_t) src[3])
       );
+}
+
+// reverse byte order in the array
+void packetfunctions_reverseArrayByteOrder(uint8_t* start, uint8_t len) {
+   uint8_t *lo = start;
+   uint8_t *hi = start + len - 1;
+   uint8_t swap;
+   while (lo < hi) {
+      swap = *lo;
+      *lo++ = *hi;
+      *hi-- = swap;
+   }
 }
 
 //=========================== private =========================================

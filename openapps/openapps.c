@@ -7,18 +7,19 @@
 #include "opendefs.h"
 
 // CoAP
+#include "opencoap.h"
 #include "c6t.h"
 #include "cinfo.h"
 #include "cleds.h"
-#include "cexample.h"
-#include "cstorm.h"
+#include "cjoin.h"
 #include "cwellknown.h"
 #include "rrt.h"
-// TCP
-#include "techo.h"
 // UDP
 #include "uecho.h"
 #include "uinject.h"
+#include "userialbridge.h"
+#include "uexpiration.h"
+#include "uexpiration_monitor.h"
 
 //=========================== variables =======================================
 
@@ -29,16 +30,21 @@
 //=========================== private =========================================
 
 void openapps_init(void) {
+   //-- 04-TRAN
+   opencoap_init();     // initialize before any of the CoAP applications
+   
    // CoAP
-   c6t_init();
+   //c6t_init();
    cinfo_init();
-   //cexample_init();
    cleds__init();
-   cstorm_init();
+   //cjoin_init();
    cwellknown_init();
-   rrt_init();
-   // TCP
-   techo_init();
+   //rrt_init();
+   
    // UDP
-//   uecho_init();
+   //uecho_init();
+   //uinject_init();
+   //userialbridge_init();
+   //uexpiration_init();
+   //umonitor_init();
 }

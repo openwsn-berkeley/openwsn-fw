@@ -15,7 +15,7 @@
 /**
 \brief The length of the superframe, in slots.
 
-The superframe repears over time and can be arbitrarly long.
+The superframe reappears over time and can be arbitrarily long.
 */
 #define SLOTFRAME_LENGTH    11 //should be 101
 
@@ -23,7 +23,7 @@ The superframe repears over time and can be arbitrarly long.
 #define SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS                      1
 #define SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET                        0
 #define SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET                     0
-#define SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE          1 //id of slotframe
+#define SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE          0 //id of slotframe
 #define SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_NUMBER          1 //1 slotframe by default.
 
 #define NUMSERIALRX          3
@@ -36,7 +36,7 @@ The superframe repears over time and can be arbitrarly long.
         MAXACTIVESLOTS < SLOTFRAME_LENGTH 
         
   This would make sure number of slots are available (SLOTFRAME_LENGTH-MAXACTIVESLOTS) 
-  for seiral port to tranmit data to dagroot. 
+  for serial port to transmit data to dagroot.
 */
 
 #define NUMSLOTSOFF          5
@@ -73,7 +73,15 @@ See MINBE for an explanation of backoff.
 \brief a threshold used for triggering the maintaining process.uint: percent
 */
 #define PDR_THRESHOLD      80 // 80 means 80%
-#define MIN_NUMTX_FOR_PDR  50 // don't calculate PDR when numTx is lower than this value 
+#define MIN_NUMTX_FOR_PDR  50 // don't calculate PDR when numTx is lower than this value
+
+typedef enum{
+    LINKOPTIONS_TX              = 1<<0,
+    LINKOPTIONS_RX              = 1<<1,
+    LINKOPTIONS_SHARED          = 1<<2,
+    LINKOPTIONS_TIMEKEPPING     = 1<<3,
+    LINKOPTIONS_PRIORITY        = 1<<4
+}linkOptions_t;
 
 //=========================== typedef =========================================
 
@@ -184,7 +192,7 @@ void              schedule_removeAllCells(
 );
 scheduleEntry_t*  schedule_getCurrentScheduleEntry(void);
 uint8_t           schedule_getNumOfSlotsByType(cellType_t type);
-uint8_t           schedule_getNumberOfFreeEntries();
+uint8_t           schedule_getNumberOfFreeEntries(void);
 // from IEEE802154E
 void               schedule_syncSlotOffset(slotOffset_t targetSlotOffset);
 void               schedule_advanceSlot(void);
@@ -202,8 +210,15 @@ void               schedule_indicateTx(
                         asn_t*    asnTimestamp,
                         bool      succesfullTx
                    );
-
-void               schedule_housekeeping();
+// from sixtop
+bool               schedule_getOneCellAfterOffset(
+    uint8_t metadata,
+    uint8_t offset,
+    open_addr_t* neighbor, 
+    uint8_t cellOptions, 
+    uint16_t* slotoffset, 
+    uint16_t* channeloffset
+);
 /**
 \}
 \}

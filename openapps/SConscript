@@ -6,33 +6,43 @@ localEnv      = env.Clone()
 
 #===== retrieve the list of apps to build
 
-# apps which should always be built
-defaultApps   = [
-    'c6t',
-    'cinfo',
-    'cleds',
-    'cwellknown',
-    'techo',
-    'uecho',
-    'uinject',
-    'userialbridge',
-    'rrt',
-]
+defaultApps   = []
 if localEnv['board']=='python':
     defaultApps  += [
+        'c6t',
+        'cinfo',
+        'cleds',
+        'cwellknown',
+        'uecho',
+        'uinject',
+        'userialbridge',
+        'uexpiration',
+        'uexpiration_monitor',
+        'rrt',
         'cexample',
         'cstorm',
+        'cjoin',
     ]
 
-# apps which should always be present
-defaultAppsInit   = [
-    'c6t',
-    'cinfo',
-    'cleds',
-    'cwellknown',
-    'techo',
-    'uecho',
-    'rrt',
+# source files that should be included in the build other than
+# those with default application name (application.c)
+additionalSourceFiles = [
+    os.path.join('opencoap','openoscoap.c'),
+    os.path.join('opencoap','usha.c'),
+    os.path.join('opencoap','hkdf.c'),
+    os.path.join('opencoap','hmac.c'),
+    os.path.join('opencoap','sha224-256.c'),
+    os.path.join('opencoap','cborencoder.c'),
+    os.path.join('cjoin','cbor.c'),
+]
+
+# header files that should be included in the build other than
+# those with default application name (application.h)
+additionalHeaderFiles = [
+    os.path.join('opencoap','openoscoap.h'),
+    os.path.join('opencoap','sha.h'),
+    os.path.join('opencoap','cborencoder.h'),
+    os.path.join('cjoin','cbor.h'),
 ]
 
 # additional apps the user wants to build
@@ -42,8 +52,13 @@ else:
     userApps  = []
 
 # union of default and additional apps (without duplicates)
-apps = sorted(list(set(defaultApps+userApps)))
-appsInit = sorted(list(set(defaultAppsInit+userApps)))
+apps      = ['opencoap']
+apps     += sorted(list(set(defaultApps+userApps)))
+if userApps:
+    appsInit  = ['opencoap'] # make sure opencoap is initialized first
+    appsInit += sorted(list(set(userApps)))
+else:
+    appsInit = []
 
 #===== rule to create a (temporary) openapps_dyn.c file
 
@@ -103,6 +118,9 @@ for a in apps:
     sources_c     += [os.path.join(a,a+'.c')]
     sources_h     += [os.path.join(a,a+'.h')]
 
+sources_c += additionalSourceFiles
+sources_h += additionalHeaderFiles
+
 #===== build the openapps library
 
 if localEnv['board']=='python':
@@ -134,6 +152,7 @@ else:
             os.path.join('#','openstack','cross-layers'),
             os.path.join('#','openstack','02a-MAClow'),
             os.path.join('#','openstack','02b-MAChigh'),
+            os.path.join('#','openstack','03a-IPHC'),
             os.path.join('#','openstack','03b-IPv6'),
             # openapps
             os.path.join('#','openapps'),

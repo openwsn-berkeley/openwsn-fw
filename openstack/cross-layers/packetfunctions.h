@@ -29,6 +29,7 @@ bool     packetfunctions_isBroadcastMulticast(open_addr_t* address);
 bool     packetfunctions_isAllRoutersMulticast(open_addr_t* address);
 bool     packetfunctions_isAllHostsMulticast(open_addr_t* address);
 bool     packetfunctions_sameAddress(open_addr_t* address_1, open_addr_t* address_2);
+bool     packetfunctions_isLinkLocal(open_addr_t* address);
 
 // read/write addresses to/from packets
 void     packetfunctions_readAddress(uint8_t* payload, uint8_t type, open_addr_t* writeToAddress, bool littleEndian);
@@ -55,6 +56,7 @@ void     packetfunctions_htons( uint16_t val, uint8_t* dest );
 uint16_t packetfunctions_ntohs( uint8_t* src );
 void     packetfunctions_htonl( uint32_t val, uint8_t* dest );
 uint32_t packetfunctions_ntohl( uint8_t* src );
+void     packetfunctions_reverseArrayByteOrder(uint8_t* start, uint8_t len);
 
 /**
 \}

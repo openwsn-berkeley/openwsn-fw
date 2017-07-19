@@ -2020,57 +2020,6 @@
     <group>
       <name>boards</name>
       <group>
-        <name>common</name>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\abstimer.c</name>
-          <excluded>
-            <configuration>Debug</configuration>
-          </excluded>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\abstimers2.c</name>
-          <excluded>
-            <configuration>Debug</configuration>
-          </excluded>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_cbc.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_cbc.h</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_ccms.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_ccms.h</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_ctr.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_ctr.h</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_ecb.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_ecb.h</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\dummy_crypto_engine.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\dummy_crypto_engine.h</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\firmware_crypto_engine.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\firmware_crypto_engine.h</name>
-        </file>
-      </group>
-      <group>
         <name>telosb</name>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\adc_sensor.c</name>
@@ -2082,16 +2031,10 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\board.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\board_crypto_engine.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\board_crypto_engine.h</name>
-        </file>
-        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\board_info.h</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\bsp_timer.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\cryptoengine.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\debugpins.c</name>
@@ -2103,7 +2046,7 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\leds.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\radiotimer.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\sctimer.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\sensors.c</name>
@@ -2167,12 +2110,6 @@
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\cc2420.h</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\cc2420_crypto.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\cc2420_crypto.h</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\radio.c</name>
