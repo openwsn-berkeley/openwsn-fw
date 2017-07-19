@@ -158,8 +158,8 @@ owerror_t openoscoap_protect_message(
         oscoap_security_context_t *context, 
         uint8_t version, 
         uint8_t code,
-        coap_option_iht* options,
-        uint8_t optionsLen,
+        coap_option_iht* incomingOptions,
+        uint8_t incomingOptionsLen,
         OpenQueueEntry_t* msg,
         uint16_t sequenceNumber) {
 
@@ -176,9 +176,19 @@ owerror_t openoscoap_protect_message(
     owerror_t encStatus;
     coap_option_iht* objectSecurity;
     bool payloadPresent;
+    uint8_t                   option_count;
+    uint8_t                   option_index;
 
     // find object security option in the list of passed options
-    objectSecurity = opencoap_find_option(options, optionsLen, COAP_OPTION_NUM_OBJECTSECURITY);
+    option_count = opencoap_find_option(incomingOptions, incomingOptionsLen, COAP_OPTION_NUM_OBJECTSECURITY, &option_index);
+    if(option_count >= 1)
+    {
+      objectSecurity = &incomingOptions[option_index];
+    }
+    else
+    {
+      objectSecurity = NULL;
+    }
     if (objectSecurity == NULL) { // objectSecurity option should be set by the application
         return E_FAIL;
     }
@@ -208,8 +218,8 @@ owerror_t openoscoap_protect_message(
 
     // encode the options to the openqueue payload buffer
     opencoap_options_encode(msg, 
-            options, 
-            optionsLen, 
+            incomingOptions, 
+            incomingOptionsLen, 
             COAP_OPTION_CLASS_E);
 
     payload = &msg->payload[0];
@@ -293,8 +303,8 @@ owerror_t openoscoap_unprotect_message(
         oscoap_security_context_t *context, 
         uint8_t version, 
         uint8_t code,
-        coap_option_iht* options,
-        uint8_t* optionsLen,
+        coap_option_iht* incomingOptions,
+        uint8_t* incomingOptionsLen,
         OpenQueueEntry_t* msg,
         uint16_t sequenceNumber) {
  
@@ -312,9 +322,19 @@ owerror_t openoscoap_unprotect_message(
     uint8_t ciphertextLen;
     bool payloadInObjSec;
     uint8_t index;
+    uint8_t option_count;
+    uint8_t option_index;
 
     // find object security option in the list of passed options
-    objectSecurity = opencoap_find_option(options, *optionsLen, COAP_OPTION_NUM_OBJECTSECURITY);
+    option_count = opencoap_find_option(incomingOptions, *incomingOptionsLen, COAP_OPTION_NUM_OBJECTSECURITY, &option_index);
+    if(option_count >= 1)
+    {
+      objectSecurity = &incomingOptions[option_index];
+    }   
+    else
+    {
+      objectSecurity = NULL;
+    }
     if (objectSecurity == NULL) { // return FAIL if object security option is not present
         return E_FAIL;
     }
@@ -405,11 +425,11 @@ owerror_t openoscoap_unprotect_message(
     }
 
     if (payloadInObjSec) {
-        opencoap_options_parse(objectSecurity->pValue, objectSecurity->length, options, optionsLen);
+        opencoap_options_parse(objectSecurity->pValue, objectSecurity->length, incomingOptions, incomingOptionsLen);
     }
     else {
         packetfunctions_tossFooter(msg, AES_CCM_16_64_128_TAG_LEN);
-        index = opencoap_options_parse(&msg->payload[0], msg->length, options, optionsLen);
+        index = opencoap_options_parse(&msg->payload[0], msg->length, incomingOptions, incomingOptionsLen);
         packetfunctions_tossHeader(msg, index);
     }
 
