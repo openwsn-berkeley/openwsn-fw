@@ -18,6 +18,8 @@
 //=========================== defines =========================================
 #define TX_ANT_DLY 16436
 #define RX_ANT_DLY 16436
+#define TX_TO_RX_DELAY_UUS 60
+
 
 //=========================== variables =======================================
 
@@ -31,12 +33,12 @@ typedef struct {
 radio_vars_t radio_vars;
 dwt_config_t UWBConfigs[6] = 
 {
-	{1,11,11,DWT_PRF_64M,1,DWT_BR_6M8,DWT_PLEN_128,DWT_PAC8,DWT_PHRMODE_STD,256},
-	{2,11,11,DWT_PRF_64M,1,DWT_BR_6M8,DWT_PLEN_128,DWT_PAC8,DWT_PHRMODE_STD,256},
-	{3,11,11,DWT_PRF_64M,1,DWT_BR_6M8,DWT_PLEN_128,DWT_PAC8,DWT_PHRMODE_STD,256},
-	{4,17,17,DWT_PRF_64M,1,DWT_BR_6M8,DWT_PLEN_128,DWT_PAC8,DWT_PHRMODE_STD,256},
-	{5,11,11,DWT_PRF_64M,1,DWT_BR_6M8,DWT_PLEN_128,DWT_PAC8,DWT_PHRMODE_STD,256},
-	{7,17,17,DWT_PRF_64M,1,DWT_BR_6M8,DWT_PLEN_128,DWT_PAC8,DWT_PHRMODE_STD,256}
+	{1, DWT_PRF_64M, DWT_PLEN_1024, DWT_PAC32, 11, 11, 1, DWT_BR_110K,DWT_PHRMODE_STD, (1025+64-32)},
+	{2, DWT_PRF_64M, DWT_PLEN_1024, DWT_PAC32, 11, 11, 1, DWT_BR_110K,DWT_PHRMODE_STD, (1025+64-32)},
+	{3, DWT_PRF_64M, DWT_PLEN_1024, DWT_PAC32, 11, 11, 1, DWT_BR_110K,DWT_PHRMODE_STD, (1025+64-32)},
+	{4, DWT_PRF_64M, DWT_PLEN_1024, DWT_PAC32, 17, 17, 1, DWT_BR_110K,DWT_PHRMODE_STD, (1025+64-32)},
+	{5, DWT_PRF_64M, DWT_PLEN_1024, DWT_PAC32, 11, 11, 1, DWT_BR_110K,DWT_PHRMODE_STD, (1025+64-32)},
+	{7, DWT_PRF_64M, DWT_PLEN_1024, DWT_PAC32, 17, 17, 1, DWT_BR_110K,DWT_PHRMODE_STD, (1025+64-32)},
 };
 
 
@@ -107,6 +109,7 @@ void radio_init() {
 					 DWT_INT_SFDT|
 					 DWT_INT_RXPTO,
 					 1);
+	dwt_setrxaftertxdelay(TX_TO_RX_DELAY_UUS);
 	// change state
 	radio_vars.state          = RADIOSTATE_RFOFF;
 }
@@ -219,7 +222,7 @@ void radio_txNow() {
 	// change state
 	radio_vars.state = RADIOSTATE_TRANSMITTING;
 
-	dwt_starttx(DWT_START_TX_IMMEDIATE);
+	dwt_starttx(DWT_START_TX_IMMEDIATE|DWT_RESPONSE_EXPECTED);
     if (radio_vars.startFrame_cb!=NULL) {
         // call the callback
 		val=radiotimer_getCapturedTime();

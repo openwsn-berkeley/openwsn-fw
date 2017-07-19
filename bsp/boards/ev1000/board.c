@@ -84,10 +84,10 @@ void board_init(){
     
     GPIOB->ODR |= 0X0010;//set low
     
-    GPIO_EXTILineConfig(GPIO_PortSourceGPIOB, GPIO_PinSource5);//Connect EXTI Line10 to PB.05
+    GPIO_EXTILineConfig(GPIO_PortSourceGPIOB, GPIO_PinSource5);//Connect EXTI Line5 to PB.05
     EXTI_ClearITPendingBit(EXTI_Line5);
 
-    //Configures EXTI line 10 to generate an interrupt on rising edge
+    //Configures EXTI line 5 to generate an interrupt on rising edge
     EXTI_InitTypeDef  EXTI_InitStructure; 
     EXTI_InitStructure.EXTI_Line    = EXTI_Line5;
     EXTI_InitStructure.EXTI_Mode    = EXTI_Mode_Interrupt; 
