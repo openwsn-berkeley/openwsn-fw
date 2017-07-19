@@ -112,7 +112,7 @@ int mote_main(void) {
    // prepare radio
    radio_rfOn();
    radio_setFrequency(CHANNEL);
-   
+   radiotimer_start(10);
    // switch in RX by default
    radio_rxEnable();
    app_vars.state = APP_STATE_RX;
