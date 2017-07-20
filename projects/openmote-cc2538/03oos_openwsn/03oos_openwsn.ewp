@@ -346,9 +346,9 @@
           <state>$PROJ_DIR$\..\..\..\openapps\uexpiration\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\uexpiration_monitor\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\userialbridge\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\headers\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\source\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\</state>
           <state>$PROJ_DIR$\..\..\..\projects\common\03oos_openwsn</state>
         </option>
         <option>
@@ -2224,7 +2224,7 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\radio.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\radiotimer.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\radiotimer.c</name>
           <excluded>
             <configuration>Debug</configuration>
           </excluded>

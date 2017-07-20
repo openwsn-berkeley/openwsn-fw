@@ -320,9 +320,9 @@
           <state>$PROJ_DIR$\..\..\..\kernel\</state>
           <state>$PROJ_DIR$\..\..\..\drivers\common\</state>
           <state>$PROJ_DIR$\..\..\..\inc\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\headers\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\source\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\</state>
           <state>$PROJ_DIR$\..\..\..\projects\common\03oos_openwsn</state>
         </option>
         <option>

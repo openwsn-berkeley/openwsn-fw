@@ -20,7 +20,7 @@ end of frame event), it will turn on its error LED.
 #include "board.h"
 #include "radio.h"
 #include "leds.h"
-#include "bsp_timer.h"
+#include "sctimer.h"
 
 //=========================== defines =========================================
 
@@ -43,8 +43,6 @@ typedef enum {
 } app_state_t;
 
 typedef struct {
-   uint8_t              num_radioTimerOverflows;
-   uint8_t              num_radioTimerCompare;
    uint8_t              num_startFrame;
    uint8_t              num_endFrame;
    uint8_t              num_timer;
@@ -66,10 +64,8 @@ app_vars_t app_vars;
 
 //=========================== prototypes ======================================
 
-void     cb_radioTimerOverflows(void);
-void     cb_radioTimerCompare(void);
-void     cb_startFrame(PORT_RADIOTIMER_WIDTH timestamp);
-void     cb_endFrame(PORT_RADIOTIMER_WIDTH timestamp);
+void     cb_startFrame(PORT_TIMER_WIDTH timestamp);
+void     cb_endFrame(PORT_TIMER_WIDTH timestamp);
 void     cb_timer(void);
 
 //=========================== main ============================================
@@ -87,8 +83,6 @@ int mote_main(void) {
    board_init();
  
    // add callback functions radio
-   radio_setOverflowCb(cb_radioTimerOverflows);
-   radio_setCompareCb(cb_radioTimerCompare);
    radio_setStartFrameCb(cb_startFrame);
    radio_setEndFrameCb(cb_endFrame);
    
@@ -99,8 +93,9 @@ int mote_main(void) {
    }
    
    // start bsp timer
-   bsp_timer_set_callback(cb_timer);
-   bsp_timer_scheduleIn(TIMER_PERIOD);
+   sctimer_set_callback(cb_timer);
+   sctimer_setCompare(sctimer_readCounter()+TIMER_PERIOD);
+   sctimer_enable();
    
    // prepare radio
    radio_rfOn();
@@ -222,17 +217,7 @@ int mote_main(void) {
 
 //=========================== callbacks =======================================
 
-void cb_radioTimerOverflows(void) {
-   // update debug stats
-   app_dbg.num_radioTimerOverflows++;
-}
-
-void cb_radioTimerCompare(void) {
-   // update debug stats
-   app_dbg.num_radioTimerCompare++;
-}
-
-void cb_startFrame(PORT_RADIOTIMER_WIDTH timestamp) {
+void cb_startFrame(PORT_TIMER_WIDTH timestamp) {
    // set flag
    app_vars.flags |= APP_FLAG_START_FRAME;
    
@@ -240,7 +225,7 @@ void cb_startFrame(PORT_RADIOTIMER_WIDTH timestamp) {
    app_dbg.num_startFrame++;
 }
 
-void cb_endFrame(PORT_RADIOTIMER_WIDTH timestamp) {
+void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
    // set flag
    app_vars.flags |= APP_FLAG_END_FRAME;
    
@@ -255,6 +240,5 @@ void cb_timer(void) {
    // update debug stats
    app_dbg.num_timer++;
    
-   // schedule again
-   bsp_timer_scheduleIn(TIMER_PERIOD);
+   sctimer_setCompare(sctimer_readCounter()+TIMER_PERIOD);
 }

@@ -84,7 +84,7 @@ void icmpv6rpl_init() {
    icmpv6rpl_vars.timerIdDIO                = opentimers_create();
 
    //initialize PIO -> move this to dagroot code
-   icmpv6rpl_vars.pio.type                  = 0x08;
+   icmpv6rpl_vars.pio.type                  = RPL_OPTION_PIO;
    icmpv6rpl_vars.pio.optLen                = 30;
    icmpv6rpl_vars.pio.prefLen               = 64;
    icmpv6rpl_vars.pio.flags                 = 96;
@@ -104,7 +104,20 @@ void icmpv6rpl_init() {
         sizeof(idmanager_getMyID(ADDR_64B)->addr_64b)
      );
    }
-
+   //configuration option 
+   icmpv6rpl_vars.conf.type = RPL_OPTION_CONFIG;
+   icmpv6rpl_vars.conf.optLen = 14;
+   icmpv6rpl_vars.conf.flagsAPCS = DEFAULT_PATH_CONTROL_SIZE; //DEFAULT_PATH_CONTROL_SIZE = 0
+   icmpv6rpl_vars.conf.DIOIntDoubl = 8; //8 -> trickle period - max times it will double ~20min
+   icmpv6rpl_vars.conf.DIOIntMin = 12 ; // 12 ->  min trickle period -> 16s 
+   icmpv6rpl_vars.conf.DIORedun = 0 ; // 0
+   icmpv6rpl_vars.conf.maxRankIncrease = 2048; //  2048
+   icmpv6rpl_vars.conf.minHopRankIncrease = 256 ; //256
+   icmpv6rpl_vars.conf.OCP = 0; // 0 OF0
+   icmpv6rpl_vars.conf.reserved = 0;
+   icmpv6rpl_vars.conf.defLifetime = 0xff; //infinite - limit for DAO period  -> 0xff 
+   icmpv6rpl_vars.conf.lifetimeUnit = 0xffff; // 0xffff
+   
    opentimers_scheduleIn(
        icmpv6rpl_vars.timerIdDIO,
        872 +(openrandom_get16b()&0xff),
@@ -469,8 +482,8 @@ void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t* msg) {
    dagrank_t        neighborRank;
    open_addr_t      NeighborAddress;
    open_addr_t      myPrefix;
-   uint8_t          tempRank[2];
-
+   uint8_t*         current;
+   uint8_t          optionsLen;
    // take ownership over the packet
    msg->owner = COMPONENT_NEIGHBORS;
    
@@ -486,20 +499,43 @@ void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t* msg) {
    
    // save pointer to incoming DIO header in global structure for simplfying debug.
    icmpv6rpl_vars.incomingDio = (icmpv6rpl_dio_ht*)(msg->payload);
-   icmpv6rpl_vars.incomingPio = (icmpv6rpl_pio_t*) (msg->payload + sizeof(icmpv6rpl_dio_ht));
-
-   // update PIO with the received one.
-   memcpy(&icmpv6rpl_vars.pio,icmpv6rpl_vars.incomingPio, sizeof(icmpv6rpl_pio_t));
-
-   // update my prefix from PIO 
-   // looks like we adopt the prefix from any PIO without a question about this node being our parent??
-   myPrefix.type = ADDR_PREFIX;
-   memcpy(
-      myPrefix.prefix,
-      icmpv6rpl_vars.incomingPio->prefix,
-      sizeof(myPrefix.prefix)
-   );
-   idmanager_setMyID(&myPrefix);
+   current = msg->payload + sizeof(icmpv6rpl_dio_ht);
+   optionsLen = msg->length - sizeof(icmpv6rpl_dio_ht);
+   
+   while (optionsLen>0){
+     switch (current[0]){
+     case RPL_OPTION_CONFIG:
+       // configuration option
+       icmpv6rpl_vars.incomingConf = (icmpv6rpl_config_ht*)(current);
+       memcpy(&icmpv6rpl_vars.conf,icmpv6rpl_vars.incomingConf, sizeof(icmpv6rpl_config_ht));
+       // do whatever needs to be done with the configuration option of RPL
+       optionsLen = optionsLen - current[1] - 2;
+       current = current + current[1] + 2;
+       break;
+     case RPL_OPTION_PIO:
+       // pio
+        icmpv6rpl_vars.incomingPio = (icmpv6rpl_pio_t*)(current);
+        // update PIO with the received one.
+        memcpy(&icmpv6rpl_vars.pio,icmpv6rpl_vars.incomingPio, sizeof(icmpv6rpl_pio_t));
+        // update my prefix from PIO 
+        // looks like we adopt the prefix from any PIO without a question about this node being our parent??
+        myPrefix.type = ADDR_PREFIX;
+        memcpy(
+          myPrefix.prefix,
+          icmpv6rpl_vars.incomingPio->prefix,
+          sizeof(myPrefix.prefix)
+        );
+        idmanager_setMyID(&myPrefix);
+        optionsLen = optionsLen - current[1] - 2;
+        current = current + current[1] + 2;
+       break;
+     default:
+       //option not supported, just jump the len;
+       optionsLen = optionsLen - current[1] - 2;
+       current = current + current[1] + 2;
+       break;
+     }
+   }
    
    // quick fix: rank is two bytes in network order: need to swap bytes
    temp_8b            = *(msg->payload+2);
@@ -635,6 +671,16 @@ void sendDIO() {
    // set DIO destination
    memcpy(&(msg->l3_destinationAdd),&icmpv6rpl_vars.dioDestination,sizeof(open_addr_t));
    
+   //===== Configuration option
+   packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_config_ht));
+    
+   //copy the PIO in the packet
+   memcpy(
+      ((icmpv6rpl_pio_t*)(msg->payload)),
+      &(icmpv6rpl_vars.conf),
+      sizeof(icmpv6rpl_config_ht)
+   );
+   
    //===== PIO payload
 
    packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_pio_t));
@@ -646,11 +692,12 @@ void sendDIO() {
       idmanager_getMyID(ADDR_PREFIX)->prefix,
       sizeof(idmanager_getMyID(ADDR_PREFIX)->prefix)
    );
-    memcpy(
+   // host address is not needed. Only prefix.
+   /* memcpy(
       &(icmpv6rpl_vars.pio.prefix[8]),
       idmanager_getMyID(ADDR_64B)->addr_64b,
       sizeof(idmanager_getMyID(ADDR_64B)->addr_64b)
-   );
+   );*/
    
    //copy the PIO in the packet
    memcpy(
