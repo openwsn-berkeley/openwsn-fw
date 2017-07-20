@@ -181,12 +181,9 @@ owerror_t openoscoap_protect_message(
 
     // find object security option in the list of passed options
     option_count = opencoap_find_option(incomingOptions, incomingOptionsLen, COAP_OPTION_NUM_OBJECTSECURITY, &option_index);
-    if(option_count >= 1)
-    {
+    if(option_count >= 1) {
       objectSecurity = &incomingOptions[option_index];
-    }
-    else
-    {
+    } else {
       objectSecurity = NULL;
     }
     if (objectSecurity == NULL) { // objectSecurity option should be set by the application
@@ -327,12 +324,9 @@ owerror_t openoscoap_unprotect_message(
 
     // find object security option in the list of passed options
     option_count = opencoap_find_option(incomingOptions, *incomingOptionsLen, COAP_OPTION_NUM_OBJECTSECURITY, &option_index);
-    if(option_count >= 1)
-    {
+    if(option_count >= 1) {
       objectSecurity = &incomingOptions[option_index];
-    }   
-    else
-    {
+    } else {
       objectSecurity = NULL;
     }
     if (objectSecurity == NULL) { // return FAIL if object security option is not present

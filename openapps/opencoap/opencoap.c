@@ -172,12 +172,9 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    // process handled options
    //== Stateless Proxy option
    option_count = opencoap_find_option(coap_incomingOptions, coap_incomingOptionsLen, COAP_OPTION_NUM_STATELESSPROXY, &option_index);
-   if(option_count >= 1)
-   {
+   if(option_count >= 1) {
      statelessProxy = &coap_incomingOptions[option_index];
-   }
-   else
-   {
+   } else {
      statelessProxy = NULL;
    }
    if (statelessProxy) {
@@ -188,12 +185,9 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
 
    //== Proxy Scheme option
    option_count = opencoap_find_option(coap_incomingOptions, coap_incomingOptionsLen, COAP_OPTION_NUM_PROXYSCHEME, &option_index);
-   if(option_count >= 1)
-   {
+   if(option_count >= 1) {
      proxyScheme = &coap_incomingOptions[option_index];
-   }
-   else
-   {
+   } else {
      proxyScheme = NULL;
    }
    if (proxyScheme) {
@@ -205,12 +199,9 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
 
    //== Object Security Option
    option_count = opencoap_find_option(coap_incomingOptions, coap_incomingOptionsLen, COAP_OPTION_NUM_OBJECTSECURITY, &option_index);
-   if(option_count >= 1)
-   {
+   if(option_count >= 1) {
      objectSecurity = &coap_incomingOptions[option_index];
-   }
-   else
-   {
+   } else {
      objectSecurity = NULL;
    }
    if (objectSecurity) {
@@ -306,7 +297,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
         
         option_count = opencoap_find_option(coap_incomingOptions, coap_incomingOptionsLen, COAP_OPTION_NUM_URIPATH, &option_index);
         if (
-             option_count >= 2                                       &&
+             option_count == 2                                       &&
              temp_desc->path0len>0                                   &&
              temp_desc->path0val!=NULL                               &&
              temp_desc->path1len>0                                   &&
@@ -315,9 +306,9 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
           // resource has a path of form path0/path1
              
           if (
-                coap_incomingOptions[option_index].length==temp_desc->path0len                               &&
-                memcmp(coap_incomingOptions[option_index].pValue,temp_desc->path0val,temp_desc->path0len)==0 &&
-                coap_incomingOptions[option_index+1].length==temp_desc->path1len                               &&
+                coap_incomingOptions[option_index].length==temp_desc->path0len                                  &&
+                memcmp(coap_incomingOptions[option_index].pValue,temp_desc->path0val,temp_desc->path0len)==0    &&
+                coap_incomingOptions[option_index+1].length==temp_desc->path1len                                &&
                 memcmp(coap_incomingOptions[option_index+1].pValue,temp_desc->path1val,temp_desc->path1len)==0
              ) {
              if (temp_desc->securityContext != NULL && 
@@ -874,22 +865,35 @@ owerror_t opencoap_options_encode(
 }
 
 uint8_t opencoap_find_option(coap_option_iht* array, uint8_t arrayLen, coap_option_t option, uint8_t* startIndex) {
-   uint8_t i, j;
-
-   for (i=0; i<MAX_COAP_OPTIONS; i++) {
-      if (array[i].type == option) {
-         // skip until different type
-         for (j=i; j<MAX_COAP_OPTIONS && array[j].type == option; j++) {}
-         if (startIndex != NULL) {
-            *startIndex = i;
-         }
-         return j-i;
+   uint8_t i;
+   uint8_t j = 0;
+   bool found = FALSE;
+  
+  for (i=0; i< arrayLen; i++){
+    if (array[i].type == option) {
+      
+      // validate if startIndex is already set
+      if (found == FALSE) {
+        if (startIndex != NULL) {
+           *startIndex = i;
+        }
+        found = TRUE;
       }
-   }
-   if (startIndex != NULL) {
-      *startIndex = 0;
-   }
-   return 0;
+      
+      //increment option counter
+      j++;
+    }
+  }
+  
+  // option not found
+  if (found == FALSE) {
+    if (startIndex != NULL) {
+       *startIndex = 0;
+    }
+  }
+  
+  return j;
+  
 }
 
 //=========================== private =========================================
@@ -999,12 +1003,9 @@ void opencoap_handle_proxy_scheme(OpenQueueEntry_t *msg,
 
     // verify that Proxy Scheme is set to coap
     option_count = opencoap_find_option(incomingOptions, incomingOptionsLen, COAP_OPTION_NUM_PROXYSCHEME, &option_index);
-    if(option_count >= 1)
-    {
+    if(option_count >= 1) {
       proxyScheme = &incomingOptions[option_index];
-    }
-    else
-    {
+    } else {
       proxyScheme = NULL;
     }
     if (memcmp(proxySchemeCoap, proxyScheme->pValue, sizeof(proxySchemeCoap)-1) != 0) {
@@ -1013,12 +1014,9 @@ void opencoap_handle_proxy_scheme(OpenQueueEntry_t *msg,
 
     // verify that UriHost is set to "6tisch.arpa"
     option_count = opencoap_find_option(incomingOptions, incomingOptionsLen, COAP_OPTION_NUM_URIHOST, &option_index);
-    if(option_count >= 1)
-    {
+    if(option_count >= 1) {
       uriHost = &incomingOptions[option_index];
-    }
-    else
-    {
+    } else {
       uriHost = NULL;
     }
     if (uriHost) {
