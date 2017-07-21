@@ -24,9 +24,9 @@ When you run the application, you should see the LEDs "counting".
 
 //=========================== defines =========================================
 
-#define TIMER0_PERIOD_MS   400
-#define TIMER1_PERIOD_MS   800
-#define TIMER2_PERIOD_MS  1600
+#define TIMER0_PERIOD_MS   40
+#define TIMER1_PERIOD_MS   80
+#define TIMER2_PERIOD_MS  160
 
 //=========================== variables =======================================
 
@@ -99,7 +99,7 @@ void timer1_cb(opentimers_id_t id) {
 }
 
 void timer2_cb(opentimers_id_t id) {
-    leds_debug_toggle();
+    leds_radio_toggle();
 }
 
 //=========================== stub functions ==================================
