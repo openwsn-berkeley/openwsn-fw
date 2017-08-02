@@ -16,6 +16,10 @@
 #define ACTION_NO       'N'
 #define ACTION_TOGGLE   'T'
 
+static const uint8_t linklocalprefix[] = {
+   0xfe, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
 //=========================== typedef =========================================
 
 BEGIN_PACK

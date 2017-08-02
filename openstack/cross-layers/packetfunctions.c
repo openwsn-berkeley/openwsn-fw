@@ -396,45 +396,75 @@ bool packetfunctions_checkCRC(OpenQueueEntry_t* msg) {
 //see http://www-net.cs.umass.edu/kurose/transport/UDP.html, or http://tools.ietf.org/html/rfc1071
 //see http://en.wikipedia.org/wiki/User_Datagram_Protocol#IPv6_PSEUDO-HEADER
 void packetfunctions_calculateChecksum(OpenQueueEntry_t* msg, uint8_t* checksum_ptr) {
-   uint8_t temp_checksum[2];
-   uint8_t little_helper[2];
+    uint8_t temp_checksum[2];
+    uint8_t little_helper[2];
+    open_addr_t prefix64btoWrite;
+    open_addr_t mac64btoWrite;
+    open_addr_t localscopeAddress;
    
-   // initialize running checksum
-   temp_checksum[0]  = 0;
-   temp_checksum[1]  = 0;
+    // initialize running checksum
+    temp_checksum[0]  = 0;
+    temp_checksum[1]  = 0;
    
-   //===== IPv6 pseudo header
+    //===== IPv6 pseudo header
+    
+    // determine the source and destination address format
+    if (packetfunctions_isBroadcastMulticast(&msg->l3_destinationAdd)==TRUE){
+        // use link local address for source address (prefix and EUI64)
+        
+        // source address
+        onesComplementSum(temp_checksum,(uint8_t*)linklocalprefix,8);
+        memcpy(&localscopeAddress,idmanager_getMyID(ADDR_64B),sizeof(open_addr_t));
+        // invert 'u' bit (section 2.5.1 at https://www.ietf.org/rfc/rfc2373.txt)
+        localscopeAddress.addr_64b[0] ^= 0x02;
+        onesComplementSum(temp_checksum,localscopeAddress.addr_64b,8);
+        
+        // destination address
+        onesComplementSum(temp_checksum,msg->l3_destinationAdd.addr_128b,16);
+    } else {
+        packetfunctions_ip128bToMac64b(
+            &msg->l3_destinationAdd,
+            &prefix64btoWrite,
+            &mac64btoWrite
+        );
+        if (packetfunctions_sameAddress(&prefix64btoWrite,(idmanager_getMyID(ADDR_PREFIX)))==TRUE){
+            // use 64-bit ipv6 address for source address and destination address
+            onesComplementSum(temp_checksum,(idmanager_getMyID(ADDR_64B))->addr_64b,8);
+            onesComplementSum(temp_checksum,mac64btoWrite.addr_64b,8);
+        } else {
+            // use 128-bit ipv6 address for source address and destination address
+          
+            // source address
+            onesComplementSum(temp_checksum,(idmanager_getMyID(ADDR_PREFIX))->prefix,8);
+            onesComplementSum(temp_checksum,(idmanager_getMyID(ADDR_64B))->addr_64b,8);
+            // destination address
+            onesComplementSum(temp_checksum,msg->l3_destinationAdd.addr_128b,16);
+        }
+    }
    
-   // source address (prefix and EUI64)
-   onesComplementSum(temp_checksum,(idmanager_getMyID(ADDR_PREFIX))->prefix,8);
-   onesComplementSum(temp_checksum,(idmanager_getMyID(ADDR_64B))->addr_64b,8);
+    // length
+    little_helper[0] = 0;
+    little_helper[1] = msg->length;
+    onesComplementSum(temp_checksum,little_helper,2);
    
-   // destination address
-   onesComplementSum(temp_checksum,msg->l3_destinationAdd.addr_128b,16);
+    // next header
+    little_helper[0] = 0;
+    little_helper[1] = msg->l4_protocol;
+    onesComplementSum(temp_checksum,little_helper,2);
    
-   // length
-   little_helper[0] = 0;
-   little_helper[1] = msg->length;
-   onesComplementSum(temp_checksum,little_helper,2);
+    //===== payload
    
-   // next header
-   little_helper[0] = 0;
-   little_helper[1] = msg->l4_protocol;
-   onesComplementSum(temp_checksum,little_helper,2);
+    // reset the checksum currently in the payload
+    *checksum_ptr     = 0;
+    *(checksum_ptr+1) = 0;
    
-   //===== payload
+    onesComplementSum(temp_checksum,msg->payload,msg->length);
+    temp_checksum[0] ^= 0xFF;
+    temp_checksum[1] ^= 0xFF;
    
-   // reset the checksum currently in the payload
-   *checksum_ptr     = 0;
-   *(checksum_ptr+1) = 0;
-   
-   onesComplementSum(temp_checksum,msg->payload,msg->length);
-   temp_checksum[0] ^= 0xFF;
-   temp_checksum[1] ^= 0xFF;
-   
-   //write in packet
-   *checksum_ptr     = temp_checksum[0];
-   *(checksum_ptr+1) = temp_checksum[1];
+    //write in packet
+    *checksum_ptr     = temp_checksum[0];
+    *(checksum_ptr+1) = temp_checksum[1];
 }
 
 
