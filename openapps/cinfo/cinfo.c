@@ -106,13 +106,14 @@ owerror_t cinfo_receive(
          // stack name and version
          packetfunctions_reserveHeaderSize(msg,1);
          msg->payload[0] = '\n';
-         packetfunctions_reserveHeaderSize(msg,sizeof(infoStackName)-1+5);
+         packetfunctions_reserveHeaderSize(msg,sizeof(infoStackName)-1+6);
          memcpy(&msg->payload[0],&infoStackName,sizeof(infoStackName)-1);
-         msg->payload[sizeof(infoStackName)-1+5-5] = '0'+OPENWSN_VERSION_MAJOR;
-         msg->payload[sizeof(infoStackName)-1+5-4] = '.';
-         msg->payload[sizeof(infoStackName)-1+5-3] = '0'+OPENWSN_VERSION_MINOR;
-         msg->payload[sizeof(infoStackName)-1+5-2] = '.';
-         msg->payload[sizeof(infoStackName)-1+5-1] = '0'+OPENWSN_VERSION_PATCH;
+         msg->payload[sizeof(infoStackName)-1+6-6] = '0'+OPENWSN_VERSION_MAJOR;
+         msg->payload[sizeof(infoStackName)-1+6-5] = '.';
+         msg->payload[sizeof(infoStackName)-1+6-4] = '0'+OPENWSN_VERSION_MINOR / 10;
+         msg->payload[sizeof(infoStackName)-1+6-3] = '0'+OPENWSN_VERSION_MINOR % 10;
+         msg->payload[sizeof(infoStackName)-1+6-2] = '.';
+         msg->payload[sizeof(infoStackName)-1+6-1] = '0'+OPENWSN_VERSION_PATCH;
          
          // set the CoAP header
          coap_header->Code                = COAP_CODE_RESP_CONTENT;
