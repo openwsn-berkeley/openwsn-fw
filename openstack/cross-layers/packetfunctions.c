@@ -398,8 +398,6 @@ bool packetfunctions_checkCRC(OpenQueueEntry_t* msg) {
 void packetfunctions_calculateChecksum(OpenQueueEntry_t* msg, uint8_t* checksum_ptr) {
     uint8_t temp_checksum[2];
     uint8_t little_helper[2];
-    open_addr_t prefix64btoWrite;
-    open_addr_t mac64btoWrite;
     open_addr_t localscopeAddress;
    
     // initialize running checksum
@@ -419,27 +417,16 @@ void packetfunctions_calculateChecksum(OpenQueueEntry_t* msg, uint8_t* checksum_
         localscopeAddress.addr_64b[0] ^= 0x02;
         onesComplementSum(temp_checksum,localscopeAddress.addr_64b,8);
         
-        // destination address
+        // boardcast destination address
         onesComplementSum(temp_checksum,msg->l3_destinationAdd.addr_128b,16);
     } else {
-        packetfunctions_ip128bToMac64b(
-            &msg->l3_destinationAdd,
-            &prefix64btoWrite,
-            &mac64btoWrite
-        );
-        if (packetfunctions_sameAddress(&prefix64btoWrite,(idmanager_getMyID(ADDR_PREFIX)))==TRUE){
-            // use 64-bit ipv6 address for source address and destination address
-            onesComplementSum(temp_checksum,(idmanager_getMyID(ADDR_64B))->addr_64b,8);
-            onesComplementSum(temp_checksum,mac64btoWrite.addr_64b,8);
-        } else {
-            // use 128-bit ipv6 address for source address and destination address
-          
-            // source address
-            onesComplementSum(temp_checksum,(idmanager_getMyID(ADDR_PREFIX))->prefix,8);
-            onesComplementSum(temp_checksum,(idmanager_getMyID(ADDR_64B))->addr_64b,8);
-            // destination address
-            onesComplementSum(temp_checksum,msg->l3_destinationAdd.addr_128b,16);
-        }
+        // use 128-bit ipv6 address for source address and destination address
+      
+        // source address
+        onesComplementSum(temp_checksum,(idmanager_getMyID(ADDR_PREFIX))->prefix,8);
+        onesComplementSum(temp_checksum,(idmanager_getMyID(ADDR_64B))->addr_64b,8);
+        // destination address
+        onesComplementSum(temp_checksum,msg->l3_destinationAdd.addr_128b,16);
     }
    
     // length
