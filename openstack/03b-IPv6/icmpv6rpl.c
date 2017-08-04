@@ -43,6 +43,7 @@ void icmpv6rpl_init() {
    
    //=== routing
    icmpv6rpl_vars.haveParent=FALSE;
+   icmpv6rpl_vars.daoSent=FALSE;
    if (idmanager_getIsDAGroot()==TRUE) {
       icmpv6rpl_vars.myDAGrank=MINHOPRANKINCREASE;
    } else {
@@ -81,6 +82,42 @@ void icmpv6rpl_init() {
    
    icmpv6rpl_vars.dioPeriod                 = TIMER_DIO_TIMEOUT;
    icmpv6rpl_vars.timerIdDIO                = opentimers_create();
+
+   //initialize PIO -> move this to dagroot code
+   icmpv6rpl_vars.pio.type                  = RPL_OPTION_PIO;
+   icmpv6rpl_vars.pio.optLen                = 30;
+   icmpv6rpl_vars.pio.prefLen               = 64;
+   icmpv6rpl_vars.pio.flags                 = 96;
+   icmpv6rpl_vars.pio.plifetime             = 0xFFFFFFFF;
+   icmpv6rpl_vars.pio.vlifetime             = 0xFFFFFFFF;
+   // if not dagroot then do not initialize, will receive PIO and update fields
+   // later
+   if (idmanager_getIsDAGroot()){
+     memcpy(
+        &(icmpv6rpl_vars.pio.prefix[0]),
+        idmanager_getMyID(ADDR_PREFIX)->prefix,
+        sizeof(idmanager_getMyID(ADDR_PREFIX)->prefix)
+     );
+      memcpy(
+        &(icmpv6rpl_vars.pio.prefix[8]),
+        idmanager_getMyID(ADDR_64B)->addr_64b,
+        sizeof(idmanager_getMyID(ADDR_64B)->addr_64b)
+     );
+   }
+   //configuration option 
+   icmpv6rpl_vars.conf.type = RPL_OPTION_CONFIG;
+   icmpv6rpl_vars.conf.optLen = 14;
+   icmpv6rpl_vars.conf.flagsAPCS = DEFAULT_PATH_CONTROL_SIZE; //DEFAULT_PATH_CONTROL_SIZE = 0
+   icmpv6rpl_vars.conf.DIOIntDoubl = 8; //8 -> trickle period - max times it will double ~20min
+   icmpv6rpl_vars.conf.DIOIntMin = 12 ; // 12 ->  min trickle period -> 16s 
+   icmpv6rpl_vars.conf.DIORedun = 0 ; // 0
+   icmpv6rpl_vars.conf.maxRankIncrease = 2048; //  2048
+   icmpv6rpl_vars.conf.minHopRankIncrease = 256 ; //256
+   icmpv6rpl_vars.conf.OCP = 0; // 0 OF0
+   icmpv6rpl_vars.conf.reserved = 0;
+   icmpv6rpl_vars.conf.defLifetime = 0xff; //infinite - limit for DAO period  -> 0xff 
+   icmpv6rpl_vars.conf.lifetimeUnit = 0xffff; // 0xffff
+   
    opentimers_scheduleIn(
        icmpv6rpl_vars.timerIdDIO,
        872 +(openrandom_get16b()&0xff),
@@ -161,8 +198,12 @@ uint8_t icmpv6rpl_getRPLIntanceID(){
    return icmpv6rpl_vars.dao.rplinstanceId;
 }
                                                 
-void    icmpv6rpl_getRPLDODAGid(uint8_t* address_128b){
-    memcpy(address_128b,icmpv6rpl_vars.dao.DODAGID,16);
+owerror_t icmpv6rpl_getRPLDODAGid(uint8_t* address_128b){
+   if (icmpv6rpl_vars.fDodagidWritten) {
+       memcpy(address_128b,icmpv6rpl_vars.dao.DODAGID,16);
+       return E_SUCCESS;
+   }
+   return E_FAIL;
 }
 
 /**
@@ -201,7 +242,6 @@ void icmpv6rpl_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 */
 void icmpv6rpl_receive(OpenQueueEntry_t* msg) {
    uint8_t      icmpv6code;
-   open_addr_t  myPrefix;
    
    // take ownership
    msg->owner      = COMPONENT_ICMPv6RPL;
@@ -222,25 +262,6 @@ void icmpv6rpl_receive(OpenQueueEntry_t* msg) {
             // stop here if I'm in the DAG root
             break; // break, don't return
          }
-                  
-         memcpy(
-            &(icmpv6rpl_vars.dio),
-            (icmpv6rpl_dio_ht*)(msg->payload),
-            sizeof(icmpv6rpl_dio_ht)
-         );
-         
-         // write DODAGID in DIO and DAO
-         icmpv6rpl_writeDODAGid(&(((icmpv6rpl_dio_ht*)(msg->payload))->DODAGID[0]));
-         
-         // update my prefix // looks like we adopt the prefix from any DIO without a question about this node being our parent??
-         myPrefix.type = ADDR_PREFIX;
-         memcpy(
-            myPrefix.prefix,
-            &((icmpv6rpl_dio_ht*)(msg->payload))->DODAGID[0],
-            sizeof(myPrefix.prefix)
-         );
-         idmanager_setMyID(&myPrefix);
-         
          // update routing info for that neighbor
          icmpv6rpl_indicateRxDIO(msg);
          
@@ -359,7 +380,6 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
             return;
         }
     }
-    
     // prep for loop, remember state before neighbor table scanning
     prevParentIndex      = icmpv6rpl_vars.ParentIndex;
     prevHadParent        = icmpv6rpl_vars.haveParent;
@@ -461,15 +481,69 @@ void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t* msg) {
    uint8_t          temp_8b;
    dagrank_t        neighborRank;
    open_addr_t      NeighborAddress;
-  
+   open_addr_t      myPrefix;
+   uint8_t*         current;
+   uint8_t          optionsLen;
    // take ownership over the packet
    msg->owner = COMPONENT_NEIGHBORS;
    
+   // update some fields of our DIO 
+   memcpy(
+      &(icmpv6rpl_vars.dio),
+      (icmpv6rpl_dio_ht*)(msg->payload),
+      sizeof(icmpv6rpl_dio_ht)
+   );
+   
+   // write DODAGID in DIO and DAO
+   icmpv6rpl_writeDODAGid(&(((icmpv6rpl_dio_ht*)(msg->payload))->DODAGID[0]));
+   
    // save pointer to incoming DIO header in global structure for simplfying debug.
    icmpv6rpl_vars.incomingDio = (icmpv6rpl_dio_ht*)(msg->payload);
+   current = msg->payload + sizeof(icmpv6rpl_dio_ht);
+   optionsLen = msg->length - sizeof(icmpv6rpl_dio_ht);
+   
+   while (optionsLen>0){
+     switch (current[0]){
+     case RPL_OPTION_CONFIG:
+       // configuration option
+       icmpv6rpl_vars.incomingConf = (icmpv6rpl_config_ht*)(current);
+       memcpy(&icmpv6rpl_vars.conf,icmpv6rpl_vars.incomingConf, sizeof(icmpv6rpl_config_ht));
+       // do whatever needs to be done with the configuration option of RPL
+       optionsLen = optionsLen - current[1] - 2;
+       current = current + current[1] + 2;
+       break;
+     case RPL_OPTION_PIO:
+       // pio
+        icmpv6rpl_vars.incomingPio = (icmpv6rpl_pio_t*)(current);
+        // update PIO with the received one.
+        memcpy(&icmpv6rpl_vars.pio,icmpv6rpl_vars.incomingPio, sizeof(icmpv6rpl_pio_t));
+        // update my prefix from PIO 
+        // looks like we adopt the prefix from any PIO without a question about this node being our parent??
+        myPrefix.type = ADDR_PREFIX;
+        memcpy(
+          myPrefix.prefix,
+          icmpv6rpl_vars.incomingPio->prefix,
+          sizeof(myPrefix.prefix)
+        );
+        idmanager_setMyID(&myPrefix);
+        optionsLen = optionsLen - current[1] - 2;
+        current = current + current[1] + 2;
+       break;
+     default:
+       //option not supported, just jump the len;
+       optionsLen = optionsLen - current[1] - 2;
+       current = current + current[1] + 2;
+       break;
+     }
+   }
+   
    // quick fix: rank is two bytes in network order: need to swap bytes
    temp_8b            = *(msg->payload+2);
    icmpv6rpl_vars.incomingDio->rank = (temp_8b << 8) + *(msg->payload+3);
+   
+   //update rank in DIO as well (which will be overwritten with my rank when send).
+   icmpv6rpl_vars.dio.rank = icmpv6rpl_vars.incomingDio->rank;
+
    // update rank of that neighbor in table
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
       if (neighbors_getNeighborEui64(&NeighborAddress, ADDR_64B, i)) { // this neighbor entry is in use
@@ -597,6 +671,42 @@ void sendDIO() {
    // set DIO destination
    memcpy(&(msg->l3_destinationAdd),&icmpv6rpl_vars.dioDestination,sizeof(open_addr_t));
    
+   //===== Configuration option
+   packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_config_ht));
+    
+   //copy the PIO in the packet
+   memcpy(
+      ((icmpv6rpl_pio_t*)(msg->payload)),
+      &(icmpv6rpl_vars.conf),
+      sizeof(icmpv6rpl_config_ht)
+   );
+   
+   //===== PIO payload
+
+   packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_pio_t));
+
+   // copy my prefix into the PIO
+   
+   memcpy(
+      &(icmpv6rpl_vars.pio.prefix[0]),
+      idmanager_getMyID(ADDR_PREFIX)->prefix,
+      sizeof(idmanager_getMyID(ADDR_PREFIX)->prefix)
+   );
+   // host address is not needed. Only prefix.
+   /* memcpy(
+      &(icmpv6rpl_vars.pio.prefix[8]),
+      idmanager_getMyID(ADDR_64B)->addr_64b,
+      sizeof(idmanager_getMyID(ADDR_64B)->addr_64b)
+   );*/
+   
+   //copy the PIO in the packet
+   memcpy(
+      ((icmpv6rpl_pio_t*)(msg->payload)),
+      &(icmpv6rpl_vars.pio),
+      sizeof(icmpv6rpl_pio_t)
+   );
+
+
    //===== DIO payload
    // note: DIO is already mostly populated
    icmpv6rpl_vars.dio.rank                  = icmpv6rpl_getMyDAGrank();
@@ -821,6 +931,7 @@ void sendDAO() {
    //===== send
    if (icmpv6_send(msg)==E_SUCCESS) {
       icmpv6rpl_vars.busySendingDAO = TRUE;
+      icmpv6rpl_vars.daoSent = TRUE;
    } else {
       openqueue_freePacketBuffer(msg);
    }
@@ -836,7 +947,10 @@ void icmpv6rpl_setDAOPeriod(uint16_t daoPeriod){
     icmpv6rpl_vars.daoPeriod = daoPeriod/1000;
 }
 
-
-
-
+bool icmpv6rpl_daoSent(void) {
+    if (idmanager_getIsDAGroot()==TRUE) {
+        return TRUE;
+    }
+    return icmpv6rpl_vars.daoSent;
+}
 

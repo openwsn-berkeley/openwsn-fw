@@ -37,7 +37,8 @@ static const uint8_t ebIEsBytestream[] = {
 
 #define EB_IE_LEN                   28
 
-#define SYNCHRONIZING_CHANNEL       26 // channel the mote listens on to synchronize
+#define NUM_CHANNELS                16 // number of channels to channel hop on
+#define SYNCHRONIZING_CHANNEL       26 // channel the mote listens on to synchronize (physical channel)
 #define TXRETRIES                    3 // number of MAC retries before declaring failed
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to successfully synchronize
@@ -250,7 +251,7 @@ typedef struct {
    uint8_t                   asnOffset;               // offset inside the frame
    uint8_t                   singleChannel;           // the single channel used for transmission
    bool                      singleChannelChanged;    // detect id singleChannelChanged
-   uint8_t                   chTemplate[16];          // storing the template of hopping sequence
+   uint8_t                   chTemplate[NUM_CHANNELS];// storing the template of hopping sequence
    // template ID
    uint8_t                   tsTemplateId;            // timeslot template id
    uint8_t                   chTemplateId;            // channel hopping tempalte id

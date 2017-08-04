@@ -5,17 +5,13 @@ Since the driver modules for different platforms have the same declaration, you
 can use this project with any platform.
 
 This application allows you to verify the correct functioning of the opentimers
-drivers. It starts 3 periodic timers.
-Each timer is attached an LED (error, radio and sync). When you run the application, you should see the LEDs
-"counting".
+drivers. It starts 3 periodic timers, with periods TIMER0_PERIOD_MS,
+TIMER1_PERIOD_MS and TIMER2_PERIOD_MS. Each timer is attached an LED (error,
+sync, debug, respec.).
 
-|    timer value    |  LED  | debugpin |
-|-------------------|-------|----------|
-| APP_DLY_TIMER0_ms | error |    frame |
-| APP_DLY_TIMER1_ms | radio |     slot |
-| APP_DLY_TIMER2_ms |  sync |      fsm |
+When you run the application, you should see the LEDs "counting".
 
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2014.
+\author Thomas Watteyne <thomas.watteyne@inria.fr>, July 2017.
 */
 
 #include "stdint.h"
@@ -23,23 +19,30 @@ Each timer is attached an LED (error, radio and sync). When you run the applicat
 // bsp modules required
 #include "board.h"
 #include "leds.h"
-#include "debugpins.h"
 // driver modules required
 #include "opentimers.h"
 
 //=========================== defines =========================================
 
-#define APP_DLY_TIMER0_ms   40
-#define APP_DLY_TIMER1_ms   80
-#define APP_DLY_TIMER2_ms  160
+#define TIMER0_PERIOD_MS   400
+#define TIMER1_PERIOD_MS   800
+#define TIMER2_PERIOD_MS  1600
 
 //=========================== variables =======================================
 
+typedef struct {
+    opentimers_id_t timer0_id;
+    opentimers_id_t timer1_id;
+    opentimers_id_t timer2_id;
+} app_vars_t;
+
+app_vars_t app_vars;
+
 //=========================== prototypes ======================================
 
-void cb_timer0(opentimer_id_t id);
-void cb_timer1(opentimer_id_t id);
-void cb_timer2(opentimer_id_t id);
+void timer0_cb(opentimers_id_t id);
+void timer1_cb(opentimers_id_t id);
+void timer2_cb(opentimers_id_t id);
 
 //=========================== main ============================================
 
@@ -47,50 +50,56 @@ void cb_timer2(opentimer_id_t id);
 \brief The program starts executing here.
 */
 int mote_main(void) {
-   board_init();
-   opentimers_init();
-   
-   opentimers_start(
-      APP_DLY_TIMER0_ms,     // duration
-      TIMER_PERIODIC,        // type
-      TIME_MS,               // timetype
-      cb_timer0              // callback
-   );
-   
-   opentimers_start(
-      APP_DLY_TIMER1_ms,     // duration
-      TIMER_PERIODIC,        // type
-      TIME_MS,               // timetype
-      cb_timer1              // callback
-   );
-   
-   opentimers_start(
-      APP_DLY_TIMER2_ms,     // duration
-      TIMER_PERIODIC,        // type
-      TIME_MS,               // timetype
-      cb_timer2              // callback
-   );
-   
-   while(1) {
-      board_sleep();
-   }
+    
+    memset(&app_vars,0,sizeof(app_vars_t));
+    
+    board_init();
+    opentimers_init();
+    
+    app_vars.timer0_id = opentimers_create();
+    opentimers_scheduleIn    (
+        app_vars.timer0_id,    // id
+        TIMER0_PERIOD_MS,      // duration
+        TIME_MS,               // time_type
+        TIMER_PERIODIC,        // timer_type
+        timer0_cb              // callback
+    );
+    
+    app_vars.timer1_id = opentimers_create();
+    opentimers_scheduleIn    (
+        app_vars.timer1_id,    // id
+        TIMER1_PERIOD_MS,      // duration
+        TIME_MS,               // time_type
+        TIMER_PERIODIC,        // timer_type
+        timer1_cb              // callback
+    );
+    
+    app_vars.timer2_id = opentimers_create();
+    opentimers_scheduleIn    (
+        app_vars.timer2_id,    // id
+        TIMER2_PERIOD_MS,      // duration
+        TIME_MS,               // time_type
+        TIMER_PERIODIC,        // timer_type
+        timer2_cb              // callback
+    );
+    
+    while(1) {
+        board_sleep();
+    }
 }
 
 //=========================== callbacks =======================================
 
-void cb_timer0(opentimer_id_t id) {
-    debugpins_frame_toggle();
-   leds_error_toggle();
+void timer0_cb(opentimers_id_t id) {
+    leds_error_toggle();
 }
 
-void cb_timer1(opentimer_id_t id) {
-   debugpins_slot_toggle();
-   leds_radio_toggle();   
+void timer1_cb(opentimers_id_t id) {
+    leds_sync_toggle();
 }
 
-void cb_timer2(opentimer_id_t id) {
-   debugpins_fsm_toggle();
-   leds_sync_toggle();
+void timer2_cb(opentimers_id_t id) {
+    leds_debug_toggle();
 }
 
 //=========================== stub functions ==================================

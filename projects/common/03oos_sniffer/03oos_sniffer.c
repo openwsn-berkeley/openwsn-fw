@@ -184,7 +184,7 @@ void ieee154e_getAsn(uint8_t* array)                    {return;}
 void schedule_startDAGroot(void)                        {return;}
 void schedule_setFrameLength(uint16_t frameLength)      {return;}
 
-void sixtop_setEBPeriod(uint8_t ebPeriod){return;}
+void sixtop_setEBPeriod(uint8_t ebPeriod)                                 {return;}
 void sixtop_request(
     uint8_t      code, 
     open_addr_t* neighbor, 
@@ -197,19 +197,19 @@ void sixtop_request(
     uint16_t     listingMaxNumCells
 )                                                                           {return;}
 bool sixtop_setHandler(six2six_handler_t handler)                           {return TRUE;}
-void sixtop_setIsResponseEnabled(bool isEnabled){return;}
+void sixtop_setIsResponseEnabled(bool isEnabled)                          {return;}
 void sixtop_setKaPeriod(uint16_t kaPeriod)                                  {return;}
 void sf0_appPktPeriod(uint8_t numAppPacketsPerSlotFrame)                    {return;}
 uint8_t  sf0_getsfid(void)                                                  {return 0;}
 
 void openbridge_triggerData(void)                                           {return;}
 
-void icmpv6rpl_setDIOPeriod(uint16_t dioPeriod) {return;}
-void icmpv6rpl_setDAOPeriod(uint16_t daoPeriod) {return;}
-void icmpv6rpl_setMyDAGrank(uint16_t rank) {return;}
-void icmpv6rpl_writeDODAGid(uint8_t* dodagid) {return;}
-void icmpv6rpl_updateMyDAGrankAndParentSelection(void) {return;}
-bool icmpv6rpl_getPreferredParentEui64(open_addr_t* neighbor){return TRUE;}
+void icmpv6rpl_setDIOPeriod(uint16_t dioPeriod)                           {return;}
+void icmpv6rpl_setDAOPeriod(uint16_t daoPeriod)                           {return;}
+void icmpv6rpl_setMyDAGrank(uint16_t rank)                                {return;}
+void icmpv6rpl_writeDODAGid(uint8_t* dodagid)                             {return;}
+void icmpv6rpl_updateMyDAGrankAndParentSelection(void)                    {return;}
+bool icmpv6rpl_getPreferredParentEui64(open_addr_t* neighbor)             {return TRUE;}
 void icmpv6echo_setIsReplyEnabled(bool isEnabled)                           {return;}
 
 bool debugPrint_asn(void)       {return TRUE;}
@@ -221,3 +221,6 @@ bool debugPrint_queue(void)     {return TRUE;}
 bool debugPrint_neighbors(void) {return TRUE;}
 bool debugPrint_myDAGrank(void) {return TRUE;}
 bool debugPrint_kaPeriod(void)  {return TRUE;}
+
+void IEEE802154_security_setBeaconKey(uint8_t index, uint8_t* value)      {return;}
+void IEEE802154_security_setDataKey(uint8_t index, uint8_t* value)        {return;}

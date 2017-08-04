@@ -18,11 +18,12 @@ const uint8_t cleds_path0[]       = "l";
 
 //=========================== prototypes ======================================
 
-owerror_t cleds_receive(
-   OpenQueueEntry_t* msg,
-   coap_header_iht*  coap_header,
-   coap_option_iht*  coap_options
-);
+owerror_t cleds_receive(OpenQueueEntry_t* msg,
+        coap_header_iht*  coap_header,
+        coap_option_iht*  coap_incomingOptions,
+        coap_option_iht*  coap_outgoingOptions,
+        uint8_t*          coap_outgoingOptionsLen);
+
 void     cleds_sendDone(
    OpenQueueEntry_t* msg,
    owerror_t error
@@ -38,6 +39,7 @@ void cleds__init() {
    cleds_vars.desc.path1len            = 0;
    cleds_vars.desc.path1val            = NULL;
    cleds_vars.desc.componentID         = COMPONENT_CLEDS;
+   cleds_vars.desc.securityContext     = NULL;
    cleds_vars.desc.discoverable        = TRUE;
    cleds_vars.desc.callbackRx          = &cleds_receive;
    cleds_vars.desc.callbackSendDone    = &cleds_sendDone;
@@ -58,11 +60,11 @@ void cleds__init() {
 
 \return Whether the response is prepared successfully.
 */
-owerror_t cleds_receive(
-      OpenQueueEntry_t* msg,
-      coap_header_iht*  coap_header,
-      coap_option_iht*  coap_options
-   ) {
+owerror_t cleds_receive(OpenQueueEntry_t* msg,
+        coap_header_iht*  coap_header,
+        coap_option_iht*  coap_incomingOptions,
+        coap_option_iht*  coap_outgoingOptions,
+        uint8_t*          coap_outgoingOptionsLen) {
    owerror_t outcome;
    
    switch (coap_header->Code) {
@@ -72,13 +74,12 @@ owerror_t cleds_receive(
          msg->length                      = 0;
          
          // add CoAP payload
-         packetfunctions_reserveHeaderSize(msg,2);
-         msg->payload[0]                  = COAP_PAYLOAD_MARKER;
+         packetfunctions_reserveHeaderSize(msg,1);
 
          if (leds_error_isOn()==1) {
-            msg->payload[1]               = '1';
+            msg->payload[0]               = '1';
          } else {
-            msg->payload[1]               = '0';
+            msg->payload[0]               = '0';
          }
             
          // set the CoAP header

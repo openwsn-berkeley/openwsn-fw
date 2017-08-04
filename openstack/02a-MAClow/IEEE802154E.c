@@ -687,6 +687,11 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
       ieee154e_vars.dataReceived->l2_dsn       = ieee802514_header.dsn;
       memcpy(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop),&(ieee802514_header.src),sizeof(open_addr_t));
 
+      // verify that incoming security level is acceptable
+      if (IEEE802154_security_acceptableLevel(ieee154e_vars.dataReceived, &ieee802514_header) == FALSE) {
+            break;
+      }
+
       if (ieee154e_vars.dataReceived->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
          // If we are not synced, we need to parse IEs and retrieve the ASN
          // before authenticating the beacon, because nonce is created from the ASN
@@ -698,7 +703,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
          else { // discard other frames as we cannot decrypt without being synced
             break;
          }
-      } // checked if unsecured frame should pass during header retrieval
+      }
 
       // toss the IEEE802.15.4 header -- this does not include IEs as they are processed
       // next.
@@ -732,7 +737,6 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
       
       // declare synchronized
       changeIsSync(TRUE);
-      
       // log the info
       openserial_printInfo(COMPONENT_IEEE802154E,ERR_SYNCHRONIZED,
                             (errorparameter_t)ieee154e_vars.slotOffset,
@@ -777,7 +781,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
             infer the asnOffset based on the fact that
             ieee154e_vars.freq = 11 + (asnOffset + channelOffset)%16 
             */
-            for (i=0;i<16;i++){
+        for (i=0;i<NUM_CHANNELS;i++){
                 if ((ieee154e_vars.freq - 11)==ieee154e_vars.chTemplate[i]){
                     break;
                 }
@@ -1495,13 +1499,18 @@ port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
       ieee154e_vars.ackReceived->l2_frameType  = ieee802514_header.frameType;
       ieee154e_vars.ackReceived->l2_dsn        = ieee802514_header.dsn;
       memcpy(&(ieee154e_vars.ackReceived->l2_nextORpreviousHop),&(ieee802514_header.src),sizeof(open_addr_t));
-
+        
+        // verify that incoming security level is acceptable
+        if (IEEE802154_security_acceptableLevel(ieee154e_vars.ackReceived, &ieee802514_header) == FALSE) {
+            break;
+        }
+ 
       // check the security level of the ACK frame and decrypt/authenticate
       if (ieee154e_vars.ackReceived->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
             if (IEEE802154_security_incomingFrame(ieee154e_vars.ackReceived) != E_SUCCESS) {
          	 break;
           }
-      } // checked if unsecured frame should pass during header retrieval
+        } 
       
       // toss the IEEE802.15.4 header
       packetfunctions_tossHeader(ieee154e_vars.ackReceived,ieee802514_header.headerLength);
@@ -1751,12 +1760,26 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
       ieee154e_vars.dataReceived->l2_IEListPresent  = ieee802514_header.ieListPresent;
       memcpy(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop),&(ieee802514_header.src),sizeof(open_addr_t));
 
-      // if security is enabled, decrypt/authenticate the frame.
+        // verify that incoming security level is acceptable
+        if (IEEE802154_security_acceptableLevel(ieee154e_vars.dataReceived, &ieee802514_header) == FALSE) {
+            break;
+        }
+   
+        // if security is active and configured need to decrypt the frame
       if (ieee154e_vars.dataReceived->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
-         if (IEEE802154_security_incomingFrame(ieee154e_vars.dataReceived) != E_SUCCESS) {
+            if (IEEE802154_security_isConfigured()) {
+                if (IEEE802154_security_incomingFrame(ieee154e_vars.dataReceived) != E_SUCCESS) {
                 break;
-         }
-      } // checked if unsecured frame should pass during header retrieval
+                }
+            }
+            // bypass authentication of beacons during join process
+            else if(ieee154e_vars.dataReceived->l2_frameType == IEEE154_TYPE_BEACON) { // not joined yet
+                packetfunctions_tossFooter(ieee154e_vars.dataReceived, ieee154e_vars.dataReceived->l2_authenticationLength);
+            }
+            else {
+                break;
+            }
+        }
 
       // toss the IEEE802.15.4 header
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_header.headerLength);
@@ -1869,7 +1892,10 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
 #endif
       } else {
          // synchronize to the received packet if I'm not a DAGroot and this is my preferred parent
-         if (idmanager_getIsDAGroot()==FALSE && icmpv6rpl_isPreferredParent(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop))) {
+            // or in case I'm in the middle of the join process when parent is not yet selected
+            if ((idmanager_getIsDAGroot()==FALSE && 
+                icmpv6rpl_isPreferredParent(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop))) ||
+                IEEE802154_security_isConfigured() == FALSE) {
             synchronizePacket(ieee154e_vars.syncCapturedTime);
          }
          // indicate reception to upper layer (no ACK asked)
@@ -2264,9 +2290,16 @@ bool isValidJoin(OpenQueueEntry_t* eb, ieee802154_header_iht *parsedHeader) {
    // correct frame length and correct pointers (first byte of the frame)
    packetfunctions_reserveHeaderSize(eb, parsedHeader->headerLength);
 
-   // verify EB's authentication tag
+   // verify EB's authentication tag if keys are configured
+   if (IEEE802154_security_isConfigured()) {
    if (IEEE802154_security_incomingFrame(eb) == E_SUCCESS) {
       return TRUE;
+   }
+   }
+   else {
+       // bypass authentication check for beacons if security is not configured
+        packetfunctions_tossFooter(eb,eb->l2_authenticationLength);
+        return TRUE;
    }
 
    return FALSE;
@@ -2461,7 +2494,7 @@ port_INLINE void ieee154e_syncSlotOffset() {
     infer the asnOffset based on the fact that
     ieee154e_vars.freq = 11 + (asnOffset + channelOffset)%16 
     */
-    for (i=0;i<16;i++){
+    for (i=0;i<NUM_CHANNELS;i++){
         if ((ieee154e_vars.freq - 11)==ieee154e_vars.chTemplate[i]){
             break;
 }
@@ -2711,7 +2744,7 @@ port_INLINE uint8_t calculateFrequency(uint8_t channelOffset) {
         return ieee154e_vars.singleChannel; // single channel
     } else {
         // channel hopping enabled, use the channel depending on hopping template
-        return 11 + ieee154e_vars.chTemplate[(ieee154e_vars.asnOffset+channelOffset)%16];
+        return 11 + ieee154e_vars.chTemplate[(ieee154e_vars.asnOffset+channelOffset)%NUM_CHANNELS];
     }
     //return 11+(ieee154e_vars.asnOffset+channelOffset)%16; //channel hopping
 }
