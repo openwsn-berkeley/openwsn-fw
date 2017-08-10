@@ -167,13 +167,15 @@ void icmpv6rpl_init() {
    
    icmpv6rpl_vars.daoPeriod                 = TIMER_DAO_TIMEOUT;
    icmpv6rpl_vars.timerIdDAO                = opentimers_create();
-   opentimers_scheduleIn(
-       icmpv6rpl_vars.timerIdDAO,
-       872 +(openrandom_get16b()&0xff),
-       TIME_MS,
-       TIMER_ONESHOT,
-       icmpv6rpl_timer_DAO_cb
-   );
+   // sfcontrol
+//   opentimers_scheduleIn(
+//       icmpv6rpl_vars.timerIdDAO,
+//       872 +(openrandom_get16b()&0xff),
+//       TIME_MS,
+//       TIMER_ONESHOT,
+//       icmpv6rpl_timer_DAO_cb
+//   );
+   // sfcontrol
 }
 
 void  icmpv6rpl_writeDODAGid(uint8_t* dodagid) {

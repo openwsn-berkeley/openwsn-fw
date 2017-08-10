@@ -692,11 +692,17 @@ port_INLINE void sixtop_sendEB() {
     uint8_t     i;
     uint8_t     eb_len;
     uint16_t    temp16b;
-   
+    
+    // sfcontrol
+//    if ((ieee154e_isSynch()==FALSE)                     ||
+//        (IEEE802154_security_isConfigured()==FALSE)     ||
+//        (icmpv6rpl_getMyDAGrank()==DEFAULTDAGRANK)      ||
+//        icmpv6rpl_daoSent()==FALSE) {
+          
     if ((ieee154e_isSynch()==FALSE)                     ||
         (IEEE802154_security_isConfigured()==FALSE)     ||
-        (icmpv6rpl_getMyDAGrank()==DEFAULTDAGRANK)      ||
-        icmpv6rpl_daoSent()==FALSE) {
+        (icmpv6rpl_getMyDAGrank()==DEFAULTDAGRANK) ) {
+    // sfcontrol
         // I'm not sync'ed, or did not join, or did not acquire a DAGrank or did not send out a DAO
         // before starting to advertize the network, we need to make sure that we are reachable downwards,
         // thus, the condition if DAO was sent
@@ -717,6 +723,13 @@ port_INLINE void sixtop_sendEB() {
         return;
     }
    
+    // sfcontrole
+    if (sf0_getControlslotoffset()==0){
+        // don't continue if sf control slotoffset is not get yet.
+        return;
+    }
+    // sfcontrole
+    
     // if I get here, I will send an EB
     
     // get a free packet buffer
@@ -734,18 +747,29 @@ port_INLINE void sixtop_sendEB() {
     // declare ownership over that packet
     eb->creator = COMPONENT_SIXTOP;
     eb->owner   = COMPONENT_SIXTOP;
+
+    // sf control
     
     // in case we none default number of shared cells defined in minimal configuration
-    if (ebIEsBytestream[EB_SLOTFRAME_NUMLINK_OFFSET]>1){
-        for (i=ebIEsBytestream[EB_SLOTFRAME_NUMLINK_OFFSET]-1;i>0;i--){
-            packetfunctions_reserveHeaderSize(eb,5);
-            eb->payload[0]   = i;    // slot offset
-            eb->payload[1]   = 0x00;
-            eb->payload[2]   = 0x00; // channel offset
-            eb->payload[3]   = 0x00;
-            eb->payload[4]   = 0x0F; // link options
-        }
-    }
+//    if (ebIEsBytestream[EB_SLOTFRAME_NUMLINK_OFFSET]>1){
+//        for (i=ebIEsBytestream[EB_SLOTFRAME_NUMLINK_OFFSET]-1;i>0;i--){
+//            packetfunctions_reserveHeaderSize(eb,5);
+//            eb->payload[0]   = i;    // slot offset
+//            eb->payload[1]   = 0x00;
+//            eb->payload[2]   = 0x00; // channel offset
+//            eb->payload[3]   = 0x00;
+//            eb->payload[4]   = 0x0F; // link options
+//        }
+//    }
+    
+    packetfunctions_reserveHeaderSize(eb,5);
+    eb->payload[0]   = sf0_getControlslotoffset();    // slot offset
+    eb->payload[1]   = 0x00;
+    eb->payload[2]   = 0x00; // channel offset
+    eb->payload[3]   = 0x00;
+    eb->payload[4]   = 0x0F; // link options
+    
+    // sf control
     
     // reserve space for EB IEs
     packetfunctions_reserveHeaderSize(eb,EB_IE_LEN);

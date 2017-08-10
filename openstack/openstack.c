@@ -75,8 +75,9 @@ void openstack_init(void) {
    openudp_init();
    
    //===== applications
-   openapps_init();
-   
+   // sf control
+//   openapps_init();
+   // sf control
    openserial_printInfo(
       COMPONENT_OPENWSN,ERR_BOOTED,
       (errorparameter_t)0,

@@ -16,6 +16,11 @@
 #include "adaptive_sync.h"
 #include "sctimer.h"
 
+// sfcontrol
+#include "openrandom.h"
+#include "sf0.h"
+// sfcontrol
+
 //=========================== variables =======================================
 
 ieee154e_vars_t    ieee154e_vars;
@@ -826,6 +831,9 @@ port_INLINE void activity_ti1ORri1() {
             openserial_printError(COMPONENT_IEEE802154E,ERR_DESYNCHRONIZED,
                                   (errorparameter_t)ieee154e_vars.slotOffset,
                                   (errorparameter_t)0);
+            // sfcontrol
+            icmpv6rpl_killPreferredParent();
+            // sfcontrol
             
             // update the statistics
             ieee154e_stats.numDeSync++;
@@ -914,6 +922,27 @@ port_INLINE void activity_ti1ORri1() {
                ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
             }
          }
+         
+         // sf control
+         if (ieee154e_vars.dataToSend!=NULL){
+             if (ieee154e_vars.slotOffset==0){
+                // send with 10% possibility on slotoffset 0
+                if (openrandom_get16b()>0xffff/10){
+                    ieee154e_vars.dataToSend = NULL;
+                }
+             } else {
+                if (cellType==CELLTYPE_TXRX && ieee154e_vars.slotOffset!=sf0_getControlslotoffset()){
+                    // this is the sf control slot gotten from EB 
+                    if (ieee154e_vars.dataToSend->creator!=COMPONENT_SIXTOP_RES){
+                        // only sixtop packet can be send on this slot
+                        ieee154e_vars.dataToSend = NULL;
+                    }
+                }
+             }
+         }
+         // sf control
+         
+         
          if (ieee154e_vars.dataToSend==NULL) {
             if (cellType==CELLTYPE_TX) {
                // abort
@@ -2404,8 +2433,12 @@ bool isValidEbFormat(OpenQueueEntry_t* pkt, uint16_t* lenIE){
             case IEEE802154E_MLME_SLOTFRAME_LINK_IE_SUBID:
                 schedule_setFrameNumber(*((uint8_t*)(pkt->payload)+ptr));       // number of slotframes
                 schedule_setFrameHandle(*((uint8_t*)(pkt->payload)+ptr+1));     // slotframe id
-                oldFrameLength = schedule_getFrameLength();
-                if (oldFrameLength==0){
+                // sfcontrol
+//                oldFrameLength = schedule_getFrameLength();
+//                if (oldFrameLength==0){
+                if (ieee154e_vars.isSync==FALSE){
+                    // sfcontrol
+                  
                     temp16b  = *((uint8_t*)(pkt->payload+ptr+2));               // slotframes length
                     temp16b |= *((uint8_t*)(pkt->payload+ptr+3))<<8;
                     schedule_setFrameLength(temp16b);
@@ -2414,6 +2447,19 @@ bool isValidEbFormat(OpenQueueEntry_t* pkt, uint16_t* lenIE){
                     // shared TXRX anycast slot(s)
                     memset(&temp_neighbor,0,sizeof(temp_neighbor));
                     temp_neighbor.type             = ADDR_ANYCAST;
+                    
+                    // sfcontrol
+                    // remove all old shared cells
+                    schedule_removeAllCells(schedule_getFrameHandle(),&temp_neighbor);
+                    // restore control slot
+                    schedule_addActiveSlot(
+                        sf0_getControlslotoffset(),     // slot offset
+                        CELLTYPE_TXRX,                      // type of slot
+                        TRUE,                               // shared?
+                        SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET,    // channel offset
+                        &temp_neighbor                      // neighbor
+                    );
+                    // sfcontrol
                     
                     for (i=0;i<numlinks;i++){
                         slotoffset     = *((uint8_t*)(pkt->payload+ptr+5+5*i));   // slotframes length

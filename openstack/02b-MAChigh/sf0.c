@@ -28,8 +28,24 @@ void sf0_handleRCError(uint8_t code);
 //=========================== public ==========================================
 
 void sf0_init(void) {
+    // sfcontrol
+    open_addr_t     temp_neighbor;
+    // sfcontrol
     memset(&sf0_vars,0,sizeof(sf0_vars_t));
     sf0_vars.numAppPacketsPerSlotFrame = 0;
+    // sfcontrol 
+    sf0_vars.sf_control_slotoffset = (4 + (openrandom_get16b()%(SLOTFRAME_LENGTH-NUMSERIALRX-1)));
+    
+    memset(&temp_neighbor,0,sizeof(temp_neighbor));
+    temp_neighbor.type             = ADDR_ANYCAST;
+    schedule_addActiveSlot(
+        sf0_vars.sf_control_slotoffset,     // slot offset
+        CELLTYPE_TXRX,                      // type of slot
+        TRUE,                               // shared?
+        SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET,    // channel offset
+        &temp_neighbor                      // neighbor
+    );
+    // sfcontrol 
     sixtop_setSFcallback(sf0_getsfid,sf0_getMetadata,sf0_translateMetadata,sf0_handleRCError);
 }
 
@@ -47,6 +63,12 @@ void sf0_setBackoff(uint8_t value){
 uint8_t sf0_getsfid(void){
     return SF0_ID;
 }
+
+// sf control
+uint16_t  sf0_getControlslotoffset(void){
+    return sf0_vars.sf_control_slotoffset;
+}
+// sf control
 
 uint16_t sf0_getMetadata(void){
     return SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;

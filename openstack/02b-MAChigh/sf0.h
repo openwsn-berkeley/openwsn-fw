@@ -17,6 +17,9 @@
 typedef struct {
    uint8_t numAppPacketsPerSlotFrame;
    uint8_t backoff;
+   // sfcontrol
+   uint16_t sf_control_slotoffset;
+   // sfcontrol
 } sf0_vars_t;
 
 //=========================== module variables ================================
@@ -31,6 +34,10 @@ void      sf0_appPktPeriod(uint8_t numAppPacketsPerSlotFrame);
 
 void      sf0_setBackoff(uint8_t value);
 uint8_t   sf0_getsfid(void);
+
+// sf control
+uint16_t  sf0_getControlslotoffset(void);
+// sf control
 
 bool sf0_candidateAddCellList(
    cellInfo_ht*         cellList,

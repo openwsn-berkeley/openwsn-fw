@@ -17,7 +17,9 @@
 
 The superframe reappears over time and can be arbitrarily long.
 */
-#define SLOTFRAME_LENGTH    11 //should be 101
+// sfcontrol
+#define SLOTFRAME_LENGTH    101 //should be 101
+// sfcontrol
 
 //draft-ietf-6tisch-minimal-06
 #define SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS                      1
