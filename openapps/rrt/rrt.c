@@ -24,9 +24,11 @@ rrt_vars_t rrt_vars;
 //=========================== prototypes ======================================
 
 owerror_t     rrt_receive(
-   OpenQueueEntry_t* msg,
-   coap_header_iht*  coap_header,
-   coap_option_iht*  coap_options
+        OpenQueueEntry_t* msg,
+        coap_header_iht*  coap_header,
+        coap_option_iht*  coap_incomingOptions,
+        coap_option_iht*  coap_outgoingOptions,
+        uint8_t*          coap_outgoingOptionsLen
 );
 void          rrt_sendDone(
    OpenQueueEntry_t* msg,
@@ -55,6 +57,7 @@ void rrt_init() {
    rrt_vars.desc.path1len             = 0;
    rrt_vars.desc.path1val             = NULL;
    rrt_vars.desc.componentID          = COMPONENT_RRT;
+   rrt_vars.desc.securityContext      = NULL;
    rrt_vars.desc.discoverable         = TRUE;
    rrt_vars.desc.callbackRx           = &rrt_receive;
    rrt_vars.desc.callbackSendDone     = &rrt_sendDone;
@@ -77,12 +80,13 @@ void rrt_init() {
 
 \return Whether the response is prepared successfully.
 */
-owerror_t rrt_receive(
-      OpenQueueEntry_t* msg,
-      coap_header_iht* coap_header,
-      coap_option_iht* coap_options
-   ) {
-   
+owerror_t     rrt_receive(
+        OpenQueueEntry_t* msg,
+        coap_header_iht*  coap_header,
+        coap_option_iht*  coap_incomingOptions,
+        coap_option_iht*  coap_outgoingOptions,
+        uint8_t*          coap_outgoingOptionsLen
+) {
    owerror_t outcome;
    uint8_t mssgRecvd;
    uint8_t moteToSendTo[16];
@@ -97,11 +101,6 @@ owerror_t rrt_receive(
          
          //=== prepare  CoAP response
          rrt_setGETRespMsg(msg, rrt_vars.discovered);
-         
-         
-         // payload marker
-         packetfunctions_reserveHeaderSize(msg,1);
-         msg->payload[0] = COAP_PAYLOAD_MARKER;
          
          // set the CoAP header
          coap_header->Code                = COAP_CODE_RESP_CONTENT;
@@ -130,9 +129,6 @@ owerror_t rrt_receive(
          msg->payload                     = &(msg->packet[127]);
          msg->length                      = 0;
 
-         packetfunctions_reserveHeaderSize(msg, 1);
-         msg->payload[0] = COAP_PAYLOAD_MARKER;
-
          //set the CoAP header
          coap_header->Code                = COAP_CODE_RESP_CONTENT;
 
@@ -145,10 +141,6 @@ owerror_t rrt_receive(
          
          //unregister the current mote as 'discovered' by ringmaster
          rrt_vars.discovered = 0; 
-         
-         // payload marker
-         packetfunctions_reserveHeaderSize(msg,1);
-         msg->payload[0] = COAP_PAYLOAD_MARKER;
          
          // set the CoAP header
          coap_header->Code                = COAP_CODE_RESP_CONTENT;
@@ -202,7 +194,9 @@ void rrt_setGETRespMsg(OpenQueueEntry_t* msg, uint8_t registered) {
 void rrt_sendCoAPMsg(char actionMsg, uint8_t *ipv6mote) {
       OpenQueueEntry_t* pkt;
       owerror_t outcome;
-      uint8_t numOptions;
+      coap_option_iht options[2];
+      uint8_t medType;
+
 
       pkt = openqueue_getFreePacketBuffer(COMPONENT_RRT);
       if (pkt == NULL) {
@@ -220,20 +214,16 @@ void rrt_sendCoAPMsg(char actionMsg, uint8_t *ipv6mote) {
       packetfunctions_reserveHeaderSize(pkt, 1);
       pkt->payload[0] = actionMsg;
 
-      numOptions = 0;
       // location-path option
-      packetfunctions_reserveHeaderSize(pkt,sizeof(rrt_path0)-1);
-      memcpy(&pkt->payload[0],&rrt_path0,sizeof(rrt_path0)-1);
-      packetfunctions_reserveHeaderSize(pkt,1);
-      pkt->payload[0]                  = (COAP_OPTION_NUM_URIPATH) << 4 |
-         (sizeof(rrt_path0)-1);
-       numOptions++;
-      // content-type option
-      packetfunctions_reserveHeaderSize(pkt,2);
-      pkt->payload[0]                  = COAP_OPTION_NUM_CONTENTFORMAT << 4 |
-         1;
-      pkt->payload[1]                  = COAP_MEDTYPE_APPOCTETSTREAM;
-      numOptions++;
+      options[0].type = COAP_OPTION_NUM_URIPATH;
+      options[0].length = sizeof(rrt_path0) - 1;
+      options[0].pValue = (uint8_t *) rrt_path0;
+      
+       // content-type option
+      medType = COAP_MEDTYPE_APPOCTETSTREAM;
+      options[1].type = COAP_OPTION_NUM_CONTENTFORMAT;
+      options[1].length = 1;
+      options[1].pValue = &medType;
 
       //metada
       pkt->l4_destination_port   = WKP_UDP_RINGMASTER; 
@@ -250,7 +240,9 @@ void rrt_sendCoAPMsg(char actionMsg, uint8_t *ipv6mote) {
               pkt,
               COAP_TYPE_NON,
               COAP_CODE_REQ_PUT,
-              numOptions,
+              1, // token len
+              options,
+              2, // options len
               &rrt_vars.desc
               );
       

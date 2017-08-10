@@ -376,6 +376,10 @@ void openserial_startOutput() {
             if (debugPrint_kaPeriod()==TRUE) {
                 break;
             }
+        case STATUS_JOINED:
+            if (debugPrint_joined()==TRUE) {
+                break;
+            }
         default:
             DISABLE_INTERRUPTS();
             openserial_vars.debugPrintCounter=0;
@@ -632,7 +636,7 @@ void openserial_get6pInfo(uint8_t commandId, uint8_t* code,uint8_t* cellOptions,
 }
 
 void openserial_handleCommands(void){
-    uint8_t  input_buffer[10];
+    uint8_t  input_buffer[20];
     uint8_t  numDataBytes;
     uint8_t  commandId;
     uint8_t  commandLen;
@@ -769,9 +773,13 @@ void openserial_handleCommands(void){
                 }
             }
             break;
-        default:
-            // wrong command ID
+        case COMMAND_SET_JOIN_KEY:
+            if (commandLen != 16) { break; }
+            idmanager_setJoinKey(&openserial_vars.inputBuf[ptr]);
             break;
+        default:
+           // wrong command ID
+           break;
    }
 }
 

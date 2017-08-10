@@ -118,7 +118,7 @@ class OpenHdlc(object):
 
 class moteProbe(threading.Thread):
     
-    CMD_SET_DAGROOT = '7e5259bbbb0000000000000c347e'
+    CMD_SET_DAGROOT = '7e5259bbbb00000000000001deadbeefcafedeadbeefcafedeadbeefa7d97e' # prefix: bbbb000000000000 keyindex : 01 keyvalue: deadbeefcafedeadbeefcafedeadbeef
     CMD_SEND_DATA   = '7e44141592000012e63b78001180bbbb0000000000000000000000000001bbbb000000000000141592000012e63b07d007d0000ea30d706f69706f697a837e'
     SLOT_DURATION   = 0.015
     UINJECT_MASK    = 'uinject'

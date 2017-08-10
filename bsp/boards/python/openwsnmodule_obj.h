@@ -25,6 +25,7 @@
 #include "icmpv6echo_obj.h"
 #include "icmpv6rpl_obj.h"
 #include "opencoap_obj.h"
+#include "openoscoap_obj.h"
 #include "openudp_obj.h"
 #include "idmanager_obj.h"
 #include "openqueue_obj.h"
@@ -32,12 +33,15 @@
 // applications
 #include "c6t_obj.h"
 #include "cexample_obj.h"
+#include "cjoin_obj.h"
 #include "cinfo_obj.h"
 #include "cleds_obj.h"
 #include "cstorm_obj.h"
 #include "cwellknown_obj.h"
 #include "rrt_obj.h"
 #include "uecho_obj.h"
+#include "uinject_obj.h"
+#include "userialbridge_obj.h"
 
 //=========================== prototypes ======================================
 
@@ -193,7 +197,6 @@ struct OpenMote {
    // l4
    icmpv6echo_vars_t    icmpv6echo_vars;
    icmpv6rpl_vars_t     icmpv6rpl_vars;
-   opencoap_vars_t      opencoap_vars;
    openudp_vars_t       openudp_vars;
    // l3
    monitor_expiration_vars_t        monitor_expiration_vars;
@@ -219,6 +222,9 @@ struct OpenMote {
    scheduler_vars_t     scheduler_vars;
    scheduler_dbg_t      scheduler_dbg;
    //===== openapps
+   //
+   opencoap_vars_t      opencoap_vars;
+   openoscoap_vars_t    openoscoap_vars;
    c6t_vars_t           c6t_vars;
    cexample_vars_t      cexample_vars;
    cinfo_vars_t         cinfo_vars;
@@ -227,6 +233,10 @@ struct OpenMote {
    cwellknown_vars_t    cwellknown_vars;
    rrt_vars_t           rrt_vars;
    //tohlone_vars_t       tohlone_vars;
+   cjoin_vars_t         cjoin_vars;
+   uecho_vars_t         uecho_vars;
+   uinject_vars_t       uinject_vars;
+   userialbridge_vars_t userialbridge_vars;
 };
 
 #endif

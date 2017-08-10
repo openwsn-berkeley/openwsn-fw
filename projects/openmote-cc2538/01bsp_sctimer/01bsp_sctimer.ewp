@@ -307,9 +307,9 @@
           <state>$PROJ_DIR$\..\..\..\kernel\</state>
           <state>$PROJ_DIR$\..\..\..\drivers\common\</state>
           <state>$PROJ_DIR$\..\..\..\inc\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\headers\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\source\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\</state>
           <state>$PROJ_DIR$\..\..\..\projects\common\03oos_openwsn</state>
         </option>
         <option>
@@ -1884,45 +1884,6 @@
     <group>
       <name>boards</name>
       <group>
-        <name>common</name>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_cbc.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_cbc.h</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_ccms.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_ccms.h</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_ctr.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_ctr.h</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_ecb.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_ecb.h</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\dummy_crypto_engine.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\dummy_crypto_engine.h</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\firmware_crypto_engine.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\firmware_crypto_engine.h</name>
-        </file>
-      </group>
-      <group>
         <name>openmote-cc2538</name>
         <group>
           <name>headers</name>
@@ -2141,7 +2102,7 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\adc_sensor.h</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\board.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\board.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\board_info.h</name>
@@ -2153,13 +2114,10 @@
           </excluded>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\cc2538_crypto_engine.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\cc2538_crypto_engine.h</name>
-        </file>
-        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\cc2538rf.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\cryptoengine.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\debugpins.c</name>

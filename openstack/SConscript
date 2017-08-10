@@ -33,8 +33,6 @@ sources_c = [
     os.path.join('cross-layers','openqueue.c'),
     os.path.join('cross-layers','openrandom.c'),
     os.path.join('cross-layers','packetfunctions.c'),
-    os.path.join('cross-layers','openaes.c'),
-    os.path.join('cross-layers','openccms.c'),
 ]
 sources_h = [
     'openstack.h',
@@ -64,8 +62,6 @@ sources_h = [
     os.path.join('cross-layers','openqueue.h'),
     os.path.join('cross-layers','openrandom.h'),
     os.path.join('cross-layers','packetfunctions.h'),
-    os.path.join('cross-layers','openaes.h'),
-    os.path.join('cross-layers','openccms.h'),
     #=== apps
     os.path.join('#','openapps','userialbridge','userialbridge.h'),
 ]
@@ -118,9 +114,9 @@ else:
             os.path.join('#','openapps','uecho'),
             os.path.join('#','openapps','uinject'),
             os.path.join('#','openapps','userialbridge'),
+            os.path.join('#','openapps','cjoin'),
             os.path.join('#','openapps','uexpiration'),
             os.path.join('#','openapps','uexpiration_monitor'),
-            
         ],
     )
     

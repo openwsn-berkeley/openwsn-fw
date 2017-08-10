@@ -9,6 +9,7 @@
 #include "board.h"
 #include "scheduler.h"
 #include "openstack.h"
+#include "opentimers.h"
 // needed for spoofing
 #include "openqueue.h"
 #include "opentimers.h"
@@ -32,7 +33,7 @@ macpong_vars_t macpong_vars;
 
 //=========================== prototypes ======================================
 
-void macpong_initSend(void);
+void macpong_initSend(opentimers_id_t id);
 void macpong_send(uint8_t payloadCtr);
 
 //=========================== initialization ==================================
@@ -48,7 +49,7 @@ int mote_main(void) {
    return 0; // this line should never be reached
 }
 
-void macpong_initSend() {
+void macpong_initSend(opentimers_id_t id) {
     bool timeToSend = FALSE;
     macpong_vars.macpongCounter = (macpong_vars.macpongCounter+1)%5;
     switch (macpong_vars.macpongCounter) {
@@ -59,10 +60,10 @@ void macpong_initSend() {
             break;
    }
    opentimers_scheduleIn(
-        macpong_vars.timerId, // timerId
+        macpong_vars.timerId, // id
         1000,                 // duration
-        TIME_MS,              // timetype
-        TIMER_ONESHOT,
+        TIME_MS,              // time_type
+        TIMER_ONESHOT,        // timer_type
         macpong_initSend      // callback
    );
   
@@ -119,7 +120,7 @@ void iphc_init(void) {
         1000,                  // duration
         reference,             // reference
         TIME_MS,               // timetype
-        macpong_initSend      // callback
+        macpong_initSend       // callback
     );
 }
 
@@ -167,6 +168,9 @@ bool icmpv6rpl_isPreferredParent(open_addr_t* address)               {
 }
 dagrank_t icmpv6rpl_getMyDAGrank(void)                               { 
     return 0; 
+}
+bool icmpv6rpl_daoSent(void) {
+    return TRUE;
 }
 void icmpv6rpl_setMyDAGrank(dagrank_t rank)                          { return; }
 void icmpv6rpl_killPreferredParent(void)                             { return; }

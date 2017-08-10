@@ -5,6 +5,7 @@
 #include "openserial.h"
 #include "neighbors.h"
 #include "schedule.h"
+#include "IEEE802154_security.h"
 
 //=========================== variables =======================================
 
@@ -49,7 +50,15 @@ void idmanager_init() {
    idmanager_vars.myPrefix.prefix[6]   = 0x00;
    idmanager_vars.myPrefix.prefix[7]   = 0x00;
 #else
-   memset(&idmanager_vars.myPrefix.prefix[0], 0x00, sizeof(idmanager_vars.myPrefix.prefix));
+   // set prefix to link-local
+   idmanager_vars.myPrefix.prefix[0]   = 0xfe;
+   idmanager_vars.myPrefix.prefix[1]   = 0x80;
+   idmanager_vars.myPrefix.prefix[2]   = 0x00;
+   idmanager_vars.myPrefix.prefix[3]   = 0x00;
+   idmanager_vars.myPrefix.prefix[4]   = 0x00;
+   idmanager_vars.myPrefix.prefix[5]   = 0x00;
+   idmanager_vars.myPrefix.prefix[6]   = 0x00;
+   idmanager_vars.myPrefix.prefix[7]   = 0x00;
 #endif
    
    // my64bID
@@ -191,9 +200,11 @@ bool idmanager_isMyAddress(open_addr_t* addr) {
 
 void idmanager_triggerAboutRoot() {
    uint8_t         number_bytes_from_input_buffer;
-   uint8_t         input_buffer[9];
+   uint8_t         input_buffer[1+8+1+16];
    open_addr_t     myPrefix;
    uint8_t         dodagid[16];
+   uint8_t         keyIndex;
+   uint8_t*        keyValue;
    
    //=== get command from OpenSerial
    number_bytes_from_input_buffer = openserial_getInputBuffer(input_buffer,sizeof(input_buffer));
@@ -235,13 +246,33 @@ void idmanager_triggerAboutRoot() {
       sizeof(myPrefix.prefix)
    );
    idmanager_setMyID(&myPrefix);
-   
+  
    // indicate DODAGid to RPL
    memcpy(&dodagid[0],idmanager_vars.myPrefix.prefix,8);  // prefix
    memcpy(&dodagid[8],idmanager_vars.my64bID.addr_64b,8); // eui64
    icmpv6rpl_writeDODAGid(dodagid);
-   
+
+   // store L2 security key index and key value
+   // for the moment, keys K1 and K2 are the same
+   keyIndex = input_buffer[9];
+   keyValue = &input_buffer[10];
+   IEEE802154_security_setBeaconKey(keyIndex, keyValue);
+   IEEE802154_security_setDataKey(keyIndex, keyValue);
+
    return;
+}
+
+void idmanager_setJoinKey(uint8_t *key) {
+    memcpy(idmanager_vars.joinKey, key, 16);
+}
+
+void idmanager_getJoinKey(uint8_t **pKey) {
+    *pKey = idmanager_vars.joinKey;
+    return; 
+}
+
+void idmanager_setJoinAsn(asn_t* asn) {
+    memcpy(&idmanager_vars.joinAsn, asn, sizeof(asn_t));
 }
 
 /**
@@ -265,5 +296,13 @@ bool debugPrint_id() {
    return TRUE;
 }
 
+bool debugPrint_joined() {
+   asn_t output;
+   output.byte4         =  idmanager_vars.joinAsn.byte4;
+   output.bytes2and3    =  idmanager_vars.joinAsn.bytes2and3;
+   output.bytes0and1    =  idmanager_vars.joinAsn.bytes0and1;
+   openserial_printStatus(STATUS_JOINED,(uint8_t*)&output,sizeof(output));
+   return TRUE;
+}
 
 //=========================== private =========================================
