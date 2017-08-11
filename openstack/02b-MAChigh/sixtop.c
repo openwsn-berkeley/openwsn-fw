@@ -20,7 +20,7 @@
 //=========================== define ==========================================
 
 // in seconds: sixtop maintaince is called every 30 seconds
-#define MAINTENANCE_PERIOD        30
+#define MAINTENANCE_PERIOD        10
 
 //=========================== variables =======================================
 
@@ -748,28 +748,17 @@ port_INLINE void sixtop_sendEB() {
     eb->creator = COMPONENT_SIXTOP;
     eb->owner   = COMPONENT_SIXTOP;
 
-    // sf control
-    
     // in case we none default number of shared cells defined in minimal configuration
-//    if (ebIEsBytestream[EB_SLOTFRAME_NUMLINK_OFFSET]>1){
-//        for (i=ebIEsBytestream[EB_SLOTFRAME_NUMLINK_OFFSET]-1;i>0;i--){
-//            packetfunctions_reserveHeaderSize(eb,5);
-//            eb->payload[0]   = i;    // slot offset
-//            eb->payload[1]   = 0x00;
-//            eb->payload[2]   = 0x00; // channel offset
-//            eb->payload[3]   = 0x00;
-//            eb->payload[4]   = 0x0F; // link options
-//        }
-//    }
-    
-    packetfunctions_reserveHeaderSize(eb,5);
-    eb->payload[0]   = sf0_getControlslotoffset();    // slot offset
-    eb->payload[1]   = 0x00;
-    eb->payload[2]   = 0x00; // channel offset
-    eb->payload[3]   = 0x00;
-    eb->payload[4]   = 0x0F; // link options
-    
-    // sf control
+    if (ebIEsBytestream[EB_SLOTFRAME_NUMLINK_OFFSET]>1){
+        for (i=ebIEsBytestream[EB_SLOTFRAME_NUMLINK_OFFSET]-1;i>0;i--){
+            packetfunctions_reserveHeaderSize(eb,5);
+            eb->payload[0]   = i;    // slot offset
+            eb->payload[1]   = 0x00;
+            eb->payload[2]   = 0x00; // channel offset
+            eb->payload[3]   = 0x00;
+            eb->payload[4]   = 0x0F; // link options
+        }
+    }
     
     // reserve space for EB IEs
     packetfunctions_reserveHeaderSize(eb,EB_IE_LEN);

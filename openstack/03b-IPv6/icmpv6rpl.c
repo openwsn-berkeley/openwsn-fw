@@ -10,6 +10,9 @@
 #include "idmanager.h"
 #include "opentimers.h"
 #include "IEEE802154E.h"
+// sfcontrol
+#include "sf0.h"
+// sfcontrol
 
 //=========================== variables =======================================
 
@@ -373,7 +376,10 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
     uint16_t  rankIncrease;
     dagrank_t neighborRank;
     uint32_t  tentativeDAGrank;
-   
+    // sfcontrol
+    open_addr_t temp_neighbor;
+    uint16_t  temp_slotoffset;
+    // sfcontrol
     // if I'm a DAGroot, my DAGrank is always MINHOPRANKINCREASE
     if ((idmanager_getIsDAGroot())==TRUE) {
         // the dagrank is not set through setting command, set rank to MINHOPRANKINCREASE here 
@@ -389,6 +395,12 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
     // update my rank to current parent first
     if (icmpv6rpl_vars.haveParent==TRUE){
         rankIncrease     = neighbors_getLinkMetric(icmpv6rpl_vars.ParentIndex);
+        // sfcontrol
+        if (rankIncrease == (3*DEFAULTLINKCOST-2)*MINHOPRANKINCREASE) {
+            // there is no transmission to current parent yet, do not update parent
+            return;
+        }
+        // sfcontrol
         neighborRank     = neighbors_getNeighborRank(icmpv6rpl_vars.ParentIndex);
         tentativeDAGrank = (uint32_t)neighborRank+rankIncrease;
         if (tentativeDAGrank>65535) {
@@ -438,10 +450,32 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
    if (foundBetterParent) {
       icmpv6rpl_vars.haveParent=TRUE;
       if (!prevHadParent) {
+         // sfcontrol
          // in case preParent is killed before calling this function, clear the preferredParent flag
-         neighbors_setPreferredParent(prevParentIndex, FALSE);
-         // set neighbors as preferred parent
+//         neighbors_setPreferredParent(prevParentIndex, FALSE); // called when killing preparent
+         // sfcontrol
+         
+        // set neighbors as preferred parent
          neighbors_setPreferredParent(icmpv6rpl_vars.ParentIndex, TRUE);
+         
+         // sfcontrol
+         if (neighbors_getNeighborEui64(&temp_neighbor,ADDR_64B,icmpv6rpl_vars.ParentIndex)){
+            temp_slotoffset = sf0_hashFunction(temp_neighbor.addr_64b[7]);
+            if (schedule_isSlotOffsetAvailable(temp_slotoffset)){
+                schedule_addActiveSlot(
+                    temp_slotoffset,                    // slot offset
+                    CELLTYPE_TXRX,                      // type of slot
+                    TRUE,                               // shared?
+                    SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET,    // channel offset
+                    &temp_neighbor                      // neighbor
+                );
+            } else {
+                // already added when sync
+            }
+         }
+         // remove all none parent control slot
+         schedule_removeNonParentTXRXCells(schedule_getFrameHandle(),&temp_neighbor);
+         // sfcontrol
       } else {
          if (icmpv6rpl_vars.ParentIndex==prevParentIndex) {
              // report on the rank change if any, not on the deletion/creation of parent
@@ -454,6 +488,24 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
              neighbors_setPreferredParent(prevParentIndex, FALSE);
              // set neighbors as preferred parent
              neighbors_setPreferredParent(icmpv6rpl_vars.ParentIndex, TRUE);
+             
+             // sfcontrol
+             if (neighbors_getNeighborEui64(&temp_neighbor,ADDR_64B,icmpv6rpl_vars.ParentIndex)){
+                temp_slotoffset = sf0_hashFunction(temp_neighbor.addr_64b[7]);
+                if (schedule_isSlotOffsetAvailable(temp_slotoffset)){
+                    schedule_addActiveSlot(
+                        temp_slotoffset,                    // slot offset
+                        CELLTYPE_TXRX,                      // type of slot
+                        TRUE,                               // shared?
+                        SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET,    // channel offset
+                        &temp_neighbor                      // neighbor
+                    );
+                }
+             }
+             // remove all none parent control slot
+             schedule_removeNonParentTXRXCells(schedule_getFrameHandle(),&temp_neighbor);
+             // sfcontrol
+             
          }
       }
    } else {
@@ -572,7 +624,23 @@ void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t* msg) {
 }
 
 void icmpv6rpl_killPreferredParent() {
+    // sfcontrol
+    open_addr_t temp_neighbor;
+    uint16_t  temp_slotoffset;
+    // sfcontrol
+    
     icmpv6rpl_vars.haveParent=FALSE;
+    
+    // sfcontrol
+    neighbors_setPreferredParent(icmpv6rpl_vars.ParentIndex, FALSE);
+    if (neighbors_getNeighborEui64(&temp_neighbor,ADDR_64B,icmpv6rpl_vars.ParentIndex)){
+        temp_slotoffset = sf0_hashFunction(temp_neighbor.addr_64b[7]);
+        schedule_removeActiveSlot(
+            temp_slotoffset,
+            &temp_neighbor
+        );
+    }
+    // sfcontrol
     if (idmanager_getIsDAGroot()==TRUE) {
        icmpv6rpl_vars.myDAGrank=MINHOPRANKINCREASE;
     } else {

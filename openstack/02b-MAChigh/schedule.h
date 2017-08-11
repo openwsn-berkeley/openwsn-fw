@@ -192,6 +192,14 @@ void              schedule_removeAllCells(
    uint8_t        slotframeID,
    open_addr_t*   previousHop
 );
+
+// sfcontrol
+void              schedule_removeNoneParentTXRXCells(
+   uint8_t        slotframeID,
+   open_addr_t*   parent
+);
+// sfcontrol
+
 scheduleEntry_t*  schedule_getCurrentScheduleEntry(void);
 uint8_t           schedule_getNumOfSlotsByType(cellType_t type);
 uint8_t           schedule_getNumberOfFreeEntries(void);

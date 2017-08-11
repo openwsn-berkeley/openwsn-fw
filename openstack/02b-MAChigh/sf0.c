@@ -34,7 +34,7 @@ void sf0_init(void) {
     memset(&sf0_vars,0,sizeof(sf0_vars_t));
     sf0_vars.numAppPacketsPerSlotFrame = 0;
     // sfcontrol 
-    sf0_vars.sf_control_slotoffset = (4 + (openrandom_get16b()%(SLOTFRAME_LENGTH-NUMSERIALRX-1)));
+    sf0_vars.sf_control_slotoffset = sf0_hashFunction(idmanager_getMyID(ADDR_64B)->addr_64b[7]);
     
     memset(&temp_neighbor,0,sizeof(temp_neighbor));
     temp_neighbor.type             = ADDR_ANYCAST;
@@ -67,6 +67,10 @@ uint8_t sf0_getsfid(void){
 // sf control
 uint16_t  sf0_getControlslotoffset(void){
     return sf0_vars.sf_control_slotoffset;
+}
+
+uint16_t  sf0_hashFunction(uint16_t functionInput){
+    return 4 + (functionInput%(SLOTFRAME_LENGTH-NUMSERIALRX-SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS));
 }
 // sf control
 

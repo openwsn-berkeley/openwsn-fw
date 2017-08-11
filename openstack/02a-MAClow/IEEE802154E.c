@@ -775,7 +775,11 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
         // at this point, ASN and frame length are known
         // the current slotoffset can be inferred
         ieee154e_syncSlotOffset();
-        schedule_syncSlotOffset(ieee154e_vars.slotOffset);
+        
+        // sfcontrol, comment function below as it's called in ieee154e_syncSlotOffset()
+//        schedule_syncSlotOffset(ieee154e_vars.slotOffset);
+        // sfcontrol
+        
         ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
         /* 
         infer the asnOffset based on the fact that
@@ -916,10 +920,21 @@ port_INLINE void activity_ti1ORri1() {
          if (schedule_getOkToSend()) {
             schedule_getNeighbor(&neighbor);
             ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor);
-            if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX)) {
+            
+            // sfcontrol
+//            if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX)) {
+            // neighbor.type == ANYCAST filter out the PARENT control slot
+            if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX) && (neighbor.type == ADDR_ANYCAST)) {
+              // no EBs on slot 0 (avoid too much neighbor in table without rank)
+              if (ieee154e_vars.slotOffset!=0){
+            // sfcontrol
+              
                couldSendEB=TRUE;
                // look for an EB packet in the queue
                ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
+               // sfcontrol
+              }
+              // sfcontrol
             }
          }
          
@@ -929,14 +944,6 @@ port_INLINE void activity_ti1ORri1() {
                 // send with 10% possibility on slotoffset 0
                 if (openrandom_get16b()>0xffff/10){
                     ieee154e_vars.dataToSend = NULL;
-                }
-             } else {
-                if (cellType==CELLTYPE_TXRX && ieee154e_vars.slotOffset!=sf0_getControlslotoffset()){
-                    // this is the sf control slot gotten from EB 
-                    if (ieee154e_vars.dataToSend->creator!=COMPONENT_SIXTOP_RES){
-                        // only sixtop packet can be send on this slot
-                        ieee154e_vars.dataToSend = NULL;
-                    }
                 }
              }
          }
@@ -2459,6 +2466,20 @@ bool isValidEbFormat(OpenQueueEntry_t* pkt, uint16_t* lenIE){
                         SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET,    // channel offset
                         &temp_neighbor                      // neighbor
                     );
+                    /*
+                        the current slotoffset needs to be sync'ed after EB pass validating.
+                        for this reason, the control slot of parent, which is current slot needs
+                        to be installed before ieee154e_syncSlotOffset is called.
+                    */
+                    // add neighbor's control slot
+                    schedule_addActiveSlot(
+                        sf0_hashFunction(pkt->l2_nextORpreviousHop.addr_64b[7]),// slot offset
+                        CELLTYPE_TXRX,                      // type of slot
+                        TRUE,                               // shared?
+                        SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET,    // channel offset
+                        &(pkt->l2_nextORpreviousHop)         // neighbor
+                    );
+                    
                     // sfcontrol
                     
                     for (i=0;i<numlinks;i++){

@@ -37,6 +37,7 @@ uint8_t   sf0_getsfid(void);
 
 // sf control
 uint16_t  sf0_getControlslotoffset(void);
+uint16_t  sf0_hashFunction(uint16_t functionInput);
 // sf control
 
 bool sf0_candidateAddCellList(
