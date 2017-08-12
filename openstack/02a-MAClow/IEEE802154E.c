@@ -921,33 +921,31 @@ port_INLINE void activity_ti1ORri1() {
             schedule_getNeighbor(&neighbor);
             ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor);
             
-            // sfcontrol
-//            if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX)) {
-            // neighbor.type == ANYCAST filter out the PARENT control slot
-            if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX) && (neighbor.type == ADDR_ANYCAST)) {
-              // no EBs on slot 0 (avoid too much neighbor in table without rank)
-              if (ieee154e_vars.slotOffset!=0){
-            // sfcontrol
-              
+            if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX)) {
                couldSendEB=TRUE;
                // look for an EB packet in the queue
                ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
-               // sfcontrol
-              }
-              // sfcontrol
             }
+            
+            // parent sfcontrol slot
+            if (cellType==CELLTYPE_TXRX && neighbor.type == ADDR_64B){
+                // only allow sixtop res packet transmit on parent sfcontrol 
+                if (ieee154e_vars.dataToSend!=NULL && ieee154e_vars.dataToSend->creator!=COMPONENT_SIXTOP_RES){
+                    ieee154e_vars.dataToSend = NULL; 
+                }
+            }
+            // sfcontrol
          }
          
-         // sf control
-         if (ieee154e_vars.dataToSend!=NULL){
-             if (ieee154e_vars.slotOffset==0){
-                // send with 10% possibility on slotoffset 0
-                if (openrandom_get16b()>0xffff/10){
-                    ieee154e_vars.dataToSend = NULL;
-                }
-             }
+         // minimal slot 
+         if (ieee154e_vars.dataToSend!=NULL && ieee154e_vars.slotOffset==0){
+            // send data packet with 10% possibility on slotoffset 0
+            // don't send EB on slot 0
+            if (couldSendEB || openrandom_get16b()>0xffff/10){
+                ieee154e_vars.dataToSend = NULL;
+            }
          }
-         // sf control
+         // sfcontrol
          
          
          if (ieee154e_vars.dataToSend==NULL) {
