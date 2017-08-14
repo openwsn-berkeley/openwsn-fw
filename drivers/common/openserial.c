@@ -720,10 +720,6 @@ void openserial_handleCommands(void){
             if (foundNeighbor==FALSE) {
                 break;
             }
-            if (sixtop_setHandler(SIX_HANDLER_SF0)==FALSE){
-                // one sixtop transcation is happening, only one instance at one time
-                return;
-            }
             // the following sequence of bytes are, slotframe, cellOption, numCell, celllist
             openserial_get6pInfo(commandId,&code,&cellOptions,&numCell,celllist_add,celllist_delete,&listOffset,&maxListLen,ptr,commandLen);
             sixtop_request(

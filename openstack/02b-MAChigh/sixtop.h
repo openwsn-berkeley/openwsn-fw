@@ -62,30 +62,21 @@ typedef enum {
 typedef enum {
     // ready for next event
     SIX_STATE_IDLE                              = 0x00,
-    // sending
-    SIX_STATE_SENDING_REQUEST                   = 0x01,
     // waiting for SendDone confirmation
-    SIX_STATE_WAIT_ADDREQUEST_SENDDONE          = 0x02,   
-    SIX_STATE_WAIT_DELETEREQUEST_SENDDONE       = 0x03,
-    SIX_STATE_WAIT_RELOCATEREQUEST_SENDDONE     = 0x04,
-    SIX_STATE_WAIT_COUNTREQUEST_SENDDONE        = 0x05,
-    SIX_STATE_WAIT_LISTREQUEST_SENDDONE         = 0x06,
-    SIX_STATE_WAIT_CLEARREQUEST_SENDDONE        = 0x07,
+    SIX_STATE_WAIT_ADDREQUEST_SENDDONE          = 0x01,   
+    SIX_STATE_WAIT_DELETEREQUEST_SENDDONE       = 0x02,
+    SIX_STATE_WAIT_RELOCATEREQUEST_SENDDONE     = 0x03,
+    SIX_STATE_WAIT_COUNTREQUEST_SENDDONE        = 0x04,
+    SIX_STATE_WAIT_LISTREQUEST_SENDDONE         = 0x05,
+    SIX_STATE_WAIT_CLEARREQUEST_SENDDONE        = 0x06,
     // waiting for response from the neighbor
-    SIX_STATE_WAIT_ADDRESPONSE                  = 0x08, 
-    SIX_STATE_WAIT_DELETERESPONSE               = 0x09,
-    SIX_STATE_WAIT_RELOCATERESPONSE             = 0x0a,
-    SIX_STATE_WAIT_COUNTRESPONSE                = 0x0b,
-    SIX_STATE_WAIT_LISTRESPONSE                 = 0x0c,
-    SIX_STATE_WAIT_CLEARRESPONSE                = 0x0d,
+    SIX_STATE_WAIT_ADDRESPONSE                  = 0x07, 
+    SIX_STATE_WAIT_DELETERESPONSE               = 0x08,
+    SIX_STATE_WAIT_RELOCATERESPONSE             = 0x09,
+    SIX_STATE_WAIT_COUNTRESPONSE                = 0x0a,
+    SIX_STATE_WAIT_LISTRESPONSE                 = 0x0b,
+    SIX_STATE_WAIT_CLEARRESPONSE                = 0x0c,
 } six2six_state_t;
-
-// before sixtop protocol is called, sixtop handler must be set
-typedef enum {
-    SIX_HANDLER_NONE                            = 0x00, // when complete reservation, handler must be set to none
-    SIX_HANDLER_MAINTAIN                        = 0x01, // the handler is maintenance process
-    SIX_HANDLER_SF0                             = 0x02  // the handler is otf
-} six2six_handler_t;
 
 typedef enum {
     METADATA_TYPE_FRAMEID                       = 0
@@ -114,7 +105,6 @@ typedef struct {
    uint16_t                     ebPeriod;                // period of sending EB
    six2six_state_t              six2six_state;
    uint8_t                      commandID;
-   six2six_handler_t            handler;
    bool                         isResponseEnabled;
    uint8_t                      cellOptions;
    cellInfo_ht                  celllist_toDelete[CELLLIST_MAX_LEN];
@@ -130,7 +120,6 @@ typedef struct {
 void      sixtop_init(void);
 void      sixtop_setKaPeriod(uint16_t kaPeriod);
 void      sixtop_setEBPeriod(uint8_t ebPeriod);
-bool      sixtop_setHandler(six2six_handler_t handler);
 void      sixtop_setSFcallback(
     sixtop_sf_getsfid     cb0,
     sixtop_sf_getmetadata cb1, 
@@ -138,7 +127,7 @@ void      sixtop_setSFcallback(
     sixtop_sf_handle_callback cb3
 );
 // scheduling
-void sixtop_request(
+owerror_t sixtop_request(
     uint8_t      code, 
     open_addr_t* neighbor, 
     uint8_t      numCells, 
