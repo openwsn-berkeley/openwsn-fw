@@ -191,7 +191,7 @@ void schedule_startDAGroot(void)                                          {retur
 void schedule_setFrameLength(uint16_t frameLength)                        {return;}
 
 void sixtop_setEBPeriod(uint8_t ebPeriod)                                 {return;}
-void sixtop_request(
+owerror_t sixtop_request(
     uint8_t      code, 
     open_addr_t* neighbor, 
     uint8_t      numCells, 
@@ -201,8 +201,7 @@ void sixtop_request(
     uint8_t      sfid,
     uint16_t     listingOffset,
     uint16_t     listingMaxNumCells
-)                                                                         {return;}
-bool sixtop_setHandler(six2six_handler_t handler)                         {return TRUE;}
+)                                                                         {return E_FAIL;}
 void sixtop_setIsResponseEnabled(bool isEnabled)                          {return;}
 void sixtop_setKaPeriod(uint16_t kaPeriod)                                {return;}
 void sf0_appPktPeriod(uint8_t numAppPacketsPerSlotFrame)                  {return;}
