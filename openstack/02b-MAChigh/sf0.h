@@ -9,6 +9,7 @@
 */
 
 #include "opendefs.h"
+#include "opentimers.h"
 
 //=========================== define ==========================================
 
@@ -19,6 +20,11 @@ typedef struct {
    uint8_t backoff;
    // sfcontrol
    uint16_t sf_control_slotoffset;
+   opentimers_id_t query_timer;
+   opentimers_id_t trafficcontrol_timer;
+   bool sf_controlSlot_reserved;
+   bool sf_isBusySendingQuery;
+   uint8_t sf_query_offset;
    // sfcontrol
 } sf0_vars_t;
 
@@ -38,6 +44,8 @@ uint8_t   sf0_getsfid(void);
 // sf control
 uint16_t  sf0_getControlslotoffset(void);
 uint16_t  sf0_hashFunction(uint16_t functionInput);
+bool      sf0_isTrafficControlled(void);
+void      sf0_6pQueryReceived(OpenQueueEntry_t* msg);
 // sf control
 
 bool sf0_candidateAddCellList(

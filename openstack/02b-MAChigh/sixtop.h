@@ -33,6 +33,7 @@
 #define IANA_6TOP_CMD_COUNT         0x04 // CMD_COUNT        | count scheduled cells     
 #define IANA_6TOP_CMD_LIST          0x05 // CMD_LIST         | list the scheduled cells  
 #define IANA_6TOP_CMD_CLEAR         0x06 // CMD_CLEAR        | clear all cells
+#define IANA_6TOP_CMD_QUERY         0x07 // CMD_QUERY        | query neighbors to start sixtop transcation
 // 6P return code
 #define IANA_6TOP_RC_SUCCESS        0x00 // RC_SUCCESS       | operation succeeded
 #define IANA_6TOP_RC_ERROR          0x01 // RC_ERROR         | generic error

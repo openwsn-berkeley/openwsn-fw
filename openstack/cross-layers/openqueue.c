@@ -250,6 +250,34 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
    return NULL;
 }
 
+// sfcontrol
+OpenQueueEntry_t*  openqueue_macGetPacketCreatedBy(uint8_t creator,open_addr_t* toNeighbor){
+    uint8_t i;
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+
+    // first to look the packet created by creator
+    for (i=0;i<QUEUELENGTH;i++) {
+        if (
+            openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
+            openqueue_vars.queue[i].creator==creator &&
+            (
+                (
+                    toNeighbor->type==ADDR_64B &&
+                    packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)
+                ) || toNeighbor->type==ADDR_ANYCAST
+            )
+        ){
+            ENABLE_INTERRUPTS();
+            return &openqueue_vars.queue[i];
+        }
+    }
+    
+    ENABLE_INTERRUPTS();
+    return NULL;
+}
+// sfcontrol
+
 bool openqueue_isHighPriorityEntryEnough(){
     uint8_t i;
     uint8_t numberOfEntry;
@@ -283,6 +311,24 @@ OpenQueueEntry_t* openqueue_macGetEBPacket() {
    ENABLE_INTERRUPTS();
    return NULL;
 }
+
+// sfcontrol
+OpenQueueEntry_t* openqueue_macGetDIOPacket(){
+   uint8_t i;
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   for (i=0;i<QUEUELENGTH;i++) {
+      if (openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
+          openqueue_vars.queue[i].creator==COMPONENT_ICMPv6RPL           &&
+          packetfunctions_isBroadcastMulticast(&(openqueue_vars.queue[i].l2_nextORpreviousHop))) {
+         ENABLE_INTERRUPTS();
+         return &openqueue_vars.queue[i];
+      }
+   }
+   ENABLE_INTERRUPTS();
+   return NULL;
+}
+// sfcontrol
 
 //=========================== private =========================================
 

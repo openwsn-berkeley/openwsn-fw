@@ -723,13 +723,6 @@ port_INLINE void sixtop_sendEB() {
         return;
     }
    
-    // sfcontrole
-    if (sf0_getControlslotoffset()==0){
-        // don't continue if sf control slotoffset is not get yet.
-        return;
-    }
-    // sfcontrole
-    
     // if I get here, I will send an EB
     
     // get a free packet buffer

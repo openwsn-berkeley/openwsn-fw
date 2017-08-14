@@ -194,7 +194,7 @@ void              schedule_removeAllCells(
 );
 
 // sfcontrol
-void              schedule_removeNoneParentTXRXCells(
+void              schedule_removeNonParentTXRXCells(
    uint8_t        slotframeID,
    open_addr_t*   parent
 );

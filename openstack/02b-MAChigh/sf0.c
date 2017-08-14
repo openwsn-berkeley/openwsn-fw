@@ -7,11 +7,17 @@
 #include "idmanager.h"
 #include "openapps.h"
 #include "openrandom.h"
+#include "openqueue.h"
+#include "IEEE802154E.h"
 
 //=========================== definition =====================================
 
-#define SF0_ID            0
-#define SF0THRESHOLD      2
+#define SF0_ID                            0
+#define SF0THRESHOLD                      2
+#define SF0_QUERY_RANGE                  10 // slots
+
+#define SF0_QUERY_PERIOD              10000 // miliseconds
+#define SF0_TRAFFICCONTROL_TIMEOUT     5000 // miliseconds
 
 //=========================== variables =======================================
 
@@ -24,6 +30,9 @@ void sf0_bandwidthEstimate_task(void);
 uint16_t sf0_getMetadata(void);
 metadata_t sf0_translateMetadata(void);
 void sf0_handleRCError(uint8_t code);
+
+void sf0_6pQuery_timer_cb(opentimers_id_t id);
+void sf0_trafficControl_timer_cb(opentimers_id_t id);
 
 //=========================== public ==========================================
 
@@ -44,6 +53,17 @@ void sf0_init(void) {
         TRUE,                               // shared?
         SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET,    // channel offset
         &temp_neighbor                      // neighbor
+    );
+    
+    // start sf0 6pquery timer
+    sf0_vars.query_timer          = opentimers_create();
+    sf0_vars.trafficcontrol_timer = opentimers_create();
+    opentimers_scheduleIn(
+        sf0_vars.query_timer, 
+        SF0_QUERY_PERIOD,
+        TIME_MS, 
+        TIMER_PERIODIC, 
+        sf0_6pQuery_timer_cb
     );
     // sfcontrol 
     sixtop_setSFcallback(sf0_getsfid,sf0_getMetadata,sf0_translateMetadata,sf0_handleRCError);
@@ -67,6 +87,10 @@ uint8_t sf0_getsfid(void){
 // sf control
 uint16_t  sf0_getControlslotoffset(void){
     return sf0_vars.sf_control_slotoffset;
+}
+
+bool sf0_isTrafficControlled(void){
+    return sf0_vars.sf_controlSlot_reserved;
 }
 
 uint16_t  sf0_hashFunction(uint16_t functionInput){
@@ -106,6 +130,80 @@ void sf0_handleRCError(uint8_t code){
     }
 }
 
+// sfcontrol
+
+void sf0_6pQueryReceived(OpenQueueEntry_t* msg){
+    uint8_t i;
+    printf("packet received\n");
+    for (i=0;i<msg->length;i++){
+        printf("%d ",msg->payload[i]);
+    }
+    printf("\n");
+}
+
+void sf0_6pQuery_timer_cb(opentimers_id_t id){
+    open_addr_t     temp_neighbor;
+    owerror_t       outcome;
+    
+    // stop if I'm not sync'ed or did not acquire a DAGrank
+    if (
+        ieee154e_isSynch()==FALSE               || \
+        icmpv6rpl_getMyDAGrank()==DEFAULTDAGRANK
+    ) {
+      
+        openqueue_removeAllCreatedBy(COMPONENT_SIXTOP_RES);
+        sf0_vars.sf_isBusySendingQuery = FALSE;
+        // stop here
+        return;
+    }
+   
+    // do not send DIO if I have the default DAG rank
+    if (sf0_vars.sf_isBusySendingQuery==TRUE){
+        
+        // stop here
+        return;
+    }
+    
+    memset(&temp_neighbor,0,sizeof(temp_neighbor));
+    temp_neighbor.type             = ADDR_ANYCAST;
+    outcome = sixtop_request(
+        IANA_6TOP_CMD_QUERY,                                            // code
+        &temp_neighbor,                                                 // neighbor
+        1,                                                              // number cells
+        LINKOPTIONS_TX | LINKOPTIONS_RX | LINKOPTIONS_SHARED,           // cellOptions
+        NULL,                                                           // celllist to add    (not used)
+        NULL,                                                           // celllist to delete (not used)
+        SF0_ID,                                                         // sfid
+        (sf0_vars.sf_query_offset+SF0_QUERY_RANGE)%SLOTFRAME_LENGTH,    // query offset (reuse list command offset parameter)
+        0                                                               // list command maximum celllist (not used)
+    );
+    if (outcome == E_SUCCESS){
+        // update query offset
+        sf0_vars.sf_query_offset = (sf0_vars.sf_query_offset+SF0_QUERY_RANGE)%SLOTFRAME_LENGTH;
+        
+        sf0_vars.sf_isBusySendingQuery = TRUE;
+        
+        sf0_vars.sf_controlSlot_reserved = TRUE;
+        opentimers_scheduleIn(
+            sf0_vars.trafficcontrol_timer, 
+            SF0_TRAFFICCONTROL_TIMEOUT,
+            TIME_MS, 
+            TIMER_ONESHOT, 
+            sf0_trafficControl_timer_cb
+        );
+    }
+}
+
+void sf0_trafficControl_timer_cb(opentimers_id_t id){
+    sf0_vars.sf_controlSlot_reserved = FALSE;
+}
+
+void sf0_6pQuerySenddone(OpenQueueEntry_t* msg){
+    sf0_vars.sf_isBusySendingQuery = FALSE;
+    openqueue_freePacketBuffer(msg);
+}
+
+// sfcontrol
 //=========================== private =========================================
 
 void sf0_bandwidthEstimate_task(void){

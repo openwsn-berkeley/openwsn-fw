@@ -919,34 +919,53 @@ port_INLINE void activity_ti1ORri1() {
          // check whether we can send
          if (schedule_getOkToSend()) {
             schedule_getNeighbor(&neighbor);
-            ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor);
             
-            if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX)) {
-               couldSendEB=TRUE;
-               // look for an EB packet in the queue
-               ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
-            }
-            
-            // parent sfcontrol slot
-            if (cellType==CELLTYPE_TXRX && neighbor.type == ADDR_64B){
-                // only allow sixtop res packet transmit on parent sfcontrol 
-                if (ieee154e_vars.dataToSend!=NULL && ieee154e_vars.dataToSend->creator!=COMPONENT_SIXTOP_RES){
-                    ieee154e_vars.dataToSend = NULL; 
+            // sfcontrol
+            /**
+                minimal slot 0:
+                    only send DIO with possibility of 10 %
+                my control slot:
+                    when traffic controlled by sf0:
+                        only allow sixtopres packet to send
+                    when not:
+                        only allow sixtopres, EB and DIO to send
+                parent control slot:
+                    only able to send sixtopres
+                other slots:
+                    find data packet according to slot associated address
+            */
+              
+            if (ieee154e_vars.slotOffset==SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET){
+                ieee154e_vars.dataToSend = openqueue_macGetDIOPacket();
+                if (ieee154e_vars.dataToSend != NULL && openrandom_get16b()>0xffff/10){
+                    ieee154e_vars.dataToSend = NULL;
+                }
+            } else {
+                if (ieee154e_vars.slotOffset==sf0_getControlslotoffset()){
+                    if (sf0_isTrafficControlled()==TRUE){
+                        ieee154e_vars.dataToSend = openqueue_macGetPacketCreatedBy(COMPONENT_SIXTOP_RES,&neighbor);
+                    } else {
+                        ieee154e_vars.dataToSend = openqueue_macGetPacketCreatedBy(COMPONENT_SIXTOP_RES,&neighbor);
+                        if (ieee154e_vars.dataToSend == NULL){
+                            ieee154e_vars.dataToSend = openqueue_macGetDIOPacket();
+                            if (ieee154e_vars.dataToSend == NULL){
+                                couldSendEB=TRUE;
+                                ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
+                            }
+                        }
+                    }
+                } else {
+                    if (cellType==CELLTYPE_TXRX && neighbor.type == ADDR_64B){
+                        // this is parent control slot
+                        ieee154e_vars.dataToSend = openqueue_macGetPacketCreatedBy(COMPONENT_SIXTOP_RES,&neighbor);
+                    } else {
+                        // all other slots send data packet 
+                        ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor);
+                    }
                 }
             }
             // sfcontrol
          }
-         
-         // minimal slot 
-         if (ieee154e_vars.dataToSend!=NULL && ieee154e_vars.slotOffset==0){
-            // send data packet with 10% possibility on slotoffset 0
-            // don't send EB on slot 0
-            if (couldSendEB || openrandom_get16b()>0xffff/10){
-                ieee154e_vars.dataToSend = NULL;
-            }
-         }
-         // sfcontrol
-         
          
          if (ieee154e_vars.dataToSend==NULL) {
             if (cellType==CELLTYPE_TX) {
@@ -957,6 +976,9 @@ port_INLINE void activity_ti1ORri1() {
                changeToRX=TRUE;
             }
          } else {
+            if (ieee154e_vars.dataToSend->creator == COMPONENT_SIXTOP_RES){
+                printf(" sixtop_res packet at slot %d\n",ieee154e_vars.slotOffset);
+            }
             // change state
             changeState(S_TXDATAOFFSET);
             // change owner
