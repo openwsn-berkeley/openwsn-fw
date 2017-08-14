@@ -90,7 +90,6 @@ void sf0_bandwidthEstimate_task(void){
     int8_t         bw_self;
     cellInfo_ht    celllist_add[CELLLIST_MAX_LEN];
     cellInfo_ht    celllist_delete[CELLLIST_MAX_LEN];
-    owerror_t      outcome;
     
     // do not reserve cells if I'm a DAGroot
     if (idmanager_getIsDAGroot()){
@@ -131,7 +130,7 @@ void sf0_bandwidthEstimate_task(void){
             // failed to get cell list to add
             return;
         }
-        outcome = sixtop_request(
+        sixtop_request(
             IANA_6TOP_CMD_ADD,                  // code
             &neighbor,                          // neighbor
             bw_incoming+bw_self-bw_outgoing+1,  // number cells
@@ -142,8 +141,6 @@ void sf0_bandwidthEstimate_task(void){
             0,                                  // list command offset (not used)
             0                                   // list command maximum celllist (not used)
         );
-        // post action depending outcome
-        // to do
     } else {
         // remove cell(s)
         if ( (bw_incoming+bw_self) < (bw_outgoing-SF0THRESHOLD)) {
@@ -151,7 +148,7 @@ void sf0_bandwidthEstimate_task(void){
                 // failed to get cell list to delete
                 return;
             }
-            outcome = sixtop_request(
+            sixtop_request(
                 IANA_6TOP_CMD_DELETE,   // code
                 &neighbor,              // neighbor
                 SF0THRESHOLD,           // number cells
@@ -162,8 +159,6 @@ void sf0_bandwidthEstimate_task(void){
                 0,                      // list command offset (not used)
                 0                       // list command maximum celllist (not used)
             );
-            // post action depending outcome
-            // to do
         } else {
             // nothing to do
         }

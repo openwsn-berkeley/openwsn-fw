@@ -191,7 +191,7 @@ void schedule_startDAGroot(void)                                          {retur
 void schedule_setFrameLength(uint16_t frameLength)                        {return;}
 
 void sixtop_setEBPeriod(uint8_t ebPeriod)                                 {return;}
-void sixtop_request(
+owerror_t sixtop_request(
     uint8_t      code, 
     open_addr_t* neighbor, 
     uint8_t      numCells, 
