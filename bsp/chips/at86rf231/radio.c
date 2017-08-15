@@ -57,7 +57,7 @@ void radio_init() {
    radio_spiWriteReg(RG_ANT_DIV, RADIO_CHIP_ANTENNA);     // use chip antenna
 #define RG_TRX_CTRL_1 0x04
    radio_spiWriteReg(RG_TRX_CTRL_1, 0x20);                // have the radio calculate CRC
-#define INIT_TX_POWER 0x0                                 // potentially set TX_POWER to other than power-on default (0x0)
+#define INIT_TX_POWER 0x0F                                // potentially set TX_POWER to other than power-on default (0x0)
                                                           // 0x0 = +3dBm, 0x6 = 0dBm, 0x9 = -3dBm,
                                                           // 0xC = -7dBm, 0xE = -12dBm, 0xF = -17dBm
    radio_spiWriteReg(RG_PHY_TX_PWR, (0x3<<6)|INIT_TX_POWER);

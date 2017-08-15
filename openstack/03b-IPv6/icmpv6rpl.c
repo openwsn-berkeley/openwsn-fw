@@ -881,7 +881,19 @@ void sendDAO() {
    
    // dont' send a DAO if you're still busy sending the previous one
    if (icmpv6rpl_vars.busySendingDAO==TRUE) {
-      return;
+      if (
+          icmpv6rpl_getPreferredParentEui64(&address)==TRUE && \
+          openqueue_macGetPacketCreatedBy(COMPONENT_ICMPv6RPL,&address) == NULL 
+      ){
+          // I have old DAO in buffer its destination is not reachable, remove them
+          openqueue_removeAllCreatedBy(COMPONENT_ICMPv6RPL);
+          
+          // I'm not busy sending DAO/DIO
+          icmpv6rpl_vars.busySendingDAO = FALSE;
+          icmpv6rpl_vars.busySendingDIO = FALSE;
+      } else {
+          return;
+      }
    }
    
    // if you get here, you start construct DAO

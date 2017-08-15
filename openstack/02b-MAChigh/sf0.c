@@ -16,7 +16,7 @@
 #define SF0THRESHOLD                      2
 #define SF0_QUERY_RANGE                  10 // slots
 
-#define SF0_QUERY_PERIOD              20000 // miliseconds
+#define SF0_QUERY_PERIOD              15000 // miliseconds
 #define SF0_TRAFFICCONTROL_TIMEOUT    10000 // miliseconds
 
 //=========================== variables =======================================
@@ -94,7 +94,11 @@ bool sf0_isTrafficControlled(void){
 }
 
 uint16_t  sf0_hashFunction(uint16_t functionInput){
+#ifdef FASTSIM
+    return 4 + ((functionInput*10)%(SLOTFRAME_LENGTH-NUMSERIALRX-SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS));
+#else
     return 4 + (functionInput%(SLOTFRAME_LENGTH-NUMSERIALRX-SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS));
+#endif
 }
 // sf control
 
@@ -176,8 +180,28 @@ void sf0_6pQuery_timer_cb(opentimers_id_t id){
     if (
         idmanager_getIsDAGroot() == FALSE &&
         schedule_getNumOfSlotsByType(CELLTYPE_TX)==0
-    ){  
+    ){
         // do not send query if my schedule is no ready yet
+        return;
+    }
+    
+    memset(&temp_neighbor,0,sizeof(temp_neighbor));
+    temp_neighbor.type        = ADDR_ANYCAST;
+    
+    if (openqueue_macGetPacketCreatedBy(COMPONENT_SIXTOP_RES,&temp_neighbor)!=NULL){
+        // previous sixtop transcation is still going on
+        // skip 6p query this time
+      
+        // turn on traffic control helping sixtop transcation
+        sf0_vars.sf_controlSlot_reserved = TRUE;
+        opentimers_scheduleIn(
+            sf0_vars.trafficcontrol_timer, 
+            SF0_TRAFFICCONTROL_TIMEOUT,
+            TIME_MS, 
+            TIMER_ONESHOT, 
+            sf0_trafficControl_timer_cb
+        );
+      
         return;
     }
     
@@ -185,6 +209,8 @@ void sf0_6pQuery_timer_cb(opentimers_id_t id){
     temp_neighbor.type        = ADDR_16B;
     temp_neighbor.addr_16b[0] = 0xff;
     temp_neighbor.addr_16b[1] = 0xff;
+    
+    
     
     outcome = sixtop_request(
         IANA_6TOP_CMD_QUERY,                                            // code
