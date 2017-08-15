@@ -518,7 +518,7 @@ void schedule_removeAllCells(
 }
 
 // sfcontrol
-void              schedule_removeNonParentTXRXCells(
+void              schedule_removeNonParentCells(
     uint8_t        slotframeID,
     open_addr_t*   parent
 ){
@@ -528,7 +528,6 @@ void              schedule_removeNonParentTXRXCells(
     for(i=0;i<MAXACTIVESLOTS;i++){
         if (
             schedule_vars.scheduleBuf[i].neighbor.type == ADDR_64B      && \
-            schedule_vars.scheduleBuf[i].type          == CELLTYPE_TXRX && \
             !packetfunctions_sameAddress(&(schedule_vars.scheduleBuf[i].neighbor),parent)
         ){
            schedule_removeActiveSlot(

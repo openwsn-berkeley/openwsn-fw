@@ -934,7 +934,6 @@ port_INLINE void activity_ti1ORri1() {
                 other slots:
                     find data packet according to slot associated address
             */
-              
             if (ieee154e_vars.slotOffset==SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET){
                 ieee154e_vars.dataToSend = openqueue_macGetDIOPacket();
                 if (ieee154e_vars.dataToSend != NULL && openrandom_get16b()>0xffff/10){
@@ -976,9 +975,6 @@ port_INLINE void activity_ti1ORri1() {
                changeToRX=TRUE;
             }
          } else {
-            if (ieee154e_vars.dataToSend->creator == COMPONENT_SIXTOP_RES){
-                printf(" sixtop_res packet at slot %d\n",ieee154e_vars.slotOffset);
-            }
             // change state
             changeState(S_TXDATAOFFSET);
             // change owner

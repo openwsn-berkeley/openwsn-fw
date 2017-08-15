@@ -69,13 +69,14 @@ typedef enum {
     SIX_STATE_WAIT_COUNTREQUEST_SENDDONE        = 0x04,
     SIX_STATE_WAIT_LISTREQUEST_SENDDONE         = 0x05,
     SIX_STATE_WAIT_CLEARREQUEST_SENDDONE        = 0x06,
+    SIX_STATE_WAIT_QUERYREQUEST_SENDDONE        = 0x07,
     // waiting for response from the neighbor
-    SIX_STATE_WAIT_ADDRESPONSE                  = 0x07, 
-    SIX_STATE_WAIT_DELETERESPONSE               = 0x08,
-    SIX_STATE_WAIT_RELOCATERESPONSE             = 0x09,
-    SIX_STATE_WAIT_COUNTRESPONSE                = 0x0a,
-    SIX_STATE_WAIT_LISTRESPONSE                 = 0x0b,
-    SIX_STATE_WAIT_CLEARRESPONSE                = 0x0c,
+    SIX_STATE_WAIT_ADDRESPONSE                  = 0x08, 
+    SIX_STATE_WAIT_DELETERESPONSE               = 0x09,
+    SIX_STATE_WAIT_RELOCATERESPONSE             = 0x0a,
+    SIX_STATE_WAIT_COUNTRESPONSE                = 0x0b,
+    SIX_STATE_WAIT_LISTRESPONSE                 = 0x0c,
+    SIX_STATE_WAIT_CLEARRESPONSE                = 0x0d,
 } six2six_state_t;
 
 typedef enum {

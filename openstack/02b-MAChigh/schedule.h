@@ -41,7 +41,7 @@ The superframe reappears over time and can be arbitrarily long.
   for serial port to transmit data to dagroot.
 */
 
-#define NUMSLOTSOFF          5
+#define NUMSLOTSOFF          20
 
 /**
 \brief Maximum number of active slots in a superframe.
@@ -194,7 +194,7 @@ void              schedule_removeAllCells(
 );
 
 // sfcontrol
-void              schedule_removeNonParentTXRXCells(
+void              schedule_removeNonParentCells(
    uint8_t        slotframeID,
    open_addr_t*   parent
 );

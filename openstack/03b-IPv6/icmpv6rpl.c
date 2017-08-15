@@ -172,13 +172,13 @@ void icmpv6rpl_init() {
    icmpv6rpl_vars.daoPeriod                 = TIMER_DAO_TIMEOUT;
    icmpv6rpl_vars.timerIdDAO                = opentimers_create();
    // sfcontrol
-//   opentimers_scheduleIn(
-//       icmpv6rpl_vars.timerIdDAO,
-//       872 +(openrandom_get16b()&0xff),
-//       TIME_MS,
-//       TIMER_ONESHOT,
-//       icmpv6rpl_timer_DAO_cb
-//   );
+   opentimers_scheduleIn(
+       icmpv6rpl_vars.timerIdDAO,
+       872 +(openrandom_get16b()&0xff),
+       TIME_MS,
+       TIMER_ONESHOT,
+       icmpv6rpl_timer_DAO_cb
+   );
    // sfcontrol
 }
 
@@ -475,7 +475,7 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
             }
          }
          // remove all none parent control slot
-         schedule_removeNonParentTXRXCells(schedule_getFrameHandle(),&temp_neighbor);
+         schedule_removeNonParentCells(schedule_getFrameHandle(),&temp_neighbor);
          // sfcontrol
       } else {
          if (icmpv6rpl_vars.ParentIndex==prevParentIndex) {
@@ -504,7 +504,7 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
                 }
              }
              // remove all none parent control slot
-             schedule_removeNonParentTXRXCells(schedule_getFrameHandle(),&temp_neighbor);
+             schedule_removeNonParentCells(schedule_getFrameHandle(),&temp_neighbor);
              // sfcontrol
              
          }
@@ -636,10 +636,12 @@ void icmpv6rpl_killPreferredParent() {
     neighbors_setPreferredParent(icmpv6rpl_vars.ParentIndex, FALSE);
     if (neighbors_getNeighborEui64(&temp_neighbor,ADDR_64B,icmpv6rpl_vars.ParentIndex)){
         temp_slotoffset = sf0_hashFunction(temp_neighbor.addr_64b[7]);
-        schedule_removeActiveSlot(
-            temp_slotoffset,
-            &temp_neighbor
-        );
+        if (schedule_isSlotOffsetAvailable(temp_slotoffset)==FALSE){
+            schedule_removeActiveSlot(
+                temp_slotoffset,
+                &temp_neighbor
+            );
+        }
     }
     // sfcontrol
     if (idmanager_getIsDAGroot()==TRUE) {

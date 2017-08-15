@@ -16,8 +16,8 @@
 #define SF0THRESHOLD                      2
 #define SF0_QUERY_RANGE                  10 // slots
 
-#define SF0_QUERY_PERIOD              10000 // miliseconds
-#define SF0_TRAFFICCONTROL_TIMEOUT     5000 // miliseconds
+#define SF0_QUERY_PERIOD              20000 // miliseconds
+#define SF0_TRAFFICCONTROL_TIMEOUT    10000 // miliseconds
 
 //=========================== variables =======================================
 
@@ -132,13 +132,22 @@ void sf0_handleRCError(uint8_t code){
 
 // sfcontrol
 
-void sf0_6pQueryReceived(OpenQueueEntry_t* msg){
-    uint8_t i;
-    printf("packet received\n");
-    for (i=0;i<msg->length;i++){
-        printf("%d ",msg->payload[i]);
+void sf0_6pQuery_notifyReceived(uint16_t queryOffset, open_addr_t* neighbor){
+    if (queryOffset<SLOTFRAME_LENGTH-SF0_QUERY_RANGE){
+        if (
+            sf0_vars.sf_control_slotoffset < (queryOffset+SF0_QUERY_RANGE)%SLOTFRAME_LENGTH && \
+            sf0_vars.sf_control_slotoffset > (queryOffset)%SLOTFRAME_LENGTH
+        ){
+            sf0_bandwidthEstimate_task();
+        }
+    } else {
+        if (
+            sf0_vars.sf_control_slotoffset < (queryOffset+SF0_QUERY_RANGE)%SLOTFRAME_LENGTH || \
+            sf0_vars.sf_control_slotoffset > (queryOffset)%SLOTFRAME_LENGTH
+        ){
+            sf0_bandwidthEstimate_task();
+        }
     }
-    printf("\n");
 }
 
 void sf0_6pQuery_timer_cb(opentimers_id_t id){
@@ -164,8 +173,19 @@ void sf0_6pQuery_timer_cb(opentimers_id_t id){
         return;
     }
     
+    if (
+        idmanager_getIsDAGroot() == FALSE &&
+        schedule_getNumOfSlotsByType(CELLTYPE_TX)==0
+    ){  
+        // do not send query if my schedule is no ready yet
+        return;
+    }
+    
     memset(&temp_neighbor,0,sizeof(temp_neighbor));
-    temp_neighbor.type             = ADDR_ANYCAST;
+    temp_neighbor.type        = ADDR_16B;
+    temp_neighbor.addr_16b[0] = 0xff;
+    temp_neighbor.addr_16b[1] = 0xff;
+    
     outcome = sixtop_request(
         IANA_6TOP_CMD_QUERY,                                            // code
         &temp_neighbor,                                                 // neighbor
@@ -198,9 +218,8 @@ void sf0_trafficControl_timer_cb(opentimers_id_t id){
     sf0_vars.sf_controlSlot_reserved = FALSE;
 }
 
-void sf0_6pQuerySenddone(OpenQueueEntry_t* msg){
+void sf0_6pQuery_sendDone(void){
     sf0_vars.sf_isBusySendingQuery = FALSE;
-    openqueue_freePacketBuffer(msg);
 }
 
 // sfcontrol
@@ -210,10 +229,7 @@ void sf0_bandwidthEstimate_task(void){
     open_addr_t    neighbor;
     bool           foundNeighbor;
     int8_t         bw_outgoing;
-    int8_t         bw_incoming;
-    int8_t         bw_self;
     cellInfo_ht    celllist_add[CELLLIST_MAX_LEN];
-    cellInfo_ht    celllist_delete[CELLLIST_MAX_LEN];
     
     // do not reserve cells if I'm a DAGroot
     if (idmanager_getIsDAGroot()){
@@ -230,34 +246,18 @@ void sf0_bandwidthEstimate_task(void){
     if (foundNeighbor==FALSE) {
         return;
     }
-    
-    // get bandwidth of outgoing, incoming and self.
-    // Here we just calculate the estimated bandwidth for 
-    // the application sending on dedicate cells(TX or Rx).
+
     bw_outgoing = schedule_getNumOfSlotsByType(CELLTYPE_TX);
-    bw_incoming = schedule_getNumOfSlotsByType(CELLTYPE_RX);
     
-    // get self required bandwith, you can design your
-    // application and assign bw_self accordingly. 
-    // for example:
-    //    bw_self = application_getBandwdith(app_name);
-    // By default, it's set to zero.
-    // bw_self = openapps_getBandwidth(COMPONENT_UINJECT);
-    bw_self = sf0_vars.numAppPacketsPerSlotFrame;
-    
-    // In SF0, scheduledCells = bw_outgoing
-    //         requiredCells  = bw_incoming + bw_self
-    // when scheduledCells<requiredCells, add one or more cell
-    
-    if (bw_outgoing <= bw_incoming+bw_self){
-        if (sf0_candidateAddCellList(celllist_add,bw_incoming+bw_self-bw_outgoing+1)==FALSE){
+    if (bw_outgoing==0){
+        if (sf0_candidateAddCellList(celllist_add,1)==FALSE){
             // failed to get cell list to add
             return;
         }
         sixtop_request(
             IANA_6TOP_CMD_ADD,                  // code
             &neighbor,                          // neighbor
-            bw_incoming+bw_self-bw_outgoing+1,  // number cells
+            1,                                  // number cells
             LINKOPTIONS_TX,                     // cellOptions
             celllist_add,                       // celllist to add
             NULL,                               // celllist to delete (not used)
@@ -265,27 +265,6 @@ void sf0_bandwidthEstimate_task(void){
             0,                                  // list command offset (not used)
             0                                   // list command maximum celllist (not used)
         );
-    } else {
-        // remove cell(s)
-        if ( (bw_incoming+bw_self) < (bw_outgoing-SF0THRESHOLD)) {
-            if (sf0_candidateRemoveCellList(celllist_delete,&neighbor,SF0THRESHOLD)==FALSE){
-                // failed to get cell list to delete
-                return;
-            }
-            sixtop_request(
-                IANA_6TOP_CMD_DELETE,   // code
-                &neighbor,              // neighbor
-                SF0THRESHOLD,           // number cells
-                LINKOPTIONS_TX,         // cellOptions
-                NULL,                   // celllist to add (not used)
-                celllist_delete,        // celllist to delete
-                SF0_ID,                 // sfid
-                0,                      // list command offset (not used)
-                0                       // list command maximum celllist (not used)
-            );
-        } else {
-            // nothing to do
-        }
     }
 }
 

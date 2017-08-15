@@ -45,7 +45,9 @@ uint8_t   sf0_getsfid(void);
 uint16_t  sf0_getControlslotoffset(void);
 uint16_t  sf0_hashFunction(uint16_t functionInput);
 bool      sf0_isTrafficControlled(void);
-void      sf0_6pQueryReceived(OpenQueueEntry_t* msg);
+void      sf0_6pQuery_notifyReceived(uint16_t queryOffset, open_addr_t* neighbor);
+
+void      sf0_6pQuery_sendDone(void);
 // sf control
 
 bool sf0_candidateAddCellList(

@@ -264,6 +264,16 @@ owerror_t sixtop_request(
         len +=1;
     }
     
+    // sfcontrol
+    if (code == IANA_6TOP_CMD_QUERY){
+        // append 6p query offset
+        packetfunctions_reserveHeaderSize(pkt,sizeof(uint16_t));
+        *((uint8_t*)(pkt->payload))   = (uint8_t)(listingOffset & 0x00FF);
+        *((uint8_t*)(pkt->payload+1)) = (uint8_t)(listingOffset & 0xFF00)>>8;
+        len +=2;
+    }
+    // sfcontrol
+    
     if (code != IANA_6TOP_CMD_CLEAR){
         // append 6p celloptions
         packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
@@ -317,7 +327,7 @@ owerror_t sixtop_request(
     pkt->l2_payloadIEpresent = TRUE;
     // record this packet as sixtop request message
     pkt->l2_sixtop_messageType    = SIXTOP_CELL_REQUEST;
-    
+        
     // send packet
     outcome = sixtop_send(pkt);
     
@@ -342,6 +352,9 @@ owerror_t sixtop_request(
             break;
         case IANA_6TOP_CMD_CLEAR:
             sixtop_vars.six2six_state = SIX_STATE_WAIT_CLEARREQUEST_SENDDONE;
+            break;
+        case IANA_6TOP_CMD_QUERY:
+            sixtop_vars.six2six_state = SIX_STATE_WAIT_QUERYREQUEST_SENDDONE;
             break;
         }
     } else {
@@ -892,19 +905,34 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
             case SIX_STATE_WAIT_CLEARREQUEST_SENDDONE:
                 sixtop_vars.six2six_state = SIX_STATE_WAIT_CLEARRESPONSE;
                 break;
+            // sfcontrol
+            case SIX_STATE_WAIT_QUERYREQUEST_SENDDONE:
+                // do nothing
+            // sfcontrol
             default:
                 // should never happen
                 break;
             }
-            // start timeout timer if I am waiting for a response
-            opentimers_scheduleIn(
-                sixtop_vars.timeoutTimerId,
-                SIX2SIX_TIMEOUT_MS,
-                TIME_MS,
-                TIMER_ONESHOT,
-                sixtop_timeout_timer_cb
-            );
+            // sfcontrol
+            if (sixtop_vars.six2six_state != SIX_STATE_WAIT_QUERYREQUEST_SENDDONE){
+                // start timeout timer if I am waiting for a response
+                opentimers_scheduleIn(
+                    sixtop_vars.timeoutTimerId,
+                    SIX2SIX_TIMEOUT_MS,
+                    TIME_MS,
+                    TIMER_ONESHOT,
+                    sixtop_timeout_timer_cb
+                );
+            }
+            // sfcontrol
         }
+        // sfcontrol
+        // no matter success or not, reset sixtop status after query command sent out
+        if (sixtop_vars.six2six_state == SIX_STATE_WAIT_QUERYREQUEST_SENDDONE){
+            sf0_6pQuery_sendDone();
+            sixtop_vars.six2six_state = SIX_STATE_IDLE;
+        }
+        // sfcontrol
     }
     
     // if this is a response send done
@@ -1061,7 +1089,8 @@ void sixtop_six2six_notifyReceive(
     uint16_t          offset;
     uint16_t          length_groupid_type;
     uint16_t          startingOffset;
-    uint8_t           maxNumCells;
+    uint16_t          maxNumCells;
+    uint16_t          queryOffset;
     uint16_t          i;
     uint16_t          slotoffset;
     uint16_t          channeloffset;
@@ -1109,13 +1138,15 @@ void sixtop_six2six_notifyReceive(
                 returnCode = IANA_6TOP_RC_SFID_ERR;
                 break;
             }
+            // sfcontrol
             // generation check
-            if (gen != neighbors_getGeneration(&(pkt->l2_nextORpreviousHop)) && code != IANA_6TOP_CMD_CLEAR){
-                returnCode = IANA_6TOP_RC_GEN_ERR;
-                break;
-            }
+//            if (gen != neighbors_getGeneration(&(pkt->l2_nextORpreviousHop)) && code != IANA_6TOP_CMD_CLEAR && code != IANA_6TOP_CMD_QUERY ){
+//                returnCode = IANA_6TOP_RC_GEN_ERR;
+//                break;
+//            }
+            // sfcontrol
             // previous 6p transcation check
-            if (sixtop_vars.six2six_state != SIX_STATE_IDLE){
+            if (sixtop_vars.six2six_state != SIX_STATE_IDLE && code != IANA_6TOP_CMD_QUERY){
                 returnCode = IANA_6TOP_RC_RESET;
                 break;
             }
@@ -1150,6 +1181,18 @@ void sixtop_six2six_notifyReceive(
             cellOptions  = *((uint8_t*)(pkt->payload)+ptr);
             ptr         += 1;
             pktLen      -= 1;
+            
+            // sfcontrol
+            // query command
+            if (code == IANA_6TOP_CMD_QUERY){
+                queryOffset  = *((uint8_t*)(pkt->payload)+ptr);
+                queryOffset |= *((uint8_t*)(pkt->payload)+ptr+1)<<8;
+                ptr += 2;
+                openqueue_freePacketBuffer(response_pkt);
+                sf0_6pQuery_notifyReceived(queryOffset,&(pkt->l2_nextORpreviousHop));
+                return;
+            }
+            // sfcontrol
             
             // list command
             if (code == IANA_6TOP_CMD_LIST){
