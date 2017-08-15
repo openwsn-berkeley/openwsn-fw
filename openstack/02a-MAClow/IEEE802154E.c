@@ -2489,7 +2489,7 @@ bool isValidEbFormat(OpenQueueEntry_t* pkt, uint16_t* lenIE){
                     */
                     // add neighbor's control slot
                     schedule_addActiveSlot(
-                        sf0_hashFunction(pkt->l2_nextORpreviousHop.addr_64b[7]),// slot offset
+                        sf0_hashFunction(256*pkt->l2_nextORpreviousHop.addr_64b[6]+pkt->l2_nextORpreviousHop.addr_64b[7]),// slot offset
                         CELLTYPE_TXRX,                      // type of slot
                         TRUE,                               // shared?
                         SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET,    // channel offset

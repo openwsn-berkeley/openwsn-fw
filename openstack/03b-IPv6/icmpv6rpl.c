@@ -461,7 +461,7 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
          
          // sfcontrol
          if (neighbors_getNeighborEui64(&temp_neighbor,ADDR_64B,icmpv6rpl_vars.ParentIndex)){
-            temp_slotoffset = sf0_hashFunction(temp_neighbor.addr_64b[7]);
+            temp_slotoffset = sf0_hashFunction(256*temp_neighbor.addr_64b[6]+temp_neighbor.addr_64b[7]);
             if (schedule_isSlotOffsetAvailable(temp_slotoffset)){
                 schedule_addActiveSlot(
                     temp_slotoffset,                    // slot offset
@@ -492,7 +492,7 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
              
              // sfcontrol
              if (neighbors_getNeighborEui64(&temp_neighbor,ADDR_64B,icmpv6rpl_vars.ParentIndex)){
-                temp_slotoffset = sf0_hashFunction(temp_neighbor.addr_64b[7]);
+                temp_slotoffset = sf0_hashFunction(256*temp_neighbor.addr_64b[6]+temp_neighbor.addr_64b[7]);
                 if (schedule_isSlotOffsetAvailable(temp_slotoffset)){
                     schedule_addActiveSlot(
                         temp_slotoffset,                    // slot offset
@@ -635,7 +635,7 @@ void icmpv6rpl_killPreferredParent() {
     // sfcontrol
     neighbors_setPreferredParent(icmpv6rpl_vars.ParentIndex, FALSE);
     if (neighbors_getNeighborEui64(&temp_neighbor,ADDR_64B,icmpv6rpl_vars.ParentIndex)){
-        temp_slotoffset = sf0_hashFunction(temp_neighbor.addr_64b[7]);
+        temp_slotoffset = sf0_hashFunction(256*temp_neighbor.addr_64b[6]+temp_neighbor.addr_64b[7]);
         if (schedule_isSlotOffsetAvailable(temp_slotoffset)==FALSE){
             schedule_removeActiveSlot(
                 temp_slotoffset,

@@ -43,7 +43,7 @@ void sf0_init(void) {
     memset(&sf0_vars,0,sizeof(sf0_vars_t));
     sf0_vars.numAppPacketsPerSlotFrame = 0;
     // sfcontrol 
-    sf0_vars.sf_control_slotoffset = sf0_hashFunction(idmanager_getMyID(ADDR_64B)->addr_64b[7]);
+    sf0_vars.sf_control_slotoffset = sf0_hashFunction(256*idmanager_getMyID(ADDR_64B)->addr_64b[6]+idmanager_getMyID(ADDR_64B)->addr_64b[7]);
     
     memset(&temp_neighbor,0,sizeof(temp_neighbor));
     temp_neighbor.type             = ADDR_ANYCAST;
