@@ -711,6 +711,13 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
       // toss the IEEE802.15.4 header -- this does not include IEs as they are processed
       // next.
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_header.headerLength);
+      
+      // sfcontrol
+      if (ieee802514_header.frameType==IEEE154_TYPE_BEACON && ieee154e_vars.dataReceived->l1_rssi<BADNEIGHBORMAXRSSI){
+          break;
+      }
+      
+      // sfcontrol
      
       // process IEs
       lenIE = 0;
@@ -2494,7 +2501,7 @@ bool isValidEbFormat(OpenQueueEntry_t* pkt, uint16_t* lenIE){
                     if (tempSlotoffset == sf0_getControlslotoffset()){
                         // there is a conflict when using this hashFunction, replace my control slot by neighbor's control slot.
                         // (same slotoffset and type but with neighbor's ADDR_64B address associated)
-                        schedule_removeActiveSlot(tempSlotoffset,temp_neighbor);
+                        schedule_removeActiveSlot(tempSlotoffset,&temp_neighbor);
                     }
                     
                     schedule_addActiveSlot(
