@@ -96,7 +96,7 @@ void          neighbors_resetGeneration(open_addr_t* address);
 // get addresses
 bool          neighbors_getNeighborEui64(open_addr_t* address,uint8_t addr_type,uint8_t index);
 // maintenance
-void          neighbors_removeOld(void);
+void          neighbors_housekeeping(void);
 // debug
 bool          debugPrint_neighbors(void);
 
