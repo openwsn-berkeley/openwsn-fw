@@ -9,6 +9,8 @@
 #include "openrandom.h"
 #include "openqueue.h"
 #include "IEEE802154E.h"
+#include "IEEE802154_security.h"
+#include "openserial.h"
 
 //=========================== definition =====================================
 
@@ -26,6 +28,7 @@ sf0_vars_t sf0_vars;
 //=========================== prototypes ======================================
 
 void sf0_bandwidthEstimate_task(void);
+void sf0_probeParentBySendingKA(void);
 // sixtop callback 
 uint16_t sf0_getMetadata(void);
 metadata_t sf0_translateMetadata(void);
@@ -142,14 +145,16 @@ void sf0_6pQuery_notifyReceived(uint16_t queryOffset, open_addr_t* neighbor){
             sf0_vars.sf_control_slotoffset < (queryOffset+SF0_QUERY_RANGE)%SLOTFRAME_LENGTH && \
             sf0_vars.sf_control_slotoffset > (queryOffset)%SLOTFRAME_LENGTH
         ){
-            sf0_bandwidthEstimate_task();
+//            sf0_bandwidthEstimate_task();
+            sf0_probeParentBySendingKA();
         }
     } else {
         if (
             sf0_vars.sf_control_slotoffset < (queryOffset+SF0_QUERY_RANGE)%SLOTFRAME_LENGTH || \
             sf0_vars.sf_control_slotoffset > (queryOffset)%SLOTFRAME_LENGTH
         ){
-            sf0_bandwidthEstimate_task();
+//            sf0_bandwidthEstimate_task();
+            sf0_probeParentBySendingKA();
         }
     }
 }
@@ -292,6 +297,74 @@ void sf0_bandwidthEstimate_task(void){
             0                                   // list command maximum celllist (not used)
         );
     }
+}
+
+void sf0_probeParentBySendingKA(void){
+    open_addr_t    kaNeighAddr;
+    bool           foundNeighbor;
+    OpenQueueEntry_t* kaPkt;
+    
+    if (ieee154e_isSynch()==FALSE) {
+        // I'm not sync'ed
+      
+        // delete packets genereted by this module (EB and KA) from openqueue
+        openqueue_removeAllCreatedBy(COMPONENT_SIXTOP_RES);
+      
+        // I'm not busy sending a KA
+        sf0_vars.busySendingKA = FALSE;
+      
+        // stop here
+        return;
+    }
+   
+    if (sf0_vars.busySendingKA==TRUE) {
+        // don't proceed if I'm still sending a KA
+        return;
+    }
+    
+    // do not reserve cells if I'm a DAGroot
+    if (idmanager_getIsDAGroot()){
+        return;
+    }
+
+    // get preferred parent
+    foundNeighbor = icmpv6rpl_getPreferredParentEui64(&kaNeighAddr);
+    if (foundNeighbor==FALSE) {
+        return;
+    }
+    
+    // if I get here, I will send a KA
+   
+    // get a free packet buffer
+    kaPkt = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP);
+    if (kaPkt==NULL) {
+        openserial_printError(
+            COMPONENT_SIXTOP,
+            ERR_NO_FREE_PACKET_BUFFER,
+            (errorparameter_t)1,
+            (errorparameter_t)0
+        );
+        return;
+    }
+   
+    // declare ownership over that packet
+    kaPkt->creator = COMPONENT_SIXTOP_RES;
+    kaPkt->owner   = COMPONENT_SIXTOP_RES;
+   
+    // some l2 information about this packet
+    memcpy(&(kaPkt->l2_nextORpreviousHop),&kaNeighAddr,sizeof(open_addr_t));
+   
+    // set l2-security attributes
+    kaPkt->l2_securityLevel   = IEEE802154_SECURITY_LEVEL; // do not exchange KAs with 
+    kaPkt->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE;
+    kaPkt->l2_keyIndex        = IEEE802154_security_getDataKeyIndex();
+    kaPkt->l2_payloadIEpresent= FALSE;
+
+    // put in queue for MAC to handle
+    sixtop_send(kaPkt);
+    
+    // I'm now busy sending a KA
+    sf0_vars.busySendingKA = TRUE;
 }
 
 void sf0_appPktPeriod(uint8_t numAppPacketsPerSlotFrame){

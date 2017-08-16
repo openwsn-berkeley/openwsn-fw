@@ -25,6 +25,8 @@ typedef struct {
    bool sf_controlSlot_reserved;
    bool sf_isBusySendingQuery;
    uint8_t sf_query_offset;
+   
+   bool busySendingKA;
    // sfcontrol
 } sf0_vars_t;
 
