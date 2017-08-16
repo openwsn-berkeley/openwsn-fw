@@ -940,7 +940,7 @@ port_INLINE void activity_ti1ORri1() {
                     ieee154e_vars.dataToSend = NULL;
                 }
             } else {
-                if (ieee154e_vars.slotOffset==sf0_getControlslotoffset()){
+                if (ieee154e_vars.slotOffset==sf0_getControlslotoffset() && neighbor.type == ADDR_ANYCAST){
                     if (sf0_isTrafficControlled()==TRUE){
                         ieee154e_vars.dataToSend = openqueue_macGetPacketCreatedBy(COMPONENT_SIXTOP_RES,&neighbor);
                     } else {
@@ -2384,6 +2384,8 @@ bool isValidEbFormat(OpenQueueEntry_t* pkt, uint16_t* lenIE){
     ptr = 0;
     mlme_ie_found = FALSE;
     
+    uint16_t tempSlotoffset;
+    
     while (ptr<pkt->length){
     
         temp16b  = *((uint8_t*)(pkt->payload)+ptr);
@@ -2484,12 +2486,19 @@ bool isValidEbFormat(OpenQueueEntry_t* pkt, uint16_t* lenIE){
                     );
                     /*
                         the current slotoffset needs to be sync'ed after EB pass validating.
-                        for this reason, the control slot of parent, which is current slot needs
+                        for this reason, the control slot of neighbor, which is current slot needs
                         to be installed before ieee154e_syncSlotOffset is called.
                     */
                     // add neighbor's control slot
+                    tempSlotoffset = sf0_hashFunction(256*pkt->l2_nextORpreviousHop.addr_64b[6]+pkt->l2_nextORpreviousHop.addr_64b[7]);
+                    if (tempSlotoffset == sf0_getControlslotoffset()){
+                        // there is a conflict when using this hashFunction, replace my control slot by neighbor's control slot.
+                        // (same slotoffset and type but with neighbor's ADDR_64B address associated)
+                        schedule_removeActiveSlot(tempSlotoffset,temp_neighbor);
+                    }
+                    
                     schedule_addActiveSlot(
-                        sf0_hashFunction(256*pkt->l2_nextORpreviousHop.addr_64b[6]+pkt->l2_nextORpreviousHop.addr_64b[7]),// slot offset
+                        tempSlotoffset,// slot offset
                         CELLTYPE_TXRX,                      // type of slot
                         TRUE,                               // shared?
                         SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET,    // channel offset

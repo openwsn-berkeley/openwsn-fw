@@ -718,6 +718,15 @@ void sendDIO() {
       return;
    }
    
+   // sfcontrol
+   if (schedule_getNumOfSlotsByType(CELLTYPE_TXRX)<3){
+      // usually there is slot 0, my slotcontrol and neighbor slotcontrol
+      // if there are less than 3 slot, there is hash conflict, don't send DIO
+      // this avoids the conllision with neighbor's slotcontrol
+      return;
+   }
+   // sfcontrol
+   
    // if you get here, all good to send a DIO
    
    // reserve a free packet buffer for DIO
