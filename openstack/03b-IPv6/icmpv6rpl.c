@@ -400,12 +400,6 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
             return;
         }
         rankIncrease     = neighbors_getLinkMetric(icmpv6rpl_vars.ParentIndex);
-        // sfcontrol
-        if (rankIncrease == (3*DEFAULTLINKCOST-2)*MINHOPRANKINCREASE) {
-            // there is no transmission to current parent yet, do not update parent
-            return;
-        }
-        // sfcontrol
         neighborRank     = neighbors_getNeighborRank(icmpv6rpl_vars.ParentIndex);
         tentativeDAGrank = (uint32_t)neighborRank+rankIncrease;
         if (tentativeDAGrank>65535) {
