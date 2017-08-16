@@ -386,6 +386,10 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
     prevRankIncrease     = icmpv6rpl_vars.rankIncrease;
     // update my rank to current parent first
     if (icmpv6rpl_vars.haveParent==TRUE){
+        if (neighbors_reachedMaxTransmission(icmpv6rpl_vars.ParentIndex)==FALSE){
+            // I havn't enough transmission to my parent, don't update.
+            return;
+        }
         rankIncrease     = neighbors_getLinkMetric(icmpv6rpl_vars.ParentIndex);
         neighborRank     = neighbors_getNeighborRank(icmpv6rpl_vars.ParentIndex);
         tentativeDAGrank = (uint32_t)neighborRank+rankIncrease;
