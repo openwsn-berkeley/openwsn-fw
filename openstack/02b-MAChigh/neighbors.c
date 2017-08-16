@@ -524,7 +524,7 @@ uint16_t neighbors_getLinkMetric(uint8_t index) {
     // we assume that this neighbor has already been checked for being in use         
     // calculate link cost to this neighbor
     if (neighbors_vars.neighbors[index].numTxACK==0) {
-        if (neighbors_vars.neighbors[index].numTx<=DEFAULTLINKCOST){
+        if (neighbors_vars.neighbors[index].numTx<DEFAULTLINKCOST){
             rankIncrease = (3*DEFAULTLINKCOST-2)*MINHOPRANKINCREASE;
         } else {
             rankIncrease = (3*LARGESTLINKCOST-2)*MINHOPRANKINCREASE;
@@ -549,82 +549,56 @@ uint16_t neighbors_getLinkMetric(uint8_t index) {
 //===== maintenance
 
 void  neighbors_housekeeping() {
-    uint8_t    i, j;
+    uint8_t    i, j, k;
     bool       haveParent;
-    uint8_t    neighborIndexWithLowestRank[3];
+    uint8_t    neighborIndexWithLowestRank[NUM_MAINTAINED_NEIGHBOR];
+    uint8_t    neighbor_counter;
+    bool       neighbor_recorded;
     dagrank_t  lowestRank;
-    PORT_TIMER_WIDTH timeSinceHeard;
     
     // neighbors marked as NO_RES will never removed.
     
-    // first round
-    lowestRank = MAXDAGRANK;
-    for (i=0;i<MAXNUMNEIGHBORS;i++) {
-        if (neighbors_vars.neighbors[i].used==1) {
-            if (
-                lowestRank>neighbors_vars.neighbors[i].DAGrank && 
-                neighbors_vars.neighbors[i].f6PNORES == FALSE
-            ){
-                lowestRank = neighbors_vars.neighbors[i].DAGrank;
-                neighborIndexWithLowestRank[0] = i;
+    for (neighbor_counter=0;neighbor_counter<NUM_MAINTAINED_NEIGHBOR;neighbor_counter++){
+        lowestRank = MAXDAGRANK;
+        for (i=0;i<MAXNUMNEIGHBORS;i++) {
+            if (neighbors_vars.neighbors[i].used==1) {
+                if (
+                    lowestRank>neighbors_vars.neighbors[i].DAGrank && 
+                    neighbors_vars.neighbors[i].f6PNORES == FALSE
+                ){
+                    neighbor_recorded = FALSE;
+                    for (k=0;k<neighbor_counter;k++){
+                        if (i == neighborIndexWithLowestRank[k]){
+                            neighbor_recorded = TRUE;
+                            break;
+                        }
+                    }
+                    if (neighbor_recorded == FALSE){
+                        lowestRank = neighbors_vars.neighbors[i].DAGrank;
+                        neighborIndexWithLowestRank[neighbor_counter] = i;
+                    }
+                }
             }
+        }
+        
+        if (lowestRank==MAXDAGRANK){
+            // none of the neighbors have rank yet
+            return;
         }
     }
     
-    if (lowestRank==MAXDAGRANK){
-        // none of the neighbors have rank yet
-        return;
-    }
-   
-    // second round
-    lowestRank = MAXDAGRANK;
+    // remove all neighbors except the ones that f6PNORES flag is set or 
+    // is recorded as lowest NUM_MAINTAINED_NEIGHBOR rank neighbors
     for (i=0;i<MAXNUMNEIGHBORS;i++) {
         if (neighbors_vars.neighbors[i].used==1) {
-            if (
-                lowestRank>neighbors_vars.neighbors[i].DAGrank &&
-                i != neighborIndexWithLowestRank[0]           && 
-                neighbors_vars.neighbors[i].f6PNORES == FALSE
-            ){
-                lowestRank = neighbors_vars.neighbors[i].DAGrank;
-                neighborIndexWithLowestRank[1] = i;
+            neighbor_recorded = FALSE;
+            for (k=0;k<neighbor_counter;k++){
+                if (i == neighborIndexWithLowestRank[k]){
+                    neighbor_recorded = TRUE;
+                    break;
+                }
             }
-        }
-    }
-   
-    if (lowestRank==MAXDAGRANK){
-        // only one neighbor has rank
-        return;
-    }
-   
-    // third round
-    lowestRank = MAXDAGRANK;
-    for (i=0;i<MAXNUMNEIGHBORS;i++) {
-        if (neighbors_vars.neighbors[i].used==1) {
-            if (
-                lowestRank>neighbors_vars.neighbors[i].DAGrank &&
-                i != neighborIndexWithLowestRank[0]           &&
-                i != neighborIndexWithLowestRank[1]           && 
-                neighbors_vars.neighbors[i].f6PNORES == FALSE
-            ){
-                lowestRank = neighbors_vars.neighbors[i].DAGrank;
-                neighborIndexWithLowestRank[2] = i;
-            }
-        }
-    }
-    
-    if (lowestRank==MAXDAGRANK){
-        // only two neighbors have rank
-        return;
-    }
-    
-    // remove all neighbors except the ones that f6PNORES flag is set or is recorded as lowest 3 rank neighbors
-    for (i=0;i<MAXNUMNEIGHBORS;i++) {
-        if (neighbors_vars.neighbors[i].used==1) {
-            if (
-                i!= neighborIndexWithLowestRank[0] &&
-                i!= neighborIndexWithLowestRank[1] &&
-                i!= neighborIndexWithLowestRank[2]
-            ) {
+            if (neighbor_recorded == FALSE) {
                 haveParent = icmpv6rpl_getPreferredParentIndex(&j);
                 if (haveParent && (i==j)) { // this is our preferred parent, carefully!
                     icmpv6rpl_killPreferredParent();

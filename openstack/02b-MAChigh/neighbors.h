@@ -17,12 +17,13 @@
 #define GOODNEIGHBORMINRSSI       -90 //dBm
 #define SWITCHSTABILITYTHRESHOLD  3
 #define DEFAULTLINKCOST           4
-#define LARGESTLINKCOST           8
+#define LARGESTLINKCOST           16
 
 #define MAXDAGRANK                0xffff
 #define DEFAULTDAGRANK            MAXDAGRANK
 #define MINHOPRANKINCREASE        256  //default value in RPL and Minimal 6TiSCH draft
 
+#define NUM_MAINTAINED_NEIGHBOR   5
 
 //=========================== typedef =========================================
 
