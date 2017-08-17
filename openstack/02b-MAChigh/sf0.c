@@ -21,6 +21,9 @@
 #define SF0_QUERY_PERIOD              15000 // miliseconds
 #define SF0_TRAFFICCONTROL_TIMEOUT    10000 // miliseconds
 
+#define SF0_QUERY_ACTION_KA
+//#define SF0_QUERY_ACTION_6PQUERY
+
 //=========================== variables =======================================
 
 sf0_vars_t sf0_vars;
@@ -145,16 +148,25 @@ void sf0_6pQuery_notifyReceived(uint16_t queryOffset, open_addr_t* neighbor){
             sf0_vars.sf_control_slotoffset < (queryOffset+SF0_QUERY_RANGE)%SLOTFRAME_LENGTH && \
             sf0_vars.sf_control_slotoffset > (queryOffset)%SLOTFRAME_LENGTH
         ){
+#ifdef SF0_QUERY_ACTION_6PQUERY
 //            sf0_bandwidthEstimate_task();
+#endif
+#ifdef SF0_QUERY_ACTION_KA
             sf0_probeParentBySendingKA();
+#endif
         }
     } else {
         if (
             sf0_vars.sf_control_slotoffset < (queryOffset+SF0_QUERY_RANGE)%SLOTFRAME_LENGTH || \
             sf0_vars.sf_control_slotoffset > (queryOffset)%SLOTFRAME_LENGTH
         ){
+#ifdef SF0_QUERY_ACTION_6PQUERY
 //            sf0_bandwidthEstimate_task();
+#endif
+#ifdef SF0_QUERY_ACTION_KA
             sf0_probeParentBySendingKA();
+#endif
+
         }
     }
 }
@@ -182,6 +194,7 @@ void sf0_6pQuery_timer_cb(opentimers_id_t id){
         return;
     }
     
+#ifdef SF0_QUERY_ACTION_6PQUERY
     if (
         idmanager_getIsDAGroot() == FALSE &&
         schedule_getNumOfSlotsByType(CELLTYPE_TX)==0
@@ -189,6 +202,7 @@ void sf0_6pQuery_timer_cb(opentimers_id_t id){
         // do not send query if my schedule is no ready yet
         return;
     }
+#endif
     
     memset(&temp_neighbor,0,sizeof(temp_neighbor));
     temp_neighbor.type        = ADDR_ANYCAST;
