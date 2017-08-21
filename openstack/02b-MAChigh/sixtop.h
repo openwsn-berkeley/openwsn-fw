@@ -48,9 +48,6 @@
 // SF ID
 #define SFID_SF0  0
 
-// Default Ch. ID
-#define DEFAULT_CHANNEL_OFFSET 2
-
 typedef enum {
     SIXTOP_CELL_REQUEST       = 0x00,
     SIXTOP_CELL_RESPONSE      = 0x01,

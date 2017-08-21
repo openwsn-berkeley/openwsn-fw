@@ -546,6 +546,7 @@ void openserial_handleEcho(uint8_t* buf, uint8_t bufLen){
 
 void openserial_get6pInfo(uint8_t commandId, uint8_t* code,uint8_t* cellOptions,uint8_t* numCells,cellInfo_ht* celllist_add,cellInfo_ht* celllist_delete,uint8_t* listOffset,uint8_t* maxListLen,uint8_t ptr, uint8_t commandLen){
     uint8_t i; 
+    uint8_t celllistLen;
     
     // clear command
     if (commandId == COMMAND_SET_6P_CLEAR){
@@ -582,9 +583,10 @@ void openserial_get6pInfo(uint8_t commandId, uint8_t* code,uint8_t* cellOptions,
         *code = IANA_6TOP_CMD_ADD;
         // retrieve cell list
         i = 0;
-        while(commandLen>0){
+        celllistLen = commandLen/2;
+        while(commandLen>celllistLen){
             celllist_add[i].slotoffset     = openserial_vars.inputBuf[ptr];
-            celllist_add[i].channeloffset  = DEFAULT_CHANNEL_OFFSET;
+            celllist_add[i].channeloffset  = openserial_vars.inputBuf[ptr+celllistLen];
             celllist_add[i].isUsed         = TRUE;
             ptr         += 1;
             commandLen  -= 1;
@@ -592,14 +594,16 @@ void openserial_get6pInfo(uint8_t commandId, uint8_t* code,uint8_t* cellOptions,
         }
         return;
     }
-    
+
     // delete command
     if (commandId == COMMAND_SET_6P_DELETE){
         *code = IANA_6TOP_CMD_DELETE;
+        // retrieve cell list
         i = 0;
-        while(commandLen>0){
+        celllistLen = commandLen/2;
+        while(commandLen>celllistLen){
             celllist_delete[i].slotoffset     = openserial_vars.inputBuf[ptr];
-            celllist_delete[i].channeloffset  = DEFAULT_CHANNEL_OFFSET;
+            celllist_delete[i].channeloffset  = openserial_vars.inputBuf[ptr+celllistLen];
             celllist_delete[i].isUsed         = TRUE;
             ptr         += 1;
             commandLen  -= 1;
@@ -615,17 +619,20 @@ void openserial_get6pInfo(uint8_t commandId, uint8_t* code,uint8_t* cellOptions,
         i = 0;
         while(i<*numCells){
             celllist_delete[i].slotoffset     = openserial_vars.inputBuf[ptr];
-            celllist_delete[i].channeloffset  = DEFAULT_CHANNEL_OFFSET;
+            celllist_delete[i].channeloffset  = openserial_vars.inputBuf[ptr+*numCells];
             celllist_delete[i].isUsed         = TRUE;
             ptr         += 1;
-            commandLen  -= 1;
             i++;
         }
+        
+        commandLen      -= (*numCells) * 2;
+        ptr             += *numCells;
         // retrieve cell list to be relocated
         i = 0;
-        while(commandLen>0){
+        celllistLen = commandLen/2;
+        while(commandLen>celllistLen){
             celllist_add[i].slotoffset     = openserial_vars.inputBuf[ptr];
-            celllist_add[i].channeloffset  = DEFAULT_CHANNEL_OFFSET;
+            celllist_add[i].channeloffset  = openserial_vars.inputBuf[ptr+celllistLen];
             celllist_add[i].isUsed         = TRUE;
             ptr         += 1;
             commandLen  -= 1;
@@ -650,7 +657,7 @@ void openserial_handleCommands(void){
    
     open_addr_t neighbor;
     bool        foundNeighbor;
-   
+    
     ptr = 0;
     memset(celllist_add,0,CELLLIST_MAX_LEN*sizeof(cellInfo_ht));
     memset(celllist_delete,0,CELLLIST_MAX_LEN*sizeof(cellInfo_ht));
@@ -663,7 +670,7 @@ void openserial_handleCommands(void){
     ptr++;
     commandLen = openserial_vars.inputBuf[ptr];
     ptr++;
-   
+    
     switch(commandId) {
         case COMMAND_SET_EBPERIOD:
             comandParam_8 = openserial_vars.inputBuf[ptr];

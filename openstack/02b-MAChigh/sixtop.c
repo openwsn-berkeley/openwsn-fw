@@ -1706,7 +1706,7 @@ bool sixtop_areAvailableCellsToBeRemoved(
    
     i                   = 0;
     numOfavailableCells = 0;
-    available           = FALSE;
+    available           = TRUE;
     
     // translate cellOptions to cell type 
     if (cellOptions == LINKOPTIONS_TX){
@@ -1727,6 +1727,7 @@ bool sixtop_areAvailableCellsToBeRemoved(
     } else {
         do {
             if (cellList[i].isUsed){
+                memset(&info,0,sizeof(slotinfo_element_t));
                 if (type==CELLTYPE_TXRX){
                     schedule_getSlotInfo(cellList[i].slotoffset,&anycastAddr,&info);
                 } else {
@@ -1742,16 +1743,14 @@ bool sixtop_areAvailableCellsToBeRemoved(
             i++;
         }while(i<CELLLIST_MAX_LEN && numOfavailableCells<numOfCells);
       
-        if(numOfavailableCells>0){
+        if(numOfavailableCells==numOfCells && available == TRUE){
             //the rest link will not be scheduled, mark them as off type
             while(i<CELLLIST_MAX_LEN){
                 cellList[i].isUsed = FALSE;
                 i++;
             }
-            // local schedule can statisfy the bandwidth of cell request. 
-            available = TRUE;
         } else {
-            // local schedule can't statisfy the bandwidth of cell request
+            // local schedule can't satisfy the bandwidth of cell request
             available = FALSE;
         }
     }
