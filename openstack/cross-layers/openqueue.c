@@ -251,7 +251,7 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
 }
 
 // sfcontrol
-OpenQueueEntry_t*  openqueue_macGetPacketCreatedBy(uint8_t creator,open_addr_t* toNeighbor){
+OpenQueueEntry_t*  openqueue_macGetSixtopResPacket(uint8_t creator,open_addr_t* toNeighbor){
     uint8_t i;
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
@@ -262,10 +262,8 @@ OpenQueueEntry_t*  openqueue_macGetPacketCreatedBy(uint8_t creator,open_addr_t* 
             openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
             openqueue_vars.queue[i].creator==creator &&
             (
-                (
-                    toNeighbor->type==ADDR_64B &&
-                    packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)
-                ) || toNeighbor->type==ADDR_ANYCAST
+                (toNeighbor->type==ADDR_64B || toNeighbor->type==ADDR_ANYCAST) &&  
+                packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)
             )
         ){
             ENABLE_INTERRUPTS();
