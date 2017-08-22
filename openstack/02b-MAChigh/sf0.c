@@ -16,10 +16,10 @@
 
 #define SF0_ID                            0
 #define SF0THRESHOLD                      2
-#define SF0_QUERY_RANGE                  10 // slots
+#define SF0_QUERY_RANGE                   1 // slots
 
-#define SF0_QUERY_PERIOD              15000 // miliseconds
-#define SF0_TRAFFICCONTROL_TIMEOUT    10000 // miliseconds
+#define SF0_QUERY_PERIOD              8000 // miliseconds
+#define SF0_TRAFFICCONTROL_TIMEOUT    6000 // miliseconds
 
 #define SF0_QUERY_ACTION_KA
 //#define SF0_QUERY_ACTION_6PQUERY
@@ -145,11 +145,11 @@ void sf0_handleRCError(uint8_t code){
 void sf0_6pQuery_notifyReceived(uint16_t queryOffset, open_addr_t* neighbor){
     if (queryOffset<SLOTFRAME_LENGTH-SF0_QUERY_RANGE){
         if (
-            sf0_vars.sf_control_slotoffset < (queryOffset+SF0_QUERY_RANGE)%SLOTFRAME_LENGTH && \
-            sf0_vars.sf_control_slotoffset > (queryOffset)%SLOTFRAME_LENGTH
+            sf0_vars.sf_control_slotoffset <= (queryOffset+SF0_QUERY_RANGE)%SLOTFRAME_LENGTH && \
+            sf0_vars.sf_control_slotoffset >  (queryOffset)%SLOTFRAME_LENGTH
         ){
 #ifdef SF0_QUERY_ACTION_6PQUERY
-//            sf0_bandwidthEstimate_task();
+            sf0_bandwidthEstimate_task();
 #endif
 #ifdef SF0_QUERY_ACTION_KA
             sf0_probeParentBySendingKA();
@@ -161,7 +161,7 @@ void sf0_6pQuery_notifyReceived(uint16_t queryOffset, open_addr_t* neighbor){
             sf0_vars.sf_control_slotoffset > (queryOffset)%SLOTFRAME_LENGTH
         ){
 #ifdef SF0_QUERY_ACTION_6PQUERY
-//            sf0_bandwidthEstimate_task();
+            sf0_bandwidthEstimate_task();
 #endif
 #ifdef SF0_QUERY_ACTION_KA
             sf0_probeParentBySendingKA();
@@ -228,9 +228,7 @@ void sf0_6pQuery_timer_cb(opentimers_id_t id){
     temp_neighbor.type        = ADDR_16B;
     temp_neighbor.addr_16b[0] = 0xff;
     temp_neighbor.addr_16b[1] = 0xff;
-    
-    
-    
+
     outcome = sixtop_request(
         IANA_6TOP_CMD_QUERY,                                            // code
         &temp_neighbor,                                                 // neighbor

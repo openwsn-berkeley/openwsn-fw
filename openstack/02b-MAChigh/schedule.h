@@ -18,7 +18,12 @@
 The superframe reappears over time and can be arbitrarily long.
 */
 // sfcontrol
-#define SLOTFRAME_LENGTH    101 //should be 101
+#define SLOTFRAME_LENGTH    37 //should be 101
+
+// sharedslot2 = 8 means there are 8 slots where each of the slot shared by 2 nodes.
+//sharedslot0 = 0 sharedslot1 = 4 sharedslot2 = 8 sharedslot3 = 10 sharedslot4 = 7 sharedslot5 = 4 sharedslot>5 = 0
+//slotframe 37 slotframe duration 0.555
+
 // sfcontrol
 
 //draft-ietf-6tisch-minimal-06
