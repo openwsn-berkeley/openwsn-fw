@@ -274,22 +274,6 @@ bool neighbors_isNeighborWithHigherDAGrank(uint8_t index) {
    return returnVal;
 }
 
-bool neighbors_reachedMaxTransmission(uint8_t index){
-    bool    returnVal;
-    
-    if (
-        neighbors_vars.neighbors[index].used     == TRUE            &&
-        neighbors_vars.neighbors[index].numTx    >  DEFAULTLINKCOST &&
-        neighbors_vars.neighbors[index].numTxACK == 0
-    ) { 
-        returnVal = TRUE;
-    } else {
-        returnVal = FALSE;
-    }
-    
-    return returnVal;
-}
-
 //===== updating neighbor information
 
 /**
@@ -505,8 +489,8 @@ void neighbors_setNeighborNoResource(open_addr_t* address){
    }
 }
 
-void neighbors_setPreferredParent(uint8_t index, bool isPreferred){
-    neighbors_vars.neighbors[index].parentPreference = isPreferred;
+void neighbors_setPreferredParent(uint8_t index, uint8_t preference){
+    neighbors_vars.neighbors[index].parentPreference = preference;
 }
 
 //===== managing routing info
@@ -524,11 +508,7 @@ uint16_t neighbors_getLinkMetric(uint8_t index) {
     // we assume that this neighbor has already been checked for being in use         
     // calculate link cost to this neighbor
     if (neighbors_vars.neighbors[index].numTxACK==0) {
-        if (neighbors_vars.neighbors[index].numTx<DEFAULTLINKCOST){
-            rankIncrease = (3*DEFAULTLINKCOST-2)*MINHOPRANKINCREASE;
-        } else {
-            rankIncrease = (3*LARGESTLINKCOST-2)*MINHOPRANKINCREASE;
-        }
+        rankIncrease = (3*DEFAULTLINKCOST-2)*MINHOPRANKINCREASE;
     } else {
         //6TiSCH minimal draft using OF0 for rank computation: ((3*numTx/numTxAck)-2)*minHopRankIncrease
         // numTx is on 8 bits, so scaling up 10 bits won't lead to saturation
@@ -548,13 +528,12 @@ uint16_t neighbors_getLinkMetric(uint8_t index) {
 
 //===== maintenance
 
-void  neighbors_housekeeping() {
-    uint8_t    i, j, k;
-    bool       haveParent;
-    uint8_t    neighborIndexWithLowestRank[NUM_MAINTAINED_NEIGHBOR];
+void  neighbors_sortRankAndHousekeeping(uint8_t* neighborIndexWithLowestRank, uint8_t* highestRankParentIndex) {
+    uint8_t    i, k;
     uint8_t    neighbor_counter;
     bool       neighbor_recorded;
     dagrank_t  lowestRank;
+    uint16_t   rankIncrease;
     
     // neighbors marked as NO_RES will never removed.
     
@@ -562,8 +541,9 @@ void  neighbors_housekeeping() {
         lowestRank = MAXDAGRANK;
         for (i=0;i<MAXNUMNEIGHBORS;i++) {
             if (neighbors_vars.neighbors[i].used==1) {
+                rankIncrease     = neighbors_getLinkMetric(i);
                 if (
-                    lowestRank>neighbors_vars.neighbors[i].DAGrank && 
+                    lowestRank>neighbors_vars.neighbors[i].DAGrank+rankIncrease && 
                     neighbors_vars.neighbors[i].f6PNORES == FALSE
                 ){
                     neighbor_recorded = FALSE;
@@ -574,7 +554,7 @@ void  neighbors_housekeeping() {
                         }
                     }
                     if (neighbor_recorded == FALSE){
-                        lowestRank = neighbors_vars.neighbors[i].DAGrank;
+                        lowestRank = neighbors_vars.neighbors[i].DAGrank + rankIncrease;
                         neighborIndexWithLowestRank[neighbor_counter] = i;
                     }
                 }
@@ -582,10 +562,12 @@ void  neighbors_housekeeping() {
         }
         
         if (lowestRank==MAXDAGRANK){
-            // none of the neighbors have rank yet
-            return;
+            // none of rest neighbors have rank yet
+            break;
         }
     }
+    
+    *highestRankParentIndex = neighbor_counter-1;
     
     // remove all neighbors except the ones that f6PNORES flag is set or 
     // is recorded as lowest NUM_MAINTAINED_NEIGHBOR rank neighbors
@@ -599,13 +581,10 @@ void  neighbors_housekeeping() {
                 }
             }
             if (neighbor_recorded == FALSE) {
-                haveParent = icmpv6rpl_getPreferredParentIndex(&j);
-                if (haveParent && (i==j)) { // this is our preferred parent, carefully!
-                    icmpv6rpl_killPreferredParent();
-                    icmpv6rpl_updateMyDAGrankAndParentSelection();
-                }
                 if (neighbors_vars.neighbors[i].f6PNORES == FALSE){
                     removeNeighbor(i);
+                } else {
+                    neighbors_vars.neighbors[i].parentPreference = FALSE;
                 }
             }
         }

@@ -663,13 +663,13 @@ has fired. This timer is set to fire every second, on average.
 The body of this function executes one of the MAC management task.
 */
 void timer_sixtop_management_fired(void) {
-   
+  
     sixtop_vars.mgtTaskCounter = (sixtop_vars.mgtTaskCounter+1)%MAINTENANCE_PERIOD;
    
     switch (sixtop_vars.mgtTaskCounter) {
     case 0:
         // called every MAINTENANCE_PERIOD seconds
-        neighbors_housekeeping();
+        icmpv6rpl_updateMyDAGrankAndParentSelection();
         break;
     default:
         // called every second, except once every MAINTENANCE_PERIOD seconds

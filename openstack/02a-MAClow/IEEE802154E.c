@@ -842,9 +842,6 @@ port_INLINE void activity_ti1ORri1() {
             openserial_printError(COMPONENT_IEEE802154E,ERR_DESYNCHRONIZED,
                                   (errorparameter_t)ieee154e_vars.slotOffset,
                                   (errorparameter_t)0);
-            // sfcontrol
-            icmpv6rpl_killPreferredParent();
-            // sfcontrol
             
             // update the statistics
             ieee154e_stats.numDeSync++;
@@ -2377,7 +2374,6 @@ bool isValidEbFormat(OpenQueueEntry_t* pkt, uint16_t* lenIE){
     uint8_t subid;
     
     uint8_t  i;
-    uint8_t  oldFrameLength;
     uint8_t  numlinks;
     open_addr_t temp_neighbor;
     uint16_t slotoffset;

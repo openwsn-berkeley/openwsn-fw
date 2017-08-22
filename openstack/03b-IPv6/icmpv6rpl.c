@@ -46,7 +46,6 @@ void icmpv6rpl_init() {
    memset(&icmpv6rpl_vars,0,sizeof(icmpv6rpl_vars_t));
    
    //=== routing
-   icmpv6rpl_vars.haveParent=FALSE;
    icmpv6rpl_vars.daoSent=FALSE;
    if (idmanager_getIsDAGroot()==TRUE) {
       icmpv6rpl_vars.myDAGrank=MINHOPRANKINCREASE;
@@ -295,11 +294,34 @@ void icmpv6rpl_receive(OpenQueueEntry_t* msg) {
 /**
 \brief Retrieve this mote's parent index in neighbor table.
 
-\returns TRUE and index of parent if have one, FALSE if no parent
+\returns TRUE and index of my preferred parent if have one, FALSE if no parent
 */
 bool icmpv6rpl_getPreferredParentIndex(uint8_t* indexptr) {
-   *indexptr = icmpv6rpl_vars.ParentIndex;
-   return icmpv6rpl_vars.haveParent;
+    uint8_t i;
+    uint16_t lowestRankIncrease;
+    uint16_t lowestRankIncreaseParent;
+    uint16_t rankIncrease;
+    
+    lowestRankIncrease = MAXDAGRANK;
+    for (i=0;i<icmpv6rpl_vars.numParent;i++){
+        rankIncrease = neighbors_getLinkMetric(icmpv6rpl_vars.parentIndex[i]);
+        if (rankIncrease < lowestRankIncrease){
+            lowestRankIncrease       = rankIncrease;
+            lowestRankIncreaseParent = icmpv6rpl_vars.parentIndex[i];
+        }
+    }
+    
+    // choose lowest rank increase as preferred parent
+    if (lowestRankIncrease==(3*DEFAULTLINKCOST-2)*MINHOPRANKINCREASE){
+        // no statistic yet on each parent, randomly choose one (lowest rank parent has highest possibility to be chosen)
+        if (openrandom_get16b()>0xffff/2){
+            lowestRankIncreaseParent = icmpv6rpl_vars.parentIndex[0];
+        } else {
+            lowestRankIncreaseParent = icmpv6rpl_vars.parentIndex[openrandom_get16b()%(icmpv6rpl_vars.numParent)];
+        }
+    }
+    *indexptr = lowestRankIncreaseParent;
+    return (icmpv6rpl_vars.numParent>0);
 }
 
 /**
@@ -307,14 +329,33 @@ bool icmpv6rpl_getPreferredParentIndex(uint8_t* indexptr) {
 \param[out] addressToWrite Where to copy the preferred parent's address to.
 */
 bool icmpv6rpl_getPreferredParentEui64(open_addr_t* addressToWrite) {
-    if (
-        icmpv6rpl_vars.haveParent && 
-        neighbors_getNeighborNoResource(icmpv6rpl_vars.ParentIndex)==FALSE
-    ){
-        return neighbors_getNeighborEui64(addressToWrite,ADDR_64B,icmpv6rpl_vars.ParentIndex);
-    } else {
+    uint8_t i;
+    uint16_t lowestRankIncrease;
+    uint16_t lowestRankIncreaseParent;
+    uint16_t rankIncrease;
+    if (icmpv6rpl_vars.numParent==0){
+        addressToWrite = NULL;
         return FALSE;
     }
+    lowestRankIncrease = MAXDAGRANK;
+    for (i=0;i<icmpv6rpl_vars.numParent;i++){
+        rankIncrease = neighbors_getLinkMetric(icmpv6rpl_vars.parentIndex[i]);
+        if (rankIncrease < lowestRankIncrease){
+            lowestRankIncrease       = rankIncrease;
+            lowestRankIncreaseParent = icmpv6rpl_vars.parentIndex[i];
+        }
+    }
+    
+    // choose lowest rank increase as preferred parent
+    if (lowestRankIncrease==(3*DEFAULTLINKCOST-2)*MINHOPRANKINCREASE){
+        // no statistic yet on each parent, randomly choose one (lowest rank parent has highest possibility to be chosen)
+        if (openrandom_get16b()>0xffff/2){
+            lowestRankIncreaseParent = icmpv6rpl_vars.parentIndex[0];
+        } else {
+            lowestRankIncreaseParent = icmpv6rpl_vars.parentIndex[openrandom_get16b()%(icmpv6rpl_vars.numParent)];
+        }
+    }
+    return neighbors_getNeighborEui64(addressToWrite,ADDR_64B,lowestRankIncreaseParent);
 }
 
 /**
@@ -325,23 +366,29 @@ bool icmpv6rpl_getPreferredParentEui64(open_addr_t* addressToWrite) {
 \returns TRUE if that neighbor is preferred parent, FALSE otherwise.
 */
 bool icmpv6rpl_isPreferredParent(open_addr_t* address) {
-   open_addr_t  temp;
-   // do we currently have a parent?
-   if (icmpv6rpl_vars.haveParent==FALSE) {
-      return FALSE;
-   }
+    open_addr_t  temp;
+    uint8_t      i;
    
-   //compare parent address to the one presented.
-   switch (address->type) {
-      case ADDR_64B:
-         neighbors_getNeighborEui64(&temp,ADDR_64B,icmpv6rpl_vars.ParentIndex);
-         return packetfunctions_sameAddress(address,&temp);
-      default:
-         openserial_printCritical(COMPONENT_NEIGHBORS,ERR_WRONG_ADDR_TYPE,
+    // do we currently have a parent?
+    if (icmpv6rpl_vars.numParent==0) {
+        return FALSE;
+    }
+    
+    if (address->type!=ADDR_64B){
+        openserial_printCritical(COMPONENT_NEIGHBORS,ERR_WRONG_ADDR_TYPE,
                                (errorparameter_t)address->type,
                                (errorparameter_t)3);
-         return FALSE;
-   }
+        return FALSE;
+    }
+    
+    for (i=0;i<icmpv6rpl_vars.numParent;i++){
+        neighbors_getNeighborEui64(&temp,ADDR_64B,icmpv6rpl_vars.parentIndex[i]);
+        if (packetfunctions_sameAddress(address,&temp)==TRUE){
+            return TRUE;
+        }
+    }
+    
+    return FALSE;
 }
 
 /**
@@ -368,18 +415,13 @@ void icmpv6rpl_setMyDAGrank(dagrank_t rank){
 */
 void icmpv6rpl_updateMyDAGrankAndParentSelection() {
     uint8_t   i;
-    uint16_t  previousDAGrank;
-    uint16_t  prevRankIncrease;
-    uint8_t   prevParentIndex;
-    bool      prevHadParent;
-    bool      foundBetterParent;
     // temporaries
     uint16_t  rankIncrease;
     dagrank_t neighborRank;
     uint32_t  tentativeDAGrank;
-    // sfcontrol
-    open_addr_t temp_neighbor;
-    uint16_t  temp_slotoffset;
+    
+    uint8_t   neighborIndexWithLowestRank[NUM_MAINTAINED_NEIGHBOR];
+    uint8_t   highestRankParentIndex;
     // sfcontrol
     // if I'm a DAGroot, my DAGrank is always MINHOPRANKINCREASE
     if ((idmanager_getIsDAGroot())==TRUE) {
@@ -389,18 +431,24 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
             return;
         }
     }
-    // prep for loop, remember state before neighbor table scanning
-    prevParentIndex      = icmpv6rpl_vars.ParentIndex;
-    prevHadParent        = icmpv6rpl_vars.haveParent;
-    prevRankIncrease     = icmpv6rpl_vars.rankIncrease;
-    // update my rank to current parent first
-    if (icmpv6rpl_vars.haveParent==TRUE){
-        if (neighbors_reachedMaxTransmission(icmpv6rpl_vars.ParentIndex)==FALSE){
-            // I havn't enough transmission to my parent, don't update.
-            return;
-        }
-        rankIncrease     = neighbors_getLinkMetric(icmpv6rpl_vars.ParentIndex);
-        neighborRank     = neighbors_getNeighborRank(icmpv6rpl_vars.ParentIndex);
+    
+    // rank neighbor according to rank
+    neighbors_sortRankAndHousekeeping(neighborIndexWithLowestRank,&highestRankParentIndex);
+    
+    if (highestRankParentIndex==0xff){
+        // no parent yet
+        return;
+    }
+    
+    if (highestRankParentIndex<PARENTS_NUM){
+        icmpv6rpl_vars.numParent = highestRankParentIndex+1;
+    } else {
+        icmpv6rpl_vars.numParent = PARENTS_NUM;
+    }
+    
+    if (icmpv6rpl_vars.numParent > 0){
+        rankIncrease     = neighbors_getLinkMetric(neighborIndexWithLowestRank[icmpv6rpl_vars.numParent-1]);
+        neighborRank     = neighbors_getNeighborRank(neighborIndexWithLowestRank[icmpv6rpl_vars.numParent-1]);
         tentativeDAGrank = (uint32_t)neighborRank+rankIncrease;
         if (tentativeDAGrank>65535) {
             icmpv6rpl_vars.myDAGrank = 65535;
@@ -408,113 +456,20 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
             icmpv6rpl_vars.myDAGrank = (uint16_t)tentativeDAGrank;
         }
     }
-    previousDAGrank      = icmpv6rpl_vars.myDAGrank;
-    foundBetterParent    = FALSE;
-    icmpv6rpl_vars.haveParent = FALSE;
     
-    // loop through neighbor table, update myDAGrank
+    // reset preferred parent
     for (i=0;i<MAXNUMNEIGHBORS;i++) {
-        if (neighbors_isStableNeighborByIndex(i)) { // in use and link is stable
-            // neighbor marked as NORES can't be parent
-            if (neighbors_getNeighborNoResource(i)==TRUE) {
-                continue;
-            }
-            // get link cost to this neighbor
-            rankIncrease=neighbors_getLinkMetric(i);
-            // get this neighbor's advertized rank
-            neighborRank=neighbors_getNeighborRank(i);
-            // if this neighbor has unknown/infinite rank, pass on it
-            if (neighborRank==DEFAULTDAGRANK) continue;
-            // compute tentative cost of full path to root through this neighbor
-            tentativeDAGrank = (uint32_t)neighborRank+rankIncrease;
-            if (tentativeDAGrank > 65535) {tentativeDAGrank = 65535;}
-            // if not low enough to justify switch, pass (i.e. hysterisis)
-            if (
-                (previousDAGrank<tentativeDAGrank) ||
-                (previousDAGrank-tentativeDAGrank < 2*MINHOPRANKINCREASE)
-            ) {
-                  continue;
-            }
-            // remember that we have at least one valid candidate parent
-            foundBetterParent=TRUE;
-            // select best candidate so far
-            if (icmpv6rpl_vars.myDAGrank>tentativeDAGrank) {
-                icmpv6rpl_vars.myDAGrank    = (uint16_t)tentativeDAGrank;
-                icmpv6rpl_vars.ParentIndex  = i;
-                icmpv6rpl_vars.rankIncrease = rankIncrease;
-            }
-        }
+        neighbors_setPreferredParent(i,0);
     }
-   
-   if (foundBetterParent) {
-      icmpv6rpl_vars.haveParent=TRUE;
-      if (!prevHadParent) {
-         // sfcontrol
-         // in case preParent is killed before calling this function, clear the preferredParent flag
-//         neighbors_setPreferredParent(prevParentIndex, FALSE); // called when killing preparent
-         // sfcontrol
-         
-        // set neighbors as preferred parent
-         neighbors_setPreferredParent(icmpv6rpl_vars.ParentIndex, TRUE);
-         
-         // sfcontrol
-         if (neighbors_getNeighborEui64(&temp_neighbor,ADDR_64B,icmpv6rpl_vars.ParentIndex)){
-            temp_slotoffset = sf0_hashFunction(256*temp_neighbor.addr_64b[6]+temp_neighbor.addr_64b[7]);
-            if (schedule_isSlotOffsetAvailable(temp_slotoffset)){
-                schedule_addActiveSlot(
-                    temp_slotoffset,                    // slot offset
-                    CELLTYPE_TXRX,                      // type of slot
-                    TRUE,                               // shared?
-                    SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET,    // channel offset
-                    &temp_neighbor                      // neighbor
-                );
-            } else {
-                // already added when sync
-            }
-         }
-         // remove all none parent control slot
-         schedule_removeNonParentCells(schedule_getFrameHandle(),&temp_neighbor);
-         // sfcontrol
-      } else {
-         if (icmpv6rpl_vars.ParentIndex==prevParentIndex) {
-             // report on the rank change if any, not on the deletion/creation of parent
-             if (icmpv6rpl_vars.myDAGrank!=previousDAGrank) {
-             } else {
-                 // same parent, same rank, nothing to report about 
-             }
-         } else {
-             // clear neighbors preferredParent flag
-             neighbors_setPreferredParent(prevParentIndex, FALSE);
-             // set neighbors as preferred parent
-             neighbors_setPreferredParent(icmpv6rpl_vars.ParentIndex, TRUE);
-             
-             // sfcontrol
-             if (neighbors_getNeighborEui64(&temp_neighbor,ADDR_64B,icmpv6rpl_vars.ParentIndex)){
-                temp_slotoffset = sf0_hashFunction(256*temp_neighbor.addr_64b[6]+temp_neighbor.addr_64b[7]);
-                if (schedule_isSlotOffsetAvailable(temp_slotoffset)){
-                    schedule_addActiveSlot(
-                        temp_slotoffset,                    // slot offset
-                        CELLTYPE_TXRX,                      // type of slot
-                        TRUE,                               // shared?
-                        SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET,    // channel offset
-                        &temp_neighbor                      // neighbor
-                    );
-                }
-             }
-             // remove all none parent control slot
-             schedule_removeNonParentCells(schedule_getFrameHandle(),&temp_neighbor);
-             // sfcontrol
-             
-         }
-      }
-   } else {
-      // restore routing table as we found it on entry
-      icmpv6rpl_vars.myDAGrank   = previousDAGrank;
-      icmpv6rpl_vars.ParentIndex = prevParentIndex;
-      icmpv6rpl_vars.haveParent  = prevHadParent;
-      icmpv6rpl_vars.rankIncrease= prevRankIncrease;
-      // no change to report on
-   }
+    
+    // neighbor with lowest rank has preference 2
+    neighbors_setPreferredParent(neighborIndexWithLowestRank[0],MAXPREFERENCE);
+    for (i=1;i<icmpv6rpl_vars.numParent;i++) {
+        // other parents have preference 1
+        neighbors_setPreferredParent(neighborIndexWithLowestRank[i],MAXPREFERENCE-1);
+    }
+    
+    memcpy(&icmpv6rpl_vars.parentIndex[0],&neighborIndexWithLowestRank[0],icmpv6rpl_vars.numParent);
 }
 
 /**
@@ -601,13 +556,21 @@ void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t* msg) {
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
       if (neighbors_getNeighborEui64(&NeighborAddress, ADDR_64B, i)) { // this neighbor entry is in use
          if (packetfunctions_sameAddress(&(msg->l2_nextORpreviousHop),&NeighborAddress)) { // matching address
+            if (
+                icmpv6rpl_vars.numParent==PARENTS_NUM && 
+                icmpv6rpl_vars.incomingDio->rank > icmpv6rpl_vars.parentIndex[icmpv6rpl_vars.numParent-1]
+            ){
+                // donot process neighbor DIO if its rank is larger than my highest parent rank to avoid loop/greediness
+                // https://tools.ietf.org/html/rfc6550#section-3.7.1
+                break;
+            }
             neighborRank=neighbors_getNeighborRank(i);
             if (
               (icmpv6rpl_vars.incomingDio->rank > neighborRank) &&
-              (icmpv6rpl_vars.incomingDio->rank - neighborRank) > (DEFAULTLINKCOST*2*MINHOPRANKINCREASE)
+              (icmpv6rpl_vars.incomingDio->rank - neighborRank) > ((3*DEFAULTLINKCOST-2)*MINHOPRANKINCREASE)
             ) {
                // the new DAGrank looks suspiciously high, only increment a bit
-               neighbors_setNeighborRank(i,neighborRank + (DEFAULTLINKCOST*2*MINHOPRANKINCREASE));
+               neighbors_setNeighborRank(i,neighborRank + (3*DEFAULTLINKCOST-2)*MINHOPRANKINCREASE);
                openserial_printError(COMPONENT_NEIGHBORS,ERR_LARGE_DAGRANK,
                                (errorparameter_t)icmpv6rpl_vars.incomingDio->rank,
                                (errorparameter_t)neighborRank);
@@ -623,25 +586,9 @@ void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t* msg) {
 }
 
 void icmpv6rpl_killPreferredParent() {
-    // sfcontrol
-    open_addr_t temp_neighbor;
-    uint16_t  temp_slotoffset;
-    // sfcontrol
     
-    icmpv6rpl_vars.haveParent=FALSE;
-    
-    // sfcontrol
-    neighbors_setPreferredParent(icmpv6rpl_vars.ParentIndex, FALSE);
-    if (neighbors_getNeighborEui64(&temp_neighbor,ADDR_64B,icmpv6rpl_vars.ParentIndex)){
-        temp_slotoffset = sf0_hashFunction(256*temp_neighbor.addr_64b[6]+temp_neighbor.addr_64b[7]);
-        if (schedule_isSlotOffsetAvailable(temp_slotoffset)==FALSE){
-            schedule_removeActiveSlot(
-                temp_slotoffset,
-                &temp_neighbor
-            );
-        }
-    }
-    // sfcontrol
+    icmpv6rpl_vars.numParent=FALSE;
+
     if (idmanager_getIsDAGroot()==TRUE) {
        icmpv6rpl_vars.myDAGrank=MINHOPRANKINCREASE;
     } else {
@@ -988,7 +935,7 @@ void sendDAO() {
          
          // remember I found it
          numTargetParents++;
-      }  
+      }
       //limit to MAX_TARGET_PARENTS the number of DAO target addresses to send
       //section 8.2.1 pag 67 RFC6550 -- using a subset
       // poipoi TODO base selection on ETX rather than first X.

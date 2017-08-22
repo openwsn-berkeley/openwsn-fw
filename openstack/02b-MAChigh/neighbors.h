@@ -16,8 +16,7 @@
 #define BADNEIGHBORMAXRSSI        -80 //dBm
 #define GOODNEIGHBORMINRSSI       -90 //dBm
 #define SWITCHSTABILITYTHRESHOLD  3
-#define DEFAULTLINKCOST           4
-#define LARGESTLINKCOST           16
+#define DEFAULTLINKCOST           16
 
 #define MAXDAGRANK                0xffff
 #define DEFAULTDAGRANK            MAXDAGRANK
@@ -68,14 +67,13 @@ uint8_t       neighbors_getSequenceNumber(open_addr_t* address);
 // setters
 void          neighbors_setNeighborRank(uint8_t index, dagrank_t rank);
 void          neighbors_setNeighborNoResource(open_addr_t* address);
-void          neighbors_setPreferredParent(uint8_t index, bool isPreferred);
+void          neighbors_setPreferredParent(uint8_t index, uint8_t preference);
 // interrogators
 bool          neighbors_isStableNeighbor(open_addr_t* address);
 bool          neighbors_isStableNeighborByIndex(uint8_t index);
 bool          neighbors_isInsecureNeighbor(open_addr_t* address);
 bool          neighbors_isNeighborWithLowerDAGrank(uint8_t index);
 bool          neighbors_isNeighborWithHigherDAGrank(uint8_t index);
-bool          neighbors_reachedMaxTransmission(uint8_t index);
 
 // updating neighbor information
 void          neighbors_indicateRx(
@@ -99,7 +97,7 @@ void          neighbors_resetGeneration(open_addr_t* address);
 // get addresses
 bool          neighbors_getNeighborEui64(open_addr_t* address,uint8_t addr_type,uint8_t index);
 // maintenance
-void          neighbors_housekeeping(void);
+void          neighbors_sortRankAndHousekeeping(uint8_t* neighborIndexWithLowestRank, uint8_t* highestRankParentIndex);
 // debug
 bool          debugPrint_neighbors(void);
 

@@ -61,6 +61,8 @@
 //section 8.2.1 pag 67 RFC6550 -- using a subset
 #define MAX_TARGET_PARENTS        0x01
 
+#define PARENTS_NUM               3
+
 enum{
   OPTION_ROUTE_INFORMATION_TYPE   = 0x03,
   OPTION_DODAG_CONFIGURATION_TYPE = 0x04,
@@ -197,8 +199,8 @@ typedef struct {
    // routing table
    dagrank_t                 myDAGrank;               ///< rank of this router within DAG.
    uint16_t                  rankIncrease;            ///< the cost of the link to the parent, in units of rank
-   bool                      haveParent;              ///< this router has a route to DAG root
-   uint8_t                   ParentIndex;             ///< index of Parent in neighbor table (iff haveParent==TRUE)
+   uint8_t                   numParent;               ///< this number of route the router has to DAG root
+   uint8_t                   parentIndex[PARENTS_NUM];///< index of Parent in neighbor table (if isParent==TRUE)
    // actually only here for debug
    icmpv6rpl_dio_ht*         incomingDio;             //keep it global to be able to debug correctly.
    icmpv6rpl_pio_t*          incomingPio;             //pio structure incoming
