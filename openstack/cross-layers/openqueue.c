@@ -251,7 +251,7 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
 }
 
 // sfcontrol
-OpenQueueEntry_t*  openqueue_macGetSixtopResPacket(uint8_t creator,open_addr_t* toNeighbor){
+OpenQueueEntry_t*  openqueue_macGetPacketCreatedBy(uint8_t creator,open_addr_t* toNeighbor){
     uint8_t i;
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
