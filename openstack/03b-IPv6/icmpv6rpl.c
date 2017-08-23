@@ -422,6 +422,10 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
     
     uint8_t   neighborIndexWithLowestRank[NUM_MAINTAINED_NEIGHBOR];
     uint8_t   highestRankParentIndex;
+    
+    uint16_t  parentAddress_16b;
+    open_addr_t parentAddress;
+    
     // sfcontrol
     // if I'm a DAGroot, my DAGrank is always MINHOPRANKINCREASE
     if ((idmanager_getIsDAGroot())==TRUE) {
@@ -470,6 +474,24 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
     }
     
     memcpy(&icmpv6rpl_vars.parentIndex[0],&neighborIndexWithLowestRank[0],icmpv6rpl_vars.numParent);
+    
+    // update parent sf control cells, which are dedicate txrx cells
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+    schedule_removeDedicateTxRxCells();
+    for (i=0;i<icmpv6rpl_vars.numParent;i++){
+        if (neighbors_getNeighborEui64(&parentAddress,ADDR_64B,icmpv6rpl_vars.parentIndex[i])){
+            parentAddress_16b = 256*parentAddress.addr_64b[6]+parentAddress.addr_64b[7];
+            schedule_addActiveSlot(
+                sf0_hashFunction(parentAddress_16b),
+                CELLTYPE_TXRX,
+                TRUE,
+                0,
+                &parentAddress
+            );
+        }
+    }
+    ENABLE_INTERRUPTS();
 }
 
 /**
@@ -666,10 +688,7 @@ void sendDIO() {
    }
    
    // sfcontrol
-   if (idmanager_getIsDAGroot()==FALSE && schedule_getNumOfSlotsByType(CELLTYPE_TXRX)<3){
-      // usually there is slot 0, my slotcontrol and neighbor slotcontrol
-      // if there are less than 3 slot, there is hash conflict, don't send DIO
-      // this avoids the conllision with neighbor's slotcontrol
+   if (schedule_hasSFControlCell()==FALSE){
       return;
    }
    // sfcontrol

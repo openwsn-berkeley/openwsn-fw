@@ -722,10 +722,7 @@ port_INLINE void sixtop_sendEB() {
     }
     
     // sfcontrol
-    if (idmanager_getIsDAGroot()==FALSE && schedule_getNumOfSlotsByType(CELLTYPE_TXRX)<3){
-        // usually there is slot 0, my slotcontrol and neighbor slotcontrol
-        // if there are less than 3 slot, there is hash conflict, don't send DIO
-        // this avoids the conllision with neighbor's slotcontrol
+    if (schedule_hasSFControlCell()==FALSE){
         return;
     }
     // sfcontrol

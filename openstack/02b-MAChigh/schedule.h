@@ -199,10 +199,8 @@ void              schedule_removeAllCells(
 );
 
 // sfcontrol
-void              schedule_removeNonParentCells(
-   uint8_t        slotframeID,
-   open_addr_t*   parent
-);
+void              schedule_removeDedicateTxRxCells(void);
+bool              schedule_hasSFControlCell(void);
 // sfcontrol
 
 scheduleEntry_t*  schedule_getCurrentScheduleEntry(void);

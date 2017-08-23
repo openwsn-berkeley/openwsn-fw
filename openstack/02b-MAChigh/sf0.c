@@ -92,7 +92,7 @@ uint8_t sf0_getsfid(void){
 
 // sf control
 uint16_t  sf0_getControlslotoffset(void){
-    return sf0_vars.sf_control_slotoffset;
+    return sf0_hashFunction(256*idmanager_getMyID(ADDR_64B)->addr_64b[6]+idmanager_getMyID(ADDR_64B)->addr_64b[7]);
 }
 
 bool sf0_isTrafficControlled(void){

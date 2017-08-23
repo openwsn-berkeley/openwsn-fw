@@ -500,6 +500,7 @@ uint16_t  schedule_getCellsCounts(uint8_t frameID,cellType_t type, open_addr_t* 
     ENABLE_INTERRUPTS();
     return count;
 }
+
 void schedule_removeAllCells(
     uint8_t        slotframeID,
     open_addr_t*   previousHop
@@ -518,17 +519,13 @@ void schedule_removeAllCells(
 }
 
 // sfcontrol
-void              schedule_removeNonParentCells(
-    uint8_t        slotframeID,
-    open_addr_t*   parent
-){
+void schedule_removeDedicateTxRxCells(){
     uint8_t i;
     
-    // remove all entries in schedule with previousHop address
     for(i=0;i<MAXACTIVESLOTS;i++){
         if (
             schedule_vars.scheduleBuf[i].neighbor.type == ADDR_64B      && \
-            !packetfunctions_sameAddress(&(schedule_vars.scheduleBuf[i].neighbor),parent)
+            schedule_vars.scheduleBuf[i].type          == CELLTYPE_TXRX
         ){
            schedule_removeActiveSlot(
               schedule_vars.scheduleBuf[i].slotOffset,
@@ -536,6 +533,21 @@ void              schedule_removeNonParentCells(
            );
         }
     }
+}
+
+bool schedule_hasSFControlCell(void){
+    uint8_t i;
+    
+    for(i=0;i<MAXACTIVESLOTS;i++){
+        if (
+            schedule_vars.scheduleBuf[i].neighbor.type == ADDR_ANYCAST  && \
+            schedule_vars.scheduleBuf[i].type          == CELLTYPE_TXRX && \
+            schedule_vars.scheduleBuf[i].slotOffset    == sf0_getControlslotoffset()
+        ){
+           return TRUE;
+        }
+    }
+    return FALSE;
 }
 // sfcontrol
 
