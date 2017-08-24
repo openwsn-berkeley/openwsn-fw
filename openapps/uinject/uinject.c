@@ -130,6 +130,3 @@ void uinject_task_cb() {
       openqueue_freePacketBuffer(pkt);
    }
 }
-
-
-

@@ -324,6 +324,8 @@ static void prvSetupTimerInterrupt( void )
  * scheduler is being used or not.
  */
 
+#if configUSE_TICKLESS_IDLE == 0
+
 #if configUSE_PREEMPTION == 1
 
 	/*
@@ -362,5 +364,5 @@ static void prvSetupTimerInterrupt( void )
 	}
 #endif
 
-
+#endif
 	

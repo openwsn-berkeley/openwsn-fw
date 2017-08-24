@@ -246,6 +246,9 @@ elif env['toolchain']=='armgcc':
         # misc
         env.Replace(NM           = 'arm-none-eabi-nm')
         env.Replace(SIZE         = 'arm-none-eabi-size')
+
+        if env['kernel'] == 'freertos':
+		    env.Append(CCFLAGS       = '-DUSE_FREERTOS')
         
     elif env['board']=='silabs-ezr32wg':
         # compiler (C)

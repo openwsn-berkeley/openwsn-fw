@@ -7,26 +7,68 @@ localEnv = env.Clone()
 FREERTOS_VERSION = 'FreeRTOSV8.1.2'
 
 target    =  'libkernel'
-sources_c = [
-    'scheduler.c',
-    os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','tasks.c'),
-    os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','queue.c'),
-    os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','list.c'),
-]
 
-if localEnv['board']=='python':
+if localEnv['board'] not in ['openmote-cc2538']:
     
-    raise SystemError("FreeRTOS kernel not supported in simulation mode")
-
+    raise SystemError('kernel {0} can not be used for board {1}'.format(localEnv['kernel'],localEnv['board']))		
+	
 else:
     
-    localEnv.Append(
-        CPPPATH =  [
-            os.path.join('.'),
-            os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','include'),
-            os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','portable','GCC','MSP430F449'),
-        ],
-    )
+    if localEnv['toolchain']=='armgcc':
+       sources_c = [
+           'scheduler.c',
+            os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','tasks.c'),
+            os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','queue.c'),
+            os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','list.c'),
+            os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','portable','MemMang','heap_1.c'),
+            os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','portable','GCC','ARM_CM3','port.c'),
+       ]
+           
+       localEnv.Append(
+           CPPPATH =  [
+               os.path.join('.'),
+               os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','include'),
+               os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','portable','GCC','ARM_CM3'),
+           ],
+       )
+    
+    elif localEnv['toolchain']=='mspgcc':
+       sources_c = [
+           'scheduler.c',
+            os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','tasks.c'),
+            os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','queue.c'),
+            os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','list.c'),
+            os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','portable','MemMang','heap_1.c'),
+            os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','portable','GCC','MSP430F449','port.c'),
+       ]
+           
+       localEnv.Append(
+           CPPPATH =  [
+               os.path.join('.'),
+               os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','include'),
+               os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','portable','GCC','MSP430F449'),
+           ],
+       )
+
+    elif localEnv['toolchain']=='iar':
+       #TODO -- how to discriminate between arm and msp430?
+       sources_c = [
+           'scheduler.c',
+            os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','tasks.c'),
+            os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','queue.c'),
+            os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','list.c'),
+            os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','portable','MemMang','heap_1.c'),
+            os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','portable','IAR','MSP430','port.c'),
+       ]
+           
+       localEnv.Append(
+           CPPPATH =  [
+               os.path.join('.'),
+               os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','include'),
+               os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','portable','IAR','MSP430'),
+           ],
+       )
+    
     
     libkernel = localEnv.Library(
         target = target,

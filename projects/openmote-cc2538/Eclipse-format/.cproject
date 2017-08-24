@@ -191,36 +191,12 @@
 				<useDefaultCommand>true</useDefaultCommand>
 				<runAllBuilders>true</runAllBuilders>
 			</target>
-			<target name="bsp_radio_rx" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+			<target name="oos_openwsn (freertos)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>${SCONS}</buildCommand>
-				<buildArguments>board=OpenMote-CC2538 toolchain=armgcc</buildArguments>
-				<buildTarget>bsp_radio_rx</buildTarget>
+				<buildArguments>board=OpenMote-CC2538 toolchain=armgcc kernel=freertos</buildArguments>
+				<buildTarget>oos_openwsn</buildTarget>
 				<stopOnError>true</stopOnError>
-				<useDefaultCommand>true</useDefaultCommand>
-				<runAllBuilders>true</runAllBuilders>
-			</target>
-			<target name="bsp_radio_tx" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-				<buildCommand>${SCONS}</buildCommand>
-				<buildArguments>board=OpenMote-CC2538 toolchain=armgcc</buildArguments>
-				<buildTarget>bsp_radio_tx</buildTarget>
-				<stopOnError>true</stopOnError>
-				<useDefaultCommand>true</useDefaultCommand>
-				<runAllBuilders>true</runAllBuilders>
-			</target>
-			<target name="bsp_radio_rx (clean)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-				<buildCommand>${SCONS}</buildCommand>
-				<buildArguments>board=OpenMote-CC2538 toolchain=armgcc</buildArguments>
-				<buildTarget>-c bsp_radio_rx</buildTarget>
-				<stopOnError>true</stopOnError>
-				<useDefaultCommand>true</useDefaultCommand>
-				<runAllBuilders>true</runAllBuilders>
-			</target>
-			<target name="bsp_radio_tx (clean)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
-				<buildCommand>${SCONS}</buildCommand>
-				<buildArguments>board=OpenMote-CC2538 toolchain=armgcc</buildArguments>
-				<buildTarget>-c bsp_radio_tx</buildTarget>
-				<stopOnError>true</stopOnError>
-				<useDefaultCommand>true</useDefaultCommand>
+				<useDefaultCommand>false</useDefaultCommand>
 				<runAllBuilders>true</runAllBuilders>
 			</target>
 		</buildTargets>

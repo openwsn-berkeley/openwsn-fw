@@ -88,7 +88,7 @@ privileged Vs unprivileged linkage and placement. */
 #endif
 
 #if ( INCLUDE_xEventGroupSetBitFromISR == 1 ) && ( INCLUDE_xTimerPendFunctionCall == 0 )
-	#error INCLUDE_xTimerPendFunctionCall must also be set to one to make the xEventGroupSetBitFromISR() function available.
+	//#error INCLUDE_xTimerPendFunctionCall must also be set to one to make the xEventGroupSetBitFromISR() function available.
 #endif
 
 /* The following bit fields convey control information in a task's event list

@@ -18,11 +18,9 @@
 //=========================== defines =========================================
 
 //===== interrupt state
-
 #define INTERRUPT_DECLARATION()
-#define DISABLE_INTERRUPTS() IntMasterDisable()
-
-#define ENABLE_INTERRUPTS() IntMasterEnable()
+#define DISABLE_INTERRUPTS() //IntMasterDisable()
+#define ENABLE_INTERRUPTS() //IntMasterEnable()
 
 //===== timer
 

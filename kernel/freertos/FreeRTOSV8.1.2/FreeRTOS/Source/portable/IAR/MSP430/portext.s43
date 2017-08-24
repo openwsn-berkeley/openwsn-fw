@@ -126,7 +126,7 @@ xPortStartScheduler:
 
 	/* Setup the hardware to generate the tick.  Interrupts are disabled
 	when this function is called. */
-	call	#vPortSetupTimerInterrupt
+	// poipoi call	#vPortSetupTimerInterrupt
 
 	/* Restore the context of the first task that is going to run. */
 	portRESTORE_CONTEXT
@@ -134,10 +134,12 @@ xPortStartScheduler:
 
 
 	/* Install vTickISR as the timer A0 interrupt. */
+        /* poipoi 
 	ASEG
 	ORG 0xFFE0 + TIMERA0_VECTOR
 
 	_vTickISR_: DC16 vTickISR
+        */
 
 
 	END

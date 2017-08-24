@@ -619,8 +619,8 @@ void sixtop_sendingEb_timer_cb(opentimers_id_t id){
     );
 }
 
-void sixtop_maintenance_timer_cb(opentimers_id_t id) {
-    scheduler_push_task(timer_sixtop_management_fired,TASKPRIO_SIXTOP);
+void sixtop_maintenance_timer_cb(opentimer_id_t id) {
+   scheduler_push_task(timer_sixtop_management_fired,TASKPRIO_SIXTOP_TIMEOUT);
 }
 
 void sixtop_timeout_timer_cb(opentimers_id_t id) {

@@ -31,6 +31,7 @@ typedef enum {
    TASKPRIO_MAX                   = 0x0c,
 } task_prio_t;
 
+
 #define TASK_LIST_DEPTH           10
 
 //=========================== typedef =========================================
@@ -41,6 +42,7 @@ typedef struct task_llist_t {
    task_cbt                       cb;
    task_prio_t                    prio;
    void*                          next;
+   uint16_t                           counter;
 } taskList_item_t;
 
 //=========================== module variables ================================

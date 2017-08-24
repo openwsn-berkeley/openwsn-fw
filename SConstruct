@@ -43,7 +43,10 @@ project:
         
     toolchain      Toolchain implementation. The 'python' board requires gcc
                    (MinGW on Windows build host).
-                   mspgcc, iar, iar-proj, gcc
+                   mspgcc, iar, iar-proj, gcc, armgcc
+				   
+	kernel         The kernel to use. either FreeRTOS or the default 
+	               non-preemptive OpenOS scheduler. freertos, openos
     
     Connected hardware variables:
     bootload       Location of the board to bootload the binary on. 

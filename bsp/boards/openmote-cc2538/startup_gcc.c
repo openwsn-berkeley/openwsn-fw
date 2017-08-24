@@ -57,6 +57,11 @@
 #endif
 
 extern int main (void);
+#ifdef USE_FREERTOS
+extern void vPortSVCHandler(void);
+extern void xPortPendSVHandler(void);
+extern void xPortSysTickHandler(void);
+#endif
 
 void ResetISR(void);
 void NmiSR(void);
@@ -95,6 +100,7 @@ const lockPageCCA_t __cca =
   FLASH_START_ADDR 				      // Vector table located at flash start address
 };
 
+
 __attribute__ ((section(".vectors"), used))
 void (* const gVectors[])(void) =
 {
@@ -109,11 +115,25 @@ void (* const gVectors[])(void) =
    0,                                      // 8 Reserved
    0,                                      // 9 Reserved
    0,                                      // 10 Reserved
-   IntDefaultHandler,                      // 11 SVCall handler
+#ifdef USE_FREERTOS
+   vPortSVCHandler,                        // 11 SVCall handler
+#else
+   0,
+#endif
    IntDefaultHandler,                      // 12 Debug monitor handler
    0,                                      // 13 Reserved
-   IntDefaultHandler,                      // 14 The PendSV handler
-   IntDefaultHandler,                      // 15 The SysTick handler
+#ifdef USE_FREERTOS
+   xPortPendSVHandler,                     // 14 The PendSV handler
+#else
+   0,
+#endif
+#ifdef USE_FREERTOS
+
+   xPortSysTickHandler,                    // 15 The SysTick handler
+#else
+   0,
+#endif
+
    IntDefaultHandler,                      // 16 GPIO Port A
    IntDefaultHandler,                      // 17 GPIO Port B
    IntDefaultHandler,                      // 18 GPIO Port C
@@ -305,6 +325,8 @@ IntDefaultHandler (void)
 { 
     while(1)
     {
+
+
     }
 }
 
