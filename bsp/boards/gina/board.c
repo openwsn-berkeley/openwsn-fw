@@ -12,9 +12,8 @@
 #include "uart.h"
 #include "spi.h"
 #include "i2c.h"
-#include "bsp_timer.h"
+#include "sctimer.h"
 #include "radio.h"
-#include "radiotimer.h"
 #include "eui64.h"
 
 // sensors
@@ -76,9 +75,8 @@ void board_init() {
    uart_init();
    spi_init();
    i2c_init();
-   bsp_timer_init();
    radio_init();
-   radiotimer_init();
+   sctimer_init();
    //ADC_init();
    
    // enable interrupts
@@ -218,11 +216,7 @@ ISR(USCIAB0RX) {
 ISR(TIMERA1) {
    CAPTURE_TIME();
    debugpins_isr_set();
-   
-   if (radiotimer_isr()==KICK_SCHEDULER) {       // radiotimer
-      __bic_SR_register_on_exit(CPUOFF);
-   }
-   debugpins_isr_clr();
+   while(1); // should never happen
 }
 
 ISR(TIMERA0) {
@@ -245,18 +239,17 @@ ISR(COMPARATORA) {
 }
 
 ISR(TIMERB1) {
-   CAPTURE_TIME();
    debugpins_isr_set();
-   while(1); // should never happen
+   if (sctimer_isr()==KICK_SCHEDULER) {          // sctimer
+      __bic_SR_register_on_exit(CPUOFF);
+   }
+   debugpins_isr_clr();
 }
 
 ISR(TIMERB0) {
    CAPTURE_TIME();
    debugpins_isr_set();
-   if (bsp_timer_isr()==KICK_SCHEDULER) {        // timer: 0
-      __bic_SR_register_on_exit(CPUOFF);
-   }
-   debugpins_isr_clr();
+   while(1); // should never happen
 }
 
 ISR(NMI) {

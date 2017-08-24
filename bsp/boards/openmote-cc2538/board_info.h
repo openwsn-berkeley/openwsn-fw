@@ -56,6 +56,9 @@
 #define PORT_PIN_RADIO_RESET_LOW()     // nothing
 
 //===== IEEE802154E timing
+
+#define SLOTDURATION_10MS // by default, we use 10ms time slot
+
 #ifdef SLOTDURATION_10MS
 // time-slot related
 #define PORT_TsSlotDuration                 328   // counter counts one extra count, see datasheet
@@ -66,7 +69,7 @@
 #define PORT_maxTxAckPrepare                10    //  122us (measured  94us)
 // radio speed related
 #ifdef L2_SECURITY_ACTIVE
-#define PORT_delayTx                         7    //  366us (measured xxxus)
+#define PORT_delayTx                        14    //  366us (measured xxxus)
 #else
 #define PORT_delayTx                        12    //  366us (measured xxxus)
 #endif
@@ -92,7 +95,7 @@
 
 //===== per-board number of sensors
 
-#define NUMSENSORS 7
+#define NUMSENSORS      7
 
 //=========================== typedef  ========================================
 

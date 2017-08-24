@@ -15,7 +15,7 @@
 
 const uint8_t cstorm_path0[]    = "storm";
 const uint8_t cstorm_payload[]  = "OpenWSN";
-static const uint8_t dst_addr[]   = {
+static const uint8_t dst_addr[] = {
    0xbb, 0xbb, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01
 }; 
@@ -29,8 +29,10 @@ cstorm_vars_t cstorm_vars;
 owerror_t cstorm_receive(
    OpenQueueEntry_t* msg,
    coap_header_iht*  coap_header,
-   coap_option_iht*  coap_options
-);
+   coap_option_iht*  coap_incomingOptions,
+   coap_option_iht*  coap_outgoingOptions,
+   uint8_t*          coap_outgoingOptionsLen);
+
 void cstorm_timer_cb(void);
 void cstorm_task_cb(void);
 void cstorm_sendDone(OpenQueueEntry_t* msg, owerror_t error);
@@ -45,6 +47,7 @@ void cstorm_init(void) {
    cstorm_vars.desc.path1len              = 0;
    cstorm_vars.desc.path1val              = NULL;
    cstorm_vars.desc.componentID           = COMPONENT_CSTORM;
+   cstorm_vars.desc.securityContext       = NULL;
    cstorm_vars.desc.discoverable          = TRUE;
    cstorm_vars.desc.callbackRx            = &cstorm_receive;
    cstorm_vars.desc.callbackSendDone      = &cstorm_sendDone;
@@ -55,23 +58,28 @@ void cstorm_init(void) {
    //comment : not running by default
    cstorm_vars.period           = 6553; 
    
-   cstorm_vars.timerId                    = opentimers_start(
-      cstorm_vars.period,
-      TIMER_PERIODIC,TIME_MS,
-      cstorm_timer_cb
+   cstorm_vars.timerId          = opentimers_create();
+   opentimers_scheduleIn(
+       cstorm_vars.timerId,
+       cstorm_vars.period,
+       TIME_MS,
+       TIMER_PERIODIC,
+       cstorm_timer_cb
    );
    
-   //stop 
-   //opentimers_stop(cstorm_vars.timerId);
+   //stop
+   //opentimers_destroy(cstorm_vars.timerId);
    */
 }
 
 //=========================== private =========================================
 
 owerror_t cstorm_receive(
-      OpenQueueEntry_t* msg,
-      coap_header_iht*  coap_header,
-      coap_option_iht*  coap_options
+        OpenQueueEntry_t* msg,
+        coap_header_iht*  coap_header,
+        coap_option_iht*  coap_incomingOptions,
+        coap_option_iht*  coap_outgoingOptions,
+        uint8_t*          coap_outgoingOptionsLen
    ) {
    owerror_t outcome;
    
@@ -84,12 +92,10 @@ owerror_t cstorm_receive(
          msg->length              = 0;
          
          // add CoAP payload
-         packetfunctions_reserveHeaderSize(msg, 3);
-         msg->payload[0]          = COAP_PAYLOAD_MARKER;
-         
+         packetfunctions_reserveHeaderSize(msg, 2);
          // return as big endian
-         msg->payload[1]          = (uint8_t)(cstorm_vars.period >> 8);
-         msg->payload[2]          = (uint8_t)(cstorm_vars.period & 0xff);
+         msg->payload[0]          = (uint8_t)(cstorm_vars.period >> 8);
+         msg->payload[1]          = (uint8_t)(cstorm_vars.period & 0xff);
          
          // set the CoAP header
          coap_header->Code        = COAP_CODE_RESP_CONTENT;
@@ -111,11 +117,16 @@ owerror_t cstorm_receive(
          
          /*
          // stop and start again only if period > 0
-         opentimers_stop(cstorm_vars.timerId);
+         opentimers_cancel(cstorm_vars.timerId);
          
          if(cstorm_vars.period > 0) {
-            opentimers_setPeriod(cstorm_vars.timerId,TIME_MS,cstorm_vars.period);
-            opentimers_restart(cstorm_vars.timerId);
+               opentimers_scheduleIn(
+                   cstorm_vars.timerId,
+                   cstorm_vars.period,
+                   TIME_MS,
+                   TIMER_PERIODIC,
+                   cstorm_timer_cb
+               );
          }
          */
          
@@ -148,20 +159,21 @@ void cstorm_timer_cb(){
 void cstorm_task_cb() {
    OpenQueueEntry_t*    pkt;
    owerror_t            outcome;
-   uint8_t              numOptions;
+   coap_option_iht      options[2];
+   uint8_t              medType;
    
    // don't run if not synch
    if (ieee154e_isSynch() == FALSE) return;
    
    // don't run on dagroot
    if (idmanager_getIsDAGroot()) {
-      opentimers_stop(cstorm_vars.timerId);
+      opentimers_destroy(cstorm_vars.timerId);
       return;
    }
    
    if(cstorm_vars.period == 0) {
       // stop the periodic timer
-      opentimers_stop(cstorm_vars.timerId);
+      opentimers_cancel(cstorm_vars.timerId);
       return;
    }
    
@@ -188,29 +200,17 @@ void cstorm_task_cb() {
    packetfunctions_reserveHeaderSize(pkt,sizeof(cstorm_payload)-1);
    memcpy(&pkt->payload[0],cstorm_payload,sizeof(cstorm_payload)-1);
    
-   //set the TKL byte as a counter of Options
-   //TODO: This is not conform with RFC7252, but yes with current dissector WS v1.10.6
-   numOptions = 0;
-   
-   //Bigger Options last in message, first in the code (as it is in reverse order) 
-   //Deltas are calculated between too consecutive lengthes.
-   
+    // location-path option
+   options[0].type = COAP_OPTION_NUM_URIPATH;
+   options[0].length = sizeof(cstorm_path0) - 1;
+   options[0].pValue = (uint8_t *) cstorm_path0;
+
+  
    // content-type option
-   packetfunctions_reserveHeaderSize(pkt,2);
-   pkt->payload[0] = (COAP_OPTION_NUM_CONTENTFORMAT-COAP_OPTION_NUM_URIPATH) << 4 | 1; 
-   pkt->payload[1] = COAP_MEDTYPE_APPOCTETSTREAM;
-   numOptions++;
-   
-   // location-path option
-   packetfunctions_reserveHeaderSize(pkt,sizeof(cstorm_path0)-1);
-   memcpy(&pkt->payload[0],cstorm_path0,sizeof(cstorm_path0)-1);
-   packetfunctions_reserveHeaderSize(pkt,1);
-   pkt->payload[0] = (COAP_OPTION_NUM_URIPATH-7) << 4 | (sizeof(cstorm_path0)-1);
-   numOptions++;
-   
-   // length of uri-port option added directly by opencoap_send
-   packetfunctions_reserveHeaderSize(pkt,11);
-   numOptions++;
+   medType = COAP_MEDTYPE_APPOCTETSTREAM;
+   options[1].type = COAP_OPTION_NUM_CONTENTFORMAT;
+   options[1].length = 1;
+   options[1].pValue = &medType; 
    
    // metadata
    pkt->l4_destination_port = WKP_UDP_COAP;
@@ -222,7 +222,9 @@ void cstorm_task_cb() {
       pkt,
       COAP_TYPE_NON,
       COAP_CODE_REQ_PUT,
-      numOptions,
+      1, // token len
+      options,
+      2, // options len
       &cstorm_vars.desc
    );
    

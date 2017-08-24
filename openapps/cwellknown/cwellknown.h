@@ -18,6 +18,7 @@
 
 typedef struct {
    coap_resource_desc_t desc;
+   uint8_t medType;
 } cwellknown_vars_t;
 
 //=========================== prototypes ======================================

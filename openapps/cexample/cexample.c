@@ -5,7 +5,6 @@
 #include "opendefs.h"
 #include "cexample.h"
 #include "opencoap.h"
-#include "opentimers.h"
 #include "openqueue.h"
 #include "packetfunctions.h"
 #include "openserial.h"
@@ -29,10 +28,13 @@ cexample_vars_t cexample_vars;
 
 //=========================== prototypes ======================================
 
-owerror_t cexample_receive(OpenQueueEntry_t* msg,
-                    coap_header_iht*  coap_header,
-                    coap_option_iht*  coap_options);
-void    cexample_timer_cb(opentimer_id_t id);
+owerror_t cexample_receive( OpenQueueEntry_t* msg,
+        coap_header_iht*  coap_header,
+        coap_option_iht*  coap_incomingOptions,
+        coap_option_iht*  coap_outgoingOptions,
+        uint8_t*          coap_outgoingOptionsLen);
+
+void    cexample_timer_cb(opentimers_id_t id);
 void    cexample_task_cb(void);
 void    cexample_sendDone(OpenQueueEntry_t* msg,
                        owerror_t error);
@@ -41,28 +43,37 @@ void    cexample_sendDone(OpenQueueEntry_t* msg,
 
 void cexample_init() {
    
-   // prepare the resource descriptor for the /ex path
-   cexample_vars.desc.path0len             = sizeof(cexample_path0)-1;
-   cexample_vars.desc.path0val             = (uint8_t*)(&cexample_path0);
-   cexample_vars.desc.path1len             = 0;
-   cexample_vars.desc.path1val             = NULL;
-   cexample_vars.desc.componentID          = COMPONENT_CEXAMPLE;
-   cexample_vars.desc.discoverable         = TRUE;
-   cexample_vars.desc.callbackRx           = &cexample_receive;
-   cexample_vars.desc.callbackSendDone     = &cexample_sendDone;
-   
-   
-   opencoap_register(&cexample_vars.desc);
-   cexample_vars.timerId    = opentimers_start(CEXAMPLEPERIOD,
-                                                TIMER_PERIODIC,TIME_MS,
-                                                cexample_timer_cb);
+    // prepare the resource descriptor for the /ex path
+    cexample_vars.desc.path0len             = sizeof(cexample_path0)-1;
+    cexample_vars.desc.path0val             = (uint8_t*)(&cexample_path0);
+    cexample_vars.desc.path1len             = 0;
+    cexample_vars.desc.path1val             = NULL;
+    cexample_vars.desc.componentID          = COMPONENT_CEXAMPLE;
+    cexample_vars.desc.securityContext      = NULL;
+    cexample_vars.desc.discoverable         = TRUE;
+    cexample_vars.desc.callbackRx           = &cexample_receive;
+    cexample_vars.desc.callbackSendDone     = &cexample_sendDone;
+    
+    
+    opencoap_register(&cexample_vars.desc);
+    cexample_vars.timerId    = opentimers_create();
+    opentimers_scheduleIn(
+        cexample_vars.timerId, 
+        CEXAMPLEPERIOD, 
+        TIME_MS, 
+        TIMER_PERIODIC,
+        cexample_timer_cb
+    );
 }
 
 //=========================== private =========================================
 
-owerror_t cexample_receive(OpenQueueEntry_t* msg,
-                      coap_header_iht* coap_header,
-                      coap_option_iht* coap_options) {
+owerror_t cexample_receive( OpenQueueEntry_t* msg,
+        coap_header_iht*  coap_header,
+        coap_option_iht*  coap_incomingOptions,
+        coap_option_iht*  coap_outgoingOptions,
+        uint8_t*          coap_outgoingOptionsLen) {
+
    return E_FAIL;
 }
 
@@ -76,18 +87,20 @@ void cexample_task_cb() {
    OpenQueueEntry_t*    pkt;
    owerror_t            outcome;
    uint8_t              i;
+   coap_option_iht      options[2];
    
    uint16_t             x_int       = 0;
    uint16_t             sum         = 0;
    uint16_t             avg         = 0;
    uint8_t              N_avg       = 10;
+   uint8_t              medtype;
    
    // don't run if not synch
    if (ieee154e_isSynch() == FALSE) return;
    
    // don't run on dagroot
    if (idmanager_getIsDAGroot()) {
-      opentimers_stop(cexample_vars.timerId);
+      opentimers_destroy(cexample_vars.timerId);
       return;
    }
    
@@ -120,19 +133,16 @@ void cexample_task_cb() {
    pkt->payload[0]                = (avg>>8)&0xff;
    pkt->payload[1]                = (avg>>0)&0xff;
 
-   packetfunctions_reserveHeaderSize(pkt,1);
-   pkt->payload[0] = COAP_PAYLOAD_MARKER;
-   
-   // content-type option
-   packetfunctions_reserveHeaderSize(pkt,2);
-   pkt->payload[0]                = (COAP_OPTION_NUM_CONTENTFORMAT - COAP_OPTION_NUM_URIPATH) << 4
-                                    | 1;
-   pkt->payload[1]                = COAP_MEDTYPE_APPOCTETSTREAM;
-   // location-path option
-   packetfunctions_reserveHeaderSize(pkt,sizeof(cexample_path0)-1);
-   memcpy(&pkt->payload[0],cexample_path0,sizeof(cexample_path0)-1);
-   packetfunctions_reserveHeaderSize(pkt,1);
-   pkt->payload[0]                = ((COAP_OPTION_NUM_URIPATH) << 4) | (sizeof(cexample_path0)-1);
+   // set location-path option
+   options[0].type = COAP_OPTION_NUM_URIPATH;
+   options[0].length = sizeof(cexample_path0) - 1;
+   options[0].pValue = (uint8_t *) cexample_path0;
+
+   // set content-type option
+   medtype = COAP_MEDTYPE_APPOCTETSTREAM;
+   options[1].type = COAP_OPTION_NUM_CONTENTFORMAT;
+   options[1].length = 1;
+   options[1].pValue = &medtype;
    
    // metadata
    pkt->l4_destination_port       = WKP_UDP_COAP;
@@ -144,7 +154,9 @@ void cexample_task_cb() {
       pkt,
       COAP_TYPE_NON,
       COAP_CODE_REQ_PUT,
-      1,
+      1, // token len
+      options,
+      2, // options len
       &cexample_vars.desc
    );
    
@@ -157,5 +169,8 @@ void cexample_task_cb() {
 }
 
 void cexample_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
-   openqueue_freePacketBuffer(msg);
+    openqueue_freePacketBuffer(msg);
 }
+
+
+

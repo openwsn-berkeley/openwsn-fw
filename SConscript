@@ -44,10 +44,10 @@ if env['forcetopology']==1:
     env.Append(CPPDEFINES    = 'FORCETOPOLOGY')
 if env['noadaptivesync']==1:
     env.Append(CPPDEFINES    = 'NOADAPTIVESYNC')
-if env['cryptoengine']:
-    env.Append(CPPDEFINES    = {'CRYPTO_ENGINE_SCONS' : env['cryptoengine']})
 if env['l2_security']==1:
     env.Append(CPPDEFINES    = 'L2_SECURITY_ACTIVE')
+if env['deadline_option']==1:
+    env.Append(CPPDEFINES    = 'DEADLINE_OPTION_ENABLED')
 
 if env['toolchain']=='mspgcc':
     
@@ -201,6 +201,7 @@ elif env['toolchain']=='armgcc':
     if   env['board']=='openmote-cc2538':
         if env['revision'] == "A1":
             linker_file = 'cc2538sf23.lds'
+            print "*** OPENMOTE CC2538 REV. A1 ***\n"
         else:
             linker_file = 'cc2538sf53.lds'
         
@@ -215,9 +216,15 @@ elif env['toolchain']=='armgcc':
         env.Append(CCFLAGS       = '-mthumb')
         env.Append(CCFLAGS       = '-g3')
         env.Append(CCFLAGS       = '-Wstrict-prototypes')
+        if env['revision'] == "A1":
+            env.Append(CCFLAGS   = '-DREVA1=1')
+            
         # assembler
         env.Replace(AS           = 'arm-none-eabi-as')
         env.Append(ASFLAGS       = '-ggdb -g3 -mcpu=cortex-m3 -mlittle-endian')
+        if env['revision'] == "A1":
+            env.Append(ASFLAGS   = '-DREVA1=1')
+     
         # linker
         env.Append(LINKFLAGS     = '-Tbsp/boards/openmote-cc2538/' + linker_file)
         env.Append(LINKFLAGS     = '-nostartfiles')
@@ -225,7 +232,10 @@ elif env['toolchain']=='armgcc':
         env.Append(LINKFLAGS     = '-mcpu=cortex-m3')
         env.Append(LINKFLAGS     = '-mthumb')
         env.Append(LINKFLAGS     = '-g3')
-        # object manipulation
+        if env['revision'] == "A1":
+            env.Append(LINKFLAGS   = '-DREVA1=1')
+		
+		# object manipulation
         env.Replace(OBJCOPY      = 'arm-none-eabi-objcopy')
         env.Replace(OBJDUMP      = 'arm-none-eabi-objdump')
         # archiver
