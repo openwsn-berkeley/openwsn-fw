@@ -79,6 +79,8 @@ project:
     noadaptivesync Do not use adaptive synchronization.
     l2_security   Use hop-by-hop encryption and authentication.
                   0 (off), 1 (on)
+    printf        Sends the string messages to openvisualizer  
+                  0 (off ), 1 (on, default)
     ide           qtcreator
 
     Common variables:
@@ -137,6 +139,7 @@ command_line_options = {
     'debug':            ['0','1'],
     'noadaptivesync':   ['0','1'],
     'l2_security':      ['0','1'],
+    'printf':           ['1','0'],          # 1=on (default),  0=off
     'deadline_option':  ['0','1'],
     'ide':              ['none','qtcreator'],
     'revision':         ['']
@@ -284,6 +287,14 @@ command_line_vars.AddVariables(
         validate_option,                                   # validator
         int,                                               # converter
     ),
+    (
+        'printf',                                          # key
+        '',                                                # help
+        command_line_options['printf'][0],                 # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+
     (
         'deadline_option',                                     # key
         '',                                                # help

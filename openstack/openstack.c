@@ -76,7 +76,12 @@ void openstack_init(void) {
    
    //===== applications
    openapps_init();
-   
+
+   //will be printed only if printf is activated
+   char str[150];
+   snprintf(str, 150, "Printf is active ");
+   openserial_printf(COMPONENT_OPENWSN, str, strlen(str));
+
    openserial_printInfo(
       COMPONENT_OPENWSN,ERR_BOOTED,
       (errorparameter_t)0,
