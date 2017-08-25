@@ -159,6 +159,7 @@ BEGIN_PACK
 typedef struct{
     uint8_t     status;
     uint8_t     parent[8];     //parent (=next hop) when the DAO was transmitted
+    uint8_t     DODAGID[16];
 }evtDAO_t;
 END_PACK
 
@@ -296,7 +297,7 @@ void    openserial_statRx(OpenQueueEntry_t* msg);
 void    openserial_statTx(OpenQueueEntry_t* msg);
 void    openserial_statPktDropped(uint8_t status, OpenQueueEntry_t* msg);
 void    openserial_statDIO(uint8_t status, uint8_t rplinstanceId, dagrank_t rank, uint8_t *DODAGID);
-void    openserial_statDAO(uint8_t *parent);
+void    openserial_statDAO(uint8_t status, uint8_t *parent, uint8_t *DODAGID);
 void    openserial_stat6Pcmd(uint8_t command, uint8_t status, open_addr_t *neigh, cellInfo_ht* cells, uint8_t nbCells);
 
 // retrieving inputBuffer

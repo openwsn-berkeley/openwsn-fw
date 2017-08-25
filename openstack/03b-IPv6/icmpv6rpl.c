@@ -233,7 +233,12 @@ void icmpv6rpl_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 
         icmpv6rpl_vars.busySendingDIO = FALSE;
    } else {
-        icmpv6rpl_vars.busySendingDAO = FALSE;
+       if (error == E_SUCCESS)
+           openserial_statDAO(TXED, msg->l2_nextORpreviousHop.addr_64b, msg->l3_destinationAdd.addr_128b);
+       else
+           openserial_statDAO(FAILED, msg->l2_nextORpreviousHop.addr_64b, msg->l3_destinationAdd.addr_128b);
+
+       icmpv6rpl_vars.busySendingDAO = FALSE;
    }
    
    // free packet
@@ -943,7 +948,11 @@ void sendDAO() {
    if (icmpv6_send(msg)==E_SUCCESS) {
       icmpv6rpl_vars.busySendingDAO = TRUE;
       icmpv6rpl_vars.daoSent = TRUE;
+
+      openserial_statDAO(ENQUEUED, msg->l2_nextORpreviousHop.addr_64b, msg->l3_destinationAdd.addr_128b);
+
    } else {
+      openserial_statDAO(FAILED, msg->l2_nextORpreviousHop.addr_64b, msg->l3_destinationAdd.addr_128b);
       openqueue_freePacketBuffer(msg);
    }
 }

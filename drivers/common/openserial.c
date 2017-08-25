@@ -460,13 +460,14 @@ void openserial_statDIO(uint8_t status, uint8_t rplinstanceId, dagrank_t rank, u
 }
 
 //push an event to track DAO
-void openserial_statDAO(uint8_t *parent){
+void openserial_statDAO(uint8_t status, uint8_t *parent, uint8_t *DODAGID){
 
 #ifdef OPENSERIAL_STAT
     evtDAO_t          evt;
     //info
+    evt.status          = status;
     memcpy(evt.parent, parent, 8);
-
+    memcpy(evt.DODAGID, DODAGID, 16);
     openserial_printStat(SERTYPE_DAO, (uint8_t*)&evt, sizeof(evt));
 #endif
 
