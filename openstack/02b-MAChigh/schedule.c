@@ -367,6 +367,10 @@ owerror_t schedule_addActiveSlot(
    }
    
    ENABLE_INTERRUPTS();
+
+   //notification through the serial line
+   openserial_statCell(CELLADD, slotContainer);
+
    return E_SUCCESS;
 }
 
@@ -408,6 +412,9 @@ owerror_t schedule_removeActiveSlot(slotOffset_t slotOffset, open_addr_t* neighb
       return E_FAIL;
    }
    
+   //notification of openvisualizer
+   openserial_statCell(CELLDEL, slotContainer);
+
    // remove from linked list
    if (slotContainer->next==slotContainer) {
       // this is the last active slot
@@ -705,6 +712,24 @@ channelOffset_t schedule_getChannelOffset() {
    
    ENABLE_INTERRUPTS();
    
+   return returnVal;
+}
+
+/**
+\brief Get the slot offset of the current schedule entry.
+
+\returns The slot offset of the current schedule entry.
+*/
+slotOffset_t schedule_getSlotOffset() {
+   slotOffset_t returnVal;
+
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+
+   returnVal = schedule_vars.currentScheduleEntry->slotOffset;
+
+   ENABLE_INTERRUPTS();
+
    return returnVal;
 }
 
