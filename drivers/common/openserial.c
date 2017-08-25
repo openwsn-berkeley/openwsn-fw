@@ -446,10 +446,15 @@ void openserial_statPktDropped(uint8_t code, OpenQueueEntry_t* msg){
 //===== Statistics - RPL
 
 //push an event to track DIO
-void openserial_statDIO(void){
+void openserial_statDIO(uint8_t status, uint8_t rplinstanceId, dagrank_t rank, uint8_t *DODAGID){
 
 #ifdef OPENSERIAL_STAT
-    openserial_printStat(SERTYPE_DIO, NULL, 0);
+    evtDIO_t     evt;
+    evt.status          = status;
+    evt.rplinstanceId   = rplinstanceId;
+    evt.rank            = rank;
+    memcpy(evt.DODAGID, DODAGID, 16);
+    openserial_printStat(SERTYPE_DIO, (uint8_t*)&evt, sizeof(evt));
 #endif
 
 }

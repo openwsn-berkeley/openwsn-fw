@@ -67,15 +67,15 @@ enum {
 
 
 enum{
-   SERTYPE_PKT_TX             = 0x01,
-   SERTYPE_PKT_RX             = 0x02,
-   SERTYPE_CELL               = 0x03,
-   SERTYPE_ACK                = 0x04,
-   SERTYPE_PKT_DROPPED        = 0x05,
-   SERTYPE_DIO                = 0x06,
-   SERTYPE_DAO                = 0x07,
-   SERTYPE_NODESTATE          = 0x08,
-   SERTYPE_6PCMD              = 0x09,
+    SERTYPE_PKT_TX             = 0x01,
+    SERTYPE_PKT_RX             = 0x02,
+    SERTYPE_CELL               = 0x03,
+    SERTYPE_ACK                = 0x04,
+    SERTYPE_PKT_DROPPED        = 0x05,
+    SERTYPE_DIO                = 0x06,
+    SERTYPE_DAO                = 0x07,
+    SERTYPE_NODESTATE          = 0x08,
+    SERTYPE_6PCMD              = 0x09,
 };
 
 enum{
@@ -86,69 +86,79 @@ enum{
 
 BEGIN_PACK
 typedef struct{
-   uint8_t     code;
-   uint8_t     type;
-   uint8_t     shared;
-   uint8_t     slotOffset;
-   uint8_t     channelOffset;
-   uint8_t     neighbor[8];
+    uint8_t     code;
+    uint8_t     type;
+    uint8_t     shared;
+    uint8_t     slotOffset;
+    uint8_t     channelOffset;
+    uint8_t     neighbor[8];
 } evtCell_t;
 END_PACK
 
 BEGIN_PACK
 typedef struct{
-   uint8_t     code;        // RX or TX
-   uint8_t     l2addr[8];
+    uint8_t     code;        // RX or TX
+    uint8_t     l2addr[8];
 }evtAck_t;
 END_PACK
 
 BEGIN_PACK
 typedef struct{
-   uint8_t     length;
-   uint8_t     frame_type;
-   slotOffset_t slotOffset;
-   uint8_t     frequency;
-   uint8_t     l2Dest[8];
-   uint8_t     txPower;
-   uint8_t     numTxAttempts;
-   uint8_t     l3_destinationAdd[16];
-   uint8_t     l3_sourceAdd[16];
-   uint8_t     l4_protocol;
-   uint16_t    l4_sourcePortORicmpv6Type;
-   uint16_t    l4_destination_port;
+    uint8_t     length;
+    uint8_t     frame_type;
+    slotOffset_t slotOffset;
+    uint8_t     frequency;
+    uint8_t     l2Dest[8];
+    uint8_t     txPower;
+    uint8_t     numTxAttempts;
+    uint8_t     l3_destinationAdd[16];
+    uint8_t     l3_sourceAdd[16];
+    uint8_t     l4_protocol;
+    uint16_t    l4_sourcePortORicmpv6Type;
+    uint16_t    l4_destination_port;
 } evtPktTx_t;
 END_PACK
 
 BEGIN_PACK
 typedef struct{
-   uint8_t     length;
-   uint8_t     frame_type;
-   slotOffset_t slotOffset;
-   uint8_t     frequency;
-   uint8_t     l2Src[8];
-   uint8_t     rssi;
-   uint8_t     lqi;
-   uint8_t     crc;
+    uint8_t     length;
+    uint8_t     frame_type;
+    slotOffset_t slotOffset;
+    uint8_t     frequency;
+    uint8_t     l2Src[8];
+    uint8_t     rssi;
+    uint8_t     lqi;
+    uint8_t     crc;
 } evtPktRx_t;
 END_PACK
 
 BEGIN_PACK
 typedef struct{
-   uint8_t     code;
-   uint8_t     length;
-   uint8_t     frame_type;
-   uint8_t     l2Src[8];
-   uint8_t     l3_destinationAdd[16];
-   uint8_t     l3_sourceAdd[16];
-   uint8_t     l4_protocol;
-   uint16_t    l4_sourcePortORicmpv6Type;
-   uint16_t    l4_destination_port;
+    uint8_t     code;
+    uint8_t     length;
+    uint8_t     frame_type;
+    uint8_t     l2Src[8];
+    uint8_t     l3_destinationAdd[16];
+    uint8_t     l3_sourceAdd[16];
+    uint8_t     l4_protocol;
+    uint16_t    l4_sourcePortORicmpv6Type;
+    uint16_t    l4_destination_port;
 } evtPktDropped_t;
 END_PACK
 
 BEGIN_PACK
 typedef struct{
-   uint8_t     parent[8];     //parent (=next hop) when the DAO was transmitted
+    uint8_t     status;         //enqueued, TXED, RCVD, etc.
+    uint8_t     rplinstanceId;
+    dagrank_t   rank;
+    uint8_t     DODAGID[16];
+}evtDIO_t;
+END_PACK
+
+BEGIN_PACK
+typedef struct{
+    uint8_t     status;
+    uint8_t     parent[8];     //parent (=next hop) when the DAO was transmitted
 }evtDAO_t;
 END_PACK
 
@@ -180,10 +190,10 @@ enum{                   //status of the 6P command
 
 BEGIN_PACK
 typedef struct{
-   uint8_t     sixtop_command;  // type of 6Pcommand (cell add/del req/rep)
-   uint8_t     status;          // result of the operation
-   uint8_t     neighbor[8];     // parent (=next hop) when the DAO was transmitted
-   cellInfo_ht  cells[OPENSERIALMAXNUMCELLS];       //up to OPENSERIALMAXNUMCELLS, cut with the correct size
+    uint8_t     sixtop_command;  // type of 6Pcommand (cell add/del req/rep)
+    uint8_t     status;          // result of the operation
+    uint8_t     neighbor[8];     // parent (=next hop) when the DAO was transmitted
+    cellInfo_ht  cells[OPENSERIALMAXNUMCELLS];       //up to OPENSERIALMAXNUMCELLS, cut with the correct size
 }evt6PCmd_t;
 END_PACK
 
@@ -285,7 +295,7 @@ void    openserial_statAck(uint8_t status, open_addr_t *l2_addr);
 void    openserial_statRx(OpenQueueEntry_t* msg);
 void    openserial_statTx(OpenQueueEntry_t* msg);
 void    openserial_statPktDropped(uint8_t status, OpenQueueEntry_t* msg);
-void    openserial_statDIO(void);
+void    openserial_statDIO(uint8_t status, uint8_t rplinstanceId, dagrank_t rank, uint8_t *DODAGID);
 void    openserial_statDAO(uint8_t *parent);
 void    openserial_stat6Pcmd(uint8_t command, uint8_t status, open_addr_t *neigh, cellInfo_ht* cells, uint8_t nbCells);
 
