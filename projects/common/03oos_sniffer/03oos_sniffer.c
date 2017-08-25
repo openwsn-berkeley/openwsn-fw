@@ -187,6 +187,11 @@ void ieee154e_setSlotDuration(uint16_t duration)                          {retur
 void ieee154e_setIsAckEnabled(bool isEnabled)                             {return;}
 void ieee154e_getAsn(uint8_t* array)                                      {return;}
 
+slotOffset_t schedule_getSlotOffset(void)                                 {return(0);}
+channelOffset_t schedule_getChannelOffset(void)                           {return(0);}
+uint8_t calculateFrequency(uint8_t channelOffset)                         {return(0);}
+
+
 void schedule_startDAGroot(void)                                          {return;}
 void schedule_setFrameLength(uint16_t frameLength)                        {return;}
 
