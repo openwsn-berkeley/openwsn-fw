@@ -49,6 +49,89 @@ if env['l2_security']==1:
 if env['deadline_option']==1:
     env.Append(CPPDEFINES    = 'DEADLINE_OPTION_ENABLED')
 
+if   env['toolchain']=='newmspgcc':
+
+    if env['board'] not in ['MoteISTv5']:
+        raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
+
+    # compiler
+    env.Replace(CC           = 'msp430-elf-gcc')
+    # assembler
+    env.Append(ASFLAGS       = '-I/opt/msp430-toolchain/current/include')
+    env.Append(ASFLAGS       = '')
+    # archiver
+    env.Replace(AR           = 'msp430-elf-ar')
+    env.Append(ARFLAGS       = '')
+    env.Replace(RANLIB       = 'msp430-elf-ranlib')
+    env.Append(RANLIBFLAGS   = '')
+    # linker
+    env.Replace(LINK         = 'msp430-elf-gcc')
+    env.Append(LINKFLAGS     = '-L/opt/msp430-toolchain/current/include')
+    env.Append(LINKFLAGS     = '-MMD')  #Preprocessor, only user header files
+    env.Append(LINKFLAGS     = '')
+    # misc
+
+    # general options
+    env.Append(CCFLAGS       = '-I/opt/msp430-toolchain/current/include')
+    env.Append(CCFLAGS       = '-Wunknown-pragmas')
+    env.Append(CCFLAGS       = '-fno-force-addr')
+    env.Append(CCFLAGS       = '-finline-limit=1')
+    env.Append(CCFLAGS       = '-fno-schedule-insns')   #should change to fschedule-insns
+    env.Append(CCFLAGS       = '-fshort-enums')    #Enum types uses smallest type possible
+    env.Append(CCFLAGS       = '-fdiagnostics-color=always')
+    #env.Append(CCFLAGS       = '-Wall')     #Preprocessor
+    env.Append(CCFLAGS       = '-Wshadow')
+    env.Append(CCFLAGS       = '-Wpointer-arith')
+    env.Append(CCFLAGS       = '-Wbad-function-cast')
+    #env.Append(CCFLAGS       = '-Wcast-align')
+    env.Append(CCFLAGS       = '-Wsign-compare')
+    env.Append(CCFLAGS       = '-Waggregate-return')
+    env.Append(CCFLAGS       = '-Wstrict-prototypes')
+    env.Append(CCFLAGS       = '-Wmissing-prototypes')
+    env.Append(CCFLAGS       = '-Wmissing-declarations')
+    env.Append(CCFLAGS       = '-Wunused')
+    env.Append(CCFLAGS       = '-Wno-main')
+    env.Append(CCFLAGS       = '')
+
+    # Debug Options
+    if env['debug'] == 1:
+        env.Append(CCFLAGS      = '-O1')
+        env.Append(CCFLAGS      = '-ggdb')
+        env.Append(CCFLAGS      = '-Wa,--gstabs')
+        env.Append(LINKFLAGS    = '-Wl,--gc-sections')
+    else:
+        env.Append(CCFLAGS      = '-Os')
+        env.Append(CCFLAGS      = '-fdata-sections')
+        env.Append(CCFLAGS      = '-ffunction-sections')
+        env.Append(CCFLAGS      = '-fomit-frame-pointer')
+        env.Append(LINKFLAGS    = '-Wl,--gc-sections')
+        env.Append(LINKFLAGS    = '-Wl,-s')
+
+    # OS Selection
+    if env['kernel'] == 'freertos':
+            env.Append(CCFLAGS       = '-DUSE_FREERTOS')
+
+    # convert ELF to iHex
+    elf2iHexFunc = Builder(
+       action = 'msp430-elf-objcopy --output-target=ihex $SOURCE $TARGET',
+       suffix = '.hex',
+    )
+    env.Append(BUILDERS = {'Elf2iHex' : elf2iHexFunc})
+
+    # convert ELF to bin
+    elf2BinFunc = Builder(
+       action = 'msp430-elf-objcopy --output-target=binary $SOURCE $TARGET',
+       suffix = '.bin',
+    )
+    env.Append(BUILDERS = {'Elf2iBin' : elf2BinFunc})
+
+    # print sizes
+    printSizeFunc = Builder(
+        action = 'msp430-elf-size $SOURCE',
+        suffix = '.phonysize',
+    )
+    env.Append(BUILDERS = {'PrintSize' : printSizeFunc})
+
 if env['toolchain']=='mspgcc':
     
     if env['board'] not in ['telosb','wsn430v13b','wsn430v14','gina','z1']:
