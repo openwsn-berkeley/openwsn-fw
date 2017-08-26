@@ -170,7 +170,6 @@ void icmpv6rpl_init() {
    
    icmpv6rpl_vars.daoPeriod                 = TIMER_DAO_TIMEOUT;
    icmpv6rpl_vars.timerIdDAO                = opentimers_create();
-   // sfcontrol
    opentimers_scheduleIn(
        icmpv6rpl_vars.timerIdDAO,
        872 +(openrandom_get16b()&0xff),
@@ -178,7 +177,6 @@ void icmpv6rpl_init() {
        TIMER_ONESHOT,
        icmpv6rpl_timer_DAO_cb
    );
-   // sfcontrol
 }
 
 void  icmpv6rpl_writeDODAGid(uint8_t* dodagid) {
@@ -476,8 +474,6 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
     memcpy(&icmpv6rpl_vars.parentIndex[0],&neighborIndexWithLowestRank[0],icmpv6rpl_vars.numParent);
     
     // update parent sf control cells, which are dedicate txrx cells
-    INTERRUPT_DECLARATION();
-    DISABLE_INTERRUPTS();
     schedule_removeDedicateTxRxCells();
     for (i=0;i<icmpv6rpl_vars.numParent;i++){
         if (neighbors_getNeighborEui64(&parentAddress,ADDR_64B,icmpv6rpl_vars.parentIndex[i])){
@@ -491,7 +487,6 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
             );
         }
     }
-    ENABLE_INTERRUPTS();
 }
 
 /**
@@ -899,7 +894,7 @@ void sendDAO() {
    //=== transit option -- from RFC 6550, page 55 - 1 transit information header per parent is required. 
    //getting only preferred parent as transit
    numTransitParents=0;
-   icmpv6rpl_getPreferredParentEui64(&address);
+   neighbors_getNeighborEui64(&address,ADDR_64B,icmpv6rpl_vars.parentIndex[numTransitParents]);
    packetfunctions_writeAddress(msg,&address,OW_BIG_ENDIAN);
    prefix=idmanager_getMyID(ADDR_PREFIX);
    packetfunctions_writeAddress(msg,prefix,OW_BIG_ENDIAN);
@@ -954,7 +949,7 @@ void sendDAO() {
          
          // remember I found it
          numTargetParents++;
-      }
+      }  
       //limit to MAX_TARGET_PARENTS the number of DAO target addresses to send
       //section 8.2.1 pag 67 RFC6550 -- using a subset
       // poipoi TODO base selection on ETX rather than first X.
