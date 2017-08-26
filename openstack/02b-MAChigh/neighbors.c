@@ -543,7 +543,7 @@ void  neighbors_sortRankAndHousekeeping(uint8_t* neighborIndexWithLowestRank, ui
             if (neighbors_vars.neighbors[i].used==1) {
                 rankIncrease     = neighbors_getLinkMetric(i);
                 if (
-                    lowestRank>neighbors_vars.neighbors[i].DAGrank+rankIncrease && 
+                    (uint32_t)lowestRank>(uint32_t)(neighbors_vars.neighbors[i].DAGrank+rankIncrease) && 
                     neighbors_vars.neighbors[i].f6PNORES == FALSE
                 ){
                     neighbor_recorded = FALSE;

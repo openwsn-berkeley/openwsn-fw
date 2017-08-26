@@ -58,6 +58,7 @@ void icmpv6rpl_init() {
    icmpv6rpl_vars.busySendingDIO            = FALSE;
    icmpv6rpl_vars.busySendingDAO            = FALSE;
    icmpv6rpl_vars.fDodagidWritten           = 0;
+   icmpv6rpl_vars.lowestRankInHistory       = DEFAULTDAGRANK;
    
    //=== DIO
    
@@ -434,7 +435,7 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
         }
     }
     
-    // rank neighbor according to rank
+    // first round to get neighbors indexes sorted by their rank
     neighbors_sortRankAndHousekeeping(neighborIndexWithLowestRank,&highestRankParentIndex);
     
     if (highestRankParentIndex==0xff){
@@ -448,20 +449,31 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
         icmpv6rpl_vars.numParent = PARENTS_NUM;
     }
     
-    if (icmpv6rpl_vars.numParent > 0){
+    // second round to check whether the candidate neighbor can be parent
+    do {
         rankIncrease     = neighbors_getLinkMetric(neighborIndexWithLowestRank[icmpv6rpl_vars.numParent-1]);
         neighborRank     = neighbors_getNeighborRank(neighborIndexWithLowestRank[icmpv6rpl_vars.numParent-1]);
         tentativeDAGrank = (uint32_t)neighborRank+rankIncrease;
-        if (tentativeDAGrank>65535) {
-            icmpv6rpl_vars.myDAGrank = 65535;
+        
+        if (tentativeDAGrank > (uint32_t)(icmpv6rpl_vars.lowestRankInHistory + (3*DEFAULTLINKCOST-2)*MINHOPRANKINCREASE)){
+            icmpv6rpl_vars.numParent--;
         } else {
-            icmpv6rpl_vars.myDAGrank = (uint16_t)tentativeDAGrank;
+            icmpv6rpl_vars.myDAGrank = tentativeDAGrank;
+            if (tentativeDAGrank<icmpv6rpl_vars.lowestRankInHistory){
+                icmpv6rpl_vars.lowestRankInHistory = icmpv6rpl_vars.myDAGrank;
+            }
+            break;
         }
-    }
+    }while (icmpv6rpl_vars.numParent > 0);
     
     // reset preferred parent
     for (i=0;i<MAXNUMNEIGHBORS;i++) {
         neighbors_setPreferredParent(i,0);
+    }
+
+    if (icmpv6rpl_vars.numParent == 0){
+        // stop if there is no available parent
+        return;
     }
     
     // neighbor with lowest rank has preference 2

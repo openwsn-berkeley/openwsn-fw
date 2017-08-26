@@ -64,13 +64,13 @@ void sf0_init(void) {
     // start sf0 6pquery timer
     sf0_vars.query_timer          = opentimers_create();
     sf0_vars.trafficcontrol_timer = opentimers_create();
-    opentimers_scheduleIn(
-        sf0_vars.query_timer, 
-        SF0_QUERY_PERIOD,
-        TIME_MS, 
-        TIMER_PERIODIC, 
-        sf0_6pQuery_timer_cb
-    );
+//    opentimers_scheduleIn(
+//        sf0_vars.query_timer, 
+//        SF0_QUERY_PERIOD,
+//        TIME_MS, 
+//        TIMER_PERIODIC, 
+//        sf0_6pQuery_timer_cb
+//    );
     // sfcontrol 
     sixtop_setSFcallback(sf0_getsfid,sf0_getMetadata,sf0_translateMetadata,sf0_handleRCError);
 }

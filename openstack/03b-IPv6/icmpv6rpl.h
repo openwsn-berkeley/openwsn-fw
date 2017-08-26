@@ -201,6 +201,7 @@ typedef struct {
    uint16_t                  rankIncrease;            ///< the cost of the link to the parent, in units of rank
    uint8_t                   numParent;               ///< this number of route the router has to DAG root
    uint8_t                   parentIndex[PARENTS_NUM];///< index of Parent in neighbor table (if isParent==TRUE)
+   uint16_t                  lowestRankInHistory;     ///< the lowest rank mote even used
    // actually only here for debug
    icmpv6rpl_dio_ht*         incomingDio;             //keep it global to be able to debug correctly.
    icmpv6rpl_pio_t*          incomingPio;             //pio structure incoming
