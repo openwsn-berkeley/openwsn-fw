@@ -190,7 +190,7 @@ elif env['toolchain']=='iar':
     env.Append(LINKFLAGS          = '-S')
     env.Append(LINKFLAGS          = '-Ointel-standard')
     env.Replace(LINKCOM           = '$LINK $SOURCES -o $TARGET $LINKFLAGS $__RPATH $_LIBDIRFLAGS $_LIBFLAGS')
-    
+
     # converts ELF to iHex
     def changeExtensionFunction(target, source, env):
         baseName      = str(target[0]).split('.')[0]
@@ -206,26 +206,26 @@ elif env['toolchain']=='iar':
         suffix = '.ihex'
     )
     env.Append(BUILDERS = {'Elf2iHex'  : changeExtensionBuilder})
-    
+
     # convert ELF to bin
     env.Append(BUILDERS = {'Elf2iBin'  : dummyFunc})
-    
+
     # print sizes
     env.Append(BUILDERS = {'PrintSize' : dummyFunc})
 
 elif env['toolchain']=='iar-proj':
-    
+
     if env['board'] not in ['telosb','gina','wsn430v13b','wsn430v14','z1','openmotestm','agilefox','openmote-cc2538','iot-lab_M3']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
-    
+
     env['IAR_EW430_INSTALLDIR'] = os.environ['IAR_EW430_INSTALLDIR']
-    
+
     try:
         iarEw430CommonBinDir      = os.path.join(env['IAR_EW430_INSTALLDIR'],'common','bin')
     except KeyError as err:
         print 'You need to install environment variable IAR_EW430_INSTALLDIR which points to the installation directory of IAR Embedded Workbench for MSP430. Example: C:\Program Files\IAR Systems\Embedded Workbench 6.5'
         raise
-    
+
     iarProjBuilderFunction = Builder(
         action = '"{0}" $SOURCE Debug'.format(
             os.path.join(iarEw430CommonBinDir,'IarBuild')
@@ -233,28 +233,28 @@ elif env['toolchain']=='iar-proj':
         src_suffix  = '.ewp',
     )
     env.Append(BUILDERS = {'iarProjBuilder' : iarProjBuilderFunction})
-    
+
     # converts ELF to iHex
     env.Append(BUILDERS = {'Elf2iHex'  : dummyFunc})
-    
+
     # convert ELF to bin
     env.Append(BUILDERS = {'Elf2iBin'  : dummyFunc})
-    
+
     # print sizes
     env.Append(BUILDERS = {'PrintSize' : dummyFunc})
-    
+
 elif env['toolchain']=='armgcc':
-    
+
     if env['board'] not in ['silabs-ezr32wg','openmote-cc2538','iot-lab_M3','iot-lab_A8-M3','openmotestm', 'samr21_xpro']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
-    
+
     if   env['board']=='openmote-cc2538':
         if env['revision'] == "A1":
             linker_file = 'cc2538sf23.lds'
             print "*** OPENMOTE CC2538 REV. A1 ***\n"
         else:
             linker_file = 'cc2538sf53.lds'
-        
+
         # compiler (C)
         env.Replace(CC           = 'arm-none-eabi-gcc')
         env.Append(CCFLAGS       = '-O0')
@@ -268,13 +268,13 @@ elif env['toolchain']=='armgcc':
         env.Append(CCFLAGS       = '-Wstrict-prototypes')
         if env['revision'] == "A1":
             env.Append(CCFLAGS   = '-DREVA1=1')
-            
+
         # assembler
         env.Replace(AS           = 'arm-none-eabi-as')
         env.Append(ASFLAGS       = '-ggdb -g3 -mcpu=cortex-m3 -mlittle-endian')
         if env['revision'] == "A1":
             env.Append(ASFLAGS   = '-DREVA1=1')
-     
+
         # linker
         env.Append(LINKFLAGS     = '-Tbsp/boards/openmote-cc2538/' + linker_file)
         env.Append(LINKFLAGS     = '-nostartfiles')
@@ -284,7 +284,7 @@ elif env['toolchain']=='armgcc':
         env.Append(LINKFLAGS     = '-g3')
         if env['revision'] == "A1":
             env.Append(LINKFLAGS   = '-DREVA1=1')
-		
+
 		# object manipulation
         env.Replace(OBJCOPY      = 'arm-none-eabi-objcopy')
         env.Replace(OBJDUMP      = 'arm-none-eabi-objdump')
@@ -299,7 +299,7 @@ elif env['toolchain']=='armgcc':
 
         if env['kernel'] == 'freertos':
 		    env.Append(CCFLAGS       = '-DUSE_FREERTOS')
-        
+
     elif env['board']=='silabs-ezr32wg':
         # compiler (C)
         env.Replace(CC           = 'arm-none-eabi-gcc')
@@ -325,17 +325,17 @@ elif env['toolchain']=='armgcc':
         env.Replace(AS           = 'arm-none-eabi-as')
         env.Append(ASFLAGS       = '-g -gdwarf-2 -mcpu=cortex-m4 -mthumb -c -x assembler-with-cpp ')
         env.Append(ASFLAGS       = '-DEZR32WG330F256R60=1')
-        
+
         # linker
         env.Append(LINKFLAGS     = '-g -gdwarf-2 -mcpu=cortex-m4 -mthumb -Tbsp/boards/silabs-ezr32wg/GCC/ezr32wg.ld')
         env.Append(LINKFLAGS     = '-Xlinker --gc-sections -Xlinker')
         env.Append(LINKFLAGS     = '-Map=${TARGET.base}.map')
-        
+
         env.Append(LINKFLAGS     = '-mfpu=fpv4-sp-d16 -mfloat-abi=softfp  --specs=nosys.specs')
         #--specs=nano.specs
         #env.Append(LINKFLAGS     = '-lgcc -lc -lnosys')
         env.Append(LINKFLAGS     = '-Wl,--start-group -lgcc -lc -lg -lm -lnosys -Wl,--end-group')
-        
+
         # object manipulation
         env.Replace(OBJCOPY      = 'arm-none-eabi-objcopy')
         env.Replace(OBJDUMP      = 'arm-none-eabi-objdump')
@@ -349,7 +349,7 @@ elif env['toolchain']=='armgcc':
         env.Replace(SIZE         = 'arm-none-eabi-size')
 
     elif env['board'] in ['openmotestm','iot-lab_M3', 'iot-lab_A8-M3']:
-        
+
         # compiler (C)
         env.Replace(CC           = 'arm-none-eabi-gcc')
         if os.name=='nt':
@@ -400,9 +400,9 @@ elif env['toolchain']=='armgcc':
         # misc
         env.Replace(NM           = 'arm-none-eabi-nm')
         env.Replace(SIZE         = 'arm-none-eabi-size')
-        
+
     elif   env['board']=='samr21_xpro':
-        
+
         # compiler (C)
         env.Replace(CC           = 'arm-none-eabi-gcc')
         env.Append(CCFLAGS       = '-O1')
@@ -441,73 +441,73 @@ elif env['toolchain']=='armgcc':
         # misc
         env.Replace(NM           = 'arm-none-eabi-nm')
         env.Replace(SIZE         = 'arm-none-eabi-size')
-        
+
     else:
         raise SystemError('unexpected board={0}'.format(env['board']))
-    
+
     # converts ELF to iHex
     elf2iHexFunc = Builder(
        action = 'arm-none-eabi-objcopy -O ihex $SOURCE $TARGET',
        suffix = '.ihex',
     )
     env.Append(BUILDERS = {'Elf2iHex'  : elf2iHexFunc})
-    
+
     # convert ELF to bin
     elf2BinFunc = Builder(
        action = 'arm-none-eabi-objcopy -O binary $SOURCE $TARGET',
        suffix = '.bin',
     )
     env.Append(BUILDERS = {'Elf2iBin'  : elf2BinFunc})
-    
+
     # print sizes
     printSizeFunc = Builder(
         action = 'arm-none-eabi-size --format=berkeley -x --totals $SOURCE',
         suffix = '.phonysize',
     )
     env.Append(BUILDERS = {'PrintSize' : printSizeFunc})
-    
+
 elif env['toolchain']=='gcc':
-    
+
     # compiler (C)
     env.Append(CCFLAGS       = '-Wall')
-    
+
     if env['board'] not in ['python']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
-    
+
     if env['board'] in ['python']:
         env.Append(CPPDEFINES = 'OPENSIM')
-    
+
     if env['fastsim']==1:
         env.Append(CPPDEFINES = 'FASTSIM')
         #env.Append(CPPDEFINES = 'TRACE_ON')
-    
+
     if os.name!='nt':
         if env['simhost'].endswith('linux'):
-            # enabling shared library to be reallocated 
+            # enabling shared library to be reallocated
             env.Append(CCFLAGS        = '-fPIC')
             if not sys.platform.startswith('darwin'): # line added per FW-230
                 env.Append(SHLINKFLAGS    = '-Wl,-Bsymbolic-functions') # per FW-176
                 env.Append(SHCFLAGS       = '-Wl,-Bsymbolic-functions') # per FW-176
-            
+
             if platform.architecture()[0]=='64bit' and env['simhost']=='x86-linux':
                 # Cross-compile x86 Linux target from 64-bit host. Also see
                 # projects/python/SConscript.env.
                 env.Append(CCFLAGS        = '-m32')
-                # Resolves a conflict between Python's pyconfig.h, which uses 
+                # Resolves a conflict between Python's pyconfig.h, which uses
                 # '200112'L, and libc's features.h, which uses '200809L'.
                 env.Append(CPPDEFINES     = [('_POSIX_C_SOURCE','200112L')])
                 env.Append(SHLINKFLAGS    = '-m32')
-                
+
         if env['simhost'] == 'amd64-windows':
             # Used by Python includes
             env.Append(CPPDEFINES = 'MS_WIN64')
-    
+
     # converts ELF to iHex
     env.Append(BUILDERS = {'Elf2iHex'  : dummyFunc})
-    
+
     # convert ELF to bin
     env.Append(BUILDERS = {'Elf2iBin'  : dummyFunc})
-    
+
     # print sizes
     env.Append(BUILDERS = {'PrintSize' : dummyFunc})
 
@@ -519,8 +519,8 @@ if env['ide']=='qtcreator':
     q.QtCreatorManager().initialize(env['board'])
 else:
     print env['ide']
-    
-    
+
+
 #============================ upload over JTAG ================================
 
 def jtagUploadFunc(location):
@@ -572,7 +572,7 @@ def expandBootloadPortList(ports):
         port  = ports[0]
         ports = []
         last_char = port[-1:]
-        base_dir  = os.path.dirname(port)      
+        base_dir  = os.path.dirname(port)
 
         # /dev/ttyUSBX means bootload all ttyUSB ports
         if (last_char == "X"):
@@ -597,18 +597,70 @@ def expandBootloadPortList(ports):
 
     return ports
 
-class telosb_bootloadThread(threading.Thread):
+class MoteISTv5_bootloadThread(threading.Thread):
     def __init__(self,comPort,hexFile,countingSem):
-        
+
         # store params
         self.comPort         = comPort
         self.hexFile         = hexFile
         self.countingSem     = countingSem
-        
+
+        # initialize parent class
+        threading.Thread.__init__(self)
+        self.name            = 'MoteISTv5_bootloadThread ' + str(self.comPort)
+
+    def run(self):
+        print 'starting bootloading on ' + str(self.comPort)
+
+        if self.comPort == 'WindowsFet':
+            subprocess.call(
+                'bash '+os.path.join('bootloader','MoteISTv5','ProgramFet.sh')+' {0}'.format(self.hexFile),
+                shell=True
+            )
+        else:
+            subprocess.call(
+                'python '+os.path.join('bootloader','MoteISTv5','Python','bootloader.py')+' --file={0} --comport={1} program'.format(self.hexFile, self.comPort),
+                shell=True
+            )
+
+        print 'done bootloading on ' + str(self.comPort)
+
+        # indicate done
+        self.countingSem.release()
+
+def MoteISTv5_bootload(target, source, env):
+    bootloadThreads = []
+    countingSem     = threading.Semaphore(0)
+    # create threads
+    for comPort in env['bootload'].split(','):
+        print source[0].path.split('.')[0]+'.hex'
+        bootloadThreads += [
+            MoteISTv5_bootloadThread(
+                comPort      = comPort,
+                #hexFile      = os.path.split(source[0].path)[1].split('.')[0]+'.bin',
+                hexFile      = source[0].path.split('.')[0]+'.hex',
+                countingSem  = countingSem,
+            )
+        ]
+    # start threads
+    for t in bootloadThreads:
+        t.start()
+    # wait for threads to finish
+    for t in bootloadThreads:
+        countingSem.acquire()
+
+class telosb_bootloadThread(threading.Thread):
+    def __init__(self,comPort,hexFile,countingSem):
+
+        # store params
+        self.comPort         = comPort
+        self.hexFile         = hexFile
+        self.countingSem     = countingSem
+
         # initialize parent class
         threading.Thread.__init__(self)
         self.name            = 'telosb_bootloadThread_{0}'.format(self.comPort)
-    
+
     def run(self):
         print 'starting bootloading on {0}'.format(self.comPort)
         subprocess.call(
@@ -616,7 +668,7 @@ class telosb_bootloadThread(threading.Thread):
             shell=True
         )
         print 'done bootloading on {0}'.format(self.comPort)
-        
+
         # indicate done
         self.countingSem.release()
 
@@ -641,16 +693,16 @@ def telosb_bootload(target, source, env):
 
 class OpenMoteCC2538_bootloadThread(threading.Thread):
     def __init__(self,comPort,hexFile,countingSem):
-        
+
         # store params
         self.comPort         = comPort
         self.hexFile         = hexFile
         self.countingSem     = countingSem
-        
+
         # initialize parent class
         threading.Thread.__init__(self)
         self.name            = 'OpenMoteCC2538_bootloadThread_{0}'.format(self.comPort)
-    
+
     def run(self):
         print 'starting bootloading on {0}'.format(self.comPort)
         subprocess.call(
@@ -658,10 +710,10 @@ class OpenMoteCC2538_bootloadThread(threading.Thread):
             shell=True
         )
         print 'done bootloading on {0}'.format(self.comPort)
-        
+
         # indicate done
         self.countingSem.release()
-        
+
 def OpenMoteCC2538_bootload(target, source, env):
     bootloadThreads = []
     countingSem     = threading.Semaphore(0)
@@ -691,16 +743,16 @@ def OpenMoteCC2538_bootload(target, source, env):
 
 class openmotestm_bootloadThread(threading.Thread):
     def __init__(self,comPort,binaryFile,countingSem):
-        
+
         # store params
         self.comPort         = comPort
         self.binaryFile      = binaryFile
         self.countingSem     = countingSem
-        
+
         # initialize parent class
         threading.Thread.__init__(self)
         self.name            = 'openmotestm_bootloadThread_{0}'.format(self.comPort)
-    
+
     def run(self):
         print 'starting bootloading on {0}'.format(self.comPort)
         subprocess.call(
@@ -708,10 +760,10 @@ class openmotestm_bootloadThread(threading.Thread):
             shell=True
         )
         print 'done bootloading on {0}'.format(self.comPort)
-        
+
         # indicate done
         self.countingSem.release()
-        
+
 def openmotestm_bootload(target, source, env):
     bootloadThreads = []
     countingSem     = threading.Semaphore(0)
@@ -730,19 +782,19 @@ def openmotestm_bootload(target, source, env):
     # wait for threads to finish
     for t in bootloadThreads:
         countingSem.acquire()
-        
+
 class IotLabM3_bootloadThread(threading.Thread):
     def __init__(self,comPort,binaryFile,countingSem):
-        
+
         # store params
         self.comPort         = comPort
         self.binaryFile      = binaryFile
         self.countingSem     = countingSem
-        
+
         # initialize parent class
         threading.Thread.__init__(self)
         self.name            = 'IotLabM3_bootloadThread_{0}'.format(self.comPort)
-    
+
     def run(self):
         print 'starting bootloading on {0}'.format(self.comPort)
         subprocess.call(
@@ -750,10 +802,10 @@ class IotLabM3_bootloadThread(threading.Thread):
             shell=True
         )
         print 'done bootloading on {0}'.format(self.comPort)
-        
+
         # indicate done
         self.countingSem.release()
-        
+
 def IotLabM3_bootload(target, source, env):
     bootloadThreads = []
     countingSem     = threading.Semaphore(0)
@@ -776,7 +828,7 @@ def IotLabM3_bootload(target, source, env):
     # wait for threads to finish
     for t in bootloadThreads:
         countingSem.acquire()
-        
+
 # bootload
 def BootloadFunc():
     if   env['board']=='telosb':
@@ -832,14 +884,14 @@ def buildLibs(projectDir):
         '02drv': [                             'libkernel','libdrivers','libbsp'],
         '03oos': ['libopenstack','libopenapps','libopenstack','libkernel','libdrivers','libbsp'], # this order needed for mspgcc
     }
-    
+
     returnVal = None
     for k,v in libs_dict.items():
         if projectDir.startswith(k):
            returnVal = v
-    
+
     assert returnVal!=None
-    
+
     return returnVal
 
 def buildIncludePath(projectDir,localEnv):
@@ -867,9 +919,9 @@ def project_finder(localEnv):
     - projects\common\
     - projects\<board>\
     '''
-    
+
     # list subdirectories
-    
+
     if env['toolchain']=='iar-proj':
         # no VariantDir is used
         PATH_TO_BOARD_PROJECTS    = os.getcwd()
@@ -878,68 +930,68 @@ def project_finder(localEnv):
         PATH_TO_BOARD_PROJECTS    = os.path.join('..','..','..','..','projects',os.path.split(os.getcwd())[-1])
     tempsubdirs                   = os.listdir(PATH_TO_BOARD_PROJECTS)
     subdirs                       = [name for name in tempsubdirs if os.path.isdir(os.path.join(PATH_TO_BOARD_PROJECTS,name)) ]
-    
+
     # parse dirs and build targets
     for projectDir in subdirs:
-        
+
         src_dir         = os.path.join(PATH_TO_BOARD_PROJECTS,projectDir)
         variant_dir     = os.path.join(env['VARDIR'],'projects',projectDir)
-        
+
         added           = False
         targetName      = projectDir[2:]
-        
+
         if  (
                 ('{0}.c'.format(projectDir) in os.listdir(os.path.join(PATH_TO_BOARD_PROJECTS,projectDir))) and
-                (localEnv['toolchain']!='iar-proj') and 
+                (localEnv['toolchain']!='iar-proj') and
                 (localEnv['board']!='python')
             ):
             # "normal" case
-            
+
             localEnv.VariantDir(
                 src_dir     = src_dir,
                 variant_dir = variant_dir,
             )
-            
+
             target =  projectDir
             source = [
                 os.path.join(projectDir,'{0}.c'.format(projectDir)),
             ]
             libs   = buildLibs(projectDir)
-            
+
             buildIncludePath(projectDir,localEnv)
-            
+
             # In Linux, you cannot have the same target name as the name of the
             # directory name.
             target = target+"_prog"
-            
+
             exe = localEnv.Program(
                 target  = target,
                 source  = source,
                 LIBS    = libs,
             )
             targetAction = localEnv.PostBuildExtras(exe)
-            
+
             Alias(targetName, [targetAction])
             added = True
-        
+
         elif (
                 ('{0}.c'.format(projectDir) in os.listdir(os.path.join(PATH_TO_BOARD_PROJECTS,projectDir))) and
                 (localEnv['board']=='python')
             ):
             # Python case
-            
+
             # build the artifacts in a separate directory
             localEnv.VariantDir(
                 src_dir     = src_dir,
                 variant_dir = variant_dir,
             )
-            
+
             # build both the application's and the Python module's main files
             sources_c = [
                 os.path.join(projectDir,'{0}.c'.format(projectDir)),
                 os.path.join(projectDir,'openwsnmodule.c'),
             ]
-            
+
             localEnv.Command(
                 os.path.join(projectDir,'openwsnmodule.c'),
                 os.path.join('#','bsp','boards','python','openwsnmodule.c'),
@@ -947,14 +999,14 @@ def project_finder(localEnv):
                     Copy('$TARGET', '$SOURCE')
                 ]
             )
-            
+
             # objectify those two files
             for s in sources_c:
                 localEnv.Objectify(
                     target = localEnv.ObjectifiedFilename(s),
                     source = s,
                 )
-            
+
             # prepare environment for this build
             if os.name!='nt' and localEnv['simhost'].endswith('-windows'):
                 # Cross-build handling -- find DLL, rather than hardcode version,
@@ -964,23 +1016,23 @@ def project_finder(localEnv):
                     pathname = pathnames[0]
                 else:
                     raise SystemError("Can't find python dll in provided simhostpy")
-                
+
                 # ':' means no prefix, like 'lib', for shared library name
                 pysyslib = ':{0}'.format(os.path.basename(pathname))
                 pylibExt = '.pyd'
             else:
                 pysyslib = 'python' + distutils.sysconfig.get_config_var('VERSION')
                 pylibExt = distutils.sysconfig.get_config_var('SO')
-            
+
             target = targetName
             source = [localEnv.ObjectifiedFilename(s) for s in sources_c]
             libs   = buildLibs(projectDir)
             libs  += [[pysyslib]]
-            
+
             buildIncludePath(projectDir,localEnv)
-            
+
             # build a shared library (a Python extension module) rather than an exe
-            
+
             targetAction = localEnv.SharedLibrary(
                 target,
                 source,
@@ -988,25 +1040,25 @@ def project_finder(localEnv):
                 SHLIBPREFIX    = '',
                 SHLIBSUFFIX    = pylibExt,
             )
-            
+
             Alias(targetName, [targetAction])
             added = True
-            
+
         elif (
                 ('{0}.ewp'.format(projectDir) in os.listdir(os.path.join(PATH_TO_BOARD_PROJECTS,projectDir))) and
                 (localEnv['toolchain']=='iar-proj')
             ):
             # iar-proj case
-            
+
             source = [os.path.join(projectDir,'{0}.ewp'.format(projectDir)),]
-                        
+
             targetAction = localEnv.iarProjBuilder(
                 source  = source,
             )
-            
+
             Alias(targetName, [targetAction])
             added = True
-        
+
         if added:
             populateTargetGroup(localEnv,targetName)
 
