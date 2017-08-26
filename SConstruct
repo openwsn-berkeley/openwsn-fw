@@ -45,8 +45,12 @@ project:
                    (MinGW on Windows build host).
                    mspgcc, iar, iar-proj, gcc, armgcc
 				   
-	kernel         The kernel to use. either FreeRTOS or the default 
-	               non-preemptive OpenOS scheduler. freertos, openos
+    kernel         The kernel to use. either FreeRTOS or the default 
+	           non-preemptive OpenOS scheduler. freertos, openos
+
+    datamodel      Data model to use. Specific to MSP430X processors. Options
+                   available are "small" or "large", 16b or 20b addressing
+                   mode. If not specified small model is chosen.
     
     Connected hardware variables:
     bootload       Location of the board to bootload the binary on. 
@@ -107,6 +111,7 @@ command_line_options = {
         'wsn430v13b',
         'wsn430v14',
         'z1',
+        'MoteISTv5',
         # Cortex-M3
         'openmote-cc2538',
         'silabs-ezr32wg',
@@ -119,6 +124,7 @@ command_line_options = {
         'python',
     ],
     'toolchain':   [
+	'newmspgcc',
         'mspgcc',
         'iar',
         'iar-proj',
@@ -142,7 +148,9 @@ command_line_options = {
     'l2_security':      ['0','1'],
     'deadline_option':  ['0','1'],
     'ide':              ['none','qtcreator'],
-    'revision':         ['']
+    'revision':         [''],
+    # Extended mode capable MSP430X processor option
+    'datamodel':        ['small','large'],
 }
 
 def validate_option(key, value, env):
@@ -193,6 +201,14 @@ command_line_vars.AddVariables(
         'kernel',                                          # key
         '',                                                # help
         command_line_options['kernel'][0],                 # default
+        validate_option,                                   # validator
+        None,                                              # converter
+    ),
+    # Extended mode capable MSP430X core
+    (
+        'datamodel',                                       # key
+        '',                                                # help
+        command_line_options['datamodel'][0],              # default
         validate_option,                                   # validator
         None,                                              # converter
     ),
