@@ -132,7 +132,7 @@ if   env['toolchain']=='newmspgcc':
     )
     env.Append(BUILDERS = {'PrintSize' : printSizeFunc})
 
-if env['toolchain']=='mspgcc':
+elif env['toolchain']=='mspgcc':
     
     if env['board'] not in ['telosb','wsn430v13b','wsn430v14','gina','z1']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))

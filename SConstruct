@@ -124,8 +124,8 @@ command_line_options = {
         'python',
     ],
     'toolchain':   [
-	'newmspgcc',
         'mspgcc',
+	'newmspgcc',
         'iar',
         'iar-proj',
         'armgcc',
