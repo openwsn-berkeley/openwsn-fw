@@ -162,23 +162,6 @@ bool packetfunctions_isAllHostsMulticast(open_addr_t* address) {
    return FALSE;
 }
 
-bool packetfunctions_isLinkLocal(open_addr_t* address) {
-    if (
-      address->type          == ADDR_128B &&
-      address->addr_128b[0]  == 0xfe &&
-      address->addr_128b[1]  == 0x80 &&
-      address->addr_128b[2]  == 0x00 &&
-      address->addr_128b[3]  == 0x00 &&
-      address->addr_128b[4]  == 0x00 &&
-      address->addr_128b[5]  == 0x00 &&
-      address->addr_128b[6]  == 0x00 &&
-      address->addr_128b[7]  == 0x00 
-   ) {
-      return TRUE;
-   }
-   return FALSE;
-}
-
 bool packetfunctions_sameAddress(open_addr_t* address_1, open_addr_t* address_2) {
    uint8_t address_length;
    
@@ -293,10 +276,9 @@ void packetfunctions_reserveHeaderSize(OpenQueueEntry_t* pkt, uint8_t header_len
 }
 
 void packetfunctions_tossHeader(OpenQueueEntry_t* pkt, uint8_t header_length) {
-
    pkt->payload += header_length;
    pkt->length  -= header_length;
-   if ( (uint8_t*)(pkt->payload) > (uint8_t*)(pkt->packet+127) ) {
+   if ( (uint8_t*)(pkt->payload) > (uint8_t*)(pkt->packet+126) ) {
       openserial_printError(COMPONENT_PACKETFUNCTIONS,ERR_HEADER_TOO_LONG,
                             (errorparameter_t)1,
                             (errorparameter_t)pkt->length);
@@ -337,6 +319,9 @@ void packetfunctions_duplicatePacket(OpenQueueEntry_t* dst, OpenQueueEntry_t* sr
 
    // update l2_ASNpayload pointer
    dst->l2_ASNpayload = dst->payload + (src->l2_ASNpayload - src->payload);
+
+   // update l2_scheduleIE_cellObjects pointer
+   dst->l2_sixtop_cellObjects = dst->payload + (src->l2_sixtop_cellObjects - src->payload);
 
    // update l2_payload pointer
    dst->l2_payload = dst->payload + (src->l2_payload - src->payload);
@@ -396,62 +381,45 @@ bool packetfunctions_checkCRC(OpenQueueEntry_t* msg) {
 //see http://www-net.cs.umass.edu/kurose/transport/UDP.html, or http://tools.ietf.org/html/rfc1071
 //see http://en.wikipedia.org/wiki/User_Datagram_Protocol#IPv6_PSEUDO-HEADER
 void packetfunctions_calculateChecksum(OpenQueueEntry_t* msg, uint8_t* checksum_ptr) {
-    uint8_t temp_checksum[2];
-    uint8_t little_helper[2];
-    open_addr_t localscopeAddress;
+   uint8_t temp_checksum[2];
+   uint8_t little_helper[2];
    
-    // initialize running checksum
-    temp_checksum[0]  = 0;
-    temp_checksum[1]  = 0;
+   // initialize running checksum
+   temp_checksum[0]  = 0;
+   temp_checksum[1]  = 0;
    
-    //===== IPv6 pseudo header
-    
-    // determine the source and destination address format
-    if (packetfunctions_isBroadcastMulticast(&msg->l3_destinationAdd)==TRUE){
-        // use link local address for source address (prefix and EUI64)
-        
-        // source address
-        onesComplementSum(temp_checksum,(uint8_t*)linklocalprefix,8);
-        memcpy(&localscopeAddress,idmanager_getMyID(ADDR_64B),sizeof(open_addr_t));
-        // invert 'u' bit (section 2.5.1 at https://www.ietf.org/rfc/rfc2373.txt)
-        localscopeAddress.addr_64b[0] ^= 0x02;
-        onesComplementSum(temp_checksum,localscopeAddress.addr_64b,8);
-        
-        // boardcast destination address
-        onesComplementSum(temp_checksum,msg->l3_destinationAdd.addr_128b,16);
-    } else {
-        // use 128-bit ipv6 address for source address and destination address
-      
-        // source address
-        onesComplementSum(temp_checksum,(idmanager_getMyID(ADDR_PREFIX))->prefix,8);
-        onesComplementSum(temp_checksum,(idmanager_getMyID(ADDR_64B))->addr_64b,8);
-        // destination address
-        onesComplementSum(temp_checksum,msg->l3_destinationAdd.addr_128b,16);
-    }
+   //===== IPv6 pseudo header
    
-    // length
-    little_helper[0] = 0;
-    little_helper[1] = msg->length;
-    onesComplementSum(temp_checksum,little_helper,2);
+   // source address (prefix and EUI64)
+   onesComplementSum(temp_checksum,(idmanager_getMyID(ADDR_PREFIX))->prefix,8);
+   onesComplementSum(temp_checksum,(idmanager_getMyID(ADDR_64B))->addr_64b,8);
    
-    // next header
-    little_helper[0] = 0;
-    little_helper[1] = msg->l4_protocol;
-    onesComplementSum(temp_checksum,little_helper,2);
+   // destination address
+   onesComplementSum(temp_checksum,msg->l3_destinationAdd.addr_128b,16);
    
-    //===== payload
+   // length
+   little_helper[0] = 0;
+   little_helper[1] = msg->length;
+   onesComplementSum(temp_checksum,little_helper,2);
    
-    // reset the checksum currently in the payload
-    *checksum_ptr     = 0;
-    *(checksum_ptr+1) = 0;
+   // next header
+   little_helper[0] = 0;
+   little_helper[1] = msg->l4_protocol;
+   onesComplementSum(temp_checksum,little_helper,2);
    
-    onesComplementSum(temp_checksum,msg->payload,msg->length);
-    temp_checksum[0] ^= 0xFF;
-    temp_checksum[1] ^= 0xFF;
+   //===== payload
    
-    //write in packet
-    *checksum_ptr     = temp_checksum[0];
-    *(checksum_ptr+1) = temp_checksum[1];
+   // reset the checksum currently in the payload
+   *checksum_ptr     = 0;
+   *(checksum_ptr+1) = 0;
+   
+   onesComplementSum(temp_checksum,msg->payload,msg->length);
+   temp_checksum[0] ^= 0xFF;
+   temp_checksum[1] ^= 0xFF;
+   
+   //write in packet
+   *checksum_ptr     = temp_checksum[0];
+   *(checksum_ptr+1) = temp_checksum[1];
 }
 
 
@@ -498,18 +466,6 @@ uint32_t packetfunctions_ntohl( uint8_t* src ) {
       (((uint32_t) src[2]) << 8)      |
       (((uint32_t) src[3])
       );
-}
-
-// reverse byte order in the array
-void packetfunctions_reverseArrayByteOrder(uint8_t* start, uint8_t len) {
-   uint8_t *lo = start;
-   uint8_t *hi = start + len - 1;
-   uint8_t swap;
-   while (lo < hi) {
-      swap = *lo;
-      *lo++ = *hi;
-      *hi-- = swap;
-   }
 }
 
 //=========================== private =========================================

@@ -196,7 +196,7 @@ void adaptive_sync_countCompensationTimeout() {
          adaptive_sync_vars.compensateTicks += SYNC_ACCURACY;
       }
       // update current slot duration and reload compensationTimeout
-      radiotimer_setPeriod(newSlotDuration);
+      radio_setTimerPeriod(newSlotDuration);
       adaptive_sync_vars.compensationTimeout = adaptive_sync_vars.compensationInfo_vars.compensationSlots;
 #ifdef OPENSIM
       debugpins_debug_set();
@@ -251,7 +251,7 @@ void adaptive_sync_countCompensationTimeout_compoundSlots(uint16_t compoundSlots
          newSlotDuration                    += compensateTicks*SYNC_ACCURACY;
          adaptive_sync_vars.compensateTicks += compensateTicks * SYNC_ACCURACY;
       }
-      radiotimer_setPeriod(newSlotDuration);
+      radio_setTimerPeriod(newSlotDuration);
 #ifdef OPENSIM
       debugpins_debug_set();
       debugpins_debug_clr();

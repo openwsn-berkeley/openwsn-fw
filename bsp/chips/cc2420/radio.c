@@ -10,7 +10,6 @@
 #include "spi.h"
 #include "debugpins.h"
 #include "leds.h"
-#include "sctimer.h"
 
 //=========================== defines =========================================
 
@@ -40,14 +39,24 @@ void radio_init(void) {
    // change state
    radio_vars.state          = RADIOSTATE_RFOFF;
    
+   // start radiotimer with dummy setting to activate SFD pin interrupt
+   radiotimer_start(0xffff);
 }
 
-void radio_setStartFrameCb(radio_capture_cbt cb) {
-  sctimer_setStartFrameCb(cb);
+void radio_setOverflowCb(radiotimer_compare_cbt cb) {
+   radiotimer_setOverflowCb(cb);
 }
 
-void radio_setEndFrameCb(radio_capture_cbt cb) {
-   sctimer_setEndFrameCb(cb);
+void radio_setCompareCb(radiotimer_compare_cbt cb) {
+   radiotimer_setCompareCb(cb);
+}
+
+void radio_setStartFrameCb(radiotimer_capture_cbt cb) {
+   radiotimer_setStartFrameCb(cb);
+}
+
+void radio_setEndFrameCb(radiotimer_capture_cbt cb) {
+   radiotimer_setEndFrameCb(cb);
 }
 
 //===== reset
@@ -117,6 +126,24 @@ void radio_reset(void) {
       &radio_vars.radioStatusByte,
       *(uint16_t*)&cc2420_RXCTRL1_reg
    );
+}
+
+//===== timer
+
+void radio_startTimer(uint16_t period) {
+   radiotimer_start(period);
+}
+
+uint16_t radio_getTimerValue(void) {
+   return radiotimer_getValue();
+}
+
+void radio_setTimerPeriod(uint16_t period) {
+   radiotimer_setPeriod(period);
+}
+
+uint16_t radio_getTimerPeriod(void) {
+   return radiotimer_getPeriod();
 }
 
 //===== RF admin

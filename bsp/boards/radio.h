@@ -12,7 +12,7 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 */
 
-#include "board.h"
+#include "radiotimer.h"
 
 //=========================== define ==========================================
 
@@ -44,18 +44,23 @@ typedef enum {
 
 //=========================== typedef =========================================
 
-typedef void  (*radio_capture_cbt)(PORT_TIMER_WIDTH timestamp);
-
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
 
 // admin
 void                radio_init(void);
-void                radio_setStartFrameCb(radio_capture_cbt cb);
-void                radio_setEndFrameCb(radio_capture_cbt cb);
+void                radio_setOverflowCb(radiotimer_compare_cbt cb);
+void                radio_setCompareCb(radiotimer_compare_cbt cb);
+void                radio_setStartFrameCb(radiotimer_capture_cbt cb);
+void                radio_setEndFrameCb(radiotimer_capture_cbt cb);
 // reset
 void                radio_reset(void);
+// timer
+void                radio_startTimer(PORT_TIMER_WIDTH period);
+PORT_TIMER_WIDTH    radio_getTimerValue(void);
+void                radio_setTimerPeriod(PORT_TIMER_WIDTH period);
+PORT_TIMER_WIDTH    radio_getTimerPeriod(void);
 // RF admin
 void                radio_setFrequency(uint8_t frequency);
 void                radio_rfOn(void);

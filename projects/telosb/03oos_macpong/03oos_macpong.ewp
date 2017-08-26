@@ -2110,6 +2110,9 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\board_info.h</name>
         </file>
         <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\bsp_timer.c</name>
+        </file>
+        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\debugpins.c</name>
         </file>
         <file>
@@ -2119,7 +2122,7 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\leds.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\sctimer.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\radiotimer.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\sensors.c</name>
@@ -2259,15 +2262,9 @@
       <name>02a-MAClow</name>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\adaptive_sync.c</name>
-        <excluded>
-          <configuration>Debug</configuration>
-        </excluded>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\adaptive_sync.h</name>
-        <excluded>
-          <configuration>Debug</configuration>
-        </excluded>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154.c</name>

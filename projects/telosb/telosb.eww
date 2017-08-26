@@ -2,9 +2,6 @@
 
 <workspace>
   <project>
-    <path>$WS_DIR$\lib_bsp\lib_bsp.ewp</path>
-  </project>
-  <project>
     <path>$WS_DIR$\00std_button\00std_button.ewp</path>
   </project>
   <project>
@@ -15,6 +12,9 @@
   </project>
   <project>
     <path>$WS_DIR$\00std_eui64\00std_eui64.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\00std_eui64_uart\00std_eui64_uart.ewp</path>
   </project>
   <project>
     <path>$WS_DIR$\00std_i2c\00std_i2c.ewp</path>
@@ -35,6 +35,15 @@
     <path>$WS_DIR$\00std_xon_xoff\00std_xon_xoff.ewp</path>
   </project>
   <project>
+    <path>$WS_DIR$\01bsp_bothtimers\01bsp_bothtimers.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\01bsp_bsp_timer\01bsp_bsp_timer.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\01bsp_closetimers\01bsp_closetimers.ewp</path>
+  </project>
+  <project>
     <path>$WS_DIR$\01bsp_debugpins\01bsp_debugpins.ewp</path>
   </project>
   <project>
@@ -51,6 +60,9 @@
   </project>
   <project>
     <path>$WS_DIR$\01bsp_radio_tx\01bsp_radio_tx.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\01bsp_radiotimer\01bsp_radiotimer.ewp</path>
   </project>
   <project>
     <path>$WS_DIR$\01bsp_spi\01bsp_spi.ewp</path>

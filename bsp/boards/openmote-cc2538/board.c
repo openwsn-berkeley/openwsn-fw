@@ -19,25 +19,22 @@
 #include <source/sys_ctrl.h>
 
 #include "board.h"
+#include "bsp_timer.h"
 #include "debugpins.h"
 #include "i2c.h"
 #include "leds.h"
 #include "radio.h"
+#include "radiotimer.h"
 #include "sensors.h"
-#include "sctimer.h"
 #include "uart.h"
-#include "cryptoengine.h"
 
 //=========================== variables =======================================
 
 #define BSP_BUTTON_BASE                 ( GPIO_C_BASE )
 #define BSP_BUTTON_USER                 ( GPIO_PIN_3 )
 
-#ifdef REVA1 //Rev.A1 uses SF23 cc2538 which start at diffferent location
-    #define CC2538_FLASH_ADDRESS            ( 0x0023F800 )
-#else
-    #define CC2538_FLASH_ADDRESS            ( 0x0027F800 )
-#endif
+#define CC2538_FLASH_ADDRESS            ( 0x0027F800 )
+
 //=========================== prototypes ======================================
 
 void board_timer_init(void);
@@ -55,8 +52,6 @@ static void SysCtrlWakeupSetting(void);
 
 static void GPIO_C_Handler(void);
 
-bool user_button_initialized;
-
 //=========================== main ============================================
 
 extern int mote_main(void);
@@ -68,20 +63,20 @@ int main(void) {
 //=========================== public ==========================================
 
 void board_init(void) {
-   user_button_initialized = FALSE;
-   
    gpio_init();
    clock_init();
+
    board_timer_init();
+
    leds_init();
    debugpins_init();
    button_init();
-   sctimer_init();
+   bsp_timer_init();
+   radiotimer_init();
    uart_init();
    radio_init();
    i2c_init();
    sensors_init();
-   cryptoengine_init();
 }
 
 /**
@@ -202,9 +197,6 @@ static void button_init(void) {
     /* Delay to avoid pin floating problems */
     for (i = 0xFFFF; i != 0; i--);
 
-    GPIOPinIntDisable(BSP_BUTTON_BASE, BSP_BUTTON_USER);
-    GPIOPinIntClear(BSP_BUTTON_BASE, BSP_BUTTON_USER);
-
     /* The button is an input GPIO on falling edge */
     GPIOPinTypeGPIOInput(BSP_BUTTON_BASE, BSP_BUTTON_USER);
     GPIOIntTypeSet(BSP_BUTTON_BASE, BSP_BUTTON_USER, GPIO_FALLING_EDGE);
@@ -215,7 +207,6 @@ static void button_init(void) {
     /* Clear and enable the interrupt */
     GPIOPinIntClear(BSP_BUTTON_BASE, BSP_BUTTON_USER);
     GPIOPinIntEnable(BSP_BUTTON_BASE, BSP_BUTTON_USER);
-    user_button_initialized = TRUE;
 }
 
 static void SysCtrlRunSetting(void) {
@@ -300,16 +291,12 @@ static void SysCtrlWakeupSetting(void) {
  * Erases a Flash sector to trigger the bootloader backdoor
  */
 static void GPIO_C_Handler(void) {
-    if (!user_button_initialized) return;
     /* Disable the interrupts */
     IntMasterDisable();
-    leds_all_off();
 
     /* Eras the CCA flash page */
     FlashMainPageErase(CC2538_FLASH_ADDRESS);
 
-    leds_circular_shift();
-    
     /* Reset the board */
     SysCtrlReset();
 }

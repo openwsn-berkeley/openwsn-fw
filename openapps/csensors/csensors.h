@@ -16,7 +16,6 @@
 #include "opencoap.h"
 #include "opensensors.h"
 #include "sensors.h"
-#include "opentimers.h"
 
 //=========================== define ==========================================
 
@@ -29,7 +28,7 @@ typedef struct {
    coap_resource_desc_t         desc;
    opensensors_resource_desc_t* opensensors_resource;
    uint16_t                     period;
-   opentimers_id_t             timerId;
+   opentimer_id_t               timerId;
 } csensors_resource_t;
 
 //=========================== module variables ================================
@@ -41,7 +40,6 @@ typedef struct {
    uint8_t                      cb_list[CSENSORSTASKLIST];
    uint8_t                      cb_put;
    uint8_t                      cb_get;
-   uint8_t                      medType;
 } csensors_vars_t;
 
 //=========================== variables =======================================
@@ -56,4 +54,3 @@ void csensors_init(void);
 */
 
 #endif
-

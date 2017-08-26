@@ -35,6 +35,7 @@ to this board.
 //===== timer
 
 #define PORT_TIMER_WIDTH                    uint16_t
+#define PORT_RADIOTIMER_WIDTH               uint16_t
 
 #define PORT_SIGNED_INT_WIDTH               int16_t
 #define PORT_TICS_PER_MS                    33
@@ -58,13 +59,13 @@ to this board.
 #define PORT_TsSlotDuration                 492   // counter counts one extra count, see datasheet
 
 // execution speed related
-#define PORT_maxTxDataPrepare               100   //  2899us (measured 2516us)
+#define PORT_maxTxDataPrepare               100    //  2899us (measured 2420us)
 #define PORT_maxRxAckPrepare                20    //   610us (measured  474us)
 #define PORT_maxRxDataPrepare               33    //  1000us (measured  477us)
-#define PORT_maxTxAckPrepare                45    //  1372us (measured 1328us)- cannot be bigger than 28.. is the limit for telosb as actvitiy_rt5 is executed almost there.
+#define PORT_maxTxAckPrepare                40    //   792us (measured  746us)- cannot be bigger than 28.. is the limit for telosb as actvitiy_rt5 is executed almost there.
 
 // radio speed related
-#define PORT_delayTx                        16    //   488us (measured  473us)
+#define PORT_delayTx                        12    //   366us (measured  352us)
 #define PORT_delayRx                        0     //     0us (can not measure)
 
 //===== adaptive_sync accuracy

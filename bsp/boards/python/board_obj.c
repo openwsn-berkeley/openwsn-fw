@@ -10,9 +10,10 @@
 #include "debugpins_obj.h"
 #include "leds_obj.h"
 #include "uart_obj.h"
+#include "bsp_timer_obj.h"
 #include "radio_obj.h"
+#include "radiotimer_obj.h"
 #include "eui64_obj.h"
-#include "sctimer_obj.h"
 
 //=========================== variables =======================================
 
@@ -30,9 +31,10 @@ void board_init(OpenMote* self) {
    // initialize bsp modules
    debugpins_init(self);
    leds_init(self);
-   sctimer_init(self);
    uart_init(self);
+   bsp_timer_init(self);
    radio_init(self);
+   radiotimer_init(self);
    
    // forward to Python
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_board_init],NULL);

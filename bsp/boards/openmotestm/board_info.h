@@ -29,10 +29,10 @@ to return the board's description.
 
 //===== timer
 
-#define PORT_TIMER_WIDTH                    uint32_t
-#define PORT_RADIOTIMER_WIDTH               uint32_t
+#define PORT_TIMER_WIDTH                    uint16_t
+#define PORT_RADIOTIMER_WIDTH               uint16_t
 
-#define PORT_SIGNED_INT_WIDTH               int32_t
+#define PORT_SIGNED_INT_WIDTH               int16_t
 #define PORT_TICS_PER_MS                    32
 #define SCHEDULER_WAKEUP()                  EXTI->SWIER |= EXTI_Line1;
 #define SCHEDULER_ENABLE_INTERRUPT()        //enable in board use EXTI_Line1
@@ -68,7 +68,7 @@ to return the board's description.
 
 //===== adaptive_sync accuracy
 
-#define SYNC_ACCURACY                       2     // ticks
+#define SYNC_ACCURACY                           2     // by ticks
 
 //=========================== typedef  ========================================
 

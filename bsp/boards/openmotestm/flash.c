@@ -16,7 +16,7 @@
 
 //=========================== public ==========================================
 
-void flash_init(void) {   
+void flash_init() {   
     FLASH_Unlock(); 
     FLASH_ClearFlag(FLASH_FLAG_BSY | FLASH_FLAG_EOP|FLASH_FLAG_PGERR |FLASH_FLAG_WRPRTERR);
 }
@@ -27,7 +27,7 @@ uint8_t flash_erasePage(uint32_t address) {
     return status;
 }
 
-uint8_t  flash_erase_optByte(void) {
+uint8_t  flash_erase_optByte() {
     uint8_t status;
     status = FLASH_EraseOptionBytes();
     return status;

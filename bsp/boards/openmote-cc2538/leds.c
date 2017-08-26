@@ -131,48 +131,9 @@ void leds_error_blink() {
 }
 
 void leds_circular_shift() {
-   uint8_t i;
-   volatile uint16_t delay;
-   
-   // turn all LEDs off
-   bspLedClear(BSP_LED_ALL);
-     
-   // incrementally turn LED on
-   for (i=0;i<10;i++) {
-      bspLedSet(BSP_LED_1);
-      for (delay=0xffff;delay>0;delay--);
-      bspLedClear(BSP_LED_1);
-      bspLedSet(BSP_LED_2);
-      for (delay=0xffff;delay>0;delay--);
-      bspLedClear(BSP_LED_2);
-      bspLedSet(BSP_LED_3);
-      for (delay=0xffff;delay>0;delay--);
-      bspLedClear(BSP_LED_3);
-      bspLedSet(BSP_LED_4);
-      for (delay=0xffff;delay>0;delay--);
-      bspLedClear(BSP_LED_ALL);
-   }
 }
 
 void leds_increment() {
-  uint8_t i;
-   volatile uint16_t delay;
-   
-   // turn all LEDs off
-   bspLedClear(BSP_LED_ALL);
-     
-   // incrementally turn LED on
-   for (i=0;i<10;i++) {
-      bspLedSet(BSP_LED_1);
-      for (delay=0xffff;delay>0;delay--);
-      bspLedSet(BSP_LED_2);
-      for (delay=0xffff;delay>0;delay--);
-      bspLedSet(BSP_LED_3);
-      for (delay=0xffff;delay>0;delay--);
-      bspLedSet(BSP_LED_4);
-      for (delay=0xffff;delay>0;delay--);
-      bspLedClear(BSP_LED_ALL);
-   }
 }
 
 //=========================== private =========================================

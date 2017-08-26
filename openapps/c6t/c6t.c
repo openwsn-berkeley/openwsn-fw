@@ -11,7 +11,6 @@
 #include "idmanager.h"
 #include "openqueue.h"
 #include "neighbors.h"
-#include "sf0.h"
 
 //=========================== defines =========================================
 
@@ -23,11 +22,10 @@ c6t_vars_t c6t_vars;
 
 //=========================== prototypes ======================================
 
-owerror_t c6t_receive(OpenQueueEntry_t* msg,
-        coap_header_iht*  coap_header,
-        coap_option_iht*  coap_incomingOptions,
-        coap_option_iht*  coap_outgoingOptions,
-        uint8_t*          coap_outgoingOptionsLen
+owerror_t c6t_receive(
+   OpenQueueEntry_t* msg,
+   coap_header_iht*  coap_header,
+   coap_option_iht*  coap_options
 );
 void    c6t_sendDone(
    OpenQueueEntry_t* msg,
@@ -45,7 +43,6 @@ void c6t_init() {
    c6t_vars.desc.path1len            = 0;
    c6t_vars.desc.path1val            = NULL;
    c6t_vars.desc.componentID         = COMPONENT_C6T;
-   c6t_vars.desc.securityContext     = NULL;
    c6t_vars.desc.discoverable        = TRUE;
    c6t_vars.desc.callbackRx          = &c6t_receive;
    c6t_vars.desc.callbackSendDone    = &c6t_sendDone;
@@ -65,17 +62,15 @@ void c6t_init() {
 
 \return Whether the response is prepared successfully.
 */
-owerror_t c6t_receive(OpenQueueEntry_t* msg,
-        coap_header_iht*  coap_header,
-        coap_option_iht*  coap_incomingOptions,
-        coap_option_iht*  coap_outgoingOptions,
-        uint8_t*          coap_outgoingOptionsLen
-) {
+owerror_t c6t_receive(
+      OpenQueueEntry_t* msg,
+      coap_header_iht*  coap_header,
+      coap_option_iht*  coap_options
+   ) {
+   
    owerror_t            outcome;
    open_addr_t          neighbor;
    bool                 foundNeighbor;
-   cellInfo_ht          celllist_add[CELLLIST_MAX_LEN];
-   cellInfo_ht          celllist_delete[CELLLIST_MAX_LEN];
    
    switch (coap_header->Code) {
       
@@ -94,28 +89,26 @@ owerror_t c6t_receive(OpenQueueEntry_t* msg,
             break;
          }
          
-         if (sf0_candidateAddCellList(celllist_add,1)==FALSE){
+         if (sixtop_setHandler(SIX_HANDLER_SF0)==FALSE){
+            // one sixtop transcation is happening, only one instance at one time
+            
             // set the CoAP header
-            outcome                       = E_FAIL;
             coap_header->Code             = COAP_CODE_RESP_CHANGED;
+           
+            outcome                       = E_FAIL;
             break;
          }
          // call sixtop
-         outcome = sixtop_request(
-            IANA_6TOP_CMD_ADD,                  // code
-            &neighbor,                          // neighbor
-            1,                                  // number cells
-            LINKOPTIONS_TX,                     // cellOptions
-            celllist_add,                       // celllist to add
-            NULL,                               // celllist to delete (not used)
-            sf0_getsfid(),                      // sfid
-            0,                                  // list command offset (not used)
-            0                                   // list command maximum celllist (not used)
+         sixtop_request(
+            IANA_6TOP_CMD_ADD,
+            &neighbor,
+            1
          );
          
          // set the CoAP header
          coap_header->Code             = COAP_CODE_RESP_CHANGED;
-
+         
+         outcome                       = E_SUCCESS;
          break;
       
       case COAP_CODE_REQ_DELETE:
@@ -133,28 +126,26 @@ owerror_t c6t_receive(OpenQueueEntry_t* msg,
             break;
          }
          
-         // call sixtop
-         if (sf0_candidateRemoveCellList(celllist_delete,&neighbor,1)==FALSE){
+         if (sixtop_setHandler(SIX_HANDLER_SF0)==FALSE){
+            // one sixtop transcation is happening, only one instance at one time
+            
             // set the CoAP header
-            outcome                       = E_FAIL;
             coap_header->Code             = COAP_CODE_RESP_CHANGED;
+           
+            outcome                       = E_FAIL;
             break;
          }
          // call sixtop
-         outcome = sixtop_request(
-            IANA_6TOP_CMD_ADD,                  // code
-            &neighbor,                          // neighbor
-            1,                                  // number cells
-            LINKOPTIONS_TX,                     // cellOptions
-            celllist_add,                       // celllist to add
-            NULL,                               // celllist to delete (not used)
-            sf0_getsfid(),                      // sfid
-            0,                                  // list command offset (not used)
-            0                                   // list command maximum celllist (not used)
+         sixtop_request(
+            IANA_6TOP_CMD_DELETE,
+            &neighbor,
+            1
          );
          
          // set the CoAP header
          coap_header->Code             = COAP_CODE_RESP_CHANGED;
+         
+         outcome                       = E_SUCCESS;
          break;
          
       default:

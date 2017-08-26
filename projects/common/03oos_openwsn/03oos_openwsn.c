@@ -5,6 +5,7 @@
 */
 
 #include "board.h"
+#include "crypto_engine.h"
 #include "scheduler.h"
 #include "openstack.h"
 #include "opendefs.h"
@@ -13,6 +14,7 @@ int mote_main(void) {
    
    // initialize
    board_init();
+   CRYPTO_ENGINE.init();
    scheduler_init();
    openstack_init();
    

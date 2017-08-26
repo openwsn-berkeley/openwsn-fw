@@ -12,8 +12,9 @@
 #include "uart.h"
 #include "spi.h"
 #include "i2c.h"
-#include "sctimer.h"
+#include "bsp_timer.h"
 #include "radio.h"
+#include "radiotimer.h"
 #include "eui64.h"
 
 //#define ISR_BUTTON 1
@@ -63,8 +64,9 @@ void board_init() {
    leds_init();
    uart_init();
    spi_init();
+   bsp_timer_init();
    radio_init();
-   sctimer_init();
+   radiotimer_init();
    
    // enable interrupts
    __bis_SR_register(GIE);
@@ -162,7 +164,7 @@ ISR(COMPARATORA){
 
 ISR(TIMERB1){
    debugpins_isr_set();
-   if (sctimer_isr()==KICK_SCHEDULER) {       // radiotimer
+   if (radiotimer_isr()==KICK_SCHEDULER) {       // radiotimer
       __bic_SR_register_on_exit(CPUOFF);
    }
    debugpins_isr_clr();
@@ -170,7 +172,10 @@ ISR(TIMERB1){
 
 ISR(TIMERA0){
    debugpins_isr_set();
-   while(1); // should never happen
+   if (bsp_timer_isr()==KICK_SCHEDULER) {        // timer: 0
+      __bic_SR_register_on_exit(CPUOFF);
+   }
+   debugpins_isr_clr();
 }
 
 ISR(TIMERB0){

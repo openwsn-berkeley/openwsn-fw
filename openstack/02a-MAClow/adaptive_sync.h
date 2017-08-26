@@ -34,7 +34,7 @@ typedef struct {
 
 typedef struct {
    adaptive_sync_state_t     clockState;
-   PORT_TIMER_WIDTH          elapsedSlots;            // since last synchronizatino, this number of slots have elapsed.
+   PORT_RADIOTIMER_WIDTH     elapsedSlots;            // since last synchronizatino, this number of slots have elapsed.
    uint16_t                  compensationTimeout;     // decrease one every slot, when it reach zero, adjust currectly slot length by 2 tick(60us). 
    uint16_t                  compensateTicks;         // record how many ticks  are compensated 
    asn_t                     oldASN;                  // the asn when synchronized previous time

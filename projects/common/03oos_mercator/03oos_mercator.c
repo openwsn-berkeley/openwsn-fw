@@ -18,9 +18,10 @@ int mote_main(void) {
    board_init();
    scheduler_init();
    opentimers_init();
-   mercator_vars.sendTimerId = opentimers_create();
 
    leds_all_off();
+   radiotimer_start(0xffff);
+   radiotimer_cancel();
    
    // get mac
    eui64_get(mercator_vars.mac);
@@ -133,7 +134,7 @@ void serial_rx_REQ_IDLE(void) {
       return;
    }
    if (mercator_vars.status == ST_TX){
-      opentimers_cancel(mercator_vars.sendTimerId);
+      opentimers_stop(mercator_vars.sendTimerId);
    } else if (mercator_vars.status == ST_RX){
       leds_radio_off();
    }
@@ -182,8 +183,7 @@ void serial_rx_REQ_TX(void) {
    // TODO set TX Power
 
    // init opentimers to send packets periodically
-   opentimers_scheduleIn(
-      mercator_vars.sendTimerId,
+   mercator_vars.sendTimerId  = opentimers_start(
       htons(req->txifdur),
       TIMER_PERIODIC,
       TIME_MS,
@@ -462,7 +462,7 @@ void cb_endFrame(uint16_t timestamp) {
    }
 }
 
-void cb_sendPacket(opentimers_id_t id){
+void cb_sendPacket(opentimer_id_t id){
    IND_TXDONE_ht* resp;
    uint16_t pkctr;
    uint8_t pkctr_offset = 10; // srcmac[8] + transctr[2]
@@ -477,7 +477,7 @@ void cb_sendPacket(opentimers_id_t id){
    leds_error_off();
 
    if (mercator_vars.txpk_numpk == mercator_vars.txpk_totalnumpk) {
-      opentimers_cancel(mercator_vars.sendTimerId);
+      opentimers_stop(mercator_vars.sendTimerId);
 
       // finishing TX
       radio_rfOff();

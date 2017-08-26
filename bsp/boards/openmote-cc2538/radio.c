@@ -23,7 +23,7 @@
 #include "debugpins.h"
 #include "leds.h"
 #include "radio.h"
-#include "sctimer.h"
+#include "radiotimer.h"
 
 //=========================== defines =========================================
 
@@ -38,8 +38,8 @@
 //=========================== variables =======================================
 
 typedef struct {
-   radio_capture_cbt         startFrame_cb;
-   radio_capture_cbt         endFrame_cb;
+   radiotimer_capture_cbt    startFrame_cb;
+   radiotimer_capture_cbt    endFrame_cb;
    radio_state_t             state; 
 } radio_vars_t;
 
@@ -143,6 +143,9 @@ void radio_init() {
    IntRegister(INT_RFCORERTX, radio_isr_internal);
    IntRegister(INT_RFCOREERR, radio_error_isr);
    
+   IntPrioritySet(INT_RFCORERTX, HAL_INT_PRIOR_MAC);
+   IntPrioritySet(INT_RFCOREERR, HAL_INT_PRIOR_MAC);
+   
    IntEnable(INT_RFCORERTX);
    
    /* Enable all RF Error interrupts */
@@ -154,11 +157,19 @@ void radio_init() {
    radio_vars.state               = RADIOSTATE_RFOFF;
 }
 
-void radio_setStartFrameCb(radio_capture_cbt cb) {
+void radio_setOverflowCb(radiotimer_compare_cbt cb) {
+   radiotimer_setOverflowCb(cb);
+}
+
+void radio_setCompareCb(radiotimer_compare_cbt cb) {
+   radiotimer_setCompareCb(cb);
+}
+
+void radio_setStartFrameCb(radiotimer_capture_cbt cb) {
    radio_vars.startFrame_cb  = cb;
 }
 
-void radio_setEndFrameCb(radio_capture_cbt cb) {
+void radio_setEndFrameCb(radiotimer_capture_cbt cb) {
    radio_vars.endFrame_cb    = cb;
 }
 
@@ -177,6 +188,24 @@ void radio_reset() {
       CC2538_RF_CSP_ISRFOFF();
    }
    radio_init();
+}
+
+//===== timer
+
+void radio_startTimer(PORT_TIMER_WIDTH period) {
+   radiotimer_start(period);
+}
+
+PORT_TIMER_WIDTH radio_getTimerValue() {
+   return radiotimer_getValue();
+}
+
+void radio_setTimerPeriod(PORT_TIMER_WIDTH period) {
+   radiotimer_setPeriod(period);
+}
+
+PORT_TIMER_WIDTH radio_getTimerPeriod() {
+   return radiotimer_getPeriod();
 }
 
 //===== RF admin
@@ -437,10 +466,8 @@ void radio_isr_internal(void) {
    volatile PORT_TIMER_WIDTH capturedTime;
    uint8_t  irq_status0,irq_status1;
    
-   debugpins_isr_set();
-   
    // capture the time
-   capturedTime = sctimer_readCounter();
+   capturedTime = radiotimer_getCapturedTime();
    
    // reading IRQ_STATUS
    irq_status0 = HWREG(RFCORE_SFR_RFIRQF0);
@@ -460,7 +487,6 @@ void radio_isr_internal(void) {
       if (radio_vars.startFrame_cb!=NULL) {
          // call the callback
          radio_vars.startFrame_cb(capturedTime);
-         debugpins_isr_clr();
          // kick the OS
          return;
       } else {
@@ -475,7 +501,6 @@ void radio_isr_internal(void) {
       if (radio_vars.endFrame_cb!=NULL) {
          // call the callback
          radio_vars.endFrame_cb(capturedTime);
-         debugpins_isr_clr();
          // kick the OS
          return;
       } else {
@@ -490,7 +515,6 @@ void radio_isr_internal(void) {
       if (radio_vars.endFrame_cb!=NULL) {
          // call the callback
          radio_vars.endFrame_cb(capturedTime);
-         debugpins_isr_clr();
          // kick the OS
          return;
       } else {
@@ -506,14 +530,12 @@ void radio_isr_internal(void) {
       if (radio_vars.endFrame_cb!=NULL) {
          // call the callback
          radio_vars.endFrame_cb(capturedTime);
-         debugpins_isr_clr();
          // kick the OS
          return;
       } else {
          while(1);
       }
    }
-   debugpins_isr_clr();
    
    return;
 }

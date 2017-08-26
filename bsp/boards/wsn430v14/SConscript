@@ -18,13 +18,13 @@ cc2420 = localEnv.SConscript(
 
 source = [
     'board.c',
-    'sctimer.c',
+    'bsp_timer.c',
     'debugpins.c',
     'eui64.c',
     'leds.c',
+    'radiotimer.c',
     'spi.c',
     'uart.c',
-    'cryptoengine.c',
 ]
 
 board  = localEnv.Object(source=source) + cc2420

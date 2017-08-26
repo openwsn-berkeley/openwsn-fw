@@ -68,7 +68,6 @@ len=17  num=84  rssi=-81  lqi=108 crc=1
 #include "radio.h"
 #include "leds.h"
 #include "uart.h"
-#include "sctimer.h"
 
 //=========================== defines =========================================
 
@@ -79,6 +78,7 @@ len=17  num=84  rssi=-81  lqi=108 crc=1
 //=========================== variables =======================================
 
 typedef struct {
+   uint8_t    num_radioTimerOverflows;
    uint8_t    num_radioTimerCompare;
    uint8_t    num_startFrame;
    uint8_t    num_endFrame;
@@ -107,6 +107,7 @@ app_vars_t app_vars;
 
 // radiotimer
 void cb_radioTimerOverflows(void);
+void cb_radioTimerCompare(void);
 // radio
 void cb_startFrame(PORT_TIMER_WIDTH timestamp);
 void cb_endFrame(PORT_TIMER_WIDTH timestamp);
@@ -128,8 +129,10 @@ int mote_main(void) {
    board_init();
    
    // add callback functions radio
-   sctimer_setStartFrameCb(cb_startFrame);
-   sctimer_setEndFrameCb(cb_endFrame);
+   radio_setOverflowCb(cb_radioTimerOverflows);
+   radio_setCompareCb(cb_radioTimerCompare);
+   radio_setStartFrameCb(cb_startFrame);
+   radio_setEndFrameCb(cb_endFrame);
    
    // setup UART
    uart_setCallbacks(cb_uartTxDone,cb_uartRxCb);
@@ -183,6 +186,20 @@ int mote_main(void) {
 }
 
 //=========================== callbacks =======================================
+
+//===== radiotimer
+
+void cb_radioTimerOverflows(void) {
+   
+   // update debug stats
+   app_dbg.num_radioTimerOverflows++;
+}
+
+void cb_radioTimerCompare(void) {
+   
+   // update debug stats
+   app_dbg.num_radioTimerCompare++;
+}
 
 //===== radio
 

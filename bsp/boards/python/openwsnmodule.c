@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include "openwsnmodule.h"
 
+#include "bsp_timer.h"
+
 //=========================== OpenMote Class ==================================
 
 //===== members
@@ -47,13 +49,17 @@ static PyObject* OpenMote_getState(OpenMote* self) {
    PyObject* returnVal;
    PyObject* uart_icb_tx;
    PyObject* uart_icb_rx;
+   PyObject* bsp_timer_icb_cb;
    PyObject* radio_icb_startFrame_cb;
    PyObject* radio_icb_endFrame_cb;
-   PyObject* sctimer_icb_compare_cb;
+   PyObject* radiotimer_icb_overflow_cb;
+   PyObject* radiotimer_icb_compare_cb;
+   //PyObject* ohlone_vars;
+   PyObject* tcpinject_vars;
    PyObject* icmpv6echo_vars;
    PyObject* icmpv6rpl_vars;
    PyObject* opencoap_vars;
-   PyObject* monitor_expiration_vars;
+   PyObject* tcp_vars;
    PyObject* neighbors_vars;
    PyObject* sixtop_vars;
    PyObject* sf0_vars;
@@ -77,12 +83,28 @@ static PyObject* OpenMote_getState(OpenMote* self) {
    PyDict_SetItemString(returnVal, "uart_icb_tx", uart_icb_tx);
    uart_icb_rx                    = PyInt_FromLong((intptr_t)self->uart_icb.rxCb);
    PyDict_SetItemString(returnVal, "uart_icb_rx", uart_icb_rx);
+   bsp_timer_icb_cb               = PyInt_FromLong((intptr_t)self->bsp_timer_icb.cb);
+   PyDict_SetItemString(returnVal, "bsp_timer_icb_cb", bsp_timer_icb_cb);
    radio_icb_startFrame_cb        = PyInt_FromLong((intptr_t)self->radio_icb.startFrame_cb);
    PyDict_SetItemString(returnVal, "radio_icb_startFrame_cb", radio_icb_startFrame_cb);
    radio_icb_endFrame_cb          = PyInt_FromLong((intptr_t)self->radio_icb.endFrame_cb);
    PyDict_SetItemString(returnVal, "radio_icb_endFrame_cb", radio_icb_endFrame_cb   );
-   sctimer_icb_compare_cb         = PyInt_FromLong((intptr_t)self->sctimer_icb.compare_cb);
-   PyDict_SetItemString(returnVal, "sctimer_icb_compare_cb", sctimer_icb_compare_cb);
+   radiotimer_icb_overflow_cb     = PyInt_FromLong((intptr_t)self->radiotimer_icb.overflow_cb);
+   PyDict_SetItemString(returnVal, "radiotimer_icb_overflow_cb", radiotimer_icb_overflow_cb);
+   radiotimer_icb_compare_cb      = PyInt_FromLong((intptr_t)self->radiotimer_icb.compare_cb);
+   PyDict_SetItemString(returnVal, "radiotimer_icb_compare_cb", radiotimer_icb_compare_cb);
+   
+   // ohlone_vars
+   /*
+   ohlone_vars = PyDict_New();
+   // TODO
+   PyDict_SetItemString(returnVal, "ohlone_vars", ohlone_vars);
+   */
+   
+   // tcpinject_vars
+   tcpinject_vars = PyDict_New();
+   // TODO
+   PyDict_SetItemString(returnVal, "tcpinject_vars", tcpinject_vars);
    
    // icmpv6echo_vars
    icmpv6echo_vars = PyDict_New();
@@ -99,11 +121,11 @@ static PyObject* OpenMote_getState(OpenMote* self) {
    // TODO
    PyDict_SetItemString(returnVal, "opencoap_vars", opencoap_vars);
    
-   // monitor_expiration_vars
-   monitor_expiration_vars = PyDict_New();
+   // tcp_vars
+   tcp_vars = PyDict_New();
    // TODO
-   PyDict_SetItemString(returnVal, "monitor_expiration_vars", monitor_expiration_vars);
-
+   PyDict_SetItemString(returnVal, "tcp_vars", tcp_vars);
+   
    // neighbors_vars
    neighbors_vars = PyDict_New();
    // TODO
@@ -182,6 +204,17 @@ static PyObject* OpenMote_getState(OpenMote* self) {
    return returnVal;
 }
 
+static PyObject* OpenMote_bsp_timer_isr(OpenMote* self) {
+   
+   // no arguments
+   
+   // call the callback
+   bsp_timer_isr(self);
+   
+   // return successfully
+   Py_RETURN_NONE;
+}
+
 static PyObject* OpenMote_radio_isr_startFrame(OpenMote* self, PyObject* args) {
    int capturedTime;
    
@@ -189,8 +222,8 @@ static PyObject* OpenMote_radio_isr_startFrame(OpenMote* self, PyObject* args) {
    if (!PyArg_ParseTuple(args, "i", &capturedTime)) {
       return NULL;
    }
-   if (capturedTime>0xffffffff) {
-      fprintf(stderr,"[OpenMote_radio_isr_startFrame] FATAL: capturedTime larger than 0xffffffff\n");
+   if (capturedTime>0xffff) {
+      fprintf(stderr,"[OpenMote_radio_isr_startFrame] FATAL: capturedTime larger than 0xffff\n");
       // TODO raise exception
       return NULL;
    }
@@ -198,7 +231,7 @@ static PyObject* OpenMote_radio_isr_startFrame(OpenMote* self, PyObject* args) {
    // call the callback
    radio_intr_startOfFrame(
       self,
-      (uint32_t)capturedTime
+      (uint16_t)capturedTime
    );
    
    // return successfully
@@ -212,8 +245,8 @@ static PyObject* OpenMote_radio_isr_endFrame(OpenMote* self, PyObject* args) {
    if (!PyArg_ParseTuple(args, "i", &capturedTime)) {
       return NULL;
    }
-   if (capturedTime>0xffffffff) {
-      fprintf(stderr,"[OpenMote_radio_isr_endFrame] FATAL: capturedTime larger than 0xffffffff\n");
+   if (capturedTime>0xffff) {
+      fprintf(stderr,"[OpenMote_radio_isr_startFrame] FATAL: capturedTime larger than 0xffff\n");
       // TODO raise exception
       return NULL;
    }
@@ -221,19 +254,30 @@ static PyObject* OpenMote_radio_isr_endFrame(OpenMote* self, PyObject* args) {
    // call the callback
    radio_intr_endOfFrame(
       self,
-      (uint32_t)capturedTime
+      (uint16_t)capturedTime
    );
    
    // return successfully
    Py_RETURN_NONE;
 }
 
-static PyObject* OpenMote_sctimer_isr(OpenMote* self) {
+static PyObject* OpenMote_radiotimer_isr_compare(OpenMote* self) {
    
    // no arguments
    
    // call the callback
-   sctimer_intr_compare(self);
+   radiotimer_intr_compare(self);
+   
+   // return successfully
+   Py_RETURN_NONE;
+}
+
+static PyObject* OpenMote_radiotimer_isr_overflow(OpenMote* self) {
+   
+   // no arguments
+   
+   // call the callback
+   radiotimer_intr_overflow(self);
    
    // return successfully
    Py_RETURN_NONE;
@@ -294,9 +338,11 @@ static PyMethodDef OpenMote_methods[] = {
    {  "set_callback",             (PyCFunction)OpenMote_set_callback,               METH_VARARGS,  ""},
    {  "getState",                 (PyCFunction)OpenMote_getState,                   METH_NOARGS,   ""},
    //=== BSP
+   {  "bsp_timer_isr",            (PyCFunction)OpenMote_bsp_timer_isr,              METH_NOARGS,   ""},
    {  "radio_isr_startFrame",     (PyCFunction)OpenMote_radio_isr_startFrame,       METH_VARARGS,  ""},
    {  "radio_isr_endFrame",       (PyCFunction)OpenMote_radio_isr_endFrame,         METH_VARARGS,  ""},
-   {  "sctimer_isr",              (PyCFunction)OpenMote_sctimer_isr,                METH_NOARGS,   ""},
+   {  "radiotimer_isr_compare",   (PyCFunction)OpenMote_radiotimer_isr_compare,     METH_NOARGS,   ""},
+   {  "radiotimer_isr_overflow",  (PyCFunction)OpenMote_radiotimer_isr_overflow,    METH_NOARGS,   ""},
    {  "uart_isr_tx",              (PyCFunction)OpenMote_uart_isr_tx,                METH_NOARGS,   ""},
    {  "uart_isr_rx",              (PyCFunction)OpenMote_uart_isr_rx,                METH_NOARGS,   ""},
    {  "supply_on",                (PyCFunction)OpenMote_supply_on,                  METH_NOARGS,   ""},

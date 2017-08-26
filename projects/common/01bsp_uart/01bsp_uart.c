@@ -20,12 +20,12 @@ TeraTerm):
 // bsp modules required
 #include "board.h"
 #include "uart.h"
-#include "sctimer.h"
+#include "bsp_timer.h"
 #include "leds.h"
 
 //=========================== defines =========================================
 
-#define SCTIMER_PERIOD     0xffff // 0xffff@32kHz = 2s
+#define BSP_TIMER_PERIOD     0xffff // 0xffff@32kHz = 2s
 uint8_t stringToSend[]       = "Hello, World!\r\n";
 
 //=========================== variables =======================================
@@ -63,9 +63,9 @@ int mote_main(void) {
    uart_setCallbacks(cb_uartTxDone,cb_uartRxCb);
    uart_enableInterrupts();
    
-   // setup sctimer
-   sctimer_set_callback(cb_compare);
-   sctimer_setCompare(sctimer_readCounter()+SCTIMER_PERIOD);
+   // setup BSP timer
+   bsp_timer_set_callback(cb_compare);
+   bsp_timer_scheduleIn(BSP_TIMER_PERIOD);
    
    while(1) {
       
@@ -89,7 +89,7 @@ void cb_compare(void) {
    app_vars.uartSendNow = 1;
    
    // schedule again
-   sctimer_setCompare(sctimer_readCounter()+SCTIMER_PERIOD);
+   bsp_timer_scheduleIn(BSP_TIMER_PERIOD);
 }
 
 void cb_uartTxDone(void) {

@@ -18,7 +18,7 @@
 
 typedef struct {
    coap_resource_desc_t desc;
-   opentimers_id_t     timerId;
+   opentimer_id_t       timerId;
    uint16_t             period;   ///< inter-packet period (in ms)
 } cstorm_vars_t;
 
@@ -32,4 +32,3 @@ void cstorm_init(void);
 */
 
 #endif
-

@@ -13,8 +13,8 @@ while True:
     hisAddress     = dist_addr[0]
     hisPort        = dist_addr[1]
     
-    asn  = struct.unpack('<HHB',request[-14:-9])
-    counter  = struct.unpack('<h',request[-9:-7])
+    asn  = struct.unpack('<HHB',request[:5])
+    counter  = struct.unpack('<h',request[-2:])[0]
     
     print 'received "{0}" from [{1}]:{2}'.format(counter,hisAddress,hisPort)
 

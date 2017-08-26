@@ -14,10 +14,10 @@
 #include "openqueue.h"
 #include "openrandom.h"
 #include "opentimers.h"
-#include "opentimers.h"
 //-- 02a-TSCH
 #include "adaptive_sync.h"
 #include "IEEE802154E.h"
+#include "ieee802154_security_driver.h"
 //-- 02b-RES
 #include "schedule.h"
 #include "sixtop.h"
@@ -32,6 +32,7 @@
 #include "icmpv6echo.h"
 #include "icmpv6rpl.h"
 //-- 04-TRAN
+#include "opentcp.h"
 #include "openudp.h"
 //===== applications
 #include "openapps.h"
@@ -56,8 +57,9 @@ void openstack_init(void) {
    openrandom_init();
    opentimers_init();
    //-- 02a-TSCH
-//   adaptive_sync_init();
+   adaptive_sync_init();
    ieee154e_init();
+   IEEE802154_SECURITY.init();
    //-- 02b-RES
    schedule_init();
    sixtop_init();
@@ -72,6 +74,7 @@ void openstack_init(void) {
    icmpv6echo_init();
    icmpv6rpl_init();
    //-- 04-TRAN
+   opentcp_init();
    openudp_init();
    
    //===== applications
@@ -83,4 +86,3 @@ void openstack_init(void) {
       (errorparameter_t)0
    );
 }
-

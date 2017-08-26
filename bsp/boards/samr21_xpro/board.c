@@ -48,8 +48,9 @@
 #include "board.h"
 #include "uart.h"
 #include "opentimers.h"
+#include "radiotimer.h"
 #include "radio.h"
-#include "sctimer.h"
+#include "bsp_timer.h"
 #include "spi.h"
 #include "debugpins.h"
 #include "leds.h"
@@ -129,8 +130,12 @@ void board_init(void)
  /* UART Init */
  uart_init();  
  
- /* BSP Timer Init*/
- sctimer_init(); 
+ /* BSP Timer Init  --Init the RTC before BSP Timer*/
+ bsp_timer_init(); 
+ 
+ 
+ /* Radio Timer Init */
+ radiotimer_init();
  
  /* Clear the Radio Interrupt */
  extint_enable_irq(TRX_EXT_INT_CH);

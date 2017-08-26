@@ -25,13 +25,13 @@
 
 //=========================== prototypes ======================================
 
-void i2c_start(void);
-void i2c_stop(void);
+void i2c_start();
+void i2c_stop();
 void i2c_transmit(uint8_t byte);
 void i2c_address_direction(uint8_t address, uint8_t direction);
 
-uint8_t i2c_receive_ack(void);
-uint8_t i2c_receive_nack(void);
+uint8_t i2c_receive_ack();
+uint8_t i2c_receive_nack();
 
 //=========================== public ==========================================
 
@@ -126,7 +126,7 @@ void isr_i2c_rx(uint8_t bus_num){
 
 //=========================== private =========================================
 
-void i2c_start(void){
+void i2c_start(){
     // Generate start condition
     I2C_GenerateSTART(I2Cx, ENABLE);
     // Wait for I2C EV5.
@@ -135,7 +135,7 @@ void i2c_start(void){
     while (!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_MODE_SELECT));
 }
 
-void i2c_stop(void){
+void i2c_stop(){
     // Generate I2C stop condition
     I2C_GenerateSTOP(I2Cx, ENABLE);
     // Wait until I2C stop condition is finished
@@ -165,7 +165,7 @@ void i2c_transmit(uint8_t byte){
     while (!I2C_CheckEvent(I2Cx, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
 }
 
-uint8_t i2c_receive_ack(void){
+uint8_t i2c_receive_ack(){
     // Enable ACK of received data
     I2C_AcknowledgeConfig(I2Cx, ENABLE);
     // Wait for I2C EV7
@@ -175,7 +175,7 @@ uint8_t i2c_receive_ack(void){
     return I2C_ReceiveData(I2Cx);
 }
 
-uint8_t i2c_receive_nack(void){
+uint8_t i2c_receive_nack(){
     // Disable ACK of received data
     I2C_AcknowledgeConfig(I2Cx, DISABLE);
     // Wait for I2C EV7

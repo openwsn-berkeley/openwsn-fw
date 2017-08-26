@@ -17,8 +17,7 @@ void registerNewNeighbor(
         int8_t       rssi,
         asn_t*       asnTimestamp,
         bool         joinPrioPresent,
-        uint8_t      joinPrio,
-        bool         insecure
+        uint8_t      joinPrio
      );
 bool isNeighbor(open_addr_t* neighbor);
 void removeNeighbor(uint8_t neighborIndex);
@@ -95,54 +94,8 @@ open_addr_t* neighbors_getKANeighbor(uint16_t kaPeriod) {
    return NULL;
 }
 
-/**
-\brief Find neighbor which should act as a Join Proxy during the join process.
-
-This function iterates through the neighbor table and identifies the neighbor
-with lowest join priority metric to send join traffic through. 
-
-\returns A pointer to the neighbor's address, or NULL if no join proxy is found.
-*/
-open_addr_t* neighbors_getJoinProxy() {
-   uint8_t i;
-   uint8_t joinPrioMinimum;
-   open_addr_t* joinProxy;
-
-   joinPrioMinimum = 0xff;
-   joinProxy = NULL;
-   for (i=0;i<MAXNUMNEIGHBORS;i++) {
-      if (neighbors_vars.neighbors[i].used==TRUE && 
-              neighbors_vars.neighbors[i].joinPrio <= joinPrioMinimum) {
-          joinProxy = &(neighbors_vars.neighbors[i].addr_64b);
-          joinPrioMinimum = neighbors_vars.neighbors[i].joinPrio;
-      }
-   }
-   return joinProxy;
-}
-
 bool neighbors_getNeighborNoResource(uint8_t index){
     return neighbors_vars.neighbors[index].f6PNORES;
-}
-
-uint8_t neighbors_getGeneration(open_addr_t* address){
-    uint8_t i;
-    for (i=0;i<MAXNUMNEIGHBORS;i++){
-        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b)){
-            break;
-        }
-    }
-    return neighbors_vars.neighbors[i].generation;
-}
-
-uint8_t neighbors_getSequenceNumber(open_addr_t* address){
-    uint8_t i;
-    for (i=0;i<MAXNUMNEIGHBORS;i++){
-        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b)){
-            break;
-        }
-    }
-    return neighbors_vars.neighbors[i].sequenceNumber;
-
 }
 
 //===== interrogators
@@ -199,41 +152,6 @@ bool neighbors_isStableNeighborByIndex(uint8_t index) {
 }
 
 /**
-\brief Indicate whether some neighbor is an insecure neighbor
-
-\param[in] address The address of the neighbor, a 64-bit address.
-
-\returns TRUE if that neighbor is insecure, FALSE otherwise.
-*/
-bool neighbors_isInsecureNeighbor(open_addr_t* address) {
-   uint8_t     i;
-   bool        returnVal;
-   
-   // if not found, insecure
-   returnVal  = TRUE;
-   
-   switch (address->type) {
-      case ADDR_64B:
-         break;
-      default:
-         openserial_printCritical(COMPONENT_NEIGHBORS,ERR_WRONG_ADDR_TYPE,
-                               (errorparameter_t)address->type,
-                               (errorparameter_t)0);
-         return returnVal;
-   }
-   
-   // iterate through neighbor table
-   for (i=0;i<MAXNUMNEIGHBORS;i++) {
-      if (isThisRowMatching(address,i)) {
-         returnVal  = neighbors_vars.neighbors[i].insecure;
-         break;
-      }
-   }
-   
-   return returnVal;
-}
-
-/**
 \brief Indicate whether some neighbor has a lower DAG rank that me.
 
 \param[in] index The index of that neighbor in the neighbor table.
@@ -274,22 +192,6 @@ bool neighbors_isNeighborWithHigherDAGrank(uint8_t index) {
    return returnVal;
 }
 
-bool neighbors_reachedMaxTransmission(uint8_t index){
-    bool    returnVal;
-    
-    if (
-        neighbors_vars.neighbors[index].used     == TRUE            &&
-        neighbors_vars.neighbors[index].numTx    >  DEFAULTLINKCOST &&
-        neighbors_vars.neighbors[index].numTxACK == 0
-    ) { 
-        returnVal = TRUE;
-    } else {
-        returnVal = FALSE;
-    }
-    
-    return returnVal;
-}
-
 //===== updating neighbor information
 
 /**
@@ -317,8 +219,7 @@ void neighbors_indicateRx(open_addr_t* l2_src,
                           int8_t       rssi,
                           asn_t*       asnTs,
                           bool         joinPrioPresent,
-                          uint8_t      joinPrio,
-                          bool         insecure) {
+                          uint8_t      joinPrio) {
    uint8_t i;
    bool    newNeighbor;
    
@@ -330,9 +231,6 @@ void neighbors_indicateRx(open_addr_t* l2_src,
          // this is not a new neighbor
          newNeighbor = FALSE;
          
-         // whether the neighbor is considered as secure or not
-         neighbors_vars.neighbors[i].insecure = insecure;
-
          // update numRx, rssi, asn
          neighbors_vars.neighbors[i].numRx++;
          neighbors_vars.neighbors[i].rssi=rssi;
@@ -372,7 +270,7 @@ void neighbors_indicateRx(open_addr_t* l2_src,
    
    // register new neighbor
    if (newNeighbor==TRUE) {
-      registerNewNeighbor(l2_src, rssi, asnTs, joinPrioPresent, joinPrio, insecure);
+      registerNewNeighbor(l2_src, rssi, asnTs, joinPrioPresent,joinPrio);
    }
 }
 
@@ -433,36 +331,6 @@ void neighbors_indicateTx(open_addr_t* l2_dest,
    }
 }
 
-void neighbors_updateSequenceNumber(open_addr_t* address){
-    uint8_t i;
-    for (i=0;i<MAXNUMNEIGHBORS;i++){
-        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b)){
-            neighbors_vars.neighbors[i].sequenceNumber = (neighbors_vars.neighbors[i].sequenceNumber+1) & 0x0F;
-            break;
-        }
-    }
-}
-
-void neighbors_updateGeneration(open_addr_t* address){
-    uint8_t i;
-    for (i=0;i<MAXNUMNEIGHBORS;i++){
-        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b)){
-            neighbors_vars.neighbors[i].generation = (neighbors_vars.neighbors[i].generation+1)%9;
-            break;
-        }
-    }
-}
-
-void neighbors_resetGeneration(open_addr_t* address){
-    uint8_t i;
-    for (i=0;i<MAXNUMNEIGHBORS;i++){
-        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b)){
-            neighbors_vars.neighbors[i].generation = 0;
-            break;
-        }
-    }
-}
-
 //===== write addresses
 
 /**
@@ -518,32 +386,28 @@ This really belongs to icmpv6rpl but it would require a much more complex interf
 */
 
 uint16_t neighbors_getLinkMetric(uint8_t index) {
-    uint16_t  rankIncrease;
-    uint32_t  rankIncreaseIntermediary; // stores intermediary results of rankIncrease calculation
+   uint16_t  rankIncrease;
+   uint32_t  rankIncreaseIntermediary; // stores intermediary results of rankIncrease calculation
 
-    // we assume that this neighbor has already been checked for being in use         
-    // calculate link cost to this neighbor
-    if (neighbors_vars.neighbors[index].numTxACK==0) {
-        if (neighbors_vars.neighbors[index].numTx<=DEFAULTLINKCOST){
-            rankIncrease = (3*DEFAULTLINKCOST-2)*MINHOPRANKINCREASE;
-        } else {
-            rankIncrease = (3*LARGESTLINKCOST-2)*MINHOPRANKINCREASE;
-        }
-    } else {
-        //6TiSCH minimal draft using OF0 for rank computation: ((3*numTx/numTxAck)-2)*minHopRankIncrease
-        // numTx is on 8 bits, so scaling up 10 bits won't lead to saturation
-        // but this <<10 followed by >>10 does not provide any benefit either. Result is the same.
-        rankIncreaseIntermediary = (((uint32_t)neighbors_vars.neighbors[index].numTx) << 10);
-        rankIncreaseIntermediary = (3*rankIncreaseIntermediary * MINHOPRANKINCREASE) / ((uint32_t)neighbors_vars.neighbors[index].numTxACK);
-        rankIncreaseIntermediary = rankIncreaseIntermediary - ((uint32_t)(2 * MINHOPRANKINCREASE)<<10);
-        // this could still overflow for numTx large and numTxAck small, Casting to 16 bits will yiel the least significant bits
-        if (rankIncreaseIntermediary >= (65536<<10)) {
-            rankIncrease = 65535;
-        } else {
-            rankIncrease = (uint16_t)(rankIncreaseIntermediary >> 10);
-        }
-    }
-    return rankIncrease;
+   // we assume that this neighbor has already been checked for being in use         
+   // calculate link cost to this neighbor
+   if (neighbors_vars.neighbors[index].numTxACK==0) {
+      rankIncrease = (3*DEFAULTLINKCOST-2)*MINHOPRANKINCREASE;
+   } else {
+      //6TiSCH minimal draft using OF0 for rank computation: ((3*numTx/numTxAck)-2)*minHopRankIncrease
+      // numTx is on 8 bits, so scaling up 10 bits won't lead to saturation
+      // but this <<10 followed by >>10 does not provide any benefit either. Result is the same.
+      rankIncreaseIntermediary = (((uint32_t)neighbors_vars.neighbors[index].numTx) << 10);
+      rankIncreaseIntermediary = (3*rankIncreaseIntermediary * MINHOPRANKINCREASE) / ((uint32_t)neighbors_vars.neighbors[index].numTxACK);
+      rankIncreaseIntermediary = rankIncreaseIntermediary - ((uint32_t)(2 * MINHOPRANKINCREASE)<<10);
+      // this could still overflow for numTx large and numTxAck small, Casting to 16 bits will yiel the least significant bits
+      if (rankIncreaseIntermediary >= (65536<<10)) {
+         rankIncrease = 65535;
+      } else {
+      rankIncrease = (uint16_t)(rankIncreaseIntermediary >> 10);
+      }
+   }
+   return rankIncrease;
 }
 
 //===== maintenance
@@ -553,7 +417,7 @@ void  neighbors_removeOld() {
     bool       haveParent;
     uint8_t    neighborIndexWithLowestRank[3];
     dagrank_t  lowestRank;
-    PORT_TIMER_WIDTH timeSinceHeard;
+    PORT_RADIOTIMER_WIDTH timeSinceHeard;
     
     // remove old neighbor
     for (i=0;i<MAXNUMNEIGHBORS;i++) {
@@ -680,8 +544,7 @@ void registerNewNeighbor(open_addr_t* address,
                          int8_t       rssi,
                          asn_t*       asnTimestamp,
                          bool         joinPrioPresent,
-                         uint8_t      joinPrio,
-                         bool         insecure) {
+                         uint8_t      joinPrio) {
    uint8_t  i;
    // filter errors
    if (address->type!=ADDR_64B) {
@@ -697,7 +560,6 @@ void registerNewNeighbor(open_addr_t* address,
          if (neighbors_vars.neighbors[i].used==FALSE) {
             // add this neighbor
             neighbors_vars.neighbors[i].used                   = TRUE;
-            neighbors_vars.neighbors[i].insecure               = insecure;
             // neighbors_vars.neighbors[i].stableNeighbor         = FALSE;
             // Note: all new neighbors are consider stable
             neighbors_vars.neighbors[i].stableNeighbor         = TRUE;

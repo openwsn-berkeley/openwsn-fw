@@ -984,11 +984,7 @@
         <debug>1</debug>
         <option>
           <name>CUTest</name>
-          <state>-I$TOOLKIT_DIR$\inc</state>
-          <state>-@$TOOLKIT_DIR$\bin\iar.cmd</state>
-          <state>-@$PROJ_DIR$\source.txt</state>
-          <state>-@$PROJ_DIR$\include.txt</state>
-          <state>--preinclude=$PROJ_DIR$\IAR_ULPAdvisor_Defs.h</state>
+          <state>###Uninitialized###</state>
         </option>
         <option>
           <name>ULPRules</name>
@@ -2021,11 +2017,59 @@
   </configuration>
   <group>
     <name>bsp</name>
-    <excluded>
-      <configuration>Debug</configuration>
-    </excluded>
     <group>
       <name>boards</name>
+      <group>
+        <name>common</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\abstimer.c</name>
+          <excluded>
+            <configuration>Debug</configuration>
+          </excluded>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\abstimers2.c</name>
+          <excluded>
+            <configuration>Debug</configuration>
+          </excluded>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_cbc.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_cbc.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_ccms.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_ccms.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_ctr.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_ctr.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_ecb.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\aes_ecb.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\dummy_crypto_engine.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\dummy_crypto_engine.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\firmware_crypto_engine.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\firmware_crypto_engine.h</name>
+        </file>
+      </group>
       <group>
         <name>telosb</name>
         <file>
@@ -2038,10 +2082,16 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\board.c</name>
         </file>
         <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\board_crypto_engine.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\board_crypto_engine.h</name>
+        </file>
+        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\board_info.h</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\cryptoengine.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\bsp_timer.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\debugpins.c</name>
@@ -2053,7 +2103,7 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\leds.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\sctimer.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\radiotimer.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\sensors.c</name>
@@ -2119,6 +2169,12 @@
           <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\cc2420.h</name>
         </file>
         <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\cc2420_crypto.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\cc2420_crypto.h</name>
+        </file>
+        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\radio.c</name>
         </file>
       </group>
@@ -2137,12 +2193,6 @@
     <name>inc</name>
     <file>
       <name>$PROJ_DIR$\..\..\..\inc\opendefs.h</name>
-    </file>
-  </group>
-  <group>
-    <name>libs</name>
-    <file>
-      <name>$PROJ_DIR$\..\lib_bsp\Debug\Exe\lib_bsp.r43</name>
     </file>
   </group>
   <group>

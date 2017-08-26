@@ -7,34 +7,34 @@
 \addtogroup sctimer
 \{
 
-\brief A timer module with only a single compare value.
+\brief A timer module with only a single compare value. Can be used to replace
+       the "bsp_timer" and "radiotimer" modules with the help of abstimer.
 
-\author Tengfei Chang <tengfei.chang@inria.fr>, April 2017.
+\author Xavi Vilajosana <xvilajosana@eecs.berkeley.edu>, May 2012.
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, May 2012.
 */
 
 #include "stdint.h"
 #include "board.h"
 
+//=========================== define ==========================================
+#define SCTIMER_TICS_MS 33
 //=========================== typedef =========================================
 
-typedef void  (*sctimer_cbt)(void);
-typedef void  (*sctimer_capture_cbt)(PORT_TIMER_WIDTH timestamp);
+typedef kick_scheduler_t (*sctimer_cbt)(void);
 
 //=========================== variables =======================================
 
 
 //=========================== prototypes ======================================
 
-void     sctimer_init(void);
-void     sctimer_setCompare(PORT_TIMER_WIDTH val);
-void     sctimer_set_callback(sctimer_cbt cb);
-void     sctimer_setStartFrameCb(sctimer_capture_cbt cb);
-void     sctimer_setEndFrameCb(sctimer_capture_cbt cb);
-PORT_TIMER_WIDTH sctimer_readCounter(void);
-void     sctimer_enable(void);
-void     sctimer_disable(void);
-
-kick_scheduler_t sctimer_isr(void);
+void sctimer_init(void);
+void sctimer_stop(void);
+void sctimer_schedule(PORT_TIMER_WIDTH val);
+PORT_TIMER_WIDTH sctimer_getValue(void);
+void sctimer_setCb(sctimer_cbt cb);
+void sctimer_clearISR(void);
+void sctimer_reset(void);
 
 /**
 \}

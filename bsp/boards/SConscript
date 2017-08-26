@@ -7,23 +7,15 @@ localEnv = env.Clone()
 
 sources_h = [
     'board.h',
-    'cryptoengine.h',
+    'bsp_timer.h',
+    'crypto_engine.h',
     'debugpins.h',
     'eui64.h',
     'leds.h',
     'radio.h',
+    'radiotimer.h',
     'uart.h',
-    'sctimer.h',
-    os.path.join('common', 'openccms.h'),
-    os.path.join('common', 'openaes.h'),
 ]
-
-sources_c = [
-    os.path.join('common', 'openccms.c'),
-    os.path.join('common', 'openaes.c'),
-]
-
-target = 'libbsp'
 
 #============================ SCons targets ===================================
 
@@ -31,32 +23,34 @@ if localEnv['board']=='python':
     
     actions = []
     
-    for s in sources_c+sources_h:
+    for s in sources_h:
         action = localEnv.Objectify(
             target = localEnv.ObjectifiedFilename(s),
             source = s,
         )
         actions += [action]
-        
+    
     Alias('objectifybspheaders', actions)
-    
-    common = [localEnv.ObjectifiedFilename(s) for s in sources_c]
-    
-else:
-    common = sources_c
-    
-common = localEnv.Object(source=common)
-        
+
 if env['toolchain']!='iar-proj':
-        
+    
     board = localEnv.SConscript(
         os.path.join('#','bsp','boards',localEnv['board'],'SConscript'),
         variant_dir = localEnv['board'],
         exports     = {'env': env},
     )
 
-    libbsp = localEnv.Library(
-        target = target,
-        source = [board,common],
+    common = localEnv.SConscript(
+        os.path.join('#','bsp','boards','common','SConscript'),
+        variant_dir = 'common',
+        exports     = {'env': env},
     )
-    Alias(target, libbsp)
+
+    source = [board, common]
+    target = 'libbsp'
+
+    libbsp = localEnv.Library(
+        target=target,
+        source=source,
+    )
+    Alias('libbsp', libbsp)

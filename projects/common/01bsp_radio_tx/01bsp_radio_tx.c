@@ -17,7 +17,7 @@ remainder of the packet contains an incrementing bytes.
 #include "board.h"
 #include "radio.h"
 #include "leds.h"
-#include "sctimer.h"
+#include "bsp_timer.h"
 
 //=========================== defines =========================================
 
@@ -67,9 +67,10 @@ int mote_main(void) {
    board_init();
    
    // add radio callback functions
-   sctimer_set_callback(cb_radioTimerOverflows);
-   sctimer_setStartFrameCb(cb_startFrame);
-   sctimer_setEndFrameCb(cb_endFrame);
+   radio_setOverflowCb(cb_radioTimerOverflows);
+   radio_setCompareCb(cb_radioTimerCompare);
+   radio_setStartFrameCb(cb_startFrame);
+   radio_setEndFrameCb(cb_endFrame);
    
    // prepare radio
    radio_rfOn();
@@ -77,8 +78,7 @@ int mote_main(void) {
    radio_rfOff();
    
    // start periodic overflow
-   sctimer_setCompare(TIMER_PERIOD);
-   sctimer_enable();
+   radiotimer_start(TIMER_PERIOD);
    
    while(1) {
       

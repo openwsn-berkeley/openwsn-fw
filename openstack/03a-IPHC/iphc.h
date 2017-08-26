@@ -144,9 +144,6 @@ enum TYPE_6LORH_enums{
     RH3_6LOTH_TYPE_4         = 0x04,
     RPI_6LOTH_TYPE           = 0x05,
     IPECAP_6LOTH_TYPE        = 0x06,
-#ifdef DEADLINE_OPTION_ENABLED
-    DEADLINE_6LOTH_TYPE      = 0x07,
-#endif    
 };
 
 enum SIZE_6LORH_RH3_enums{
@@ -168,9 +165,6 @@ typedef struct {
    uint8_t     next_header;
    uint8_t*    routing_header[MAXNUM_RH3];
    uint8_t*    hopByhop_option;
-#ifdef DEADLINE_OPTION_ENABLED
-   uint8_t*    deadline_option;
-#endif   
    uint8_t     hop_limit;
    uint8_t	   rhe_length;
    open_addr_t src;
@@ -220,29 +214,6 @@ typedef struct {
 } rpl_option_ht;
 END_PACK
 
-#ifdef DEADLINE_OPTION_ENABLED
-BEGIN_PACK
-typedef struct {
-   uint8_t    optionType;
-   uint8_t    o_flag:1;         //
-   uint8_t    d_flag:1;         //
-   uint8_t    exp_etl:3; 				//
-   uint8_t    org_otl:3; 				//
-   uint8_t    time_unit:2; 				//exp_er,org_or
-   uint8_t		exponent:3;				//
-   uint8_t		rsv:3;						//
-	 uint8_t		et_val[8];				//
-	 uint8_t		ot_val[8];				//
-	 int16_t		time_left;
-} deadline_option_ht;
-END_PACK
-#endif
-
-typedef struct {
-   int16_t		time_left;
-	 uint16_t		time_elapsed;
-} monitor_expiration_vars_t;
-
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
@@ -253,9 +224,6 @@ owerror_t     iphc_sendFromForwarding(
    ipv6_header_iht*     ipv6_outer_header, 
    ipv6_header_iht*     ipv6_inner_header, 
    rpl_option_ht*       rpl_option, 
-#ifdef DEADLINE_OPTION_ENABLED 
-   deadline_option_ht*	deadline_option,
-#endif   
    uint32_t*            flow_label,
    uint8_t*             rh3_copy,
    uint8_t              rh3_length,
@@ -288,17 +256,6 @@ uint8_t iphc_retrieveIPv6HopByHopHeader(
    rpl_option_ht*       rpl_option
 );
 
-#ifdef DEADLINE_OPTION_ENABLED
-void iphc_retrieveIPv6DeadlineHeader(
-   OpenQueueEntry_t*    msg,
-   uint8_t*       deadline_msg_ptr,
-   deadline_option_ht*       deadline_option
-);
-
-void iphc_getDeadlineInfo(
-   monitor_expiration_vars_t*	stats
-);
-#endif
 /**
 \}
 \}
