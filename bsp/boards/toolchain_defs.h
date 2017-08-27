@@ -22,12 +22,11 @@
    #if __MSP430X__ & __MSP430_CPUX_TARGET_C20__ /* support for F5 familly processors */
       #define __MSPGCC_MAYBE_C16__ __attribute__((__c16__))
    #else /* -mc20 */
+    #define __MSPGCC_MAYBE_C16__
       #if defined(__GNUC__) && (__GNUC__==4)  && (__GNUC_MINOR__<=5) && defined(__MSP430__)
          // mspgcc <4.5.x
          #include <signal.h>
          #define              ISR(v) interrupt (v ## _VECTOR) v ## _ISR(void)
-      #else   /* endif GNU <= 4.5 */
-      #define __MSPGCC_MAYBE_C16__
       #endif
    #endif /* -mc20 */
    #define        ISR(v)   void __attribute__((__interrupt__ (a##_VECTOR))) __MSPGCC_MAYBE_C16__ (v##_ISR)(void)
