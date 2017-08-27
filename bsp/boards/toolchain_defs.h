@@ -31,8 +31,8 @@
          #define              ISR(v) interrupt (v ## _VECTOR) v ## _ISR(void)
       #elif
 
-	#define              __PRAGMA__(x) _Pragma(#x)
-	#define              ISR(v) __PRAGMA__(vector=v ##_VECTOR) __interrupt void v ##_ISR(void)
+	#define	__PRAGMA__(x) _Pragma(#x)
+	#define	ISR(v) __PRAGMA__(vector=v ##_VECTOR) __interrupt void v ##_ISR(void)
 
       #endif /* END OTHER MSPGCC */
    #endif
