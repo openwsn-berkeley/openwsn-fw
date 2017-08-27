@@ -1,7 +1,6 @@
 language: c
 
 before_script:
-file_glob: true
 - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 6D1D8367A3421AFB
 - sudo add-apt-repository -y ppa:terry.guo/gcc-arm-embedded
 - sudo apt-get update
