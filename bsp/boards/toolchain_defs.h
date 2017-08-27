@@ -18,19 +18,24 @@
 //===== ISR and pragma
 
 #if defined(__GNUC__)  &&  defined(__MSP430__)
+
     /* This is the MSPGCC compiler */
-   #if __MSP430X__ & __MSP430_CPUX_TARGET_C20__ /* support for F5 familly processors */
-      #define __MSPGCC_MAYBE_C16__ __attribute__((__c16__))
-   #else /* -mc20 */
-    #define __MSPGCC_MAYBE_C16__
+   #if __MSP430X__ && __MSP430_CPUX_TARGET_C20__
+      /* support for F5 familly processors */
+      #define ISR(v)   void __attribute__((__interrupt__ (a##_VECTOR))) __attribute__((__c16__)) (v##_ISR)(void)
+
+   #else /* END MSP430X */
+
       #if defined(__GNUC__) && (__GNUC__==4)  && (__GNUC_MINOR__<=5) && defined(__MSP430__)
          // mspgcc <4.5.x
-         #include <legacymsp430.h>
-         //#define              ISR(v) interrupt (v ## _VECTOR) v ## _ISR(void)
-      #endif
-   #endif /* -mc20 */
-   #define        ISR(v)   void __attribute__((__interrupt__ (a##_VECTOR))) __MSPGCC_MAYBE_C16__ (v##_ISR)(void)
-#else /* -mc20 */
+         #define              ISR(v) interrupt (v ## _VECTOR) v ## _ISR(void)
+      #endif /* END OTHER MSPGCC */
+
+	#define              __PRAGMA__(x) _Pragma(#x)
+	#define              ISR(v) __PRAGMA__(vector=v ##_VECTOR) __interrupt void v ##_ISR(void)
+   #endif
+
+#else 
    // other
    #define              __PRAGMA__(x) _Pragma(#x)
    #define              ISR(v) __PRAGMA__(vector=v ##_VECTOR) __interrupt void v ##_ISR(void)
