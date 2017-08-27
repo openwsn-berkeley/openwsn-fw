@@ -7,7 +7,7 @@ before_script:
 - sudo apt-get install gcc-arm-none-eabi
 # Download and install SOMMNIUM msp430-gcc binaries (This is the newmspgcc)
 - mkdir ./temp
-- cd    ./tmep
+- cd    ./temp
 - wget  http://software-dl.ti.com/msp430/msp430_public_sw/mcu/msp430/MSPGCC/4_02_00_00/exports/msp430-gcc-support-files-1.194.zip &
 - wget  http://software-dl.ti.com/msp430/msp430_public_sw/mcu/msp430/MSPGCC/4_02_00_00/exports/msp430-gcc-5.3.0.224_linux64.tar.bz2
 - unzip msp430-gcc-support-files*.zip &
