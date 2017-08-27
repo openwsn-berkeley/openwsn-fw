@@ -1,6 +1,7 @@
 language: c
 
 before_script:
+file_glob: true
 - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 6D1D8367A3421AFB
 - sudo add-apt-repository -y ppa:terry.guo/gcc-arm-embedded
 - sudo apt-get update
@@ -12,8 +13,8 @@ before_script:
 - wget  http://software-dl.ti.com/msp430/msp430_public_sw/mcu/msp430/MSPGCC/4_02_00_00/exports/msp430-gcc-5.3.0.224_linux64.tar.bz2
 - unzip msp430-gcc-support-files*.zip &
 - sudo  mkdir -p /opt/msp430-toolchain && sudo tar xvjf msp430-gcc*.tar.bz2 -C /opt/msp430-toolchain --strip-components=1
-- sudo  mv ./msp430-gcc-support-files/include/*.ld /opt/msp430-toolchain/msp430-elf/lib/ldscripts
-- sudo  mv ./msp430-gcc-support-files/include/* /opt/msp430-toolchain/msp430-elf/include
+- sudo  mv msp430-gcc-support-files/include/*.ld /opt/msp430-toolchain/msp430-elf/lib/ldscripts
+- sudo  mv msp430-gcc-support-files/include/* /opt/msp430-toolchain/msp430-elf/include
 - sudo  rm -rf *	#clean Downloads.dir
 - cd ..
 - echo "export PATH=\$PATH:/opt/msp430-toolchain/bin" >> .bashrc
