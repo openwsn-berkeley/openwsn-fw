@@ -29,6 +29,8 @@ void sendDIO(void);
 void icmpv6rpl_timer_DAO_cb(opentimers_id_t id);
 void icmpv6rpl_timer_DAO_task(void);
 void sendDAO(void);
+// parent update cb
+void icmpv6rpl_timer_parent_update_cb(opentimers_id_t id);
 
 //=========================== public ==========================================
 
@@ -177,6 +179,16 @@ void icmpv6rpl_init() {
        TIME_MS,
        TIMER_ONESHOT,
        icmpv6rpl_timer_DAO_cb
+   );
+   
+   // parent update timer
+   icmpv6rpl_vars.timerIdParentUpdate        = opentimers_create();
+   opentimers_scheduleIn(
+       icmpv6rpl_vars.timerIdParentUpdate,
+       TIMER_PARENT_UPDATE_TIMEOUT,
+       TIME_MS,
+       TIMER_PERIODIC,
+       icmpv6rpl_timer_parent_update_cb
    );
 }
 
@@ -328,33 +340,19 @@ bool icmpv6rpl_getPreferredParentIndex(uint8_t* indexptr) {
 \param[out] addressToWrite Where to copy the preferred parent's address to.
 */
 bool icmpv6rpl_getPreferredParentEui64(open_addr_t* addressToWrite) {
-    uint8_t i;
-    uint16_t lowestRankIncrease;
-    uint16_t lowestRankIncreaseParent;
-    uint16_t rankIncrease;
+    
+    uint16_t parentIndex;
     if (icmpv6rpl_vars.numParent==0){
         addressToWrite = NULL;
         return FALSE;
     }
-    lowestRankIncrease = MAXDAGRANK;
-    for (i=0;i<icmpv6rpl_vars.numParent;i++){
-        rankIncrease = neighbors_getLinkMetric(icmpv6rpl_vars.parentIndex[i]);
-        if (rankIncrease < lowestRankIncrease){
-            lowestRankIncrease       = rankIncrease;
-            lowestRankIncreaseParent = icmpv6rpl_vars.parentIndex[i];
-        }
+    if (openrandom_get16b()>0xffff/2){
+        parentIndex = icmpv6rpl_vars.parentIndex[0];
+    } else {
+        parentIndex = icmpv6rpl_vars.parentIndex[openrandom_get16b()%(icmpv6rpl_vars.numParent)];
     }
     
-    // choose lowest rank increase as preferred parent
-    if (lowestRankIncrease==(3*DEFAULTLINKCOST-2)*MINHOPRANKINCREASE){
-        // no statistic yet on each parent, randomly choose one (lowest rank parent has highest possibility to be chosen)
-        if (openrandom_get16b()>0xffff/2){
-            lowestRankIncreaseParent = icmpv6rpl_vars.parentIndex[0];
-        } else {
-            lowestRankIncreaseParent = icmpv6rpl_vars.parentIndex[openrandom_get16b()%(icmpv6rpl_vars.numParent)];
-        }
-    }
-    return neighbors_getNeighborEui64(addressToWrite,ADDR_64B,lowestRankIncreaseParent);
+    return neighbors_getNeighborEui64(addressToWrite,ADDR_64B,parentIndex);
 }
 
 /**
@@ -425,6 +423,10 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
     uint16_t  parentAddress_16b;
     open_addr_t parentAddress;
     
+    uint8_t   j;
+    uint16_t  tempSlotoffset;
+    uint16_t  parentControlSlots[PARENTS_NUM];
+    
     // sfcontrol
     // if I'm a DAGroot, my DAGrank is always MINHOPRANKINCREASE
     if ((idmanager_getIsDAGroot())==TRUE) {
@@ -485,20 +487,27 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
     
     memcpy(&icmpv6rpl_vars.parentIndex[0],&neighborIndexWithLowestRank[0],icmpv6rpl_vars.numParent);
     
-    // update parent sf control cells, which are dedicate txrx cells
-    schedule_removeDedicateTxRxCells();
+    // update parent sf control cells
+    j = 0;
+    memset(&parentControlSlots[0], 0, PARENTS_NUM);
     for (i=0;i<icmpv6rpl_vars.numParent;i++){
         if (neighbors_getNeighborEui64(&parentAddress,ADDR_64B,icmpv6rpl_vars.parentIndex[i])){
             parentAddress_16b = 256*parentAddress.addr_64b[6]+parentAddress.addr_64b[7];
-            schedule_addActiveSlot(
-                sf0_hashFunction(parentAddress_16b),
-                CELLTYPE_TXRX,
-                TRUE,
-                0,
-                &parentAddress
-            );
+            tempSlotoffset = sf0_hashFunction(parentAddress_16b);
+            if (schedule_isSlotOffsetAvailable(tempSlotoffset)==TRUE){
+                schedule_addActiveSlot(
+                    tempSlotoffset,
+                    CELLTYPE_TXRX,
+                    TRUE,
+                    0,
+                    &parentAddress
+                );
+            }
+            parentControlSlots[j] = tempSlotoffset;
+            j++;
         }
     }
+    schedule_removeDedicateTxRxCellsExcept(parentControlSlots,j);
 }
 
 /**
@@ -585,14 +594,6 @@ void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t* msg) {
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
       if (neighbors_getNeighborEui64(&NeighborAddress, ADDR_64B, i)) { // this neighbor entry is in use
          if (packetfunctions_sameAddress(&(msg->l2_nextORpreviousHop),&NeighborAddress)) { // matching address
-            if (
-                icmpv6rpl_vars.numParent==PARENTS_NUM && 
-                icmpv6rpl_vars.incomingDio->rank > icmpv6rpl_vars.parentIndex[icmpv6rpl_vars.numParent-1]
-            ){
-                // donot process neighbor DIO if its rank is larger than my highest parent rank to avoid loop/greediness
-                // https://tools.ietf.org/html/rfc6550#section-3.7.1
-                break;
-            }
             neighborRank=neighbors_getNeighborRank(i);
             if (
               (icmpv6rpl_vars.incomingDio->rank > neighborRank) &&
@@ -822,6 +823,24 @@ void icmpv6rpl_timer_DAO_task() {
         break;
     default:
         break;
+    }
+}
+
+void icmpv6rpl_timer_parent_update_cb(opentimers_id_t id){
+    open_addr_t       newNexthop;
+    OpenQueueEntry_t* msg;
+  
+    // called every TIMER_PARENT_UPDATE_TIMEOUT miliseconds
+    icmpv6rpl_updateMyDAGrankAndParentSelection();
+    
+    // get update to date parent as nexthop
+    memset(&newNexthop,0,sizeof(open_addr_t));
+    icmpv6rpl_getPreferredParentEui64(&newNexthop);
+    msg = openqueue_rplGetSentToNonParentPackets(&icmpv6rpl_vars.parentIndex[0],icmpv6rpl_vars.numParent);
+    
+    if (msg!=NULL && newNexthop.type != ADDR_NONE){
+        memcpy(&msg->l2_nextORpreviousHop, &newNexthop, sizeof(open_addr_t));
+        memcpy(msg->l2_nextHopPayload, &(newNexthop.addr_64b[0]), 8);
     }
 }
 

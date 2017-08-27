@@ -35,14 +35,12 @@ owerror_t     sixtop_send_internal(
 );
 
 // timer interrupt callbacks
-void          sixtop_maintenance_timer_cb(opentimers_id_t id);
 void          sixtop_timeout_timer_cb(opentimers_id_t id);
 void          sixtop_sendingEb_timer_cb(opentimers_id_t id);
 
 //=== EB/KA task
 
 void          timer_sixtop_sendEb_fired(void);
-void          timer_sixtop_management_fired(void);
 void          sixtop_sendEB(void);
 void          sixtop_sendKA(void);
 
@@ -104,7 +102,6 @@ void sixtop_init() {
     sixtop_vars.busySendingKA      = FALSE;
     sixtop_vars.busySendingEB      = FALSE;
     sixtop_vars.dsn                = 0;
-    sixtop_vars.mgtTaskCounter     = 0;
     sixtop_vars.kaPeriod           = MAXKAPERIOD;
     sixtop_vars.ebPeriod           = EBPERIOD;
     sixtop_vars.isResponseEnabled  = TRUE;
@@ -117,15 +114,6 @@ void sixtop_init() {
         TIME_MS,
         TIMER_ONESHOT,
         sixtop_sendingEb_timer_cb
-    );
-    
-    sixtop_vars.maintenanceTimerId   = opentimers_create();
-    opentimers_scheduleIn(
-        sixtop_vars.maintenanceTimerId,
-        sixtop_vars.periodMaintenance,
-        TIME_MS,
-        TIMER_PERIODIC,
-        sixtop_maintenance_timer_cb
     );
     
     sixtop_vars.timeoutTimerId      =  opentimers_create();
@@ -632,10 +620,6 @@ void sixtop_sendingEb_timer_cb(opentimers_id_t id){
     );
 }
 
-void sixtop_maintenance_timer_cb(opentimers_id_t id) {
-    scheduler_push_task(timer_sixtop_management_fired,TASKPRIO_SIXTOP);
-}
-
 void sixtop_timeout_timer_cb(opentimers_id_t id) {
     scheduler_push_task(timer_sixtop_six2six_timeout_fired,TASKPRIO_SIXTOP_TIMEOUT);
 }
@@ -650,29 +634,6 @@ void timer_sixtop_sendEb_fired(){
         sixtop_sendEB();
         break;
     default:
-        break;
-    }
-}
-
-/**
-\brief Timer handlers which triggers MAC management task.
-
-This function is called in task context by the scheduler after the RES timer
-has fired. This timer is set to fire every second, on average.
-
-The body of this function executes one of the MAC management task.
-*/
-void timer_sixtop_management_fired(void) {
-  
-    sixtop_vars.mgtTaskCounter = (sixtop_vars.mgtTaskCounter+1)%MAINTENANCE_PERIOD;
-   
-    switch (sixtop_vars.mgtTaskCounter) {
-    case 0:
-        // called every MAINTENANCE_PERIOD seconds
-        icmpv6rpl_updateMyDAGrankAndParentSelection();
-        break;
-    default:
-        // called every second, except once every MAINTENANCE_PERIOD seconds
         sixtop_sendKA();
         break;
     }

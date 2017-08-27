@@ -12,8 +12,9 @@
 
 //=========================== define ==========================================
 
-#define TIMER_DIO_TIMEOUT         10  // seconds
-#define TIMER_DAO_TIMEOUT         60  // seconds
+#define TIMER_DIO_TIMEOUT               10  // seconds
+#define TIMER_DAO_TIMEOUT               60  // seconds
+#define TIMER_PARENT_UPDATE_TIMEOUT  10000  // miliseconds
 
 // Non-Storing Mode of Operation (1)
 #define MOP_DIO_A                 0<<5
@@ -202,6 +203,7 @@ typedef struct {
    uint8_t                   numParent;               ///< this number of route the router has to DAG root
    uint8_t                   parentIndex[PARENTS_NUM];///< index of Parent in neighbor table (if isParent==TRUE)
    uint16_t                  lowestRankInHistory;     ///< the lowest rank mote even used
+   opentimers_id_t           timerIdParentUpdate;     ///< ID of the timer used to update parent.
    // actually only here for debug
    icmpv6rpl_dio_ht*         incomingDio;             //keep it global to be able to debug correctly.
    icmpv6rpl_pio_t*          incomingPio;             //pio structure incoming
@@ -221,14 +223,14 @@ uint8_t  icmpv6rpl_getRPLIntanceID(void);
 owerror_t icmpv6rpl_getRPLDODAGid(uint8_t* address_128b);
 void     icmpv6rpl_setDIOPeriod(uint16_t dioPeriod);
 void     icmpv6rpl_setDAOPeriod(uint16_t daoPeriod);
-bool     icmpv6rpl_getPreferredParentIndex(uint8_t* indexptr);           // new DB
-bool     icmpv6rpl_getPreferredParentEui64(open_addr_t* addressToWrite); // new DB
-bool     icmpv6rpl_isPreferredParent(open_addr_t* address);              // new DB
-dagrank_t icmpv6rpl_getMyDAGrank(void);                                  // new DB
-void     icmpv6rpl_setMyDAGrank(dagrank_t rank);                         // new DB
-void     icmpv6rpl_killPreferredParent(void);                            // new DB
-void     icmpv6rpl_updateMyDAGrankAndParentSelection(void);              // new DB
-void     icmpv6rpl_indicateRxDIO(OpenQueueEntry_t* msg);                 // new DB
+bool     icmpv6rpl_getPreferredParentIndex(uint8_t* indexptr);
+bool     icmpv6rpl_getPreferredParentEui64(open_addr_t* addressToWrite);
+bool     icmpv6rpl_isPreferredParent(open_addr_t* address);
+dagrank_t icmpv6rpl_getMyDAGrank(void);
+void     icmpv6rpl_setMyDAGrank(dagrank_t rank);
+void     icmpv6rpl_killPreferredParent(void);
+void     icmpv6rpl_updateMyDAGrankAndParentSelection(void);
+void     icmpv6rpl_indicateRxDIO(OpenQueueEntry_t* msg);
 bool     icmpv6rpl_daoSent(void);
 
 

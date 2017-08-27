@@ -4,6 +4,7 @@
 #include "packetfunctions.h"
 #include "IEEE802154E.h"
 #include "IEEE802154_security.h"
+#include "neighbors.h"
 
 //=========================== defination =====================================
 
@@ -266,6 +267,40 @@ OpenQueueEntry_t*  openqueue_macGetPacketCreatedBy(uint8_t creator,open_addr_t* 
                 packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)
             )
         ){
+            ENABLE_INTERRUPTS();
+            return &openqueue_vars.queue[i];
+        }
+    }
+    
+    ENABLE_INTERRUPTS();
+    return NULL;
+}
+
+OpenQueueEntry_t* openqueue_rplGetSentToNonParentPackets(uint8_t* parentIndex, uint8_t numPacket){
+    uint8_t      i,j;
+    open_addr_t  address;
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+
+    // first to look the packet created by layer requiring routing
+    for (i=0;i<QUEUELENGTH;i++) {
+        if (
+            openqueue_vars.queue[i].owner   == COMPONENT_SIXTOP_TO_IEEE802154E &&
+            openqueue_vars.queue[i].creator >= COMPONENT_FORWARDING            &&
+            packetfunctions_isBroadcastMulticast(&openqueue_vars.queue[i].l2_nextORpreviousHop) == FALSE
+        ){
+            for (j=0;j<numPacket;j++){
+                if (
+                    neighbors_getNeighborEui64(&address,ADDR_64B,parentIndex[j]) &&
+                    packetfunctions_sameAddress(&address,&openqueue_vars.queue[i].l2_nextORpreviousHop)
+                ){
+                    break;
+                }
+            }
+            if (j==numPacket){
+                // find the packet trying to sent to non parent neighbor
+                break;
+            }
             ENABLE_INTERRUPTS();
             return &openqueue_vars.queue[i];
         }

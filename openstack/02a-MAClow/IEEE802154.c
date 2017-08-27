@@ -120,6 +120,8 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
          case ADDR_16B:
          case ADDR_64B:
             packetfunctions_writeAddress(msg,nextHop,OW_LITTLE_ENDIAN);
+            // when parent set changes, the nexthop may need to be changed, mark the position of nexthop
+            msg->l2_nextHopPayload = msg->payload;
             break;
          default:
             openserial_printCritical(COMPONENT_IEEE802154,ERR_WRONG_ADDR_TYPE,

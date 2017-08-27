@@ -519,20 +519,34 @@ void schedule_removeAllCells(
 }
 
 // sfcontrol
-void schedule_removeDedicateTxRxCells(){
-    uint8_t i;
+bool schedule_removeDedicateTxRxCellsExcept(uint16_t * exceptCells, uint8_t length){
+    uint8_t i,j;
+    bool    isExceptionCell;
+    bool    hasCellRemoved;
     
+    hasCellRemoved = FALSE;
     for(i=0;i<MAXACTIVESLOTS;i++){
         if (
             schedule_vars.scheduleBuf[i].neighbor.type == ADDR_64B      && \
             schedule_vars.scheduleBuf[i].type          == CELLTYPE_TXRX
         ){
-           schedule_removeActiveSlot(
-              schedule_vars.scheduleBuf[i].slotOffset,
-              &(schedule_vars.scheduleBuf[i].neighbor)
-           );
+            isExceptionCell = FALSE;
+            for (j=0;j<length;j++){
+                if (schedule_vars.scheduleBuf[i].slotOffset == exceptCells[j]){
+                    isExceptionCell = TRUE;
+                    break;
+                }
+            }
+            if (isExceptionCell==FALSE){
+                schedule_removeActiveSlot(
+                    schedule_vars.scheduleBuf[i].slotOffset,
+                    &(schedule_vars.scheduleBuf[i].neighbor)
+                );
+                hasCellRemoved = TRUE;
+            }
         }
     }
+    return hasCellRemoved;
 }
 
 bool schedule_hasSFControlCell(void){
