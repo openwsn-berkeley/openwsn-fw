@@ -17,11 +17,6 @@
 #include "idmanager.h"
 #include "schedule.h"
 
-//=========================== define ==========================================
-
-// in seconds: sixtop maintaince is called every 30 seconds
-#define MAINTENANCE_PERIOD        10
-
 //=========================== variables =======================================
 
 sixtop_vars_t sixtop_vars;
@@ -627,7 +622,13 @@ void sixtop_timeout_timer_cb(opentimers_id_t id) {
 //======= EB/KA task
 
 void timer_sixtop_sendEb_fired(){
-    sixtop_vars.ebCounter = (sixtop_vars.ebCounter+1)%sixtop_vars.ebPeriod;
+    sixtop_vars.ebPeriod = EBPERIOD*(neighbors_getNumNeighbors()+1);
+    if (sixtop_vars.ebCounter >= sixtop_vars.ebPeriod){
+        // generate an EB when ebPeriod become smaller
+        sixtop_vars.ebCounter = 0;
+    } else {
+        sixtop_vars.ebCounter = (sixtop_vars.ebCounter+1)%sixtop_vars.ebPeriod;
+    }
     switch (sixtop_vars.ebCounter) {
     case 0:
         // called every EBPERIOD seconds
