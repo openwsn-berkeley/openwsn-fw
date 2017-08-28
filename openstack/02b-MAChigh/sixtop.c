@@ -622,7 +622,7 @@ void sixtop_timeout_timer_cb(opentimers_id_t id) {
 //======= EB/KA task
 
 void timer_sixtop_sendEb_fired(){
-    sixtop_vars.ebPeriod = EBPERIOD*(neighbors_getNumNeighbors()+1);
+    sixtop_vars.ebPeriod = EBPERIOD*(2*(neighbors_getNumNeighbors())+1);
     if (sixtop_vars.ebCounter >= sixtop_vars.ebPeriod){
         // generate an EB when ebPeriod become smaller
         sixtop_vars.ebCounter = 0;
