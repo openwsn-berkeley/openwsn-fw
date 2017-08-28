@@ -927,7 +927,8 @@ port_INLINE void activity_ti1ORri1() {
             // sfcontrol
             /**
                 minimal slot 0:
-                    only send DIO with possibility of 10 %
+                    only send DIO with possibility of 10% or
+                    stop sending DIO if control slot conflict detected
                 my control slot:
                     when traffic controlled by sf0:
                         only allow sixtopres packet to send
@@ -940,7 +941,10 @@ port_INLINE void activity_ti1ORri1() {
             */
             if (ieee154e_vars.slotOffset==SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET){
                 ieee154e_vars.dataToSend = openqueue_macGetDIOPacket();
-                if (ieee154e_vars.dataToSend != NULL && openrandom_get16b()>0xffff/10){
+                if (
+                    (ieee154e_vars.dataToSend != NULL && openrandom_get16b()>0xffff/10) ||
+                    sf0_getControlslotConflictWithParent()
+                ){
                     ieee154e_vars.dataToSend = NULL;
                 }
             } else {
@@ -960,7 +964,8 @@ port_INLINE void activity_ti1ORri1() {
                 } else {
                     if (cellType==CELLTYPE_TXRX && neighbor.type == ADDR_64B){
                         // this is parent control slot
-                        ieee154e_vars.dataToSend = openqueue_macGetPacketCreatedBy(COMPONENT_SIXTOP_RES,&neighbor);
+//                        ieee154e_vars.dataToSend = openqueue_macGetPacketCreatedBy(COMPONENT_SIXTOP_RES,&neighbor);
+                        ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor);
                     } else {
                         // all other slots send data packet 
                         ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor);
@@ -2498,6 +2503,7 @@ bool isValidEbFormat(OpenQueueEntry_t* pkt, uint16_t* lenIE){
                         // there is a conflict when using this hashFunction, replace my control slot by neighbor's control slot.
                         // (same slotoffset and type but with neighbor's ADDR_64B address associated)
                         schedule_removeActiveSlot(tempSlotoffset,&temp_neighbor);
+                        sf0_setControlslotConflictWithParent(TRUE);
                     }
                     
                     schedule_addActiveSlot(

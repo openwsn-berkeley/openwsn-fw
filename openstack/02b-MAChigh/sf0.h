@@ -25,7 +25,7 @@ typedef struct {
    bool sf_controlSlot_reserved;
    bool sf_isBusySendingQuery;
    uint8_t sf_query_offset;
-   
+   bool controlCellConflictWithParent;
    bool busySendingKA;
    // sfcontrol
 } sf0_vars_t;
@@ -48,6 +48,8 @@ uint16_t  sf0_getControlslotoffset(void);
 uint16_t  sf0_hashFunction(uint16_t functionInput);
 bool      sf0_isTrafficControlled(void);
 void      sf0_6pQuery_notifyReceived(uint16_t queryOffset, open_addr_t* neighbor);
+bool      sf0_getControlslotConflictWithParent();
+void      sf0_setControlslotConflictWithParent(bool isConflicted);
 
 void      sf0_6pQuery_sendDone(void);
 // sf control

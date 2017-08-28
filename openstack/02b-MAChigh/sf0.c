@@ -171,6 +171,14 @@ void sf0_6pQuery_notifyReceived(uint16_t queryOffset, open_addr_t* neighbor){
     }
 }
 
+bool sf0_getControlslotConflictWithParent(){
+    return sf0_vars.controlCellConflictWithParent;
+}
+
+void sf0_setControlslotConflictWithParent(bool isConflicted){
+    sf0_vars.controlCellConflictWithParent = isConflicted;
+}
+
 void sf0_6pQuery_timer_cb(opentimers_id_t id){
     open_addr_t     temp_neighbor;
     owerror_t       outcome;
