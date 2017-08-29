@@ -47,6 +47,8 @@ OpenQueueEntry_t*  openqueue_macGetDataPacket(open_addr_t* toNeighbor);
 OpenQueueEntry_t*  openqueue_macGetEBPacket(void);
 OpenQueueEntry_t*  openqueue_macGetDIOPacket(void);
 OpenQueueEntry_t*  openqueue_macGetPacketCreatedBy(uint8_t creator,open_addr_t* toNeighbor);
+// called by sf0
+uint8_t            openqueue_macGetNumberOfPacketCreatedBy(uint8_t creator);
 // called by icmpv6rpl to update outgoing route
 OpenQueueEntry_t*  openqueue_rplGetSentToNonParentPackets(uint8_t* parentIndex, uint8_t numPacket);
 

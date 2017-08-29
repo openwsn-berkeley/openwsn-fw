@@ -535,6 +535,11 @@ void  neighbors_sortRankAndHousekeeping(uint8_t* neighborIndexWithLowestRank, ui
     dagrank_t  lowestRank;
     uint16_t   rankIncrease;
     
+    if (idmanager_getIsDAGroot()){
+        // don't calculate for dagroot
+        return;
+    }
+    
     // neighbors marked as NO_RES will never removed.
     
     for (neighbor_counter=0;neighbor_counter<NUM_MAINTAINED_NEIGHBOR;neighbor_counter++){
@@ -656,10 +661,12 @@ void registerNewNeighbor(open_addr_t* address,
          i++;
       }
       if (i==MAXNUMNEIGHBORS) {
-         openserial_printError(COMPONENT_NEIGHBORS,ERR_NEIGHBORS_FULL,
+        if (idmanager_getIsDAGroot()==FALSE){
+            openserial_printError(COMPONENT_NEIGHBORS,ERR_NEIGHBORS_FULL,
                                (errorparameter_t)MAXNUMNEIGHBORS,
                                (errorparameter_t)0);
-         return;
+        }
+        return;
       }
    }
 }

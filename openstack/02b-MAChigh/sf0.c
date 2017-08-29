@@ -20,6 +20,7 @@
 
 #define SF0_QUERY_PERIOD              8000 // miliseconds
 #define SF0_TRAFFICCONTROL_TIMEOUT    6000 // miliseconds
+#define SF0_BANDWIDTHESTIMATE_TIMEOUT 60000// miliseconds
 
 #define SF0_QUERY_ACTION_KA
 //#define SF0_QUERY_ACTION_6PQUERY
@@ -39,6 +40,7 @@ void sf0_handleRCError(uint8_t code);
 
 void sf0_6pQuery_timer_cb(opentimers_id_t id);
 void sf0_trafficControl_timer_cb(opentimers_id_t id);
+void sf0_bandwidthestimate_timer_cb(opentimers_id_t id);
 
 //=========================== public ==========================================
 
@@ -62,8 +64,16 @@ void sf0_init(void) {
     );
     
     // start sf0 6pquery timer
-    sf0_vars.query_timer          = opentimers_create();
-    sf0_vars.trafficcontrol_timer = opentimers_create();
+    sf0_vars.sf0_bandwidthestimate_timer = opentimers_create();
+    opentimers_scheduleIn(
+        sf0_vars.sf0_bandwidthestimate_timer, 
+        SF0_BANDWIDTHESTIMATE_TIMEOUT,
+        TIME_MS, 
+        TIMER_PERIODIC, 
+        sf0_bandwidthestimate_timer_cb
+    );
+//    sf0_vars.query_timer          = opentimers_create();
+//    sf0_vars.trafficcontrol_timer = opentimers_create();
 //    opentimers_scheduleIn(
 //        sf0_vars.query_timer, 
 //        SF0_QUERY_PERIOD,
@@ -76,7 +86,7 @@ void sf0_init(void) {
 }
 
 // this function is called once per slotframe. 
-void sf0_notifyNewSlotframe(void) {
+void sf0_bandwidthestimate_timer_cb(opentimers_id_t id) {
    scheduler_push_task(sf0_bandwidthEstimate_task,TASKPRIO_SF0);
 }
 

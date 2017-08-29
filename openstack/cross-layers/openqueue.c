@@ -309,6 +309,26 @@ OpenQueueEntry_t* openqueue_rplGetSentToNonParentPackets(uint8_t* parentIndex, u
     ENABLE_INTERRUPTS();
     return NULL;
 }
+
+uint8_t  openqueue_macGetNumberOfPacketCreatedBy(uint8_t creator){
+    uint8_t i,numberOfCells;
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+
+    numberOfCells = 0;
+    // first to look the packet created by creator
+    for (i=0;i<QUEUELENGTH;i++) {
+        if (
+            openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
+            openqueue_vars.queue[i].creator==creator
+        ){
+            numberOfCells++;
+        }
+    }
+    
+    ENABLE_INTERRUPTS();
+    return numberOfCells;
+}
 // sfcontrol
 
 bool openqueue_isHighPriorityEntryEnough(){
