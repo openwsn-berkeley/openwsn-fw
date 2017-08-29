@@ -829,6 +829,7 @@ void icmpv6rpl_timer_DAO_task() {
 void icmpv6rpl_timer_parent_update_cb(opentimers_id_t id){
     open_addr_t       newNexthop;
     OpenQueueEntry_t* msg;
+    uint8_t           i;
   
     // called every TIMER_PARENT_UPDATE_TIMEOUT miliseconds
     icmpv6rpl_updateMyDAGrankAndParentSelection();
@@ -840,7 +841,9 @@ void icmpv6rpl_timer_parent_update_cb(opentimers_id_t id){
     
     if (msg!=NULL && newNexthop.type != ADDR_NONE){
         memcpy(&msg->l2_nextORpreviousHop, &newNexthop, sizeof(open_addr_t));
-        memcpy(msg->l2_nextHopPayload, &(newNexthop.addr_64b[0]), 8);
+        for (i=0;i<8;i++){
+            msg->l2_nextHopPayload[i] = newNexthop.addr_64b[8-i-1];
+        }
     }
 }
 
@@ -893,11 +896,6 @@ void sendDAO() {
       } else {
           return;
       }
-   }
-   
-   // if there is no cell to the parent, stop generating DAO
-   if (schedule_getCellsCounts(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,CELLTYPE_TX,&address)==0){
-        return;
    }
    
    // if you get here, you start construct DAO
