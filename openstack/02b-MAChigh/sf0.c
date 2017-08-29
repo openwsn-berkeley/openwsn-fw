@@ -42,8 +42,8 @@ void sf0_handleRCError(uint8_t code);
 
 void sf0_6pQuery_timer_cb(opentimers_id_t id);
 void sf0_trafficControl_timer_cb(opentimers_id_t id);
-void sf0_bandwidthestimate_timer_cb(opentimers_id_t id);
-void sf0_probeParent_timer_cb(opentimers_id_t id);
+
+void task_sf0_6pQuery_timer_fired(void);
 
 //=========================== public ==========================================
 
@@ -163,6 +163,10 @@ void sf0_setControlslotConflictWithParent(bool isConflicted){
 }
 
 void sf0_6pQuery_timer_cb(opentimers_id_t id){
+    scheduler_push_task(task_sf0_6pQuery_timer_fired,TASKPRIO_SF0);
+}
+
+void task_sf0_6pQuery_timer_fired(void){
     open_addr_t     temp_neighbor;
     owerror_t       outcome;
     
@@ -233,7 +237,7 @@ void sf0_6pQuery_timer_cb(opentimers_id_t id){
         0                                                               // list command maximum celllist (not used)
     );
     if (outcome == E_SUCCESS){
-      
+        
         sf0_vars.received6Ppreviously = FALSE;
         
         sf0_vars.sf_isBusySendingQuery = TRUE;
@@ -277,7 +281,7 @@ void sf0_bandwidthEstimate_task(open_addr_t* neighbor){
         sf0_vars.backoff -= 1;
         return;
     }
-    
+
     if (icmpv6rpl_isPreferredParent(neighbor)==FALSE){
         return;
     }
