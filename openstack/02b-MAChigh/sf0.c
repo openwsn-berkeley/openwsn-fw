@@ -33,7 +33,7 @@ sf0_vars_t sf0_vars;
 
 //=========================== prototypes ======================================
 
-void sf0_bandwidthEstimate_task(void);
+void sf0_bandwidthEstimate_task(open_addr_t* neighbor);
 void sf0_probeParentBySendingKA(void);
 // sixtop callback 
 uint16_t sf0_getMetadata(void);
@@ -68,14 +68,6 @@ void sf0_init(void) {
     );
     
     // start sf0 6pquery timer
-//    sf0_vars.sf0_bandwidthestimate_timer = opentimers_create();
-//    opentimers_scheduleIn(
-//        sf0_vars.sf0_bandwidthestimate_timer, 
-//        SF0_BANDWIDTHESTIMATE_TIMEOUT,
-//        TIME_MS, 
-//        TIMER_PERIODIC, 
-//        sf0_bandwidthestimate_timer_cb
-//    );
     sf0_vars.query_timer          = opentimers_create();
     sf0_vars.trafficcontrol_timer = opentimers_create();
     opentimers_scheduleIn(
@@ -85,25 +77,8 @@ void sf0_init(void) {
         TIMER_PERIODIC, 
         sf0_6pQuery_timer_cb
     );
-//    sf0_vars.sf0_probeParent_timer = opentimers_create();
-//    opentimers_scheduleIn(
-//        sf0_vars.sf0_probeParent_timer, 
-//        SF0_PROBEPARENT_PERIOD,
-//        TIME_MS, 
-//        TIMER_PERIODIC, 
-//        sf0_probeParent_timer_cb
-//    );
     // sfcontrol 
     sixtop_setSFcallback(sf0_getsfid,sf0_getMetadata,sf0_translateMetadata,sf0_handleRCError);
-}
-
-// this function is called once per slotframe. 
-void sf0_bandwidthestimate_timer_cb(opentimers_id_t id) {
-    scheduler_push_task(sf0_bandwidthEstimate_task,TASKPRIO_SF0);
-}
-        
-void sf0_probeParent_timer_cb(opentimers_id_t id){
-    scheduler_push_task(sf0_probeParentBySendingKA,TASKPRIO_SF0);
 }
 
 void sf0_setBackoff(uint8_t value){
@@ -171,7 +146,7 @@ void sf0_handleRCError(uint8_t code){
 void sf0_6pQuery_notifyReceived(uint16_t query_factor, open_addr_t* neighbor){
     if (openrandom_get16b() < 0xffff/query_factor){
 #ifdef SF0_QUERY_ACTION_6PQUERY
-        sf0_bandwidthEstimate_task();
+        sf0_bandwidthEstimate_task(neighbor);
 #endif
 #ifdef SF0_QUERY_ACTION_KA
         sf0_probeParentBySendingKA();
@@ -289,9 +264,7 @@ void sf0_setReceived6Ppreviously(bool received){
 // sfcontrol
 //=========================== private =========================================
 
-void sf0_bandwidthEstimate_task(void){
-    open_addr_t    neighbor;
-    bool           foundNeighbor;
+void sf0_bandwidthEstimate_task(open_addr_t* neighbor){
     int8_t         bw_outgoing;
     cellInfo_ht    celllist_add[CELLLIST_MAX_LEN];
     
@@ -305,9 +278,7 @@ void sf0_bandwidthEstimate_task(void){
         return;
     }
     
-    // get preferred parent
-    foundNeighbor = icmpv6rpl_getPreferredParentEui64(&neighbor);
-    if (foundNeighbor==FALSE) {
+    if (icmpv6rpl_isPreferredParent(neighbor)==FALSE){
         return;
     }
 
@@ -320,7 +291,7 @@ void sf0_bandwidthEstimate_task(void){
         }
         sixtop_request(
             IANA_6TOP_CMD_ADD,                  // code
-            &neighbor,                          // neighbor
+            neighbor,                           // neighbor
             1,                                  // number cells
             LINKOPTIONS_TX,                     // cellOptions
             celllist_add,                       // celllist to add
