@@ -23,9 +23,11 @@ typedef struct {
    opentimers_id_t query_timer;
    opentimers_id_t trafficcontrol_timer;
    opentimers_id_t sf0_bandwidthestimate_timer;
+   opentimers_id_t sf0_probeParent_timer;
    bool sf_controlSlot_reserved;
    bool sf_isBusySendingQuery;
-   uint8_t sf_query_offset;
+   uint8_t sf_query_factor;
+   bool received6Ppreviously;
    bool controlCellConflictWithParent;
    bool busySendingKA;
    // sfcontrol
@@ -48,11 +50,12 @@ uint8_t   sf0_getsfid(void);
 uint16_t  sf0_getControlslotoffset(void);
 uint16_t  sf0_hashFunction(uint16_t functionInput);
 bool      sf0_isTrafficControlled(void);
-void      sf0_6pQuery_notifyReceived(uint16_t queryOffset, open_addr_t* neighbor);
+void      sf0_6pQuery_notifyReceived(uint16_t query_factor, open_addr_t* neighbor);
 bool      sf0_getControlslotConflictWithParent();
 void      sf0_setControlslotConflictWithParent(bool isConflicted);
 
 void      sf0_6pQuery_sendDone(void);
+void      sf0_setReceived6Ppreviously(bool received);
 // sf control
 
 bool sf0_candidateAddCellList(

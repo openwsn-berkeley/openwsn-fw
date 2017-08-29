@@ -16,14 +16,16 @@
 
 #define SF0_ID                            0
 #define SF0THRESHOLD                      2
-#define SF0_QUERY_RANGE                   1 // slots
+#define SF0_QUERY_MAX_FACTOR             10 // 10 => 1/10
+#define SF0_QUERY_MIN_FACTOR              3 // 3 =>  1/3
 
-#define SF0_QUERY_PERIOD              8000 // miliseconds
-#define SF0_TRAFFICCONTROL_TIMEOUT    6000 // miliseconds
+#define SF0_QUERY_PERIOD              20000 // miliseconds
+#define SF0_TRAFFICCONTROL_TIMEOUT    10000 // miliseconds
 #define SF0_BANDWIDTHESTIMATE_TIMEOUT 60000// miliseconds
+#define SF0_PROBEPARENT_PERIOD        60000// miliseconds
 
-#define SF0_QUERY_ACTION_KA
-//#define SF0_QUERY_ACTION_6PQUERY
+//#define SF0_QUERY_ACTION_KA
+#define SF0_QUERY_ACTION_6PQUERY
 
 //=========================== variables =======================================
 
@@ -41,6 +43,7 @@ void sf0_handleRCError(uint8_t code);
 void sf0_6pQuery_timer_cb(opentimers_id_t id);
 void sf0_trafficControl_timer_cb(opentimers_id_t id);
 void sf0_bandwidthestimate_timer_cb(opentimers_id_t id);
+void sf0_probeParent_timer_cb(opentimers_id_t id);
 
 //=========================== public ==========================================
 
@@ -52,6 +55,7 @@ void sf0_init(void) {
     sf0_vars.numAppPacketsPerSlotFrame = 0;
     // sfcontrol 
     sf0_vars.sf_control_slotoffset = sf0_hashFunction(256*idmanager_getMyID(ADDR_64B)->addr_64b[6]+idmanager_getMyID(ADDR_64B)->addr_64b[7]);
+    sf0_vars.sf_query_factor       = SF0_QUERY_MAX_FACTOR;
     
     memset(&temp_neighbor,0,sizeof(temp_neighbor));
     temp_neighbor.type             = ADDR_ANYCAST;
@@ -64,22 +68,30 @@ void sf0_init(void) {
     );
     
     // start sf0 6pquery timer
-    sf0_vars.sf0_bandwidthestimate_timer = opentimers_create();
-    opentimers_scheduleIn(
-        sf0_vars.sf0_bandwidthestimate_timer, 
-        SF0_BANDWIDTHESTIMATE_TIMEOUT,
-        TIME_MS, 
-        TIMER_PERIODIC, 
-        sf0_bandwidthestimate_timer_cb
-    );
-//    sf0_vars.query_timer          = opentimers_create();
-//    sf0_vars.trafficcontrol_timer = opentimers_create();
+//    sf0_vars.sf0_bandwidthestimate_timer = opentimers_create();
 //    opentimers_scheduleIn(
-//        sf0_vars.query_timer, 
-//        SF0_QUERY_PERIOD,
+//        sf0_vars.sf0_bandwidthestimate_timer, 
+//        SF0_BANDWIDTHESTIMATE_TIMEOUT,
 //        TIME_MS, 
 //        TIMER_PERIODIC, 
-//        sf0_6pQuery_timer_cb
+//        sf0_bandwidthestimate_timer_cb
+//    );
+    sf0_vars.query_timer          = opentimers_create();
+    sf0_vars.trafficcontrol_timer = opentimers_create();
+    opentimers_scheduleIn(
+        sf0_vars.query_timer, 
+        SF0_QUERY_PERIOD,
+        TIME_MS, 
+        TIMER_PERIODIC, 
+        sf0_6pQuery_timer_cb
+    );
+//    sf0_vars.sf0_probeParent_timer = opentimers_create();
+//    opentimers_scheduleIn(
+//        sf0_vars.sf0_probeParent_timer, 
+//        SF0_PROBEPARENT_PERIOD,
+//        TIME_MS, 
+//        TIMER_PERIODIC, 
+//        sf0_probeParent_timer_cb
 //    );
     // sfcontrol 
     sixtop_setSFcallback(sf0_getsfid,sf0_getMetadata,sf0_translateMetadata,sf0_handleRCError);
@@ -87,7 +99,11 @@ void sf0_init(void) {
 
 // this function is called once per slotframe. 
 void sf0_bandwidthestimate_timer_cb(opentimers_id_t id) {
-   scheduler_push_task(sf0_bandwidthEstimate_task,TASKPRIO_SF0);
+    scheduler_push_task(sf0_bandwidthEstimate_task,TASKPRIO_SF0);
+}
+        
+void sf0_probeParent_timer_cb(opentimers_id_t id){
+    scheduler_push_task(sf0_probeParentBySendingKA,TASKPRIO_SF0);
 }
 
 void sf0_setBackoff(uint8_t value){
@@ -152,32 +168,14 @@ void sf0_handleRCError(uint8_t code){
 
 // sfcontrol
 
-void sf0_6pQuery_notifyReceived(uint16_t queryOffset, open_addr_t* neighbor){
-    if (queryOffset<SLOTFRAME_LENGTH-SF0_QUERY_RANGE){
-        if (
-            sf0_vars.sf_control_slotoffset <= (queryOffset+SF0_QUERY_RANGE)%SLOTFRAME_LENGTH && \
-            sf0_vars.sf_control_slotoffset >  (queryOffset)%SLOTFRAME_LENGTH
-        ){
+void sf0_6pQuery_notifyReceived(uint16_t query_factor, open_addr_t* neighbor){
+    if (openrandom_get16b() < 0xffff/query_factor){
 #ifdef SF0_QUERY_ACTION_6PQUERY
-            sf0_bandwidthEstimate_task();
+        sf0_bandwidthEstimate_task();
 #endif
 #ifdef SF0_QUERY_ACTION_KA
-            sf0_probeParentBySendingKA();
+        sf0_probeParentBySendingKA();
 #endif
-        }
-    } else {
-        if (
-            sf0_vars.sf_control_slotoffset < (queryOffset+SF0_QUERY_RANGE)%SLOTFRAME_LENGTH || \
-            sf0_vars.sf_control_slotoffset > (queryOffset)%SLOTFRAME_LENGTH
-        ){
-#ifdef SF0_QUERY_ACTION_6PQUERY
-            sf0_bandwidthEstimate_task();
-#endif
-#ifdef SF0_QUERY_ACTION_KA
-            sf0_probeParentBySendingKA();
-#endif
-
-        }
     }
 }
 
@@ -205,22 +203,12 @@ void sf0_6pQuery_timer_cb(opentimers_id_t id){
         return;
     }
    
-    // do not send DIO if I have the default DAG rank
+    // do not send 6p query if I have the default DAG rank
     if (sf0_vars.sf_isBusySendingQuery==TRUE){
         
         // stop here
         return;
     }
-    
-#ifdef SF0_QUERY_ACTION_6PQUERY
-    if (
-        idmanager_getIsDAGroot() == FALSE &&
-        schedule_getNumOfSlotsByType(CELLTYPE_TX)==0
-    ){
-        // do not send query if my schedule is no ready yet
-        return;
-    }
-#endif
     
     memset(&temp_neighbor,0,sizeof(temp_neighbor));
     temp_neighbor.type        = ADDR_ANYCAST;
@@ -238,7 +226,7 @@ void sf0_6pQuery_timer_cb(opentimers_id_t id){
             TIMER_ONESHOT, 
             sf0_trafficControl_timer_cb
         );
-      
+        
         return;
     }
     
@@ -246,6 +234,17 @@ void sf0_6pQuery_timer_cb(opentimers_id_t id){
     temp_neighbor.type        = ADDR_16B;
     temp_neighbor.addr_16b[0] = 0xff;
     temp_neighbor.addr_16b[1] = 0xff;
+    
+    if (sf0_vars.received6Ppreviously==FALSE){
+        if (sf0_vars.sf_query_factor>SF0_QUERY_MIN_FACTOR && (schedule_getNumOfSlotsByType(CELLTYPE_RX)>0)){
+            // change query factor when I have a rx cell in my schedule first
+            sf0_vars.sf_query_factor--;
+        }
+    } else {
+        if (sf0_vars.sf_query_factor<SF0_QUERY_MAX_FACTOR){
+            sf0_vars.sf_query_factor++;
+        }
+    }
 
     outcome = sixtop_request(
         IANA_6TOP_CMD_QUERY,                                            // code
@@ -255,12 +254,12 @@ void sf0_6pQuery_timer_cb(opentimers_id_t id){
         NULL,                                                           // celllist to add    (not used)
         NULL,                                                           // celllist to delete (not used)
         SF0_ID,                                                         // sfid
-        (sf0_vars.sf_query_offset+SF0_QUERY_RANGE)%SLOTFRAME_LENGTH,    // query offset (reuse list command offset parameter)
+        sf0_vars.sf_query_factor,                                       // query offset (reuse list command offset parameter)
         0                                                               // list command maximum celllist (not used)
     );
     if (outcome == E_SUCCESS){
-        // update query offset
-        sf0_vars.sf_query_offset = (sf0_vars.sf_query_offset+SF0_QUERY_RANGE)%SLOTFRAME_LENGTH;
+      
+        sf0_vars.received6Ppreviously = FALSE;
         
         sf0_vars.sf_isBusySendingQuery = TRUE;
         
@@ -281,6 +280,10 @@ void sf0_trafficControl_timer_cb(opentimers_id_t id){
 
 void sf0_6pQuery_sendDone(void){
     sf0_vars.sf_isBusySendingQuery = FALSE;
+}
+
+void sf0_setReceived6Ppreviously(bool received){
+    sf0_vars.received6Ppreviously = received;
 }
 
 // sfcontrol

@@ -895,6 +895,11 @@ void sendDAO() {
       }
    }
    
+   // if there is no cell to the parent, stop generating DAO
+   if (schedule_getCellsCounts(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,CELLTYPE_TX,&address)==0){
+        return;
+   }
+   
    // if you get here, you start construct DAO
    
    // reserve a free packet buffer for DAO

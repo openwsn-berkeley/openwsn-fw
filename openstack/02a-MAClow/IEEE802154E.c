@@ -964,8 +964,8 @@ port_INLINE void activity_ti1ORri1() {
                 } else {
                     if (cellType==CELLTYPE_TXRX && neighbor.type == ADDR_64B){
                         // this is parent control slot
-//                        ieee154e_vars.dataToSend = openqueue_macGetPacketCreatedBy(COMPONENT_SIXTOP_RES,&neighbor);
-                        ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor);
+                        ieee154e_vars.dataToSend = openqueue_macGetPacketCreatedBy(COMPONENT_SIXTOP_RES,&neighbor);
+//                        ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor);
                     } else {
                         // all other slots send data packet 
                         ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor);

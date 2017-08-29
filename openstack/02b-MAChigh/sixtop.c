@@ -1058,7 +1058,7 @@ void sixtop_six2six_notifyReceive(
     uint16_t          length_groupid_type;
     uint16_t          startingOffset;
     uint16_t          maxNumCells;
-    uint16_t          queryOffset;
+    uint16_t          query_factor;
     uint16_t          i;
     uint16_t          slotoffset;
     uint16_t          channeloffset;
@@ -1153,11 +1153,11 @@ void sixtop_six2six_notifyReceive(
             // sfcontrol
             // query command
             if (code == IANA_6TOP_CMD_QUERY){
-                queryOffset  = *((uint8_t*)(pkt->payload)+ptr);
-                queryOffset |= *((uint8_t*)(pkt->payload)+ptr+1)<<8;
+                query_factor  = *((uint8_t*)(pkt->payload)+ptr);
+                query_factor |= *((uint8_t*)(pkt->payload)+ptr+1)<<8;
                 ptr += 2;
                 openqueue_freePacketBuffer(response_pkt);
-                sf0_6pQuery_notifyReceived(queryOffset,&(pkt->l2_nextORpreviousHop));
+                sf0_6pQuery_notifyReceived(query_factor,&(pkt->l2_nextORpreviousHop));
                 return;
             }
             // sfcontrol
@@ -1431,6 +1431,12 @@ void sixtop_six2six_notifyReceive(
         response_pkt->l2_sixtop_messageType    = SIXTOP_CELL_RESPONSE;
 
         if (sixtop_vars.isResponseEnabled){
+            // sfcontrol
+            if (code == IANA_6TOP_CMD_ADD){
+                sf0_setReceived6Ppreviously(TRUE);
+            }
+            // sfcontrol
+            
             // send packet
             sixtop_send(response_pkt);
         } else {
