@@ -26,7 +26,7 @@
 // Quantity AA is updated for major changes that will need user code changes
 //
 
-#define DW1000_DRIVER_VERSION               0x040002
-#define DW1000_DEVICE_DRIVER_VER_STRING     "DW1000 Device Driver Version 04.00.02"
+#define DW1000_DRIVER_VERSION               0x040004
+#define DW1000_DEVICE_DRIVER_VER_STRING     "DW1000 Device Driver Version 04.00.04"
 
 #endif

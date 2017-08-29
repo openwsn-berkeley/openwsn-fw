@@ -135,7 +135,7 @@ void uart_writeByte(uint8_t byteToWrite) {
 
 uint8_t uart_readByte() {
     
-    uint16_t temp;
+    uint16_t temp = 0;
 #ifndef BOARD_EV1000
     temp = USART_ReceiveData(USART1);
 #endif

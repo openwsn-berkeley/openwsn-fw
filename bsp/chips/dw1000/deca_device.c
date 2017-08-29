@@ -1541,7 +1541,7 @@ uint32 _dwt_otpprogword32(uint32 data, uint16 address)
  *
  * returns DWT_SUCCESS for success, or DWT_ERROR for error
  */
-uint32 dwt_otpwriteandverify(uint32 value, uint16 address)
+int dwt_otpwriteandverify(uint32 value, uint16 address)
 {
     int prog_ok = DWT_SUCCESS;
     int retry = 0;

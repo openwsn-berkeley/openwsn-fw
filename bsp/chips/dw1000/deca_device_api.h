@@ -145,6 +145,7 @@ typedef signed long int32;
 #define DWT_PRESRV_SLEEP 0x0100                      // PRES_SLEEP - on wakeup preserve sleep bit
 #define DWT_LOADOPSET    0x0080                      // ONW_L64P - on wakeup load operating parameter set for 64 PSR
 #define DWT_CONFIG       0x0040                      // ONW_LDC - on wakeup restore (load) the saved configurations (from AON array into HIF)
+#define DWT_LOADEUI      0x0008                      // ONW_LEUI - on wakeup load EUI
 #define DWT_RX_EN        0x0002                      // ONW_RX - on wakeup activate reception
 #define DWT_TANDV        0x0001                      // ONW_RADC - on wakeup run ADC to sample temperature and voltage sensor values
 
@@ -545,10 +546,10 @@ void dwt_writetxfctrl(uint16 txFrameLength, uint16 txBufferOffset, int ranging);
  * @brief This call initiates the transmission, input parameter indicates which TX mode is used see below
  *
  * input parameters:
- * @param mode - if 0 immediate TX (no response expected)
- *               if 1 delayed TX (no response expected)
- *               if 2 immediate TX (response expected - so the receiver will be automatically turned on after TX is done)
- *               if 3 delayed TX (response expected - so the receiver will be automatically turned on after TX is done)
+ * @param mode - if mode = DWT_START_TX_IMMEDIATE - immediate TX (no response expected)
+ *               if mode = DWT_START_TX_DELAYED - delayed TX (no response expected)
+ *               if mode = DWT_START_TX_IMMEDIATE | DWT_RESPONSE_EXPECTED - immediate TX (response expected - so the receiver will be automatically turned on after TX is done)
+ *               if mode = DWT_START_TX_DELAYED | DWT_RESPONSE_EXPECTED - delayed TX (response expected - so the receiver will be automatically turned on after TX is done)
  *
  * output parameters
  *
@@ -1323,7 +1324,7 @@ void dwt_readeventcounters(dwt_deviceentcnts_t *counters);
  *
  * returns DWT_SUCCESS for success, or DWT_ERROR for error
  */
-uint32 dwt_otpwriteandverify(uint32 value, uint16 address);
+int dwt_otpwriteandverify(uint32 value, uint16 address);
 
 /*! ------------------------------------------------------------------------------------------------------------------
  * @fn dwt_setleds()
@@ -1644,7 +1645,7 @@ void dwt_write8bitoffsetreg(int regFileID, int regOffset, uint8 regval);
  *
  * returns DWT_SUCCESS for success, or DWT_ERROR for error
  */
-int writetospi(uint16 headerLength, const uint8 *headerBuffer, uint32 bodylength, const uint8 *bodyBuffer);
+extern int writetospi(uint16 headerLength, const uint8 *headerBuffer, uint32 bodylength, const uint8 *bodyBuffer);
 
 /*! ------------------------------------------------------------------------------------------------------------------
  * @fn readfromspi()
@@ -1668,7 +1669,7 @@ int writetospi(uint16 headerLength, const uint8 *headerBuffer, uint32 bodylength
  *
  * returns DWT_SUCCESS for success (and the position in the buffer at which data begins), or DWT_ERROR for error
  */
-int readfromspi(uint16 headerLength, const uint8 *headerBuffer, uint32 readlength, uint8 *readBuffer);
+extern int readfromspi(uint16 headerLength, const uint8 *headerBuffer, uint32 readlength, uint8 *readBuffer);
 
 // ---------------------------------------------------------------------------
 //
@@ -1734,22 +1735,6 @@ void decamutexoff(decaIrqStatus_t s) ;
  * no return value
  */
 void deca_sleep(unsigned int time_ms);
-
-/*! ------------------------------------------------------------------------------------------------------------------
- * @fn deca_spi_init(uint8_t speed)
- *
- * @brief Switch the SPI speed
- *
- * input parameters:
- * @param speed - SPI speed:
- *     speed: 0 = slow
- *     speed: 1 = fast
- *
- * output parameters
- *
- * no return value
- */
-void deca_spi_init(uint8 speed);
 
 #ifdef __cplusplus
 }

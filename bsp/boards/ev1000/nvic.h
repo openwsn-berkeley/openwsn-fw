@@ -22,8 +22,7 @@ void NVIC_Configuration(void);
 //configuration module interrput on openmotestm32 
 void NVIC_uart(void);
 void NVIC_spi(void);
-void NVIC_bsptimer(void);
-void NVIC_radiotimer(void);
+void NVIC_sctimer(void);
 void NVIC_radio(void);
 
 #endif

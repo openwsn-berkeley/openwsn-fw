@@ -10,8 +10,9 @@
 #include "radio.h"
 #include "deca_device_api.h"
 #include "deca_regs.h"
+#include "deca_port.h"
 #include "spi.h"
-#include "radiotimer.h"
+#include "sctimer.h"
 #include "debugpins.h"
 #include "leds.h"
 
@@ -19,23 +20,25 @@
 #define TX_ANT_DLY 16436
 #define RX_ANT_DLY 16436
 #define TX_TO_RX_DELAY_UUS 60
-
+//#define RX_RESP_TO_UUS 5000
+#define RX_RESP_TO_UUS 0
 
 //=========================== variables =======================================
 
 typedef struct {
-   radiotimer_capture_cbt    startFrame_cb;
-   radiotimer_capture_cbt    endFrame_cb;
+   radio_capture_cbt         startFrame_cb;
+   radio_capture_cbt         endFrame_cb;
    radio_state_t             state; 
    uint16_t 				 rx_frameLen;
+   uint32_t					 radio_status;
 } radio_vars_t;
 
 radio_vars_t radio_vars;
 dwt_config_t UWBConfigs[6] = 
 {
-	{1, DWT_PRF_64M, DWT_PLEN_1024, DWT_PAC32, 11, 11, 1, DWT_BR_110K,DWT_PHRMODE_STD, (1025+64-32)},
-	{2, DWT_PRF_64M, DWT_PLEN_1024, DWT_PAC32, 11, 11, 1, DWT_BR_110K,DWT_PHRMODE_STD, (1025+64-32)},
-	{3, DWT_PRF_64M, DWT_PLEN_1024, DWT_PAC32, 11, 11, 1, DWT_BR_110K,DWT_PHRMODE_STD, (1025+64-32)},
+	{1, DWT_PRF_64M, DWT_PLEN_1024, DWT_PAC32, 9, 9, 1, DWT_BR_110K,DWT_PHRMODE_STD, (1025+64-32)},
+	{2, DWT_PRF_64M, DWT_PLEN_1024, DWT_PAC32, 9, 9, 1, DWT_BR_110K,DWT_PHRMODE_STD, (1025+64-32)},
+	{3, DWT_PRF_64M, DWT_PLEN_1024, DWT_PAC32, 9, 9, 1, DWT_BR_110K,DWT_PHRMODE_STD, (1025+64-32)},
 	{4, DWT_PRF_64M, DWT_PLEN_1024, DWT_PAC32, 17, 17, 1, DWT_BR_110K,DWT_PHRMODE_STD, (1025+64-32)},
 	{5, DWT_PRF_64M, DWT_PLEN_1024, DWT_PAC32, 11, 11, 1, DWT_BR_110K,DWT_PHRMODE_STD, (1025+64-32)},
 	{7, DWT_PRF_64M, DWT_PLEN_1024, DWT_PAC32, 17, 17, 1, DWT_BR_110K,DWT_PHRMODE_STD, (1025+64-32)},
@@ -76,7 +79,7 @@ void radio_init() {
     GPIO_Init(GPIOA, &GPIO_InitStructure);
 	GPIO_SetBits(GPIOA, GPIO_Pin_0);
 	deca_sleep(2);
-	if(DWT_SUCCESS != dwt_initialise(DWT_LOADUCODE))
+	if(DWT_SUCCESS != dwt_initialise(DWT_LOADNONE))
 	{
 		error_handler();
 	}
@@ -110,23 +113,18 @@ void radio_init() {
 					 DWT_INT_RXPTO,
 					 1);
 	dwt_setrxaftertxdelay(TX_TO_RX_DELAY_UUS);
+	dwt_setrxtimeout(RX_RESP_TO_UUS);
+
 	// change state
 	radio_vars.state          = RADIOSTATE_RFOFF;
 }
 
-void radio_setOverflowCb(radiotimer_compare_cbt cb) {
-   radiotimer_setOverflowCb(cb);
-}
 
-void radio_setCompareCb(radiotimer_compare_cbt cb) {
-   radiotimer_setCompareCb(cb);
-}
-
-void radio_setStartFrameCb(radiotimer_capture_cbt cb) {
+void radio_setStartFrameCb(radio_capture_cbt cb) {
    radio_vars.startFrame_cb  = cb;
 }
 
-void radio_setEndFrameCb(radiotimer_capture_cbt cb) {
+void radio_setEndFrameCb(radio_capture_cbt cb) {
    radio_vars.endFrame_cb    = cb;
 }
 
@@ -136,24 +134,6 @@ void radio_reset() {
 	// Make sure the SPI is running at low speed
 	dwt_softreset();
 	leds_radio_off();
-}
-
-//===== timer
-
-void radio_startTimer(PORT_TIMER_WIDTH period) {
-   radiotimer_start(period);
-}
-
-PORT_TIMER_WIDTH radio_getTimerValue() {
-   return radiotimer_getValue();
-}
-
-void radio_setTimerPeriod(PORT_TIMER_WIDTH period) {
-   radiotimer_setPeriod(period);
-}
-
-PORT_TIMER_WIDTH radio_getTimerPeriod() {
-   return radiotimer_getPeriod();
 }
 
 //===== RF admin
@@ -225,7 +205,7 @@ void radio_txNow() {
 	dwt_starttx(DWT_START_TX_IMMEDIATE|DWT_RESPONSE_EXPECTED);
     if (radio_vars.startFrame_cb!=NULL) {
         // call the callback
-		val=radiotimer_getCapturedTime();
+		val=sctimer_readCounter();
 		radio_vars.startFrame_cb(val);
 	}
 }
@@ -265,16 +245,15 @@ void radio_getReceivedFrame(uint8_t* pBufRead,
 	if( (radio_vars.rx_frameLen != 0) && (radio_vars.state == RADIOSTATE_TXRX_DONE)){
 		// get diagnostics data for the received frame
 		dwt_readdiagnostics(&rx_diag);
-		// In UWB there is no RSSI as such, use CIR growth instead
-		*pRssi = (uint8_t)(rx_diag.maxGrowthCIR>>8);
+		// use max noise instead. There is a RSSI formula which we could apply too.
+		*pRssi = (uint8_t)(rx_diag.maxNoise>>8);
 		// LQI doesn't exist either use the first path amplitude instead
 		*pLqi = (uint8_t)(rx_diag.firstPathAmp1>>8);
-		*pCrc = 1;
 	} else{
 		*pRssi = 0;
 		*pLqi = 0;
-		*pCrc = 0;
 	}
+	*pCrc = (radio_vars.radio_status & (SYS_STATUS_RXDFR| SYS_STATUS_RXFCG))?1:0;
 	*pLenRead = radio_vars.rx_frameLen;
 }
 
@@ -291,7 +270,7 @@ void radio_txDoneCb(const dwt_cb_data_t* cb_data){
 	PORT_TIMER_WIDTH capturedTime;
 
 	// capture the time
-	capturedTime = radiotimer_getCapturedTime();
+	capturedTime = sctimer_readCounter();
 	radio_vars.rx_frameLen = 0;
 	radio_vars.state = RADIOSTATE_TXRX_DONE;
 	if( radio_vars.endFrame_cb != NULL){
@@ -303,8 +282,9 @@ void radio_rxOkCb(const dwt_cb_data_t* cb_data){
 	PORT_TIMER_WIDTH capturedTime;
 
 	// capture the time
-	capturedTime = radiotimer_getCapturedTime();
+	capturedTime = sctimer_readCounter();
 	radio_vars.rx_frameLen = cb_data->datalength;
+	radio_vars.radio_status = cb_data->status;
 	radio_vars.state = RADIOSTATE_TXRX_DONE;
 	if( radio_vars.endFrame_cb != NULL){
 		radio_vars.endFrame_cb(capturedTime);
@@ -315,8 +295,9 @@ void radio_rxErrCb(const dwt_cb_data_t* cb_data){
 	PORT_TIMER_WIDTH capturedTime;
 
 	// capture the time
-	capturedTime = radiotimer_getCapturedTime();
+	capturedTime = sctimer_readCounter();
 	radio_vars.rx_frameLen = 0;
+	radio_vars.radio_status = cb_data->status;
 	radio_vars.state = RADIOSTATE_TXRX_DONE;
 	if( radio_vars.endFrame_cb != NULL){
 		radio_vars.endFrame_cb(capturedTime);
@@ -328,8 +309,9 @@ void radio_rxToCb(const dwt_cb_data_t* cb_data){
 	PORT_TIMER_WIDTH capturedTime;
 
 	// capture the time
-	capturedTime = radiotimer_getCapturedTime();
+	capturedTime = sctimer_readCounter();
 	radio_vars.rx_frameLen = 0;
+	radio_vars.radio_status = cb_data->status;
 	radio_vars.state = RADIOSTATE_TXRX_DONE;
 	if( radio_vars.endFrame_cb != NULL){
 		radio_vars.endFrame_cb(capturedTime);

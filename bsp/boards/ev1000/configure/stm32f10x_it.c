@@ -18,8 +18,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
 #include "leds.h"
-#include "bsp_timer.h"
-#include "radiotimer.h"
+#include "sctimer.h"
 #include "spi.h"
 #include "radio.h"
 #include "uart.h"
@@ -487,14 +486,6 @@ void TIM1_CC_IRQHandler(void)
 *******************************************************************************/
 void TIM2_IRQHandler(void)
 {
-  debugpins_isr_set();
-  if(TIM_GetFlagStatus(TIM2,TIM_FLAG_CC1) != RESET)
-  {
-    TIM_ClearFlag(TIM2,TIM_FLAG_CC1);
-    //leds_error_toggle();
-    bsp_timer_isr();
-  }
-  debugpins_isr_clr();
 }
 
 /*******************************************************************************
@@ -665,7 +656,7 @@ void RTCAlarm_IRQHandler(void)
   if(EXTI_GetITStatus(EXTI_Line17) != RESET)
   {
 	EXTI_ClearITPendingBit(EXTI_Line17);
-        radiotimer_isr();
+        sctimer_isr();
   }
   debugpins_isr_clr();
 }

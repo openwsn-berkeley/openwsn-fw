@@ -24,11 +24,11 @@ end of frame event), it will turn on its error LED.
 
 //=========================== defines =========================================
 
-#define LENGTH_PACKET   125+LENGTH_CRC ///< maximum length is 127 bytes
+#define LENGTH_PACKET   125//+LENGTH_CRC ///< maximum length is 127 bytes CRC is automatically added by the transceiver
 #ifndef BOARD_EV1000
 #define CHANNEL         11             ///< 11=2.405GHz
 #else //BOARD_EV1000
-#define CHANNEL         3              ///< 3 4492.8MHz 499.2MHz channel width
+#define CHANNEL         2              ///< 3 4492.8MHz 499.2MHz channel width
 #endif //BOARD_EV1000
 #define TIMER_PERIOD    0xffff         ///< 0xffff = 2s@32kHz
 //#define ID              0x99           ///< byte sent in the packets
@@ -107,7 +107,6 @@ int mote_main(void) {
    // prepare radio
    radio_rfOn();
    radio_setFrequency(CHANNEL);
-   radiotimer_start(10);
    // switch in RX by default
    radio_rxEnable();
    app_vars.state = APP_STATE_RX;

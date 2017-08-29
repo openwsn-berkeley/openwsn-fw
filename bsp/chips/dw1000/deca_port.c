@@ -6,7 +6,7 @@
  */
 #include "board.h"
 #include "opendefs.h"
-#include "bsp_timer.h"
+#include "sctimer.h"
 #include "spi.h"
 #include "deca_device_api.h"
 #include "deca_regs.h"
@@ -35,8 +35,8 @@ void deca_sleep( unsigned int time_ms)
 #else
 	// Make use of the bsp_timer module
 	PORT_TIMER_WIDTH end_time = 0;
-	end_time = bsp_timer_get_currentValue() + time_ms;
-	while( bsp_timer_get_currentValue() < end_time);
+	end_time = sctimer_readCounter() + time_ms;
+	while( sctimer_readCounter() < end_time);
 #endif
 }
 

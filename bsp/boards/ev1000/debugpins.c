@@ -14,7 +14,7 @@
 
 //=========================== public ==========================================
 
-void debugpins_init() {
+void debugpins_init(void) {
   
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC , ENABLE);
     
@@ -41,85 +41,85 @@ void debugpins_init() {
 }
 
 // PC.5
-void debugpins_frame_toggle(){
+void debugpins_frame_toggle(void){
     
     GPIOC->ODR ^= 0X0020;
 }
-void debugpins_frame_clr() {
+void debugpins_frame_clr(void) {
     
     GPIOC->ODR &= ~0X0020;
 }
-void debugpins_frame_set() {
+void debugpins_frame_set(void) {
     
     GPIOC->ODR |=  0X0020;
 }   
 
 // PC.4
-void debugpins_slot_toggle() {
+void debugpins_slot_toggle(void) {
     
     GPIOC->ODR ^=  0X0010;
 }
-void debugpins_slot_clr() {
+void debugpins_slot_clr(void) {
     
     GPIOC->ODR &= ~0X0010;
 }
-void debugpins_slot_set() {
+void debugpins_slot_set(void) {
     
     GPIOC->ODR |=  0X0010;
 }
 
 // PC.3
-void debugpins_fsm_toggle() {
+void debugpins_fsm_toggle(void) {
     
     GPIOC->ODR ^=  0X0008;
 }
-void debugpins_fsm_clr() {
+void debugpins_fsm_clr(void) {
     
     GPIOC->ODR &= ~0X0008;
 }
-void debugpins_fsm_set() {
+void debugpins_fsm_set(void) {
     
     GPIOC->ODR |=  0X0008;
 }
 
 // PC.2
-void debugpins_task_toggle() {
+void debugpins_task_toggle(void) {
     
     GPIOC->ODR ^=  0X0004;
 }
-void debugpins_task_clr() {
+void debugpins_task_clr(void) {
     
     GPIOC->ODR &= ~0X0004;
 }
-void debugpins_task_set() {
+void debugpins_task_set(void) {
     
     GPIOC->ODR |= 0X0004;
 }
 
 // PC.1
-void debugpins_isr_toggle() {
+void debugpins_isr_toggle(void) {
     
     GPIOC->ODR ^=  0X0002;
 }
-void debugpins_isr_clr() {
+void debugpins_isr_clr(void) {
     
     GPIOC->ODR &= ~0X0002;
 }
-void debugpins_isr_set() {
+void debugpins_isr_set(void) {
     
     GPIOC->ODR |= 0X0002;
 }
 
 // PC.0
-void debugpins_radio_toggle() {
+void debugpins_radio_toggle(void) {
     
     GPIOC->ODR ^=  0X0001;
 }
-void debugpins_radio_clr() {
+void debugpins_radio_clr(void) {
     
     GPIOC->ODR &= ~0X0001;
 }
-void debugpins_radio_set() {
+void debugpins_radio_set(void) {
     
     GPIOC->ODR |=  0X0001;
 }
