@@ -154,7 +154,7 @@ void sf0_6pQuery_notifyReceived(uint16_t query_factor, open_addr_t* neighbor){
     }
 }
 
-bool sf0_getControlslotConflictWithParent(){
+bool sf0_getControlslotConflictWithParent(void){
     return sf0_vars.controlCellConflictWithParent;
 }
 
