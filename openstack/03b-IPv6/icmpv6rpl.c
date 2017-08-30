@@ -308,30 +308,34 @@ void icmpv6rpl_receive(OpenQueueEntry_t* msg) {
 \returns TRUE and index of my preferred parent if have one, FALSE if no parent
 */
 bool icmpv6rpl_getPreferredParentIndex(uint8_t* indexptr) {
-    uint8_t i;
-    uint16_t lowestRankIncrease;
-    uint16_t lowestRankIncreaseParent;
-    uint16_t rankIncrease;
+    bool        foundPreferredParent;
+    uint8_t     i;
+    open_addr_t address;
+    if (icmpv6rpl_vars.numParent==0){
+        return FALSE;
+    }
     
-    lowestRankIncrease = MAXDAGRANK;
+    foundPreferredParent = FALSE;
     for (i=0;i<icmpv6rpl_vars.numParent;i++){
-        rankIncrease = neighbors_getLinkMetric(icmpv6rpl_vars.parentIndex[i]);
-        if (rankIncrease < lowestRankIncrease){
-            lowestRankIncrease       = rankIncrease;
-            lowestRankIncreaseParent = icmpv6rpl_vars.parentIndex[i];
+        // choose the parent who has Tx cell
+        if (
+            neighbors_getNeighborEui64(&address,ADDR_64B,icmpv6rpl_vars.parentIndex[i]) && \
+            schedule_getCellsCounts(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,CELLTYPE_TX,&address)>0
+        ){
+            *indexptr            = icmpv6rpl_vars.parentIndex[i];
+            foundPreferredParent = TRUE;
+            break;
         }
     }
     
-    // choose lowest rank increase as preferred parent
-    if (lowestRankIncrease==(3*DEFAULTLINKCOST-2)*MINHOPRANKINCREASE){
-        // no statistic yet on each parent, randomly choose one (lowest rank parent has highest possibility to be chosen)
+    // if no parent has Tx cell, randomly choose one
+    if (foundPreferredParent==FALSE){
         if (openrandom_get16b()>0xffff/2){
-            lowestRankIncreaseParent = icmpv6rpl_vars.parentIndex[0];
+            *indexptr = icmpv6rpl_vars.parentIndex[0];
         } else {
-            lowestRankIncreaseParent = icmpv6rpl_vars.parentIndex[openrandom_get16b()%(icmpv6rpl_vars.numParent)];
+            *indexptr = icmpv6rpl_vars.parentIndex[openrandom_get16b()%(icmpv6rpl_vars.numParent)];
         }
     }
-    *indexptr = lowestRankIncreaseParent;
     return (icmpv6rpl_vars.numParent>0);
 }
 
@@ -341,15 +345,11 @@ bool icmpv6rpl_getPreferredParentIndex(uint8_t* indexptr) {
 */
 bool icmpv6rpl_getPreferredParentEui64(open_addr_t* addressToWrite) {
     
-    uint16_t parentIndex;
-    if (icmpv6rpl_vars.numParent==0){
+    uint8_t  parentIndex;
+    
+    if (icmpv6rpl_getPreferredParentIndex(&parentIndex)==FALSE){
         addressToWrite = NULL;
         return FALSE;
-    }
-    if (openrandom_get16b()>0xffff/2){
-        parentIndex = icmpv6rpl_vars.parentIndex[0];
-    } else {
-        parentIndex = icmpv6rpl_vars.parentIndex[openrandom_get16b()%(icmpv6rpl_vars.numParent)];
     }
     
     return neighbors_getNeighborEui64(addressToWrite,ADDR_64B,parentIndex);
