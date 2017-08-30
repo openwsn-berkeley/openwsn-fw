@@ -127,6 +127,7 @@ command_line_options = {
     ],
     'toolchain':   [
         'mspgcc',
+        'newmspgcc',
         'iar',
         'iar-proj',
         'armgcc',
