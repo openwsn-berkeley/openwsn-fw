@@ -837,7 +837,7 @@ void icmpv6rpl_timer_parent_update_cb(opentimers_id_t id){
     // get update to date parent as nexthop
     memset(&newNexthop,0,sizeof(open_addr_t));
     icmpv6rpl_getPreferredParentEui64(&newNexthop);
-    msg = openqueue_rplGetSentToNonParentPackets(&icmpv6rpl_vars.parentIndex[0],icmpv6rpl_vars.numParent);
+    msg = openqueue_rplGetSentToNonParentPackets(&newNexthop);
     
     if (msg!=NULL && newNexthop.type != ADDR_NONE){
         memcpy(&msg->l2_nextORpreviousHop, &newNexthop, sizeof(open_addr_t));

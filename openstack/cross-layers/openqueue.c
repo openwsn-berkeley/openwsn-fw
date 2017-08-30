@@ -278,8 +278,8 @@ OpenQueueEntry_t*  openqueue_macGetPacketCreatedBy(uint8_t creator,open_addr_t* 
     return NULL;
 }
 
-OpenQueueEntry_t* openqueue_rplGetSentToNonParentPackets(uint8_t* parentIndex, uint8_t numPacket){
-    uint8_t      i,j;
+OpenQueueEntry_t* openqueue_rplGetSentToNonParentPackets(open_addr_t* newNexthop){
+    uint8_t      i;
     open_addr_t  address;
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
@@ -289,20 +289,8 @@ OpenQueueEntry_t* openqueue_rplGetSentToNonParentPackets(uint8_t* parentIndex, u
         if (
             openqueue_vars.queue[i].owner   == COMPONENT_SIXTOP_TO_IEEE802154E &&
             openqueue_vars.queue[i].creator >= COMPONENT_FORWARDING            &&
-            packetfunctions_isBroadcastMulticast(&openqueue_vars.queue[i].l2_nextORpreviousHop) == FALSE
+            packetfunctions_sameAddress(newNexthop,&openqueue_vars.queue[i].l2_nextORpreviousHop) == FALSE
         ){
-            for (j=0;j<numPacket;j++){
-                if (
-                    neighbors_getNeighborEui64(&address,ADDR_64B,parentIndex[j]) &&
-                    packetfunctions_sameAddress(&address,&openqueue_vars.queue[i].l2_nextORpreviousHop)
-                ){
-                    break;
-                }
-            }
-            if (j==numPacket){
-                // find the packet trying to sent to non parent neighbor
-                break;
-            }
             ENABLE_INTERRUPTS();
             return &openqueue_vars.queue[i];
         }

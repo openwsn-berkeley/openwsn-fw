@@ -50,7 +50,7 @@ OpenQueueEntry_t*  openqueue_macGetPacketCreatedBy(uint8_t creator,open_addr_t* 
 // called by sf0
 uint8_t            openqueue_macGetNumberOfPacketCreatedBy(uint8_t creator);
 // called by icmpv6rpl to update outgoing route
-OpenQueueEntry_t*  openqueue_rplGetSentToNonParentPackets(uint8_t* parentIndex, uint8_t numPacket);
+OpenQueueEntry_t*  openqueue_rplGetSentToNonParentPackets(open_addr_t* newNexthop);
 
 /**
 \}
