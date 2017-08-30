@@ -508,7 +508,7 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
             j++;
         }
     }
-    schedule_removeDedicateCellsExcept(parentControlSlots,j);
+    schedule_removeDedicateTxRxCellsExcept(parentControlSlots,j);
 }
 
 /**
