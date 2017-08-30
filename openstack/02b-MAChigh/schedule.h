@@ -199,7 +199,7 @@ void              schedule_removeAllCells(
 );
 
 // sfcontrol
-bool              schedule_removeDedicateTxRxCellsExcept(uint16_t * exceptCells, uint8_t length);
+bool              schedule_removeDedicateCellsExcept(uint16_t * exceptCells, uint8_t length);
 bool              schedule_hasSFControlCell(void);
 // sfcontrol
 

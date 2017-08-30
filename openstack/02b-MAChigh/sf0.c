@@ -294,7 +294,7 @@ void sf0_bandwidthEstimate_task(open_addr_t* neighbor){
         return;
     }
 
-    bw_outgoing = schedule_getNumOfSlotsByType(CELLTYPE_TX);
+    bw_outgoing = schedule_getCellsCounts(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,CELLTYPE_TX,neighbor);
     
     if (bw_outgoing==0){
         if (sf0_candidateAddCellList(celllist_add,1)==FALSE){
