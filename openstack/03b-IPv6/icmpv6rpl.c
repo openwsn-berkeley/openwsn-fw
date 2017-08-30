@@ -841,9 +841,10 @@ void task_icmpv6rpl_parent_update(void){
     
     // get update to date parent as nexthop
     memset(&newNexthop,0,sizeof(open_addr_t));
-    icmpv6rpl_getPreferredParentEui64(&newNexthop);
-    msg = openqueue_rplGetSentToNonParentPackets(&newNexthop);
-    
+    msg = NULL;
+    if (icmpv6rpl_getPreferredParentEui64(&newNexthop)){
+        msg = openqueue_rplGetSentToNonParentPackets(&newNexthop);
+    }
     if (msg!=NULL && newNexthop.type != ADDR_NONE){
         memcpy(&msg->l2_nextORpreviousHop, &newNexthop, sizeof(open_addr_t));
         for (i=0;i<8;i++){

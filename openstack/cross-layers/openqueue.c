@@ -280,15 +280,15 @@ OpenQueueEntry_t*  openqueue_macGetPacketCreatedBy(uint8_t creator,open_addr_t* 
 
 OpenQueueEntry_t* openqueue_rplGetSentToNonParentPackets(open_addr_t* newNexthop){
     uint8_t      i;
-    open_addr_t  address;
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
 
     // first to look the packet created by layer requiring routing
     for (i=0;i<QUEUELENGTH;i++) {
         if (
-            openqueue_vars.queue[i].owner   == COMPONENT_SIXTOP_TO_IEEE802154E &&
-            openqueue_vars.queue[i].creator >= COMPONENT_FORWARDING            &&
+            openqueue_vars.queue[i].owner   == COMPONENT_SIXTOP_TO_IEEE802154E                          &&
+            openqueue_vars.queue[i].creator >= COMPONENT_FORWARDING                                     &&
+            packetfunctions_isBroadcastMulticast(&openqueue_vars.queue[i].l3_destinationAdd) == FALSE   &&
             packetfunctions_sameAddress(newNexthop,&openqueue_vars.queue[i].l2_nextORpreviousHop) == FALSE
         ){
             ENABLE_INTERRUPTS();
@@ -363,7 +363,7 @@ OpenQueueEntry_t* openqueue_macGetDIOPacket(){
    for (i=0;i<QUEUELENGTH;i++) {
       if (openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
           openqueue_vars.queue[i].creator==COMPONENT_ICMPv6RPL           &&
-          packetfunctions_isBroadcastMulticast(&(openqueue_vars.queue[i].l2_nextORpreviousHop))) {
+          packetfunctions_isBroadcastMulticast(&(openqueue_vars.queue[i].l3_destinationAdd))) {
          ENABLE_INTERRUPTS();
          return &openqueue_vars.queue[i];
       }
