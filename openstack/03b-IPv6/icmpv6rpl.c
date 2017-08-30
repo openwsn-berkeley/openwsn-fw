@@ -31,6 +31,7 @@ void icmpv6rpl_timer_DAO_task(void);
 void sendDAO(void);
 // parent update cb
 void icmpv6rpl_timer_parent_update_cb(opentimers_id_t id);
+void task_icmpv6rpl_parent_update(void);
 
 //=========================== public ==========================================
 
@@ -827,6 +828,10 @@ void icmpv6rpl_timer_DAO_task() {
 }
 
 void icmpv6rpl_timer_parent_update_cb(opentimers_id_t id){
+    scheduler_push_task(task_icmpv6rpl_parent_update,TASKPRIO_RPL);
+}
+
+void task_icmpv6rpl_parent_update(void){
     open_addr_t       newNexthop;
     OpenQueueEntry_t* msg;
     uint8_t           i;
