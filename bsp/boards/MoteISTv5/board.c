@@ -206,8 +206,8 @@ void activate_switches(void){
 
 
 // USCI_A0_VECTOR
-//ISR(USCI_A0){
-void __attribute__((__interrupt__ (USCI_A0_VECTOR))) __MSPGCC_MAYBE_C16__ (USCI_A0_ISR)(void){
+ISR(USCI_A0){
+//void __attribute__((__interrupt__ (USCI_A0_VECTOR))) __MSPGCC_MAYBE_C16__ (USCI_A0_ISR)(void){
    uint16_t op = UCA0IV;
 
    switch(op) { //switch(__even_in_range(UCA0IV,4))
@@ -233,8 +233,8 @@ void __attribute__((__interrupt__ (USCI_A0_VECTOR))) __MSPGCC_MAYBE_C16__ (USCI_
 }
 
 // USCI_B3_VECTOR
-//ISR(USCI_B3){
-void __attribute__((__interrupt__ (USCI_B3_VECTOR))) __MSPGCC_MAYBE_C16__ (USCI_B3_ISR)(void){
+ISR(USCI_B3){
+//void __attribute__((__interrupt__ (USCI_B3_VECTOR))) __MSPGCC_MAYBE_C16__ (USCI_B3_ISR)(void){
    uint16_t op = UCB3IV;
 
    switch(op) {
@@ -258,8 +258,8 @@ void __attribute__((__interrupt__ (USCI_B3_VECTOR))) __MSPGCC_MAYBE_C16__ (USCI_
 
 
 // PORT1_VECTOR
-//ISR(PORT1) {
-void __attribute__((__interrupt__ (PORT1_VECTOR))) __MSPGCC_MAYBE_C16__ (PORT1_ISR)(void){
+ISR(PORT1) {
+//void __attribute__((__interrupt__ (PORT1_VECTOR))) __MSPGCC_MAYBE_C16__ (PORT1_ISR)(void){
    uint16_t op = P1IV;
 
    switch(op){
@@ -287,7 +287,8 @@ void __attribute__((__interrupt__ (PORT1_VECTOR))) __MSPGCC_MAYBE_C16__ (PORT1_I
 
 // TIMERA0_VECTOR
 // This interrupt only serves TA0CCR1-6
-void __attribute__((__interrupt__ (TIMER0_A1_VECTOR))) __MSPGCC_MAYBE_C16__ (TIMER0_A1_ISR)(void){
+ISR(TIMER0_A1) {
+//void __attribute__((__interrupt__ (TIMER0_A1_VECTOR))) __MSPGCC_MAYBE_C16__ (TIMER0_A1_ISR)(void){
 //ISR(TIMER0_A1) {
    debugpins_isr_set();
    if (radiotimer_isr()==KICK_SCHEDULER) {       // radiotimer
@@ -302,7 +303,8 @@ void __attribute__((__interrupt__ (TIMER0_A1_VECTOR))) __MSPGCC_MAYBE_C16__ (TIM
 // TIMERB0_VECTOR
 // This interrupt only serves TB0CCR0
 // For other TB0CC's use TIMER0_B0_VECTOR
-void __attribute__((__interrupt__ (TIMER0_B0_VECTOR))) __MSPGCC_MAYBE_C16__ (TIMER0_B0_ISR)(void){
+ISR(TIMER0_B0) {
+//void __attribute__((__interrupt__ (TIMER0_B0_VECTOR))) __MSPGCC_MAYBE_C16__ (TIMER0_B0_ISR)(void){
 //ISR(TIMER0_B0) {
 
    debugpins_isr_set();
