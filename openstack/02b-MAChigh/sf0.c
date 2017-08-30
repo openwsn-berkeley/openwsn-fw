@@ -189,6 +189,14 @@ void task_sf0_6pQuery_timer_fired(void){
         return;
     }
     
+    if (
+        idmanager_getIsDAGroot()                  == FALSE &&
+        schedule_getNumOfSlotsByType(CELLTYPE_TX) == 0  
+    ) {
+        // don't send 6p query until getting a tx cell to parent
+        return;
+    }
+    
     memset(&temp_neighbor,0,sizeof(temp_neighbor));
     temp_neighbor.type        = ADDR_ANYCAST;
     
