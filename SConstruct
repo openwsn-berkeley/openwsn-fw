@@ -34,20 +34,24 @@ project:
     These pairs qualify how the project is built, and are organized here into
     functional groups. Below each variable's description are the valid 
     options, with the default value listed first.
-    
+
     board          Board to build for. 'python' is for software simulation.
                    telosb, wsn430v14, wsn430v13b, gina, z1, python,
-                   iot-lab_M3, iot-lab_A8-M3
+                   iot-lab_M3, iot-lab_A8-M3, MoteISTv5
 
     version        Board version
         
     toolchain      Toolchain implementation. The 'python' board requires gcc
                    (MinGW on Windows build host).
-                   mspgcc, iar, iar-proj, gcc, armgcc
-				   
-	kernel         The kernel to use. either FreeRTOS or the default 
+                   mspgcc, newmspgcc, iar, iar-proj, gcc, armgcc
+
+	kernel         The kernel to use. either FreeRTOS or the default
 	               non-preemptive OpenOS scheduler. freertos, openos
-    
+
+    datamodel      Data model to use. Specific to MSP430X processors. Options
+                   available are "small" or "large", 16b or 20b addressing
+                   mode. If not specified small model is chosen.
+
     Connected hardware variables:
     bootload       Location of the board to bootload the binary on. 
                    COMx for Windows, /dev entries for Linux
@@ -57,7 +61,7 @@ project:
                    COMx for Windows, /dev entry for Linux
     fet_version    Firmware version running on the MSP-FET430uif for jtag.
                    2, 3
-    
+
     Simulation variables:
     fastsim        Compiles the firmware for fast simulation.
                    1 (on), 0 (off)
@@ -70,12 +74,12 @@ project:
                    amd64-linux, x86-linux, amd64-windows, x86-windows
     simhostpy      Home directory for simhost cross-build Python headers and 
                    shared library.
-    
+
     Variables for special use cases.
     dagroot        Setting a mote as DAG root is typically done through
                    OpenVisualizer. In some rare cases when the OpenVisualizer
-                   cannot send commands to the mote (e.g. IoT-LAB platform), 
-                   use this flag to build a firmware image which is, by 
+                   cannot send commands to the mote (e.g. IoT-LAB platform),
+                   use this flag to build a firmware image which is, by
                    default, in DAG root mode.
     forcetopology  Force the topology to the one indicated in the
                    openstack/02a-MAClow/topology.c file.
@@ -109,6 +113,7 @@ command_line_options = {
         'wsn430v13b',
         'wsn430v14',
         'z1',
+        'MoteISTv5',
         # Cortex-M3
         'openmote-cc2538',
         'silabs-ezr32wg',
@@ -122,6 +127,7 @@ command_line_options = {
     ],
     'toolchain':   [
         'mspgcc',
+        'newmspgcc',
         'iar',
         'iar-proj',
         'armgcc',
@@ -144,7 +150,9 @@ command_line_options = {
     'cryptoengine':     ['', 'dummy_crypto_engine', 'firmware_crypto_engine', 'board_crypto_engine'],
     'l2_security':      ['0','1'],
     'ide':              ['none','qtcreator'],
-    'revision':         ['']
+    'revision':         [''],
+    # Extended mode capable MSP430X processor option
+    'datamodel':        ['small','large'],
 }
 
 def validate_option(key, value, env):
@@ -195,6 +203,14 @@ command_line_vars.AddVariables(
         'kernel',                                          # key
         '',                                                # help
         command_line_options['kernel'][0],                 # default
+        validate_option,                                   # validator
+        None,                                              # converter
+    ),
+    # Extended mode capable MSP430X core
+    (
+        'datamodel',                                       # key
+        '',                                                # help
+        command_line_options['datamodel'][0],              # default
         validate_option,                                   # validator
         None,                                              # converter
     ),

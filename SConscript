@@ -25,7 +25,7 @@ if env['board']!='python':
             os.path.join('#','drivers','common'),
             os.path.join('#','kernel'),
             os.path.join('#','openapps'),
-            os.path.join('#','openstack'),
+            os.path.join('#','openstack'), 
         ]
     )
 
@@ -84,6 +84,89 @@ if env['toolchain']=='mspgcc':
     # print sizes
     printSizeFunc = Builder(
         action = 'msp430-size $SOURCE',
+        suffix = '.phonysize',
+    )
+    env.Append(BUILDERS = {'PrintSize' : printSizeFunc})
+
+elif env['toolchain']=='newmspgcc':
+
+    if env['board'] not in ['MoteISTv5',]:
+        raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
+
+    # compiler
+    env.Replace(CC           = 'msp430-elf-gcc')
+    # assembler
+    env.Append(ASFLAGS       = '-I/opt/msp430-toolchain/current/include')
+    env.Append(ASFLAGS       = '')
+    # archiver
+    env.Replace(AR           = 'msp430-elf-ar')
+    env.Append(ARFLAGS       = '')
+    env.Replace(RANLIB       = 'msp430-elf-ranlib')
+    env.Append(RANLIBFLAGS   = '')
+    # linker
+    env.Replace(LINK         = 'msp430-elf-gcc')
+    env.Append(LINKFLAGS     = '-L/opt/msp430-toolchain/current/include')
+    env.Append(LINKFLAGS     = '-MMD')  #Preprocessor, only user header files
+    env.Append(LINKFLAGS     = '')
+    # misc
+
+    # general options
+    env.Append(CCFLAGS       = '-I/opt/msp430-toolchain/current/include')
+    env.Append(CCFLAGS       = '-Wunknown-pragmas')
+    env.Append(CCFLAGS       = '-fno-force-addr')
+    env.Append(CCFLAGS       = '-finline-limit=1')
+    env.Append(CCFLAGS       = '-fno-schedule-insns')   #should change to fschedule-insns
+    env.Append(CCFLAGS       = '-fshort-enums')    #Enum types uses smallest type possible
+    env.Append(CCFLAGS       = '-fdiagnostics-color=always')
+    #env.Append(CCFLAGS       = '-Wall')     #Preprocessor
+    env.Append(CCFLAGS       = '-Wshadow')
+    env.Append(CCFLAGS       = '-Wpointer-arith')
+    env.Append(CCFLAGS       = '-Wbad-function-cast')
+    #env.Append(CCFLAGS       = '-Wcast-align')
+    env.Append(CCFLAGS       = '-Wsign-compare')
+    env.Append(CCFLAGS       = '-Waggregate-return')
+    env.Append(CCFLAGS       = '-Wstrict-prototypes')
+    env.Append(CCFLAGS       = '-Wmissing-prototypes')
+    env.Append(CCFLAGS       = '-Wmissing-declarations')
+    env.Append(CCFLAGS       = '-Wunused')
+    env.Append(CCFLAGS       = '-Wno-main')
+    env.Append(CCFLAGS       = '')
+
+    # Debug Options
+    if env['debug'] == 1:
+        env.Append(CCFLAGS      = '-O1')
+        env.Append(CCFLAGS      = '-ggdb')
+        env.Append(CCFLAGS      = '-Wa,--gstabs')
+        env.Append(LINKFLAGS    = '-Wl,--gc-sections')
+    else:
+        env.Append(CCFLAGS      = '-Os')
+        env.Append(CCFLAGS      = '-fdata-sections')
+        env.Append(CCFLAGS      = '-ffunction-sections')
+        env.Append(CCFLAGS      = '-fomit-frame-pointer')
+        env.Append(LINKFLAGS    = '-Wl,--gc-sections')
+        env.Append(LINKFLAGS    = '-Wl,-s')
+
+    # OS Selection
+    if env['kernel'] == 'freertos':
+            env.Append(CCFLAGS       = '-DUSE_FREERTOS')
+
+    # convert ELF to iHex
+    elf2iHexFunc = Builder(
+       action = 'msp430-elf-objcopy --output-target=ihex $SOURCE $TARGET',
+       suffix = '.hex',
+    )
+    env.Append(BUILDERS = {'Elf2iHex' : elf2iHexFunc})
+
+    # convert ELF to bin
+    elf2BinFunc = Builder(
+       action = 'msp430-elf-objcopy --output-target=binary $SOURCE $TARGET',
+       suffix = '.bin',
+    )
+    env.Append(BUILDERS = {'Elf2iBin' : elf2BinFunc})
+
+    # print sizes
+    printSizeFunc = Builder(
+        action = 'msp430-elf-size $SOURCE',
         suffix = '.phonysize',
     )
     env.Append(BUILDERS = {'PrintSize' : printSizeFunc})
@@ -716,6 +799,58 @@ def IotLabM3_bootload(target, source, env):
     # wait for threads to finish
     for t in bootloadThreads:
         countingSem.acquire()
+
+class MoteISTv5_bootloadThread(threading.Thread):
+    def __init__(self,comPort,hexFile,countingSem):
+
+        # store params
+        self.comPort         = comPort
+        self.hexFile         = hexFile
+        self.countingSem     = countingSem
+
+        # initialize parent class
+        threading.Thread.__init__(self)
+        self.name            = 'MoteISTv5_bootloadThread ' + str(self.comPort)
+
+    def run(self):
+        print 'starting bootloading on ' + str(self.comPort)
+
+        if self.comPort == 'WindowsFet':
+            subprocess.call(
+                'bash '+os.path.join('bootloader','MoteISTv5','ProgramFet.sh')+' {0}'.format(self.hexFile),
+                shell=True
+            )
+        else:
+            subprocess.call(
+                'python '+os.path.join('bootloader','MoteISTv5','Python','bootloader.py')+' --file={0} --comport={1} program'.format(self.hexFile, self.comPort),
+                shell=True
+            )
+
+        print 'done bootloading on ' + str(self.comPort)
+
+        # indicate done
+        self.countingSem.release()
+
+def MoteISTv5_bootload(target, source, env):
+    bootloadThreads = []
+    countingSem     = threading.Semaphore(0)
+    # create threads
+    for comPort in env['bootload'].split(','):
+        print source[0].path.split('.')[0]+'.hex'
+        bootloadThreads += [
+            MoteISTv5_bootloadThread(
+                comPort      = comPort,
+                #hexFile      = os.path.split(source[0].path)[1].split('.')[0]+'.bin',
+                hexFile      = source[0].path.split('.')[0]+'.hex',
+                countingSem  = countingSem,
+            )
+        ]
+    # start threads
+    for t in bootloadThreads:
+        t.start()
+    # wait for threads to finish
+    for t in bootloadThreads:
+        countingSem.acquire()
         
 # bootload
 def BootloadFunc():
@@ -743,6 +878,12 @@ def BootloadFunc():
             suffix      = '.phonyupload',
             src_suffix  = '.bin'
          )
+    elif env['board']=='MoteISTv5':
+        return Builder(
+            action      = MoteISTv5_bootload,
+            suffix      = '.MRM3upload',
+            src_suffix  = '.hex',
+        )
     else:
         raise SystemError('bootloading on board={0} unsupported.'.format(env['board']))
 if env['bootload']:
