@@ -354,6 +354,11 @@ void sf0_bandwidthEstimate_task(open_addr_t* neighbor){
     bw_outgoing = schedule_getCellsCounts(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,CELLTYPE_TX,neighbor);
     
     if (bw_outgoing==0){
+        if (schedule_getNumberOfFreeEntries()==0){
+            // stop send 6p add command if I have no free entries for slot
+            return;
+        }
+      
         if (sf0_candidateAddCellList(celllist_add,1)==FALSE){
             // failed to get cell list to add
             return;
