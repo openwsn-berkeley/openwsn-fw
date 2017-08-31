@@ -161,6 +161,17 @@ void sf0_handleRCError(uint8_t code, open_addr_t* neighbor){
 // sfcontrol
 
 void sf0_6pQuery_notifyReceived(uint16_t query_factor, open_addr_t* neighbor){
+  
+    if (idmanager_getIsDAGroot()==FALSE && query_factor == 0xff && schedule_getCellsCounts(CELLTYPE_TX,neighbor)==0){
+        // don't have a tx to the neighbor, mark it as no resource
+        neighbors_setNeighborNoResource(neighbor);
+        // reset the lowestRankInHistory as this neighbor can't be parent forever
+        icmpv6rpl_resetLowestRankInHistory();
+        // update parent
+        icmpv6rpl_updateMyDAGrankAndParentSelection();
+        return;
+    }
+  
     if (openrandom_get16b() < 0xffff/query_factor){
 #ifdef SF0_QUERY_ACTION_6PQUERY
         sf0_bandwidthEstimate_task(neighbor);
@@ -198,13 +209,6 @@ void task_sf0_6pQuery_timer_fired(void){
         // stop here
         return;
     }
-    
-    
-    if (schedule_getNumberOfFreeEntries()==0){
-        // stop send 6pQuery if I have no free entries for slot
-        return;
-    }
-    
    
     // do not send 6p query if I have the default DAG rank
     if (sf0_vars.sf_isBusySendingQuery==TRUE){
@@ -246,17 +250,21 @@ void task_sf0_6pQuery_timer_fired(void){
     temp_neighbor.addr_16b[0] = 0xff;
     temp_neighbor.addr_16b[1] = 0xff;
     
-    if (sf0_vars.received6Ppreviously==FALSE){
-        if (sf0_vars.sf_query_factor>SF0_QUERY_MIN_FACTOR && (schedule_getNumOfSlotsByType(CELLTYPE_RX)>0)){
-            // change query factor when I have a rx cell in my schedule first
-            sf0_vars.sf_query_factor--;
+    if (schedule_getNumberOfFreeEntries()>0){
+        if (sf0_vars.received6Ppreviously==FALSE){
+            if (sf0_vars.sf_query_factor>SF0_QUERY_MIN_FACTOR && (schedule_getNumOfSlotsByType(CELLTYPE_RX)>0)){
+                // change query factor when I have a rx cell in my schedule first
+                sf0_vars.sf_query_factor--;
+            }
+        } else {
+            if (sf0_vars.sf_query_factor<SF0_QUERY_MAX_FACTOR){
+                sf0_vars.sf_query_factor++;
+            }
         }
     } else {
-        if (sf0_vars.sf_query_factor<SF0_QUERY_MAX_FACTOR){
-            sf0_vars.sf_query_factor++;
-        }
+        sf0_vars.sf_query_factor = 0xff;
     }
-
+    
     outcome = sixtop_request(
         IANA_6TOP_CMD_QUERY,                                            // code
         &temp_neighbor,                                                 // neighbor
@@ -351,7 +359,7 @@ void sf0_bandwidthEstimate_task(open_addr_t* neighbor){
         return;
     }
 
-    bw_outgoing = schedule_getCellsCounts(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,CELLTYPE_TX,neighbor);
+    bw_outgoing = schedule_getCellsCounts(CELLTYPE_TX,neighbor);
     
     if (bw_outgoing==0){
         if (schedule_getNumberOfFreeEntries()==0){

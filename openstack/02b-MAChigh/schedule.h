@@ -189,7 +189,6 @@ owerror_t          schedule_removeActiveSlot(
 );
 bool               schedule_isSlotOffsetAvailable(uint16_t slotOffset);
 uint16_t          schedule_getCellsCounts(
-    uint8_t frameID,
     cellType_t type,
     open_addr_t* neighbor
 );

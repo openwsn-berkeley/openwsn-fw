@@ -321,7 +321,7 @@ bool icmpv6rpl_getPreferredParentIndex(uint8_t* indexptr) {
         // choose the parent who has Tx cell
         if (
             neighbors_getNeighborEui64(&address,ADDR_64B,icmpv6rpl_vars.parentIndex[i]) && \
-            schedule_getCellsCounts(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,CELLTYPE_TX,&address)>0
+            schedule_getCellsCounts(CELLTYPE_TX,&address)>0
         ){
             *indexptr            = icmpv6rpl_vars.parentIndex[i];
             foundPreferredParent = TRUE;
@@ -509,6 +509,10 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
         }
     }
     schedule_removeDedicateTxRxCellsExcept(parentControlSlots,j);
+}
+
+void icmpv6rpl_resetLowestRankInHistory(void){
+    icmpv6rpl_vars.lowestRankInHistory = MAXDAGRANK;
 }
 
 /**

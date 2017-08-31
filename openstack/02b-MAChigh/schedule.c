@@ -474,17 +474,12 @@ bool schedule_isSlotOffsetAvailable(uint16_t slotOffset){
    return TRUE;
 }
 
-uint16_t  schedule_getCellsCounts(uint8_t frameID,cellType_t type, open_addr_t* neighbor){
+uint16_t  schedule_getCellsCounts(cellType_t type, open_addr_t* neighbor){
     uint16_t         count = 0;
     scheduleEntry_t* scheduleWalker;
    
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
-    
-    if (frameID != SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE){
-        ENABLE_INTERRUPTS();
-        return 0;
-    }
    
     scheduleWalker = schedule_vars.currentScheduleEntry;
     do {
