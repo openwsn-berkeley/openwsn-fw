@@ -201,6 +201,7 @@ void              schedule_removeAllCells(
 // sfcontrol
 bool              schedule_removeDedicateTxRxCellsExcept(uint16_t * exceptCells, uint8_t length);
 bool              schedule_hasSFControlCell(void);
+bool              schedule_getNonParentNeighborWithTxCell(open_addr_t* addrToWrite);
 // sfcontrol
 
 scheduleEntry_t*  schedule_getCurrentScheduleEntry(void);

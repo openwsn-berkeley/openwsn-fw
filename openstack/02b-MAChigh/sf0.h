@@ -22,6 +22,7 @@ typedef struct {
    uint16_t sf_control_slotoffset;
    opentimers_id_t query_timer;
    opentimers_id_t trafficcontrol_timer;
+   opentimers_id_t housekeeping_timer;
    bool sf_controlSlot_reserved;
    bool sf_isBusySendingQuery;
    uint8_t sf_query_factor;

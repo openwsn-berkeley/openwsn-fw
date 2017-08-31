@@ -563,6 +563,22 @@ bool schedule_hasSFControlCell(void){
     }
     return FALSE;
 }
+
+bool schedule_getNonParentNeighborWithTxCell(open_addr_t*   addrToWrite){
+    uint8_t i;
+    
+    for(i=0;i<MAXACTIVESLOTS;i++){
+        if (
+            schedule_vars.scheduleBuf[i].type                                     == CELLTYPE_TX && \
+            icmpv6rpl_isPreferredParent(&(schedule_vars.scheduleBuf[i].neighbor)) == FALSE
+        ){
+            memcpy(addrToWrite, &(schedule_vars.scheduleBuf[i].neighbor), sizeof(open_addr_t));
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
 // sfcontrol
 
 scheduleEntry_t* schedule_getCurrentScheduleEntry(){

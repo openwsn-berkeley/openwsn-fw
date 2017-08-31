@@ -16,13 +16,14 @@
 
 #define SF0_ID                            0
 #define SF0THRESHOLD                      2
-#define SF0_QUERY_MAX_FACTOR             10 // 10 => 1/10
-#define SF0_QUERY_MIN_FACTOR              3 // 3 =>  1/3
+#define SF0_QUERY_MAX_FACTOR              6 // 10 => 1/10
+#define SF0_QUERY_MIN_FACTOR              2 // 3 =>  1/3
 
 #define SF0_QUERY_PERIOD              20000 // miliseconds
 #define SF0_TRAFFICCONTROL_TIMEOUT    10000 // miliseconds
-#define SF0_BANDWIDTHESTIMATE_TIMEOUT 60000// miliseconds
-#define SF0_PROBEPARENT_PERIOD        60000// miliseconds
+#define SF0_BANDWIDTHESTIMATE_TIMEOUT 60000 // miliseconds
+#define SF0_PROBEPARENT_PERIOD        60000 // miliseconds
+#define SF0_HOUSEKEEPING_PERIOD       60000 // miliseconds
 
 //#define SF0_QUERY_ACTION_KA
 #define SF0_QUERY_ACTION_6PQUERY
@@ -38,12 +39,14 @@ void sf0_probeParentBySendingKA(void);
 // sixtop callback 
 uint16_t sf0_getMetadata(void);
 metadata_t sf0_translateMetadata(void);
-void sf0_handleRCError(uint8_t code);
+void sf0_handleRCError(uint8_t code, open_addr_t* neighbor);
 
 void sf0_6pQuery_timer_cb(opentimers_id_t id);
 void sf0_trafficControl_timer_cb(opentimers_id_t id);
+void sf0_housekeeping_timer_cb(opentimers_id_t id);
 
 void task_sf0_6pQuery_timer_fired(void);
+void task_sf0_housekeeping_timer_fired(void);
 
 //=========================== public ==========================================
 
@@ -77,6 +80,15 @@ void sf0_init(void) {
         TIMER_PERIODIC, 
         sf0_6pQuery_timer_cb
     );
+    
+    sf0_vars.housekeeping_timer   = opentimers_create();
+    opentimers_scheduleIn(
+        sf0_vars.housekeeping_timer, 
+        SF0_HOUSEKEEPING_PERIOD,
+        TIME_MS, 
+        TIMER_PERIODIC, 
+        sf0_housekeeping_timer_cb
+    ); 
     // sfcontrol 
     sixtop_setSFcallback(sf0_getsfid,sf0_getMetadata,sf0_translateMetadata,sf0_handleRCError);
 }
@@ -117,7 +129,7 @@ metadata_t sf0_translateMetadata(void){
     return METADATA_TYPE_FRAMEID;
 }
 
-void sf0_handleRCError(uint8_t code){
+void sf0_handleRCError(uint8_t code, open_addr_t* neighbor){
     if (code==IANA_6TOP_RC_BUSY){
         // disable sf0 for [0...2^4] slotframe long time
         sf0_setBackoff(openrandom_get16b()%(1<<4));
@@ -189,13 +201,13 @@ void task_sf0_6pQuery_timer_fired(void){
         return;
     }
     
-//    if (
-//        idmanager_getIsDAGroot()                  == FALSE &&
-//        schedule_getNumOfSlotsByType(CELLTYPE_TX) == 0  
-//    ) {
-//        // don't send 6p query until getting a tx cell to parent
-//        return;
-//    }
+    if (
+        idmanager_getIsDAGroot()                  == FALSE &&
+        schedule_getNumOfSlotsByType(CELLTYPE_TX) == 0  
+    ) {
+        // don't send 6p query until getting a tx cell to parent
+        return;
+    }
     
     memset(&temp_neighbor,0,sizeof(temp_neighbor));
     temp_neighbor.type        = ADDR_ANYCAST;
@@ -273,11 +285,49 @@ void sf0_setReceived6Ppreviously(bool received){
     sf0_vars.received6Ppreviously = received;
 }
 
+void sf0_housekeeping_timer_cb(opentimers_id_t id){
+    scheduler_push_task(task_sf0_housekeeping_timer_fired,TASKPRIO_SF0);
+}
+
+void task_sf0_housekeeping_timer_fired(void){
+    cellInfo_ht    celllist_delete[CELLLIST_MAX_LEN];
+    open_addr_t    neighbor;
+    // do not reserve cells if I'm a DAGroot
+    if (idmanager_getIsDAGroot()){
+        return;
+    }
+    
+    if (sf0_vars.backoff>0){
+        sf0_vars.backoff -= 1;
+        return;
+    }
+    
+    if (schedule_getNonParentNeighborWithTxCell(&neighbor)==FALSE){
+        return;
+    }
+
+    if (sf0_candidateRemoveCellList(celllist_delete,&neighbor,1)==FALSE){
+        // failed to get cell list to add
+        return;
+    }
+    sixtop_request(
+        IANA_6TOP_CMD_DELETE,               // code
+        &neighbor,                           // neighbor
+        1,                                  // number cells
+        LINKOPTIONS_TX,                     // cellOptions
+        NULL,                               // celllist to add (not used)
+        celllist_delete,                    // celllist to delete 
+        SF0_ID,                             // sfid
+        0,                                  // list command offset (not used)
+        0                                   // list command maximum celllist (not used)
+    );
+}
+
 // sfcontrol
 //=========================== private =========================================
 
 void sf0_bandwidthEstimate_task(open_addr_t* neighbor){
-    int8_t         bw_outgoing;
+    uint8_t        bw_outgoing;
     cellInfo_ht    celllist_add[CELLLIST_MAX_LEN];
     
     // do not reserve cells if I'm a DAGroot
