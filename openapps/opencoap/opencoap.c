@@ -353,9 +353,12 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
                 found=TRUE;
             }
             
-            // resource found, verify if it needs to be decrypted
+            // resource found
+            // verify if it needs to be decrypted
+            // errors are passed to the application without decryption as they do not contain
+            // object security option
             if (found==TRUE && temp_desc->callbackRx!=NULL) {
-                if (temp_desc->securityContext != NULL) {
+                if (temp_desc->securityContext != NULL && coap_header.Code < COAP_CODE_RESP_BADREQ) {
                     coap_incomingOptionsLen = MAX_COAP_OPTIONS;
                     decStatus = openoscoap_unprotect_message(temp_desc->securityContext,
                             coap_header.Ver,
