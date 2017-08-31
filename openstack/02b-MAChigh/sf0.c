@@ -151,6 +151,11 @@ void sf0_handleRCError(uint8_t code, open_addr_t* neighbor){
     if (code==IANA_6TOP_RC_SFID_ERR){
         // TBD: the sfId does not match
     }
+    
+    if (code==IANA_6TOP_RC_NORES){
+        // mark the neighbor as no resource
+        neighbors_setNeighborNoResource(neighbor);
+    }
 }
 
 // sfcontrol
@@ -193,6 +198,13 @@ void task_sf0_6pQuery_timer_fired(void){
         // stop here
         return;
     }
+    
+    
+    if (schedule_getNumberOfFreeEntries()==0){
+        // stop send 6pQuery if I have no free entries for slot
+        return;
+    }
+    
    
     // do not send 6p query if I have the default DAG rank
     if (sf0_vars.sf_isBusySendingQuery==TRUE){
@@ -310,17 +322,12 @@ void task_sf0_housekeeping_timer_fired(void){
         // failed to get cell list to add
         return;
     }
-    sixtop_request(
-        IANA_6TOP_CMD_DELETE,               // code
-        &neighbor,                           // neighbor
-        1,                                  // number cells
-        LINKOPTIONS_TX,                     // cellOptions
-        NULL,                               // celllist to add (not used)
-        celllist_delete,                    // celllist to delete 
-        SF0_ID,                             // sfid
-        0,                                  // list command offset (not used)
-        0                                   // list command maximum celllist (not used)
-    );
+    
+    /**  do nothing for debugging, so I can see the wrong scheduled tx cell
+    */
+    // remove the tx cell directly
+//    schedule_removeActiveSlot(celllist_delete[0].slotoffset,&neighbor);
+    
 }
 
 // sfcontrol
