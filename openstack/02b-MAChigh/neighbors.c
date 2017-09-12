@@ -112,6 +112,7 @@ open_addr_t* neighbors_getJoinProxy() {
    joinProxy = NULL;
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
       if (neighbors_vars.neighbors[i].used==TRUE && 
+              neighbors_vars.neighbors[i].stableNeighbor==TRUE &&
               neighbors_vars.neighbors[i].joinPrio <= joinPrioMinimum) {
           joinProxy = &(neighbors_vars.neighbors[i].addr_64b);
           joinPrioMinimum = neighbors_vars.neighbors[i].joinPrio;
