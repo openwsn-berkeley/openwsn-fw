@@ -17,6 +17,7 @@
 #include "debugpins.h"
 #include "opentimers.h"
 #include "gpio.h"
+#include "cryptoengine.h"
 
 //=========================== main ============================================
 
@@ -91,6 +92,7 @@ void board_init(void)
     debugpins_init();
     //enable nvic for the radio
     NVIC_radio();
+    cryptoengine_init();
 }
 
 void board_sleep(){

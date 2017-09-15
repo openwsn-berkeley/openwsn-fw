@@ -22,6 +22,12 @@ source   = \
     Glob('configure/*.c') + \
     Glob('library/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/src/*.c')
 
+localEnv.Append(
+        CPPPATH =  [
+            os.path.join('#','bsp','chips','at86rf231'),
+        ],
+)
+
 board  = localEnv.Object(source=source) + rf231
 
 Return('board')
