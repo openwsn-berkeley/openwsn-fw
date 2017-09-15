@@ -334,6 +334,8 @@ int mote_main(void) {
 #endif /* TEST_AES_CCMS_AUTH_INVERSE */
 
    board_init();
+
+   leds_all_off();
    
 #if TEST_AES_ECB
    if (run_aes_ecb_suite(aes_ecb_suite, sizeof(aes_ecb_suite)/sizeof(aes_ecb_suite[0])) == E_FAIL) {
