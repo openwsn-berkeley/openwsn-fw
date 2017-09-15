@@ -5,6 +5,9 @@
     <path>$WS_DIR$\01bsp_sctimer\01bsp_sctimer.ewp</path>
   </project>
   <project>
+    <path>$WS_DIR$\01bsp_deepsleep\01bsp_deepsleep.ewp</path>
+  </project>
+  <project>
     <path>$WS_DIR$\02drv_opentimers\02drv_opentimers.ewp</path>
   </project>
   <project>
@@ -21,6 +24,10 @@
       <name>all_debug</name>
       <member>
         <project>01bsp_sctimer</project>
+        <configuration>Debug</configuration>
+      </member>
+	  <member>
+        <project>01bsp_deepsleep</project>
         <configuration>Debug</configuration>
       </member>
       <member>
