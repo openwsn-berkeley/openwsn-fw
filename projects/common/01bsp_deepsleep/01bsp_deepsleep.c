@@ -36,7 +36,7 @@ app_vars_t app_vars;
 //=========================== prototypes ======================================
 
 void cb_compare(void);
-void board_deep_sleep(void);
+
 
 //=========================== main ============================================
 
@@ -56,17 +56,6 @@ int mote_main(void) {
    }
 }
 
-void board_deep_sleep() {
-    //
-    // Let system enter powermode 2 when going to deep sleep
-    //
-    SysCtrlPowerModeSet(SYS_CTRL_PM_2);
-    
-    //
-    // Go to sleep
-    //
-    SysCtrlDeepSleep();
-}
 //=========================== callbacks =======================================
 
 void cb_compare(void) {

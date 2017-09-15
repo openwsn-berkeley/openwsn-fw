@@ -109,6 +109,7 @@ static const uint8_t infouCName[]           = "CC2538";
 static const uint8_t infoRadioName[]        = "CC2538 SoC";
 
 //=========================== prototypes ======================================
+void board_deep_sleep(void);
 
 //=========================== public ==========================================
 

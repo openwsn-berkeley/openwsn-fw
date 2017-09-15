@@ -92,6 +92,19 @@ void board_sleep(void) {
     SysCtrlSleep();
 }
 
+
+void board_deep_sleep(void) {
+    //
+    // Let system enter powermode 2 when going to deep sleep
+    //
+    SysCtrlPowerModeSet(SYS_CTRL_PM_2);
+    
+    //
+    // Go to sleep
+    //
+    SysCtrlDeepSleep();
+}
+
 /**
  * Timer runs at 32 MHz and is 32-bit wide
  * The timer is divided by 32, whichs gives a 1 microsecond ticks
