@@ -6,13 +6,7 @@ from subprocess import call
 
 currentDir = os.path.dirname(os.path.realpath(__file__))
 
-OOCD_TARGET='stm32f1x'
 OOCD_ITF=os.path.join(currentDir, 'iotlab-m3.cfg')
-
-OOCD_PORT = '123'
-GDB_PORT = '3' + OOCD_PORT
-TELNET_PORT = '4' + OOCD_PORT
-TCL_PORT = '5' + OOCD_PORT
 
 if os.name=='nt':
    extension = '.exe'
@@ -24,7 +18,6 @@ def usage():
 Examples:
     ./%s example/main -p /dev/ttyUSB0 
     """ % (sys.argv[0], sys.argv[0]))
-
 
 # from http://stackoverflow.com/questions/377017/test-if-executable-exists-in-python
 def which(program):
@@ -47,7 +40,7 @@ def which(program):
 try:
    OPENOCD = which('openocd' + extension)
 except RuntimeError as e:
-    print('ERROR: {} requires OpenOCD with ft2232 interface.'.format(sys.argv[0]))
+    print('ERROR: {} requires OpenOCD with ftdi interface.'.format(sys.argv[0]))
     print('')
     sys.exit(1)
 
@@ -83,15 +76,14 @@ if os.name=='nt':
 
 call([OPENOCD,
    '-f', os.path.join(currentDir, OOCD_ITF),
-   '-f', os.path.join('target', OOCD_TARGET) + '.cfg',
-   '-c', 'gdb_port ' + GDB_PORT,
-   '-c', 'telnet_port ' + TELNET_PORT,
-   '-c', 'tcl_port ' + TCL_PORT,
+   '-c', 'tcl_port 0',
+   '-c', 'telnet_port 0',
+   '-c', 'gdb_port 0',
    '-c', 'init',
    '-c', 'targets',
-   '-c', 'reset halt',
-   '-c', 'reset init', 
+   '-c', 'reset halt', 
    '-c', 'flash write_image erase ' + binary,
+   '-c', 'reset halt',
    '-c', 'verify_image ' + binary,
    '-c', 'reset run',
    '-c', 'shutdown'])
