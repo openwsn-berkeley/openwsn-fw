@@ -23,12 +23,17 @@
 ieee802154_security_vars_t ieee802154_security_vars;
 
 //========= common functions regardless of whether L2SEC is used or not =======
-// following 6 functions are also called when L2SEC is not used. This is to facilitate
+// following 7 functions are also called when L2SEC is not used. This is to facilitate
 // automated testing of SECJOIN without L2SEC and to ensure the order in which nodes
 // start sending out EBs. With the current implementation, EBs are sent only once the
 // node has received a Join Response from the JRC.
 
 void IEEE802154_security_init(void) {
+
+   // By default, we assume that no dynamic keying (SEC JOIN) is used
+   // if an app is linked with dynamic keying support, it should set
+   // this flag to true by calling IEEE802154_security_setDynamicKeying()
+   ieee802154_security_vars.dynamicKeying = FALSE;
 
     // TODO joinPermitted flag should be set dynamically upon a button press
     // and propagated through the network via EBs
@@ -61,11 +66,19 @@ void IEEE802154_security_setDataKey(uint8_t index, uint8_t* value) {
 }
 
 bool IEEE802154_security_isConfigured() {
+    if (ieee802154_security_vars.dynamicKeying == FALSE) {
+        return TRUE;
+    }
+
     if (ieee802154_security_vars.k1.index != IEEE802154_SECURITY_KEYINDEX_INVALID &&
          ieee802154_security_vars.k2.index != IEEE802154_SECURITY_KEYINDEX_INVALID) {
         return TRUE;
     }
     return FALSE;
+}
+
+void IEEE802154_security_setDynamicKeying() {
+    ieee802154_security_vars.dynamicKeying = TRUE;
 }
 
 //=========================== public ==========================================

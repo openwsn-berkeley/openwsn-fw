@@ -52,6 +52,7 @@ typedef struct{
 //=========================== variables =======================================
 
 typedef struct {
+   bool                    dynamicKeying;
    bool                    joinPermitted;
    symmetric_key_802154_t  k1;
    symmetric_key_802154_t  k2;
@@ -73,6 +74,7 @@ void        IEEE802154_security_setDataKey(uint8_t index, uint8_t* value);
 uint8_t     IEEE802154_security_getSecurityLevel(OpenQueueEntry_t *msg);
 bool        IEEE802154_security_acceptableLevel(OpenQueueEntry_t* msg, ieee802154_header_iht* parsedHeader);
 bool        IEEE802154_security_isConfigured(void);
+void        IEEE802154_security_setDynamicKeying(void);
 
 
 /**
