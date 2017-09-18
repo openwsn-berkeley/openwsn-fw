@@ -25,8 +25,7 @@
 \warning should be exactly 256 so wrap-around on the index does not require
          the use of a slow modulo operator.
 */
-#define SERIAL_OUTPUT_BUFFER_SIZE 1024 // leave at 256!
-#define OUTPUT_BUFFER_MASK       0x3FF
+#define SERIAL_OUTPUT_BUFFER_SIZE 256 // leave at 256!
 
 /**
 \brief Number of bytes of the serial input buffer, in bytes.
@@ -115,8 +114,8 @@ typedef struct {
     // output
     bool                outputBufFilled;
     uint16_t            outputCrc;
-    uint16_t            outputBufIdxW;
-    uint16_t            outputBufIdxR;
+    uint8_t             outputBufIdxW;
+    uint8_t             outputBufIdxR;
     uint8_t             outputBuf[SERIAL_OUTPUT_BUFFER_SIZE];
 } openserial_vars_t;
 
