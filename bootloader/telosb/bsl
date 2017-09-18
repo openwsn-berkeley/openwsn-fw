@@ -274,7 +274,7 @@ class LowLevel:
 	self.swapRSTTEST = 0
 	self.telosLatch = 0
 	self.telosI2C = 0
-        
+
         self.protocolMode = self.MODE_BSL
         self.BSLMemAccessWarning = 0                #Default: no warning.
         self.slowmode = 0
@@ -597,7 +597,7 @@ class LowLevel:
                             sys.stderr.write("  bslSync() timeout, retry ...\n")
                     elif loopcnt == 4:
                         #nmi may have caused the first reset to be ignored, try again
-                        self.bslReset(0) 
+                        self.bslReset(0)
                         self.bslReset(1)
                     elif loopcnt > 0:
                         if DEBUG > 1:
@@ -607,7 +607,7 @@ class LowLevel:
                             sys.stderr.write("  bslSync() timeout\n")
             else:                                   #garbage
                 if DEBUG > 1: sys.stderr.write("  bslSync() failed (0x%02x), retry ...\n" % ord(c))
-                
+
                 raise BSLException(self.ERR_BSL_SYNC)       #Sync. failed
 
     def bslTxRx(self, cmd, addr, length = 0, blkout = None, wait=0):
@@ -758,7 +758,7 @@ class Memory:
                 sys.stderr.write("ELF section %s at 0x%04x %d bytes\n" % (section.name, section.lma, len(section.data)))
             if len(section.data):
                 self.segments.append( Segment(section.lma, section.data) )
-        
+
     def loadFile(self, filename):
         """fill memory with the contents of a file. file type is determined from extension"""
         #TODO: do a contents based detection
@@ -1001,7 +1001,7 @@ class BootStrapLoader(LowLevel):
         if self.bslVer <= 0x0130 and adjsp:
             #only do this on BSL where it's needed to prevent
             #malfunction with F4xx devices/ newer ROM-BSLs
-            
+
             #Execute function within bootstrap loader
             #to prepare stack pointer for the following patch.
             #This function will lock the protected functions again.
@@ -1026,7 +1026,7 @@ class BootStrapLoader(LowLevel):
                     sys.stderr.write("Using built in BSL replacement for F1x devices\n")
                     sys.stderr.flush()
                 replacementBSL.loadTIText(cStringIO.StringIO(F1X_BSL))  #parse embedded BSL
-    
+
         #now download the new BSL, if allowed and needed (version lower than the
         #the replacement) or forced
         if replacementBSL is not None:
@@ -1088,7 +1088,7 @@ class BootStrapLoader(LowLevel):
         self.txPasswd(self.passwd)
 
         #update version info
-        #verison only valid for the internal ones, but it also makes sure 
+        #verison only valid for the internal ones, but it also makes sure
         #that the patches are not applied if the user d/ls one
         self.bslVer = 0x0150
 
@@ -1159,13 +1159,13 @@ class BootStrapLoader(LowLevel):
             a,l = baudconfigs[baudrate]
         except KeyError:
             raise ValueError, "baudrate not valid. valid values are %r" % baudconfigs.keys()
-        
+
         sys.stderr.write("Changing baudrate to %d ...\n" % baudrate)
         sys.stderr.flush()
         self.bslTxRx(self.BSL_CHANGEBAUD,   #Command: change baudrate
                     a, l)                   #args are coded in adr and len
         time.sleep(0.010)                   #recomended delay
-        self.serialport.setBaudrate(baudrate)
+        self.serialport.baudrate = baudrate
 
     def actionReadBSLVersion(self):
         """informational output of BSL version number.
@@ -1233,7 +1233,7 @@ General options:
   --swap-reset-test     Swap the RST and TEST pins (used for some BSL hardware)
   --telos-latch         Special twiddle in BSL reset for Telos hardware
   --telos-i2c           DTR/RTS map via an I2C switch to TCK/RST in Telos Rev.B
-  --telos               Implies options --invert-reset, --invert-test, 
+  --telos               Implies options --invert-reset, --invert-test,
                         --swap-reset-test, and --telos-latch
   --telosb              Implies options --swap-reset-test, --telos-i2c,
                         --no-BSL-download, and --speed=38400
@@ -1527,7 +1527,7 @@ def main():
         reset = 0
 
     sys.stderr.flush()
-    
+
     #prepare data to download
     bsl.data = Memory()                             #prepare downloaded data
     if filetype is not None:                        #if the filetype is given...
