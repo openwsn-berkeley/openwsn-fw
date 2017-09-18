@@ -378,23 +378,100 @@ static owerror_t aes_ctr_enc(uint8_t* m,
 \returns E_SUCCESS when the encryption was successful. 
 */
 owerror_t aes_cbc_enc_raw(uint8_t* buffer, uint8_t len, uint8_t iv[16]) {
-   uint8_t  n;
-   uint8_t  k;
-   uint8_t  nb;
-   uint8_t* pbuf;
-   uint8_t* pxor;
+    uint8_t  n;
+    uint8_t  k;
+    uint8_t  nb;
+    uint8_t* pbuf;
+    uint8_t* pxor;
+    uint8_t spi_tx_buffer[3];
+    uint8_t spi_rx_buffer[16];
+    uint8_t aes_cmd;
+    uint8_t aes_status;
 
-   nb = len >> 4;
-   pxor = iv;
-   for (n = 0; n < nb; n++) {
-      pbuf = &buffer[16 * n];
-      // may be faster if vector are aligned to 4 bytes (use long instead char in xor)
-      for (k = 0; k < 16; k++) {
-            pbuf[k] ^= pxor[k];
-      }
-      at86rf231_crypto_opt_ecb(pbuf);
-      pxor = pbuf;
-   }
+    nb = len >> 4;
+    pxor = iv;
+    pbuf = buffer;
+    for (k = 0; k < 16; k++) {
+        pbuf[k] ^= pxor[k];
+    }
+    at86rf231_crypto_opt_ecb(pbuf);
+
+    aes_cmd = 0xA0; // AES-CBC encryption start
+    aes_status = 0x00;
+    // first block already done, start actual CBC processing in hardware
+    for (n = 1; n<nb; n++) {
+        pbuf = &buffer[16 * n];
+        spi_tx_buffer[0] = 0x40; // SRAM write
+        spi_tx_buffer[1] = RG_AES_CTRL; // AES_CTRL register
+        spi_tx_buffer[2] = 0x20; // CBC encryption
+
+        spi_txrx(spi_tx_buffer,
+                sizeof(spi_tx_buffer),
+                SPI_BUFFER,
+                (uint8_t*)spi_rx_buffer,
+                sizeof(spi_rx_buffer),
+                SPI_FIRST,
+                SPI_NOTLAST);
+
+        spi_txrx((uint8_t*)pbuf,
+                16,
+                SPI_BUFFER,
+                (uint8_t*)spi_rx_buffer,
+                sizeof(spi_rx_buffer),
+                SPI_NOTFIRST,
+                SPI_NOTLAST);
+
+        spi_txrx(&aes_cmd,
+                sizeof(aes_cmd),
+                SPI_BUFFER,
+                (uint8_t*)spi_rx_buffer,
+                sizeof(spi_rx_buffer),
+                SPI_NOTFIRST,
+                SPI_LAST);
+    
+        // Prepare to read the AES status register
+        spi_tx_buffer[0] = 0x00;
+        spi_tx_buffer[1] = RG_AES_STATUS;
+
+        // Busy wait reading AES status register until it is done or an error occurs
+        do {
+            spi_txrx(spi_tx_buffer,
+                    sizeof(spi_tx_buffer),
+                    SPI_BUFFER,
+                    (uint8_t*)spi_rx_buffer,
+                    sizeof(spi_rx_buffer),
+                    SPI_FIRST,
+                    SPI_LAST);
+            aes_status = spi_rx_buffer[2];
+        } while((aes_status & 0x01) == 0x00);
+
+        if ((aes_status & 0x80) == 0x01) {
+            // an error occured
+            return E_FAIL;
+        }
+
+        spi_tx_buffer[0] = 0x00;
+        spi_tx_buffer[1] = RG_AES_STATE_KEY;
+
+        // send the command to read the ciphertext
+        spi_txrx(spi_tx_buffer,
+                    2,
+                    SPI_BUFFER,
+                    (uint8_t*)spi_rx_buffer,
+                    16,
+                    SPI_FIRST,
+                    SPI_NOTLAST);
+
+        // read the actual ciphertext
+        spi_txrx(spi_tx_buffer,
+                    16,
+                    SPI_BUFFER,
+                    (uint8_t*)pbuf,
+                    16,
+                    SPI_NOTFIRST,
+                    SPI_LAST);
+    }
+
    return E_SUCCESS;
 }
 
