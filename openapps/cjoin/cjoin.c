@@ -56,6 +56,9 @@ void        cjoin_setIsJoined(bool newValue);
 //=========================== public ==========================================
 
 void cjoin_init() {
+   // declare the usage of dynamic keying to L2 security module
+   IEEE802154_security_setDynamicKeying();
+
    // prepare the resource descriptor for the /j path
    cjoin_vars.desc.path0len                        = sizeof(cjoin_path0)-1;
    cjoin_vars.desc.path0val                        = (uint8_t*)(&cjoin_path0);
