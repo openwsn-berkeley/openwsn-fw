@@ -355,6 +355,7 @@ void opentimers_timer_callback(void){
     PORT_TIMER_WIDTH tempTimerGap;
     PORT_TIMER_WIDTH tempLastTimeout = opentimers_vars.currentTimeout;
     // 1. find the expired timer
+    idToCallCB = TOO_MANY_TIMERS_ERROR;
     for (i=0;i<MAX_NUM_TIMERS;i++){
         if (opentimers_vars.timersBuf[i].isrunning==TRUE){
             // all timers in the past within TIMERTHRESHOLD ticks
@@ -366,6 +367,13 @@ void opentimers_timer_callback(void){
                 if (tempLastTimeout>opentimers_vars.timersBuf[i].currentCompareValue){
                     tempLastTimeout = opentimers_vars.timersBuf[i].currentCompareValue;
                 }
+                if (idToCallCB==TOO_MANY_TIMERS_ERROR){
+                    idToCallCB = i;
+                } else {
+                    if (opentimers_vars.timersBuf[i].priority<opentimers_vars.timersBuf[idToCallCB].priority){
+                        idToCallCB = i;
+                    }
+                }
             }
         }
     }
@@ -376,19 +384,6 @@ void opentimers_timer_callback(void){
     // 2. call the callback of expired timers
     opentimers_vars.insideISR = TRUE;
     
-    idToCallCB = TOO_MANY_TIMERS_ERROR;
-    // find out the timer expired with highest priority 
-    for (j=0;j<MAX_NUM_TIMERS;j++){
-        if (opentimers_vars.timersBuf[j].hasExpired == TRUE){
-            if (idToCallCB==TOO_MANY_TIMERS_ERROR){
-                idToCallCB = j;
-            } else {
-                if (opentimers_vars.timersBuf[j].priority<opentimers_vars.timersBuf[idToCallCB].priority){
-                    idToCallCB = j;
-                }
-            }
-        }
-    }
     if (idToCallCB==TOO_MANY_TIMERS_ERROR){
         // no more timer expired
     } else {
@@ -420,6 +415,7 @@ void opentimers_timer_callback(void){
                     }
                     opentimers_vars.timersBuf[j].hasExpired          = FALSE;
                 }
+                break;
             }
         }
     }
