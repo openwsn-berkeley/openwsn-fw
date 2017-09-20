@@ -22,7 +22,7 @@
 #define LENGTH_PACKET   125+LENGTH_CRC ///< maximum length is 127 bytes
 #define CHANNEL         20             ///< 20=2.450GHz
 #define ID              0x99           ///< byte sent in the packets
-#define TIMER_PERIOD    0x1fff         
+#define TIMER_PERIOD    0x1ff
 
 //=========================== variables =======================================
 
@@ -65,11 +65,11 @@ void     task_uploadPacket(void);
 \brief The program starts executing here.
 */
 int mote_main(void) {
-   
+
    PORT_TIMER_WIDTH       reference;
    // clear local variables
    memset(&app_vars,0,sizeof(app_vars_t));
-   
+
    // initialize board
    board_init();
    scheduler_init();
@@ -77,11 +77,11 @@ int mote_main(void) {
    idmanager_init();
    openrandom_init();
    opentimers_init();
- 
+
    // add callback functions radio
    radio_setStartFrameCb(cb_startFrame);
    radio_setEndFrameCb(cb_endFrame);
-   
+
    // start timer
    app_vars.timerId = opentimers_create();
    reference        = opentimers_getValue();
@@ -92,48 +92,48 @@ int mote_main(void) {
         TIME_TICS,            // timetype
         cb_timer               // callback
    );
-   
+
    // prepare radio
    radio_rfOn();
    radio_setFrequency(CHANNEL);
    app_vars.channel = CHANNEL;
-   
+
    // switch in RX by default
    radio_rxEnable();
    radio_rxNow();
-   
+
    scheduler_start();
-   
+
    return 0;
 }
 
 //=========================== interface =======================================
 void sniffer_setListeningChannel(uint8_t channel){
-    
+
     while(app_vars.flag != APP_FLAG_IDLE);
     radio_rfOff();
     radio_rfOn();
     radio_setFrequency(channel);
     app_vars.channel = channel;
     radio_rxEnable();
-    radio_rxNow(); 
+    radio_rxNow();
 }
 
 //=========================== callbacks =======================================
 
 void cb_startFrame(PORT_TIMER_WIDTH timestamp) {
-    
+
    app_vars.flag |= APP_FLAG_START_FRAME;
    // led
    leds_error_on();
 }
 
 void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
-   
+
    app_vars.flag |= APP_FLAG_END_FRAME;
    // done receiving a packet
    app_vars.packet_len = sizeof(app_vars.packet);
-  
+
    // get packet from radio
    radio_getReceivedFrame(
       app_vars.packet,
@@ -143,7 +143,7 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
       &app_vars.rxpk_lqi,
       &app_vars.rxpk_crc
    );
-   
+
    scheduler_push_task(task_uploadPacket,TASKPRIO_SNIFFER);
    app_vars.flag &= ~APP_FLAG_START_FRAME;
    app_vars.flag &= ~APP_FLAG_END_FRAME;
@@ -152,7 +152,7 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
 }
 
 void cb_timer(opentimers_id_t id) {
-    
+
    // schedule again
    opentimers_scheduleIn(
         app_vars.timerId,     // timerId
@@ -192,12 +192,12 @@ void schedule_setFrameLength(uint16_t frameLength)                        {retur
 
 void sixtop_setEBPeriod(uint8_t ebPeriod)                                 {return;}
 owerror_t sixtop_request(
-    uint8_t      code, 
-    open_addr_t* neighbor, 
-    uint8_t      numCells, 
-    uint8_t      cellOptions, 
-    cellInfo_ht* celllist_toBeAdded, 
-    cellInfo_ht* celllist_toBeRemoved, 
+    uint8_t      code,
+    open_addr_t* neighbor,
+    uint8_t      numCells,
+    uint8_t      cellOptions,
+    cellInfo_ht* celllist_toBeAdded,
+    cellInfo_ht* celllist_toBeRemoved,
     uint8_t      sfid,
     uint16_t     listingOffset,
     uint16_t     listingMaxNumCells
