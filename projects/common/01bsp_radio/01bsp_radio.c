@@ -24,10 +24,14 @@ end of frame event), it will turn on its error LED.
 
 //=========================== defines =========================================
 
-#define LENGTH_PACKET   125+LENGTH_CRC ///< maximum length is 127 bytes
+#define LENGTH_PACKET   125//+LENGTH_CRC ///< maximum length is 127 bytes CRC is automatically added by the transceiver
+#ifndef BOARD_EV1000
 #define CHANNEL         11             ///< 11=2.405GHz
+#else //BOARD_EV1000
+#define CHANNEL         2              ///< 3 4492.8MHz 499.2MHz channel width
+#endif //BOARD_EV1000
 #define TIMER_PERIOD    0xffff         ///< 0xffff = 2s@32kHz
-#define ID              0x99           ///< byte sent in the packets
+//#define ID              0x99           ///< byte sent in the packets
 
 //=========================== variables =======================================
 
@@ -62,6 +66,8 @@ typedef struct {
 
 app_vars_t app_vars;
 
+volatile uint8_t ID = 0x99; // Allows changing the ID from within the debugger
+
 //=========================== prototypes ======================================
 
 void     cb_startFrame(PORT_TIMER_WIDTH timestamp);
@@ -74,10 +80,11 @@ void     cb_timer(void);
 \brief The program starts executing here.
 */
 int mote_main(void) {
-   uint8_t i;
+   uint8_t i = 0;
    
    // clear local variables
    memset(&app_vars,0,sizeof(app_vars_t));
+   memset(&app_dbg,0,sizeof(app_dbg_t));
    
    // initialize board
    board_init();
@@ -100,7 +107,6 @@ int mote_main(void) {
    // prepare radio
    radio_rfOn();
    radio_setFrequency(CHANNEL);
-   
    // switch in RX by default
    radio_rxEnable();
    app_vars.state = APP_STATE_RX;

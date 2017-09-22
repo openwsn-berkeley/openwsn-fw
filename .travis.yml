@@ -36,3 +36,4 @@ script:
 - scons board=iot-lab_M3                              toolchain=armgcc verbose=1 oos_openwsn
 - scons board=iot-lab_A8-M3                           toolchain=armgcc verbose=1 oos_openwsn
 - scons board=samr21_xpro                             toolchain=armgcc verbose=1 oos_openwsn
+- scons board=ev1000                                  toolchain=armgcc verbose=1 oos_openwsn
