@@ -1,0 +1,8 @@
+Import('env')
+
+localEnv = env.Clone()
+
+source = ['si70x.c']
+si70x  = localEnv.Object(source=source)
+
+Return('si70x')

@@ -83,8 +83,8 @@ void board_init(void) {
    uart_init();
    radio_init();
    i2c_init();
-   //sensors_init();
-   cryptoengine_init();
+   sensors_init();
+   cryptoengine_init();  
 }
 
 void antenna_init(){
