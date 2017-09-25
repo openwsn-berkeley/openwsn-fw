@@ -47,6 +47,8 @@ bool board_timer_expired(uint32_t future);
 static void clock_init(void);
 static void gpio_init(void);
 static void button_init(void);
+static void antenna_init(void);
+
 
 static void SysCtrlDeepSleepSetting(void);
 static void SysCtrlSleepSetting(void);
@@ -72,6 +74,7 @@ void board_init(void) {
    
    gpio_init();
    clock_init();
+   antenna_init();
    board_timer_init();
    leds_init();
    debugpins_init();
@@ -80,8 +83,14 @@ void board_init(void) {
    uart_init();
    radio_init();
    i2c_init();
-   sensors_init();
+   //sensors_init();
    cryptoengine_init();
+}
+
+void antenna_init(){
+   //use cc2538 2.4ghz radio
+   GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_CC2538_24GHZ, BSP_ANTENNA_CC2538_24GHZ);
+   GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_AT215_24GHZ, 0);
 }
 
 /**

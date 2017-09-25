@@ -41,7 +41,7 @@ void bspLedToggle(uint8_t ui8Leds);
 
 void leds_init() {
     GPIOPinTypeGPIOOutput(BSP_LED_BASE, BSP_LED_ALL);
-	GPIOPinWrite(BSP_LED_BASE, BSP_LED_ALL, 0);
+	GPIOPinWrite(BSP_LED_BASE, BSP_LED_ALL, BSP_LED_ALL);
 }
 
 // red
@@ -182,7 +182,8 @@ port_INLINE void bspLedSet(uint8_t ui8Leds)
     //
     // Turn on specified LEDs
     //
-    GPIOPinWrite(BSP_LED_BASE, ui8Leds, ui8Leds);
+    GPIOPinWrite(BSP_LED_BASE, ui8Leds, 0);
+    
 }
 
 port_INLINE void bspLedClear(uint8_t ui8Leds)
@@ -190,7 +191,7 @@ port_INLINE void bspLedClear(uint8_t ui8Leds)
     //
     // Turn off specified LEDs
     //
-    GPIOPinWrite(BSP_LED_BASE, ui8Leds, 0);
+    GPIOPinWrite(BSP_LED_BASE, ui8Leds, ui8Leds);
 }
 
 port_INLINE void bspLedToggle(uint8_t ui8Leds)
