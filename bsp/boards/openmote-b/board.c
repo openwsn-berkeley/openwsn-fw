@@ -27,6 +27,7 @@
 #include "sctimer.h"
 #include "uart.h"
 #include "cryptoengine.h"
+#include "spi.h"
 
 //=========================== variables =======================================
 
@@ -83,6 +84,7 @@ void board_init(void) {
    uart_init();
    radio_init();
    i2c_init();
+   spi_init();
    sensors_init();
    cryptoengine_init();  
 }

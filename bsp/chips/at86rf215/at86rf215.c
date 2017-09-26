@@ -5,12 +5,11 @@
 */
 
 #include "board.h"
-#include "radio.h"
 #include "at86rf215.h"
 #include "spi.h"
-#include "radiotimer.h"
 #include "debugpins.h"
 #include "leds.h"
+#include "radio.h"
 
 
 void at86rf215_spiStrobe(uint8_t strobe) {

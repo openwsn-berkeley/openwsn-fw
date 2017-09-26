@@ -25,6 +25,7 @@
 #define SPI_PIN_SSI_RX              GPIO_PIN_4      //    MOSI      
 #define SPI_PIN_SSI_TX              GPIO_PIN_5      //    MISO     
 #define SPI_GPIO_SSI_BASE           GPIO_A_BASE
+
 //=========================== variables =======================================
 
 typedef struct {
@@ -69,7 +70,7 @@ void spi_init() {
     GPIOPinTypeSSI(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_CLK | SPI_PIN_SSI_FSS | SPI_PIN_SSI_RX | SPI_PIN_SSI_TX);
     GPIOPinTypeSSI(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_CLK | SPI_PIN_SSI_RX | SPI_PIN_SSI_TX);
     
-    SSIConfigSetExpClk(SSI0_BASE, SysCtrlIOClockGet(), SSI_FRF_MOTO_MODE_0, SSI_MODE_MASTER, SysCtrlClockGet()/2, 8);
+    SSIConfigSetExpClk(SSI0_BASE, SysCtrlIOClockGet(), SSI_FRF_MOTO_MODE_0, SSI_MODE_MASTER, SysCtrlIOClockGet()/2, 8);
     
     // Enable the SSI0 module.
     SSIEnable(SSI0_BASE);
@@ -113,7 +114,7 @@ void    spi_txrx(uint8_t*     bufTx,
     // implementation 1. use a callback function when transaction finishes
    
     // write first byte to TX buffer
-    SSIDataPut(SPI_GPIO_SSI_BASE, *spi_vars.pNextTxByte);
+    SSIDataPut(SSI0_BASE, *spi_vars.pNextTxByte);
     
     spi_vars.pNextTxByte++;
        
@@ -122,14 +123,19 @@ void    spi_txrx(uint8_t*     bufTx,
     
     for (uint32_t i =  0; i < lenbufTx; i++)
     {
+        // set it low (is inverted)
+        GPIOPinWrite(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_FSS, 0);
+  
         // Push a byte
-        SSIDataPut(SPI_GPIO_SSI_BASE, spi_vars.pNextTxByte[i]);
+        SSIDataPut(SSI0_BASE, spi_vars.pNextTxByte[i]);
 
         // Wait until it is complete
-        while(SSIBusy(SPI_GPIO_SSI_BASE));
+        while(SSIBusy(SSI0_BASE));
 
         // Read a byte
-        SSIDataGet(SPI_GPIO_SSI_BASE, &data);
+        SSIDataGet(SSI0_BASE, &data);
+        
+        GPIOPinWrite(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_FSS, SPI_PIN_SSI_FSS);
 
         // Store the result
         spi_vars.pNextRxByte[i] = (uint8_t)(data & 0xFF);
@@ -147,7 +153,7 @@ void    spi_txrx(uint8_t*     bufTx,
 port_INLINE void enableInterrupts(void)
 {
     // Enable the SPI interrupt
-    SSIIntEnable(SPI_GPIO_SSI_BASE, (SSI_TXFF | SSI_RXFF | SSI_RXTO | SSI_RXOR));
+    SSIIntEnable(SSI0_BASE, (SSI_TXFF | SSI_RXFF | SSI_RXTO | SSI_RXOR));
 
     // Enable the SPI interrupt
     IntEnable(INT_SSI0);
@@ -156,7 +162,7 @@ port_INLINE void enableInterrupts(void)
 port_INLINE void disableInterrupts(void)
 {
     // Disable the SPI interrupt
-    SSIIntDisable(SPI_GPIO_SSI_BASE, (SSI_TXFF | SSI_RXFF | SSI_RXTO | SSI_RXOR));
+    SSIIntDisable(SSI0_BASE, (SSI_TXFF | SSI_RXFF | SSI_RXTO | SSI_RXOR));
 
     // Disable the SPI interrupt
     IntDisable(INT_SSI0);
@@ -170,12 +176,12 @@ kick_scheduler_t spi_isr() {
 #ifdef SPI_IN_INTERRUPT_MODE  
     uint32_t data;
     // save the byte just received in the RX buffer
-    status = SSIIntStatus(SPI_GPIO_SSI_BASE, true);
+    status = SSIIntStatus(SSI0_BASE, true);
 
     // Clear SPI interrupt in the NVIC
     IntPendClear(INT_SSI0);
     
-    SSIDataGet(SPI_GPIO_SSI_BASE, &data);
+    SSIDataGet(SSI0_BASE, &data);
 
     // Store the result
     spi_vars.pNextRxByte = (uint8_t)(data & 0xFF);
@@ -187,7 +193,7 @@ kick_scheduler_t spi_isr() {
    
     if (spi_vars.txBytesLeft>0) {
         // write next byte to TX buffer
-        SSIDataPut(SPI_GPIO_SSI_BASE, *spi_vars.pNextTxByte);
+        SSIDataPut(SSI0_BASE, *spi_vars.pNextTxByte);
           
     } else {
         // SPI is not busy anymore
