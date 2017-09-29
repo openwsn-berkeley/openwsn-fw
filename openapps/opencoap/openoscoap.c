@@ -157,7 +157,7 @@ void openoscoap_init_security_context(oscoap_security_context_t *ctx,
 owerror_t openoscoap_protect_message(
         oscoap_security_context_t *context, 
         uint8_t version, 
-        uint8_t code
+        uint8_t code,
         coap_option_iht* incomingOptions,
         uint8_t incomingOptionsLen,
         OpenQueueEntry_t* msg,
@@ -426,9 +426,6 @@ owerror_t openoscoap_unprotect_message(
         index = opencoap_options_parse(&msg->payload[0], msg->length, incomingOptions, incomingOptionsLen);
         packetfunctions_tossHeader(msg, index);
     }
-
-    return E_SUCCESS;
-}
 
     return E_SUCCESS;
 }
