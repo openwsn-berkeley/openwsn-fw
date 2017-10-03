@@ -7,7 +7,7 @@
 #include "stdio.h"
 #include "stdint.h"
 
-#include "stm32f10x_lib.h"
+#include "stm32f10x_conf.h"
 #include "rcc.h"
 #include "nvic.h"
 #include "i2c.h"

@@ -17,6 +17,9 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
+#include "usb_conf.h"
+#include "usb_core.h"
+#include "usb_istr.h"
 #include "leds.h"
 #include "sctimer.h"
 #include "spi.h"
@@ -30,7 +33,6 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
@@ -364,26 +366,26 @@ void ADC1_2_IRQHandler(void)
 }
 
 /*******************************************************************************
-* Function Name  : USB_HP_CAN_TX_IRQHandler
-* Description    : This function handles USB High Priority or CAN TX interrupts 
+* Function Name  : CAN1_TX_IRQHandler
+* Description    : This function handles CAN TX interrupts 
 *                  requests.
 * Input          : None
 * Output         : None
 * Return         : None
 *******************************************************************************/
-void USB_HP_CAN_TX_IRQHandler(void)
+void CAN1_TX_IRQHandler(void)
 {
 }
 
 /*******************************************************************************
-* Function Name  : USB_LP_CAN_RX0_IRQHandler
-* Description    : This function handles USB Low Priority or CAN RX0 interrupts 
+* Function Name  : CAN1_RX0_IRQHandler
+* Description    : This function handles CAN RX0 interrupts 
 *                  requests.
 * Input          : None
 * Output         : None
 * Return         : None
 *******************************************************************************/
-void USB_LP_CAN_RX0_IRQHandler(void)
+void CAN1_RX0_IRQHandler(void)
 {
 }
 
@@ -662,93 +664,15 @@ void RTCAlarm_IRQHandler(void)
 }
 
 /*******************************************************************************
-* Function Name  : USBWakeUp_IRQHandler
+* Function Name  : OTG_FS_WKUP_IRQHandler
 * Description    : This function handles USB WakeUp interrupt request.
 * Input          : None
 * Output         : None
 * Return         : None
 *******************************************************************************/
-void USBWakeUp_IRQHandler(void)
+void USB_FS_WKUP_IRQHandler(void)
 {
-}
-
-/*******************************************************************************
-* Function Name  : TIM8_BRK_IRQHandler
-* Description    : This function handles TIM8 Break interrupt request.
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void TIM8_BRK_IRQHandler(void)
-{
-}
-
-/*******************************************************************************
-* Function Name  : TIM8_UP_IRQHandler
-* Description    : This function handles TIM8 overflow and update interrupt 
-*                  request.
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void TIM8_UP_IRQHandler(void)
-{
-}
-
-/*******************************************************************************
-* Function Name  : TIM8_TRG_COM_IRQHandler
-* Description    : This function handles TIM8 Trigger and commutation interrupts 
-*                  requests.
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void TIM8_TRG_COM_IRQHandler(void)
-{
-}
-
-/*******************************************************************************
-* Function Name  : TIM8_CC_IRQHandler
-* Description    : This function handles TIM8 capture compare interrupt request.
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void TIM8_CC_IRQHandler(void)
-{
-}
-
-/*******************************************************************************
-* Function Name  : ADC3_IRQHandler
-* Description    : This function handles ADC3 global interrupt request.
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void ADC3_IRQHandler(void)
-{
-}
-
-/*******************************************************************************
-* Function Name  : FSMC_IRQHandler
-* Description    : This function handles FSMC global interrupt request.
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void FSMC_IRQHandler(void)
-{
-}
-
-/*******************************************************************************
-* Function Name  : SDIO_IRQHandler
-* Description    : This function handles SDIO global interrupt request.
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
-void SDIO_IRQHandler(void)
-{
+  EXTI_ClearITPendingBit(EXTI_Line18);
 }
 
 /*******************************************************************************
@@ -861,5 +785,83 @@ void DMA2_Channel3_IRQHandler(void)
 void DMA2_Channel4_5_IRQHandler(void)
 {
 }
+
+/*******************************************************************************
+* Function Name  : ETH_IRQHandler
+* Description    : This function handles Ethernet interrupt requests.
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void ETH_IRQHandler(void){
+	
+}
+
+/*******************************************************************************
+* Function Name  : ETH_WKUP_IRQHandler
+* Description    : This function handles ethernet wakeup interrupt request.
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void ETH_WKUP_IRQHandler(void){
+	
+}
+
+/*******************************************************************************
+* Function Name  : CAN2_TX_IRQHandler
+* Description    : This function handles CAN2 TX interrupt request.
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void CAN2_TX_IRQHandler(void){
+	
+}
+
+/*******************************************************************************
+* Function Name  : CAN2_RX0_IRQHandler
+* Description    : This function handles CAN2 RX0 interrupt request.
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void CAN2_RX0_IRQHandler(void){
+	
+}
+
+/*******************************************************************************
+* Function Name  : CAN2_RX1_IRQHandler
+* Description    : This function handles CAN2 RX1 interrupt request.
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void CAN2_RX1_IRQHandler(void){
+	
+}
+
+/*******************************************************************************
+* Function Name  : CAN2_SCE_IRQHandler
+* Description    : This function handles CAN2 SCE interrupt request.
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void CAN2_SCE_IRQHandler(void){
+	
+}
+
+/*******************************************************************************
+* Function Name  : OTG_FS_IRQHandler
+* Description    : This function handles USB global interrupt request.
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void USB_FS_IRQHandler(void){
+	USB_Istr();
+}
+
 
 /******************* (C) COPYRIGHT 2008 STMicroelectronics *****END OF FILE****/

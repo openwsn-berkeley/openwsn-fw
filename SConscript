@@ -234,8 +234,8 @@ elif env['toolchain']=='armgcc':
         env.Append(LINKFLAGS     = '-g3')
         if env['revision'] == "A1":
             env.Append(LINKFLAGS   = '-DREVA1=1')
-		
-		# object manipulation
+        
+        # object manipulation
         env.Replace(OBJCOPY      = 'arm-none-eabi-objcopy')
         env.Replace(OBJDUMP      = 'arm-none-eabi-objdump')
         # archiver
@@ -295,7 +295,7 @@ elif env['toolchain']=='armgcc':
         env.Replace(NM           = 'arm-none-eabi-nm')
         env.Replace(SIZE         = 'arm-none-eabi-size')
 
-    elif env['board'] in ['openmotestm','ev1000','iot-lab_M3', 'iot-lab_A8-M3']:
+    elif env['board'] in ['openmotestm','iot-lab_M3', 'iot-lab_A8-M3']:
         
         # compiler (C)
         env.Replace(CC           = 'arm-none-eabi-gcc')
@@ -324,6 +324,61 @@ elif env['toolchain']=='armgcc':
         # linker
         env.Append(LINKFLAGS     = '-DUSE_STDPERIPH_DRIVER')
         env.Append(LINKFLAGS     = '-DUSE_STM32_DISCOVERY')
+        env.Append(LINKFLAGS     = '-g3')
+        env.Append(LINKFLAGS     = '-ggdb')
+        env.Append(LINKFLAGS     = '-mcpu=cortex-m3')
+        env.Append(LINKFLAGS     = '-mlittle-endian')
+        env.Append(LINKFLAGS     = '-static')
+        env.Append(LINKFLAGS     = '-lgcc')
+        env.Append(LINKFLAGS     = '-mthumb')
+        env.Append(LINKFLAGS     = '-mthumb-interwork')
+        env.Append(LINKFLAGS     = '-nostartfiles')
+        env.Append(LINKFLAGS     = '-Tbsp/boards/'+env['board']+'/stm32_flash.ld')
+        env.Append(LINKFLAGS     = os.path.join('build',env['board']+'_armgcc','bsp','boards',env['board'],'startup.o'))
+        env.Append(LINKFLAGS     = os.path.join('build',env['board']+'_armgcc','bsp','boards',env['board'],'configure','stm32f10x_it.o'))
+        # object manipulation
+        env.Replace(OBJCOPY      = 'arm-none-eabi-objcopy')
+        env.Replace(OBJDUMP      = 'arm-none-eabi-objdump')
+        # archiver
+        env.Replace(AR           = 'arm-none-eabi-ar')
+        env.Append(ARFLAGS       = '')
+        env.Replace(RANLIB       = 'arm-none-eabi-ranlib')
+        env.Append(RANLIBFLAGS   = '')
+        # misc
+        env.Replace(NM           = 'arm-none-eabi-nm')
+        env.Replace(SIZE         = 'arm-none-eabi-size')
+
+    elif env['board']=='ev1000':
+        
+        # compiler (C)
+        env.Replace(CC           = 'arm-none-eabi-gcc')
+        if os.name=='nt':
+            env.Append(CCFLAGS   = '-DHSE_VALUE=((uint32_t)16000000)')
+        else:
+            env.Append(CCFLAGS   = '-DHSE_VALUE=\\(\\(uint32_t\\)16000000\\)')
+        env.Append(CCFLAGS       = '-DSTM32F10X_CL')
+        env.Append(CCFLAGS       = '-DUSE_NUCLEO')
+        env.Append(CCFLAGS       = '-DUSE_STDPERIPH_DRIVER')
+        env.Append(CCFLAGS       = '-ggdb')
+        env.Append(CCFLAGS       = '-g3')
+        env.Append(CCFLAGS       = '-std=gnu99')
+        env.Append(CCFLAGS       = '-O0')
+        env.Append(CCFLAGS       = '-Wall')
+        env.Append(CCFLAGS       = '-Wstrict-prototypes')
+        env.Append(CCFLAGS       = '-mcpu=cortex-m3')
+        env.Append(CCFLAGS       = '-mlittle-endian')
+        env.Append(CCFLAGS       = '-mthumb')
+        env.Append(CCFLAGS       = '-mthumb-interwork')
+        env.Append(CCFLAGS       = '-nostartfiles')
+
+        # compiler (C++)
+        env.Replace(CXX          = 'arm-none-eabi-g++')
+        # assembler
+        env.Replace(AS           = 'arm-none-eabi-as')
+        env.Append(ASFLAGS       = '-ggdb -g3 -mcpu=cortex-m3 -mlittle-endian')
+        # linker
+        env.Append(LINKFLAGS     = '-DUSE_STDPERIPH_DRIVER')
+        #env.Append(LINKFLAGS     = '-DUSE_STM32_DISCOVERY')
         env.Append(LINKFLAGS     = '-g3')
         env.Append(LINKFLAGS     = '-ggdb')
         env.Append(LINKFLAGS     = '-mcpu=cortex-m3')

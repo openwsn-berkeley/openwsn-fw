@@ -11,7 +11,7 @@ to return the board's description.
 #ifndef __BOARD_INFO_H
 #define __BOARD_INFO_H
 
-#include "stm32f10x_lib.h"
+#include "stm32f10x_conf.h"
 #include "stdint.h"
 #include "string.h"
 
@@ -23,11 +23,11 @@ to return the board's description.
 //#define PACK_END    _Pragma("pack()")
 
 #define BOARD_EV1000 1
-
+#define EV1000_USB 1
 #define INTERRUPT_DECLARATION(); //no declaration
 
-#define DISABLE_INTERRUPTS()    NVIC_SETPRIMASK();
-#define ENABLE_INTERRUPTS()     NVIC_RESETPRIMASK();
+#define DISABLE_INTERRUPTS()    __disable_irq();
+#define ENABLE_INTERRUPTS()     __enable_irq();
 
 //===== timer
 
@@ -38,12 +38,12 @@ to return the board's description.
 #define PORT_TICS_PER_MS                    32
 #define SCHEDULER_WAKEUP()                  EXTI->SWIER |= EXTI_Line1;
 #define SCHEDULER_ENABLE_INTERRUPT()        //enable in board use EXTI_Line1
-
-// this is a workaround from the fact that the interrupt pin for the GINA radio
-// is not connected to a pin on the MSP which allows time capture.
+/*
+//this is a workaround from the fact that the interrupt pin for the GINA radio
+//is not connected to a pin on the MSP which allows time capture.
 #define CAPTURE_TIME()  TACCTL2 |=  CCIS0;  \
                         TACCTL2 &= ~CCIS0;
-
+*/
 //===== pinout
 
 // [P4.7] radio SLP_TR_CNTL

@@ -2,14 +2,19 @@
 \brief openmoteSTM32 definition of the "uart" bsp module.
 
 \author Chang Tengfei <tengfei.chang@gmail.com>,  July 2012.
+\author Jean-Michel Rubillon <jmrubillon@theiet.org>, September 2017
 */
 
-#include "stm32f10x_lib.h"
+#include "stm32f10x_conf.h"
 #include "stdio.h"
 #include "stdint.h"
 #include "string.h"
 #include "uart.h"
 #include "leds.h"
+
+#ifdef EV1000_USB
+#include "cdc_usb.h"
+#endif //EV1000_USB
 
 #include "rcc.h"
 #include "nvic.h"
@@ -28,6 +33,8 @@ typedef struct {
 
 uart_vars_t uart_vars;
 
+
+
 //=========================== prototypes ======================================
 
 //=========================== public ==========================================
@@ -36,6 +43,7 @@ void uart_init() {
     
     // reset local variables
     memset(&uart_vars,0,sizeof(uart_vars_t));
+
 #ifndef BOARD_EV1000 // The EV1000 board does not have a serial port available. Could use USB instead.
     //when this value is 0, we are send the first data
     uart_vars.startOrend = 0;
@@ -44,7 +52,7 @@ void uart_init() {
   
     USART_InitTypeDef USART_InitStructure;
 
-    // Enable USART1 and GPIOC clock
+    // Enable USART1 and GPIOA clock
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA , ENABLE);
     
@@ -72,6 +80,8 @@ void uart_init() {
     GPIO_InitStructure.GPIO_Speed   = GPIO_Speed_2MHz;
     GPIO_InitStructure.GPIO_Mode    = GPIO_Mode_IN_FLOATING;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
+#elif defined EV1000_USB
+	usb_init();
 #endif
 }
 
@@ -130,14 +140,23 @@ void uart_writeByte(uint8_t byteToWrite) {
             USART_ITConfig(USART1, USART_IT_TXE, DISABLE);
         }
     }
+#else
+	#ifdef EV1000_USB
+		USB_SendData(&byteToWrite, 1);
+	#endif
 #endif
 }
 
 uint8_t uart_readByte() {
     
-    uint16_t temp = 0;
 #ifndef BOARD_EV1000
+    uint16_t temp = 0;
     temp = USART_ReceiveData(USART1);
+#else
+	#ifdef EV1000_USB
+	uint8_t temp = 0;
+	USB_ReceiveData(&temp, 1);
+	#endif
 #endif
     return (uint8_t)temp;
 }

@@ -5,7 +5,7 @@
 \author Jean-Michel Rubillon <jmrubillon@theiet.org>, April 2017
 */
 
-#include "stm32f10x_lib.h"
+#include "stm32f10x_conf.h"
 #include "leds.h"
 
 //=========================== defines =========================================

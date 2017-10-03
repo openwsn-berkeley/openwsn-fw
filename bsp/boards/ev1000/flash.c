@@ -4,7 +4,7 @@
 \author Chang Tengfei <tengfei.chang@gmail.com>,  July 2012.
 */
 
-#include "stm32f10x_lib.h"
+#include "stm32f10x_conf.h"
 #include "flash.h"
 #include "leds.h"
 #include "stdint.h"

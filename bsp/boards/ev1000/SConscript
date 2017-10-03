@@ -21,7 +21,9 @@ source   = \
     Glob('*.s') + \
     Glob('configure/*.c') + \
     Glob('configure/*.s') + \
-    Glob('library/src/*.c')
+    Glob('library/src/*.c') + \
+    Glob('library/src/*.s') + \
+    Glob('library/USB/src/*.c') 
 
 board  = localEnv.Object(source=source) + dw1000
 

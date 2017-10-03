@@ -5,7 +5,7 @@
 \author Chang Tengfei <tengfei.chang@gmail.com>,  July 2012.
 \author Jean-Michel Rubillon <jmrubillon@theiet.org>, April 2017
 */
-#include "stm32f10x_lib.h"
+#include "stm32f10x_conf.h"
 #include "board.h"
 // bsp modules
 #include "leds.h"
@@ -118,7 +118,7 @@ void board_sleep(void) {
 
 
 void board_reset(void){
-    NVIC_GenerateSystemReset();
+    NVIC_SystemReset();
 }
 
 // ========================== private =========================================

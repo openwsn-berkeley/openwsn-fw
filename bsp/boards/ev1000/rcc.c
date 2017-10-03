@@ -3,7 +3,8 @@
 
 \author Chang Tengfei <tengfei.chang@gmail.com>,  July 2012.
 */
-#include "stm32f10x_lib.h"
+#include "stm32f10x_conf.h"
+#include "board_info.h"
 #include "board.h"
 //=========================== defines =========================================
 
@@ -39,7 +40,7 @@ void RCC_Configuration(void){
 	
 	
     // PLLCLK = 12MHz/1 * 6 = 72 MHz
-    RCC_PLLConfig(RCC_PLLSource_HSE_Div1, RCC_PLLMul_6);
+    RCC_PLLConfig(RCC_PLLSource_PREDIV1, RCC_PLLMul_6);
     
     // Enable PLL 
     RCC_PLLCmd(ENABLE);
@@ -64,6 +65,15 @@ void RCC_Configuration(void){
      
     //enable AFIO 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
+
+#ifdef EV1000_USB
+#if !defined( STM32F10X_CL )
+	#error "STM32F10X_CL not defined!"
+#endif
+	RCC_OTGFSCLKConfig(RCC_OTGFSCLKSource_PLLVCO_Div2);
+ 	RCC_APB2PeriphClockCmd(RCC_APB1Periph_USB, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA , ENABLE);
+#endif
 }
 
 //when wakeup by alarm, configure rcc

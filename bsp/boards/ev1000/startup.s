@@ -163,8 +163,8 @@ g_pfnVectors:
 	.word	DMA1_Channel6_IRQHandler
 	.word	DMA1_Channel7_IRQHandler
 	.word	ADC1_2_IRQHandler
-	.word	USB_HP_CAN1_TX_IRQHandler
-	.word	USB_LP_CAN1_RX0_IRQHandler
+	.word	CAN1_TX_IRQHandler
+	.word	CAN1_RX0_IRQHandler
 	.word	CAN1_RX1_IRQHandler
 	.word	CAN1_SCE_IRQHandler
 	.word	EXTI9_5_IRQHandler
@@ -186,14 +186,14 @@ g_pfnVectors:
 	.word	USART3_IRQHandler
 	.word	EXTI15_10_IRQHandler
 	.word	RTCAlarm_IRQHandler
-	.word	USBWakeUp_IRQHandler
-	.word	TIM8_BRK_IRQHandler
-	.word	TIM8_UP_IRQHandler
-	.word	TIM8_TRG_COM_IRQHandler
-	.word	TIM8_CC_IRQHandler
-	.word	ADC3_IRQHandler
-	.word	FSMC_IRQHandler
-	.word	SDIO_IRQHandler
+	.word	USB_FS_WKUP_IRQHandler
+	.word	0
+	.word	0
+	.word	0
+	.word	0
+	.word	0
+	.word	0
+	.word	0
 	.word	TIM5_IRQHandler
 	.word	SPI3_IRQHandler
 	.word	UART4_IRQHandler
@@ -204,13 +204,13 @@ g_pfnVectors:
 	.word	DMA2_Channel2_IRQHandler
 	.word	DMA2_Channel3_IRQHandler
 	.word	DMA2_Channel4_5_IRQHandler
-	.word	0
-	.word	0
-	.word	0
-	.word	0
-	.word	0
-	.word	0
-	.word	0
+	.word	ETH_IRQHandler
+	.word	ETH_WKUP_IRQHandler
+	.word	CAN2_TX_IRQHandler
+	.word	CAN2_RX0_IRQHandler
+	.word	CAN2_RX1_IRQHandler
+	.word	CAN2_SCE_IRQHandler
+	.word	USB_FS_IRQHandler
 	.word	0
 	.word	0
 	.word	0

@@ -4,7 +4,8 @@
 \author Chang Tengfei <tengfei.chang@gmail.com>,  July 2012.
 */
 
-#include "stm32f10x_lib.h"
+#include "stm32f10x_conf.h"
+#include "stm32f10x_it.h"
 //=========================== defines =========================================
 
 //=========================== variables =======================================
@@ -21,14 +22,15 @@ void NVIC_init(void) {
 
 //configuration uart interrput
 void NVIC_uart(void) {
-    
+#ifdef EV1000_USB    
     //Configure NVIC: Preemption Priority = 3 and Sub Priority = 3
     NVIC_InitTypeDef NVIC_InitStructure;
-    NVIC_InitStructure.NVIC_IRQChannel                      = USART1_IRQChannel;
+    NVIC_InitStructure.NVIC_IRQChannel                      = USART1_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority    = 3;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority           = 3;
     NVIC_InitStructure.NVIC_IRQChannelCmd                   = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
+#endif
 }
 
 //configuration spi interrput
@@ -51,7 +53,7 @@ void NVIC_sctimer(void) {
     NVIC_InitTypeDef NVIC_InitStructure;
     //Configure RTC Alarm interrupt:
     //Configure NVIC: Preemption Priority = 1 and Sub Priority = 1
-    NVIC_InitStructure.NVIC_IRQChannel                      = RTCAlarm_IRQChannel;
+    NVIC_InitStructure.NVIC_IRQChannel                      = RTCAlarm_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority    = 1;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority           = 1;
     NVIC_InitStructure.NVIC_IRQChannelCmd                   = ENABLE;
@@ -63,11 +65,27 @@ void NVIC_radio(void){
     
      //Configure NVIC: Preemption Priority = 1 and Sub Priority = 0
     NVIC_InitTypeDef  NVIC_InitStructure;
-    NVIC_InitStructure.NVIC_IRQChannel                      = EXTI9_5_IRQChannel; 
+    NVIC_InitStructure.NVIC_IRQChannel                      = EXTI9_5_IRQn; 
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority    = 1;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority           = 0; 
     NVIC_InitStructure.NVIC_IRQChannelCmd                   = ENABLE; 
     NVIC_Init(&NVIC_InitStructure);
+}
+
+// Configure usb interrupts
+void NVIC_usb(void){
+#ifdef EV1000_USB
+	NVIC_InitTypeDef NVIC_InitStructure;
+	NVIC_InitStructure.NVIC_IRQChannel = OTG_FS_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 3;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 3;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+
+	NVIC_InitStructure.NVIC_IRQChannel = USBWakeUp_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+	NVIC_Init(&NVIC_InitStructure);
+#endif
 }
 
 //configuration of interrupt on openmotestm32

@@ -3,7 +3,7 @@
 
 \author Tengfei Chang <tengfei.chang@eecs.berkeley.edu>, February 2012.
 */
-#include "stm32f10x_lib.h"
+#include "stm32f10x_conf.h"
 #include "debugpins.h"
 
 //=========================== defines =========================================

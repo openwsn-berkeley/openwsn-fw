@@ -1,7 +1,8 @@
 /**
-\brief GINA-specific definition of the "eui64" bsp module.
+\brief EV1000 definition of the "eui64" bsp module.
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, March 2012.
+\author Jean-Michel Rubillon <jmrubillon@theiet.org>, September 2017.
 */
 
 #include "string.h"
@@ -10,7 +11,7 @@
 //=========================== defines =========================================
 
 #define ADDRESSOFFSET 0x04
-#define ADDRESS_EUI 0x0807FFF0
+#define ADDRESS_EUI 0x1FFFF7E8
 
 //=========================== variables =======================================
 
