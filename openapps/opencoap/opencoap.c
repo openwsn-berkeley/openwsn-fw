@@ -319,7 +319,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
           };
 
         } else if (
-             coap_incomingOptions[option_index].type==COAP_OPTION_NUM_URIPATH    &&
+             option_count == 1                                &&
              temp_desc->path0len>0                            &&
              temp_desc->path0val!=NULL
           ) {
@@ -335,6 +335,11 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
              }
              found = TRUE;
           };
+        } else {
+          // option_count == 0  ||
+          // option_count >= 2
+          // resource has not a valid path or path is too long
+          found = FALSE;      
         };
          
          // iterate to next resource, if not found
@@ -870,9 +875,13 @@ owerror_t opencoap_options_encode(
 
 
 uint8_t opencoap_find_option(coap_option_iht* array, uint8_t arrayLen, coap_option_t option, uint8_t* startIndex) {
-   uint8_t i;
-   uint8_t j = 0;
-   bool found = FALSE;
+  uint8_t i;
+  uint8_t j;
+  bool found;
+   
+  //init local variables
+  j = 0;
+  found = FALSE;
   
   for (i=0; i< arrayLen; i++){
     if (array[i].type == option) {
