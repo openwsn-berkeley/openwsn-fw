@@ -113,6 +113,7 @@ command_line_options = {
         'agilefox',
         'samr21_xpro',
 		'ev1000',
+		'inteled',
         # misc.
         'python',
     ],

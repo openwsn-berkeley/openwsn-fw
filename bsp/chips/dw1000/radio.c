@@ -226,7 +226,7 @@ void radio_rxEnable() {
 }
 
 void radio_rxNow() {
-   radio_vars.state = RADIOSTATE_RECEIVING;
+   //radio_vars.state = RADIOSTATE_RECEIVING;
 }
 
 void radio_getReceivedFrame(uint8_t* pBufRead,

@@ -195,7 +195,7 @@ elif env['toolchain']=='iar-proj':
     
 elif env['toolchain']=='armgcc':
     
-    if env['board'] not in ['silabs-ezr32wg','openmote-cc2538','iot-lab_M3','iot-lab_A8-M3','openmotestm', 'ev1000', 'samr21_xpro']:
+    if env['board'] not in ['silabs-ezr32wg','openmote-cc2538','iot-lab_M3','iot-lab_A8-M3','openmotestm', 'ev1000', 'samr21_xpro', 'inteled']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     if   env['board']=='openmote-cc2538':
@@ -348,14 +348,14 @@ elif env['toolchain']=='armgcc':
         env.Replace(NM           = 'arm-none-eabi-nm')
         env.Replace(SIZE         = 'arm-none-eabi-size')
 
-    elif env['board']=='ev1000':
+    elif env['board'] in ['ev1000', 'inteled']:
         
         # compiler (C)
         env.Replace(CC           = 'arm-none-eabi-gcc')
         if os.name=='nt':
-            env.Append(CCFLAGS   = '-DHSE_VALUE=((uint32_t)16000000)')
+            env.Append(CCFLAGS   = '-DHSE_VALUE=((uint32_t)12000000)')
         else:
-            env.Append(CCFLAGS   = '-DHSE_VALUE=\\(\\(uint32_t\\)16000000\\)')
+            env.Append(CCFLAGS   = '-DHSE_VALUE=\\(\\(uint32_t\\)12000000\\)')
         env.Append(CCFLAGS       = '-DSTM32F10X_CL')
         env.Append(CCFLAGS       = '-DUSE_NUCLEO')
         env.Append(CCFLAGS       = '-DUSE_STDPERIPH_DRIVER')
