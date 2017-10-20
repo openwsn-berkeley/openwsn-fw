@@ -21,9 +21,13 @@ source   = \
     Glob('*.s') + \
     Glob('configure/*.c') + \
     Glob('configure/*.s') + \
-    Glob('library/src/*.c') + \
-    Glob('library/src/*.s') + \
-    Glob('library/USB/src/*.c') 
+    Glob('library/src/stm32f10x_*.c') + \
+	Glob('library/src/misc.c') + \
+    Glob('library/src/*.s')
+
+if env['usb']==1:
+	source = source + \
+    Glob('library/src/usb_*.c') 
 
 board  = localEnv.Object(source=source) + dw1000
 

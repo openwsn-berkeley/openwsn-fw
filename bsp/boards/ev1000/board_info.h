@@ -22,8 +22,6 @@ to return the board's description.
 //#define PACK_START  _Pragma("pack(1)")
 //#define PACK_END    _Pragma("pack()")
 
-#define BOARD_EV1000 1
-#define EV1000_USB 1
 #define INTERRUPT_DECLARATION(); //no declaration
 
 #define DISABLE_INTERRUPTS()    __disable_irq();
@@ -55,14 +53,15 @@ to return the board's description.
 #define PORT_PIN_RADIO_RESET_LOW()        //GPIOC->ODR &= ~0X0040;
 
 //===== IEEE802154E timing
+#define SLOTDURATION_10MS
 
 // time-slot related
-#define PORT_TsSlotDuration                 491   // counter counts one extra count, see datasheet
+#define PORT_TsSlotDuration                 328   // counter counts one extra count, see datasheet
 // execution speed related
-#define PORT_maxTxDataPrepare               66    // 2014us (measured 746us)
-#define PORT_maxRxAckPrepare                20    //  305us (measured  83us)
-#define PORT_maxRxDataPrepare               33    // 1007us (measured  84us)
-#define PORT_maxTxAckPrepare                30    //  305us (measured 219us)
+#define PORT_maxTxDataPrepare               10    // 2014us (measured 746us)
+#define PORT_maxRxAckPrepare                10    //  305us (measured  83us)
+#define PORT_maxRxDataPrepare               4    // 1007us (measured  84us)
+#define PORT_maxTxAckPrepare                10    //  305us (measured 219us)
 // radio speed related
 #define PORT_delayTx                        10     //  214us (measured 219us)
 #define PORT_delayRx                        0     //    0us (can not measure)

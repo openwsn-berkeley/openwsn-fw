@@ -349,13 +349,16 @@ elif env['toolchain']=='armgcc':
         env.Replace(SIZE         = 'arm-none-eabi-size')
 
     elif env['board']=='ev1000':
-        
+ 
+        if env['usb']==1:
+            env.Append(CCFLAGS    = '-DEV1000_USB')
+ 
         # compiler (C)
         env.Replace(CC           = 'arm-none-eabi-gcc')
         if os.name=='nt':
-            env.Append(CCFLAGS   = '-DHSE_VALUE=((uint32_t)16000000)')
+            env.Append(CCFLAGS   = '-DHSE_VALUE=((uint32_t)12000000)')
         else:
-            env.Append(CCFLAGS   = '-DHSE_VALUE=\\(\\(uint32_t\\)16000000\\)')
+            env.Append(CCFLAGS   = '-DHSE_VALUE=\\(\\(uint32_t\\)12000000\\)')
         env.Append(CCFLAGS       = '-DSTM32F10X_CL')
         env.Append(CCFLAGS       = '-DUSE_NUCLEO')
         env.Append(CCFLAGS       = '-DUSE_STDPERIPH_DRIVER')

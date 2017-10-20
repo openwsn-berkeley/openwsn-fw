@@ -226,7 +226,7 @@ void radio_rxEnable() {
 }
 
 void radio_rxNow() {
-   radio_vars.state = RADIOSTATE_RECEIVING;
+   //radio_vars.state = RADIOSTATE_RECEIVING;
 }
 
 void radio_getReceivedFrame(uint8_t* pBufRead,
@@ -242,17 +242,12 @@ void radio_getReceivedFrame(uint8_t* pBufRead,
 	if( (maxBufLen <= radio_vars.rx_frameLen) && (radio_vars.rx_frameLen != 0)){
 		dwt_readrxdata(pBufRead,radio_vars.rx_frameLen,0);
 	}
-	if( (radio_vars.rx_frameLen != 0) && (radio_vars.state == RADIOSTATE_TXRX_DONE)){
-		// get diagnostics data for the received frame
-		dwt_readdiagnostics(&rx_diag);
-		// use max noise instead. There is a RSSI formula which we could apply too.
-		*pRssi = (uint8_t)(rx_diag.maxNoise>>8);
-		// LQI doesn't exist either use the first path amplitude instead
-		*pLqi = (uint8_t)(rx_diag.firstPathAmp1>>8);
-	} else{
-		*pRssi = 0;
-		*pLqi = 0;
-	}
+	// get diagnostics data for the received frame
+	dwt_readdiagnostics(&rx_diag);
+	// use max noise instead. There is a RSSI formula which we could apply too.
+	*pRssi = (uint8_t)(rx_diag.maxNoise>>8);
+	// LQI doesn't exist either use the first path amplitude instead
+	*pLqi = (uint8_t)(rx_diag.firstPathAmp1>>8);
 	*pCrc = (radio_vars.radio_status & (SYS_STATUS_RXDFR| SYS_STATUS_RXFCG))?1:0;
 	*pLenRead = radio_vars.rx_frameLen;
 }

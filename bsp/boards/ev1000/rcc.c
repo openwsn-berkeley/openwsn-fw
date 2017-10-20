@@ -70,7 +70,7 @@ void RCC_Configuration(void){
 #if !defined( STM32F10X_CL )
 	#error "STM32F10X_CL not defined!"
 #endif
-	RCC_OTGFSCLKConfig(RCC_OTGFSCLKSource_PLLVCO_Div2);
+	RCC_OTGFSCLKConfig(RCC_OTGFSCLKSource_PLLVCO_Div3);
  	RCC_APB2PeriphClockCmd(RCC_APB1Periph_USB, ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA , ENABLE);
 #endif

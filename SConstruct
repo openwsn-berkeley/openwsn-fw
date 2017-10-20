@@ -140,7 +140,8 @@ command_line_options = {
     'l2_security':      ['0','1'],
     'deadline_option':  ['0','1'],
     'ide':              ['none','qtcreator'],
-    'revision':         ['']
+    'revision':         [''],
+	'usb':				['0','1']
 }
 
 def validate_option(key, value, env):
@@ -312,6 +313,13 @@ command_line_vars.AddVariables(
         command_line_options['revision'][0],               # default
         None,                                              # validator
         None,                                              # converter
+    ),
+    (
+        'usb',                                             # key
+        'USB rather than uart comms',                      # help
+        command_line_options['usb'][0],  		           # default
+        validate_option,                                   # validator
+        int,                                               # converter
     ),
 )
 
