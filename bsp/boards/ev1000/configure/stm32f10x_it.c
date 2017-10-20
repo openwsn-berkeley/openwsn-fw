@@ -17,9 +17,11 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
+#ifdef EV1000_USB
 #include "usb_conf.h"
 #include "usb_core.h"
 #include "usb_istr.h"
+#endif
 #include "leds.h"
 #include "sctimer.h"
 #include "spi.h"
@@ -860,7 +862,9 @@ void CAN2_SCE_IRQHandler(void){
 * Return         : None
 *******************************************************************************/
 void USB_FS_IRQHandler(void){
+#ifdef EV1000_USB
 	USB_Istr();
+#endif
 }
 
 
