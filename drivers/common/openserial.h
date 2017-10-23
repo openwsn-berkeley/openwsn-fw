@@ -26,7 +26,7 @@
          the use of a slow modulo operator.
 */
 #define SERIAL_OUTPUT_BUFFER_SIZE 1024 // leave at 256!
-#define OUTPUT_BUFFER_MASK       0x3FF
+#define OUTPUT_BUFFER_MASK       0x03FF
 
 /**
 \brief Number of bytes of the serial input buffer, in bytes.

@@ -8,6 +8,8 @@
 
 //=========================== defines =========================================
 
+#define OUTPUT_BUFFER_MASK 0x03FF
+
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
@@ -165,7 +167,7 @@ void uart_writeCircularBuffer_FASTSIM(OpenMote* self, uint8_t* buffer, uint16_t*
    PyObject*   result;
    PyObject*   item;
    int         res;
-   uint16_t    len;
+   int16_t     len;
    uint16_t    i;
    
 #ifdef TRACE_ON
@@ -179,6 +181,10 @@ void uart_writeCircularBuffer_FASTSIM(OpenMote* self, uint8_t* buffer, uint16_t*
    
    // forward to Python
    len        = (*outputBufIdxW)-(*outputBufIdxR);
+   if (len<0){
+      len = len+OUTPUT_BUFFER_MASK+1;
+   }
+        
    frame      = PyList_New(len);
    i = 0;
    while (*outputBufIdxR!=*outputBufIdxW) {
@@ -193,6 +199,7 @@ void uart_writeCircularBuffer_FASTSIM(OpenMote* self, uint8_t* buffer, uint16_t*
       
       // increment index
       (*outputBufIdxR)++;
+      (*outputBufIdxR) = (*outputBufIdxR) & OUTPUT_BUFFER_MASK;
       i++;
    }
    arglist    = Py_BuildValue("(O)",frame);
