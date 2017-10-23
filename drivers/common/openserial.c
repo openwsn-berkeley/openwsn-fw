@@ -403,6 +403,7 @@ void openserial_startOutput() {
         );
 #else
         uart_writeByte(openserial_vars.outputBuf[OUTPUT_BUFFER_MASK & (openserial_vars.outputBufIdxR++)]);
+        openserial_vars.outputBufIdxR = OUTPUT_BUFFER_MASK & (openserial_vars.outputBufIdxR);
 #endif
     } else {
         openserial_stop();
@@ -799,10 +800,11 @@ void openserial_board_reset_cb(opentimers_id_t id) {
 */
 port_INLINE void outputHdlcOpen() {
     // initialize the value of the CRC
-    openserial_vars.outputCrc                                        = HDLC_CRCINIT;
+    openserial_vars.outputCrc     = HDLC_CRCINIT;
 
     // write the opening HDLC flag
-    openserial_vars.outputBuf[OUTPUT_BUFFER_MASK & (openserial_vars.outputBufIdxW++)]       = HDLC_FLAG;
+    openserial_vars.outputBuf[OUTPUT_BUFFER_MASK & (openserial_vars.outputBufIdxW++)] = HDLC_FLAG;
+    openserial_vars.outputBufIdxW = OUTPUT_BUFFER_MASK & (openserial_vars.outputBufIdxW);
 }
 /**
 \brief Add a byte to the outgoing HDLC frame being built.
@@ -816,8 +818,10 @@ port_INLINE void outputHdlcWrite(uint8_t b) {
     if (b==HDLC_FLAG || b==HDLC_ESCAPE) {
         openserial_vars.outputBuf[OUTPUT_BUFFER_MASK & (openserial_vars.outputBufIdxW++)]   = HDLC_ESCAPE;
         b                                                            = b^HDLC_ESCAPE_MASK;
+        openserial_vars.outputBufIdxW = OUTPUT_BUFFER_MASK & (openserial_vars.outputBufIdxW);
     }
     openserial_vars.outputBuf[OUTPUT_BUFFER_MASK & (openserial_vars.outputBufIdxW++)]       = b;
+    openserial_vars.outputBufIdxW = OUTPUT_BUFFER_MASK & (openserial_vars.outputBufIdxW);
 }
 /**
 \brief Finalize the outgoing HDLC frame.
@@ -834,6 +838,7 @@ port_INLINE void outputHdlcClose() {
 
     // write the closing HDLC flag
     openserial_vars.outputBuf[OUTPUT_BUFFER_MASK & (openserial_vars.outputBufIdxW++)]       = HDLC_FLAG;
+    openserial_vars.outputBufIdxW = OUTPUT_BUFFER_MASK & (openserial_vars.outputBufIdxW);
 }
 
 //===== hdlc (input)
@@ -904,6 +909,7 @@ void isr_openserial_tx() {
             }
             if (openserial_vars.outputBufFilled) {
                 uart_writeByte(openserial_vars.outputBuf[OUTPUT_BUFFER_MASK & (openserial_vars.outputBufIdxR++)]);
+                openserial_vars.outputBufIdxR = OUTPUT_BUFFER_MASK & (openserial_vars.outputBufIdxR);
             }
             break;
         case MODE_OFF:
