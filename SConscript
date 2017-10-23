@@ -348,16 +348,11 @@ elif env['toolchain']=='armgcc':
         env.Replace(NM           = 'arm-none-eabi-nm')
         env.Replace(SIZE         = 'arm-none-eabi-size')
 
-<<<<<<< HEAD
     elif env['board'] in ['ev1000', 'inteled']:
-        
-=======
-    elif env['board']=='ev1000':
- 
+
         if env['usb']==1:
             env.Append(CCFLAGS    = '-DEV1000_USB')
  
->>>>>>> FW-636_develop
         # compiler (C)
         env.Replace(CC           = 'arm-none-eabi-gcc')
         if os.name=='nt':
