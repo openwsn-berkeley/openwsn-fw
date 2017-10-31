@@ -31,6 +31,10 @@ typedef struct {
    radio_state_t             state; 
    uint16_t 				 rx_frameLen;
    uint32_t					 radio_status;
+   kick_scheduler_t			 isr_retValue;
+   uint32_t					 rxg_count;
+   uint32_t					 txg_count;
+   uint32_t					 txa_count;
 } radio_vars_t;
 
 radio_vars_t radio_vars;
@@ -66,6 +70,7 @@ void radio_init() {
 
 	// change state
 	radio_vars.state          = RADIOSTATE_STOPPED;
+	radio_vars.isr_retValue   = DO_NOT_KICK_SCHEDULER;
 
 	leds_all_on();
 	deca_sleep(500);
@@ -102,15 +107,9 @@ void radio_init() {
     dwt_settxantennadelay(TX_ANT_DLY);
     dwt_setleds(0x03);
 	// set the DW1000 callbacks
-	dwt_setcallbacks(radio_txDoneCb, radio_rxOkCb, radio_rxToCb, radio_rxErrCb);
+	dwt_setcallbacks(radio_txDoneCb, radio_rxOkCb, NULL, NULL);
 	dwt_setinterrupt(DWT_INT_TFRS|
-					 DWT_INT_RPHE|
-					 DWT_INT_RFCG|
-					 DWT_INT_RFCE|
-					 DWT_INT_RFSL|
-					 DWT_INT_RFTO|
-					 DWT_INT_SFDT|
-					 DWT_INT_RXPTO,
+					 DWT_INT_RFCG,
 					 1);
 	dwt_setrxaftertxdelay(TX_TO_RX_DELAY_UUS);
 	dwt_setrxtimeout(RX_RESP_TO_UUS);
@@ -140,12 +139,13 @@ void radio_reset() {
 void radio_setFrequency(uint8_t frequency) {
 	// change state
 	radio_vars.state = RADIOSTATE_SETTING_FREQUENCY;
-	if( (frequency >= 1) && (frequency<=5) ){
-	   frequency = frequency -1;
-	} else if( frequency == 7){
-		frequency = frequency - 2;
-	} else {
-		frequency = 0;
+	// ieee815e expects channels between 11 and 26 to be available.
+	// in UWB this is not the case we're limited to only 6 channels
+	// i.e. 1..5, 7 which the following block enforces
+	if( frequency == 26){
+		frequency = 5;
+	}else{
+		frequency = (frequency -11) % 5;
 	}
 	
 	dwt_configure(&UWBConfigs[frequency]);
@@ -179,8 +179,8 @@ void radio_loadPacket(uint8_t* packet, uint16_t len) {
    // change state
    radio_vars.state = RADIOSTATE_LOADING_PACKET;
    
-	dwt_writetxdata(len, packet, 0);
-	dwt_writetxfctrl(len, 0, 0);
+	dwt_writetxdata(len-2, packet, 0);
+	dwt_writetxfctrl(len-2, 0, 0);
    // change state
    radio_vars.state = RADIOSTATE_PACKET_LOADED;
 }
@@ -201,7 +201,6 @@ void radio_txNow() {
 	PORT_TIMER_WIDTH val;
 	// change state
 	radio_vars.state = RADIOSTATE_TRANSMITTING;
-
 	dwt_starttx(DWT_START_TX_IMMEDIATE|DWT_RESPONSE_EXPECTED);
     if (radio_vars.startFrame_cb!=NULL) {
         // call the callback
@@ -222,11 +221,11 @@ void radio_rxEnable() {
 	debugpins_radio_set();
 	leds_radio_on();
 	// change state
+	radio_vars.isr_retValue = DO_NOT_KICK_SCHEDULER;
 	radio_vars.state = RADIOSTATE_LISTENING;
 }
 
 void radio_rxNow() {
-   //radio_vars.state = RADIOSTATE_RECEIVING;
 }
 
 void radio_getReceivedFrame(uint8_t* pBufRead,
@@ -239,7 +238,7 @@ void radio_getReceivedFrame(uint8_t* pBufRead,
 	dwt_rxdiag_t rx_diag;
     
 	// read the packet in
-	if( (maxBufLen <= radio_vars.rx_frameLen) && (radio_vars.rx_frameLen != 0)){
+	if( (radio_vars.rx_frameLen <= maxBufLen ) && (radio_vars.rx_frameLen != 0)){
 		dwt_readrxdata(pBufRead,radio_vars.rx_frameLen,0);
 	}
 	// get diagnostics data for the received frame
@@ -261,6 +260,21 @@ void error_handler(void){
 }
 
 //=========================== callbacks =======================================
+void radio_txStartOfFrameCb(const dwt_cb_data_t* cb_data){
+	PORT_TIMER_WIDTH capturedTime;
+
+	// capture the time
+	capturedTime = sctimer_readCounter();
+	radio_vars.state = RADIOSTATE_TRANSMITTING;
+	radio_vars.isr_retValue = KICK_SCHEDULER;
+	radio_vars.txa_count += 1;
+	radio_vars.radio_status = cb_data->status;
+	if( radio_vars.startFrame_cb != NULL){
+		radio_vars.startFrame_cb(capturedTime);
+	}
+	
+}
+
 void radio_txDoneCb(const dwt_cb_data_t* cb_data){
 	PORT_TIMER_WIDTH capturedTime;
 
@@ -268,8 +282,25 @@ void radio_txDoneCb(const dwt_cb_data_t* cb_data){
 	capturedTime = sctimer_readCounter();
 	radio_vars.rx_frameLen = 0;
 	radio_vars.state = RADIOSTATE_TXRX_DONE;
+	radio_vars.isr_retValue = KICK_SCHEDULER;
+	radio_vars.radio_status = cb_data->status;
+	radio_vars.txg_count += 1;
 	if( radio_vars.endFrame_cb != NULL){
 		radio_vars.endFrame_cb(capturedTime);
+	}
+}
+
+void radio_rxStartOfFrameCb(const dwt_cb_data_t* cb_data){
+	PORT_TIMER_WIDTH capturedTime;
+
+	// capture the time
+	capturedTime = sctimer_readCounter();
+	radio_vars.radio_status = cb_data->status;
+	radio_vars.state = RADIOSTATE_RECEIVING;
+	radio_vars.isr_retValue = KICK_SCHEDULER;
+	radio_vars.rxg_count += 1;
+	if( radio_vars.startFrame_cb != NULL){
+		radio_vars.startFrame_cb(capturedTime);
 	}
 }
 
@@ -278,36 +309,15 @@ void radio_rxOkCb(const dwt_cb_data_t* cb_data){
 
 	// capture the time
 	capturedTime = sctimer_readCounter();
-	radio_vars.rx_frameLen = cb_data->datalength;
+	// The DW1000 calculates the CRC automatically and does not pass it to the received frame.
+	// To be compatible with the higher level layers we add the CRC length to the received frame,
+	// knowning that it will be discarded without being read.
+	// Should the higher layers ever start reading the CRC then we will need to calculate it here.
+	radio_vars.rx_frameLen = cb_data->datalength +2;
 	radio_vars.radio_status = cb_data->status;
 	radio_vars.state = RADIOSTATE_TXRX_DONE;
-	if( radio_vars.endFrame_cb != NULL){
-		radio_vars.endFrame_cb(capturedTime);
-	}
-}
-
-void radio_rxErrCb(const dwt_cb_data_t* cb_data){
-	PORT_TIMER_WIDTH capturedTime;
-
-	// capture the time
-	capturedTime = sctimer_readCounter();
-	radio_vars.rx_frameLen = 0;
-	radio_vars.radio_status = cb_data->status;
-	radio_vars.state = RADIOSTATE_TXRX_DONE;
-	if( radio_vars.endFrame_cb != NULL){
-		radio_vars.endFrame_cb(capturedTime);
-	}
-	
-}
-
-void radio_rxToCb(const dwt_cb_data_t* cb_data){
-	PORT_TIMER_WIDTH capturedTime;
-
-	// capture the time
-	capturedTime = sctimer_readCounter();
-	radio_vars.rx_frameLen = 0;
-	radio_vars.radio_status = cb_data->status;
-	radio_vars.state = RADIOSTATE_TXRX_DONE;
+	radio_vars.isr_retValue = KICK_SCHEDULER;
+	radio_vars.rxg_count += 1;
 	if( radio_vars.endFrame_cb != NULL){
 		radio_vars.endFrame_cb(capturedTime);
 	}
@@ -317,8 +327,5 @@ void radio_rxToCb(const dwt_cb_data_t* cb_data){
 
 kick_scheduler_t radio_isr() {
 	dwt_isr();
-	if(radio_vars.state == RADIOSTATE_TXRX_DONE){
-		return KICK_SCHEDULER;
-	}
-	return DO_NOT_KICK_SCHEDULER;
+	return 	radio_vars.isr_retValue;
 }
