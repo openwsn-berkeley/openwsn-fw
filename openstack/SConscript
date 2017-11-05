@@ -45,7 +45,6 @@ sources_h = [
     #=== 02b-MAChigh
     os.path.join('02b-MAChigh','neighbors.h'),
     os.path.join('02b-MAChigh','sf0.h'),
-    os.path.join('02b-MAChigh','sfx.h'),
     os.path.join('02b-MAChigh','schedule.h'),
     os.path.join('02b-MAChigh','sixtop.h'),
     #=== 03a-IPHC
