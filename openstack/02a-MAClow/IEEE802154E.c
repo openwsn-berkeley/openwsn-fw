@@ -772,35 +772,28 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
 port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
     uint8_t i;
     if (isValidEbFormat(pkt,lenIE)==TRUE){
-            // at this point, ASN and frame length are known
-            // the current slotoffset can be inferred
-            ieee154e_syncSlotOffset();
-            schedule_syncSlotOffset(ieee154e_vars.slotOffset);
-            ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
-            
-            // get real frequence
-            if (ieee154e_vars.slotOffset==0){
-                // use the real frequence which is indicated by next byte
-                ieee154e_vars.freq = *((uint8_t*)(pkt->payload)+*lenIE);
-            }
-            
-            /* 
-            infer the asnOffset based on the fact that
-            ieee154e_vars.freq = 11 + (asnOffset + channelOffset)%16 
-            */
+        // at this point, ASN and frame length are known
+        // the current slotoffset can be inferred
+        ieee154e_syncSlotOffset();
+        schedule_syncSlotOffset(ieee154e_vars.slotOffset);
+        ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
+        /* 
+        infer the asnOffset based on the fact that
+        ieee154e_vars.freq = 11 + (asnOffset + channelOffset)%16 
+        */
         for (i=0;i<NUM_CHANNELS;i++){
-                if ((ieee154e_vars.freq - 11)==ieee154e_vars.chTemplate[i]){
-                    break;
-                }
+            if ((ieee154e_vars.freq - 11)==ieee154e_vars.chTemplate[i]){
+                break;
             }
-            ieee154e_vars.asnOffset = i - schedule_getChannelOffset();
+        }
+        ieee154e_vars.asnOffset = i - schedule_getChannelOffset();
         return TRUE;
     } else {
         // wrong eb format
         openserial_printError(COMPONENT_IEEE802154E,ERR_UNSUPPORTED_FORMAT,3,0);
-         return FALSE;
-   }
-   }
+        return FALSE;
+    }
+}
 
 //======= TX
 
@@ -1125,13 +1118,8 @@ port_INLINE void activity_ti2() {
     packetfunctions_reserveFooterSize(&ieee154e_vars.localCopyForTransmission, 2);
 #endif
    
-
-   if (ieee154e_vars.slotOffset !=0){
-     // configure the radio for that frequency
-     radio_setFrequency(ieee154e_vars.freq);
-   } else {
-     radio_setFrequency(SYNCHRONIZING_CHANNEL);
-   }
+   // configure the radio for that frequency
+   radio_setFrequency(ieee154e_vars.freq);
    
    // load the packet in the radio's Tx buffer
    radio_loadPacket(ieee154e_vars.localCopyForTransmission.payload,
@@ -1498,7 +1486,7 @@ port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
                                    &ieee154e_vars.ackReceived->l1_rssi,
                                    &ieee154e_vars.ackReceived->l1_lqi,
                                    &ieee154e_vars.ackReceived->l1_crc);
-      
+          
         // break if wrong length
         if (ieee154e_vars.ackReceived->length<LENGTH_CRC || ieee154e_vars.ackReceived->length>LENGTH_IEEE154_MAX) {
             // break from the do-while loop and execute the clean-up code below
@@ -1566,7 +1554,7 @@ port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
         // inform upper layer
         notif_sendDone(ieee154e_vars.dataToSend,E_SUCCESS);
         ieee154e_vars.dataToSend = NULL;
-      
+        
         // in any case, execute the clean-up code below (processing of ACK done)
     } while (0);
    
@@ -1598,13 +1586,9 @@ port_INLINE void activity_ri2() {
     // radiotimer_schedule(DURATION_rt2);
 #endif
    
+   // configure the radio for that frequency
+   radio_setFrequency(ieee154e_vars.freq);
 
-   if (ieee154e_vars.slotOffset !=0){
-       // configure the radio for that frequency
-       radio_setFrequency(ieee154e_vars.freq);
-   } else {
-       radio_setFrequency(SYNCHRONIZING_CHANNEL);
-   }
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
     radio_rxEnable_scum();
 #else
