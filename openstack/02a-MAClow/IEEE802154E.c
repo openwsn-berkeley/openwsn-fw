@@ -16,7 +16,6 @@
 #include "adaptive_sync.h"
 #include "sctimer.h"
 #include "openrandom.h"
-#include "sfy_hashtable.h"
 
 //=========================== definition ======================================
 
@@ -926,33 +925,6 @@ port_INLINE void activity_ti1ORri1() {
                // look for an EB packet in the queue
                ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
             }
-            switch(ieee154e_vars.slotOffset){
-                case 0:
-                    // only send EB
-                    couldSendEB=TRUE;
-                    ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
-                    break;
-                case 1:
-                    // only send DIO
-                    couldSendEB=FALSE;
-                    ieee154e_vars.dataToSend = openqueue_macGetDIOPacket();
-                    break;
-                default:
-                    couldSendEB=FALSE;
-                    // only send Unicast
-                    ieee154e_vars.dataToSend = openqueue_macGetUnicastPacket(&neighbor);
-                    // if I have Tx slot for the unicast packet, send it at that Tx slot
-                    if (
-                        ieee154e_vars.dataToSend != NULL                       &&
-                        ieee154e_vars.dataToSend->creator>COMPONENT_SIXTOP_RES && 
-                        ieee154e_vars.slotOffset == sfy_hashtable_getSharedSlotMe()
-                    ){
-                        if (schedule_getCellsCounts(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,CELLTYPE_TX,&(ieee154e_vars.dataToSend->l2_nextORpreviousHop))>0){
-                            ieee154e_vars.dataToSend = NULL;
-                        }
-                    }
-                    break;
-            }
          }
          
          // udpate cell usgae bitmap, set as true if I have packet to send
@@ -982,7 +954,6 @@ port_INLINE void activity_ti1ORri1() {
                join_priority = (icmpv6rpl_getMyDAGrank()/MINHOPRANKINCREASE)-1; //poipoi -- use dagrank(rank)-1
                memcpy(ieee154e_vars.dataToSend->l2_ASNpayload,&asn[0],sizeof(asn_t));
                memcpy(ieee154e_vars.dataToSend->l2_ASNpayload+sizeof(asn_t),&join_priority,sizeof(uint8_t));
-               *(ieee154e_vars.dataToSend->l2_realFrequence) = ieee154e_vars.freq;
             }
             // record that I attempt to transmit this packet
             ieee154e_vars.dataToSend->l2_numTxAttempts++;
@@ -2723,34 +2694,32 @@ void changeIsSync(bool newIsSync) {
 //======= notifying upper layer
 
 void notif_sendDone(OpenQueueEntry_t* packetSent, owerror_t error) {
-   // record the outcome of the trasmission attempt
-   packetSent->l2_sendDoneError   = error;
-   // record the current ASN
-   memcpy(&packetSent->l2_asn,&ieee154e_vars.asn,sizeof(asn_t));
-   packetSent->l2_slotoffset      = ieee154e_vars.slotOffset;
-   // associate this packet with the virtual component
-   // COMPONENT_IEEE802154E_TO_RES so RES can knows it's for it
-   packetSent->owner              = COMPONENT_IEEE802154E_TO_SIXTOP;
-   // post RES's sendDone task
-   scheduler_push_task(task_sixtopNotifSendDone,TASKPRIO_SIXTOP_NOTIF_TXDONE);
-   
-   // wake up the scheduler
-   SCHEDULER_WAKEUP();
+    // record the outcome of the trasmission attempt
+    packetSent->l2_sendDoneError   = error;
+    // record the current ASN
+    memcpy(&packetSent->l2_asn,&ieee154e_vars.asn,sizeof(asn_t));
+    // associate this packet with the virtual component
+    // COMPONENT_IEEE802154E_TO_RES so RES can knows it's for it
+    packetSent->owner              = COMPONENT_IEEE802154E_TO_SIXTOP;
+    // post RES's sendDone task
+    scheduler_push_task(task_sixtopNotifSendDone,TASKPRIO_SIXTOP_NOTIF_TXDONE);
+    
+    // wake up the scheduler
+    SCHEDULER_WAKEUP();
 }
 
 void notif_receive(OpenQueueEntry_t* packetReceived) {
-   // record the current ASN
-   memcpy(&packetReceived->l2_asn, &ieee154e_vars.asn, sizeof(asn_t));
-   packetReceived->l2_slotoffset  = ieee154e_vars.slotOffset;
-   // indicate reception to the schedule, to keep statistics
-   schedule_indicateRx(&packetReceived->l2_asn);
-   // associate this packet with the virtual component
-   // COMPONENT_IEEE802154E_TO_SIXTOP so sixtop can knows it's for it
-   packetReceived->owner          = COMPONENT_IEEE802154E_TO_SIXTOP;
-   // post RES's Receive task
-   scheduler_push_task(task_sixtopNotifReceive,TASKPRIO_SIXTOP_NOTIF_RX);
-   // wake up the scheduler
-   SCHEDULER_WAKEUP();
+    // record the current ASN
+    memcpy(&packetReceived->l2_asn, &ieee154e_vars.asn, sizeof(asn_t));
+    // indicate reception to the schedule, to keep statistics
+    schedule_indicateRx(&packetReceived->l2_asn);
+    // associate this packet with the virtual component
+    // COMPONENT_IEEE802154E_TO_SIXTOP so sixtop can knows it's for it
+    packetReceived->owner          = COMPONENT_IEEE802154E_TO_SIXTOP;
+    // post RES's Receive task
+    scheduler_push_task(task_sixtopNotifReceive,TASKPRIO_SIXTOP_NOTIF_RX);
+    // wake up the scheduler
+    SCHEDULER_WAKEUP();
 }
 
 //======= stats

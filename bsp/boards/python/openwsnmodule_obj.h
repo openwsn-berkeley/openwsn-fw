@@ -21,8 +21,6 @@
 #include "neighbors_obj.h"
 #include "sixtop_obj.h"
 #include "sf0_obj.h"
-#include "sfx_obj.h"
-#include "sfy_hashtable_obj.h"
 #include "schedule_obj.h"
 #include "icmpv6echo_obj.h"
 #include "icmpv6rpl_obj.h"
@@ -207,8 +205,6 @@ struct OpenMote {
    neighbors_vars_t     neighbors_vars;
    schedule_vars_t      schedule_vars;
    sf0_vars_t           sf0_vars;
-   sfx_vars_t           sfx_vars;
-   sfy_hashtable_vars_t sfy_hashtable_vars;
    // l2a
    adaptive_sync_vars_t adaptive_sync_vars;
    ieee802154_security_vars_t ieee802154_security_vars;

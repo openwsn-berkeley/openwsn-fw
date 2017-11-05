@@ -24,12 +24,11 @@ typedef enum {
    TASKPRIO_COAP                  = 0x06,
    TASKPRIO_ADAPTIVE_SYNC         = 0x07,
    TASKPRIO_SF0                   = 0x08,
-   TASKPRIO_SFX                   = 0x09,
    // tasks trigger by other interrupts
-   TASKPRIO_BUTTON                = 0x0a,
-   TASKPRIO_SIXTOP_TIMEOUT        = 0x0b,
-   TASKPRIO_SNIFFER               = 0x0c,
-   TASKPRIO_MAX                   = 0x0d,
+   TASKPRIO_BUTTON                = 0x08,
+   TASKPRIO_SIXTOP_TIMEOUT        = 0x0a,
+   TASKPRIO_SNIFFER               = 0x0b,
+   TASKPRIO_MAX                   = 0x0c,
 } task_prio_t;
 
 #define TASK_LIST_DEPTH           10

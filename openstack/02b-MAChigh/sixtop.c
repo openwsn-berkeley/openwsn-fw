@@ -5,7 +5,6 @@
 #include "neighbors.h"
 #include "IEEE802154E.h"
 #include "iphc.h"
-#include "sfx.h"
 #include "packetfunctions.h"
 #include "openrandom.h"
 #include "scheduler.h"
@@ -353,93 +352,91 @@ owerror_t sixtop_request(
 //======= from upper layer
 
 owerror_t sixtop_send(OpenQueueEntry_t *msg) {
-   
-   // set metadata
-   msg->owner        = COMPONENT_SIXTOP;
-   msg->l2_frameType = IEEE154_TYPE_DATA;
-
-   // set l2-security attributes
+    
+    // set metadata
+    msg->owner        = COMPONENT_SIXTOP;
+    msg->l2_frameType = IEEE154_TYPE_DATA;
+    
+    // set l2-security attributes
     msg->l2_securityLevel   = IEEE802154_security_getSecurityLevel(msg);
-   msg->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE; 
+    msg->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE; 
     msg->l2_keyIndex        = IEEE802154_security_getDataKeyIndex();
-
-   if (msg->l2_payloadIEpresent == FALSE) {
-      return sixtop_send_internal(
-         msg,
-         FALSE
-      );
-   } else {
-      return sixtop_send_internal(
-         msg,
-         TRUE
-      );
-   }
+    
+    if (msg->l2_payloadIEpresent == FALSE) {
+        return sixtop_send_internal(
+            msg,
+            FALSE
+        );
+    } else {
+        return sixtop_send_internal(
+            msg,
+            TRUE
+        );
+    }
 }
 
 //======= from lower layer
 
 void task_sixtopNotifSendDone() {
-   OpenQueueEntry_t* msg;
-   
-   // get recently-sent packet from openqueue
-   msg = openqueue_sixtopGetSentPacket();
-   if (msg==NULL) {
-      openserial_printCritical(
-         COMPONENT_SIXTOP,
-         ERR_NO_SENT_PACKET,
-         (errorparameter_t)0,
-         (errorparameter_t)0
-      );
-      return;
-   }
-   
-   // take ownership
-   msg->owner = COMPONENT_SIXTOP;
-   
-   // update neighbor statistics
-   if (msg->l2_sendDoneError==E_SUCCESS) {
-      neighbors_indicateTx(
-         &(msg->l2_nextORpreviousHop),
-         msg->l2_numTxAttempts,
-         TRUE,
-         &msg->l2_asn,
-         msg->l2_slotoffset
-      );
-   } else {
-      neighbors_indicateTx(
-         &(msg->l2_nextORpreviousHop),
-         msg->l2_numTxAttempts,
-         FALSE,
-         &msg->l2_asn,
-         msg->l2_slotoffset
-      );
-   }
-   
-   // send the packet to where it belongs
-   switch (msg->creator) {
-      case COMPONENT_SIXTOP:
-         if (msg->l2_frameType==IEEE154_TYPE_BEACON) {
-            // this is a EB
-            
-            // not busy sending EB anymore
-            sixtop_vars.busySendingEB = FALSE;
-         } else {
-            // this is a KA
-            
-            // not busy sending KA anymore
-            sixtop_vars.busySendingKA = FALSE;
-         }
-         // discard packets
-         openqueue_freePacketBuffer(msg);
-         break;
-      case COMPONENT_SIXTOP_RES:
-         sixtop_six2six_sendDone(msg,msg->l2_sendDoneError);
-         break;
-      default:
-         // send the rest up the stack
-         iphc_sendDone(msg,msg->l2_sendDoneError);
-         break;
-   }
+    OpenQueueEntry_t* msg;
+    
+    // get recently-sent packet from openqueue
+    msg = openqueue_sixtopGetSentPacket();
+    if (msg==NULL) {
+        openserial_printCritical(
+            COMPONENT_SIXTOP,
+            ERR_NO_SENT_PACKET,
+            (errorparameter_t)0,
+            (errorparameter_t)0
+        );
+        return;
+    }
+    
+    // take ownership
+    msg->owner = COMPONENT_SIXTOP;
+    
+    // update neighbor statistics
+    if (msg->l2_sendDoneError==E_SUCCESS) {
+        neighbors_indicateTx(
+            &(msg->l2_nextORpreviousHop),
+            msg->l2_numTxAttempts,
+            TRUE,
+            &msg->l2_asn
+        );
+    } else {
+        neighbors_indicateTx(
+             &(msg->l2_nextORpreviousHop),
+             msg->l2_numTxAttempts,
+             FALSE,
+             &msg->l2_asn
+        );
+    }
+    
+    // send the packet to where it belongs
+    switch (msg->creator) {
+        case COMPONENT_SIXTOP:
+            if (msg->l2_frameType==IEEE154_TYPE_BEACON) {
+                // this is a EB
+                
+                // not busy sending EB anymore
+                sixtop_vars.busySendingEB = FALSE;
+            } else {
+                // this is a KA
+                
+                // not busy sending KA anymore
+                sixtop_vars.busySendingKA = FALSE;
+            }
+            // discard packets
+            openqueue_freePacketBuffer(msg);
+            break;
+        case COMPONENT_SIXTOP_RES:
+            sixtop_six2six_sendDone(msg,msg->l2_sendDoneError);
+            break;
+        default:
+            // send the rest up the stack
+            iphc_sendDone(msg,msg->l2_sendDoneError);
+            break;
+    }
 }
 
 void task_sixtopNotifReceive() {
@@ -681,53 +678,55 @@ timers_res_fired() function, but is declared as a separate function for better
 readability of the code.
 */
 port_INLINE void sixtop_sendEB() {
-   OpenQueueEntry_t* eb;
+    OpenQueueEntry_t* eb;
     uint8_t     i;
     uint8_t     eb_len;
     uint16_t    temp16b;
    
-    if ((ieee154e_isSynch()==FALSE)                     ||
+    if (
+        (ieee154e_isSynch()==FALSE)                     ||
         (IEEE802154_security_isConfigured()==FALSE)     ||
         (icmpv6rpl_getMyDAGrank()==DEFAULTDAGRANK)      ||
-        icmpv6rpl_daoSent()==FALSE) {
+        icmpv6rpl_daoSent()==FALSE
+    ) {
         // I'm not sync'ed, or did not join, or did not acquire a DAGrank or did not send out a DAO
         // before starting to advertize the network, we need to make sure that we are reachable downwards,
         // thus, the condition if DAO was sent
+        
+        // delete packets genereted by this module (EB and KA) from openqueue
+        openqueue_removeAllCreatedBy(COMPONENT_SIXTOP);
+        
+        // I'm not busy sending an EB or KA
+        sixtop_vars.busySendingEB = FALSE;
+        sixtop_vars.busySendingKA = FALSE;
+        
+        // stop here
+        return;
+    }
    
-      // delete packets genereted by this module (EB and KA) from openqueue
-      openqueue_removeAllCreatedBy(COMPONENT_SIXTOP);
-      
-      // I'm not busy sending an EB or KA
-      sixtop_vars.busySendingEB = FALSE;
-      sixtop_vars.busySendingKA = FALSE;
-      
-      // stop here
-      return;
-   }
-   
-   if (sixtop_vars.busySendingEB==TRUE) {
-      // don't continue if I'm still sending a previous EB
-      return;
-   }
-   
-   // if I get here, I will send an EB
-   
-   // get a free packet buffer
-   eb = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP);
-   if (eb==NULL) {
+    if (sixtop_vars.busySendingEB==TRUE) {
+        // don't continue if I'm still sending a previous EB
+        return;
+    }
+    
+    // if I get here, I will send an EB
+    
+    // get a free packet buffer
+    eb = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP);
+    if (eb==NULL) {
         openserial_printError(
             COMPONENT_SIXTOP,
             ERR_NO_FREE_PACKET_BUFFER,
-                            (errorparameter_t)0,
+            (errorparameter_t)0,
             (errorparameter_t)0
         );
-      return;
-   }
-   
-   // declare ownership over that packet
-   eb->creator = COMPONENT_SIXTOP;
-   eb->owner   = COMPONENT_SIXTOP;
-   
+        return;
+    }
+    
+    // declare ownership over that packet
+    eb->creator = COMPONENT_SIXTOP;
+    eb->owner   = COMPONENT_SIXTOP;
+    
     // in case we none default number of shared cells defined in minimal configuration
     if (ebIEsBytestream[EB_SLOTFRAME_NUMLINK_OFFSET]>1){
         for (i=ebIEsBytestream[EB_SLOTFRAME_NUMLINK_OFFSET]-1;i>0;i--){
@@ -739,13 +738,13 @@ port_INLINE void sixtop_sendEB() {
             eb->payload[4]   = 0x0F; // link options
         }
     }
-   
+    
     // reserve space for EB IEs
     packetfunctions_reserveHeaderSize(eb,EB_IE_LEN);
     for (i=0;i<EB_IE_LEN;i++){
         eb->payload[i]   = ebIEsBytestream[i];
     }
-  
+    
     if (ebIEsBytestream[EB_SLOTFRAME_NUMLINK_OFFSET]>1){
         // reconstruct the MLME IE header since length changed 
         eb_len = EB_IE_LEN-2+5*(ebIEsBytestream[EB_SLOTFRAME_NUMLINK_OFFSET]-1);
@@ -758,26 +757,26 @@ port_INLINE void sixtop_sendEB() {
     // Note: the actual value of the current ASN and JP will be written by the
     //    IEEE802.15.4e when transmitting
     eb->l2_ASNpayload               = &eb->payload[EB_ASN0_OFFSET]; 
-  
-   // some l2 information about this packet
-   eb->l2_frameType                     = IEEE154_TYPE_BEACON;
-   eb->l2_nextORpreviousHop.type        = ADDR_16B;
-   eb->l2_nextORpreviousHop.addr_16b[0] = 0xff;
-   eb->l2_nextORpreviousHop.addr_16b[1] = 0xff;
-   
-   //I has an IE in my payload
-   eb->l2_payloadIEpresent = TRUE;
+    
+    // some l2 information about this packet
+    eb->l2_frameType                     = IEEE154_TYPE_BEACON;
+    eb->l2_nextORpreviousHop.type        = ADDR_16B;
+    eb->l2_nextORpreviousHop.addr_16b[0] = 0xff;
+    eb->l2_nextORpreviousHop.addr_16b[1] = 0xff;
+    
+    //I has an IE in my payload
+    eb->l2_payloadIEpresent = TRUE;
 
-   // set l2-security attributes
-   eb->l2_securityLevel   = IEEE802154_SECURITY_LEVEL_BEACON;
-   eb->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE;
+    // set l2-security attributes
+    eb->l2_securityLevel   = IEEE802154_SECURITY_LEVEL_BEACON;
+    eb->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE;
     eb->l2_keyIndex        = IEEE802154_security_getBeaconKeyIndex();
-
-   // put in queue for MAC to handle
-   sixtop_send_internal(eb,eb->l2_payloadIEpresent);
-   
-   // I'm now busy sending an EB
-   sixtop_vars.busySendingEB = TRUE;
+    
+    // put in queue for MAC to handle
+    sixtop_send_internal(eb,eb->l2_payloadIEpresent);
+    
+    // I'm now busy sending an EB
+    sixtop_vars.busySendingEB = TRUE;
 }
 
 /**
@@ -1074,7 +1073,6 @@ void sixtop_six2six_notifyReceive(
     uint8_t           response_pktLen   = 0;
     cellInfo_ht       celllist_list[CELLLIST_MAX_LEN];
     bool              scheduleChanged;
-    open_addr_t*      neighbor;
     
     if (type == SIXTOP_CELL_REQUEST){
         // if this is a 6p request message

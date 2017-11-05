@@ -13,8 +13,8 @@
 //=========================== define ==========================================
 
 #define MAXPREFERENCE             2
-#define BADNEIGHBORMAXRSSI        -65 //dBm
-#define GOODNEIGHBORMINRSSI       -75 //dBm
+#define BADNEIGHBORMAXRSSI        -80 //dBm
+#define GOODNEIGHBORMINRSSI       -90 //dBm
 #define SWITCHSTABILITYTHRESHOLD  3
 #define DEFAULTLINKCOST           4
 #define LARGESTLINKCOST           8
@@ -23,7 +23,6 @@
 #define DEFAULTDAGRANK            MAXDAGRANK
 #define MINHOPRANKINCREASE        256  //default value in RPL and Minimal 6TiSCH draft
 
-#define LOWESTRSSIASPARENT        -80 //dBm
 //=========================== typedef =========================================
 
 BEGIN_PACK
@@ -91,8 +90,7 @@ void          neighbors_indicateTx(
    open_addr_t*         dest,
    uint8_t              numTxAttempts,
    bool                 was_finally_acked,
-   asn_t*               asnTimestamp,
-   uint16_t             slotOffset
+   asn_t*               asnTimestamp
 );
 void          neighbors_updateSequenceNumber(open_addr_t* address);
 void          neighbors_updateGeneration(open_addr_t* address);

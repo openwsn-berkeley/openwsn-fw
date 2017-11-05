@@ -402,27 +402,23 @@ The fields which are updated are:
    on final transmission attempt.
 \param[in] asnTs ASN of the last transmission attempt.
 */
-void neighbors_indicateTx(open_addr_t* l2_dest,
-                          uint8_t      numTxAttempts,
-                          bool         was_finally_acked,
-                          asn_t*       asnTs,
-                          uint16_t     slotOffset) {
+void neighbors_indicateTx(
+    open_addr_t* l2_dest,
+    uint8_t      numTxAttempts,
+    bool         was_finally_acked,
+    asn_t*       asnTs
+) {
     uint8_t i;
     // don't run through this function if packet was sent to broadcast address
     if (packetfunctions_isBroadcastMulticast(l2_dest)==TRUE) {
         return;
     }
-   
+    
     // loop through neighbor table
     for (i=0;i<MAXNUMNEIGHBORS;i++) {
         if (isThisRowMatching(l2_dest,i)) {
             // handle roll-over case
-            if (slotOffset<SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS){
-                if (was_finally_acked==TRUE){
-                    memcpy(&neighbors_vars.neighbors[i].asn,asnTs,sizeof(asn_t));
-                }
-                return;
-            }
+            
             if (neighbors_vars.neighbors[i].numTx>(0xff-numTxAttempts)) {
                 neighbors_vars.neighbors[i].numWraps++; //counting the number of times that tx wraps.
                 neighbors_vars.neighbors[i].numTx/=2;
@@ -444,7 +440,7 @@ void neighbors_indicateTx(open_addr_t* l2_dest,
             // forgetting about the ancient past and giving more importance to recent observations.
             break;
         }
-   }
+    }
 }
 
 void neighbors_updateSequenceNumber(open_addr_t* address){

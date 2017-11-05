@@ -229,7 +229,6 @@ bool               schedule_getOneCellAfterOffset(
 );
 
 void               schedule_updateCellUsageBitMap(bool hasPacketToSend);
-void               schedule_housekeeping();
 
 /**
 \}

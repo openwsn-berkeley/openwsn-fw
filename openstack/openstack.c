@@ -23,8 +23,6 @@
 #include "sixtop.h"
 #include "neighbors.h"
 #include "sf0.h"
-#include "sfx.h"
-#include "sfy_hashtable.h"
 //-- 03a-IPHC
 #include "openbridge.h"
 #include "iphc.h"
@@ -62,11 +60,9 @@ void openstack_init(void) {
    ieee154e_init();
    //-- 02b-RES
    schedule_init();
-   sfy_hashtable_init();
    sixtop_init();
    neighbors_init();
    sf0_init();
-   sfx_init();
    //-- 03a-IPHC
    openbridge_init();
    iphc_init();
