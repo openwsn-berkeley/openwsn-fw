@@ -8,6 +8,7 @@
 #include "sf0.h"
 #include "sfx.h"
 #include "IEEE802154E.h"
+#include "icmpv6rpl.h"
 
 //=========================== definition ======================================
 
@@ -259,7 +260,7 @@ void  schedule_getSlotInfo(
 /**
 \brief Get the maximum number of active slots.
 
-\param[out] maximum number of active slots
+\returns maximum number of active slots
 */
 uint16_t  schedule_getMaxActiveSlots() {
    return schedule_vars.maxActiveSlots;
@@ -474,6 +475,11 @@ bool schedule_isSlotOffsetAvailable(uint16_t slotOffset){
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    
+   if (slotOffset>=schedule_vars.frameLength){
+      ENABLE_INTERRUPTS();
+      return FALSE;
+   }
+   
    scheduleWalker = schedule_vars.currentScheduleEntry;
    do {
       if(slotOffset == scheduleWalker->slotOffset){
@@ -645,12 +651,6 @@ void schedule_advanceSlot() {
   
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
-   if (
-     schedule_vars.currentScheduleEntry->slotOffset >= \
-     ((scheduleEntry_t*)schedule_vars.currentScheduleEntry->next)->slotOffset
-   ) {
-       sfx_notifyNewSlotframe();
-   }
    schedule_vars.currentScheduleEntry = schedule_vars.currentScheduleEntry->next;
    
    ENABLE_INTERRUPTS();
@@ -799,7 +799,7 @@ bool schedule_getOkToSend() {
       
       returnVal = TRUE;
    } else {
-      // non-shared slot: check backoff before answering
+      // shared slot: check backoff before answering
       
       // decrement backoff
       if (schedule_vars.backoff>0) {
@@ -915,38 +915,39 @@ void schedule_housekeeping(){
     open_addr_t neighbor;
     
     
+bool schedule_getOneCellAfterOffset(uint8_t metadata,uint8_t offset,open_addr_t* neighbor, uint8_t cellOptions, uint16_t* slotoffset, uint16_t* channeloffset){
+   bool returnVal;
+   scheduleEntry_t* scheduleWalker;
+   cellType_t type;
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
 
-    for(i=0;i<MAXACTIVESLOTS;i++) {
-        // remove Rx cell if haven't heard anything for a while longer than 2*DESYNCTIMEOUT
-//        if(schedule_vars.scheduleBuf[i].type == CELLTYPE_RX){
-//            timeSinceHeard = ieee154e_asnDiff(&(schedule_vars.scheduleBuf[i].lastUsedAsn));
-//            // max interval of two packet on Rx, 2*DESYNCTIMEOUT
-//            if (timeSinceHeard>2*DESYNCTIMEOUT){
-//                schedule_removeActiveSlot(
-//                    schedule_vars.scheduleBuf[i].slotOffset,
-//                    &(schedule_vars.scheduleBuf[i].neighbor)
-//                );
-//                break;
-//            }
-//        }
-        if(schedule_vars.scheduleBuf[i].type == CELLTYPE_TX){
-            // remove Tx cell if it's scheduled to non-preferred parent
-            if (icmpv6rpl_getPreferredParentEui64(&neighbor)==TRUE) {
-                if(packetfunctions_sameAddress(&neighbor,&(schedule_vars.scheduleBuf[i].neighbor))==FALSE){
-                    if (sixtop_setHandler(SIX_HANDLER_SFX)==FALSE){
-                       // one sixtop transcation is happening, only one instance at one time
-                       continue;
+   // translate cellOptions to cell type 
+   if (cellOptions == LINKOPTIONS_TX){
+      type = CELLTYPE_TX;
                     }
-                    sixtop_request(IANA_6TOP_CMD_CLEAR,&(schedule_vars.scheduleBuf[i].neighbor),1);
-                    break;
+   if (cellOptions == LINKOPTIONS_RX){
+      type = CELLTYPE_RX;
                 }
+   if (cellOptions == (LINKOPTIONS_TX | LINKOPTIONS_RX | LINKOPTIONS_SHARED)){
+      type = CELLTYPE_TXRX;
             }
+   
+   returnVal      = FALSE;
+   scheduleWalker = &schedule_vars.scheduleBuf[0]; // fisrt entry record slotoffset 0
+   do {
+      if(type == scheduleWalker->type && scheduleWalker->slotOffset >= offset){
+         *slotoffset    = scheduleWalker->slotOffset;
+         *channeloffset = scheduleWalker->channelOffset;
+         returnVal      = TRUE;
+         break;
         }
-    }
+      scheduleWalker = scheduleWalker->next;
+   }while(scheduleWalker!=&schedule_vars.scheduleBuf[0]);
    
     ENABLE_INTERRUPTS();
+   
+   return returnVal;
 }
 
 //=========================== private =========================================

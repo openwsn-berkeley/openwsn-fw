@@ -3,6 +3,7 @@
 #include "packetfunctions.h"
 #include "idmanager.h"
 #include "openserial.h"
+#include "IEEE802154E.h"
 #include "sixtop.h"
 #include "forwarding.h"
 #include "neighbors.h"
@@ -14,6 +15,10 @@
 static const uint8_t dagroot_mac64b[]   = {0x02,
    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01
 }; 
+
+#ifdef DEADLINE_OPTION_ENABLED
+    static monitor_expiration_vars_t  monitor_expiration_vars;
+#endif
 
 //=========================== prototypes ======================================
 
@@ -28,7 +33,7 @@ uint8_t iphc_retrieveIphcHeader(open_addr_t* temp_addr_16b,
    open_addr_t*         temp_addr_64b,
    uint8_t*             dispatch,
    uint8_t*             tf,
-   bool*                nh,
+   uint8_t*             nh,
    uint8_t*             hlim,
    uint8_t*             sam,
    uint8_t*             m,
@@ -44,6 +49,17 @@ void iphc_prependIPv6HopByHopHeader(
    rpl_option_ht*       rpl_option
 );
 
+#ifdef DEADLINE_OPTION_ENABLED
+// IPv6 Deadline hop-by-hop header
+void iphc_prependIPv6DeadlineHeader(
+   OpenQueueEntry_t* msg
+);
+
+uint8_t iphc_getAsnLen(
+   uint8_t* asn
+);
+#endif
+
 //=========================== public ==========================================
 
 void      iphc_init() {
@@ -55,6 +71,9 @@ owerror_t iphc_sendFromForwarding(
     ipv6_header_iht*  ipv6_outer_header,
     ipv6_header_iht*  ipv6_inner_header,
     rpl_option_ht*    rpl_option,
+#ifdef DEADLINE_OPTION_ENABLED
+    deadline_option_ht*	deadline_option,
+#endif    
     uint32_t*         flow_label,
     uint8_t*          rh3_copy,
     uint8_t           rh3_length,
@@ -167,6 +186,17 @@ owerror_t iphc_sendFromForwarding(
         }
     }
     
+#ifdef DEADLINE_OPTION_ENABLED
+    if ( (msg->creator == COMPONENT_UEXPIRATION) && (deadline_option != NULL) ) { 
+        if (
+            deadline_option->optionType==DEADLINE_HOPBYHOP_HEADER_OPTION_TYPE && 
+            packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE
+        ){                    
+						iphc_prependIPv6DeadlineHeader(msg);
+        }
+    }
+#endif     
+    
     //prepend Option hop by hop header except when src routing and dst is not 0xffff
     //-- this is a little trick as src routing is using an option header set to 0x00
     if (
@@ -222,13 +252,21 @@ void iphc_receive(OpenQueueEntry_t* msg) {
     uint8_t              page_length;
     rpl_option_ht        rpl_option;
     uint8_t              rpi_length;
+#ifdef DEADLINE_OPTION_ENABLED    
+    deadline_option_ht*  deadline_ptr = NULL; 
+    deadline_option_ht   curr_deadline_option;
+#endif    
    
     msg->owner      = COMPONENT_IPHC;
    
     memset(&ipv6_outer_header,0,sizeof(ipv6_header_iht));
     memset(&ipv6_inner_header,0,sizeof(ipv6_header_iht));
     memset(&rpl_option,0,sizeof(rpl_option_ht));
-    
+
+#ifdef DEADLINE_OPTION_ENABLED    
+    ipv6_outer_header.deadline_option = NULL;
+#endif    
+    					    
     // then regular header
     iphc_retrieveIPv6Header(msg,&ipv6_outer_header,&ipv6_inner_header,&page_length);
     
@@ -247,6 +285,19 @@ void iphc_receive(OpenQueueEntry_t* msg) {
                               msg,
                               &rpl_option
                          );
+               
+#ifdef DEADLINE_OPTION_ENABLED              
+            if(ipv6_outer_header.deadline_option){  
+                
+                memset(&curr_deadline_option,0,sizeof(curr_deadline_option));     
+            		iphc_retrieveIPv6DeadlineHeader(
+                                  msg,
+                                  ipv6_outer_header.deadline_option,
+                                  &curr_deadline_option
+                             );                 
+                 deadline_ptr = &curr_deadline_option;               
+            }           
+#endif
          
             // toss the headers
             packetfunctions_tossHeader(
@@ -260,6 +311,9 @@ void iphc_receive(OpenQueueEntry_t* msg) {
             msg,
             &ipv6_outer_header,
             &ipv6_inner_header,
+#ifdef DEADLINE_OPTION_ENABLED   
+            deadline_ptr,
+#endif            
             &rpl_option
         );
    } else {
@@ -278,7 +332,7 @@ owerror_t iphc_prependIPv6Header(
       OpenQueueEntry_t* msg,
       uint8_t           tf,
       uint32_t          value_flowLabel,
-      bool              nh,
+      uint8_t           nh,
       uint8_t           value_nextHeader,
       uint8_t           hlim,
       uint8_t           value_hopLimit,
@@ -524,7 +578,7 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_outer_
     open_addr_t     temp_addr_64b;
     uint8_t         dispatch;
     uint8_t         tf;
-    bool            nh;
+    uint8_t         nh;
     uint8_t         hlim;
     uint8_t         sam;
     uint8_t         m;
@@ -684,7 +738,16 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_outer_
     						);
     					}
     				}
-    			} else {
+    			}
+#ifdef DEADLINE_OPTION_ENABLED    			
+    			else if (lorh_type == DEADLINE_6LOTH_TYPE){
+    						ipv6_outer_header->deadline_option = (uint8_t*)(msg->payload) + \
+    							*page_length + \
+								extention_header_length;	
+    						extention_header_length += (lorh_length + 1);
+    			}
+#endif			
+    			 else {
     				//unknown elective packet, print error and skip it
     				openserial_printError(
     						COMPONENT_IPHC,
@@ -725,7 +788,7 @@ uint8_t iphc_retrieveIphcHeader(open_addr_t* temp_addr_16b,
     open_addr_t*         temp_addr_64b,
     uint8_t*             dispatch,
     uint8_t*             tf,
-    bool*                nh,
+    uint8_t*             nh,
     uint8_t*             hlim,
     uint8_t*             sam,
     uint8_t*             m,
@@ -1026,7 +1089,6 @@ uint8_t iphc_retrieveIphcHeader(open_addr_t* temp_addr_16b,
 
 \param[in,out] msg             The message to prepend the header to.
 \param[in]     nextheader      The next header value to use.
-\param[in]     nh              Whether the next header is inline or compressed.
 \param[in]     rpl_option      The RPL option to include.
 */
 void iphc_prependIPv6HopByHopHeader(
@@ -1058,14 +1120,86 @@ void iphc_prependIPv6HopByHopHeader(
    *((uint8_t*)(msg->payload)) = temp_8b;
 }
 
+#ifdef DEADLINE_OPTION_ENABLED
+//===== IPv6 Deadline hop-by-hop header
+/**
+\brief Prepend an IPv6 Deadline hop-by-hop header to a message.
+
+\note The field are written in reverse order.
+
+\param[in,out] msg   The message to prepend the header to.
+*/
+void iphc_prependIPv6DeadlineHeader(
+      OpenQueueEntry_t* msg
+   ){
+   uint8_t temp_8b = 0, temp_len = 0, asn_len = 0;
+   deadline_option_ht curr_deadline_option;
+   uint8_t asn_array[5];
+
+   // Origination Time (OT)
+   if (msg->orgination_time_flag == 1){	
+      ieee154e_getAsn(asn_array);
+      
+      asn_len = iphc_getAsnLen(asn_array);
+      
+      packetfunctions_reserveHeaderSize(msg,asn_len);
+      memcpy(&msg->payload[0],&asn_array,asn_len*sizeof(uint8_t));
+      temp_len += asn_len;
+      
+      //set OTL flag value
+      curr_deadline_option.org_otl = asn_len-1;   		
+   } else {
+      //set OTL flag value
+      curr_deadline_option.org_otl = 0;
+   } 
+   
+   // Expiration Time (ET)
+   ieee154e_calculateExpTime(msg->max_delay,asn_array);    
+   asn_len = iphc_getAsnLen(asn_array);
+   packetfunctions_reserveHeaderSize(msg,asn_len);
+   memcpy(&msg->payload[0],&asn_array,asn_len*sizeof(uint8_t));
+   temp_len += asn_len;
+   
+   // 4th byte
+   // TU(2bytes) | EXP(3bytes) | RSV(3bytes)
+   curr_deadline_option.time_unit = 2 ; // in ASN
+   curr_deadline_option.exponent = 0; // Time in ASN
+   curr_deadline_option.rsv = 0; // Reserved
+   temp_8b = (curr_deadline_option.time_unit << 6) | (curr_deadline_option.exponent << 3) | curr_deadline_option.rsv;
+   packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
+   *((uint8_t*)(msg->payload)) = temp_8b;
+   temp_len ++;
+   
+   // 3rd byte
+   // O_FLAG(1byte) | D_FLAG(1byte) | ETL(3bytes) | OTL(3bytes)   
+   curr_deadline_option.exp_etl = asn_len-1;
+   
+   curr_deadline_option.o_flag = msg->orgination_time_flag;
+   curr_deadline_option.d_flag = msg->drop_flag;   
+   
+   temp_8b = (msg->orgination_time_flag << 7) | (msg->drop_flag << 6) | (curr_deadline_option.exp_etl << 3) | (curr_deadline_option.org_otl);
+   packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
+   *((uint8_t*)(msg->payload)) = temp_8b;
+   temp_len ++;   
+   
+   // 2nd byte : Elective Header Type : DEADLINE
+   packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
+   *((uint8_t*)(msg->payload)) = DEADLINE_6LOTH_TYPE;
+   temp_len ++;
+   
+   // 1st byte : 6LoRH Type: ELECTIVE  
+   temp_8b = ELECTIVE_6LoRH | temp_len; 
+   packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
+   *((uint8_t*)(msg->payload)) = temp_8b;
+}
+#endif
+
 /**
 \brief Retrieve an IPv6 hop-by-hop header from a message.
 
-\param[in,out] msg             The message to retrieve the header from.
-\param[out]    hopbyhop_header Pointer to the structure to hold the retrieved
-   hop-by-hop option.
-\param[out]    rpl_option      Pointer to the structure to hold the retrieved
-   RPL option.
+\param[in,out] msg        The message to retrieve the header from.
+\param[out]    rpl_option Pointer to the structure to hold the retrieved RPL option.
+\returns       the header length in bytes.
 */
 uint8_t iphc_retrieveIPv6HopByHopHeader(
       OpenQueueEntry_t*      msg,
@@ -1117,3 +1251,105 @@ uint8_t iphc_retrieveIPv6HopByHopHeader(
    }
    return length;
 }
+
+#ifdef DEADLINE_OPTION_ENABLED
+/**
+\brief Retrieve a Deadline hop-by-hop header from a message.
+
+\param[in,out] msg            The message to retrieve the header from.
+\param[in] deadline_msg_ptr   Pointer to the Deadline header.
+\param[out] deadline_option   Pointer to the structure to hold the retrieved Deadline option 
+*/
+void iphc_retrieveIPv6DeadlineHeader(
+      OpenQueueEntry_t*      msg,
+      uint8_t*    deadline_msg_ptr,
+      deadline_option_ht*     deadline_option
+   ){
+   uint8_t temp_8b, type, i, length = 0;
+   asn_t exp_asn, my_asn;
+   uint8_t my_asn_array[5];   	 
+
+   temp_8b = *((uint8_t*)deadline_msg_ptr);
+	 length ++;
+   type    = *((uint8_t*)(deadline_msg_ptr)+length);
+
+   if (
+       (temp_8b & FORMAT_6LORH_MASK) == ELECTIVE_6LoRH &&
+       type == DEADLINE_6LOTH_TYPE
+   ){
+		   	  						
+       // 3rd byte
+       length ++;
+       temp_8b = *((uint8_t*)(deadline_msg_ptr)+length);
+       
+       deadline_option->o_flag  	= (temp_8b >> 7);
+       deadline_option->d_flag  	= (temp_8b >> 6);       
+       deadline_option->exp_etl 	= (temp_8b >> 3);
+       deadline_option->org_otl  	= (temp_8b);                 
+
+       // 4th byte
+       length ++;
+       temp_8b = *((uint8_t*)(deadline_msg_ptr)+length);
+       deadline_option->time_unit  	= (temp_8b >> 6);
+       deadline_option->exponent 	= (temp_8b >> 3);
+
+       // Expiration Time 
+       length ++;       
+       for( i=0; i<=deadline_option->exp_etl; i++) {
+         deadline_option->et_val[i] = *((uint8_t*)(deadline_msg_ptr)+length);
+         length ++;
+       }		   
+       ieee154e_orderToASNStructure(deadline_option->et_val, &exp_asn); 
+			 
+       // Calculate delay experienced by packet
+       ieee154e_getAsn(my_asn_array);
+       ieee154e_orderToASNStructure(my_asn_array, &my_asn);			 
+       deadline_option->time_left = ieee154e_computeAsnDiff(&exp_asn, &my_asn);	
+       if (deadline_option->time_left < 0) {
+          deadline_option->time_left = 0;
+          openserial_printError(
+    						COMPONENT_IPHC,
+								ERR_6LORH_DEADLINE_EXPIRED,
+								(errorparameter_t)0,
+								(errorparameter_t)0
+    					); 
+       }	
+       monitor_expiration_vars.time_left = deadline_option->time_left;      
+       		   
+       // Origination Time 
+       if(deadline_option->o_flag){ 
+           for( i=0; i<=deadline_option->org_otl; i++) {
+              deadline_option->ot_val[i] = *((uint8_t*)(deadline_msg_ptr)+length);
+              length ++;
+           }
+           ieee154e_orderToASNStructure(deadline_option->ot_val, &my_asn); 
+           monitor_expiration_vars.time_elapsed = ieee154e_asnDiff( &my_asn);	
+       }                   
+		  	     
+   } else {
+       openserial_printError(
+          COMPONENT_IPHC,
+          ERR_6LOWPAN_UNSUPPORTED,
+          (errorparameter_t)14,
+          (errorparameter_t)type
+       );
+   }
+}
+
+// To send deadline hop-by-hop info to upper layers
+void iphc_getDeadlineInfo(monitor_expiration_vars_t*	stats) {
+   stats->time_left = monitor_expiration_vars.time_left;
+   stats->time_elapsed = monitor_expiration_vars.time_elapsed;
+   memset(&(monitor_expiration_vars),0,sizeof(monitor_expiration_vars_t));
+}
+
+uint8_t iphc_getAsnLen(uint8_t* asn) {
+   uint8_t i;
+   for(i=5; i>=1; i--) {
+       if(asn[i-1] != 0) {
+          return (i);
+       }
+   }
+   return 5;
+}
+#endif

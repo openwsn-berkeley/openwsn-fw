@@ -9,6 +9,7 @@
 */
 
 #include "opentimers.h"
+#include "openudp.h"
 
 //=========================== define ==========================================
 
@@ -19,9 +20,10 @@
 //=========================== variables =======================================
 
 typedef struct {
-   opentimer_id_t       timerId;  ///< periodic timer which triggers transmission
+   opentimers_id_t     timerId;  ///< periodic timer which triggers transmission
    uint16_t             counter;  ///< incrementing counter which is written into the packet
    uint16_t              period;  ///< uinject packet sending period>
+   udp_resource_desc_t     desc;  ///< resource descriptor for this module, used to register at UDP stack
 } uinject_vars_t;
 
 //=========================== prototypes ======================================
@@ -35,3 +37,4 @@ void uinject_receive(OpenQueueEntry_t* msg);
 */
 
 #endif
+

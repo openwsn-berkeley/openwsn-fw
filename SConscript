@@ -44,10 +44,10 @@ if env['forcetopology']==1:
     env.Append(CPPDEFINES    = 'FORCETOPOLOGY')
 if env['noadaptivesync']==1:
     env.Append(CPPDEFINES    = 'NOADAPTIVESYNC')
-if env['cryptoengine']:
-    env.Append(CPPDEFINES    = {'CRYPTO_ENGINE_SCONS' : env['cryptoengine']})
 if env['l2_security']==1:
     env.Append(CPPDEFINES    = 'L2_SECURITY_ACTIVE')
+if env['deadline_option']==1:
+    env.Append(CPPDEFINES    = 'DEADLINE_OPTION_ENABLED')
 
 if env['toolchain']=='mspgcc':
     
@@ -165,7 +165,7 @@ elif env['toolchain']=='iar':
 
 elif env['toolchain']=='iar-proj':
     
-    if env['board'] not in ['telosb','gina','wsn430v13b','wsn430v14','z1','openmotestm','agilefox','openmote-cc2538','iot-lab_M3']:
+    if env['board'] not in ['telosb','gina','wsn430v13b','wsn430v14','z1','openmotestm','agilefox','openmote-cc2538','openmote-b','iot-lab_M3']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     env['IAR_EW430_INSTALLDIR'] = os.environ['IAR_EW430_INSTALLDIR']
@@ -195,12 +195,13 @@ elif env['toolchain']=='iar-proj':
     
 elif env['toolchain']=='armgcc':
     
-    if env['board'] not in ['silabs-ezr32wg','openmote-cc2538','iot-lab_M3','iot-lab_A8-M3','openmotestm', 'samr21_xpro']:
+    if env['board'] not in ['silabs-ezr32wg','openmote-cc2538','openmote-b','iot-lab_M3','iot-lab_A8-M3','openmotestm', 'samr21_xpro']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
-    if   env['board']=='openmote-cc2538':
+    if   env['board'] in ['openmote-cc2538','openmote-b']:
         if env['revision'] == "A1":
             linker_file = 'cc2538sf23.lds'
+            print "*** OPENMOTE CC2538 REV. A1 ***\n"
         else:
             linker_file = 'cc2538sf53.lds'
         
@@ -215,17 +216,26 @@ elif env['toolchain']=='armgcc':
         env.Append(CCFLAGS       = '-mthumb')
         env.Append(CCFLAGS       = '-g3')
         env.Append(CCFLAGS       = '-Wstrict-prototypes')
+        if env['revision'] == "A1":
+            env.Append(CCFLAGS   = '-DREVA1=1')
+            
         # assembler
         env.Replace(AS           = 'arm-none-eabi-as')
         env.Append(ASFLAGS       = '-ggdb -g3 -mcpu=cortex-m3 -mlittle-endian')
+        if env['revision'] == "A1":
+            env.Append(ASFLAGS   = '-DREVA1=1')
+     
         # linker
-        env.Append(LINKFLAGS     = '-Tbsp/boards/openmote-cc2538/' + linker_file)
+        env.Append(LINKFLAGS     = '-Tbsp/boards/'+env['board']+'/' + linker_file)
         env.Append(LINKFLAGS     = '-nostartfiles')
         env.Append(LINKFLAGS     = '-Wl,-Map,${TARGET.base}.map')
         env.Append(LINKFLAGS     = '-mcpu=cortex-m3')
         env.Append(LINKFLAGS     = '-mthumb')
         env.Append(LINKFLAGS     = '-g3')
-        # object manipulation
+        if env['revision'] == "A1":
+            env.Append(LINKFLAGS   = '-DREVA1=1')
+		
+		# object manipulation
         env.Replace(OBJCOPY      = 'arm-none-eabi-objcopy')
         env.Replace(OBJDUMP      = 'arm-none-eabi-objdump')
         # archiver
@@ -722,7 +732,7 @@ def BootloadFunc():
             suffix      = '.phonyupload',
             src_suffix  = '.ihex',
         )
-    elif env['board']=='openmote-cc2538':
+    elif env['board'] in ['openmote-cc2538','openmote-b'] :
         return Builder(
             action      = OpenMoteCC2538_bootload,
             suffix      = '.phonyupload',
@@ -767,7 +777,7 @@ def buildLibs(projectDir):
         '00std': [                                                              ],
         '01bsp': [                                                      'libbsp'],
         '02drv': [                             'libkernel','libdrivers','libbsp'],
-        '03oos': ['libopenstack','libopenapps','libkernel','libdrivers','libbsp'], # this order needed for mspgcc
+        '03oos': ['libopenstack','libopenapps','libopenstack','libkernel','libdrivers','libbsp'], # this order needed for mspgcc
     }
     
     returnVal = None

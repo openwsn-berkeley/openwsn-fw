@@ -18,10 +18,10 @@
 
 //===== timer
 
-#define PORT_TIMER_WIDTH                    uint16_t
-#define PORT_RADIOTIMER_WIDTH               uint16_t
+#define PORT_TIMER_WIDTH                    uint32_t
+#define PORT_RADIOTIMER_WIDTH               uint32_t
 
-#define PORT_SIGNED_INT_WIDTH               int16_t
+#define PORT_SIGNED_INT_WIDTH               int32_t
 #define PORT_TICS_PER_MS                    33
 
 // on GINA, we use the comparatorA interrupt for the OS
@@ -73,6 +73,9 @@
 //===== adaptive_sync accuracy
 
 #define SYNC_ACCURACY                       1 // when using openmoteSTM, change to 2
+
+//===== sctimer scheduling
+#define TIMERTHRESHOLD                     10  
 
 //=========================== typedef  ========================================
 

@@ -1,9 +1,8 @@
 #include "opendefs.h"
 #include "IEEE802154E.h"
 #include "radio.h"
-#include "radiotimer.h"
 #include "IEEE802154.h"
-#include "ieee802154_security_driver.h"
+#include "IEEE802154_security.h"
 #include "openqueue.h"
 #include "idmanager.h"
 #include "openserial.h"
@@ -15,7 +14,7 @@
 #include "debugpins.h"
 #include "sixtop.h"
 #include "adaptive_sync.h"
-#include "processIE.h"
+#include "sctimer.h"
 #include "openrandom.h"
 #include "sfy_hashtable.h"
 
@@ -31,60 +30,58 @@ ieee154e_dbg_t     ieee154e_dbg;
 
 // SYNCHRONIZING
 void     activity_synchronize_newSlot(void);
-void     activity_synchronize_startOfFrame(PORT_RADIOTIMER_WIDTH capturedTime);
-void     activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedTime);
+void     activity_synchronize_startOfFrame(PORT_TIMER_WIDTH capturedTime);
+void     activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime);
 // TX
 void     activity_ti1ORri1(void);
 void     activity_ti2(void);
 void     activity_tie1(void);
 void     activity_ti3(void);
 void     activity_tie2(void);
-void     activity_ti4(PORT_RADIOTIMER_WIDTH capturedTime);
+void     activity_ti4(PORT_TIMER_WIDTH capturedTime);
 void     activity_tie3(void);
-void     activity_ti5(PORT_RADIOTIMER_WIDTH capturedTime);
+void     activity_ti5(PORT_TIMER_WIDTH capturedTime);
 void     activity_ti6(void);
 void     activity_tie4(void);
 void     activity_ti7(void);
 void     activity_tie5(void);
-void     activity_ti8(PORT_RADIOTIMER_WIDTH capturedTime);
+void     activity_ti8(PORT_TIMER_WIDTH capturedTime);
 void     activity_tie6(void);
-void     activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime);
+void     activity_ti9(PORT_TIMER_WIDTH capturedTime);
 // RX
 void     activity_ri2(void);
 void     activity_rie1(void);
 void     activity_ri3(void);
 void     activity_rie2(void);
-void     activity_ri4(PORT_RADIOTIMER_WIDTH capturedTime);
+void     activity_ri4(PORT_TIMER_WIDTH capturedTime);
 void     activity_rie3(void);
-void     activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime);
+void     activity_ri5(PORT_TIMER_WIDTH capturedTime);
 void     activity_ri6(void);
 void     activity_rie4(void);
 void     activity_ri7(void);
 void     activity_rie5(void);
-void     activity_ri8(PORT_RADIOTIMER_WIDTH capturedTime);
+void     activity_ri8(PORT_TIMER_WIDTH capturedTime);
 void     activity_rie6(void);
-void     activity_ri9(PORT_RADIOTIMER_WIDTH capturedTime);
+void     activity_ri9(PORT_TIMER_WIDTH capturedTime);
 
 // frame validity check
 bool     isValidRxFrame(ieee802154_header_iht* ieee802514_header);
 bool     isValidAck(ieee802154_header_iht*     ieee802514_header,
                     OpenQueueEntry_t*          packetSent);
 bool     isValidJoin(OpenQueueEntry_t* eb, ieee802154_header_iht *parsedHeader); 
+bool     isValidEbFormat(OpenQueueEntry_t* pkt, uint16_t* lenIE);
 // IEs Handling
 bool     ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE);
+void     timeslotTemplateIDStoreFromEB(uint8_t id);
+void     channelhoppingTemplateIDStoreFromEB(uint8_t id);
 // ASN handling
 void     incrementAsnOffset(void);
 void     ieee154e_resetAsn(void);
 void     ieee154e_syncSlotOffset(void);
 void     asnStoreFromEB(uint8_t* asn);
 void     joinPriorityStoreFromEB(uint8_t jp);
-
-// timeslot template handling
-void     timeslotTemplateIDStoreFromEB(uint8_t id);
-// channelhopping template handling
-void     channelhoppingTemplateIDStoreFromEB(uint8_t id);
 // synchronization
-void     synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived);
+void     synchronizePacket(PORT_TIMER_WIDTH timeReceived);
 void     synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection);
 void     changeIsSync(bool newIsSync);
 // notifying upper layer
@@ -100,8 +97,8 @@ void     endSlot(void);
 bool     debugPrint_asn(void);
 bool     debugPrint_isSync(void);
 // interrupts
-void     isr_ieee154e_newSlot(void);
-void     isr_ieee154e_timer(void);
+void     isr_ieee154e_newSlot(opentimers_id_t id);
+void     isr_ieee154e_timer(opentimers_id_t id);
 
 //=========================== admin ===========================================
 
@@ -145,12 +142,24 @@ void ieee154e_init() {
    radio_rfOn();
    
    // set callback functions for the radio
-   radio_setOverflowCb(isr_ieee154e_newSlot);
-   radio_setCompareCb(isr_ieee154e_timer);
+   //radiotimer_setOverflowCb(isr_ieee154e_newSlot);
+   //radiotimer_setCompareCb(isr_ieee154e_timer);
    radio_setStartFrameCb(ieee154e_startOfFrame);
    radio_setEndFrameCb(ieee154e_endOfFrame);
    // have the radio start its timer
-   radio_startTimer(ieee154e_vars.slotDuration);
+   ieee154e_vars.timerId = opentimers_create();
+   // assign ieee802154e timer with highest priority
+   opentimers_setPriority(ieee154e_vars.timerId,0);
+   opentimers_scheduleAbsolute(
+        ieee154e_vars.timerId,          // timerId
+        ieee154e_vars.slotDuration,     // duration
+        sctimer_readCounter(),          // reference
+        TIME_TICS,                      // timetype
+        isr_ieee154e_newSlot            // callback
+   );
+   // radiotimer_start(ieee154e_vars.slotDuration);
+   //
+   IEEE802154_security_init();
 }
 
 //=========================== public ==========================================
@@ -162,13 +171,13 @@ void ieee154e_init() {
 
 \returns The ASN difference, or 0xffff if more than 65535 different
 */
-PORT_RADIOTIMER_WIDTH ieee154e_asnDiff(asn_t* someASN) {
-   PORT_RADIOTIMER_WIDTH diff;
+PORT_TIMER_WIDTH ieee154e_asnDiff(asn_t* someASN) {
+   PORT_TIMER_WIDTH diff;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    if (ieee154e_vars.asn.byte4 != someASN->byte4) {
       ENABLE_INTERRUPTS();
-      return (PORT_RADIOTIMER_WIDTH)0xFFFFFFFF;;
+      return (PORT_TIMER_WIDTH)0xFFFFFFFF;;
    }
    
    diff = 0;
@@ -180,12 +189,84 @@ PORT_RADIOTIMER_WIDTH ieee154e_asnDiff(asn_t* someASN) {
       diff += 0xffff-someASN->bytes0and1;
       diff += 1;
    } else {
-      diff = (PORT_RADIOTIMER_WIDTH)0xFFFFFFFF;;
+      diff = (PORT_TIMER_WIDTH)0xFFFFFFFF;;
    }
    ENABLE_INTERRUPTS();
    return diff;
 }
 
+#ifdef DEADLINE_OPTION_ENABLED
+/**
+/brief Difference between two ASN values
+
+\param[in] h_asn bigger ASN value
+\param[in] l_asn smaller ASN value
+
+\returns The ASN difference, or 0xffff if more than 65535 different
+*/
+int16_t ieee154e_computeAsnDiff(asn_t* h_asn, asn_t* l_asn) {
+   int16_t diff;
+
+   if (h_asn->byte4 != l_asn->byte4) {
+      return (int16_t)0xFFFFFFFF;
+   }
+   
+   diff = 0;
+   if (h_asn->bytes2and3 == l_asn->bytes2and3) {
+      return h_asn->bytes0and1-l_asn->bytes0and1;
+   } else if (h_asn->bytes2and3-l_asn->bytes2and3==1) {
+      diff  = h_asn->bytes0and1;
+      diff += 0xffff-l_asn->bytes0and1;
+      diff += 1;
+   } else {
+      diff = (int16_t)0xFFFFFFFF;
+   }
+   return diff;
+}
+
+/**
+/brief Determine Expiration Time in ASN
+
+\param[in]  max_delay Maximum permissible delay before which 
+            packet is expected to reach destination
+
+\param[out] et_asn bigger ASN value
+*/
+void ieee154e_calculateExpTime(uint16_t max_delay, uint8_t* et_asn) {
+   uint8_t delay_array[5];
+   uint8_t i =0, carry = 0,slot_time = 0;
+   uint16_t sum = 0, delay_in_asn =0;
+	
+   memset(&delay_array[0],0,5);
+   
+   //Slot time = (Duration in ticks * Time equivalent ticks w.r.t 32kHz) in ms
+   slot_time = (ieee154e_getSlotDuration()*305)/10000;  
+   delay_in_asn = max_delay / slot_time; 
+		
+   delay_array[0]         = (delay_in_asn     & 0xff);
+   delay_array[1]         = (delay_in_asn/256 & 0xff);
+   
+   ieee154e_getAsn(&et_asn[0]);
+   for(i=0; i<5; i++) {
+      sum = et_asn[i] + delay_array[i] + carry;  
+      et_asn[i] = sum & 0xFF; 
+      carry = ((sum >> 8) & 0xFF);
+   }
+}
+
+/**
+/brief Format asn to asn_t structure
+
+\param[in]  in  asn value represented in array format
+
+\param[out] val_asn   asn value represented in asn_t format
+*/
+void ieee154e_orderToASNStructure(uint8_t* in,asn_t* val_asn) {
+   val_asn->bytes0and1   =     in[0] + 256*in[1];
+   val_asn->bytes2and3   =     in[2] + 256*in[3];
+   val_asn->byte4        =     in[4];
+}
+#endif
 //======= events
 
 /**
@@ -193,8 +274,17 @@ PORT_RADIOTIMER_WIDTH ieee154e_asnDiff(asn_t* someASN) {
 
 This function executes in ISR mode, when the new slot timer fires.
 */
-void isr_ieee154e_newSlot() {
-   radio_setTimerPeriod(ieee154e_vars.slotDuration);
+void isr_ieee154e_newSlot(opentimers_id_t id) {
+    ieee154e_vars.startOfSlotReference = opentimers_getCurrentTimeout();
+    opentimers_scheduleAbsolute(
+        ieee154e_vars.timerId,                  // timerId
+        TsSlotDuration,                         // duration
+        ieee154e_vars.startOfSlotReference,     // reference
+        TIME_TICS,                              // timetype
+        isr_ieee154e_newSlot                    // callback
+    );
+    ieee154e_vars.slotDuration          = TsSlotDuration;
+    // radiotimer_setPeriod(ieee154e_vars.slotDuration);
    if (ieee154e_vars.isSync==FALSE) {
       if (idmanager_getIsDAGroot()==TRUE) {
          changeIsSync(TRUE);
@@ -218,7 +308,7 @@ void isr_ieee154e_newSlot() {
 
 This function executes in ISR mode, when the FSM timer fires.
 */
-void isr_ieee154e_timer() {
+void isr_ieee154e_timer(opentimers_id_t id) {
    switch (ieee154e_vars.state) {
       case S_TXDATAOFFSET:
          activity_ti2();
@@ -297,13 +387,14 @@ void isr_ieee154e_timer() {
 
 This function executes in ISR mode.
 */
-void ieee154e_startOfFrame(PORT_RADIOTIMER_WIDTH capturedTime) {
+void ieee154e_startOfFrame(PORT_TIMER_WIDTH capturedTime) {
+   PORT_TIMER_WIDTH referenceTime = capturedTime - ieee154e_vars.startOfSlotReference;
    if (ieee154e_vars.isSync==FALSE) {
-     activity_synchronize_startOfFrame(capturedTime);
+     activity_synchronize_startOfFrame(referenceTime);
    } else {
       switch (ieee154e_vars.state) {
          case S_TXDATADELAY:   
-            activity_ti4(capturedTime);
+            activity_ti4(referenceTime);
             break;
          case S_RXACKREADY:
             /*
@@ -314,7 +405,7 @@ void ieee154e_startOfFrame(PORT_RADIOTIMER_WIDTH capturedTime) {
             */
             // no break!
          case S_RXACKLISTEN:
-            activity_ti8(capturedTime);
+            activity_ti8(referenceTime);
             break;
          case S_RXDATAREADY:
             /*
@@ -322,10 +413,10 @@ void ieee154e_startOfFrame(PORT_RADIOTIMER_WIDTH capturedTime) {
             */
             // no break!
          case S_RXDATALISTEN:
-            activity_ri4(capturedTime);
+            activity_ri4(referenceTime);
             break;
          case S_TXACKDELAY:
-            activity_ri8(capturedTime);
+            activity_ri8(referenceTime);
             break;
          default:
             // log the error
@@ -345,22 +436,23 @@ void ieee154e_startOfFrame(PORT_RADIOTIMER_WIDTH capturedTime) {
 
 This function executes in ISR mode.
 */
-void ieee154e_endOfFrame(PORT_RADIOTIMER_WIDTH capturedTime) {
+void ieee154e_endOfFrame(PORT_TIMER_WIDTH capturedTime) {
+   PORT_TIMER_WIDTH referenceTime = capturedTime - ieee154e_vars.startOfSlotReference;
    if (ieee154e_vars.isSync==FALSE) {
-      activity_synchronize_endOfFrame(capturedTime);
+      activity_synchronize_endOfFrame(referenceTime);
    } else {
       switch (ieee154e_vars.state) {
          case S_TXDATA:
-            activity_ti5(capturedTime);
+            activity_ti5(referenceTime);
             break;
          case S_RXACK:
-            activity_ti9(capturedTime);
+            activity_ti9(referenceTime);
             break;
          case S_RXDATA:
-            activity_ri5(capturedTime);
+            activity_ri5(referenceTime);
             break;
          case S_TXACK:
-            activity_ri9(capturedTime);
+            activity_ri9(referenceTime);
             break;
          default:
             // log the error
@@ -433,6 +525,9 @@ port_INLINE void activity_synchronize_newSlot() {
       return;
    }
    
+   ieee154e_vars.radioOnInit=sctimer_readCounter();
+   ieee154e_vars.radioOnThisSlot=TRUE;
+   
    // if this is the first time I call this function while not synchronized,
    // switch on the radio in Rx mode
    if (ieee154e_vars.state!=S_SYNCLISTEN) {
@@ -450,9 +545,11 @@ port_INLINE void activity_synchronize_newSlot() {
       
       // switch on the radio in Rx mode.
       radio_rxEnable();
-      ieee154e_vars.radioOnInit=radio_getTimerValue();
-      ieee154e_vars.radioOnThisSlot=TRUE;
       radio_rxNow();
+   } else {
+      // I'm listening last slot
+      ieee154e_stats.numTicsOn    += ieee154e_vars.slotDuration;
+      ieee154e_stats.numTicsTotal += ieee154e_vars.slotDuration;
    }
    
    // if I'm already in S_SYNCLISTEN, while not synchronized,
@@ -470,8 +567,6 @@ port_INLINE void activity_synchronize_newSlot() {
       
       // switch on the radio in Rx mode.
       radio_rxEnable();
-      ieee154e_vars.radioOnInit=radio_getTimerValue();
-      ieee154e_vars.radioOnThisSlot=TRUE;
       radio_rxNow();
       ieee154e_vars.singleChannelChanged = FALSE;
    }
@@ -490,7 +585,7 @@ port_INLINE void activity_synchronize_newSlot() {
    }
 }
 
-port_INLINE void activity_synchronize_startOfFrame(PORT_RADIOTIMER_WIDTH capturedTime) {
+port_INLINE void activity_synchronize_startOfFrame(PORT_TIMER_WIDTH capturedTime) {
    
    // don't care about packet if I'm not listening
    if (ieee154e_vars.state!=S_SYNCLISTEN) {
@@ -510,7 +605,7 @@ port_INLINE void activity_synchronize_startOfFrame(PORT_RADIOTIMER_WIDTH capture
    ieee154e_vars.syncCapturedTime = capturedTime;
 }
 
-port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedTime) {
+port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) {
    ieee802154_header_iht ieee802514_header;
    uint16_t              lenIE;
    
@@ -596,20 +691,23 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       ieee154e_vars.dataReceived->l2_dsn       = ieee802514_header.dsn;
       memcpy(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop),&(ieee802514_header.src),sizeof(open_addr_t));
 
+      // verify that incoming security level is acceptable
+      if (IEEE802154_security_acceptableLevel(ieee154e_vars.dataReceived, &ieee802514_header) == FALSE) {
+            break;
+      }
+
       if (ieee154e_vars.dataReceived->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
          // If we are not synced, we need to parse IEs and retrieve the ASN
          // before authenticating the beacon, because nonce is created from the ASN
          if (!ieee154e_vars.isSync && ieee802514_header.frameType == IEEE154_TYPE_BEACON) {
             if (!isValidJoin(ieee154e_vars.dataReceived, &ieee802514_header)) {
-               // invalidate variables
-               memset(&ieee154e_vars, 0, sizeof(ieee154e_vars_t));
                break;
             }
          }
          else { // discard other frames as we cannot decrypt without being synced
             break;
          }
-      } // checked if unsecured frame should pass during header retrieval
+      }
 
       // toss the IEEE802.15.4 header -- this does not include IEs as they are processed
       // next.
@@ -633,7 +731,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       radio_rfOff();
       
       // compute radio duty cycle
-      ieee154e_vars.radioOnTics += (radio_getTimerValue()-ieee154e_vars.radioOnInit);
+      ieee154e_vars.radioOnTics += (sctimer_readCounter()-ieee154e_vars.radioOnInit);
 
       // toss the IEs
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,lenIE);
@@ -643,7 +741,6 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       
       // declare synchronized
       changeIsSync(TRUE);
-      
       // log the info
       openserial_printInfo(COMPONENT_IEEE802154E,ERR_SYNCHRONIZED,
                             (errorparameter_t)ieee154e_vars.slotOffset,
@@ -674,126 +771,8 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
 }
 
 port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
-   uint8_t               ptr;
-   uint8_t               temp_8b;
-   uint8_t               gr_elem_id;
-   uint8_t               subid;
-   uint16_t              temp_16b;
-   uint16_t              len;
-   uint16_t              sublen;
-   // flag used for understanding if the slotoffset should be inferred from both ASN and slotframe length
-   bool                  f_asn2slotoffset;
-   uint8_t               i; // used for find the index in channel hopping template
-   
-   ptr=0;
-   
-   // payload IE header, header IE is processed before when retrieve header  
-   
-   //candidate IE header  if type ==0 header IE if type==1 payload IE
-   temp_8b    = *((uint8_t*)(pkt->payload)+ptr);
-   ptr++;
-   
-   temp_16b   = temp_8b + ((*((uint8_t*)(pkt->payload)+ptr)) << 8);
-   ptr++;
-   
-   *lenIE     = ptr;
-   
-   if ((temp_16b & IEEE802154E_DESC_TYPE_PAYLOAD_IE) == IEEE802154E_DESC_TYPE_PAYLOAD_IE){
-      // payload IE
-      
-      len          = temp_16b & IEEE802154E_DESC_LEN_PAYLOAD_IE_MASK;
-      gr_elem_id   = (temp_16b & IEEE802154E_DESC_GROUPID_PAYLOAD_IE_MASK)>>IEEE802154E_DESC_GROUPID_PAYLOAD_IE_SHIFT;
-   } else {
-      // header IE
-      
-      len          = temp_16b & IEEE802154E_DESC_LEN_HEADER_IE_MASK;
-      gr_elem_id   = (temp_16b & IEEE802154E_DESC_ELEMENTID_HEADER_IE_MASK)>>IEEE802154E_DESC_ELEMENTID_HEADER_IE_SHIFT; 
-   }
-   
-   *lenIE         += len;
-   
-   //===== sub-elements
-   
-   switch(gr_elem_id){
-      
-      case IEEE802154E_MLME_IE_GROUPID:
-         // MLME IE
-         f_asn2slotoffset = FALSE;
-         do {
-            
-            //read sub IE header
-            temp_8b     = *((uint8_t*)(pkt->payload)+ptr);
-            ptr         = ptr + 1;
-            temp_16b    = temp_8b  + ((*((uint8_t*)(pkt->payload)+ptr))<<8);
-            ptr         = ptr + 1;
-            
-            len         = len - 2; //remove header fields len
-            
-            if ((temp_16b & IEEE802154E_DESC_TYPE_LONG) == IEEE802154E_DESC_TYPE_LONG){
-               // long sub-IE
-               
-               sublen   = temp_16b & IEEE802154E_DESC_LEN_LONG_MLME_IE_MASK;
-               subid    = (temp_16b & IEEE802154E_DESC_SUBID_LONG_MLME_IE_MASK)>>IEEE802154E_DESC_SUBID_LONG_MLME_IE_SHIFT; 
-            } else {
-               // short sub-IE
-               
-               sublen   = temp_16b & IEEE802154E_DESC_LEN_SHORT_MLME_IE_MASK;
-               subid    = (temp_16b & IEEE802154E_DESC_SUBID_SHORT_MLME_IE_MASK)>>IEEE802154E_DESC_SUBID_SHORT_MLME_IE_SHIFT; 
-            }
-            
-            switch(subid){
-               
-               case IEEE802154E_MLME_SYNC_IE_SUBID:
-                  // Sync IE: ASN and Join Priority 
-                  
-                  if (idmanager_getIsDAGroot()==FALSE) {
-                     // ASN
-                     asnStoreFromEB((uint8_t*)(pkt->payload)+ptr);
-                     // ASN is known, but the frame length is not
-                     // frame length will be known after parsing the frame and link IE
-                     f_asn2slotoffset = TRUE;
-                     ptr = ptr + 5;
-                     // join priority
-                     joinPriorityStoreFromEB(*((uint8_t*)(pkt->payload)+ptr));
-                     ptr = ptr + 1;
-                  }
-                  break;
-               
-               case IEEE802154E_MLME_SLOTFRAME_LINK_IE_SUBID:
-                  if ((idmanager_getIsDAGroot()==FALSE) && (ieee154e_isSynch()==FALSE)) {
-                     processIE_retrieveSlotframeLinkIE(pkt,&ptr);
-                  }
-                  break;
-               
-               case IEEE802154E_MLME_TIMESLOT_IE_SUBID:
-                  if (idmanager_getIsDAGroot()==FALSE) {
-                      // timelsot template ID
-                      timeslotTemplateIDStoreFromEB(*((uint8_t*)(pkt->payload)+ptr));
-                      ptr = ptr + 1;
-                      if (ieee154e_vars.tsTemplateId != TIMESLOT_TEMPLATE_ID){
-                          ieee154e_vars.slotDuration = *((uint8_t*)(pkt->payload)+ptr);
-                          ptr = ptr + 1;
-                          ieee154e_vars.slotDuration |= ((*((uint8_t*)(pkt->payload)+ptr))<<8) & 0xff00;
-                          ptr = ptr + 1;
-                      }
-                  }
-                  break;
-                  
-               case IEEE802154E_MLME_CHANNELHOPPING_IE_SUBID:
-                  if (idmanager_getIsDAGroot()==FALSE) {
-                      // timelsot template ID
-                      channelhoppingTemplateIDStoreFromEB(*((uint8_t*)(pkt->payload)+ptr));
-                      ptr = ptr + 1;
-                  }
-                  break;
-               default:
-                  return FALSE;
-                  break;
-            }
-            
-            len = len - sublen;
-         } while(len>1); // we add one byte to indicate the real frequence, so here loop when len>1, not len>0
-         if (f_asn2slotoffset == TRUE) {
+    uint8_t i;
+    if (isValidEbFormat(pkt,lenIE)==TRUE){
             // at this point, ASN and frame length are known
             // the current slotoffset can be inferred
             ieee154e_syncSlotOffset();
@@ -810,31 +789,19 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
             infer the asnOffset based on the fact that
             ieee154e_vars.freq = 11 + (asnOffset + channelOffset)%16 
             */
-            for (i=0;i<16;i++){
+        for (i=0;i<NUM_CHANNELS;i++){
                 if ((ieee154e_vars.freq - 11)==ieee154e_vars.chTemplate[i]){
                     break;
                 }
             }
             ieee154e_vars.asnOffset = i - schedule_getChannelOffset();
-         }
-         break;
-         
-      default:
-         *lenIE = 0; //no header or not recognized.
+        return TRUE;
+    } else {
+        // wrong eb format
+        openserial_printError(COMPONENT_IEEE802154E,ERR_UNSUPPORTED_FORMAT,3,0);
          return FALSE;
    }
-   
-   if(*lenIE>127) {
-      // log the error
-      openserial_printError(
-         COMPONENT_IEEE802154E,
-         ERR_HEADER_TOO_LONG,
-         (errorparameter_t)*lenIE,
-         (errorparameter_t)1
-      );
    }
-   return TRUE;
-}
 
 //======= TX
 
@@ -842,7 +809,8 @@ port_INLINE void activity_ti1ORri1() {
    cellType_t  cellType;
    open_addr_t neighbor;
    uint8_t     i;
-   sync_IE_ht  sync_IE;
+   uint8_t     asn[5];
+   uint8_t     join_priority;
    bool        changeToRX=FALSE;
    bool        couldSendEB=FALSE;
 
@@ -913,7 +881,15 @@ port_INLINE void activity_ti1ORri1() {
                ieee154e_vars.numOfSleepSlots = schedule_getFrameLength()+ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset; 
           }
           
-          radio_setTimerPeriod(TsSlotDuration*(ieee154e_vars.numOfSleepSlots));
+          opentimers_scheduleAbsolute(
+              ieee154e_vars.timerId,                            // timerId
+              TsSlotDuration*(ieee154e_vars.numOfSleepSlots),   // duration
+              ieee154e_vars.startOfSlotReference,               // reference
+              TIME_TICS,                                        // timetype
+              isr_ieee154e_newSlot                              // callback
+          );
+          ieee154e_vars.slotDuration = TsSlotDuration*(ieee154e_vars.numOfSleepSlots);
+          // radiotimer_setPeriod(TsSlotDuration*(ieee154e_vars.numOfSleepSlots));
            
           //increase ASN by numOfSleepSlots-1 slots as at this slot is already incremented by 1
           for (i=0;i<ieee154e_vars.numOfSleepSlots-1;i++){
@@ -1002,9 +978,10 @@ port_INLINE void activity_ti1ORri1() {
             if (couldSendEB==TRUE) {        // I will be sending an EB
                //copy synch IE  -- should be Little endian???
                // fill in the ASN field of the EB
-               ieee154e_getAsn(sync_IE.asn);
-               sync_IE.join_priority = (icmpv6rpl_getMyDAGrank()/MINHOPRANKINCREASE)-1; //poipoi -- use dagrank(rank)-1
-               memcpy(ieee154e_vars.dataToSend->l2_ASNpayload,&sync_IE,sizeof(sync_IE_ht));
+               ieee154e_getAsn(asn);
+               join_priority = (icmpv6rpl_getMyDAGrank()/MINHOPRANKINCREASE)-1; //poipoi -- use dagrank(rank)-1
+               memcpy(ieee154e_vars.dataToSend->l2_ASNpayload,&asn[0],sizeof(asn_t));
+               memcpy(ieee154e_vars.dataToSend->l2_ASNpayload+sizeof(asn_t),&join_priority,sizeof(uint8_t));
                *(ieee154e_vars.dataToSend->l2_realFrequence) = ieee154e_vars.freq;
             }
             // record that I attempt to transmit this packet
@@ -1019,7 +996,7 @@ port_INLINE void activity_ti1ORri1() {
             // check if packet needs to be encrypted/authenticated before transmission 
             if (ieee154e_vars.localCopyForTransmission.l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) { // security enabled
                 // encrypt in a local copy
-                if (IEEE802154_SECURITY.outgoingFrame(&ieee154e_vars.localCopyForTransmission) != E_SUCCESS) {
+                if (IEEE802154_security_outgoingFrameSecurity(&ieee154e_vars.localCopyForTransmission) != E_SUCCESS) {
                     // keep the frame in the OpenQueue in order to retry later
                     endSlot(); // abort
                     return;
@@ -1039,7 +1016,14 @@ port_INLINE void activity_ti1ORri1() {
             radiotimer_setCapture(ACTION_TX_SEND_DONE);
 #else
             // arm tt1
-            radiotimer_schedule(DURATION_tt1);
+            opentimers_scheduleAbsolute(
+                ieee154e_vars.timerId,                            // timerId
+                DURATION_tt1,                                     // duration
+                ieee154e_vars.startOfSlotReference,               // reference
+                TIME_TICS,                                        // timetype
+                isr_ieee154e_timer                                // callback
+            );
+            // radiotimer_schedule(DURATION_tt1);
 #endif
             break;
          }
@@ -1061,7 +1045,14 @@ port_INLINE void activity_ti1ORri1() {
          radiotimer_setCapture(ACTION_RX_DONE);
 #else
          // arm rt1
-         radiotimer_schedule(DURATION_rt1);
+         opentimers_scheduleAbsolute(
+              ieee154e_vars.timerId,                            // timerId
+              DURATION_rt1,                                     // duration
+              ieee154e_vars.startOfSlotReference,               // reference
+              TIME_TICS,                                        // timetype
+              isr_ieee154e_timer                                // callback
+         );
+         // radiotimer_schedule(DURATION_rt1);
 #endif
          break;
       case CELLTYPE_SERIALRX:
@@ -1098,7 +1089,15 @@ port_INLINE void activity_ti1ORri1() {
              }
          }
          // set the timer based on calcualted number of slots to skip
-         radio_setTimerPeriod(TsSlotDuration*(ieee154e_vars.numOfSleepSlots));
+         opentimers_scheduleAbsolute(
+              ieee154e_vars.timerId,                            // timerId
+              TsSlotDuration*(ieee154e_vars.numOfSleepSlots),   // duration
+              ieee154e_vars.startOfSlotReference,               // reference
+              TIME_TICS,                                        // timetype
+              isr_ieee154e_newSlot                              // callback
+         );
+         ieee154e_vars.slotDuration = TsSlotDuration*(ieee154e_vars.numOfSleepSlots);
+         // radiotimer_setPeriod(TsSlotDuration*(ieee154e_vars.numOfSleepSlots));
          
 #ifdef ADAPTIVE_SYNC
          // deal with the case when schedule multi slots
@@ -1129,7 +1128,14 @@ port_INLINE void activity_ti2() {
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
 #else
     // arm tt2
-    radiotimer_schedule(DURATION_tt2);
+    opentimers_scheduleAbsolute(
+          ieee154e_vars.timerId,                            // timerId
+          DURATION_tt2,                                     // duration
+          ieee154e_vars.startOfSlotReference,               // reference
+          TIME_TICS,                                        // timetype
+          isr_ieee154e_timer                                // callback
+    );
+    // radiotimer_schedule(DURATION_tt2);
 
     // make a local copy of the frame
     packetfunctions_duplicatePacket(&ieee154e_vars.localCopyForTransmission, ieee154e_vars.dataToSend);
@@ -1137,7 +1143,7 @@ port_INLINE void activity_ti2() {
     // check if packet needs to be encrypted/authenticated before transmission 
     if (ieee154e_vars.localCopyForTransmission.l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) { // security enabled
         // encrypt in a local copy
-        if (IEEE802154_SECURITY.outgoingFrame(&ieee154e_vars.localCopyForTransmission) != E_SUCCESS) {
+        if (IEEE802154_security_outgoingFrameSecurity(&ieee154e_vars.localCopyForTransmission) != E_SUCCESS) {
             // keep the frame in the OpenQueue in order to retry later
             endSlot(); // abort
             return;
@@ -1162,7 +1168,7 @@ port_INLINE void activity_ti2() {
    
    // enable the radio in Tx mode. This does not send the packet.
    radio_txEnable();
-   ieee154e_vars.radioOnInit=radio_getTimerValue();
+    ieee154e_vars.radioOnInit=sctimer_readCounter();
    ieee154e_vars.radioOnThisSlot=TRUE;
    
    // change state
@@ -1189,7 +1195,14 @@ port_INLINE void activity_ti3() {
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
 #else
     // arm tt3
-    radiotimer_schedule(DURATION_tt3);
+    opentimers_scheduleAbsolute(
+        ieee154e_vars.timerId,                            // timerId
+        DURATION_tt3,                                     // duration
+        ieee154e_vars.startOfSlotReference,               // reference
+        TIME_TICS,                                        // timetype
+        isr_ieee154e_timer                                // callback
+    );
+    // radiotimer_schedule(DURATION_tt3);
     
     // give the 'go' to transmit
     radio_txNow();
@@ -1207,7 +1220,7 @@ port_INLINE void activity_tie2() {
 }
 
 //start of frame interrupt
-port_INLINE void activity_ti4(PORT_RADIOTIMER_WIDTH capturedTime) {
+port_INLINE void activity_ti4(PORT_TIMER_WIDTH capturedTime) {
     // change state
     changeState(S_TXDATA);
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
@@ -1215,7 +1228,14 @@ port_INLINE void activity_ti4(PORT_RADIOTIMER_WIDTH capturedTime) {
     radiotimer_cancel(ACTION_NORMAL_TIMER);
 #else
     // cancel tt3
-    radiotimer_cancel();
+    opentimers_scheduleAbsolute(
+        ieee154e_vars.timerId,                            // timerId
+        ieee154e_vars.slotDuration,                       // duration
+        ieee154e_vars.startOfSlotReference,               // reference
+        TIME_TICS,                                        // timetype
+        isr_ieee154e_newSlot                              // callback
+    );
+    // radiotimer_cancel();
 #endif
     // record the captured time
     ieee154e_vars.lastCapturedTime = capturedTime;
@@ -1224,7 +1244,14 @@ port_INLINE void activity_ti4(PORT_RADIOTIMER_WIDTH capturedTime) {
     radiotimer_schedule(ACTION_NORMAL_TIMER,DURATION_tt4);
 #else
     // arm tt4
-    radiotimer_schedule(DURATION_tt4);
+    opentimers_scheduleAbsolute(
+        ieee154e_vars.timerId,                            // timerId
+        DURATION_tt4,                                     // duration
+        ieee154e_vars.startOfSlotReference,               // reference
+        TIME_TICS,                                        // timetype
+        isr_ieee154e_timer                                // callback
+    );
+    // radiotimer_schedule(DURATION_tt4);
 #endif
 }
 
@@ -1238,7 +1265,7 @@ port_INLINE void activity_tie3() {
     endSlot();
 }
 
-port_INLINE void activity_ti5(PORT_RADIOTIMER_WIDTH capturedTime) {
+port_INLINE void activity_ti5(PORT_TIMER_WIDTH capturedTime) {
     bool listenForAck;
     
     // change state
@@ -1248,11 +1275,18 @@ port_INLINE void activity_ti5(PORT_RADIOTIMER_WIDTH capturedTime) {
     radiotimer_cancel(ACTION_NORMAL_TIMER);
 #else
     // cancel tt4
-    radiotimer_cancel();
+    opentimers_scheduleAbsolute(
+        ieee154e_vars.timerId,                            // timerId
+        ieee154e_vars.slotDuration,                       // duration
+        ieee154e_vars.startOfSlotReference,               // reference
+        TIME_TICS,                                        // timetype
+        isr_ieee154e_newSlot                              // callback
+    );
+    // radiotimer_cancel();
 #endif
     // turn off the radio
     radio_rfOff();
-    ieee154e_vars.radioOnTics+=(radio_getTimerValue()-ieee154e_vars.radioOnInit);
+    ieee154e_vars.radioOnTics+=(sctimer_readCounter()-ieee154e_vars.radioOnInit);
    
     // record the captured time
     ieee154e_vars.lastCapturedTime = capturedTime;
@@ -1278,7 +1312,14 @@ port_INLINE void activity_ti5(PORT_RADIOTIMER_WIDTH capturedTime) {
         radiotimer_setCapture(ACTION_RX_DONE);
 #else
         // arm tt5
-        radiotimer_schedule(DURATION_tt5);
+        opentimers_scheduleAbsolute(
+            ieee154e_vars.timerId,                            // timerId
+            DURATION_tt5,                                     // duration
+            ieee154e_vars.startOfSlotReference,               // reference
+            TIME_TICS,                                        // timetype
+            isr_ieee154e_timer                                // callback
+        );
+        // radiotimer_schedule(DURATION_tt5);
 #endif
     } else {
         // indicate succesful Tx to schedule to keep statistics
@@ -1298,7 +1339,14 @@ port_INLINE void activity_ti6() {
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
 #else
     // arm tt6
-    radiotimer_schedule(DURATION_tt6);
+    opentimers_scheduleAbsolute(
+        ieee154e_vars.timerId,                            // timerId
+        DURATION_tt6,                                     // duration
+        ieee154e_vars.startOfSlotReference,               // reference
+        TIME_TICS,                                        // timetype
+        isr_ieee154e_timer                                // callback
+    );
+    // radiotimer_schedule(DURATION_tt6);
 #endif   
    
     // configure the radio for that frequency
@@ -1312,7 +1360,7 @@ port_INLINE void activity_ti6() {
 #endif
    
     //caputre init of radio for duty cycle calculation
-    ieee154e_vars.radioOnInit=radio_getTimerValue();
+    ieee154e_vars.radioOnInit=sctimer_readCounter();
     ieee154e_vars.radioOnThisSlot=TRUE;
    
     // change state
@@ -1340,7 +1388,14 @@ port_INLINE void activity_ti7() {
    radiotimer_schedule(ACTION_NORMAL_TIMER,DURATION_tt7);
 #else
    // arm tt7
-   radiotimer_schedule(DURATION_tt7);
+   opentimers_scheduleAbsolute(
+        ieee154e_vars.timerId,                            // timerId
+        DURATION_tt7,                                     // duration
+        ieee154e_vars.startOfSlotReference,               // reference
+        TIME_TICS,                                        // timetype
+        isr_ieee154e_timer                                // callback
+    );
+   // radiotimer_schedule(DURATION_tt7);
 #endif
 }
 
@@ -1366,7 +1421,7 @@ port_INLINE void activity_tie5() {
     endSlot();
 }
 
-port_INLINE void activity_ti8(PORT_RADIOTIMER_WIDTH capturedTime) {
+port_INLINE void activity_ti8(PORT_TIMER_WIDTH capturedTime) {
     // change state
     changeState(S_RXACK);
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
@@ -1374,7 +1429,14 @@ port_INLINE void activity_ti8(PORT_RADIOTIMER_WIDTH capturedTime) {
     radiotimer_cancel(ACTION_NORMAL_TIMER);
 #else
     // cancel tt7
-    radiotimer_cancel();
+    opentimers_scheduleAbsolute(
+        ieee154e_vars.timerId,                            // timerId
+        ieee154e_vars.slotDuration,                       // duration
+        ieee154e_vars.startOfSlotReference,               // reference
+        TIME_TICS,                                        // timetype
+        isr_ieee154e_newSlot                              // callback
+    );
+    // radiotimer_cancel();
 #endif
     // record the captured time
     ieee154e_vars.lastCapturedTime = capturedTime;
@@ -1383,7 +1445,14 @@ port_INLINE void activity_ti8(PORT_RADIOTIMER_WIDTH capturedTime) {
     radiotimer_schedule(ACTION_NORMAL_TIMER,DURATION_tt8);
 #else
     // arm tt8
-    radiotimer_schedule(DURATION_tt8);
+   opentimers_scheduleAbsolute(
+        ieee154e_vars.timerId,                            // timerId
+        DURATION_tt8,                                     // duration
+        ieee154e_vars.startOfSlotReference,               // reference
+        TIME_TICS,                                        // timetype
+        isr_ieee154e_timer                                // callback
+    );
+    // radiotimer_schedule(DURATION_tt8);
 #endif
 }
 
@@ -1396,7 +1465,7 @@ port_INLINE void activity_tie6() {
     endSlot();
 }
 
-port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
+port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
     ieee802154_header_iht     ieee802514_header;
     
     // change state
@@ -1406,12 +1475,19 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
     radiotimer_cancel(ACTION_NORMAL_TIMER);
 #else
     // cancel tt8
-    radiotimer_cancel();
+    opentimers_scheduleAbsolute(
+        ieee154e_vars.timerId,                            // timerId
+        ieee154e_vars.slotDuration,                       // duration
+        ieee154e_vars.startOfSlotReference,               // reference
+        TIME_TICS,                                        // timetype
+        isr_ieee154e_newSlot                              // callback
+    );
+    // radiotimer_cancel();
 #endif
     // turn off the radio
     radio_rfOff();
     //compute tics radio on.
-    ieee154e_vars.radioOnTics+=(radio_getTimerValue()-ieee154e_vars.radioOnInit);
+    ieee154e_vars.radioOnTics+=(sctimer_readCounter()-ieee154e_vars.radioOnInit);
    
     // record the captured time
     ieee154e_vars.lastCapturedTime = capturedTime;
@@ -1485,12 +1561,17 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
         ieee154e_vars.ackReceived->l2_dsn        = ieee802514_header.dsn;
         memcpy(&(ieee154e_vars.ackReceived->l2_nextORpreviousHop),&(ieee802514_header.src),sizeof(open_addr_t));
       
+        // verify that incoming security level is acceptable
+        if (IEEE802154_security_acceptableLevel(ieee154e_vars.ackReceived, &ieee802514_header) == FALSE) {
+            break;
+        }
+ 
         // check the security level of the ACK frame and decrypt/authenticate
         if (ieee154e_vars.ackReceived->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
-            if (IEEE802154_SECURITY.incomingFrame(ieee154e_vars.ackReceived) != E_SUCCESS) {
+            if (IEEE802154_security_incomingFrame(ieee154e_vars.ackReceived) != E_SUCCESS) {
                 break;
             }
-        } // checked if unsecured frame should pass during header retrieval
+        } 
     
         // toss the IEEE802.15.4 header
         packetfunctions_tossHeader(ieee154e_vars.ackReceived,ieee802514_header.headerLength);
@@ -1536,7 +1617,14 @@ port_INLINE void activity_ri2() {
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
 #else
     // arm rt2
-    radiotimer_schedule(DURATION_rt2);
+   opentimers_scheduleAbsolute(
+        ieee154e_vars.timerId,                            // timerId
+        DURATION_rt2,                                     // duration
+        ieee154e_vars.startOfSlotReference,               // reference
+        TIME_TICS,                                        // timetype
+        isr_ieee154e_timer                                // callback
+    );
+    // radiotimer_schedule(DURATION_rt2);
 #endif
    
 
@@ -1552,7 +1640,7 @@ port_INLINE void activity_ri2() {
     // enable the radio in Rx mode. The radio does not actively listen yet.
     radio_rxEnable();
 #endif
-   ieee154e_vars.radioOnInit=radio_getTimerValue();
+    ieee154e_vars.radioOnInit=sctimer_readCounter();
    ieee154e_vars.radioOnThisSlot=TRUE;
        
     // change state
@@ -1580,7 +1668,14 @@ port_INLINE void activity_ri3() {
     radiotimer_schedule(ACTION_NORMAL_TIMER,DURATION_rt3);
 #else
     // arm rt3 
-    radiotimer_schedule(DURATION_rt3);
+    opentimers_scheduleAbsolute(
+        ieee154e_vars.timerId,                            // timerId
+        DURATION_rt3,                                     // duration
+        ieee154e_vars.startOfSlotReference,               // reference
+        TIME_TICS,                                        // timetype
+        isr_ieee154e_timer                                // callback
+    );
+    // radiotimer_schedule(DURATION_rt3);
 #endif
 }
 
@@ -1589,7 +1684,7 @@ port_INLINE void activity_rie2() {
    endSlot();
 }
 
-port_INLINE void activity_ri4(PORT_RADIOTIMER_WIDTH capturedTime) {
+port_INLINE void activity_ri4(PORT_TIMER_WIDTH capturedTime) {
 
    // change state
    changeState(S_RXDATA);
@@ -1598,7 +1693,14 @@ port_INLINE void activity_ri4(PORT_RADIOTIMER_WIDTH capturedTime) {
    radiotimer_cancel(ACTION_NORMAL_TIMER);
 #else
    // cancel rt3
-   radiotimer_cancel();
+    opentimers_scheduleAbsolute(
+        ieee154e_vars.timerId,                            // timerId
+        ieee154e_vars.slotDuration,                       // duration
+        ieee154e_vars.startOfSlotReference,               // reference
+        TIME_TICS,                                        // timetype
+        isr_ieee154e_newSlot                              // callback
+    );
+    // radiotimer_cancel();
 #endif
    // record the captured time
    ieee154e_vars.lastCapturedTime = capturedTime;
@@ -1608,12 +1710,18 @@ port_INLINE void activity_ri4(PORT_RADIOTIMER_WIDTH capturedTime) {
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
    radiotimer_schedule(ACTION_NORMAL_TIMER,DURATION_rt4);
 #else
-   radiotimer_schedule(DURATION_rt4);
+    opentimers_scheduleAbsolute(
+        ieee154e_vars.timerId,                            // timerId
+        DURATION_rt4,                                     // duration
+        ieee154e_vars.startOfSlotReference,               // reference
+        TIME_TICS,                                        // timetype
+        isr_ieee154e_timer                                // callback
+    );
+    // radiotimer_schedule(DURATION_rt4);
 #endif
 }
 
 port_INLINE void activity_rie3() {
-     
    // log the error
    openserial_printError(COMPONENT_IEEE802154E,ERR_WDDATADURATION_OVERFLOWS,
                          (errorparameter_t)ieee154e_vars.state,
@@ -1623,7 +1731,7 @@ port_INLINE void activity_rie3() {
    endSlot();
 }
 
-port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
+port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
    ieee802154_header_iht ieee802514_header;
    uint16_t lenIE=0;
    
@@ -1634,11 +1742,18 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
    radiotimer_cancel(ACTION_NORMAL_TIMER);
 #else
    // cancel rt4
-   radiotimer_cancel();
+    opentimers_scheduleAbsolute(
+        ieee154e_vars.timerId,                            // timerId
+        ieee154e_vars.slotDuration,                       // duration
+        ieee154e_vars.startOfSlotReference,               // reference
+        TIME_TICS,                                        // timetype
+        isr_ieee154e_newSlot                              // callback
+    );
+    // radiotimer_cancel();
 #endif
    // turn off the radio
    radio_rfOff();
-   ieee154e_vars.radioOnTics+=radio_getTimerValue()-ieee154e_vars.radioOnInit;
+    ieee154e_vars.radioOnTics+=sctimer_readCounter()-ieee154e_vars.radioOnInit;
    // get a buffer to put the (received) data in
    ieee154e_vars.dataReceived = openqueue_getFreePacketBuffer(COMPONENT_IEEE802154E);
    if (ieee154e_vars.dataReceived==NULL) {
@@ -1669,12 +1784,14 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       
       // retrieve the received data frame from the radio's Rx buffer
       ieee154e_vars.dataReceived->payload = &(ieee154e_vars.dataReceived->packet[FIRST_FRAME_BYTE]);
-      radio_getReceivedFrame(       ieee154e_vars.dataReceived->payload,
+        radio_getReceivedFrame(
+            ieee154e_vars.dataReceived->payload,
                                    &ieee154e_vars.dataReceived->length,
                              sizeof(ieee154e_vars.dataReceived->packet),
                                    &ieee154e_vars.dataReceived->l1_rssi,
                                    &ieee154e_vars.dataReceived->l1_lqi,
-                                   &ieee154e_vars.dataReceived->l1_crc);
+            &ieee154e_vars.dataReceived->l1_crc
+        );
       
       // break if wrong length
       if (ieee154e_vars.dataReceived->length<LENGTH_CRC || ieee154e_vars.dataReceived->length>LENGTH_IEEE154_MAX ) {
@@ -1709,26 +1826,41 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       ieee154e_vars.dataReceived->l2_IEListPresent  = ieee802514_header.ieListPresent;
       memcpy(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop),&(ieee802514_header.src),sizeof(open_addr_t));
 
-      // if security is enabled, decrypt/authenticate the frame.
+        // verify that incoming security level is acceptable
+        if (IEEE802154_security_acceptableLevel(ieee154e_vars.dataReceived, &ieee802514_header) == FALSE) {
+            break;
+        }
+   
+        // if security is active and configured need to decrypt the frame
       if (ieee154e_vars.dataReceived->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
-         if (IEEE802154_SECURITY.incomingFrame(ieee154e_vars.dataReceived) != E_SUCCESS) {
+            if (IEEE802154_security_isConfigured()) {
+                if (IEEE802154_security_incomingFrame(ieee154e_vars.dataReceived) != E_SUCCESS) {
             break;
          }
-      } // checked if unsecured frame should pass during header retrieval
+            }
+            // bypass authentication of beacons during join process
+            else if(ieee154e_vars.dataReceived->l2_frameType == IEEE154_TYPE_BEACON) { // not joined yet
+                packetfunctions_tossFooter(ieee154e_vars.dataReceived, ieee154e_vars.dataReceived->l2_authenticationLength);
+            }
+            else {
+                break;
+            }
+        }
 
       // toss the IEEE802.15.4 header
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_header.headerLength);
 
-      // handle IEs xv poipoi
-      // reset join priority 
-      // retrieve IE in sixtop
-      if ((ieee802514_header.valid==TRUE &&
+      
+        if (
+            ieee802514_header.frameType       == IEEE154_TYPE_BEACON                             && // if it is not a beacon and have ie, the ie will be processed in sixtop
           ieee802514_header.ieListPresent==TRUE && 
-          ieee802514_header.frameType==IEEE154_TYPE_BEACON && // if it is not a beacon and have ie, the ie will be processed in sixtop
-          packetfunctions_sameAddress(&ieee802514_header.panid,idmanager_getMyID(ADDR_PANID)) && 
-          ieee154e_processIEs(ieee154e_vars.dataReceived,&lenIE))==FALSE) {
-          //log  that the packet is not carrying IEs
+            packetfunctions_sameAddress(&ieee802514_header.panid,idmanager_getMyID(ADDR_PANID))
+        ) {
+            if (ieee154e_processIEs(ieee154e_vars.dataReceived,&lenIE)==FALSE){
+                // retrieve EB IE failed, break the do-while loop and execute the clean up code below
+                break;
       }
+        }
       
      // toss the IEs including Synch
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,lenIE);
@@ -1754,9 +1886,11 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
            ieee154e_vars.ackToSend = openqueue_getFreePacketBuffer(COMPONENT_IEEE802154E);
            if (ieee154e_vars.ackToSend==NULL) {
               // log the error
-              openserial_printError(COMPONENT_IEEE802154E,ERR_NO_FREE_PACKET_BUFFER,
+                openserial_printError(
+                    COMPONENT_IEEE802154E,ERR_NO_FREE_PACKET_BUFFER,
                                     (errorparameter_t)0,
-                                    (errorparameter_t)0);
+                    (errorparameter_t)0
+                );
               // indicate we received a packet anyway (we don't want to loose any)
               notif_receive(ieee154e_vars.dataReceived);
               // free local variable
@@ -1784,7 +1918,8 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
            ieee154e_vars.ackToSend->l2_keyIdMode     = ieee154e_vars.dataReceived->l2_keyIdMode;
            ieee154e_vars.ackToSend->l2_keyIndex      = ieee154e_vars.dataReceived->l2_keyIndex;
 
-           ieee802154_prependHeader(ieee154e_vars.ackToSend,
+            ieee802154_prependHeader(
+                ieee154e_vars.ackToSend,
                                     ieee154e_vars.ackToSend->l2_frameType,
                                     FALSE,//no payloadIE in ack
                                     ieee154e_vars.dataReceived->l2_dsn,
@@ -1793,7 +1928,7 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
            
            // if security is enabled, encrypt directly in OpenQueue as there are no retransmissions for ACKs
            if (ieee154e_vars.ackToSend->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
-                if (IEEE802154_SECURITY.outgoingFrame(ieee154e_vars.ackToSend) != E_SUCCESS) {
+                if (IEEE802154_security_outgoingFrameSecurity(ieee154e_vars.ackToSend) != E_SUCCESS) {
                     openqueue_freePacketBuffer(ieee154e_vars.ackToSend);
                     endSlot();
                     return;
@@ -1812,11 +1947,21 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
             radiotimer_setCapture(ACTION_TX_SEND_DONE);
 #else
          // arm rt5
-         radiotimer_schedule(DURATION_rt5);
+            opentimers_scheduleAbsolute(
+                ieee154e_vars.timerId,                            // timerId
+                DURATION_rt5,                                     // duration
+                ieee154e_vars.startOfSlotReference,               // reference
+                TIME_TICS,                                        // timetype
+                isr_ieee154e_timer                                // callback
+            );
+            // radiotimer_schedule(DURATION_rt5);
 #endif
       } else {
-         // synchronize to the received packet iif I'm not a DAGroot and this is my preferred parent
-         if (idmanager_getIsDAGroot()==FALSE && icmpv6rpl_isPreferredParent(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop))) {
+            // synchronize to the received packet if I'm not a DAGroot and this is my preferred parent
+            // or in case I'm in the middle of the join process when parent is not yet selected
+            if ((idmanager_getIsDAGroot()==FALSE && 
+                icmpv6rpl_isPreferredParent(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop))) ||
+                IEEE802154_security_isConfigured() == FALSE) {
             synchronizePacket(ieee154e_vars.syncCapturedTime);
          }
          // indicate reception to upper layer (no ACK asked)
@@ -1849,7 +1994,14 @@ port_INLINE void activity_ri6() {
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
 #else
     // arm rt6
-    radiotimer_schedule(DURATION_rt6);
+    opentimers_scheduleAbsolute(
+        ieee154e_vars.timerId,                            // timerId
+        DURATION_rt6,                                     // duration
+        ieee154e_vars.startOfSlotReference,               // reference
+        TIME_TICS,                                        // timetype
+        isr_ieee154e_timer                                // callback
+    );
+    // radiotimer_schedule(DURATION_rt6);
 #endif
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
 #else
@@ -1896,7 +2048,7 @@ port_INLINE void activity_ri6() {
    
     // if security is enabled, encrypt directly in OpenQueue as there are no retransmissions for ACKs
     if (ieee154e_vars.ackToSend->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
-        if (IEEE802154_SECURITY.outgoingFrame(ieee154e_vars.ackToSend) != E_SUCCESS) {
+        if (IEEE802154_security_outgoingFrameSecurity(ieee154e_vars.ackToSend) != E_SUCCESS) {
             openqueue_freePacketBuffer(ieee154e_vars.ackToSend);
             endSlot();
             return;
@@ -1914,7 +2066,7 @@ port_INLINE void activity_ri6() {
    
     // enable the radio in Tx mode. This does not send that packet.
     radio_txEnable();
-    ieee154e_vars.radioOnInit=radio_getTimerValue();
+    ieee154e_vars.radioOnInit=sctimer_readCounter();
     ieee154e_vars.radioOnThisSlot=TRUE;
     // change state
     changeState(S_TXACKREADY);
@@ -1939,7 +2091,14 @@ port_INLINE void activity_ri7() {
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
 #else
     // arm rt7
-    radiotimer_schedule(DURATION_rt7);
+    opentimers_scheduleAbsolute(
+        ieee154e_vars.timerId,                            // timerId
+        DURATION_rt7,                                     // duration
+        ieee154e_vars.startOfSlotReference,               // reference
+        TIME_TICS,                                        // timetype
+        isr_ieee154e_timer                                // callback
+    );
+    // radiotimer_schedule(DURATION_rt7);
     
     // give the 'go' to transmit
     radio_txNow(); 
@@ -1956,7 +2115,7 @@ port_INLINE void activity_rie5() {
    endSlot();
 }
 
-port_INLINE void activity_ri8(PORT_RADIOTIMER_WIDTH capturedTime) {
+port_INLINE void activity_ri8(PORT_TIMER_WIDTH capturedTime) {
     // change state
     changeState(S_TXACK);
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
@@ -1964,7 +2123,14 @@ port_INLINE void activity_ri8(PORT_RADIOTIMER_WIDTH capturedTime) {
     radiotimer_cancel(ACTION_NORMAL_TIMER);
 #else
     // cancel rt7
-    radiotimer_cancel();
+    opentimers_scheduleAbsolute(
+        ieee154e_vars.timerId,                            // timerId
+        ieee154e_vars.slotDuration,                       // duration
+        ieee154e_vars.startOfSlotReference,               // reference
+        TIME_TICS,                                        // timetype
+        isr_ieee154e_newSlot                              // callback
+    );
+    // radiotimer_cancel();
 #endif
     // record the captured time
     ieee154e_vars.lastCapturedTime = capturedTime;
@@ -1973,7 +2139,14 @@ port_INLINE void activity_ri8(PORT_RADIOTIMER_WIDTH capturedTime) {
     radiotimer_schedule(ACTION_NORMAL_TIMER,DURATION_rt8);
 #else
     // arm rt8
-    radiotimer_schedule(DURATION_rt8);
+    opentimers_scheduleAbsolute(
+        ieee154e_vars.timerId,                            // timerId
+        DURATION_rt8,                                     // duration
+        ieee154e_vars.startOfSlotReference,               // reference
+        TIME_TICS,                                        // timetype
+        isr_ieee154e_timer                                // callback
+    );
+    // radiotimer_schedule(DURATION_rt8);
 #endif
 }
 
@@ -1987,7 +2160,7 @@ port_INLINE void activity_rie6() {
    endSlot();
 }
 
-port_INLINE void activity_ri9(PORT_RADIOTIMER_WIDTH capturedTime) {
+port_INLINE void activity_ri9(PORT_TIMER_WIDTH capturedTime) {
    // change state
    changeState(S_RXPROC);
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
@@ -1995,7 +2168,14 @@ port_INLINE void activity_ri9(PORT_RADIOTIMER_WIDTH capturedTime) {
    radiotimer_cancel(ACTION_NORMAL_TIMER);
 #else
    // cancel rt8
-   radiotimer_cancel();
+    opentimers_scheduleAbsolute(
+        ieee154e_vars.timerId,                            // timerId
+        ieee154e_vars.slotDuration,                       // duration
+        ieee154e_vars.startOfSlotReference,               // reference
+        TIME_TICS,                                        // timetype
+        isr_ieee154e_newSlot                              // callback
+    );
+    // radiotimer_cancel();
 #endif
    // record the captured time
    ieee154e_vars.lastCapturedTime = capturedTime;
@@ -2164,12 +2344,173 @@ bool isValidJoin(OpenQueueEntry_t* eb, ieee802154_header_iht *parsedHeader) {
    // correct frame length and correct pointers (first byte of the frame)
    packetfunctions_reserveHeaderSize(eb, parsedHeader->headerLength);
 
-   // verify EB's authentication tag
-   if (IEEE802154_SECURITY.incomingFrame(eb) == E_SUCCESS) {
+   // verify EB's authentication tag if keys are configured
+   if (IEEE802154_security_isConfigured()) {
+      if (IEEE802154_security_incomingFrame(eb) == E_SUCCESS) {
       return TRUE;
+   }
+   }
+   else {
+       // bypass authentication check for beacons if security is not configured
+        packetfunctions_tossFooter(eb,eb->l2_authenticationLength);
+        return TRUE;
    }
 
    return FALSE;
+}
+
+bool isValidEbFormat(OpenQueueEntry_t* pkt, uint16_t* lenIE){
+    
+    bool    chTemplate_checkPass;
+    bool    tsTemplate_checkpass;
+    bool    sync_ie_checkPass;
+    bool    slotframelink_ie_checkPass;
+    
+    uint8_t ptr;
+    uint16_t temp16b;
+    bool    mlme_ie_found;
+    uint8_t mlme_ie_content_offset;
+    uint8_t ielen;
+    
+    uint8_t subtype;
+    uint8_t sublen;
+    uint8_t subid;
+    
+    uint8_t  i;
+    uint8_t  oldFrameLength;
+    uint8_t  numlinks;
+    open_addr_t temp_neighbor;
+    uint16_t slotoffset;
+    uint16_t channeloffset;
+    
+    chTemplate_checkPass        = FALSE;
+    tsTemplate_checkpass        = FALSE;
+    sync_ie_checkPass           = FALSE;
+    slotframelink_ie_checkPass  = FALSE; 
+    
+    ptr = 0;
+    mlme_ie_found = FALSE;
+    
+    while (ptr<pkt->length){
+    
+        temp16b  = *((uint8_t*)(pkt->payload)+ptr);
+        temp16b |= (*((uint8_t*)(pkt->payload)+ptr+1))<<8;
+        ptr += 2;
+        
+        ielen = temp16b & IEEE802154E_DESC_LEN_PAYLOAD_IE_MASK;
+        
+        if (
+            (temp16b & IEEE802154E_DESC_GROUPID_PAYLOAD_IE_MASK)>>IEEE802154E_DESC_GROUPID_PAYLOAD_IE_SHIFT != IEEE802154E_MLME_IE_GROUPID || 
+            (temp16b & IEEE802154E_DESC_TYPE_LONG) == 0
+        ){
+            // this is not MLME IE
+            ptr += ielen;
+        } else {
+            // found the MLME payload IE
+            mlme_ie_found = TRUE;
+            mlme_ie_content_offset = ptr;
+            break;
+        }
+    }
+    
+    if (mlme_ie_found==FALSE){
+        // didn't find the MLME payload IE
+        return FALSE;
+    }
+    
+    while(
+        ptr<mlme_ie_content_offset+ielen &&
+        (
+            chTemplate_checkPass        == FALSE || 
+            tsTemplate_checkpass        == FALSE ||
+            sync_ie_checkPass           == FALSE ||
+            slotframelink_ie_checkPass  == FALSE 
+        )
+    ){
+        // subID
+        temp16b  = *((uint8_t*)(pkt->payload)+ptr);
+        temp16b |= (*((uint8_t*)(pkt->payload)+ptr+1))<<8;
+        ptr += 2;
+        
+        subtype = (temp16b & IEEE802154E_DESC_TYPE_IE_MASK)>>IEEE802154E_DESC_TYPE_IE_SHIFT;
+        if (subtype == 1) {
+            // this is long type subID
+            subid  = (temp16b & IEEE802154E_DESC_SUBID_LONG_MLME_IE_MASK)>>IEEE802154E_DESC_SUBID_LONG_MLME_IE_SHIFT;
+            sublen = (temp16b & IEEE802154E_DESC_LEN_LONG_MLME_IE_MASK);
+            switch(subid){
+            case IEEE802154E_MLME_CHANNELHOPPING_IE_SUBID:
+                channelhoppingTemplateIDStoreFromEB(*((uint8_t*)(pkt->payload+ptr)));
+                chTemplate_checkPass = TRUE;
+                break;
+            default:
+                // unsupported IE type, skip the ie
+              break;
+            }
+        } else {
+            // this is short type subID
+            subid  = (temp16b & IEEE802154E_DESC_SUBID_SHORT_MLME_IE_MASK)>>IEEE802154E_DESC_SUBID_SHORT_MLME_IE_SHIFT;
+            sublen = (temp16b & IEEE802154E_DESC_LEN_SHORT_MLME_IE_MASK);
+            switch(subid){
+            case IEEE802154E_MLME_SYNC_IE_SUBID:
+                asnStoreFromEB((uint8_t*)(pkt->payload+ptr));
+                joinPriorityStoreFromEB(*((uint8_t*)(pkt->payload)+ptr+5));
+                sync_ie_checkPass    = TRUE;
+                break;
+            case IEEE802154E_MLME_TIMESLOT_IE_SUBID:
+                timeslotTemplateIDStoreFromEB(*((uint8_t*)(pkt->payload)+ptr));
+                tsTemplate_checkpass = TRUE;
+                break;
+            case IEEE802154E_MLME_SLOTFRAME_LINK_IE_SUBID:
+                schedule_setFrameNumber(*((uint8_t*)(pkt->payload)+ptr));       // number of slotframes
+                schedule_setFrameHandle(*((uint8_t*)(pkt->payload)+ptr+1));     // slotframe id
+                oldFrameLength = schedule_getFrameLength();
+                if (oldFrameLength==0){
+                    temp16b  = *((uint8_t*)(pkt->payload+ptr+2));               // slotframes length
+                    temp16b |= *((uint8_t*)(pkt->payload+ptr+3))<<8;
+                    schedule_setFrameLength(temp16b);
+                    numlinks = *((uint8_t*)(pkt->payload+ptr+4));               // number of links
+
+                    // shared TXRX anycast slot(s)
+                    memset(&temp_neighbor,0,sizeof(temp_neighbor));
+                    temp_neighbor.type             = ADDR_ANYCAST;
+                    
+                    for (i=0;i<numlinks;i++){
+                        slotoffset     = *((uint8_t*)(pkt->payload+ptr+5+5*i));   // slotframes length
+                        slotoffset    |= *((uint8_t*)(pkt->payload+ptr+5+5*i+1))<<8;
+                        
+                        channeloffset  = *((uint8_t*)(pkt->payload+ptr+5+5*i+2));   // slotframes length
+                        channeloffset |= *((uint8_t*)(pkt->payload+ptr+5+5*i+3))<<8;
+                        
+                        schedule_addActiveSlot(
+                            slotoffset,    // slot offset
+                            CELLTYPE_TXRX, // type of slot
+                            TRUE,          // shared?
+                            channeloffset, // channel offset
+                            &temp_neighbor // neighbor
+                        );
+                    }
+                }
+                slotframelink_ie_checkPass = TRUE;
+                break;
+            default:
+                // unsupported IE type, skip the ie
+                break;
+            }
+        }
+        ptr += sublen;
+    }
+    
+    if (
+        chTemplate_checkPass     && 
+        tsTemplate_checkpass     && 
+        sync_ie_checkPass        && 
+        slotframelink_ie_checkPass
+    ) {
+        *lenIE = pkt->length;
+        return TRUE;
+    } else {
+        return FALSE;
+    }
 }
 
 port_INLINE void asnStoreFromEB(uint8_t* asn) {
@@ -2185,6 +2526,7 @@ port_INLINE void asnStoreFromEB(uint8_t* asn) {
 port_INLINE void ieee154e_syncSlotOffset() {
    frameLength_t frameLength;
    uint32_t slotOffset;
+    uint8_t i;
    
    frameLength = schedule_getFrameLength();
    
@@ -2199,6 +2541,19 @@ port_INLINE void ieee154e_syncSlotOffset() {
    slotOffset = slotOffset % frameLength;
    
    ieee154e_vars.slotOffset       = (slotOffset_t) slotOffset;
+   
+    schedule_syncSlotOffset(ieee154e_vars.slotOffset);
+    ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
+    /* 
+    infer the asnOffset based on the fact that
+    ieee154e_vars.freq = 11 + (asnOffset + channelOffset)%16 
+    */
+    for (i=0;i<NUM_CHANNELS;i++){
+        if ((ieee154e_vars.freq - 11)==ieee154e_vars.chTemplate[i]){
+            break;
+}
+    }
+    ieee154e_vars.asnOffset = i - schedule_getChannelOffset();
 }
 
 void ieee154e_setIsAckEnabled(bool isEnabled){
@@ -2240,19 +2595,18 @@ port_INLINE void channelhoppingTemplateIDStoreFromEB(uint8_t id){
 }
 //======= synchronization
 
-void synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived) {
+void synchronizePacket(PORT_TIMER_WIDTH timeReceived) {
    PORT_SIGNED_INT_WIDTH timeCorrection;
-   PORT_RADIOTIMER_WIDTH newPeriod;
-   PORT_RADIOTIMER_WIDTH currentPeriod;
-   PORT_RADIOTIMER_WIDTH currentValue;
+   PORT_TIMER_WIDTH newPeriod;
+   PORT_TIMER_WIDTH currentPeriod;
+   PORT_TIMER_WIDTH currentValue;
    
    // record the current timer value and period
-   currentValue                   =  radio_getTimerValue();
-   currentPeriod                  =  radio_getTimerPeriod();
+   currentValue                   =  opentimers_getValue()-ieee154e_vars.startOfSlotReference;
+   currentPeriod                  =  ieee154e_vars.slotDuration;
    
    // calculate new period
    timeCorrection                 =  (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)timeReceived - (PORT_SIGNED_INT_WIDTH)TsTxOffset);
-
 
    // The interrupt beginning a new slot can either occur after the packet has been
    // or while it is being received, possibly because the mote is not yet synchronized.
@@ -2262,20 +2616,28 @@ void synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived) {
    // we need the new slot to end after the remaining time which is timeCorrection
    // and in this constellation is guaranteed to be positive.
    if (currentValue < timeReceived) {
-       newPeriod = (PORT_RADIOTIMER_WIDTH)timeCorrection;
+       newPeriod = (PORT_TIMER_WIDTH)timeCorrection;
    } else {
-       newPeriod =  (PORT_RADIOTIMER_WIDTH)((PORT_SIGNED_INT_WIDTH)currentPeriod + timeCorrection);
+       newPeriod =  (PORT_TIMER_WIDTH)((PORT_SIGNED_INT_WIDTH)currentPeriod + timeCorrection);
    }
    
    // detect whether I'm too close to the edge of the slot, in that case,
    // skip a slot and increase the temporary slot length to be 2 slots long
    if ((PORT_SIGNED_INT_WIDTH)newPeriod - (PORT_SIGNED_INT_WIDTH)currentValue < (PORT_SIGNED_INT_WIDTH)RESYNCHRONIZATIONGUARD) {
-      newPeriod                  +=  ieee154e_vars.slotDuration;
+      newPeriod                  +=  TsSlotDuration;
       incrementAsnOffset();
    }
    
    // resynchronize by applying the new period
-   radio_setTimerPeriod(newPeriod);
+    opentimers_scheduleAbsolute(
+        ieee154e_vars.timerId,                            // timerId
+        newPeriod,                                        // duration
+        ieee154e_vars.startOfSlotReference,               // reference
+        TIME_TICS,                                        // timetype
+        isr_ieee154e_newSlot                              // callback
+    );
+    ieee154e_vars.slotDuration = newPeriod;
+    // radiotimer_setPeriod(newPeriod);
 #ifdef ADAPTIVE_SYNC
    // indicate time correction to adaptive sync module
    adaptive_sync_indicateTimeCorrection(timeCorrection,ieee154e_vars.dataReceived->l2_nextORpreviousHop);
@@ -2285,11 +2647,7 @@ void synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived) {
    
    // log a large timeCorrection
    if (
-         ieee154e_vars.isSync==TRUE &&
-         (
-            timeCorrection<-LIMITLARGETIMECORRECTION ||
-            timeCorrection> LIMITLARGETIMECORRECTION
-         )
+         ieee154e_vars.isSync==TRUE
       ) {
       openserial_printError(COMPONENT_IEEE802154E,ERR_LARGE_TIMECORRECTION,
                             (errorparameter_t)timeCorrection,
@@ -2307,15 +2665,23 @@ void synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived) {
 }
 
 void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
-   PORT_RADIOTIMER_WIDTH newPeriod;
-   PORT_RADIOTIMER_WIDTH currentPeriod;
+   PORT_TIMER_WIDTH newPeriod;
+   PORT_TIMER_WIDTH currentPeriod;
    
    // calculate new period
-   currentPeriod                  =  radio_getTimerPeriod();
-   newPeriod                      =  (PORT_RADIOTIMER_WIDTH)((PORT_SIGNED_INT_WIDTH)currentPeriod+timeCorrection);
+   currentPeriod                  =  ieee154e_vars.slotDuration;
+   newPeriod                      =  (PORT_TIMER_WIDTH)((PORT_SIGNED_INT_WIDTH)currentPeriod+timeCorrection);
 
    // resynchronize by applying the new period
-   radio_setTimerPeriod(newPeriod);
+    opentimers_scheduleAbsolute(
+        ieee154e_vars.timerId,                            // timerId
+        newPeriod,                                        // duration
+        ieee154e_vars.startOfSlotReference,               // reference
+        TIME_TICS,                                        // timetype
+        isr_ieee154e_newSlot                              // callback
+    );
+    ieee154e_vars.slotDuration = newPeriod;
+    // radiotimer_setPeriod(newPeriod);
    
    // reset the de-synchronization timeout
    ieee154e_vars.deSyncTimeout    = DESYNCTIMEOUT;
@@ -2325,11 +2691,7 @@ void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
 #endif
    // log a large timeCorrection
    if (
-         ieee154e_vars.isSync==TRUE &&
-         (
-            timeCorrection<-LIMITLARGETIMECORRECTION ||
-            timeCorrection> LIMITLARGETIMECORRECTION
-         )
+         ieee154e_vars.isSync==TRUE
       ) {
       openserial_printError(COMPONENT_IEEE802154E,ERR_LARGE_TIMECORRECTION,
                             (errorparameter_t)timeCorrection,
@@ -2439,7 +2801,7 @@ port_INLINE uint8_t calculateFrequency(uint8_t channelOffset) {
         return ieee154e_vars.singleChannel; // single channel
     } else {
         // channel hopping enabled, use the channel depending on hopping template
-        return 11 + ieee154e_vars.chTemplate[(ieee154e_vars.asnOffset+channelOffset)%16];
+        return 11 + ieee154e_vars.chTemplate[(ieee154e_vars.asnOffset+channelOffset)%NUM_CHANNELS];
     }
     //return 11+(ieee154e_vars.asnOffset+channelOffset)%16; //channel hopping
 }
@@ -2510,13 +2872,20 @@ void endSlot() {
    
    // compute the duty cycle if radio has been turned on
    if (ieee154e_vars.radioOnThisSlot==TRUE){  
-      ieee154e_vars.radioOnTics+=(radio_getTimerValue()-ieee154e_vars.radioOnInit);
+      ieee154e_vars.radioOnTics+=(sctimer_readCounter()-ieee154e_vars.radioOnInit);
    }
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
    radiotimer_cancel(ACTION_ALL_RADIOTIMER_INTERRUPT);
 #else
    // clear any pending timer
-   radiotimer_cancel();
+    opentimers_scheduleAbsolute(
+        ieee154e_vars.timerId,                            // timerId
+        ieee154e_vars.slotDuration,                       // duration
+        ieee154e_vars.startOfSlotReference,               // reference
+        TIME_TICS,                                        // timetype
+        isr_ieee154e_newSlot                              // callback
+    );
+    // radiotimer_cancel();
 #endif
    // reset capturedTimes
    ieee154e_vars.lastCapturedTime = 0;
@@ -2524,7 +2893,7 @@ void endSlot() {
    
    //computing duty cycle.
    ieee154e_stats.numTicsOn+=ieee154e_vars.radioOnTics;//accumulate and tics the radio is on for that window
-   ieee154e_stats.numTicsTotal+=radio_getTimerPeriod();//increment total tics by timer period.
+   ieee154e_stats.numTicsTotal+=ieee154e_vars.slotDuration;//increment total tics by timer period.
 
    if (ieee154e_stats.numTicsTotal>DUTY_CYCLE_WINDOW_LIMIT){
       ieee154e_stats.numTicsTotal = ieee154e_stats.numTicsTotal>>1;

@@ -11,14 +11,12 @@ sources_c = [
     os.path.join('02a-MAClow','topology.c'),
     os.path.join('02a-MAClow','IEEE802154.c'),
     os.path.join('02a-MAClow','IEEE802154E.c'),
-    os.path.join('02a-MAClow','adaptive_sync.c'),
+#    os.path.join('02a-MAClow','adaptive_sync.c'),
     os.path.join('02a-MAClow','IEEE802154_security.c'),
-    os.path.join('02a-MAClow','IEEE802154_dummy_security.c'),
     #=== 02b-MAChigh
     os.path.join('02b-MAChigh','neighbors.c'),
     os.path.join('02b-MAChigh','sf0.c'),
     os.path.join('02b-MAChigh','sfx.c'),
-    os.path.join('02b-MAChigh','processIE.c'),
     os.path.join('02b-MAChigh','schedule.c'),
     os.path.join('02b-MAChigh','sixtop.c'),
     os.path.join('02b-MAChigh','sfy_hashtable.c'),
@@ -31,8 +29,6 @@ sources_c = [
     os.path.join('03b-IPv6','icmpv6echo.c'),
     os.path.join('03b-IPv6','icmpv6rpl.c'),
     #=== 04-TRAN
-    os.path.join('04-TRAN','opencoap.c'),
-    os.path.join('04-TRAN','opentcp.c'),
     os.path.join('04-TRAN','openudp.c'),
     #=== cross-layers
     os.path.join('cross-layers','idmanager.c'),
@@ -47,14 +43,11 @@ sources_h = [
     os.path.join('02a-MAClow','IEEE802154.h'),
     os.path.join('02a-MAClow','IEEE802154E.h'),
     os.path.join('02a-MAClow','adaptive_sync.h'),
-    os.path.join('02a-MAClow','ieee802154_security_driver.h'),
     os.path.join('02a-MAClow','IEEE802154_security.h'),
-    os.path.join('02a-MAClow','IEEE802154_dummy_security.h'),
     #=== 02b-MAChigh
     os.path.join('02b-MAChigh','neighbors.h'),
     os.path.join('02b-MAChigh','sf0.h'),
     os.path.join('02b-MAChigh','sfx.h'),
-    os.path.join('02b-MAChigh','processIE.h'),
     os.path.join('02b-MAChigh','schedule.h'),
     os.path.join('02b-MAChigh','sixtop.h'),
     os.path.join('02b-MAChigh','sfy_hashtable.h'),
@@ -67,8 +60,6 @@ sources_h = [
     os.path.join('03b-IPv6','icmpv6echo.h'),
     os.path.join('03b-IPv6','icmpv6rpl.h'),
     #=== 04-TRAN
-    os.path.join('04-TRAN','opencoap.h'),
-    os.path.join('04-TRAN','opentcp.h'),
     os.path.join('04-TRAN','openudp.h'),
     #=== cross-layers
     os.path.join('cross-layers','idmanager.h'),
@@ -114,6 +105,7 @@ else:
             os.path.join('#','openstack','cross-layers'),
             # openapps
             # TODO: remove once cleaned-up?
+            os.path.join('#','openapps','opencoap'),
             os.path.join('#','openapps','c6t'),
             os.path.join('#','openapps','cexample'),
             os.path.join('#','openapps','cinfo'),
@@ -126,6 +118,9 @@ else:
             os.path.join('#','openapps','uecho'),
             os.path.join('#','openapps','uinject'),
             os.path.join('#','openapps','userialbridge'),
+            os.path.join('#','openapps','cjoin'),
+            os.path.join('#','openapps','uexpiration'),
+            os.path.join('#','openapps','uexpiration_monitor'),
         ],
     )
     

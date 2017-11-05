@@ -77,10 +77,8 @@ project:
     forcetopology  Force the topology to the one indicated in the
                    openstack/02a-MAClow/topology.c file.
     noadaptivesync Do not use adaptive synchronization.
-    cryptoengine   Select appropriate crypto engine implementation
-                   (dummy_crypto_engine, firmware_crypto_engine, 
-                   board_crypto_engine).
     l2_security   Use hop-by-hop encryption and authentication.
+                  0 (off), 1 (on)
     ide           qtcreator
 
     Common variables:
@@ -108,6 +106,7 @@ command_line_options = {
         'z1',
         # Cortex-M3
         'openmote-cc2538',
+		'openmote-b',
         'silabs-ezr32wg',
         'openmotestm',
         'iot-lab_M3',
@@ -138,8 +137,8 @@ command_line_options = {
     'forcetopology':    ['0','1'],
     'debug':            ['0','1'],
     'noadaptivesync':   ['0','1'],
-    'cryptoengine':     ['', 'dummy_crypto_engine', 'firmware_crypto_engine', 'board_crypto_engine'],
     'l2_security':      ['0','1'],
+    'deadline_option':  ['0','1'],
     'ide':              ['none','qtcreator'],
     'revision':         ['']
 }
@@ -266,13 +265,6 @@ command_line_vars.AddVariables(
         int,                                               # converter
     ),
     (
-        'cryptoengine',                                    # key
-        '',                                                # help
-        command_line_options['cryptoengine'][0],           # default
-        validate_option,                                   # validator
-        None,                                              # converter
-    ),
-    (
         'debug',                                           # key
         '',                                                # help
         command_line_options['debug'][0],                  # default
@@ -290,6 +282,13 @@ command_line_vars.AddVariables(
         'l2_security',                                     # key
         '',                                                # help
         command_line_options['l2_security'][0],            # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
+        'deadline_option',                                     # key
+        '',                                                # help
+        command_line_options['deadline_option'][1],            # default
         validate_option,                                   # validator
         int,                                               # converter
     ),

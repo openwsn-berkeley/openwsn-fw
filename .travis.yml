@@ -28,6 +28,7 @@ script:
 - scons board=openmote-cc2538                         toolchain=armgcc verbose=1 oos_openwsn
 - scons board=openmote-cc2538     goldenImage=sniffer toolchain=armgcc verbose=1 oos_sniffer
 - scons board=openmote-cc2538     goldenImage=root    toolchain=armgcc verbose=1 oos_openwsn
+- scons board=openmote-b                              toolchain=armgcc verbose=1 oos_openwsn
 - scons board=wsn430v14                               toolchain=mspgcc verbose=1 oos_openwsn
 - scons board=wsn430v13b                              toolchain=mspgcc verbose=1 oos_openwsn
 - scons board=gina                                    toolchain=mspgcc verbose=1 oos_openwsn
