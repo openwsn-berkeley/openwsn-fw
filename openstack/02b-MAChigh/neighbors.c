@@ -280,8 +280,7 @@ bool neighbors_reachedMaxTransmission(uint8_t index){
     
     if (
         neighbors_vars.neighbors[index].used     == TRUE            &&
-        neighbors_vars.neighbors[index].numTx    >  DEFAULTLINKCOST &&
-        neighbors_vars.neighbors[index].numTxACK == 0
+        neighbors_vars.neighbors[index].numTx    >  DEFAULTLINKCOST
     ) { 
         returnVal = TRUE;
     } else {
