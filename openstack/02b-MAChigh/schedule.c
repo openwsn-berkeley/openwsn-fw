@@ -133,10 +133,6 @@ bool debugPrint_schedule() {
       &schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].lastUsedAsn,
       sizeof(asn_t)
    );
-   temp.usageBitMap                    = \
-      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].usageBitMap;
-   temp.bitMapIndex                    = \
-      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].bitMapIndex;
    
    // send status data over serial port
    openserial_printStatus(
@@ -322,10 +318,6 @@ owerror_t schedule_addActiveSlot(
    slotContainer->lastUsedAsn.bytes0and1 = 256*asn[1]+asn[0];
    slotContainer->lastUsedAsn.bytes2and3 = 256*asn[3]+asn[2];
    slotContainer->lastUsedAsn.byte4      = asn[4];
-   
-   // fill that schedule entry with default usage vlalue
-   slotContainer->bitMapIndex            = 0;
-   slotContainer->usageBitMap            = 0x003F;// last 6 bits are pre-set
    
    // insert in circular list
    if (schedule_vars.currentScheduleEntry==NULL) {
@@ -881,9 +873,6 @@ void schedule_resetEntry(scheduleEntry_t* e) {
    e->lastUsedAsn.bytes0and1 = 0;
    e->lastUsedAsn.bytes2and3 = 0;
    e->lastUsedAsn.byte4      = 0;
-   
-   e->usageBitMap            = 0;
-   e->bitMapIndex            = 0;
    
    e->next                   = NULL;
 }

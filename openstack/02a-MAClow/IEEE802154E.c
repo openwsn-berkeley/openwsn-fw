@@ -16,6 +16,7 @@
 #include "adaptive_sync.h"
 #include "sctimer.h"
 #include "openrandom.h"
+#include "msf.h"
 
 //=========================== definition ======================================
 
