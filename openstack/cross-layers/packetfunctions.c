@@ -80,36 +80,43 @@ void packetfunctions_mac16bToMac64b(open_addr_t* mac16b, open_addr_t* mac64btoWr
 //======= address recognition
 
 bool packetfunctions_isBroadcastMulticast(open_addr_t* address) {
-   uint8_t i;
-   uint8_t address_length;
-   //IPv6 multicast
-   if (address->type==ADDR_128B) {
-      if (address->addr_128b[0]==0xff) {
-         return TRUE;
-      } else {
-         return FALSE;
-      }
-   }
-   //15.4 broadcast
-   switch (address->type) {
-      case ADDR_16B:
-         address_length = 2;
-         break;
-      case ADDR_64B:
-         address_length = 8;
-         break;
-      default:
-         openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
+    uint8_t i;
+    uint8_t address_length;
+    
+    // anycast type
+    if (address->type==ADDR_ANYCAST) {
+        return TRUE;
+    }
+    
+    //IPv6 multicast
+    if (address->type==ADDR_128B) {
+        if (address->addr_128b[0]==0xff) {
+            return TRUE;
+        } else {
+            return FALSE;
+        }
+    }
+    
+    //15.4 broadcast
+    switch (address->type) {
+        case ADDR_16B:
+            address_length = 2;
+            break;
+        case ADDR_64B:
+            address_length = 8;
+            break;
+        default:
+            openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
                                (errorparameter_t)address->type,
                                (errorparameter_t)4);
-         return FALSE;
-   }
-   for (i=0;i<address_length;i++) {
-      if (address->addr_128b[i]!=0xFF) {
-         return FALSE;
-      }
-   }
-   return TRUE;
+            return FALSE;
+    }
+    for (i=0;i<address_length;i++) {
+        if (address->addr_128b[i]!=0xFF) {
+            return FALSE;
+        }
+    }    
+    return TRUE;
 }
 
 bool packetfunctions_isAllRoutersMulticast(open_addr_t* address) {
