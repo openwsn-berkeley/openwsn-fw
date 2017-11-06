@@ -173,6 +173,9 @@ owerror_t openserial_printCritical(
 ) {
     opentimers_id_t id; 
     uint32_t         reference;
+    
+    printf("critical error happened %d %d %d %d\n", calling_component,error_code,arg1,arg2);
+    
     // blink error LED, this is serious
     leds_error_blink();
     

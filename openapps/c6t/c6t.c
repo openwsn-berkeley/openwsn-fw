@@ -105,7 +105,7 @@ owerror_t c6t_receive(OpenQueueEntry_t* msg,
             IANA_6TOP_CMD_ADD,                  // code
             &neighbor,                          // neighbor
             1,                                  // number cells
-            LINKOPTIONS_TX,                     // cellOptions
+            CELLOPTIONS_TX,                     // cellOptions
             celllist_add,                       // celllist to add
             NULL,                               // celllist to delete (not used)
             msf_getsfid(),                      // sfid
@@ -145,7 +145,7 @@ owerror_t c6t_receive(OpenQueueEntry_t* msg,
             IANA_6TOP_CMD_ADD,                  // code
             &neighbor,                          // neighbor
             1,                                  // number cells
-            LINKOPTIONS_TX,                     // cellOptions
+            CELLOPTIONS_TX,                     // cellOptions
             celllist_add,                       // celllist to add
             NULL,                               // celllist to delete (not used)
             msf_getsfid(),                      // sfid

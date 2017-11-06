@@ -493,49 +493,6 @@ bool schedule_isSlotOffsetAvailable(uint16_t slotOffset){
    return TRUE;
 }
 
-uint8_t schedule_getUsageStatus(scheduleEntry_t* entry){
-    uint8_t  count;
-    uint16_t bm;
-    
-    count = 0;
-    bm = entry->usageBitMap;
-    
-    while (bm>0){
-        count = count+1;
-        bm    = bm & (bm-1);
-    }
-    return count;
-}
-
-uint16_t schedule_getTotalCellUsageStatus(cellType_t type, open_addr_t* neighbor){
-   uint16_t usageCount = 0;
-   scheduleEntry_t* scheduleWalker;
-   
-   INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
-   
-   scheduleWalker = schedule_vars.currentScheduleEntry;
-   do {
-       if(
-          type == scheduleWalker->type &&
-          (
-              (
-                  type == CELLTYPE_TX &&
-                  packetfunctions_sameAddress(&(scheduleWalker->neighbor),neighbor)
-              ) ||
-              type == CELLTYPE_TXRX
-          )
-       ){
-          usageCount += schedule_getUsageStatus(scheduleWalker);
-       }
-       scheduleWalker = scheduleWalker->next;
-   }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
-   
-   ENABLE_INTERRUPTS();
-   
-   return usageCount;
-}
-
 uint16_t  schedule_getCellsCounts(uint8_t frameID,cellType_t type, open_addr_t* neighbor){
     uint16_t         count = 0;
     scheduleEntry_t* scheduleWalker;
@@ -586,28 +543,6 @@ void schedule_removeAllCells(
 
 scheduleEntry_t* schedule_getCurrentScheduleEntry(){
     return schedule_vars.currentScheduleEntry;
-}
-
-//=== from otf
-uint8_t schedule_getNumOfSlotsByType(cellType_t type){
-   uint8_t returnVal;
-   scheduleEntry_t* scheduleWalker;
-   
-   INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
-   
-   returnVal = 0;
-   scheduleWalker = schedule_vars.currentScheduleEntry;
-   do {
-      if(type == scheduleWalker->type){
-          returnVal += 1;
-      }
-      scheduleWalker = scheduleWalker->next;
-   }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
-   
-   ENABLE_INTERRUPTS();
-   
-   return returnVal;
 }
 
 uint8_t schedule_getNumberOfFreeEntries(){
@@ -891,22 +826,6 @@ void schedule_indicateTx(asn_t* asnTimestamp, bool succesfullTx) {
    
    ENABLE_INTERRUPTS();
 }
-
-void schedule_updateCellUsageBitMap(bool hasPacketToSend){
-    uint16_t temp;  
-  
-    schedule_vars.currentScheduleEntry->bitMapIndex += 1;
-    if (schedule_vars.currentScheduleEntry->bitMapIndex == CELL_USAGE_CALCULATION_WINDOWS){
-        schedule_vars.currentScheduleEntry->bitMapIndex = 0;
-    }
-    
-    temp = (uint16_t)1 << schedule_vars.currentScheduleEntry->bitMapIndex;
-    if (hasPacketToSend) {
-        schedule_vars.currentScheduleEntry->usageBitMap |= temp;
-    } else {
-        schedule_vars.currentScheduleEntry->usageBitMap &= ~temp;
-    }
-}   
     
 bool schedule_getOneCellAfterOffset(uint8_t metadata,uint8_t offset,open_addr_t* neighbor, uint8_t cellOptions, uint16_t* slotoffset, uint16_t* channeloffset){
     bool returnVal;
@@ -916,13 +835,13 @@ bool schedule_getOneCellAfterOffset(uint8_t metadata,uint8_t offset,open_addr_t*
     DISABLE_INTERRUPTS();
 
     // translate cellOptions to cell type 
-    if (cellOptions == LINKOPTIONS_TX){
+    if (cellOptions == CELLOPTIONS_TX){
         type = CELLTYPE_TX;
     }
-    if (cellOptions == LINKOPTIONS_RX){
+    if (cellOptions == CELLOPTIONS_RX){
         type = CELLTYPE_RX;
     }
-    if (cellOptions == (LINKOPTIONS_TX | LINKOPTIONS_RX | LINKOPTIONS_SHARED)){
+    if (cellOptions == (CELLOPTIONS_TX | CELLOPTIONS_RX | CELLOPTIONS_SHARED)){
         type = CELLTYPE_TXRX;
     }
     

@@ -1158,8 +1158,8 @@ void sixtop_six2six_notifyReceive(
                 
                 returnCode = IANA_6TOP_RC_SUCCESS;
                 startingOffset = offset;
-                if ((cellOptions & (LINKOPTIONS_TX | LINKOPTIONS_RX)) != (LINKOPTIONS_TX | LINKOPTIONS_RX)){
-                    cellOptions_transformed = cellOptions ^ (LINKOPTIONS_TX | LINKOPTIONS_RX);
+                if ((cellOptions & (CELLOPTIONS_TX | CELLOPTIONS_RX)) != (CELLOPTIONS_TX | CELLOPTIONS_RX)){
+                    cellOptions_transformed = cellOptions ^ (CELLOPTIONS_TX | CELLOPTIONS_RX);
             } else {
                     cellOptions_transformed = cellOptions;
                 }
@@ -1206,8 +1206,8 @@ void sixtop_six2six_notifyReceive(
             if (code == IANA_6TOP_CMD_COUNT){
                 numCells = 0;
                 startingOffset = 0;
-                if ((cellOptions & (LINKOPTIONS_TX | LINKOPTIONS_RX)) != (LINKOPTIONS_TX | LINKOPTIONS_RX)){
-                    cellOptions_transformed = cellOptions ^ (LINKOPTIONS_TX | LINKOPTIONS_RX);
+                if ((cellOptions & (CELLOPTIONS_TX | CELLOPTIONS_RX)) != (CELLOPTIONS_TX | CELLOPTIONS_RX)){
+                    cellOptions_transformed = cellOptions ^ (CELLOPTIONS_TX | CELLOPTIONS_RX);
                     } else {
                     cellOptions_transformed = cellOptions;
                     }
@@ -1287,8 +1287,8 @@ void sixtop_six2six_notifyReceive(
                     pktLen -= 4;
                     i++;
                 }
-                if ((cellOptions & (LINKOPTIONS_TX | LINKOPTIONS_RX)) != (LINKOPTIONS_TX | LINKOPTIONS_RX)){
-                    cellOptions_transformed = cellOptions ^ (LINKOPTIONS_TX | LINKOPTIONS_RX);
+                if ((cellOptions & (CELLOPTIONS_TX | CELLOPTIONS_RX)) != (CELLOPTIONS_TX | CELLOPTIONS_RX)){
+                    cellOptions_transformed = cellOptions ^ (CELLOPTIONS_TX | CELLOPTIONS_RX);
                 } else {
                     cellOptions_transformed = cellOptions;
                 }
@@ -1327,8 +1327,8 @@ void sixtop_six2six_notifyReceive(
                     temp16--;
                     i++;
             }
-                if ((cellOptions & (LINKOPTIONS_TX | LINKOPTIONS_RX)) != (LINKOPTIONS_TX | LINKOPTIONS_RX)){
-                    cellOptions_transformed = cellOptions ^ (LINKOPTIONS_TX | LINKOPTIONS_RX);
+                if ((cellOptions & (CELLOPTIONS_TX | CELLOPTIONS_RX)) != (CELLOPTIONS_TX | CELLOPTIONS_RX)){
+                    cellOptions_transformed = cellOptions ^ (CELLOPTIONS_TX | CELLOPTIONS_RX);
                 } else {
                     cellOptions_transformed = cellOptions;
         }
@@ -1371,8 +1371,8 @@ void sixtop_six2six_notifyReceive(
         response_pkt->l2_sixtop_returnCode  = returnCode;
         response_pkt->l2_sixtop_frameID     = metadata;
         // revert tx and rx link option bits
-        if ((cellOptions & (LINKOPTIONS_TX | LINKOPTIONS_RX)) != (LINKOPTIONS_TX | LINKOPTIONS_RX)){
-            response_pkt->l2_sixtop_cellOptions = cellOptions ^ (LINKOPTIONS_TX | LINKOPTIONS_RX);
+        if ((cellOptions & (CELLOPTIONS_TX | CELLOPTIONS_RX)) != (CELLOPTIONS_TX | CELLOPTIONS_RX)){
+            response_pkt->l2_sixtop_cellOptions = cellOptions ^ (CELLOPTIONS_TX | CELLOPTIONS_RX);
         } else {
             response_pkt->l2_sixtop_cellOptions = cellOptions;
         }
@@ -1555,15 +1555,15 @@ bool sixtop_addCells(
     bool        hasCellsAdded;
    
     // translate cellOptions to cell type 
-    if (cellOptions == LINKOPTIONS_TX){
+    if (cellOptions == CELLOPTIONS_TX){
         type     = CELLTYPE_TX;
         isShared = FALSE;
       }
-    if (cellOptions == LINKOPTIONS_RX){
+    if (cellOptions == CELLOPTIONS_RX){
         type     = CELLTYPE_RX;  
         isShared = FALSE;
    }
-    if (cellOptions == (LINKOPTIONS_TX | LINKOPTIONS_RX | LINKOPTIONS_SHARED)){
+    if (cellOptions == (CELLOPTIONS_TX | CELLOPTIONS_RX | CELLOPTIONS_SHARED)){
         type     = CELLTYPE_TXRX;  
         isShared = TRUE;
     }
@@ -1605,13 +1605,13 @@ bool sixtop_removeCells(
     bool        hasCellsRemoved;
   
     // translate cellOptions to cell type 
-    if (cellOptions == LINKOPTIONS_TX){
+    if (cellOptions == CELLOPTIONS_TX){
         isShared = FALSE;
       }
-    if (cellOptions == LINKOPTIONS_RX){ 
+    if (cellOptions == CELLOPTIONS_RX){ 
         isShared = FALSE;
    }
-    if (cellOptions == (LINKOPTIONS_TX | LINKOPTIONS_RX | LINKOPTIONS_SHARED)){ 
+    if (cellOptions == (CELLOPTIONS_TX | CELLOPTIONS_RX | CELLOPTIONS_SHARED)){ 
         isShared = TRUE;
 }
 
@@ -1700,13 +1700,13 @@ bool sixtop_areAvailableCellsToBeRemoved(
     available           = TRUE;
   
     // translate cellOptions to cell type 
-    if (cellOptions == LINKOPTIONS_TX){
+    if (cellOptions == CELLOPTIONS_TX){
         type = CELLTYPE_TX;
     }
-    if (cellOptions == LINKOPTIONS_RX){
+    if (cellOptions == CELLOPTIONS_RX){
         type = CELLTYPE_RX;
     }
-    if (cellOptions == (LINKOPTIONS_TX | LINKOPTIONS_RX | LINKOPTIONS_SHARED)){
+    if (cellOptions == (CELLOPTIONS_TX | CELLOPTIONS_RX | CELLOPTIONS_SHARED)){
         type = CELLTYPE_TXRX;
         memset(&anycastAddr,0,sizeof(open_addr_t));
         anycastAddr.type = ADDR_ANYCAST;

@@ -76,11 +76,11 @@ See MINBE for an explanation of backoff.
 #define MIN_NUMTX_FOR_PDR  50 // don't calculate PDR when numTx is lower than this value 
 
 typedef enum{
-    LINKOPTIONS_TX              = 1<<0,
-    LINKOPTIONS_RX              = 1<<1,
-    LINKOPTIONS_SHARED          = 1<<2,
-    LINKOPTIONS_TIMEKEPPING     = 1<<3,
-    LINKOPTIONS_PRIORITY        = 1<<4
+    CELLOPTIONS_TX              = 1<<0,
+    CELLOPTIONS_RX              = 1<<1,
+    CELLOPTIONS_SHARED          = 1<<2,
+    CELLOPTIONS_TIMEKEPPING     = 1<<3,
+    CELLOPTIONS_PRIORITY        = 1<<4
 }linkOptions_t;
 
 //=========================== typedef =========================================
@@ -186,8 +186,6 @@ owerror_t          schedule_removeActiveSlot(
    open_addr_t*         neighbor
 );
 bool               schedule_isSlotOffsetAvailable(uint16_t slotOffset);
-uint8_t            schedule_getUsageStatus(scheduleEntry_t* entry);
-uint16_t           schedule_getTotalCellUsageStatus(cellType_t type, open_addr_t* neighbor);
 uint16_t           schedule_getCellsCounts(
     uint8_t frameID,
     cellType_t type,
@@ -198,7 +196,6 @@ void              schedule_removeAllCells(
    open_addr_t*   previousHop
 );
 scheduleEntry_t*  schedule_getCurrentScheduleEntry(void);
-uint8_t           schedule_getNumOfSlotsByType(cellType_t type);
 uint8_t           schedule_getNumberOfFreeEntries(void);
 
 // from IEEE802154E
@@ -227,9 +224,6 @@ bool               schedule_getOneCellAfterOffset(
     uint16_t* slotoffset, 
     uint16_t* channeloffset
 );
-
-void               schedule_updateCellUsageBitMap(bool hasPacketToSend);
-
 /**
 \}
 \}

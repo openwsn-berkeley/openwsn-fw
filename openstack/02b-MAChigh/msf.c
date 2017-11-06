@@ -4,14 +4,10 @@
 #include "sixtop.h"
 #include "scheduler.h"
 #include "schedule.h"
-#include "idmanager.h"
 #include "openapps.h"
 #include "openrandom.h"
 
 //=========================== definition =====================================
-
-#define IANA_6TISCH_SFID_MSF    0
-#define SF0THRESHOLD            2
 
 //=========================== variables =======================================
 
@@ -19,11 +15,13 @@ msf_vars_t msf_vars;
 
 //=========================== prototypes ======================================
 
-void msf_bandwidthEstimate_task(void);
 // sixtop callback 
 uint16_t msf_getMetadata(void);
 metadata_t msf_translateMetadata(void);
 void msf_handleRCError(uint8_t code);
+// msf private
+void msf_trigger6pAdd(void);
+void msf_trigger6pDelete(void);
 
 //=========================== public ==========================================
 
@@ -33,15 +31,28 @@ void msf_init(void) {
     sixtop_setSFcallback(msf_getsfid,msf_getMetadata,msf_translateMetadata,msf_handleRCError);
 }
 
-// this function is called once per slotframe. 
-void msf_notifyNewSlotframe(void) {
-   scheduler_push_task(msf_bandwidthEstimate_task,TASKPRIO_MSF);
-}
-
 void msf_setBackoff(uint8_t value){
     msf_vars.backoff = value;
 }
 
+// called by schedule
+void    msf_updateCellsPassed(void){
+    msf_vars.numCellsPassed++;
+    if (msf_vars.numCellsPassed == MAX_NUMCELLS){
+        if (msf_vars.numCellsUsed > LIM_NUMCELLSUSED_HIGH){
+            msf_trigger6pAdd();
+        }
+        if (msf_vars.numCellsUsed < LIM_NUMCELLSUSED_LOW){
+            msf_trigger6pDelete();
+        }
+        msf_vars.numCellsPassed = 0;
+        msf_vars.numCellsUsed   = 0;
+    }
+}
+
+void    msf_updateCellsUsed(void){
+    msf_vars.numCellsUsed++;
+}
 //=========================== callback =========================================
 
 uint8_t msf_getsfid(void){
@@ -86,24 +97,11 @@ void msf_handleRCError(uint8_t code){
 
 //=========================== private =========================================
 
-void msf_bandwidthEstimate_task(void){
+
+void msf_trigger6pAdd(void){
     open_addr_t    neighbor;
     bool           foundNeighbor;
-    int8_t         bw_outgoing;
-    int8_t         bw_incoming;
-    int8_t         bw_self;
     cellInfo_ht    celllist_add[CELLLIST_MAX_LEN];
-    cellInfo_ht    celllist_delete[CELLLIST_MAX_LEN];
-    
-    // do not reserve cells if I'm a DAGroot
-    if (idmanager_getIsDAGroot()){
-        return;
-    }
-    
-    if (msf_vars.backoff>0){
-        msf_vars.backoff -= 1;
-        return;
-    }
     
     // get preferred parent
     foundNeighbor = icmpv6rpl_getPreferredParentEui64(&neighbor);
@@ -111,62 +109,50 @@ void msf_bandwidthEstimate_task(void){
         return;
     }
     
-    // get bandwidth of outgoing, incoming and self.
-    // Here we just calculate the estimated bandwidth for 
-    // the application sending on dedicate cells(TX or Rx).
-    bw_outgoing = schedule_getNumOfSlotsByType(CELLTYPE_TX);
-    bw_incoming = schedule_getNumOfSlotsByType(CELLTYPE_RX);
-    
-    // get self required bandwith, you can design your
-    // application and assign bw_self accordingly. 
-    // for example:
-    //    bw_self = application_getBandwdith(app_name);
-    // By default, it's set to zero.
-    // bw_self = openapps_getBandwidth(COMPONENT_UINJECT);
-    bw_self = msf_vars.numAppPacketsPerSlotFrame;
-    
-    // In msf, scheduledCells = bw_outgoing
-    //         requiredCells  = bw_incoming + bw_self
-    // when scheduledCells<requiredCells, add one or more cell
-    
-    if (bw_outgoing <= bw_incoming+bw_self){
-        if (msf_candidateAddCellList(celllist_add,bw_incoming+bw_self-bw_outgoing+1)==FALSE){
-            // failed to get cell list to add
-            return;
-        }
-        sixtop_request(
-            IANA_6TOP_CMD_ADD,                  // code
-            &neighbor,                          // neighbor
-            bw_incoming+bw_self-bw_outgoing+1,  // number cells
-            LINKOPTIONS_TX,                     // cellOptions
-            celllist_add,                       // celllist to add
-            NULL,                               // celllist to delete (not used)
-            IANA_6TISCH_SFID_MSF,               // sfid
-            0,                                  // list command offset (not used)
-            0                                   // list command maximum celllist (not used)
-        );
-    } else {
-        // remove cell(s)
-        if ( (bw_incoming+bw_self) < (bw_outgoing-SF0THRESHOLD)) {
-            if (msf_candidateRemoveCellList(celllist_delete,&neighbor,SF0THRESHOLD)==FALSE){
-                // failed to get cell list to delete
-                return;
-            }
-            sixtop_request(
-                IANA_6TOP_CMD_DELETE,   // code
-                &neighbor,              // neighbor
-                SF0THRESHOLD,           // number cells
-                LINKOPTIONS_TX,         // cellOptions
-                NULL,                   // celllist to add (not used)
-                celllist_delete,        // celllist to delete
-                IANA_6TISCH_SFID_MSF,   // sfid
-                0,                      // list command offset (not used)
-                0                       // list command maximum celllist (not used)
-            );
-        } else {
-            // nothing to do
-        }
+    if (msf_candidateAddCellList(celllist_add,NUMCELLS_MSF)==FALSE){
+        // failed to get cell list to add
+        return;
     }
+    
+    sixtop_request(
+        IANA_6TOP_CMD_ADD,                  // code
+        &neighbor,                          // neighbor
+        NUMCELLS_MSF,                       // number cells
+        CELLOPTIONS_MSF,                    // cellOptions
+        celllist_add,                       // celllist to add
+        NULL,                               // celllist to delete (not used)
+        IANA_6TISCH_SFID_MSF,               // sfid
+        0,                                  // list command offset (not used)
+        0                                   // list command maximum celllist (not used)
+    );
+}
+
+void msf_trigger6pDelete(void){
+    open_addr_t    neighbor;
+    bool           foundNeighbor;
+    cellInfo_ht    celllist_delete[CELLLIST_MAX_LEN];
+    
+    // get preferred parent
+    foundNeighbor = icmpv6rpl_getPreferredParentEui64(&neighbor);
+    if (foundNeighbor==FALSE) {
+        return;
+    }
+    
+    if (msf_candidateRemoveCellList(celllist_delete,&neighbor,1)==FALSE){
+        // failed to get cell list to delete
+        return;
+    }
+    sixtop_request(
+        IANA_6TOP_CMD_DELETE,   // code
+        &neighbor,              // neighbor
+        NUMCELLS_MSF,           // number cells
+        CELLOPTIONS_MSF,        // cellOptions
+        NULL,                   // celllist to add (not used)
+        celllist_delete,        // celllist to delete
+        IANA_6TISCH_SFID_MSF,   // sfid
+        0,                      // list command offset (not used)
+        0                       // list command maximum celllist (not used)
+    );
 }
 
 void msf_appPktPeriod(uint8_t numAppPacketsPerSlotFrame){
@@ -187,7 +173,7 @@ bool msf_candidateAddCellList(
         slotoffset = openrandom_get16b()%schedule_getFrameLength();
         if(schedule_isSlotOffsetAvailable(slotoffset)==TRUE){
             cellList[numCandCells].slotoffset       = slotoffset;
-            cellList[numCandCells].channeloffset    = openrandom_get16b()%16;
+            cellList[numCandCells].channeloffset    = openrandom_get16b()&0x0F;
             cellList[numCandCells].isUsed           = TRUE;
             numCandCells++;
         }

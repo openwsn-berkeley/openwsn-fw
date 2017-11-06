@@ -909,9 +909,10 @@ port_INLINE void activity_ti1ORri1() {
          openserial_stop();
          // assuming that there is nothing to send
          ieee154e_vars.dataToSend = NULL;
+         // get the neighbor to check this is dedicated cell or not later
+         schedule_getNeighbor(&neighbor);
          // check whether we can send
          if (schedule_getOkToSend()) {
-            schedule_getNeighbor(&neighbor);
             ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor);
             if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX)) {
                couldSendEB=TRUE;
@@ -920,11 +921,12 @@ port_INLINE void activity_ti1ORri1() {
             }
          }
          
-         // udpate cell usgae bitmap, set as true if I have packet to send
-         if (ieee154e_vars.dataToSend==NULL) {
-             schedule_updateCellUsageBitMap(FALSE);
-         } else {
-             schedule_updateCellUsageBitMap(TRUE);
+         // update numcellpassed and numcellused on dedicated cell
+         if (packetfunctions_isBroadcastMulticast(&neighbor)==FALSE){
+            if (ieee154e_vars.dataToSend!=NULL) {
+                msf_updateCellsUsed();
+            }
+            msf_updateCellsPassed();
          }
          
          if (ieee154e_vars.dataToSend==NULL) {
