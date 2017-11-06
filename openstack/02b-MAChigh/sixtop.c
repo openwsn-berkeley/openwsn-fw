@@ -1575,7 +1575,7 @@ bool sixtop_addCells(
     open_addr_t temp_neighbor;
     cellType_t  type;
     bool        hasCellsAdded;
-    
+   
     // translate cellOptions to cell type 
     if (cellOptions == LINKOPTIONS_TX){
         type     = CELLTYPE_TX;
@@ -1589,14 +1589,9 @@ bool sixtop_addCells(
         type     = CELLTYPE_TXRX;  
         isShared = TRUE;
     }
-    
-    if (isShared){
-        memset(&temp_neighbor,0,sizeof(temp_neighbor));
-        temp_neighbor.type             = ADDR_ANYCAST;
-    } else {
-        memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
-    }
-    
+   
+    memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
+
     hasCellsAdded = FALSE;
     // add cells to schedule
     for(i = 0;i<CELLLIST_MAX_LEN;i++){
@@ -1609,40 +1604,23 @@ bool sixtop_addCells(
                 cellList[i].channeloffset,
                 &temp_neighbor
             );
-        }
+         }
     }
-    
+   
     return hasCellsAdded;
 }
 
 bool sixtop_removeCells(
-    uint8_t      slotframeID,
-    cellInfo_ht* cellList,
-    open_addr_t* previousHop,
+      uint8_t      slotframeID,
+      cellInfo_ht* cellList,
+      open_addr_t* previousHop,
     uint8_t      cellOptions
-){
-    uint8_t i;
-    bool        isShared;
+   ){
+    uint8_t     i;
     open_addr_t temp_neighbor;
     bool        hasCellsRemoved;
-    
-    // translate cellOptions to cell type 
-    if (cellOptions == LINKOPTIONS_TX){
-        isShared = FALSE;
-    }
-    if (cellOptions == LINKOPTIONS_RX){ 
-        isShared = FALSE;
-    }
-    if (cellOptions == (LINKOPTIONS_TX | LINKOPTIONS_RX | LINKOPTIONS_SHARED)){ 
-        isShared = TRUE;
-    }
-    
-    if (isShared){
-        memset(&temp_neighbor,0,sizeof(temp_neighbor));
-        temp_neighbor.type             = ADDR_ANYCAST;
-    } else {
-        memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
-    }
+
+    memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
     
     hasCellsRemoved = FALSE;
     // delete cells from schedule
