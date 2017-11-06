@@ -106,7 +106,7 @@ void sixtop_init() {
     sixtop_vars.dsn                = 0;
     sixtop_vars.mgtTaskCounter     = 0;
     sixtop_vars.kaPeriod           = MAXKAPERIOD;
-    sixtop_vars.ebPeriod           = EBPERIOD;
+    sixtop_vars.ebPeriod           = EB_PORTION*(neighbors_getNumNeighbors()+1);
     sixtop_vars.isResponseEnabled  = TRUE;
     sixtop_vars.six2six_state      = SIX_STATE_IDLE;
     
@@ -630,14 +630,27 @@ void sixtop_timeout_timer_cb(opentimers_id_t id) {
 //======= EB/KA task
 
 void timer_sixtop_sendEb_fired(){
-    sixtop_vars.ebCounter = (sixtop_vars.ebCounter+1)%sixtop_vars.ebPeriod;
-    switch (sixtop_vars.ebCounter) {
-    case 0:
-        // called every EBPERIOD seconds
+    
+    uint16_t newPeriod;
+    // current period 
+    newPeriod = EB_PORTION*(neighbors_getNumNeighbors()+1);
+    if (
+        sixtop_vars.ebPeriod  < newPeriod &&
+        sixtop_vars.ebCounter > newPeriod
+    ){
+        sixtop_vars.ebCounter = 0;
+        sixtop_vars.ebPeriod  = newPeriod;
         sixtop_sendEB();
-        break;
-    default:
-        break;
+    } else {
+        sixtop_vars.ebPeriod  = newPeriod;
+        sixtop_vars.ebCounter = (sixtop_vars.ebCounter+1)%sixtop_vars.ebPeriod;
+        switch (sixtop_vars.ebCounter) {
+        case 0:
+            sixtop_sendEB();
+            break;
+        default:
+            break;
+        }
     }
 }
 

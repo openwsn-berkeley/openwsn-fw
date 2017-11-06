@@ -42,7 +42,7 @@ static const uint8_t ebIEsBytestream[] = {
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to successfully synchronize
 #define US_PER_TICK                 30 // number of us per 32kHz clock tick
-#define EBPERIOD                     2 // in seconds: 2 -> EB every 2 seconds
+#define EB_PORTION                   6 // The portion of minimal cells that used for sending EB.
 #define MAXKAPERIOD               2000 // in slots: @15ms per slot -> ~30 seconds. Max value used by adaptive synchronization.
 #define DESYNCTIMEOUT             2333 // in slots: @15ms per slot -> ~35 seconds. A larger DESYNCTIMEOUT is needed if using a larger KATIMEOUT.
 #define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"

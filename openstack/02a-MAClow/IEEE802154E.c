@@ -15,6 +15,7 @@
 #include "sixtop.h"
 #include "adaptive_sync.h"
 #include "sctimer.h"
+#include "openrandom.h"
 
 //=========================== variables =======================================
 
