@@ -22,7 +22,7 @@
 #include "schedule.h"
 #include "icmpv6rpl.h"
 #include "icmpv6echo.h"
-#include "sf0.h"
+#include "msf.h"
 
 //=========================== variables =======================================
 
@@ -736,7 +736,7 @@ void openserial_handleCommands(void){
                 cellOptions,       // cellOptions
                 celllist_add,      // celllist to add
                 celllist_delete,   // celllist to delete (not used)
-                sf0_getsfid(),     // sfid
+                msf_getsfid(),     // sfid
                 listOffset,        // list command offset (not used)
                 maxListLen         // list command maximum celllist (not used)
             );
@@ -761,7 +761,7 @@ void openserial_handleCommands(void){
             break;
         case COMMAND_SET_UINJECTPERIOD:
             comandParam_8 = openserial_vars.inputBuf[ptr];
-            sf0_appPktPeriod(comandParam_8);
+            msf_appPktPeriod(comandParam_8);
             break;
         case COMMAND_SET_ECHO_REPLY_STATUS:
             comandParam_8 = openserial_vars.inputBuf[ptr];

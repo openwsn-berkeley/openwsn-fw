@@ -5,7 +5,7 @@
 #include "packetfunctions.h"
 #include "sixtop.h"
 #include "idmanager.h"
-#include "sf0.h"
+#include "msf.h"
 #include "IEEE802154E.h"
 #include "icmpv6rpl.h"
 

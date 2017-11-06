@@ -1,5 +1,5 @@
 #include "opendefs.h"
-#include "sf0.h"
+#include "msf.h"
 #include "neighbors.h"
 #include "sixtop.h"
 #include "scheduler.h"
@@ -10,65 +10,65 @@
 
 //=========================== definition =====================================
 
-#define SF0_ID            0
-#define SF0THRESHOLD      2
+#define IANA_6TISCH_SFID_MSF    0
+#define SF0THRESHOLD            2
 
 //=========================== variables =======================================
 
-sf0_vars_t sf0_vars;
+msf_vars_t msf_vars;
 
 //=========================== prototypes ======================================
 
-void sf0_bandwidthEstimate_task(void);
+void msf_bandwidthEstimate_task(void);
 // sixtop callback 
-uint16_t sf0_getMetadata(void);
-metadata_t sf0_translateMetadata(void);
-void sf0_handleRCError(uint8_t code);
+uint16_t msf_getMetadata(void);
+metadata_t msf_translateMetadata(void);
+void msf_handleRCError(uint8_t code);
 
 //=========================== public ==========================================
 
-void sf0_init(void) {
-    memset(&sf0_vars,0,sizeof(sf0_vars_t));
-    sf0_vars.numAppPacketsPerSlotFrame = 0;
-    sixtop_setSFcallback(sf0_getsfid,sf0_getMetadata,sf0_translateMetadata,sf0_handleRCError);
+void msf_init(void) {
+    memset(&msf_vars,0,sizeof(msf_vars_t));
+    msf_vars.numAppPacketsPerSlotFrame = 0;
+    sixtop_setSFcallback(msf_getsfid,msf_getMetadata,msf_translateMetadata,msf_handleRCError);
 }
 
 // this function is called once per slotframe. 
-void sf0_notifyNewSlotframe(void) {
-   scheduler_push_task(sf0_bandwidthEstimate_task,TASKPRIO_SF0);
+void msf_notifyNewSlotframe(void) {
+   scheduler_push_task(msf_bandwidthEstimate_task,TASKPRIO_MSF);
 }
 
-void sf0_setBackoff(uint8_t value){
-    sf0_vars.backoff = value;
+void msf_setBackoff(uint8_t value){
+    msf_vars.backoff = value;
 }
 
 //=========================== callback =========================================
 
-uint8_t sf0_getsfid(void){
-    return SF0_ID;
+uint8_t msf_getsfid(void){
+    return IANA_6TISCH_SFID_MSF;
 }
 
-uint16_t sf0_getMetadata(void){
+uint16_t msf_getMetadata(void){
     return SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;
 }
 
-metadata_t sf0_translateMetadata(void){
+metadata_t msf_translateMetadata(void){
     return METADATA_TYPE_FRAMEID;
 }
 
-void sf0_handleRCError(uint8_t code){
+void msf_handleRCError(uint8_t code){
     if (code==IANA_6TOP_RC_BUSY){
-        // disable sf0 for [0...2^4] slotframe long time
-        sf0_setBackoff(openrandom_get16b()%(1<<4));
+        // disable msf for [0...2^4] slotframe long time
+        msf_setBackoff(openrandom_get16b()%(1<<4));
     }
     
     if (code==IANA_6TOP_RC_RESET){
-        // TBD: the neighbor can't statisfy the 6p request with given cells, call sf0 to make a decision 
+        // TBD: the neighbor can't statisfy the 6p request with given cells, call msf to make a decision 
         // (e.g. issue another 6p request with different cell list)
     }
     
     if (code==IANA_6TOP_RC_ERROR){
-        // TBD: the neighbor can't statisfy the 6p request, call sf0 to make a decision
+        // TBD: the neighbor can't statisfy the 6p request, call msf to make a decision
     }
     
     if (code==IANA_6TOP_RC_VER_ERR){
@@ -86,7 +86,7 @@ void sf0_handleRCError(uint8_t code){
 
 //=========================== private =========================================
 
-void sf0_bandwidthEstimate_task(void){
+void msf_bandwidthEstimate_task(void){
     open_addr_t    neighbor;
     bool           foundNeighbor;
     int8_t         bw_outgoing;
@@ -100,8 +100,8 @@ void sf0_bandwidthEstimate_task(void){
         return;
     }
     
-    if (sf0_vars.backoff>0){
-        sf0_vars.backoff -= 1;
+    if (msf_vars.backoff>0){
+        msf_vars.backoff -= 1;
         return;
     }
     
@@ -123,14 +123,14 @@ void sf0_bandwidthEstimate_task(void){
     //    bw_self = application_getBandwdith(app_name);
     // By default, it's set to zero.
     // bw_self = openapps_getBandwidth(COMPONENT_UINJECT);
-    bw_self = sf0_vars.numAppPacketsPerSlotFrame;
+    bw_self = msf_vars.numAppPacketsPerSlotFrame;
     
-    // In SF0, scheduledCells = bw_outgoing
+    // In msf, scheduledCells = bw_outgoing
     //         requiredCells  = bw_incoming + bw_self
     // when scheduledCells<requiredCells, add one or more cell
     
     if (bw_outgoing <= bw_incoming+bw_self){
-        if (sf0_candidateAddCellList(celllist_add,bw_incoming+bw_self-bw_outgoing+1)==FALSE){
+        if (msf_candidateAddCellList(celllist_add,bw_incoming+bw_self-bw_outgoing+1)==FALSE){
             // failed to get cell list to add
             return;
         }
@@ -141,14 +141,14 @@ void sf0_bandwidthEstimate_task(void){
             LINKOPTIONS_TX,                     // cellOptions
             celllist_add,                       // celllist to add
             NULL,                               // celllist to delete (not used)
-            SF0_ID,                             // sfid
+            IANA_6TISCH_SFID_MSF,               // sfid
             0,                                  // list command offset (not used)
             0                                   // list command maximum celllist (not used)
         );
     } else {
         // remove cell(s)
         if ( (bw_incoming+bw_self) < (bw_outgoing-SF0THRESHOLD)) {
-            if (sf0_candidateRemoveCellList(celllist_delete,&neighbor,SF0THRESHOLD)==FALSE){
+            if (msf_candidateRemoveCellList(celllist_delete,&neighbor,SF0THRESHOLD)==FALSE){
                 // failed to get cell list to delete
                 return;
             }
@@ -159,7 +159,7 @@ void sf0_bandwidthEstimate_task(void){
                 LINKOPTIONS_TX,         // cellOptions
                 NULL,                   // celllist to add (not used)
                 celllist_delete,        // celllist to delete
-                SF0_ID,                 // sfid
+                IANA_6TISCH_SFID_MSF,   // sfid
                 0,                      // list command offset (not used)
                 0                       // list command maximum celllist (not used)
             );
@@ -169,11 +169,11 @@ void sf0_bandwidthEstimate_task(void){
     }
 }
 
-void sf0_appPktPeriod(uint8_t numAppPacketsPerSlotFrame){
-    sf0_vars.numAppPacketsPerSlotFrame = numAppPacketsPerSlotFrame;
+void msf_appPktPeriod(uint8_t numAppPacketsPerSlotFrame){
+    msf_vars.numAppPacketsPerSlotFrame = numAppPacketsPerSlotFrame;
 }
 
-bool sf0_candidateAddCellList(
+bool msf_candidateAddCellList(
       cellInfo_ht* cellList,
       uint8_t      requiredCells
    ){
@@ -200,7 +200,7 @@ bool sf0_candidateAddCellList(
     }
 }
 
-bool sf0_candidateRemoveCellList(
+bool msf_candidateRemoveCellList(
       cellInfo_ht* cellList,
       open_addr_t* neighbor,
       uint8_t      requiredCells
