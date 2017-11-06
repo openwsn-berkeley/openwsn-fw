@@ -1568,12 +1568,7 @@ bool sixtop_addCells(
         isShared = TRUE;
     }
    
-    if (isShared){
-        memset(&temp_neighbor,0,sizeof(temp_neighbor));
-        temp_neighbor.type             = ADDR_ANYCAST;
-    } else {
-        memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
-    }
+    memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
 
     hasCellsAdded = FALSE;
     // add cells to schedule
@@ -1600,27 +1595,10 @@ bool sixtop_removeCells(
     uint8_t      cellOptions
    ){
     uint8_t     i;
-    bool        isShared;
     open_addr_t temp_neighbor;
     bool        hasCellsRemoved;
     
-    // translate cellOptions to cell type 
-    if (cellOptions == CELLOPTIONS_TX){
-        isShared = FALSE;
-    }
-    if (cellOptions == CELLOPTIONS_RX){ 
-        isShared = FALSE;
-    }
-    if (cellOptions == (CELLOPTIONS_TX | CELLOPTIONS_RX | CELLOPTIONS_SHARED)){ 
-        isShared = TRUE;
-    }
-
-    if (isShared){
-        memset(&temp_neighbor,0,sizeof(temp_neighbor));
-        temp_neighbor.type             = ADDR_ANYCAST;
-    } else {
-        memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
-    }
+    memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
     
     hasCellsRemoved = FALSE;
     // delete cells from schedule
