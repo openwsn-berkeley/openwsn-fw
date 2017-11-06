@@ -29,35 +29,36 @@ void schedule_resetEntry(scheduleEntry_t* pScheduleEntry);
 \post Call this function before calling any other function in this module.
 */
 void schedule_init() {
-   slotOffset_t    start_slotOffset;
-   slotOffset_t    running_slotOffset;
-   open_addr_t     temp_neighbor;
+    slotOffset_t    start_slotOffset;
+    slotOffset_t    running_slotOffset;
+    open_addr_t     temp_neighbor;
 
-   // reset local variables
-   memset(&schedule_vars,0,sizeof(schedule_vars_t));
-   for (running_slotOffset=0;running_slotOffset<MAXACTIVESLOTS;running_slotOffset++) {
-      schedule_resetEntry(&schedule_vars.scheduleBuf[running_slotOffset]);
-   }
-   schedule_vars.backoffExponent = MINBE-1;
-   schedule_vars.maxActiveSlots = MAXACTIVESLOTS;
-   
-   start_slotOffset = SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;
-   if (idmanager_getIsDAGroot()==TRUE) {
-      schedule_startDAGroot();
-   }
-   
-   // serial RX slot(s)
-   start_slotOffset += SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;
-   memset(&temp_neighbor,0,sizeof(temp_neighbor));
-   for (running_slotOffset=start_slotOffset;running_slotOffset<start_slotOffset+NUMSERIALRX;running_slotOffset++) {
-      schedule_addActiveSlot(
-         running_slotOffset,                    // slot offset
-         CELLTYPE_SERIALRX,                     // type of slot
-         FALSE,                                 // shared?
-         0,                                     // channel offset
-         &temp_neighbor                         // neighbor
-      );
-   }
+    // reset local variables
+    memset(&schedule_vars,0,sizeof(schedule_vars_t));
+    for (running_slotOffset=0;running_slotOffset<MAXACTIVESLOTS;running_slotOffset++) {
+        schedule_resetEntry(&schedule_vars.scheduleBuf[running_slotOffset]);
+    }
+    schedule_vars.backoffExponenton_minimalCell   = MINBE-1;
+    schedule_vars.backoffExponenton_dedicatedCell = MINBE-1;
+    schedule_vars.maxActiveSlots = MAXACTIVESLOTS;
+    
+    start_slotOffset = SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;
+    if (idmanager_getIsDAGroot()==TRUE) {
+        schedule_startDAGroot();
+    }
+    
+    // serial RX slot(s)
+    start_slotOffset += SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;
+    memset(&temp_neighbor,0,sizeof(temp_neighbor));
+    for (running_slotOffset=start_slotOffset;running_slotOffset<start_slotOffset+NUMSERIALRX;running_slotOffset++) {
+        schedule_addActiveSlot(
+            running_slotOffset,                    // slot offset
+            CELLTYPE_SERIALRX,                     // type of slot
+            FALSE,                                 // shared?
+            0,                                     // channel offset
+            &temp_neighbor                         // neighbor
+        );
+    }
 }
 
 /**
@@ -156,8 +157,8 @@ bool debugPrint_backoff() {
    uint8_t temp[2];
    
    // gather status data
-   temp[0] = schedule_vars.backoffExponent;
-   temp[1] = schedule_vars.backoff;
+   temp[0] = schedule_vars.backoffExponenton_minimalCell;
+   temp[1] = schedule_vars.backoff_minimalCell;
    
    // send status data over serial port
    openserial_printStatus(
@@ -713,35 +714,52 @@ Note that the backoff counter is global, not per slot.
 
 \returns TRUE if it is OK to send on this slot, FALSE otherwise.
 */
-bool schedule_getOkToSend() {
-   bool returnVal;
-   
-   INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
-   
-   if (schedule_vars.currentScheduleEntry->shared==FALSE) {
-      // non-shared slot: backoff does not apply
-      
-      returnVal = TRUE;
-   } else {
-      // shared slot: check backoff before answering
-      
-      // decrement backoff
-      if (schedule_vars.backoff>0) {
-         schedule_vars.backoff--;
-      }
-      
-      // only return TRUE if backoff hit 0
-      if (schedule_vars.backoff==0) {
-         returnVal = TRUE;
-      } else {
-         returnVal = FALSE;
-      }
-   }
-   
-   ENABLE_INTERRUPTS();
-   
-   return returnVal;
+bool schedule_getOkToSend(void) {
+    bool returnVal;
+    
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+    
+    if (schedule_vars.currentScheduleEntry->shared==FALSE) {
+        // non-shared slot: backoff does not apply
+        
+        returnVal = TRUE;
+    } else {
+        // shared slot: check backoff before answering
+     
+        if (schedule_vars.currentScheduleEntry->neighbor.type==ADDR_ANYCAST){
+            
+            // this is a minimal cell
+            
+            if (schedule_vars.backoff_minimalCell>0) {
+                schedule_vars.backoff_minimalCell--;
+            }
+            
+            // only return TRUE if backoff hit 0
+            if (schedule_vars.backoff_minimalCell==0) {
+                returnVal = TRUE;
+            } else {
+                returnVal = FALSE;
+            }
+        } else {
+            // this is a dedicated cell
+            
+            if (schedule_vars.backoff_dedicatedCell>0) {
+                schedule_vars.backoff_dedicatedCell--;
+            }
+            
+            // only return TRUE if backoff hit 0
+            if (schedule_vars.backoff_dedicatedCell==0) {
+                returnVal = TRUE;
+            } else {
+                returnVal = FALSE;
+            }
+        }
+    }
+    
+    ENABLE_INTERRUPTS();
+    
+    return returnVal;
 }
 
 /**
@@ -749,15 +767,17 @@ bool schedule_getOkToSend() {
 */
 void schedule_resetBackoff() {
    
-   INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
-   
-   // reset backoffExponent
-   schedule_vars.backoffExponent = MINBE-1;
-   // reset backoff
-   schedule_vars.backoff         = 0;
-   
-   ENABLE_INTERRUPTS();
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+    
+    // reset backoffExponent
+    schedule_vars.backoffExponenton_minimalCell   = MINBE-1;
+    schedule_vars.backoffExponenton_dedicatedCell = MINBE-1;
+    // reset backoff
+    schedule_vars.backoff_minimalCell             = 0;
+    schedule_vars.backoff_dedicatedCell           = 0;
+    
+    ENABLE_INTERRUPTS();
 }
 
 /**
@@ -782,40 +802,52 @@ void schedule_indicateRx(asn_t* asnTimestamp) {
 */
 void schedule_indicateTx(asn_t* asnTimestamp, bool succesfullTx) {
    
-   INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
-   
-   // increment usage statistics
-   if (schedule_vars.currentScheduleEntry->numTx==0xFF) {
-      schedule_vars.currentScheduleEntry->numTx/=2;
-      schedule_vars.currentScheduleEntry->numTxACK/=2;
-   }
-   schedule_vars.currentScheduleEntry->numTx++;
-   if (succesfullTx==TRUE) {
-      schedule_vars.currentScheduleEntry->numTxACK++;
-   }
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+    
+    // increment usage statistics
+    if (schedule_vars.currentScheduleEntry->numTx==0xFF) {
+        schedule_vars.currentScheduleEntry->numTx/=2;
+        schedule_vars.currentScheduleEntry->numTxACK/=2;
+    }
+    schedule_vars.currentScheduleEntry->numTx++;
+    if (succesfullTx==TRUE) {
+        schedule_vars.currentScheduleEntry->numTxACK++;
+    }
 
-   // update last used timestamp
-   memcpy(&schedule_vars.currentScheduleEntry->lastUsedAsn, asnTimestamp, sizeof(asn_t));
+    // update last used timestamp
+    memcpy(&schedule_vars.currentScheduleEntry->lastUsedAsn, asnTimestamp, sizeof(asn_t));
 
-   // update this backoff parameters for shared slots
-   if (schedule_vars.currentScheduleEntry->shared==TRUE) {
-      if (succesfullTx==TRUE) {
-         // reset backoffExponent
-         schedule_vars.backoffExponent = MINBE-1;
-         // reset backoff
-         schedule_vars.backoff         = 0;
-      } else {
-         // increase the backoffExponent
-         if (schedule_vars.backoffExponent<MAXBE) {
-            schedule_vars.backoffExponent++;
-         }
-         // set the backoff to a random value in [0..2^BE]
-         schedule_vars.backoff         = openrandom_get16b()%(1<<schedule_vars.backoffExponent);
-      }
-   }
-   
-   ENABLE_INTERRUPTS();
+    // update this backoff parameters for shared slots
+    if (schedule_vars.currentScheduleEntry->shared==TRUE) {
+        if (succesfullTx==TRUE) {
+            if (schedule_vars.currentScheduleEntry->neighbor.type == ADDR_ANYCAST){
+                // reset backoffExponent
+                schedule_vars.backoffExponenton_minimalCell     = MINBE-1;
+                // reset backoff
+                schedule_vars.backoff_minimalCell               = 0;
+            } else {
+                schedule_vars.backoffExponenton_dedicatedCell   = MINBE-1;
+                schedule_vars.backoff_dedicatedCell             = 0;
+            }
+        } else {
+            if (schedule_vars.currentScheduleEntry->neighbor.type == ADDR_ANYCAST){
+                // increase the backoffExponent
+                if (schedule_vars.backoffExponenton_minimalCell<MAXBE) {
+                    schedule_vars.backoffExponenton_minimalCell++;
+                }
+                // set the backoff to a random value in [0..2^BE]
+                schedule_vars.backoff_minimalCell       = openrandom_get16b()%(1<<schedule_vars.backoffExponenton_minimalCell);
+            } else {
+                if (schedule_vars.backoffExponenton_dedicatedCell<MAXBE) {
+                    schedule_vars.backoffExponenton_dedicatedCell++;
+                }
+                schedule_vars.backoff_dedicatedCell     = openrandom_get16b()%(1<<schedule_vars.backoffExponenton_dedicatedCell);
+            }
+        }
+    }
+    
+    ENABLE_INTERRUPTS();
 }
 
 bool schedule_getOneCellAfterOffset(uint8_t metadata,uint8_t offset,open_addr_t* neighbor, uint8_t cellOptions, uint16_t* slotoffset, uint16_t* channeloffset){
