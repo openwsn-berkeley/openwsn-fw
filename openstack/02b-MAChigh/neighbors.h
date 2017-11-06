@@ -63,7 +63,6 @@ open_addr_t*  neighbors_getJoinProxy(void);
 bool          neighbors_getNeighborNoResource(uint8_t index);
 int8_t        neighbors_getRssi(uint8_t index);
 uint8_t       neighbors_getNumTx(uint8_t index);
-uint8_t       neighbors_getGeneration(open_addr_t* address);
 uint8_t       neighbors_getSequenceNumber(open_addr_t* address);
 // setters
 void          neighbors_setNeighborRank(uint8_t index, dagrank_t rank);
@@ -93,8 +92,7 @@ void          neighbors_indicateTx(
    asn_t*               asnTimestamp
 );
 void          neighbors_updateSequenceNumber(open_addr_t* address);
-void          neighbors_updateGeneration(open_addr_t* address);
-void          neighbors_resetGeneration(open_addr_t* address);
+void          neighbors_resetSequenceNumber(open_addr_t* address);
 
 // get addresses
 bool          neighbors_getNeighborEui64(open_addr_t* address,uint8_t addr_type,uint8_t index);

@@ -23,12 +23,10 @@
 #define IANA_6TOP_TYPE_REQUEST      0<<IANA_6TOP_TYPE_SHIFT
 #define IANA_6TOP_TYPE_RESPONSE     1<<IANA_6TOP_TYPE_SHIFT
 #define IANA_6TOP_TYPE_CONFIRMATION 2<<IANA_6TOP_TYPE_SHIFT
-// 6p schedule generation shift
-#define IANA_6TOP_GEN_SHIFT         4
 // 6P command Id
-#define IANA_6TOP_CMD_NONE     0x00
-#define IANA_6TOP_CMD_ADD      0x01 // CMD_ADD          | add one or more cells     
-#define IANA_6TOP_CMD_DELETE   0x02 // CMD_DELETE       | delete one or more cells  
+#define IANA_6TOP_CMD_NONE          0x00
+#define IANA_6TOP_CMD_ADD           0x01 // CMD_ADD          | add one or more cells     
+#define IANA_6TOP_CMD_DELETE        0x02 // CMD_DELETE       | delete one or more cells  
 #define IANA_6TOP_CMD_RELOCATE      0x03 // CMD_RELOCATE     | relocate one or more cells  
 #define IANA_6TOP_CMD_COUNT         0x04 // CMD_COUNT        | count scheduled cells     
 #define IANA_6TOP_CMD_LIST          0x05 // CMD_LIST         | list the scheduled cells  
@@ -40,7 +38,7 @@
 #define IANA_6TOP_RC_RESET          0x03 // RC_RESET         | critical error, reset
 #define IANA_6TOP_RC_VER_ERR        0x04 // RC_VER_ERR       | unsupported 6P version   
 #define IANA_6TOP_RC_SFID_ERR       0x05 // RC_SFID_ERR      | unsupported SFID         
-#define IANA_6TOP_RC_GEN_ERR        0x06 // RC_GEN_ERR       | wrong schedule generation       
+#define IANA_6TOP_RC_SEQNUM_ERR     0x06 // RC_SEQNUM_ERR    | wrong sequence number
 #define IANA_6TOP_RC_BUSY           0x07 // RC_BUSY          | busy
 #define IANA_6TOP_RC_NORES          0x08 // RC_NORES         | not enough resources      
 #define IANA_6TOP_RC_CELLLIST_ERR   0x09 // RC_CELLLIST_ERR  | cellList error      
@@ -82,7 +80,7 @@ typedef enum {
 // >2^4*3*(101/9)*15=8080 (2^MAXEB * maxretries * (slotframe / numberOfsharedCellsFor6p)*slotlength) (ms))
 // on the receiver side of sixtop, it may has mutiple sixtop request in the queue to response (most of them will return with RC BUSY)
 // increase the timeout longer than calculated value
-#define SIX2SIX_TIMEOUT_MS      10000 
+#define SIX2SIX_TIMEOUT_MS      20000 
 typedef uint8_t                 (*sixtop_sf_getsfid)(void);
 typedef uint16_t                (*sixtop_sf_getmetadata)(void);
 typedef metadata_t              (*sixtop_sf_translatemetadata)(void);

@@ -78,6 +78,10 @@ void sf0_handleRCError(uint8_t code){
     if (code==IANA_6TOP_RC_SFID_ERR){
         // TBD: the sfId does not match
     }
+    
+    if (code==IANA_6TOP_RC_SEQNUM_ERR){
+        // TBD: the seqNum does not match
+    }
 }
 
 //=========================== private =========================================

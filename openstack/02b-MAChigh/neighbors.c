@@ -132,16 +132,6 @@ bool neighbors_getNeighborNoResource(uint8_t index){
     return neighbors_vars.neighbors[index].f6PNORES;
 }
 
-uint8_t neighbors_getGeneration(open_addr_t* address){
-    uint8_t i;
-    for (i=0;i<MAXNUMNEIGHBORS;i++){
-        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b)){
-            break;
-        }
-    }
-    return neighbors_vars.neighbors[i].generation;
-}
-
 uint8_t neighbors_getSequenceNumber(open_addr_t* address){
     uint8_t i;
     for (i=0;i<MAXNUMNEIGHBORS;i++){
@@ -447,27 +437,21 @@ void neighbors_updateSequenceNumber(open_addr_t* address){
     uint8_t i;
     for (i=0;i<MAXNUMNEIGHBORS;i++){
         if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b)){
-            neighbors_vars.neighbors[i].sequenceNumber = (neighbors_vars.neighbors[i].sequenceNumber+1) & 0x0F;
+            neighbors_vars.neighbors[i].sequenceNumber = (neighbors_vars.neighbors[i].sequenceNumber+1) & 0xFF;
+            // rollover from 0xff to 0x01
+            if (neighbors_vars.neighbors[i].sequenceNumber == 0){
+                neighbors_vars.neighbors[i].sequenceNumber = 1;
+            }
             break;
         }
     }
 }
 
-void neighbors_updateGeneration(open_addr_t* address){
+void neighbors_resetSequenceNumber(open_addr_t* address){
     uint8_t i;
     for (i=0;i<MAXNUMNEIGHBORS;i++){
         if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b)){
-            neighbors_vars.neighbors[i].generation = (neighbors_vars.neighbors[i].generation+1)%9;
-            break;
-        }
-    }
-}
-
-void neighbors_resetGeneration(open_addr_t* address){
-    uint8_t i;
-    for (i=0;i<MAXNUMNEIGHBORS;i++){
-        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b)){
-            neighbors_vars.neighbors[i].generation = 0;
+            neighbors_vars.neighbors[i].sequenceNumber = 0;
             break;
         }
     }
