@@ -130,11 +130,11 @@ void sixtop_init() {
 }
 
 void sixtop_setKaPeriod(uint16_t kaPeriod) {
-   if(kaPeriod > MAXKAPERIOD) {
-      sixtop_vars.kaPeriod = MAXKAPERIOD;
-   } else {
-      sixtop_vars.kaPeriod = kaPeriod;
-   } 
+    if(kaPeriod > MAXKAPERIOD) {
+        sixtop_vars.kaPeriod = MAXKAPERIOD;
+    } else {
+        sixtop_vars.kaPeriod = kaPeriod;
+    } 
 }
 
 void sixtop_setEBPeriod(uint8_t ebPeriod) {
@@ -149,12 +149,12 @@ void  sixtop_setSFcallback(
     sixtop_sf_getmetadata       cb1, 
     sixtop_sf_translatemetadata cb2, 
     sixtop_sf_handle_callback   cb3
-    ){
+){
    sixtop_vars.cb_sf_getsfid            = cb0;
    sixtop_vars.cb_sf_getMetadata        = cb1;
    sixtop_vars.cb_sf_translateMetadata  = cb2;
    sixtop_vars.cb_sf_handleRCError      = cb3;
-    }
+}
 
 //======= scheduling
 
@@ -184,7 +184,7 @@ owerror_t sixtop_request(
         // neighbor can't be none or previous transcation doesn't finishe yet
         return E_FAIL;
     }
-      
+
     // get a free packet buffer
     pkt = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP_RES);
     if (pkt==NULL) {
@@ -206,7 +206,7 @@ owerror_t sixtop_request(
         memcpy(sixtop_vars.celllist_toDelete,celllist_toBeDeleted,CELLLIST_MAX_LEN*sizeof(cellInfo_ht));
     }
     sixtop_vars.cellOptions = cellOptions;
-   
+    
     len  = 0;
     if (
         code == IANA_6TOP_CMD_ADD      || 
@@ -241,7 +241,7 @@ owerror_t sixtop_request(
         // append 6p numberCells
         packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
         *((uint8_t*)(pkt->payload)) = numCells;
-        len+=1;
+        len += 1;
     }
     
     if (code == IANA_6TOP_CMD_LIST){
@@ -254,11 +254,11 @@ owerror_t sixtop_request(
         packetfunctions_reserveHeaderSize(pkt,sizeof(uint16_t));
         *((uint8_t*)(pkt->payload))   = (uint8_t)(listingOffset & 0x00FF);
         *((uint8_t*)(pkt->payload+1)) = (uint8_t)(listingOffset & 0xFF00)>>8;
-        len +=2;
+        len += 2;
         // append 6p Reserved field
         packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
         *((uint8_t*)(pkt->payload)) = 0;
-        len+=1;
+        len += 1;
     }
     
     if (code != IANA_6TOP_CMD_CLEAR){
@@ -313,7 +313,7 @@ owerror_t sixtop_request(
     pkt->l2_payloadIEpresent = TRUE;
     // record this packet as sixtop request message
     pkt->l2_sixtop_messageType    = SIXTOP_CELL_REQUEST;
-   
+    
     // send packet
     outcome = sixtop_send(pkt);
     
@@ -344,20 +344,20 @@ owerror_t sixtop_request(
     }
     return outcome;
 }
-      
+
 //======= from upper layer
 
 owerror_t sixtop_send(OpenQueueEntry_t *msg) {
-    
+
     // set metadata
     msg->owner        = COMPONENT_SIXTOP;
     msg->l2_frameType = IEEE154_TYPE_DATA;
-    
+
     // set l2-security attributes
     msg->l2_securityLevel   = IEEE802154_security_getSecurityLevel(msg);
     msg->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE; 
     msg->l2_keyIndex        = IEEE802154_security_getDataKeyIndex();
-    
+
     if (msg->l2_payloadIEpresent == FALSE) {
         return sixtop_send_internal(
             msg,
@@ -527,12 +527,12 @@ status information about several modules in the OpenWSN stack.
 \returns TRUE if this function printed something, FALSE otherwise.
 */
 bool debugPrint_myDAGrank() {
-   uint16_t output;
-   
-   output = 0;
-   output = icmpv6rpl_getMyDAGrank();
-   openserial_printStatus(STATUS_DAGRANK,(uint8_t*)&output,sizeof(uint16_t));
-   return TRUE;
+    uint16_t output;
+    
+    output = 0;
+    output = icmpv6rpl_getMyDAGrank();
+    openserial_printStatus(STATUS_DAGRANK,(uint8_t*)&output,sizeof(uint16_t));
+    return TRUE;
 }
 
 /**
@@ -544,15 +544,15 @@ status information about several modules in the OpenWSN stack.
 \returns TRUE if this function printed something, FALSE otherwise.
 */
 bool debugPrint_kaPeriod() {
-   uint16_t output;
-   
-   output = sixtop_vars.kaPeriod;
-   openserial_printStatus(
-       STATUS_KAPERIOD,
-       (uint8_t*)&output,
-       sizeof(output)
-   );
-   return TRUE;
+    uint16_t output;
+    
+    output = sixtop_vars.kaPeriod;
+    openserial_printStatus(
+        STATUS_KAPERIOD,
+        (uint8_t*)&output,
+        sizeof(output)
+    );
+    return TRUE;
 }
 
 void sixtop_setIsResponseEnabled(bool isEnabled){
@@ -576,39 +576,39 @@ IEEE802154E will handle the packet.
 \returns E_SUCCESS iff successful.
 */
 owerror_t sixtop_send_internal(
-   OpenQueueEntry_t* msg, 
-   bool    payloadIEPresent) {
+    OpenQueueEntry_t* msg, 
+    bool    payloadIEPresent) {
 
-   // assign a number of retries
-   if (
-      packetfunctions_isBroadcastMulticast(&(msg->l2_nextORpreviousHop))==TRUE
-      ) {
-      msg->l2_retriesLeft = 1;
-   } else {
-      msg->l2_retriesLeft = TXRETRIES + 1;
-   }
-   // record this packet's dsn (for matching the ACK)
-   msg->l2_dsn = sixtop_vars.dsn++;
-   // this is a new packet which I never attempted to send
-   msg->l2_numTxAttempts = 0;
-   // transmit with the default TX power
-   msg->l1_txPower = TX_POWER;
-   // add a IEEE802.15.4 header
+    // assign a number of retries
+    if (
+        packetfunctions_isBroadcastMulticast(&(msg->l2_nextORpreviousHop))==TRUE
+    ) {
+        msg->l2_retriesLeft = 1;
+    } else {
+        msg->l2_retriesLeft = TXRETRIES + 1;
+    }
+    // record this packet's dsn (for matching the ACK)
+    msg->l2_dsn = sixtop_vars.dsn++;
+    // this is a new packet which I never attempted to send
+    msg->l2_numTxAttempts = 0;
+    // transmit with the default TX power
+    msg->l1_txPower = TX_POWER;
+    // add a IEEE802.15.4 header
     ieee802154_prependHeader(
         msg,
-                            msg->l2_frameType,
-                            payloadIEPresent,
-                            msg->l2_dsn,
-                            &(msg->l2_nextORpreviousHop)
-                            );
-   // change owner to IEEE802154E fetches it from queue
-   msg->owner  = COMPONENT_SIXTOP_TO_IEEE802154E;
-   return E_SUCCESS;
+        msg->l2_frameType,
+        payloadIEPresent,
+        msg->l2_dsn,
+        &(msg->l2_nextORpreviousHop)
+    );
+    // change owner to IEEE802154E fetches it from queue
+    msg->owner  = COMPONENT_SIXTOP_TO_IEEE802154E;
+    return E_SUCCESS;
 }
 
 // timer interrupt callbacks
 void sixtop_sendingEb_timer_cb(opentimers_id_t id){
-   scheduler_push_task(timer_sixtop_sendEb_fired,TASKPRIO_SIXTOP);
+    scheduler_push_task(timer_sixtop_sendEb_fired,TASKPRIO_SIXTOP);
     // update the period
     sixtop_vars.periodMaintenance  = 872 +(openrandom_get16b()&0xff);
     opentimers_scheduleIn(
@@ -621,11 +621,11 @@ void sixtop_sendingEb_timer_cb(opentimers_id_t id){
 }
 
 void sixtop_maintenance_timer_cb(opentimers_id_t id) {
-   scheduler_push_task(timer_sixtop_management_fired,TASKPRIO_SIXTOP);
+    scheduler_push_task(timer_sixtop_management_fired,TASKPRIO_SIXTOP);
 }
 
 void sixtop_timeout_timer_cb(opentimers_id_t id) {
-   scheduler_push_task(timer_sixtop_six2six_timeout_fired,TASKPRIO_SIXTOP_TIMEOUT);
+    scheduler_push_task(timer_sixtop_six2six_timeout_fired,TASKPRIO_SIXTOP_TIMEOUT);
 }
 
 //======= EB/KA task
@@ -665,18 +665,18 @@ The body of this function executes one of the MAC management task.
 */
 void timer_sixtop_management_fired(void) {
    
-   sixtop_vars.mgtTaskCounter = (sixtop_vars.mgtTaskCounter+1)%MAINTENANCE_PERIOD;
+    sixtop_vars.mgtTaskCounter = (sixtop_vars.mgtTaskCounter+1)%MAINTENANCE_PERIOD;
    
-   switch (sixtop_vars.mgtTaskCounter) {
-      case 0:
-         // called every MAINTENANCE_PERIOD seconds
-         neighbors_removeOld();
-         break;
-      default:
-         // called every second, except once every MAINTENANCE_PERIOD seconds
-         sixtop_sendKA();
-         break;
-   }
+    switch (sixtop_vars.mgtTaskCounter) {
+        case 0:
+            // called every MAINTENANCE_PERIOD seconds
+            neighbors_removeOld();
+            break;
+        default:
+            // called every second, except once every MAINTENANCE_PERIOD seconds
+            sixtop_sendKA();
+            break;
+    }
 }
 
 /**
@@ -796,78 +796,78 @@ timers_res_fired() function, but is declared as a separate function for better
 readability of the code.
 */
 port_INLINE void sixtop_sendKA() {
-   OpenQueueEntry_t* kaPkt;
-   open_addr_t*      kaNeighAddr;
-   
-   if (ieee154e_isSynch()==FALSE) {
-      // I'm not sync'ed
+    OpenQueueEntry_t* kaPkt;
+    open_addr_t*      kaNeighAddr;
+    
+    if (ieee154e_isSynch()==FALSE) {
+        // I'm not sync'ed
+        
+        // delete packets genereted by this module (EB and KA) from openqueue
+        openqueue_removeAllCreatedBy(COMPONENT_SIXTOP);
+        
+        // I'm not busy sending an EB or KA
+        sixtop_vars.busySendingEB = FALSE;
+        sixtop_vars.busySendingKA = FALSE;
       
-      // delete packets genereted by this module (EB and KA) from openqueue
-      openqueue_removeAllCreatedBy(COMPONENT_SIXTOP);
-      
-      // I'm not busy sending an EB or KA
-      sixtop_vars.busySendingEB = FALSE;
-      sixtop_vars.busySendingKA = FALSE;
-      
-      // stop here
-      return;
-   }
-   
-   if (sixtop_vars.busySendingKA==TRUE) {
-      // don't proceed if I'm still sending a KA
-      return;
-   }
-   
-   kaNeighAddr = neighbors_getKANeighbor(sixtop_vars.kaPeriod);
-   if (kaNeighAddr==NULL) {
-      // don't proceed if I have no neighbor I need to send a KA to
-      return;
-   }
-   
-   // if I get here, I will send a KA
-   
-   // get a free packet buffer
-   kaPkt = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP);
-   if (kaPkt==NULL) {
+        // stop here
+        return;
+    }
+
+    if (sixtop_vars.busySendingKA==TRUE) {
+        // don't proceed if I'm still sending a KA
+        return;
+    }
+
+    kaNeighAddr = neighbors_getKANeighbor(sixtop_vars.kaPeriod);
+    if (kaNeighAddr==NULL) {
+        // don't proceed if I have no neighbor I need to send a KA to
+        return;
+    }
+
+    // if I get here, I will send a KA
+
+    // get a free packet buffer
+    kaPkt = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP);
+    if (kaPkt==NULL) {
         openserial_printError(
             COMPONENT_SIXTOP,
             ERR_NO_FREE_PACKET_BUFFER,
-                            (errorparameter_t)1,
+            (errorparameter_t)1,
             (errorparameter_t)0
         );
-      return;
+        return;
    }
    
-   // declare ownership over that packet
-   kaPkt->creator = COMPONENT_SIXTOP;
-   kaPkt->owner   = COMPONENT_SIXTOP;
-   
-   // some l2 information about this packet
-   kaPkt->l2_frameType = IEEE154_TYPE_DATA;
-   memcpy(&(kaPkt->l2_nextORpreviousHop),kaNeighAddr,sizeof(open_addr_t));
-   
-   // set l2-security attributes
+    // declare ownership over that packet
+    kaPkt->creator = COMPONENT_SIXTOP;
+    kaPkt->owner   = COMPONENT_SIXTOP;
+    
+    // some l2 information about this packet
+    kaPkt->l2_frameType = IEEE154_TYPE_DATA;
+    memcpy(&(kaPkt->l2_nextORpreviousHop),kaNeighAddr,sizeof(open_addr_t));
+    
+    // set l2-security attributes
     kaPkt->l2_securityLevel   = IEEE802154_SECURITY_LEVEL; // do not exchange KAs with 
-   kaPkt->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE;
+    kaPkt->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE;
     kaPkt->l2_keyIndex        = IEEE802154_security_getDataKeyIndex();
 
-   // put in queue for MAC to handle
-   sixtop_send_internal(kaPkt,FALSE);
-   
-   // I'm now busy sending a KA
-   sixtop_vars.busySendingKA = TRUE;
+    // put in queue for MAC to handle
+    sixtop_send_internal(kaPkt,FALSE);
+    
+    // I'm now busy sending a KA
+    sixtop_vars.busySendingKA = TRUE;
 
 #ifdef OPENSIM
-   debugpins_ka_set();
-   debugpins_ka_clr();
+    debugpins_ka_set();
+    debugpins_ka_clr();
 #endif
 }
 
 //======= six2six task
 
 void timer_sixtop_six2six_timeout_fired(void) {
-   // timeout timer fired, reset the state of sixtop to idle
-   sixtop_vars.six2six_state = SIX_STATE_IDLE;
+    // timeout timer fired, reset the state of sixtop to idle
+    sixtop_vars.six2six_state = SIX_STATE_IDLE;
     opentimers_cancel(sixtop_vars.timeoutTimerId);
 }
 
@@ -980,32 +980,32 @@ port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE) {
     uint8_t subtypeid,code,sfid,version,type,seqNum;
     uint16_t temp_16b,len,headerlen;
    
-    ptr=0;  
-    headerlen = 0;
+    ptr         = 0;
+    headerlen   = 0;
   
     //candidate IE header  if type ==0 header IE if type==1 payload IE
-    temp_8b = *((uint8_t*)(pkt->payload)+ptr);
+    temp_8b     = *((uint8_t*)(pkt->payload)+ptr);
     ptr++;
-    temp_16b = temp_8b + ((*((uint8_t*)(pkt->payload)+ptr))<<8);
+    temp_16b    = temp_8b + ((*((uint8_t*)(pkt->payload)+ptr))<<8);
     ptr++;
-    *lenIE +=2;
+    *lenIE += 2;
     // check ietf ie group id, type
     if ((temp_16b & IEEE802154E_DESC_LEN_PAYLOAD_ID_TYPE_MASK) != (IANA_IETF_IE_GROUP_ID | IANA_IETF_IE_TYPE)){
         // wrong IE ID or type, record and drop the packet
         openserial_printError(COMPONENT_SIXTOP,ERR_UNSUPPORTED_FORMAT,0,0);
         return FALSE;
     }
-        len = temp_16b & IEEE802154E_DESC_LEN_PAYLOAD_IE_MASK;
-    *lenIE    += len;
+    len = temp_16b & IEEE802154E_DESC_LEN_PAYLOAD_IE_MASK;
+    *lenIE += len;
   
     // check 6p subtype Id
     subtypeid  = *((uint8_t*)(pkt->payload)+ptr);
-        ptr += 1;
+    ptr += 1;
     if (subtypeid != IANA_6TOP_SUBIE_ID){
         // wrong subtypeID, record and drop the packet
         openserial_printError(COMPONENT_SIXTOP,ERR_UNSUPPORTED_FORMAT,1,0);
-                return FALSE;
-        }
+        return FALSE;
+    }
     headerlen += 1;
     
     // check 6p version
@@ -1017,26 +1017,26 @@ port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE) {
         openserial_printError(COMPONENT_SIXTOP,ERR_UNSUPPORTED_FORMAT,2,0);
         return FALSE;
     }
-    version = temp_8b &  IANA_6TOP_VESION_MASK;
-    type    = temp_8b >> IANA_6TOP_TYPE_SHIFT;
+    version    = temp_8b &  IANA_6TOP_VESION_MASK;
+    type       = temp_8b >> IANA_6TOP_TYPE_SHIFT;
     headerlen += 1;
     
     // get 6p code
-    code    = *((uint8_t*)(pkt->payload)+ptr);
-    ptr    += 1;
+    code       = *((uint8_t*)(pkt->payload)+ptr);
+    ptr       += 1;
     headerlen += 1;
     // get 6p sfid
-    sfid    = *((uint8_t*)(pkt->payload)+ptr);
-    ptr    += 1;
+    sfid       = *((uint8_t*)(pkt->payload)+ptr);
+    ptr       += 1;
     headerlen += 1;
     // get 6p seqNum and GEN
-    seqNum  =  *((uint8_t*)(pkt->payload)+ptr) & 0xff;
-    ptr    += 1;
+    seqNum     =  *((uint8_t*)(pkt->payload)+ptr) & 0xff;
+    ptr       += 1;
     headerlen += 1;
     
     // give six2six to process
     sixtop_six2six_notifyReceive(version,type,code,sfid,seqNum,ptr,len-headerlen,pkt);
-    *lenIE  = len+2;
+    *lenIE     = len+2;
     return TRUE;
 }
 
@@ -1160,7 +1160,7 @@ void sixtop_six2six_notifyReceive(
                 startingOffset = offset;
                 if ((cellOptions & (CELLOPTIONS_TX | CELLOPTIONS_RX)) != (CELLOPTIONS_TX | CELLOPTIONS_RX)){
                     cellOptions_transformed = cellOptions ^ (CELLOPTIONS_TX | CELLOPTIONS_RX);
-            } else {
+                } else {
                     cellOptions_transformed = cellOptions;
                 }
                 for(i=0; i<maxNumCells; i++) {
@@ -1187,7 +1187,7 @@ void sixtop_six2six_notifyReceive(
                         break;
                     }
                 }
-                    if (
+                if (
                     schedule_getOneCellAfterOffset(
                         metadata,
                         startingOffset,
@@ -1195,7 +1195,7 @@ void sixtop_six2six_notifyReceive(
                         cellOptions_transformed,
                         &slotoffset,
                         &channeloffset) == FALSE
-                    ){
+                ){
                     returnCode = IANA_6TOP_RC_EOL;
                 }
                 
@@ -1208,9 +1208,9 @@ void sixtop_six2six_notifyReceive(
                 startingOffset = 0;
                 if ((cellOptions & (CELLOPTIONS_TX | CELLOPTIONS_RX)) != (CELLOPTIONS_TX | CELLOPTIONS_RX)){
                     cellOptions_transformed = cellOptions ^ (CELLOPTIONS_TX | CELLOPTIONS_RX);
-                    } else {
+                } else {
                     cellOptions_transformed = cellOptions;
-                    }
+                }
                 for(i=0; i<schedule_getFrameLength(); i++) {
                     if (
                         schedule_getOneCellAfterOffset(
@@ -1231,7 +1231,7 @@ void sixtop_six2six_notifyReceive(
                 response_pkt->payload[0] =  numCells & 0x00FF;
                 response_pkt->payload[1] = (numCells & 0xFF00)>>8;
                 response_pktLen         += 2;
-                    break;
+                break;
             }
             
             numCells = *((uint8_t*)(pkt->payload)+ptr);
@@ -1243,7 +1243,7 @@ void sixtop_six2six_notifyReceive(
                 if (schedule_getNumberOfFreeEntries() < numCells){
                     returnCode = IANA_6TOP_RC_NORES;
                     break;
-                    }
+                }
                 // retrieve cell list
                 i = 0;
                 memset(response_pkt->l2_sixtop_celllist_add,0,sizeof(response_pkt->l2_sixtop_celllist_add));
@@ -1270,7 +1270,7 @@ void sixtop_six2six_notifyReceive(
                     }
                 }
                 returnCode = IANA_6TOP_RC_SUCCESS;
-                    break;
+                break;
             }
             
             // delete command
@@ -1308,7 +1308,7 @@ void sixtop_six2six_notifyReceive(
                     returnCode = IANA_6TOP_RC_CELLLIST_ERR;
                 }
                     break;
-                }
+            }
             
             // relocate command
             if (code == IANA_6TOP_CMD_RELOCATE){
@@ -1326,12 +1326,12 @@ void sixtop_six2six_notifyReceive(
                     pktLen -= 4;
                     temp16--;
                     i++;
-            }
+                }
                 if ((cellOptions & (CELLOPTIONS_TX | CELLOPTIONS_RX)) != (CELLOPTIONS_TX | CELLOPTIONS_RX)){
                     cellOptions_transformed = cellOptions ^ (CELLOPTIONS_TX | CELLOPTIONS_RX);
                 } else {
                     cellOptions_transformed = cellOptions;
-        }
+                }
                 if (sixtop_areAvailableCellsToBeRemoved(metadata,numCells,response_pkt->l2_sixtop_celllist_delete,&(pkt->l2_nextORpreviousHop),cellOptions_transformed)==FALSE){
                     returnCode = IANA_6TOP_RC_CELLLIST_ERR;
                     break;
@@ -1544,10 +1544,10 @@ void sixtop_six2six_notifyReceive(
 
 bool sixtop_addCells(
     uint8_t      slotframeID,
-      cellInfo_ht* cellList,
+    cellInfo_ht* cellList,
     open_addr_t* previousHop,
     uint8_t      cellOptions
-   ){
+){
     uint8_t     i;
     bool        isShared;
     open_addr_t temp_neighbor;
@@ -1558,11 +1558,11 @@ bool sixtop_addCells(
     if (cellOptions == CELLOPTIONS_TX){
         type     = CELLTYPE_TX;
         isShared = FALSE;
-      }
+    }
     if (cellOptions == CELLOPTIONS_RX){
         type     = CELLTYPE_RX;  
         isShared = FALSE;
-   }
+    }
     if (cellOptions == (CELLOPTIONS_TX | CELLOPTIONS_RX | CELLOPTIONS_SHARED)){
         type     = CELLTYPE_TXRX;  
         isShared = TRUE;
@@ -1571,9 +1571,9 @@ bool sixtop_addCells(
     if (isShared){
         memset(&temp_neighbor,0,sizeof(temp_neighbor));
         temp_neighbor.type             = ADDR_ANYCAST;
-   } else {
+    } else {
         memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
-   }
+    }
 
     hasCellsAdded = FALSE;
     // add cells to schedule
@@ -1588,10 +1588,10 @@ bool sixtop_addCells(
                 &temp_neighbor
             );
          }
-      }
+    }
    
     return hasCellsAdded;
-   }
+}
 
 bool sixtop_removeCells(
       uint8_t      slotframeID,
@@ -1599,21 +1599,21 @@ bool sixtop_removeCells(
       open_addr_t* previousHop,
     uint8_t      cellOptions
    ){
-   uint8_t     i;
+    uint8_t     i;
     bool        isShared;
-   open_addr_t temp_neighbor;
+    open_addr_t temp_neighbor;
     bool        hasCellsRemoved;
-  
+    
     // translate cellOptions to cell type 
     if (cellOptions == CELLOPTIONS_TX){
         isShared = FALSE;
-      }
+    }
     if (cellOptions == CELLOPTIONS_RX){ 
         isShared = FALSE;
-   }
+    }
     if (cellOptions == (CELLOPTIONS_TX | CELLOPTIONS_RX | CELLOPTIONS_SHARED)){ 
         isShared = TRUE;
-}
+    }
 
     if (isShared){
         memset(&temp_neighbor,0,sizeof(temp_neighbor));
@@ -1621,18 +1621,18 @@ bool sixtop_removeCells(
     } else {
         memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
     }
-   
+    
     hasCellsRemoved = FALSE;
     // delete cells from schedule
     for(i=0;i<CELLLIST_MAX_LEN;i++){
         if (cellList[i].isUsed){
             hasCellsRemoved = TRUE;
-         schedule_removeActiveSlot(
+            schedule_removeActiveSlot(
                 cellList[i].slotoffset,
                 &temp_neighbor
-         );
-      }
-   }
+            );
+        }
+    }
     
     return hasCellsRemoved;
 }
@@ -1641,64 +1641,64 @@ bool sixtop_areAvailableCellsToBeScheduled(
       uint8_t      frameID, 
       uint8_t      numOfCells, 
       cellInfo_ht* cellList
-   ){
-   uint8_t i;
+){
+    uint8_t i;
     uint8_t numbOfavailableCells;
-   bool    available;
-   
-   i          = 0;
+    bool    available;
+    
+    i          = 0;
     numbOfavailableCells = 0;
-   available  = FALSE;
+    available  = FALSE;
   
     if(numOfCells == 0 || numOfCells>CELLLIST_MAX_LEN){
-      // log wrong parameter error TODO
+        // log wrong parameter error TODO
     
-      available = FALSE;
-   } else {
-      do {
+        available = FALSE;
+    } else {
+        do {
             if(schedule_isSlotOffsetAvailable(cellList[i].slotoffset) == TRUE){
                 numbOfavailableCells++;
-         } else {
+            } else {
                 // mark the cell
                 cellList[i].isUsed = FALSE;
-         }
-         i++;
+            }
+            i++;
         }while(i<CELLLIST_MAX_LEN && numbOfavailableCells!=numOfCells);
-      
+        
         if(numbOfavailableCells>0){
             // there are more than one cell can be added.
             // the rest cells in the list will not be used
             while(i<CELLLIST_MAX_LEN){
                 cellList[i].isUsed = FALSE;
-            i++;
-         }
-         available = TRUE;
-      } else {
+                i++;
+            }
+            available = TRUE;
+        } else {
             // No cell in the list is able to be added
-         available = FALSE;
-      }
-   }
-   return available;
+            available = FALSE;
+        }
+    }
+    return available;
 }
 
 bool sixtop_areAvailableCellsToBeRemoved(      
-        uint8_t      frameID, 
-        uint8_t      numOfCells, 
-        cellInfo_ht* cellList,
+    uint8_t      frameID, 
+    uint8_t      numOfCells, 
+    cellInfo_ht* cellList,
     open_addr_t* neighbor,
     uint8_t      cellOptions
-    ){
-   uint8_t              i;
+){
+    uint8_t              i;
     uint8_t              numOfavailableCells;
-   bool                 available;
-   slotinfo_element_t   info;
+    bool                 available;
+    slotinfo_element_t   info;
     cellType_t           type;
     open_addr_t          anycastAddr;
-   
-   i          = 0;
+    
+    i          = 0;
     numOfavailableCells = 0;
     available           = TRUE;
-  
+    
     // translate cellOptions to cell type 
     if (cellOptions == CELLOPTIONS_TX){
         type = CELLTYPE_TX;
@@ -1713,17 +1713,17 @@ bool sixtop_areAvailableCellsToBeRemoved(
     }
     
     if(numOfCells == 0 || numOfCells>CELLLIST_MAX_LEN){
-      // log wrong parameter error TODO
-      available = FALSE;
-   } else {
-      do {
+        // log wrong parameter error TODO
+        available = FALSE;
+    } else {
+        do {
             if (cellList[i].isUsed){
                 memset(&info,0,sizeof(slotinfo_element_t));
                 if (type==CELLTYPE_TXRX){
                     schedule_getSlotInfo(cellList[i].slotoffset,&anycastAddr,&info);
-          } else {
+                } else {
                     schedule_getSlotInfo(cellList[i].slotoffset,neighbor,&info);
-          }
+                }
                 if(info.link_type != type){
                     available = FALSE;
                     break;
@@ -1731,9 +1731,9 @@ bool sixtop_areAvailableCellsToBeRemoved(
                     numOfavailableCells++;
                 }
             }
-          i++;
+            i++;
         }while(i<CELLLIST_MAX_LEN && numOfavailableCells<numOfCells);
-      
+        
         if(numOfavailableCells==numOfCells && available == TRUE){
             //the rest link will not be scheduled, mark them as off type
             while(i<CELLLIST_MAX_LEN){

@@ -327,7 +327,6 @@ owerror_t schedule_addActiveSlot(
    slotContainer->bitMapIndex            = 0;
    slotContainer->usageBitMap            = 0x003F;// last 6 bits are pre-set
    
-   
    // insert in circular list
    if (schedule_vars.currentScheduleEntry==NULL) {
       // this is the first active slot added
@@ -582,12 +581,12 @@ void schedule_syncSlotOffset(slotOffset_t targetSlotOffset) {
 \brief advance to next active slot
 */
 void schedule_advanceSlot() {
-  
-   INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
-   schedule_vars.currentScheduleEntry = schedule_vars.currentScheduleEntry->next;
-   
-   ENABLE_INTERRUPTS();
+
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+    schedule_vars.currentScheduleEntry = schedule_vars.currentScheduleEntry->next;
+
+    ENABLE_INTERRUPTS();
 }
 
 /**
@@ -826,7 +825,7 @@ void schedule_indicateTx(asn_t* asnTimestamp, bool succesfullTx) {
    
    ENABLE_INTERRUPTS();
 }
-    
+
 bool schedule_getOneCellAfterOffset(uint8_t metadata,uint8_t offset,open_addr_t* neighbor, uint8_t cellOptions, uint16_t* slotoffset, uint16_t* channeloffset){
     bool returnVal;
     scheduleEntry_t* scheduleWalker;
