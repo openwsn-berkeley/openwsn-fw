@@ -514,69 +514,69 @@ bool debugPrint_macStats() {
 //======= SYNCHRONIZING
 
 port_INLINE void activity_synchronize_newSlot() {
-   // I'm in the middle of receiving a packet
-   if (ieee154e_vars.state==S_SYNCRX) {
-      return;
-   }
-   
-   ieee154e_vars.radioOnInit=sctimer_readCounter();
-   ieee154e_vars.radioOnThisSlot=TRUE;
-   
-   // if this is the first time I call this function while not synchronized,
-   // switch on the radio in Rx mode
-   if (ieee154e_vars.state!=S_SYNCLISTEN) {
-      // change state
-      changeState(S_SYNCLISTEN);
-      
-      // turn off the radio (in case it wasn't yet)
-      radio_rfOff();
-      
-      // configure the radio to listen to the default synchronizing channel
-      radio_setFrequency(SYNCHRONIZING_CHANNEL);
-      
-      // update record of current channel
-      ieee154e_vars.freq = SYNCHRONIZING_CHANNEL;
-      
-      // switch on the radio in Rx mode.
-      radio_rxEnable();
-      radio_rxNow();
-   } else {
-      // I'm listening last slot
-      ieee154e_stats.numTicsOn    += ieee154e_vars.slotDuration;
-      ieee154e_stats.numTicsTotal += ieee154e_vars.slotDuration;
-   }
-   
-   // if I'm already in S_SYNCLISTEN, while not synchronized,
-   // but the synchronizing channel has been changed,
-   // change the synchronizing channel
-   if ((ieee154e_vars.state==S_SYNCLISTEN) && (ieee154e_vars.singleChannelChanged == TRUE)) {
-      // turn off the radio (in case it wasn't yet)
-      radio_rfOff();
-      
-      // update record of current channel
-      ieee154e_vars.freq = calculateFrequency(ieee154e_vars.singleChannel);
-      
-      // configure the radio to listen to the default synchronizing channel
-      radio_setFrequency(ieee154e_vars.freq);
-      
-      // switch on the radio in Rx mode.
-      radio_rxEnable();
-      radio_rxNow();
-      ieee154e_vars.singleChannelChanged = FALSE;
-   }
-   
-   // increment ASN (used only to schedule serial activity)
-   incrementAsnOffset();
-   
-   // to be able to receive and transmist serial even when not synchronized
-   // take turns every 8 slots sending and receiving
-   if        ((ieee154e_vars.asn.bytes0and1&0x000f)==0x0000) {
-      openserial_stop();
-      openserial_startOutput();
-   } else if ((ieee154e_vars.asn.bytes0and1&0x000f)==0x0008) {
-      openserial_stop();
-      openserial_startInput();
-   }
+    // I'm in the middle of receiving a packet
+    if (ieee154e_vars.state==S_SYNCRX) {
+        return;
+    }
+    
+    ieee154e_vars.radioOnInit=sctimer_readCounter();
+    ieee154e_vars.radioOnThisSlot=TRUE;
+    
+    // if this is the first time I call this function while not synchronized,
+    // switch on the radio in Rx mode
+    if (ieee154e_vars.state!=S_SYNCLISTEN) {
+        // change state
+        changeState(S_SYNCLISTEN);
+        
+        // turn off the radio (in case it wasn't yet)
+        radio_rfOff();
+        
+        // update record of current channel
+        ieee154e_vars.freq = (openrandom_get16b()&0x0F) + 11;
+        
+        // configure the radio to listen to the default synchronizing channel
+        radio_setFrequency(ieee154e_vars.freq);
+        
+        // switch on the radio in Rx mode.
+        radio_rxEnable();
+        radio_rxNow();
+    } else {
+        // I'm listening last slot
+        ieee154e_stats.numTicsOn    += ieee154e_vars.slotDuration;
+        ieee154e_stats.numTicsTotal += ieee154e_vars.slotDuration;
+    }
+    
+    // if I'm already in S_SYNCLISTEN, while not synchronized,
+    // but the synchronizing channel has been changed,
+    // change the synchronizing channel
+    if ((ieee154e_vars.state==S_SYNCLISTEN) && (ieee154e_vars.singleChannelChanged == TRUE)) {
+        // turn off the radio (in case it wasn't yet)
+        radio_rfOff();
+        
+        // update record of current channel
+        ieee154e_vars.freq = calculateFrequency(ieee154e_vars.singleChannel);
+        
+        // configure the radio to listen to the default synchronizing channel
+        radio_setFrequency(ieee154e_vars.freq);
+        
+        // switch on the radio in Rx mode.
+        radio_rxEnable();
+        radio_rxNow();
+        ieee154e_vars.singleChannelChanged = FALSE;
+    }
+    
+    // increment ASN (used only to schedule serial activity)
+    incrementAsnOffset();
+    
+    // to be able to receive and transmist serial even when not synchronized
+    // take turns every 8 slots sending and receiving
+    if ((ieee154e_vars.asn.bytes0and1&0x000f)==0x0000) {
+        openserial_stop();
+        openserial_startOutput();
+    } else if ((ieee154e_vars.asn.bytes0and1&0x000f)==0x0008) {
+        openserial_stop();
+        openserial_startInput();
+    }
 }
 
 port_INLINE void activity_synchronize_startOfFrame(PORT_TIMER_WIDTH capturedTime) {
