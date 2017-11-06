@@ -80,7 +80,7 @@ void icmpv6rpl_init() {
    icmpv6rpl_vars.dioDestination.type = ADDR_128B;
    memcpy(&icmpv6rpl_vars.dioDestination.addr_128b[0],all_routers_multicast,sizeof(all_routers_multicast));
    
-   icmpv6rpl_vars.dioPeriod                 = TIMER_DIO_TIMEOUT;
+   icmpv6rpl_vars.dioPeriod                 = DIO_PORTION*(neighbors_getNumNeighbors()+1);
    icmpv6rpl_vars.timerIdDIO                = opentimers_create();
 
    //initialize PIO -> move this to dagroot code
@@ -610,14 +610,27 @@ void icmpv6rpl_timer_DIO_cb(opentimers_id_t id) {
 \note This function is executed in task context, called by the scheduler.
 */
 void icmpv6rpl_timer_DIO_task() {
-    icmpv6rpl_vars.dioTimerCounter = (icmpv6rpl_vars.dioTimerCounter+1)%icmpv6rpl_vars.dioPeriod;
-    switch (icmpv6rpl_vars.dioTimerCounter) {
-    case 0:
-        // called every TIMER_DIO_TIMEOUT seconds
+    
+    uint16_t newPeriod;
+    // current period 
+    newPeriod = DIO_PORTION*(neighbors_getNumNeighbors()+1);
+    if (
+        icmpv6rpl_vars.dioPeriod        < newPeriod &&
+        icmpv6rpl_vars.dioTimerCounter  > newPeriod
+    ){
+        icmpv6rpl_vars.dioTimerCounter  = 0;
+        icmpv6rpl_vars.dioPeriod        = newPeriod;
         sendDIO();
-        break;
-    default:
-        break;
+    } else {
+        icmpv6rpl_vars.dioPeriod        = newPeriod;
+        icmpv6rpl_vars.dioTimerCounter  = (icmpv6rpl_vars.dioTimerCounter+1)%icmpv6rpl_vars.dioPeriod;
+        switch (icmpv6rpl_vars.dioTimerCounter) {
+        case 0:
+            sendDIO();
+            break;
+        default:
+            break;
+        }
     }
 }
 

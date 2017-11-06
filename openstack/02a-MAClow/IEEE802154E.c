@@ -536,11 +536,11 @@ port_INLINE void activity_synchronize_newSlot() {
       // turn off the radio (in case it wasn't yet)
       radio_rfOff();
       
+        // update record of current channel
+        ieee154e_vars.freq = (openrandom_get16b()&0x0F) + 11;
+        
       // configure the radio to listen to the default synchronizing channel
-      radio_setFrequency(SYNCHRONIZING_CHANNEL);
-      
-      // update record of current channel
-      ieee154e_vars.freq = SYNCHRONIZING_CHANNEL;
+        radio_setFrequency(ieee154e_vars.freq);
       
       // switch on the radio in Rx mode.
       radio_rxEnable();
@@ -1124,12 +1124,11 @@ port_INLINE void activity_ti2() {
    // load the packet in the radio's Tx buffer
    radio_loadPacket(ieee154e_vars.localCopyForTransmission.payload,
                     ieee154e_vars.localCopyForTransmission.length);
-   
    // enable the radio in Tx mode. This does not send the packet.
    radio_txEnable();
+
     ieee154e_vars.radioOnInit=sctimer_readCounter();
    ieee154e_vars.radioOnThisSlot=TRUE;
-   
    // change state
    changeState(S_TXDATAREADY);
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
@@ -1588,7 +1587,6 @@ port_INLINE void activity_ri2() {
    
    // configure the radio for that frequency
    radio_setFrequency(ieee154e_vars.freq);
-
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
     radio_rxEnable_scum();
 #else
@@ -2145,6 +2143,7 @@ port_INLINE void activity_ri9(PORT_TIMER_WIDTH capturedTime) {
    if (idmanager_getIsDAGroot()==FALSE && icmpv6rpl_isPreferredParent(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop))) {
       synchronizePacket(ieee154e_vars.syncCapturedTime);
    }
+   
    // inform upper layer of reception (after ACK sent)
    notif_receive(ieee154e_vars.dataReceived);
    
@@ -2687,7 +2686,6 @@ void notif_sendDone(OpenQueueEntry_t* packetSent, owerror_t error) {
     packetSent->owner              = COMPONENT_IEEE802154E_TO_SIXTOP;
     // post RES's sendDone task
     scheduler_push_task(task_sixtopNotifSendDone,TASKPRIO_SIXTOP_NOTIF_TXDONE);
-    
     // wake up the scheduler
     SCHEDULER_WAKEUP();
 }
