@@ -386,6 +386,8 @@ typedef struct {
    uint8_t          joinPrio;
    bool             f6PNORES;
    uint8_t          sequenceNumber;
+   uint8_t          backoffExponenton;
+   uint8_t          backoff;
 } neighborRow_t;
 END_PACK
 

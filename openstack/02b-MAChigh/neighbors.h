@@ -96,6 +96,11 @@ void          neighbors_resetSequenceNumber(open_addr_t* address);
 
 // get addresses
 bool          neighbors_getNeighborEui64(open_addr_t* address,uint8_t addr_type,uint8_t index);
+// update backoff field
+void          neighbors_updateBackoff(open_addr_t* address);
+void          neighbors_decreaseBackoff(open_addr_t* address);
+bool          neighbors_backoffHitZero(open_addr_t* address);
+void          neighbors_resetBackoff(open_addr_t* address);
 // maintenance
 void          neighbors_removeOld(void);
 // debug
