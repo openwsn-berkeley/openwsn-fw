@@ -72,8 +72,7 @@ See MINBE for an explanation of backoff.
 /**
 \brief a threshold used for triggering the maintaining process.uint: percent
 */
-#define PDR_THRESHOLD      80 // 80 means 80%
-#define MIN_NUMTX_FOR_PDR  50 // don't calculate PDR when numTx is lower than this value 
+#define RELOCATE_PDRTHRES  50 // 50 means 50%
 
 typedef enum{
     CELLOPTIONS_TX              = 1<<0,
@@ -108,7 +107,6 @@ typedef struct {
    uint8_t         numTx;
    uint8_t         numTxACK;
    asn_t           lastUsedAsn;
-   bool            mark_toBeRemoved;
    void*           next;
 } scheduleEntry_t;
 
@@ -195,6 +193,10 @@ void              schedule_removeAllCells(
 );
 scheduleEntry_t*  schedule_getCurrentScheduleEntry(void);
 uint8_t           schedule_getNumberOfFreeEntries(void);
+uint8_t           schedule_getNumberOfDedicatedCells(open_addr_t* neighbor);
+bool              schedule_isNumTxWrapped(open_addr_t* neighbor);
+bool              schedule_getCellsToBeRelocated(open_addr_t* neighbor, cellInfo_ht* celllist);
+bool              schedule_hasDedicatedCells(void);
 
 // from IEEE802154E
 void               schedule_syncSlotOffset(slotOffset_t targetSlotOffset);

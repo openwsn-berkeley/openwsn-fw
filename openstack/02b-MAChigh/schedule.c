@@ -556,18 +556,125 @@ uint8_t schedule_getNumberOfFreeEntries(){
    return counter;
 }
 
-//=== from IEEE802154E: reading the schedule and updating statistics
-
-void schedule_syncSlotOffset(slotOffset_t targetSlotOffset) {
+uint8_t schedule_getNumberOfDedicatedCells(open_addr_t* neighbor){
+   uint8_t i; 
+   uint8_t counter;
    
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    
-   while (schedule_vars.currentScheduleEntry->slotOffset!=targetSlotOffset) {
-      schedule_advanceSlot();
+   counter = 0;
+   for(i=0;i<MAXACTIVESLOTS;i++) {
+      if(
+         packetfunctions_sameAddress(&schedule_vars.scheduleBuf[i].neighbor, neighbor) == TRUE
+      ){
+         counter++;
+      }
    }
    
    ENABLE_INTERRUPTS();
+   
+   return counter;
+}
+
+bool schedule_isNumTxWrapped(open_addr_t* neighbor){
+    uint8_t i;
+    
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+    
+    for(i=0;i<MAXACTIVESLOTS;i++) {
+        if(
+            packetfunctions_sameAddress(&schedule_vars.scheduleBuf[i].neighbor, neighbor) == TRUE
+        ){
+            if (schedule_vars.scheduleBuf[i].numTx<0xFF/2){
+                ENABLE_INTERRUPTS();
+                return FALSE;
+            }
+        }
+    }
+    
+    ENABLE_INTERRUPTS();
+    return TRUE;
+}
+bool schedule_getCellsToBeRelocated(open_addr_t* neighbor, cellInfo_ht* celllist){
+    uint8_t     i;
+    
+    uint16_t    highestPDR;
+    uint16_t    cellPDR;
+    
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+    
+    highestPDR = 0;
+    // found the cell with higest PDR
+    for(i=0;i<MAXACTIVESLOTS;i++) {
+        if(
+            packetfunctions_sameAddress(&schedule_vars.scheduleBuf[i].neighbor, neighbor) == TRUE
+        ){
+            if (schedule_vars.scheduleBuf[i].numTx>0){
+                cellPDR = 100*schedule_vars.scheduleBuf[i].numTxACK/schedule_vars.scheduleBuf[i].numTx;
+                if (cellPDR > highestPDR){
+                    highestPDR = cellPDR;
+                }
+            }
+        }
+    }
+    
+    if (highestPDR==0){
+        // no cell to relocate
+        return FALSE;
+    }
+    
+    for(i=0;i<MAXACTIVESLOTS;i++) {
+        if(
+            packetfunctions_sameAddress(&schedule_vars.scheduleBuf[i].neighbor, neighbor) == TRUE
+        ){
+            if (schedule_vars.scheduleBuf[i].numTx>0){
+                cellPDR = 100*schedule_vars.scheduleBuf[i].numTxACK/schedule_vars.scheduleBuf[i].numTx;
+                if (highestPDR-cellPDR > RELOCATE_PDRTHRES){
+                    celllist->isUsed            = TRUE;
+                    celllist->slotoffset        = schedule_vars.scheduleBuf[i].slotOffset;
+                    celllist->channeloffset     = schedule_vars.scheduleBuf[i].channelOffset;
+                    return TRUE;
+                }
+            }
+        }
+    }
+    
+    ENABLE_INTERRUPTS();
+    
+    return FALSE;
+}
+
+bool schedule_hasDedicatedCells(void){
+    uint8_t i;
+    
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+    
+    for(i=0;i<MAXACTIVESLOTS;i++) {
+        if(schedule_vars.scheduleBuf[i].neighbor.type == ADDR_64B){
+            return TRUE;
+        }
+    }
+    
+    ENABLE_INTERRUPTS();
+    return FALSE;
+}
+
+//=== from IEEE802154E: reading the schedule and updating statistics
+
+void schedule_syncSlotOffset(slotOffset_t targetSlotOffset) {
+   
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+    
+    while (schedule_vars.currentScheduleEntry->slotOffset!=targetSlotOffset) {
+        schedule_advanceSlot();
+    }
+    
+    ENABLE_INTERRUPTS();
 }
 
 /**
@@ -586,16 +693,16 @@ void schedule_advanceSlot() {
 \brief return slotOffset of next active slot
 */
 slotOffset_t schedule_getNextActiveSlotOffset() {
-   slotOffset_t res;   
-   
-   INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
-   
-   res = ((scheduleEntry_t*)(schedule_vars.currentScheduleEntry->next))->slotOffset;
-   
-   ENABLE_INTERRUPTS();
-   
-   return res;
+    slotOffset_t res;   
+    
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+    
+    res = ((scheduleEntry_t*)(schedule_vars.currentScheduleEntry->next))->slotOffset;
+    
+    ENABLE_INTERRUPTS();
+    
+    return res;
 }
 
 /**
@@ -604,16 +711,16 @@ slotOffset_t schedule_getNextActiveSlotOffset() {
 \returns The frame length.
 */
 frameLength_t schedule_getFrameLength() {
-   frameLength_t returnVal;
-   
-   INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
-   
-   returnVal = schedule_vars.frameLength;
-   
-   ENABLE_INTERRUPTS();
-   
-   return returnVal;
+    frameLength_t returnVal;
+    
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+    
+    returnVal = schedule_vars.frameLength;
+    
+    ENABLE_INTERRUPTS();
+    
+    return returnVal;
 }
 
 /**

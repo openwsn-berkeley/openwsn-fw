@@ -6,6 +6,7 @@
 #include "schedule.h"
 #include "openapps.h"
 #include "openrandom.h"
+#include "idmanager.h"
 
 //=========================== definition =====================================
 
@@ -19,9 +20,13 @@ msf_vars_t msf_vars;
 uint16_t msf_getMetadata(void);
 metadata_t msf_translateMetadata(void);
 void msf_handleRCError(uint8_t code);
+
+void msf_timer_housekeeping_cb(opentimers_id_t id);
+void msf_timer_housekeeping_task(void);
 // msf private
 void msf_trigger6pAdd(void);
 void msf_trigger6pDelete(void);
+void msf_housekeeping(void);
 
 //=========================== public ==========================================
 
@@ -29,6 +34,14 @@ void msf_init(void) {
     memset(&msf_vars,0,sizeof(msf_vars_t));
     msf_vars.numAppPacketsPerSlotFrame = 0;
     sixtop_setSFcallback(msf_getsfid,msf_getMetadata,msf_translateMetadata,msf_handleRCError);
+    msf_vars.housekeepingTimerId = opentimers_create();
+    opentimers_scheduleIn(
+        msf_vars.housekeepingTimerId,
+        872 +(openrandom_get16b()&0xff),
+        TIME_MS,
+        TIMER_ONESHOT,
+        msf_timer_housekeeping_cb
+    );
 }
 
 void msf_setBackoff(uint8_t value){
@@ -95,8 +108,30 @@ void msf_handleRCError(uint8_t code){
     }
 }
 
-//=========================== private =========================================
+void msf_timer_housekeeping_cb(opentimers_id_t id){
+    scheduler_push_task(msf_timer_housekeeping_task,TASKPRIO_MSF);
+    // update the period
+    opentimers_scheduleIn(
+        msf_vars.housekeepingTimerId,
+        872 +(openrandom_get16b()&0xff),
+        TIME_MS,
+        TIMER_ONESHOT,
+        msf_timer_housekeeping_cb
+    );
+}
+                        
+void msf_timer_housekeeping_task(void){
+    msf_vars.housekeepingTimerCounter = (msf_vars.housekeepingTimerCounter+1)%HOUSEKEEPING_PERIOD;
+    switch (msf_vars.housekeepingTimerCounter) {
+    case 0:
+        msf_housekeeping();
+        break;
+    default:
+        break;
+    }
+}
 
+//=========================== private =========================================
 
 void msf_trigger6pAdd(void){
     open_addr_t    neighbor;
@@ -138,7 +173,12 @@ void msf_trigger6pDelete(void){
         return;
     }
     
-    if (msf_candidateRemoveCellList(celllist_delete,&neighbor,1)==FALSE){
+    if (schedule_getNumberOfDedicatedCells(&neighbor)<=1){
+        // at least one dedicated cell presents
+        return;
+    }
+    
+    if (msf_candidateRemoveCellList(celllist_delete,&neighbor,NUMCELLS_MSF)==FALSE){
         // failed to get cell list to delete
         return;
     }
@@ -215,4 +255,43 @@ bool msf_candidateRemoveCellList(
    }else{
       return TRUE;
    }
+}
+
+void msf_housekeeping(void){
+    
+    open_addr_t    neighbor;
+    bool           foundNeighbor;
+    cellInfo_ht    celllist_add[CELLLIST_MAX_LEN];
+    cellInfo_ht    celllist_delete[CELLLIST_MAX_LEN];
+    foundNeighbor = icmpv6rpl_getPreferredParentEui64(&neighbor);
+    if (foundNeighbor==FALSE) {
+        return;
+    }
+    if (schedule_getNumberOfDedicatedCells(&neighbor)==0){
+        msf_trigger6pAdd();
+        return;
+    }
+    
+    if (schedule_isNumTxWrapped(&neighbor)==FALSE){
+        return;
+    }
+    
+    memset(celllist_delete, 0, CELLLIST_MAX_LEN*sizeof(cellInfo_ht));
+    if (schedule_getCellsToBeRelocated(&neighbor, celllist_delete)){
+        if (msf_candidateAddCellList(celllist_add,NUMCELLS_MSF)==FALSE){
+            // failed to get cell list to add
+            return;
+        }
+        sixtop_request(
+            IANA_6TOP_CMD_RELOCATE,   // code
+            &neighbor,              // neighbor
+            NUMCELLS_MSF,           // number cells
+            CELLOPTIONS_MSF,        // cellOptions
+            celllist_add,           // celllist to add
+            celllist_delete,        // celllist to delete
+            IANA_6TISCH_SFID_MSF,   // sfid
+            0,                      // list command offset (not used)
+            0                       // list command maximum celllist (not used)
+        );
+    }
 }

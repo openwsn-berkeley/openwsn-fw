@@ -9,7 +9,7 @@
 */
 
 #include "opendefs.h"
-
+#include "opentimers.h"
 //=========================== define ==========================================
 
 #define IANA_6TISCH_SFID_MSF    0
@@ -20,6 +20,8 @@
 #define LIM_NUMCELLSUSED_HIGH   12
 #define LIM_NUMCELLSUSED_LOW     4
 
+#define HOUSEKEEPING_PERIOD     60 // seconds
+
 //=========================== typedef =========================================
 
 typedef struct {
@@ -27,6 +29,8 @@ typedef struct {
    uint8_t backoff;
    uint8_t numCellsPassed;
    uint8_t numCellsUsed;
+   opentimers_id_t housekeepingTimerId;
+   uint8_t housekeepingTimerCounter;
 } msf_vars_t;
 
 //=========================== module variables ================================
