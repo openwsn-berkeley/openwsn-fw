@@ -387,6 +387,8 @@ typedef struct {
    bool             f6PNORES;
    uint8_t          generation;
    uint8_t          sequenceNumber;
+   uint8_t          backoffExponenton;
+   uint8_t          backoff;
 } neighborRow_t;
 END_PACK
 
