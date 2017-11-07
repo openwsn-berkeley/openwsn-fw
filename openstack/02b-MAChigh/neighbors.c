@@ -807,6 +807,7 @@ void removeNeighbor(uint8_t neighborIndex) {
    neighbors_vars.neighbors[neighborIndex].asn.bytes2and3            = 0;
    neighbors_vars.neighbors[neighborIndex].asn.byte4                 = 0;
    neighbors_vars.neighbors[neighborIndex].f6PNORES                  = FALSE;
+   neighbors_vars.neighbors[neighborIndex].sequenceNumber            = 0;
 }
 
 //=========================== helpers =========================================
