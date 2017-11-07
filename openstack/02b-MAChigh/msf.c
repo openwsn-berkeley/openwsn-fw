@@ -7,6 +7,7 @@
 #include "openapps.h"
 #include "openrandom.h"
 #include "idmanager.h"
+#include "icmpv6rpl.h"
 
 //=========================== definition =====================================
 
@@ -49,7 +50,12 @@ void msf_setBackoff(uint8_t value){
 }
 
 // called by schedule
-void    msf_updateCellsPassed(void){
+void    msf_updateCellsPassed(open_addr_t* neighbor){
+  
+    if (icmpv6rpl_isPreferredParent(neighbor)==FALSE){
+        return;
+    }
+  
     msf_vars.numCellsPassed++;
     if (msf_vars.numCellsPassed == MAX_NUMCELLS){
         if (msf_vars.numCellsUsed > LIM_NUMCELLSUSED_HIGH){
@@ -63,7 +69,12 @@ void    msf_updateCellsPassed(void){
     }
 }
 
-void    msf_updateCellsUsed(void){
+void    msf_updateCellsUsed(open_addr_t* neighbor){
+  
+    if (icmpv6rpl_isPreferredParent(neighbor)==FALSE){
+        return;
+    }
+    
     msf_vars.numCellsUsed++;
 }
 //=========================== callback =========================================

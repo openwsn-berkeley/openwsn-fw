@@ -218,14 +218,14 @@ uint8_t  icmpv6rpl_getRPLIntanceID(void);
 owerror_t icmpv6rpl_getRPLDODAGid(uint8_t* address_128b);
 void     icmpv6rpl_setDIOPeriod(uint16_t dioPeriod);
 void     icmpv6rpl_setDAOPeriod(uint16_t daoPeriod);
-bool     icmpv6rpl_getPreferredParentIndex(uint8_t* indexptr);           // new DB
-bool     icmpv6rpl_getPreferredParentEui64(open_addr_t* addressToWrite); // new DB
-bool     icmpv6rpl_isPreferredParent(open_addr_t* address);              // new DB
-dagrank_t icmpv6rpl_getMyDAGrank(void);                                  // new DB
-void     icmpv6rpl_setMyDAGrank(dagrank_t rank);                         // new DB
-void     icmpv6rpl_killPreferredParent(void);                            // new DB
-void     icmpv6rpl_updateMyDAGrankAndParentSelection(void);              // new DB
-void     icmpv6rpl_indicateRxDIO(OpenQueueEntry_t* msg);                 // new DB
+bool     icmpv6rpl_getPreferredParentIndex(uint8_t* indexptr);
+bool     icmpv6rpl_getPreferredParentEui64(open_addr_t* addressToWrite);
+bool     icmpv6rpl_isPreferredParent(open_addr_t* address);
+dagrank_t icmpv6rpl_getMyDAGrank(void);
+void     icmpv6rpl_setMyDAGrank(dagrank_t rank);
+void     icmpv6rpl_killPreferredParent(void);
+void     icmpv6rpl_updateMyDAGrankAndParentSelection(void);
+void     icmpv6rpl_indicateRxDIO(OpenQueueEntry_t* msg);
 bool     icmpv6rpl_daoSent(void);
 
 

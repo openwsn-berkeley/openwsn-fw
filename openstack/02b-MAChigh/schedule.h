@@ -194,7 +194,7 @@ uint8_t           schedule_getNumberOfFreeEntries(void);
 uint8_t           schedule_getNumberOfDedicatedCells(open_addr_t* neighbor);
 bool              schedule_isNumTxWrapped(open_addr_t* neighbor);
 bool              schedule_getCellsToBeRelocated(open_addr_t* neighbor, cellInfo_ht* celllist);
-bool              schedule_hasDedicatedCells(void);
+bool              schedule_hasDedicatedCellToNeighbor(open_addr_t* neighbor);
 
 // from IEEE802154E
 void               schedule_syncSlotOffset(slotOffset_t targetSlotOffset);

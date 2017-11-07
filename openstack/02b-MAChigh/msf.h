@@ -52,8 +52,8 @@ bool    msf_candidateRemoveCellList(
     uint8_t requiredCells
 );
 // called by schedule
-void    msf_updateCellsPassed(void);
-void    msf_updateCellsUsed(void);
+void    msf_updateCellsPassed(open_addr_t* neighbor);
+void    msf_updateCellsUsed(open_addr_t* neighbor);
 /**
 \}
 \}

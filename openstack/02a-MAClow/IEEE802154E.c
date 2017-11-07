@@ -912,27 +912,30 @@ port_INLINE void activity_ti1ORri1() {
             
             // check whether we can send
             if (schedule_getOkToSend()) {
-                if (schedule_hasDedicatedCells()){
-                    if (packetfunctions_isBroadcastMulticast(&neighbor)==FALSE){
-                        ieee154e_vars.dataToSend = openqueue_macGetDedicatedPacket(&neighbor);
-                    } else {
-                        ieee154e_vars.dataToSend = openqueue_macGetBoardcastPacket();
+                if (packetfunctions_isBroadcastMulticast(&neighbor)==FALSE){
+                    // this is a dedicated cell
+                    ieee154e_vars.dataToSend = openqueue_macGetDedicatedPacket(&neighbor);
+                    // update numcellpassed and numcellused on dedicated cell
+                    if (ieee154e_vars.dataToSend!=NULL) {
+                        msf_updateCellsUsed(&neighbor);
                     }
+                    msf_updateCellsPassed(&neighbor);
                 } else {
+                    // this is minimal cell
                     ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor);
                     if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX)) {
                         couldSendEB=TRUE;
                         // look for an EB packet in the queue
                         ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
+                    } else {
+                        // there is a packet to send
+                        if (
+                            schedule_hasDedicatedCellToNeighbor(&ieee154e_vars.dataToSend->l2_nextORpreviousHop)
+                        ) {
+                            // leave the packet to be sent on dedicated cell and pick up a broadcast packet.
+                            ieee154e_vars.dataToSend = openqueue_macGetBoardcastPacket();
+                        }
                     }
-                }
-                
-                // update numcellpassed and numcellused on dedicated cell
-                if (packetfunctions_isBroadcastMulticast(&neighbor)==FALSE){
-                    if (ieee154e_vars.dataToSend!=NULL) {
-                        msf_updateCellsUsed();
-                    }
-                    msf_updateCellsPassed();
                 }
             }
             

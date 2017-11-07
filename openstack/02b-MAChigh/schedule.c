@@ -647,14 +647,17 @@ bool schedule_getCellsToBeRelocated(open_addr_t* neighbor, cellInfo_ht* celllist
     return FALSE;
 }
 
-bool schedule_hasDedicatedCells(void){
+bool schedule_hasDedicatedCellToNeighbor(open_addr_t* neighbor){
     uint8_t i;
     
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
     
     for(i=0;i<MAXACTIVESLOTS;i++) {
-        if(schedule_vars.scheduleBuf[i].neighbor.type == ADDR_64B){
+        if(
+            schedule_vars.scheduleBuf[i].neighbor.type == ADDR_64B &&
+            packetfunctions_sameAddress(neighbor,&schedule_vars.scheduleBuf[i].neighbor)
+        ){
             return TRUE;
         }
     }

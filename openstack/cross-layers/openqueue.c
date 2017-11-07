@@ -345,42 +345,37 @@ OpenQueueEntry_t*  openqueue_macGetBoardcastPacket(){
 
 OpenQueueEntry_t*  openqueue_macGetDedicatedPacket(open_addr_t* toNeighbor){
     uint8_t i;
+    uint8_t packet_index;
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
     
+    packet_index = QUEUELENGTH;
     // first to look the sixtop RES packet
     for (i=0;i<QUEUELENGTH;i++) {
        if (
            openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
-           openqueue_vars.queue[i].creator==COMPONENT_SIXTOP_RES &&
            (
-               (
-                   toNeighbor->type==ADDR_64B &&
-                   packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)
-               )
+               toNeighbor->type==ADDR_64B &&
+               packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)
            )
        ){
-          ENABLE_INTERRUPTS();
-          return &openqueue_vars.queue[i];
+            if (packet_index==QUEUELENGTH){
+                packet_index = i;
+            } else {
+                if (openqueue_vars.queue[i].creator<openqueue_vars.queue[packet_index].creator){
+                    packet_index = i;
+                }
+            }
        }
     }
-   
-    for (i=0;i<QUEUELENGTH;i++) {
-       if (
-           openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
-           (
-               (
-                   toNeighbor->type==ADDR_64B &&
-                   packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)
-               )
-           )
-       ){
-          ENABLE_INTERRUPTS();
-          return &openqueue_vars.queue[i];
-       }
+    
+    if (packet_index == QUEUELENGTH){
+        ENABLE_INTERRUPTS();
+        return NULL;
+    } else {
+        ENABLE_INTERRUPTS();
+        return &openqueue_vars.queue[packet_index];
     }
-    ENABLE_INTERRUPTS();
-    return NULL;
 }
 
 
