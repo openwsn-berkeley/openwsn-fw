@@ -1697,8 +1697,9 @@ port_INLINE void activity_rie3() {
 }
 
 port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
-    ieee802154_header_iht ieee802514_header;
-    uint16_t lenIE=0;
+    ieee802154_header_iht       ieee802514_header;
+    uint16_t                    lenIE=0;
+    open_addr_t*                addressToWrite;
 
     // change state
     changeState(S_TXACKOFFSET);
@@ -1922,9 +1923,18 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
         } else {
             // synchronize to the received packet if I'm not a DAGroot and this is my preferred parent
             // or in case I'm in the middle of the join process when parent is not yet selected
-            if ((idmanager_getIsDAGroot()==FALSE && 
-                icmpv6rpl_isPreferredParent(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop))) ||
-                IEEE802154_security_isConfigured() == FALSE
+            // or in case I don't have a dedicated cell to my parent yet
+            if (
+                (
+                    idmanager_getIsDAGroot()                           == FALSE && 
+                    icmpv6rpl_isPreferredParent(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop))
+                )                                                               ||
+                IEEE802154_security_isConfigured()                     == FALSE ||
+                icmpv6rpl_getPreferredParentEui64(addressToWrite)      == FALSE ||
+                (
+                    icmpv6rpl_getPreferredParentEui64(addressToWrite)           &&
+                    schedule_hasDedicatedCellToNeighbor(addressToWrite)== FALSE
+                )
             ) {
                 synchronizePacket(ieee154e_vars.syncCapturedTime);
             }
