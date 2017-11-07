@@ -172,24 +172,15 @@ void               schedule_getSlotInfo(
    open_addr_t*         neighbor,
    slotinfo_element_t*  info
 );
-
-uint16_t           schedule_getMaxActiveSlots(void);
-
 owerror_t          schedule_removeActiveSlot(
    slotOffset_t         slotOffset,
    open_addr_t*         neighbor
 );
 bool               schedule_isSlotOffsetAvailable(uint16_t slotOffset);
-uint16_t           schedule_getCellsCounts(
-    uint8_t frameID,
-    cellType_t type,
-    open_addr_t* neighbor
-);
 void              schedule_removeAllCells(
    uint8_t        slotframeID,
    open_addr_t*   previousHop
 );
-scheduleEntry_t*  schedule_getCurrentScheduleEntry(void);
 uint8_t           schedule_getNumberOfFreeEntries(void);
 uint8_t           schedule_getNumberOfDedicatedCells(open_addr_t* neighbor);
 bool              schedule_isNumTxWrapped(open_addr_t* neighbor);
@@ -201,8 +192,6 @@ void               schedule_syncSlotOffset(slotOffset_t targetSlotOffset);
 void               schedule_advanceSlot(void);
 slotOffset_t       schedule_getNextActiveSlotOffset(void);
 frameLength_t      schedule_getFrameLength(void);
-uint8_t            schedule_getFrameHandle(void);
-uint8_t            schedule_getFrameNumber(void);
 cellType_t         schedule_getType(void);
 void               schedule_getNeighbor(open_addr_t* addrToWrite);
 channelOffset_t    schedule_getChannelOffset(void);

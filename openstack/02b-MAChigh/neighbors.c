@@ -237,27 +237,6 @@ bool neighbors_isInsecureNeighbor(open_addr_t* address) {
 
 \param[in] index The index of that neighbor in the neighbor table.
 
-\returns TRUE if that neighbor is in use and has a lower DAG rank than me, FALSE otherwise.
-*/
-bool neighbors_isNeighborWithLowerDAGrank(uint8_t index) {
-   bool    returnVal;
-   
-   if (neighbors_vars.neighbors[index].used==TRUE &&
-       neighbors_vars.neighbors[index].DAGrank < icmpv6rpl_getMyDAGrank()) { 
-      returnVal = TRUE;
-   } else {
-      returnVal = FALSE;
-   }
-   
-   return returnVal;
-}
-
-
-/**
-\brief Indicate whether some neighbor has a lower DAG rank that me.
-
-\param[in] index The index of that neighbor in the neighbor table.
-
 \returns TRUE if that neighbor is in use and has a higher DAG rank than me, FALSE otherwise.
 */
 bool neighbors_isNeighborWithHigherDAGrank(uint8_t index) {

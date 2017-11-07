@@ -254,15 +254,6 @@ void  schedule_getSlotInfo(
 }
 
 /**
-\brief Get the maximum number of active slots.
-
-\returns maximum number of active slots
-*/
-uint16_t  schedule_getMaxActiveSlots() {
-   return schedule_vars.maxActiveSlots;
-}
-
-/**
 \brief Add a new active slot into the schedule.
 
 \param slotOffset       The slotoffset of the new slot
@@ -485,37 +476,6 @@ bool schedule_isSlotOffsetAvailable(uint16_t slotOffset){
    return TRUE;
 }
 
-uint16_t  schedule_getCellsCounts(uint8_t frameID,cellType_t type, open_addr_t* neighbor){
-    uint16_t         count = 0;
-    scheduleEntry_t* scheduleWalker;
-   
-    INTERRUPT_DECLARATION();
-    DISABLE_INTERRUPTS();
-    
-    if (frameID != SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE){
-        ENABLE_INTERRUPTS();
-        return 0;
-    }
-   
-    scheduleWalker = schedule_vars.currentScheduleEntry;
-    do {
-       if(
-          (type == scheduleWalker->type) &&
-          (
-              (
-                  type == CELLTYPE_TXRX ||
-                  (type == CELLTYPE_TX &&  packetfunctions_sameAddress(&(scheduleWalker->neighbor),neighbor))
-              )
-          )
-       ){
-           count++;
-       }
-       scheduleWalker = scheduleWalker->next;
-    }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
-   
-    ENABLE_INTERRUPTS();
-    return count;
-}
 void schedule_removeAllCells(
     uint8_t        slotframeID,
     open_addr_t*   previousHop
@@ -531,10 +491,6 @@ void schedule_removeAllCells(
            );
         }
     }
-}
-
-scheduleEntry_t* schedule_getCurrentScheduleEntry(){
-    return schedule_vars.currentScheduleEntry;
 }
 
 uint8_t schedule_getNumberOfFreeEntries(){
@@ -726,41 +682,6 @@ frameLength_t schedule_getFrameLength() {
     return returnVal;
 }
 
-/**
-\brief Get the frame handle.
-
-\returns The frame handle.
-*/
-uint8_t schedule_getFrameHandle() {
-   uint8_t returnVal;
-   
-   INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
-   
-   returnVal = schedule_vars.frameHandle;
-   
-   ENABLE_INTERRUPTS();
-   
-   return returnVal;
-}
-
-/**
-\brief Get the frame number.
-
-\returns The frame number.
-*/
-uint8_t schedule_getFrameNumber() {
-   uint8_t returnVal;
-   
-   INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
-   
-   returnVal = schedule_vars.frameNumber;
-   
-   ENABLE_INTERRUPTS();
-   
-   return returnVal;
-}
 /**
 \brief Get the type of the current schedule entry.
 

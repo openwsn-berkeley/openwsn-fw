@@ -146,23 +146,6 @@ void openqueue_removeAllCreatedBy(uint8_t creator) {
    ENABLE_INTERRUPTS();
 }
 
-/**
-\brief Free all the packet buffers owned by a specific module.
-
-\param owner The identifier of the component, taken in COMPONENT_*.
-*/
-void openqueue_removeAllOwnedBy(uint8_t owner) {
-   uint8_t i;
-   INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
-   for (i=0;i<QUEUELENGTH;i++){
-      if (openqueue_vars.queue[i].owner==owner) {
-         openqueue_reset_entry(&(openqueue_vars.queue[i]));
-      }
-   }
-   ENABLE_INTERRUPTS();
-}
-
 //======= called by RES
 
 OpenQueueEntry_t* openqueue_sixtopGetSentPacket() {
@@ -193,21 +176,6 @@ OpenQueueEntry_t* openqueue_sixtopGetReceivedPacket() {
    }
    ENABLE_INTERRUPTS();
    return NULL;
-}
-
-uint8_t  openqueue_sixtopGetNumberOfPacketCreatedBy(uint8_t creator){
-   uint8_t i;
-   uint8_t counter;
-   INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
-   counter = 0;
-   for (i=0;i<QUEUELENGTH;i++) {
-      if (openqueue_vars.queue[i].creator==creator) {
-         counter += 1;
-      }
-   }
-   ENABLE_INTERRUPTS();
-   return counter;
 }
 
 //======= called by IEEE80215E
@@ -263,31 +231,6 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
     }
     ENABLE_INTERRUPTS();
     return NULL;
-}
-
-OpenQueueEntry_t* openqueue_getIpPacket(void){
-   uint8_t i;
-   INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
-   for (i=0;i<QUEUELENGTH;i++){
-      if (openqueue_vars.queue[i].creator==COMPONENT_CSTORM) {
-         ENABLE_INTERRUPTS();
-         return &openqueue_vars.queue[i];
-      } else {
-        if (openqueue_vars.queue[i].creator==COMPONENT_FORWARDING){
-           ENABLE_INTERRUPTS();
-           return &openqueue_vars.queue[i];
-        } else {
-           if (openqueue_vars.queue[i].creator==COMPONENT_ICMPv6RPL){
-              if (packetfunctions_isBroadcastMulticast(&(openqueue_vars.queue[i].l2_nextORpreviousHop))==FALSE)
-              ENABLE_INTERRUPTS();
-              return &openqueue_vars.queue[i];
-           }
-        }
-      }
-   }
-   ENABLE_INTERRUPTS();
-   return NULL;
 }
 
 bool openqueue_isHighPriorityEntryEnough(){

@@ -72,7 +72,6 @@ void          neighbors_setPreferredParent(uint8_t index, bool isPreferred);
 bool          neighbors_isStableNeighbor(open_addr_t* address);
 bool          neighbors_isStableNeighborByIndex(uint8_t index);
 bool          neighbors_isInsecureNeighbor(open_addr_t* address);
-bool          neighbors_isNeighborWithLowerDAGrank(uint8_t index);
 bool          neighbors_isNeighborWithHigherDAGrank(uint8_t index);
 bool          neighbors_reachedMaxTransmission(uint8_t index);
 
