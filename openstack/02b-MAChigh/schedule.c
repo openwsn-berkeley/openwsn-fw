@@ -8,6 +8,7 @@
 #include "msf.h"
 #include "IEEE802154E.h"
 #include "icmpv6rpl.h"
+#include "neighbors.h"
 
 //=========================== definition ======================================
 
