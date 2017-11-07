@@ -7,6 +7,7 @@
 #include "idmanager.h"
 #include "sf0.h"
 #include "icmpv6rpl.h"
+#include "neighbors.h"
 
 //=========================== variables =======================================
 
