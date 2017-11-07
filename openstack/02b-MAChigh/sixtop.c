@@ -349,6 +349,23 @@ owerror_t sixtop_request(
 
 owerror_t sixtop_send(OpenQueueEntry_t *msg) {
 
+    open_addr_t addressToWrite;
+    
+    if (
+        idmanager_getIsDAGroot() == FALSE &&
+        (
+            icmpv6rpl_getPreferredParentEui64(&addressToWrite) == FALSE      ||
+            (
+                icmpv6rpl_getPreferredParentEui64(&addressToWrite)           &&
+                schedule_hasDedicatedCellToNeighbor(&addressToWrite)== FALSE &&
+                msg->creator != COMPONENT_SIXTOP_RES                         &&
+                msg->creator != COMPONENT_CJOIN
+            )
+        )
+    ){
+        return E_FAIL;
+    }
+
     // set metadata
     msg->owner        = COMPONENT_SIXTOP;
     msg->l2_frameType = IEEE154_TYPE_DATA;
@@ -691,7 +708,9 @@ port_INLINE void sixtop_sendEB() {
     uint8_t     i;
     uint8_t     eb_len;
     uint16_t    temp16b;
-   
+    open_addr_t addressToWrite;
+    
+    memset(&addressToWrite,0,sizeof(open_addr_t));
     if (
         (ieee154e_isSynch()==FALSE)                     ||
         (IEEE802154_security_isConfigured()==FALSE)     ||
@@ -710,6 +729,26 @@ port_INLINE void sixtop_sendEB() {
         sixtop_vars.busySendingKA = FALSE;
         
         // stop here
+        return;
+    }
+
+    if (
+        idmanager_getIsDAGroot() == FALSE &&
+        (
+            icmpv6rpl_getPreferredParentEui64(&addressToWrite) == FALSE ||
+            (
+                icmpv6rpl_getPreferredParentEui64(&addressToWrite) &&
+                schedule_hasDedicatedCellToNeighbor(&addressToWrite) == FALSE
+            )
+        )
+    ){
+        // delete packets genereted by this module (EB and KA) from openqueue
+        openqueue_removeAllCreatedBy(COMPONENT_SIXTOP);
+        
+        // I'm not busy sending an EB or KA
+        sixtop_vars.busySendingEB = FALSE;
+        sixtop_vars.busySendingKA = FALSE;
+        
         return;
     }
    
@@ -821,6 +860,17 @@ port_INLINE void sixtop_sendKA() {
     kaNeighAddr = neighbors_getKANeighbor(sixtop_vars.kaPeriod);
     if (kaNeighAddr==NULL) {
         // don't proceed if I have no neighbor I need to send a KA to
+        return;
+    }
+    
+    if (schedule_hasDedicatedCellToNeighbor(kaNeighAddr) == FALSE){
+        // delete packets genereted by this module (EB and KA) from openqueue
+        openqueue_removeAllCreatedBy(COMPONENT_SIXTOP);
+        
+        // I'm not busy sending an EB or KA
+        sixtop_vars.busySendingEB = FALSE;
+        sixtop_vars.busySendingKA = FALSE;
+        
         return;
     }
 
