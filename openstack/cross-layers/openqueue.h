@@ -47,8 +47,8 @@ uint8_t            openqueue_sixtopGetNumberOfPacketCreatedBy(uint8_t creator);
 // called by IEEE80215E
 OpenQueueEntry_t*  openqueue_macGetDataPacket(open_addr_t* toNeighbor);
 OpenQueueEntry_t*  openqueue_macGetEBPacket(void);
-OpenQueueEntry_t*  openqueue_macGetDIOPacket(void);
-OpenQueueEntry_t*  openqueue_macGetUnicastPacket(open_addr_t* toNeighbor);
+OpenQueueEntry_t*  openqueue_macGetBoardcastPacket(void);
+OpenQueueEntry_t*  openqueue_macGetDedicatedPacket(open_addr_t* toNeighbor);
 /**
 \}
 \}

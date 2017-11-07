@@ -797,29 +797,28 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
 //======= TX
 
 port_INLINE void activity_ti1ORri1() {
-   cellType_t  cellType;
-   open_addr_t neighbor;
-   uint8_t     i;
-   uint8_t     asn[5];
-   uint8_t     join_priority;
-   bool        changeToRX=FALSE;
-   bool        couldSendEB=FALSE;
+    cellType_t  cellType;
+    open_addr_t neighbor;
+    uint8_t     i;
+    uint8_t     asn[5];
+    uint8_t     join_priority;
+    bool        changeToRX=FALSE;
+    bool        couldSendEB=FALSE;
 
-   // increment ASN (do this first so debug pins are in sync)
-   incrementAsnOffset();
-   
-   // wiggle debug pins
-   debugpins_slot_toggle();
-   if (ieee154e_vars.slotOffset==0) {
-      debugpins_frame_toggle();
-   }
-   
-   // desynchronize if needed
-   if (idmanager_getIsDAGroot()==FALSE) {
-      if(ieee154e_vars.deSyncTimeout > ieee154e_vars.numOfSleepSlots){
-         ieee154e_vars.deSyncTimeout -= ieee154e_vars.numOfSleepSlots;
-      }
-      else{
+    // increment ASN (do this first so debug pins are in sync)
+    incrementAsnOffset();
+    
+    // wiggle debug pins
+    debugpins_slot_toggle();
+    if (ieee154e_vars.slotOffset==0) {
+        debugpins_frame_toggle();
+    }
+    
+    // desynchronize if needed
+    if (idmanager_getIsDAGroot()==FALSE) {
+        if(ieee154e_vars.deSyncTimeout > ieee154e_vars.numOfSleepSlots){
+            ieee154e_vars.deSyncTimeout -= ieee154e_vars.numOfSleepSlots;
+        } else {
             // Reset sleep slots
             ieee154e_vars.numOfSleepSlots = 1;
         
@@ -837,252 +836,261 @@ port_INLINE void activity_ti1ORri1() {
             // abort
             endSlot();
             return;
-      }
-   }
-   
-   // if the previous slot took too long, we will not be in the right state
-   if (ieee154e_vars.state!=S_SLEEP) {
-      // log the error
-      openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_STATE_IN_STARTSLOT,
+        }
+    }
+    
+    // if the previous slot took too long, we will not be in the right state
+    if (ieee154e_vars.state!=S_SLEEP) {
+        // log the error
+        openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_STATE_IN_STARTSLOT,
                             (errorparameter_t)ieee154e_vars.state,
                             (errorparameter_t)ieee154e_vars.slotOffset);
-      // abort
-      endSlot();
-      return;
-   }
-   
-   // Reset sleep slots
-   ieee154e_vars.numOfSleepSlots = 1;
-   
-   if (ieee154e_vars.slotOffset==ieee154e_vars.nextActiveSlotOffset) {
-      // this is the next active slot
-      
-      // advance the schedule
-      schedule_advanceSlot();
-      
-      // calculate the frequency to transmit on
-      ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset()); 
-      
-      // find the next one
-      ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
-      if (idmanager_getIsSlotSkip() && idmanager_getIsDAGroot()==FALSE) {
-          if (ieee154e_vars.nextActiveSlotOffset>ieee154e_vars.slotOffset) {
-               ieee154e_vars.numOfSleepSlots = ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset;
-          } else {
-               ieee154e_vars.numOfSleepSlots = schedule_getFrameLength()+ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset; 
-          }
-          
-          opentimers_scheduleAbsolute(
-              ieee154e_vars.timerId,                            // timerId
-              TsSlotDuration*(ieee154e_vars.numOfSleepSlots),   // duration
-              ieee154e_vars.startOfSlotReference,               // reference
-              TIME_TICS,                                        // timetype
-              isr_ieee154e_newSlot                              // callback
-          );
-          ieee154e_vars.slotDuration = TsSlotDuration*(ieee154e_vars.numOfSleepSlots);
-          // radiotimer_setPeriod(TsSlotDuration*(ieee154e_vars.numOfSleepSlots));
-           
-          //increase ASN by numOfSleepSlots-1 slots as at this slot is already incremented by 1
-          for (i=0;i<ieee154e_vars.numOfSleepSlots-1;i++){
-             incrementAsnOffset();
-          }
-      }  
-      ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();      
-   } else {
-      // this is NOT the next active slot, abort
-      // stop using serial
-      openserial_stop();
-      // abort the slot
-      endSlot();
-      //start outputing serial
-      openserial_startOutput();
-      return;
-   }
-   
-   // check the schedule to see what type of slot this is
-   cellType = schedule_getType();
-   switch (cellType) {
-      case CELLTYPE_TXRX:
-      case CELLTYPE_TX:
-         // stop using serial
-         openserial_stop();
-         // assuming that there is nothing to send
-         ieee154e_vars.dataToSend = NULL;
-         // get the neighbor to check this is dedicated cell or not later
-         schedule_getNeighbor(&neighbor);
-         // check whether we can send
-         if (schedule_getOkToSend()) {
-            ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor);
-            if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX)) {
-               couldSendEB=TRUE;
-               // look for an EB packet in the queue
-               ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
-            }
-         }
-         
-         // update numcellpassed and numcellused on dedicated cell
-         if (packetfunctions_isBroadcastMulticast(&neighbor)==FALSE){
-            if (ieee154e_vars.dataToSend!=NULL) {
-                msf_updateCellsUsed();
-            }
-            msf_updateCellsPassed();
-         }
-         
-         if (ieee154e_vars.dataToSend==NULL) {
-            if (cellType==CELLTYPE_TX) {
-               // abort
-               endSlot();
-               break;
+        // abort
+        endSlot();
+        return;
+    }
+    
+    // Reset sleep slots
+    ieee154e_vars.numOfSleepSlots = 1;
+    
+    if (ieee154e_vars.slotOffset==ieee154e_vars.nextActiveSlotOffset) {
+        // this is the next active slot
+        
+        // advance the schedule
+        schedule_advanceSlot();
+        
+        // calculate the frequency to transmit on
+        ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset()); 
+        
+        // find the next one
+        ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
+        if (idmanager_getIsSlotSkip() && idmanager_getIsDAGroot()==FALSE) {
+            if (ieee154e_vars.nextActiveSlotOffset>ieee154e_vars.slotOffset) {
+                ieee154e_vars.numOfSleepSlots = ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset;
             } else {
-               changeToRX=TRUE;
+                ieee154e_vars.numOfSleepSlots = schedule_getFrameLength()+ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset; 
             }
-         } else {
-            // change state
-            changeState(S_TXDATAOFFSET);
-            // change owner
-            ieee154e_vars.dataToSend->owner = COMPONENT_IEEE802154E;
-            if (couldSendEB==TRUE) {        // I will be sending an EB
-               //copy synch IE  -- should be Little endian???
-               // fill in the ASN field of the EB
-               ieee154e_getAsn(asn);
-               join_priority = (icmpv6rpl_getMyDAGrank()/MINHOPRANKINCREASE)-1; //poipoi -- use dagrank(rank)-1
-               memcpy(ieee154e_vars.dataToSend->l2_ASNpayload,&asn[0],sizeof(asn_t));
-               memcpy(ieee154e_vars.dataToSend->l2_ASNpayload+sizeof(asn_t),&join_priority,sizeof(uint8_t));
-            }
-            // record that I attempt to transmit this packet
-            ieee154e_vars.dataToSend->l2_numTxAttempts++;
-#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
-            // 1. schedule timer for loading packet
-            radiotimer_schedule(ACTION_LOAD_PACKET,      DURATION_tt1);
-            // prepare the packet for load packet action at DURATION_tt1
-            // make a local copy of the frame
-            packetfunctions_duplicatePacket(&ieee154e_vars.localCopyForTransmission, ieee154e_vars.dataToSend);
-
-            // check if packet needs to be encrypted/authenticated before transmission 
-            if (ieee154e_vars.localCopyForTransmission.l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) { // security enabled
-                // encrypt in a local copy
-                if (IEEE802154_security_outgoingFrameSecurity(&ieee154e_vars.localCopyForTransmission) != E_SUCCESS) {
-                    // keep the frame in the OpenQueue in order to retry later
-                    endSlot(); // abort
-                    return;
-                }
-            }
-            // add 2 CRC bytes only to the local copy as we end up here for each retransmission
-            packetfunctions_reserveFooterSize(&ieee154e_vars.localCopyForTransmission, 2);
-            // set the tx buffer address and length register.(packet is NOT loaded at this moment)
-            radio_loadPacket_prepare(ieee154e_vars.localCopyForTransmission.payload,
-                                     ieee154e_vars.localCopyForTransmission.length);
-            // 2. schedule timer for sending packet
-            radiotimer_schedule(ACTION_SEND_PACKET,  DURATION_tt2);
-            // 3. schedule timer radio tx watchdog
-            radiotimer_schedule(ACTION_NORMAL_TIMER, DURATION_tt3);
-            // 4. set capture interrupt for Tx SFD senddone and packet senddone
-            radiotimer_setCapture(ACTION_TX_SFD_DONE);
-            radiotimer_setCapture(ACTION_TX_SEND_DONE);
-#else
-            // arm tt1
+            
             opentimers_scheduleAbsolute(
                 ieee154e_vars.timerId,                            // timerId
-                DURATION_tt1,                                     // duration
+                TsSlotDuration*(ieee154e_vars.numOfSleepSlots),   // duration
+                ieee154e_vars.startOfSlotReference,               // reference
+                TIME_TICS,                                        // timetype
+                isr_ieee154e_newSlot                              // callback
+            );
+            ieee154e_vars.slotDuration = TsSlotDuration*(ieee154e_vars.numOfSleepSlots);
+            // radiotimer_setPeriod(TsSlotDuration*(ieee154e_vars.numOfSleepSlots));
+            
+            //increase ASN by numOfSleepSlots-1 slots as at this slot is already incremented by 1
+            for (i=0;i<ieee154e_vars.numOfSleepSlots-1;i++){
+                incrementAsnOffset();
+            }
+        }  
+        ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();      
+    } else {
+        // this is NOT the next active slot, abort
+        // stop using serial
+        openserial_stop();
+        // abort the slot
+        endSlot();
+        //start outputing serial
+        openserial_startOutput();
+        return;
+    }
+    
+    // check the schedule to see what type of slot this is
+    cellType = schedule_getType();
+    switch (cellType) {
+        case CELLTYPE_TXRX:
+        case CELLTYPE_TX:
+            // stop using serial
+            openserial_stop();
+            // assuming that there is nothing to send
+            ieee154e_vars.dataToSend = NULL;
+            // get the neighbor to check this is dedicated cell or not later
+            schedule_getNeighbor(&neighbor);
+            
+            // check whether we can send
+            if (schedule_getOkToSend()) {
+                if (schedule_hasDedicatedCells()){
+                    if (packetfunctions_isBroadcastMulticast(&neighbor)==FALSE){
+                        ieee154e_vars.dataToSend = openqueue_macGetDedicatedPacket(&neighbor);
+                    } else {
+                        ieee154e_vars.dataToSend = openqueue_macGetBoardcastPacket();
+                    }
+                } else {
+                    ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor);
+                    if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX)) {
+                        couldSendEB=TRUE;
+                        // look for an EB packet in the queue
+                        ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
+                    }
+                }
+                
+                // update numcellpassed and numcellused on dedicated cell
+                if (packetfunctions_isBroadcastMulticast(&neighbor)==FALSE){
+                    if (ieee154e_vars.dataToSend!=NULL) {
+                        msf_updateCellsUsed();
+                    }
+                    msf_updateCellsPassed();
+                }
+            }
+            
+            if (ieee154e_vars.dataToSend==NULL) {
+                if (cellType==CELLTYPE_TX) {
+                    // abort
+                    endSlot();
+                    break;
+                } else {
+                    changeToRX=TRUE;
+                }
+            } else {
+                // change state
+                changeState(S_TXDATAOFFSET);
+                // change owner
+                ieee154e_vars.dataToSend->owner = COMPONENT_IEEE802154E;
+                if (couldSendEB==TRUE) {        // I will be sending an EB
+                    //copy synch IE  -- should be Little endian???
+                    // fill in the ASN field of the EB
+                    ieee154e_getAsn(asn);
+                    join_priority = (icmpv6rpl_getMyDAGrank()/MINHOPRANKINCREASE)-1; //poipoi -- use dagrank(rank)-1
+                    memcpy(ieee154e_vars.dataToSend->l2_ASNpayload,&asn[0],sizeof(asn_t));
+                    memcpy(ieee154e_vars.dataToSend->l2_ASNpayload+sizeof(asn_t),&join_priority,sizeof(uint8_t));
+                }
+                // record that I attempt to transmit this packet
+                ieee154e_vars.dataToSend->l2_numTxAttempts++;
+#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
+                // 1. schedule timer for loading packet
+                radiotimer_schedule(ACTION_LOAD_PACKET,      DURATION_tt1);
+                // prepare the packet for load packet action at DURATION_tt1
+                // make a local copy of the frame
+                packetfunctions_duplicatePacket(&ieee154e_vars.localCopyForTransmission, ieee154e_vars.dataToSend);
+
+                // check if packet needs to be encrypted/authenticated before transmission 
+                if (ieee154e_vars.localCopyForTransmission.l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) { // security enabled
+                    // encrypt in a local copy
+                    if (IEEE802154_security_outgoingFrameSecurity(&ieee154e_vars.localCopyForTransmission) != E_SUCCESS) {
+                        // keep the frame in the OpenQueue in order to retry later
+                        endSlot(); // abort
+                        return;
+                    }
+                }
+                // add 2 CRC bytes only to the local copy as we end up here for each retransmission
+                packetfunctions_reserveFooterSize(&ieee154e_vars.localCopyForTransmission, 2);
+                // set the tx buffer address and length register.(packet is NOT loaded at this moment)
+                radio_loadPacket_prepare(ieee154e_vars.localCopyForTransmission.payload,
+                                     ieee154e_vars.localCopyForTransmission.length);
+                // 2. schedule timer for sending packet
+                radiotimer_schedule(ACTION_SEND_PACKET,  DURATION_tt2);
+                // 3. schedule timer radio tx watchdog
+                radiotimer_schedule(ACTION_NORMAL_TIMER, DURATION_tt3);
+                // 4. set capture interrupt for Tx SFD senddone and packet senddone
+                radiotimer_setCapture(ACTION_TX_SFD_DONE);
+                radiotimer_setCapture(ACTION_TX_SEND_DONE);
+#else
+                // arm tt1
+                opentimers_scheduleAbsolute(
+                    ieee154e_vars.timerId,                            // timerId
+                    DURATION_tt1,                                     // duration
+                    ieee154e_vars.startOfSlotReference,               // reference
+                    TIME_TICS,                                        // timetype
+                    isr_ieee154e_timer                                // callback
+                );
+                // radiotimer_schedule(DURATION_tt1);
+#endif
+                break;
+            }
+        case CELLTYPE_RX:
+            if (changeToRX==FALSE) {
+                // stop using serial
+                openserial_stop();
+            }
+            // change state
+            changeState(S_RXDATAOFFSET);
+#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
+            // arm rt1
+            radiotimer_schedule(ACTION_RADIORX_ENABLE,DURATION_rt1);
+            radio_rxPacket_prepare();
+            // 2. schedule timer for starting 
+            radiotimer_schedule(ACTION_NORMAL_TIMER,DURATION_rt2);
+            // 3.  set capture interrupt for Rx SFD done and receiving packet done
+            radiotimer_setCapture(ACTION_RX_SFD_DONE);
+            radiotimer_setCapture(ACTION_RX_DONE);
+#else
+            // arm rt1
+            opentimers_scheduleAbsolute(
+                ieee154e_vars.timerId,                            // timerId
+                DURATION_rt1,                                     // duration
                 ieee154e_vars.startOfSlotReference,               // reference
                 TIME_TICS,                                        // timetype
                 isr_ieee154e_timer                                // callback
             );
-            // radiotimer_schedule(DURATION_tt1);
+            // radiotimer_schedule(DURATION_rt1);
 #endif
             break;
-         }
-      case CELLTYPE_RX:
-         if (changeToRX==FALSE) {
+        case CELLTYPE_SERIALRX:
             // stop using serial
             openserial_stop();
-         }
-         // change state
-         changeState(S_RXDATAOFFSET);
-#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
-         // arm rt1
-         radiotimer_schedule(ACTION_RADIORX_ENABLE,DURATION_rt1);
-         radio_rxPacket_prepare();
-         // 2. schedule timer for starting 
-         radiotimer_schedule(ACTION_NORMAL_TIMER,DURATION_rt2);
-         // 3.  set capture interrupt for Rx SFD done and receiving packet done
-         radiotimer_setCapture(ACTION_RX_SFD_DONE);
-         radiotimer_setCapture(ACTION_RX_DONE);
-#else
-         // arm rt1
-         opentimers_scheduleAbsolute(
-              ieee154e_vars.timerId,                            // timerId
-              DURATION_rt1,                                     // duration
-              ieee154e_vars.startOfSlotReference,               // reference
-              TIME_TICS,                                        // timetype
-              isr_ieee154e_timer                                // callback
-         );
-         // radiotimer_schedule(DURATION_rt1);
-#endif
-         break;
-      case CELLTYPE_SERIALRX:
-         // stop using serial
-         openserial_stop();
-         // abort the slot
-         endSlot();
-         //start inputting serial data
-         openserial_startInput();
-         //this is to emulate a set of serial input slots without having the slotted structure.
+            // abort the slot
+            endSlot();
+            //start inputting serial data
+            openserial_startInput();
+            //this is to emulate a set of serial input slots without having the slotted structure.
 
-         //skip the serial rx slots
-         ieee154e_vars.numOfSleepSlots = NUMSERIALRX;
-         
-         //increase ASN by NUMSERIALRX-1 slots as at this slot is already incremented by 1
-         for (i=0;i<NUMSERIALRX-1;i++){
-            incrementAsnOffset();
-            // advance the schedule
-            schedule_advanceSlot();
-            // find the next one
-            ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
-         }
-         // possibly skip additional slots if enabled
-         if (idmanager_getIsSlotSkip() && idmanager_getIsDAGroot()==FALSE) {
-             if (ieee154e_vars.nextActiveSlotOffset>ieee154e_vars.slotOffset) {
-                 ieee154e_vars.numOfSleepSlots = ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset+NUMSERIALRX-1;
-             } else {
-                 ieee154e_vars.numOfSleepSlots = schedule_getFrameLength()+ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset+NUMSERIALRX-1; 
-             }
-              
-             //only increase ASN by numOfSleepSlots-NUMSERIALRX
-             for (i=0;i<ieee154e_vars.numOfSleepSlots-NUMSERIALRX;i++){
+            //skip the serial rx slots
+            ieee154e_vars.numOfSleepSlots = NUMSERIALRX;
+            
+            //increase ASN by NUMSERIALRX-1 slots as at this slot is already incremented by 1
+            for (i=0;i<NUMSERIALRX-1;i++){
                 incrementAsnOffset();
-             }
-         }
-         // set the timer based on calcualted number of slots to skip
-         opentimers_scheduleAbsolute(
-              ieee154e_vars.timerId,                            // timerId
-              TsSlotDuration*(ieee154e_vars.numOfSleepSlots),   // duration
-              ieee154e_vars.startOfSlotReference,               // reference
-              TIME_TICS,                                        // timetype
-              isr_ieee154e_newSlot                              // callback
-         );
-         ieee154e_vars.slotDuration = TsSlotDuration*(ieee154e_vars.numOfSleepSlots);
-         // radiotimer_setPeriod(TsSlotDuration*(ieee154e_vars.numOfSleepSlots));
-         
+                // advance the schedule
+                schedule_advanceSlot();
+                // find the next one
+                ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
+            }
+            // possibly skip additional slots if enabled
+            if (idmanager_getIsSlotSkip() && idmanager_getIsDAGroot()==FALSE) {
+                if (ieee154e_vars.nextActiveSlotOffset>ieee154e_vars.slotOffset) {
+                    ieee154e_vars.numOfSleepSlots = ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset+NUMSERIALRX-1;
+                } else {
+                    ieee154e_vars.numOfSleepSlots = schedule_getFrameLength()+ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset+NUMSERIALRX-1; 
+                }
+                
+                //only increase ASN by numOfSleepSlots-NUMSERIALRX
+                for (i=0;i<ieee154e_vars.numOfSleepSlots-NUMSERIALRX;i++){
+                    incrementAsnOffset();
+                }
+            }
+            // set the timer based on calcualted number of slots to skip
+            opentimers_scheduleAbsolute(
+                ieee154e_vars.timerId,                            // timerId
+                TsSlotDuration*(ieee154e_vars.numOfSleepSlots),   // duration
+                ieee154e_vars.startOfSlotReference,               // reference
+                TIME_TICS,                                        // timetype
+                isr_ieee154e_newSlot                              // callback
+            );
+            ieee154e_vars.slotDuration = TsSlotDuration*(ieee154e_vars.numOfSleepSlots);
+            // radiotimer_setPeriod(TsSlotDuration*(ieee154e_vars.numOfSleepSlots));
+            
 #ifdef ADAPTIVE_SYNC
-         // deal with the case when schedule multi slots
-         adaptive_sync_countCompensationTimeout_compoundSlots(NUMSERIALRX-1);
+            // deal with the case when schedule multi slots
+            adaptive_sync_countCompensationTimeout_compoundSlots(NUMSERIALRX-1);
 #endif
-         break;
-      case CELLTYPE_MORESERIALRX:
-         // do nothing (not even endSlot())
-         break;
-      default:
-         // stop using serial
-         openserial_stop();
-         // log the error
-         openserial_printCritical(COMPONENT_IEEE802154E,ERR_WRONG_CELLTYPE,
+            break;
+        case CELLTYPE_MORESERIALRX:
+            // do nothing (not even endSlot())
+            break;
+        default:
+            // stop using serial
+            openserial_stop();
+            // log the error
+            openserial_printCritical(COMPONENT_IEEE802154E,ERR_WRONG_CELLTYPE,
                                (errorparameter_t)cellType,
                                (errorparameter_t)ieee154e_vars.slotOffset);
-         // abort
-         endSlot();
-         break;
-   }
+            // abort
+            endSlot();
+            break;
+    }
 }
 
 port_INLINE void activity_ti2() {
