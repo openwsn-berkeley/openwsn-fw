@@ -2127,11 +2127,6 @@ port_INLINE void activity_ri9(PORT_TIMER_WIDTH capturedTime) {
    // clear local variable
    ieee154e_vars.ackToSend = NULL;
    
-   // synchronize to the received packet
-   if (idmanager_getIsDAGroot()==FALSE && icmpv6rpl_isPreferredParent(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop))) {
-      synchronizePacket(ieee154e_vars.syncCapturedTime);
-   }
-   
    // inform upper layer of reception (after ACK sent)
    notif_receive(ieee154e_vars.dataReceived);
    
