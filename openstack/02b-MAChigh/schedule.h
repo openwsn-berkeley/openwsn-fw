@@ -143,10 +143,8 @@ typedef struct {
    frameLength_t    maxActiveSlots;
    uint8_t          frameHandle;
    uint8_t          frameNumber;
-   uint8_t          backoffExponenton_minimalCell;
-   uint8_t          backoff_minimalCell;
-   uint8_t          backoffExponenton_dedicatedCell;
-   uint8_t          backoff_dedicatedCell;
+   uint8_t          backoffExponenton;
+   uint8_t          backoff;
    uint8_t          debugPrintRow;
 } schedule_vars_t;
 

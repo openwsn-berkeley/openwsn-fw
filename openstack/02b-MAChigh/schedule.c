@@ -35,8 +35,7 @@ void schedule_init() {
     for (running_slotOffset=0;running_slotOffset<MAXACTIVESLOTS;running_slotOffset++) {
         schedule_resetEntry(&schedule_vars.scheduleBuf[running_slotOffset]);
     }
-    schedule_vars.backoffExponenton_minimalCell   = MINBE-1;
-    schedule_vars.backoffExponenton_dedicatedCell = MINBE-1;
+    schedule_vars.backoffExponenton   = MINBE-1;
     schedule_vars.maxActiveSlots = MAXACTIVESLOTS;
     
     start_slotOffset = SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;
@@ -154,8 +153,8 @@ bool debugPrint_backoff() {
    uint8_t temp[2];
    
    // gather status data
-   temp[0] = schedule_vars.backoffExponenton_minimalCell;
-   temp[1] = schedule_vars.backoff_minimalCell;
+   temp[0] = schedule_vars.backoffExponenton;
+   temp[1] = schedule_vars.backoff;
    
    // send status data over serial port
    openserial_printStatus(
@@ -733,34 +732,24 @@ bool schedule_getOkToSend(void) {
         returnVal = TRUE;
     } else {
         // shared slot: check backoff before answering
-     
-        if (schedule_vars.currentScheduleEntry->neighbor.type==ADDR_ANYCAST){
-            
+      
+        if (schedule_vars.currentScheduleEntry->neighbor.type == ADDR_ANYCAST){
             // this is a minimal cell
-            
-            if (schedule_vars.backoff_minimalCell>0) {
-                schedule_vars.backoff_minimalCell--;
+            if (schedule_vars.backoff>0) {
+                schedule_vars.backoff--;
             }
             
             // only return TRUE if backoff hit 0
-            if (schedule_vars.backoff_minimalCell==0) {
+            if (schedule_vars.backoff==0) {
                 returnVal = TRUE;
             } else {
                 returnVal = FALSE;
             }
         } else {
             // this is a dedicated cell
+            neighbors_decreaseBackoff(&schedule_vars.currentScheduleEntry->neighbor);
             
-            if (schedule_vars.backoff_dedicatedCell>0) {
-                schedule_vars.backoff_dedicatedCell--;
-            }
-            
-            // only return TRUE if backoff hit 0
-            if (schedule_vars.backoff_dedicatedCell==0) {
-                returnVal = TRUE;
-            } else {
-                returnVal = FALSE;
-            }
+            returnVal = neighbors_backoffHitZero(&schedule_vars.currentScheduleEntry->neighbor);
         }
     }
     
@@ -778,11 +767,9 @@ void schedule_resetBackoff() {
     DISABLE_INTERRUPTS();
     
     // reset backoffExponent
-    schedule_vars.backoffExponenton_minimalCell   = MINBE-1;
-    schedule_vars.backoffExponenton_dedicatedCell = MINBE-1;
+    schedule_vars.backoffExponenton   = MINBE-1;
     // reset backoff
-    schedule_vars.backoff_minimalCell             = 0;
-    schedule_vars.backoff_dedicatedCell           = 0;
+    schedule_vars.backoff             = 0;
     
     ENABLE_INTERRUPTS();
 }
@@ -828,28 +815,24 @@ void schedule_indicateTx(asn_t* asnTimestamp, bool succesfullTx) {
     // update this backoff parameters for shared slots
     if (schedule_vars.currentScheduleEntry->shared==TRUE) {
         if (succesfullTx==TRUE) {
-            if (schedule_vars.currentScheduleEntry->neighbor.type == ADDR_ANYCAST){
+            if (schedule_vars.currentScheduleEntry->neighbor.type==ADDR_ANYCAST){
                 // reset backoffExponent
-                schedule_vars.backoffExponenton_minimalCell     = MINBE-1;
+                schedule_vars.backoffExponenton     = MINBE-1;
                 // reset backoff
-                schedule_vars.backoff_minimalCell               = 0;
+                schedule_vars.backoff               = 0;
             } else {
-                schedule_vars.backoffExponenton_dedicatedCell   = MINBE-1;
-                schedule_vars.backoff_dedicatedCell             = 0;
+                neighbors_resetBackoff(&schedule_vars.currentScheduleEntry->neighbor);
             }
         } else {
-            if (schedule_vars.currentScheduleEntry->neighbor.type == ADDR_ANYCAST){
+            if (schedule_vars.currentScheduleEntry->neighbor.type==ADDR_ANYCAST){
                 // increase the backoffExponent
-                if (schedule_vars.backoffExponenton_minimalCell<MAXBE) {
-                    schedule_vars.backoffExponenton_minimalCell++;
+                if (schedule_vars.backoffExponenton<MAXBE) {
+                    schedule_vars.backoffExponenton++;
                 }
                 // set the backoff to a random value in [0..2^BE]
-                schedule_vars.backoff_minimalCell       = openrandom_get16b()%(1<<schedule_vars.backoffExponenton_minimalCell);
+                schedule_vars.backoff       = openrandom_get16b()%(1<<schedule_vars.backoffExponenton);
             } else {
-                if (schedule_vars.backoffExponenton_dedicatedCell<MAXBE) {
-                    schedule_vars.backoffExponenton_dedicatedCell++;
-                }
-                schedule_vars.backoff_dedicatedCell     = openrandom_get16b()%(1<<schedule_vars.backoffExponenton_dedicatedCell);
+                neighbors_updateBackoff(&schedule_vars.currentScheduleEntry->neighbor);
             }
         }
     }
