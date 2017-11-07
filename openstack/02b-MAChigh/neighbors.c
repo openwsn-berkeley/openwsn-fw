@@ -758,6 +758,8 @@ void registerNewNeighbor(open_addr_t* address,
             neighbors_vars.neighbors[i].numTx                  = 0;
             neighbors_vars.neighbors[i].numTxACK               = 0;
             memcpy(&neighbors_vars.neighbors[i].asn,asnTimestamp,sizeof(asn_t));
+            neighbors_vars.neighbors[i].backoffExponenton      = MINBE-1;;
+            neighbors_vars.neighbors[i].backoff                = 0;
             //update jp
             if (joinPrioPresent==TRUE){
                neighbors_vars.neighbors[i].joinPrio=joinPrio;
