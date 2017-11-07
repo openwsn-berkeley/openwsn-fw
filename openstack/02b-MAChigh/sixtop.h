@@ -38,10 +38,11 @@
 #define IANA_6TOP_RC_RESET          0x03 // RC_RESET         | critical error, reset
 #define IANA_6TOP_RC_VER_ERR        0x04 // RC_VER_ERR       | unsupported 6P version   
 #define IANA_6TOP_RC_SFID_ERR       0x05 // RC_SFID_ERR      | unsupported SFID         
-#define IANA_6TOP_RC_SEQNUM_ERR     0x06 // RC_SEQNUM_ERR    | wrong sequence number
-#define IANA_6TOP_RC_BUSY           0x07 // RC_BUSY          | busy
-#define IANA_6TOP_RC_NORES          0x08 // RC_NORES         | not enough resources      
-#define IANA_6TOP_RC_CELLLIST_ERR   0x09 // RC_CELLLIST_ERR  | cellList error      
+#define IANA_6TOP_RC_SEQNUM_ERR     0x06 // RC_SEQNUM_ERR    | wrong sequence number  
+#define IANA_6TOP_RC_CELLLIST_ERR   0x07 // RC_CELLLIST_ERR  | cellList error
+#define IANA_6TOP_RC_BUSY           0x08 // RC_BUSY          | busy   
+#define IANA_6TOP_RC_LOCKED         0x09 // RC_LOCKED        | locked
+#define IANA_6TOP_RC_NORES          0x0a // RC_NORES         | not enough resources 
 
 // SF ID
 #define SFID_SF0  0
@@ -84,7 +85,7 @@ typedef enum {
 typedef uint8_t                 (*sixtop_sf_getsfid)(void);
 typedef uint16_t                (*sixtop_sf_getmetadata)(void);
 typedef metadata_t              (*sixtop_sf_translatemetadata)(void);
-typedef void (*sixtop_sf_handle_callback)(uint8_t arg);
+typedef void (*sixtop_sf_handle_callback)(uint8_t arg, open_addr_t* address);
       
 #define SIXTOP_MINIMAL_EBPERIOD     5 // minist period of sending EB
 

@@ -16,11 +16,14 @@
 #define CELLOPTIONS_MSF         CELLOPTIONS_TX | CELLOPTIONS_RX | CELLOPTIONS_SHARED
 #define NUMCELLS_MSF            1
 
-#define MAX_NUMCELLS            16
-#define LIM_NUMCELLSUSED_HIGH   12
-#define LIM_NUMCELLSUSED_LOW     4
+#define MAX_NUMCELLS                   16
+#define LIM_NUMCELLSUSED_HIGH          12
+#define LIM_NUMCELLSUSED_LOW            4
 
-#define HOUSEKEEPING_PERIOD     60 // seconds
+#define HOUSEKEEPING_PERIOD             60 // seconds
+#define QUARANTINE_DURATION            300 // seconds
+#define WAITDURATION_MIN             30000 // miliseconds
+#define WAITDURATION_RANDOM_RANGE    30000 // miliseconds
 
 //=========================== typedef =========================================
 
@@ -31,6 +34,8 @@ typedef struct {
    uint8_t numCellsUsed;
    opentimers_id_t housekeepingTimerId;
    uint8_t housekeepingTimerCounter;
+   opentimers_id_t waitretryTimerId;
+   bool    waitretry;
 } msf_vars_t;
 
 //=========================== module variables ================================
@@ -40,7 +45,6 @@ typedef struct {
 // admin
 void    msf_init(void);
 void    msf_appPktPeriod(uint8_t numAppPacketsPerSlotFrame);
-void    msf_setBackoff(uint8_t value);
 uint8_t msf_getsfid(void);
 bool    msf_candidateAddCellList(
     cellInfo_ht* cellList,

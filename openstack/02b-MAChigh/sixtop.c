@@ -1527,7 +1527,7 @@ void sixtop_six2six_notifyReceive(
                 break;
             }
         } else {
-            sixtop_vars.cb_sf_handleRCError(code);
+            sixtop_vars.cb_sf_handleRCError(code, &(pkt->l2_nextORpreviousHop));
         }
         openserial_printInfo(
             COMPONENT_SIXTOP,

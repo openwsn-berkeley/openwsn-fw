@@ -20,10 +20,14 @@ msf_vars_t msf_vars;
 // sixtop callback 
 uint16_t msf_getMetadata(void);
 metadata_t msf_translateMetadata(void);
-void msf_handleRCError(uint8_t code);
+void msf_handleRCError(uint8_t code, open_addr_t* address);
 
 void msf_timer_housekeeping_cb(opentimers_id_t id);
 void msf_timer_housekeeping_task(void);
+
+void msf_timer_waitretry_cb(opentimers_id_t id);
+
+void msf_timer_clear_task(void);
 // msf private
 void msf_trigger6pAdd(void);
 void msf_trigger6pDelete(void);
@@ -43,10 +47,7 @@ void msf_init(void) {
         TIMER_ONESHOT,
         msf_timer_housekeeping_cb
     );
-}
-
-void msf_setBackoff(uint8_t value){
-    msf_vars.backoff = value;
+    msf_vars.waitretryTimerId    = opentimers_create();
 }
 
 // called by schedule
@@ -91,32 +92,50 @@ metadata_t msf_translateMetadata(void){
     return METADATA_TYPE_FRAMEID;
 }
 
-void msf_handleRCError(uint8_t code){
-    if (code==IANA_6TOP_RC_BUSY){
-        // disable msf for [0...2^4] slotframe long time
-        msf_setBackoff(openrandom_get16b()%(1<<4));
+void msf_handleRCError(uint8_t code, open_addr_t* address){
+    uint16_t waitDuration;
+  
+    if (
+        code==IANA_6TOP_RC_RESET        ||
+        code==IANA_6TOP_RC_LOCKED       ||
+        code==IANA_6TOP_RC_BUSY
+    ){
+        // waitretry
+        msf_vars.waitretry = TRUE;
+        waitDuration = WAITDURATION_MIN+openrandom_get16b()%WAITDURATION_RANDOM_RANGE;
+        opentimers_scheduleIn(
+            msf_vars.waitretryTimerId,
+            waitDuration,
+            TIME_MS,
+            TIMER_ONESHOT,
+            msf_timer_waitretry_cb
+        );
     }
     
-    if (code==IANA_6TOP_RC_RESET){
-        // TBD: the neighbor can't statisfy the 6p request with given cells, call msf to make a decision 
-        // (e.g. issue another 6p request with different cell list)
+    if (
+        code==IANA_6TOP_RC_ERROR        ||
+        code==IANA_6TOP_RC_VER_ERR      ||
+        code==IANA_6TOP_RC_SFID_ERR
+    ){
+        // quarantine
     }
     
-    if (code==IANA_6TOP_RC_ERROR){
-        // TBD: the neighbor can't statisfy the 6p request, call msf to make a decision
+    if (
+        code==IANA_6TOP_RC_SEQNUM_ERR   ||
+        code==IANA_6TOP_RC_CELLLIST_ERR
+    ){
+        // clear
+        scheduler_push_task(msf_timer_clear_task,TASKPRIO_MSF);
     }
     
-    if (code==IANA_6TOP_RC_VER_ERR){
-        // TBD: the 6p verion does not match
+    if (code==IANA_6TOP_RC_NORES){
+        // mark neighbor f6NORES
+        neighbors_setNeighborNoResource(address);
     }
-    
-    if (code==IANA_6TOP_RC_SFID_ERR){
-        // TBD: the sfId does not match
-    }
-    
-    if (code==IANA_6TOP_RC_SEQNUM_ERR){
-        // TBD: the seqNum does not match
-    }
+}
+
+void msf_timer_waitretry_cb(opentimers_id_t id){
+    msf_vars.waitretry = FALSE;
 }
 
 void msf_timer_housekeeping_cb(opentimers_id_t id){
@@ -142,12 +161,39 @@ void msf_timer_housekeeping_task(void){
     }
 }
 
+void msf_timer_clear_task(void){
+    open_addr_t    neighbor;
+    bool           foundNeighbor;
+    
+    // get preferred parent
+    foundNeighbor = icmpv6rpl_getPreferredParentEui64(&neighbor);
+    if (foundNeighbor==FALSE) {
+        return;
+    }
+    
+    sixtop_request(
+        IANA_6TOP_CMD_CLEAR,                // code
+        &neighbor,                          // neighbor
+        NUMCELLS_MSF,                       // number cells
+        CELLOPTIONS_MSF,                    // cellOptions
+        NULL,                               // celllist to add (not used)
+        NULL,                               // celllist to delete (not used)
+        IANA_6TISCH_SFID_MSF,               // sfid
+        0,                                  // list command offset (not used)
+        0                                   // list command maximum celllist (not used)
+    );
+}
+
 //=========================== private =========================================
 
 void msf_trigger6pAdd(void){
     open_addr_t    neighbor;
     bool           foundNeighbor;
     cellInfo_ht    celllist_add[CELLLIST_MAX_LEN];
+    
+    if (msf_vars.waitretry){
+        return;
+    }
     
     // get preferred parent
     foundNeighbor = icmpv6rpl_getPreferredParentEui64(&neighbor);
@@ -177,6 +223,10 @@ void msf_trigger6pDelete(void){
     open_addr_t    neighbor;
     bool           foundNeighbor;
     cellInfo_ht    celllist_delete[CELLLIST_MAX_LEN];
+    
+    if (msf_vars.waitretry){
+        return;
+    }
     
     // get preferred parent
     foundNeighbor = icmpv6rpl_getPreferredParentEui64(&neighbor);
@@ -284,6 +334,10 @@ void msf_housekeeping(void){
     }
     
     if (schedule_isNumTxWrapped(&neighbor)==FALSE){
+        return;
+    }
+    
+    if (msf_vars.waitretry){
         return;
     }
     
