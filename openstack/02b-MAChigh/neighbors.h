@@ -16,8 +16,8 @@
 #define BADNEIGHBORMAXRSSI        -80 //dBm
 #define GOODNEIGHBORMINRSSI       -90 //dBm
 #define SWITCHSTABILITYTHRESHOLD  3
-#define DEFAULTLINKCOST           4
-#define LARGESTLINKCOST           8
+#define DEFAULTLINKCOST           8
+#define MINIMAL_TX                DEFAULTLINKCOST
 
 #define MAXDAGRANK                0xffff
 #define DEFAULTDAGRANK            MAXDAGRANK
@@ -73,7 +73,7 @@ bool          neighbors_isStableNeighbor(open_addr_t* address);
 bool          neighbors_isStableNeighborByIndex(uint8_t index);
 bool          neighbors_isInsecureNeighbor(open_addr_t* address);
 bool          neighbors_isNeighborWithHigherDAGrank(uint8_t index);
-bool          neighbors_reachedMaxTransmission(uint8_t index);
+bool          neighbors_reachedMinimalTransmission(uint8_t index);
 
 // updating neighbor information
 void          neighbors_indicateRx(

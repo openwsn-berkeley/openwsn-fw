@@ -253,12 +253,12 @@ bool neighbors_isNeighborWithHigherDAGrank(uint8_t index) {
    return returnVal;
 }
 
-bool neighbors_reachedMaxTransmission(uint8_t index){
+bool neighbors_reachedMinimalTransmission(uint8_t index){
     bool    returnVal;
     
     if (
         neighbors_vars.neighbors[index].used     == TRUE            &&
-        neighbors_vars.neighbors[index].numTx    >  DEFAULTLINKCOST
+        neighbors_vars.neighbors[index].numTx    >  MINIMAL_TX
     ) { 
         returnVal = TRUE;
     } else {
@@ -550,11 +550,7 @@ uint16_t neighbors_getLinkMetric(uint8_t index) {
     // we assume that this neighbor has already been checked for being in use         
     // calculate link cost to this neighbor
     if (neighbors_vars.neighbors[index].numTxACK==0) {
-        if (neighbors_vars.neighbors[index].numTx<=DEFAULTLINKCOST){
-            rankIncrease = (3*DEFAULTLINKCOST-2)*MINHOPRANKINCREASE;
-        } else {
-            rankIncrease = (3*LARGESTLINKCOST-2)*MINHOPRANKINCREASE;
-        }
+        rankIncrease = (3*DEFAULTLINKCOST-2)*MINHOPRANKINCREASE;
     } else {
         //6TiSCH minimal draft using OF0 for rank computation: ((3*numTx/numTxAck)-2)*minHopRankIncrease
         // numTx is on 8 bits, so scaling up 10 bits won't lead to saturation

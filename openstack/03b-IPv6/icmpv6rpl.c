@@ -393,7 +393,7 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
         if (neighbors_getNeighborNoResource(icmpv6rpl_vars.ParentIndex)==TRUE){
             icmpv6rpl_vars.myDAGrank = 65535;
         } else {
-            if (neighbors_reachedMaxTransmission(icmpv6rpl_vars.ParentIndex)==FALSE){
+            if (neighbors_reachedMinimalTransmission(icmpv6rpl_vars.ParentIndex)==FALSE){
                 // I havn't enough transmission to my parent, don't update.
                 return;
             }
