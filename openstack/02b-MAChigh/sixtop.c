@@ -355,14 +355,16 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
     open_addr_t addressToWrite;
     
     if (
-        idmanager_getIsDAGroot() == FALSE &&
+        idmanager_getIsDAGroot() == FALSE               &&
         (
-            icmpv6rpl_getPreferredParentEui64(&addressToWrite) == FALSE      ||
+            msg->creator != COMPONENT_SIXTOP_RES        &&
+            msg->creator != COMPONENT_CJOIN             &&
             (
-                icmpv6rpl_getPreferredParentEui64(&addressToWrite)           &&
-                schedule_hasDedicatedCellToNeighbor(&addressToWrite)== FALSE &&
-                msg->creator != COMPONENT_SIXTOP_RES                         &&
-                msg->creator != COMPONENT_CJOIN
+                icmpv6rpl_getPreferredParentEui64(&addressToWrite) == FALSE      ||
+                (
+                    icmpv6rpl_getPreferredParentEui64(&addressToWrite)           &&
+                    schedule_hasDedicatedCellToNeighbor(&addressToWrite)== FALSE
+                )
             )
         )
     ){
