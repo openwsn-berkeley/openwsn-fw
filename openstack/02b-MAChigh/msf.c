@@ -78,6 +78,23 @@ void    msf_updateCellsUsed(open_addr_t* neighbor){
     
     msf_vars.numCellsUsed++;
 }
+
+void    msf_trigger6pClear(open_addr_t* neighbor){
+        
+    if (schedule_hasDedicatedCellToNeighbor(neighbor)>0){
+        sixtop_request(
+            IANA_6TOP_CMD_CLEAR,                // code
+            neighbor,                           // neighbor
+            NUMCELLS_MSF,                       // number cells
+            CELLOPTIONS_MSF,                    // cellOptions
+            NULL,                               // celllist to add (not used)
+            NULL,                               // celllist to delete (not used)
+            IANA_6TISCH_SFID_MSF,               // sfid
+            0,                                  // list command offset (not used)
+            0                                   // list command maximum celllist (not used)
+        );
+    }
+}
 //=========================== callback =========================================
 
 uint8_t msf_getsfid(void){

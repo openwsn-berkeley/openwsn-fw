@@ -112,6 +112,7 @@ typedef struct {
    sixtop_sf_getmetadata        cb_sf_getMetadata;
    sixtop_sf_translatemetadata  cb_sf_translateMetadata;
    sixtop_sf_handle_callback    cb_sf_handleRCError;
+   open_addr_t          neighborToClearCells;
 } sixtop_vars_t;
 
 //=========================== prototypes ======================================

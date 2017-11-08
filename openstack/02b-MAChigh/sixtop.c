@@ -266,6 +266,9 @@ owerror_t sixtop_request(
         packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
         *((uint8_t*)(pkt->payload)) = cellOptions;
         len+=1;
+    } else {
+        // record the neighbor in case no response  for clear
+        memcpy(&sixtop_vars.neighborToClearCells,neighbor,sizeof(open_addr_t));
     }
     
     // append 6p metadata
@@ -916,6 +919,16 @@ port_INLINE void sixtop_sendKA() {
 //======= six2six task
 
 void timer_sixtop_six2six_timeout_fired(void) {
+  
+    if (sixtop_vars.six2six_state == SIX_STATE_WAIT_CLEARRESPONSE){
+        // no response for the 6p clear, just clear locally
+        schedule_removeAllCells(
+            sixtop_vars.cb_sf_getMetadata(),
+            &sixtop_vars.neighborToClearCells
+        );
+        neighbors_resetSequenceNumber(&sixtop_vars.neighborToClearCells);
+        memset(&sixtop_vars.neighborToClearCells,0,sizeof(open_addr_t));
+    }
     // timeout timer fired, reset the state of sixtop to idle
     sixtop_vars.six2six_state = SIX_STATE_IDLE;
     opentimers_cancel(sixtop_vars.timeoutTimerId);
@@ -1585,6 +1598,7 @@ void sixtop_six2six_notifyReceive(
             (errorparameter_t)code,
             (errorparameter_t)sixtop_vars.six2six_state
         );
+        memset(&sixtop_vars.neighborToClearCells,0,sizeof(open_addr_t));
         sixtop_vars.six2six_state   = SIX_STATE_IDLE;
         opentimers_cancel(sixtop_vars.timeoutTimerId);
     }

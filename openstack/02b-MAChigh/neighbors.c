@@ -6,6 +6,7 @@
 #include "openserial.h"
 #include "IEEE802154E.h"
 #include "openrandom.h"
+#include "msf.h"
 
 //=========================== variables =======================================
 
@@ -524,6 +525,7 @@ void neighbors_setNeighborNoResource(open_addr_t* address){
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
       if (isThisRowMatching(address,i)) {
           neighbors_vars.neighbors[i].f6PNORES = TRUE;
+          icmpv6rpl_updateMyDAGrankAndParentSelection();
           break;
       }
    }
@@ -575,8 +577,6 @@ uint16_t neighbors_getLinkMetric(uint8_t index) {
 void  neighbors_removeOld() {
     uint8_t    i, j;
     bool       haveParent;
-    uint8_t    neighborIndexWithLowestRank[3];
-    dagrank_t  lowestRank;
     PORT_TIMER_WIDTH timeSinceHeard;
     
     // remove old neighbor
@@ -584,93 +584,13 @@ void  neighbors_removeOld() {
         if (neighbors_vars.neighbors[i].used==1) {
             timeSinceHeard = ieee154e_asnDiff(&neighbors_vars.neighbors[i].asn);
             if (timeSinceHeard>DESYNCTIMEOUT) {
-                haveParent = icmpv6rpl_getPreferredParentIndex(&j);
-                if (haveParent && (i==j)) { // this is our preferred parent, carefully!
-                    icmpv6rpl_killPreferredParent();
-                    removeNeighbor(i);
-                    icmpv6rpl_updateMyDAGrankAndParentSelection();
-                } else {
-                    removeNeighbor(i);
-                }
-            }
-        }
-    }
-    
-    // neighbors marked as NO_RES will never removed.
-    
-    // first round
-    lowestRank = MAXDAGRANK;
-    for (i=0;i<MAXNUMNEIGHBORS;i++) {
-        if (neighbors_vars.neighbors[i].used==1) {
-            if (
-                lowestRank>neighbors_vars.neighbors[i].DAGrank && 
-                neighbors_vars.neighbors[i].f6PNORES == FALSE
-            ){
-                lowestRank = neighbors_vars.neighbors[i].DAGrank;
-                neighborIndexWithLowestRank[0] = i;
-            }
-        }
-    }
-    
-    if (lowestRank==MAXDAGRANK){
-        // none of the neighbors have rank yet
-        return;
-    }
-    // second round
-    lowestRank = MAXDAGRANK;
-    for (i=0;i<MAXNUMNEIGHBORS;i++) {
-        if (neighbors_vars.neighbors[i].used==1) {
-            if (
-                lowestRank>neighbors_vars.neighbors[i].DAGrank &&
-                i != neighborIndexWithLowestRank[0]           && 
-                neighbors_vars.neighbors[i].f6PNORES == FALSE
-            ){
-                lowestRank = neighbors_vars.neighbors[i].DAGrank;
-                neighborIndexWithLowestRank[1] = i;
-
-            }
-        }
-    }
-   
-    if (lowestRank==MAXDAGRANK){
-        // only one neighbor has rank
-        return;
-    }
-   
-    // third round
-    lowestRank = MAXDAGRANK;
-    for (i=0;i<MAXNUMNEIGHBORS;i++) {
-        if (neighbors_vars.neighbors[i].used==1) {
-            if (
-                lowestRank>neighbors_vars.neighbors[i].DAGrank &&
-                i != neighborIndexWithLowestRank[0]           &&
-                i != neighborIndexWithLowestRank[1]           && 
-                neighbors_vars.neighbors[i].f6PNORES == FALSE
-            ){
-                lowestRank = neighbors_vars.neighbors[i].DAGrank;
-                neighborIndexWithLowestRank[2] = i;
-            }
-        }
-    }
-    
-    if (lowestRank==MAXDAGRANK){
-        // only two neighbors have rank
-        return;
-    }
-    
-    // remove all neighbors except the ones that f6PNORES flag is set or is recorded as lowest 3 rank neighbors
-    for (i=0;i<MAXNUMNEIGHBORS;i++) {
-        if (neighbors_vars.neighbors[i].used==1) {
-            if (
-                i!= neighborIndexWithLowestRank[0] &&
-                i!= neighborIndexWithLowestRank[1] &&
-                i!= neighborIndexWithLowestRank[2]
-            ) {
+                msf_trigger6pClear(&neighbors_vars.neighbors[i].addr_64b);
                 haveParent = icmpv6rpl_getPreferredParentIndex(&j);
                 if (haveParent && (i==j)) { // this is our preferred parent, carefully!
                     icmpv6rpl_killPreferredParent();
                     icmpv6rpl_updateMyDAGrankAndParentSelection();
                 }
+                // keep the NORES neighbor in the table
                 if (neighbors_vars.neighbors[i].f6PNORES == FALSE){
                     removeNeighbor(i);
                 }
