@@ -55,7 +55,7 @@ void sctimer_intr_compare(OpenMote* self);
 // uart
 void uart_intr_tx(OpenMote* self);
 void uart_intr_rx(OpenMote* self);
-void uart_writeBufferByLen_FASTSIM(OpenMote* self, uint8_t* buffer, uint8_t len);
+void uart_writeBufferByLen_FASTSIM(OpenMote* self, uint8_t* buffer, uint16_t len);
 
 // supply
 void supply_on(OpenMote* self);
