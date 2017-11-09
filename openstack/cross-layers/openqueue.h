@@ -44,7 +44,7 @@ OpenQueueEntry_t*  openqueue_sixtopGetReceivedPacket(void);
 // called by IEEE80215E
 OpenQueueEntry_t*  openqueue_macGetDataPacket(open_addr_t* toNeighbor);
 OpenQueueEntry_t*  openqueue_macGetEBPacket(void);
-OpenQueueEntry_t*  openqueue_macGetBoardcastPacket(void);
+OpenQueueEntry_t*  openqueue_macGetDIOPacket(void);
 OpenQueueEntry_t*  openqueue_macGetDedicatedPacket(open_addr_t* toNeighbor);
 /**
 \}

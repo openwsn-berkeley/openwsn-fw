@@ -933,7 +933,12 @@ port_INLINE void activity_ti1ORri1() {
                             schedule_hasDedicatedCellToNeighbor(&ieee154e_vars.dataToSend->l2_nextORpreviousHop)
                         ) {
                             // leave the packet to be sent on dedicated cell and pick up a broadcast packet.
-                            ieee154e_vars.dataToSend = openqueue_macGetBoardcastPacket();
+                            ieee154e_vars.dataToSend = openqueue_macGetDIOPacket();
+                            if (ieee154e_vars.dataToSend==NULL){
+                                couldSendEB=TRUE;
+                                // look for an EB packet in the queue
+                                ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
+                            }
                         }
                     }
                 }

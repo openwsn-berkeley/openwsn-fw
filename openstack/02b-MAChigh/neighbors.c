@@ -574,6 +574,17 @@ void  neighbors_removeOld() {
     uint8_t    i, j;
     bool       haveParent;
     PORT_TIMER_WIDTH timeSinceHeard;
+    open_addr_t addressToWrite;
+
+    if (
+        icmpv6rpl_getPreferredParentEui64(&addressToWrite) == FALSE      ||
+        (
+            icmpv6rpl_getPreferredParentEui64(&addressToWrite)           &&
+            schedule_hasDedicatedCellToNeighbor(&addressToWrite)== FALSE
+        )
+    ) {
+        return;
+    }
     
     // remove old neighbor
     for (i=0;i<MAXNUMNEIGHBORS;i++) {
