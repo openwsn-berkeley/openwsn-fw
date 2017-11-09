@@ -8,6 +8,7 @@
 #include "openrandom.h"
 #include "idmanager.h"
 #include "icmpv6rpl.h"
+#include "IEEE802154E.h"
 
 //=========================== definition =====================================
 
@@ -341,6 +342,11 @@ void msf_housekeeping(void){
     bool           foundNeighbor;
     cellInfo_ht    celllist_add[CELLLIST_MAX_LEN];
     cellInfo_ht    celllist_delete[CELLLIST_MAX_LEN];
+    
+    if (ieee154e_isSynch()==FALSE) {
+        return;
+    }
+    
     foundNeighbor = icmpv6rpl_getPreferredParentEui64(&neighbor);
     if (foundNeighbor==FALSE) {
         return;
