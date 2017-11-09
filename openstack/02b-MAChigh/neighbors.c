@@ -379,6 +379,7 @@ void neighbors_indicateTx(
     asn_t*       asnTs
 ) {
     uint8_t i;
+    uint8_t parentIndex;
     // don't run through this function if packet was sent to broadcast address
     if (packetfunctions_isBroadcastMulticast(l2_dest)==TRUE) {
         return;
@@ -387,6 +388,19 @@ void neighbors_indicateTx(
     // loop through neighbor table
     for (i=0;i<MAXNUMNEIGHBORS;i++) {
         if (isThisRowMatching(l2_dest,i)) {
+          
+            // only update numTx and numTxACK when I have a dedicated cell
+            if (
+                icmpv6rpl_getPreferredParentIndex(&parentIndex)==FALSE  ||
+                schedule_hasDedicatedCellToNeighbor(&neighbors_vars.neighbors[parentIndex].addr_64b)==FALSE
+            ){
+                if (was_finally_acked==TRUE) {
+                    memcpy(&neighbors_vars.neighbors[i].asn,asnTs,sizeof(asn_t));
+                }
+                
+                break;
+            }
+            
             // handle roll-over case
             
             if (neighbors_vars.neighbors[i].numTx>(0xff-numTxAttempts)) {
