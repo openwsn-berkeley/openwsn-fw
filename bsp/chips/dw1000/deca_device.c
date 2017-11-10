@@ -78,6 +78,8 @@ typedef struct
     dwt_cb_t    cbRxOk;             // Callback for RX good frame event
     dwt_cb_t    cbRxTo;             // Callback for RX timeout events
     dwt_cb_t    cbRxErr;            // Callback for RX error events
+	dwt_cb_t    cbRxSFD;            // Callback for RX SFD events
+	dwt_cb_t    cbTxSFD;            // Callback for TX SFD events
 } dwt_local_data_t ;
 
 static dwt_local_data_t dw1000local ; // Static local device data
@@ -2066,17 +2068,21 @@ void dwt_setrxaftertxdelay(uint32 rxDelayTime)
  * @param cbRxOk - the pointer to the RX good frame event callback function
  * @param cbRxTo - the pointer to the RX timeout events callback function
  * @param cbRxErr - the pointer to the RX error events callback function
+ * @param cbRxSFD - the pointer to the RX SFD event callback function
+ * @param cbTxSFD - the pointer to the TX SFD event callback function
  *
  * output parameters
  *
  * no return value
  */
-void dwt_setcallbacks(dwt_cb_t cbTxDone, dwt_cb_t cbRxOk, dwt_cb_t cbRxTo, dwt_cb_t cbRxErr)
+void dwt_setcallbacks(dwt_cb_t cbTxDone, dwt_cb_t cbRxOk, dwt_cb_t cbRxTo, dwt_cb_t cbRxErr, dwt_cb_t cbRxSFD, dwt_cb_t cbTxSFD)
 {
     dw1000local.cbTxDone = cbTxDone;
     dw1000local.cbRxOk = cbRxOk;
     dw1000local.cbRxTo = cbRxTo;
     dw1000local.cbRxErr = cbRxErr;
+	dw1000local.cbRxSFD = cbRxSFD;
+	dw1000local.cbTxSFD = cbTxSFD;
 }
 
 /*! ------------------------------------------------------------------------------------------------------------------
@@ -2103,6 +2109,8 @@ uint8 dwt_checkirq(void)
  *          - TXFRS (through cbTxDone callback)
  *          - RXRFTO/RXPTO (through cbRxTo callback)
  *          - RXPHE/RXFCE/RXRFSL/RXSFDTO/AFFREJ/LDEERR (through cbRxTo cbRxErr)
+ *          - RXSFD (through cbRxSFD callback)
+ *          - TXSFD (through cbTxSFD callback)
  *        For all events, corresponding interrupts are cleared and necessary resets are performed. In addition, in the RXFCG case,
  *        received frame information and frame control are read before calling the callback. If double buffering is activated, it
  *        will also toggle between reception buffers once the reception callback processing has ended.
@@ -2123,6 +2131,13 @@ void dwt_isr(void)
 {
     uint32 status = dw1000local.cbData.status = dwt_read32bitreg(SYS_STATUS_ID); // Read status register low 32bits
 
+	// Handle RX SFD event
+	if( status & SYS_STATUS_RXSFDD){
+        dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_ALL_RX_GOOD); // Clear all receive status bits
+		if(dw1000local.cbRxSFD != NULL){
+			dw1000local.cbRxSFD(&dw1000local.cbData);
+		}
+	}
     // Handle RX good frame event
     if(status & SYS_STATUS_RXFCG)
     {
@@ -2177,6 +2192,13 @@ void dwt_isr(void)
         }
     }
 
+	// Handle the Tx frame begins event
+	if(status & SYS_STATUS_TXFRB){
+		dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_ALL_TX); // Clear TX event bits
+		if( dw1000local.cbTxSFD != NULL){
+			dw1000local.cbTxSFD(&dw1000local.cbData);
+		}
+	}
     // Handle TX confirmation event
     if(status & SYS_STATUS_TXFRS)
     {

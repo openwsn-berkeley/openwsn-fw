@@ -383,7 +383,13 @@ This function executes in ISR mode.
 */
 void ieee154e_startOfFrame(PORT_TIMER_WIDTH capturedTime) {
    PORT_TIMER_WIDTH referenceTime = capturedTime - ieee154e_vars.startOfSlotReference;
+   debugpins_rxframe_set();
+   debugpins_rxframe_clr();
    if (ieee154e_vars.isSync==FALSE) {
+	   debugpins_rxframe_set();
+	   debugpins_rxframe_clr();
+	   debugpins_rxframe_set();
+	   debugpins_rxframe_clr();
      activity_synchronize_startOfFrame(referenceTime);
    } else {
       switch (ieee154e_vars.state) {
@@ -422,6 +428,14 @@ void ieee154e_startOfFrame(PORT_TIMER_WIDTH capturedTime) {
             break;
       }
    }
+   debugpins_rxframe_set();
+   debugpins_rxframe_clr();
+   debugpins_rxframe_set();
+   debugpins_rxframe_clr();
+   debugpins_rxframe_set();
+   debugpins_rxframe_clr();
+   debugpins_rxframe_set();
+   debugpins_rxframe_clr();
    ieee154e_dbg.num_startOfFrame++;
 }
 
@@ -432,7 +446,13 @@ This function executes in ISR mode.
 */
 void ieee154e_endOfFrame(PORT_TIMER_WIDTH capturedTime) {
    PORT_TIMER_WIDTH referenceTime = capturedTime - ieee154e_vars.startOfSlotReference;
+   debugpins_txframe_set();
+   debugpins_txframe_clr();
    if (ieee154e_vars.isSync==FALSE) {
+	   debugpins_txframe_set();
+	   debugpins_txframe_clr();
+	   debugpins_txframe_set();
+	   debugpins_txframe_clr();
       activity_synchronize_endOfFrame(referenceTime);
    } else {
       switch (ieee154e_vars.state) {
@@ -458,6 +478,14 @@ void ieee154e_endOfFrame(PORT_TIMER_WIDTH capturedTime) {
             break;
       }
    }
+   debugpins_txframe_set();
+   debugpins_txframe_clr();
+   debugpins_txframe_set();
+   debugpins_txframe_clr();
+   debugpins_txframe_set();
+   debugpins_txframe_clr();
+   debugpins_txframe_set();
+   debugpins_txframe_clr();
    ieee154e_dbg.num_endOfFrame++;
 }
 
@@ -585,7 +613,6 @@ port_INLINE void activity_synchronize_startOfFrame(PORT_TIMER_WIDTH capturedTime
    if (ieee154e_vars.state!=S_SYNCLISTEN) {
       return;
    }
-   
    // change state
    changeState(S_SYNCRX);
    

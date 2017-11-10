@@ -38,7 +38,8 @@ void RCC_Configuration(void){
 	RCC_LSEConfig(RCC_LSE_ON);
 	RCC_RTCCLKConfig(RCC_RTCCLKSource_LSE);
 	
-	
+	// enable the prediv1 clock source to be HSE
+	RCC_PREDIV1Config(RCC_PREDIV1_Source_HSE, RCC_PREDIV1_Div1);
     // PLLCLK = 12MHz/1 * 6 = 72 MHz
     RCC_PLLConfig(RCC_PLLSource_PREDIV1, RCC_PLLMul_6);
     

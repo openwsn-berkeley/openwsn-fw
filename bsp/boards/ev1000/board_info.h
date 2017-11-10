@@ -1,11 +1,12 @@
 /**
-\brief openmoteSTM32 board information bsp module.
+\brief EV1000 board information bsp module.
 
 This module simply defines some strings describing the board, which CoAP uses
 to return the board's description.
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 \author Tengfei Chang <tengfei.chang@gmail.com>,  July 2012.
+\author Jean-Michel Rubillon <jmrubillon@theiet.org>, May 2017
 */
 
 #ifndef __BOARD_INFO_H
@@ -56,16 +57,19 @@ to return the board's description.
 //#define SLOTDURATION_10MS
 
 // time-slot related
-#define PORT_TsSlotDuration                 328   // counter counts one extra count, see datasheet
+#define PORT_TsSlotDuration                 656   // ~20ms
 // execution speed related
-#define PORT_maxTxDataPrepare               10    // 2014us (measured 746us)
+#define PORT_maxTxDataPrepare               5    // 155us (measured 150us)
 #define PORT_maxRxAckPrepare                10    //  305us (measured  83us)
 #define PORT_maxRxDataPrepare               4    // 1007us (measured  84us)
 #define PORT_maxTxAckPrepare                10    //  305us (measured 219us)
 // radio speed related
-#define PORT_delayTx                        10     //  214us (measured 219us)
+#define PORT_delayTx                        1     //  31us (measured 23us)
 #define PORT_delayRx                        0     //    0us (can not measure)
 // radio watchdog
+#define PORT_wdRadioTx					    33
+#define PORT_wdDataDuration	                330	  // 11ms  (measured 10.1ms)
+#define PORT_wdAckDuration	                330
 
 //===== adaptive_sync accuracy
 

@@ -57,6 +57,11 @@ to return the board's description.
 
 // time-slot related
 #define PORT_TsSlotDuration                 656   // ~20ms
+#define PORT_TsTxOffset                     260   //  4000us
+#define PORT_TsLongGT                  		151   //  5000us
+#define PORT_TsTxAckDelay                   151   //  5000us
+#define PORT_TsShortGT                      16   //   500us
+
 // execution speed related
 #define PORT_maxTxDataPrepare               5    // 155us (measured 150us)
 #define PORT_maxRxAckPrepare                10    //  305us (measured  83us)
@@ -68,7 +73,7 @@ to return the board's description.
 // radio watchdog
 #define PORT_wdRadioTx					    33
 #define PORT_wdDataDuration	                330	  // 11ms  (measured 10.1ms)
-#define PORT_wdAckDuration	                98
+#define PORT_wdAckDuration	                330
 //===== adaptive_sync accuracy
 
 #define SYNC_ACCURACY                           2     // by ticks

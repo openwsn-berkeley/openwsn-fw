@@ -156,20 +156,76 @@ typedef enum {
 // expressed in 32kHz ticks:
 //    - ticks = duration_in_seconds * 32768
 //    - duration_in_seconds = ticks / 32768
+#ifndef PORT_TsTxOffset
+	#ifdef SLOTDURATION_10MS
+	   #define PORT_TsTxOffset     70
+	#else
+	   #define PORT_TsTxOffset     131
+	#endif
+#endif
+#ifndef PORT_TsLongGT
+	#ifdef SLOTDURATION_10MS
+	   #define PORT_TsLongGT     36
+	#else
+	   #define PORT_TsLongGT     43
+	#endif
+#endif
+#ifndef PORT_TsTxAckDelay
+	#ifdef SLOTDURATION_10MS
+	   #define PORT_TsTxAckDelay     33
+	#else
+	   #define PORT_TsTxAckDelay     151
+	#endif
+#endif
+#ifndef PORT_TsShortGT
+	#ifdef SLOTDURATION_10MS
+	   #define PORT_TsShortGT     9
+	#else
+	   #define PORT_TsShortGT     16
+	#endif
+#endif
+#ifndef PORT_TsSlotDuration
+   #error "Please define PORT_TsSlotDuration in board_info.h"
+#endif
+#ifndef PORT_maxTxDataPrepare
+   #error "Please define PORT_maxTxDataPrepare in board_info.h"
+#endif
+#ifndef PORT_maxRxAckPrepare
+   #error "Please define PORT_maxRxAckPrepare in board_info.h"
+#endif
+#ifndef PORT_maxRxDataPrepare
+   #error "Please define PORT_maxRxDataPrepare in board_info.h"
+#endif
+#ifndef PORT_maxTxAckPrepare
+   #error "Please define PORT_maxTxAckPrepare in board_info.h"
+#endif
+#ifndef PORT_delayTx
+   #error "Please define PORT_delayTx in board_info.h"
+#endif
+#ifndef PORT_delayRx
+   #error "Please define PORT_delayRx in board_info.h"
+#endif
+#ifndef PORT_wdRadioTx
+   #define PORT_wdRadioTx         33
+#endif
+#ifndef PORT_wdDataDuration
+   #define PORT_wdDataDuration     164
+#endif
+#ifndef PORT_wdAckDuration
+	#ifdef SLOTDURATION_10MS
+	   #define PORT_wdAckDuration     80
+	#else
+	   #define PORT_wdAckDuration     98
+	#endif
+#endif
+
 enum ieee154e_atomicdurations_enum {
    // time-slot related
-#ifdef SLOTDURATION_10MS
-   TsTxOffset                =   70,                  //  2120us
-   TsLongGT                  =   36,                  //  1100us
-   TsTxAckDelay              =   33,                  //  1000us
-   TsShortGT                 =    9,                  //   500us, The standardlized value for this is 400/2=200us(7ticks). Currectly 7 doesn't work for short packet, change it back to 7 when found the problem.
-#else
-   TsTxOffset                =  131,                  //  4000us
-   TsLongGT                  =   43,                  //  1300us
-   TsTxAckDelay              =  151,                  //  4606us
-   TsShortGT                 =   16,                  //   500us
-#endif
-   TsSlotDuration            =  PORT_TsSlotDuration,  // 10000us
+   TsTxOffset                =  PORT_TsTxOffset,
+   TsLongGT                  =  PORT_TsLongGT,
+   TsTxAckDelay              =  PORT_TsTxAckDelay,
+   TsShortGT                 =  PORT_TsShortGT,
+   TsSlotDuration            =  PORT_TsSlotDuration,
    // execution speed related
    maxTxDataPrepare          =  PORT_maxTxDataPrepare,
    maxRxAckPrepare           =  PORT_maxRxAckPrepare,
@@ -179,13 +235,9 @@ enum ieee154e_atomicdurations_enum {
    delayTx                   =  PORT_delayTx,         // between GO signal and SFD
    delayRx                   =  PORT_delayRx,         // between GO signal and start listening
    // radio watchdog
-   wdRadioTx                 =  PORT_wdRadioTx,       //  1000us (needs to be >delayTx)
-   wdDataDuration            =  PORT_wdDataDuration,  //  5000us (measured 4280us with max payload)
-#ifdef SLOTDURATION_10MS
-   wdAckDuration             =   80,                  //  2400us (measured 1000us)
-#else
-   wdAckDuration             =   PORT_wdAckDuration,                  //  3000us (measured 1000us)
-#endif
+   wdRadioTx                 =  PORT_wdRadioTx,       //  needs to be >delayTx
+   wdDataDuration            =  PORT_wdDataDuration,  //  measure with max payload
+   wdAckDuration             =  PORT_wdAckDuration,
 };
 
 //shift of bytes in the linkOption bitmap: draft-ietf-6tisch-minimal-10.txt: page 6

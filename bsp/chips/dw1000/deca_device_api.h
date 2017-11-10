@@ -128,7 +128,9 @@ typedef signed long int32;
 #define DWT_FF_RSVD_EN              0x040           // reserved frame types allowed
 
 //DW1000 interrupt events
+#define DWT_INT_TXFRB           0x00000010          // TxFrame begins
 #define DWT_INT_TFRS            0x00000080          // frame sent
+#define DWT_INT_RXSFD           0x00000200          // Rx Start of frame detected
 #define DWT_INT_LDED            0x00000400          // micro-code has finished execution
 #define DWT_INT_RFCG            0x00004000          // frame received with good CRC
 #define DWT_INT_RPHE            0x00001000          // receiver PHY header error
@@ -979,12 +981,14 @@ int dwt_spicswakeup(uint8 *buff, uint16 length);
  * @param cbRxOk - the pointer to the RX good frame event callback function
  * @param cbRxTo - the pointer to the RX timeout events callback function
  * @param cbRxErr - the pointer to the RX error events callback function
+ * @param cbRxSFD - the pointer to the RX SFD event callback function
+ * @param cbTxSFD - the pointer to the TX SFD event callback function
  *
  * output parameters
  *
  * no return value
  */
-void dwt_setcallbacks(dwt_cb_t cbTxDone, dwt_cb_t cbRxOk, dwt_cb_t cbRxTo, dwt_cb_t cbRxErr);
+void dwt_setcallbacks(dwt_cb_t cbTxDone, dwt_cb_t cbRxOk, dwt_cb_t cbRxTo, dwt_cb_t cbRxErr, dwt_cb_t cbRxSFD, dwt_cb_t cbTxSFD);
 
 /*! ------------------------------------------------------------------------------------------------------------------
  * @fn dwt_checkirq()
@@ -1047,7 +1051,9 @@ void dwt_lowpowerlistenisr(void);
  *
  * @brief This function enables the specified events to trigger an interrupt.
  * The following events can be enabled:
+ * DWT_INT_TXFRB        0x00000010          // TxFrame begins
  * DWT_INT_TFRS         0x00000080          // frame sent
+ * DWT_INT_RXSFD        0x00000200          // Rx Start of frame detected
  * DWT_INT_RFCG         0x00004000          // frame received with good CRC
  * DWT_INT_RPHE         0x00001000          // receiver PHY header error
  * DWT_INT_RFCE         0x00008000          // receiver CRC error

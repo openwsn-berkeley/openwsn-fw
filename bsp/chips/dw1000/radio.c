@@ -35,6 +35,7 @@ typedef struct {
    uint32_t					 rxg_count;
    uint32_t					 txg_count;
    uint32_t					 txa_count;
+   uint32_t		             rxErrTo_count;
 } radio_vars_t;
 
 radio_vars_t radio_vars;
@@ -53,8 +54,9 @@ dwt_config_t UWBConfigs[6] =
 void error_handler(void);
 void radio_txDoneCb(const dwt_cb_data_t* cb_data);
 void radio_rxOkCb(const dwt_cb_data_t* cb_data);
-void radio_rxErrCb(const dwt_cb_data_t* cb_data);
-void radio_rxToCb(const dwt_cb_data_t* cb_data);
+void radio_rxErrAndToCb(const dwt_cb_data_t* cb_data);
+void radio_txStartOfFrameCb(const dwt_cb_data_t* cb_data);
+void radio_rxStartOfFrameCb(const dwt_cb_data_t* cb_data);
 
 //=========================== public ==========================================
 
@@ -107,10 +109,18 @@ void radio_init() {
     dwt_settxantennadelay(TX_ANT_DLY);
     dwt_setleds(0x03);
 	// set the DW1000 callbacks
-	dwt_setcallbacks(radio_txDoneCb, radio_rxOkCb, NULL, NULL);
-	dwt_setinterrupt(DWT_INT_TFRS|
-					 DWT_INT_RFCG,
-					 1);
+	dwt_setcallbacks(radio_txDoneCb, radio_rxOkCb, radio_rxErrAndToCb, radio_rxErrAndToCb, radio_rxStartOfFrameCb, radio_txStartOfFrameCb);
+	dwt_setinterrupt(DWT_INT_TFRS|     // Frame sent OK
+					 DWT_INT_TXFRB|    // TX frame begins
+					 DWT_INT_RXSFD|    // RX start of frame detected
+					 DWT_INT_RFCG|     // Frame received OK
+					 DWT_INT_RPHE|     // Rx phy header error
+					 DWT_INT_RFCE|     // Rx CRC error
+					 DWT_INT_RFSL|     // Rx RF sync lost
+					 DWT_INT_RFTO|     // Rx timeout
+					 DWT_INT_SFDT|     // Start of frame timeout
+					 DWT_INT_RXPTO,    // Preamble detect timeout
+				 1);
 	dwt_setrxaftertxdelay(TX_TO_RX_DELAY_UUS);
 	dwt_setrxtimeout(RX_RESP_TO_UUS);
 
@@ -132,7 +142,7 @@ void radio_setEndFrameCb(radio_capture_cbt cb) {
 void radio_reset() {
 	// Make sure the SPI is running at low speed
 	dwt_softreset();
-	leds_radio_off();
+	//leds_radio_off();
 }
 
 //===== RF admin
@@ -155,7 +165,7 @@ void radio_setFrequency(uint8_t frequency) {
 }
 
 void radio_rfOn() {
-   leds_radio_on();
+   //leds_radio_on();
 }
 
 void radio_rfOff() {
@@ -323,6 +333,11 @@ void radio_rxOkCb(const dwt_cb_data_t* cb_data){
 	}
 }
 
+// error and timeout handler
+void radio_rxErrAndToCb(const dwt_cb_data_t* cb_data){
+	radio_vars.rxErrTo_count += 1;
+	radio_rxEnable();
+}
 //=========================== interrupt handlers ==============================
 
 kick_scheduler_t radio_isr() {
