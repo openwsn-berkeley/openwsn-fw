@@ -1,12 +1,11 @@
 /**
-\brief EV1000 board information bsp module.
+\brief openmoteSTM32 board information bsp module.
 
 This module simply defines some strings describing the board, which CoAP uses
 to return the board's description.
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 \author Tengfei Chang <tengfei.chang@gmail.com>,  July 2012.
-\author Jean-Michel Rubillon <jmrubillon@theiet.org>, May 2017
 */
 
 #ifndef __BOARD_INFO_H
@@ -30,6 +29,7 @@ to return the board's description.
 
 //===== timer
 
+#define SLOTDURATION_10MS
 #define PORT_TIMER_WIDTH                    uint32_t
 #define PORT_RADIOTIMER_WIDTH               uint32_t
 
@@ -54,10 +54,14 @@ to return the board's description.
 #define PORT_PIN_RADIO_RESET_LOW()        //GPIOC->ODR &= ~0X0040;
 
 //===== IEEE802154E timing
-//#define SLOTDURATION_10MS
 
 // time-slot related
 #define PORT_TsSlotDuration                 656   // ~20ms
+#define PORT_TsTxOffset                     260   //  4000us
+#define PORT_TsLongGT                  		151   //  5000us
+#define PORT_TsTxAckDelay                   151   //  5000us
+#define PORT_TsShortGT                      16   //   500us
+
 // execution speed related
 #define PORT_maxTxDataPrepare               5    // 155us (measured 150us)
 #define PORT_maxRxAckPrepare                10    //  305us (measured  83us)
@@ -70,7 +74,6 @@ to return the board's description.
 #define PORT_wdRadioTx					    33
 #define PORT_wdDataDuration	                330	  // 11ms  (measured 10.1ms)
 #define PORT_wdAckDuration	                330
-
 //===== adaptive_sync accuracy
 
 #define SYNC_ACCURACY                           2     // by ticks
@@ -80,8 +83,8 @@ to return the board's description.
 //=========================== variables =======================================
 
 static const uint8_t rreg_uriquery[]        = "h=ucb";
-static const uint8_t infoBoardname[]        = "ev1000";
-static const uint8_t infouCName[]           = "STM32F105";
+static const uint8_t infoBoardname[]        = "InteLED v1.0";
+static const uint8_t infouCName[]           = "STM32F105RCT";
 static const uint8_t infoRadioName[]        = "DW1000";
 
 //=========================== prototypes ======================================

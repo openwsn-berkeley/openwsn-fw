@@ -38,7 +38,8 @@ void RCC_Configuration(void){
 	RCC_LSEConfig(RCC_LSE_ON);
 	RCC_RTCCLKConfig(RCC_RTCCLKSource_LSE);
 	
-	
+	// enable the prediv1 clock source to be HSE
+	RCC_PREDIV1Config(RCC_PREDIV1_Source_HSE, RCC_PREDIV1_Div1);
     // PLLCLK = 12MHz/1 * 6 = 72 MHz
     RCC_PLLConfig(RCC_PLLSource_PREDIV1, RCC_PLLMul_6);
     
@@ -65,15 +66,6 @@ void RCC_Configuration(void){
      
     //enable AFIO 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
-
-#ifdef EV1000_USB
-#if !defined( STM32F10X_CL )
-	#error "STM32F10X_CL not defined!"
-#endif
-	RCC_OTGFSCLKConfig(RCC_OTGFSCLKSource_PLLVCO_Div3);
- 	RCC_APB2PeriphClockCmd(RCC_APB1Periph_USB, ENABLE);
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA , ENABLE);
-#endif
 }
 
 //when wakeup by alarm, configure rcc

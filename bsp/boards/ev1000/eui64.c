@@ -21,8 +21,8 @@
 
 void eui64_get(uint8_t* addressToWrite) {
     
-    memcpy(addressToWrite,(void const*)ADDRESS_EUI,4);
-    memcpy(addressToWrite+4,(void const*)(ADDRESS_EUI+ADDRESSOFFSET),4);
+    memcpy(addressToWrite,(void const*)(ADDRESS_EUI+ADDRESSOFFSET),4);
+    memcpy(addressToWrite+4,(void const*)ADDRESS_EUI,4);
   
 }
 

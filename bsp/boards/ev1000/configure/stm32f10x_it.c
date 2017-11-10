@@ -17,11 +17,6 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
-#ifdef EV1000_USB
-#include "usb_conf.h"
-#include "usb_core.h"
-#include "usb_istr.h"
-#endif
 #include "leds.h"
 #include "sctimer.h"
 #include "spi.h"
@@ -571,12 +566,12 @@ void I2C2_ER_IRQHandler(void)
 *******************************************************************************/
 void SPI1_IRQHandler(void)
 {
-  debugpins_isr_set();
+  //debugpins_isr_set();
   if(SPI_I2S_GetFlagStatus(SPI1,SPI_I2S_FLAG_RXNE) != RESET)
   {
     spi_isr();
   }
-  debugpins_isr_clr();
+  //debugpins_isr_clr();
 }
 
 /*******************************************************************************
@@ -599,19 +594,6 @@ void SPI2_IRQHandler(void)
 *******************************************************************************/
 void USART1_IRQHandler(void)
 {  
-    debugpins_isr_set();
-    if(USART_GetFlagStatus(USART1,USART_FLAG_RXNE) != RESET)
-    {
-      USART_ClearFlag(USART1,USART_FLAG_RXNE);
-      
-        uart_rx_isr();
-    }
-  
-    if(USART_GetFlagStatus(USART1,USART_FLAG_TXE) != RESET)
-    { 
-        uart_tx_isr(); 
-    }
-    debugpins_isr_clr();
 }
 
 /*******************************************************************************
@@ -623,6 +605,19 @@ void USART1_IRQHandler(void)
 *******************************************************************************/
 void USART2_IRQHandler(void)
 {
+    //debugpins_isr_set();
+    if(USART_GetFlagStatus(USART2,USART_FLAG_RXNE) != RESET)
+    {
+      USART_ClearFlag(USART2,USART_FLAG_RXNE);
+      
+        uart_rx_isr();
+    }
+  
+    if(USART_GetFlagStatus(USART2,USART_FLAG_TXE) != RESET)
+    { 
+        uart_tx_isr(); 
+    }
+    //debugpins_isr_clr();
 }
 
 /*******************************************************************************
@@ -656,13 +651,11 @@ void EXTI15_10_IRQHandler(void)
 *******************************************************************************/
 void RTCAlarm_IRQHandler(void)
 {
-  debugpins_isr_set();
   if(EXTI_GetITStatus(EXTI_Line17) != RESET)
   {
 	EXTI_ClearITPendingBit(EXTI_Line17);
         sctimer_isr();
   }
-  debugpins_isr_clr();
 }
 
 /*******************************************************************************
@@ -674,7 +667,6 @@ void RTCAlarm_IRQHandler(void)
 *******************************************************************************/
 void USB_FS_WKUP_IRQHandler(void)
 {
-  EXTI_ClearITPendingBit(EXTI_Line18);
 }
 
 /*******************************************************************************
@@ -862,9 +854,6 @@ void CAN2_SCE_IRQHandler(void){
 * Return         : None
 *******************************************************************************/
 void USB_FS_IRQHandler(void){
-#ifdef EV1000_USB
-	USB_Istr();
-#endif
 }
 
 
