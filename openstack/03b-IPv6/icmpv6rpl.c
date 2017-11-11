@@ -950,6 +950,7 @@ void sendDAO() {
    
    //=== DAO header
    packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_dao_ht));
+   icmpv6rpl_vars.dao.DAOSequence++;
    memcpy(
       ((icmpv6rpl_dao_ht*)(msg->payload)),
       &(icmpv6rpl_vars.dao),
