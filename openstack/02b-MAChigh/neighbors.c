@@ -614,7 +614,10 @@ void  neighbors_removeOld() {
                     icmpv6rpl_updateMyDAGrankAndParentSelection();
                 }
                 // keep the NORES neighbor in the table
-                if (neighbors_vars.neighbors[i].f6PNORES == FALSE){
+                if (
+                    neighbors_vars.neighbors[i].f6PNORES    == FALSE &&
+                    neighbors_vars.neighbors[i].inBlacklist == FALSE
+                ){
                     removeNeighbor(i);
                 }
             }

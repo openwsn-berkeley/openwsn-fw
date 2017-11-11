@@ -339,7 +339,6 @@ bool msf_candidateRemoveCellList(
 void msf_housekeeping(void){
     
     open_addr_t    parentNeighbor;
-    open_addr_t*   nonParentNeighbor;
     bool           foundNeighbor;
     cellInfo_ht    celllist_add[CELLLIST_MAX_LEN];
     cellInfo_ht    celllist_delete[CELLLIST_MAX_LEN];
@@ -358,12 +357,6 @@ void msf_housekeeping(void){
     }
     
     if (msf_vars.waitretry){
-        return;
-    }
-    
-    nonParentNeighbor = schedule_getNonParentNeighborWithDedicatedCells(&parentNeighbor);
-    if (nonParentNeighbor != NULL){
-        msf_trigger6pClear(nonParentNeighbor);
         return;
     }
     
