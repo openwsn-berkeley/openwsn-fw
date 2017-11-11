@@ -338,7 +338,8 @@ bool msf_candidateRemoveCellList(
 
 void msf_housekeeping(void){
     
-    open_addr_t    neighbor;
+    open_addr_t    parentNeighbor;
+    open_addr_t*   nonParentNeighbor;
     bool           foundNeighbor;
     cellInfo_ht    celllist_add[CELLLIST_MAX_LEN];
     cellInfo_ht    celllist_delete[CELLLIST_MAX_LEN];
@@ -347,16 +348,12 @@ void msf_housekeeping(void){
         return;
     }
     
-    foundNeighbor = icmpv6rpl_getPreferredParentEui64(&neighbor);
+    foundNeighbor = icmpv6rpl_getPreferredParentEui64(&parentNeighbor);
     if (foundNeighbor==FALSE) {
         return;
     }
-    if (schedule_getNumberOfDedicatedCells(&neighbor)==0){
+    if (schedule_getNumberOfDedicatedCells(&parentNeighbor)==0){
         msf_trigger6pAdd();
-        return;
-    }
-    
-    if (schedule_isNumTxWrapped(&neighbor)==FALSE){
         return;
     }
     
@@ -364,22 +361,32 @@ void msf_housekeeping(void){
         return;
     }
     
+    nonParentNeighbor = schedule_getNonParentNeighborWithDedicatedCells(&parentNeighbor);
+    if (nonParentNeighbor != NULL){
+        msf_trigger6pClear(nonParentNeighbor);
+        return;
+    }
+    
+    if (schedule_isNumTxWrapped(&parentNeighbor)==FALSE){
+        return;
+    }
+    
     memset(celllist_delete, 0, CELLLIST_MAX_LEN*sizeof(cellInfo_ht));
-    if (schedule_getCellsToBeRelocated(&neighbor, celllist_delete)){
+    if (schedule_getCellsToBeRelocated(&parentNeighbor, celllist_delete)){
         if (msf_candidateAddCellList(celllist_add,NUMCELLS_MSF)==FALSE){
             // failed to get cell list to add
             return;
         }
         sixtop_request(
             IANA_6TOP_CMD_RELOCATE,   // code
-            &neighbor,              // neighbor
-            NUMCELLS_MSF,           // number cells
-            CELLOPTIONS_MSF,        // cellOptions
-            celllist_add,           // celllist to add
-            celllist_delete,        // celllist to delete
-            IANA_6TISCH_SFID_MSF,   // sfid
-            0,                      // list command offset (not used)
-            0                       // list command maximum celllist (not used)
+            &parentNeighbor,          // neighbor
+            NUMCELLS_MSF,             // number cells
+            CELLOPTIONS_MSF,          // cellOptions
+            celllist_add,             // celllist to add
+            celllist_delete,          // celllist to delete
+            IANA_6TISCH_SFID_MSF,     // sfid
+            0,                        // list command offset (not used)
+            0                         // list command maximum celllist (not used)
         );
     }
 }

@@ -533,6 +533,26 @@ uint8_t schedule_getNumberOfDedicatedCells(open_addr_t* neighbor){
    return counter;
 }
 
+open_addr_t* schedule_getNonParentNeighborWithDedicatedCells(open_addr_t* neighbor){
+   uint8_t i; 
+   
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+
+   for(i=0;i<MAXACTIVESLOTS;i++) {
+      if(
+         schedule_vars.scheduleBuf[i].neighbor.type == ADDR_64B &&
+         packetfunctions_sameAddress(&schedule_vars.scheduleBuf[i].neighbor, neighbor) == FALSE
+      ){
+         return &schedule_vars.scheduleBuf[i].neighbor;
+      }
+   }
+   
+   ENABLE_INTERRUPTS();
+   
+   return NULL;
+}
+
 bool schedule_isNumTxWrapped(open_addr_t* neighbor){
     uint8_t i;
     

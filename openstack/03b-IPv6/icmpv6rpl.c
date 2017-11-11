@@ -466,7 +466,6 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
                 neighbors_setPreferredParent(icmpv6rpl_vars.ParentIndex, TRUE);
                 // get prepare parent address
                 neighbors_getNeighborEui64(&addressToWrite,ADDR_64B,prevParentIndex);
-                msf_trigger6pClear(&addressToWrite);
             }
         }
     } else {
