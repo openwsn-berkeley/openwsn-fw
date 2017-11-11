@@ -932,12 +932,18 @@ port_INLINE void activity_ti1ORri1() {
                         if (
                             schedule_hasDedicatedCellToNeighbor(&ieee154e_vars.dataToSend->l2_nextORpreviousHop)
                         ) {
-                            // leave the packet to be sent on dedicated cell and pick up a broadcast packet.
-                            ieee154e_vars.dataToSend = openqueue_macGetDIOPacket();
-                            if (ieee154e_vars.dataToSend==NULL){
-                                couldSendEB=TRUE;
-                                // look for an EB packet in the queue
-                                ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
+                            // allow sixtop response with SEQNUM_ERR return code send on minimal cell
+                            if (
+                                ieee154e_vars.dataToSend->creator!=COMPONENT_SIXTOP_RES ||
+                                ieee154e_vars.dataToSend->l2_sixtop_returnCode != IANA_6TOP_RC_SEQNUM_ERR 
+                            ) {
+                                // leave the packet to be sent on dedicated cell and pick up a broadcast packet.
+                                ieee154e_vars.dataToSend = openqueue_macGetDIOPacket();
+                                if (ieee154e_vars.dataToSend==NULL){
+                                    couldSendEB=TRUE;
+                                    // look for an EB packet in the queue
+                                    ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
+                                }
                             }
                         }
                     }

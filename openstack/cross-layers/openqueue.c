@@ -301,7 +301,11 @@ OpenQueueEntry_t*  openqueue_macGetDedicatedPacket(open_addr_t* toNeighbor){
            (
                toNeighbor->type==ADDR_64B &&
                packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)
-           )
+           ) && // sixtop response with SEQNUM_ERR shouldn't be send on dedicated cell
+            (
+                openqueue_vars.queue[i].creator                 != COMPONENT_SIXTOP_RES ||
+                openqueue_vars.queue[i].l2_sixtop_returnCode    != IANA_6TOP_RC_SEQNUM_ERR 
+            )
        ){
             if (packet_index==QUEUELENGTH){
                 packet_index = i;
