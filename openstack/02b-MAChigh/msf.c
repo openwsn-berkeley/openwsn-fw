@@ -39,7 +39,12 @@ void msf_housekeeping(void);
 void msf_init(void) {
     memset(&msf_vars,0,sizeof(msf_vars_t));
     msf_vars.numAppPacketsPerSlotFrame = 0;
-    sixtop_setSFcallback(msf_getsfid,msf_getMetadata,msf_translateMetadata,msf_handleRCError);
+    sixtop_setSFcallback(
+        (sixtop_sf_getsfid)msf_getsfid,
+        (sixtop_sf_getmetadata)msf_getMetadata,
+        (sixtop_sf_translatemetadata)msf_translateMetadata,
+        (sixtop_sf_handle_callback)msf_handleRCError
+    );
     msf_vars.housekeepingTimerId = opentimers_create();
     opentimers_scheduleIn(
         msf_vars.housekeepingTimerId,
@@ -112,7 +117,7 @@ metadata_t msf_translateMetadata(void){
 
 void msf_handleRCError(uint8_t code, open_addr_t* address){
     uint16_t waitDuration;
-  
+    
     if (
         code==IANA_6TOP_RC_RESET        ||
         code==IANA_6TOP_RC_LOCKED       ||
@@ -209,6 +214,10 @@ void msf_trigger6pAdd(void){
     bool           foundNeighbor;
     cellInfo_ht    celllist_add[CELLLIST_MAX_LEN];
     
+    if (ieee154e_isSynch()==FALSE) {
+        return;
+    }
+    
     if (msf_vars.waitretry){
         return;
     }
@@ -241,6 +250,10 @@ void msf_trigger6pDelete(void){
     open_addr_t    neighbor;
     bool           foundNeighbor;
     cellInfo_ht    celllist_delete[CELLLIST_MAX_LEN];
+    
+    if (ieee154e_isSynch()==FALSE) {
+        return;
+    }
     
     if (msf_vars.waitretry){
         return;
