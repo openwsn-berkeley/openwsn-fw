@@ -134,6 +134,10 @@ bool neighbors_getNeighborNoResource(uint8_t index){
     return neighbors_vars.neighbors[index].f6PNORES;
 }
 
+bool neighbors_getNeighborIsInBlacklist(uint8_t index){
+    return neighbors_vars.neighbors[index].inBlacklist;
+}
+
 uint8_t neighbors_getSequenceNumber(open_addr_t* address){
     uint8_t i;
     for (i=0;i<MAXNUMNEIGHBORS;i++){
@@ -257,9 +261,9 @@ bool neighbors_reachedMinimalTransmission(uint8_t index){
     bool    returnVal;
     
     if (
-        neighbors_vars.neighbors[index].used     == TRUE            &&
-        neighbors_vars.neighbors[index].numTx    >  MINIMAL_TX
-    ) { 
+        neighbors_vars.neighbors[index].used  == TRUE &&
+        neighbors_vars.neighbors[index].numTx >  MINIMAL_NUM_TX
+    ) {
         returnVal = TRUE;
     } else {
         returnVal = FALSE;
@@ -379,7 +383,6 @@ void neighbors_indicateTx(
     asn_t*       asnTs
 ) {
     uint8_t i;
-    uint8_t parentIndex;
     // don't run through this function if packet was sent to broadcast address
     if (packetfunctions_isBroadcastMulticast(l2_dest)==TRUE) {
         return;
@@ -388,19 +391,6 @@ void neighbors_indicateTx(
     // loop through neighbor table
     for (i=0;i<MAXNUMNEIGHBORS;i++) {
         if (isThisRowMatching(l2_dest,i)) {
-          
-            // only update numTx and numTxACK when I have a dedicated cell
-            if (
-                icmpv6rpl_getPreferredParentIndex(&parentIndex)==FALSE  ||
-                schedule_hasDedicatedCellToNeighbor(&neighbors_vars.neighbors[parentIndex].addr_64b)==FALSE
-            ){
-                if (was_finally_acked==TRUE) {
-                    memcpy(&neighbors_vars.neighbors[i].asn,asnTs,sizeof(asn_t));
-                }
-                
-                break;
-            }
-            
             // handle roll-over case
             
             if (neighbors_vars.neighbors[i].numTx>(0xff-numTxAttempts)) {
@@ -415,13 +405,9 @@ void neighbors_indicateTx(
                 neighbors_vars.neighbors[i].numTxACK++;
                 memcpy(&neighbors_vars.neighbors[i].asn,asnTs,sizeof(asn_t));
             }
-            // #TODO : investigate this TX wrap thing! @incorrect in the meantime
-            // DB (Nov 2015) I believe this is correct. The ratio numTx/numTxAck is still a correct approximation
-            // of ETX after scaling down by a factor 2. Obviously, each one of numTx and numTxAck is no longer an
-            // accurate count of the related events, so don't rely of them to keep track of frames sent and ack received,
-            // and don't use numTx as a frame sequence number!
-            // The scaling means that older events have less weight when the scaling occurs. It is a way of progressively
-            // forgetting about the ancient past and giving more importance to recent observations.
+            
+            // numTx and numTxAck changed,, update my rank
+            icmpv6rpl_updateMyDAGrankAndParentSelection();
             break;
         }
     }
@@ -564,7 +550,15 @@ uint16_t neighbors_getLinkMetric(uint8_t index) {
     // we assume that this neighbor has already been checked for being in use         
     // calculate link cost to this neighbor
     if (neighbors_vars.neighbors[index].numTxACK==0) {
-        rankIncrease = (3*DEFAULTLINKCOST-2)*MINHOPRANKINCREASE;
+        if (neighbors_vars.neighbors[index].numTx > DEFAULTLINKCOST){
+            if (neighbors_vars.neighbors[index].numTx < MINIMAL_NUM_TX){
+                rankIncrease = (3*neighbors_vars.neighbors[index].numTx-2)*MINHOPRANKINCREASE;
+            } else {
+                rankIncrease = 65535;
+            }
+        } else {
+            rankIncrease = (3*DEFAULTLINKCOST-2)*MINHOPRANKINCREASE;
+        }
     } else {
         //6TiSCH minimal draft using OF0 for rank computation: ((3*numTx/numTxAck)-2)*minHopRankIncrease
         // numTx is on 8 bits, so scaling up 10 bits won't lead to saturation
@@ -577,6 +571,14 @@ uint16_t neighbors_getLinkMetric(uint8_t index) {
             rankIncrease = 65535;
         } else {
             rankIncrease = (uint16_t)(rankIncreaseIntermediary >> 10);
+        }
+        
+        if (
+            rankIncrease>(3*DEFAULTLINKCOST-2)*MINHOPRANKINCREASE &&
+            neighbors_vars.neighbors[index].numTx > MINIMAL_NUM_TX
+        ){
+            // PDR too low, put the neighbor in blacklist
+            neighbors_vars.neighbors[index].inBlacklist = TRUE;
         }
     }
     return rankIncrease;

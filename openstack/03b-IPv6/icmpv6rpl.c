@@ -304,7 +304,8 @@ bool icmpv6rpl_getPreferredParentIndex(uint8_t* indexptr) {
 bool icmpv6rpl_getPreferredParentEui64(open_addr_t* addressToWrite) {
     if (
         icmpv6rpl_vars.haveParent && 
-        neighbors_getNeighborNoResource(icmpv6rpl_vars.ParentIndex)==FALSE
+        neighbors_getNeighborNoResource(icmpv6rpl_vars.ParentIndex)    == FALSE &&
+        neighbors_getNeighborIsInBlacklist(icmpv6rpl_vars.ParentIndex) == FALSE
     ){
         return neighbors_getNeighborEui64(addressToWrite,ADDR_64B,icmpv6rpl_vars.ParentIndex);
     } else {
@@ -390,7 +391,10 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
     // update my rank to current parent first
     if (icmpv6rpl_vars.haveParent==TRUE){
       
-        if (neighbors_getNeighborNoResource(icmpv6rpl_vars.ParentIndex)==TRUE){
+        if (
+            neighbors_getNeighborNoResource(icmpv6rpl_vars.ParentIndex)    == TRUE ||
+            neighbors_getNeighborIsInBlacklist(icmpv6rpl_vars.ParentIndex) == TRUE
+        ){
             icmpv6rpl_vars.myDAGrank = 65535;
         } else {
             if (neighbors_reachedMinimalTransmission(icmpv6rpl_vars.ParentIndex)==FALSE){
@@ -415,7 +419,10 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
     for (i=0;i<MAXNUMNEIGHBORS;i++) {
         if (neighbors_isStableNeighborByIndex(i)) { // in use and link is stable
             // neighbor marked as NORES can't be parent
-            if (neighbors_getNeighborNoResource(i)==TRUE) {
+            if (
+                neighbors_getNeighborNoResource(i)   == TRUE ||
+                neighbors_getNeighborIsInBlacklist(i)== TRUE
+            ) {
                 continue;
             }
             // get link cost to this neighbor
@@ -565,10 +572,10 @@ void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t* msg) {
             neighborRank=neighbors_getNeighborRank(i);
             if (
               (icmpv6rpl_vars.incomingDio->rank > neighborRank) &&
-              (icmpv6rpl_vars.incomingDio->rank - neighborRank) > (DEFAULTLINKCOST*2*MINHOPRANKINCREASE)
+              (icmpv6rpl_vars.incomingDio->rank - neighborRank) > ((3*DEFAULTLINKCOST-2)*MINHOPRANKINCREASE)
             ) {
                // the new DAGrank looks suspiciously high, only increment a bit
-               neighbors_setNeighborRank(i,neighborRank + (DEFAULTLINKCOST*2*MINHOPRANKINCREASE));
+               neighbors_setNeighborRank(i,neighborRank + ((3*DEFAULTLINKCOST-2)*2*MINHOPRANKINCREASE));
                openserial_printError(COMPONENT_NEIGHBORS,ERR_LARGE_DAGRANK,
                                (errorparameter_t)icmpv6rpl_vars.incomingDio->rank,
                                (errorparameter_t)neighborRank);

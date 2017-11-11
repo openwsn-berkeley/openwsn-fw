@@ -16,8 +16,8 @@
 #define BADNEIGHBORMAXRSSI        -80 //dBm
 #define GOODNEIGHBORMINRSSI       -90 //dBm
 #define SWITCHSTABILITYTHRESHOLD  3
-#define DEFAULTLINKCOST           8
-#define MINIMAL_TX                DEFAULTLINKCOST
+#define DEFAULTLINKCOST           4   // this value has too be no greater than 6, when MAXEB is 4 and MAXRETRIES is 4
+#define MINIMAL_NUM_TX            64
 
 #define MAXDAGRANK                0xffff
 #define DEFAULTDAGRANK            MAXDAGRANK
@@ -61,6 +61,7 @@ uint16_t      neighbors_getLinkMetric(uint8_t index);
 open_addr_t*  neighbors_getKANeighbor(uint16_t kaPeriod);
 open_addr_t*  neighbors_getJoinProxy(void);
 bool          neighbors_getNeighborNoResource(uint8_t index);
+bool          neighbors_getNeighborIsInBlacklist(uint8_t index);
 int8_t        neighbors_getRssi(uint8_t index);
 uint8_t       neighbors_getNumTx(uint8_t index);
 uint8_t       neighbors_getSequenceNumber(open_addr_t* address);
