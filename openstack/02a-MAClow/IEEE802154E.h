@@ -313,7 +313,7 @@ void               ieee154e_endOfFrame(PORT_TIMER_WIDTH capturedTime);
 bool               debugPrint_asn(void);
 bool               debugPrint_isSync(void);
 bool               debugPrint_macStats(void);
-
+uint8_t            calculateFrequency(uint8_t channelOffset);
 /**
 \}
 \}

@@ -226,9 +226,19 @@ void icmpv6rpl_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    
    // I'm not busy sending DIO/DAO anymore
    if (packetfunctions_isBroadcastMulticast(&(msg->l2_nextORpreviousHop))){
+        if (error == E_SUCCESS)
+            openserial_statDIO(TXED, icmpv6rpl_vars.dio.rplinstanceId, icmpv6rpl_vars.dio.rank, icmpv6rpl_vars.dio.DODAGID);
+        else
+            openserial_statDIO(FAILED, icmpv6rpl_vars.dio.rplinstanceId, icmpv6rpl_vars.dio.rank, icmpv6rpl_vars.dio.DODAGID);
+
         icmpv6rpl_vars.busySendingDIO = FALSE;
    } else {
-        icmpv6rpl_vars.busySendingDAO = FALSE;
+       if (error == E_SUCCESS)
+           openserial_statDAO(TXED, msg->l2_nextORpreviousHop.addr_64b, msg->l3_destinationAdd.addr_128b);
+       else
+           openserial_statDAO(FAILED, msg->l2_nextORpreviousHop.addr_64b, msg->l3_destinationAdd.addr_128b);
+
+       icmpv6rpl_vars.busySendingDAO = FALSE;
    }
    
    // free packet
@@ -747,9 +757,11 @@ void sendDIO() {
     //send
     if (icmpv6_send(msg)==E_SUCCESS) {
         icmpv6rpl_vars.busySendingDIO = TRUE; 
+        openserial_statDIO(ENQUEUED, icmpv6rpl_vars.dio.rplinstanceId, icmpv6rpl_vars.dio.rank, icmpv6rpl_vars.dio.DODAGID);
     } else {
         openqueue_freePacketBuffer(msg);
-    }
+        openserial_statDIO(FAILED, icmpv6rpl_vars.dio.rplinstanceId, icmpv6rpl_vars.dio.rank, icmpv6rpl_vars.dio.DODAGID);
+     }
 }
 
 //===== DAO-related
@@ -949,7 +961,11 @@ void sendDAO() {
    if (icmpv6_send(msg)==E_SUCCESS) {
       icmpv6rpl_vars.busySendingDAO = TRUE;
       icmpv6rpl_vars.daoSent = TRUE;
+
+      openserial_statDAO(ENQUEUED, msg->l2_nextORpreviousHop.addr_64b, msg->l3_destinationAdd.addr_128b);
+
    } else {
+      openserial_statDAO(FAILED, msg->l2_nextORpreviousHop.addr_64b, msg->l3_destinationAdd.addr_128b);
       openqueue_freePacketBuffer(msg);
    }
 }

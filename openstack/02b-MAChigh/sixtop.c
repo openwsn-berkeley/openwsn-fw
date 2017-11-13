@@ -228,6 +228,8 @@ owerror_t sixtop_request(
                     len += 4;
                 }
             }
+            //statEvent -> to OV
+            openserial_stat6Pcmd(CELLADD_REQ, ENQUEUED, neighbor, celllist_toBeAdded, SCHEDULEIEMAXNUMCELLS);
         }
         if (code == IANA_6TOP_CMD_DELETE || code == IANA_6TOP_CMD_RELOCATE){
             for(i=0;i<CELLLIST_MAX_LEN;i++) {
@@ -240,6 +242,8 @@ owerror_t sixtop_request(
                     len += 4;
                 }
             }
+            //statEvent -> to OV
+            openserial_stat6Pcmd(CELLDEL_REQ, ENQUEUED, neighbor, celllist_toBeDeleted, SCHEDULEIEMAXNUMCELLS);
         }
         // append 6p numberCells
         packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
@@ -872,36 +876,69 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
     
     bool scheduleChanged;
     msg->owner = COMPONENT_SIXTOP_RES;
-    
+
     // if this is a request send done
     if (msg->l2_sixtop_messageType == SIXTOP_CELL_REQUEST){
+        //stats to OpenVisualizer
+        uint8_t status;
+        if(error == E_FAIL)
+            status = FAILED;
+        else
+            status = TXED;
+
+        // the packet has been sent out successfully
+        switch (sixtop_vars.six2six_state) {
+        case SIX_STATE_WAIT_ADDREQUEST_SENDDONE:
+            openserial_stat6Pcmd(CELLADD_REQ, status, &(msg->l2_nextORpreviousHop), msg->l2_sixtop_celllist_add, SCHEDULEIEMAXNUMCELLS);
+            break;
+        case SIX_STATE_WAIT_DELETEREQUEST_SENDDONE:
+            openserial_stat6Pcmd(CELLDEL_REQ, status, &(msg->l2_nextORpreviousHop), msg->l2_sixtop_celllist_delete, SCHEDULEIEMAXNUMCELLS);
+            break;
+        case SIX_STATE_WAIT_RELOCATEREQUEST_SENDDONE:
+            openserial_stat6Pcmd(CELLADD_REQ, status, &(msg->l2_nextORpreviousHop), msg->l2_sixtop_celllist_add, SCHEDULEIEMAXNUMCELLS);
+            openserial_stat6Pcmd(CELLDEL_REQ, status, &(msg->l2_nextORpreviousHop), msg->l2_sixtop_celllist_delete, SCHEDULEIEMAXNUMCELLS);
+            break;
+        case SIX_STATE_WAIT_LISTREQUEST_SENDDONE:
+            openserial_stat6Pcmd(CELLLIST_REQ, status, &(msg->l2_nextORpreviousHop), NULL, 0);
+            break;
+        case SIX_STATE_WAIT_COUNTREQUEST_SENDDONE:
+            openserial_stat6Pcmd(CELLCOUNT_REQ, status, &(msg->l2_nextORpreviousHop), NULL, 0);
+            break;
+        case SIX_STATE_WAIT_CLEARREQUEST_SENDDONE:
+            openserial_stat6Pcmd(CELLCLEAR_REQ, status, &(msg->l2_nextORpreviousHop), NULL, 0);
+            break;
+        default:
+            // should never happen
+            break;
+        }
+
         if(error == E_FAIL) {
             // reset handler and state if the request is failed to send out
             sixtop_vars.six2six_state = SIX_STATE_IDLE;
         } else {
             // the packet has been sent out successfully
             switch (sixtop_vars.six2six_state) {
-            case SIX_STATE_WAIT_ADDREQUEST_SENDDONE:
-                sixtop_vars.six2six_state = SIX_STATE_WAIT_ADDRESPONSE;
-                break;
-            case SIX_STATE_WAIT_DELETEREQUEST_SENDDONE:
-                sixtop_vars.six2six_state = SIX_STATE_WAIT_DELETERESPONSE;
-                break;
-            case SIX_STATE_WAIT_RELOCATEREQUEST_SENDDONE:
-                sixtop_vars.six2six_state = SIX_STATE_WAIT_RELOCATERESPONSE;
-                break;
-            case SIX_STATE_WAIT_LISTREQUEST_SENDDONE:
-                sixtop_vars.six2six_state = SIX_STATE_WAIT_LISTRESPONSE;
-                break;
-            case SIX_STATE_WAIT_COUNTREQUEST_SENDDONE:
-                sixtop_vars.six2six_state = SIX_STATE_WAIT_COUNTRESPONSE;
-                break;
-            case SIX_STATE_WAIT_CLEARREQUEST_SENDDONE:
-                sixtop_vars.six2six_state = SIX_STATE_WAIT_CLEARRESPONSE;
-                break;
-            default:
-                // should never happen
-                break;
+                case SIX_STATE_WAIT_ADDREQUEST_SENDDONE:
+                    sixtop_vars.six2six_state = SIX_STATE_WAIT_ADDRESPONSE;
+                    break;
+                case SIX_STATE_WAIT_DELETEREQUEST_SENDDONE:
+                    sixtop_vars.six2six_state = SIX_STATE_WAIT_DELETERESPONSE;
+                    break;
+                case SIX_STATE_WAIT_RELOCATEREQUEST_SENDDONE:
+                    sixtop_vars.six2six_state = SIX_STATE_WAIT_RELOCATERESPONSE;
+                    break;
+                case SIX_STATE_WAIT_LISTREQUEST_SENDDONE:
+                    sixtop_vars.six2six_state = SIX_STATE_WAIT_LISTRESPONSE;
+                    break;
+                case SIX_STATE_WAIT_COUNTREQUEST_SENDDONE:
+                    sixtop_vars.six2six_state = SIX_STATE_WAIT_COUNTRESPONSE;
+                    break;
+                case SIX_STATE_WAIT_CLEARREQUEST_SENDDONE:
+                    sixtop_vars.six2six_state = SIX_STATE_WAIT_CLEARRESPONSE;
+                    break;
+                default:
+                    // should never happen
+                    break;
             }
             // start timeout timer if I am waiting for a response
             opentimers_scheduleIn(
@@ -977,6 +1014,36 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
         } else {
             // doesn't receive the ACK of response packet from request side. 
             // Do nothing, request side will timeout when it doesn't receive the response packet.
+        }
+
+
+        //stat to openVizualizer for the response
+        uint8_t status;
+        if (error == E_SUCCESS)
+            status = TXED;
+        else
+            status = FAILED;
+
+        switch(msg->l2_sixtop_command){
+            case IANA_6TOP_CMD_ADD:
+                openserial_stat6Pcmd(CELLADD_REP, status, &(msg->l2_nextORpreviousHop), msg->l2_sixtop_celllist_add, SCHEDULEIEMAXNUMCELLS);
+                break;
+
+            case IANA_6TOP_CMD_DELETE:
+                openserial_stat6Pcmd(CELLDEL_REP, status, &(msg->l2_nextORpreviousHop), msg->l2_sixtop_celllist_delete, SCHEDULEIEMAXNUMCELLS);
+                break;
+
+            case IANA_6TOP_CMD_RELOCATE:
+                openserial_stat6Pcmd(CELLADD_REP, status, &(msg->l2_nextORpreviousHop), msg->l2_sixtop_celllist_add, SCHEDULEIEMAXNUMCELLS);
+                openserial_stat6Pcmd(CELLDEL_REP, status, &(msg->l2_nextORpreviousHop), msg->l2_sixtop_celllist_delete, SCHEDULEIEMAXNUMCELLS);
+                break;
+
+            case IANA_6TOP_CMD_CLEAR:
+                openserial_stat6Pcmd(CELLCLEAR_REP, status, &(msg->l2_nextORpreviousHop), NULL, 0);
+                break;
+
+            default:
+                break;
         }
     }
     // free the buffer
@@ -1196,6 +1263,10 @@ void sixtop_six2six_notifyReceive(
                     } else {
                         // no more cell after offset
                         returnCode = IANA_6TOP_RC_EOL;
+
+                        //stats to OV
+                        openserial_stat6Pcmd(CELLLIST_REQ, RCVD, &(pkt->l2_nextORpreviousHop), NULL, 0);
+                        openserial_stat6Pcmd(CELLLIST_REP, ENQUEUED, &(pkt->l2_nextORpreviousHop), NULL, 0);
                         break;
                     }
                 }
@@ -1211,6 +1282,10 @@ void sixtop_six2six_notifyReceive(
                     returnCode = IANA_6TOP_RC_EOL;
                 }
                 
+                //stats to OV
+                openserial_stat6Pcmd(CELLLIST_REQ, RCVD, &(pkt->l2_nextORpreviousHop), NULL, 0);
+                openserial_stat6Pcmd(CELLLIST_REP, ENQUEUED, &(pkt->l2_nextORpreviousHop), NULL, 0);
+
                 break;
             }
             
@@ -1243,6 +1318,11 @@ void sixtop_six2six_notifyReceive(
                 response_pkt->payload[0] =  numCells & 0x00FF;
                 response_pkt->payload[1] = (numCells & 0xFF00)>>8;
                 response_pktLen         += 2;
+
+                //stats to OV
+                openserial_stat6Pcmd(CELLCOUNT_REQ, RCVD, &(pkt->l2_nextORpreviousHop), NULL, 0);
+                openserial_stat6Pcmd(CELLCOUNT_REP, ENQUEUED, &(pkt->l2_nextORpreviousHop), NULL, 0);
+
                 break;
             }
             
@@ -1252,6 +1332,9 @@ void sixtop_six2six_notifyReceive(
             
             // add command
             if (code == IANA_6TOP_CMD_ADD){
+                //stats to OV
+                openserial_stat6Pcmd(CELLADD_REQ, RCVD, &(pkt->l2_nextORpreviousHop), NULL, 0);
+
                 if (schedule_getNumberOfFreeEntries() < numCells){
                     returnCode = IANA_6TOP_RC_NORES;
                     break;
@@ -1281,12 +1364,17 @@ void sixtop_six2six_notifyReceive(
                         }
                     }
                 }
+                //stats to OV
+                openserial_stat6Pcmd(CELLADD_REP, ENQUEUED, &(pkt->l2_nextORpreviousHop), response_pkt->l2_sixtop_celllist_add, SCHEDULEIEMAXNUMCELLS);
+
                 returnCode = IANA_6TOP_RC_SUCCESS;
                 break;
             }
             
             // delete command
             if (code == IANA_6TOP_CMD_DELETE){
+                openserial_stat6Pcmd(CELLADD_REQ, RCVD, &(pkt->l2_nextORpreviousHop), NULL, 0);
+
                 i = 0;
                 memset(response_pkt->l2_sixtop_celllist_delete,0,sizeof(response_pkt->l2_sixtop_celllist_delete));
                 while(pktLen>0){
@@ -1319,11 +1407,18 @@ void sixtop_six2six_notifyReceive(
                 } else {
                     returnCode = IANA_6TOP_RC_CELLLIST_ERR;
                 }
+
+                //stats to OV
+                openserial_stat6Pcmd(CELLADD_REP, ENQUEUED, &(pkt->l2_nextORpreviousHop), response_pkt->l2_sixtop_celllist_delete, SCHEDULEIEMAXNUMCELLS);
+
                 break;
             }
             
             // relocate command
             if (code == IANA_6TOP_CMD_RELOCATE){
+                openserial_stat6Pcmd(CELLADD_REQ, RCVD, &(pkt->l2_nextORpreviousHop), NULL, 0);
+                openserial_stat6Pcmd(CELLDEL_REQ, RCVD, &(pkt->l2_nextORpreviousHop), NULL, 0);
+
                 // retrieve cell list to be relocated
                 i = 0;
                 memset(response_pkt->l2_sixtop_celllist_delete,0,sizeof(response_pkt->l2_sixtop_celllist_delete));
@@ -1374,6 +1469,10 @@ void sixtop_six2six_notifyReceive(
                     }
                 }
                 returnCode = IANA_6TOP_RC_SUCCESS;
+
+                openserial_stat6Pcmd(CELLADD_REP, ENQUEUED, &(pkt->l2_nextORpreviousHop), response_pkt->l2_sixtop_celllist_add, SCHEDULEIEMAXNUMCELLS);
+                openserial_stat6Pcmd(CELLDEL_REP, ENQUEUED, &(pkt->l2_nextORpreviousHop), response_pkt->l2_sixtop_celllist_delete, SCHEDULEIEMAXNUMCELLS);
+
                 break;
             }
         } while(0);
@@ -1463,6 +1562,9 @@ void sixtop_six2six_notifyReceive(
                 ) { 
                     neighbors_updateGeneration(&(pkt->l2_nextORpreviousHop));
                 }
+
+                openserial_stat6Pcmd(CELLADD_REP, RCVD, &(pkt->l2_nextORpreviousHop), pkt->l2_sixtop_celllist_add, SCHEDULEIEMAXNUMCELLS);
+
                 break;
             case SIX_STATE_WAIT_DELETERESPONSE:
                 if (
@@ -1475,6 +1577,8 @@ void sixtop_six2six_notifyReceive(
                 ) {
                     neighbors_updateGeneration(&(pkt->l2_nextORpreviousHop));
                 }
+                openserial_stat6Pcmd(CELLDEL_REP, RCVD, &(pkt->l2_nextORpreviousHop), sixtop_vars.celllist_toDelete, SCHEDULEIEMAXNUMCELLS);
+
                 break;
             case SIX_STATE_WAIT_RELOCATERESPONSE:
                 i = 0;
@@ -1504,6 +1608,9 @@ void sixtop_six2six_notifyReceive(
                 if (scheduleChanged) {
                     neighbors_updateGeneration(&(pkt->l2_nextORpreviousHop));
                 }
+                openserial_stat6Pcmd(CELLDEL_REP, RCVD, &(pkt->l2_nextORpreviousHop), sixtop_vars.celllist_toDelete, SCHEDULEIEMAXNUMCELLS);
+                openserial_stat6Pcmd(CELLADD_REP, RCVD, &(pkt->l2_nextORpreviousHop), pkt->l2_sixtop_celllist_add, SCHEDULEIEMAXNUMCELLS);
+
                 break;
             case SIX_STATE_WAIT_COUNTRESPONSE:
                 numCells  = *((uint8_t*)(pkt->payload)+ptr);
@@ -1515,6 +1622,8 @@ void sixtop_six2six_notifyReceive(
                     (errorparameter_t)numCells,
                     (errorparameter_t)sixtop_vars.six2six_state
                 );
+                openserial_stat6Pcmd(CELLCOUNT_REP, RCVD, &(pkt->l2_nextORpreviousHop), NULL, 0);
+
                 break;
             case SIX_STATE_WAIT_LISTRESPONSE:
                 i = 0;
@@ -1536,6 +1645,8 @@ void sixtop_six2six_notifyReceive(
                     (errorparameter_t)celllist_list[0].slotoffset,
                     (errorparameter_t)celllist_list[1].slotoffset
                 );
+                openserial_stat6Pcmd(CELLLIST_REP, RCVD, &(pkt->l2_nextORpreviousHop), celllist_list, 0);
+
                 break;
             case SIX_STATE_WAIT_CLEARRESPONSE:
                 schedule_removeAllCells(
@@ -1543,6 +1654,8 @@ void sixtop_six2six_notifyReceive(
                     &(pkt->l2_nextORpreviousHop)
                 );
                 neighbors_resetGeneration(&(pkt->l2_nextORpreviousHop));
+                openserial_stat6Pcmd(CELLCLEAR_REP, RCVD, &(pkt->l2_nextORpreviousHop), NULL, 0);
+
                 break;
             default:
                 // should neven happen
