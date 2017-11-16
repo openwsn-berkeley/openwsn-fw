@@ -46,13 +46,13 @@ void debugpins_radio_toggle(void);
 void debugpins_radio_clr(void);
 void debugpins_radio_set(void);
 
-void debugpins_txframe_toggle(void);
-void debugpins_txframe_clr(void);
-void debugpins_txframe_set(void);
+void debugpins_eof_toggle(void);
+void debugpins_eof_clr(void);
+void debugpins_eof_set(void);
 
-void debugpins_rxframe_toggle(void);
-void debugpins_rxframe_clr(void);
-void debugpins_rxframe_set(void);
+void debugpins_sof_toggle(void);
+void debugpins_sof_clr(void);
+void debugpins_sof_set(void);
 
 #ifdef OPENSIM
 void debugpins_ka_clr(void);

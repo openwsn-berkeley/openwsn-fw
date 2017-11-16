@@ -417,7 +417,6 @@ void CAN_SCE_IRQHandler(void)
 *******************************************************************************/
 void EXTI9_5_IRQHandler(void)
 {
-    debugpins_isr_set();
     if(EXTI_GetITStatus(EXTI_Line5) != RESET)
     {
       //leds_sync_toggle();
@@ -427,7 +426,6 @@ void EXTI9_5_IRQHandler(void)
       RCC_Wakeup();
       radio_isr();
     }
-    debugpins_isr_clr();
 }
 
 /*******************************************************************************
@@ -651,11 +649,13 @@ void EXTI15_10_IRQHandler(void)
 *******************************************************************************/
 void RTCAlarm_IRQHandler(void)
 {
+  debugpins_isr_set();
   if(EXTI_GetITStatus(EXTI_Line17) != RESET)
   {
 	EXTI_ClearITPendingBit(EXTI_Line17);
         sctimer_isr();
   }
+  debugpins_isr_clr();
 }
 
 /*******************************************************************************

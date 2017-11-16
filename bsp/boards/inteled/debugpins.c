@@ -26,7 +26,7 @@ void debugpins_init(void) {
     GPIO_Init(GPIOC, &GPIO_InitStructure);
   
     GPIOC->ODR |= 0X0080;      // rxframe,   PC.7
-    GPIOC->ODR |= 0X0040;      // txframe,   PC.6
+    GPIOC->ODR |= 0X0040;      // eof,   PC.6
     GPIOC->ODR |= 0X0020;      // frame, PC.5
     GPIOC->ODR |= 0X0010;      // slot,  PC.4
     GPIOC->ODR |= 0X0008;      // fsm,   PC.3
@@ -34,8 +34,8 @@ void debugpins_init(void) {
     GPIOC->ODR |= 0X0002;      // isr,   PC.1
     GPIOC->ODR |= 0X0001;      // radio, PC.0
    
-    debugpins_rxframe_clr();
-	debugpins_txframe_clr();
+    debugpins_sof_clr();
+	debugpins_eof_clr();
     debugpins_frame_clr();
     debugpins_slot_clr();
     debugpins_fsm_clr();
@@ -45,29 +45,29 @@ void debugpins_init(void) {
 }
 
 // PC.7
-void debugpins_rxframe_toggle(void){
+void debugpins_sof_toggle(void){
     
     GPIOC->ODR ^= 0X0080;
 }
-void debugpins_rxframe_clr(void) {
+void debugpins_sof_clr(void) {
     
     GPIOC->ODR &= ~0X0080;
 }
-void debugpins_rxframe_set(void) {
+void debugpins_sof_set(void) {
     
     GPIOC->ODR |=  0X0080;
 }   
 
 // PC.6
-void debugpins_txframe_toggle(void){
+void debugpins_eof_toggle(void){
     
     GPIOC->ODR ^= 0X0040;
 }
-void debugpins_txframe_clr(void) {
+void debugpins_eof_clr(void) {
     
     GPIOC->ODR &= ~0X0040;
 }
-void debugpins_txframe_set(void) {
+void debugpins_eof_set(void) {
     
     GPIOC->ODR |=  0X0040;
 }   

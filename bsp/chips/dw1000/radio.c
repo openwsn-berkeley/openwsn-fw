@@ -212,11 +212,6 @@ void radio_txNow() {
 	// change state
 	radio_vars.state = RADIOSTATE_TRANSMITTING;
 	dwt_starttx(DWT_START_TX_IMMEDIATE|DWT_RESPONSE_EXPECTED);
-    if (radio_vars.startFrame_cb!=NULL) {
-        // call the callback
-		val=sctimer_readCounter();
-		radio_vars.startFrame_cb(val);
-	}
 }
 
 //===== RX
@@ -275,6 +270,7 @@ void radio_txStartOfFrameCb(const dwt_cb_data_t* cb_data){
 
 	// capture the time
 	capturedTime = sctimer_readCounter();
+	debugpins_sof_set();
 	radio_vars.state = RADIOSTATE_TRANSMITTING;
 	radio_vars.isr_retValue = KICK_SCHEDULER;
 	radio_vars.txa_count += 1;
@@ -282,6 +278,7 @@ void radio_txStartOfFrameCb(const dwt_cb_data_t* cb_data){
 	if( radio_vars.startFrame_cb != NULL){
 		radio_vars.startFrame_cb(capturedTime);
 	}
+	debugpins_sof_clr();
 	
 }
 
@@ -290,6 +287,7 @@ void radio_txDoneCb(const dwt_cb_data_t* cb_data){
 
 	// capture the time
 	capturedTime = sctimer_readCounter();
+	debugpins_eof_set();
 	radio_vars.rx_frameLen = 0;
 	radio_vars.state = RADIOSTATE_TXRX_DONE;
 	radio_vars.isr_retValue = KICK_SCHEDULER;
@@ -298,6 +296,7 @@ void radio_txDoneCb(const dwt_cb_data_t* cb_data){
 	if( radio_vars.endFrame_cb != NULL){
 		radio_vars.endFrame_cb(capturedTime);
 	}
+	debugpins_eof_clr();
 }
 
 void radio_rxStartOfFrameCb(const dwt_cb_data_t* cb_data){
@@ -305,6 +304,7 @@ void radio_rxStartOfFrameCb(const dwt_cb_data_t* cb_data){
 
 	// capture the time
 	capturedTime = sctimer_readCounter();
+	debugpins_sof_set();
 	radio_vars.radio_status = cb_data->status;
 	radio_vars.state = RADIOSTATE_RECEIVING;
 	radio_vars.isr_retValue = KICK_SCHEDULER;
@@ -312,6 +312,7 @@ void radio_rxStartOfFrameCb(const dwt_cb_data_t* cb_data){
 	if( radio_vars.startFrame_cb != NULL){
 		radio_vars.startFrame_cb(capturedTime);
 	}
+	debugpins_sof_clr();
 }
 
 void radio_rxOkCb(const dwt_cb_data_t* cb_data){
@@ -319,6 +320,7 @@ void radio_rxOkCb(const dwt_cb_data_t* cb_data){
 
 	// capture the time
 	capturedTime = sctimer_readCounter();
+	debugpins_eof_set();
 	// The DW1000 calculates the CRC automatically and does not pass it to the received frame.
 	// To be compatible with the higher level layers we add the CRC length to the received frame,
 	// knowning that it will be discarded without being read.
@@ -331,6 +333,7 @@ void radio_rxOkCb(const dwt_cb_data_t* cb_data){
 	if( radio_vars.endFrame_cb != NULL){
 		radio_vars.endFrame_cb(capturedTime);
 	}
+	debugpins_eof_clr();
 }
 
 // error and timeout handler

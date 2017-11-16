@@ -35,6 +35,7 @@ to return the board's description.
 
 #define PORT_SIGNED_INT_WIDTH               int32_t
 #define PORT_TICS_PER_MS                    32
+
 #define SCHEDULER_WAKEUP()                  EXTI->SWIER |= EXTI_Line1;
 #define SCHEDULER_ENABLE_INTERRUPT()        //enable in board use EXTI_Line1
 /*
@@ -56,24 +57,24 @@ to return the board's description.
 //===== IEEE802154E timing
 
 // time-slot related
-#define PORT_TsSlotDuration                 656   // ~20ms
-#define PORT_TsTxOffset                     260   //  4000us
-#define PORT_TsLongGT                  		151   //  5000us
-#define PORT_TsTxAckDelay                   151   //  5000us
+#define PORT_TsSlotDuration                 800   // ~20ms
+#define PORT_TsTxOffset                     100  //  8000s
+#define PORT_TsLongGT                  		43   //  1344us
+#define PORT_TsTxAckDelay                   72   //  2250us
 #define PORT_TsShortGT                      16   //   500us
 
 // execution speed related
-#define PORT_maxTxDataPrepare               5    // 155us (measured 150us)
-#define PORT_maxRxAckPrepare                10    //  305us (measured  83us)
-#define PORT_maxRxDataPrepare               4    // 1007us (measured  84us)
-#define PORT_maxTxAckPrepare                10    //  305us (measured 219us)
+#define PORT_maxTxDataPrepare               66   // ~2ms (measured )
+#define PORT_maxRxAckPrepare                20   //  us (measured us)
+#define PORT_maxRxDataPrepare               33   //  us (measured us)
+#define PORT_maxTxAckPrepare                30   //  us (measured us)
 // radio speed related
-#define PORT_delayTx                        1     //  31us (measured 23us)
+#define PORT_delayTx                        2     //  64us (measured 31us)
 #define PORT_delayRx                        0     //    0us (can not measure)
 // radio watchdog
-#define PORT_wdRadioTx					    33
-#define PORT_wdDataDuration	                330	  // 11ms  (measured 10.1ms)
-#define PORT_wdAckDuration	                330
+#define PORT_wdRadioTx					    32    // ~1ms
+#define PORT_wdDataDuration	                384	  // 12ms  (measured 11.1ms)
+#define PORT_wdAckDuration	                98
 //===== adaptive_sync accuracy
 
 #define SYNC_ACCURACY                           2     // by ticks
