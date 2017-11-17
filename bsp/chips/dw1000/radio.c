@@ -35,7 +35,8 @@ typedef struct {
    uint32_t					 rxg_count;
    uint32_t					 txg_count;
    uint32_t					 txa_count;
-   uint32_t		             rxErrTo_count;
+   uint32_t		             rxErr_count;
+   uint32_t		             rxTo_count;
 } radio_vars_t;
 
 radio_vars_t radio_vars;
@@ -54,7 +55,8 @@ dwt_config_t UWBConfigs[6] =
 void error_handler(void);
 void radio_txDoneCb(const dwt_cb_data_t* cb_data);
 void radio_rxOkCb(const dwt_cb_data_t* cb_data);
-void radio_rxErrAndToCb(const dwt_cb_data_t* cb_data);
+void radio_rxErrCb(const dwt_cb_data_t* cb_data);
+void radio_rxToCb(const dwt_cb_data_t* cb_data);
 void radio_txStartOfFrameCb(const dwt_cb_data_t* cb_data);
 void radio_rxStartOfFrameCb(const dwt_cb_data_t* cb_data);
 
@@ -109,7 +111,7 @@ void radio_init() {
     dwt_settxantennadelay(TX_ANT_DLY);
     dwt_setleds(0x03);
 	// set the DW1000 callbacks
-	dwt_setcallbacks(radio_txDoneCb, radio_rxOkCb, radio_rxErrAndToCb, radio_rxErrAndToCb, radio_rxStartOfFrameCb, radio_txStartOfFrameCb);
+	dwt_setcallbacks(radio_txDoneCb, radio_rxOkCb, radio_rxToCb, radio_rxErrCb, radio_rxStartOfFrameCb, radio_txStartOfFrameCb);
 	dwt_setinterrupt(DWT_INT_TFRS|     // Frame sent OK
 					 DWT_INT_TXFRB|    // TX frame begins
 					 DWT_INT_RXSFD|    // RX start of frame detected
@@ -208,7 +210,6 @@ void radio_txEnable() {
 }
 
 void radio_txNow() {
-	PORT_TIMER_WIDTH val;
 	// change state
 	radio_vars.state = RADIOSTATE_TRANSMITTING;
 	dwt_starttx(DWT_START_TX_IMMEDIATE|DWT_RESPONSE_EXPECTED);
@@ -336,9 +337,32 @@ void radio_rxOkCb(const dwt_cb_data_t* cb_data){
 	debugpins_eof_clr();
 }
 
-// error and timeout handler
-void radio_rxErrAndToCb(const dwt_cb_data_t* cb_data){
-	radio_vars.rxErrTo_count += 1;
+// Receive Error handler
+void radio_rxErrCb(const dwt_cb_data_t* cb_data){
+	PORT_TIMER_WIDTH capturedTime;
+
+	// capture the time
+	capturedTime = sctimer_readCounter();
+	debugpins_eof_set();
+	// The DW1000 calculates the CRC automatically and does not pass it to the received frame.
+	// To be compatible with the higher level layers we add the CRC length to the received frame,
+	// knowning that it will be discarded without being read.
+	// Should the higher layers ever start reading the CRC then we will need to calculate it here.
+	radio_vars.rx_frameLen = cb_data->datalength +2;
+	radio_vars.radio_status = cb_data->status;
+	radio_vars.state = RADIOSTATE_TXRX_DONE;
+	radio_vars.isr_retValue = KICK_SCHEDULER;
+	radio_vars.rxErr_count += 1;
+	if( radio_vars.endFrame_cb != NULL){
+		radio_vars.endFrame_cb(capturedTime);
+	}
+	radio_rxEnable();
+	debugpins_eof_clr();
+}
+
+// Rx timeout handler
+void radio_rxToCb(const dwt_cb_data_t* cb_data){
+	radio_vars.rxTo_count += 1;
 	radio_rxEnable();
 }
 //=========================== interrupt handlers ==============================
