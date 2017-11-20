@@ -344,11 +344,8 @@ void radio_rxErrCb(const dwt_cb_data_t* cb_data){
 	// capture the time
 	capturedTime = sctimer_readCounter();
 	debugpins_eof_set();
-	// The DW1000 calculates the CRC automatically and does not pass it to the received frame.
-	// To be compatible with the higher level layers we add the CRC length to the received frame,
-	// knowning that it will be discarded without being read.
-	// Should the higher layers ever start reading the CRC then we will need to calculate it here.
-	radio_vars.rx_frameLen = cb_data->datalength +2;
+	// Indicate that the frame received is to be discarded
+	radio_vars.rx_frameLen = 0;
 	radio_vars.radio_status = cb_data->status;
 	radio_vars.state = RADIOSTATE_TXRX_DONE;
 	radio_vars.isr_retValue = KICK_SCHEDULER;
