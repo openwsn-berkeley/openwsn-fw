@@ -50,6 +50,7 @@ static void gpio_init(void);
 static void button_init(void);
 static void antenna_init(void);
 
+static void radio_subghz_init(void);
 
 static void SysCtrlDeepSleepSetting(void);
 static void SysCtrlSleepSetting(void);
@@ -83,12 +84,33 @@ void board_init(void) {
    sctimer_init();
    uart_init();
    radio_init();
+   radio_subghz_init();
    i2c_init();
    spi_init();
    sensors_init();
    cryptoengine_init();  
 }
 
+
+void radio_subghz_init(){
+    volatile uint32_t delay;
+
+   //set radio control pins to output
+   GPIOPinTypeGPIOOutput(GPIO_C_BASE, GPIO_PIN_0);
+   GPIOPinTypeGPIOOutput(GPIO_D_BASE, GPIO_PIN_1);
+   
+   //set radio pwr off
+   GPIOPinWrite(GPIO_C_BASE, GPIO_PIN_0, 0);
+   for(delay=0;delay<0xA2C2;delay++);
+   
+   //init the radio, pwr up the radio
+   GPIOPinWrite(GPIO_C_BASE, GPIO_PIN_0, GPIO_PIN_0);
+   for(delay=0;delay<0xA2C2;delay++);
+  
+   //reset the radio -- inverted so set it to 0.
+   GPIOPinWrite(GPIO_D_BASE, GPIO_PIN_1, GPIO_PIN_1); 
+   
+}
 void antenna_init(){
    //use cc2538 2.4ghz radio
    GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_CC2538_24GHZ, BSP_ANTENNA_CC2538_24GHZ);
