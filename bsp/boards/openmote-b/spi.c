@@ -21,9 +21,9 @@
 
 //=========================== defines =========================================
 #define SPI_PIN_SSI_CLK             GPIO_PIN_2      //    CLK       
-#define SPI_PIN_SSI_FSS             GPIO_PIN_3      //    CSB       
-#define SPI_PIN_SSI_RX              GPIO_PIN_4      //    MOSI      
-#define SPI_PIN_SSI_TX              GPIO_PIN_5      //    MISO     
+#define SPI_PIN_SSI_FSS             GPIO_PIN_3      //    CSn       
+#define SPI_PIN_SSI_RX              GPIO_PIN_4      //    MISO      
+#define SPI_PIN_SSI_TX              GPIO_PIN_5      //    MOSI     
 #define SPI_GPIO_SSI_BASE           GPIO_A_BASE
 
 //=========================== variables =======================================
@@ -57,28 +57,36 @@ void spi_init() {
     // clear variables
     memset(&spi_vars,0,sizeof(spi_vars_t));  
     
+    // set the clk miso and cs pins as output
+    GPIOPinTypeGPIOOutput(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_CLK);
+    GPIOPinTypeGPIOOutput(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_TX);
+    GPIOPinTypeGPIOOutput(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_FSS);
+    
+    //set cs to high
+    GPIOPinWrite(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_FSS, SPI_PIN_SSI_FSS);
+    //set pins to low
+    GPIOPinWrite(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_TX, 0);
+    GPIOPinWrite(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_CLK, 0);
+    
     SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_SSI0);
+    SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_SSI0);
+    SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_SSI0);
+    
     SSIDisable(SSI0_BASE);
     SSIClockSourceSet(SSI0_BASE, SSI_CLOCK_PIOSC);
-
   
     IOCPinConfigPeriphOutput(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_CLK, IOC_MUX_OUT_SEL_SSI0_CLKOUT);    
-    IOCPinConfigPeriphOutput(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_FSS, IOC_MUX_OUT_SEL_SSI0_FSSOUT);
     IOCPinConfigPeriphOutput(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_TX, IOC_MUX_OUT_SEL_SSI0_TXD);    
     IOCPinConfigPeriphInput(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_RX, IOC_SSIRXD_SSI0);    
     
-    GPIOPinTypeSSI(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_CLK | SPI_PIN_SSI_FSS | SPI_PIN_SSI_RX | SPI_PIN_SSI_TX);
-    GPIOPinTypeSSI(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_CLK | SPI_PIN_SSI_RX | SPI_PIN_SSI_TX);
+    GPIOPinTypeSSI(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_CLK );
+    GPIOPinTypeSSI(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_RX );
+    GPIOPinTypeSSI(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_TX );
     
-    SSIConfigSetExpClk(SSI0_BASE, SysCtrlIOClockGet(), SSI_FRF_MOTO_MODE_0, SSI_MODE_MASTER, SysCtrlIOClockGet()/2, 8);
+    SSIConfigSetExpClk(SSI0_BASE, SysCtrlIOClockGet(), SSI_FRF_MOTO_MODE_0, SSI_MODE_MASTER, /*SysCtrlIOClockGet()/2*/8000000, 8);
     
     // Enable the SSI0 module.
     SSIEnable(SSI0_BASE);
-  
-#ifdef SPI_IN_INTERRUPT_MODE
-   //TODO
-   // register ISR and enable interrupt
-#endif
 }
 
 #ifdef SPI_IN_INTERRUPT_MODE
@@ -109,23 +117,14 @@ void    spi_txrx(uint8_t*     bufTx,
    
     // SPI is now busy
     spi_vars.busy             =  1;
-   
-#ifdef SPI_IN_INTERRUPT_MODE
-    // implementation 1. use a callback function when transaction finishes
-   
-    // write first byte to TX buffer
-    SSIDataPut(SSI0_BASE, *spi_vars.pNextTxByte);
     
-    spi_vars.pNextTxByte++;
-       
-    enableInterrupts();
-#else
+    // lower CS signal to have slave listening
+    if (spi_vars.isFirst==SPI_FIRST) {
+       GPIOPinWrite(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_FSS, 0);
+    }
     
     for (uint32_t i =  0; i < lenbufTx; i++)
     {
-        // set it low (is inverted)
-        GPIOPinWrite(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_FSS, 0);
-  
         // Push a byte
         SSIDataPut(SSI0_BASE, spi_vars.pNextTxByte[i]);
 
@@ -135,17 +134,18 @@ void    spi_txrx(uint8_t*     bufTx,
         // Read a byte
         SSIDataGet(SSI0_BASE, &data);
         
-        GPIOPinWrite(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_FSS, SPI_PIN_SSI_FSS);
-
         // Store the result
         spi_vars.pNextRxByte[i] = (uint8_t)(data & 0xFF);
-                // one byte less to go
-        
+        // one byte less to go
+     }
+   
+     if (spi_vars.isLast==SPI_LAST) {
+        GPIOPinWrite(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_FSS, SPI_PIN_SSI_FSS);
      }
 
     // SPI is not busy anymore
     spi_vars.busy             =  0;
-#endif
+
 }
 
 //=========================== private =========================================

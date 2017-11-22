@@ -41,7 +41,7 @@ void bspLedToggle(uint8_t ui8Leds);
 
 void leds_init() {
     GPIOPinTypeGPIOOutput(BSP_LED_BASE, BSP_LED_ALL);
-	GPIOPinWrite(BSP_LED_BASE, BSP_LED_ALL, BSP_LED_ALL);
+    GPIOPinWrite(BSP_LED_BASE, BSP_LED_ALL, BSP_LED_ALL);
 }
 
 // red

@@ -31,8 +31,8 @@
 
 //=========================== variables =======================================
 
-#define BSP_BUTTON_BASE                 ( GPIO_C_BASE )
-#define BSP_BUTTON_USER                 ( GPIO_PIN_3 )
+#define BSP_BUTTON_BASE                 ( GPIO_D_BASE )
+#define BSP_BUTTON_USER                 ( GPIO_PIN_5 )
 
 #ifdef REVA1 //Rev.A1 uses SF23 cc2538 which start at diffferent location
     #define CC2538_FLASH_ADDRESS            ( 0x0023F800 )
@@ -79,7 +79,7 @@ void board_init(void) {
    board_timer_init();
    leds_init();
    debugpins_init();
-   button_init();
+   //button_init();
    sctimer_init();
    uart_init();
    radio_init();
@@ -157,16 +157,22 @@ void board_reset(void) {
 
 static void gpio_init(void) {
     /* Set GPIOs as output */
-    GPIOPinTypeGPIOOutput(GPIO_A_BASE, 0xFF);
-    GPIOPinTypeGPIOOutput(GPIO_B_BASE, 0xFF);
-    GPIOPinTypeGPIOOutput(GPIO_C_BASE, 0xFF);
-    GPIOPinTypeGPIOOutput(GPIO_D_BASE, 0xFF);
+    //GPIOPinTypeGPIOOutput(GPIO_A_BASE, 0xFF);
+    //GPIOPinTypeGPIOOutput(GPIO_B_BASE, 0xFF);
+    //GPIOPinTypeGPIOOutput(GPIO_C_BASE, 0xFF);
+    //GPIOPinTypeGPIOOutput(GPIO_D_BASE, 0xFF);
+    
+    // all to input
+    GPIOPinTypeGPIOInput(GPIO_A_BASE, 0xFF);
+    GPIOPinTypeGPIOInput(GPIO_B_BASE, 0xFF);
+    GPIOPinTypeGPIOInput(GPIO_C_BASE, 0xFF);
+    GPIOPinTypeGPIOInput(GPIO_D_BASE, 0xFF);
 
     /* Initialize GPIOs to low */
-    GPIOPinWrite(GPIO_A_BASE, 0xFF, 0x00);
-    GPIOPinWrite(GPIO_B_BASE, 0xFF, 0x00);
-    GPIOPinWrite(GPIO_C_BASE, 0xFF, 0x00);
-    GPIOPinWrite(GPIO_D_BASE, 0xFF, 0x00);
+    //GPIOPinWrite(GPIO_A_BASE, 0xFF, 0x00);
+    //GPIOPinWrite(GPIO_B_BASE, 0xFF, 0x00);
+    //GPIOPinWrite(GPIO_C_BASE, 0xFF, 0x00);
+    //GPIOPinWrite(GPIO_D_BASE, 0xFF, 0x00);
 }
 
 static void clock_init(void) {
@@ -219,6 +225,8 @@ static void button_init(void) {
     /* The button is an input GPIO on falling edge */
     GPIOPinTypeGPIOInput(BSP_BUTTON_BASE, BSP_BUTTON_USER);
     GPIOIntTypeSet(BSP_BUTTON_BASE, BSP_BUTTON_USER, GPIO_FALLING_EDGE);
+
+    GPIOPinIntClear(BSP_BUTTON_BASE, BSP_BUTTON_USER);
 
     /* Register the interrupt */
     GPIOPortIntRegister(BSP_BUTTON_BASE, GPIO_C_Handler);
