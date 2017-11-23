@@ -100,6 +100,7 @@ void sctimer_disable(void){
 kick_scheduler_t sctimer_isr(void){
     debugpins_isr_set();
     if (sctimer_vars.sctimer_cb!=NULL) {
+        sctimer_vars.noNeedClearFlag = 0;
         sctimer_vars.sctimer_cb();
         debugpins_isr_clr();
         if (sctimer_vars.noNeedClearFlag==0){
