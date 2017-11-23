@@ -49,7 +49,8 @@ void radio_init() {
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
     // enable sfd done and send done interruptions of tranmission
     // enable sfd done and receiving done interruptions of reception
-    RFCONTROLLER_REG__INT_CONFIG    = TX_SFD_DONE_INT_EN            |   \
+    RFCONTROLLER_REG__INT_CONFIG    = TX_LOAD_DONE_INT_EN           |   \
+                                      TX_SFD_DONE_INT_EN            |   \
                                       TX_SEND_DONE_INT_EN           |   \
                                       RX_SFD_DONE_INT_EN            |   \
                                       RX_DONE_INT_EN                |   \
@@ -125,19 +126,11 @@ void radio_rfOff() {
 
 //===== TX
 
-void radio_loadPacket_prepare(uint8_t* packet, uint8_t len){
-    memcpy(&radio_vars.radio_tx_buffer[0],packet,len);
-
-    // load packet in TXFIFO
-    RFCONTROLLER_REG__TX_DATA_ADDR  = &(radio_vars.radio_tx_buffer[0]);
-    RFCONTROLLER_REG__TX_PACK_LEN   = len;
-}
-
 void radio_loadPacket(uint8_t* packet, uint16_t len) {
     uint8_t i;
     // change state
     radio_vars.state = RADIOSTATE_LOADING_PACKET;
-#ifndef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
+    
     memcpy(&radio_vars.radio_tx_buffer[0],packet,len);
 
     // load packet in TXFIFO
@@ -145,7 +138,7 @@ void radio_loadPacket(uint8_t* packet, uint16_t len) {
     RFCONTROLLER_REG__TX_PACK_LEN   = len;
 
     RFCONTROLLER_REG__CONTROL       = TX_LOAD;
-#endif
+
     // add some delay for loading
     for (i=0;i<0xff;i++);
     
@@ -303,6 +296,10 @@ kick_scheduler_t radio_isr() {
         } else {
             while(1);
         }
+    }
+    
+    if (irq_status & TX_LOAD_DONE_INT){
+        RFCONTROLLER_REG__INT_CLEAR = TX_LOAD_DONE_INT;
     }
     
     if (irq_error == 0) {
