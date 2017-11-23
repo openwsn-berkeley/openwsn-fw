@@ -7,7 +7,7 @@
 
 #include "board.h"
 #include "radio.h"
-#include "radiotimer.h"
+#include "sctimer.h"
 #include "debugpins.h"
 #include "leds.h"
 #include "memory_map.h"
@@ -24,8 +24,8 @@
 //=========================== variables =======================================
 
 typedef struct {
-    radiotimer_capture_cbt    startFrame_cb;
-    radiotimer_capture_cbt    endFrame_cb;
+    radio_capture_cbt         startFrame_cb;
+    radio_capture_cbt         endFrame_cb;
     uint8_t                   radio_tx_buffer[MAXLENGTH_TRX_BUFFER] __attribute__ ((aligned (4)));
     uint8_t                   radio_rx_buffer[MAXLENGTH_TRX_BUFFER] __attribute__ ((aligned (4)));
     radio_state_t             state; 
@@ -75,19 +75,11 @@ void radio_init() {
     radio_vars.state                = RADIOSTATE_RFOFF;
 }
 
-void radio_setOverflowCb(radiotimer_compare_cbt cb) {
-    radiotimer_setOverflowCb(cb);
-}
-
-void radio_setCompareCb(radiotimer_compare_cbt cb) {
-    radiotimer_setCompareCb(cb);
-}
-
-void radio_setStartFrameCb(radiotimer_capture_cbt cb) {
+void radio_setStartFrameCb(radio_capture_cbt cb) {
     radio_vars.startFrame_cb    = cb;
 }
 
-void radio_setEndFrameCb(radiotimer_capture_cbt cb) {
+void radio_setEndFrameCb(radio_capture_cbt cb) {
     radio_vars.endFrame_cb      = cb;
 }
 
@@ -96,24 +88,6 @@ void radio_setEndFrameCb(radiotimer_capture_cbt cb) {
 void radio_reset() {
     // reset SCuM radio module
     PORT_PIN_RADIO_RESET_LOW();
-}
-
-//===== timer
-
-void radio_startTimer(PORT_TIMER_WIDTH period) {
-   radiotimer_start(period);
-}
-
-PORT_TIMER_WIDTH radio_getTimerValue() {
-   return radiotimer_getValue();
-}
-
-void radio_setTimerPeriod(PORT_TIMER_WIDTH period) {
-   radiotimer_setPeriod(period);
-}
-
-PORT_TIMER_WIDTH radio_getTimerPeriod() {
-   return radiotimer_getPeriod();
 }
 
 //===== RF admin
@@ -159,7 +133,7 @@ void radio_loadPacket_prepare(uint8_t* packet, uint8_t len){
     RFCONTROLLER_REG__TX_PACK_LEN   = len;
 }
 
-void radio_loadPacket(uint8_t* packet, uint8_t len) {
+void radio_loadPacket(uint8_t* packet, uint16_t len) {
     uint8_t i;
     // change state
     radio_vars.state = RADIOSTATE_LOADING_PACKET;
@@ -278,7 +252,7 @@ kick_scheduler_t radio_isr() {
         if (irq_status & TX_SFD_DONE_INT) {
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
             // get the capture Time from capture register
-            capturedTime = TIMER_COUTER_CONVERT_500K_TO_32K(RFTIMER_REG__CAPTURE0);
+            capturedTime = TIMER_COUNTER_CONVERT_500K_TO_32K(RFTIMER_REG__CAPTURE0);
 #endif
             RFCONTROLLER_REG__INT_CLEAR = TX_SFD_DONE_INT;
             // a SFD is just sent, update radio state
@@ -287,7 +261,7 @@ kick_scheduler_t radio_isr() {
         if (irq_status & RX_SFD_DONE_INT) {
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
             // get the capture Time from capture register
-            capturedTime = TIMER_COUTER_CONVERT_500K_TO_32K(RFTIMER_REG__CAPTURE1);
+            capturedTime = TIMER_COUNTER_CONVERT_500K_TO_32K(RFTIMER_REG__CAPTURE1);
 #endif
             RFCONTROLLER_REG__INT_CLEAR = RX_SFD_DONE_INT;
             // a SFD is just received, update radio state
@@ -306,14 +280,14 @@ kick_scheduler_t radio_isr() {
         if (irq_status & TX_SEND_DONE_INT) {
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
             // get the capture Time from capture register
-            capturedTime = TIMER_COUTER_CONVERT_500K_TO_32K(RFTIMER_REG__CAPTURE2);
+            capturedTime = TIMER_COUNTER_CONVERT_500K_TO_32K(RFTIMER_REG__CAPTURE2);
 #endif
             RFCONTROLLER_REG__INT_CLEAR = TX_SEND_DONE_INT;
         }
         if (irq_status & RX_DONE_INT) {
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
             // get the capture Time from capture register
-            capturedTime = TIMER_COUTER_CONVERT_500K_TO_32K(RFTIMER_REG__CAPTURE3);
+            capturedTime = TIMER_COUNTER_CONVERT_500K_TO_32K(RFTIMER_REG__CAPTURE3);
 #endif
             RFCONTROLLER_REG__INT_CLEAR = RX_DONE_INT;
         }
