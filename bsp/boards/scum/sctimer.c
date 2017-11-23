@@ -21,6 +21,7 @@
 typedef struct {
     sctimer_cbt      sctimer_cb;
     PORT_TIMER_WIDTH last_compare_value;
+    uint8_t          noNeedClearFlag;
 } sctimer_vars_t;
 
 sctimer_vars_t sctimer_vars;
@@ -58,14 +59,15 @@ void sctimer_setCompare(PORT_TIMER_WIDTH val){
         // the timer is already late, schedule the ISR right now manually 
         // not sure how to do this in scum, just miss this ISR for now
         // don't clear the flag, so another interrupt will happen after exiting the ISR
+        sctimer_vars.noNeedClearFlag = 1;
     } else {
         if (val-TIMER_COUNTER_CONVERT_500K_TO_32K(RFTIMER_REG__COUNTER)<MINIMUM_COMPAREVALE_ADVANCE){
             // there is hardware limitation to schedule the timer within TIMERTHRESHOLD ticks
             // schedule ISR right now manually
             // don't clear the flag, so another interrupt will happen after exiting the ISR
+            sctimer_vars.noNeedClearFlag = 1;
         } else {
-            // only clear the flag here
-            RFTIMER_REG__INT_CLEAR          = RFTIMER_REG__INT_COMPARE0_INT;
+            // mark clear the flag here
             // schedule the timer at val
             RFTIMER_REG__COMPARE0           = (PORT_TIMER_WIDTH)(TIMER_COUNTER_CONVERT_32K_TO_500K(val) & RFTIMER_MAX_COUNT);
             RFTIMER_REG__COMPARE0_CONTROL   = RFTIMER_COMPARE_ENABLE |   \
@@ -100,8 +102,12 @@ kick_scheduler_t sctimer_isr(void){
     if (sctimer_vars.sctimer_cb!=NULL) {
         sctimer_vars.sctimer_cb();
         debugpins_isr_clr();
+        if (sctimer_vars.noNeedClearFlag==0){
+            RFTIMER_REG__INT_CLEAR = RFTIMER_REG__INT_COMPARE0_INT;
+        }
         return KICK_SCHEDULER;
     }
     debugpins_isr_clr();
+    RFTIMER_REG__INT_CLEAR = RFTIMER_REG__INT_COMPARE0_INT;
     return DO_NOT_KICK_SCHEDULER;
 }
