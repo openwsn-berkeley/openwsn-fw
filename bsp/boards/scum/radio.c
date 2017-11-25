@@ -126,6 +126,21 @@ void radio_rfOff() {
 
 //===== TX
 
+#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
+void radio_loadPacket_prepare(uint8_t* packet, uint16_t len){
+    
+    radio_vars.state = RADIOSTATE_LOADING_PACKET;
+    
+    memcpy(&radio_vars.radio_tx_buffer[0],packet,len);
+    
+    RFCONTROLLER_REG__TX_DATA_ADDR  = &(radio_vars.radio_tx_buffer[0]);
+    RFCONTROLLER_REG__TX_PACK_LEN   = len;
+    
+    // will be loaded when load timer fired, change the state in advance
+    radio_vars.state = RADIOSTATE_PACKET_LOADED;
+}
+#endif
+
 void radio_loadPacket(uint8_t* packet, uint16_t len) {
     uint8_t i;
     // change state
@@ -235,9 +250,10 @@ kick_scheduler_t radio_isr() {
     PORT_TIMER_WIDTH capturedTime;
     PORT_TIMER_WIDTH irq_status = RFCONTROLLER_REG__INT;
     PORT_TIMER_WIDTH irq_error  = RFCONTROLLER_REG__ERROR;
-
-#ifndef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
-    capturedTime                = radiotimer_getCapturedTime();
+    
+#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
+#else
+    capturedTime                = sctimer_readCounter();
 #endif
     if (irq_status & TX_SFD_DONE_INT || irq_status & RX_SFD_DONE_INT){
         // SFD is just sent or received, check the specific interruption and 
