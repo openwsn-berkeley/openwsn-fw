@@ -16,6 +16,8 @@ run regardless of your radio, but might not return anything useful.
 #include "spi.h"
 #include "leds.h"
 #include "gpio.h"
+#include "at86rf215.h"
+
 #include <headers/hw_memmap.h>
 
 
@@ -46,12 +48,31 @@ app_vars_t app_vars;
 int mote_main(void) {
    uint8_t parnumber;
    uint8_t address_hi, address_lo;
-   
+   uint32_t delay;
+   uint8_t spi_tx[6];
+   uint8_t spi_rx[6];
+ 
    memset(&app_vars,0,sizeof(app_vars));
    
    // initialize
    board_init();
   
+   //set radio control pins to output
+  GPIOPinTypeGPIOOutput(GPIO_C_BASE, GPIO_PIN_0);
+  GPIOPinTypeGPIOOutput(GPIO_D_BASE, GPIO_PIN_1);
+  
+  //set radio pwr off
+  GPIOPinWrite(GPIO_C_BASE, GPIO_PIN_0, 0);
+  for(delay=0;delay<0xA2C2;delay++);
+  
+  //init the radio, pwr up the radio
+  GPIOPinWrite(GPIO_C_BASE, GPIO_PIN_0, GPIO_PIN_0);
+  for(delay=0;delay<0xA2C2;delay++);
+  
+  //reset the radio -- inverted so set it to 0.
+  GPIOPinWrite(GPIO_D_BASE, GPIO_PIN_1, GPIO_PIN_1);
+   
+   
    address_hi = (uint8_t) ((AT86RF215_PN_ADDR & 0xFF00) >> 8);
    address_lo = (uint8_t) ((AT86RF215_PN_ADDR & 0x00FF) >> 0);
     
@@ -77,5 +98,26 @@ int mote_main(void) {
    if (parnumber == AT86RF215_PN_215){
      leds_radio_on();
    }
-   while(1);      
+    
+   memset(&spi_tx[0],0,sizeof(spi_tx));
+   memset(&spi_rx[0],0,sizeof(spi_rx));
+   spi_tx[0] = (AT86RF215_READ_CMD | (uint8_t)(RG_RF09_IRQS >> 8));
+   spi_tx[1] = (uint8_t)(RG_RF09_IRQS & 0xFF);             
+    
+   spi_txrx(
+        spi_tx,                     // bufTx
+        6,                          // lenbufTx
+        SPI_BUFFER,                 // returnType
+        spi_rx,                      // bufRx
+        6,                          // maxLenBufRx
+        SPI_FIRST,                  // isFirst
+        SPI_LAST                    // isLast
+    );
+    
+   if (spi_rx[2] == 1){
+     leds_sync_on();
+   }
+
+  while (1);
+   return 0;
 }

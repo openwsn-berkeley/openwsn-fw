@@ -23,11 +23,13 @@
 #include "i2c.h"
 #include "leds.h"
 #include "radio.h"
+#include "radio_subghz.h"
 #include "sensors.h"
 #include "sctimer.h"
 #include "uart.h"
 #include "cryptoengine.h"
 #include "spi.h"
+#include "radio_subghz.h"
 
 //=========================== variables =======================================
 
@@ -50,14 +52,13 @@ static void gpio_init(void);
 static void button_init(void);
 static void antenna_init(void);
 
-static void radio_subghz_init(void);
 
 static void SysCtrlDeepSleepSetting(void);
 static void SysCtrlSleepSetting(void);
 static void SysCtrlRunSetting(void);
 static void SysCtrlWakeupSetting(void);
 
-static void GPIO_C_Handler(void);
+static void GPIO_D_Handler(void);
 
 bool user_button_initialized;
 
@@ -80,37 +81,19 @@ void board_init(void) {
    board_timer_init();
    leds_init();
    debugpins_init();
-   //button_init();
+  // button_init();
    sctimer_init();
    uart_init();
    radio_init();
-   radio_subghz_init();
    i2c_init();
    spi_init();
+   radiosubghz_init();
    sensors_init();
    cryptoengine_init();  
 }
 
 
-void radio_subghz_init(){
-    volatile uint32_t delay;
 
-   //set radio control pins to output
-   GPIOPinTypeGPIOOutput(GPIO_C_BASE, GPIO_PIN_0);
-   GPIOPinTypeGPIOOutput(GPIO_D_BASE, GPIO_PIN_1);
-   
-   //set radio pwr off
-   GPIOPinWrite(GPIO_C_BASE, GPIO_PIN_0, 0);
-   for(delay=0;delay<0xA2C2;delay++);
-   
-   //init the radio, pwr up the radio
-   GPIOPinWrite(GPIO_C_BASE, GPIO_PIN_0, GPIO_PIN_0);
-   for(delay=0;delay<0xA2C2;delay++);
-  
-   //reset the radio -- inverted so set it to 0.
-   GPIOPinWrite(GPIO_D_BASE, GPIO_PIN_1, GPIO_PIN_1); 
-   
-}
 void antenna_init(){
    //use cc2538 2.4ghz radio
    GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_CC2538_24GHZ, BSP_ANTENNA_CC2538_24GHZ);
@@ -178,23 +161,12 @@ void board_reset(void) {
 //=========================== private =========================================
 
 static void gpio_init(void) {
-    /* Set GPIOs as output */
-    //GPIOPinTypeGPIOOutput(GPIO_A_BASE, 0xFF);
-    //GPIOPinTypeGPIOOutput(GPIO_B_BASE, 0xFF);
-    //GPIOPinTypeGPIOOutput(GPIO_C_BASE, 0xFF);
-    //GPIOPinTypeGPIOOutput(GPIO_D_BASE, 0xFF);
     
     // all to input
     GPIOPinTypeGPIOInput(GPIO_A_BASE, 0xFF);
     GPIOPinTypeGPIOInput(GPIO_B_BASE, 0xFF);
     GPIOPinTypeGPIOInput(GPIO_C_BASE, 0xFF);
     GPIOPinTypeGPIOInput(GPIO_D_BASE, 0xFF);
-
-    /* Initialize GPIOs to low */
-    //GPIOPinWrite(GPIO_A_BASE, 0xFF, 0x00);
-    //GPIOPinWrite(GPIO_B_BASE, 0xFF, 0x00);
-    //GPIOPinWrite(GPIO_C_BASE, 0xFF, 0x00);
-    //GPIOPinWrite(GPIO_D_BASE, 0xFF, 0x00);
 }
 
 static void clock_init(void) {
@@ -247,11 +219,13 @@ static void button_init(void) {
     /* The button is an input GPIO on falling edge */
     GPIOPinTypeGPIOInput(BSP_BUTTON_BASE, BSP_BUTTON_USER);
     GPIOIntTypeSet(BSP_BUTTON_BASE, BSP_BUTTON_USER, GPIO_FALLING_EDGE);
-
+    
+    GPIOIntWakeupEnable(GPIO_IWE_PORT_D);
+    
     GPIOPinIntClear(BSP_BUTTON_BASE, BSP_BUTTON_USER);
 
     /* Register the interrupt */
-    GPIOPortIntRegister(BSP_BUTTON_BASE, GPIO_C_Handler);
+    GPIOPortIntRegister(BSP_BUTTON_BASE, GPIO_D_Handler);
 
     /* Clear and enable the interrupt */
     GPIOPinIntClear(BSP_BUTTON_BASE, BSP_BUTTON_USER);
@@ -337,10 +311,11 @@ static void SysCtrlWakeupSetting(void) {
 //=========================== interrupt handlers ==============================
 
 /**
- * GPIO_C interrupt handler. User button is GPIO_C_3
+ * GPIO_C interrupt handler. User button is GPIO_D
  * Erases a Flash sector to trigger the bootloader backdoor
  */
-static void GPIO_C_Handler(void) {
+static void GPIO_D_Handler(void) {
+    GPIOPinIntClear(BSP_BUTTON_BASE, BSP_BUTTON_USER);
     if (!user_button_initialized) return;
     /* Disable the interrupts */
     IntMasterDisable();

@@ -7,6 +7,12 @@
     <project>
     <path>$WS_DIR$\01bsp_spi\01bsp_spi.ewp</path>
   </project>
+    <project>
+    <path>$WS_DIR$\01bsp_radio_subghz_rx\01bsp_radio_subghz_rx.ewp</path>
+  </project>
+    <project>
+    <path>$WS_DIR$\01bsp_radio_subghz_tx\01bsp_radio_subghz_tx.ewp</path>
+  </project>
   <project>
     <path>$WS_DIR$\02drv_opentimers\02drv_opentimers.ewp</path>
   </project>
@@ -28,6 +34,14 @@
       </member>
 	  <member>
         <project>01bsp_spi</project>
+        <configuration>Debug</configuration>
+      </member>
+	  <member>
+        <project>01bsp_radio_subghz_rx</project>
+        <configuration>Debug</configuration>
+      </member>
+	   <member>
+        <project>01bsp_radio_subghz_tx</project>
         <configuration>Debug</configuration>
       </member>
       <member>

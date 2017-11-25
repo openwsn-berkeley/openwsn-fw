@@ -336,41 +336,17 @@
                     <state>$PROJ_DIR$\..\..\..\bsp\</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\boards\</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\boards\common\</state>
-                    <state>$PROJ_DIR$\..\..\..\bsp\chips\si70x\</state>
+                    <state>$PROJ_DIR$\..\..\..\bsp\chips\adxl346\</state>
+                    <state>$PROJ_DIR$\..\..\..\bsp\chips\max44009\</state>
+                    <state>$PROJ_DIR$\..\..\..\bsp\chips\sht21\</state>
                     <state>$PROJ_DIR$\..\..\..\kernel\</state>
                     <state>$PROJ_DIR$\..\..\..\drivers\common\</state>
                     <state>$PROJ_DIR$\..\..\..\inc\</state>
-                    <state>$PROJ_DIR$\..\..\..\openstack\</state>
-                    <state>$PROJ_DIR$\..\..\..\openstack\OpenwsnHeads\</state>
-                    <state>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\</state>
-                    <state>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\</state>
-                    <state>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\</state>
-                    <state>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\</state>
-                    <state>$PROJ_DIR$\..\..\..\openstack\04-TRAN\</state>
-                    <state>$PROJ_DIR$\..\..\..\openstack\cross-layers\</state>
-                    <state>$PROJ_DIR$\..\..\..\openapps\</state>
-                    <state>$PROJ_DIR$\..\..\..\openapps\c6t\</state>
-                    <state>$PROJ_DIR$\..\..\..\openapps\cexample\</state>
-                    <state>$PROJ_DIR$\..\..\..\openapps\cinfo\</state>
-                    <state>$PROJ_DIR$\..\..\..\openapps\cjoin\</state>
-                    <state>$PROJ_DIR$\..\..\..\openapps\cleds\</state>
-                    <state>$PROJ_DIR$\..\..\..\openapps\csensors\</state>
-                    <state>$PROJ_DIR$\..\..\..\openapps\cwellknown\</state>
-                    <state>$PROJ_DIR$\..\..\..\openapps\opencoap\</state>
-                    <state>$PROJ_DIR$\..\..\..\openapps\techo\</state>
-                    <state>$PROJ_DIR$\..\..\..\openapps\tohlone\</state>
-                    <state>$PROJ_DIR$\..\..\..\openapps\uecho\</state>
-                    <state>$PROJ_DIR$\..\..\..\openapps\cstorm\</state>
-                    <state>$PROJ_DIR$\..\..\..\openapps\rrt\</state>
-                    <state>$PROJ_DIR$\..\..\..\openapps\uinject\</state>
-                    <state>$PROJ_DIR$\..\..\..\openapps\uexpiration\</state>
-                    <state>$PROJ_DIR$\..\..\..\openapps\uexpiration_monitor\</state>
-                    <state>$PROJ_DIR$\..\..\..\openapps\userialbridge\</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\headers\</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\</state>
                     <state>$PROJ_DIR$\..\..\..\projects\common\03oos_openwsn</state>
-                    <state>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215</state>
+                    <state>$PROJ_DIR$\..\..\..\bsp\chips\si70x</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
@@ -662,15 +638,15 @@
                 <option>
                     <name>OOCOutputFormat</name>
                     <version>3</version>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>OCOutputOverride</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>OOCOutputFile</name>
-                    <state>03oos_openwsn.hex</state>
+                    <state>01bsp_sctimer.srec</state>
                 </option>
                 <option>
                     <name>OOCCommandLineProducer</name>
@@ -678,7 +654,7 @@
                 </option>
                 <option>
                     <name>OOCObjCopyEnable</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
             </data>
         </settings>
@@ -725,7 +701,7 @@
                 </option>
                 <option>
                     <name>IlinkOutputFile</name>
-                    <state>03oos_openwsn.out</state>
+                    <state>01bsp_sctimer.out</state>
                 </option>
                 <option>
                     <name>IlinkDebugInfoEnable</name>
@@ -761,7 +737,7 @@
                 </option>
                 <option>
                     <name>IlinkMapFile</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>IlinkLogFile</name>
@@ -2060,15 +2036,6 @@
         </settings>
     </configuration>
     <group>
-        <name>application</name>
-        <file>
-            <name>$PROJ_DIR$\..\..\common\03oos_openwsn\03oos_openwsn.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\common\03oos_openwsn\03oos_openwsn.h</name>
-        </file>
-    </group>
-    <group>
         <name>bsp</name>
         <group>
             <name>boards</name>
@@ -2324,12 +2291,6 @@
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\radio.c</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\radio_subghz.c</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\radio_subghz.h</name>
-                </file>
-                <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\radiotimer.c</name>
                     <excluded>
                         <configuration>Debug</configuration>
@@ -2361,7 +2322,7 @@
                 </excluded>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\bsp\boards\cryptoengine.h</name>
+                <name>$PROJ_DIR$\..\..\..\bsp\boards\crypto_engine.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\bsp\boards\debugpins.h</name>
@@ -2388,6 +2349,9 @@
                 <name>$PROJ_DIR$\..\..\..\bsp\boards\sctimer.h</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\..\..\bsp\boards\sensors.h</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\..\..\bsp\boards\spi.h</name>
             </file>
             <file>
@@ -2400,12 +2364,39 @@
         <group>
             <name>chips</name>
             <group>
+                <name>adxl346</name>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\adxl346\adxl346.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\adxl346\adxl346.h</name>
+                </file>
+            </group>
+            <group>
                 <name>at86rf215</name>
                 <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\at86rf215.c</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\at86rf215.h</name>
+                </file>
+            </group>
+            <group>
+                <name>max44009</name>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\max44009\max44009.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\max44009\max44009.h</name>
+                </file>
+            </group>
+            <group>
+                <name>sht21</name>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\sht21\sht21.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\sht21\sht21.h</name>
                 </file>
             </group>
             <group>
@@ -2420,384 +2411,21 @@
         </group>
     </group>
     <group>
-        <name>drivers</name>
-        <group>
-            <name>common</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\drivers\common\openhdlc.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\drivers\common\openhdlc.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\drivers\common\opensensors.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\drivers\common\opensensors.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\drivers\common\openserial.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\drivers\common\openserial.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.h</name>
-            </file>
-        </group>
-    </group>
-    <group>
         <name>inc</name>
         <file>
             <name>$PROJ_DIR$\..\..\..\inc\opendefs.h</name>
         </file>
     </group>
     <group>
-        <name>kernel</name>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\kernel\openos\scheduler.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\kernel\scheduler.h</name>
-        </file>
-    </group>
-    <group>
-        <name>openapps</name>
+        <name>projects</name>
         <group>
-            <name>c6t</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\c6t\c6t.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\c6t\c6t.h</name>
-            </file>
+            <name>common</name>
+            <group>
+                <name>0bsp_spi</name>
+                <file>
+                    <name>$PROJ_DIR$\..\..\common\01bsp_spi\01bsp_spi.c</name>
+                </file>
+            </group>
         </group>
-        <group>
-            <name>cexample</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\cexample\cexample.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\cexample\cexample.h</name>
-            </file>
-        </group>
-        <group>
-            <name>cinfo</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\cinfo\cinfo.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\cinfo\cinfo.h</name>
-            </file>
-        </group>
-        <group>
-            <name>cjoin</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cbor.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cbor.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cjoin.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cjoin.h</name>
-            </file>
-        </group>
-        <group>
-            <name>cleds</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\cleds\cleds.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\cleds\cleds.h</name>
-            </file>
-        </group>
-        <group>
-            <name>csensors</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\csensors\csensors.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\csensors\csensors.h</name>
-            </file>
-        </group>
-        <group>
-            <name>cstorm</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\cstorm\cstorm.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\cstorm\cstorm.h</name>
-            </file>
-        </group>
-        <group>
-            <name>cwellknow</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\cwellknown\cwellknown.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\cwellknown\cwellknown.h</name>
-            </file>
-        </group>
-        <group>
-            <name>opencoap</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\opencoap\cborencoder.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\opencoap\cborencoder.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\opencoap\hkdf.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\opencoap\hmac.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\opencoap\opencoap.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\opencoap\opencoap.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\opencoap\openoscoap.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\opencoap\openoscoap.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\opencoap\sha-private.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\opencoap\sha.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\opencoap\sha224-256.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\opencoap\usha.c</name>
-            </file>
-        </group>
-        <group>
-            <name>rrt</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\rrt\rrt.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\rrt\rrt.h</name>
-            </file>
-        </group>
-        <group>
-            <name>uecho</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\uecho\uecho.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\uecho\uecho.h</name>
-            </file>
-        </group>
-        <group>
-            <name>uexpiration</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\uexpiration\uexpiration.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\uexpiration\uexpiration.h</name>
-            </file>
-        </group>
-        <group>
-            <name>uexpiration_monitor</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\uexpiration_monitor\uexpiration_monitor.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\uexpiration_monitor\uexpiration_monitor.h</name>
-            </file>
-        </group>
-        <group>
-            <name>uinject</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\uinject\uinject.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\uinject\uinject.h</name>
-            </file>
-        </group>
-        <group>
-            <name>userialbridge</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\userialbridge\userialbridge.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\userialbridge\userialbridge.h</name>
-            </file>
-        </group>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\openapps\openapps.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\openapps\openapps.h</name>
-        </file>
-    </group>
-    <group>
-        <name>openstack</name>
-        <group>
-            <name>02a-MAClow</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\adaptive_sync.c</name>
-                <excluded>
-                    <configuration>Debug</configuration>
-                </excluded>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\adaptive_sync.h</name>
-                <excluded>
-                    <configuration>Debug</configuration>
-                </excluded>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154_security.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154_security.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\ieee802154_security_driver.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154E.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154E.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\topology.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\topology.h</name>
-            </file>
-        </group>
-        <group>
-            <name>02b-MAChigh</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\neighbors.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\neighbors.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\schedule.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\schedule.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sf0.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sf0.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sixtop.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sixtop.h</name>
-            </file>
-        </group>
-        <group>
-            <name>03a-IPHC</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\iphc.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\iphc.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\openbridge.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\openbridge.h</name>
-            </file>
-        </group>
-        <group>
-            <name>03b-IPv6</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\forwarding.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\forwarding.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\icmpv6.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\icmpv6.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\icmpv6echo.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\icmpv6echo.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\icmpv6rpl.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\icmpv6rpl.h</name>
-            </file>
-        </group>
-        <group>
-            <name>04-TRAN</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\openudp.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\openudp.h</name>
-            </file>
-        </group>
-        <group>
-            <name>cross-layers</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\cross-layers\idmanager.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\cross-layers\idmanager.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\cross-layers\openqueue.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\cross-layers\openqueue.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\cross-layers\openrandom.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\cross-layers\openrandom.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\cross-layers\packetfunctions.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\cross-layers\packetfunctions.h</name>
-            </file>
-        </group>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\openstack\openstack.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\openstack\openstack.h</name>
-        </file>
     </group>
 </project>

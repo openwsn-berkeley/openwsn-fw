@@ -2,6 +2,8 @@
 \brief AT86RF215-specific library.
 
 \author Jonathan Munoz <jonathan.munoz@inria.fr>, August 2016.
+\author Xavi Vilajosana <xvilajosana@eecs.berkeley.edu>, December 2017.
+
 */
 
 #include "board.h"
