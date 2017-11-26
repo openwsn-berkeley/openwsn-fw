@@ -1129,10 +1129,6 @@ port_INLINE void activity_ti2() {
     ieee154e_vars.radioOnThisSlot=TRUE;
     // change state
     changeState(S_TXDATAREADY);
-#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
-    // update state in advance
-    changeState(S_TXDATADELAY);
-#endif
 }
 
 port_INLINE void activity_tie1() {
@@ -1590,7 +1586,7 @@ port_INLINE void activity_ri2() {
 #endif
     ieee154e_vars.radioOnInit=sctimer_readCounter();
     ieee154e_vars.radioOnThisSlot=TRUE;
-       
+    
     // change state
     changeState(S_RXDATAREADY);
 }
@@ -2758,43 +2754,43 @@ this function toggles the FSM debug pin.
 \param[in] newstate The state the IEEE802.15.4e FSM is now in.
 */
 void changeState(ieee154e_state_t newstate) {
-   // update the state
-   ieee154e_vars.state = newstate;
-   // wiggle the FSM debug pin
-   switch (ieee154e_vars.state) {
-      case S_SYNCLISTEN:
-      case S_TXDATAOFFSET:
-         debugpins_fsm_set();
-         break;
-      case S_SLEEP:
-      case S_RXDATAOFFSET:
-         debugpins_fsm_clr();
-         break;
-      case S_SYNCRX:
-      case S_SYNCPROC:
-      case S_TXDATAPREPARE:
-      case S_TXDATAREADY:
-      case S_TXDATADELAY:
-      case S_TXDATA:
-      case S_RXACKOFFSET:
-      case S_RXACKPREPARE:
-      case S_RXACKREADY:
-      case S_RXACKLISTEN:
-      case S_RXACK:
-      case S_TXPROC:
-      case S_RXDATAPREPARE:
-      case S_RXDATAREADY:
-      case S_RXDATALISTEN:
-      case S_RXDATA:
-      case S_TXACKOFFSET:
-      case S_TXACKPREPARE:
-      case S_TXACKREADY:
-      case S_TXACKDELAY:
-      case S_TXACK:
-      case S_RXPROC:
-         debugpins_fsm_toggle();
-         break;
-   }
+    // update the state
+    ieee154e_vars.state = newstate;
+    // wiggle the FSM debug pin
+    switch (ieee154e_vars.state) {
+        case S_SYNCLISTEN:
+        case S_TXDATAOFFSET:
+            debugpins_fsm_set();
+            break;
+        case S_SLEEP:
+        case S_RXDATAOFFSET:
+            debugpins_fsm_clr();
+            break;
+        case S_SYNCRX:
+        case S_SYNCPROC:
+        case S_TXDATAPREPARE:
+        case S_TXDATAREADY:
+        case S_TXDATADELAY:
+        case S_TXDATA:
+        case S_RXACKOFFSET:
+        case S_RXACKPREPARE:
+        case S_RXACKREADY:
+        case S_RXACKLISTEN:
+        case S_RXACK:
+        case S_TXPROC:
+        case S_RXDATAPREPARE:
+        case S_RXDATAREADY:
+        case S_RXDATALISTEN:
+        case S_RXDATA:
+        case S_TXACKOFFSET:
+        case S_TXACKPREPARE:
+        case S_TXACKREADY:
+        case S_TXACKDELAY:
+        case S_TXACK:
+        case S_RXPROC:
+            debugpins_fsm_toggle();
+            break;
+    }
 }
 
 /**
