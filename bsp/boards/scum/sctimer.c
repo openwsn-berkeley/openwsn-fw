@@ -55,14 +55,19 @@ void sctimer_set_callback(sctimer_cbt cb){
 \brief set compare interrupt
 */
 void sctimer_setCompare(PORT_TIMER_WIDTH val){
+    
+    PORT_TIMER_WIDTH currentTime;
+
+    currentTime = TIMER_COUNTER_CONVERT_500K_TO_32K(RFTIMER_REG__COUNTER);
+    
     sctimer_enable();
-    if (TIMER_COUNTER_CONVERT_500K_TO_32K(RFTIMER_REG__COUNTER) - val < TIMERLOOP_THRESHOLD){
+    if (currentTime - val < TIMERLOOP_THRESHOLD){
         // the timer is already late, schedule the ISR right now manually 
         // not sure how to do this in scum, just miss this ISR for now
         // don't clear the flag, so another interrupt will happen after exiting the ISR
         sctimer_vars.noNeedClearFlag = 1;
     } else {
-        if (val-TIMER_COUNTER_CONVERT_500K_TO_32K(RFTIMER_REG__COUNTER)<MINIMUM_COMPAREVALE_ADVANCE){
+        if (val-currentTime<MINIMUM_COMPAREVALE_ADVANCE){
             // there is hardware limitation to schedule the timer within TIMERTHRESHOLD ticks
             // schedule ISR right now manually
             // don't clear the flag, so another interrupt will happen after exiting the ISR

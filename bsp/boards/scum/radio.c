@@ -248,6 +248,9 @@ void radio_getReceivedFrame(uint8_t* pBufRead,
 kick_scheduler_t radio_isr() {
     
     PORT_TIMER_WIDTH capturedTime;
+    
+    debugpins_isr_set();
+    
     PORT_TIMER_WIDTH irq_status = RFCONTROLLER_REG__INT;
     PORT_TIMER_WIDTH irq_error  = RFCONTROLLER_REG__ERROR;
     
