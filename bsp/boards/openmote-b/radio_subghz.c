@@ -81,6 +81,7 @@ void radiosubghz_reset(void) {
 }
 
 void radiosubghz_init(void) {
+
   //power it on and configure pins
   radiosubghz_powerOn();
 
@@ -89,19 +90,13 @@ void radiosubghz_init(void) {
   
   // change state
   radiosubghz_vars.state          = RADIOSTATE_STOPPED;
-  
-  //poipoi
-  if ((at86rf215_spiReadReg(RG_RF_PN) != 0x34) | (at86rf215_spiReadReg(RG_RF_VN) != 0x03)) {
-    while(1); //UNKNOWN DEVICE, FINISH
-  }
-  //
-  
-  
-  // reset radio
+   
+   // reset radio
   radiosubghz_reset();
   
   at86rf215_spiStrobe(CMD_RF_TRXOFF);
   while(at86rf215_status() != RF_STATE_TRXOFF);
+  
   // change state
   radiosubghz_vars.state          = RADIOSTATE_RFOFF;
   
@@ -119,8 +114,7 @@ void radiosubghz_init(void) {
   
   /* Clear and enable the interrupt */
   GPIOPinIntEnable(AT86RF215_IRQ_BASE, AT86RF215_IRQ_PIN); 
-  
-  
+    
   //check part number and version
   if ((at86rf215_spiReadReg(RG_RF_PN) != 0x34) | (at86rf215_spiReadReg(RG_RF_VN) != 0x03)) {
     while(1); //UNKNOWN DEVICE, FINISH
@@ -152,7 +146,6 @@ void     radiosubghz_change_modulation(registerSetting_t * mod){
   mod_list++;
 }
 
-
 void radiosubghz_setStartFrameCb(radio_capture_cbt cb) {
   radiosubghz_vars.startFrame_cb  = cb;
 }
@@ -161,15 +154,11 @@ void radiosubghz_setEndFrameCb(radio_capture_cbt cb) {
   radiosubghz_vars.endFrame_cb    = cb;
 }
 
-
-
-
 //===== RF admin
 //channel spacing in KHz
 //frequency_0 in kHz
 //frequency_nb integer
 void radiosubghz_setFrequency(uint16_t channel_spacing, uint32_t frequency_0, uint16_t channel) {
-  
   frequency_0 = (frequency_0/25);
   at86rf215_spiWriteReg(RG_RF09_CS, (uint8_t)(channel_spacing/25));
   at86rf215_spiWriteReg(RG_RF09_CCF0L, (uint8_t)(frequency_0%256));
@@ -178,15 +167,12 @@ void radiosubghz_setFrequency(uint16_t channel_spacing, uint32_t frequency_0, ui
   at86rf215_spiWriteReg(RG_RF09_CNM, (uint8_t)(channel/256));
   // change state
   radiosubghz_vars.state = RADIOSTATE_FREQUENCY_SET;
-  
 }
 
 void radiosubghz_rfOn(void) {
-  
   //put the radio in the TRXPREP state
   at86rf215_spiStrobe(CMD_RF_TRXOFF);
   //while(radiosubghz_vars.state != RADIOSTATE_TX_ENABLED);
-  
 }
 
 void radiosubghz_rfOff(void) {
@@ -335,9 +321,7 @@ void radiosubghz_isr() {
      // while(1);
     }                
   }
-  
   radiosubghz_clear_isr();
- 
 }
 
 port_INLINE void radiosubghz_clear_isr(){

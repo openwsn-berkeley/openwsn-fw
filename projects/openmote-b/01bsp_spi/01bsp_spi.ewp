@@ -639,7 +639,7 @@
                 <option>
                     <name>OOCOutputFormat</name>
                     <version>3</version>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>OCOutputOverride</name>
@@ -647,7 +647,7 @@
                 </option>
                 <option>
                     <name>OOCOutputFile</name>
-                    <state>01bsp_sctimer.srec</state>
+                    <state>01bsp_spi.hex</state>
                 </option>
                 <option>
                     <name>OOCCommandLineProducer</name>
@@ -655,7 +655,7 @@
                 </option>
                 <option>
                     <name>OOCObjCopyEnable</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
             </data>
         </settings>
@@ -2429,6 +2429,12 @@
             <name>common</name>
             <group>
                 <name>0bsp_spi</name>
+                <file>
+                    <name>$PROJ_DIR$\..\..\common\01bsp_leds\01bsp_leds.c</name>
+                    <excluded>
+                        <configuration>Debug</configuration>
+                    </excluded>
+                </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\common\01bsp_spi\01bsp_spi.c</name>
                 </file>

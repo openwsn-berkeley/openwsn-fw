@@ -19,6 +19,7 @@
 #include <source/sys_ctrl.h>
 
 #include "board.h"
+#include "board_info.h"
 #include "debugpins.h"
 #include "i2c.h"
 #include "leds.h"
@@ -317,6 +318,20 @@ static void SysCtrlWakeupSetting(void) {
 static void GPIO_D_Handler(void) {
     GPIOPinIntClear(BSP_BUTTON_BASE, BSP_BUTTON_USER);
     if (!user_button_initialized) return;
+    /* Disable the interrupts */
+    IntMasterDisable();
+    leds_all_off();
+
+    /* Eras the CCA flash page */
+    FlashMainPageErase(CC2538_FLASH_ADDRESS);
+
+    leds_circular_shift();
+    
+    /* Reset the board */
+    SysCtrlReset();
+}
+
+void eraseFlash(){
     /* Disable the interrupts */
     IntMasterDisable();
     leds_all_off();

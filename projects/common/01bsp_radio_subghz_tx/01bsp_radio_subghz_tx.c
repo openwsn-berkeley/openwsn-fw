@@ -84,9 +84,7 @@ int mote_main(void) {
    sctimer_enable();
       
    while(1) {
-      
-      
-      
+         
       radiosubghz_rfOff();
       app_vars.txpk_txNow = 0;
       while (app_vars.txpk_txNow==0) {
