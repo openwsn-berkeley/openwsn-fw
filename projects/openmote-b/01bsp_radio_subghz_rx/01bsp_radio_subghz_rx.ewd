@@ -84,7 +84,7 @@
                 </option>
                 <option>
                     <name>OCDynDriverList</name>
-                    <state>JLINK_ID</state>
+                    <state>XDS100_ID</state>
                 </option>
                 <option>
                     <name>OCLastSavedByProductVersion</name>
@@ -92,7 +92,7 @@
                 </option>
                 <option>
                     <name>UseFlashLoader</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>CLowLevel</name>
@@ -658,7 +658,7 @@
                 </option>
                 <option>
                     <name>OCProbeConfig</name>
-                    <state></state>
+                    <state>$TOOLKIT_DIR$\config\debugger\TexasInstruments\CC2538.ProbeConfig</state>
                 </option>
                 <option>
                     <name>IjetProbeConfigRadio</name>
@@ -892,7 +892,7 @@
                 </option>
                 <option>
                     <name>CCSwoClockAuto</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>CCSwoClockEdit</name>
@@ -1198,11 +1198,11 @@
                 </option>
                 <option>
                     <name>TIPackage</name>
-                    <state>C:\ti\ccsv5\ccs_base</state>
+                    <state>C:\ti\ccs_base</state>
                 </option>
                 <option>
                     <name>BoardFile</name>
-                    <state>Browse to your board file</state>
+                    <state>$TOOLKIT_DIR$\config\debugger\TexasInstruments\xds\CC2538_XDS110_JTAG.dat</state>
                 </option>
                 <option>
                     <name>DoLogfile</name>
@@ -1294,7 +1294,7 @@
                 </option>
                 <option>
                     <name>CCXds100CpuClockEdit</name>
-                    <state></state>
+                    <state>32.0</state>
                 </option>
                 <option>
                     <name>CCXds100SwoClockAuto</name>

@@ -345,8 +345,9 @@
                     <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\headers\</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\</state>
-                    <state>$PROJ_DIR$\..\..\..\projects\common\03oos_openwsn</state>
+                    <state>C:\Users\Xavi\Desktop\OpenWSN\openwsn-fw\projects\common\01bsp_radio_subghz_rx</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\chips\si70x</state>
+                    <state>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
@@ -2291,6 +2292,12 @@
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\radio.c</name>
                 </file>
                 <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\radio_subghz.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\radio_subghz.h</name>
+                </file>
+                <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\radiotimer.c</name>
                     <excluded>
                         <configuration>Debug</configuration>
@@ -2421,9 +2428,9 @@
         <group>
             <name>common</name>
             <group>
-                <name>0bsp_spi</name>
+                <name>0bsp_radio_subghz_rx</name>
                 <file>
-                    <name>$PROJ_DIR$\..\..\common\01bsp_spi\01bsp_spi.c</name>
+                    <name>$PROJ_DIR$\..\..\common\01bsp_radio_subghz_rx\01bsp_radio_subghz_rx.c</name>
                 </file>
             </group>
         </group>

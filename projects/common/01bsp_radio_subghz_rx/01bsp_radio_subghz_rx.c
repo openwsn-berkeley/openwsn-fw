@@ -65,16 +65,21 @@ len=17  num=84  rssi=-81  lqi=108 crc=1
 #include "stdint.h"
 #include "string.h"
 #include "board.h"
-#include "radio.h"
+#include "radio_subghz.h"
 #include "leds.h"
 #include "uart.h"
 #include "sctimer.h"
 
 //=========================== defines =========================================
 
-#define LENGTH_PACKET        125+LENGTH_CRC ///< maximum length is 127 bytes
-#define CHANNEL              11             ///< 11 = 2.405GHz
+
 #define LENGTH_SERIAL_FRAME  8              ///< length of the serial frame
+
+#define LENGTH_PACKET   125+LENGTH_CRC // maximum length is 127 bytes
+#define CHANNEL_SPACING      1200            
+#define FREQUENCY_CENTER   863625
+#define CHANNEL                 0 
+#define TIMER_PERIOD    (32768>>1)     // (32768>>1) = 500ms @ 32kHz
 
 //=========================== variables =======================================
 
@@ -90,11 +95,12 @@ typedef struct {
    // rx packet
    volatile   uint8_t    rxpk_done;
               uint8_t    rxpk_buf[LENGTH_PACKET];
-              uint8_t    rxpk_len;
+              uint16_t   rxpk_len;
               uint8_t    rxpk_num;
               int8_t     rxpk_rssi;
               uint8_t    rxpk_lqi;
               bool       rxpk_crc;
+              uint8_t    mcs;
    // uart
               uint8_t    uart_txFrame[LENGTH_SERIAL_FRAME];
               uint8_t    uart_lastTxByte;
@@ -122,24 +128,25 @@ void cb_uartRxCb(void);
 int mote_main(void) {
    
    // clear local variables
-   memset(&app_vars,0,sizeof(app_vars_t));
+ //  memset(&app_vars,0,sizeof(app_vars_t));
    
    // initialize board
    board_init();
    
    // add callback functions radio
-   sctimer_setStartFrameCb(cb_startFrame);
-   sctimer_setEndFrameCb(cb_endFrame);
+   radiosubghz_setStartFrameCb(cb_startFrame);
+   radiosubghz_setEndFrameCb(cb_endFrame);
    
    // setup UART
    uart_setCallbacks(cb_uartTxDone,cb_uartRxCb);
    
    // prepare radio
-   radio_rfOn();
-   radio_setFrequency(CHANNEL);
+   radiosubghz_rfOn();
+   radiosubghz_setFrequency(CHANNEL_SPACING,FREQUENCY_CENTER,CHANNEL); 
+   //radiosubghz_rfOff();
    
    // switch in RX
-   radio_rxEnable();
+   radiosubghz_rxEnable();
    
    while (1) {
       
@@ -148,7 +155,9 @@ int mote_main(void) {
       while (app_vars.rxpk_done==0) {
          board_sleep();
       }
-      
+
+      radiosubghz_rxEnable();
+
       // if I get here, I just received a packet
       
       //===== send notification over serial port
@@ -202,13 +211,15 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
    leds_sync_on();
 
    // get packet from radio
-   radio_getReceivedFrame(
+
+   radiosubghz_getReceivedFrame(
       app_vars.rxpk_buf,
       &app_vars.rxpk_len,
       sizeof(app_vars.rxpk_buf),
       &app_vars.rxpk_rssi,
       &app_vars.rxpk_lqi,
-      &app_vars.rxpk_crc
+      &app_vars.rxpk_crc,
+      &app_vars.mcs      
    );
    
    // read the packet number
