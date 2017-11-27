@@ -18,6 +18,16 @@
 #include "openrandom.h"
 
 //=========================== variables =======================================
+const uint8_t chTemplate_default[16] = { 
+   5,6,12,7,15,4,14,11,8,0,1,2,13,3,9,10 
+}; 
+ 
+// refer to RFC8180: https://tools.ietf.org/html/rfc8180#appendix-A.1 
+// ASN and join Metric are replaced later when sending an EB 
+const uint8_t ebIEsBytestream[28] = { 
+    0x1A,0x88,0x06,0x1A,0x00,0x00,            0x00,0x00,                                0x00,0x00,0x01,0x1C,0x00,0x01, 
+    0xC8,0x00,0x0A,0x1B,0x01,0x00,SLOTFRAME_LENGTH,0x00,SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS,0x00,0x00,0x00,0x00,0x0F 
+}; 
 
 ieee154e_vars_t    ieee154e_vars;
 ieee154e_stats_t   ieee154e_stats;

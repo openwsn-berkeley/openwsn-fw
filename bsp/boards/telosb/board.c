@@ -15,6 +15,10 @@
 #include "radio.h"
 
 //=========================== variables =======================================
+const uint8_t * const rreg_uriquery        = "h=ucb";
+const uint8_t * const infoBoardname        = "TelosB";
+const uint8_t * const infouCName           = "MSP430f1611";
+const uint8_t * const infoRadioName        = "CC2420";
 
 //=========================== prototypes ======================================
 

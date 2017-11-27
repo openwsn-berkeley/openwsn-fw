@@ -73,11 +73,7 @@ enum{
 /**
 \brief Well-known IPv6 multicast address for "all routers".
 */
-static const uint8_t all_routers_multicast[] = {
-   0xff, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, \
-   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1a
-};
-
+const uint8_t all_routers_multicast[LENGTH_ADDR128b];
 //=========================== typedef =========================================
 
 //===== DIO
