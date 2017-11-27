@@ -16,11 +16,13 @@ sources_h = [
     'sctimer.h',
     os.path.join('common', 'openccms.h'),
     os.path.join('common', 'openaes.h'),
+	#os.path.join('openmote-b', 'radio_subghz.h'),
 ]
 
 sources_c = [
     os.path.join('common', 'openccms.c'),
     os.path.join('common', 'openaes.c'),
+	#os.path.join('openmote-b', 'radio_subghz.c'),
 ]
 
 target = 'libbsp'

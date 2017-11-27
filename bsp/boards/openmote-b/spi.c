@@ -6,12 +6,12 @@
 #include "board.h"
 #include "board_info.h"
 #include "ssi.h"
-#include "hw_ints.h"
 #include "spi.h"
 #include "gpio.h"
 #include "ioc.h"
 #include "sys_ctrl.h"
 
+#include <headers/hw_ints.h>
 #include <headers/hw_ioc.h>
 #include <headers/hw_memmap.h>
 #include <headers/hw_ssi.h>
