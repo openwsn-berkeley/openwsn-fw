@@ -9,7 +9,7 @@ TIMER_PERIOD ticks. The packet contains LENGTH_PACKET bytes. The first byte
 is the packet number, which increments for each transmitted packet. The
 remainder of the packet contains an incrementing bytes.
 
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2014.
+\author Xavi Vilajosana <xvilajosana@eecs.berkeley.edu>, December 2017.
 */
 
 #include "stdint.h"

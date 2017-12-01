@@ -4522,7 +4522,7 @@ static const registerSetting_t basic_settings_ofdm_4_mcs6[] = {  //TODO
   {RG_BBC0_OFDMPHRTX, 0x06},  
 };
 
-static const registerSetting_t* modulation_list[] = {
+/*static const registerSetting_t* modulation_list[] = {
 //  {basic_settings_ofdm_1_mcs0},
 //  {basic_settings_ofdm_2_mcs0},  
 //  {basic_settings_ofdm_1_mcs1},
@@ -4531,20 +4531,20 @@ static const registerSetting_t* modulation_list[] = {
 //  {basic_settings_ofdm_1_mcs2},
 //  {basic_settings_ofdm_2_mcs2},
 //  {basic_settings_ofdm_3_mcs2},
-  {basic_settings_ofdm_4_mcs2},
+  basic_settings_ofdm_4_mcs2,
 //  {basic_settings_ofdm_1_mcs3},  
 //  {basic_settings_ofdm_2_mcs3},
 //  {basic_settings_ofdm_3_mcs3},
-  {basic_settings_ofdm_4_mcs3},
+  basic_settings_ofdm_4_mcs3,
 //  {basic_settings_ofdm_2_mcs4},
 //  {basic_settings_ofdm_3_mcs4},
-  {basic_settings_ofdm_4_mcs4},
+  basic_settings_ofdm_4_mcs4,
 //  {basic_settings_ofdm_2_mcs5},
 //  {basic_settings_ofdm_3_mcs5},
-  {basic_settings_ofdm_4_mcs5},
+  basic_settings_ofdm_4_mcs5,
 //  {basic_settings_ofdm_3_mcs6},
-  {basic_settings_ofdm_4_mcs6},
-};
+  basic_settings_ofdm_4_mcs6,
+};*/
 
 static const uint16_t sizes[] = {
     6, 127, 1000, 2047,

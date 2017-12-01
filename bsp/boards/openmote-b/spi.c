@@ -168,8 +168,6 @@ port_INLINE void disableInterrupts(void)
     IntDisable(INT_SSI0);
 }
 
-
-
 //=========================== interrupt handlers ==============================
 
 kick_scheduler_t spi_isr() {

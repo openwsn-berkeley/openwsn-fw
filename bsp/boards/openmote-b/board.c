@@ -93,8 +93,6 @@ void board_init(void) {
    cryptoengine_init();  
 }
 
-
-
 void antenna_init(){
    //use cc2538 2.4ghz radio
    GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_CC2538_24GHZ, BSP_ANTENNA_CC2538_24GHZ);
@@ -319,18 +317,12 @@ static void GPIO_D_Handler(void) {
     GPIOPinIntClear(BSP_BUTTON_BASE, BSP_BUTTON_USER);
     if (!user_button_initialized) return;
     /* Disable the interrupts */
-    IntMasterDisable();
-    leds_all_off();
-
-    /* Eras the CCA flash page */
-    FlashMainPageErase(CC2538_FLASH_ADDRESS);
-
-    leds_circular_shift();
-    
-    /* Reset the board */
-    SysCtrlReset();
+    eraseFlash();
 }
 
+/**
+* Erase the flash so bootloader is load after reboot
+*/
 void eraseFlash(){
     /* Disable the interrupts */
     IntMasterDisable();

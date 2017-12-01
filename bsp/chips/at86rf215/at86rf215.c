@@ -215,6 +215,8 @@ void at86rf215_read_isr (uint8_t* rf09_isr){
     *(rf09_isr+3)   = spi_rx[5];  
 }
 
+
+
 void at86rf215_readBurst(uint16_t reg, uint8_t* regValueRead, uint16_t size){
     uint8_t spi_tx[2049];
 
@@ -222,7 +224,7 @@ void at86rf215_readBurst(uint16_t reg, uint8_t* regValueRead, uint16_t size){
 
     spi_tx[0] = (uint8_t)(reg/256);
     spi_tx[1] = (uint8_t)(reg%256);
-    
+    //TODO xv --  the size in the spi transaction is large than uint8_t, the api of spi needs to support lengths larger than 255    
     spi_txrx(
         spi_tx,                     // bufTx
         sizeof(spi_tx),             // lenbufTx

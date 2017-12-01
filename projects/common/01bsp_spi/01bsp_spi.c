@@ -16,7 +16,6 @@ run regardless of your radio, but might not return anything useful.
 #include "spi.h"
 #include "leds.h"
 #include "gpio.h"
-#include "at86rf215.h"
 
 #include <headers/hw_memmap.h>
 
@@ -26,6 +25,7 @@ run regardless of your radio, but might not return anything useful.
 
 #define AT86RF215_PN_ADDR               ( 0x000D )
 #define AT86RF215_PN_215                ( 0x34 )
+#define RG_RF09_IRQS                    (0x00)
 
 //=========================== defines =========================================
 

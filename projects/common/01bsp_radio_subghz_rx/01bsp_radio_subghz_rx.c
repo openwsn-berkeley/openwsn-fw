@@ -58,7 +58,7 @@ len=17  num=84  rssi=-80  lqi=108 crc=1
 len=17  num=84  rssi=-81  lqi=108 crc=1
 
 
-\author Xavi Vilajosana xvilajosana@eecs.berkeley.edu>, June 2012.
+\author Xavi Vilajosana xvilajosana@eecs.berkeley.edu>, December 2017
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2014.
 */
 
@@ -75,7 +75,7 @@ len=17  num=84  rssi=-81  lqi=108 crc=1
 
 #define LENGTH_SERIAL_FRAME  8              ///< length of the serial frame
 
-#define LENGTH_PACKET   125+LENGTH_CRC // maximum length is 127 bytes
+#define LENGTH_PACKET   123+LENGTH_CRC // maximum length is 127 bytes
 #define CHANNEL_SPACING      1200            
 #define FREQUENCY_CENTER   863625
 #define CHANNEL                 0 

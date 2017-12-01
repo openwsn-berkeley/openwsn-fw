@@ -48,8 +48,8 @@ typedef struct {
 radiosubghz_vars_t radiosubghz_vars;
 
 //=========================== public ==========================================
-static void radiosubghz_read_isr();
-static void radiosubghz_clear_isr();
+static void radiosubghz_read_isr(void);
+static void radiosubghz_clear_isr(void);
 
 //isr handler for the radio
 static void radiosubghz_isr(void);
@@ -64,13 +64,14 @@ void radiosubghz_powerOn(void)
   
   //set radio pwr off
   GPIOPinWrite(GPIO_C_BASE, GPIO_PIN_0, 0);
+  GPIOPinWrite(GPIO_D_BASE, GPIO_PIN_1, 0);
   for(delay=0;delay<0xA2C2;delay++);
   
   //init the radio, pwr up the radio
   GPIOPinWrite(GPIO_C_BASE, GPIO_PIN_0, GPIO_PIN_0);
   for(delay=0;delay<0xA2C2;delay++);
   
-  //reset the radio -- inverted so set it to 0.
+  //reset the radio 
   GPIOPinWrite(GPIO_D_BASE, GPIO_PIN_1, GPIO_PIN_1);
  
 }
@@ -274,7 +275,7 @@ void radiosubghz_read_isr(){
 void radiosubghz_isr() {
   
   PORT_TIMER_WIDTH capturedTime;
-  kick_scheduler_t result = DO_NOT_KICK_SCHEDULER;
+ // kick_scheduler_t result = DO_NOT_KICK_SCHEDULER;
   
   GPIOPinIntClear(AT86RF215_IRQ_BASE, AT86RF215_IRQ_PIN);
   
@@ -285,7 +286,7 @@ void radiosubghz_isr() {
   
   if (radiosubghz_vars.rf09_isr & IRQS_TRXRDY_MASK){
     radiosubghz_vars.state = RADIOSTATE_TX_ENABLED;
-    result = DO_NOT_KICK_SCHEDULER;
+   // result = DO_NOT_KICK_SCHEDULER;
   }
   
   if (radiosubghz_vars.bb0_isr & IRQS_RXFS_MASK){
@@ -294,7 +295,7 @@ void radiosubghz_isr() {
       // call the callback
       radiosubghz_vars.startFrame_cb(capturedTime);
       // kick the OS
-      result = KICK_SCHEDULER;
+     // result = KICK_SCHEDULER;
     } else {
       //while(1);
     }
@@ -305,7 +306,7 @@ void radiosubghz_isr() {
       // call the callback
       radiosubghz_vars.endFrame_cb(capturedTime);
       // kick the OS
-      result = KICK_SCHEDULER;
+     // result = KICK_SCHEDULER;
     } else {
       //while(1);
     }                
@@ -316,7 +317,7 @@ void radiosubghz_isr() {
       // call the callback
       radiosubghz_vars.endFrame_cb(capturedTime);
       // kick the OS
-      result = KICK_SCHEDULER;   
+      //result = KICK_SCHEDULER;   
     } else {
      // while(1);
     }                
