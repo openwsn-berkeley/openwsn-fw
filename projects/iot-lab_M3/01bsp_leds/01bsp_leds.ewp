@@ -1952,9 +1952,6 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\board.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\bsp_timer.c</name>
-        </file>
-        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\debugpins.c</name>
         </file>
         <file>
@@ -1973,10 +1970,10 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\nvic.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\radiotimer.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\rcc.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\rcc.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\sctimer.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\spi.c</name>
