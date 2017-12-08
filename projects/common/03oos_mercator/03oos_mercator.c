@@ -399,11 +399,11 @@ void isr_openserial_rx_mod(void) {
 
 //===== radiotimer
 
-void cb_startFrame(uint16_t timestamp){
+void cb_startFrame(PORT_TIMER_WIDTH timestamp){
     // nothing
 }
 
-void cb_endFrame(uint16_t timestamp) {
+void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
    // local vars
    RF_PACKET_ht* rx_temp;
    bool         is_expected = TRUE;
