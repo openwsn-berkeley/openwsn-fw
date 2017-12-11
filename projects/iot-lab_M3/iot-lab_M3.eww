@@ -8,6 +8,9 @@
     <path>$WS_DIR$\01bsp_radio_tx\01bsp_radio_tx.ewp</path>
   </project>
   <project>
+    <path>$WS_DIR$\01bsp_sctimer\01bsp_sctimer.ewp</path>
+  </project>
+  <project>
     <path>$WS_DIR$\01bsp_uart\01bsp_uart.ewp</path>
   </project>
   <project>
