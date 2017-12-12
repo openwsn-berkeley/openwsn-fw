@@ -112,9 +112,9 @@ void ieee154e_init() {
    memset(&ieee154e_vars,0,sizeof(ieee154e_vars_t));
    memset(&ieee154e_dbg,0,sizeof(ieee154e_dbg_t));
    
-   board_getRadios(radio_functions);
+   board_getRadios(&radio_functions);
    
-   ieee154e_vars.singleChannel     = 0; // 0 means channel hopping
+   ieee154e_vars.singleChannel     = SYNCHRONIZING_CHANNEL; // 0 means channel hopping
    ieee154e_vars.isAckEnabled      = TRUE;
    ieee154e_vars.isSecurityEnabled = FALSE;
    ieee154e_vars.slotDuration      = TsSlotDuration;

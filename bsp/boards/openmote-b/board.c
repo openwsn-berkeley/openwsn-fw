@@ -98,8 +98,8 @@ void board_init(void) {
    cryptoengine_init();  
 }
 
-void board_getRadios(radio_functions_t* radio_function){
-     radio_function = radio_funct;
+void board_getRadios(radio_functions_t** radio_function){
+     *radio_function = radio_funct;
 }
 
 void antenna_init(){
