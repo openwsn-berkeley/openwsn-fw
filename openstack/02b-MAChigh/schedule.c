@@ -52,7 +52,8 @@ void schedule_init() {
          CELLTYPE_SERIALRX,                     // type of slot
          FALSE,                                 // shared?
          0,                                     // channel offset
-         &temp_neighbor                         // neighbor
+         &temp_neighbor,                        // neighbor
+         RADIOTPYE_ANY                          // not used for serialrx
       );
    }
 }
@@ -64,6 +65,7 @@ void schedule_startDAGroot() {
    slotOffset_t    start_slotOffset;
    slotOffset_t    running_slotOffset;
    open_addr_t     temp_neighbor;
+   radioType_t     rt;
    
    start_slotOffset = SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;
    // set frame length, handle and number (default 1 by now)
@@ -80,12 +82,14 @@ void schedule_startDAGroot() {
    memset(&temp_neighbor,0,sizeof(temp_neighbor));
    temp_neighbor.type             = ADDR_ANYCAST;
    for (running_slotOffset=start_slotOffset;running_slotOffset<start_slotOffset+SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;running_slotOffset++) {
+      rt=(radioType_t)running_slotOffset; // this is a little trick to get each minimal cell use a different radio
       schedule_addActiveSlot(
          running_slotOffset,                 // slot offset
          CELLTYPE_TXRX,                      // type of slot
          TRUE,                               // shared?
          SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET,    // channel offset
-         &temp_neighbor                      // neighbor
+         &temp_neighbor,                     // neighbor
+         rt                                  // radio type.
       );
    }
 }
@@ -273,7 +277,8 @@ owerror_t schedule_addActiveSlot(
       cellType_t      type,
       bool            shared,
       channelOffset_t channelOffset,
-      open_addr_t*    neighbor
+      open_addr_t*    neighbor,
+      radioType_t     radioType
    ) {
    scheduleEntry_t* slotContainer;
    scheduleEntry_t* previousSlotWalker;
@@ -356,6 +361,7 @@ owerror_t schedule_addActiveSlot(
             slotContainer->shared                    = FALSE;
             slotContainer->channelOffset             = 0;
             memset(&slotContainer->neighbor,0,sizeof(open_addr_t));
+            slotContainer->radio_type                = radioType;
             ENABLE_INTERRUPTS();
             return E_FAIL;
          }
@@ -669,6 +675,24 @@ cellType_t schedule_getType() {
    DISABLE_INTERRUPTS();
    
    returnVal = schedule_vars.currentScheduleEntry->type;
+   
+   ENABLE_INTERRUPTS();
+   
+   return returnVal;
+}
+
+/**
+\brief Get the radio type of the current schedule entry.
+
+\returns The radio type of the current schedule entry (subghz or 2.4GHz).
+*/
+radioType_t        schedule_getRadioType(void) {
+   radioType_t returnVal;
+   
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   
+   returnVal = schedule_vars.currentScheduleEntry->radio_type;
    
    ENABLE_INTERRUPTS();
    

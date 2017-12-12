@@ -75,7 +75,8 @@ bool          sixtop_addCells(
    uint8_t              slotframeID,
    cellInfo_ht*         cellList,
    open_addr_t*         previousHop,
-   uint8_t              cellOptions
+   uint8_t              cellOptions,
+   radioType_t          radioType
 );
 bool          sixtop_removeCells(
    uint8_t              slotframeID,
@@ -912,7 +913,8 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
                             msg->l2_sixtop_frameID,
                             msg->l2_sixtop_celllist_add,
                             &(msg->l2_nextORpreviousHop),
-                            msg->l2_sixtop_cellOptions
+                            msg->l2_sixtop_cellOptions,
+                            msg->l2_radioType
                         ) == TRUE
                     ) {
                         neighbors_updateGeneration(&(msg->l2_nextORpreviousHop));
@@ -943,7 +945,8 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
                                             msg->l2_sixtop_frameID,
                                             msg->l2_sixtop_celllist_add,
                                             &(msg->l2_nextORpreviousHop),
-                                            msg->l2_sixtop_cellOptions
+                                            msg->l2_sixtop_cellOptions,
+                                            msg->l2_radioType
                                         );
                     if (scheduleChanged){
                         neighbors_updateGeneration(&(msg->l2_nextORpreviousHop));
@@ -1376,6 +1379,8 @@ void sixtop_six2six_notifyReceive(
             response_pkt->l2_sixtop_cellOptions = cellOptions;
         }
         
+        response_pkt->l2_radioType = pkt->l2_radioType;
+        
         // append 6p Seqnum and schedule Generation
         packetfunctions_reserveHeaderSize(response_pkt,sizeof(uint8_t));
         *((uint8_t*)(response_pkt->payload)) = seqNum | gen<<IANA_6TOP_GEN_SHIFT;
@@ -1445,7 +1450,8 @@ void sixtop_six2six_notifyReceive(
                         sixtop_vars.cb_sf_getMetadata(),     // frame id 
                         pkt->l2_sixtop_celllist_add,  // celllist to be added
                         &(pkt->l2_nextORpreviousHop), // neighbor that cells to be added to
-                        sixtop_vars.cellOptions       // cell options
+                        sixtop_vars.cellOptions,      // cell options
+                        pkt->l2_radioType
                     ) == TRUE
                 ) { 
                     neighbors_updateGeneration(&(pkt->l2_nextORpreviousHop));
@@ -1486,7 +1492,8 @@ void sixtop_six2six_notifyReceive(
                                         sixtop_vars.cb_sf_getMetadata(),     // frame id 
                                         pkt->l2_sixtop_celllist_add,  // celllist to be added
                                         &(pkt->l2_nextORpreviousHop), // neighbor that cells to be added to
-                                        sixtop_vars.cellOptions       // cell options
+                                        sixtop_vars.cellOptions,      // cell options
+                                        pkt->l2_radioType
                                    );
                 if (scheduleChanged) {
                     neighbors_updateGeneration(&(pkt->l2_nextORpreviousHop));
@@ -1555,7 +1562,8 @@ bool sixtop_addCells(
     uint8_t      slotframeID,
     cellInfo_ht* cellList,
     open_addr_t* previousHop,
-    uint8_t      cellOptions
+    uint8_t      cellOptions,
+    radioType_t  radioType
 ){
     uint8_t     i;
     bool        isShared;
@@ -1594,7 +1602,8 @@ bool sixtop_addCells(
                 type,
                 isShared,
                 cellList[i].channeloffset,
-                &temp_neighbor
+                &temp_neighbor,
+                radioType
             );
         }
     }

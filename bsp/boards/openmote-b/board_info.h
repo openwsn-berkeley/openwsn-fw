@@ -105,6 +105,13 @@
 #define BSP_ANTENNA_AT215_24GHZ     GPIO_PIN_3      //!< PD3 -- subghz
  
 
+// number of radios in this board.
+#define MAX_NUM_RADIOS         2
+typedef enum {
+   RADIOTPYE_2D4GHZ          = 0,
+   RADIOTPYE_SUBGHZ          = 1,
+   RADIOTPYE_ANY             = 2  
+} radioType_t;
 //=========================== typedef  ========================================
 
 //=========================== variables =======================================

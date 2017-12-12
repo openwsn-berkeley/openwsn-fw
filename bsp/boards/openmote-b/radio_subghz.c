@@ -5,7 +5,7 @@
 */
 
 #include "board.h"
-#include "radio.h"
+//#include "radio.h"
 #include "radio_subghz.h"
 
 #include "at86rf215.h"
@@ -55,6 +55,36 @@ static void radiosubghz_clear_isr(void);
 static void radiosubghz_isr(void);
 
 //===== admin
+
+void  radiosubghz_setFunctions(radio_functions_t * funcs){
+    funcs->radio_change_modulation  = radiosubghz_change_modulation;
+    funcs->radio_powerOn            = radiosubghz_powerOn;
+    // RF admin
+    funcs->radio_init               = radiosubghz_init;
+    funcs->radio_setStartFrameCb    = radiosubghz_setStartFrameCb;
+    funcs->radio_setEndFrameCb      = radiosubghz_setEndFrameCb;
+    // RF admin
+    funcs->radio_rfOn               = radiosubghz_rfOn;
+    funcs->radio_rfOff              = radiosubghz_rfOff;
+    funcs->radio_setFrequency       = radiosubghz_setFrequency;
+    funcs->radio_change_modulation  = radiosubghz_change_modulation;
+    funcs->radio_change_size        = radiosubghz_change_size;
+    // reset
+    funcs->radio_reset              = radiosubghz_reset;
+    // TX
+    funcs->radio_loadPacket_prepare = radiosubghz_loadPacket_prepare;
+    funcs->radio_txEnable           = radiosubghz_txEnable;
+    funcs->radio_txNow              = radiosubghz_txNow;
+    funcs->radio_loadPacket         = radiosubghz_loadPacket;
+    // RX
+    funcs->radio_rxPacket_prepare   = radiosubghz_rxPacket_prepare;
+    funcs->radio_rxEnable           = radiosubghz_rxEnable;
+    funcs->radio_rxEnable_scum      = radiosubghz_rxEnable_scum;
+    funcs->radio_rxNow              = radiosubghz_rxNow;
+    funcs->radio_getReceivedFrame   = radiosubghz_getReceivedFrame;
+    funcs->radio_getCRCLen          = radiosubghz_getCRCLen;
+}
+
 void radiosubghz_powerOn(void)
 {
   volatile uint32_t delay;
@@ -258,6 +288,11 @@ void radiosubghz_getReceivedFrame(
   *mcs    = (at86rf215_spiReadReg(RG_BBC0_OFDMPHRRX)&OFDMPHRRX_MCS_MASK);
 }
 
+//returns the crc len for this radio
+uint8_t  radiosubghz_getCRCLen(void){
+  return LENGTH_CRC_SUBGHZ;
+}
+
 //=========================== private ========================================= 
 
 void radiosubghz_read_isr(){
@@ -331,3 +366,8 @@ port_INLINE void radiosubghz_clear_isr(){
   radiosubghz_vars.bb0_isr = 0;
   radiosubghz_vars.bb1_isr = 0;
 }
+
+
+void    radiosubghz_loadPacket_prepare(uint8_t* packet, uint8_t len){}
+void    radiosubghz_rxPacket_prepare(void){}
+void    radiosubghz_rxEnable_scum(void){}

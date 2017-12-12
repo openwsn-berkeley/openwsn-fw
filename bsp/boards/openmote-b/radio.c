@@ -60,6 +60,35 @@ void     radio_isr_internal(void);
 
 //===== admin
 
+void     radio_setFunctions(radio_functions_t * funcs){
+    funcs->radio_change_modulation  = radio_change_modulation;
+    funcs->radio_powerOn            = radio_powerOn;
+    // RF admin
+    funcs->radio_init               = radio_init;
+    funcs->radio_setStartFrameCb    = radio_setStartFrameCb;
+    funcs->radio_setEndFrameCb      = radio_setEndFrameCb;
+    // RF admin
+    funcs->radio_rfOn               = radio_rfOn;
+    funcs->radio_rfOff              = radio_rfOff;
+    funcs->radio_setFrequency       = radio_setFrequency;
+    funcs->radio_change_modulation  = radio_change_modulation;
+    funcs->radio_change_size        = radio_change_size;
+    // reset
+    funcs->radio_reset              = radio_reset;
+    // TX
+    funcs->radio_loadPacket_prepare = radio_loadPacket_prepare;
+    funcs->radio_txEnable           = radio_txEnable;
+    funcs->radio_txNow              = radio_txNow;
+    funcs->radio_loadPacket         = radio_loadPacket;
+    // RX
+    funcs->radio_rxPacket_prepare   = radio_rxPacket_prepare;
+    funcs->radio_rxEnable           = radio_rxEnable;
+    funcs->radio_rxEnable_scum      = radio_rxEnable_scum;
+    funcs->radio_rxNow              = radio_rxNow;
+    funcs->radio_getReceivedFrame   = radio_getReceivedFrame;
+    funcs->radio_getCRCLen          = radio_getCRCLen;
+}
+
 void radio_init() {
    
    // clear variables
@@ -181,7 +210,7 @@ void radio_reset() {
 
 //===== RF admin
 
-void radio_setFrequency(uint8_t frequency) {
+void radio_setFrequency(uint16_t channel_spacing, uint32_t frequency_0, uint16_t frequency) {
 
    // change state
    radio_vars.state = RADIOSTATE_SETTING_FREQUENCY;
@@ -318,12 +347,14 @@ void radio_rxNow() {
    while(!((HWREG(RFCORE_XREG_FSMSTAT1) & RFCORE_XREG_FSMSTAT1_RX_ACTIVE)));
 }
 
+
 void radio_getReceivedFrame(uint8_t* pBufRead,
-                            uint8_t* pLenRead,
-                            uint8_t  maxBufLen,
-                             int8_t* pRssi,
-                            uint8_t* pLqi,
-                               bool* pCrc) {
+                            uint16_t* pLenRead,
+                            uint16_t  maxBufLen,
+                              int8_t* pRssi,
+                             uint8_t* pLqi,
+                                bool* pCrc,
+                             uint8_t*  mcs) {
    uint8_t crc_corr,i;
    
    uint8_t len=0;
@@ -406,6 +437,12 @@ void radio_off(void){
       HWREG(RFCORE_SFR_RFIRQF0) = ~(RFCORE_SFR_RFIRQF0_FIFOP|RFCORE_SFR_RFIRQF0_RXPKTDONE);
    }
 }
+
+//returns the crc len for this radio
+uint8_t  radio_getCRCLen(void){
+  return LENGTH_CRC;
+}
+
 
 //=========================== callbacks =======================================
 
@@ -529,3 +566,10 @@ void radio_error_isr(void){
       //poipoi  -- todo handle error
    }
 }
+
+void                radio_powerOn(void){}
+void                radio_change_modulation(registerSetting_t * mod){}
+void                radio_change_size(uint16_t* size){}
+void                radio_loadPacket_prepare(uint8_t* packet, uint8_t len){}
+void                radio_rxPacket_prepare(void){}
+void                radio_rxEnable_scum(void){}

@@ -20,7 +20,7 @@ The superframe reappears over time and can be arbitrarily long.
 #define SLOTFRAME_LENGTH    11 //should be 101
 
 //draft-ietf-6tisch-minimal-06
-#define SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS                      1
+#define SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS                      MAX_NUM_RADIOS
 #define SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET                        0
 #define SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET                     0
 #define SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE          0 //id of slotframe
@@ -89,6 +89,8 @@ typedef uint8_t    channelOffset_t;
 typedef uint16_t   slotOffset_t;
 typedef uint16_t   frameLength_t;
 
+
+
 typedef enum {
    CELLTYPE_OFF              = 0,
    CELLTYPE_TX               = 1,
@@ -103,6 +105,7 @@ typedef struct {
    cellType_t      type;
    bool            shared;
    uint8_t         channelOffset;
+   radioType_t     radio_type;
    open_addr_t     neighbor;
    uint8_t         numRx;
    uint8_t         numTx;
@@ -165,7 +168,8 @@ owerror_t          schedule_addActiveSlot(
    cellType_t           type,
    bool                 shared,
    uint8_t              channelOffset,
-   open_addr_t*         neighbor
+   open_addr_t*         neighbor,
+   radioType_t          radioType
 );
 
 void               schedule_getSlotInfo(
@@ -201,6 +205,7 @@ frameLength_t      schedule_getFrameLength(void);
 uint8_t            schedule_getFrameHandle(void);
 uint8_t            schedule_getFrameNumber(void);
 cellType_t         schedule_getType(void);
+radioType_t        schedule_getRadioType(void);
 void               schedule_getNeighbor(open_addr_t* addrToWrite);
 channelOffset_t    schedule_getChannelOffset(void);
 bool               schedule_getOkToSend(void);

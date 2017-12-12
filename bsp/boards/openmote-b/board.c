@@ -18,6 +18,7 @@
 #include <source/gptimer.h>
 #include <source/sys_ctrl.h>
 
+
 #include "board.h"
 #include "board_info.h"
 #include "debugpins.h"
@@ -63,6 +64,8 @@ static void GPIO_D_Handler(void);
 
 bool user_button_initialized;
 
+radio_functions_t radio_funct[MAX_NUM_RADIOS];
+
 //=========================== main ============================================
 
 extern int mote_main(void);
@@ -86,11 +89,17 @@ void board_init(void) {
    sctimer_init();
    uart_init();
    radio_init();
+   radio_setFunctions(&radio_funct[RADIOTPYE_2D4GHZ]);
    i2c_init();
    spi_init();
    radiosubghz_init();
+   radiosubghz_setFunctions(&radio_funct[RADIOTPYE_SUBGHZ]);
    sensors_init();
    cryptoengine_init();  
+}
+
+void board_getRadios(radio_functions_t* radio_function){
+     radio_function = radio_funct;
 }
 
 void antenna_init(){

@@ -24,11 +24,7 @@
 /* === EXTERNALS =========================================================== */
 
 /* === TYPES =============================================================== */
-typedef struct
-{
-    uint16_t  addr;
-    uint8_t   data;
-}registerSetting_t;
+
 
 typedef struct
 {

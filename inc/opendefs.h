@@ -312,7 +312,7 @@ typedef struct {
    uint8_t       creator;                                       // the component which called getFreePacketBuffer()
    uint8_t       owner;                                         // the component which currently owns the entry
    uint8_t*      payload;                                       // pointer to the start of the payload within 'packet'
-   uint8_t       length;                                        // length in bytes of the payload
+   uint16_t       length;                                        // length in bytes of the payload
    //l7
    uint16_t      max_delay;                      // Max delay in milliseconds before which the packet should be delivered to the receiver
    bool					 orgination_time_flag;
@@ -331,6 +331,7 @@ typedef struct {
    owerror_t     l2_sendDoneError;                              // outcome of trying to send this packet
    open_addr_t   l2_nextORpreviousHop;                          // 64b IEEE802.15.4 next (down stack) or previous (up) hop address
    uint8_t       l2_frameType;                                  // beacon, data, ack, cmd
+   radioType_t   l2_radioType;                                  // 2.4Ghz or Subghz or others...
    uint8_t       l2_dsn;                                        // sequence number of the received frame
    uint8_t       l2_retriesLeft;                                // number Tx retries left before packet dropped (dropped when hits 0)
    uint8_t       l2_numTxAttempts;                              // number Tx attempts
@@ -363,6 +364,7 @@ typedef struct {
    int8_t        l1_rssi;                                       // RSSI of received packet
    uint8_t       l1_lqi;                                        // LQI of received packet
    bool          l1_crc;                                        // did received packet pass CRC check?
+   uint8_t       l1_mcs;                                        // LQI of received packet
    //the packet
    uint8_t       packet[1+1+125+2+1];                           // 1B spi address, 1B length, 125B data, 2B CRC, 1B LQI
 } OpenQueueEntry_t;
