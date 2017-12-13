@@ -68,8 +68,8 @@ int mote_main(void) {
    
    // add radio callback functions
    sctimer_set_callback(cb_radioTimerOverflows);
-   sctimer_setStartFrameCb(cb_startFrame);
-   sctimer_setEndFrameCb(cb_endFrame);
+   radio_setStartFrameCb(cb_startFrame);
+   radio_setEndFrameCb(cb_endFrame);
    
    // prepare radio
    radio_rfOn();

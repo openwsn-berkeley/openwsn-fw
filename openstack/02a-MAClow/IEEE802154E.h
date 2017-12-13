@@ -38,14 +38,13 @@ static const uint8_t ebIEsBytestream[] = {
 #define EB_IE_LEN                   28
 
 #define NUM_CHANNELS                16 // number of channels to channel hop on
-#define SYNCHRONIZING_CHANNEL       26 // channel the mote listens on to synchronize (physical channel)
 #define DEFAULT_CH_SPACING           1200 // default channel spacing for subghz           
 #define DEFAULT_FREQUENCY_CENTER     863625 // defualt freque
 #define TXRETRIES                    3 // number of MAC retries before declaring failed
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to successfully synchronize
 #define US_PER_TICK                 30 // number of us per 32kHz clock tick
-#define EBPERIOD                     2 // in seconds: 2 -> EB every 2 seconds
+#define EB_PORTION                   6 // The portion of minimal cells that used for sending EB.
 #define MAXKAPERIOD               2000 // in slots: @15ms per slot -> ~30 seconds. Max value used by adaptive synchronization.
 #define DESYNCTIMEOUT             2333 // in slots: @15ms per slot -> ~35 seconds. A larger DESYNCTIMEOUT is needed if using a larger KATIMEOUT.
 #define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"
@@ -182,7 +181,7 @@ enum ieee154e_atomicdurations_enum {
    delayTx                   =  PORT_delayTx,         // between GO signal and SFD
    delayRx                   =  PORT_delayRx,         // between GO signal and start listening
    // radio watchdog
-   wdRadioTx                 =   33,                  //  1000us (needs to be >delayTx)
+   wdRadioTx                 =   33,                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 43 is tested and works)
    wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
 #ifdef SLOTDURATION_10MS
    wdAckDuration             =   80,                  //  2400us (measured 1000us)
@@ -291,9 +290,6 @@ typedef struct {
    PORT_TIMER_WIDTH          num_startOfFrame;
    PORT_TIMER_WIDTH          num_endOfFrame;
 } ieee154e_dbg_t;
-
-
-
 
 //=========================== prototypes ======================================
 

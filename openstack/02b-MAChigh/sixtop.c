@@ -107,7 +107,7 @@ void sixtop_init() {
     sixtop_vars.dsn                = 0;
     sixtop_vars.mgtTaskCounter     = 0;
     sixtop_vars.kaPeriod           = MAXKAPERIOD;
-    sixtop_vars.ebPeriod           = EBPERIOD;
+    sixtop_vars.ebPeriod           = EB_PORTION*(neighbors_getNumNeighbors()+1);
     sixtop_vars.isResponseEnabled  = TRUE;
     sixtop_vars.six2six_state      = SIX_STATE_IDLE;
     
@@ -631,14 +631,27 @@ void sixtop_timeout_timer_cb(opentimers_id_t id) {
 //======= EB/KA task
 
 void timer_sixtop_sendEb_fired(){
-    sixtop_vars.ebCounter = (sixtop_vars.ebCounter+1)%sixtop_vars.ebPeriod;
-    switch (sixtop_vars.ebCounter) {
-    case 0:
-        // called every EBPERIOD seconds
+    
+    uint16_t newPeriod;
+    // current period 
+    newPeriod = EB_PORTION*(neighbors_getNumNeighbors()+1);
+    if (
+        sixtop_vars.ebPeriod  < newPeriod &&
+        sixtop_vars.ebCounter > newPeriod
+    ){
+        sixtop_vars.ebCounter = 0;
+        sixtop_vars.ebPeriod  = newPeriod;
         sixtop_sendEB();
-        break;
-    default:
-        break;
+    } else {
+        sixtop_vars.ebPeriod  = newPeriod;
+        sixtop_vars.ebCounter = (sixtop_vars.ebCounter+1)%sixtop_vars.ebPeriod;
+        switch (sixtop_vars.ebCounter) {
+        case 0:
+            sixtop_sendEB();
+            break;
+        default:
+            break;
+        }
     }
 }
 
@@ -1570,7 +1583,7 @@ bool sixtop_addCells(
     open_addr_t temp_neighbor;
     cellType_t  type;
     bool        hasCellsAdded;
-    
+   
     // translate cellOptions to cell type 
     if (cellOptions == LINKOPTIONS_TX){
         type     = CELLTYPE_TX;
@@ -1584,14 +1597,9 @@ bool sixtop_addCells(
         type     = CELLTYPE_TXRX;  
         isShared = TRUE;
     }
-    
-    if (isShared){
-        memset(&temp_neighbor,0,sizeof(temp_neighbor));
-        temp_neighbor.type             = ADDR_ANYCAST;
-    } else {
-        memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
-    }
-    
+   
+    memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
+
     hasCellsAdded = FALSE;
     // add cells to schedule
     for(i = 0;i<CELLLIST_MAX_LEN;i++){
@@ -1605,40 +1613,23 @@ bool sixtop_addCells(
                 &temp_neighbor,
                 radioType
             );
-        }
+         }
     }
-    
+   
     return hasCellsAdded;
 }
 
 bool sixtop_removeCells(
-    uint8_t      slotframeID,
-    cellInfo_ht* cellList,
-    open_addr_t* previousHop,
+      uint8_t      slotframeID,
+      cellInfo_ht* cellList,
+      open_addr_t* previousHop,
     uint8_t      cellOptions
-){
-    uint8_t i;
-    bool        isShared;
+   ){
+    uint8_t     i;
     open_addr_t temp_neighbor;
     bool        hasCellsRemoved;
-    
-    // translate cellOptions to cell type 
-    if (cellOptions == LINKOPTIONS_TX){
-        isShared = FALSE;
-    }
-    if (cellOptions == LINKOPTIONS_RX){ 
-        isShared = FALSE;
-    }
-    if (cellOptions == (LINKOPTIONS_TX | LINKOPTIONS_RX | LINKOPTIONS_SHARED)){ 
-        isShared = TRUE;
-    }
-    
-    if (isShared){
-        memset(&temp_neighbor,0,sizeof(temp_neighbor));
-        temp_neighbor.type             = ADDR_ANYCAST;
-    } else {
-        memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
-    }
+
+    memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
     
     hasCellsRemoved = FALSE;
     // delete cells from schedule

@@ -48,7 +48,9 @@ void                radio_change_size(uint16_t* size);
 // reset
 void                radio_reset(void);
 // TX
-void                radio_loadPacket_prepare(uint8_t* packet, uint8_t len);
+#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
+void                radio_loadPacket_prepare(uint8_t* packet, uint16_t len);
+#endif
 void                radio_txEnable(void);
 void                radio_txNow(void);
 void                radio_loadPacket(uint8_t* packet, uint16_t len);
@@ -66,8 +68,6 @@ void                radio_getReceivedFrame(uint8_t* bufRead,
                                 uint8_t*  mcs);
 uint8_t             radio_getCRCLen(void);
 uint8_t             radio_calculateFrequency(uint8_t channelOffset, uint8_t asnOffset, uint8_t numChannels, uint8_t* hopSeq, bool singleChannel);
-
-
 
 // interrupt handlers
 kick_scheduler_t    radio_isr(void);

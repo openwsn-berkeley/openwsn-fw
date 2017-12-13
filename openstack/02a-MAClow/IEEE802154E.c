@@ -15,6 +15,7 @@
 #include "sixtop.h"
 #include "adaptive_sync.h"
 #include "sctimer.h"
+#include "openrandom.h"
 
 //=========================== variables =======================================
 
@@ -107,62 +108,66 @@ Call this function once before any other function in this module, possibly
 during boot-up.
 */
 void ieee154e_init() {
-   uint8_t i;
-   // initialize variables
-   memset(&ieee154e_vars,0,sizeof(ieee154e_vars_t));
-   memset(&ieee154e_dbg,0,sizeof(ieee154e_dbg_t));
-   
-   board_getRadios(&radio_functions);
-   
-   ieee154e_vars.singleChannel     = SYNCHRONIZING_CHANNEL; // 0 means channel hopping
-   ieee154e_vars.isAckEnabled      = TRUE;
-   ieee154e_vars.isSecurityEnabled = FALSE;
-   ieee154e_vars.slotDuration      = TsSlotDuration;
-   ieee154e_vars.numOfSleepSlots   = 1;
-   
-   ieee154e_vars.ch_spacing        = DEFAULT_CH_SPACING;
-   ieee154e_vars.frequency         = DEFAULT_FREQUENCY_CENTER;
-   
-   // default hopping template
-   memcpy(
-       &(ieee154e_vars.chTemplate[0]),
-       chTemplate_default,
-       sizeof(ieee154e_vars.chTemplate)
-   );
-   
-   if (idmanager_getIsDAGroot()==TRUE) {
-      changeIsSync(TRUE);
-   } else {
-      changeIsSync(FALSE);
-   }
-   
-   resetStats();
-   ieee154e_stats.numDeSync                 = 0;
-   
-   // switch all radios radio on
-   for (i=0;i<MAX_NUM_RADIOS;i++){
-      radio_functions[i].radio_rfOn();
-      radio_functions[i].radio_setStartFrameCb(ieee154e_startOfFrame);
-      radio_functions[i].radio_setEndFrameCb(ieee154e_endOfFrame);
-   }
-     
+    
+    uint8_t i;
+    // initialize variables
+    memset(&ieee154e_vars,0,sizeof(ieee154e_vars_t));
+    memset(&ieee154e_dbg,0,sizeof(ieee154e_dbg_t));
+    
+    ieee154e_vars.singleChannel     = 0; // 0 means channel hopping
+    board_getRadios(&radio_functions);
+    
+    ieee154e_vars.singleChannel     = SYNCHRONIZING_CHANNEL; // 0 means channel hopping
+    ieee154e_vars.isAckEnabled      = TRUE;
+    ieee154e_vars.isSecurityEnabled = FALSE;
+    ieee154e_vars.slotDuration      = TsSlotDuration;
+    ieee154e_vars.numOfSleepSlots   = 1;
+    
+    ieee154e_vars.ch_spacing        = DEFAULT_CH_SPACING;
+    ieee154e_vars.frequency         = DEFAULT_FREQUENCY_CENTER;
+    
+    // default hopping template
+    memcpy(
+        &(ieee154e_vars.chTemplate[0]),
+        chTemplate_default,
+        sizeof(ieee154e_vars.chTemplate)
+    );
+    
+    if (idmanager_getIsDAGroot()==TRUE) {
+        changeIsSync(TRUE);
+    } else {
+        changeIsSync(FALSE);
+    }
+    
+    resetStats();
+    ieee154e_stats.numDeSync                 = 0;
+    
+    // switch all radios radio on
+    for (i=0;i<MAX_NUM_RADIOS;i++){
+        radio_functions[i].radio_rfOn();
+        radio_functions[i].radio_setStartFrameCb(ieee154e_startOfFrame);
+        radio_functions[i].radio_setEndFrameCb(ieee154e_endOfFrame);
+    }
+    
    // set callback functions for the radio
    //radiotimer_setOverflowCb(isr_ieee154e_newSlot);
    //radiotimer_setCompareCb(isr_ieee154e_timer);
-   // have the radio start its timer
-   ieee154e_vars.timerId = opentimers_create();
-   // assign ieee802154e timer with highest priority
-   opentimers_setPriority(ieee154e_vars.timerId,0);
-   opentimers_scheduleAbsolute(
+#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
+    sctimer_set_actionCallback(isr_ieee154e_timer);
+#endif
+    // have the radio start its timer
+    ieee154e_vars.timerId = opentimers_create();
+    // assign ieee802154e timer with highest priority
+    opentimers_setPriority(ieee154e_vars.timerId,0);
+    opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,          // timerId
         ieee154e_vars.slotDuration,     // duration
         sctimer_readCounter(),          // reference
         TIME_TICS,                      // timetype
         isr_ieee154e_newSlot            // callback
-   );
-   // radiotimer_start(ieee154e_vars.slotDuration);
-   //
-   IEEE802154_security_init();
+    );
+    // radiotimer_start(ieee154e_vars.slotDuration);
+    IEEE802154_security_init();
 }
 
 //=========================== public ==========================================
@@ -236,25 +241,25 @@ int16_t ieee154e_computeAsnDiff(asn_t* h_asn, asn_t* l_asn) {
 \param[out] et_asn bigger ASN value
 */
 void ieee154e_calculateExpTime(uint16_t max_delay, uint8_t* et_asn) {
-   uint8_t delay_array[5];
-   uint8_t i =0, carry = 0,slot_time = 0;
-   uint16_t sum = 0, delay_in_asn =0;
-	
-   memset(&delay_array[0],0,5);
-   
-   //Slot time = (Duration in ticks * Time equivalent ticks w.r.t 32kHz) in ms
-   slot_time = (ieee154e_getSlotDuration()*305)/10000;  
-   delay_in_asn = max_delay / slot_time; 
-		
-   delay_array[0]         = (delay_in_asn     & 0xff);
-   delay_array[1]         = (delay_in_asn/256 & 0xff);
-   
-   ieee154e_getAsn(&et_asn[0]);
-   for(i=0; i<5; i++) {
-      sum = et_asn[i] + delay_array[i] + carry;  
-      et_asn[i] = sum & 0xFF; 
-      carry = ((sum >> 8) & 0xFF);
-   }
+    uint8_t delay_array[5];
+    uint8_t i =0, carry = 0,slot_time = 0;
+    uint16_t sum = 0, delay_in_asn =0;
+    
+    memset(&delay_array[0],0,5);
+    
+    //Slot time = (Duration in ticks * Time equivalent ticks w.r.t 32kHz) in ms
+    slot_time = (ieee154e_getSlotDuration()*305)/10000;  
+    delay_in_asn = max_delay / slot_time; 
+    
+    delay_array[0]         = (delay_in_asn     & 0xff);
+    delay_array[1]         = (delay_in_asn/256 & 0xff);
+    
+    ieee154e_getAsn(&et_asn[0]);
+    for(i=0; i<5; i++) {
+        sum = et_asn[i] + delay_array[i] + carry;  
+        et_asn[i] = sum & 0xFF; 
+        carry = ((sum >> 8) & 0xFF);
+    }
 }
 
 /**
@@ -278,6 +283,7 @@ void ieee154e_orderToASNStructure(uint8_t* in,asn_t* val_asn) {
 This function executes in ISR mode, when the new slot timer fires.
 */
 void isr_ieee154e_newSlot(opentimers_id_t id) {
+    
     ieee154e_vars.startOfSlotReference = opentimers_getCurrentTimeout();
     opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                  // timerId
@@ -288,22 +294,22 @@ void isr_ieee154e_newSlot(opentimers_id_t id) {
     );
     ieee154e_vars.slotDuration          = TsSlotDuration;
     // radiotimer_setPeriod(ieee154e_vars.slotDuration);
-   if (ieee154e_vars.isSync==FALSE) {
-      if (idmanager_getIsDAGroot()==TRUE) {
-         changeIsSync(TRUE);
-         ieee154e_resetAsn();
-         ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
-      } else {
-         activity_synchronize_newSlot();
-      }
-   } else {
+    if (ieee154e_vars.isSync==FALSE) {
+        if (idmanager_getIsDAGroot()==TRUE) {
+            changeIsSync(TRUE);
+            ieee154e_resetAsn();
+            ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
+        } else {
+            activity_synchronize_newSlot();
+        }
+    } else {
 #ifdef ADAPTIVE_SYNC
-     // adaptive synchronization
-      adaptive_sync_countCompensationTimeout();
+        // adaptive synchronization
+        adaptive_sync_countCompensationTimeout();
 #endif
-      activity_ti1ORri1();
-   }
-   ieee154e_dbg.num_newSlot++;
+        activity_ti1ORri1();
+    }
+    ieee154e_dbg.num_newSlot++;
 }
 
 /**
@@ -523,75 +529,75 @@ bool debugPrint_macStats() {
 //======= SYNCHRONIZING
 
 port_INLINE void activity_synchronize_newSlot() {
-  // using only 2.4Ghz radio to synchronize.
-  
-  // I'm in the middle of receiving a packet
-   if (ieee154e_vars.state==S_SYNCRX) {
-      return;
-   }
-   
-   ieee154e_vars.radioOnInit=sctimer_readCounter();
-   ieee154e_vars.radioOnThisSlot=TRUE;
-   
-   // if this is the first time I call this function while not synchronized,
-   // switch on the radio in Rx mode
-   if (ieee154e_vars.state!=S_SYNCLISTEN) {
-      // change state
-      changeState(S_SYNCLISTEN);
-      
-      // turn off the radio (in case it wasn't yet) 
-      radio_functions[RADIOTPYE_2D4GHZ].radio_rfOff();
-      radio_functions[RADIOTPYE_2D4GHZ].radio_setStartFrameCb(ieee154e_startOfFrame);
-      radio_functions[RADIOTPYE_2D4GHZ].radio_setEndFrameCb(ieee154e_endOfFrame);
-      
-      
-      // configure the radio to listen to the default synchronizing channel
-      //(uint16_t channel_spacing, uint32_t frequency_0, uint16_t channel);
-      radio_functions[RADIOTPYE_2D4GHZ].radio_setFrequency(DEFAULT_CH_SPACING,DEFAULT_FREQUENCY_CENTER,SYNCHRONIZING_CHANNEL);
-      
-      // update record of current channel
-      ieee154e_vars.channel = SYNCHRONIZING_CHANNEL;
-      
-      // switch on the radio in Rx mode.
-      radio_functions[RADIOTPYE_2D4GHZ].radio_rxEnable();
-      radio_functions[RADIOTPYE_2D4GHZ].radio_rxNow();
-   } else {
-      // I'm listening last slot
-      ieee154e_stats.numTicsOn    += ieee154e_vars.slotDuration;
-      ieee154e_stats.numTicsTotal += ieee154e_vars.slotDuration;
-   }
-   
-   // if I'm already in S_SYNCLISTEN, while not synchronized,
-   // but the synchronizing channel has been changed,
-   // change the synchronizing channel
-   if ((ieee154e_vars.state==S_SYNCLISTEN) && (ieee154e_vars.singleChannelChanged == TRUE)) {
-      // turn off the radio (in case it wasn't yet)
-       radio_functions[RADIOTPYE_2D4GHZ].radio_rfOff();
-      
-      // update record of current channel
-      ieee154e_vars.channel = calculateFrequency(ieee154e_vars.singleChannel);
-      
-      // configure the radio to listen to the default synchronizing channel
-      radio_functions[RADIOTPYE_2D4GHZ].radio_setFrequency(ieee154e_vars.ch_spacing,ieee154e_vars.frequency,ieee154e_vars.channel);
+    // using only 2.4Ghz radio to synchronize.
+    
+    // I'm in the middle of receiving a packet
+    if (ieee154e_vars.state==S_SYNCRX) {
+        return;
+    }
+    
+    ieee154e_vars.radioOnInit=sctimer_readCounter();
+    ieee154e_vars.radioOnThisSlot=TRUE;
+    
+    // if this is the first time I call this function while not synchronized,
+    // switch on the radio in Rx mode
+    if (ieee154e_vars.state!=S_SYNCLISTEN) {
+        // change state
+        changeState(S_SYNCLISTEN);
+        
+        // turn off the radio (in case it wasn't yet)
+        radio_functions[RADIOTPYE_2D4GHZ].radio_rfOff();
+        radio_functions[RADIOTPYE_2D4GHZ].radio_setStartFrameCb(ieee154e_startOfFrame);
+        radio_functions[RADIOTPYE_2D4GHZ].radio_setEndFrameCb(ieee154e_endOfFrame);
+        
+        // update record of current channel
+        ieee154e_vars.channel = (openrandom_get16b()&0x0F) + 11;
+        
+        // configure the radio to listen to the default synchronizing channel
+        //(uint16_t channel_spacing, uint32_t frequency_0, uint16_t channel);
+        radio_functions[RADIOTPYE_2D4GHZ].radio_setFrequency(DEFAULT_CH_SPACING,DEFAULT_FREQUENCY_CENTER,ieee154e_vars.channel);
+        
       
       // switch on the radio in Rx mode.
-      radio_functions[RADIOTPYE_2D4GHZ].radio_rxEnable();
-      radio_functions[RADIOTPYE_2D4GHZ].radio_rxNow();
-      ieee154e_vars.singleChannelChanged = FALSE;
-   }
-   
-   // increment ASN (used only to schedule serial activity)
-   incrementAsnOffset();
-   
-   // to be able to receive and transmist serial even when not synchronized
-   // take turns every 8 slots sending and receiving
-   if        ((ieee154e_vars.asn.bytes0and1&0x000f)==0x0000) {
-      openserial_stop();
-      openserial_startOutput();
-   } else if ((ieee154e_vars.asn.bytes0and1&0x000f)==0x0008) {
-      openserial_stop();
-      openserial_startInput();
-   }
+        radio_functions[RADIOTPYE_2D4GHZ].radio_rxEnable();
+        radio_functions[RADIOTPYE_2D4GHZ].radio_rxNow();
+    } else {
+        // I'm listening last slot
+        ieee154e_stats.numTicsOn    += ieee154e_vars.slotDuration;
+        ieee154e_stats.numTicsTotal += ieee154e_vars.slotDuration;
+    }
+    
+    // if I'm already in S_SYNCLISTEN, while not synchronized,
+    // but the synchronizing channel has been changed,
+    // change the synchronizing channel
+    if ((ieee154e_vars.state==S_SYNCLISTEN) && (ieee154e_vars.singleChannelChanged == TRUE)) {
+        // turn off the radio (in case it wasn't yet)
+        radio_functions[RADIOTPYE_2D4GHZ].radio_rfOff();
+        
+        // update record of current channel
+        ieee154e_vars.channel = calculateFrequency(ieee154e_vars.singleChannel);
+        
+        // configure the radio to listen to the default synchronizing channel
+        radio_functions[RADIOTPYE_2D4GHZ].radio_setFrequency(ieee154e_vars.ch_spacing,ieee154e_vars.frequency,ieee154e_vars.channel);
+        
+        // switch on the radio in Rx mode.
+        radio_functions[RADIOTPYE_2D4GHZ].radio_rxEnable();
+        radio_functions[RADIOTPYE_2D4GHZ].radio_rxNow();
+        ieee154e_vars.singleChannelChanged = FALSE;
+    }
+    
+    // increment ASN (used only to schedule serial activity)
+    incrementAsnOffset();
+    
+    // to be able to receive and transmist serial even when not synchronized
+    // take turns every 8 slots sending and receiving
+    if ((ieee154e_vars.asn.bytes0and1&0x000f)==0x0000) {
+        openserial_stop();
+        openserial_startOutput();
+    } else if ((ieee154e_vars.asn.bytes0and1&0x000f)==0x0008) {
+        openserial_stop();
+        openserial_startInput();
+    }
 }
 
 port_INLINE void activity_synchronize_startOfFrame(PORT_TIMER_WIDTH capturedTime) {
@@ -949,7 +955,6 @@ port_INLINE void activity_ti1ORri1() {
             
             // change owner
             ieee154e_vars.dataToSend->owner = COMPONENT_IEEE802154E;
-
             if (couldSendEB==TRUE) {        // I will be sending an EB
                //copy synch IE  -- should be Little endian???
                // fill in the ASN field of the EB
@@ -962,7 +967,7 @@ port_INLINE void activity_ti1ORri1() {
             ieee154e_vars.dataToSend->l2_numTxAttempts++;
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
             // 1. schedule timer for loading packet
-            radiotimer_schedule(ACTION_LOAD_PACKET,      DURATION_tt1);
+            sctimer_scheduleActionIn(ACTION_LOAD_PACKET, ieee154e_vars.startOfSlotReference+DURATION_tt1);
             // prepare the packet for load packet action at DURATION_tt1
             // make a local copy of the frame
             packetfunctions_duplicatePacket(&ieee154e_vars.localCopyForTransmission, ieee154e_vars.dataToSend);
@@ -978,16 +983,20 @@ port_INLINE void activity_ti1ORri1() {
             }
             // add 2 CRC bytes only to the local copy as we end up here for each retransmission
             packetfunctions_reserveFooterSize(&ieee154e_vars.localCopyForTransmission, 2);
+            
+            // configure the radio for that frequency
+            radio_setFrequency(ieee154e_vars.channel);
+            
             // set the tx buffer address and length register.(packet is NOT loaded at this moment)
             radio_loadPacket_prepare(ieee154e_vars.localCopyForTransmission.payload,
                                      ieee154e_vars.localCopyForTransmission.length);
             // 2. schedule timer for sending packet
-            radiotimer_schedule(ACTION_SEND_PACKET,  DURATION_tt2);
+            sctimer_scheduleActionIn(ACTION_SEND_PACKET,  ieee154e_vars.startOfSlotReference+DURATION_tt2);
             // 3. schedule timer radio tx watchdog
-            radiotimer_schedule(ACTION_NORMAL_TIMER, DURATION_tt3);
+            sctimer_scheduleActionIn(ACTION_SET_TIMEOUT, ieee154e_vars.startOfSlotReference+DURATION_tt3);
             // 4. set capture interrupt for Tx SFD senddone and packet senddone
-            radiotimer_setCapture(ACTION_TX_SFD_DONE);
-            radiotimer_setCapture(ACTION_TX_SEND_DONE);
+            sctimer_setCapture(ACTION_TX_SFD_DONE);
+            sctimer_setCapture(ACTION_TX_SEND_DONE);
 #else
             // arm tt1
             opentimers_scheduleAbsolute(
@@ -1014,13 +1023,16 @@ port_INLINE void activity_ti1ORri1() {
 
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
          // arm rt1
-         radiotimer_schedule(ACTION_RADIORX_ENABLE,DURATION_rt1);
+         sctimer_scheduleActionIn(ACTION_RADIORX_ENABLE,ieee154e_vars.startOfSlotReference+DURATION_rt1);
          radio_rxPacket_prepare();
          // 2. schedule timer for starting 
-         radiotimer_schedule(ACTION_NORMAL_TIMER,DURATION_rt2);
+         sctimer_scheduleActionIn(ACTION_SET_TIMEOUT,  ieee154e_vars.startOfSlotReference+DURATION_rt2);
          // 3.  set capture interrupt for Rx SFD done and receiving packet done
-         radiotimer_setCapture(ACTION_RX_SFD_DONE);
-         radiotimer_setCapture(ACTION_RX_DONE);
+         sctimer_setCapture(ACTION_RX_SFD_DONE);
+         sctimer_setCapture(ACTION_RX_DONE);
+         
+         // configure the radio for that frequency
+         radio_setFrequency(ieee154e_vars.freq);
 #else
          // arm rt1
          opentimers_scheduleAbsolute(
@@ -1130,7 +1142,6 @@ port_INLINE void activity_ti2() {
    
     // add 2 CRC bytes only to the local copy as we end up here for each retransmission
     packetfunctions_reserveFooterSize(&ieee154e_vars.localCopyForTransmission, 2);
-#endif
    
     // configure the radio for that frequency
     radio_functions[ieee154e_vars.radioType].radio_setFrequency(ieee154e_vars.ch_spacing,ieee154e_vars.frequency,ieee154e_vars.channel);
@@ -1138,6 +1149,7 @@ port_INLINE void activity_ti2() {
     // load the packet in the radio's Tx buffer
     radio_functions[ieee154e_vars.radioType].radio_loadPacket(ieee154e_vars.localCopyForTransmission.payload,
                      ieee154e_vars.localCopyForTransmission.length);
+#endif
     // enable the radio in Tx mode. This does not send the packet.
     radio_functions[ieee154e_vars.radioType].radio_txEnable();
 
@@ -1145,10 +1157,6 @@ port_INLINE void activity_ti2() {
     ieee154e_vars.radioOnThisSlot=TRUE;
     // change state
     changeState(S_TXDATAREADY);
-#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
-    // update state in advance
-    changeState(S_TXDATADELAY);
-#endif
 }
 
 port_INLINE void activity_tie1() {
@@ -1197,7 +1205,7 @@ port_INLINE void activity_ti4(PORT_TIMER_WIDTH capturedTime) {
     changeState(S_TXDATA);
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
     // cancel tt3
-    radiotimer_cancel(ACTION_NORMAL_TIMER);
+    sctimer_actionCancel(ACTION_SET_TIMEOUT);
 #else
     // cancel tt3
     opentimers_scheduleAbsolute(
@@ -1213,7 +1221,7 @@ port_INLINE void activity_ti4(PORT_TIMER_WIDTH capturedTime) {
     ieee154e_vars.lastCapturedTime = capturedTime;
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
     // arm tt4
-    radiotimer_schedule(ACTION_NORMAL_TIMER,DURATION_tt4);
+    sctimer_scheduleActionIn(ACTION_SET_TIMEOUT,ieee154e_vars.startOfSlotReference+DURATION_tt4);
 #else
     // arm tt4
     opentimers_scheduleAbsolute(
@@ -1244,7 +1252,7 @@ port_INLINE void activity_ti5(PORT_TIMER_WIDTH capturedTime) {
     changeState(S_RXACKOFFSET);
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
     // cancel tt4
-    radiotimer_cancel(ACTION_NORMAL_TIMER);
+    sctimer_actionCancel(ACTION_SET_TIMEOUT);
 #else
     // cancel tt4
     opentimers_scheduleAbsolute(
@@ -1274,14 +1282,17 @@ port_INLINE void activity_ti5(PORT_TIMER_WIDTH capturedTime) {
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
         // 1. schedule timer for enabling receiving
         // arm tt5
-        radiotimer_schedule(ACTION_RADIORX_ENABLE,DURATION_tt5);
+        sctimer_scheduleActionIn(ACTION_RADIORX_ENABLE,ieee154e_vars.startOfSlotReference+DURATION_tt5);
         // set receiving buffer address (radio is NOT enabled at this moment)
         radio_rxPacket_prepare();
         // 2. schedule timer for starting receiving
-        radiotimer_schedule(ACTION_NORMAL_TIMER,DURATION_tt6);
+        sctimer_scheduleActionIn(ACTION_SET_TIMEOUT,ieee154e_vars.startOfSlotReference+DURATION_tt6);
         // 3. set capture for receiving SFD and packet receiving done
-        radiotimer_setCapture(ACTION_RX_SFD_DONE);
-        radiotimer_setCapture(ACTION_RX_DONE);
+        sctimer_setCapture(ACTION_RX_SFD_DONE);
+        sctimer_setCapture(ACTION_RX_DONE);
+        
+        // configure the radio for that frequency
+        radio_setFrequency(ieee154e_vars.freq);
 #else
         // arm tt5
         opentimers_scheduleAbsolute(
@@ -1309,6 +1320,8 @@ port_INLINE void activity_ti6() {
     // change state
     changeState(S_RXACKPREPARE);
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
+    // enable the radio in Rx mode. The radio is not actively listening yet.
+    radio_rxEnable_scum();
 #else
     // arm tt6
     opentimers_scheduleAbsolute(
@@ -1319,18 +1332,12 @@ port_INLINE void activity_ti6() {
         isr_ieee154e_timer                                // callback
     );
     // radiotimer_schedule(DURATION_tt6);
-#endif   
    
     // configure the radio for that frequency
     radio_functions[ieee154e_vars.radioType].radio_setFrequency(ieee154e_vars.ch_spacing,ieee154e_vars.frequency,ieee154e_vars.channel);
    
-#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
-    // enable the radio in Rx mode. The radio is not actively listening yet.
-    radio_rxEnable_scum();
-#else
     radio_functions[ieee154e_vars.radioType].radio_rxEnable();
 #endif
-   
     //caputre init of radio for duty cycle calculation
     ieee154e_vars.radioOnInit=sctimer_readCounter();
     ieee154e_vars.radioOnThisSlot=TRUE;
@@ -1357,7 +1364,7 @@ port_INLINE void activity_ti7() {
    radio_functions[ieee154e_vars.radioType].radio_rxNow();
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
    // arm tt7
-   radiotimer_schedule(ACTION_NORMAL_TIMER,DURATION_tt7);
+    sctimer_scheduleActionIn(ACTION_SET_TIMEOUT,ieee154e_vars.startOfSlotReference+DURATION_tt7);
 #else
    // arm tt7
    opentimers_scheduleAbsolute(
@@ -1398,7 +1405,7 @@ port_INLINE void activity_ti8(PORT_TIMER_WIDTH capturedTime) {
     changeState(S_RXACK);
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
     // cancel tt7
-    radiotimer_cancel(ACTION_NORMAL_TIMER);
+    sctimer_actionCancel(ACTION_SET_TIMEOUT);
 #else
     // cancel tt7
     opentimers_scheduleAbsolute(
@@ -1414,7 +1421,7 @@ port_INLINE void activity_ti8(PORT_TIMER_WIDTH capturedTime) {
     ieee154e_vars.lastCapturedTime = capturedTime;
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
     // arm tt8
-    radiotimer_schedule(ACTION_NORMAL_TIMER,DURATION_tt8);
+    sctimer_scheduleActionIn(ACTION_SET_TIMEOUT,ieee154e_vars.startOfSlotReference+DURATION_tt8);
 #else
     // arm tt8
    opentimers_scheduleAbsolute(
@@ -1444,7 +1451,7 @@ port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
     changeState(S_TXPROC);
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
     // cancel tt8
-    radiotimer_cancel(ACTION_NORMAL_TIMER);
+    sctimer_actionCancel(ACTION_SET_TIMEOUT);
 #else
     // cancel tt8
     opentimers_scheduleAbsolute(
@@ -1493,7 +1500,7 @@ port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
         
         // retrieve the received ack frame from the radio's Rx buffer
         ieee154e_vars.ackReceived->payload = &(ieee154e_vars.ackReceived->packet[FIRST_FRAME_BYTE]);
-        radio_functions[ieee154e_vars.radioType].radio_getReceivedFrame(       ieee154e_vars.ackReceived->payload,
+        radio_functions[ieee154e_vars.radioType].radio_getReceivedFrame(ieee154e_vars.ackReceived->payload,
                                    &ieee154e_vars.ackReceived->length,
                              sizeof(ieee154e_vars.ackReceived->packet),
                                    &ieee154e_vars.ackReceived->l1_rssi,
@@ -1587,10 +1594,12 @@ port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
 port_INLINE void activity_ri2() {
     // change state
     changeState(S_RXDATAPREPARE);
+    
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
+    radio_rxEnable_scum();
 #else
     // arm rt2
-   opentimers_scheduleAbsolute(
+    opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         DURATION_rt2,                                     // duration
         ieee154e_vars.startOfSlotReference,               // reference
@@ -1598,31 +1607,27 @@ port_INLINE void activity_ri2() {
         isr_ieee154e_timer                                // callback
     );
     // radiotimer_schedule(DURATION_rt2);
-#endif
-   
+    
     // configure the radio for that frequency
     radio_functions[ieee154e_vars.radioType].radio_setFrequency(ieee154e_vars.ch_spacing,ieee154e_vars.frequency,ieee154e_vars.channel);
-#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
-    radio_rxEnable_scum();
-#else
-    // enable the radio in Rx mode. The radio does not actively listen yet.
+    
     radio_functions[ieee154e_vars.radioType].radio_rxEnable();
 #endif
     ieee154e_vars.radioOnInit=sctimer_readCounter();
     ieee154e_vars.radioOnThisSlot=TRUE;
-       
+    
     // change state
     changeState(S_RXDATAREADY);
 }
 
 port_INLINE void activity_rie1() {
-   // log the error
-   openserial_printError(COMPONENT_IEEE802154E,ERR_MAXRXDATAPREPARE_OVERFLOWS,
+    // log the error
+    openserial_printError(COMPONENT_IEEE802154E,ERR_MAXRXDATAPREPARE_OVERFLOWS,
                          (errorparameter_t)ieee154e_vars.state,
                          (errorparameter_t)ieee154e_vars.slotOffset);
-   
-   // abort
-   endSlot();
+    
+    // abort
+    endSlot();
 }
 
 port_INLINE void activity_ri3() {
@@ -1633,7 +1638,7 @@ port_INLINE void activity_ri3() {
     radio_functions[ieee154e_vars.radioType].radio_rxNow();
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
     // arm rt3
-    radiotimer_schedule(ACTION_NORMAL_TIMER,DURATION_rt3);
+    sctimer_scheduleActionIn(ACTION_SET_TIMEOUT,ieee154e_vars.startOfSlotReference+DURATION_rt3);
 #else
     // arm rt3 
     opentimers_scheduleAbsolute(
@@ -1656,9 +1661,10 @@ port_INLINE void activity_ri4(PORT_TIMER_WIDTH capturedTime) {
 
    // change state
    changeState(S_RXDATA);
+    
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
    // cancel rt3
-   radiotimer_cancel(ACTION_NORMAL_TIMER);
+    sctimer_actionCancel(ACTION_SET_TIMEOUT);
 #else
    // cancel rt3
     opentimers_scheduleAbsolute(
@@ -1676,7 +1682,7 @@ port_INLINE void activity_ri4(PORT_TIMER_WIDTH capturedTime) {
    // record the captured time to sync
    ieee154e_vars.syncCapturedTime = capturedTime;
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
-   radiotimer_schedule(ACTION_NORMAL_TIMER,DURATION_rt4);
+    sctimer_scheduleActionIn(ACTION_SET_TIMEOUT,ieee154e_vars.startOfSlotReference+DURATION_rt4);
 #else
     opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
@@ -1690,6 +1696,7 @@ port_INLINE void activity_ri4(PORT_TIMER_WIDTH capturedTime) {
 }
 
 port_INLINE void activity_rie3() {
+    
     // log the error
     openserial_printError(COMPONENT_IEEE802154E,ERR_WDDATADURATION_OVERFLOWS,
                          (errorparameter_t)ieee154e_vars.state,
@@ -1707,7 +1714,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
     changeState(S_TXACKOFFSET);
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
     // cancel rt4
-    radiotimer_cancel(ACTION_NORMAL_TIMER);
+    sctimer_actionCancel(ACTION_SET_TIMEOUT);
 #else
     // cancel rt4
     opentimers_scheduleAbsolute(
@@ -1849,8 +1856,6 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
         // check if ack requested
         if (ieee802514_header.ackRequested==1 && ieee154e_vars.isAckEnabled == TRUE) {
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
-            // 1. schedule timer for loading packet
-            radiotimer_schedule(ACTION_LOAD_PACKET,DURATION_rt5);
             // get a buffer to put the ack to send in
             ieee154e_vars.ackToSend = openqueue_getFreePacketBuffer(COMPONENT_IEEE802154E);
             if (ieee154e_vars.ackToSend==NULL) {
@@ -1868,7 +1873,6 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
                 endSlot();
                 return;
             }
-           
             // declare ownership over that packet
             ieee154e_vars.ackToSend->creator = COMPONENT_IEEE802154E;
             ieee154e_vars.ackToSend->owner   = COMPONENT_IEEE802154E;
@@ -1905,15 +1909,20 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
             }
             // space for 2-byte CRC
             packetfunctions_reserveFooterSize(ieee154e_vars.ackToSend,2);
+            // 1. schedule timer for loading packet
+            sctimer_scheduleActionIn(ACTION_LOAD_PACKET,ieee154e_vars.startOfSlotReference+DURATION_rt5);
             // set tx buffer address and length to prepare loading packet (packet is NOT loaded at this moment)
             radio_loadPacket_prepare(ieee154e_vars.ackToSend->payload,
                                     ieee154e_vars.ackToSend->length);
-            radiotimer_schedule(ACTION_SEND_PACKET,DURATION_rt6);
+            sctimer_scheduleActionIn(ACTION_SEND_PACKET,ieee154e_vars.startOfSlotReference+DURATION_rt6);
             // 2. schedule timer for radio tx watchdog
-            radiotimer_schedule(ACTION_NORMAL_TIMER,DURATION_rt7);
+            sctimer_scheduleActionIn(ACTION_SET_TIMEOUT,ieee154e_vars.startOfSlotReference+DURATION_rt7);
             // 3. set capture for SFD senddone and Tx send done
-            radiotimer_setCapture(ACTION_TX_SFD_DONE);
-            radiotimer_setCapture(ACTION_TX_SEND_DONE);
+            sctimer_setCapture(ACTION_TX_SFD_DONE);
+            sctimer_setCapture(ACTION_TX_SEND_DONE);
+            
+            // configure the radio for that frequency
+            radio_setFrequency(ieee154e_vars.freq);
 #else
             // arm rt5
             opentimers_scheduleAbsolute(
@@ -1971,9 +1980,7 @@ port_INLINE void activity_ri6() {
         isr_ieee154e_timer                                // callback
     );
     // radiotimer_schedule(DURATION_rt6);
-#endif
-#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
-#else
+    
     // get a buffer to put the ack to send in
     ieee154e_vars.ackToSend = openqueue_getFreePacketBuffer(COMPONENT_IEEE802154E);
     if (ieee154e_vars.ackToSend==NULL) {
@@ -2024,15 +2031,15 @@ port_INLINE void activity_ri6() {
         }
     }
     // space for 2-byte CRC
-   packetfunctions_reserveFooterSize(ieee154e_vars.ackToSend,2);
-#endif
-   // configure the radio for that frequency
-   radio_functions[ieee154e_vars.radioType].radio_setFrequency(ieee154e_vars.ch_spacing,ieee154e_vars.frequency,ieee154e_vars.channel);
-   
-   // load the packet in the radio's Tx buffer
-   radio_functions[ieee154e_vars.radioType].radio_loadPacket(ieee154e_vars.ackToSend->payload,
+    packetfunctions_reserveFooterSize(ieee154e_vars.ackToSend,2);
+    
+    // configure the radio for that frequency
+    radio_functions[ieee154e_vars.radioType].radio_setFrequency(ieee154e_vars.ch_spacing,ieee154e_vars.frequency,ieee154e_vars.channel);
+    
+    // load the packet in the radio's Tx buffer
+    radio_functions[ieee154e_vars.radioType].radio_loadPacket(ieee154e_vars.ackToSend->payload,
                     ieee154e_vars.ackToSend->length);
-   
+#endif
     // enable the radio in Tx mode. This does not send that packet.
     radio_functions[ieee154e_vars.radioType].radio_txEnable();
     ieee154e_vars.radioOnInit=sctimer_readCounter();
@@ -2089,7 +2096,7 @@ port_INLINE void activity_ri8(PORT_TIMER_WIDTH capturedTime) {
     changeState(S_TXACK);
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
     // cancel rt7
-    radiotimer_cancel(ACTION_NORMAL_TIMER);
+    sctimer_actionCancel(ACTION_SET_TIMEOUT);
 #else
     // cancel rt7
     opentimers_scheduleAbsolute(
@@ -2105,7 +2112,7 @@ port_INLINE void activity_ri8(PORT_TIMER_WIDTH capturedTime) {
     ieee154e_vars.lastCapturedTime = capturedTime;
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
     // arm rt8
-    radiotimer_schedule(ACTION_NORMAL_TIMER,DURATION_rt8);
+    sctimer_scheduleActionIn(ACTION_SET_TIMEOUT,ieee154e_vars.startOfSlotReference+DURATION_rt8);
 #else
     // arm rt8
     opentimers_scheduleAbsolute(
@@ -2134,7 +2141,7 @@ port_INLINE void activity_ri9(PORT_TIMER_WIDTH capturedTime) {
    changeState(S_RXPROC);
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
    // cancel rt8
-   radiotimer_cancel(ACTION_NORMAL_TIMER);
+    sctimer_actionCancel(ACTION_SET_TIMEOUT);
 #else
    // cancel rt8
     opentimers_scheduleAbsolute(
@@ -2154,11 +2161,6 @@ port_INLINE void activity_ri9(PORT_TIMER_WIDTH capturedTime) {
    
    // clear local variable
    ieee154e_vars.ackToSend = NULL;
-   
-   // synchronize to the received packet
-   if (idmanager_getIsDAGroot()==FALSE && icmpv6rpl_isPreferredParent(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop))) {
-      synchronizePacket(ieee154e_vars.syncCapturedTime);
-   }
    
    // inform upper layer of reception (after ACK sent)
    notif_receive(ieee154e_vars.dataReceived);
@@ -2836,21 +2838,21 @@ function should already have been done. If this is not the case, this function
 will do that for you, but assume that something went wrong.
 */
 void endSlot() {
-   uint8_t i;
-   
-   for (i=0;i<MAX_NUM_RADIOS;i++){
-   // turn off the radio
-    radio_functions[RADIOTPYE_2D4GHZ].radio_rfOff();
-   }
-   
-   // compute the duty cycle if radio has been turned on
-   if (ieee154e_vars.radioOnThisSlot==TRUE){  
-      ieee154e_vars.radioOnTics+=(sctimer_readCounter()-ieee154e_vars.radioOnInit);
-   }
+    uint8_t i;
+    
+    for (i=0;i<MAX_NUM_RADIOS;i++){
+    // turn off the radio
+     radio_functions[RADIOTPYE_2D4GHZ].radio_rfOff();
+    }
+    
+    // compute the duty cycle if radio has been turned on
+    if (ieee154e_vars.radioOnThisSlot==TRUE){  
+        ieee154e_vars.radioOnTics+=(sctimer_readCounter()-ieee154e_vars.radioOnInit);
+    }
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
-   radiotimer_cancel(ACTION_ALL_RADIOTIMER_INTERRUPT);
+    sctimer_actionCancel(ACTION_ALL_RADIOTIMER_INTERRUPT);
 #else
-   // clear any pending timer
+    // clear any pending timer
     opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
         ieee154e_vars.slotDuration,                       // duration
@@ -2860,76 +2862,76 @@ void endSlot() {
     );
     // radiotimer_cancel();
 #endif
-   // reset capturedTimes
-   ieee154e_vars.lastCapturedTime = 0;
-   ieee154e_vars.syncCapturedTime = 0;
-   
-   //computing duty cycle.
-   ieee154e_stats.numTicsOn+=ieee154e_vars.radioOnTics;//accumulate and tics the radio is on for that window
-   ieee154e_stats.numTicsTotal+=ieee154e_vars.slotDuration;//increment total tics by timer period.
-
-   if (ieee154e_stats.numTicsTotal>DUTY_CYCLE_WINDOW_LIMIT){
-      ieee154e_stats.numTicsTotal = ieee154e_stats.numTicsTotal>>1;
-      ieee154e_stats.numTicsOn    = ieee154e_stats.numTicsOn>>1;
-   }
-
-   //clear vars for duty cycle on this slot   
-   ieee154e_vars.radioOnTics=0;
-   ieee154e_vars.radioOnThisSlot=FALSE;
-   
-   // clean up dataToSend
-   if (ieee154e_vars.dataToSend!=NULL) {
-      // if everything went well, dataToSend was set to NULL in ti9
-      // getting here means transmit failed
-      
-      // indicate Tx fail to schedule to update stats
-      schedule_indicateTx(&ieee154e_vars.asn,FALSE);
-      
-      //decrement transmits left counter
-      ieee154e_vars.dataToSend->l2_retriesLeft--;
-      
-      if (ieee154e_vars.dataToSend->l2_retriesLeft==0) {
-         // indicate tx fail if no more retries left
-         notif_sendDone(ieee154e_vars.dataToSend,E_FAIL);
-      } else {
-         // return packet to the virtual COMPONENT_SIXTOP_TO_IEEE802154E component
-         ieee154e_vars.dataToSend->owner = COMPONENT_SIXTOP_TO_IEEE802154E;
-      }
-      
-      // reset local variable
-      ieee154e_vars.dataToSend = NULL;
-   }
-   
-   // clean up dataReceived
-   if (ieee154e_vars.dataReceived!=NULL) {
-      // assume something went wrong. If everything went well, dataReceived
-      // would have been set to NULL in ri9.
-      // indicate  "received packet" to upper layer since we don't want to loose packets
-      notif_receive(ieee154e_vars.dataReceived);
-      // reset local variable
-      ieee154e_vars.dataReceived = NULL;
-   }
-   
-   // clean up ackToSend
-   if (ieee154e_vars.ackToSend!=NULL) {
-      // free ackToSend so corresponding RAM memory can be recycled
-      openqueue_freePacketBuffer(ieee154e_vars.ackToSend);
-      // reset local variable
-      ieee154e_vars.ackToSend = NULL;
-   }
-   
-   // clean up ackReceived
-   if (ieee154e_vars.ackReceived!=NULL) {
-      // free ackReceived so corresponding RAM memory can be recycled
-      openqueue_freePacketBuffer(ieee154e_vars.ackReceived);
-      // reset local variable
-      ieee154e_vars.ackReceived = NULL;
-   }
-   
-   // change state
-   changeState(S_SLEEP);
+    // reset capturedTimes
+    ieee154e_vars.lastCapturedTime = 0;
+    ieee154e_vars.syncCapturedTime = 0;
+    
+    //computing duty cycle.
+    ieee154e_stats.numTicsOn+=ieee154e_vars.radioOnTics;//accumulate and tics the radio is on for that window
+    ieee154e_stats.numTicsTotal+=ieee154e_vars.slotDuration;//increment total tics by timer period.
+    
+    if (ieee154e_stats.numTicsTotal>DUTY_CYCLE_WINDOW_LIMIT){
+        ieee154e_stats.numTicsTotal = ieee154e_stats.numTicsTotal>>1;
+        ieee154e_stats.numTicsOn    = ieee154e_stats.numTicsOn>>1;
+    }
+    
+    //clear vars for duty cycle on this slot   
+    ieee154e_vars.radioOnTics=0;
+    ieee154e_vars.radioOnThisSlot=FALSE;
+    
+    // clean up dataToSend
+    if (ieee154e_vars.dataToSend!=NULL) {
+        // if everything went well, dataToSend was set to NULL in ti9
+        // getting here means transmit failed
+        
+        // indicate Tx fail to schedule to update stats
+        schedule_indicateTx(&ieee154e_vars.asn,FALSE);
+        
+        //decrement transmits left counter
+        ieee154e_vars.dataToSend->l2_retriesLeft--;
+        
+        if (ieee154e_vars.dataToSend->l2_retriesLeft==0) {
+            // indicate tx fail if no more retries left
+            notif_sendDone(ieee154e_vars.dataToSend,E_FAIL);
+        } else {
+            // return packet to the virtual COMPONENT_SIXTOP_TO_IEEE802154E component
+            ieee154e_vars.dataToSend->owner = COMPONENT_SIXTOP_TO_IEEE802154E;
+        }
+        
+        // reset local variable
+        ieee154e_vars.dataToSend = NULL;
+    }
+    
+    // clean up dataReceived
+    if (ieee154e_vars.dataReceived!=NULL) {
+        // assume something went wrong. If everything went well, dataReceived
+        // would have been set to NULL in ri9.
+        // indicate  "received packet" to upper layer since we don't want to loose packets
+        notif_receive(ieee154e_vars.dataReceived);
+        // reset local variable
+        ieee154e_vars.dataReceived = NULL;
+    }
+    
+    // clean up ackToSend
+    if (ieee154e_vars.ackToSend!=NULL) {
+        // free ackToSend so corresponding RAM memory can be recycled
+        openqueue_freePacketBuffer(ieee154e_vars.ackToSend);
+        // reset local variable
+        ieee154e_vars.ackToSend = NULL;
+    }
+    
+    // clean up ackReceived
+    if (ieee154e_vars.ackReceived!=NULL) {
+        // free ackReceived so corresponding RAM memory can be recycled
+        openqueue_freePacketBuffer(ieee154e_vars.ackReceived);
+        // reset local variable
+        ieee154e_vars.ackReceived = NULL;
+    }
+    
+    // change state
+    changeState(S_SLEEP);
 }
 
 bool ieee154e_isSynch(){
-   return ieee154e_vars.isSync;
+    return ieee154e_vars.isSync;
 }

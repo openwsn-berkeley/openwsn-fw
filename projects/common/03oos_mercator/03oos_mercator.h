@@ -184,7 +184,7 @@ void isr_openserial_rx_mod(void);
 uint16_t htons(uint16_t val);
 
    // initial radio
-void cb_startFrame(uint16_t timestamp);
-void cb_endFrame(uint16_t timestamp);
+void cb_startFrame(PORT_TIMER_WIDTH timestamp);
+void cb_endFrame(PORT_TIMER_WIDTH timestamp);
 void cb_sendPacket(opentimers_id_t id);
 void cb_finishTx(void);

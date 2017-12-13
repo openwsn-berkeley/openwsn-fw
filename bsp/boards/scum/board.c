@@ -10,10 +10,9 @@
 // bsp modules
 #include "leds.h"
 #include "uart.h"
-#include "bsp_timer.h"
 #include "radio.h"
-#include "radiotimer.h"
 #include "eui64.h"
+#include "sctimer.h"
 
 //=========================== variables =======================================
 
@@ -36,9 +35,8 @@ void board_init() {
     debugpins_init();
     leds_init();
     uart_init();
-    bsp_timer_init();
+    sctimer_init();
     radio_init();
-    radiotimer_init();
     eui64_get(eui);
 }
 

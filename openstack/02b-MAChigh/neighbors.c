@@ -5,6 +5,7 @@
 #include "idmanager.h"
 #include "openserial.h"
 #include "IEEE802154E.h"
+#include "openrandom.h"
 
 //=========================== variables =======================================
 
@@ -280,8 +281,7 @@ bool neighbors_reachedMaxTransmission(uint8_t index){
     
     if (
         neighbors_vars.neighbors[index].used     == TRUE            &&
-        neighbors_vars.neighbors[index].numTx    >  DEFAULTLINKCOST &&
-        neighbors_vars.neighbors[index].numTxACK == 0
+        neighbors_vars.neighbors[index].numTx    >  DEFAULTLINKCOST
     ) { 
         returnVal = TRUE;
     } else {
@@ -486,6 +486,57 @@ bool  neighbors_getNeighborEui64(open_addr_t* address, uint8_t addr_type, uint8_
    }
    return ReturnVal;
 }
+// ==== update backoff
+void neighbors_updateBackoff(open_addr_t* address){
+    uint8_t i;
+    for (i=0;i<MAXNUMNEIGHBORS;i++){
+        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b)){
+            // increase the backoffExponent
+            if (neighbors_vars.neighbors[i].backoffExponenton<MAXBE) {
+                neighbors_vars.neighbors[i].backoffExponenton++;
+            }
+            // set the backoff to a random value in [0..2^BE]
+            neighbors_vars.neighbors[i].backoff = openrandom_get16b()%(1<<neighbors_vars.neighbors[i].backoffExponenton);
+            break;
+        }
+    }
+}
+void neighbors_decreaseBackoff(open_addr_t* address){
+    uint8_t i;
+    for (i=0;i<MAXNUMNEIGHBORS;i++){
+        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b)){
+            if (neighbors_vars.neighbors[i].backoff>0) {
+                neighbors_vars.neighbors[i].backoff--;
+            }
+            break;
+        }
+    }
+}
+bool neighbors_backoffHitZero(open_addr_t* address){
+    uint8_t i;
+    bool returnVal;
+    
+    returnVal = FALSE;
+    for (i=0;i<MAXNUMNEIGHBORS;i++){
+        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b)){
+            returnVal = (neighbors_vars.neighbors[i].backoff==0);
+            break;
+        }
+    }
+    return returnVal;
+}
+
+void neighbors_resetBackoff(open_addr_t* address){
+    uint8_t i;
+
+    for (i=0;i<MAXNUMNEIGHBORS;i++){
+        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b)){
+            neighbors_vars.neighbors[i].backoffExponenton     = MINBE-1;
+            neighbors_vars.neighbors[i].backoff               = 0;
+            break;
+        }
+    }
+}
 
 //===== setters
 
@@ -667,12 +718,12 @@ status information about several modules in the OpenWSN stack.
 \returns TRUE if this function printed something, FALSE otherwise.
 */
 bool debugPrint_neighbors() {
-   debugNeighborEntry_t temp;
-   neighbors_vars.debugRow=(neighbors_vars.debugRow+1)%MAXNUMNEIGHBORS;
-   temp.row=neighbors_vars.debugRow;
-   temp.neighborEntry=neighbors_vars.neighbors[neighbors_vars.debugRow];
-   openserial_printStatus(STATUS_NEIGHBORS,(uint8_t*)&temp,sizeof(debugNeighborEntry_t));
-   return TRUE;
+    debugNeighborEntry_t temp;
+    neighbors_vars.debugRow=(neighbors_vars.debugRow+1)%MAXNUMNEIGHBORS;
+    temp.row=neighbors_vars.debugRow;
+    temp.neighborEntry=neighbors_vars.neighbors[neighbors_vars.debugRow];
+    openserial_printStatus(STATUS_NEIGHBORS,(uint8_t*)&temp,sizeof(debugNeighborEntry_t));
+    return TRUE;
 }
 
 //=========================== private =========================================
@@ -756,6 +807,7 @@ void removeNeighbor(uint8_t neighborIndex) {
    neighbors_vars.neighbors[neighborIndex].asn.bytes2and3            = 0;
    neighbors_vars.neighbors[neighborIndex].asn.byte4                 = 0;
    neighbors_vars.neighbors[neighborIndex].f6PNORES                  = FALSE;
+   neighbors_vars.neighbors[neighborIndex].sequenceNumber            = 0;
 }
 
 //=========================== helpers =========================================

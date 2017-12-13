@@ -8,8 +8,9 @@ from coap import coap
 import signal
 
 MOTE_IP = 'bbbb::1415:92cc:0:2'
+UDPPORT = 61618 # can't be the port used in OV
 
-c = coap.coap()
+c = coap.coap(udpPort=UDPPORT)
 
 # read the information about the board status
 p = c.GET('coap://[{0}]/i'.format(MOTE_IP))
