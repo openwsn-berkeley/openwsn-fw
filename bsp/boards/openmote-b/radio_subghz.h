@@ -14,7 +14,7 @@
 
 */
 
-#include "board.h"
+#include "radio.h"
 //=========================== define ==========================================
 
 #define LENGTH_CRC_SUBGHZ    4
@@ -58,6 +58,8 @@ void     radio_subghz_getReceivedFrame(uint8_t* bufRead,
 void    radio_subghz_loadPacket_prepare(uint8_t* packet, uint8_t len);
 void    radio_subghz_rxPacket_prepare(void);
 void    radio_subghz_rxEnable_scum(void);
+
+radio_state_t radio_subghz_getState(void);
 
 // interrupt handlers
 void    radio_subghz_isr(void);

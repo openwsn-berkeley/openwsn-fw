@@ -231,6 +231,10 @@ void radio_subghz_loadPacket(uint8_t* packet, uint16_t len) {
     //at86rf215_readBurst(0x0306, packet, len);
 }
 
+radio_state_t radio_subghz_getState(void){
+    return radio_subghz_vars.state;
+}
+
 void radio_subghz_txEnable(void) {
 
     // change state
@@ -239,18 +243,20 @@ void radio_subghz_txEnable(void) {
     // wiggle debug pin
     debugpins_radio_set();
     leds_radio_on();
-    at86rf215_spiReadReg(0);
-    while(radio_subghz_vars.state != RADIOSTATE_TX_ENABLED); 
-    // change state
 }
 
 void radio_subghz_txNow(void) {
+    
+    // check radio state transit to TRX PREPARE
+    if (radio_subghz_vars.state != RADIOSTATE_TX_ENABLED){
+        // return directly
+        return;
+    }
+  
     // change state
     radio_subghz_vars.state = RADIOSTATE_TRANSMITTING;
 
     at86rf215_spiStrobe(CMD_RF_TX);
-    while(radio_subghz_vars.state != RADIOSTATE_TXRX_DONE);
-    at86rf215_spiStrobe(RF_TRXOFF);
 }
 
 //===== RX
@@ -319,7 +325,7 @@ void radio_subghz_isr() {
     
     if (radio_subghz_vars.rf09_isr & IRQS_TRXRDY_MASK){
         radio_subghz_vars.state = RADIOSTATE_TX_ENABLED;
-    // result = DO_NOT_KICK_SCHEDULER;
+        // result = DO_NOT_KICK_SCHEDULER;
     }
     
     if (radio_subghz_vars.bb0_isr & IRQS_RXFS_MASK){

@@ -877,10 +877,6 @@ port_INLINE void activity_ti1ORri1() {
       // advance the schedule
       schedule_advanceSlot();
       
-      // TODO xv poipoi move this to where the neighbor is known so we can use the right 
-      // freq according to the used radio . calculate the frequency to transmit on
-      ieee154e_vars.channel = calculateFrequency(schedule_getChannelOffset()); 
-      
       // find the next one
       ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
       if (idmanager_getIsSlotSkip() && idmanager_getIsDAGroot()==FALSE) {
@@ -929,8 +925,10 @@ port_INLINE void activity_ti1ORri1() {
          // check whether we can send
          if (schedule_getOkToSend()) {
             schedule_getNeighbor(&neighbor);
-            ieee154e_vars.radioType = schedule_getRadioType();   
-            
+            ieee154e_vars.radioType = schedule_getRadioType(); 
+            // freq according to the used radio . calculate the frequency to transmit on
+            ieee154e_vars.channel = calculateFrequency(schedule_getChannelOffset()); 
+      
             //get the radiotype
             ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor,ieee154e_vars.radioType);
             
@@ -1018,7 +1016,9 @@ port_INLINE void activity_ti1ORri1() {
          changeState(S_RXDATAOFFSET);
          
          // assign radio type for RX
-         ieee154e_vars.radioType = schedule_getRadioType();   
+         ieee154e_vars.radioType = schedule_getRadioType();
+         // freq according to the used radio . calculate the frequency to transmit on
+         ieee154e_vars.channel = calculateFrequency(schedule_getChannelOffset()); 
 
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
          // arm rt1
@@ -1182,7 +1182,7 @@ port_INLINE void activity_ti3() {
         isr_ieee154e_timer                                // callback
     );
     // radiotimer_schedule(DURATION_tt3);
-    
+
     // give the 'go' to transmit
     radio_functions[ieee154e_vars.radioType].radio_txNow();
 #endif
@@ -2458,7 +2458,7 @@ bool isValidEbFormat(OpenQueueEntry_t* pkt, uint16_t* lenIE){
                             TRUE,          // shared?
                             channeloffset, // channel offset
                             &temp_neighbor,// neighbor
-                            ieee154e_vars.radioType
+                            (radioType_t)i // radio type. this is a trick to install minimal cells for each radio 
                         );
                     }
                 }
@@ -2837,12 +2837,9 @@ function should already have been done. If this is not the case, this function
 will do that for you, but assume that something went wrong.
 */
 void endSlot() {
-    uint8_t i;
     
-    for (i=0;i<MAX_NUM_RADIOS;i++){
     // turn off the radio
-     radio_functions[RADIOTPYE_2D4GHZ].radio_rfOff();
-    }
+    radio_functions[ieee154e_vars.radioType].radio_rfOff();
     
     // compute the duty cycle if radio has been turned on
     if (ieee154e_vars.radioOnThisSlot==TRUE){  

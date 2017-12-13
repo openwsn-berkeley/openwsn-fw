@@ -70,14 +70,14 @@ int mote_main(void) {
    
    // add radio callback functions
    sctimer_set_callback(cb_radioTimerOverflows);
-   radiosubghz_setStartFrameCb(cb_startFrame);
-   radiosubghz_setEndFrameCb(cb_endFrame);
+   radio_subghz_setStartFrameCb(cb_startFrame);
+   radio_subghz_setEndFrameCb(cb_endFrame);
    
    // prepare radio
-   radiosubghz_rfOn();
-   //radiosubghz_change_modulation(basic_settings_ofdm_1_mcs2);
-   radiosubghz_setFrequency(CHANNEL_SPACING,FREQUENCY_CENTER,CHANNEL); 
-   radiosubghz_rfOff();
+   radio_subghz_rfOn();
+   //radio_subghz_change_modulation(basic_settings_ofdm_1_mcs2);
+   radio_subghz_setFrequency(CHANNEL_SPACING,FREQUENCY_CENTER,CHANNEL); 
+   radio_subghz_rfOff();
    
    // start periodic overflow
    sctimer_setCompare(sctimer_readCounter()+TIMER_PERIOD);
@@ -85,7 +85,7 @@ int mote_main(void) {
       
    while(1) {
          
-      radiosubghz_rfOff();
+      radio_subghz_rfOff();
       app_vars.txpk_txNow = 0;
       while (app_vars.txpk_txNow==0) {
          board_sleep();
@@ -103,10 +103,12 @@ int mote_main(void) {
       }
       
       // send packet
-      radiosubghz_rfOn();
-      radiosubghz_txEnable();
-      radiosubghz_loadPacket(app_vars.txpk_buf,app_vars.txpk_len);
-      radiosubghz_txNow();
+      radio_subghz_rfOn();
+      radio_subghz_loadPacket(app_vars.txpk_buf,app_vars.txpk_len);
+      radio_subghz_txEnable();
+      while(radio_subghz_getState() != RADIOSTATE_TX_ENABLED);
+      radio_subghz_txNow();
+      while(radio_subghz_getState() != RADIOSTATE_TXRX_DONE);
    }
 }
 

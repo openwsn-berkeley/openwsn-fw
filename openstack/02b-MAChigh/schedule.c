@@ -315,6 +315,7 @@ owerror_t schedule_addActiveSlot(
    slotContainer->type                      = type;
    slotContainer->shared                    = shared;
    slotContainer->channelOffset             = channelOffset;
+   slotContainer->radio_type                = radioType;
    memcpy(&slotContainer->neighbor,neighbor,sizeof(open_addr_t));
    
    // insert in circular list
