@@ -24,16 +24,16 @@
 #include "debugpins.h"
 #include "i2c.h"
 #include "leds.h"
-#include "radio.h"
-#include "radio_subghz.h"
 #include "sensors.h"
 #include "sctimer.h"
 #include "uart.h"
 #include "cryptoengine.h"
 #include "spi.h"
+#include "radio.h"
+#include "radio_2d4ghz.h"
 #include "radio_subghz.h"
 
-//=========================== variables =======================================
+//=========================== defines =======================================
 
 #define BSP_BUTTON_BASE                 ( GPIO_D_BASE )
 #define BSP_BUTTON_USER                 ( GPIO_PIN_5 )
@@ -54,7 +54,6 @@ static void gpio_init(void);
 static void button_init(void);
 static void antenna_init(void);
 
-
 static void SysCtrlDeepSleepSetting(void);
 static void SysCtrlSleepSetting(void);
 static void SysCtrlRunSetting(void);
@@ -63,8 +62,6 @@ static void SysCtrlWakeupSetting(void);
 static void GPIO_D_Handler(void);
 
 bool user_button_initialized;
-
-radio_functions_t radio_funct[MAX_NUM_RADIOS];
 
 //=========================== main ============================================
 
@@ -77,29 +74,31 @@ int main(void) {
 //=========================== public ==========================================
 
 void board_init(void) {
-   user_button_initialized = FALSE;
-   
-   gpio_init();
-   clock_init();
-   antenna_init();
-   board_timer_init();
-   leds_init();
-   debugpins_init();
-  // button_init();
-   sctimer_init();
-   uart_init();
-   radio_init();
-   radio_setFunctions(&radio_funct[RADIOTPYE_2D4GHZ]);
-   i2c_init();
-   spi_init();
-   radiosubghz_init();
-   radiosubghz_setFunctions(&radio_funct[RADIOTPYE_SUBGHZ]);
-   sensors_init();
-   cryptoengine_init();  
-}
-
-void board_getRadios(radio_functions_t** radio_function){
-     *radio_function = radio_funct;
+    
+    radio_functions_t* radio_functions;
+    
+    user_button_initialized = FALSE;
+    
+    gpio_init();
+    clock_init();
+    antenna_init();
+    board_timer_init();
+    leds_init();
+    debugpins_init();
+    // button_init();
+    sctimer_init();
+    uart_init();
+    
+    radio_getFunctions(&radio_functions);
+    radio_2d4ghz_init();
+    radio_2d4ghz_setFunctions(&radio_functions[RADIOTPYE_2D4GHZ]);
+    
+    i2c_init();
+    spi_init();
+    radio_subghz_init();
+    radio_subghz_setFunctions(&radio_functions[RADIOTPYE_SUBGHZ]);
+    sensors_init();
+    cryptoengine_init();  
 }
 
 void antenna_init(){

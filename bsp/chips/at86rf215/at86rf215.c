@@ -11,7 +11,7 @@
 #include "spi.h"
 #include "debugpins.h"
 #include "leds.h"
-#include "radio.h"
+#include "radio_subghz.h"
 
 
 void at86rf215_spiStrobe(uint8_t strobe) {
@@ -110,7 +110,7 @@ void at86rf215_spiWriteFifo(uint8_t* bufToWrite, uint16_t len) {
     // step 3. send the payload.
     spi_txrx(
         bufToWrite,                 // bufTx
-        len - LENGTH_CRC,           // lenbufTx
+        len - LENGTH_CRC_SUBGHZ,    // lenbufTx
         SPI_LASTBYTE,               // returnType
         NULL,                       // bufRx
         1,                          // maxLenBufRx
