@@ -371,7 +371,7 @@ port_INLINE void radiosubghz_clear_isr(){
 
 uint8_t radiosubghz_calculateFrequency(uint8_t channelOffset, uint8_t asnOffset, uint8_t numChannels, uint8_t* hopSeq, bool singleChannel){
   if (singleChannel) {
-    return channelOffset; // single channel
+    return 0; // single channel
   } else {
     // channel hopping enabled, use the channel depending on hopping template modulo the available channels for this platform.
     return hopSeq[(asnOffset+channelOffset)%numChannels] % NUM_CHANNELS_SUBGHZ;

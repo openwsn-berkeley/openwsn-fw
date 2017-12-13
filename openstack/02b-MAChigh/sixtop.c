@@ -636,6 +636,7 @@ void timer_sixtop_sendEb_fired(){
     case 0:
         // called every EBPERIOD seconds
         sixtop_sendEB();
+        sixtop_vars.numEBs++;
         break;
     default:
         break;
@@ -673,6 +674,7 @@ This is one of the MAC management tasks. This function inlines in the
 timers_res_fired() function, but is declared as a separate function for better
 readability of the code.
 */
+
 port_INLINE void sixtop_sendEB() {
     OpenQueueEntry_t* eb;
     uint8_t     i;
@@ -765,6 +767,11 @@ port_INLINE void sixtop_sendEB() {
     eb->l2_securityLevel   = IEEE802154_SECURITY_LEVEL_BEACON;
     eb->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE;
     eb->l2_keyIndex        = IEEE802154_security_getBeaconKeyIndex();
+    
+    if (sixtop_vars.numEBs%MAX_NUM_RADIOS){
+      //one EB with every radi
+      eb->l2_radioType = (radioType_t)(sixtop_vars.numEBs%2);
+    }
 
     // put in queue for MAC to handle
     sixtop_send_internal(eb,eb->l2_payloadIEpresent);
