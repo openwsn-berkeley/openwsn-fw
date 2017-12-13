@@ -115,7 +115,7 @@ void ieee154e_init() {
     memset(&ieee154e_dbg,0,sizeof(ieee154e_dbg_t));
     
     ieee154e_vars.singleChannel     = 0; // 0 means channel hopping
-    board_getRadios(&radio_functions);
+    radio_getFunctions(&radio_functions);
     
     ieee154e_vars.isAckEnabled      = TRUE;
     ieee154e_vars.isSecurityEnabled = FALSE;
@@ -666,7 +666,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
       
       // retrieve the received data frame from the radio's Rx buffer
       ieee154e_vars.dataReceived->payload = &(ieee154e_vars.dataReceived->packet[FIRST_FRAME_BYTE]);
-      radio_functions[RADIOTPYE_2D4GHZ].radio_getReceivedFrame(       ieee154e_vars.dataReceived->payload,
+      radio_functions[RADIOTPYE_2D4GHZ].radio_getReceivedFrame(ieee154e_vars.dataReceived->payload,
                                    &ieee154e_vars.dataReceived->length,
                              sizeof(ieee154e_vars.dataReceived->packet),
                                    &ieee154e_vars.dataReceived->l1_rssi,
@@ -675,7 +675,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
                                    &ieee154e_vars.dataReceived->l1_mcs);
       
       // break if packet too short
-      if (ieee154e_vars.dataReceived->length<LENGTH_CRC || ieee154e_vars.dataReceived->length>LENGTH_IEEE154_MAX) {
+      if (ieee154e_vars.dataReceived->length<radio_functions[RADIOTPYE_2D4GHZ].radio_getCRCLen() || ieee154e_vars.dataReceived->length>LENGTH_IEEE154_MAX) {
          // break from the do-while loop and execute abort code below
           openserial_printError(COMPONENT_IEEE802154E,ERR_INVALIDPACKETFROMRADIO,
                             (errorparameter_t)0,
@@ -684,7 +684,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
       }
       
       // toss CRC (2 last bytes)
-      packetfunctions_tossFooter(   ieee154e_vars.dataReceived, LENGTH_CRC);
+      packetfunctions_tossFooter(   ieee154e_vars.dataReceived, radio_functions[RADIOTPYE_2D4GHZ].radio_getCRCLen());
       
       // break if invalid CRC
       if (ieee154e_vars.dataReceived->l1_crc==FALSE) {
@@ -1518,7 +1518,7 @@ port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
         }
       
         // toss CRC (2 last bytes)
-        packetfunctions_tossFooter(   ieee154e_vars.ackReceived, LENGTH_CRC);
+        packetfunctions_tossFooter(   ieee154e_vars.ackReceived, radio_functions[ieee154e_vars.radioType].radio_getCRCLen());
    
         // break if invalid CRC
         if (ieee154e_vars.ackReceived->l1_crc==FALSE) {

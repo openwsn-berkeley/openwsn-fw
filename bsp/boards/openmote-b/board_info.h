@@ -107,7 +107,6 @@
 
 // number of radios in this board.
 #define MAX_NUM_RADIOS         2
-#define DAGROOT
 
 //=========================== typedef  ========================================
 
