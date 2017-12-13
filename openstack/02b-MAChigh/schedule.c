@@ -118,6 +118,8 @@ bool debugPrint_schedule() {
       schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].shared;
    temp.channelOffset                  = \
       schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].channelOffset;
+   temp.radio_type                     = \
+      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].radio_type;
    memcpy(
       &temp.neighbor,
       &schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].neighbor,

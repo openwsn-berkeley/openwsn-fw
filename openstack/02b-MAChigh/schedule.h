@@ -121,6 +121,7 @@ typedef struct {
    uint8_t         type;
    bool            shared;
    uint8_t         channelOffset;
+   radioType_t     radio_type;
    open_addr_t     neighbor;
    uint8_t         numRx;
    uint8_t         numTx;
