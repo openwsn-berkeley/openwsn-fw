@@ -246,6 +246,8 @@ void radio_subghz_txEnable(void) {
 }
 
 void radio_subghz_txNow(void) {
+  
+    PORT_TIMER_WIDTH capturedTime;
     
     // check radio state transit to TRX PREPARE
     if (radio_subghz_vars.state != RADIOSTATE_TX_ENABLED){
@@ -257,6 +259,13 @@ void radio_subghz_txNow(void) {
     radio_subghz_vars.state = RADIOSTATE_TRANSMITTING;
 
     at86rf215_spiStrobe(CMD_RF_TX);
+    
+    if (radio_subghz_vars.startFrame_cb!=NULL) {
+        // capture the time
+        capturedTime = sctimer_readCounter();
+        // call the callback
+        radio_subghz_vars.startFrame_cb(capturedTime);
+    }
 }
 
 //===== RX

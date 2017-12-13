@@ -59,7 +59,7 @@
 
 //===== IEEE802154E timing
 
-#define SLOTDURATION_10MS // by default, we use 10ms time slot
+//#define SLOTDURATION_10MS // by default, we use 10ms time slot
 
 #ifdef SLOTDURATION_10MS
 // time-slot related
@@ -107,7 +107,7 @@
 
 // number of radios in this board.
 #define MAX_NUM_RADIOS         2
-
+   
 //=========================== typedef  ========================================
 
 typedef enum {
