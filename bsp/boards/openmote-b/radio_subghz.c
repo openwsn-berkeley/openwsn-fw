@@ -83,6 +83,7 @@ void  radiosubghz_setFunctions(radio_functions_t * funcs){
     funcs->radio_rxNow              = radiosubghz_rxNow;
     funcs->radio_getReceivedFrame   = radiosubghz_getReceivedFrame;
     funcs->radio_getCRCLen          = radiosubghz_getCRCLen;
+    funcs->radio_calculateFrequency = radiosubghz_calculateFrequency;
 }
 
 void radiosubghz_powerOn(void)
@@ -365,6 +366,16 @@ port_INLINE void radiosubghz_clear_isr(){
   radiosubghz_vars.rf24_isr = 0;
   radiosubghz_vars.bb0_isr = 0;
   radiosubghz_vars.bb1_isr = 0;
+}
+
+
+uint8_t radiosubghz_calculateFrequency(uint8_t channelOffset, uint8_t asnOffset, uint8_t numChannels, uint8_t* hopSeq, bool singleChannel){
+  if (singleChannel) {
+    return channelOffset; // single channel
+  } else {
+    // channel hopping enabled, use the channel depending on hopping template modulo the available channels for this platform.
+    return hopSeq[(asnOffset+channelOffset)%numChannels] % NUM_CHANNELS_SUBGHZ;
+  }  
 }
 
 

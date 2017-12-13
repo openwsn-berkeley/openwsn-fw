@@ -87,6 +87,7 @@ void     radio_setFunctions(radio_functions_t * funcs){
     funcs->radio_rxNow              = radio_rxNow;
     funcs->radio_getReceivedFrame   = radio_getReceivedFrame;
     funcs->radio_getCRCLen          = radio_getCRCLen;
+    funcs->radio_calculateFrequency = radio_calculateFrequency;
 }
 
 void radio_init() {
@@ -567,9 +568,19 @@ void radio_error_isr(void){
    }
 }
 
-void                radio_powerOn(void){}
-void                radio_change_modulation(registerSetting_t * mod){}
-void                radio_change_size(uint16_t* size){}
-void                radio_loadPacket_prepare(uint8_t* packet, uint8_t len){}
-void                radio_rxPacket_prepare(void){}
-void                radio_rxEnable_scum(void){}
+uint8_t radio_calculateFrequency(uint8_t channelOffset, uint8_t asnOffset, uint8_t numChannels, uint8_t* hopSeq, bool singleChannel){
+  if (singleChannel) {
+    return channelOffset; // single channel
+  } else {
+    // channel hopping enabled, use the channel depending on hopping template
+    return 11 + hopSeq[(asnOffset+channelOffset)%numChannels];
+  } 
+}
+
+
+void  radio_powerOn(void){}
+void  radio_change_modulation(registerSetting_t * mod){}
+void  radio_change_size(uint16_t* size){}
+void  radio_loadPacket_prepare(uint8_t* packet, uint8_t len){}
+void  radio_rxPacket_prepare(void){}
+void  radio_rxEnable_scum(void){}

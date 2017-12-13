@@ -17,7 +17,6 @@
 //=========================== define ==========================================
 
 #define LENGTH_CRC 2
-
 /**
 \brief Current state of the radio.
 
@@ -65,7 +64,10 @@ void                radio_getReceivedFrame(uint8_t* bufRead,
                                 uint8_t*  lqi,
                                    bool*  crc,
                                 uint8_t*  mcs);
-uint8_t                radio_getCRCLen(void);
+uint8_t             radio_getCRCLen(void);
+uint8_t             radio_calculateFrequency(uint8_t channelOffset, uint8_t asnOffset, uint8_t numChannels, uint8_t* hopSeq, bool singleChannel);
+
+
 
 // interrupt handlers
 kick_scheduler_t    radio_isr(void);

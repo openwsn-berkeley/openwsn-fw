@@ -17,7 +17,9 @@
 #include "board.h"
 //=========================== define ==========================================
 
-#define LENGTH_CRC_SUBGHZ 4
+#define LENGTH_CRC_SUBGHZ    4
+#define NUM_CHANNELS_SUBGHZ  4 // number of channels to channel hop on
+
 
 
 
@@ -63,7 +65,10 @@ void    radiosubghz_rxEnable_scum(void);
 
 // interrupt handlers
 void    radiosubghz_isr(void);
-uint8_t            radiosubghz_getCRCLen(void);
+
+// some helpers for the MAC
+uint8_t radiosubghz_getCRCLen(void);
+uint8_t radiosubghz_calculateFrequency(uint8_t channelOffset, uint8_t asnOffset, uint8_t numChannels, uint8_t* hopSeq, bool singleChannel);
 
 
 /**

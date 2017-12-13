@@ -2768,12 +2768,11 @@ different channel offsets in the same slot.
 */
 port_INLINE uint8_t calculateFrequency(uint8_t channelOffset) {
     if (ieee154e_vars.singleChannel >= 11 && ieee154e_vars.singleChannel <= 26 ) {
-        return ieee154e_vars.singleChannel; // single channel
+        return radio_functions[ieee154e_vars.radioType].radio_calculateFrequency(ieee154e_vars.singleChannel,ieee154e_vars.asnOffset, NUM_CHANNELS,  ieee154e_vars.chTemplate, true); // single channel
     } else {
         // channel hopping enabled, use the channel depending on hopping template
-        return 11 + ieee154e_vars.chTemplate[(ieee154e_vars.asnOffset+channelOffset)%NUM_CHANNELS];
-    }
-    //return 11+(ieee154e_vars.asnOffset+channelOffset)%16; //channel hopping
+        return radio_functions[ieee154e_vars.radioType].radio_calculateFrequency(channelOffset,ieee154e_vars.asnOffset, NUM_CHANNELS,  ieee154e_vars.chTemplate, false); 
+    } 
 }
 
 /**
