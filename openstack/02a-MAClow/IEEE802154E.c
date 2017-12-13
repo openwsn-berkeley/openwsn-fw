@@ -117,7 +117,6 @@ void ieee154e_init() {
     ieee154e_vars.singleChannel     = 0; // 0 means channel hopping
     board_getRadios(&radio_functions);
     
-    ieee154e_vars.singleChannel     = SYNCHRONIZING_CHANNEL; // 0 means channel hopping
     ieee154e_vars.isAckEnabled      = TRUE;
     ieee154e_vars.isSecurityEnabled = FALSE;
     ieee154e_vars.slotDuration      = TsSlotDuration;

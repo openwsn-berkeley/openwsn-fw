@@ -48,9 +48,7 @@ void                radio_change_size(uint16_t* size);
 // reset
 void                radio_reset(void);
 // TX
-#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
-void                radio_loadPacket_prepare(uint8_t* packet, uint16_t len);
-#endif
+void                radio_loadPacket_prepare(uint8_t* packet, uint8_t len);
 void                radio_txEnable(void);
 void                radio_txNow(void);
 void                radio_loadPacket(uint8_t* packet, uint16_t len);
