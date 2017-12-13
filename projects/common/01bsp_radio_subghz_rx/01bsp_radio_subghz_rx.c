@@ -73,9 +73,9 @@ len=17  num=84  rssi=-81  lqi=108 crc=1
 //=========================== defines =========================================
 
 
-#define LENGTH_SERIAL_FRAME  8              ///< length of the serial frame
+#define LENGTH_SERIAL_FRAME  8                ///< length of the serial frame
 
-#define LENGTH_PACKET   123+LENGTH_CRC // maximum length is 127 bytes
+#define LENGTH_PACKET   123+LENGTH_CRC_SUBGHZ // maximum length is 127 bytes
 #define CHANNEL_SPACING      1200            
 #define FREQUENCY_CENTER   863625
 #define CHANNEL                 0 

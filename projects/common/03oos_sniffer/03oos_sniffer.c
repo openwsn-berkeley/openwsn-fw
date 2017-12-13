@@ -19,10 +19,12 @@
 
 //=========================== defines =========================================
 
-#define LENGTH_PACKET   125+LENGTH_CRC ///< maximum length is 127 bytes
-#define CHANNEL         20             ///< 20=2.450GHz
-#define ID              0x99           ///< byte sent in the packets
-#define TIMER_PERIOD    0x1ff
+#define LENGTH_PACKET    125+LENGTH_CRC ///< maximum length is 127 bytes
+#define CHANNEL          20             ///< 20=2.450GHz
+#define ID               0x99           ///< byte sent in the packets
+#define TIMER_PERIOD     0x1ff
+#define CHANNEL_SPACING  1200            
+#define FREQUENCY_CENTER 863625
 
 //=========================== variables =======================================
 
@@ -41,10 +43,11 @@ typedef struct {
    app_state_t          app_state;
    uint8_t              flag;
    uint8_t              packet[LENGTH_PACKET];
-   uint8_t              packet_len;
+   uint16_t             packet_len;
    int8_t               rxpk_rssi;
    uint8_t              rxpk_lqi;
    bool                 rxpk_crc;
+   uint8_t              rxpk_mcs;
    uint8_t              channel;
    uint8_t              outputOrInput;
    opentimers_id_t      timerId;
@@ -95,7 +98,11 @@ int mote_main(void) {
 
    // prepare radio
    radio_rfOn();
-   radio_setFrequency(CHANNEL);
+   radio_setFrequency(
+      CHANNEL_SPACING,
+      FREQUENCY_CENTER,
+      CHANNEL
+   );
    app_vars.channel = CHANNEL;
 
    // switch in RX by default
@@ -113,7 +120,11 @@ void sniffer_setListeningChannel(uint8_t channel){
     while(app_vars.flag != APP_FLAG_IDLE);
     radio_rfOff();
     radio_rfOn();
-    radio_setFrequency(channel);
+    radio_setFrequency(
+        CHANNEL_SPACING,
+        FREQUENCY_CENTER,
+        CHANNEL
+    );
     app_vars.channel = channel;
     radio_rxEnable();
     radio_rxNow();
@@ -141,7 +152,8 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
       sizeof(app_vars.packet),
       &app_vars.rxpk_rssi,
       &app_vars.rxpk_lqi,
-      &app_vars.rxpk_crc
+      &app_vars.rxpk_crc,
+      &app_vars.rxpk_mcs
    );
 
    scheduler_push_task(task_uploadPacket,TASKPRIO_SNIFFER);

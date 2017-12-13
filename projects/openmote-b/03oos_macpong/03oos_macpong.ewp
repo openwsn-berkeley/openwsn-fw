@@ -339,6 +339,8 @@
                     <state>$PROJ_DIR$\..\..\..\bsp\chips\adxl346\</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\chips\max44009\</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\chips\sht21\</state>
+                    <state>$PROJ_DIR$\..\..\..\bsp\chips\si70x\</state>
+                    <state>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\</state>
                     <state>$PROJ_DIR$\..\..\..\kernel\</state>
                     <state>$PROJ_DIR$\..\..\..\drivers\common\</state>
                     <state>$PROJ_DIR$\..\..\..\inc\</state>
@@ -2312,10 +2314,19 @@
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\radio.c</name>
                 </file>
                 <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\radio_subghz.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\radio_subghz.h</name>
+                </file>
+                <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\sctimer.c</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\sensors.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\spi.c</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\startup_gcc.c</name>
@@ -2382,6 +2393,15 @@
                 </file>
             </group>
             <group>
+                <name>at86rf215</name>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\at86rf215.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\at86rf215.h</name>
+                </file>
+            </group>
+            <group>
                 <name>max44009</name>
                 <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\chips\max44009\max44009.c</name>
@@ -2397,6 +2417,15 @@
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\chips\sht21\sht21.h</name>
+                </file>
+            </group>
+            <group>
+                <name>si70x</name>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\si70x\si70x.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\si70x\si70x.h</name>
                 </file>
             </group>
         </group>
