@@ -83,7 +83,7 @@ void spi_init() {
     GPIOPinTypeSSI(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_RX );
     GPIOPinTypeSSI(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_TX );
     
-    SSIConfigSetExpClk(SSI0_BASE, SysCtrlIOClockGet(), SSI_FRF_MOTO_MODE_0, SSI_MODE_MASTER, /*SysCtrlIOClockGet()/2*/8000000, 8);
+    SSIConfigSetExpClk(SSI0_BASE, SysCtrlIOClockGet(), SSI_FRF_MOTO_MODE_0, SSI_MODE_MASTER, /*SysCtrlIOClockGet()/2*/16000000, 8);
     
     // Enable the SSI0 module.
     SSIEnable(SSI0_BASE);

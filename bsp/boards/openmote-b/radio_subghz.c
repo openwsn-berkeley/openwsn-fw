@@ -214,7 +214,7 @@ void radio_subghz_rfOff(void) {
     at86rf215_spiStrobe(CMD_RF_TRXOFF);
     // wiggle debug pin
     debugpins_radio_clr();
-    leds_radio_off();
+    leds_debug_off();
 
     // change state
     radio_subghz_vars.state = RADIOSTATE_RFOFF;
@@ -242,7 +242,7 @@ void radio_subghz_txEnable(void) {
     at86rf215_spiStrobe(CMD_RF_TXPREP);
     // wiggle debug pin
     debugpins_radio_set();
-    leds_radio_on();
+    leds_debug_on();
 }
 
 void radio_subghz_txNow(void) {
@@ -275,7 +275,7 @@ void radio_subghz_rxEnable(void) {
     radio_subghz_vars.state = RADIOSTATE_ENABLING_RX; 
     // wiggle debug pin
     debugpins_radio_set();
-    leds_radio_on();
+    leds_debug_on();
     at86rf215_spiStrobe(CMD_RF_RX);
     // change state
     radio_subghz_vars.state = RADIOSTATE_LISTENING;

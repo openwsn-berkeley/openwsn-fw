@@ -194,7 +194,7 @@ static void clock_init(void) {
 
     /* Set the IO clock to operate at 16 MHz */
     /* This way peripherals can run while the system clock is gated */
-    SysCtrlIOClockSet(SYS_CTRL_SYSDIV_16MHZ);
+    SysCtrlIOClockSet(SYS_CTRL_SYSDIV_32MHZ);
 
     /* Wait until the selected clock configuration is stable */
     while (!((HWREG(SYS_CTRL_CLOCK_STA)) & (SYS_CTRL_CLOCK_STA_XOSC_STB)));
