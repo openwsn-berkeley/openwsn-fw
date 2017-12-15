@@ -335,4 +335,5 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry) {
    entry->l2_payloadIEpresent          = 0;
    //l2-security
    entry->l2_securityLevel             = 0;
+   entry->l2_radioType                 = RADIOTPYE_2D4GHZ;
 }

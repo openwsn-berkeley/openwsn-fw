@@ -88,6 +88,8 @@ void radio_2d4ghz_setFunctions(radio_functions_t * funcs){
     funcs->radio_getReceivedFrame   = radio_2d4ghz_getReceivedFrame;
     funcs->radio_getCRCLen          = radio_2d4ghz_getCRCLen;
     funcs->radio_calculateFrequency = radio_2d4ghz_calculateFrequency;
+    funcs->radio_getDelayTx         = radio_2d4ghz_getDelayTx;
+    funcs->radio_getDelayRx         = radio_2d4ghz_getDelayRx;
 }
 
 void radio_2d4ghz_init() {
@@ -447,6 +449,13 @@ uint8_t  radio_2d4ghz_getCRCLen(void){
     return LENGTH_CRC;
 }
 
+uint8_t radio_2d4ghz_getDelayTx(void){
+    return delayTx_2D4GHZ;
+}
+
+uint8_t radio_2d4ghz_getDelayRx(void){
+    return delayRx_2D4GHZ;
+}
 
 //=========================== callbacks =======================================
 

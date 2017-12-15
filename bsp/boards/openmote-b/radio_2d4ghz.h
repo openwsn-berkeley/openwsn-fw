@@ -24,7 +24,9 @@
       are called in the righr order. The radio keeps a state for debugging purposes only.
 */
 
-#define LENGTH_CRC 2
+#define LENGTH_CRC      2
+#define delayTx_2D4GHZ 12
+#define delayRx_2D4GHZ  0
 
 //=========================== typedef =========================================
 
@@ -66,7 +68,8 @@ void                radio_2d4ghz_getReceivedFrame(uint8_t* bufRead,
                                 uint8_t*  mcs);
 uint8_t             radio_2d4ghz_getCRCLen(void);
 uint8_t             radio_2d4ghz_calculateFrequency(uint8_t channelOffset, uint8_t asnOffset, uint8_t numChannels, uint8_t* hopSeq, bool singleChannel);
-
+uint8_t             radio_2d4ghz_getDelayTx(void);
+uint8_t             radio_2d4ghz_getDelayRx(void);
 // interrupt handlers
 kick_scheduler_t    radio_2d4ghz_isr(void);
 

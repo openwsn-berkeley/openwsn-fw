@@ -44,7 +44,7 @@ static const uint8_t ebIEsBytestream[] = {
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to successfully synchronize
 #define US_PER_TICK                 30 // number of us per 32kHz clock tick
-#define EB_PORTION                   6 // The portion of minimal cells that used for sending EB.
+#define EB_PORTION                   2 // The portion of minimal cells that used for sending EB.
 #define MAXKAPERIOD               2000 // in slots: @15ms per slot -> ~30 seconds. Max value used by adaptive synchronization.
 #define DESYNCTIMEOUT             2333 // in slots: @15ms per slot -> ~35 seconds. A larger DESYNCTIMEOUT is needed if using a larger KATIMEOUT.
 #define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"
@@ -178,8 +178,8 @@ enum ieee154e_atomicdurations_enum {
    maxRxDataPrepare          =  PORT_maxRxDataPrepare,
    maxTxAckPrepare           =  PORT_maxTxAckPrepare,
    // radio speed related
-   delayTx                   =  PORT_delayTx,         // between GO signal and SFD
-   delayRx                   =  PORT_delayRx,         // between GO signal and start listening
+//   delayTx                   =  PORT_delayTx,         // between GO signal and SFD
+//   delayRx                   =  PORT_delayRx,         // between GO signal and start listening
    // radio watchdog
    wdRadioTx                 =   33,                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 43 is tested and works)
    wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
@@ -200,23 +200,23 @@ enum ieee154e_linkOption_enum {
 
 // FSM timer durations (combinations of atomic durations)
 // TX
-#define DURATION_tt1 ieee154e_vars.lastCapturedTime+TsTxOffset-delayTx-maxTxDataPrepare
-#define DURATION_tt2 ieee154e_vars.lastCapturedTime+TsTxOffset-delayTx
-#define DURATION_tt3 ieee154e_vars.lastCapturedTime+TsTxOffset-delayTx+wdRadioTx
-#define DURATION_tt4 ieee154e_vars.lastCapturedTime+wdDataDuration
-#define DURATION_tt5 ieee154e_vars.lastCapturedTime+TsTxAckDelay-TsShortGT-delayRx-maxRxAckPrepare
-#define DURATION_tt6 ieee154e_vars.lastCapturedTime+TsTxAckDelay-TsShortGT-delayRx
-#define DURATION_tt7 ieee154e_vars.lastCapturedTime+TsTxAckDelay+TsShortGT
-#define DURATION_tt8 ieee154e_vars.lastCapturedTime+wdAckDuration
+#define DURATION_tt1(delayTx) ieee154e_vars.lastCapturedTime+TsTxOffset-delayTx-maxTxDataPrepare
+#define DURATION_tt2(delayTx) ieee154e_vars.lastCapturedTime+TsTxOffset-delayTx
+#define DURATION_tt3(delayTx) ieee154e_vars.lastCapturedTime+TsTxOffset-delayTx+wdRadioTx
+#define DURATION_tt4          ieee154e_vars.lastCapturedTime+wdDataDuration
+#define DURATION_tt5(delayRx) ieee154e_vars.lastCapturedTime+TsTxAckDelay-TsShortGT-delayRx-maxRxAckPrepare
+#define DURATION_tt6(delayRx) ieee154e_vars.lastCapturedTime+TsTxAckDelay-TsShortGT-delayRx
+#define DURATION_tt7          ieee154e_vars.lastCapturedTime+TsTxAckDelay+TsShortGT
+#define DURATION_tt8          ieee154e_vars.lastCapturedTime+wdAckDuration
 // RX
-#define DURATION_rt1 ieee154e_vars.lastCapturedTime+TsTxOffset-TsLongGT-delayRx-maxRxDataPrepare
-#define DURATION_rt2 ieee154e_vars.lastCapturedTime+TsTxOffset-TsLongGT-delayRx
-#define DURATION_rt3 ieee154e_vars.lastCapturedTime+TsTxOffset+TsLongGT
-#define DURATION_rt4 ieee154e_vars.lastCapturedTime+wdDataDuration
-#define DURATION_rt5 ieee154e_vars.lastCapturedTime+TsTxAckDelay-delayTx-maxTxAckPrepare
-#define DURATION_rt6 ieee154e_vars.lastCapturedTime+TsTxAckDelay-delayTx
-#define DURATION_rt7 ieee154e_vars.lastCapturedTime+TsTxAckDelay-delayTx+wdRadioTx
-#define DURATION_rt8 ieee154e_vars.lastCapturedTime+wdAckDuration
+#define DURATION_rt1(delayRx) ieee154e_vars.lastCapturedTime+TsTxOffset-TsLongGT-delayRx-maxRxDataPrepare
+#define DURATION_rt2(delayRx) ieee154e_vars.lastCapturedTime+TsTxOffset-TsLongGT-delayRx
+#define DURATION_rt3          ieee154e_vars.lastCapturedTime+TsTxOffset+TsLongGT
+#define DURATION_rt4          ieee154e_vars.lastCapturedTime+wdDataDuration
+#define DURATION_rt5(delayTx) ieee154e_vars.lastCapturedTime+TsTxAckDelay-delayTx-maxTxAckPrepare
+#define DURATION_rt6(delayTx) ieee154e_vars.lastCapturedTime+TsTxAckDelay-delayTx
+#define DURATION_rt7(delayTx) ieee154e_vars.lastCapturedTime+TsTxAckDelay-delayTx+wdRadioTx
+#define DURATION_rt8          ieee154e_vars.lastCapturedTime+wdAckDuration
 
 //=========================== typedef =========================================
 
@@ -270,6 +270,8 @@ typedef struct {
    uint16_t                  slotDuration;            // duration of slot
    opentimers_id_t           timerId;                 // id of timer used for implementing TSCH slot FSM 
    uint32_t                  startOfSlotReference;    // the time refer to the beginning of slot
+   uint8_t                   delayTx;                 // radio specific tx delay
+   uint8_t                   delayRx;                 // radio specific rx delay
 } ieee154e_vars_t;
 
 BEGIN_PACK

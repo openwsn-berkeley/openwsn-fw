@@ -86,7 +86,7 @@
 #define PORT_maxRxDataPrepare               33    // 1007us (measured  84us)
 #define PORT_maxTxAckPrepare                22    //  305us (measured 219us)
 // radio speed related
-#define PORT_delayTx                        12    //  214us (measured 219us)
+#define PORT_delayTx                        42    //  214us (measured 219us)
 #define PORT_delayRx                        0     //    0us (can not measure)
 // radio watchdog
 #endif
@@ -107,6 +107,8 @@
 
 // number of radios in this board.
 #define MAX_NUM_RADIOS         2
+
+//#define DAGROOT
    
 //=========================== typedef  ========================================
 

@@ -92,6 +92,8 @@ typedef struct {
                             uint8_t* hopSeq, 
                             bool singleChannel
                         );
+    uint8_t             (*radio_getDelayTx)(void);
+    uint8_t             (*radio_getDelayRx)(void);
 } radio_functions_t;
 
 //=========================== variables =======================================

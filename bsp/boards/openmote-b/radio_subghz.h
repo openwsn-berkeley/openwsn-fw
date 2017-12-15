@@ -19,6 +19,8 @@
 
 #define LENGTH_CRC_SUBGHZ    4
 #define NUM_CHANNELS_SUBGHZ  4 // number of channels to channel hop on
+#define delayTx_SUBGHZ      40
+#define delayRx_SUBGHZ       0
 
 //=========================== typedef =========================================
 //=========================== variables =======================================
@@ -67,6 +69,8 @@ void    radio_subghz_isr(void);
 // some helpers for the MAC
 uint8_t radio_subghz_getCRCLen(void);
 uint8_t radio_subghz_calculateFrequency(uint8_t channelOffset, uint8_t asnOffset, uint8_t numChannels, uint8_t* hopSeq, bool singleChannel);
+uint8_t radio_subghz_getDelayTx(void);
+uint8_t radio_subghz_getDelayRx(void);
 /**
 \}
 \}

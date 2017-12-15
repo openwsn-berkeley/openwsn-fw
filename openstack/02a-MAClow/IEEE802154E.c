@@ -114,7 +114,7 @@ void ieee154e_init() {
     memset(&ieee154e_vars,0,sizeof(ieee154e_vars_t));
     memset(&ieee154e_dbg,0,sizeof(ieee154e_dbg_t));
     
-    ieee154e_vars.singleChannel     = 0; // 0 means channel hopping
+    ieee154e_vars.singleChannel     = 26; // 0 means channel hopping
     radio_getFunctions(&radio_functions);
     
     ieee154e_vars.isAckEnabled      = TRUE;
@@ -552,6 +552,8 @@ port_INLINE void activity_synchronize_newSlot() {
         // update record of current channel
         ieee154e_vars.channel = (openrandom_get16b()&0x0F) + 11;
         
+        ieee154e_vars.channel = 26;
+        
         // configure the radio to listen to the default synchronizing channel
         //(uint16_t channel_spacing, uint32_t frequency_0, uint16_t channel);
         radio_functions[RADIOTPYE_2D4GHZ].radio_setFrequency(DEFAULT_CH_SPACING,DEFAULT_FREQUENCY_CENTER,ieee154e_vars.channel);
@@ -684,7 +686,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
       }
       
       // toss CRC (2 last bytes)
-      packetfunctions_tossFooter(   ieee154e_vars.dataReceived, radio_functions[RADIOTPYE_2D4GHZ].radio_getCRCLen());
+      packetfunctions_tossFooter(ieee154e_vars.dataReceived, radio_functions[RADIOTPYE_2D4GHZ].radio_getCRCLen());
       
       // break if invalid CRC
       if (ieee154e_vars.dataReceived->l1_crc==FALSE) {
@@ -925,7 +927,12 @@ port_INLINE void activity_ti1ORri1() {
          // check whether we can send
          if (schedule_getOkToSend()) {
             schedule_getNeighbor(&neighbor);
-            ieee154e_vars.radioType = schedule_getRadioType(); 
+            ieee154e_vars.radioType = schedule_getRadioType();
+            
+            // get the delayTx and delayRx for used radio 
+            ieee154e_vars.delayTx   = radio_functions[ieee154e_vars.radioType].radio_getDelayTx();
+            ieee154e_vars.delayRx   = radio_functions[ieee154e_vars.radioType].radio_getDelayRx();
+            
             // freq according to the used radio . calculate the frequency to transmit on
             ieee154e_vars.channel = calculateFrequency(schedule_getChannelOffset()); 
       
@@ -964,7 +971,10 @@ port_INLINE void activity_ti1ORri1() {
             ieee154e_vars.dataToSend->l2_numTxAttempts++;
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
             // 1. schedule timer for loading packet
-            sctimer_scheduleActionIn(ACTION_LOAD_PACKET, ieee154e_vars.startOfSlotReference+DURATION_tt1);
+            sctimer_scheduleActionIn(
+                ACTION_LOAD_PACKET, 
+                ieee154e_vars.startOfSlotReference+DURATION_tt1(ieee154e_vars.delayTx))
+            );
             // prepare the packet for load packet action at DURATION_tt1
             // make a local copy of the frame
             packetfunctions_duplicatePacket(&ieee154e_vars.localCopyForTransmission, ieee154e_vars.dataToSend);
@@ -988,22 +998,27 @@ port_INLINE void activity_ti1ORri1() {
             radio_loadPacket_prepare(ieee154e_vars.localCopyForTransmission.payload,
                                      ieee154e_vars.localCopyForTransmission.length);
             // 2. schedule timer for sending packet
-            sctimer_scheduleActionIn(ACTION_SEND_PACKET,  ieee154e_vars.startOfSlotReference+DURATION_tt2);
+            sctimer_scheduleActionIn(
+                ACTION_SEND_PACKET,  
+                ieee154e_vars.startOfSlotReference+DURATION_tt2(ieee154e_vars.delayTx)
+            );
             // 3. schedule timer radio tx watchdog
-            sctimer_scheduleActionIn(ACTION_SET_TIMEOUT, ieee154e_vars.startOfSlotReference+DURATION_tt3);
+            sctimer_scheduleActionIn(
+                ACTION_SET_TIMEOUT, 
+                ieee154e_vars.startOfSlotReference+DURATION_tt3(ieee154e_vars.delayTx)
+            );
             // 4. set capture interrupt for Tx SFD senddone and packet senddone
             sctimer_setCapture(ACTION_TX_SFD_DONE);
             sctimer_setCapture(ACTION_TX_SEND_DONE);
 #else
             // arm tt1
             opentimers_scheduleAbsolute(
-                ieee154e_vars.timerId,                            // timerId
-                DURATION_tt1,                                     // duration
-                ieee154e_vars.startOfSlotReference,               // reference
-                TIME_TICS,                                        // timetype
-                isr_ieee154e_timer                                // callback
+                ieee154e_vars.timerId,                                                          // timerId
+                DURATION_tt1(ieee154e_vars.delayTx),      // duration
+                ieee154e_vars.startOfSlotReference,                                             // reference
+                TIME_TICS,                                                                      // timetype
+                isr_ieee154e_timer                                                              // callback
             );
-            // radiotimer_schedule(DURATION_tt1);
 #endif
             break;
          }
@@ -1017,15 +1032,20 @@ port_INLINE void activity_ti1ORri1() {
          
          // assign radio type for RX
          ieee154e_vars.radioType = schedule_getRadioType();
+         
+         // get the delayTx and delayRx for used radio 
+         ieee154e_vars.delayTx   = radio_functions[ieee154e_vars.radioType].radio_getDelayTx();
+         ieee154e_vars.delayRx   = radio_functions[ieee154e_vars.radioType].radio_getDelayRx();
+         
          // freq according to the used radio . calculate the frequency to transmit on
          ieee154e_vars.channel = calculateFrequency(schedule_getChannelOffset()); 
 
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
          // arm rt1
-         sctimer_scheduleActionIn(ACTION_RADIORX_ENABLE,ieee154e_vars.startOfSlotReference+DURATION_rt1);
+         sctimer_scheduleActionIn(ACTION_RADIORX_ENABLE,ieee154e_vars.startOfSlotReference+DURATION_rt1(ieee154e_vars.delayRx));
          radio_rxPacket_prepare();
          // 2. schedule timer for starting 
-         sctimer_scheduleActionIn(ACTION_SET_TIMEOUT,  ieee154e_vars.startOfSlotReference+DURATION_rt2);
+         sctimer_scheduleActionIn(ACTION_SET_TIMEOUT,  ieee154e_vars.startOfSlotReference+DURATION_rt2(ieee154e_vars.delayRx));
          // 3.  set capture interrupt for Rx SFD done and receiving packet done
          sctimer_setCapture(ACTION_RX_SFD_DONE);
          sctimer_setCapture(ACTION_RX_DONE);
@@ -1036,12 +1056,11 @@ port_INLINE void activity_ti1ORri1() {
          // arm rt1
          opentimers_scheduleAbsolute(
               ieee154e_vars.timerId,                            // timerId
-              DURATION_rt1,                                     // duration
+              DURATION_rt1(ieee154e_vars.delayRx),              // duration
               ieee154e_vars.startOfSlotReference,               // reference
               TIME_TICS,                                        // timetype
               isr_ieee154e_timer                                // callback
          );
-         // radiotimer_schedule(DURATION_rt1);
 #endif
          break;
       case CELLTYPE_SERIALRX:
@@ -1118,13 +1137,12 @@ port_INLINE void activity_ti2() {
 #else
     // arm tt2
     opentimers_scheduleAbsolute(
-          ieee154e_vars.timerId,                            // timerId
-          DURATION_tt2,                                     // duration
-          ieee154e_vars.startOfSlotReference,               // reference
-          TIME_TICS,                                        // timetype
-          isr_ieee154e_timer                                // callback
+          ieee154e_vars.timerId,                                                        // timerId
+          DURATION_tt2(ieee154e_vars.delayTx),    // duration
+          ieee154e_vars.startOfSlotReference,                                           // reference
+          TIME_TICS,                                                                    // timetype
+          isr_ieee154e_timer                                                            // callback
     );
-    // radiotimer_schedule(DURATION_tt2);
 
     // make a local copy of the frame
     packetfunctions_duplicatePacket(&ieee154e_vars.localCopyForTransmission, ieee154e_vars.dataToSend);
@@ -1139,8 +1157,8 @@ port_INLINE void activity_ti2() {
         }
     }
    
-    // add 2 CRC bytes only to the local copy as we end up here for each retransmission
-    packetfunctions_reserveFooterSize(&ieee154e_vars.localCopyForTransmission, 2);
+    // add CRC bytes only to the local copy as we end up here for each retransmission
+    packetfunctions_reserveFooterSize(&ieee154e_vars.localCopyForTransmission, radio_functions[ieee154e_vars.radioType].radio_getCRCLen());
    
     // configure the radio for that frequency
     radio_functions[ieee154e_vars.radioType].radio_setFrequency(ieee154e_vars.ch_spacing,ieee154e_vars.frequency,ieee154e_vars.channel);
@@ -1175,13 +1193,12 @@ port_INLINE void activity_ti3() {
 #else
     // arm tt3
     opentimers_scheduleAbsolute(
-        ieee154e_vars.timerId,                            // timerId
-        DURATION_tt3,                                     // duration
-        ieee154e_vars.startOfSlotReference,               // reference
-        TIME_TICS,                                        // timetype
-        isr_ieee154e_timer                                // callback
+        ieee154e_vars.timerId,                                                          // timerId
+        DURATION_tt3(ieee154e_vars.delayTx),      // duration
+        ieee154e_vars.startOfSlotReference,                                             // reference
+        TIME_TICS,                                                                      // timetype
+        isr_ieee154e_timer                                                              // callback
     );
-    // radiotimer_schedule(DURATION_tt3);
 
     // give the 'go' to transmit
     radio_functions[ieee154e_vars.radioType].radio_txNow();
@@ -1281,11 +1298,11 @@ port_INLINE void activity_ti5(PORT_TIMER_WIDTH capturedTime) {
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
         // 1. schedule timer for enabling receiving
         // arm tt5
-        sctimer_scheduleActionIn(ACTION_RADIORX_ENABLE,ieee154e_vars.startOfSlotReference+DURATION_tt5);
+        sctimer_scheduleActionIn(ACTION_RADIORX_ENABLE,ieee154e_vars.startOfSlotReference+DURATION_tt5(ieee154e_vars.delayRx));
         // set receiving buffer address (radio is NOT enabled at this moment)
         radio_rxPacket_prepare();
         // 2. schedule timer for starting receiving
-        sctimer_scheduleActionIn(ACTION_SET_TIMEOUT,ieee154e_vars.startOfSlotReference+DURATION_tt6);
+        sctimer_scheduleActionIn(ACTION_SET_TIMEOUT,ieee154e_vars.startOfSlotReference+DURATION_tt6(ieee154e_vars.delayRx));
         // 3. set capture for receiving SFD and packet receiving done
         sctimer_setCapture(ACTION_RX_SFD_DONE);
         sctimer_setCapture(ACTION_RX_DONE);
@@ -1296,12 +1313,11 @@ port_INLINE void activity_ti5(PORT_TIMER_WIDTH capturedTime) {
         // arm tt5
         opentimers_scheduleAbsolute(
             ieee154e_vars.timerId,                            // timerId
-            DURATION_tt5,                                     // duration
+            DURATION_tt5(ieee154e_vars.delayRx),              // duration
             ieee154e_vars.startOfSlotReference,               // reference
             TIME_TICS,                                        // timetype
             isr_ieee154e_timer                                // callback
         );
-        // radiotimer_schedule(DURATION_tt5);
 #endif
     } else {
         // indicate succesful Tx to schedule to keep statistics
@@ -1325,13 +1341,12 @@ port_INLINE void activity_ti6() {
     // arm tt6
     opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
-        DURATION_tt6,                                     // duration
+        DURATION_tt6(ieee154e_vars.delayRx),              // duration
         ieee154e_vars.startOfSlotReference,               // reference
         TIME_TICS,                                        // timetype
         isr_ieee154e_timer                                // callback
     );
-    // radiotimer_schedule(DURATION_tt6);
-   
+
     // configure the radio for that frequency
     radio_functions[ieee154e_vars.radioType].radio_setFrequency(ieee154e_vars.ch_spacing,ieee154e_vars.frequency,ieee154e_vars.channel);
    
@@ -1518,7 +1533,7 @@ port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
         }
       
         // toss CRC (2 last bytes)
-        packetfunctions_tossFooter(   ieee154e_vars.ackReceived, radio_functions[ieee154e_vars.radioType].radio_getCRCLen());
+        packetfunctions_tossFooter(ieee154e_vars.ackReceived, radio_functions[ieee154e_vars.radioType].radio_getCRCLen());
    
         // break if invalid CRC
         if (ieee154e_vars.ackReceived->l1_crc==FALSE) {
@@ -1600,12 +1615,11 @@ port_INLINE void activity_ri2() {
     // arm rt2
     opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
-        DURATION_rt2,                                     // duration
+        DURATION_rt2(ieee154e_vars.delayRx),              // duration
         ieee154e_vars.startOfSlotReference,               // reference
         TIME_TICS,                                        // timetype
         isr_ieee154e_timer                                // callback
     );
-    // radiotimer_schedule(DURATION_rt2);
     
     // configure the radio for that frequency
     radio_functions[ieee154e_vars.radioType].radio_setFrequency(ieee154e_vars.ch_spacing,ieee154e_vars.frequency,ieee154e_vars.channel);
@@ -1647,7 +1661,6 @@ port_INLINE void activity_ri3() {
         TIME_TICS,                                        // timetype
         isr_ieee154e_timer                                // callback
     );
-    // radiotimer_schedule(DURATION_rt3);
 #endif
 }
 
@@ -1690,7 +1703,6 @@ port_INLINE void activity_ri4(PORT_TIMER_WIDTH capturedTime) {
         TIME_TICS,                                        // timetype
         isr_ieee154e_timer                                // callback
     );
-    // radiotimer_schedule(DURATION_rt4);
 #endif
 }
 
@@ -1909,13 +1921,13 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
             // space for 2-byte CRC
             packetfunctions_reserveFooterSize(ieee154e_vars.ackToSend,2);
             // 1. schedule timer for loading packet
-            sctimer_scheduleActionIn(ACTION_LOAD_PACKET,ieee154e_vars.startOfSlotReference+DURATION_rt5);
+            sctimer_scheduleActionIn(ACTION_LOAD_PACKET,ieee154e_vars.startOfSlotReference+DURATION_rt5(ieee154e_vars.delayTx));
             // set tx buffer address and length to prepare loading packet (packet is NOT loaded at this moment)
             radio_loadPacket_prepare(ieee154e_vars.ackToSend->payload,
                                     ieee154e_vars.ackToSend->length);
-            sctimer_scheduleActionIn(ACTION_SEND_PACKET,ieee154e_vars.startOfSlotReference+DURATION_rt6);
+            sctimer_scheduleActionIn(ACTION_SEND_PACKET,ieee154e_vars.startOfSlotReference+DURATION_rt6(ieee154e_vars.delayTx));
             // 2. schedule timer for radio tx watchdog
-            sctimer_scheduleActionIn(ACTION_SET_TIMEOUT,ieee154e_vars.startOfSlotReference+DURATION_rt7);
+            sctimer_scheduleActionIn(ACTION_SET_TIMEOUT,ieee154e_vars.startOfSlotReference+DURATION_rt7(ieee154e_vars.delayTx));
             // 3. set capture for SFD senddone and Tx send done
             sctimer_setCapture(ACTION_TX_SFD_DONE);
             sctimer_setCapture(ACTION_TX_SEND_DONE);
@@ -1926,12 +1938,11 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
             // arm rt5
             opentimers_scheduleAbsolute(
                 ieee154e_vars.timerId,                            // timerId
-                DURATION_rt5,                                     // duration
+                DURATION_rt5(ieee154e_vars.delayTx),              // duration
                 ieee154e_vars.startOfSlotReference,               // reference
                 TIME_TICS,                                        // timetype
                 isr_ieee154e_timer                                // callback
             );
-            // radiotimer_schedule(DURATION_rt5);
 #endif
         } else {
             // synchronize to the received packet if I'm not a DAGroot and this is my preferred parent
@@ -1973,12 +1984,11 @@ port_INLINE void activity_ri6() {
     // arm rt6
     opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
-        DURATION_rt6,                                     // duration
+        DURATION_rt6(ieee154e_vars.delayTx),              // duration
         ieee154e_vars.startOfSlotReference,               // reference
         TIME_TICS,                                        // timetype
         isr_ieee154e_timer                                // callback
     );
-    // radiotimer_schedule(DURATION_rt6);
     
     // get a buffer to put the ack to send in
     ieee154e_vars.ackToSend = openqueue_getFreePacketBuffer(COMPONENT_IEEE802154E);
@@ -2029,8 +2039,8 @@ port_INLINE void activity_ri6() {
             return;
         }
     }
-    // space for 2-byte CRC
-    packetfunctions_reserveFooterSize(ieee154e_vars.ackToSend,2);
+    // space for byte CRC
+    packetfunctions_reserveFooterSize(ieee154e_vars.ackToSend,radio_functions[ieee154e_vars.radioType].radio_getCRCLen());
     
     // configure the radio for that frequency
     radio_functions[ieee154e_vars.radioType].radio_setFrequency(ieee154e_vars.ch_spacing,ieee154e_vars.frequency,ieee154e_vars.channel);
@@ -2068,12 +2078,11 @@ port_INLINE void activity_ri7() {
     // arm rt7
     opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                            // timerId
-        DURATION_rt7,                                     // duration
+        DURATION_rt7(ieee154e_vars.delayTx),              // duration
         ieee154e_vars.startOfSlotReference,               // reference
         TIME_TICS,                                        // timetype
         isr_ieee154e_timer                                // callback
     );
-    // radiotimer_schedule(DURATION_rt7);
     
     // give the 'go' to transmit
     radio_functions[ieee154e_vars.radioType].radio_txNow(); 
@@ -2121,7 +2130,6 @@ port_INLINE void activity_ri8(PORT_TIMER_WIDTH capturedTime) {
         TIME_TICS,                                        // timetype
         isr_ieee154e_timer                                // callback
     );
-    // radiotimer_schedule(DURATION_rt8);
 #endif
 }
 
@@ -2487,12 +2495,12 @@ bool isValidEbFormat(OpenQueueEntry_t* pkt, uint16_t* lenIE){
 
 port_INLINE void asnStoreFromEB(uint8_t* asn) {
    
-   // store the ASN
-   ieee154e_vars.asn.bytes0and1   =     asn[0]+
+    // store the ASN
+    ieee154e_vars.asn.bytes0and1   =     asn[0]+
                                     256*asn[1];
-   ieee154e_vars.asn.bytes2and3   =     asn[2]+
+    ieee154e_vars.asn.bytes2and3   =     asn[2]+
                                     256*asn[3];
-   ieee154e_vars.asn.byte4        =     asn[4];
+    ieee154e_vars.asn.byte4        =     asn[4];
 }
 
 port_INLINE void ieee154e_syncSlotOffset() {

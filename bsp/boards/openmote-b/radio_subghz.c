@@ -84,6 +84,8 @@ void  radio_subghz_setFunctions(radio_functions_t * funcs) {
     funcs->radio_getReceivedFrame   = radio_subghz_getReceivedFrame;
     funcs->radio_getCRCLen          = radio_subghz_getCRCLen;
     funcs->radio_calculateFrequency = radio_subghz_calculateFrequency;
+    funcs->radio_getDelayTx         = radio_subghz_getDelayTx;
+    funcs->radio_getDelayRx         = radio_subghz_getDelayRx;
 }
 
 void radio_subghz_powerOn(void) {
@@ -277,12 +279,19 @@ void radio_subghz_rxEnable(void) {
     debugpins_radio_set();
     leds_debug_on();
     at86rf215_spiStrobe(CMD_RF_RX);
+
     // change state
     radio_subghz_vars.state = RADIOSTATE_LISTENING;
 }
 
 void radio_subghz_rxNow(void) {
     //nothing to do
+    if(at86rf215_status() != RF_STATE_RX){
+        leds_error_toggle();
+        return;
+    }
+  
+  
 }
 
 void radio_subghz_getReceivedFrame(
@@ -304,6 +313,14 @@ void radio_subghz_getReceivedFrame(
 //returns the crc len for this radio
 uint8_t  radio_subghz_getCRCLen(void){
     return LENGTH_CRC_SUBGHZ;
+}
+
+uint8_t radio_subghz_getDelayTx(void){
+    return delayTx_SUBGHZ;
+}
+
+uint8_t radio_subghz_getDelayRx(void){
+    return delayRx_SUBGHZ;
 }
 
 //=========================== private ========================================= 

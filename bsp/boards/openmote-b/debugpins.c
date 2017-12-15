@@ -80,13 +80,13 @@ void debugpins_fsm_set() {
 
 // PB1
 void debugpins_task_toggle() {
-	bspDBpinToggle(BSP_PINB_BASE,BSP_PINB_1);
+//	bspDBpinToggle(BSP_PINB_BASE,BSP_PINB_1);
 }
 void debugpins_task_clr() {
-	GPIOPinWrite(BSP_PINB_BASE, BSP_PINB_1, 0);
+//	GPIOPinWrite(BSP_PINB_BASE, BSP_PINB_1, 0);
 }
 void debugpins_task_set() {
-	GPIOPinWrite(BSP_PINB_BASE, BSP_PINB_1, BSP_PINB_1);
+//	GPIOPinWrite(BSP_PINB_BASE, BSP_PINB_1, BSP_PINB_1);
 }
 
 // PC3

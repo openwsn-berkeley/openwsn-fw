@@ -104,7 +104,7 @@ void    spi_txrx(uint8_t*     bufTx,
                  spi_last_t   isLast) {
 
     uint32_t data;
-
+    GPIOPinWrite(GPIO_B_BASE, GPIO_PIN_1, GPIO_PIN_1);
     // register spi frame to send
     spi_vars.pNextTxByte      =  bufTx;
     spi_vars.numTxedBytes     =  0;
@@ -145,7 +145,7 @@ void    spi_txrx(uint8_t*     bufTx,
 
     // SPI is not busy anymore
     spi_vars.busy             =  0;
-
+    GPIOPinWrite(GPIO_B_BASE, GPIO_PIN_1, 0);
 }
 
 //=========================== private =========================================

@@ -781,9 +781,9 @@ port_INLINE void sixtop_sendEB() {
     eb->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE;
     eb->l2_keyIndex        = IEEE802154_security_getBeaconKeyIndex();
     
-    if (sixtop_vars.numEBs%MAX_NUM_RADIOS){
-      //one EB with every radi
-      eb->l2_radioType = (radioType_t)(sixtop_vars.numEBs%2);
+    if (MAX_NUM_RADIOS==2){
+        //one EB with every radio
+        eb->l2_radioType = (radioType_t)(sixtop_vars.numEBs&0x01);
     }
 
     // put in queue for MAC to handle
