@@ -128,25 +128,25 @@ void cb_uartRxCb(void);
 int mote_main(void) {
    
    // clear local variables
- //  memset(&app_vars,0,sizeof(app_vars_t));
+   memset(&app_vars,0,sizeof(app_vars_t));
    
    // initialize board
    board_init();
    
    // add callback functions radio
-   radiosubghz_setStartFrameCb(cb_startFrame);
-   radiosubghz_setEndFrameCb(cb_endFrame);
+   radio_subghz_setStartFrameCb(cb_startFrame);
+   radio_subghz_setEndFrameCb(cb_endFrame);
    
    // setup UART
    uart_setCallbacks(cb_uartTxDone,cb_uartRxCb);
    
    // prepare radio
-   radiosubghz_rfOn();
-   radiosubghz_setFrequency(CHANNEL_SPACING,FREQUENCY_CENTER,CHANNEL); 
+   radio_subghz_rfOn();
+   radio_subghz_setFrequency(CHANNEL_SPACING,FREQUENCY_CENTER,CHANNEL); 
    //radiosubghz_rfOff();
    
    // switch in RX
-   radiosubghz_rxEnable();
+   radio_subghz_rxEnable();
    
    while (1) {
       
@@ -156,7 +156,7 @@ int mote_main(void) {
          board_sleep();
       }
 
-      radiosubghz_rxEnable();
+      radio_subghz_rxEnable();
 
       // if I get here, I just received a packet
       
@@ -212,7 +212,7 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
 
    // get packet from radio
 
-   radiosubghz_getReceivedFrame(
+   radio_subghz_getReceivedFrame(
       app_vars.rxpk_buf,
       &app_vars.rxpk_len,
       sizeof(app_vars.rxpk_buf),

@@ -2041,6 +2041,24 @@
         <group>
             <name>boards</name>
             <group>
+                <name>common</name>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\boards\common\openaes.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\boards\common\openaes.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\boards\common\openccms.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\boards\common\openccms.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\boards\common\openradio.c</name>
+                </file>
+            </group>
+            <group>
                 <name>openmote-b</name>
                 <group>
                     <name>headers</name>
@@ -2289,7 +2307,10 @@
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\leds.c</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\radio.c</name>
+                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\radio_2d4ghz.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\radio_2d4ghz.h</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\radio_subghz.c</name>
