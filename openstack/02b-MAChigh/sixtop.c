@@ -601,6 +601,13 @@ owerror_t sixtop_send_internal(
         msg->l2_dsn,
         &(msg->l2_nextORpreviousHop)
     );
+    
+        
+    if (MAX_NUM_RADIOS==2){
+        //one EB with every radio
+        msg->l2_radioType = (radioType_t)(msg->l2_dsn&0x01);
+    }
+    
     // change owner to IEEE802154E fetches it from queue
     msg->owner  = COMPONENT_SIXTOP_TO_IEEE802154E;
     return E_SUCCESS;
@@ -648,7 +655,6 @@ void timer_sixtop_sendEb_fired(){
         switch (sixtop_vars.ebCounter) {
         case 0:
             sixtop_sendEB();
-            sixtop_vars.numEBs++;
             break;
         default:
             break;
@@ -780,11 +786,6 @@ port_INLINE void sixtop_sendEB() {
     eb->l2_securityLevel   = IEEE802154_SECURITY_LEVEL_BEACON;
     eb->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE;
     eb->l2_keyIndex        = IEEE802154_security_getBeaconKeyIndex();
-    
-    if (MAX_NUM_RADIOS==2){
-        //one EB with every radio
-        eb->l2_radioType = (radioType_t)(sixtop_vars.numEBs&0x01);
-    }
 
     // put in queue for MAC to handle
     sixtop_send_internal(eb,eb->l2_payloadIEpresent);

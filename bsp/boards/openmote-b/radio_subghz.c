@@ -342,6 +342,8 @@ void radio_subghz_isr() {
     PORT_TIMER_WIDTH capturedTime;
     // kick_scheduler_t result = DO_NOT_KICK_SCHEDULER;
 
+    debugpins_isr_set();
+
     GPIOPinIntClear(AT86RF215_IRQ_BASE, AT86RF215_IRQ_PIN);
 
     // capture the time
@@ -390,6 +392,7 @@ void radio_subghz_isr() {
         }
     }
     radio_subghz_clear_isr();
+    debugpins_isr_clr();
 }
 
 port_INLINE void radio_subghz_clear_isr(){

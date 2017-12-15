@@ -932,7 +932,6 @@ void sendDAO() {
    
    
    //=== DAO header
-   icmpv6rpl_vars.dao.DAOSequence++;
    packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_dao_ht));
    memcpy(
       ((icmpv6rpl_dao_ht*)(msg->payload)),
@@ -945,11 +944,6 @@ void sendDAO() {
    ((ICMPv6_ht*)(msg->payload))->type       = msg->l4_sourcePortORicmpv6Type;
    ((ICMPv6_ht*)(msg->payload))->code       = IANA_ICMPv6_RPL_DAO;
    packetfunctions_calculateChecksum(msg,(uint8_t*)&(((ICMPv6_ht*)(msg->payload))->checksum)); //call last
-   
-   if (MAX_NUM_RADIOS==2){
-        //one EB with every radio
-        msg->l2_radioType = (radioType_t)(icmpv6rpl_vars.dao.DAOSequence&0x01);
-   }
      
    //===== send
    if (icmpv6_send(msg)==E_SUCCESS) {
