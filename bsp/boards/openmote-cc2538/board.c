@@ -238,6 +238,7 @@ static void SysCtrlRunSetting(void) {
 
   /* Enable UART0 and RFC when running */
   SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_GPT2);
+  SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_GPT3);
   SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_UART0);
   SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_RFC);
 }
@@ -262,6 +263,7 @@ static void SysCtrlSleepSetting(void) {
 
   /* Enable UART and RFC during sleep */
   SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_GPT2);
+  SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_GPT3);
   SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_UART0);
   SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_RFC);
 }
