@@ -78,7 +78,6 @@ int mote_main(void) {
     
     // initialize board.
     board_init();
-    pwm_init();
     
     sctimer_set_callback(cb_compare);
     sctimer_setCompare(sctimer_readCounter()+SCTIMER_PERIOD);

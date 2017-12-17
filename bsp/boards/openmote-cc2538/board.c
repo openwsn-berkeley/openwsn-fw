@@ -27,6 +27,7 @@
 #include "sctimer.h"
 #include "uart.h"
 #include "cryptoengine.h"
+#include "pwm.h"
 
 //=========================== variables =======================================
 
@@ -82,6 +83,7 @@ void board_init(void) {
    i2c_init();
    sensors_init();
    cryptoengine_init();
+   pwm_init();
 }
 
 /**
