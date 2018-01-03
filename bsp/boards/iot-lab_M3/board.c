@@ -18,6 +18,12 @@
 #include "opentimers.h"
 #include "gpio.h"
 
+//=========================== variables =======================================
+const uint8_t * const rreg_uriquery        = "h=ucb";
+const uint8_t * const infoBoardname        = "IOT-LAB_M3";
+const uint8_t * const infouCName           = "STM32F103";
+const uint8_t * const infoRadioName        = "AT86RF231";
+
 //=========================== main ============================================
 
 extern int mote_main(void);

@@ -18,6 +18,11 @@
 
 //=========================== variable ========================================
 
+const uint8_t * const rreg_uriquery        = "h=ucb";
+const uint8_t * const infoBoardname        = "OPENMOTESTM32";
+const uint8_t * const infouCName           = "STM32F103";
+const uint8_t * const infoRadioName        = "AT86RF231";
+
 //=========================== private =========================================
 
 //Configures the different GPIO ports as Analog Inputs.

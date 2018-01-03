@@ -12,6 +12,10 @@
 #include "IEEE802154E.h"
 
 //=========================== variables =======================================
+const uint8_t all_routers_multicast[LENGTH_ADDR128b] = {
+   0xff, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, \
+   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1a
+};
 
 icmpv6rpl_vars_t             icmpv6rpl_vars;
 
