@@ -230,7 +230,6 @@ owerror_t cjoin_sendJoinRequest(open_addr_t* joinProxy) {
          (errorparameter_t)0,
          (errorparameter_t)0
       );
-      openqueue_freePacketBuffer(pkt);
       return E_FAIL;
    }
    // take ownership over that packet
