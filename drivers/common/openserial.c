@@ -245,6 +245,38 @@ owerror_t openserial_printSniffedPacket(uint8_t* buffer, uint8_t length, uint8_t
     return E_SUCCESS;
 }
 
+owerror_t openserial_printf(uint8_t calling_component, char* buffer, uint8_t length) {
+#ifdef OPENSERIAL_PRINTF
+   uint8_t  i;
+   uint8_t  asn[5];
+   INTERRUPT_DECLARATION();
+   
+   // retrieve ASN
+   ieee154e_getAsn(asn);
+   
+   DISABLE_INTERRUPTS();
+   openserial_vars.outputBufFilled  = TRUE;
+   outputHdlcOpen();
+   outputHdlcWrite(SERFRAME_MOTE2PC_PRINTF);
+   outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+   outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
+   outputHdlcWrite(calling_component);
+   outputHdlcWrite(asn[0]);
+   outputHdlcWrite(asn[1]);
+   outputHdlcWrite(asn[2]);
+   outputHdlcWrite(asn[3]);
+   outputHdlcWrite(asn[4]);
+   for (i=0;i<length;i++){
+      outputHdlcWrite(buffer[i]);
+   }
+   outputHdlcClose();
+   ENABLE_INTERRUPTS();
+   
+#endif
+   
+   return E_SUCCESS;
+}
+
 //===== retrieving inputBuffer
 
 uint8_t openserial_getInputBufferFilllevel() {
