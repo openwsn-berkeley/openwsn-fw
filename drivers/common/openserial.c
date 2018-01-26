@@ -23,6 +23,9 @@
 #include "icmpv6rpl.h"
 #include "icmpv6echo.h"
 #include "sf0.h"
+#include <stdio.h>
+
+//#define OPENSERIAL_PRINTF
 
 //=========================== variables =======================================
 
@@ -245,6 +248,133 @@ owerror_t openserial_printSniffedPacket(uint8_t* buffer, uint8_t length, uint8_t
     return E_SUCCESS;
 }
 
+
+//===== printf and helper functions
+
+//append a uint8_t at the end of a string
+char *openserial_ncat_uint8_t(char *str, uint8_t val, uint8_t length){
+#ifdef OPENSERIAL_PRINTF
+   uint8_t l = strlen(str);
+
+   if (l + 3 > length)
+      return(str);
+
+   uint8_t a, b, c;
+
+   a = val / 100;
+   b = (val - a * 100)/10;
+   c = val - a * 100 - b * 10;
+
+   if (a != 0)
+       str[l++] = '0' + a;
+   if (b != 0 || a != 0)
+       str[l++] = '0' + b;
+   str[l++] = '0' + c;
+   str[l++] = '\0';
+#endif
+   return(str);
+}
+
+//append a uint32_t at the end of a string (without the non significant zeros)
+char *openserial_ncat_uint32_t(char *str, uint32_t val, uint8_t length){
+#ifdef OPENSERIAL_PRINTF
+  uint8_t l = strlen(str);
+
+   if (l + 10 > length) //at most 10 digits
+      return(str);
+
+   uint8_t  digit, shift, i;
+   uint32_t power;
+   bool     nonzero = FALSE;
+
+
+   power = 1000000000;
+   shift = 0;           // to avoid non significant zeros
+   for(i=0; i<10; i++){
+      digit = val / power;
+      if (digit != 0 || i == 9 || nonzero){
+         nonzero = TRUE;
+         str[l + shift] = '0' + digit;
+         shift++;
+      }
+      val = val - power * digit;
+      power = power / 10;
+   }
+   str[l+shift] = '\0';
+#endif
+   return(str);
+}
+
+//append a uint32_t at the end of a string (without the non significant zeros)
+char *openserial_ncat_uint8_t_hex(char *str, uint8_t val, uint8_t length){
+#ifdef OPENSERIAL_PRINTF
+   uint8_t  l = strlen(str);
+   uint8_t  c, shift;
+
+   if (l + 2 > length) //at most 2 digits
+      return(str);
+
+
+   shift = 0;
+
+   //first digit
+   c = (val & 0xf0)  >> 4;
+   if (c < 10)
+      str[l+shift] = '0' + c;
+   else if (c < 16)
+      str[l+shift] = (uint8_t)'a' + c  - 10;
+   else
+      str[l+shift] = 'z';
+   shift++;
+
+   //second digit
+   c = val & 0x0f;
+   if (c < 10)
+      str[l+shift] = '0' + c;
+   else if (c < 16)
+      str[l+shift] = 'a' + c  - 9;
+   else
+      str[l+shift] = 'z';
+   shift++;
+
+   //Zero terminal
+   str[l+shift] = '\0';
+#endif
+   return(str);
+}
+
+owerror_t openserial_printf(uint8_t calling_component, char* buffer, uint8_t length) {
+#ifdef OPENSERIAL_PRINTF
+    uint8_t  i;
+    uint8_t  asn[5];
+    INTERRUPT_DECLARATION();
+
+    // retrieve ASN
+    ieee154e_getAsn(asn);
+
+    DISABLE_INTERRUPTS();
+    openserial_vars.outputBufFilled  = TRUE;
+    outputHdlcOpen();
+    outputHdlcWrite(SERFRAME_MOTE2PC_PRINTF);
+    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
+    outputHdlcWrite(calling_component);
+    outputHdlcWrite(asn[0]);
+    outputHdlcWrite(asn[1]);
+    outputHdlcWrite(asn[2]);
+    outputHdlcWrite(asn[3]);
+    outputHdlcWrite(asn[4]);
+    for (i=0;i<length;i++){
+        outputHdlcWrite(buffer[i]);
+    }
+    outputHdlcClose();
+    ENABLE_INTERRUPTS();
+
+#endif
+
+    return E_SUCCESS;
+}
+
 //===== retrieving inputBuffer
 
 uint8_t openserial_getInputBufferFilllevel() {
@@ -408,6 +538,7 @@ void openserial_startOutput() {
         openserial_stop();
     }
     ENABLE_INTERRUPTS();
+
 }
 
 void openserial_stop() {
