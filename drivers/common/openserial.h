@@ -9,6 +9,7 @@
 #define __OPENSERIAL_H
 
 #include "opendefs.h"
+#include "schedule.h"
 
 /**
 \addtogroup drivers
