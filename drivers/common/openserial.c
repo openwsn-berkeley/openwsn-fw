@@ -257,7 +257,7 @@ owerror_t openserial_printSniffedPacket(uint8_t* buffer, uint8_t length, uint8_t
 owerror_t openserial_print_uint32_t(uint32_t value) {
 #ifdef OPENSERIAL_PRINTF
    uint8_t  i;
-   uint8_t pvalue[5];
+   uint8_t  pvalue[4];
    INTERRUPT_DECLARATION();
 
    DISABLE_INTERRUPTS();
@@ -265,7 +265,7 @@ owerror_t openserial_print_uint32_t(uint32_t value) {
    outputHdlcOpen();
    outputHdlcWrite(SERFRAME_MOTE2PC_PRINTF);
    outputHdlcWrite(TYPE_INT);
-   pvalue = (uint8_t*)&value;
+   memcpy(pvalue, &value, 4);
    for (i=0;i<4;i++)
       outputHdlcWrite(pvalue[i]);
    outputHdlcClose();
