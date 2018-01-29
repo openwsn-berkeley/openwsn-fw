@@ -62,6 +62,10 @@ enum {
 #define SERFRAME_PC2MOTE_COMMAND                 ((uint8_t)'C')
 #define SERFRAME_PC2MOTE_TRIGGERUSERIALBRIDGE    ((uint8_t)'B')
 
+//for the schedule
+#define OPENSERIALMAXNUMCELLS   5
+#define SCHEDULEIEMAXNUMCELLS   3
+
 //=========================== typedef =========================================
 
 enum{
@@ -111,9 +115,6 @@ typedef struct{
     uint8_t     numTxAttempts;
     uint8_t     l3_destinationAdd[16];
     uint8_t     l3_sourceAdd[16];
-    uint8_t     l4_protocol;
-    uint16_t    l4_sourcePortORicmpv6Type;
-    uint16_t    l4_destination_port;
 } evtPktTx_t;
 END_PACK
 
@@ -128,20 +129,6 @@ typedef struct{
     uint8_t     lqi;
     uint8_t     crc;
 } evtPktRx_t;
-END_PACK
-
-BEGIN_PACK
-typedef struct{
-    uint8_t     code;
-    uint8_t     length;
-    uint8_t     frame_type;
-    uint8_t     l2Src[8];
-    uint8_t     l3_destinationAdd[16];
-    uint8_t     l3_sourceAdd[16];
-    uint8_t     l4_protocol;
-    uint16_t    l4_sourcePortORicmpv6Type;
-    uint16_t    l4_destination_port;
-} evtPktDropped_t;
 END_PACK
 
 BEGIN_PACK
@@ -182,10 +169,6 @@ enum{                   //status of the 6P command
     RCVD      = 3,
     FAILED    = 4
 };
-
-
-#define OPENSERIALMAXNUMCELLS   20
-#define SCHEDULEIEMAXNUMCELLS   3
 
 BEGIN_PACK
 typedef struct{

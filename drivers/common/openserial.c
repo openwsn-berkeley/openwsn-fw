@@ -300,11 +300,8 @@ owerror_t openserial_printStat(uint8_t type, uint8_t *buffer, uint8_t length) {
     outputHdlcWrite(SERFRAME_MOTE2PC_STAT);
     outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
     outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
-    outputHdlcWrite(asn[0]);
-    outputHdlcWrite(asn[1]);
-    outputHdlcWrite(asn[2]);
-    outputHdlcWrite(asn[3]);
-    outputHdlcWrite(asn[4]);
+    for(i=0;i<5;i++)
+    		outputHdlcWrite(asn[i]);
     outputHdlcWrite(type);
     for (i=0;i<length;i++){
         outputHdlcWrite(buffer[i]);
@@ -339,7 +336,6 @@ void openserial_statCell(uint8_t code, scheduleEntry_t* slotContainer){
 
 //a ack was txed or rcvd
 void openserial_statAck(uint8_t code, open_addr_t *l2addr){
-    
 #ifdef OPENSERIAL_STAT
     evtAck_t evt;
     evt.code = code;
@@ -348,100 +344,49 @@ void openserial_statAck(uint8_t code, open_addr_t *l2addr){
 #endif
 }
 
-
-//info for a transmitted packet
-void openserial_fillPktTx(evtPktTx_t *evt, OpenQueueEntry_t* msg){
-#ifdef OPENSERIAL_STAT
-    evt->length                      = msg->length;
-    evt->txPower                     = msg->l1_txPower;
-    evt->numTxAttempts               = msg->l2_numTxAttempts;
-    evt->frame_type                  = msg->l2_frameType;
-    evt->slotOffset                  = schedule_getSlotOffset();
-    evt->frequency                   = calculateFrequency(schedule_getChannelOffset());
-    evt->l4_protocol                 = msg->l4_protocol;
-    evt->l4_sourcePortORicmpv6Type   = msg->l4_sourcePortORicmpv6Type;
-    evt->l4_destination_port         = msg->l4_destination_port;
-    
-    //addrs
-    memcpy(evt->l2Dest,              msg->l2_nextORpreviousHop.addr_64b, 8);
-    memcpy(evt->l3_destinationAdd,   msg->l3_destinationAdd.addr_128b, 16);
-    memcpy(evt->l3_sourceAdd,        msg->l3_sourceAdd.addr_128b, 16);
-#endif
-}
-
-//info for a received packet
-void openserial_fillPktRx(evtPktRx_t *evt, OpenQueueEntry_t* msg){
-#ifdef OPENSERIAL_STAT
-    evt->length                      = msg->length;
-    evt->rssi                        = msg->l1_rssi;
-    evt->lqi                         = msg->l1_lqi;
-    evt->crc                         = msg->l1_crc;
-    evt->frame_type                  = msg->l2_frameType;
-    evt->slotOffset                  = schedule_getSlotOffset();
-    evt->frequency                   = calculateFrequency(schedule_getChannelOffset());
-    
-    //addrs
-    memcpy(evt->l2Src,   msg->l2_nextORpreviousHop.addr_64b, 8);
-#endif
-}
-
-//info for a dropped packet
-void openserial_fillPktDropped(evtPktDropped_t *evt, OpenQueueEntry_t* msg){
-#ifdef OPENSERIAL_STAT
-    evt->length                      = msg->length;
-    evt->frame_type                  = msg->l2_frameType;
-    evt->l4_protocol                 = msg->l4_protocol;
-    evt->l4_sourcePortORicmpv6Type   = msg->l4_sourcePortORicmpv6Type;
-    evt->l4_destination_port         = msg->l4_destination_port;
-    
-    //addrs
-    memcpy(evt->l2Src,               msg->l2_nextORpreviousHop.addr_64b, 8);
-    memcpy(evt->l3_destinationAdd,   msg->l3_destinationAdd.addr_128b, 16);
-    memcpy(evt->l3_sourceAdd,        msg->l3_sourceAdd.addr_128b, 16);
-#endif
-}
-
-
-
 //push an event to track received frames
 void openserial_statRx(OpenQueueEntry_t* msg){
-    
 #ifdef OPENSERIAL_STAT
-    evtPktRx_t evt;
-    openserial_fillPktRx(&evt, msg);
-    openserial_printStat(SERTYPE_PKT_RX, (uint8_t*)&evt, sizeof(evtPktRx_t));
+   evtPktRx_t evt;
+   evt->length                      = msg->length;
+   evt->rssi                        = msg->l1_rssi;
+   evt->lqi                         = msg->l1_lqi;
+   evt->crc                         = msg->l1_crc;
+   evt->frame_type                  = msg->l2_frameType;
+   evt->slotOffset                  = schedule_getSlotOffset();
+   evt->frequency                   = calculateFrequency(schedule_getChannelOffset());
+   memcpy(evt->l2Src,   msg->l2_nextORpreviousHop.addr_64b, 8);
+   openserial_printStat(SERTYPE_PKT_RX, (uint8_t*)&evt, sizeof(evtPktRx_t));
 #endif
 }
 
 //push an event to track transmitted frames
 void openserial_statTx(OpenQueueEntry_t* msg){
-    
 #ifdef OPENSERIAL_STAT
-    evtPktTx_t evt;
-    openserial_fillPktTx(&evt, msg);
-    openserial_printStat(SERTYPE_PKT_TX, (uint8_t*)&evt, sizeof(evtPktTx_t));
+   evtPktTx_t evt;
+   evt->length                      = msg->length;
+   evt->txPower                     = msg->l1_txPower;
+   evt->numTxAttempts               = msg->l2_numTxAttempts;
+   evt->frame_type                  = msg->l2_frameType;
+   evt->slotOffset                  = schedule_getSlotOffset();
+   evt->frequency                   = calculateFrequency(schedule_getChannelOffset());
+   
+   //addrs
+   memcpy(evt->l2Dest,              msg->l2_nextORpreviousHop.addr_64b, 8);
+   memcpy(evt->l3_destinationAdd,   msg->l3_destinationAdd.addr_128b, 16);
+   memcpy(evt->l3_sourceAdd,        msg->l3_sourceAdd.addr_128b, 16);
+   openserial_printStat(SERTYPE_PKT_TX, (uint8_t*)&evt, sizeof(evtPktTx_t));
 #endif
     
 }
 
 
-//not enough space in openqueue for this data packet
-void openserial_statPktDropped(uint8_t code, OpenQueueEntry_t* msg){
-    
-#if defined(OPENSERIAL_STAT)
-    evtPktDropped_t evt;
-    openserial_fillPktDropped(&evt, msg);
-    evt.code = code;
-    openserial_printStat(SERTYPE_PKT_DROPPED, (uint8_t*)&evt, sizeof(evtPktRx_t));
-#endif
-}
 
 
 //===== Statistics - RPL
 
 //push an event to track DIO
 void openserial_statDIO(uint8_t status, uint8_t rplinstanceId, dagrank_t rank, uint8_t *DODAGID){
-    
 #ifdef OPENSERIAL_STAT
     evtDIO_t     evt;
     evt.status          = status;
@@ -455,7 +400,6 @@ void openserial_statDIO(uint8_t status, uint8_t rplinstanceId, dagrank_t rank, u
 
 //push an event to track DAO
 void openserial_statDAO(uint8_t status, uint8_t *parent, uint8_t *DODAGID){
-    
 #ifdef OPENSERIAL_STAT
     evtDAO_t          evt;
     //info
@@ -464,7 +408,6 @@ void openserial_statDAO(uint8_t status, uint8_t *parent, uint8_t *DODAGID){
     memcpy(evt.DODAGID, DODAGID, 16);
     openserial_printStat(SERTYPE_DAO, (uint8_t*)&evt, sizeof(evt));
 #endif
-    
 }
 
 //===== Statistics - 6P
@@ -482,7 +425,7 @@ void openserial_stat6Pcmd(uint8_t sixtop_command, uint8_t status, open_addr_t *n
     
     //upper bound
     if (nb > OPENSERIALMAXNUMCELLS)
-    nb = OPENSERIALMAXNUMCELLS;
+        nb = OPENSERIALMAXNUMCELLS;
     
     //info
     info.sixtop_command  = sixtop_command;

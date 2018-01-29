@@ -671,6 +671,8 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
       
       // break if invalid CRC
       if (ieee154e_vars.dataReceived->l1_crc==FALSE) {
+         openserial_statRx(ieee154e_vars.dataReceived);
+         
          // break from the do-while loop and execute abort code below
          break;
       }
@@ -743,6 +745,9 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
       openserial_printInfo(COMPONENT_IEEE802154E,ERR_SYNCHRONIZED,
                             (errorparameter_t)ieee154e_vars.slotOffset,
                             (errorparameter_t)0);
+      
+      //stat event -> packet received
+      openserial_statRx(ieee154e_vars.dataReceived);
       
       // send received EB up the stack so RES can update statistics (synchronizing)
       notif_receive(ieee154e_vars.dataReceived);
@@ -1125,6 +1130,9 @@ port_INLINE void activity_ti2() {
     // enable the radio in Tx mode. This does not send the packet.
     radio_txEnable();
 
+    //info through the serial line when a frame is transmitted
+    openserial_statTx(ieee154e_vars.dataToSend);
+
     ieee154e_vars.radioOnInit=sctimer_readCounter();
     ieee154e_vars.radioOnThisSlot=TRUE;
     // change state
@@ -1494,6 +1502,8 @@ port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
    
         // break if invalid CRC
         if (ieee154e_vars.ackReceived->l1_crc==FALSE) {
+            openserial_statRx(ieee154e_vars.ackReceived);
+
             // break from the do-while loop and execute the clean-up code below
             break;
         }
@@ -1546,7 +1556,10 @@ port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
         // inform upper layer
         notif_sendDone(ieee154e_vars.dataToSend,E_SUCCESS);
         ieee154e_vars.dataToSend = NULL;
-      
+
+        //we received an ack
+        openserial_statAck(RCVD, &(ieee154e_vars.ackReceived->l2_nextORpreviousHop));
+
         // in any case, execute the clean-up code below (processing of ACK done)
     } while (0);
    
@@ -1753,6 +1766,8 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
       
         // if CRC doesn't check, stop
         if (ieee154e_vars.dataReceived->l1_crc==FALSE) {
+            openserial_statRx(ieee154e_vars.dataReceived);
+
             // jump to the error code below this do-while loop
             break;
         }
@@ -1820,6 +1835,9 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
             break;
         }
       
+        //stat event -> packet received
+        openserial_statRx(ieee154e_vars.dataReceived);
+       
         // record the timeCorrection and print out at end of slot
         ieee154e_vars.dataReceived->l2_timeCorrection = (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)TsTxOffset-(PORT_SIGNED_INT_WIDTH)ieee154e_vars.syncCapturedTime);
       
@@ -2125,7 +2143,10 @@ port_INLINE void activity_ri9(PORT_TIMER_WIDTH capturedTime) {
 #endif
     // record the captured time
     ieee154e_vars.lastCapturedTime = capturedTime;
-    
+   
+    //ack transmitted
+    openserial_statAck(TXED, &(ieee154e_vars.ackToSend->l2_nextORpreviousHop));
+
     // free the ack we just sent so corresponding RAM memory can be recycled
     openqueue_freePacketBuffer(ieee154e_vars.ackToSend);
     
