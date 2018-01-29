@@ -4,6 +4,9 @@
 \author Fabien Chraim <chraim@eecs.berkeley.edu>, March 2012.
 \author Thomas Watteyne <thomas.watteyne@inria.fr>, August 2016.
 */
+#include <stdio.h>
+#include <stdarg.h>
+#include <string.h>
 
 #include "opendefs.h"
 #include "openserial.h"
@@ -244,6 +247,37 @@ owerror_t openserial_printSniffedPacket(uint8_t* buffer, uint8_t length, uint8_t
     
     return E_SUCCESS;
 }
+
+//append a uint32_t at the end of a string (without the non significant zeros)
+char *openserial_ncat_uint32_t(char *str, uint32_t val, uint8_t length){
+#ifdef OPENSERIAL_PRINTF
+  uint8_t l = strlen(str);
+
+   if (l + 10 > length) //at most 10 digits
+      return(str);
+
+   uint8_t  digit, shift, i;
+   uint32_t power;
+   bool     nonzero = FALSE;
+
+
+   power = 1000000000;
+   shift = 0;           // to avoid non significant zeros
+   for(i=0; i<10; i++){
+      digit = val / power;
+      if (digit != 0 || i == 9 || nonzero){
+         nonzero = TRUE;
+         str[l + shift] = '0' + digit;
+         shift++;
+      }
+      val = val - power * digit;
+      power = power / 10;
+   }
+   str[l+shift] = '\0';
+#endif
+   return(str);
+}
+
 
 owerror_t openserial_printf(uint8_t calling_component, char* buffer, uint8_t length) {
 #ifdef OPENSERIAL_PRINTF
