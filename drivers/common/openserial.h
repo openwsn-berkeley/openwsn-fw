@@ -155,8 +155,8 @@ owerror_t openserial_printCritical(
 );
 owerror_t openserial_printData(uint8_t* buffer, uint8_t length);
 owerror_t openserial_printSniffedPacket(uint8_t* buffer, uint8_t length, uint8_t channel);
-char *openserial_ncat_uint32_t(char *str, uint32_t val, uint8_t length);
-owerror_t openserial_printf(uint8_t calling_component, char* buffer, uint8_t length);
+owerror_t openserial_print_str(char* buffer, uint8_t length);
+owerror_t openserial_print_uint32_t(uint32_t value);
 
 // retrieving inputBuffer
 uint8_t   openserial_getInputBufferFilllevel(void);

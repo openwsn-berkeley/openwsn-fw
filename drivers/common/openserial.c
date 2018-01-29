@@ -27,10 +27,16 @@
 #include "icmpv6echo.h"
 #include "sf0.h"
 
+
+
 //=========================== variables =======================================
 
 openserial_vars_t openserial_vars;
 
+enum{
+    TYPE_STR = 0,       //subtype for the printf message
+    TYPE_INT = 1
+};
 //=========================== prototypes ======================================
 
 // printing
@@ -248,38 +254,29 @@ owerror_t openserial_printSniffedPacket(uint8_t* buffer, uint8_t length, uint8_t
     return E_SUCCESS;
 }
 
-//append a uint32_t at the end of a string (without the non significant zeros)
-char *openserial_ncat_uint32_t(char *str, uint32_t val, uint8_t length){
+owerror_t openserial_print_uint32_t(uint32_t value) {
 #ifdef OPENSERIAL_PRINTF
-  uint8_t l = strlen(str);
+   uint8_t  i;
+   uint8_t pvalue[5];
+   INTERRUPT_DECLARATION();
 
-   if (l + 10 > length) //at most 10 digits
-      return(str);
+   DISABLE_INTERRUPTS();
+   openserial_vars.outputBufFilled  = TRUE;
+   outputHdlcOpen();
+   outputHdlcWrite(SERFRAME_MOTE2PC_PRINTF);
+   outputHdlcWrite(TYPE_INT);
+   pvalue = (uint8_t*)&value;
+   for (i=0;i<4;i++)
+      outputHdlcWrite(pvalue[i]);
+   outputHdlcClose();
+   ENABLE_INTERRUPTS();
 
-   uint8_t  digit, shift, i;
-   uint32_t power;
-   bool     nonzero = FALSE;
-
-
-   power = 1000000000;
-   shift = 0;           // to avoid non significant zeros
-   for(i=0; i<10; i++){
-      digit = val / power;
-      if (digit != 0 || i == 9 || nonzero){
-         nonzero = TRUE;
-         str[l + shift] = '0' + digit;
-         shift++;
-      }
-      val = val - power * digit;
-      power = power / 10;
-   }
-   str[l+shift] = '\0';
 #endif
-   return(str);
+
+   return E_SUCCESS;
 }
 
-
-owerror_t openserial_printf(uint8_t calling_component, char* buffer, uint8_t length) {
+owerror_t openserial_print_str(char* buffer, uint8_t length) {
 #ifdef OPENSERIAL_PRINTF
    uint8_t  i;
    uint8_t  asn[5];
@@ -292,9 +289,9 @@ owerror_t openserial_printf(uint8_t calling_component, char* buffer, uint8_t len
    openserial_vars.outputBufFilled  = TRUE;
    outputHdlcOpen();
    outputHdlcWrite(SERFRAME_MOTE2PC_PRINTF);
+   outputHdlcWrite(TYPE_STR);
    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
-   outputHdlcWrite(calling_component);
    for(i=0; i<5;i++)
        outputHdlcWrite(asn[i]);
    for (i=0;i<length;i++)
