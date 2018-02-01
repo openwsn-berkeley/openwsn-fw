@@ -22,6 +22,7 @@ sources_h = [
 sources_c = [
     os.path.join('common', 'openccms.c'),
     os.path.join('common', 'openaes.c'),
+    os.path.join('common', 'openradio.c'),
 	#os.path.join('openmote-b', 'radio_subghz.c'),
 ]
 
