@@ -103,7 +103,7 @@ void    spi_txrx(uint8_t*     bufTx,
                  spi_first_t  isFirst,
                  spi_last_t   isLast) {
 
-    uint32_t data;
+    uint32_t data,i;
     GPIOPinWrite(GPIO_B_BASE, GPIO_PIN_1, GPIO_PIN_1);
     // register spi frame to send
     spi_vars.pNextTxByte      =  bufTx;
@@ -123,7 +123,7 @@ void    spi_txrx(uint8_t*     bufTx,
        GPIOPinWrite(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_FSS, 0);
     }
     
-    for (uint32_t i =  0; i < lenbufTx; i++)
+    for ( i =  0; i < lenbufTx; i++)
     {
         // Push a byte
         SSIDataPut(SSI0_BASE, spi_vars.pNextTxByte[i]);

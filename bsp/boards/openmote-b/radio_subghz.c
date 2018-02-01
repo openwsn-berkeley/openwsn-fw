@@ -52,7 +52,7 @@ static void radio_subghz_read_isr(void);
 static void radio_subghz_clear_isr(void);
 
 //isr handler for the radio
-static void radio_subghz_isr(void);
+//static void radio_subghz_isr(void);
 
 //===== admin
 
@@ -114,7 +114,7 @@ void radio_subghz_reset(void) {
 }
 
 void radio_subghz_init(void) {
-
+    uint16_t i;
     //power it on and configure pins
     radio_subghz_powerOn();
 
@@ -153,7 +153,7 @@ void radio_subghz_init(void) {
         while(1); //UNKNOWN DEVICE, FINISH
     }
     // Write registers to radio -- default configuration OFDM 400kbps
-    for(uint16_t i = 0; i < (sizeof(basic_settings_ofdm_1_mcs2)/sizeof(registerSetting_t)); i++) {
+    for( i = 0; i < (sizeof(basic_settings_ofdm_1_mcs2)/sizeof(registerSetting_t)); i++) {
         at86rf215_spiWriteReg( basic_settings_ofdm_1_mcs2[i].addr, basic_settings_ofdm_1_mcs2[i].data);
     };
 
@@ -168,11 +168,12 @@ void radio_subghz_change_size(uint16_t* size){
 
 void radio_subghz_change_modulation(registerSetting_t * mod){
     static int mod_list = 1;
-
-    at86rf215_spiStrobe(CMD_RF_TRXOFF);
+    uint16_t i;
+    
+at86rf215_spiStrobe(CMD_RF_TRXOFF);
     while(at86rf215_status() != RF_STATE_TRXOFF);
 
-    for(uint16_t i = 0; i < (sizeof(*mod)/sizeof(registerSetting_t)); i++) {
+    for( i = 0; i < (sizeof(*mod)/sizeof(registerSetting_t)); i++) {
         at86rf215_spiWriteReg( mod[i].addr, mod[i].data);
     };
     radio_subghz_read_isr();
