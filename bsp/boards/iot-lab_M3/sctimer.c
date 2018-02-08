@@ -37,7 +37,7 @@ sctimer_vars_t sctimer_vars;
 
 //===== admin
 
-void sctimer_init() {
+void sctimer_init(void) {
     // clear local variables
     memset(&sctimer_vars,0,sizeof(sctimer_vars_t));
     //enable BKP and PWR, Clock
@@ -84,7 +84,7 @@ void sctimer_set_callback(sctimer_cbt cb){
 
 //===== direct access
 
-PORT_RADIOTIMER_WIDTH sctimer_readCounter() {
+PORT_RADIOTIMER_WIDTH sctimer_readCounter(void) {
     uint32_t counter;
     RTC_WaitForSynchro();
     counter = RTC_GetCounter();
@@ -180,12 +180,12 @@ void sctimer_setCompare(PORT_TIMER_WIDTH val) {
     RTC_ITConfig(RTC_IT_ALR, ENABLE);
 }
 
-void sctimer_enable() {
+void sctimer_enable(void) {
     RTC_ClearFlag(RTC_IT_ALR);
     RTC_ITConfig(RTC_IT_ALR, ENABLE);
 }
 
-void sctimer_disable() {
+void sctimer_disable(void) {
     RTC_ITConfig(RTC_IT_ALR, DISABLE);
 }
 
@@ -193,7 +193,7 @@ void sctimer_disable() {
 
 //=========================== interrupt handlers ==============================
 
-kick_scheduler_t sctimer_isr() {
+kick_scheduler_t sctimer_isr(void) {
     if (sctimer_vars.sctimer_cb!=NULL) {
         
         RCC_Wakeup();

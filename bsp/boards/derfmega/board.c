@@ -30,7 +30,7 @@ volatile uint8_t reset_source;
 
 extern int mote_main();
 
-int main() {
+int main(void) {
    reset_source = MCUSR;
    MCUSR = 0;   
    return mote_main();
@@ -38,7 +38,7 @@ int main() {
 
 //=========================== public ==========================================
 
-void board_init() {
+void board_init(void) {
    // disable watchdog timer
    wdt_reset();
    wdt_disable();
@@ -69,7 +69,7 @@ void board_init() {
    sei();   
 }
 
-void board_sleep() {
+void board_sleep(void) {
    SMCR = (0x03<<1) | 1; // power-save, enable sleep
  //  sleep_cpu();
    SMCR &= 0xFE; // disable sleep

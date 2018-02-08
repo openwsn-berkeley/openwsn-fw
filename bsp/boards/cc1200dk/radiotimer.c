@@ -25,7 +25,7 @@ radiotimer_vars_t radiotimer_vars;
 
 //===== admin
 
-void radiotimer_init() {
+void radiotimer_init(void) {
    // clear local variables
    memset(&radiotimer_vars,0,sizeof(radiotimer_vars_t));
 }
@@ -65,7 +65,7 @@ void radiotimer_start(PORT_RADIOTIMER_WIDTH period) {
 
 //===== direct access
 
-PORT_RADIOTIMER_WIDTH radiotimer_getValue() {
+PORT_RADIOTIMER_WIDTH radiotimer_getValue(void) {
    return TBR;
 }
 
@@ -73,7 +73,7 @@ void radiotimer_setPeriod(PORT_RADIOTIMER_WIDTH period) {
    TBCCR0   =  period;
 }
 
-PORT_RADIOTIMER_WIDTH radiotimer_getPeriod() {
+PORT_RADIOTIMER_WIDTH radiotimer_getPeriod(void) {
    return TBCCR0;
 }
 
@@ -87,7 +87,7 @@ void radiotimer_schedule(PORT_RADIOTIMER_WIDTH offset) {
    TBCCTL2  =  CCIE;
 }
 
-void radiotimer_cancel() {
+void radiotimer_cancel(void) {
    // reset compare value (also resets interrupt flag)
    TBCCR2   =  0;
    
@@ -97,7 +97,7 @@ void radiotimer_cancel() {
 
 //===== capture
 
-inline PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime() {
+inline PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime(void) {
    return TBR;
 }
 
@@ -108,7 +108,7 @@ inline PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime() {
 /**
 \brief TimerB CCR1-6 interrupt service routine
 */
-kick_scheduler_t radiotimer_isr() {
+kick_scheduler_t radiotimer_isr(void) {
    PORT_RADIOTIMER_WIDTH tbiv_local;
    
    // reading TBIV returns the value of the highest pending interrupt flag

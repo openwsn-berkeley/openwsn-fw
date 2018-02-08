@@ -22,13 +22,13 @@
 
 extern int mote_main();
 
-int main() {
+int main(void) {
    return mote_main();
 }
 
 //=========================== public ==========================================
 
-void board_init() {
+void board_init(void) {
    // disable watchdog timer
    WDTCTL  = WDTPW + WDTHOLD;
    
@@ -56,7 +56,7 @@ void board_init() {
    
 }
 
-void board_sleep() {
+void board_sleep(void) {
    __bis_SR_register(GIE+LPM0_bits);             // sleep, but leave ACLK on
 }
 

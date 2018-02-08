@@ -19,7 +19,7 @@ on the derfmega we use timer 2 with asynchronous operation
 
 //=========================== public ==========================================
 
-void sctimer_init() {
+void sctimer_init(void) {
    // enable power
    PRR0 &= ~(1<<PRTIM2);
    
@@ -43,11 +43,11 @@ void sctimer_schedule(PORT_TIMER_WIDTH val) {
    while(ASSR & (1<<OCR2AUB));
 }
 
-PORT_TIMER_WIDTH sctimer_getValue() {
+PORT_TIMER_WIDTH sctimer_getValue(void) {
    return TCNT2;
 }
 
-void sctimer_clearISR() {
+void sctimer_clearISR(void) {
 	TIFR2 |= (1<<OCF2A);
 }
 

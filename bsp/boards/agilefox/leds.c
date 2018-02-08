@@ -49,7 +49,7 @@ uint8_t leds_error_isOn(){
    }
    return bitstatus;
 }
-void leds_error_blink() {
+void leds_error_blink(void) {
 }
 
 // green

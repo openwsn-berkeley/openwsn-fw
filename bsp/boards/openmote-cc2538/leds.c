@@ -39,83 +39,83 @@ void bspLedToggle(uint8_t ui8Leds);
 
 //=========================== public ==========================================
 
-void leds_init() {
+void leds_init(void) {
     GPIOPinTypeGPIOOutput(BSP_LED_BASE, BSP_LED_ALL);
 	GPIOPinWrite(BSP_LED_BASE, BSP_LED_ALL, 0);
 }
 
 // red
-void    leds_error_on() {
+void    leds_error_on(void) {
 	bspLedSet(BSP_LED_1);
 }
-void    leds_error_off() {
+void    leds_error_off(void) {
 	bspLedClear(BSP_LED_1);
 }
-void    leds_error_toggle() {
+void    leds_error_toggle(void) {
 	bspLedToggle(BSP_LED_1);
 }
-uint8_t leds_error_isOn() {
+uint8_t leds_error_isOn(void) {
 	  uint32_t ui32Toggle = GPIOPinRead(BSP_LED_BASE, BSP_LED_1);
 	  return (uint8_t)(ui32Toggle & BSP_LED_1)>>4;
 }
 
 // orange
-void    leds_sync_on() {
+void    leds_sync_on(void) {
 	bspLedSet(BSP_LED_2);
 }
-void    leds_sync_off() {
+void    leds_sync_off(void) {
 	bspLedClear(BSP_LED_2);
 }
-void    leds_sync_toggle() {
+void    leds_sync_toggle(void) {
 	bspLedToggle(BSP_LED_2);
 }
-uint8_t leds_sync_isOn() {
+uint8_t leds_sync_isOn(void) {
 	uint32_t ui32Toggle = GPIOPinRead(BSP_LED_BASE, BSP_LED_2);
     return (uint8_t)(ui32Toggle & BSP_LED_2)>>5;
 }
 
 // green
-void    leds_radio_on() {
+void    leds_radio_on(void) {
 	bspLedSet(BSP_LED_4);
 }
-void    leds_radio_off() {
+void    leds_radio_off(void) {
 	bspLedClear(BSP_LED_4);
 }
-void    leds_radio_toggle() {
+void    leds_radio_toggle(void) {
 	bspLedToggle(BSP_LED_4);
 }
-uint8_t leds_radio_isOn() {
+uint8_t leds_radio_isOn(void) {
 	uint32_t ui32Toggle = GPIOPinRead(BSP_LED_BASE, BSP_LED_4);
 	return (uint8_t)(ui32Toggle & BSP_LED_4)>>7;
 }
 
 // yellow
-void    leds_debug_on() {
+void    leds_debug_on(void) {
 	bspLedSet(BSP_LED_3);
 }
-void    leds_debug_off() {
+void    leds_debug_off(void) {
 	bspLedClear(BSP_LED_3);
 }
-void    leds_debug_toggle() {
+void    leds_debug_toggle(void) {
 	bspLedToggle(BSP_LED_3);
 }
-uint8_t leds_debug_isOn() {
+uint8_t leds_debug_isOn(void) {
 	uint32_t ui32Toggle = GPIOPinRead(BSP_LED_BASE, BSP_LED_3);
 	return (uint8_t)(ui32Toggle & BSP_LED_3)>>6;
 }
 
 // all
-void leds_all_on() {
+void leds_all_on(void) {
 	bspLedSet(BSP_LED_ALL);
 }
-void leds_all_off() {
+void leds_all_off(void) {
 	bspLedClear(BSP_LED_ALL);
 }
-void leds_all_toggle() {
+void leds_all_toggle(void) {
 	bspLedToggle(BSP_LED_ALL);
 }
 
-void leds_error_blink() {
+void leds_error_blink(void) {
    uint8_t i;
    volatile uint16_t delay;
    
@@ -130,7 +130,7 @@ void leds_error_blink() {
    }
 }
 
-void leds_circular_shift() {
+void leds_circular_shift(void) {
    uint8_t i;
    volatile uint16_t delay;
    
@@ -154,7 +154,7 @@ void leds_circular_shift() {
    }
 }
 
-void leds_increment() {
+void leds_increment(void) {
   uint8_t i;
    volatile uint16_t delay;
    

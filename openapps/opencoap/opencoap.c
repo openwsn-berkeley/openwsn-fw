@@ -55,7 +55,7 @@ void opencoap_forward_message(OpenQueueEntry_t *msg,
 /**
 \brief Initialize this module.
 */
-void opencoap_init() {
+void opencoap_init(void) {
    uint16_t rand;
    uint8_t pos;
 

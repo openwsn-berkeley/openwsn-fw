@@ -24,7 +24,7 @@
 
 extern int mote_main();
 
-int main() {
+int main(void) {
    return mote_main();
 }
 
@@ -91,7 +91,7 @@ void board_init()
     NVIC_radio();
 }
 
-void board_sleep() {
+void board_sleep(void) {
     uint16_t sleepTime = radiotimer_getPeriod() - radiotimer_getCapturedTime();
     DBGMCU_Config(DBGMCU_STOP, ENABLE);
     

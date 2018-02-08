@@ -14,7 +14,7 @@ umonitor_vars_t umonitor_vars;
 
 //=========================== public ==========================================
 
-void umonitor_init() {
+void umonitor_init(void) {
    // clear local variables
    memset(&umonitor_vars,0,sizeof(umonitor_vars_t));
 
@@ -73,7 +73,7 @@ void umonitor_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }
 
-bool umonitor_debugPrint() {
+bool umonitor_debugPrint(void) {
    return FALSE;
 }
 

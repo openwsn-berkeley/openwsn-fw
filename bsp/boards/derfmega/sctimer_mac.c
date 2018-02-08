@@ -19,7 +19,7 @@ on the derfmega we use timer 2 with asynchronous operation
 
 //=========================== public ==========================================
 
-void sctimer_init() {
+void sctimer_init(void) {
    PRR0 &= ~(1<<PRTIM2); // turn on timer 2 for crystal
    SCCR0 = 0b00111000; // enable symbol counter, 32KHz clock, auto timestamp, no relative compare
    SCCR1 = 0; // no backoff slot counter
@@ -41,7 +41,7 @@ void sctimer_schedule(PORT_TIMER_WIDTH val) {
    while(SCBSY & 1);
 }
 
-PORT_TIMER_WIDTH sctimer_getValue() {
+PORT_TIMER_WIDTH sctimer_getValue(void) {
 	PORT_TIMER_WIDTH val = SCCNTLL;
 	val |= ((PORT_TIMER_WIDTH)SCCNTLH<<8);
 	val |= ((PORT_TIMER_WIDTH)SCCNTHL<<16);
@@ -49,7 +49,7 @@ PORT_TIMER_WIDTH sctimer_getValue() {
    return val;
 }
 
-void sctimer_clearISR() {
+void sctimer_clearISR(void) {
 	SCIRQM &= 0xFE;
 }
 

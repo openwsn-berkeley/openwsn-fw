@@ -100,7 +100,7 @@ void eui64_get(uint8_t* addressToWrite) {    // >= 6000us
 
 // admin
 
-uint8_t ow_reset() {              // >= 960us 
+uint8_t ow_reset(void) {              // >= 960us 
    int present;
    owpin_output_low();
    delay_us(OW_DLY_H);            // t_RSTL
@@ -120,7 +120,7 @@ void ow_write_byte(uint8_t byte) {// >= 560us
    }
 }
 
-uint8_t ow_read_byte() {          // >= 560us
+uint8_t ow_read_byte(void) {          // >= 560us
    uint8_t byte = 0;
    uint8_t bit;
    for( bit=0x01; bit!=0; bit<<=1 ) {
@@ -141,7 +141,7 @@ void ow_write_bit(int is_one) {   // >= 70us
    }
 }
 
-uint8_t ow_read_bit() {           // >= 70us
+uint8_t ow_read_bit(void) {           // >= 70us
    int bit;
    owpin_output_low();
    delay_us(OW_DLY_A);            // t_RL
@@ -152,14 +152,14 @@ uint8_t ow_read_bit() {           // >= 70us
    return bit;
 }
 
-void ow_write_bit_one() {         // >= 70us
+void ow_write_bit_one(void) {         // >= 70us
    owpin_output_low();
    delay_us(OW_DLY_A);            // t_W1L
    owpin_output_high();
    delay_us(OW_DLY_B);            // t_SLOT - t_W1L
 }
 
-void ow_write_bit_zero() {        // >= 70us
+void ow_write_bit_zero(void) {        // >= 70us
    owpin_output_low();
    delay_us(OW_DLY_C);            // t_W0L
    owpin_output_high();
@@ -198,23 +198,23 @@ void delay_us(uint16_t delay) {
 
 //===== pin
 
-void    owpin_init() {
+void    owpin_init(void) {
    P2DIR &= ~PIN_1WIRE;           // set as input
    P2OUT &= ~PIN_1WIRE;           // pull low
 }
 
-void    owpin_output_low() {
+void    owpin_output_low(void) {
    P2DIR |=  PIN_1WIRE;           // set as output
 }
 
-void    owpin_output_high() {
+void    owpin_output_high(void) {
    P2DIR &= ~PIN_1WIRE;           // set as input
 }
 
-void    owpin_prepare_read() {
+void    owpin_prepare_read(void) {
    P2DIR &= ~PIN_1WIRE;           // set as input
 }
 
-uint8_t owpin_read() {
+uint8_t owpin_read(void) {
    return (P2IN & PIN_1WIRE);
 }

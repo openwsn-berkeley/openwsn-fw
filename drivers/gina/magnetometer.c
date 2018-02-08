@@ -20,7 +20,7 @@ magnetometer_vars_t magnetometer_vars;
 
 //=========================== public ==========================================
 
-void magnetometer_init() {
+void magnetometer_init(void) {
    uint8_t reg[]={MAGNETOMETER_REG_CONF_A_ADDR,MAGNETOMETER_REG_CONF_A_SETTING};
    
    magnetometer_vars.configured = FALSE;
@@ -33,18 +33,18 @@ void magnetometer_init() {
    magnetometer_vars.configured = TRUE;
 }
 
-void magnetometer_enable() {
+void magnetometer_enable(void) {
    i2c_write_register(1,MAGNETOMETER_I2C_ADDR,
          MAGNETOMETER_REG_MODE_ADDR,
          MAGNETOMETER_REG_MODE_WAKEUP);
 }
 
-void magnetometer_disable() {
+void magnetometer_disable(void) {
    uint8_t reg[]={MAGNETOMETER_REG_MODE_ADDR,MAGNETOMETER_REG_MODE_SLEEP};
    i2c_write_register(1,MAGNETOMETER_I2C_ADDR, sizeof(reg), reg);
 }
 
-void magnetometer_get_config() {
+void magnetometer_get_config(void) {
    if (magnetometer_vars.configured==TRUE) {
       i2c_read_registers(1,MAGNETOMETER_I2C_ADDR,MAGNETOMETER_REG_CONF_A_ADDR  ,1,&magnetometer_vars.reg_CONF_A);
       i2c_read_registers(1,MAGNETOMETER_I2C_ADDR,MAGNETOMETER_REG_CONF_B_ADDR  ,1,&magnetometer_vars.reg_CONF_B);

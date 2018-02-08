@@ -55,7 +55,7 @@ bool        cjoin_getIsJoined(void);
 void        cjoin_setIsJoined(bool newValue);
 //=========================== public ==========================================
 
-void cjoin_init() {
+void cjoin_init(void) {
    // declare the usage of dynamic keying to L2 security module
    IEEE802154_security_setDynamicKeying();
 
@@ -81,7 +81,7 @@ void cjoin_init() {
    cjoin_schedule();
 }
 
-void cjoin_init_security_context() {
+void cjoin_init_security_context(void) {
    uint8_t senderID[9];     // needs to hold EUI-64 + 1 byte
    uint8_t recipientID[9];  // needs to hold EUI-64 + 1 byte
    uint8_t* joinKey;
@@ -103,7 +103,7 @@ void cjoin_init_security_context() {
                                 0);
 }
 
-void cjoin_schedule() {
+void cjoin_schedule(void) {
     uint16_t delay;
     
     if (cjoin_getIsJoined() == FALSE) {
@@ -157,7 +157,7 @@ void cjoin_retransmission_cb(opentimers_id_t id) {
     scheduler_push_task(cjoin_retransmission_task_cb, TASKPRIO_COAP);
 }
 
-void cjoin_retransmission_task_cb() {
+void cjoin_retransmission_task_cb(void) {
     open_addr_t* joinProxy;
 
     joinProxy = neighbors_getJoinProxy();
@@ -174,7 +174,7 @@ void cjoin_retransmission_task_cb() {
     cjoin_sendJoinRequest(joinProxy);
 }
 
-void cjoin_task_cb() {
+void cjoin_task_cb(void) {
     open_addr_t *joinProxy;
   
     // don't run if not synch
@@ -282,7 +282,7 @@ owerror_t cjoin_sendJoinRequest(open_addr_t* joinProxy) {
   return E_SUCCESS;
 }
 
-bool cjoin_getIsJoined() {   
+bool cjoin_getIsJoined(void) {   
    bool res;
    INTERRUPT_DECLARATION();
    

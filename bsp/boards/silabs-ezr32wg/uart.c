@@ -53,7 +53,7 @@ static void uart_isr_private(void);
 
 //=========================== public ==========================================
 
-void uart_init() { 
+void uart_init(void) { 
    // reset local variables
    memset(&uart_vars,0,sizeof(uart_vars_t));
    /* Enable peripheral clocks */
@@ -177,7 +177,7 @@ static void uart_isr_private(void){
 	debugpins_isr_clr();
 }
 
-kick_scheduler_t uart_tx_isr() {
+kick_scheduler_t uart_tx_isr(void) {
 /*   uart_clearTxInterrupts();
    if (uart_vars.txCb != NULL) {
        uart_vars.txCb();
@@ -187,7 +187,7 @@ kick_scheduler_t uart_tx_isr() {
    return DO_NOT_KICK_SCHEDULER;
 }
 
-kick_scheduler_t uart_rx_isr() {
+kick_scheduler_t uart_rx_isr(void) {
  /*  uart_clearRxInterrupts();
    if (uart_vars.rxCb != NULL) {
        uart_vars.rxCb();

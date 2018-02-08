@@ -234,7 +234,7 @@ void radio_read_isr(uint8_t* rf09_isr){
 //=========================== callbacks =======================================
 
 //=========================== interrupt handlers ==============================
-kick_scheduler_t radio_isr() {
+kick_scheduler_t radio_isr(void) {
     PORT_TIMER_WIDTH capturedTime;
     // capture the time
     capturedTime = radiotimer_getCapturedTime();
