@@ -629,7 +629,7 @@ void sixtop_timeout_timer_cb(opentimers_id_t id) {
 
 //======= EB/KA task
 
-void timer_sixtop_sendEb_fired(){
+void timer_sixtop_sendEb_fired(void) {
     
     uint16_t newPeriod;
     // current period 

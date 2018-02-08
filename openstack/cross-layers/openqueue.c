@@ -250,7 +250,7 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
    return NULL;
 }
 
-bool openqueue_isHighPriorityEntryEnough(){
+bool openqueue_isHighPriorityEntryEnough(void) {
     uint8_t i;
     uint8_t numberOfEntry;
     

@@ -108,7 +108,7 @@ void board_sleep(void) {
     __WFI();
 }
 
-void board_reset(){
+void board_reset(void) {
     NVIC_GenerateSystemReset();
 }
 

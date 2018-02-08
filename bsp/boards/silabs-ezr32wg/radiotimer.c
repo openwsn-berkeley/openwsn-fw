@@ -141,7 +141,7 @@ port_INLINE uint16_t get_real_counter(void){
 
 //=========================== interrupt handlers ==============================
 
-void radiotimer_isr_private(){
+void radiotimer_isr_private(void) {
 	debugpins_isr_set();
 	radiotimer_isr();
 	debugpins_isr_clr();

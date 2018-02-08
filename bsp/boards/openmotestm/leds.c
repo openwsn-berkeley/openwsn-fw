@@ -44,7 +44,7 @@ void leds_error_toggle(void) {
    GPIOC->ODR ^= 0X0040;
 }
 
-uint8_t leds_error_isOn(){
+uint8_t leds_error_isOn(void) {
     
     u8 bitstatus = 0x00;
     if ((GPIOC->ODR & 0X0040) != (u32)0) {
@@ -55,7 +55,7 @@ uint8_t leds_error_isOn(){
     return bitstatus;
 }
 
-void leds_error_blink(){
+void leds_error_blink(void) {
     
     for(int i=0;i<16;i++) {
         leds_error_toggle();
@@ -124,17 +124,17 @@ void leds_debug_on(void) {
     GPIOC->ODR |= 0X0800;  
 }
 
-void leds_debug_off(){
+void leds_debug_off(void) {
     
     GPIOC->ODR &= ~0X0800;  
 }
 
-void leds_debug_toggle(){
+void leds_debug_toggle(void) {
     
     GPIOC->ODR ^= 0X0800;  
 }
 
-uint8_t leds_debug_isOn(){
+uint8_t leds_debug_isOn(void) {
     
     u8 bitstatus = 0x00;
     if ((GPIOC->ODR & 0X0800) != (u32)0){
