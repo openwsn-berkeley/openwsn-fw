@@ -19,7 +19,7 @@
 
 //=========================== public ==========================================
 
-void board_init() {
+void board_init(void) {
 
   DisableWatchdog;
   //at the beginning, we source our uC off the internal clock (8MhZ), whihc is innacurate
@@ -41,7 +41,7 @@ void board_init() {
    
 }
 
-void board_sleep() {
+void board_sleep(void) {
   //poipoi __bis_SR_register(GIE+LPM3_bits);             // sleep, but leave ACLK on
 }
 

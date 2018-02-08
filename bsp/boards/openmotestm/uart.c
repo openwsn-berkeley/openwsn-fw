@@ -32,7 +32,7 @@ uart_vars_t uart_vars;
 
 //=========================== public ==========================================
 
-void uart_init() {
+void uart_init(void) {
     
     // reset local variables
     memset(&uart_vars,0,sizeof(uart_vars_t));
@@ -120,7 +120,7 @@ void uart_writeByte(uint8_t byteToWrite) {
     }
 }
 
-uint8_t uart_readByte() {
+uint8_t uart_readByte(void) {
     
     uint16_t temp;
     temp = USART_ReceiveData(USART1);
@@ -129,13 +129,13 @@ uint8_t uart_readByte() {
 
 //=========================== interrupt handlers ==============================
 
-kick_scheduler_t uart_tx_isr() {
+kick_scheduler_t uart_tx_isr(void) {
     
     uart_vars.txCb();
     return DO_NOT_KICK_SCHEDULER;
 }
 
-kick_scheduler_t uart_rx_isr() {
+kick_scheduler_t uart_rx_isr(void) {
     
     uart_vars.rxCb();
     return DO_NOT_KICK_SCHEDULER;

@@ -25,7 +25,7 @@ uart_vars_t uart_vars;
 
 //=========================== public ==========================================
 
-void uart_init() {
+void uart_init(void) {
 	//turn on power
 	PRR0 &= ~(1<<PRUSART0);
 	
@@ -76,13 +76,13 @@ uint8_t uart_readByte(){
 
 //=========================== interrupt handlers ==============================
 
-uint8_t uart_isr_tx() {
+uint8_t uart_isr_tx(void) {
    if(uart_vars.txCb)
 		uart_vars.txCb();
    return 0;
 }
 
-uint8_t uart_isr_rx() {
+uint8_t uart_isr_rx(void) {
 	char dummy;
 	if (uart_vars.rxCb)
 		uart_vars.rxCb();

@@ -33,7 +33,7 @@ port_INLINE uint16_t get_real_counter(void);
 
 //===== admin
 
-void radiotimer_init() {
+void radiotimer_init(void) {
    // clear local variables
    memset(&radiotimer_vars,0,sizeof(radiotimer_vars_t));
    
@@ -79,7 +79,7 @@ void radiotimer_start(PORT_RADIOTIMER_WIDTH period) {
 
 //===== direct access
 
-PORT_RADIOTIMER_WIDTH radiotimer_getValue() {
+PORT_RADIOTIMER_WIDTH radiotimer_getValue(void) {
 	 PORT_RADIOTIMER_WIDTH value=0;
 	 //select period register in the selector so it can be read
          value = RTC->CNT;
@@ -92,7 +92,7 @@ void radiotimer_setPeriod(PORT_RADIOTIMER_WIDTH period) {
         RTC_CompareSet(0, period);
 }
 
-PORT_RADIOTIMER_WIDTH radiotimer_getPeriod() {
+PORT_RADIOTIMER_WIDTH radiotimer_getPeriod(void) {
 	PORT_RADIOTIMER_WIDTH period=0;
          
 
@@ -112,7 +112,7 @@ void radiotimer_schedule(PORT_RADIOTIMER_WIDTH offset) {
         
 }
 
-void radiotimer_cancel() {
+void radiotimer_cancel(void) {
         RTC_IntDisable(RTC_IEN_COMP0);
         RTC_IntDisable(RTC_IEN_COMP1);
         //RTC_CompareSet(0, radiotimer_vars.currentSlotPeriod);
@@ -125,7 +125,7 @@ void radiotimer_cancel() {
 
 //===== capture
 
-port_INLINE PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime() {
+port_INLINE PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime(void) {
 	 PORT_RADIOTIMER_WIDTH value=0;
          value = RTC->CNT;
      return (PORT_RADIOTIMER_WIDTH)value;
@@ -149,7 +149,7 @@ void radiotimer_isr_private(){
 }
 
 
-kick_scheduler_t radiotimer_isr() {
+kick_scheduler_t radiotimer_isr(void) {
   /* Clear interrupt source */
     // RTC_IntClear(RTC_IFC_COMP0);
     // Compare

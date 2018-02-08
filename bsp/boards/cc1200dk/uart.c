@@ -23,7 +23,7 @@ uart_vars_t uart_vars;
 
 //=========================== public ==========================================
 
-void uart_init() {
+void uart_init(void) {
    
     P5SEL                      =  0xc0;             //P5.6,7 = USCI_A1
     UCA1CTL1                  |=  UCSWRST;           // **Put state machine in reset**
@@ -68,13 +68,13 @@ uint8_t uart_readByte(){
 
 //=========================== interrupt handlers ==============================
 
-kick_scheduler_t uart_tx_isr() {
+kick_scheduler_t uart_tx_isr(void) {
     uart_clearTxInterrupts(); // TODO: do not clear, but disable when done
     uart_vars.txCb();
     return DO_NOT_KICK_SCHEDULER;
 }
 
-kick_scheduler_t uart_rx_isr() {
+kick_scheduler_t uart_rx_isr(void) {
     uart_clearRxInterrupts(); // TODO: do not clear, but disable when done
     uart_vars.rxCb();
     return DO_NOT_KICK_SCHEDULER;

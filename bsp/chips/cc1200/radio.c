@@ -253,7 +253,7 @@ void radio_getReceivedFrame(
 //=========================== callbacks =======================================
 
 //=========================== interrupt handlers ==============================
-kick_scheduler_t radio_isr() {
+kick_scheduler_t radio_isr(void) {
     PORT_TIMER_WIDTH capturedTime;
     //uint8_t  irq_status;
     // capture the time

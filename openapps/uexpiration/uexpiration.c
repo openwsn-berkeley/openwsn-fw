@@ -20,7 +20,7 @@ void uexpiration_task_cb(void);
 
 //=========================== public ==========================================
 
-void uexpiration_init() {
+void uexpiration_init(void) {
    // clear local variables
    memset(&uexpiration_vars,0,sizeof(uexpiration_vars_t));
 
@@ -84,7 +84,7 @@ void uexpiration_timer_cb(opentimers_id_t id){
    scheduler_push_task(uexpiration_task_cb,TASKPRIO_COAP);
 }
 
-void uexpiration_task_cb() {
+void uexpiration_task_cb(void) {
    uint16_t          temp_l4_destination_port;
    OpenQueueEntry_t* reply;
    

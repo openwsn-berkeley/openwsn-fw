@@ -25,7 +25,7 @@ radiotimer_vars_t radiotimer_vars;
 
 //===== admin
 
-void radiotimer_init() {
+void radiotimer_init(void) {
    // clear local variables
    memset(&radiotimer_vars,0,sizeof(radiotimer_vars_t));
 }
@@ -72,7 +72,7 @@ void radiotimer_start(PORT_RADIOTIMER_WIDTH period) {
 
 //===== direct access
 
-PORT_RADIOTIMER_WIDTH radiotimer_getValue() {
+PORT_RADIOTIMER_WIDTH radiotimer_getValue(void) {
    return TAR;
 }
 
@@ -80,7 +80,7 @@ void radiotimer_setPeriod(PORT_RADIOTIMER_WIDTH period) {
    TACCR0   =  period;
 }
 
-PORT_RADIOTIMER_WIDTH radiotimer_getPeriod() {
+PORT_RADIOTIMER_WIDTH radiotimer_getPeriod(void) {
    return TACCR0;
 }
 
@@ -94,7 +94,7 @@ void radiotimer_schedule(PORT_RADIOTIMER_WIDTH offset) {
    TACCTL1  =  CCIE;
 }
 
-void radiotimer_cancel() {
+void radiotimer_cancel(void) {
    // reset CCR1 value (also resets interrupt flag)
    TACCR1   =  0;
    
@@ -104,7 +104,7 @@ void radiotimer_cancel() {
 
 //===== capture
 
-inline PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime() {
+inline PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime(void) {
    return TAR;
 }
 
@@ -112,7 +112,7 @@ inline PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime() {
 
 //=========================== interrupt handlers ==============================
 
-uint8_t radiotimer_isr() {
+uint8_t radiotimer_isr(void) {
    PORT_RADIOTIMER_WIDTH taiv_temp = TAIV;                    // read only once because accessing TAIV resets it
    switch (taiv_temp) {
       case 0x0002: // capture/compare CCR1

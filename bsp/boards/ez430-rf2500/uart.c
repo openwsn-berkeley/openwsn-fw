@@ -26,7 +26,7 @@ uart_vars_t uart_vars;
 
 //=========================== public ==========================================
 
-void uart_init() {
+void uart_init(void) {
    // reset local variables
    memset(&uart_vars,0,sizeof(uart_vars_t));
    
@@ -72,13 +72,13 @@ uint8_t uart_readByte(){
 
 //=========================== interrupt handlers ==============================
 
-uint8_t uart_isr_tx() {
+uint8_t uart_isr_tx(void) {
    uart_clearTxInterrupts(); // TODO: do not clear, but disable when done
    uart_vars.txCb();
    return 0;
 }
 
-uint8_t uart_isr_rx() {
+uint8_t uart_isr_rx(void) {
    uart_clearRxInterrupts(); // TODO: do not clear, but disable when done
    uart_vars.rxCb();
    return 0;

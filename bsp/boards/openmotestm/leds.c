@@ -16,7 +16,7 @@ void Delay(void);
 
 //=========================== public ==========================================
 
-void leds_init() {
+void leds_init(void) {
     
     // Enable GPIOC clock
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC , ENABLE);
@@ -29,17 +29,17 @@ void leds_init() {
 }
 
 // red
-void leds_error_on() {
+void leds_error_on(void) {
     
     GPIOC->ODR |= 0X0040;
 }
 
-void leds_error_off() {
+void leds_error_off(void) {
     
     GPIOC->ODR &= ~0X0040;
 }
 
-void leds_error_toggle() {
+void leds_error_toggle(void) {
     
    GPIOC->ODR ^= 0X0040;
 }
@@ -65,22 +65,22 @@ void leds_error_blink(){
 }
 
 // green
-void leds_radio_on() {
+void leds_radio_on(void) {
     
     GPIOC->ODR |= 0X0080;
 }
 
-void leds_radio_off() {
+void leds_radio_off(void) {
     
     GPIOC->ODR &= ~0X0080;
 }
 
-void leds_radio_toggle() {
+void leds_radio_toggle(void) {
     
     GPIOC->ODR ^= 0X0080;
 }
 
-uint8_t leds_radio_isOn() {
+uint8_t leds_radio_isOn(void) {
     
     u8 bitstatus = 0x00;
     if ((GPIOC->ODR & 0X0080) != (u32)0) {
@@ -92,22 +92,22 @@ uint8_t leds_radio_isOn() {
 }
 
 // blue
-void leds_sync_on() {
+void leds_sync_on(void) {
     
     GPIOC->ODR |= 0X0400;
 }
 
-void leds_sync_off() {
+void leds_sync_off(void) {
     
     GPIOC->ODR &= ~0X0400;
 }
 
-void leds_sync_toggle() {
+void leds_sync_toggle(void) {
     
     GPIOC->ODR ^= 0X0400;
 }
 
-uint8_t leds_sync_isOn() {
+uint8_t leds_sync_isOn(void) {
     
     u8 bitstatus = 0x00;
     if ((GPIOC->ODR & 0X0400) != (u32)0){
@@ -119,7 +119,7 @@ uint8_t leds_sync_isOn() {
 }
 
 // yellow
-void leds_debug_on() {
+void leds_debug_on(void) {
     
     GPIOC->ODR |= 0X0800;  
 }
@@ -145,20 +145,20 @@ uint8_t leds_debug_isOn(){
     return bitstatus;
 }
 
-void leds_all_on() {
+void leds_all_on(void) {
     
     GPIOC->ODR |= 0X0CC0;
 }
 
-void leds_all_off() {
+void leds_all_off(void) {
     GPIOC->ODR &= ~0X0CC0;
 }
-void leds_all_toggle() {
+void leds_all_toggle(void) {
     
     GPIOC->ODR ^= 0X0CC0;
 }
 
-void leds_circular_shift() {
+void leds_circular_shift(void) {
     
     GPIOC->ODR ^= 0X0040;
     Delay();
@@ -178,7 +178,7 @@ void leds_circular_shift() {
     Delay();
 }
 
-void leds_increment() {
+void leds_increment(void) {
     
 }
 

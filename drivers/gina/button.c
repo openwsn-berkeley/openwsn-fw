@@ -6,7 +6,7 @@
 
 //=========================== public ==========================================
 
-void button_init() {
+void button_init(void) {
    // button connected to P2.7, i.e. configuration 0x80 in P2XX register
    P2DIR  &= ~0x80;                              // input direction
    P2REN  |=  0x80;                              // enable internal resistor

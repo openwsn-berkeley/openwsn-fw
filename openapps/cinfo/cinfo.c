@@ -39,7 +39,7 @@ void          cinfo_sendDone(
 /**
 \brief Initialize this module.
 */
-void cinfo_init() {
+void cinfo_init(void) {
    // do not run if DAGroot
    if(idmanager_getIsDAGroot()==TRUE) return; 
    

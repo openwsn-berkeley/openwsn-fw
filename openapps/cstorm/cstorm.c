@@ -155,7 +155,7 @@ void cstorm_timer_cb(){
    scheduler_push_task(cstorm_task_cb,TASKPRIO_COAP);
 }
 
-void cstorm_task_cb() {
+void cstorm_task_cb(void) {
    OpenQueueEntry_t*    pkt;
    owerror_t            outcome;
    coap_option_iht      options[2];

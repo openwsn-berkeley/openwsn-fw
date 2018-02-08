@@ -40,7 +40,7 @@ uint8_t radio_spiReadRadioInfo(void);
 
 //===== admin
 
-void radio_init() {
+void radio_init(void) {
 
    // clear variables
    memset(&radio_vars,0,sizeof(radio_vars_t));
@@ -80,7 +80,7 @@ void radio_setEndFrameCb(radio_capture_cbt cb) {
 
 //===== reset
 
-void radio_reset() {
+void radio_reset(void) {
    PORT_PIN_RADIO_RESET_LOW();
 }
 
@@ -97,12 +97,12 @@ void radio_setFrequency(uint8_t frequency) {
    radio_vars.state = RADIOSTATE_FREQUENCY_SET;
 }
 
-void radio_rfOn() {
+void radio_rfOn(void) {
    PORT_PIN_RADIO_RESET_LOW();
    PORT_PIN_RADIO_RESET_HIGH();
 }
 
-void radio_rfOff() {
+void radio_rfOff(void) {
    // change state
    radio_vars.state = RADIOSTATE_TURNING_OFF;
    radio_spiReadReg(RG_TRX_STATUS);
@@ -132,7 +132,7 @@ void radio_loadPacket(uint8_t* packet, uint16_t len) {
    radio_vars.state = RADIOSTATE_PACKET_LOADED;
 }
 
-void radio_txEnable() {
+void radio_txEnable(void) {
    // change state
    radio_vars.state = RADIOSTATE_ENABLING_TX;
    
@@ -148,7 +148,7 @@ void radio_txEnable() {
    radio_vars.state = RADIOSTATE_TX_ENABLED;
 }
 
-void radio_txNow() {
+void radio_txNow(void) {
    PORT_TIMER_WIDTH val;
    // change state
    radio_vars.state = RADIOSTATE_TRANSMITTING;
@@ -173,7 +173,7 @@ void radio_txNow() {
 
 //===== RX
 
-void radio_rxEnable() {
+void radio_rxEnable(void) {
    // change state
    radio_vars.state = RADIOSTATE_ENABLING_RX;
    
@@ -191,7 +191,7 @@ void radio_rxEnable() {
    radio_vars.state = RADIOSTATE_LISTENING;
 }
 
-void radio_rxNow() {
+void radio_rxNow(void) {
    // nothing to do
 }
 
@@ -376,7 +376,7 @@ void radio_spiReadRxFifo(uint8_t* pBufRead,
 
 //=========================== interrupt handlers ==============================
 
-kick_scheduler_t radio_isr() {
+kick_scheduler_t radio_isr(void) {
    PORT_TIMER_WIDTH capturedTime;
    uint8_t  irq_status;
 

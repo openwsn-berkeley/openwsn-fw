@@ -39,7 +39,7 @@ radio_vars_t radio_vars;
 
 //===== admin
 
-void radio_init() {
+void radio_init(void) {
 
     // clear variables
     memset(&radio_vars,0,sizeof(radio_vars_t));
@@ -86,7 +86,7 @@ void radio_setEndFrameCb(radio_capture_cbt cb) {
 
 //===== reset
 
-void radio_reset() {
+void radio_reset(void) {
     // reset SCuM radio module
     PORT_PIN_RADIO_RESET_LOW();
 }
@@ -104,12 +104,12 @@ void radio_setFrequency(uint8_t frequency) {
     radio_vars.state = RADIOSTATE_FREQUENCY_SET;
 }
 
-void radio_rfOn() {
+void radio_rfOn(void) {
     // clear reset pin
     RFCONTROLLER_REG__CONTROL   &= ~RX_RESET;
 }
 
-void radio_rfOff() {
+void radio_rfOff(void) {
     // change state
     radio_vars.state            = RADIOSTATE_TURNING_OFF;
 
@@ -161,7 +161,7 @@ void radio_loadPacket(uint8_t* packet, uint16_t len) {
 
 }
 
-void radio_txEnable() {
+void radio_txEnable(void) {
     // change state
     radio_vars.state = RADIOSTATE_ENABLING_TX;
 
@@ -175,7 +175,7 @@ void radio_txEnable() {
     radio_vars.state = RADIOSTATE_TX_ENABLED;
 }
 
-void radio_txNow() {
+void radio_txNow(void) {
 
     // change state
     RFCONTROLLER_REG__CONTROL = TX_SEND;
@@ -187,7 +187,7 @@ void radio_rxPacket_prepare(void){
     DMA_REG__RF_RX_ADDR         = &(radio_vars.radio_rx_buffer[0]);
 }
 
-void radio_rxEnable() {
+void radio_rxEnable(void) {
     
     // change state
     radio_vars.state            = RADIOSTATE_ENABLING_RX;
@@ -215,7 +215,7 @@ void radio_rxEnable_scum(void){
     radio_vars.state            = RADIOSTATE_LISTENING;
 }
 
-void radio_rxNow() {
+void radio_rxNow(void) {
     // nothing to do
 }
 
@@ -245,7 +245,7 @@ void radio_getReceivedFrame(uint8_t* pBufRead,
 
 //=========================== interrupt handlers ==============================
 
-kick_scheduler_t radio_isr() {
+kick_scheduler_t radio_isr(void) {
     
     PORT_TIMER_WIDTH capturedTime;
     

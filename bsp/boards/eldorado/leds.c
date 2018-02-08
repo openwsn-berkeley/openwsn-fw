@@ -15,7 +15,7 @@
 
 //=========================== public ==========================================
 
-void leds_init() {                    
+void leds_init(void) {                    
 	//initialize led pins as outputs
 	LED1DIR = DDIR_OUTPUT;   
 	LED2DIR = DDIR_OUTPUT;	
@@ -26,50 +26,50 @@ void leds_init() {
 #endif
 }
 
-void led_error_on() {
+void led_error_on(void) {
    LED1 = LED_ON;
 }
 
-void led_error_off() {
+void led_error_off(void) {
 	LED1 = LED_OFF;
 }
-void led_error_toggle() {
+void led_error_toggle(void) {
 	LED1 = ~LED1;
 }
 
-void led_radio_on() {
+void led_radio_on(void) {
    LED2 = LED_ON;;
 }
-void led_radio_off() {
+void led_radio_off(void) {
 	LED2 = LED_OFF;;
 }
-void led_radio_toggle() {
+void led_radio_toggle(void) {
 	LED2 = ~LED2;
 }
 
-void led_sync_on() {
+void led_sync_on(void) {
 	LED3 = LED_ON;
 }
-void led_sync_off() {
+void led_sync_off(void) {
    LED3 = LED_OFF;
 }
-void led_sync_toggle() {
+void led_sync_toggle(void) {
 	LED3 = ~LED3;
 }
 
-void led_all_on() {
+void led_all_on(void) {
 	LED1 = LED_ON;
 	LED2 = LED_ON;
 	LED3 = LED_ON;
 	LED4 = LED_ON;
 }
-void led_all_off() {
+void led_all_off(void) {
 	LED1 = LED_OFF;
 	LED2 = LED_OFF;
 	LED3 = LED_OFF;
 	LED4 = LED_OFF;
 }
-void led_all_toggle() {
+void led_all_toggle(void) {
 	LED1 = ~LED1;
 	LED2 = ~LED2;
 	LED3 = ~LED3;
@@ -78,7 +78,7 @@ void led_all_toggle() {
 
 
 	bool led_temp;
-void leds_circular_shift() {
+void leds_circular_shift(void) {
 	if((LED1==LED_OFF)&&(LED2==LED_OFF)&&(LED3==LED_OFF)){              // MAKING A LED ON IF THEY ARE ALL OFF
 		LED1=LED_ON;
 	}  else if ((LED1==LED_ON)&&(LED2==LED_ON)&&(LED3==LED_ON)){        // MAKING A LED OFF IF THEY ARE ALL ON
@@ -90,7 +90,7 @@ void leds_circular_shift() {
 	LED1 = led_temp;
 }
 	unsigned int LED = 0;
-void leds_increment() {
+void leds_increment(void) {
 
 	LED = !LED1;
 	LED = LED | (!LED2*2);    // AQUIRES THE LEDS STATE
