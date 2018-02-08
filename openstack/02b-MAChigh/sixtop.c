@@ -1061,9 +1061,9 @@ void sixtop_six2six_notifyReceive(
     uint8_t              length,
     OpenQueueEntry_t*    pkt
 ){
-    uint8_t           returnCode;
-    uint16_t          metadata;
-    uint8_t           cellOptions;
+    uint8_t           returnCode        = -1;
+    uint16_t          metadata          = -1;
+    uint8_t           cellOptions       = -1;
     uint8_t           cellOptions_transformed;
     uint16_t          offset;
     uint16_t          length_groupid_type;
