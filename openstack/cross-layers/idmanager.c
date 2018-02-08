@@ -15,7 +15,7 @@ idmanager_vars_t idmanager_vars;
 
 //=========================== public ==========================================
 
-void idmanager_init() {
+void idmanager_init(void) {
    
    // reset local variables
    memset(&idmanager_vars, 0, sizeof(idmanager_vars_t));
@@ -69,7 +69,7 @@ void idmanager_init() {
    packetfunctions_mac64bToMac16b(&idmanager_vars.my64bID,&idmanager_vars.my16bID);
 }
 
-bool idmanager_getIsDAGroot() {
+bool idmanager_getIsDAGroot(void) {
    bool res;
    INTERRUPT_DECLARATION();
    
@@ -88,7 +88,7 @@ void idmanager_setIsDAGroot(bool newRole) {
    ENABLE_INTERRUPTS();
 }
 
-bool idmanager_getIsSlotSkip() {
+bool idmanager_getIsSlotSkip(void) {
    bool res;
    INTERRUPT_DECLARATION();
    
@@ -198,7 +198,7 @@ bool idmanager_isMyAddress(open_addr_t* addr) {
    }
 }
 
-void idmanager_triggerAboutRoot() {
+void idmanager_triggerAboutRoot(void) {
    uint8_t         number_bytes_from_input_buffer;
    uint8_t         input_buffer[1+8+1+16];
    open_addr_t     myPrefix;
@@ -283,7 +283,7 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_id() {
+bool debugPrint_id(void) {
    debugIDManagerEntry_t output;
    
    output.isDAGroot = idmanager_vars.isDAGroot;
@@ -296,7 +296,7 @@ bool debugPrint_id() {
    return TRUE;
 }
 
-bool debugPrint_joined() {
+bool debugPrint_joined(void) {
    asn_t output;
    output.byte4         =  idmanager_vars.joinAsn.byte4;
    output.bytes2and3    =  idmanager_vars.joinAsn.bytes2and3;

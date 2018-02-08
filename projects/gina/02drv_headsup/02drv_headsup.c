@@ -123,14 +123,14 @@ int mote_main(void) {
 
 //=========================== callbacks =======================================
 
-void cb_timer() {
+void cb_timer(void) {
    // set flag
    app_vars.flags |= APP_FLAG_TIMER;
    // update debug stats
    app_dbg.num_timer++;
 }
 
-void cb_uart_tx() {
+void cb_uart_tx(void) {
    // toggle the LED
    leds_radio_toggle();
    
@@ -146,7 +146,7 @@ void cb_uart_tx() {
    app_dbg.num_txByte++;
 }
 
-void cb_uart_rx() {
+void cb_uart_rx(void) {
    // this should never happen
    
    // simply toggle the error LED

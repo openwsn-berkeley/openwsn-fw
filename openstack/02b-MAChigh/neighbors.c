@@ -33,7 +33,7 @@ bool isThisRowMatching(
 /**
 \brief Initializes this module.
 */
-void neighbors_init() {
+void neighbors_init(void) {
    
    // clear module variables
    memset(&neighbors_vars,0,sizeof(neighbors_vars_t));
@@ -48,7 +48,7 @@ void neighbors_init() {
 
 \returns The number of neighbors this mote's currently knows of.
 */
-uint8_t neighbors_getNumNeighbors() {
+uint8_t neighbors_getNumNeighbors(void) {
    uint8_t i;
    uint8_t returnVal;
    
@@ -104,7 +104,7 @@ with lowest join priority metric to send join traffic through.
 
 \returns A pointer to the neighbor's address, or NULL if no join proxy is found.
 */
-open_addr_t* neighbors_getJoinProxy() {
+open_addr_t* neighbors_getJoinProxy(void) {
    uint8_t i;
    uint8_t joinPrioMinimum;
    open_addr_t* joinProxy;
@@ -600,7 +600,7 @@ uint16_t neighbors_getLinkMetric(uint8_t index) {
 
 //===== maintenance
 
-void  neighbors_removeOld() {
+void  neighbors_removeOld(void) {
     uint8_t    i, j;
     bool       haveParent;
     uint8_t    neighborIndexWithLowestRank[3];
@@ -717,7 +717,7 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_neighbors() {
+bool debugPrint_neighbors(void) {
     debugNeighborEntry_t temp;
     neighbors_vars.debugRow=(neighbors_vars.debugRow+1)%MAXNUMNEIGHBORS;
     temp.row=neighbors_vars.debugRow;

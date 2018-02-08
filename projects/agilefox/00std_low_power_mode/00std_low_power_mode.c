@@ -240,11 +240,11 @@ int mote_main(void) {
 
 //=========================== callbacks =======================================
 
-void cb_radioTimerOverflows() {
+void cb_radioTimerOverflows(void) {
    app_dbg.num_radioTimerOverflows++;
 }
 
-void cb_radioTimerCompare() {
+void cb_radioTimerCompare(void) {
    app_dbg.num_radioTimerCompare++;
 }
 
@@ -262,7 +262,7 @@ void cb_endFrame(uint16_t timestamp) {
    app_dbg.num_endFrame++;
 }
 
-void cb_timer() {
+void cb_timer(void) {
    // set flag
    app_vars.flags |= APP_FLAG_TIMER;
    // update debug stats

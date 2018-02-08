@@ -26,7 +26,7 @@ void schedule_resetEntry(scheduleEntry_t* pScheduleEntry);
 
 \post Call this function before calling any other function in this module.
 */
-void schedule_init() {
+void schedule_init(void) {
     slotOffset_t    start_slotOffset;
     slotOffset_t    running_slotOffset;
     open_addr_t     temp_neighbor;
@@ -61,7 +61,7 @@ void schedule_init() {
 /**
 \brief Starting the DAGroot schedule propagation.
 */
-void schedule_startDAGroot() {
+void schedule_startDAGroot(void) {
    slotOffset_t    start_slotOffset;
    slotOffset_t    running_slotOffset;
    open_addr_t     temp_neighbor;
@@ -99,7 +99,7 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_schedule() {
+bool debugPrint_schedule(void) {
    debugScheduleEntry_t temp;
    
    // increment the row just printed
@@ -150,7 +150,7 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_backoff() {
+bool debugPrint_backoff(void) {
    uint8_t temp[2];
    
    // gather status data
@@ -255,7 +255,7 @@ void  schedule_getSlotInfo(
 
 \returns maximum number of active slots
 */
-uint16_t  schedule_getMaxActiveSlots() {
+uint16_t  schedule_getMaxActiveSlots(void) {
    return schedule_vars.maxActiveSlots;
 }
 
@@ -580,7 +580,7 @@ void schedule_syncSlotOffset(slotOffset_t targetSlotOffset) {
 /**
 \brief advance to next active slot
 */
-void schedule_advanceSlot() {
+void schedule_advanceSlot(void) {
    
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();  
@@ -592,7 +592,7 @@ void schedule_advanceSlot() {
 /**
 \brief return slotOffset of next active slot
 */
-slotOffset_t schedule_getNextActiveSlotOffset() {
+slotOffset_t schedule_getNextActiveSlotOffset(void) {
    slotOffset_t res;   
    
    INTERRUPT_DECLARATION();
@@ -610,7 +610,7 @@ slotOffset_t schedule_getNextActiveSlotOffset() {
 
 \returns The frame length.
 */
-frameLength_t schedule_getFrameLength() {
+frameLength_t schedule_getFrameLength(void) {
    frameLength_t returnVal;
    
    INTERRUPT_DECLARATION();
@@ -628,7 +628,7 @@ frameLength_t schedule_getFrameLength() {
 
 \returns The frame handle.
 */
-uint8_t schedule_getFrameHandle() {
+uint8_t schedule_getFrameHandle(void) {
    uint8_t returnVal;
    
    INTERRUPT_DECLARATION();
@@ -646,7 +646,7 @@ uint8_t schedule_getFrameHandle() {
 
 \returns The frame number.
 */
-uint8_t schedule_getFrameNumber() {
+uint8_t schedule_getFrameNumber(void) {
    uint8_t returnVal;
    
    INTERRUPT_DECLARATION();
@@ -663,7 +663,7 @@ uint8_t schedule_getFrameNumber() {
 
 \returns The type of the current schedule entry.
 */
-cellType_t schedule_getType() {
+cellType_t schedule_getType(void) {
    cellType_t returnVal;
    
    INTERRUPT_DECLARATION();
@@ -696,7 +696,7 @@ void schedule_getNeighbor(open_addr_t* addrToWrite) {
 
 \returns The channel offset of the current schedule entry.
 */
-channelOffset_t schedule_getChannelOffset() {
+channelOffset_t schedule_getChannelOffset(void) {
    channelOffset_t returnVal;
    
    INTERRUPT_DECLARATION();
@@ -762,7 +762,7 @@ bool schedule_getOkToSend(void) {
 /**
 \brief Reset the backoff and backoffExponent.
 */
-void schedule_resetBackoff() {
+void schedule_resetBackoff(void) {
    
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();

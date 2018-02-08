@@ -32,7 +32,7 @@ adaptive_sync_vars_t adaptive_sync_vars;
 /**
 \brief initial this module
 */
-void adaptive_sync_init() {
+void adaptive_sync_init(void) {
    // reset local variables
    memset(&adaptive_sync_vars,0x00,sizeof(adaptive_sync_vars_t));
    
@@ -170,7 +170,7 @@ void adaptive_sync_calculateCompensatedSlots(int16_t timeCorrection) {
 
 Once compensationTimeout == 0, extend or shorten current slot length for one tick.
 */
-void adaptive_sync_countCompensationTimeout() {
+void adaptive_sync_countCompensationTimeout(void) {
    uint16_t newSlotDuration;
    
    newSlotDuration  = ieee154e_getSlotDuration();
@@ -262,7 +262,7 @@ void adaptive_sync_countCompensationTimeout_compoundSlots(uint16_t compoundSlots
 /**
 \brief set driftChanged to true.
 */
-void adaptive_sync_driftChanged() {
+void adaptive_sync_driftChanged(void) {
 #ifndef NOADAPTIVESYNC
    adaptive_sync_vars.driftChanged = TRUE;
 #endif
