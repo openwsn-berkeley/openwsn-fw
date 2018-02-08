@@ -67,7 +67,7 @@ void radio_change_size(uint16_t* size){
     *size = sizes[i%4];
     i++;
 }
-void radio_change_modulation(){
+void radio_change_modulation(void) {
     static int mod_list = 1;
     at86rf215_spiStrobe(CMD_RF_TRXOFF);
     while(at86rf215_status() != RF_STATE_TRXOFF);

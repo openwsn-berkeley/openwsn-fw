@@ -86,7 +86,7 @@ void uart_disableInterrupts(void) {
     USART_ITConfig(USART1, USART_IT_RXNE, DISABLE);
 }
 
-void uart_clearRxInterrupts(){}
+void uart_clearRxInterrupts(void) {}
 
 void uart_clearTxInterrupts(void) {
     USART_ClearFlag(USART1, USART_FLAG_TC);

@@ -194,7 +194,7 @@ void  icmpv6rpl_writeDODAGid(uint8_t* dodagid) {
    icmpv6rpl_vars.fDodagidWritten = 1;
 }
 
-uint8_t icmpv6rpl_getRPLIntanceID(){
+uint8_t icmpv6rpl_getRPLIntanceID(void) {
    return icmpv6rpl_vars.dao.rplinstanceId;
 }
                                                 

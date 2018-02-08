@@ -45,19 +45,19 @@ void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb) {
    uart_vars.rxCb = rxCb;
 }
 
-void    uart_enableInterrupts(){
+void    uart_enableInterrupts(void) {
   UC1IE    |=  (UCA1RXIE  | UCA1TXIE);  
 }
 
-void    uart_disableInterrupts(){
+void    uart_disableInterrupts(void) {
   UC1IE &= ~(UCA1RXIE | UCA1TXIE);
 }
 
-void    uart_clearRxInterrupts(){
+void    uart_clearRxInterrupts(void) {
   UC1IFG   &= ~(UCA1RXIFG);
 }
 
-void    uart_clearTxInterrupts(){
+void    uart_clearTxInterrupts(void) {
   UC1IFG   &= ~(UCA1TXIFG);
 }
 
@@ -65,7 +65,7 @@ void    uart_writeByte(uint8_t byteToWrite){
   UCA1TXBUF = byteToWrite;
 }
 
-uint8_t uart_readByte(){
+uint8_t uart_readByte(void) {
   return UCA1RXBUF;
 }
 

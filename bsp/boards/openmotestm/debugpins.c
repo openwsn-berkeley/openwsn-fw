@@ -48,7 +48,7 @@ void debugpins_init(void) {
 }
 
 // PC.5
-void debugpins_frame_toggle(){
+void debugpins_frame_toggle(void) {
     
     GPIOC->ODR ^= 0X0020;
 }

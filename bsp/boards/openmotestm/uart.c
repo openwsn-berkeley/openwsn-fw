@@ -83,23 +83,23 @@ void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb) {
      NVIC_uart();
 }
 
-void uart_enableInterrupts(){
+void uart_enableInterrupts(void) {
     
     USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
 }
 
-void uart_disableInterrupts(){
+void uart_disableInterrupts(void) {
     
     USART_ITConfig(USART1, USART_IT_TXE, DISABLE);
     USART_ITConfig(USART1, USART_IT_RXNE, DISABLE);
 }
 
-void uart_clearRxInterrupts(){
+void uart_clearRxInterrupts(void) {
     
     USART_ClearFlag(USART1,USART_FLAG_RXNE);
 }
 
-void uart_clearTxInterrupts(){
+void uart_clearTxInterrupts(void) {
     
     USART_ClearFlag(USART1,USART_FLAG_TXE);
 }

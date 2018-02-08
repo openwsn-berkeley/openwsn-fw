@@ -518,7 +518,7 @@ void schedule_removeAllCells(
     }
 }
 
-scheduleEntry_t* schedule_getCurrentScheduleEntry(){
+scheduleEntry_t* schedule_getCurrentScheduleEntry(void) {
     return schedule_vars.currentScheduleEntry;
 }
 
@@ -544,7 +544,7 @@ uint8_t schedule_getNumOfSlotsByType(cellType_t type){
    return returnVal;
 }
 
-uint8_t schedule_getNumberOfFreeEntries(){
+uint8_t schedule_getNumberOfFreeEntries(void) {
    uint8_t i; 
    uint8_t counter;
    

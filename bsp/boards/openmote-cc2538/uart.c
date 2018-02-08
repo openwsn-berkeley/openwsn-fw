@@ -94,19 +94,19 @@ void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb) {
     uart_vars.rxCb = rxCb;
 }
 
-void uart_enableInterrupts(){
+void uart_enableInterrupts(void) {
     UARTIntEnable(UART0_BASE, UART_INT_RX | UART_INT_TX | UART_INT_RT);
 }
 
-void uart_disableInterrupts(){
+void uart_disableInterrupts(void) {
     UARTIntDisable(UART0_BASE, UART_INT_RX | UART_INT_TX | UART_INT_RT);
 }
 
-void uart_clearRxInterrupts(){
+void uart_clearRxInterrupts(void) {
     UARTIntClear(UART0_BASE, UART_INT_RX | UART_INT_RT);
 }
 
-void uart_clearTxInterrupts(){
+void uart_clearTxInterrupts(void) {
     UARTIntClear(UART0_BASE, UART_INT_TX);
 }
 
@@ -114,7 +114,7 @@ void  uart_writeByte(uint8_t byteToWrite){
 	UARTCharPut(UART0_BASE, byteToWrite);
 }
 
-uint8_t uart_readByte(){
+uint8_t uart_readByte(void) {
 	 int32_t i32Char;
      i32Char = UARTCharGet(UART0_BASE);
 	 return (uint8_t)(i32Char & 0xFF);

@@ -108,6 +108,6 @@ void board_sleep(void) {
 
 
 
-void board_reset(){
+void board_reset(void) {
 }
 

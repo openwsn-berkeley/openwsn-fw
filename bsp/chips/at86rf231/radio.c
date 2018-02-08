@@ -223,7 +223,7 @@ void radio_getReceivedFrame(uint8_t* pBufRead,
 //=========================== private =========================================
 
 
-uint8_t radio_spiReadRadioInfo(){
+uint8_t radio_spiReadRadioInfo(void) {
    uint8_t              spi_tx_buffer[3];
    uint8_t              spi_rx_buffer[3];
 

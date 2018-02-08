@@ -111,7 +111,7 @@ void ieee154e_init(void) {
     memset(&ieee154e_vars,0,sizeof(ieee154e_vars_t));
     memset(&ieee154e_dbg,0,sizeof(ieee154e_dbg_t));
     
-    ieee154e_vars.singleChannel     = 0; // 0 means channel hopping
+    ieee154e_vars.singleChannel     = 26; // 0 means channel hopping
     ieee154e_vars.isAckEnabled      = TRUE;
     ieee154e_vars.isSecurityEnabled = FALSE;
     ieee154e_vars.slotDuration      = TsSlotDuration;
@@ -2233,7 +2233,7 @@ port_INLINE void incrementAsnOffset(void) {
    ieee154e_vars.asnOffset   = (ieee154e_vars.asnOffset+1)%16;
 }
 
-port_INLINE void ieee154e_resetAsn(){
+port_INLINE void ieee154e_resetAsn(void) {
     // reset slotoffset
     ieee154e_vars.slotOffset     = 0;
     ieee154e_vars.asnOffset      = 0;
@@ -2528,7 +2528,7 @@ void ieee154e_setSlotDuration(uint16_t duration){
     ieee154e_vars.slotDuration = duration;
 }
 
-uint16_t ieee154e_getSlotDuration(){
+uint16_t ieee154e_getSlotDuration(void) {
     return ieee154e_vars.slotDuration;
 }
 
@@ -2903,6 +2903,6 @@ void endSlot(void) {
     changeState(S_SLEEP);
 }
 
-bool ieee154e_isSynch(){
+bool ieee154e_isSynch(void) {
     return ieee154e_vars.isSync;
 }
