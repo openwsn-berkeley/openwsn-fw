@@ -98,7 +98,7 @@ bool sixtop_areAvailableCellsToBeRemoved(
 
 //=========================== public ==========================================
 
-void sixtop_init() {
+void sixtop_init(void) {
     
     sixtop_vars.periodMaintenance  = 872 +(openrandom_get16b()&0xff);
     sixtop_vars.busySendingKA      = FALSE;
@@ -378,7 +378,7 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
 
 //======= from lower layer
 
-void task_sixtopNotifSendDone() {
+void task_sixtopNotifSendDone(void) {
     OpenQueueEntry_t* msg;
    
     // get recently-sent packet from openqueue
@@ -440,7 +440,7 @@ void task_sixtopNotifSendDone() {
     }
 }
 
-void task_sixtopNotifReceive() {
+void task_sixtopNotifReceive(void) {
     OpenQueueEntry_t* msg;
     uint16_t          lenIE;
     // get received packet from openqueue
@@ -525,7 +525,7 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_myDAGrank() {
+bool debugPrint_myDAGrank(void) {
     uint16_t output;
 
     output = 0;
@@ -542,7 +542,7 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_kaPeriod() {
+bool debugPrint_kaPeriod(void) {
     uint16_t output;
    
     output = sixtop_vars.kaPeriod;
@@ -685,7 +685,7 @@ This is one of the MAC management tasks. This function inlines in the
 timers_res_fired() function, but is declared as a separate function for better
 readability of the code.
 */
-port_INLINE void sixtop_sendEB() {
+port_INLINE void sixtop_sendEB(void) {
     OpenQueueEntry_t* eb;
     uint8_t     i;
     uint8_t     eb_len;
@@ -792,7 +792,7 @@ This is one of the MAC management tasks. This function inlines in the
 timers_res_fired() function, but is declared as a separate function for better
 readability of the code.
 */
-port_INLINE void sixtop_sendKA() {
+port_INLINE void sixtop_sendKA(void) {
     OpenQueueEntry_t* kaPkt;
     open_addr_t*      kaNeighAddr;
     

@@ -20,13 +20,13 @@ int tx_chan;
 static int *cnt;
 char *i2c_data;
 
-void imu_measure() {
+void imu_measure(void) {
     //i2c_read(i2c_data);
 	ADC_START;
     (*cnt)++;
 }
 
-void imu_send() {
+void imu_send(void) {
     at_txmode(tx_chan);
     ADC_WAIT cmd_wait();
     //XL_WAIT cmd_wait();
