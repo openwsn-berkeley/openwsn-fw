@@ -4,6 +4,9 @@
 \author Fabien Chraim <chraim@eecs.berkeley.edu>, March 2012.
 \author Thomas Watteyne <thomas.watteyne@inria.fr>, August 2016.
 */
+#include <stdio.h>
+#include <stdarg.h>
+#include <string.h>
 
 #include "opendefs.h"
 #include "openserial.h"
@@ -24,10 +27,16 @@
 #include "icmpv6echo.h"
 #include "sf0.h"
 
+
+
 //=========================== variables =======================================
 
 openserial_vars_t openserial_vars;
 
+enum{
+    TYPE_STR = 0,       //subtype for the printf message
+    TYPE_INT = 1
+};
 //=========================== prototypes ======================================
 
 // printing
@@ -208,8 +217,8 @@ owerror_t openserial_printData(uint8_t* buffer, uint8_t length) {
     openserial_vars.outputBufFilled  = TRUE;
     outputHdlcOpen();
     outputHdlcWrite(SERFRAME_MOTE2PC_DATA);
-    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
     outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
+    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
     outputHdlcWrite(asn[0]);
     outputHdlcWrite(asn[1]);
     outputHdlcWrite(asn[2]);
@@ -232,8 +241,8 @@ owerror_t openserial_printSniffedPacket(uint8_t* buffer, uint8_t length, uint8_t
     openserial_vars.outputBufFilled  = TRUE;
     outputHdlcOpen();
     outputHdlcWrite(SERFRAME_MOTE2PC_SNIFFED_PACKET);
-    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
     outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
+    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
     for (i=0;i<length;i++){
        outputHdlcWrite(buffer[i]);
     }
@@ -243,6 +252,56 @@ owerror_t openserial_printSniffedPacket(uint8_t* buffer, uint8_t length, uint8_t
     ENABLE_INTERRUPTS();
     
     return E_SUCCESS;
+}
+
+owerror_t openserial_print_uint32_t(uint32_t value) {
+#ifdef OPENSERIAL_PRINTF
+   uint8_t  i;
+   uint8_t  pvalue[4];
+   INTERRUPT_DECLARATION();
+
+   DISABLE_INTERRUPTS();
+   openserial_vars.outputBufFilled  = TRUE;
+   outputHdlcOpen();
+   outputHdlcWrite(SERFRAME_MOTE2PC_PRINTF);
+   outputHdlcWrite(TYPE_INT);
+   memcpy(pvalue, &value, 4);
+   for (i=0;i<4;i++)
+      outputHdlcWrite(pvalue[i]);
+   outputHdlcClose();
+   ENABLE_INTERRUPTS();
+
+#endif
+
+   return E_SUCCESS;
+}
+
+owerror_t openserial_print_str(char* buffer, uint8_t length) {
+#ifdef OPENSERIAL_PRINTF
+   uint8_t  i;
+   uint8_t  asn[5];
+   INTERRUPT_DECLARATION();
+   
+   // retrieve ASN
+   ieee154e_getAsn(asn);
+   
+   DISABLE_INTERRUPTS();
+   openserial_vars.outputBufFilled  = TRUE;
+   outputHdlcOpen();
+   outputHdlcWrite(SERFRAME_MOTE2PC_PRINTF);
+   outputHdlcWrite(TYPE_STR);
+   outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
+   outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+   for(i=0; i<5;i++)
+       outputHdlcWrite(asn[i]);
+   for (i=0;i<length;i++)
+      outputHdlcWrite(buffer[i]);
+   outputHdlcClose();
+   ENABLE_INTERRUPTS();
+   
+#endif
+   
+   return E_SUCCESS;
 }
 
 //===== retrieving inputBuffer
