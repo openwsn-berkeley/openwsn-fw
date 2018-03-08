@@ -34,7 +34,7 @@ unsigned char regc[2]   = {0x0C, 0xA0};
 unsigned char regb[2]   = {0x0D, 0xC0};
 unsigned char read[1]   = {0x00};
 
-void i2c_cfg() {
+void i2c_cfg(void) {
    //Enable XL
    P5OUT = 0x10;
    P5DIR = 0x10;
@@ -53,7 +53,7 @@ void i2c_cfg() {
    ti_i2c_send(GY_ADDR,SCALE,g4,2);
 }
 
-void imu_measure() {
+void imu_measure(void) {
    recv_3axis(XL_ADDR,SCALE,i2c_data  ,read);
    recv_3axis(GY_ADDR,SCALE,i2c_data+6,readg);
    //recv_3axis(MG_ADDR,SCALE,i2c_data+12,read,350);
@@ -62,7 +62,7 @@ void imu_measure() {
    (*cnt)++;
 }
 
-void imu_send() {
+void imu_send(void) {
    at_txmode(tx_chan);
    ADC_WAIT cmd_wait();
 
@@ -72,7 +72,7 @@ void imu_send() {
 }  
 
 /* Setup packet for IMU loop */
-void imu_cfg() {
+void imu_cfg(void) {
    tx = (char*)tx_int;
    rx = (char*)rx_int;
 
@@ -97,7 +97,7 @@ void imu_cfg() {
    i2c_data = (unsigned char*)(cnt+6);
 }
 
-void radio_cfg() {
+void radio_cfg(void) {
    IRQ_ENABLE;
    at_config();
    tx_chan = CHANNEL;

@@ -32,7 +32,7 @@ void sendDAO(void);
 /**
 \brief Initialize this module.
 */
-void icmpv6rpl_init() {
+void icmpv6rpl_init(void) {
    uint8_t         dodagid[16];
    
    // retrieve my prefix and EUI64
@@ -195,7 +195,7 @@ void  icmpv6rpl_writeDODAGid(uint8_t* dodagid) {
    icmpv6rpl_vars.fDodagidWritten = 1;
 }
 
-uint8_t icmpv6rpl_getRPLIntanceID(){
+uint8_t icmpv6rpl_getRPLIntanceID(void) {
    return icmpv6rpl_vars.dao.rplinstanceId;
 }
                                                 
@@ -345,7 +345,7 @@ bool icmpv6rpl_isPreferredParent(open_addr_t* address) {
 
 \returns This mote's current DAG rank.
 */
-dagrank_t icmpv6rpl_getMyDAGrank() {
+dagrank_t icmpv6rpl_getMyDAGrank(void) {
    return icmpv6rpl_vars.myDAGrank;
 }
 
@@ -362,7 +362,7 @@ void icmpv6rpl_setMyDAGrank(dagrank_t rank){
 /**
 \brief Routing algorithm
 */
-void icmpv6rpl_updateMyDAGrankAndParentSelection() {
+void icmpv6rpl_updateMyDAGrankAndParentSelection(void) {
     uint8_t   i;
     uint16_t  previousDAGrank;
     uint16_t  prevRankIncrease;
@@ -590,7 +590,7 @@ void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t* msg) {
    } 
 }
 
-void icmpv6rpl_killPreferredParent() {
+void icmpv6rpl_killPreferredParent(void) {
     icmpv6rpl_vars.haveParent=FALSE;
     if (idmanager_getIsDAGroot()==TRUE) {
        icmpv6rpl_vars.myDAGrank=MINHOPRANKINCREASE;
@@ -626,7 +626,7 @@ void icmpv6rpl_timer_DIO_cb(opentimers_id_t id) {
 
 \note This function is executed in task context, called by the scheduler.
 */
-void icmpv6rpl_timer_DIO_task() {
+void icmpv6rpl_timer_DIO_task(void) {
     
     uint16_t newPeriod;
     // current period 
@@ -654,7 +654,7 @@ void icmpv6rpl_timer_DIO_task() {
 /**
 \brief Prepare and a send a RPL DIO.
 */
-void sendDIO() {
+void sendDIO(void) {
    OpenQueueEntry_t*    msg;
    
    // stop if I'm not sync'ed
@@ -794,7 +794,7 @@ void icmpv6rpl_timer_DAO_cb(opentimers_id_t id) {
 
 \note This function is executed in task context, called by the scheduler.
 */
-void icmpv6rpl_timer_DAO_task() {
+void icmpv6rpl_timer_DAO_task(void) {
     icmpv6rpl_vars.daoTimerCounter = (icmpv6rpl_vars.daoTimerCounter+1)%icmpv6rpl_vars.daoPeriod;
     switch (icmpv6rpl_vars.daoTimerCounter) {
     case 0:
@@ -809,7 +809,7 @@ void icmpv6rpl_timer_DAO_task() {
 /**
 \brief Prepare and a send a RPL DAO.
 */
-void sendDAO() {
+void sendDAO(void) {
    OpenQueueEntry_t*    msg;                // pointer to DAO messages
    uint8_t              nbrIdx;             // running neighbor index
    uint8_t              numTransitParents,numTargetParents;  // the number of parents indicated in transit option

@@ -172,7 +172,7 @@ void cb_timer(opentimers_id_t id) {
 }
 
 // ================================ task =======================================
-void task_uploadPacket(){
+void task_uploadPacket(void) {
     openserial_printSniffedPacket(
         &(app_vars.packet[0]),
         app_vars.packet_len,

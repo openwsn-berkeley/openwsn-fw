@@ -39,7 +39,7 @@ spi_vars_t spi_vars;
 
 //=========================== public ==========================================
 
-void spi_init() {
+void spi_init(void) {
    // clear variables
    memset(&spi_vars,0,sizeof(spi_vars_t));
    
@@ -162,7 +162,7 @@ void spi_txrx(uint8_t*     bufTx,
 
 //=========================== interrupt handlers ==============================
 
-uint8_t spi_isr() {
+uint8_t spi_isr(void) {
 #ifdef SPI_IN_INTERRUPT_MODE
    // save the byte just received in the RX buffer
    switch (spi_vars.returnType) {

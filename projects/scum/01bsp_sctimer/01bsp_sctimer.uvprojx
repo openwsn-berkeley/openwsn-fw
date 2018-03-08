@@ -10,17 +10,18 @@
       <TargetName>Target SCuM</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>5060183::V5.06 update 2 (build 183)::ARMCC</pCCUsed>
+      <pCCUsed>5060528::V5.06 update 5 (build 528)::ARMCC</pCCUsed>
+      <uAC6>0</uAC6>
       <TargetOption>
         <TargetCommonOption>
           <Device>ARMCM0</Device>
           <Vendor>ARM</Vendor>
-          <PackID>ARM.CMSIS.4.5.0</PackID>
+          <PackID>ARM.CMSIS.5.0.1</PackID>
           <PackURL>http://www.keil.com/pack/</PackURL>
-          <Cpu>IRAM(0x20000000,0x20000) IROM(0x00000000,0x40000) CPUTYPE("Cortex-M0") CLOCK(12000000) ESEL ELITTLE</Cpu>
+          <Cpu>IRAM(0x20000000,0x00020000) IROM(0x00000000,0x00040000) CPUTYPE("Cortex-M0") CLOCK(12000000) ESEL ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
-          <FlashDriverDll>UL2CM3(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0NEW_DEVICE -FS00 -FL040000 -FP0($$Device:ARMCM0$Device\ARM\Flash\NEW_DEVICE.FLM))</FlashDriverDll>
+          <FlashDriverDll>UL2CM3(-S0 -C0 -P0 -FD20000000 -FC1000)</FlashDriverDll>
           <DeviceId>0</DeviceId>
           <RegisterFile>$$Device:ARMCM0$Device\ARM\ARMCM0\Include\ARMCM0.h</RegisterFile>
           <MemoryEnv></MemoryEnv>
@@ -48,16 +49,16 @@
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
           <OutputDirectory>.\Objects\</OutputDirectory>
-          <OutputName>01bsp_radiotimer</OutputName>
+          <OutputName>01bsp_sctimer</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
-          <CreateHexFile>0</CreateHexFile>
+          <CreateHexFile>1</CreateHexFile>
           <DebugInformation>1</DebugInformation>
           <BrowseInformation>1</BrowseInformation>
           <ListingPath>.\Listings\</ListingPath>
           <HexFormatSelection>1</HexFormatSelection>
           <Merge32K>0</Merge32K>
-          <CreateBatchFile>0</CreateBatchFile>
+          <CreateBatchFile>1</CreateBatchFile>
           <BeforeCompile>
             <RunUserProg1>0</RunUserProg1>
             <RunUserProg2>0</RunUserProg2>
@@ -81,8 +82,8 @@
           <AfterMake>
             <RunUserProg1>1</RunUserProg1>
             <RunUserProg2>1</RunUserProg2>
-            <UserProg1Name>fromelf --bin .\Objects\01bsp_radiotimer.axf -o .\Objects\01bsp_radiotimer.bin</UserProg1Name>
-            <UserProg2Name>fromelf -cvf .\Objects\01bsp_radiotimer.axf -o .\Objects\disasm.txt</UserProg2Name>
+            <UserProg1Name>fromelf --bin .\Objects\01bsp_sctimer.axf -o .\Objects\01bsp_sctimer.bin</UserProg1Name>
+            <UserProg2Name>fromelf -cvf .\Objects\01bsp_sctimer.axf -o .\Objects\disasm.txt</UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
             <nStopA1X>0</nStopA1X>
@@ -322,7 +323,7 @@
             <wLevel>2</wLevel>
             <uThumb>0</uThumb>
             <uSurpInc>0</uSurpInc>
-            <uC99>0</uC99>
+            <uC99>1</uC99>
             <useXO>0</useXO>
             <v6Lang>1</v6Lang>
             <v6LangP>1</v6LangP>
@@ -330,6 +331,7 @@
             <vShortWch>1</vShortWch>
             <v6Lto>0</v6Lto>
             <v6WtE>0</v6WtE>
+            <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
               <Define></Define>
@@ -347,6 +349,7 @@
             <NoWarn>0</NoWarn>
             <uSurpInc>0</uSurpInc>
             <useXO>0</useXO>
+            <uClangAs>0</uClangAs>
             <VariousControls>
               <MiscControls></MiscControls>
               <Define></Define>
@@ -378,9 +381,9 @@
           <GroupName>application</GroupName>
           <Files>
             <File>
-              <FileName>01bsp_radiotimer.c</FileName>
+              <FileName>01bsp_sctimer.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\common\01bsp_radiotimer\01bsp_radiotimer.c</FilePath>
+              <FilePath>..\..\common\01bsp_sctimer\01bsp_sctimer.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -423,9 +426,9 @@
               <FilePath>..\..\..\bsp\boards\radio.h</FilePath>
             </File>
             <File>
-              <FileName>radiotimer.h</FileName>
+              <FileName>sctimer.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\..\..\bsp\boards\radiotimer.h</FilePath>
+              <FilePath>..\..\..\bsp\boards\sctimer.h</FilePath>
             </File>
             <File>
               <FileName>uart.h</FileName>
@@ -438,24 +441,34 @@
           <GroupName>scum</GroupName>
           <Files>
             <File>
+              <FileName>board.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\bsp\boards\scum\board.c</FilePath>
+            </File>
+            <File>
+              <FileName>debugpins.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\bsp\boards\scum\debugpins.c</FilePath>
+            </File>
+            <File>
+              <FileName>eui64.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\bsp\boards\scum\eui64.c</FilePath>
+            </File>
+            <File>
               <FileName>leds.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\bsp\boards\scum\leds.c</FilePath>
             </File>
             <File>
-              <FileName>memory_map.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\bsp\boards\scum\memory_map.h</FilePath>
-            </File>
-            <File>
-              <FileName>board_info.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\bsp\boards\scum\board_info.h</FilePath>
-            </File>
-            <File>
-              <FileName>board.c</FileName>
+              <FileName>radio.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\bsp\boards\scum\board.c</FilePath>
+              <FilePath>..\..\..\bsp\boards\scum\radio.c</FilePath>
+            </File>
+            <File>
+              <FileName>sctimer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\bsp\boards\scum\sctimer.c</FilePath>
             </File>
             <File>
               <FileName>uart.c</FileName>
@@ -463,24 +476,25 @@
               <FilePath>..\..\..\bsp\boards\scum\uart.c</FilePath>
             </File>
             <File>
-              <FileName>bsp_timer.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\bsp\boards\scum\bsp_timer.c</FilePath>
+              <FileName>board_info.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\bsp\boards\scum\board_info.h</FilePath>
             </File>
             <File>
-              <FileName>radiotimer.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\bsp\boards\scum\radiotimer.c</FilePath>
-            </File>
-            <File>
-              <FileName>debugpins.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\bsp\boards\scum\debugpins.c</FilePath>
+              <FileName>memory_map.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\bsp\boards\scum\memory_map.h</FilePath>
             </File>
           </Files>
         </Group>
       </Groups>
     </Target>
   </Targets>
+
+  <RTE>
+    <apis/>
+    <components/>
+    <files/>
+  </RTE>
 
 </Project>

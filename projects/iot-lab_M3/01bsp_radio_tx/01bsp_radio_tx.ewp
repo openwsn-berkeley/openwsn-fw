@@ -715,7 +715,7 @@
         </option>
         <option>
           <name>IlinkIcfFile</name>
-          <state>$TOOLKIT_DIR$\CONFIG\generic_cortex.icf</state>
+          <state>$TOOLKIT_DIR$\config\linker\ST\stm32f103xE.icf</state>
         </option>
         <option>
           <name>IlinkIcfFileSlave</name>
@@ -1955,9 +1955,6 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\board.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\bsp_timer.c</name>
-        </file>
-        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\debugpins.c</name>
         </file>
         <file>
@@ -1976,10 +1973,10 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\nvic.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\radiotimer.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\rcc.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\rcc.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\sctimer.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\spi.c</name>

@@ -93,7 +93,7 @@ void board_init(void)
     NVIC_radio();
 }
 
-void board_sleep(){
+void board_sleep(void) {
     DBGMCU_Config(DBGMCU_STOP, ENABLE);
     // Enable PWR and BKP clock
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE);
@@ -103,7 +103,7 @@ void board_sleep(){
     __WFI();
 }
 
-void board_reset(){
+void board_reset(void) {
     NVIC_SystemReset();
 }
 

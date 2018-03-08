@@ -33,7 +33,7 @@ bsp_timer_vars_t bsp_timer_vars;
 This functions starts the timer, i.e. the counter increments, but doesn't set
 any compare registers, so no interrupt will fire.
 */
-void bsp_timer_init() {
+void bsp_timer_init(void) {
    
     // clear local variables
     memset(&bsp_timer_vars,0,sizeof(bsp_timer_vars_t));
@@ -59,7 +59,7 @@ void bsp_timer_set_callback(bsp_timer_cbt cb) {
 This function does not stop the timer, it rather resets the value of the
 counter, and cancels a possible pending compare event.
 */
-void bsp_timer_reset() {
+void bsp_timer_reset(void) {
     // record last timer compare value
     bsp_timer_vars.last_compare_value   = 0;
 }
@@ -106,7 +106,7 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
 /**
 \brief Cancel a running compare.
 */
-void bsp_timer_cancel_schedule() {
+void bsp_timer_cancel_schedule(void) {
     RFTIMER_REG__COMPARE0_CONTROL   = 0x00;
 }
 
@@ -115,7 +115,7 @@ void bsp_timer_cancel_schedule() {
 
 \returns The current value of the timer's counter.
 */
-PORT_TIMER_WIDTH bsp_timer_get_currentValue() {
+PORT_TIMER_WIDTH bsp_timer_get_currentValue(void) {
     return TIMER_COUTER_CONVERT_500K_TO_32K(RFTIMER_REG__COUNTER);
 }
 
@@ -123,7 +123,7 @@ PORT_TIMER_WIDTH bsp_timer_get_currentValue() {
 
 //=========================== interrupt handlers ==============================
 
-kick_scheduler_t bsp_timer_isr() {
+kick_scheduler_t bsp_timer_isr(void) {
     
     // call the callback
     bsp_timer_vars.cb();

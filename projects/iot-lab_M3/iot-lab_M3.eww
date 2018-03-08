@@ -2,16 +2,13 @@
 
 <workspace>
   <project>
-    <path>$WS_DIR$\01bsp_bsp_timer\01bsp_bsp_timer.ewp</path>
-  </project>
-  <project>
     <path>$WS_DIR$\01bsp_leds\01bsp_leds.ewp</path>
   </project>
   <project>
     <path>$WS_DIR$\01bsp_radio_tx\01bsp_radio_tx.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\01bsp_radiotimer\01bsp_radiotimer.ewp</path>
+    <path>$WS_DIR$\01bsp_sctimer\01bsp_sctimer.ewp</path>
   </project>
   <project>
     <path>$WS_DIR$\01bsp_uart\01bsp_uart.ewp</path>

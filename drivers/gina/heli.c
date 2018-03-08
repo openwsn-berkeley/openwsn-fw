@@ -7,17 +7,17 @@
 
 //=========================== public ==========================================
 
-void heli_init() {
+void heli_init(void) {
    // set pins P1.2,3 as output
    P1OUT   &= ~0x0C;
    P1DIR   |=  0x0C;
 }
 
-void heli_on() {
+void heli_on(void) {
    P1OUT   |=  0x0C;
 }
 
-void heli_off() {
+void heli_off(void) {
    P1OUT   &= ~0x0C;
 }
 

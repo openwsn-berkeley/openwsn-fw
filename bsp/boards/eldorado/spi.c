@@ -40,7 +40,7 @@ spi_vars_t spi_vars;
 //=========================== prototypes ======================================
 
 //=========================== public ==========================================
-void spi_init() {
+void spi_init(void) {
 	SPI1C1 = 0x50;   /*  
 	                      *  0b01010000
 	                      *    ||||||||__ SPI serial data transfers start with MSB

@@ -34,7 +34,7 @@ void    radio_spiReadRxFifo(uint8_t* bufRead, uint8_t length);
 
 //=========================== public ==========================================
 
-void radio_init() {
+void radio_init(void) {
    //start fabien code:
 	uint8_t temp;
    IRQInit();
@@ -138,7 +138,7 @@ void radio_setEndFrameCb(radiotimer_capture_cbt cb) {
    radio_vars.endFrameCb = cb;
 }
 */
-void radio_reset() {
+void radio_reset(void) {
    PTDD_PTDD3 = 0;
    PTDD_PTDD3 = 1;//goes back to idle mode
 }
@@ -149,7 +149,7 @@ void radio_setFrequency(uint8_t frequency) {
    radio_spiWriteReg(LO1_NUM_ADDR,frequency-11);//in this radio they index the channels from 0 to 15
 }
 
-void radio_rfOn() {
+void radio_rfOn(void) {
    //poipoi
    //to leave doze mode, assert ATTN then deassert it
    MC13192_ATTN = 0;
@@ -161,7 +161,7 @@ void radio_loadPacket(uint8_t* packet, uint16_t len) {
    radio_spiWriteTxFifo(packet,len);
 }
 
-void radio_txEnable() {
+void radio_txEnable(void) {
    // turn on radio's PLL
      //read status reg
    uint16_t stat_reg = radio_spiReadReg(MODE_ADDR);
@@ -176,7 +176,7 @@ void radio_txEnable() {
    while((radio_spiReadReg(STATUS_ADDR) & 0x8000)); // busy wait until pll locks
 }
 
-void radio_txNow() {
+void radio_txNow(void) {
    // send packet by assterting the RTXEN pin
    MC13192_RTXEN = 1;
    
@@ -191,7 +191,7 @@ void radio_txNow() {
    //poipoiieee154e_startOfFrame(ieee154etimer_getCapturedTime());
 }
 
-void radio_rxEnable() {
+void radio_rxEnable(void) {
    //read status reg
    uint16_t stat_reg = radio_spiReadReg(MODE_ADDR);
    stat_reg &= 0xfff8;
@@ -206,7 +206,7 @@ void radio_rxEnable() {
    while((radio_spiReadReg(STATUS_ADDR) & 0x8000)); // busy wait until pll locks
 }
 
-void radio_rxNow() {
+void radio_rxNow(void) {
    // nothing to do
 }
 
@@ -233,7 +233,7 @@ void radio_getReceivedFrame(uint8_t* bufRead,
    //modify this function with the new variables: lenRead, maxBufLen, rssi, lqi, crc: look in telos for examples.
 }
 
-void radio_rfOff() {// turn radio off
+void radio_rfOff(void) {// turn radio off
    uint16_t stat_reg;
    
    MC13192_RTXEN = 0;//go back to idle

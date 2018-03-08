@@ -36,7 +36,7 @@ int main(void) {
    scheduler_start();
 }
 
-void isr_button() {
+void isr_button(void) {
    //prepare packet
    testRadioPacketToSend = openqueue_getFreePacketBuffer();
    //l1

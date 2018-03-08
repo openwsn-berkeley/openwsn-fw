@@ -99,7 +99,7 @@
         </option>
         <option>
           <name>OGChipSelectEditMenu</name>
-          <state>STM32F103xE	ST STM32F103xE</state>
+          <state>CC2538SF53	TexasInstruments CC2538SF53</state>
         </option>
         <option>
           <name>GenLowLevelInterface</name>
@@ -147,7 +147,7 @@
         </option>
         <option>
           <name>OGUseCmsis</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>OGUseCmsisDspLib</name>
@@ -168,9 +168,7 @@
         <debug>1</debug>
         <option>
           <name>CCDefines</name>
-          <state>STM32F10X_HD</state>
-          <state>USE_STDPERIPH_DRIVER</state>
-          <state>HSE_VALUE=((uint32_t)16000000)</state>
+          <state></state>
         </option>
         <option>
           <name>CCPreprocFile</name>
@@ -302,15 +300,17 @@
           <state>$PROJ_DIR$</state>
           <state>$PROJ_DIR$\..\..\..\bsp\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\boards\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\chips\at86rf231\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\common\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\chips\adxl346\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\chips\max44009\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\chips\sht21\</state>
           <state>$PROJ_DIR$\..\..\..\kernel\</state>
           <state>$PROJ_DIR$\..\..\..\drivers\common\</state>
           <state>$PROJ_DIR$\..\..\..\inc\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\configure\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\library\STM32F10x_StdPeriph_Lib_V3.5.0\Libraries\STM32F10x_StdPeriph_Driver\inc\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\library\STM32F10x_StdPeriph_Lib_V3.5.0\Libraries\CMSIS\CM3\DeviceSupport\ST\STM32F10x</state>
-          <state>$PROJ_DIR$\..\..\..\projects\common\01bsp_radiotimer\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\</state>
+          <state>$PROJ_DIR$\..\..\..\projects\common\03oos_openwsn</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -651,7 +651,7 @@
         </option>
         <option>
           <name>IlinkOutputFile</name>
-          <state>01bsp_radiotimer.out</state>
+          <state>01bsp_infrared.out</state>
         </option>
         <option>
           <name>IlinkDebugInfoEnable</name>
@@ -715,7 +715,7 @@
         </option>
         <option>
           <name>IlinkIcfFile</name>
-          <state>$TOOLKIT_DIR$\CONFIG\generic_cortex.icf</state>
+          <state>$TOOLKIT_DIR$\config\linker\TexasInstruments\cx2538xf53.icf</state>
         </option>
         <option>
           <name>IlinkIcfFileSlave</name>
@@ -1880,127 +1880,352 @@
     </settings>
   </configuration>
   <group>
-    <name>application</name>
-    <file>
-      <name>$PROJ_DIR$\..\..\common\01bsp_radiotimer\01bsp_radiotimer.c</name>
-    </file>
-  </group>
-  <group>
     <name>bsp</name>
     <group>
       <name>boards</name>
       <group>
-        <name>iot-lab_M3</name>
+        <name>openmote-cc2538</name>
         <group>
-          <name>configure</name>
+          <name>headers</name>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\configure\stm32f10x_conf.h</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_aes.h</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\configure\stm32f10x_it.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_ana_regs.h</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\configure\stm32f10x_it.h</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_cctest.h</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_flash_ctrl.h</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_gpio.h</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_gptimer.h</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_i2cm.h</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_i2cs.h</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_ints.h</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_ioc.h</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_memmap.h</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_nvic.h</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_pka.h</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_rfcore_ffsm.h</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_rfcore_sfr.h</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_rfcore_xreg.h</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_smwdthrosc.h</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_soc_adc.h</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_ssi.h</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_sys_ctrl.h</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_types.h</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_uart.h</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_udma.h</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_udmachctl.h</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\headers\hw_usb.h</name>
           </file>
         </group>
         <group>
-          <name>library</name>
+          <name>source</name>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\library\STM32F10x_StdPeriph_Lib_V3.5.0\Libraries\STM32F10x_StdPeriph_Driver\src\misc.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\adc.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\library\STM32F10x_StdPeriph_Lib_V3.5.0\Libraries\CMSIS\CM3\DeviceSupport\ST\STM32F10x\startup\iar\startup_stm32f10x_hd.s</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\adc.h</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\library\STM32F10x_StdPeriph_Lib_V3.5.0\Libraries\STM32F10x_StdPeriph_Driver\src\stm32f10x_dbgmcu.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\aes.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\library\STM32F10x_StdPeriph_Lib_V3.5.0\Libraries\STM32F10x_StdPeriph_Driver\src\stm32f10x_exti.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\aes.h</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\library\STM32F10x_StdPeriph_Lib_V3.5.0\Libraries\STM32F10x_StdPeriph_Driver\src\stm32f10x_flash.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\bl_commands.h</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\library\STM32F10x_StdPeriph_Lib_V3.5.0\Libraries\STM32F10x_StdPeriph_Driver\src\stm32f10x_gpio.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\ccm.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\library\STM32F10x_StdPeriph_Lib_V3.5.0\Libraries\STM32F10x_StdPeriph_Driver\src\stm32f10x_i2c.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\ccm.h</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\library\STM32F10x_StdPeriph_Lib_V3.5.0\Libraries\STM32F10x_StdPeriph_Driver\src\stm32f10x_iwdg.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\cpu.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\library\STM32F10x_StdPeriph_Lib_V3.5.0\Libraries\STM32F10x_StdPeriph_Driver\src\stm32f10x_pwr.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\cpu.h</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\library\STM32F10x_StdPeriph_Lib_V3.5.0\Libraries\STM32F10x_StdPeriph_Driver\src\stm32f10x_rcc.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\debug.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\library\STM32F10x_StdPeriph_Lib_V3.5.0\Libraries\STM32F10x_StdPeriph_Driver\src\stm32f10x_rtc.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\debug.h</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\library\STM32F10x_StdPeriph_Lib_V3.5.0\Libraries\STM32F10x_StdPeriph_Driver\src\stm32f10x_sdio.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\ecc_curveinfo.h</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\library\STM32F10x_StdPeriph_Lib_V3.5.0\Libraries\STM32F10x_StdPeriph_Driver\src\stm32f10x_spi.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\flash.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\library\STM32F10x_StdPeriph_Lib_V3.5.0\Libraries\STM32F10x_StdPeriph_Driver\src\stm32f10x_tim.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\flash.h</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\library\STM32F10x_StdPeriph_Lib_V3.5.0\Libraries\STM32F10x_StdPeriph_Driver\src\stm32f10x_usart.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\gpio.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\library\STM32F10x_StdPeriph_Lib_V3.5.0\Libraries\CMSIS\CM3\DeviceSupport\ST\STM32F10x\system_stm32f10x.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\gpio.h</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\gptimer.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\gptimer.h</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\i2c_lib.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\i2c_lib.h</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\interrupt.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\interrupt.h</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\ioc.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\ioc.h</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\pka.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\pka.h</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\rom.h</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\sha256.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\sha256.h</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\sleepmode.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\sleepmode.h</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\ssi.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\ssi.h</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\sys_ctrl.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\sys_ctrl.h</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\systick.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\systick.h</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\uarthal.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\uarthal.h</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\udma.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\udma.h</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\watchdog.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\source\watchdog.h</name>
           </file>
         </group>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\board.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\adc_sensor.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\bsp_timer.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\adc_sensor.h</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\debugpins.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\board.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\eui64.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\board_info.h</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\exti.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\cc2538rf.h</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\gpio.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\cryptoengine.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\leds.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\debugpins.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\nvic.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\eui64.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\radiotimer.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\i2c.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\rcc.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\leds.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\spi.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\pwm.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\uart.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\pwm.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\radio.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\sctimer.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\sensors.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\startup_iar.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\uart.c</name>
         </file>
       </group>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\board.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\cryptoengine.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\debugpins.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\eui64.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\i2c.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\sctimer.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\sensors.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\spi.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\toolchain_defs.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\uart.h</name>
+      </file>
     </group>
     <group>
       <name>chips</name>
       <group>
-        <name>at86rf231</name>
+        <name>adxl346</name>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf231\radio.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\chips\adxl346\adxl346.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\chips\adxl346\adxl346.h</name>
+        </file>
+      </group>
+      <group>
+        <name>max44009</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\chips\max44009\max44009.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\chips\max44009\max44009.h</name>
+        </file>
+      </group>
+      <group>
+        <name>sht21</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\chips\sht21\sht21.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\chips\sht21\sht21.h</name>
         </file>
       </group>
     </group>
+  </group>
+  <group>
+    <name>inc</name>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\inc\opendefs.h</name>
+    </file>
+  </group>
+  <group>
+    <name>projects</name>
+    <file>
+      <name>$PROJ_DIR$\01bsp_infrared.c</name>
+    </file>
   </group>
 </project>
 

@@ -36,7 +36,7 @@ void    c6t_sendDone(
 
 //=========================== public ==========================================
 
-void c6t_init() {
+void c6t_init(void) {
    if(idmanager_getIsDAGroot()==TRUE) return; 
    
    // prepare the resource descriptor for the /6t path

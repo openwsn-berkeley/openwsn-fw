@@ -23,7 +23,7 @@ void userialbridge_task_cb(void);
 
 //=========================== public ==========================================
 
-void userialbridge_init() {
+void userialbridge_init(void) {
     
     // clear local variables
     memset(&userialbridge_vars,0,sizeof(userialbridge_vars_t));
