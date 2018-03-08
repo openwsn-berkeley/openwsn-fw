@@ -706,41 +706,6 @@ frameLength_t schedule_getFrameLength(void) {
 }
 
 /**
-\brief Get the frame handle.
-
-\returns The frame handle.
-*/
-uint8_t schedule_getFrameHandle(void) {
-   uint8_t returnVal;
-   
-   INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
-   
-   returnVal = schedule_vars.frameHandle;
-   
-   ENABLE_INTERRUPTS();
-   
-   return returnVal;
-}
-
-/**
-\brief Get the frame number.
-
-\returns The frame number.
-*/
-uint8_t schedule_getFrameNumber(void) {
-   uint8_t returnVal;
-   
-   INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
-   
-   returnVal = schedule_vars.frameNumber;
-   
-   ENABLE_INTERRUPTS();
-   
-   return returnVal;
-}
-/**
 \brief Get the type of the current schedule entry.
 
 \returns The type of the current schedule entry.
