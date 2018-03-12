@@ -1306,7 +1306,7 @@ void sixtop_six2six_notifyReceive(
             // add command
             if (code == IANA_6TOP_CMD_ADD){
                 if (schedule_getNumberOfFreeEntries() < numCells){
-                    returnCode = IANA_6TOP_RC_NORES;
+                    returnCode = IANA_6TOP_RC_BUSY;
                     break;
                 }
                 // retrieve cell list

@@ -120,8 +120,7 @@ void msf_handleRCError(uint8_t code, open_addr_t* address){
     
     if (
         code==IANA_6TOP_RC_RESET        ||
-        code==IANA_6TOP_RC_LOCKED       ||
-        code==IANA_6TOP_RC_BUSY
+        code==IANA_6TOP_RC_LOCKED
     ){
         // waitretry
         msf_vars.waitretry = TRUE;
@@ -151,7 +150,7 @@ void msf_handleRCError(uint8_t code, open_addr_t* address){
         scheduler_push_task(msf_timer_clear_task,TASKPRIO_MSF);
     }
     
-    if (code==IANA_6TOP_RC_NORES){
+    if (code==IANA_6TOP_RC_BUSY){
         // mark neighbor f6NORES
         neighbors_setNeighborNoResource(address);
     }

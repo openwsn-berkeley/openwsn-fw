@@ -33,8 +33,8 @@
 #define IANA_6TOP_CMD_CLEAR         0x06 // CMD_CLEAR        | clear all cells
 // 6P return code
 #define IANA_6TOP_RC_SUCCESS        0x00 // RC_SUCCESS       | operation succeeded
-#define IANA_6TOP_RC_ERROR          0x01 // RC_ERROR         | generic error
-#define IANA_6TOP_RC_EOL            0x02 // RC_EOL           | end of list
+#define IANA_6TOP_RC_EOL            0x01 // RC_EOL           | end of list
+#define IANA_6TOP_RC_ERROR          0x02 // RC_ERROR         | generic error
 #define IANA_6TOP_RC_RESET          0x03 // RC_RESET         | critical error, reset
 #define IANA_6TOP_RC_VER_ERR        0x04 // RC_VER_ERR       | unsupported 6P version   
 #define IANA_6TOP_RC_SFID_ERR       0x05 // RC_SFID_ERR      | unsupported SFID         
@@ -42,7 +42,6 @@
 #define IANA_6TOP_RC_CELLLIST_ERR   0x07 // RC_CELLLIST_ERR  | cellList error
 #define IANA_6TOP_RC_BUSY           0x08 // RC_BUSY          | busy   
 #define IANA_6TOP_RC_LOCKED         0x09 // RC_LOCKED        | locked
-#define IANA_6TOP_RC_NORES          0x0a // RC_NORES         | not enough resources 
 
 // SF ID
 #define SFID_SF0  0
