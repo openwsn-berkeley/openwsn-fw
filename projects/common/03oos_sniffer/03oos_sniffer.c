@@ -14,7 +14,7 @@
 #include "idmanager.h"
 #include "sixtop.h"
 #include "neighbors.h"
-#include "sf0.h"
+#include "msf.h"
 #include "openrandom.h"
 
 //=========================== defines =========================================
@@ -204,8 +204,8 @@ owerror_t sixtop_request(
 )                                                                         {return E_FAIL;}
 void sixtop_setIsResponseEnabled(bool isEnabled)                          {return;}
 void sixtop_setKaPeriod(uint16_t kaPeriod)                                {return;}
-void sf0_appPktPeriod(uint8_t numAppPacketsPerSlotFrame)                  {return;}
-uint8_t  sf0_getsfid(void)                                                {return 0;}
+void msf_appPktPeriod(uint8_t numAppPacketsPerSlotFrame)                  {return;}
+uint8_t  msf_getsfid(void)                                                {return 0;}
 
 void openbridge_triggerData(void)                                         {return;}
 

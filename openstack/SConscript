@@ -15,7 +15,7 @@ sources_c = [
     os.path.join('02a-MAClow','IEEE802154_security.c'),
     #=== 02b-MAChigh
     os.path.join('02b-MAChigh','neighbors.c'),
-    os.path.join('02b-MAChigh','sf0.c'),
+    os.path.join('02b-MAChigh','msf.c'),
     os.path.join('02b-MAChigh','schedule.c'),
     os.path.join('02b-MAChigh','sixtop.c'),
     #=== 03a-IPHC
@@ -44,7 +44,7 @@ sources_h = [
     os.path.join('02a-MAClow','IEEE802154_security.h'),
     #=== 02b-MAChigh
     os.path.join('02b-MAChigh','neighbors.h'),
-    os.path.join('02b-MAChigh','sf0.h'),
+    os.path.join('02b-MAChigh','msf.h'),
     os.path.join('02b-MAChigh','schedule.h'),
     os.path.join('02b-MAChigh','sixtop.h'),
     #=== 03a-IPHC

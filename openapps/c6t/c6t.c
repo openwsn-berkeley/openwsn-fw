@@ -11,7 +11,7 @@
 #include "idmanager.h"
 #include "openqueue.h"
 #include "neighbors.h"
-#include "sf0.h"
+#include "msf.h"
 
 //=========================== defines =========================================
 
@@ -94,7 +94,7 @@ owerror_t c6t_receive(OpenQueueEntry_t* msg,
             break;
          }
          
-         if (sf0_candidateAddCellList(celllist_add,1)==FALSE){
+         if (msf_candidateAddCellList(celllist_add,1)==FALSE){
             // set the CoAP header
             outcome                       = E_FAIL;
             coap_header->Code             = COAP_CODE_RESP_CHANGED;
@@ -105,10 +105,10 @@ owerror_t c6t_receive(OpenQueueEntry_t* msg,
             IANA_6TOP_CMD_ADD,                  // code
             &neighbor,                          // neighbor
             1,                                  // number cells
-            LINKOPTIONS_TX,                     // cellOptions
+            CELLOPTIONS_TX,                     // cellOptions
             celllist_add,                       // celllist to add
             NULL,                               // celllist to delete (not used)
-            sf0_getsfid(),                      // sfid
+            msf_getsfid(),                      // sfid
             0,                                  // list command offset (not used)
             0                                   // list command maximum celllist (not used)
          );
@@ -134,7 +134,7 @@ owerror_t c6t_receive(OpenQueueEntry_t* msg,
          }
          
          // call sixtop
-         if (sf0_candidateRemoveCellList(celllist_delete,&neighbor,1)==FALSE){
+         if (msf_candidateRemoveCellList(celllist_delete,&neighbor,1)==FALSE){
             // set the CoAP header
             outcome                       = E_FAIL;
             coap_header->Code             = COAP_CODE_RESP_CHANGED;
@@ -145,10 +145,10 @@ owerror_t c6t_receive(OpenQueueEntry_t* msg,
             IANA_6TOP_CMD_ADD,                  // code
             &neighbor,                          // neighbor
             1,                                  // number cells
-            LINKOPTIONS_TX,                     // cellOptions
+            CELLOPTIONS_TX,                     // cellOptions
             celllist_add,                       // celllist to add
             NULL,                               // celllist to delete (not used)
-            sf0_getsfid(),                      // sfid
+            msf_getsfid(),                      // sfid
             0,                                  // list command offset (not used)
             0                                   // list command maximum celllist (not used)
          );

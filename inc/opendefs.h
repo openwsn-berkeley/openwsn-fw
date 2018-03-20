@@ -36,10 +36,10 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 #define LENGTH_ADDR64b   8
 #define LENGTH_ADDR128b  16
 
-#define MAXNUMNEIGHBORS  10
+#define MAXNUMNEIGHBORS  30
 
 // maximum celllist length
-#define CELLLIST_MAX_LEN 3
+#define CELLLIST_MAX_LEN 5
 
 enum {
    E_SUCCESS                           = 0,
@@ -144,40 +144,36 @@ enum {
    COMPONENT_NEIGHBORS                 = 0x0d,
    COMPONENT_SCHEDULE                  = 0x0e,
    COMPONENT_SIXTOP_RES                = 0x0f,
-   COMPONENT_SF                        = 0x10,
    //IPHC
-   COMPONENT_OPENBRIDGE                = 0x11,
-   COMPONENT_IPHC                      = 0x12,
+   COMPONENT_OPENBRIDGE                = 0x10,
+   COMPONENT_IPHC                      = 0x11,
    //IPv6
-   COMPONENT_FORWARDING                = 0x13,
-   COMPONENT_ICMPv6                    = 0x14,
-   COMPONENT_ICMPv6ECHO                = 0x15,
-   COMPONENT_ICMPv6ROUTER              = 0x16,
-   COMPONENT_ICMPv6RPL                 = 0x17,
+   COMPONENT_FORWARDING                = 0x12,
+   COMPONENT_ICMPv6                    = 0x13,
+   COMPONENT_ICMPv6ECHO                = 0x14,
+   COMPONENT_ICMPv6ROUTER              = 0x15,
+   COMPONENT_ICMPv6RPL                 = 0x16,
    //TRAN
-   COMPONENT_OPENTCP                   = 0x18,
-   COMPONENT_OPENUDP                   = 0x19,
-   COMPONENT_OPENCOAP                  = 0x1a,
+   COMPONENT_OPENUDP                   = 0x17,
+   COMPONENT_OPENCOAP                  = 0x18,
    // applications
-   COMPONENT_C6T                       = 0x1b,
-   COMPONENT_CEXAMPLE                  = 0x1c,
-   COMPONENT_CINFO                     = 0x1d,
-   COMPONENT_CLEDS                     = 0x1e,
-   COMPONENT_CSENSORS                  = 0x1f,
-   COMPONENT_CSTORM                    = 0x20,
-   COMPONENT_CWELLKNOWN                = 0x21,
-   COMPONENT_TECHO                     = 0x22,
-   COMPONENT_TOHLONE                   = 0x23,
-   COMPONENT_UECHO                     = 0x24,
-   COMPONENT_UINJECT                   = 0x25,
-   COMPONENT_RRT                       = 0x26,
-   COMPONENT_SECURITY                  = 0x27,
-   COMPONENT_USERIALBRIDGE             = 0x28,
-   COMPONENT_UEXPIRATION               = 0x29,
-   COMPONENT_UMONITOR                  = 0x2a,
-   COMPONENT_CJOIN                     = 0x2b,
-   COMPONENT_OPENOSCOAP                = 0x2c,
-   COMPONENT_CINFRARED                 = 0x2d,
+   COMPONENT_C6T                       = 0x19,
+   COMPONENT_CEXAMPLE                  = 0x1a,
+   COMPONENT_CINFO                     = 0x1b,
+   COMPONENT_CLEDS                     = 0x1c,
+   COMPONENT_CSENSORS                  = 0x1d,
+   COMPONENT_CSTORM                    = 0x1e,
+   COMPONENT_CWELLKNOWN                = 0x1f,
+   COMPONENT_UECHO                     = 0x20,
+   COMPONENT_UINJECT                   = 0x21,
+   COMPONENT_RRT                       = 0x22,
+   COMPONENT_SECURITY                  = 0x23,
+   COMPONENT_USERIALBRIDGE             = 0x24,
+   COMPONENT_UEXPIRATION               = 0x25,
+   COMPONENT_UMONITOR                  = 0x26,
+   COMPONENT_CJOIN                     = 0x27,
+   COMPONENT_OPENOSCOAP                = 0x28,
+   COMPONENT_CINFRARED                 = 0x29,
 };
 
 /**
@@ -386,7 +382,7 @@ typedef struct {
    asn_t            asn;
    uint8_t          joinPrio;
    bool             f6PNORES;
-   uint8_t          generation;
+   bool             inBlacklist;
    uint8_t          sequenceNumber;
    uint8_t          backoffExponenton;
    uint8_t          backoff;
