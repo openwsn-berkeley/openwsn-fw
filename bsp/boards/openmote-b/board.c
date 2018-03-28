@@ -101,7 +101,7 @@ void board_init(void) {
     cryptoengine_init();  
 }
 
-void antenna_init(){
+void antenna_init(void) {
    //use cc2538 2.4ghz radio
    GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_CC2538_24GHZ, BSP_ANTENNA_CC2538_24GHZ);
    GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_AT215_24GHZ, 0);

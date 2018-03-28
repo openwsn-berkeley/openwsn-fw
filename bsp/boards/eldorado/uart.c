@@ -44,7 +44,7 @@ void interrupt VectorNumber_Vsci2rx SCI2RX_ISR(void);
 
 //=========================== public ==========================================
 
-void uart_init() {
+void uart_init(void) {
 
 	SCI2C2 = 0x00;                       /* Disable the SCI2 module */
 	(void)(SCI2S1 == 0);                 /* Dummy read of the SCI2S1 registr to clear flags */
@@ -118,7 +118,7 @@ void uart_rxSetup(uint8_t*    rxBuf,
    
 }
 
-void uart_rxStart() {
+void uart_rxStart(void) {
    // enable UART RX interrupt
    SCI2C2_RIE = 0x1;
 }
@@ -141,14 +141,14 @@ void uart_readBytes(uint8_t* buf, uint8_t numBytes) {
    uart_vars.rxBufFill      -= numBytes;
 }
 
-void uart_rxStop() {
+void uart_rxStop(void) {
    // disable UART1 RX interrupt
 	SCI2C2_RIE = 0x0;
 }
 
 //=========================== private =========================================
 
-void reset_rxBuf() {
+void reset_rxBuf(void) {
    uart_vars.rxBufWrPtr      = uart_vars.rxBuf;
    uart_vars.rxBufRdPtr      = uart_vars.rxBuf;
    uart_vars.rxBufFill       = 0;

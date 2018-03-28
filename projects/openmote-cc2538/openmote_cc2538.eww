@@ -2,6 +2,9 @@
 
 <workspace>
   <project>
+    <path>$WS_DIR$\01bsp_infrared\01bsp_infrared.ewp</path>
+  </project>
+  <project>
     <path>$WS_DIR$\01bsp_sctimer\01bsp_sctimer.ewp</path>
   </project>
   <project>

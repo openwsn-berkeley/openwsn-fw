@@ -118,8 +118,8 @@ void ieee154e_setIsSecurityEnabled(void){}
 void ieee154e_setIsAckEnabled(void){}
 void ieee154e_setSingleChannel(void){}
 void sniffer_setListeningChannel(void){}
-void sf0_appPktPeriod(void){}
-uint8_t sf0_getsfid(void) {return 0;}
+void msf_appPktPeriod(void){}
+uint8_t msf_getsfid(void) {return 0;}
 
 bool debugPrint_isSync(void) {
    return FALSE;

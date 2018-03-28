@@ -4,6 +4,7 @@
 #include "packetfunctions.h"
 #include "IEEE802154E.h"
 #include "IEEE802154_security.h"
+#include "sixtop.h"
 
 //=========================== defination =====================================
 
@@ -23,7 +24,7 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry);
 /**
 \brief Initialize this module.
 */
-void openqueue_init() {
+void openqueue_init(void) {
    uint8_t i;
    for (i=0;i<QUEUELENGTH;i++){
       openqueue_reset_entry(&(openqueue_vars.queue[i]));
@@ -38,7 +39,7 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_queue() {
+bool debugPrint_queue(void) {
    debugOpenQueueEntry_t output[QUEUELENGTH];
    uint8_t i;
    for (i=0;i<QUEUELENGTH;i++) {
@@ -146,26 +147,9 @@ void openqueue_removeAllCreatedBy(uint8_t creator) {
    ENABLE_INTERRUPTS();
 }
 
-/**
-\brief Free all the packet buffers owned by a specific module.
-
-\param owner The identifier of the component, taken in COMPONENT_*.
-*/
-void openqueue_removeAllOwnedBy(uint8_t owner) {
-   uint8_t i;
-   INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
-   for (i=0;i<QUEUELENGTH;i++){
-      if (openqueue_vars.queue[i].owner==owner) {
-         openqueue_reset_entry(&(openqueue_vars.queue[i]));
-      }
-   }
-   ENABLE_INTERRUPTS();
-}
-
 //======= called by RES
 
-OpenQueueEntry_t* openqueue_sixtopGetSentPacket() {
+OpenQueueEntry_t* openqueue_sixtopGetSentPacket(void) {
    uint8_t i;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
@@ -180,7 +164,7 @@ OpenQueueEntry_t* openqueue_sixtopGetSentPacket() {
    return NULL;
 }
 
-OpenQueueEntry_t* openqueue_sixtopGetReceivedPacket() {
+OpenQueueEntry_t* openqueue_sixtopGetReceivedPacket(void) {
    uint8_t i;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
@@ -270,9 +254,11 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor, radioType_
     return NULL;
 }
 
-bool openqueue_isHighPriorityEntryEnough(){
+bool openqueue_isHighPriorityEntryEnough(void) {
     uint8_t i;
     uint8_t numberOfEntry;
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
     
     numberOfEntry = 0;
     for (i=0;i<QUEUELENGTH;i++) {
@@ -282,8 +268,10 @@ bool openqueue_isHighPriorityEntryEnough(){
     }
     
     if (numberOfEntry>QUEUELENGTH-HIGH_PRIORITY_QUEUE_ENTRY){
+        ENABLE_INTERRUPTS();
         return FALSE;
     } else {
+        ENABLE_INTERRUPTS();
         return TRUE;
     }
 }
@@ -311,6 +299,62 @@ OpenQueueEntry_t* openqueue_macGetEBPacket(radioType_t rType) {
     ENABLE_INTERRUPTS();
     return NULL;
 }
+
+OpenQueueEntry_t*  openqueue_macGetDIOPacket(){
+    uint8_t i;
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+    for (i=0;i<QUEUELENGTH;i++) {
+        if (openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
+            openqueue_vars.queue[i].creator==COMPONENT_ICMPv6RPL           &&
+            packetfunctions_isBroadcastMulticast(&(openqueue_vars.queue[i].l2_nextORpreviousHop))) {
+            ENABLE_INTERRUPTS();
+            return &openqueue_vars.queue[i];
+        }
+    }
+    ENABLE_INTERRUPTS();
+    return NULL;
+}
+
+OpenQueueEntry_t*  openqueue_macGetDedicatedPacket(open_addr_t* toNeighbor){
+    uint8_t i;
+    uint8_t packet_index;
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+    
+    packet_index = QUEUELENGTH;
+    // first to look the sixtop RES packet
+    for (i=0;i<QUEUELENGTH;i++) {
+       if (
+           openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
+           (
+               toNeighbor->type==ADDR_64B &&
+               packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)
+           ) && // sixtop response with SEQNUM_ERR shouldn't be send on dedicated cell
+            (
+                openqueue_vars.queue[i].creator                 != COMPONENT_SIXTOP_RES ||
+                openqueue_vars.queue[i].l2_sixtop_returnCode    != IANA_6TOP_RC_SEQNUM_ERR 
+            )
+       ){
+            if (packet_index==QUEUELENGTH){
+                packet_index = i;
+            } else {
+                if (openqueue_vars.queue[i].creator<openqueue_vars.queue[packet_index].creator){
+                    packet_index = i;
+                }
+            }
+       }
+    }
+    
+    if (packet_index == QUEUELENGTH){
+        ENABLE_INTERRUPTS();
+        return NULL;
+    } else {
+        ENABLE_INTERRUPTS();
+        return &openqueue_vars.queue[packet_index];
+    }
+}
+
 
 //=========================== private =========================================
 

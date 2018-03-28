@@ -41,7 +41,7 @@ radiotimer_vars_t radiotimer_vars;
 
 //===== admin
 
-void radiotimer_init() {
+void radiotimer_init(void) {
    // clear local variables
    memset(&radiotimer_vars,0,sizeof(radiotimer_vars_t));
 }
@@ -118,7 +118,7 @@ void radiotimer_start(uint16_t period) {
 
 //===== direct access
 
-uint16_t radiotimer_getValue() {
+uint16_t radiotimer_getValue(void) {
     RTC_WaitForSynchro();
     uint32_t counter = RTC_GetCounter();
     return (uint16_t)counter;
@@ -142,7 +142,7 @@ void radiotimer_setPeriod(uint16_t period) {
     RTC_ITConfig(RTC_IT_ALR, ENABLE);
 }
 
-uint16_t radiotimer_getPeriod() {
+uint16_t radiotimer_getPeriod(void) {
     RTC_WaitForSynchro();
     uint32_t period = RTC_GetAlarm();
     return (uint16_t)period;
@@ -164,7 +164,7 @@ void radiotimer_schedule(uint16_t offset) {
     RTC_ITConfig(RTC_IT_ALR, ENABLE);
 }
 
-void radiotimer_cancel() {
+void radiotimer_cancel(void) {
     RTC_ITConfig(RTC_IT_ALR, DISABLE);
     //need to disable radio also in case that a radio interrupt is happening
     
@@ -181,7 +181,7 @@ void radiotimer_cancel() {
 
 //===== capture
 
-inline uint16_t radiotimer_getCapturedTime() {
+inline uint16_t radiotimer_getCapturedTime(void) {
     RTC_WaitForSynchro();
     uint32_t counter = RTC_GetCounter();
     return (uint16_t)counter;
@@ -191,7 +191,7 @@ inline uint16_t radiotimer_getCapturedTime() {
 
 //=========================== interrupt handlers ==============================
 
-kick_scheduler_t radiotimer_isr() {
+kick_scheduler_t radiotimer_isr(void) {
    uint8_t taiv_temp = radiotimer_vars.overflowORcompare;
    switch (taiv_temp) {
       case RADIOTIMER_COMPARE:

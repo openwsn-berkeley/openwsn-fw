@@ -30,7 +30,7 @@ uart_vars_t uart_vars;
 
 //=========================== public ==========================================
 
-void uart_init() {
+void uart_init(void) {
     
     GPIO_InitTypeDef  GPIO_InitStructure;
     USART_InitTypeDef USART_InitStructure;
@@ -77,21 +77,21 @@ void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb) {
     uart_vars.rxCb = rxCb;
 }
 
-void uart_enableInterrupts() {
+void uart_enableInterrupts(void) {
     USART_ITConfig(USART1, USART_IT_TC,   ENABLE);
     USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
 }
 
-void uart_disableInterrupts() {
+void uart_disableInterrupts(void) {
     USART_ITConfig(USART1, USART_IT_TC,   DISABLE);
     USART_ITConfig(USART1, USART_IT_RXNE, DISABLE);
 }
 
-void uart_clearRxInterrupts() {
+void uart_clearRxInterrupts(void) {
     USART_ClearFlag(USART1, USART_FLAG_RXNE);
 }
 
-void uart_clearTxInterrupts() {
+void uart_clearTxInterrupts(void) {
     USART_ClearFlag(USART1, USART_FLAG_TC);
 }
 
@@ -99,7 +99,7 @@ void uart_writeByte(uint8_t byteToWrite) {
     USART_SendData(USART1,(uint16_t)byteToWrite);
 }
 
-uint8_t uart_readByte() {
+uint8_t uart_readByte(void) {
     uint16_t temp;
 
     temp = USART_ReceiveData(USART1);
@@ -108,13 +108,13 @@ uint8_t uart_readByte() {
 
 //=========================== interrupt handlers ==============================
 
-kick_scheduler_t uart_tx_isr() {
+kick_scheduler_t uart_tx_isr(void) {
     uart_clearTxInterrupts();
     uart_vars.txCb();
     return DO_NOT_KICK_SCHEDULER;
 }
 
-kick_scheduler_t uart_rx_isr() {
+kick_scheduler_t uart_rx_isr(void) {
     uart_clearRxInterrupts();
     uart_vars.rxCb();
     return DO_NOT_KICK_SCHEDULER;

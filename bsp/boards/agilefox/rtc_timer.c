@@ -26,7 +26,7 @@ rtc_timer_vars_t rtc_timer_vars;
 
 //===== admin
 
-void rtc_timer_init() {
+void rtc_timer_init(void) {
    // clear local variables
    memset(&rtc_timer_vars,0,sizeof(rtc_timer_vars_t));
 }
@@ -95,12 +95,12 @@ void rtc_timer_start(u32 alarmValue)
 
 //===== direct access
 
-uint16_t rtc_timer_getAlarm() {
+uint16_t rtc_timer_getAlarm(void) {
     uint32_t alarmValue = RTC_GetAlarm();
     return (uint16_t)alarmValue;
 }
 
-void    rtc_timer_resetCounter() {
+void    rtc_timer_resetCounter(void) {
     RTC_SetCounter(0);                //Set RTC Counter to begin a new slot
     RTC_WaitForLastTask();            //Wait until last write operation on RTC registers has finished
 }

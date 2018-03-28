@@ -37,7 +37,6 @@ bool               debugPrint_queue(void);
 OpenQueueEntry_t*  openqueue_getFreePacketBuffer(uint8_t creator);
 owerror_t          openqueue_freePacketBuffer(OpenQueueEntry_t* pkt);
 void               openqueue_removeAllCreatedBy(uint8_t creator);
-void               openqueue_removeAllOwnedBy(uint8_t owner);
 bool               openqueue_isHighPriorityEntryEnough(void);
 // called by res
 OpenQueueEntry_t*  openqueue_sixtopGetSentPacket(void);
@@ -45,7 +44,8 @@ OpenQueueEntry_t*  openqueue_sixtopGetReceivedPacket(void);
 // called by IEEE80215E
 OpenQueueEntry_t*  openqueue_macGetDataPacket(open_addr_t* toNeighbor, radioType_t rType);
 OpenQueueEntry_t*  openqueue_macGetEBPacket(radioType_t rType);
-
+OpenQueueEntry_t*  openqueue_macGetDIOPacket(void);
+OpenQueueEntry_t*  openqueue_macGetDedicatedPacket(open_addr_t* toNeighbor);
 /**
 \}
 \}

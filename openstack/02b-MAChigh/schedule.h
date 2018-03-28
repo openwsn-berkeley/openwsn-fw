@@ -17,7 +17,7 @@
 
 The superframe reappears over time and can be arbitrarily long.
 */
-#define SLOTFRAME_LENGTH    11 //should be 101
+#define SLOTFRAME_LENGTH    101 //should be 101
 
 //draft-ietf-6tisch-minimal-06
 #define SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS                      MAX_NUM_RADIOS
@@ -39,7 +39,7 @@ The superframe reappears over time and can be arbitrarily long.
   for serial port to transmit data to dagroot.
 */
 
-#define NUMSLOTSOFF          5
+#define NUMSLOTSOFF          30
 
 /**
 \brief Maximum number of active slots in a superframe.
@@ -72,15 +72,14 @@ See MINBE for an explanation of backoff.
 /**
 \brief a threshold used for triggering the maintaining process.uint: percent
 */
-#define PDR_THRESHOLD      80 // 80 means 80%
-#define MIN_NUMTX_FOR_PDR  50 // don't calculate PDR when numTx is lower than this value
+#define RELOCATE_PDRTHRES  50 // 50 means 50%
 
 typedef enum{
-    LINKOPTIONS_TX              = 1<<0,
-    LINKOPTIONS_RX              = 1<<1,
-    LINKOPTIONS_SHARED          = 1<<2,
-    LINKOPTIONS_TIMEKEPPING     = 1<<3,
-    LINKOPTIONS_PRIORITY        = 1<<4
+    CELLOPTIONS_TX              = 1<<0,
+    CELLOPTIONS_RX              = 1<<1,
+    CELLOPTIONS_SHARED          = 1<<2,
+    CELLOPTIONS_TIMEKEPPING     = 1<<3,
+    CELLOPTIONS_PRIORITY        = 1<<4
 }linkOptions_t;
 
 //=========================== typedef =========================================
@@ -178,33 +177,27 @@ void               schedule_getSlotInfo(
    open_addr_t*         neighbor,
    slotinfo_element_t*  info
 );
-
-uint16_t           schedule_getMaxActiveSlots(void);
-
 owerror_t          schedule_removeActiveSlot(
    slotOffset_t         slotOffset,
    open_addr_t*         neighbor
 );
 bool               schedule_isSlotOffsetAvailable(uint16_t slotOffset);
-uint16_t          schedule_getCellsCounts(
-    uint8_t frameID,
-    cellType_t type,
-    open_addr_t* neighbor
-);
 void              schedule_removeAllCells(
    uint8_t        slotframeID,
    open_addr_t*   previousHop
 );
-scheduleEntry_t*  schedule_getCurrentScheduleEntry(void);
-uint8_t           schedule_getNumOfSlotsByType(cellType_t type);
 uint8_t           schedule_getNumberOfFreeEntries(void);
+uint8_t           schedule_getNumberOfDedicatedCells(open_addr_t* neighbor);
+bool              schedule_isNumTxWrapped(open_addr_t* neighbor);
+bool              schedule_getCellsToBeRelocated(open_addr_t* neighbor, cellInfo_ht* celllist);
+bool              schedule_hasDedicatedCellToNeighbor(open_addr_t* neighbor);
+open_addr_t*      schedule_getNonParentNeighborWithDedicatedCells(open_addr_t* neighbor);
+
 // from IEEE802154E
 void               schedule_syncSlotOffset(slotOffset_t targetSlotOffset);
 void               schedule_advanceSlot(void);
 slotOffset_t       schedule_getNextActiveSlotOffset(void);
 frameLength_t      schedule_getFrameLength(void);
-uint8_t            schedule_getFrameHandle(void);
-uint8_t            schedule_getFrameNumber(void);
 cellType_t         schedule_getType(void);
 radioType_t        schedule_getRadioType(void);
 void               schedule_getNeighbor(open_addr_t* addrToWrite);

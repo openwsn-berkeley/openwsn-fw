@@ -593,9 +593,9 @@
               <FilePath>..\..\..\openstack\02b-MAChigh\schedule.c</FilePath>
             </File>
             <File>
-              <FileName>sf0.c</FileName>
+              <FileName>msf.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\openstack\02b-MAChigh\sf0.c</FilePath>
+              <FilePath>..\..\..\openstack\02b-MAChigh\msf.c</FilePath>
             </File>
             <File>
               <FileName>sixtop.c</FileName>

@@ -10,6 +10,7 @@
 #include "idmanager.h"
 #include "opentimers.h"
 #include "IEEE802154E.h"
+#include "msf.h"
 
 //=========================== variables =======================================
 
@@ -31,7 +32,7 @@ void sendDAO(void);
 /**
 \brief Initialize this module.
 */
-void icmpv6rpl_init() {
+void icmpv6rpl_init(void) {
    uint8_t         dodagid[16];
    
    // retrieve my prefix and EUI64
@@ -194,7 +195,7 @@ void  icmpv6rpl_writeDODAGid(uint8_t* dodagid) {
    icmpv6rpl_vars.fDodagidWritten = 1;
 }
 
-uint8_t icmpv6rpl_getRPLIntanceID(){
+uint8_t icmpv6rpl_getRPLIntanceID(void) {
    return icmpv6rpl_vars.dao.rplinstanceId;
 }
                                                 
@@ -303,7 +304,8 @@ bool icmpv6rpl_getPreferredParentIndex(uint8_t* indexptr) {
 bool icmpv6rpl_getPreferredParentEui64(open_addr_t* addressToWrite) {
     if (
         icmpv6rpl_vars.haveParent && 
-        neighbors_getNeighborNoResource(icmpv6rpl_vars.ParentIndex)==FALSE
+        neighbors_getNeighborNoResource(icmpv6rpl_vars.ParentIndex)    == FALSE &&
+        neighbors_getNeighborIsInBlacklist(icmpv6rpl_vars.ParentIndex) == FALSE
     ){
         return neighbors_getNeighborEui64(addressToWrite,ADDR_64B,icmpv6rpl_vars.ParentIndex);
     } else {
@@ -343,7 +345,7 @@ bool icmpv6rpl_isPreferredParent(open_addr_t* address) {
 
 \returns This mote's current DAG rank.
 */
-dagrank_t icmpv6rpl_getMyDAGrank() {
+dagrank_t icmpv6rpl_getMyDAGrank(void) {
    return icmpv6rpl_vars.myDAGrank;
 }
 
@@ -360,7 +362,7 @@ void icmpv6rpl_setMyDAGrank(dagrank_t rank){
 /**
 \brief Routing algorithm
 */
-void icmpv6rpl_updateMyDAGrankAndParentSelection() {
+void icmpv6rpl_updateMyDAGrankAndParentSelection(void) {
     uint8_t   i;
     uint16_t  previousDAGrank;
     uint16_t  prevRankIncrease;
@@ -371,6 +373,8 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
     uint16_t  rankIncrease;
     dagrank_t neighborRank;
     uint32_t  tentativeDAGrank;
+    
+    open_addr_t addressToWrite;
    
     // if I'm a DAGroot, my DAGrank is always MINHOPRANKINCREASE
     if ((idmanager_getIsDAGroot())==TRUE) {
@@ -386,17 +390,25 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
     prevRankIncrease     = icmpv6rpl_vars.rankIncrease;
     // update my rank to current parent first
     if (icmpv6rpl_vars.haveParent==TRUE){
-        if (neighbors_reachedMaxTransmission(icmpv6rpl_vars.ParentIndex)==FALSE){
-            // I havn't enough transmission to my parent, don't update.
-            return;
-        }
-        rankIncrease     = neighbors_getLinkMetric(icmpv6rpl_vars.ParentIndex);
-        neighborRank     = neighbors_getNeighborRank(icmpv6rpl_vars.ParentIndex);
-        tentativeDAGrank = (uint32_t)neighborRank+rankIncrease;
-        if (tentativeDAGrank>65535) {
+      
+        if (
+            neighbors_getNeighborNoResource(icmpv6rpl_vars.ParentIndex)    == TRUE ||
+            neighbors_getNeighborIsInBlacklist(icmpv6rpl_vars.ParentIndex) == TRUE
+        ){
             icmpv6rpl_vars.myDAGrank = 65535;
         } else {
-            icmpv6rpl_vars.myDAGrank = (uint16_t)tentativeDAGrank;
+            if (neighbors_reachedMinimalTransmission(icmpv6rpl_vars.ParentIndex)==FALSE){
+                // I havn't enough transmission to my parent, don't update.
+                return;
+            }
+            rankIncrease     = neighbors_getLinkMetric(icmpv6rpl_vars.ParentIndex);
+            neighborRank     = neighbors_getNeighborRank(icmpv6rpl_vars.ParentIndex);
+            tentativeDAGrank = (uint32_t)neighborRank+rankIncrease;
+            if (tentativeDAGrank>65535) {
+                icmpv6rpl_vars.myDAGrank = 65535;
+            } else {
+                icmpv6rpl_vars.myDAGrank = (uint16_t)tentativeDAGrank;
+            }
         }
     }
     previousDAGrank      = icmpv6rpl_vars.myDAGrank;
@@ -407,7 +419,10 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
     for (i=0;i<MAXNUMNEIGHBORS;i++) {
         if (neighbors_isStableNeighborByIndex(i)) { // in use and link is stable
             // neighbor marked as NORES can't be parent
-            if (neighbors_getNeighborNoResource(i)==TRUE) {
+            if (
+                neighbors_getNeighborNoResource(i)   == TRUE ||
+                neighbors_getNeighborIsInBlacklist(i)== TRUE
+            ) {
                 continue;
             }
             // get link cost to this neighbor
@@ -437,35 +452,37 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
         }
     }
    
-   if (foundBetterParent) {
-      icmpv6rpl_vars.haveParent=TRUE;
-      if (!prevHadParent) {
-         // in case preParent is killed before calling this function, clear the preferredParent flag
-         neighbors_setPreferredParent(prevParentIndex, FALSE);
-         // set neighbors as preferred parent
-         neighbors_setPreferredParent(icmpv6rpl_vars.ParentIndex, TRUE);
-      } else {
-         if (icmpv6rpl_vars.ParentIndex==prevParentIndex) {
-             // report on the rank change if any, not on the deletion/creation of parent
-             if (icmpv6rpl_vars.myDAGrank!=previousDAGrank) {
-             } else {
-                 // same parent, same rank, nothing to report about 
-             }
-         } else {
-             // clear neighbors preferredParent flag
-             neighbors_setPreferredParent(prevParentIndex, FALSE);
-             // set neighbors as preferred parent
-             neighbors_setPreferredParent(icmpv6rpl_vars.ParentIndex, TRUE);
-         }
-      }
-   } else {
-      // restore routing table as we found it on entry
-      icmpv6rpl_vars.myDAGrank   = previousDAGrank;
-      icmpv6rpl_vars.ParentIndex = prevParentIndex;
-      icmpv6rpl_vars.haveParent  = prevHadParent;
-      icmpv6rpl_vars.rankIncrease= prevRankIncrease;
-      // no change to report on
-   }
+    if (foundBetterParent) {
+        icmpv6rpl_vars.haveParent=TRUE;
+        if (!prevHadParent) {
+            // in case preParent is killed before calling this function, clear the preferredParent flag
+            neighbors_setPreferredParent(prevParentIndex, FALSE);
+            // set neighbors as preferred parent
+            neighbors_setPreferredParent(icmpv6rpl_vars.ParentIndex, TRUE);
+        } else {
+            if (icmpv6rpl_vars.ParentIndex==prevParentIndex) {
+                // report on the rank change if any, not on the deletion/creation of parent
+                if (icmpv6rpl_vars.myDAGrank!=previousDAGrank) {
+                } else {
+                    // same parent, same rank, nothing to report about 
+                }
+            } else {
+                // clear neighbors preferredParent flag
+                neighbors_setPreferredParent(prevParentIndex, FALSE);
+                // set neighbors as preferred parent
+                neighbors_setPreferredParent(icmpv6rpl_vars.ParentIndex, TRUE);
+                // get prepare parent address
+                neighbors_getNeighborEui64(&addressToWrite,ADDR_64B,prevParentIndex);
+            }
+        }
+    } else {
+        // restore routing table as we found it on entry
+        icmpv6rpl_vars.myDAGrank   = previousDAGrank;
+        icmpv6rpl_vars.ParentIndex = prevParentIndex;
+        icmpv6rpl_vars.haveParent  = prevHadParent;
+        icmpv6rpl_vars.rankIncrease= prevRankIncrease;
+        // no change to report on
+    }
 }
 
 /**
@@ -555,10 +572,10 @@ void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t* msg) {
             neighborRank=neighbors_getNeighborRank(i);
             if (
               (icmpv6rpl_vars.incomingDio->rank > neighborRank) &&
-              (icmpv6rpl_vars.incomingDio->rank - neighborRank) > (DEFAULTLINKCOST*2*MINHOPRANKINCREASE)
+              (icmpv6rpl_vars.incomingDio->rank - neighborRank) > ((3*DEFAULTLINKCOST-2)*MINHOPRANKINCREASE)
             ) {
                // the new DAGrank looks suspiciously high, only increment a bit
-               neighbors_setNeighborRank(i,neighborRank + (DEFAULTLINKCOST*2*MINHOPRANKINCREASE));
+               neighbors_setNeighborRank(i,neighborRank + ((3*DEFAULTLINKCOST-2)*2*MINHOPRANKINCREASE));
                openserial_printError(COMPONENT_NEIGHBORS,ERR_LARGE_DAGRANK,
                                (errorparameter_t)icmpv6rpl_vars.incomingDio->rank,
                                (errorparameter_t)neighborRank);
@@ -573,7 +590,7 @@ void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t* msg) {
    } 
 }
 
-void icmpv6rpl_killPreferredParent() {
+void icmpv6rpl_killPreferredParent(void) {
     icmpv6rpl_vars.haveParent=FALSE;
     if (idmanager_getIsDAGroot()==TRUE) {
        icmpv6rpl_vars.myDAGrank=MINHOPRANKINCREASE;
@@ -609,7 +626,7 @@ void icmpv6rpl_timer_DIO_cb(opentimers_id_t id) {
 
 \note This function is executed in task context, called by the scheduler.
 */
-void icmpv6rpl_timer_DIO_task() {
+void icmpv6rpl_timer_DIO_task(void) {
     
     uint16_t newPeriod;
     // current period 
@@ -637,7 +654,7 @@ void icmpv6rpl_timer_DIO_task() {
 /**
 \brief Prepare and a send a RPL DIO.
 */
-void sendDIO() {
+void sendDIO(void) {
    OpenQueueEntry_t*    msg;
    
    // stop if I'm not sync'ed
@@ -777,7 +794,7 @@ void icmpv6rpl_timer_DAO_cb(opentimers_id_t id) {
 
 \note This function is executed in task context, called by the scheduler.
 */
-void icmpv6rpl_timer_DAO_task() {
+void icmpv6rpl_timer_DAO_task(void) {
     icmpv6rpl_vars.daoTimerCounter = (icmpv6rpl_vars.daoTimerCounter+1)%icmpv6rpl_vars.daoPeriod;
     switch (icmpv6rpl_vars.daoTimerCounter) {
     case 0:
@@ -792,7 +809,7 @@ void icmpv6rpl_timer_DAO_task() {
 /**
 \brief Prepare and a send a RPL DAO.
 */
-void sendDAO() {
+void sendDAO(void) {
    OpenQueueEntry_t*    msg;                // pointer to DAO messages
    uint8_t              nbrIdx;             // running neighbor index
    uint8_t              numTransitParents,numTargetParents;  // the number of parents indicated in transit option
@@ -933,6 +950,7 @@ void sendDAO() {
    
    //=== DAO header
    packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_dao_ht));
+   icmpv6rpl_vars.dao.DAOSequence++;
    memcpy(
       ((icmpv6rpl_dao_ht*)(msg->payload)),
       &(icmpv6rpl_vars.dao),

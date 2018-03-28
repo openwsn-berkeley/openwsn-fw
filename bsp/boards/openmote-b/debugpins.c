@@ -35,7 +35,7 @@ void bspDBpinToggle(uint32_t base,uint8_t ui8Pin);
 
 //=========================== public ==========================================
 
-void debugpins_init() {
+void debugpins_init(void) {
    GPIOPinTypeGPIOOutput(BSP_PINA_BASE, BSP_PINA_7);
    GPIOPinTypeGPIOOutput(BSP_PINC_BASE, BSP_PINC_3);
    GPIOPinTypeGPIOOutput(BSP_PINB_BASE, BSP_PINB_3 | BSP_PINB_2 | BSP_PINB_1 | BSP_PINB_0);
@@ -46,68 +46,68 @@ void debugpins_init() {
 }
 
 // PA7
-void debugpins_frame_toggle() {
+void debugpins_frame_toggle(void) {
    bspDBpinToggle(BSP_PINA_BASE, BSP_PINA_7);
 }
-void debugpins_frame_clr() {
+void debugpins_frame_clr(void) {
     GPIOPinWrite(BSP_PINA_BASE, BSP_PINA_7, 0);
 }
-void debugpins_frame_set() {
+void debugpins_frame_set(void) {
    GPIOPinWrite(BSP_PINA_BASE, BSP_PINA_7, BSP_PINA_7);
 }
 
 // PB3
-void debugpins_slot_toggle() {
+void debugpins_slot_toggle(void) {
 	bspDBpinToggle(BSP_PINB_BASE, BSP_PINB_3);
 }
-void debugpins_slot_clr() {
+void debugpins_slot_clr(void) {
 	GPIOPinWrite(BSP_PINB_BASE, BSP_PINB_3, 0);
 }
-void debugpins_slot_set() {
+void debugpins_slot_set(void) {
 	GPIOPinWrite(BSP_PINB_BASE, BSP_PINB_3, BSP_PINB_3);
 }
 
 // PB2
-void debugpins_fsm_toggle() {
+void debugpins_fsm_toggle(void) {
 	bspDBpinToggle(BSP_PINB_BASE, BSP_PINB_2);
 }
-void debugpins_fsm_clr() {
+void debugpins_fsm_clr(void) {
 	GPIOPinWrite(BSP_PINB_BASE, BSP_PINB_2, 0);
 }
-void debugpins_fsm_set() {
+void debugpins_fsm_set(void) {
 	GPIOPinWrite(BSP_PINB_BASE, BSP_PINB_2, BSP_PINB_2);
 }
 
 // PB1
-void debugpins_task_toggle() {
+void debugpins_task_toggle(void) {
 //	bspDBpinToggle(BSP_PINB_BASE,BSP_PINB_1);
 }
-void debugpins_task_clr() {
+void debugpins_task_clr(void) {
 //	GPIOPinWrite(BSP_PINB_BASE, BSP_PINB_1, 0);
 }
-void debugpins_task_set() {
+void debugpins_task_set(void) {
 //	GPIOPinWrite(BSP_PINB_BASE, BSP_PINB_1, BSP_PINB_1);
 }
 
 // PC3
-void debugpins_isr_toggle() {
+void debugpins_isr_toggle(void) {
 	bspDBpinToggle(BSP_PINC_BASE, BSP_PINC_3);
 }
-void debugpins_isr_clr() {
+void debugpins_isr_clr(void) {
 	GPIOPinWrite(BSP_PINC_BASE, BSP_PINC_3, 0);
 }
-void debugpins_isr_set() {
+void debugpins_isr_set(void) {
 	GPIOPinWrite(BSP_PINC_BASE, BSP_PINC_3, BSP_PINC_3);
 }
 
 // PB0
-void debugpins_radio_toggle() {
+void debugpins_radio_toggle(void) {
 	bspDBpinToggle(BSP_PINB_BASE, BSP_PINB_0);
 }
-void debugpins_radio_clr() {
+void debugpins_radio_clr(void) {
 	GPIOPinWrite(BSP_PINB_BASE, BSP_PINB_0, 0);
 }
-void debugpins_radio_set() {
+void debugpins_radio_set(void) {
 	GPIOPinWrite(BSP_PINB_BASE, BSP_PINB_0, BSP_PINB_0);
 }
 

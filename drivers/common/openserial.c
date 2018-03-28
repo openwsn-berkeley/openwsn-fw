@@ -4,6 +4,9 @@
 \author Fabien Chraim <chraim@eecs.berkeley.edu>, March 2012.
 \author Thomas Watteyne <thomas.watteyne@inria.fr>, August 2016.
 */
+#include <stdio.h>
+#include <stdarg.h>
+#include <string.h>
 
 #include "opendefs.h"
 #include "openserial.h"
@@ -22,12 +25,18 @@
 #include "schedule.h"
 #include "icmpv6rpl.h"
 #include "icmpv6echo.h"
-#include "sf0.h"
+#include "msf.h"
+
+
 
 //=========================== variables =======================================
 
 openserial_vars_t openserial_vars;
 
+enum{
+    TYPE_STR = 0,       //subtype for the printf message
+    TYPE_INT = 1
+};
 //=========================== prototypes ======================================
 
 // printing
@@ -64,7 +73,7 @@ void sniffer_setListeningChannel(uint8_t channel);
 
 //===== admin
 
-void openserial_init() {
+void openserial_init(void) {
     uint16_t crc;
     
     // reset variable
@@ -173,6 +182,7 @@ owerror_t openserial_printCritical(
 ) {
     opentimers_id_t id; 
     uint32_t         reference;
+        
     // blink error LED, this is serious
     leds_error_blink();
     
@@ -208,8 +218,8 @@ owerror_t openserial_printData(uint8_t* buffer, uint8_t length) {
     openserial_vars.outputBufFilled  = TRUE;
     outputHdlcOpen();
     outputHdlcWrite(SERFRAME_MOTE2PC_DATA);
-    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
     outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
+    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
     outputHdlcWrite(asn[0]);
     outputHdlcWrite(asn[1]);
     outputHdlcWrite(asn[2]);
@@ -232,8 +242,8 @@ owerror_t openserial_printSniffedPacket(uint8_t* buffer, uint8_t length, uint8_t
     openserial_vars.outputBufFilled  = TRUE;
     outputHdlcOpen();
     outputHdlcWrite(SERFRAME_MOTE2PC_SNIFFED_PACKET);
-    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
     outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
+    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
     for (i=0;i<length;i++){
        outputHdlcWrite(buffer[i]);
     }
@@ -245,9 +255,59 @@ owerror_t openserial_printSniffedPacket(uint8_t* buffer, uint8_t length, uint8_t
     return E_SUCCESS;
 }
 
+owerror_t openserial_print_uint32_t(uint32_t value) {
+#ifdef OPENSERIAL_PRINTF
+   uint8_t  i;
+   uint8_t  pvalue[4];
+   INTERRUPT_DECLARATION();
+
+   DISABLE_INTERRUPTS();
+   openserial_vars.outputBufFilled  = TRUE;
+   outputHdlcOpen();
+   outputHdlcWrite(SERFRAME_MOTE2PC_PRINTF);
+   outputHdlcWrite(TYPE_INT);
+   memcpy(pvalue, &value, 4);
+   for (i=0;i<4;i++)
+      outputHdlcWrite(pvalue[i]);
+   outputHdlcClose();
+   ENABLE_INTERRUPTS();
+
+#endif
+
+   return E_SUCCESS;
+}
+
+owerror_t openserial_print_str(char* buffer, uint8_t length) {
+#ifdef OPENSERIAL_PRINTF
+   uint8_t  i;
+   uint8_t  asn[5];
+   INTERRUPT_DECLARATION();
+   
+   // retrieve ASN
+   ieee154e_getAsn(asn);
+   
+   DISABLE_INTERRUPTS();
+   openserial_vars.outputBufFilled  = TRUE;
+   outputHdlcOpen();
+   outputHdlcWrite(SERFRAME_MOTE2PC_PRINTF);
+   outputHdlcWrite(TYPE_STR);
+   outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
+   outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+   for(i=0; i<5;i++)
+       outputHdlcWrite(asn[i]);
+   for (i=0;i<length;i++)
+      outputHdlcWrite(buffer[i]);
+   outputHdlcClose();
+   ENABLE_INTERRUPTS();
+   
+#endif
+   
+   return E_SUCCESS;
+}
+
 //===== retrieving inputBuffer
 
-uint8_t openserial_getInputBufferFilllevel() {
+uint8_t openserial_getInputBufferFilllevel(void) {
     uint8_t inputBufFill;
     INTERRUPT_DECLARATION();
     
@@ -285,7 +345,7 @@ uint8_t openserial_getInputBuffer(uint8_t* bufferToWrite, uint8_t maxNumBytes) {
 
 //===== scheduling
 
-void openserial_startInput() {
+void openserial_startInput(void) {
     INTERRUPT_DECLARATION();
     
     if (openserial_vars.inputBufFill>0) {
@@ -320,7 +380,7 @@ void openserial_startInput() {
     ENABLE_INTERRUPTS();
 }
 
-void openserial_startOutput() {
+void openserial_startOutput(void) {
     uint8_t debugPrintCounter;
     INTERRUPT_DECLARATION();
     
@@ -410,7 +470,7 @@ void openserial_startOutput() {
     ENABLE_INTERRUPTS();
 }
 
-void openserial_stop() {
+void openserial_stop(void) {
     uint8_t inputBufFill;
     uint8_t cmdByte;
     bool    busyReceiving;
@@ -485,7 +545,7 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_outBufferIndexes() {
+bool debugPrint_outBufferIndexes(void) {
     uint16_t temp_buffer[2];
     INTERRUPT_DECLARATION();
     
@@ -736,7 +796,7 @@ void openserial_handleCommands(void){
                 cellOptions,       // cellOptions
                 celllist_add,      // celllist to add
                 celllist_delete,   // celllist to delete (not used)
-                sf0_getsfid(),     // sfid
+                msf_getsfid(),     // sfid
                 listOffset,        // list command offset (not used)
                 maxListLen         // list command maximum celllist (not used)
             );
@@ -761,7 +821,7 @@ void openserial_handleCommands(void){
             break;
         case COMMAND_SET_UINJECTPERIOD:
             comandParam_8 = openserial_vars.inputBuf[ptr];
-            sf0_appPktPeriod(comandParam_8);
+            msf_appPktPeriod(comandParam_8);
             break;
         case COMMAND_SET_ECHO_REPLY_STATUS:
             comandParam_8 = openserial_vars.inputBuf[ptr];
@@ -797,7 +857,7 @@ void openserial_board_reset_cb(opentimers_id_t id) {
 /**
 \brief Start an HDLC frame in the output buffer.
 */
-port_INLINE void outputHdlcOpen() {
+port_INLINE void outputHdlcOpen(void) {
     // initialize the value of the CRC
     openserial_vars.outputCrc                                        = HDLC_CRCINIT;
 
@@ -822,7 +882,7 @@ port_INLINE void outputHdlcWrite(uint8_t b) {
 /**
 \brief Finalize the outgoing HDLC frame.
 */
-port_INLINE void outputHdlcClose() {
+port_INLINE void outputHdlcClose(void) {
     uint16_t   finalCrc;
 
     // finalize the calculation of the CRC
@@ -841,7 +901,7 @@ port_INLINE void outputHdlcClose() {
 /**
 \brief Start an HDLC frame in the input buffer.
 */
-port_INLINE void inputHdlcOpen() {
+port_INLINE void inputHdlcOpen(void) {
     // reset the input buffer index
     openserial_vars.inputBufFill                                     = 0;
 
@@ -871,7 +931,7 @@ port_INLINE void inputHdlcWrite(uint8_t b) {
 /**
 \brief Finalize the incoming HDLC frame.
 */
-port_INLINE void inputHdlcClose() {
+port_INLINE void inputHdlcClose(void) {
     
     // verify the validity of the frame
     if (openserial_vars.inputCrc==HDLC_CRCGOOD) {
@@ -890,7 +950,7 @@ port_INLINE void inputHdlcClose() {
 //=========================== interrupt handlers ==============================
 
 // executed in ISR, called from scheduler.c
-void isr_openserial_tx() {
+void isr_openserial_tx(void) {
     switch (openserial_vars.mode) {
         case MODE_INPUT:
             openserial_vars.reqFrameIdx++;
@@ -913,7 +973,7 @@ void isr_openserial_tx() {
 }
 
 // executed in ISR, called from scheduler.c
-void isr_openserial_rx() {
+void isr_openserial_rx(void) {
     uint8_t rxbyte;
     uint8_t inputBufFill;
 

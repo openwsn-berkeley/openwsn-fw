@@ -15,25 +15,25 @@
 
 //=========================== public ==========================================
 
-void    leds_init() {
+void    leds_init(void) {
    P5DIR     |=  0x70;                           // P5DIR = 0bx111xxxx for LEDs
    P5OUT     |=  0x70;                           // P2OUT = 0bx111xxxx, all LEDs off
 }
 
 // red = LED1 = P5.4
-void    leds_error_on() {
+void    leds_error_on(void) {
    P5OUT     &= ~0x10;
 }
-void    leds_error_off() {
+void    leds_error_off(void) {
    P5OUT     |=  0x10;
 }
-void    leds_error_toggle() {
+void    leds_error_toggle(void) {
    P5OUT     ^=  0x10;
 }
-uint8_t leds_error_isOn() {
+uint8_t leds_error_isOn(void) {
    return (uint8_t)(~P5OUT & 0x10)>>4;
 }
-void leds_error_blink() {
+void leds_error_blink(void) {
    uint8_t i;
    volatile uint16_t delay;
    // turn all LEDs off
@@ -47,58 +47,58 @@ void leds_error_blink() {
 }
 
 // green = LED2 = P5.5
-void    leds_radio_on() {
+void    leds_radio_on(void) {
    P5OUT     &= ~0x20;
 }
-void    leds_radio_off() {
+void    leds_radio_off(void) {
    P5OUT     |=  0x20;
 }
-void    leds_radio_toggle() {
+void    leds_radio_toggle(void) {
    P5OUT     ^=  0x20;
 }
-uint8_t leds_radio_isOn() {
+uint8_t leds_radio_isOn(void) {
    return (uint8_t)(~P5OUT & 0x20)>>5;
 }
 
 // blue = LED3 = P5.6
-void    leds_sync_on() {
+void    leds_sync_on(void) {
    P5OUT     &= ~0x40;
 }
-void    leds_sync_off() {
+void    leds_sync_off(void) {
    P5OUT     |=  0x40;
 }
-void    leds_sync_toggle() {
+void    leds_sync_toggle(void) {
    P5OUT     ^=  0x40;
 }
-uint8_t leds_sync_isOn() {
+uint8_t leds_sync_isOn(void) {
    return (uint8_t)(~P5OUT & 0x40)>>6;
 }
 
-void    leds_debug_on() {
+void    leds_debug_on(void) {
    // TelosB doesn't have a debug LED :(
 }
-void    leds_debug_off() {
+void    leds_debug_off(void) {
    // TelosB doesn't have a debug LED :(
 }
-void    leds_debug_toggle() {
+void    leds_debug_toggle(void) {
    // TelosB doesn't have a debug LED :(
 }
-uint8_t leds_debug_isOn() {
+uint8_t leds_debug_isOn(void) {
    // TelosB doesn't have a debug LED :(
    return 0;
 }
 
-void    leds_all_on() {
+void    leds_all_on(void) {
    P5OUT     &= ~0x70;
 }
-void    leds_all_off() {
+void    leds_all_off(void) {
    P5OUT     |=  0x70;
 }
-void    leds_all_toggle() {
+void    leds_all_toggle(void) {
    P5OUT     ^=  0x70;
 }
 
-void    leds_circular_shift() {
+void    leds_circular_shift(void) {
    uint8_t leds_on;
    // get LED state
    leds_on  = (~P5OUT & 0x70) >> 4;
@@ -118,7 +118,7 @@ void    leds_circular_shift() {
    P5OUT &= ~( leds_on & 0x70);                  // switch off the leds marked '0' in leds_on
 }
 
-void    leds_increment() {
+void    leds_increment(void) {
    uint8_t leds_on;
    // get LED state
    leds_on  = (~P5OUT & 0x70) >> 4;
