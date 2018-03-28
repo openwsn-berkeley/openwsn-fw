@@ -971,7 +971,7 @@ port_INLINE void activity_ti1ORri1(void) {
                                 if (ieee154e_vars.dataToSend==NULL){
                                     couldSendEB=TRUE;
                                     // look for an EB packet in the queue
-                                    ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
+                                    ieee154e_vars.dataToSend = openqueue_macGetEBPacket(ieee154e_vars.radioType);
                                 }
                             }
                         }

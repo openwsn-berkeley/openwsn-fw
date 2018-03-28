@@ -85,7 +85,7 @@ void board_init(void) {
     board_timer_init();
     leds_init();
     debugpins_init();
-    // button_init();
+    button_init();
     sctimer_init();
     uart_init();
     
