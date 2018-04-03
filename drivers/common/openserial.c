@@ -849,6 +849,7 @@ void openserial_handleCommands(void){
 //===== misc
 
 void openserial_board_reset_cb(opentimers_id_t id) {
+    (void)id;
     board_reset();
 }
 
