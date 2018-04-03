@@ -38,7 +38,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    uint16_t     timeSyncInfo;
    uint16_t     length_elementid_type;
    bool         headerIEPresent = FALSE;
-   uint8_t      destAddrMode;
+   uint8_t      destAddrMode = -1;
    
    securityEnabled = msg->l2_securityLevel == IEEE154_ASH_SLF_TYPE_NOSEC ? 0 : 1;
 
