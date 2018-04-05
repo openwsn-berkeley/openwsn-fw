@@ -158,17 +158,46 @@ typedef enum {
 //    - duration_in_seconds = ticks / 32768
 enum ieee154e_atomicdurations_enum {
    // time-slot related
-#ifdef SLOTDURATION_10MS
-   TsTxOffset                =   70,                  //  2120us
-   TsLongGT                  =   36,                  //  1100us
-   TsTxAckDelay              =   33,                  //  1000us
-   TsShortGT                 =    9,                  //   500us, The standardlized value for this is 400/2=200us(7ticks). Currectly 7 doesn't work for short packet, change it back to 7 when found the problem.
+#ifdef PORT_TsTxOffset
+   TsTxOffset = PORT_TsTxOffset,
 #else
-   TsTxOffset                =  131,                  //  4000us
-   TsLongGT                  =   43,                  //  1300us
-   TsTxAckDelay              =  151,                  //  4606us
-   TsShortGT                 =   16,                  //   500us
+	#ifdef SLOTDURATION_10MS
+		TsTxOffset                =   70,                  //  2120us
+	#else
+		TsTxOffset                =  131,                  //  4000us
+	#endif
 #endif
+
+#ifdef PORT_TsLongGT
+   TsLongGT = PORT_TsLongGT,
+#else
+	#ifdef SLOTDURATION_10MS
+		TsLongGT                =   36,                  //  1100us
+	#else
+		TsLongGT                =  43,                  //  1300us
+	#endif
+#endif
+
+#ifdef PORT_TsTxAckDelay
+   TsTxAckDelay = PORT_TsTxAckDelay,
+#else
+	#ifdef SLOTDURATION_10MS
+		TsTxAckDelay                =   33,                  //  1000us
+	#else
+		TsTxAckDelay                =  151,                  //  4606us
+	#endif
+#endif
+
+#ifdef PORT_TsShortGT
+   TsShortGT = PORT_TsShortGT,
+#else
+	#ifdef SLOTDURATION_10MS
+		TsShortGT                =   9,                  //  500us, The standardlized value for this is 400/2=200us(7ticks). Currectly 7 doesn't work for short packet, change it back to 7 when found the problem.
+	#else
+		TsShortGT                =  16,                  //  500us
+	#endif
+#endif
+
    TsSlotDuration            =  PORT_TsSlotDuration,  // 10000us
    // execution speed related
    maxTxDataPrepare          =  PORT_maxTxDataPrepare,
@@ -181,11 +210,17 @@ enum ieee154e_atomicdurations_enum {
    // radio watchdog
    wdRadioTx                 =   33,                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 43 is tested and works)
    wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
-#ifdef SLOTDURATION_10MS
-   wdAckDuration             =   80,                  //  2400us (measured 1000us)
+
+#ifdef PORT_wdAckDuration
+   wdAckDuration = PORT_wdAckDuration,
 #else
-   wdAckDuration             =   98,                  //  3000us (measured 1000us)
+	#ifdef SLOTDURATION_10MS
+		wdAckDuration                =   80,                  //  2400us (measured 1000us)
+	#else
+		wdAckDuration                =  98,                  //  3000us (measured 1000us)
+	#endif
 #endif
+
 };
 
 //shift of bytes in the linkOption bitmap: draft-ietf-6tisch-minimal-10.txt: page 6

@@ -1,0 +1,5 @@
+import os
+
+Import('env')
+
+env.ProjectFinder()

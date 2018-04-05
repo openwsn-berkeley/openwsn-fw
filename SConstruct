@@ -37,7 +37,7 @@ project:
     
     board          Board to build for. 'python' is for software simulation.
                    telosb, wsn430v14, wsn430v13b, gina, z1, python,
-                   iot-lab_M3, iot-lab_A8-M3
+                   iot-lab_M3, iot-lab_A8-M3, ev1000
 
     version        Board version
         
@@ -114,6 +114,7 @@ command_line_options = {
         'iot-lab_M3',
         'iot-lab_A8-M3',
         'agilefox',
+		'ev1000',
         'samr21_xpro',
         # misc.
         'python',
@@ -143,6 +144,7 @@ command_line_options = {
     'printf':           ['1','0'],          # 1=on (default),  0=off
     'deadline_option':  ['0','1'],
     'ide':              ['none','qtcreator'],
+	'usb':              ['0','1'],
     'revision':         ['']
 }
 
@@ -299,6 +301,13 @@ command_line_vars.AddVariables(
         'deadline_option',                                     # key
         '',                                                # help
         command_line_options['deadline_option'][1],            # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
+        'usb',                                             # key
+        'whether to inculde USB driver or not',            # help
+        command_line_options['usb'][0],                    # default
         validate_option,                                   # validator
         int,                                               # converter
     ),
