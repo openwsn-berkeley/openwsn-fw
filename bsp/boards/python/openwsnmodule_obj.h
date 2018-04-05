@@ -13,6 +13,7 @@
 // OpenWSN
 #include "openserial_obj.h"
 #include "opentimers_obj.h"
+#include "openradios_obj.h"
 #include "scheduler_obj.h"
 #include "IEEE802154E_obj.h"
 #include "IEEE802154_security_obj.h"
@@ -211,6 +212,7 @@ struct OpenMote {
    ieee154e_vars_t      ieee154e_vars;
    ieee154e_stats_t     ieee154e_stats;
    ieee154e_dbg_t       ieee154e_dbg;
+   radio_functions_t*   radio_functions;
    // cross-layer
    idmanager_vars_t     idmanager_vars;
    openqueue_vars_t     openqueue_vars;
@@ -218,6 +220,7 @@ struct OpenMote {
    opentimers_vars_t    opentimers_vars;
    random_vars_t        random_vars;
    openserial_vars_t    openserial_vars;
+   openradios_vars_t    openradios_vars;
    // kernel
    scheduler_vars_t     scheduler_vars;
    scheduler_dbg_t      scheduler_dbg;

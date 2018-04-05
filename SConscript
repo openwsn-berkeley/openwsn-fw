@@ -422,8 +422,7 @@ elif env['toolchain']=='gcc':
     
     if env['board'] not in ['python']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
-    
-    if env['board'] in ['python']:
+    else:
         env.Append(CPPDEFINES = 'OPENSIM')
     
     if env['fastsim']==1:

@@ -13,10 +13,11 @@ sources_c = [
     'leds_obj.c',
     #'openwsnmodule.c', # Note: added to main build target
     'uart_obj.c',    
-    'radio_obj.c',
+    'radio_python_obj.c',
     'sctimer_obj.c',
     'supply_obj.c',
     'cryptoengine.c',
+    'openradios_obj.c',
 ]
 
 #============================ SCons targets ===================================

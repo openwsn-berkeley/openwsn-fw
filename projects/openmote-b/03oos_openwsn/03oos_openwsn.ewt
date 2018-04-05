@@ -2340,9 +2340,6 @@
                 <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\common\openccms.h</name>
                 </file>
-                <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\boards\common\openradio.c</name>
-                </file>
             </group>
             <group>
                 <name>openmote-b</name>
@@ -2687,6 +2684,12 @@
                 <name>$PROJ_DIR$\..\..\..\drivers\common\openhdlc.h</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\..\..\drivers\common\openradios.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\..\drivers\common\openradios.h</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\..\..\drivers\common\opensensors.c</name>
             </file>
             <file>
@@ -2942,6 +2945,12 @@
         <group>
             <name>02b-MAChigh</name>
             <file>
+                <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\msf.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\msf.h</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\neighbors.c</name>
             </file>
             <file>
@@ -2952,12 +2961,6 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\schedule.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sf0.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sf0.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sixtop.c</name>

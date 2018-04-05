@@ -75,7 +75,14 @@
 #define SYNC_ACCURACY                       1 // when using openmoteSTM, change to 2
 
 //===== sctimer scheduling
-#define TIMERTHRESHOLD                     10  
+#define TIMERTHRESHOLD                     10
+
+#define MAX_NUM_RADIOS                      1
+
+typedef enum {
+    RADIOTPYE_2D4GHZ          = 0,
+    RADIOTPYE_ANY             = 1
+} radioType_t;
 
 //=========================== typedef  ========================================
 

@@ -35,13 +35,13 @@ adaptive_sync_vars_t adaptive_sync_vars;
 void adaptive_sync_init(void) {
    // reset local variables
    memset(&adaptive_sync_vars,0x00,sizeof(adaptive_sync_vars_t));
-   
+
    // default local variables
    adaptive_sync_vars.clockState              = S_NONE;
    adaptive_sync_vars.sumOfTC                 = 0;
    adaptive_sync_vars.compensateThreshold     = BASIC_COMPENSATION_THRESHOLD;
    adaptive_sync_vars.driftChanged            = FALSE;
-} 
+}
 
 /**
 \brief Calculate how many slots have elapsed since last synchronization.
@@ -52,7 +52,7 @@ void adaptive_sync_init(void) {
 */
 void adaptive_sync_indicateTimeCorrection(int16_t timeCorrection, open_addr_t timesource){
    uint8_t array[5];
-   
+
    // stop calculating compensation period when compensateThreshold exceeds KATIMEOUT and drift is not changed
    if(
          adaptive_sync_vars.compensateThreshold  > MAXKAPERIOD &&
@@ -64,7 +64,7 @@ void adaptive_sync_indicateTimeCorrection(int16_t timeCorrection, open_addr_t ti
       }
       return;
    }
-   
+
    // check whether I am synchronized and also check whether it's the same neighbor synchronized to last time?
    if(
          adaptive_sync_vars.driftChanged == FALSE &&
@@ -85,7 +85,7 @@ void adaptive_sync_indicateTimeCorrection(int16_t timeCorrection, open_addr_t ti
             ieee154e_getAsn(array);
             adaptive_sync_vars.oldASN.bytes0and1           = ((uint16_t) array[1] << 8) | ((uint16_t) array[0]);
             adaptive_sync_vars.oldASN.bytes2and3           = ((uint16_t) array[3] << 8) | ((uint16_t) array[2]);
-            adaptive_sync_vars.oldASN.byte4                = array[4]; 
+            adaptive_sync_vars.oldASN.byte4                = array[4];
          } else {
             // record the timeCorrection, if not calculate.
             adaptive_sync_vars.sumOfTC                    += timeCorrection;
@@ -93,20 +93,20 @@ void adaptive_sync_indicateTimeCorrection(int16_t timeCorrection, open_addr_t ti
    } else {
       adaptive_sync_vars.compensateThreshold               = BASIC_COMPENSATION_THRESHOLD;
       sixtop_setKaPeriod(adaptive_sync_vars.compensateThreshold);
-      
+
       // when I joined the network, or changed my time parent, reset adaptive_sync relative variables
       adaptive_sync_vars.clockState                        = S_NONE;
       adaptive_sync_vars.elapsedSlots                      = 0;
       adaptive_sync_vars.compensationTimeout               = 0;
       adaptive_sync_vars.compensateTicks                   = 0;
       adaptive_sync_vars.sumOfTC                           = 0;
-      
+
       // update oldASN
       ieee154e_getAsn(array);
       adaptive_sync_vars.oldASN.bytes0and1                 = ((uint16_t) array[1] << 8) | ((uint16_t) array[0]);
       adaptive_sync_vars.oldASN.bytes2and3                 = ((uint16_t) array[3] << 8) | ((uint16_t) array[2]);
-      adaptive_sync_vars.oldASN.byte4                      = array[4]; 
-      
+      adaptive_sync_vars.oldASN.byte4                      = array[4];
+
       // record this neighbor as my time source
       memcpy(&(adaptive_sync_vars.compensationInfo_vars.neighborID), &timesource, sizeof(open_addr_t));
    }
@@ -117,19 +117,19 @@ void adaptive_sync_indicateTimeCorrection(int16_t timeCorrection, open_addr_t ti
 
 \param[in] timeCorrection time to be corrected
 
-\returns compensationSlots the number of slots. 
+\returns compensationSlots the number of slots.
 */
 void adaptive_sync_calculateCompensatedSlots(int16_t timeCorrection) {
    bool     isFirstSync;              // is this the first sync after joining network?
    uint16_t totalTimeCorrectionTicks; // how much error in ticks since last synchronization.
-   
+
    if(adaptive_sync_vars.clockState == S_NONE) {
       isFirstSync = TRUE;
    } else {
       isFirstSync = FALSE;
    }
    adaptive_sync_vars.elapsedSlots = ieee154e_asnDiff(&adaptive_sync_vars.oldASN);
-   
+
    if(isFirstSync) {
       if(timeCorrection > 1) {
          adaptive_sync_vars.clockState = S_FASTER;
@@ -154,14 +154,14 @@ void adaptive_sync_calculateCompensatedSlots(int16_t timeCorrection) {
          totalTimeCorrectionTicks                                   += timeCorrection+adaptive_sync_vars.sumOfTC;
       }
       if(totalTimeCorrectionTicks == 0) {
-         // totalTimeCorrectionTicks should be always positive if drift of clock is constant. if totalTimeCorrectionTIcks become zero, it means the drift changed for some reasons. 
+         // totalTimeCorrectionTicks should be always positive if drift of clock is constant. if totalTimeCorrectionTIcks become zero, it means the drift changed for some reasons.
          adaptive_sync_driftChanged();
       } else {
          adaptive_sync_vars.compensationInfo_vars.compensationSlots  = SYNC_ACCURACY*adaptive_sync_vars.elapsedSlots;
          adaptive_sync_vars.compensationInfo_vars.compensationSlots /= totalTimeCorrectionTicks;
       }
    }
-   
+
    adaptive_sync_vars.compensationTimeout = adaptive_sync_vars.compensationInfo_vars.compensationSlots;
 }
 
@@ -172,20 +172,20 @@ Once compensationTimeout == 0, extend or shorten current slot length for one tic
 */
 void adaptive_sync_countCompensationTimeout(void) {
    uint16_t newSlotDuration;
-   
+
    newSlotDuration  = ieee154e_getSlotDuration();
-   
+
    // if clockState is not set yet, don't compensate.
    if (adaptive_sync_vars.clockState == S_NONE) {
       return;
    }
-   
+
    if (adaptive_sync_vars.compensationTimeout == 0) {
       return; // should not happen
    }
-   
+
    adaptive_sync_vars.compensationTimeout--;
-   
+
    // when compensationTimeout, adjust current slot length
    if(adaptive_sync_vars.compensationTimeout == 0) {
       if(adaptive_sync_vars.clockState == S_SLOWER) {
@@ -214,24 +214,24 @@ void adaptive_sync_countCompensationTimeout_compoundSlots(uint16_t compoundSlots
    uint16_t counter;
    uint8_t  compensateTicks;
    uint16_t newSlotDuration;
-   
+
    newSlotDuration  = ieee154e_getSlotDuration()*(compoundSlots+1);
-   
+
    // if clockState is not set yet, don't compensate.
    if(adaptive_sync_vars.clockState == S_NONE) {
       return;
    }
-   
+
    if(adaptive_sync_vars.compensationTimeout == 0) {
       return; // should not happen
    }
-   
+
    if(compoundSlots < 1) {
       // return, if this is not a compoundSlot
       return;
    }
-   
-   counter          = compoundSlots; 
+
+   counter          = compoundSlots;
    compensateTicks  = 0;
    while(counter > 0) {
       adaptive_sync_vars.compensationTimeout--;
@@ -241,7 +241,7 @@ void adaptive_sync_countCompensationTimeout_compoundSlots(uint16_t compoundSlots
       }
       counter--;
    }
-   
+
    // when compensateTicks > 0, I need to do compensation by adjusting current slot length
    if(compensateTicks > 0) {
       if(adaptive_sync_vars.clockState == S_SLOWER) {

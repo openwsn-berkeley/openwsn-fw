@@ -5,7 +5,6 @@
 */
 
 #include "board.h"
-#include "radio.h"
 #include "radio_subghz.h"
 
 #include "at86rf215.h"
@@ -42,7 +41,7 @@ typedef struct {
     uint8_t                     rf09_isr;
     uint8_t                     rf24_isr;
     uint8_t                     bb0_isr;
-    uint8_t                     bb1_isr;    
+    uint8_t                     bb1_isr;
 } radio_subghz_vars_t;
 
 radio_subghz_vars_t radio_subghz_vars;
@@ -57,35 +56,35 @@ static void radio_subghz_clear_isr(void);
 //===== admin
 
 void  radio_subghz_setFunctions(radio_functions_t * funcs) {
-    funcs->radio_change_modulation  = radio_subghz_change_modulation;
-    funcs->radio_powerOn            = radio_subghz_powerOn;
+    funcs->radio_change_modulation_cb  = radio_subghz_change_modulation;
+    funcs->radio_powerOn_cb            = radio_subghz_powerOn;
     // RF admin
-    funcs->radio_init               = radio_subghz_init;
-    funcs->radio_setStartFrameCb    = radio_subghz_setStartFrameCb;
-    funcs->radio_setEndFrameCb      = radio_subghz_setEndFrameCb;
+    funcs->radio_init_cb               = radio_subghz_init;
+    funcs->radio_setStartFrameCb_cb    = radio_subghz_setStartFrameCb;
+    funcs->radio_setEndFrameCb_cb      = radio_subghz_setEndFrameCb;
     // RF admin
-    funcs->radio_rfOn               = radio_subghz_rfOn;
-    funcs->radio_rfOff              = radio_subghz_rfOff;
-    funcs->radio_setFrequency       = radio_subghz_setFrequency;
-    funcs->radio_change_modulation  = radio_subghz_change_modulation;
-    funcs->radio_change_size        = radio_subghz_change_size;
+    funcs->radio_rfOn_cb               = radio_subghz_rfOn;
+    funcs->radio_rfOff_cb              = radio_subghz_rfOff;
+    funcs->radio_setFrequency_cb       = radio_subghz_setFrequency;
+    funcs->radio_change_modulation_cb  = radio_subghz_change_modulation;
+    funcs->radio_change_size_cb        = radio_subghz_change_size;
     // reset
-    funcs->radio_reset              = radio_subghz_reset;
+    funcs->radio_reset_cb              = radio_subghz_reset;
     // TX
-    funcs->radio_loadPacket_prepare = radio_subghz_loadPacket_prepare;
-    funcs->radio_txEnable           = radio_subghz_txEnable;
-    funcs->radio_txNow              = radio_subghz_txNow;
-    funcs->radio_loadPacket         = radio_subghz_loadPacket;
+    funcs->radio_loadPacket_prepare_cb = radio_subghz_loadPacket_prepare;
+    funcs->radio_txEnable_cb           = radio_subghz_txEnable;
+    funcs->radio_txNow_cb              = radio_subghz_txNow;
+    funcs->radio_loadPacket_cb         = radio_subghz_loadPacket;
     // RX
-    funcs->radio_rxPacket_prepare   = radio_subghz_rxPacket_prepare;
-    funcs->radio_rxEnable           = radio_subghz_rxEnable;
-    funcs->radio_rxEnable_scum      = radio_subghz_rxEnable_scum;
-    funcs->radio_rxNow              = radio_subghz_rxNow;
-    funcs->radio_getReceivedFrame   = radio_subghz_getReceivedFrame;
-    funcs->radio_getCRCLen          = radio_subghz_getCRCLen;
-    funcs->radio_calculateFrequency = radio_subghz_calculateFrequency;
-    funcs->radio_getDelayTx         = radio_subghz_getDelayTx;
-    funcs->radio_getDelayRx         = radio_subghz_getDelayRx;
+    funcs->radio_rxPacket_prepare_cb   = radio_subghz_rxPacket_prepare;
+    funcs->radio_rxEnable_cb           = radio_subghz_rxEnable;
+    funcs->radio_rxEnable_scum_cb      = radio_subghz_rxEnable_scum;
+    funcs->radio_rxNow_cb              = radio_subghz_rxNow;
+    funcs->radio_getReceivedFrame_cb   = radio_subghz_getReceivedFrame;
+    funcs->radio_getCRCLen_cb          = radio_subghz_getCRCLen;
+    funcs->radio_calculateFrequency_cb = radio_subghz_calculateFrequency;
+    funcs->radio_getDelayTx_cb         = radio_subghz_getDelayTx;
+    funcs->radio_getDelayRx_cb         = radio_subghz_getDelayRx;
 }
 
 void radio_subghz_powerOn(void) {
@@ -103,14 +102,14 @@ void radio_subghz_powerOn(void) {
     GPIOPinWrite(GPIO_C_BASE, GPIO_PIN_0, GPIO_PIN_0);
     for(delay=0;delay<0xA2C2;delay++);
 
-    //reset the radio 
+    //reset the radio
     GPIOPinWrite(GPIO_D_BASE, GPIO_PIN_1, GPIO_PIN_1);
- 
+
 }
 
 //===== reset
 void radio_subghz_reset(void) {
-    at86rf215_spiWriteReg( RG_RF_RST, CMD_RF_RESET); 
+    at86rf215_spiWriteReg( RG_RF_RST, CMD_RF_RESET);
 }
 
 void radio_subghz_init(void) {
@@ -146,7 +145,7 @@ void radio_subghz_init(void) {
     GPIOPortIntRegister(AT86RF215_IRQ_BASE, radio_subghz_isr);
 
     /* Clear and enable the interrupt */
-    GPIOPinIntEnable(AT86RF215_IRQ_BASE, AT86RF215_IRQ_PIN); 
+    GPIOPinIntEnable(AT86RF215_IRQ_BASE, AT86RF215_IRQ_PIN);
 
     //check part number and version
     if ((at86rf215_spiReadReg(RG_RF_PN) != 0x34) | (at86rf215_spiReadReg(RG_RF_VN) != 0x03)) {
@@ -169,7 +168,7 @@ void radio_subghz_change_size(uint16_t* size){
 void radio_subghz_change_modulation(registerSetting_t * mod){
     static int mod_list = 1;
     uint16_t i;
-    
+
 at86rf215_spiStrobe(CMD_RF_TRXOFF);
     while(at86rf215_status() != RF_STATE_TRXOFF);
 
@@ -249,20 +248,20 @@ void radio_subghz_txEnable(void) {
 }
 
 void radio_subghz_txNow(void) {
-  
+
     PORT_TIMER_WIDTH capturedTime;
-    
+
     // check radio state transit to TRX PREPARE
     if (radio_subghz_vars.state != RADIOSTATE_TX_ENABLED){
         // return directly
         return;
     }
-  
+
     // change state
     radio_subghz_vars.state = RADIOSTATE_TRANSMITTING;
 
     at86rf215_spiStrobe(CMD_RF_TX);
-    
+
     if (radio_subghz_vars.startFrame_cb!=NULL) {
         // capture the time
         capturedTime = sctimer_readCounter();
@@ -275,7 +274,7 @@ void radio_subghz_txNow(void) {
 
 void radio_subghz_rxEnable(void) {
     // change state
-    radio_subghz_vars.state = RADIOSTATE_ENABLING_RX; 
+    radio_subghz_vars.state = RADIOSTATE_ENABLING_RX;
     // wiggle debug pin
     debugpins_radio_set();
     leds_debug_on();
@@ -291,8 +290,8 @@ void radio_subghz_rxNow(void) {
         leds_error_toggle();
         return;
     }
-  
-  
+
+
 }
 
 void radio_subghz_getReceivedFrame(
@@ -324,7 +323,7 @@ uint8_t radio_subghz_getDelayRx(void){
     return delayRx_SUBGHZ;
 }
 
-//=========================== private ========================================= 
+//=========================== private =========================================
 
 void radio_subghz_read_isr(){
     uint8_t flags[4];
@@ -351,12 +350,12 @@ void radio_subghz_isr() {
     capturedTime = sctimer_readCounter();
     //get isr that happened from radio
     radio_subghz_read_isr();
-    
+
     if (radio_subghz_vars.rf09_isr & IRQS_TRXRDY_MASK){
         radio_subghz_vars.state = RADIOSTATE_TX_ENABLED;
         // result = DO_NOT_KICK_SCHEDULER;
     }
-    
+
     if (radio_subghz_vars.bb0_isr & IRQS_RXFS_MASK){
         radio_subghz_vars.state = RADIOSTATE_RECEIVING;
         if (radio_subghz_vars.startFrame_cb!=NULL) {
@@ -377,7 +376,7 @@ void radio_subghz_isr() {
                 // result = KICK_SCHEDULER;
             } else {
                 //while(1);
-            }    
+            }
         }  else {
             if ((radio_subghz_vars.bb0_isr & IRQS_RXFE_MASK)){
                 radio_subghz_vars.state = RADIOSTATE_TXRX_DONE;
@@ -385,7 +384,7 @@ void radio_subghz_isr() {
                     // call the callback
                     radio_subghz_vars.endFrame_cb(capturedTime);
                     // kick the OS
-                    //result = KICK_SCHEDULER;   
+                    //result = KICK_SCHEDULER;
                 } else {
                     // while(1);
                 }

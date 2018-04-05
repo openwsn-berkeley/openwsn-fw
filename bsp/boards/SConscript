@@ -11,19 +11,15 @@ sources_h = [
     'debugpins.h',
     'eui64.h',
     'leds.h',
-    'radio.h',
     'uart.h',
     'sctimer.h',
     os.path.join('common', 'openccms.h'),
     os.path.join('common', 'openaes.h'),
-	#os.path.join('openmote-b', 'radio_subghz.h'),
 ]
 
 sources_c = [
     os.path.join('common', 'openccms.c'),
     os.path.join('common', 'openaes.c'),
-    os.path.join('common', 'openradio.c'),
-	#os.path.join('openmote-b', 'radio_subghz.c'),
 ]
 
 target = 'libbsp'
@@ -32,6 +28,7 @@ target = 'libbsp'
 
 if localEnv['board']=='python':
     
+    sources_h += [os.path.join('python', 'radio_python.h')]
     actions = []
     
     for s in sources_c+sources_h:

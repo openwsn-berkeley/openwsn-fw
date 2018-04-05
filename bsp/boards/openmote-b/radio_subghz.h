@@ -14,7 +14,7 @@
 
 */
 
-#include "radio.h"
+#include "openradios.h"
 //=========================== define ==========================================
 
 #define LENGTH_CRC_SUBGHZ    4

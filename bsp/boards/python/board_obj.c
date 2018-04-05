@@ -10,7 +10,8 @@
 #include "debugpins_obj.h"
 #include "leds_obj.h"
 #include "uart_obj.h"
-#include "radio_obj.h"
+#include "openradios_obj.h"
+#include "radio_python_obj.h"
 #include "eui64_obj.h"
 #include "sctimer_obj.h"
 
@@ -21,29 +22,35 @@
 //=========================== public ==========================================
 
 void board_init(OpenMote* self) {
-   PyObject*   result;
-   
+    PyObject*   result;
+
+    radio_functions_t* radio_functions;
+
 #ifdef TRACE_ON
-   printf("C@0x%x: board_init()...\n",self);
+    printf("C@0x%x: board_init()...\n",self);
 #endif
-   
-   // initialize bsp modules
-   debugpins_init(self);
-   leds_init(self);
-   sctimer_init(self);
-   uart_init(self);
-   radio_init(self);
-   
-   // forward to Python
-   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_board_init],NULL);
-   if (result == NULL) {
-      printf("[CRITICAL] board_init() returned NULL\r\n");
-      return;
-   }
-   Py_DECREF(result);
-   
+
+    // initialize bsp modules
+    debugpins_init(self);
+    leds_init(self);
+    sctimer_init(self);
+    uart_init(self);
+
+    // initialize all radios
+    openradios_getFunctions(self,&radio_functions);
+    radio_python_init(self);
+    radio_python_setFunctions(self,&radio_functions[RADIOTPYE_2D4GHZ]);
+
+    // forward to Python
+    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_board_init],NULL);
+    if (result == NULL) {
+        printf("[CRITICAL] board_init() returned NULL\r\n");
+        return;
+    }
+    Py_DECREF(result);
+
 #ifdef TRACE_ON
-   printf("C@0x%x: ...done.\n",self);
+    printf("C@0x%x: ...done.\n",self);
 #endif
 }
 

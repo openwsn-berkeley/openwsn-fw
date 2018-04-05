@@ -29,7 +29,7 @@
 #include "uart.h"
 #include "cryptoengine.h"
 #include "spi.h"
-#include "radio.h"
+#include "openradios.h"
 #include "radio_2d4ghz.h"
 #include "radio_subghz.h"
 
@@ -74,11 +74,11 @@ int main(void) {
 //=========================== public ==========================================
 
 void board_init(void) {
-    
+
     radio_functions_t* radio_functions;
-    
+
     user_button_initialized = FALSE;
-    
+
     gpio_init();
     clock_init();
     antenna_init();
@@ -88,17 +88,19 @@ void board_init(void) {
     button_init();
     sctimer_init();
     uart_init();
-    
-    radio_getFunctions(&radio_functions);
+    i2c_init();
+
+
+    // initialize radios
+    openradios_getFunctions(&radio_functions);
     radio_2d4ghz_init();
     radio_2d4ghz_setFunctions(&radio_functions[RADIOTPYE_2D4GHZ]);
-    
-    i2c_init();
     spi_init();
     radio_subghz_init();
     radio_subghz_setFunctions(&radio_functions[RADIOTPYE_SUBGHZ]);
+
     sensors_init();
-    cryptoengine_init();  
+    cryptoengine_init();
 }
 
 void antenna_init(void) {
@@ -122,7 +124,7 @@ void board_sleep(void) {
 void board_timer_init(void) {
     // Configure the timer
     TimerConfigure(GPTIMER2_BASE, GPTIMER_CFG_PERIODIC_UP);
-    
+
     // Enable the timer
     TimerEnable(GPTIMER2_BASE, GPTIMER_BOTH);
 }
@@ -133,9 +135,9 @@ void board_timer_init(void) {
  */
 uint32_t board_timer_get(void) {
     uint32_t current;
-    
+
     current = TimerValueGet(GPTIMER2_BASE, GPTIMER_A) >> 5;
-    
+
     return current;
 }
 
@@ -150,7 +152,7 @@ bool board_timer_expired(uint32_t future) {
     current = TimerValueGet(GPTIMER2_BASE, GPTIMER_A) >> 5;
 
     remaining = (int32_t) (future - current);
-    
+
     if (remaining > 0) {
         return false;
     } else {
@@ -168,7 +170,7 @@ void board_reset(void) {
 //=========================== private =========================================
 
 static void gpio_init(void) {
-    
+
     // all to input
     GPIOPinTypeGPIOInput(GPIO_A_BASE, 0xFF);
     GPIOPinTypeGPIOInput(GPIO_B_BASE, 0xFF);
@@ -226,9 +228,9 @@ static void button_init(void) {
     /* The button is an input GPIO on falling edge */
     GPIOPinTypeGPIOInput(BSP_BUTTON_BASE, BSP_BUTTON_USER);
     GPIOIntTypeSet(BSP_BUTTON_BASE, BSP_BUTTON_USER, GPIO_FALLING_EDGE);
-    
+
     GPIOIntWakeupEnable(GPIO_IWE_PORT_D);
-    
+
     GPIOPinIntClear(BSP_BUTTON_BASE, BSP_BUTTON_USER);
 
     /* Register the interrupt */
@@ -340,7 +342,7 @@ void eraseFlash(){
     FlashMainPageErase(CC2538_FLASH_ADDRESS);
 
     leds_circular_shift();
-    
+
     /* Reset the board */
     SysCtrlReset();
 }

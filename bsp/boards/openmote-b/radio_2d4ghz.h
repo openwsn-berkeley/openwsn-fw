@@ -12,7 +12,7 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 */
 
-#include "radio.h"
+#include "openradios.h"
 
 //=========================== define ==========================================
 
@@ -20,7 +20,7 @@
 \brief Current state of the radio 2.4ghz.
 
 \note This radio driver is very minimal in that it does not follow a state machine.
-      It is up to the MAC layer to ensure that the different radio operations 
+      It is up to the MAC layer to ensure that the different radio operations
       are called in the righr order. The radio keeps a state for debugging purposes only.
 */
 

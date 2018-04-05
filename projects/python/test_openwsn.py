@@ -28,7 +28,7 @@ import oos_openwsn
 
 def default_callback(id):
    print "P: {0}() (callback {1})".format(notifString[id],id)
-   raw_input("press Enter for next")
+   # raw_input("press Enter for next")
 
 def eui64_get():
    print "P: eui64_get()"

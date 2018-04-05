@@ -62,9 +62,11 @@ static PyObject* OpenMote_getState(OpenMote* self) {
    PyObject* ieee154e_vars;
    PyObject* ieee154e_stats;
    PyObject* ieee154e_dbg;
+   PyObject* radio_functions;
    PyObject* idmanager_vars;
    PyObject* openqueue_vars;
    PyObject* opentimers_vars;
+   PyObject* openradios_vars;
    PyObject* random_vars;
    PyObject* openserial_vars;
    PyObject* scheduler_vars;
@@ -143,6 +145,12 @@ static PyObject* OpenMote_getState(OpenMote* self) {
    ieee154e_dbg = PyDict_New();
    // TODO
    PyDict_SetItemString(returnVal, "ieee154e_dbg", ieee154e_dbg);
+
+   // radio_functions
+   radio_functions = PyDict_New();
+   // TODO
+   PyDict_SetItemString(returnVal, "radio_functions", radio_functions);
+
    
    // idmanager_vars
    idmanager_vars = PyDict_New();
@@ -159,6 +167,11 @@ static PyObject* OpenMote_getState(OpenMote* self) {
    // TODO
    PyDict_SetItemString(returnVal, "opentimers_vars", opentimers_vars);
    
+   // openradios_vars
+   openradios_vars = PyDict_New();
+   // TODO
+   PyDict_SetItemString(returnVal, "openradios_vars", openradios_vars);
+
    // random_vars
    random_vars = PyDict_New();
    // TODO

@@ -40,7 +40,7 @@
 typedef struct {
     radio_capture_cbt         startFrame_cb;
     radio_capture_cbt         endFrame_cb;
-    radio_state_t             state; 
+    radio_state_t             state;
 } radio_2d4ghz_vars_t;
 
 radio_2d4ghz_vars_t radio_2d4ghz_vars;
@@ -60,36 +60,35 @@ void     radio_2d4ghz_isr_internal(void);
 
 //===== admin
 
-void radio_2d4ghz_setFunctions(radio_functions_t * funcs){
-    funcs->radio_change_modulation  = radio_2d4ghz_change_modulation;
-    funcs->radio_powerOn            = radio_2d4ghz_powerOn;
+void radio_2d4ghz_setFunctions(radio_functions_t* funcs){
+    funcs->radio_powerOn_cb            = radio_2d4ghz_powerOn;
     // RF admin
-    funcs->radio_init               = radio_2d4ghz_init;
-    funcs->radio_setStartFrameCb    = radio_2d4ghz_setStartFrameCb;
-    funcs->radio_setEndFrameCb      = radio_2d4ghz_setEndFrameCb;
+    funcs->radio_init_cb               = radio_2d4ghz_init;
+    funcs->radio_setStartFrameCb_cb    = radio_2d4ghz_setStartFrameCb;
+    funcs->radio_setEndFrameCb_cb      = radio_2d4ghz_setEndFrameCb;
     // RF admin
-    funcs->radio_rfOn               = radio_2d4ghz_rfOn;
-    funcs->radio_rfOff              = radio_2d4ghz_rfOff;
-    funcs->radio_setFrequency       = radio_2d4ghz_setFrequency;
-    funcs->radio_change_modulation  = radio_2d4ghz_change_modulation;
-    funcs->radio_change_size        = radio_2d4ghz_change_size;
+    funcs->radio_rfOn_cb               = radio_2d4ghz_rfOn;
+    funcs->radio_rfOff_cb              = radio_2d4ghz_rfOff;
+    funcs->radio_setFrequency_cb       = radio_2d4ghz_setFrequency;
+    funcs->radio_change_modulation_cb  = radio_2d4ghz_change_modulation;
+    funcs->radio_change_size_cb        = radio_2d4ghz_change_size;
     // reset
-    funcs->radio_reset              = radio_2d4ghz_reset;
+    funcs->radio_reset_cb              = radio_2d4ghz_reset;
     // TX
-    funcs->radio_loadPacket_prepare = radio_2d4ghz_loadPacket_prepare;
-    funcs->radio_txEnable           = radio_2d4ghz_txEnable;
-    funcs->radio_txNow              = radio_2d4ghz_txNow;
-    funcs->radio_loadPacket         = radio_2d4ghz_loadPacket;
+    funcs->radio_loadPacket_prepare_cb = radio_2d4ghz_loadPacket_prepare;
+    funcs->radio_txEnable_cb           = radio_2d4ghz_txEnable;
+    funcs->radio_txNow_cb              = radio_2d4ghz_txNow;
+    funcs->radio_loadPacket_cb         = radio_2d4ghz_loadPacket;
     // RX
-    funcs->radio_rxPacket_prepare   = radio_2d4ghz_rxPacket_prepare;
-    funcs->radio_rxEnable           = radio_2d4ghz_rxEnable;
-    funcs->radio_rxEnable_scum      = radio_2d4ghz_rxEnable_scum;
-    funcs->radio_rxNow              = radio_2d4ghz_rxNow;
-    funcs->radio_getReceivedFrame   = radio_2d4ghz_getReceivedFrame;
-    funcs->radio_getCRCLen          = radio_2d4ghz_getCRCLen;
-    funcs->radio_calculateFrequency = radio_2d4ghz_calculateFrequency;
-    funcs->radio_getDelayTx         = radio_2d4ghz_getDelayTx;
-    funcs->radio_getDelayRx         = radio_2d4ghz_getDelayRx;
+    funcs->radio_rxPacket_prepare_cb   = radio_2d4ghz_rxPacket_prepare;
+    funcs->radio_rxEnable_cb           = radio_2d4ghz_rxEnable;
+    funcs->radio_rxEnable_scum_cb      = radio_2d4ghz_rxEnable_scum;
+    funcs->radio_rxNow_cb              = radio_2d4ghz_rxNow;
+    funcs->radio_getReceivedFrame_cb   = radio_2d4ghz_getReceivedFrame;
+    funcs->radio_getCRCLen_cb          = radio_2d4ghz_getCRCLen;
+    funcs->radio_calculateFrequency_cb = radio_2d4ghz_calculateFrequency;
+    funcs->radio_getDelayTx_cb         = radio_2d4ghz_getDelayTx;
+    funcs->radio_getDelayRx_cb         = radio_2d4ghz_getDelayRx;
 }
 
 void radio_2d4ghz_init() {
@@ -587,7 +586,7 @@ uint8_t radio_2d4ghz_calculateFrequency(uint8_t channelOffset, uint8_t asnOffset
     } else {
         // channel hopping enabled, use the channel depending on hopping template
         return 11 + hopSeq[(asnOffset+channelOffset)%numChannels];
-    } 
+    }
 }
 
 // not used by 2.4ghz radio
