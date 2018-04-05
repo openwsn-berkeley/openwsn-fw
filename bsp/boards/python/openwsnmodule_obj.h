@@ -235,7 +235,6 @@ struct OpenMote {
    cstorm_vars_t        cstorm_vars;
    cwellknown_vars_t    cwellknown_vars;
    rrt_vars_t           rrt_vars;
-   //tohlone_vars_t       tohlone_vars;
    cjoin_vars_t         cjoin_vars;
    uecho_vars_t         uecho_vars;
    uinject_vars_t       uinject_vars;

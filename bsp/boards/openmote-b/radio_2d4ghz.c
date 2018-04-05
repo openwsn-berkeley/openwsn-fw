@@ -212,20 +212,20 @@ void radio_2d4ghz_reset() {
 
 //===== RF admin
 
-void radio_2d4ghz_setFrequency(uint16_t channel_spacing, uint32_t frequency_0, uint16_t frequency) {
+void radio_2d4ghz_setFrequency(uint16_t channel_spacing, uint32_t frequency_0, uint16_t channel) {
 
     // change state
     radio_2d4ghz_vars.state = RADIOSTATE_SETTING_FREQUENCY;
 
     radio_2d4ghz_off();
     // configure the radio to the right frequecy
-    if((frequency < CC2538_RF_CHANNEL_MIN) || (frequency > CC2538_RF_CHANNEL_MAX)) {
+    if((channel < CC2538_RF_CHANNEL_MIN) || (channel > CC2538_RF_CHANNEL_MAX)) {
         while(1);
     }
 
     /* Changes to FREQCTRL take effect after the next recalibration */
     HWREG(RFCORE_XREG_FREQCTRL) = (CC2538_RF_CHANNEL_MIN
-        + (frequency - CC2538_RF_CHANNEL_MIN) * CC2538_RF_CHANNEL_SPACING);
+        + (channel - CC2538_RF_CHANNEL_MIN) * CC2538_RF_CHANNEL_SPACING);
 
     //radio_2d4ghz_on();
 
