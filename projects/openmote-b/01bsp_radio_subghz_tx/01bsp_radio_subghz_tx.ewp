@@ -639,7 +639,7 @@
                 <option>
                     <name>OOCOutputFormat</name>
                     <version>3</version>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>OCOutputOverride</name>
@@ -647,7 +647,7 @@
                 </option>
                 <option>
                     <name>OOCOutputFile</name>
-                    <state>01bsp_sctimer.srec</state>
+                    <state>01bsp_radio_subghz_tx.hex</state>
                 </option>
                 <option>
                     <name>OOCCommandLineProducer</name>
@@ -655,7 +655,7 @@
                 </option>
                 <option>
                     <name>OOCObjCopyEnable</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
             </data>
         </settings>
@@ -2054,9 +2054,6 @@
                 <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\common\openccms.h</name>
                 </file>
-                <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\boards\common\openradio.c</name>
-                </file>
             </group>
             <group>
                 <name>openmote-b</name>
@@ -2283,12 +2280,6 @@
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\board_info.h</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\bsp_timer.c</name>
-                    <excluded>
-                        <configuration>Debug</configuration>
-                    </excluded>
-                </file>
-                <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\cc2538rf.h</name>
                 </file>
                 <file>
@@ -2319,12 +2310,6 @@
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\radio_subghz.h</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\radiotimer.c</name>
-                    <excluded>
-                        <configuration>Debug</configuration>
-                    </excluded>
-                </file>
-                <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\sctimer.c</name>
                 </file>
                 <file>
@@ -2344,12 +2329,6 @@
                 <name>$PROJ_DIR$\..\..\..\bsp\boards\board.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</name>
-                <excluded>
-                    <configuration>Debug</configuration>
-                </excluded>
-            </file>
-            <file>
                 <name>$PROJ_DIR$\..\..\..\bsp\boards\crypto_engine.h</name>
             </file>
             <file>
@@ -2363,15 +2342,6 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</name>
-                <excluded>
-                    <configuration>Debug</configuration>
-                </excluded>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\bsp\boards\sctimer.h</name>
@@ -2437,6 +2407,18 @@
                 </file>
             </group>
         </group>
+    </group>
+    <group>
+        <name>drivers</name>
+        <group>
+            <name>common</name>
+        </group>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\drivers\common\openradios.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\drivers\common\openradios.h</name>
+        </file>
     </group>
     <group>
         <name>inc</name>
