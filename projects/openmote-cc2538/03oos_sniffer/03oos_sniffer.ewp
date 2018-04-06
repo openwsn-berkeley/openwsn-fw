@@ -1913,6 +1913,15 @@
     <group>
       <name>boards</name>
       <group>
+        <name>common</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\openradios.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\openradios.h</name>
+        </file>
+      </group>
+      <group>
         <name>openmote-CC2538</name>
         <group>
           <name>headers</name>
@@ -2170,10 +2179,16 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\radio.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\pwm.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\pwm.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\radio_2d4ghz.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\radio_2d4ghz.h</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\sctimer.c</name>

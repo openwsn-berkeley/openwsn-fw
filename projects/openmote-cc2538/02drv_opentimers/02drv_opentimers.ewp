@@ -1883,6 +1883,15 @@
     <group>
       <name>boards</name>
       <group>
+        <name>common</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\openradios.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\openradios.h</name>
+        </file>
+      </group>
+      <group>
         <name>openmote-cc2538</name>
         <group>
           <name>headers</name>
@@ -2107,12 +2116,6 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\board_info.h</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\bsp_timer.c</name>
-          <excluded>
-            <configuration>Debug</configuration>
-          </excluded>
-        </file>
-        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\cc2538rf.h</name>
         </file>
         <file>
@@ -2131,13 +2134,16 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\leds.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\radio.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\pwm.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\radiotimer.c</name>
-          <excluded>
-            <configuration>Debug</configuration>
-          </excluded>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\pwm.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\radio_2d4ghz.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\radio_2d4ghz.h</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\sctimer.c</name>
@@ -2156,12 +2162,6 @@
         <name>$PROJ_DIR$\..\..\..\bsp\boards\board.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</name>
-        <excluded>
-          <configuration>Debug</configuration>
-        </excluded>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\crypto_engine.h</name>
       </file>
       <file>
@@ -2175,15 +2175,6 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</name>
-        <excluded>
-          <configuration>Debug</configuration>
-        </excluded>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\sctimer.h</name>

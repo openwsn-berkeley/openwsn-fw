@@ -1912,6 +1912,15 @@
     <group>
       <name>boards</name>
       <group>
+        <name>common</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\openradios.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\openradios.h</name>
+        </file>
+      </group>
+      <group>
         <name>openmote-CC2538</name>
         <group>
           <name>headers</name>
@@ -2154,7 +2163,16 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\leds.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\radio.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\pwm.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\pwm.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\radio_2d4ghz.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\radio_2d4ghz.h</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\sctimer.c</name>
@@ -2192,9 +2210,6 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</name>
@@ -2297,9 +2312,15 @@
       <name>02a-MAClow</name>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\adaptive_sync.c</name>
+        <excluded>
+          <configuration>Debug</configuration>
+        </excluded>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\adaptive_sync.h</name>
+        <excluded>
+          <configuration>Debug</configuration>
+        </excluded>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154.c</name>
@@ -2329,6 +2350,12 @@
     <group>
       <name>02b-MAChigh</name>
       <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\msf.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\msf.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\neighbors.c</name>
       </file>
       <file>
@@ -2342,12 +2369,6 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\schedule.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\msf.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\msf.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sixtop.c</name>
