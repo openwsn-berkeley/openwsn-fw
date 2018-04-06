@@ -5,7 +5,7 @@
 */
 
 #include "board.h"
-#include "radio.h"
+#include "openradios.h"
 #include "leds.h"
 #include "opentimers.h"
 #include "scheduler.h"
@@ -19,12 +19,21 @@
 
 //=========================== defines =========================================
 
-#define LENGTH_PACKET    125+LENGTH_CRC ///< maximum length is 127 bytes
 #define CHANNEL          20             ///< 20=2.450GHz
 #define ID               0x99           ///< byte sent in the packets
 #define TIMER_PERIOD     0x1ff
-#define CHANNEL_SPACING  1200            
+#define CHANNEL_SPACING  1200
 #define FREQUENCY_CENTER 863625
+#define SNIFFER_RADIO    RADIOTPYE_2D4GHZ // change this if using another radio
+
+#if SNIFFER_RADIO == 0
+#define RADIO_LENGTH_CRC 2
+#endif
+#if SNIFFER_RADIO == 1
+#define RADIO_LENGTH_CRC 4
+#endif
+
+#define LENGTH_PACKET    125+RADIO_LENGTH_CRC ///< maximum length is 127 bytes
 
 //=========================== variables =======================================
 
@@ -42,7 +51,7 @@ typedef enum {
 typedef struct {
    app_state_t          app_state;
    uint8_t              flag;
-   uint8_t              packet[LENGTH_PACKET];
+   uint8_t              packet[RADIO_LENGTH_CRC];
    uint16_t             packet_len;
    int8_t               rxpk_rssi;
    uint8_t              rxpk_lqi;
@@ -51,6 +60,7 @@ typedef struct {
    uint8_t              channel;
    uint8_t              outputOrInput;
    opentimers_id_t      timerId;
+   radio_functions_t*   radio_functions;
 } app_vars_t;
 
 app_vars_t app_vars;
@@ -69,118 +79,120 @@ void     task_uploadPacket(void);
 */
 int mote_main(void) {
 
-   PORT_TIMER_WIDTH       reference;
-   // clear local variables
-   memset(&app_vars,0,sizeof(app_vars_t));
+    PORT_TIMER_WIDTH       reference;
+    // clear local variables
+    memset(&app_vars,0,sizeof(app_vars_t));
 
-   // initialize board
-   board_init();
-   scheduler_init();
-   openserial_init();
-   idmanager_init();
-   openrandom_init();
-   opentimers_init();
+    // initialize board
+    board_init();
+    scheduler_init();
+    openserial_init();
+    idmanager_init();
+    openrandom_init();
+    opentimers_init();
 
-   // add callback functions radio
-   radio_setStartFrameCb(cb_startFrame);
-   radio_setEndFrameCb(cb_endFrame);
+    openradios_getFunctions(&app_vars.radio_functions);
 
-   // start timer
-   app_vars.timerId = opentimers_create();
-   reference        = opentimers_getValue();
-   opentimers_scheduleAbsolute(
+    // switch all radios radio on
+    app_vars.radio_functions[SNIFFER_RADIO].radio_setStartFrameCb_cb(cb_startFrame);
+    app_vars.radio_functions[SNIFFER_RADIO].radio_setEndFrameCb_cb(cb_endFrame);
+
+    // start timer
+    app_vars.timerId = opentimers_create();
+    reference        = opentimers_getValue();
+    opentimers_scheduleAbsolute(
         app_vars.timerId,      // timerId
         TIMER_PERIOD,          // duration
         reference,             // reference
-        TIME_TICS,            // timetype
+        TIME_TICS,             // timetype
         cb_timer               // callback
-   );
+    );
 
-   // prepare radio
-   radio_rfOn();
-   radio_setFrequency(
-      CHANNEL_SPACING,
-      FREQUENCY_CENTER,
-      CHANNEL
-   );
-   app_vars.channel = CHANNEL;
+    // prepare radio
+    app_vars.radio_functions[SNIFFER_RADIO].radio_rfOn_cb();
+    app_vars.radio_functions[SNIFFER_RADIO].radio_setFrequency_cb(
+        CHANNEL_SPACING,
+        FREQUENCY_CENTER,
+        CHANNEL
+    );
+    app_vars.channel = CHANNEL;
 
-   // switch in RX by default
-   radio_rxEnable();
-   radio_rxNow();
+    // switch in RX by default
+    app_vars.radio_functions[SNIFFER_RADIO].radio_rxEnable_cb();
+    app_vars.radio_functions[SNIFFER_RADIO].radio_rxNow_cb();
 
-   scheduler_start();
+    scheduler_start();
 
-   return 0;
+    return 0;
 }
 
 //=========================== interface =======================================
 void sniffer_setListeningChannel(uint8_t channel){
 
     while(app_vars.flag != APP_FLAG_IDLE);
-    radio_rfOff();
-    radio_rfOn();
-    radio_setFrequency(
+    app_vars.radio_functions[SNIFFER_RADIO].radio_rfOff_cb();
+    app_vars.radio_functions[SNIFFER_RADIO].radio_rfOn_cb();
+    app_vars.radio_functions[SNIFFER_RADIO].radio_setFrequency_cb(
         CHANNEL_SPACING,
         FREQUENCY_CENTER,
-        CHANNEL
+        channel
     );
     app_vars.channel = channel;
-    radio_rxEnable();
-    radio_rxNow();
+    app_vars.radio_functions[SNIFFER_RADIO].radio_rxEnable_cb();
+    app_vars.radio_functions[SNIFFER_RADIO].radio_rxNow_cb();
 }
 
 //=========================== callbacks =======================================
 
 void cb_startFrame(PORT_TIMER_WIDTH timestamp) {
 
-   app_vars.flag |= APP_FLAG_START_FRAME;
-   // led
-   leds_error_on();
+    app_vars.flag |= APP_FLAG_START_FRAME;
+    // led
+    leds_error_on();
 }
 
 void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
 
-   app_vars.flag |= APP_FLAG_END_FRAME;
-   // done receiving a packet
-   app_vars.packet_len = sizeof(app_vars.packet);
+    app_vars.flag |= APP_FLAG_END_FRAME;
+    // done receiving a packet
+    app_vars.packet_len = sizeof(app_vars.packet);
 
-   // get packet from radio
-   radio_getReceivedFrame(
-      app_vars.packet,
-      &app_vars.packet_len,
-      sizeof(app_vars.packet),
-      &app_vars.rxpk_rssi,
-      &app_vars.rxpk_lqi,
-      &app_vars.rxpk_crc,
-      &app_vars.rxpk_mcs
-   );
+    // get packet from radio
+    app_vars.radio_functions[SNIFFER_RADIO].radio_getReceivedFrame_cb(
+        app_vars.packet,
+        &app_vars.packet_len,
+        sizeof(app_vars.packet),
+        &app_vars.rxpk_rssi,
+        &app_vars.rxpk_lqi,
+        &app_vars.rxpk_crc,
+        &app_vars.rxpk_mcs
+    );
 
-   scheduler_push_task(task_uploadPacket,TASKPRIO_SNIFFER);
-   app_vars.flag &= ~APP_FLAG_START_FRAME;
-   app_vars.flag &= ~APP_FLAG_END_FRAME;
-   // led
-   leds_error_off();
+    scheduler_push_task(task_uploadPacket,TASKPRIO_SNIFFER);
+    app_vars.flag &= ~APP_FLAG_START_FRAME;
+    app_vars.flag &= ~APP_FLAG_END_FRAME;
+    // led
+    leds_error_off();
 }
 
 void cb_timer(opentimers_id_t id) {
 
-   // schedule again
-   opentimers_scheduleIn(
+    // schedule again
+    opentimers_scheduleIn(
         app_vars.timerId,     // timerId
         TIMER_PERIOD,         // duration
         TIME_TICS,            // timetype
         TIMER_ONESHOT,        // timertype
         cb_timer              // callback
-   );
-   app_vars.outputOrInput = (app_vars.outputOrInput+1)%2;
-   if (app_vars.outputOrInput == 1) {
-       openserial_stop();
-       openserial_startOutput();
-   } else {
-       openserial_stop();
-       openserial_startInput();
-   }
+    );
+    app_vars.outputOrInput = (app_vars.outputOrInput+1)%2;
+    if (app_vars.outputOrInput == 1) {
+        openserial_stop();
+        openserial_startOutput();
+    } else {
+        openserial_stop();
+        openserial_startInput();
+    }
 }
 
 // ================================ task =======================================

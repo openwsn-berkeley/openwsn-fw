@@ -99,7 +99,15 @@
 
 #define NUMSENSORS      7
 
+// number of radios in this board.
+#define MAX_NUM_RADIOS                      1
+
 //=========================== typedef  ========================================
+
+typedef enum {
+   RADIOTPYE_2D4GHZ          = 0,
+   RADIOTPYE_ANY             = 1 
+} radioType_t;
 
 //=========================== variables =======================================
 

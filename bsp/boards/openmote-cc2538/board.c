@@ -22,7 +22,8 @@
 #include "debugpins.h"
 #include "i2c.h"
 #include "leds.h"
-#include "radio.h"
+#include "openradios.h"
+#include "radio_2d4ghz.h"
 #include "sensors.h"
 #include "sctimer.h"
 #include "uart.h"
@@ -69,21 +70,28 @@ int main(void) {
 //=========================== public ==========================================
 
 void board_init(void) {
-   user_button_initialized = FALSE;
-   
-   gpio_init();
-   clock_init();
-   board_timer_init();
-   leds_init();
-   debugpins_init();
-   button_init();
-   sctimer_init();
-   uart_init();
-   radio_init();
-   i2c_init();
-   sensors_init();
-   cryptoengine_init();
-   pwm_init();
+    radio_functions_t* radio_functions;
+
+    user_button_initialized = FALSE;
+
+    gpio_init();
+    clock_init();
+    board_timer_init();
+    leds_init();
+    debugpins_init();
+    button_init();
+    sctimer_init();
+    uart_init();
+
+    // initialize radios
+    openradios_getFunctions(&radio_functions);
+    radio_2d4ghz_init();
+    radio_2d4ghz_setFunctions(&radio_functions[RADIOTPYE_2D4GHZ]);
+
+    i2c_init();
+    sensors_init();
+    cryptoengine_init();
+    pwm_init();
 }
 
 /**
@@ -101,7 +109,7 @@ void board_sleep(void) {
 void board_timer_init(void) {
     // Configure the timer
     TimerConfigure(GPTIMER2_BASE, GPTIMER_CFG_PERIODIC_UP);
-    
+
     // Enable the timer
     TimerEnable(GPTIMER2_BASE, GPTIMER_BOTH);
 }
@@ -112,9 +120,9 @@ void board_timer_init(void) {
  */
 uint32_t board_timer_get(void) {
     uint32_t current;
-    
+
     current = TimerValueGet(GPTIMER2_BASE, GPTIMER_A) >> 5;
-    
+
     return current;
 }
 
@@ -129,7 +137,7 @@ bool board_timer_expired(uint32_t future) {
     current = TimerValueGet(GPTIMER2_BASE, GPTIMER_A) >> 5;
 
     remaining = (int32_t) (future - current);
-    
+
     if (remaining > 0) {
         return false;
     } else {
@@ -313,7 +321,7 @@ static void GPIO_C_Handler(void) {
     FlashMainPageErase(CC2538_FLASH_ADDRESS);
 
     leds_circular_shift();
-    
+
     /* Reset the board */
     SysCtrlReset();
 }
