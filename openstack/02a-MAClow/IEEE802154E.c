@@ -749,12 +749,8 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
       // turn off the radio
       ieee154e_vars.radio_functions[RADIOTPYE_2D4GHZ].radio_rfOff_cb();
 
-      printf("after rfOff is done\n");
-
       // compute radio duty cycle
       ieee154e_vars.radioOnTics += (sctimer_readCounter()-ieee154e_vars.radioOnInit);
-
-      printf("sctimer_readCounter is donen");
 
       // toss the IEs
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,lenIE);
