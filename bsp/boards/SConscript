@@ -15,6 +15,7 @@ sources_h = [
     'sctimer.h',
     os.path.join('common', 'openccms.h'),
     os.path.join('common', 'openaes.h'),
+    os.path.join('common','openradios.h'),
 ]
 
 sources_c = [
@@ -43,7 +44,10 @@ if localEnv['board']=='python':
     common = [localEnv.ObjectifiedFilename(s) for s in sources_c]
     
 else:
-    common = sources_c
+
+    sources_c += [os.path.join('common','openradios.c'),]
+
+    common     = sources_c
     
 common = localEnv.Object(source=common)
         

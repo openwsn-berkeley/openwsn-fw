@@ -17,12 +17,9 @@ sources_h = [
     os.path.join('common','opensensors.h'),
     os.path.join('common','openserial.h'),
     os.path.join('common','opentimers.h'),
-    os.path.join('common','openradios.h'),
 ]
 
 if localEnv['board']=='python':
-    
-    # the openradios.c file is located at bsp/board/python folder
 
     for s in sources_c+sources_h:
         temp = localEnv.Objectify(
@@ -38,8 +35,6 @@ if localEnv['board']=='python':
     localEnv.Depends(libdrivers,[localEnv.ObjectifiedFilename(s) for s in sources_h])
 
 else:
-
-    sources_c += [os.path.join('common','openradios.c'),]
 
     localEnv.Append(
         CPPPATH =  [
