@@ -2086,6 +2086,12 @@
                 <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\common\openccms.h</name>
                 </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\boards\common\openradios.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\boards\common\openradios.h</name>
+                </file>
             </group>
             <group>
                 <name>openmote-b</name>
@@ -2436,12 +2442,6 @@
                 <name>$PROJ_DIR$\..\..\..\drivers\common\openhdlc.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\drivers\common\openradios.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\drivers\common\openradios.h</name>
-            </file>
-            <file>
                 <name>$PROJ_DIR$\..\..\..\drivers\common\opensensors.c</name>
             </file>
             <file>
@@ -2683,9 +2683,6 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154_security.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\ieee802154_security_driver.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154E.c</name>

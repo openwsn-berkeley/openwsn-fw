@@ -20,7 +20,7 @@
 typedef struct {
    radio_capture_cbt         startFrame_cb;
    radio_capture_cbt         endFrame_cb;
-   radio_state_t             state; 
+   radio_state_t             state;
 } radio_vars_t;
 
 radio_vars_t radio_vars;
@@ -31,7 +31,7 @@ void    radio_spiWriteReg(uint8_t reg_addr, uint8_t reg_setting);
 uint8_t radio_spiReadReg(uint8_t reg_addr);
 void    radio_spiWriteTxFifo(uint8_t* bufToWrite, uint8_t lenToWrite);
 void    radio_spiReadRxFifo(uint8_t* pBufRead,
-                            uint8_t* pLenRead,
+                            uint16_t* pLenRead,
                             uint8_t  maxBufLen,
                             uint8_t* pLqi);
 uint8_t radio_spiReadRadioInfo(void);
@@ -40,17 +40,48 @@ uint8_t radio_spiReadRadioInfo(void);
 
 //===== admin
 
+void radio_setFunctions(radio_functions_t* funcs){
+    funcs->radio_powerOn_cb            = radio_powerOn;
+    // RF admin
+    funcs->radio_init_cb               = radio_init;
+    funcs->radio_setStartFrameCb_cb    = radio_setStartFrameCb;
+    funcs->radio_setEndFrameCb_cb      = radio_setEndFrameCb;
+    // RF admin
+    funcs->radio_rfOn_cb               = radio_rfOn;
+    funcs->radio_rfOff_cb              = radio_rfOff;
+    funcs->radio_setFrequency_cb       = radio_setFrequency;
+    funcs->radio_change_modulation_cb  = radio_change_modulation;
+    funcs->radio_change_size_cb        = radio_change_size;
+    // reset
+    funcs->radio_reset_cb              = radio_reset;
+    // TX
+    funcs->radio_loadPacket_prepare_cb = radio_loadPacket_prepare;
+    funcs->radio_txEnable_cb           = radio_txEnable;
+    funcs->radio_txNow_cb              = radio_txNow;
+    funcs->radio_loadPacket_cb         = radio_loadPacket;
+    // RX
+    funcs->radio_rxPacket_prepare_cb   = radio_rxPacket_prepare;
+    funcs->radio_rxEnable_cb           = radio_rxEnable;
+    funcs->radio_rxEnable_scum_cb      = radio_rxEnable_scum;
+    funcs->radio_rxNow_cb              = radio_rxNow;
+    funcs->radio_getReceivedFrame_cb   = radio_getReceivedFrame;
+    funcs->radio_getCRCLen_cb          = radio_getCRCLen;
+    funcs->radio_calculateFrequency_cb = radio_calculateFrequency;
+    funcs->radio_getDelayTx_cb         = radio_getDelayTx;
+    funcs->radio_getDelayRx_cb         = radio_getDelayRx;
+}
+
 void radio_init(void) {
 
    // clear variables
    memset(&radio_vars,0,sizeof(radio_vars_t));
-   
+
    // change state
    radio_vars.state          = RADIOSTATE_STOPPED;
-  
+
    // configure the radio
    radio_spiWriteReg(RG_TRX_STATE, CMD_FORCE_TRX_OFF);    // turn radio off
-  
+
    radio_spiWriteReg(RG_IRQ_MASK,
                      (AT_IRQ_RX_START| AT_IRQ_TRX_END));  // tell radio to fire interrupt on TRX_END and RX_START
    radio_spiReadReg(RG_IRQ_STATUS);                       // deassert the interrupt pin in case is high
@@ -63,9 +94,9 @@ void radio_init(void) {
    radio_spiWriteReg(RG_PHY_TX_PWR, (0x3<<6)|INIT_TX_POWER);
 
    //busy wait until radio status is TRX_OFF
-  
+
    while((radio_spiReadReg(RG_TRX_STATUS) & 0x1F) != TRX_OFF);
-   
+
    // change state
    radio_vars.state          = RADIOSTATE_RFOFF;
 }
@@ -86,13 +117,13 @@ void radio_reset(void) {
 
 //===== RF admin
 
-void radio_setFrequency(uint8_t frequency) {
+void radio_setFrequency(uint16_t channel_spacing, uint32_t frequency_0, uint16_t channel) {
    // change state
    radio_vars.state = RADIOSTATE_SETTING_FREQUENCY;
-   
+
    // configure the radio to the right frequecy
-   radio_spiWriteReg(RG_PHY_CC_CCA,0x20+frequency);
-   
+   radio_spiWriteReg(RG_PHY_CC_CCA,0x20+channel);
+
    // change state
    radio_vars.state = RADIOSTATE_FREQUENCY_SET;
 }
@@ -110,11 +141,11 @@ void radio_rfOff(void) {
    radio_spiWriteReg(RG_TRX_STATE, CMD_FORCE_TRX_OFF);
    //radio_spiWriteReg(RG_TRX_STATE, CMD_TRX_OFF);
    while((radio_spiReadReg(RG_TRX_STATUS) & 0x1F) != TRX_OFF); // busy wait until done
-   
+
    // wiggle debug pin
    debugpins_radio_clr();
    leds_radio_off();
-   
+
    // change state
    radio_vars.state = RADIOSTATE_RFOFF;
 }
@@ -124,10 +155,10 @@ void radio_rfOff(void) {
 void radio_loadPacket(uint8_t* packet, uint16_t len) {
    // change state
    radio_vars.state = RADIOSTATE_LOADING_PACKET;
-   
+
    // load packet in TXFIFO
    radio_spiWriteTxFifo(packet,len);
-   
+
    // change state
    radio_vars.state = RADIOSTATE_PACKET_LOADED;
 }
@@ -135,15 +166,15 @@ void radio_loadPacket(uint8_t* packet, uint16_t len) {
 void radio_txEnable(void) {
    // change state
    radio_vars.state = RADIOSTATE_ENABLING_TX;
-   
+
    // wiggle debug pin
    debugpins_radio_set();
    leds_radio_on();
-   
+
    // turn on radio's PLL
    radio_spiWriteReg(RG_TRX_STATE, CMD_PLL_ON);
    while((radio_spiReadReg(RG_TRX_STATUS) & 0x1F) != PLL_ON); // busy wait until done
-   
+
    // change state
    radio_vars.state = RADIOSTATE_TX_ENABLED;
 }
@@ -152,11 +183,11 @@ void radio_txNow(void) {
    PORT_TIMER_WIDTH val;
    // change state
    radio_vars.state = RADIOSTATE_TRANSMITTING;
-   
+
    // send packet by pulsing the SLP_TR_CNTL pin
    PORT_PIN_RADIO_SLP_TR_CNTL_HIGH();
    PORT_PIN_RADIO_SLP_TR_CNTL_LOW();
-   
+
    // The AT86RF231 does not generate an interrupt when the radio transmits the
    // SFD, which messes up the MAC state machine. The danger is that, if we leave
    // this funtion like this, any radio watchdog timer will expire.
@@ -176,17 +207,17 @@ void radio_txNow(void) {
 void radio_rxEnable(void) {
    // change state
    radio_vars.state = RADIOSTATE_ENABLING_RX;
-   
+
    // put radio in reception mode
    radio_spiWriteReg(RG_TRX_STATE, CMD_RX_ON);
-   
+
    // wiggle debug pin
    debugpins_radio_set();
    leds_radio_on();
-   
+
    // busy wait until radio really listening
    while((radio_spiReadReg(RG_TRX_STATUS) & 0x1F) != RX_ON);
-   
+
    // change state
    radio_vars.state = RADIOSTATE_LISTENING;
 }
@@ -195,24 +226,25 @@ void radio_rxNow(void) {
    // nothing to do
 }
 
-void radio_getReceivedFrame(uint8_t* pBufRead,
-                            uint8_t* pLenRead,
-                            uint8_t  maxBufLen,
-                             int8_t* pRssi,
-                            uint8_t* pLqi,
-                               bool* pCrc) {
+void radio_getReceivedFrame(uint8_t*  pBufRead,
+                            uint16_t* pLenRead,
+                            uint16_t  maxBufLen,
+                             int8_t*  pRssi,
+                            uint8_t*  pLqi,
+                               bool*  pCrc,
+                            uint8_t*  mcs) {
    uint8_t temp_reg_value;
-   
+
    //===== crc
    temp_reg_value  = radio_spiReadReg(RG_PHY_RSSI);
    *pCrc           = (temp_reg_value & 0x80)>>7;  // msb is whether packet passed CRC
-   
+
    //===== rssi
    // as per section 8.4.3 of the AT86RF231, the RSSI is calculate as:
    // -91 + ED [dBm]
    temp_reg_value  = radio_spiReadReg(RG_PHY_ED_LEVEL);
    *pRssi          = -91 + temp_reg_value;
-   
+
    //===== packet
    radio_spiReadRxFifo(pBufRead,
                        pLenRead,
@@ -249,10 +281,10 @@ uint8_t radio_spiReadRadioInfo(void) {
 void radio_spiWriteReg(uint8_t reg_addr, uint8_t reg_setting) {
    uint8_t spi_tx_buffer[2];
    uint8_t spi_rx_buffer[2];
-   
+
    spi_tx_buffer[0] = (0xC0 | reg_addr);        // turn addess in a 'reg write' address
    spi_tx_buffer[1] = reg_setting;
-   
+
    spi_txrx(spi_tx_buffer,
             sizeof(spi_tx_buffer),
             SPI_BUFFER,
@@ -265,10 +297,10 @@ void radio_spiWriteReg(uint8_t reg_addr, uint8_t reg_setting) {
 uint8_t radio_spiReadReg(uint8_t reg_addr) {
    uint8_t spi_tx_buffer[2];
    uint8_t spi_rx_buffer[2];
-   
+
    spi_tx_buffer[0] = (0x80 | reg_addr);        // turn addess in a 'reg read' address
    spi_tx_buffer[1] = 0x00;                     // send a no_operation command just to get the reg value
-   
+
    spi_txrx(spi_tx_buffer,
             sizeof(spi_tx_buffer),
             SPI_BUFFER,
@@ -276,7 +308,7 @@ uint8_t radio_spiReadReg(uint8_t reg_addr) {
             sizeof(spi_rx_buffer),
             SPI_FIRST,
             SPI_LAST);
-   
+
 
   return spi_rx_buffer[1];
 }
@@ -286,10 +318,10 @@ uint8_t radio_spiReadReg(uint8_t reg_addr) {
 void radio_spiWriteTxFifo(uint8_t* bufToWrite, uint8_t  lenToWrite) {
    uint8_t spi_tx_buffer[2];
    uint8_t spi_rx_buffer[1+1+127];               // 1B SPI address, 1B length, max. 127B data
-   
+
    spi_tx_buffer[0] = 0x60;                      // SPI destination address for TXFIFO
    spi_tx_buffer[1] = lenToWrite;                // length byte
-   
+
    spi_txrx(spi_tx_buffer,
             sizeof(spi_tx_buffer),
             SPI_BUFFER,
@@ -297,7 +329,7 @@ void radio_spiWriteTxFifo(uint8_t* bufToWrite, uint8_t  lenToWrite) {
             sizeof(spi_rx_buffer),
             SPI_FIRST,
             SPI_NOTLAST);
-   
+
    spi_txrx(bufToWrite,
             lenToWrite,
             SPI_BUFFER,
@@ -310,7 +342,7 @@ void radio_spiWriteTxFifo(uint8_t* bufToWrite, uint8_t  lenToWrite) {
 
 
 void radio_spiReadRxFifo(uint8_t* pBufRead,
-                         uint8_t* pLenRead,
+                         uint16_t* pLenRead,
                          uint8_t  maxBufLen,
                          uint8_t* pLqi) {
    // when reading the packet over SPI from the RX buffer, you get the following:
@@ -321,9 +353,9 @@ void radio_spiReadRxFifo(uint8_t* pBufRead,
    // - *[1B]     LQI
    uint8_t spi_tx_buffer[125];
    uint8_t spi_rx_buffer[3];
-   
+
    spi_tx_buffer[0] = 0x20;
-   
+
    // 2 first bytes
    spi_txrx(spi_tx_buffer,
             2,
@@ -332,12 +364,12 @@ void radio_spiReadRxFifo(uint8_t* pBufRead,
             sizeof(spi_rx_buffer),
             SPI_FIRST,
             SPI_NOTLAST);
-   
+
    *pLenRead  = spi_rx_buffer[1];
-   
+
    if (*pLenRead>2 && *pLenRead<=127) {
       // valid length
-      
+
       //read packet
       spi_txrx(spi_tx_buffer,
                *pLenRead,
@@ -346,7 +378,7 @@ void radio_spiReadRxFifo(uint8_t* pBufRead,
                125,
                SPI_NOTFIRST,
                SPI_NOTLAST);
-      
+
       // CRC (2B) and LQI (1B)
       spi_txrx(spi_tx_buffer,
                2+1,
@@ -355,12 +387,12 @@ void radio_spiReadRxFifo(uint8_t* pBufRead,
                3,
                SPI_NOTFIRST,
                SPI_LAST);
-      
+
       *pLqi   = spi_rx_buffer[2];
-      
+
    } else {
       // invalid length
-      
+
       // read a just byte to close spi
       spi_txrx(spi_tx_buffer,
                1,
@@ -372,6 +404,37 @@ void radio_spiReadRxFifo(uint8_t* pBufRead,
    }
 }
 
+//returns the crc len for this radio
+uint8_t  radio_getCRCLen(void){
+    return LENGTH_CRC;
+}
+
+uint8_t radio_getDelayTx(void){
+    return delayTx;
+}
+
+uint8_t radio_getDelayRx(void){
+    return delayRx;
+}
+
+
+uint8_t radio_calculateFrequency(uint8_t channelOffset, uint8_t asnOffset, uint8_t numChannels, uint8_t* hopSeq, bool singleChannel){
+
+    if (singleChannel) {
+        return channelOffset; // single channel
+    } else {
+        // channel hopping enabled, use the channel depending on hopping template
+        return 11 + hopSeq[(asnOffset+channelOffset)%numChannels];
+    }
+}
+
+// not used by 2.4ghz radio
+void  radio_powerOn(void){}
+void  radio_change_modulation(registerSetting_t * mod){}
+void  radio_change_size(uint16_t* size){}
+void  radio_loadPacket_prepare(uint8_t* packet, uint8_t len){}
+void  radio_rxPacket_prepare(void){}
+void  radio_rxEnable_scum(void){}
 //=========================== callbacks =======================================
 
 //=========================== interrupt handlers ==============================
@@ -385,7 +448,7 @@ kick_scheduler_t radio_isr(void) {
 
    // reading IRQ_STATUS causes radio's IRQ pin to go low
    irq_status = radio_spiReadReg(RG_IRQ_STATUS);
-    
+
    // start of frame event
    if (irq_status & AT_IRQ_RX_START) {
       // change state
@@ -412,6 +475,6 @@ kick_scheduler_t radio_isr(void) {
          while(1);
       }
    }
-   
+
    return DO_NOT_KICK_SCHEDULER;
 }

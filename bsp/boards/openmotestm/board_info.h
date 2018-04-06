@@ -17,7 +17,7 @@ to return the board's description.
 
 //=========================== defines =========================================
 
-//TODO in case previous declaration fails in certain compilers. Remove this 
+//TODO in case previous declaration fails in certain compilers. Remove this
 //one if it works with GNU GCC
 //#define PACK_START  _Pragma("pack(1)")
 //#define PACK_END    _Pragma("pack()")
@@ -70,7 +70,15 @@ to return the board's description.
 
 #define SYNC_ACCURACY                       2     // ticks
 
+// number of radios in this board.
+#define MAX_NUM_RADIOS                      1
+
 //=========================== typedef  ========================================
+
+typedef enum {
+   RADIOTPYE_2D4GHZ          = 0,
+   RADIOTPYE_ANY             = 1
+} radioType_t;
 
 //=========================== variables =======================================
 

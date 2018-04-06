@@ -303,6 +303,7 @@
           <state>$PROJ_DIR$\..\..\..\bsp\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\boards\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\common\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\chips\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\chips\at86rf231\</state>
           <state>$PROJ_DIR$\..\..\..\kernel\</state>
@@ -680,7 +681,7 @@
         </option>
         <option>
           <name>IlinkOutputFile</name>
-          <state>02drv_sensors.out</state>
+          <state>01bsp_i2c.out</state>
         </option>
         <option>
           <name>IlinkDebugInfoEnable</name>
@@ -1910,16 +1911,34 @@
   </configuration>
   <group>
     <name>application</name>
-    <file>
-      <name>$PROJ_DIR$\..\..\common\01bsp_i2c\01bsp_i2c.c</name>
-    </file>
   </group>
   <group>
     <name>bsp</name>
     <group>
       <name>boards</name>
       <group>
-        <name>opemotestm</name>
+        <name>common</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\openaes.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\openaes.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\openccms.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\openccms.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\openradios.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\openradios.h</name>
+        </file>
+      </group>
+      <group>
+        <name>openmotestm</name>
         <group>
           <name>configure</name>
           <file>
@@ -2023,13 +2042,19 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\board_info.h</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\bsp_timer.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\cryptoengine.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\debugpins.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\eui64.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\flash.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\flash.h</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\i2c.c</name>
@@ -2047,13 +2072,13 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\nvic.h</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\radiotimer.c</name>
-        </file>
-        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\rcc.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\rcc.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\sctimer.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\spi.c</name>
@@ -2064,9 +2089,6 @@
       </group>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\board.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\debugpins.h</name>
@@ -2081,10 +2103,7 @@
         <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\sensors.h</name>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\sctimer.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\uart.h</name>
@@ -2102,12 +2121,27 @@
         </file>
       </group>
       <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\spi.h</name>
+        <name>$PROJ_DIR$\..\..\..\bsp\chips\i2c.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\chips\spi.h</name>
       </file>
     </group>
   </group>
   <group>
     <name>drivers</name>
+    <group>
+      <name>common</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.h</name>
+      </file>
+    </group>
+  </group>
+  <group>
+    <name>inc</name>
     <file>
       <name>$PROJ_DIR$\..\..\..\drivers\common\openhdlc.c</name>
     </file>
@@ -2125,12 +2159,6 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\drivers\common\openserial.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.h</name>
     </file>
   </group>
 </project>

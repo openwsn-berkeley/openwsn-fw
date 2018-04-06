@@ -302,6 +302,7 @@
           <state>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\library\inc\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\boards\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\common\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\chips\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\chips\at86rf231\</state>
