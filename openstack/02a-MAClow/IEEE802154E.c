@@ -25,7 +25,6 @@
 ieee154e_vars_t    ieee154e_vars;
 ieee154e_stats_t   ieee154e_stats;
 ieee154e_dbg_t     ieee154e_dbg;
-radio_functions_t* radio_functions;
 
 //=========================== prototypes ======================================
 
@@ -142,13 +141,13 @@ void ieee154e_init(void) {
     resetStats();
     ieee154e_stats.numDeSync                 = 0;
 
-    openradios_getFunctions(&radio_functions);
+    openradios_getFunctions(&ieee154e_vars.radio_functions);
 
     // switch all radios radio on
     for (i=0;i<MAX_NUM_RADIOS;i++){
-        radio_functions[i].radio_rfOn_cb();
-        radio_functions[i].radio_setStartFrameCb_cb(ieee154e_startOfFrame);
-        radio_functions[i].radio_setEndFrameCb_cb(ieee154e_endOfFrame);
+        ieee154e_vars.radio_functions[i].radio_rfOn_cb();
+        ieee154e_vars.radio_functions[i].radio_setStartFrameCb_cb(ieee154e_startOfFrame);
+        ieee154e_vars.radio_functions[i].radio_setEndFrameCb_cb(ieee154e_endOfFrame);
     }
 
    // set callback functions for the radio
@@ -548,9 +547,9 @@ port_INLINE void activity_synchronize_newSlot(void) {
         changeState(S_SYNCLISTEN);
 
         // turn off the radio (in case it wasn't yet)
-        radio_functions[RADIOTPYE_2D4GHZ].radio_rfOff_cb();
-        radio_functions[RADIOTPYE_2D4GHZ].radio_setStartFrameCb_cb(ieee154e_startOfFrame);
-        radio_functions[RADIOTPYE_2D4GHZ].radio_setEndFrameCb_cb(ieee154e_endOfFrame);
+        ieee154e_vars.radio_functions[RADIOTPYE_2D4GHZ].radio_rfOff_cb();
+        ieee154e_vars.radio_functions[RADIOTPYE_2D4GHZ].radio_setStartFrameCb_cb(ieee154e_startOfFrame);
+        ieee154e_vars.radio_functions[RADIOTPYE_2D4GHZ].radio_setEndFrameCb_cb(ieee154e_endOfFrame);
 
         // update record of current channel
         ieee154e_vars.channel = (openrandom_get16b()&0x0F) + 11;
@@ -559,12 +558,12 @@ port_INLINE void activity_synchronize_newSlot(void) {
 
         // configure the radio to listen to the default synchronizing channel
         //(uint16_t channel_spacing, uint32_t frequency_0, uint16_t channel);
-        radio_functions[RADIOTPYE_2D4GHZ].radio_setFrequency_cb(DEFAULT_CH_SPACING,DEFAULT_FREQUENCY_CENTER,ieee154e_vars.channel);
+        ieee154e_vars.radio_functions[RADIOTPYE_2D4GHZ].radio_setFrequency_cb(DEFAULT_CH_SPACING,DEFAULT_FREQUENCY_CENTER,ieee154e_vars.channel);
 
 
       // switch on the radio in Rx mode.
-        radio_functions[RADIOTPYE_2D4GHZ].radio_rxEnable_cb();
-        radio_functions[RADIOTPYE_2D4GHZ].radio_rxNow_cb();
+        ieee154e_vars.radio_functions[RADIOTPYE_2D4GHZ].radio_rxEnable_cb();
+        ieee154e_vars.radio_functions[RADIOTPYE_2D4GHZ].radio_rxNow_cb();
     } else {
         // I'm listening last slot
         ieee154e_stats.numTicsOn    += ieee154e_vars.slotDuration;
@@ -576,17 +575,17 @@ port_INLINE void activity_synchronize_newSlot(void) {
     // change the synchronizing channel
     if ((ieee154e_vars.state==S_SYNCLISTEN) && (ieee154e_vars.singleChannelChanged == TRUE)) {
         // turn off the radio (in case it wasn't yet)
-        radio_functions[RADIOTPYE_2D4GHZ].radio_rfOff_cb();
+        ieee154e_vars.radio_functions[RADIOTPYE_2D4GHZ].radio_rfOff_cb();
 
         // update record of current channel
         ieee154e_vars.channel = ieee154e_calculateFrequency(ieee154e_vars.singleChannel);
 
         // configure the radio to listen to the default synchronizing channel
-        radio_functions[RADIOTPYE_2D4GHZ].radio_setFrequency_cb(ieee154e_vars.ch_spacing,ieee154e_vars.frequency,ieee154e_vars.channel);
+        ieee154e_vars.radio_functions[RADIOTPYE_2D4GHZ].radio_setFrequency_cb(ieee154e_vars.ch_spacing,ieee154e_vars.frequency,ieee154e_vars.channel);
 
         // switch on the radio in Rx mode.
-        radio_functions[RADIOTPYE_2D4GHZ].radio_rxEnable_cb();
-        radio_functions[RADIOTPYE_2D4GHZ].radio_rxNow_cb();
+        ieee154e_vars.radio_functions[RADIOTPYE_2D4GHZ].radio_rxEnable_cb();
+        ieee154e_vars.radio_functions[RADIOTPYE_2D4GHZ].radio_rxNow_cb();
         ieee154e_vars.singleChannelChanged = FALSE;
     }
 
@@ -671,7 +670,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
 
       // retrieve the received data frame from the radio's Rx buffer
       ieee154e_vars.dataReceived->payload = &(ieee154e_vars.dataReceived->packet[FIRST_FRAME_BYTE]);
-      radio_functions[RADIOTPYE_2D4GHZ].radio_getReceivedFrame_cb(ieee154e_vars.dataReceived->payload,
+      ieee154e_vars.radio_functions[RADIOTPYE_2D4GHZ].radio_getReceivedFrame_cb(ieee154e_vars.dataReceived->payload,
                                    &ieee154e_vars.dataReceived->length,
                              sizeof(ieee154e_vars.dataReceived->packet),
                                    &ieee154e_vars.dataReceived->l1_rssi,
@@ -680,7 +679,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
                                    &ieee154e_vars.dataReceived->l1_mcs);
 
       // break if packet too short
-      if (ieee154e_vars.dataReceived->length<radio_functions[RADIOTPYE_2D4GHZ].radio_getCRCLen_cb() || ieee154e_vars.dataReceived->length>LENGTH_IEEE154_MAX) {
+      if (ieee154e_vars.dataReceived->length<ieee154e_vars.radio_functions[RADIOTPYE_2D4GHZ].radio_getCRCLen_cb() || ieee154e_vars.dataReceived->length>LENGTH_IEEE154_MAX) {
          // break from the do-while loop and execute abort code below
           openserial_printError(COMPONENT_IEEE802154E,ERR_INVALIDPACKETFROMRADIO,
                             (errorparameter_t)0,
@@ -689,7 +688,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
       }
 
       // toss CRC (2 last bytes)
-      packetfunctions_tossFooter(ieee154e_vars.dataReceived, radio_functions[RADIOTPYE_2D4GHZ].radio_getCRCLen_cb());
+      packetfunctions_tossFooter(ieee154e_vars.dataReceived, ieee154e_vars.radio_functions[RADIOTPYE_2D4GHZ].radio_getCRCLen_cb());
 
       // break if invalid CRC
       if (ieee154e_vars.dataReceived->l1_crc==FALSE) {
@@ -748,10 +747,14 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
       }
 
       // turn off the radio
-      radio_functions[RADIOTPYE_2D4GHZ].radio_rfOff_cb();
+      ieee154e_vars.radio_functions[RADIOTPYE_2D4GHZ].radio_rfOff_cb();
+
+      printf("after rfOff is done\n");
 
       // compute radio duty cycle
       ieee154e_vars.radioOnTics += (sctimer_readCounter()-ieee154e_vars.radioOnInit);
+
+      printf("sctimer_readCounter is donen");
 
       // toss the IEs
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,lenIE);
@@ -944,8 +947,8 @@ port_INLINE void activity_ti1ORri1(void) {
                     ieee154e_vars.radioType = schedule_getRadioType();
 
                     // get the delayTx and delayRx for used radio
-                    ieee154e_vars.delayTx   = radio_functions[ieee154e_vars.radioType].radio_getDelayTx_cb();
-                    ieee154e_vars.delayRx   = radio_functions[ieee154e_vars.radioType].radio_getDelayRx_cb();
+                    ieee154e_vars.delayTx   = ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_getDelayTx_cb();
+                    ieee154e_vars.delayRx   = ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_getDelayRx_cb();
 
                     // freq according to the used radio . calculate the frequency to transmit on
                     ieee154e_vars.channel = ieee154e_calculateFrequency(schedule_getChannelOffset());
@@ -1069,8 +1072,8 @@ port_INLINE void activity_ti1ORri1(void) {
             ieee154e_vars.radioType = schedule_getRadioType();
 
             // get the delayTx and delayRx for used radio
-            ieee154e_vars.delayTx   = radio_functions[ieee154e_vars.radioType].radio_getDelayTx_cb();
-            ieee154e_vars.delayRx   = radio_functions[ieee154e_vars.radioType].radio_getDelayRx_cb();
+            ieee154e_vars.delayTx   = ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_getDelayTx_cb();
+            ieee154e_vars.delayRx   = ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_getDelayRx_cb();
 
             // freq according to the used radio . calculate the frequency to transmit on
             ieee154e_vars.channel = ieee154e_calculateFrequency(schedule_getChannelOffset());
@@ -1193,17 +1196,17 @@ port_INLINE void activity_ti2(void) {
     }
 
     // add CRC bytes only to the local copy as we end up here for each retransmission
-    packetfunctions_reserveFooterSize(&ieee154e_vars.localCopyForTransmission, radio_functions[ieee154e_vars.radioType].radio_getCRCLen_cb());
+    packetfunctions_reserveFooterSize(&ieee154e_vars.localCopyForTransmission, ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_getCRCLen_cb());
 
     // configure the radio for that frequency
-    radio_functions[ieee154e_vars.radioType].radio_setFrequency_cb(ieee154e_vars.ch_spacing,ieee154e_vars.frequency,ieee154e_vars.channel);
+    ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_setFrequency_cb(ieee154e_vars.ch_spacing,ieee154e_vars.frequency,ieee154e_vars.channel);
 
     // load the packet in the radio's Tx buffer
-    radio_functions[ieee154e_vars.radioType].radio_loadPacket_cb(ieee154e_vars.localCopyForTransmission.payload,
+    ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_loadPacket_cb(ieee154e_vars.localCopyForTransmission.payload,
                      ieee154e_vars.localCopyForTransmission.length);
 #endif
     // enable the radio in Tx mode. This does not send the packet.
-    radio_functions[ieee154e_vars.radioType].radio_txEnable_cb();
+    ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_txEnable_cb();
 
     ieee154e_vars.radioOnInit=sctimer_readCounter();
     ieee154e_vars.radioOnThisSlot=TRUE;
@@ -1236,7 +1239,7 @@ port_INLINE void activity_ti3(void) {
     );
 
     // give the 'go' to transmit
-    radio_functions[ieee154e_vars.radioType].radio_txNow_cb();
+    ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_txNow_cb();
 #endif
 }
 
@@ -1316,7 +1319,7 @@ port_INLINE void activity_ti5(PORT_TIMER_WIDTH capturedTime) {
     // radiotimer_cancel();
 #endif
     // turn off the radio
-    radio_functions[ieee154e_vars.radioType].radio_rfOff_cb();
+    ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_rfOff_cb();
     ieee154e_vars.radioOnTics+=(sctimer_readCounter()-ieee154e_vars.radioOnInit);
 
     // record the captured time
@@ -1383,9 +1386,9 @@ port_INLINE void activity_ti6(void) {
     );
 
     // configure the radio for that frequency
-    radio_functions[ieee154e_vars.radioType].radio_setFrequency_cb(ieee154e_vars.ch_spacing,ieee154e_vars.frequency,ieee154e_vars.channel);
+    ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_setFrequency_cb(ieee154e_vars.ch_spacing,ieee154e_vars.frequency,ieee154e_vars.channel);
 
-    radio_functions[ieee154e_vars.radioType].radio_rxEnable_cb();
+    ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_rxEnable_cb();
 #endif
     //caputre init of radio for duty cycle calculation
     ieee154e_vars.radioOnInit=sctimer_readCounter();
@@ -1410,7 +1413,7 @@ port_INLINE void activity_ti7(void) {
    changeState(S_RXACKLISTEN);
 
    // start listening
-   radio_functions[ieee154e_vars.radioType].radio_rxNow_cb();
+   ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_rxNow_cb();
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
    // arm tt7
     sctimer_scheduleActionIn(ACTION_SET_TIMEOUT,ieee154e_vars.startOfSlotReference+DURATION_tt7);
@@ -1513,7 +1516,7 @@ port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
     // radiotimer_cancel();
 #endif
     // turn off the radio
-    radio_functions[ieee154e_vars.radioType].radio_rfOff_cb();
+    ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_rfOff_cb();
     //compute tics radio on.
     ieee154e_vars.radioOnTics+=(sctimer_readCounter()-ieee154e_vars.radioOnInit);
 
@@ -1549,7 +1552,7 @@ port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
 
         // retrieve the received ack frame from the radio's Rx buffer
         ieee154e_vars.ackReceived->payload = &(ieee154e_vars.ackReceived->packet[FIRST_FRAME_BYTE]);
-        radio_functions[ieee154e_vars.radioType].radio_getReceivedFrame_cb(ieee154e_vars.ackReceived->payload,
+        ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_getReceivedFrame_cb(ieee154e_vars.ackReceived->payload,
                                    &ieee154e_vars.ackReceived->length,
                              sizeof(ieee154e_vars.ackReceived->packet),
                                    &ieee154e_vars.ackReceived->l1_rssi,
@@ -1558,7 +1561,7 @@ port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
                                    &ieee154e_vars.dataReceived->l1_mcs);
 
         // break if wrong length
-        if (ieee154e_vars.ackReceived->length<radio_functions[ieee154e_vars.radioType].radio_getCRCLen_cb()|| ieee154e_vars.ackReceived->length>LENGTH_IEEE154_MAX) {
+        if (ieee154e_vars.ackReceived->length<ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_getCRCLen_cb()|| ieee154e_vars.ackReceived->length>LENGTH_IEEE154_MAX) {
             // break from the do-while loop and execute the clean-up code below
             openserial_printError(COMPONENT_IEEE802154E,ERR_INVALIDPACKETFROMRADIO,
                             (errorparameter_t)1,
@@ -1568,7 +1571,7 @@ port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
         }
 
         // toss CRC (2 last bytes)
-        packetfunctions_tossFooter(ieee154e_vars.ackReceived, radio_functions[ieee154e_vars.radioType].radio_getCRCLen_cb());
+        packetfunctions_tossFooter(ieee154e_vars.ackReceived, ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_getCRCLen_cb());
 
         // break if invalid CRC
         if (ieee154e_vars.ackReceived->l1_crc==FALSE) {
@@ -1657,9 +1660,9 @@ port_INLINE void activity_ri2(void) {
     );
 
     // configure the radio for that frequency
-    radio_functions[ieee154e_vars.radioType].radio_setFrequency_cb(ieee154e_vars.ch_spacing,ieee154e_vars.frequency,ieee154e_vars.channel);
+    ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_setFrequency_cb(ieee154e_vars.ch_spacing,ieee154e_vars.frequency,ieee154e_vars.channel);
 
-    radio_functions[ieee154e_vars.radioType].radio_rxEnable_cb();
+    ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_rxEnable_cb();
 #endif
     ieee154e_vars.radioOnInit=sctimer_readCounter();
     ieee154e_vars.radioOnThisSlot=TRUE;
@@ -1683,7 +1686,7 @@ port_INLINE void activity_ri3(void) {
     changeState(S_RXDATALISTEN);
 
     // give the 'go' to receive
-    radio_functions[ieee154e_vars.radioType].radio_rxNow_cb();
+    ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_rxNow_cb();
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
     // arm rt3
     sctimer_scheduleActionIn(ACTION_SET_TIMEOUT,ieee154e_vars.startOfSlotReference+DURATION_rt3);
@@ -1774,7 +1777,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
     // radiotimer_cancel();
 #endif
     // turn off the radio
-    radio_functions[ieee154e_vars.radioType].radio_rfOff_cb();
+    ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_rfOff_cb();
     ieee154e_vars.radioOnTics+=sctimer_readCounter()-ieee154e_vars.radioOnInit;
     // get a buffer to put the (received) data in
     ieee154e_vars.dataReceived = openqueue_getFreePacketBuffer(COMPONENT_IEEE802154E);
@@ -1806,7 +1809,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
 
         // retrieve the received data frame from the radio's Rx buffer
         ieee154e_vars.dataReceived->payload = &(ieee154e_vars.dataReceived->packet[FIRST_FRAME_BYTE]);
-        radio_functions[ieee154e_vars.radioType].radio_getReceivedFrame_cb(ieee154e_vars.dataReceived->payload,
+        ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_getReceivedFrame_cb(ieee154e_vars.dataReceived->payload,
             &ieee154e_vars.dataReceived->length,
             sizeof(ieee154e_vars.dataReceived->packet),
             &ieee154e_vars.dataReceived->l1_rssi,
@@ -1816,7 +1819,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
         );
 
         // break if wrong length
-        if (ieee154e_vars.dataReceived->length<radio_functions[ieee154e_vars.radioType].radio_getCRCLen_cb() || ieee154e_vars.dataReceived->length>LENGTH_IEEE154_MAX ) {
+        if (ieee154e_vars.dataReceived->length<ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_getCRCLen_cb() || ieee154e_vars.dataReceived->length>LENGTH_IEEE154_MAX ) {
             // jump to the error code below this do-while loop
             openserial_printError(COMPONENT_IEEE802154E,ERR_INVALIDPACKETFROMRADIO,
                                 (errorparameter_t)2,
@@ -1825,7 +1828,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
         }
 
         // toss CRC (2 last bytes)
-        packetfunctions_tossFooter(ieee154e_vars.dataReceived, radio_functions[ieee154e_vars.radioType].radio_getCRCLen_cb());
+        packetfunctions_tossFooter(ieee154e_vars.dataReceived, ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_getCRCLen_cb());
 
         // if CRC doesn't check, stop
         if (ieee154e_vars.dataReceived->l1_crc==FALSE) {
@@ -2083,17 +2086,17 @@ port_INLINE void activity_ri6(void) {
         }
     }
     // space for byte CRC
-    packetfunctions_reserveFooterSize(ieee154e_vars.ackToSend,radio_functions[ieee154e_vars.radioType].radio_getCRCLen_cb());
+    packetfunctions_reserveFooterSize(ieee154e_vars.ackToSend,ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_getCRCLen_cb());
 
     // configure the radio for that frequency
-    radio_functions[ieee154e_vars.radioType].radio_setFrequency_cb(ieee154e_vars.ch_spacing,ieee154e_vars.frequency,ieee154e_vars.channel);
+    ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_setFrequency_cb(ieee154e_vars.ch_spacing,ieee154e_vars.frequency,ieee154e_vars.channel);
 
     // load the packet in the radio's Tx buffer
-    radio_functions[ieee154e_vars.radioType].radio_loadPacket_cb(ieee154e_vars.ackToSend->payload,
+    ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_loadPacket_cb(ieee154e_vars.ackToSend->payload,
                     ieee154e_vars.ackToSend->length);
 #endif
     // enable the radio in Tx mode. This does not send that packet.
-    radio_functions[ieee154e_vars.radioType].radio_txEnable_cb();
+    ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_txEnable_cb();
     ieee154e_vars.radioOnInit=sctimer_readCounter();
     ieee154e_vars.radioOnThisSlot=TRUE;
     // change state
@@ -2128,7 +2131,7 @@ port_INLINE void activity_ri7(void) {
     );
 
     // give the 'go' to transmit
-    radio_functions[ieee154e_vars.radioType].radio_txNow_cb();
+    ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_txNow_cb();
 #endif
 }
 
@@ -2826,10 +2829,10 @@ different channel offsets in the same slot.
 */
 port_INLINE uint8_t ieee154e_calculateFrequency(uint8_t channelOffset) {
     if (ieee154e_vars.singleChannel >= 11 && ieee154e_vars.singleChannel <= 26 ) {
-        return radio_functions[ieee154e_vars.radioType].radio_calculateFrequency_cb(ieee154e_vars.singleChannel,ieee154e_vars.asnOffset, NUM_CHANNELS,  ieee154e_vars.chTemplate, TRUE); // single channel
+        return ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_calculateFrequency_cb(ieee154e_vars.singleChannel,ieee154e_vars.asnOffset, NUM_CHANNELS,  ieee154e_vars.chTemplate, TRUE); // single channel
     } else {
         // channel hopping enabled, use the channel depending on hopping template
-        return radio_functions[ieee154e_vars.radioType].radio_calculateFrequency_cb(channelOffset,ieee154e_vars.asnOffset, NUM_CHANNELS,  ieee154e_vars.chTemplate, FALSE);
+        return ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_calculateFrequency_cb(channelOffset,ieee154e_vars.asnOffset, NUM_CHANNELS,  ieee154e_vars.chTemplate, FALSE);
     }
 }
 
@@ -2896,7 +2899,7 @@ will do that for you, but assume that something went wrong.
 void endSlot(void) {
 
     // turn off the radio
-    radio_functions[ieee154e_vars.radioType].radio_rfOff_cb();
+    ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_rfOff_cb();
 
     // compute the duty cycle if radio has been turned on
     if (ieee154e_vars.radioOnThisSlot==TRUE){

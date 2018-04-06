@@ -12,6 +12,7 @@
 #include "board.h"
 #include "opentimers.h"
 #include "schedule.h"
+#include "openradios.h"
 
 //=========================== debug define ====================================
 
@@ -272,6 +273,8 @@ typedef struct {
     uint32_t                  startOfSlotReference;    // the time refer to the beginning of slot
     uint8_t                   delayTx;                 // radio specific tx delay
     uint8_t                   delayRx;                 // radio specific rx delay
+
+   radio_functions_t*        radio_functions;
 } ieee154e_vars_t;
 
 BEGIN_PACK

@@ -212,7 +212,6 @@ struct OpenMote {
    ieee154e_vars_t      ieee154e_vars;
    ieee154e_stats_t     ieee154e_stats;
    ieee154e_dbg_t       ieee154e_dbg;
-   radio_functions_t*   radio_functions;
    // cross-layer
    idmanager_vars_t     idmanager_vars;
    openqueue_vars_t     openqueue_vars;
