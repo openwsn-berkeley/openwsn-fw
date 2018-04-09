@@ -30,7 +30,8 @@
 #define IANA_6TOP_CMD_RELOCATE      0x03 // CMD_RELOCATE     | relocate one or more cells  
 #define IANA_6TOP_CMD_COUNT         0x04 // CMD_COUNT        | count scheduled cells     
 #define IANA_6TOP_CMD_LIST          0x05 // CMD_LIST         | list the scheduled cells  
-#define IANA_6TOP_CMD_CLEAR         0x06 // CMD_CLEAR        | clear all cells
+#define IANA_6TOP_CMD_SIGNAL        0x06 // CMD_SIGNAL       | signal command
+#define IANA_6TOP_CMD_CLEAR         0x07 // CMD_CLEAR        | clear all cells
 // 6P return code
 #define IANA_6TOP_RC_SUCCESS        0x00 // RC_SUCCESS       | operation succeeded
 #define IANA_6TOP_RC_EOL            0x01 // RC_EOL           | end of list
