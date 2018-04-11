@@ -128,8 +128,7 @@ void    leds_increment(void) {
    } else {
       leds_on += 1;
       if ((leds_on & 0x08)!=0) {
-         leds_on &= ~0x08;
-         leds_on |=  0x01;                       // handle overflow
+         leds_on &= ~0x08;                       // handle overflow
       }
    }
    // apply updated LED state
