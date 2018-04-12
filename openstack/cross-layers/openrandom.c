@@ -37,7 +37,7 @@ uint16_t openrandom_getRandomizePeriod(uint16_t period, uint16_t range){
         // randomly choose a new period from [period/2 ... period+period/2]
         new_period = period/2+openrandom_get16b()%period;
     } else {
-        new_period = period-range/2+openrandom_get16b()%period;
+        new_period = period-range/2+openrandom_get16b()%range;
     }
     return new_period;
 }
