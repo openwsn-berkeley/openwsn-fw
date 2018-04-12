@@ -42,11 +42,11 @@ static const uint8_t ebIEsBytestream[] = {
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to successfully synchronize
 #define US_PER_TICK                 30 // number of us per 32kHz clock tick
-#define EB_PORTION                   6 // The portion of minimal cells that used for sending EB.
+#define EB_PERIOD                 2000 // in miliseconds: the period of sending EB
 #define MAXKAPERIOD               1000 // in slots: 2000@15ms per slot -> ~30 seconds. Max value used by adaptive synchronization.
 #define DESYNCTIMEOUT             2333 // in slots: 2333@15ms per slot -> ~35 seconds. A larger DESYNCTIMEOUT is needed if using a larger KATIMEOUT.
 #define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"
-#define LENGTH_IEEE154_MAX         128 // max length of a valid radio packet  
+#define LENGTH_IEEE154_MAX         128 // max length of a valid radio packet
 #define DUTY_CYCLE_WINDOW_LIMIT    (0xFFFFFFFF>>1) // limit of the dutycycle window
 
 //15.4e information elements related
@@ -158,12 +158,13 @@ typedef enum {
 //    - duration_in_seconds = ticks / 32768
 enum ieee154e_atomicdurations_enum {
    // time-slot related
-#ifdef SLOTDURATION_10MS
+#if SLOTDURATION==10
    TsTxOffset                =   70,                  //  2120us
    TsLongGT                  =   36,                  //  1100us
    TsTxAckDelay              =   33,                  //  1000us
    TsShortGT                 =    9,                  //   500us, The standardlized value for this is 400/2=200us(7ticks). Currectly 7 doesn't work for short packet, change it back to 7 when found the problem.
-#else
+#endif
+#if SLOTDURATION==15
    TsTxOffset                =  131,                  //  4000us
    TsLongGT                  =   43,                  //  1300us
    TsTxAckDelay              =  151,                  //  4606us
@@ -193,7 +194,7 @@ enum ieee154e_linkOption_enum {
    FLAG_TX_S                 = 0,
    FLAG_RX_S                 = 1,
    FLAG_SHARED_S             = 2,
-   FLAG_TIMEKEEPING_S        = 3,   
+   FLAG_TIMEKEEPING_S        = 3,
 };
 
 // FSM timer durations (combinations of atomic durations)
@@ -251,19 +252,19 @@ typedef struct {
    // template ID
    uint8_t                   tsTemplateId;            // timeslot template id
    uint8_t                   chTemplateId;            // channel hopping tempalte id
-   
+
    PORT_TIMER_WIDTH          radioOnInit;             // when within the slot the radio turns on
    PORT_TIMER_WIDTH          radioOnTics;             // how many tics within the slot the radio is on
    bool                      radioOnThisSlot;         // to control if the radio has been turned on in a slot.
-   
+
    //control
    bool                      isAckEnabled;            // whether reply for ack, used for synchronization test
    bool                      isSecurityEnabled;       // whether security is applied
    // time correction
    int16_t                   timeCorrection;          // store the timeCorrection, prepend and retrieve it inside of frame header
-   
+
    uint16_t                  slotDuration;            // duration of slot
-   opentimers_id_t           timerId;                 // id of timer used for implementing TSCH slot FSM 
+   opentimers_id_t           timerId;                 // id of timer used for implementing TSCH slot FSM
    uint32_t                  startOfSlotReference;    // the time refer to the beginning of slot
 } ieee154e_vars_t;
 

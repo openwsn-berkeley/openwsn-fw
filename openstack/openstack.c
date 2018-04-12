@@ -45,10 +45,10 @@
 //=========================== private =========================================
 
 void openstack_init(void) {
-   
+
    //===== drivers
    openserial_init();
-   
+
    //===== stack
    //-- cross-layer
    idmanager_init();    // call first since initializes EUI64 and isDAGroot
@@ -73,10 +73,10 @@ void openstack_init(void) {
    icmpv6rpl_init();
    //-- 04-TRAN
    openudp_init();
-   
+
    //===== applications
    openapps_init();
-   
+
    openserial_printInfo(
       COMPONENT_OPENWSN,ERR_BOOTED,
       (errorparameter_t)0,

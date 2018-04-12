@@ -131,11 +131,11 @@ enum {
    //MAClow
    COMPONENT_IEEE802154                = 0x08,
    COMPONENT_IEEE802154E               = 0x09,
-   
+
    // all components with higher component id than COMPONENT_IEEE802154E
-   // won't be able to get free packets from the queue 
+   // won't be able to get free packets from the queue
    // when the mote is not synch
-   
+
    //MAClow<->MAChigh ("virtual components")
    COMPONENT_SIXTOP_TO_IEEE802154E     = 0x0a,
    COMPONENT_IEEE802154E_TO_SIXTOP     = 0x0b,
@@ -189,7 +189,7 @@ enum {
    ERR_RCVD_ECHO_REPLY                 = 0x02, // received an echo reply
    ERR_GETDATA_ASKS_TOO_FEW_BYTES      = 0x03, // getData asks for too few bytes, maxNumBytes={0}, fill level={1}
    ERR_INPUT_BUFFER_OVERFLOW           = 0x04, // the input buffer has overflown
-   ERR_COMMAND_NOT_ALLOWED             = 0x05, // the command is not allowed, command = {0} 
+   ERR_COMMAND_NOT_ALLOWED             = 0x05, // the command is not allowed, command = {0}
    // l4
    ERR_WRONG_TRAN_PROTOCOL             = 0x06, // unknown transport protocol {0} (code location {1})
    ERR_WRONG_TCP_STATE                 = 0x07, // wrong TCP state {0} (code location {1})
@@ -322,8 +322,8 @@ typedef struct {
    uint8_t*      l4_payload;                                    // pointer to the start of the payload of l4 (used for retransmits)
    uint8_t       l4_length;                                     // length of the payload of l4 (used for retransmits)
    //l3
-   open_addr_t   l3_destinationAdd;                             // 128b IPv6 destination (down stack) 
-   open_addr_t   l3_sourceAdd;                                  // 128b IPv6 source address 
+   open_addr_t   l3_destinationAdd;                             // 128b IPv6 destination (down stack)
+   open_addr_t   l3_sourceAdd;                                  // 128b IPv6 source address
    //l2
    owerror_t     l2_sendDoneError;                              // outcome of trying to send this packet
    open_addr_t   l2_nextORpreviousHop;                          // 64b IEEE802.15.4 next (down stack) or previous (up) hop address
