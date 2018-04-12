@@ -17,7 +17,7 @@
 
 The superframe reappears over time and can be arbitrarily long.
 */
-#define SLOTFRAME_LENGTH    101 //should be 101
+#define SLOTFRAME_LENGTH    11 //should be 101
 
 //draft-ietf-6tisch-minimal-06
 #define SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS                      1
@@ -29,17 +29,17 @@ The superframe reappears over time and can be arbitrarily long.
 #define NUMSERIALRX          3
 
 /*
-  NUMSLOTSOFF is the max number of cells that the mote can add into schedule, 
-  besides 6TISCH_ACTIVE_CELLS and NUMSERIALRX Cell. Initially those cells are 
+  NUMSLOTSOFF is the max number of cells that the mote can add into schedule,
+  besides 6TISCH_ACTIVE_CELLS and NUMSERIALRX Cell. Initially those cells are
   off. The value of NUMSLOTSOFF can be changed but the value should satisfy:
- 
-        MAXACTIVESLOTS < SLOTFRAME_LENGTH 
-        
-  This would make sure number of slots are available (SLOTFRAME_LENGTH-MAXACTIVESLOTS) 
+
+        MAXACTIVESLOTS < SLOTFRAME_LENGTH
+
+  This would make sure number of slots are available (SLOTFRAME_LENGTH-MAXACTIVESLOTS)
   for serial port to transmit data to dagroot.
 */
 
-#define NUMSLOTSOFF          30
+#define NUMSLOTSOFF          10
 
 /**
 \brief Maximum number of active slots in a superframe.
@@ -168,7 +168,7 @@ owerror_t          schedule_addActiveSlot(
 );
 
 void               schedule_getSlotInfo(
-   slotOffset_t         slotOffset,                      
+   slotOffset_t         slotOffset,
    open_addr_t*         neighbor,
    slotinfo_element_t*  info
 );
@@ -207,14 +207,14 @@ void               schedule_indicateTx(
 bool               schedule_getOneCellAfterOffset(
     uint8_t metadata,
     uint8_t offset,
-    open_addr_t* neighbor, 
-    uint8_t cellOptions, 
-    uint16_t* slotoffset, 
+    open_addr_t* neighbor,
+    uint8_t cellOptions,
+    uint16_t* slotoffset,
     uint16_t* channeloffset
 );
 /**
 \}
 \}
 */
-          
+
 #endif
