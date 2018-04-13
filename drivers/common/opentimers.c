@@ -369,7 +369,9 @@ void opentimers_timer_callback(void){
                     tempLastTimeout = opentimers_vars.timersBuf[i].currentCompareValue;
                 }
             }
-        }
+        } else if (i==(MAX_NUM_TIMERS-1)) {
+			opentimers_vars.running = FALSE;
+		}
     }
     
     // update lastTimeout
@@ -464,9 +466,10 @@ void opentimers_timer_callback(void){
     }
     
     // 4. reschedule the timer
-    opentimers_vars.currentTimeout = opentimers_vars.timersBuf[idToSchedule].currentCompareValue;
-    opentimers_vars.lastCompare[opentimers_vars.index] = opentimers_vars.currentTimeout;
-    opentimers_vars.index = (opentimers_vars.index+1)&0x0F;
-    sctimer_setCompare(opentimers_vars.currentTimeout);
-    opentimers_vars.running        = TRUE;
+	if (TRUE==opentimers_vars.running){
+		opentimers_vars.currentTimeout = opentimers_vars.timersBuf[idToSchedule].currentCompareValue;
+		opentimers_vars.lastCompare[opentimers_vars.index] = opentimers_vars.currentTimeout;
+		opentimers_vars.index = (opentimers_vars.index + 1) & 0x0F;
+		sctimer_setCompare(opentimers_vars.currentTimeout);
+	}
 }
