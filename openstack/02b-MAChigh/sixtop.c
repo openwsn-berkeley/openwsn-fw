@@ -104,16 +104,15 @@ void sixtop_init(void) {
     sixtop_vars.dsn                = 0;
     sixtop_vars.mgtTaskCounter     = 0;
     sixtop_vars.kaPeriod           = MAXKAPERIOD;
-    sixtop_vars.ebPeriod           = EB_PERIOD;
     sixtop_vars.isResponseEnabled  = TRUE;
     sixtop_vars.six2six_state      = SIX_STATE_IDLE;
 
     sixtop_vars.ebSendingTimerId   = opentimers_create();
     opentimers_scheduleIn(
         sixtop_vars.ebSendingTimerId,
-        openrandom_getRandomizePeriod(sixtop_vars.ebPeriod, NUM_CHANNELS*SLOTFRAME_LENGTH*SLOTDURATION),
+        SLOTFRAME_LENGTH*SLOTDURATION,
         TIME_MS,
-        TIMER_ONESHOT,
+        TIMER_PERIODIC,
         sixtop_sendingEb_timer_cb
     );
 
@@ -631,14 +630,6 @@ owerror_t sixtop_send_internal(
 // timer interrupt callbacks
 void sixtop_sendingEb_timer_cb(opentimers_id_t id){
     scheduler_push_task(timer_sixtop_sendEb_fired,TASKPRIO_SIXTOP);
-    // update the period
-    opentimers_scheduleIn(
-        sixtop_vars.ebSendingTimerId,
-        openrandom_getRandomizePeriod(sixtop_vars.ebPeriod, NUM_CHANNELS*SLOTFRAME_LENGTH*SLOTDURATION),
-        TIME_MS,
-        TIMER_ONESHOT,
-        sixtop_sendingEb_timer_cb
-    );
 }
 
 void sixtop_maintenance_timer_cb(opentimers_id_t id) {
@@ -652,8 +643,11 @@ void sixtop_timeout_timer_cb(opentimers_id_t id) {
 //======= EB/KA task
 
 void timer_sixtop_sendEb_fired(void) {
-
-    sixtop_sendEB();
+    // send EBs on a portion of the minimal cells not exceeding 1/(3(N+1))
+    // https://tools.ietf.org/html/draft-chang-6tisch-msf-01#section-2
+    if(openrandom_get16b()<0xffff/(3*(neighbors_getNumNeighbors()+1))){
+        sixtop_sendEB();
+    }
 }
 
 /**

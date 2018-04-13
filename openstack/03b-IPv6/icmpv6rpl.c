@@ -123,9 +123,9 @@ void icmpv6rpl_init(void) {
 
     opentimers_scheduleIn(
         icmpv6rpl_vars.timerIdDIO,
-        openrandom_getRandomizePeriod(icmpv6rpl_vars.dioPeriod, NUM_CHANNELS*SLOTFRAME_LENGTH*SLOTDURATION),
+        SLOTFRAME_LENGTH*SLOTDURATION,
         TIME_MS,
-        TIMER_ONESHOT,
+        TIMER_PERIODIC,
         icmpv6rpl_timer_DIO_cb
     );
 
@@ -612,16 +612,7 @@ void icmpv6rpl_killPreferredParent(void) {
    task.
 */
 void icmpv6rpl_timer_DIO_cb(opentimers_id_t id) {
-
     scheduler_push_task(icmpv6rpl_timer_DIO_task,TASKPRIO_RPL);
-    // update the period
-    opentimers_scheduleIn(
-        icmpv6rpl_vars.timerIdDIO,
-        openrandom_getRandomizePeriod(icmpv6rpl_vars.dioPeriod, NUM_CHANNELS*SLOTFRAME_LENGTH*SLOTDURATION),
-        TIME_MS,
-        TIMER_ONESHOT,
-       icmpv6rpl_timer_DIO_cb
-    );
 }
 
 /**
@@ -630,8 +621,11 @@ void icmpv6rpl_timer_DIO_cb(opentimers_id_t id) {
 \note This function is executed in task context, called by the scheduler.
 */
 void icmpv6rpl_timer_DIO_task(void) {
-
-    sendDIO();
+    // send DIOs on a portion of the minimal cells not exceeding 1/(3(N+1))
+    // https://tools.ietf.org/html/draft-chang-6tisch-msf-01#section-2
+    if(openrandom_get16b()<0xffff/(3*(neighbors_getNumNeighbors()+1))){
+        sendDIO();
+    }
 }
 
 /**
