@@ -27,6 +27,7 @@
 #include "sctimer.h"
 #include "uart.h"
 #include "cryptoengine.h"
+#include "pwm.h"
 
 //=========================== variables =======================================
 
@@ -82,6 +83,7 @@ void board_init(void) {
    i2c_init();
    sensors_init();
    cryptoengine_init();
+   pwm_init();
 }
 
 /**
@@ -238,6 +240,7 @@ static void SysCtrlRunSetting(void) {
 
   /* Enable UART0 and RFC when running */
   SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_GPT2);
+  SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_GPT3);
   SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_UART0);
   SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_RFC);
 }
@@ -262,6 +265,7 @@ static void SysCtrlSleepSetting(void) {
 
   /* Enable UART and RFC during sleep */
   SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_GPT2);
+  SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_GPT3);
   SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_UART0);
   SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_RFC);
 }

@@ -12,7 +12,7 @@
 
 //=========================== public ==========================================
 
-void icmpv6_init() {
+void icmpv6_init(void) {
 }
 
 owerror_t icmpv6_send(OpenQueueEntry_t* msg) {

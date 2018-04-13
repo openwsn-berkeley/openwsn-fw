@@ -41,7 +41,7 @@ void    cexample_sendDone(OpenQueueEntry_t* msg,
 
 //=========================== public ==========================================
 
-void cexample_init() {
+void cexample_init(void) {
    
     // prepare the resource descriptor for the /ex path
     cexample_vars.desc.path0len             = sizeof(cexample_path0)-1;
@@ -83,7 +83,7 @@ void cexample_timer_cb(opentimers_id_t id){
    scheduler_push_task(cexample_task_cb,TASKPRIO_COAP);
 }
 
-void cexample_task_cb() {
+void cexample_task_cb(void) {
    OpenQueueEntry_t*    pkt;
    owerror_t            outcome;
    uint8_t              i;
@@ -118,7 +118,6 @@ void cexample_task_cb() {
          (errorparameter_t)0,
          (errorparameter_t)0
       );
-      openqueue_freePacketBuffer(pkt);
       return;
    }
    // take ownership over that packet

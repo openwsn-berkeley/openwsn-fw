@@ -14,7 +14,7 @@ sensitive_accel_temperature_vars_t sensitive_accel_temperature_vars;
 
 //=========================== public ==========================================
 
-void sensitive_accel_temperature_init() {
+void sensitive_accel_temperature_init(void) {
    volatile int i;
    if (sensitive_accel_temperature_vars.configured==FALSE) {
       sensitive_accel_temperature_vars.configured = FALSE;
@@ -46,10 +46,10 @@ void sensitive_accel_temperature_init() {
    }
 }
 
-void sensitive_accel_temperature_disable() {
+void sensitive_accel_temperature_disable(void) {
    P6OUT   &=  ~0x08;   //Turn off P6.3 to disable accelerometer and filter
 }
-void sensitive_accel_temperature_get_config() {
+void sensitive_accel_temperature_get_config(void) {
    if (sensitive_accel_temperature_vars.configured==TRUE) {
    }
 }

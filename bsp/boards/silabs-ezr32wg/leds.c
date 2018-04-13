@@ -25,7 +25,7 @@
 
 //=========================== public ==========================================
 
-void leds_init() {
+void leds_init(void) {
 	//enable clock for this peripheral
 	CMU_ClockEnable(cmuClock_HFPER, TRUE);
 	CMU_ClockEnable(cmuClock_GPIO, TRUE);
@@ -38,96 +38,96 @@ void leds_init() {
 }
 
 // red
-void leds_error_on() {
+void leds_error_on(void) {
 	GPIO_PinOutSet(gpioPortF, LEDS_PORT_ERROR);
 }
 
-void leds_error_off() {
+void leds_error_off(void) {
 	GPIO_PinOutClear(gpioPortF, LEDS_PORT_ERROR);
 }
 
-void leds_error_toggle() {
+void leds_error_toggle(void) {
 	GPIO_PinOutToggle(gpioPortF, LEDS_PORT_ERROR);
 }
 
-uint8_t leds_error_isOn() {
+uint8_t leds_error_isOn(void) {
 	return (uint8_t) (1 == GPIO_PinOutGet(gpioPortF, LEDS_PORT_ERROR));
 }
 
 // orange
-void leds_sync_on() {
+void leds_sync_on(void) {
 	GPIO_PinOutSet(gpioPortF, LEDS_PORT_SYNC);
 }
 
-void leds_sync_off() {
+void leds_sync_off(void) {
 	GPIO_PinOutClear(gpioPortF, LEDS_PORT_SYNC);
 }
 
-void leds_sync_toggle() {
+void leds_sync_toggle(void) {
 	GPIO_PinOutToggle(gpioPortF, LEDS_PORT_SYNC);
 }
 
-uint8_t leds_sync_isOn() {
+uint8_t leds_sync_isOn(void) {
 	return (uint8_t) (1 == GPIO_PinOutGet(gpioPortF, LEDS_PORT_SYNC));
 }
 
 // green
-void leds_radio_on() {
+void leds_radio_on(void) {
 	GPIO_PinOutSet(gpioPortF, LEDS_PORT_RADIO);
 }
 
-void leds_radio_off() {
+void leds_radio_off(void) {
 	GPIO_PinOutClear(gpioPortF, LEDS_PORT_RADIO);
 }
 
-void leds_radio_toggle() {
+void leds_radio_toggle(void) {
 	GPIO_PinOutToggle(gpioPortF, LEDS_PORT_RADIO);
 }
 
-uint8_t leds_radio_isOn() {
+uint8_t leds_radio_isOn(void) {
 	return (uint8_t) (1 == GPIO_PinOutGet(gpioPortF, LEDS_PORT_RADIO));
 }
 
 // yellow
-void leds_debug_on() {
+void leds_debug_on(void) {
 	GPIO_PinOutSet(gpioPortF, LEDS_PORT_DEBUG);
 }
 
-void leds_debug_off() {
+void leds_debug_off(void) {
 	GPIO_PinOutClear(gpioPortF, LEDS_PORT_DEBUG);
 }
 
-void leds_debug_toggle() {
+void leds_debug_toggle(void) {
 	GPIO_PinOutToggle(gpioPortF, LEDS_PORT_DEBUG);
 }
 
-uint8_t leds_debug_isOn() {
+uint8_t leds_debug_isOn(void) {
 	return (uint8_t) (1 == GPIO_PinOutGet(gpioPortF, LEDS_PORT_DEBUG));
 }
 
 // all
-void leds_all_on() {
+void leds_all_on(void) {
 	leds_radio_on();
 	leds_sync_on();
 	leds_debug_on();
 	leds_error_on();
 }
 
-void leds_all_off() {
+void leds_all_off(void) {
 	leds_radio_off();
 	leds_sync_off();
 	leds_debug_off();
 	leds_error_off();
 }
 
-void leds_all_toggle() {
+void leds_all_toggle(void) {
 	leds_radio_toggle();
 	leds_sync_toggle();
 	leds_debug_toggle();
 	leds_error_toggle();
 }
 
-void leds_error_blink() {
+void leds_error_blink(void) {
 	uint8_t i;
 	volatile uint16_t delay;
 
@@ -144,12 +144,12 @@ void leds_error_blink() {
 	}
 }
 
-void leds_circular_shift() {
+void leds_circular_shift(void) {
     //not implemented
 	return;
 }
 
-void leds_increment() {
+void leds_increment(void) {
 	//not implemented
 	return;
 }

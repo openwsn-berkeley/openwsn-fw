@@ -16,78 +16,78 @@
 
 //=========================== public ==========================================
 
-void leds_init() {
+void leds_init(void) {
    P2DIR      |=  0x0F;                          // P2DIR = 0bxxxx1111 for LEDs
    P2OUT      &= ~0x0F;                          // P2OUT = 0bxxxx0000, all LEDs off
 }
 
 // red
-void    leds_error_on() {
+void    leds_error_on(void) {
    P2OUT     |=  0x08;
 }
-void    leds_error_off() {
+void    leds_error_off(void) {
    P2OUT     &= ~0x08;
 }
-void    leds_error_toggle() {
+void    leds_error_toggle(void) {
    P2OUT     ^=  0x08;
 }
-uint8_t leds_error_isOn() {
+uint8_t leds_error_isOn(void) {
    return (uint8_t)(P2OUT & 0x08)>>3;
 }
 
 // orange
-void    leds_radio_on() {
+void    leds_radio_on(void) {
    P2OUT     |=  0x04;
 }
-void    leds_radio_off() {
+void    leds_radio_off(void) {
    P2OUT     &= ~0x04;
 }
-void    leds_radio_toggle() {
+void    leds_radio_toggle(void) {
    P2OUT     ^=  0x04;
 }
-uint8_t leds_radio_isOn() {
+uint8_t leds_radio_isOn(void) {
    return (P2OUT & 0x04)>>4;
 }
 
 // green
-void    leds_sync_on() {
+void    leds_sync_on(void) {
    P2OUT     |=  0x02;
 }
-void    leds_sync_off() {
+void    leds_sync_off(void) {
    P2OUT     &= ~0x02;
 }
-void    leds_sync_toggle() {
+void    leds_sync_toggle(void) {
    P2OUT     ^=  0x02;
 }
-uint8_t leds_sync_isOn() {
+uint8_t leds_sync_isOn(void) {
    return (P2OUT & 0x02)>>1;
 }
 
 // yellow
-void    leds_debug_on() {
+void    leds_debug_on(void) {
    P2OUT     |=  0x01;
 }
-void    leds_debug_off() {
+void    leds_debug_off(void) {
    P2OUT     &= ~0x01;
 }
-void    leds_debug_toggle() {
+void    leds_debug_toggle(void) {
    P2OUT     ^=  0x01;
 }
-uint8_t leds_debug_isOn() {
+uint8_t leds_debug_isOn(void) {
    return (P2OUT & 0x01)>>0;
 }
 
-void leds_all_on() {
+void leds_all_on(void) {
    P5OUT     &= ~0x0F;
 }
-void leds_all_off() {
+void leds_all_off(void) {
    P5OUT     |=  0x0F;
 }
-void leds_all_toggle() {
+void leds_all_toggle(void) {
    P5OUT     ^=  0x0F;
 }
 
-void leds_error_blink() {
+void leds_error_blink(void) {
    uint8_t i;
    volatile uint16_t delay;
    // turn all LEDs off
@@ -101,7 +101,7 @@ void leds_error_blink() {
    }
 }
 
-void leds_circular_shift() {
+void leds_circular_shift(void) {
    uint8_t temp_leds;
    if ((P2OUT & 0x0F)==0) {                      // if no LEDs on, switch on first one
       P2OUT |= 0x01;
@@ -116,7 +116,7 @@ void leds_circular_shift() {
    P2OUT &= ~(~temp_leds & 0x0F);                // switch off the leds marked '0' in temp_leds
 }
 
-void leds_increment() {
+void leds_increment(void) {
    uint8_t led_counter;
    led_counter = ((P2OUT & 0x0f)+1);
    P2OUT &= ~0x0f; //all LEDs off

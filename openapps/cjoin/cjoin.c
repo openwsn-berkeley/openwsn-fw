@@ -55,7 +55,10 @@ bool        cjoin_getIsJoined(void);
 void        cjoin_setIsJoined(bool newValue);
 //=========================== public ==========================================
 
-void cjoin_init() {
+void cjoin_init(void) {
+   // declare the usage of dynamic keying to L2 security module
+   IEEE802154_security_setDynamicKeying();
+
    // prepare the resource descriptor for the /j path
    cjoin_vars.desc.path0len                        = sizeof(cjoin_path0)-1;
    cjoin_vars.desc.path0val                        = (uint8_t*)(&cjoin_path0);
@@ -74,12 +77,11 @@ void cjoin_init() {
    cjoin_vars.timerId = opentimers_create();
 
    idmanager_setJoinKey((uint8_t *) masterSecret);
-   cjoin_init_security_context();
 
    cjoin_schedule();
 }
 
-void cjoin_init_security_context() {
+void cjoin_init_security_context(void) {
    uint8_t senderID[9];     // needs to hold EUI-64 + 1 byte
    uint8_t recipientID[9];  // needs to hold EUI-64 + 1 byte
    uint8_t* joinKey;
@@ -101,7 +103,7 @@ void cjoin_init_security_context() {
                                 0);
 }
 
-void cjoin_schedule() {
+void cjoin_schedule(void) {
     uint16_t delay;
     
     if (cjoin_getIsJoined() == FALSE) {
@@ -155,7 +157,7 @@ void cjoin_retransmission_cb(opentimers_id_t id) {
     scheduler_push_task(cjoin_retransmission_task_cb, TASKPRIO_COAP);
 }
 
-void cjoin_retransmission_task_cb() {
+void cjoin_retransmission_task_cb(void) {
     open_addr_t* joinProxy;
 
     joinProxy = neighbors_getJoinProxy();
@@ -172,7 +174,7 @@ void cjoin_retransmission_task_cb() {
     cjoin_sendJoinRequest(joinProxy);
 }
 
-void cjoin_task_cb() {
+void cjoin_task_cb(void) {
     open_addr_t *joinProxy;
   
     // don't run if not synch
@@ -191,6 +193,10 @@ void cjoin_task_cb() {
     
     // cancel the startup timer but do not destroy it as we reuse it for retransmissions
     opentimers_cancel(cjoin_vars.timerId);
+
+    // init the security context only here in order to use the latest joinKey
+    // that may be set over the serial
+    cjoin_init_security_context();
 
     cjoin_sendJoinRequest(joinProxy);
 
@@ -224,7 +230,6 @@ owerror_t cjoin_sendJoinRequest(open_addr_t* joinProxy) {
          (errorparameter_t)0,
          (errorparameter_t)0
       );
-      openqueue_freePacketBuffer(pkt);
       return E_FAIL;
    }
    // take ownership over that packet
@@ -277,7 +282,7 @@ owerror_t cjoin_sendJoinRequest(open_addr_t* joinProxy) {
   return E_SUCCESS;
 }
 
-bool cjoin_getIsJoined() {   
+bool cjoin_getIsJoined(void) {   
    bool res;
    INTERRUPT_DECLARATION();
    

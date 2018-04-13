@@ -42,7 +42,7 @@ void delay(uint16_t usec) {
 
 //==== admin
 
-void radio_init() {
+void radio_init(void) {
 
   // clear variables
   memset(&radio_vars, 0, sizeof(radio_vars_t));
@@ -91,7 +91,7 @@ void radio_setEndFrameCb(radio_capture_cbt cb) {
 
 //==== reset
 
-void radio_reset() {
+void radio_reset(void) {
   cc1101_IOCFG0_reg_t   cc1101_IOCFG0_reg;
   cc1101_PKTCTRL0_reg_t cc1101_PKTCTRL0_reg;
   cc1101_PKTLEN_reg_t   cc1101_PKTLEN_reg;
@@ -194,11 +194,11 @@ void radio_setFrequency(uint8_t frequency) {
   
 }
 
-void radio_rfOn() {
+void radio_rfOn(void) {
   // crystal oscillator already on
 }
 
-void radio_rfOff() {
+void radio_rfOff(void) {
   // change state
   radio_vars.state = RADIOSTATE_TURNING_OFF;
 
@@ -226,7 +226,7 @@ void radio_loadPacket(uint8_t* packet, uint16_t len) {
    radio_vars.state = RADIOSTATE_PACKET_LOADED;
 }
 
-void radio_txEnable() {
+void radio_txEnable(void) {
    // change state
    radio_vars.state = RADIOSTATE_ENABLING_TX;
    
@@ -239,7 +239,7 @@ void radio_txEnable() {
 }
 
 
-void radio_txNow() {
+void radio_txNow(void) {
    // change state
    radio_vars.state = RADIOSTATE_TRANSMITTING;
    
@@ -249,7 +249,7 @@ void radio_txNow() {
 //==== RX
 
 
-void radio_rxEnable() {
+void radio_rxEnable(void) {
 
    // change state
   radio_vars.state = RADIOSTATE_ENABLING_RX;
@@ -273,7 +273,7 @@ void radio_rxEnable() {
   radio_vars.state = RADIOSTATE_LISTENING;
 }
 
-void radio_rxNow() {
+void radio_rxNow(void) {
   // nothing to do, the radio is already listening.
 }
 

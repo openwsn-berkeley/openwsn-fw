@@ -151,11 +151,11 @@ owerror_t cstorm_receive(
 \note timer fired, but we don't want to execute task in ISR mode instead, push
    task to scheduler with CoAP priority, and let scheduler take care of it.
 */
-void cstorm_timer_cb(){
+void cstorm_timer_cb(void) {
    scheduler_push_task(cstorm_task_cb,TASKPRIO_COAP);
 }
 
-void cstorm_task_cb() {
+void cstorm_task_cb(void) {
    OpenQueueEntry_t*    pkt;
    owerror_t            outcome;
    coap_option_iht      options[2];
@@ -184,7 +184,6 @@ void cstorm_task_cb() {
       openserial_printError(COMPONENT_CSTORM,ERR_NO_FREE_PACKET_BUFFER,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
-      openqueue_freePacketBuffer(pkt);
       return;
    }
    

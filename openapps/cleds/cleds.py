@@ -7,8 +7,9 @@ sys.path.insert(0,os.path.join(here,'..','..','..','..','..','..','coap'))
 from coap import coap
 
 MOTE_IP = 'bbbb::1415:92cc:0:2'
+UDPPORT = 61618 # can't be the port used in OV
 
-c = coap.coap()
+c = coap.coap(udpPort=UDPPORT)
 
 # read status of debug LED
 p = c.GET('coap://[{0}]/l'.format(MOTE_IP))

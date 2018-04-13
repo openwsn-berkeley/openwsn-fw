@@ -597,7 +597,7 @@
         </option>
         <option>
           <name>OOCOutputFile</name>
-          <state></state>
+          <state>01bsp_leds.srec</state>
         </option>
         <option>
           <name>OOCCommandLineProducer</name>
@@ -1952,9 +1952,6 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\board.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\bsp_timer.c</name>
-        </file>
-        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\debugpins.c</name>
         </file>
         <file>
@@ -1973,10 +1970,10 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\nvic.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\radiotimer.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\rcc.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\rcc.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\sctimer.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\spi.c</name>
@@ -1994,12 +1991,6 @@
           <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf231\radio.c</name>
         </file>
       </group>
-    </group>
-  </group>
-  <group>
-    <name>drivers</name>
-    <group>
-      <name>common</name>
     </group>
   </group>
 </project>

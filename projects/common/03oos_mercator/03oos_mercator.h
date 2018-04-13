@@ -112,7 +112,7 @@ END_PACK
 //=========================== variables =======================================
 
 typedef struct {
-   opentimer_id_t  sendTimerId;             ///< Each time expires, a packet is sent.
+   opentimers_id_t  sendTimerId;             ///< Each time expires, a packet is sent.
    
    //=== state machine
    uint8_t         status;
@@ -184,7 +184,7 @@ void isr_openserial_rx_mod(void);
 uint16_t htons(uint16_t val);
 
    // initial radio
-void cb_startFrame(uint16_t timestamp);
-void cb_endFrame(uint16_t timestamp);
-void cb_sendPacket(opentimer_id_t id);
+void cb_startFrame(PORT_TIMER_WIDTH timestamp);
+void cb_endFrame(PORT_TIMER_WIDTH timestamp);
+void cb_sendPacket(opentimers_id_t id);
 void cb_finishTx(void);

@@ -56,7 +56,7 @@ static PyObject* OpenMote_getState(OpenMote* self) {
    PyObject* monitor_expiration_vars;
    PyObject* neighbors_vars;
    PyObject* sixtop_vars;
-   PyObject* sf0_vars;
+   PyObject* msf_vars;
    PyObject* schedule_vars;
    PyObject* schedule_dbg;
    PyObject* ieee154e_vars;
@@ -114,10 +114,10 @@ static PyObject* OpenMote_getState(OpenMote* self) {
    // TODO
    PyDict_SetItemString(returnVal, "sixtop_vars", sixtop_vars);
    
-   // sf0_vars
-   sf0_vars = PyDict_New();
+   // msf_vars
+   msf_vars = PyDict_New();
    // TODO
-   PyDict_SetItemString(returnVal, "sf0_vars", sf0_vars);   
+   PyDict_SetItemString(returnVal, "msf_vars", msf_vars);   
    
    // schedule_vars
    schedule_vars = PyDict_New();

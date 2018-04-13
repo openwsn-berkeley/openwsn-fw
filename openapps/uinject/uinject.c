@@ -24,7 +24,7 @@ void uinject_task_cb(void);
 
 //=========================== public ==========================================
 
-void uinject_init() {
+void uinject_init(void) {
    
     // clear local variables
     memset(&uinject_vars,0,sizeof(uinject_vars_t));
@@ -74,7 +74,7 @@ void uinject_timer_cb(opentimers_id_t id){
    scheduler_push_task(uinject_task_cb,TASKPRIO_COAP);
 }
 
-void uinject_task_cb() {
+void uinject_task_cb(void) {
    OpenQueueEntry_t*    pkt;
    uint8_t              asnArray[5];
    

@@ -20,14 +20,14 @@ sure all is well.
 #include "debugpins.h"
 #include "leds.h"
 #include "uart.h"
-#include "bsp_timer.h"
+#include "sctimer.h"
 
 // driver modules required
 #include "openserial.h"
 
 //=========================== defines =========================================
 
-#define BSP_TIMER_PERIOD 328          // 328@32kHz ~ 10ms
+#define SCTIMER_PERIOD 328           // 328@32kHz ~ 10ms
 
 //=========================== variables =======================================
 
@@ -57,8 +57,8 @@ int mote_main(void) {
    board_init();
    openserial_init();
    
-   bsp_timer_set_callback(cb_compare);
-   bsp_timer_scheduleIn(BSP_TIMER_PERIOD);
+   sctimer_set_callback(cb_compare);
+   sctimer_setCompare(sctimer_readCounter()+SCTIMER_PERIOD);
    
    while(1) {
       board_sleep();
@@ -84,7 +84,7 @@ int mote_main(void) {
 
 void cb_compare(void) {
    app_vars.timerFired = TRUE;
-   bsp_timer_scheduleIn(BSP_TIMER_PERIOD);
+   sctimer_setCompare(sctimer_readCounter()+SCTIMER_PERIOD);
 }
 
 //=========================== stub functions ==================================
@@ -101,6 +101,7 @@ void ieee154e_getAsn(uint8_t* array) {
    array[4]   = 0x04;
 }
 
+void idmanager_setJoinKey(void) {}
 void idmanager_triggerAboutRoot(void) {}
 void openbridge_triggerData(void) {}
 void tcpinject_trigger(void) {}
@@ -123,7 +124,8 @@ void ieee154e_setIsSecurityEnabled(void){}
 void ieee154e_setIsAckEnabled(void){}
 void ieee154e_setSingleChannel(void){}
 void sniffer_setListeningChannel(void){}
-void sf0_appPktPeriod(void){}
+void msf_appPktPeriod(void){}
+uint8_t msf_getsfid(void) {return 0;}
 
 bool debugPrint_isSync(void) {
    return FALSE;
@@ -153,5 +155,8 @@ bool debugPrint_queue(void) {
    return FALSE;
 }
 bool debugPrint_neighbors(void) {
+   return FALSE;
+}
+bool debugPrint_joined(void) {
    return FALSE;
 }

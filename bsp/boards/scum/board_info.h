@@ -40,16 +40,18 @@ to return the board's description.
 
 // this is called when require to WRITE the RFTIMER counter/compare registers,
 // where the value is going to be multiplied.
-#define TIMER_COUTER_CONVERT_32K_TO_500K(value)    value*61/4 
+#define TIMER_COUNTER_CONVERT_32K_TO_500K(value)    value*61/4 
 // this is called when require to READ  the RFTIMER counter/compare registers,
 // where the value is going to be divided.
-#define TIMER_COUTER_CONVERT_500K_TO_32K(value)    value*4/61
+#define TIMER_COUNTER_CONVERT_500K_TO_32K(value)    value*4/61
 
 //===== radio
 
 #define PORT_PIN_RADIO_RESET_LOW()          RFCONTROLLER_REG__CONTROL = 0x10;
 
 //===== IEEE802154E timing
+
+#define SLOTDURATION 15 // in miliseconds
 
 //// time-slot related
 #define PORT_TsSlotDuration                 491   // 491 ticks = 15ms   @32768Hz

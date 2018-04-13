@@ -22,7 +22,7 @@ static void openudp_receive_default_handler(OpenQueueEntry_t* msg);
 
 //=========================== public ==========================================
 
-void openudp_init() {
+void openudp_init(void) {
    // initialize the resource linked list
    openudp_vars.resources = NULL;
 }
@@ -233,7 +233,7 @@ void openudp_receive(OpenQueueEntry_t* msg) {
    }
 }
 
-bool openudp_debugPrint() {
+bool openudp_debugPrint(void) {
    return FALSE;
 }
 

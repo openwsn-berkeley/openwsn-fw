@@ -18,19 +18,22 @@
 #include "IEEE802154_security.h"
 
 //=============================define==========================================
-#ifdef L2_SECURITY_ACTIVE
 //=========================== variables =======================================
 
 ieee802154_security_vars_t ieee802154_security_vars;
 
-//=========================== prototypes ======================================
+//========= common functions regardless of whether L2SEC is used or not =======
+// following 7 functions are also called when L2SEC is not used. This is to facilitate
+// automated testing of SECJOIN without L2SEC and to ensure the order in which nodes
+// start sending out EBs. With the current implementation, EBs are sent only once the
+// node has received a Join Response from the JRC.
 
-//=========================== admin ===========================================
-
-/**
-\brief Initialization of security tables and parameters.
-*/
 void IEEE802154_security_init(void) {
+
+   // By default, we assume that no dynamic keying (SEC JOIN) is used
+   // if an app is linked with dynamic keying support, it should set
+   // this flag to true by calling IEEE802154_security_setDynamicKeying()
+   ieee802154_security_vars.dynamicKeying = FALSE;
 
     // TODO joinPermitted flag should be set dynamically upon a button press
     // and propagated through the network via EBs
@@ -45,7 +48,41 @@ void IEEE802154_security_init(void) {
    memset(&ieee802154_security_vars.k2.value[0], 0x00, 16);
       }
 
+uint8_t IEEE802154_security_getBeaconKeyIndex(void) {
+    return ieee802154_security_vars.k1.index;
+}
+uint8_t IEEE802154_security_getDataKeyIndex(void) {
+    return ieee802154_security_vars.k2.index;
+}
+
+void IEEE802154_security_setBeaconKey(uint8_t index, uint8_t* value) {
+    ieee802154_security_vars.k1.index = index;
+    memcpy(ieee802154_security_vars.k1.value, value, 16);
+}
+
+void IEEE802154_security_setDataKey(uint8_t index, uint8_t* value) {
+    ieee802154_security_vars.k2.index = index;
+    memcpy(ieee802154_security_vars.k2.value, value, 16);
+}
+
+bool IEEE802154_security_isConfigured(void) {
+    if (ieee802154_security_vars.dynamicKeying == FALSE) {
+        return TRUE;
+    }
+
+    if (ieee802154_security_vars.k1.index != IEEE802154_SECURITY_KEYINDEX_INVALID &&
+         ieee802154_security_vars.k2.index != IEEE802154_SECURITY_KEYINDEX_INVALID) {
+        return TRUE;
+    }
+    return FALSE;
+}
+
+void IEEE802154_security_setDynamicKeying(void) {
+    ieee802154_security_vars.dynamicKeying = TRUE;
+}
+
 //=========================== public ==========================================
+#ifdef L2_SECURITY_ACTIVE
 /**
 \brief Adding of Auxiliary Security Header to the IEEE802.15.4 MAC header
 */
@@ -441,31 +478,6 @@ uint8_t IEEE802154_security_auxLengthChecking(uint8_t KeyIdMode,
    return auxilary_len;
 }
 
-uint8_t IEEE802154_security_getBeaconKeyIndex(void) {
-    return ieee802154_security_vars.k1.index;
-      }
-uint8_t IEEE802154_security_getDataKeyIndex(void) {
-    return ieee802154_security_vars.k2.index;
-      }
-
-void IEEE802154_security_setBeaconKey(uint8_t index, uint8_t* value) {
-    ieee802154_security_vars.k1.index = index;
-    memcpy(ieee802154_security_vars.k1.value, value, 16);
-}
-
-void IEEE802154_security_setDataKey(uint8_t index, uint8_t* value) {
-    ieee802154_security_vars.k2.index = index;
-    memcpy(ieee802154_security_vars.k2.value, value, 16);
-      }
-
-bool IEEE802154_security_isConfigured() {
-    if (ieee802154_security_vars.k1.index != IEEE802154_SECURITY_KEYINDEX_INVALID &&
-         ieee802154_security_vars.k2.index != IEEE802154_SECURITY_KEYINDEX_INVALID) {
-         return TRUE;
-      }
-         return FALSE;
-      }
-
 uint8_t IEEE802154_security_getSecurityLevel(OpenQueueEntry_t *msg) {
     if (IEEE802154_security_isConfigured() == FALSE) {
         return IEEE154_ASH_SLF_TYPE_NOSEC;
@@ -526,10 +538,6 @@ bool IEEE802154_security_acceptableLevel(OpenQueueEntry_t* msg, ieee802154_heade
 
 #else /* L2_SECURITY_ACTIVE */
 
-void IEEE802154_security_init(void) {
-    return;
-}
-
 void IEEE802154_security_prependAuxiliarySecurityHeader(OpenQueueEntry_t* msg){
     return;
 }
@@ -552,25 +560,6 @@ uint8_t IEEE802154_security_authLengthChecking(uint8_t sec_level) {
 
 uint8_t IEEE802154_security_auxLengthChecking(uint8_t kid, uint8_t sup, uint8_t size) {
     return (uint8_t) 0;
-}
-
-uint8_t IEEE802154_security_getBeaconKeyIndex(void) {
-    return (uint8_t) 0;
-}
-uint8_t IEEE802154_security_getDataKeyIndex(void) {
-    return (uint8_t) 0;
-}
-
-void IEEE802154_security_setBeaconKey(uint8_t index, uint8_t* value) {
-    return;
-}
-
-void IEEE802154_security_setDataKey(uint8_t index, uint8_t* value) {
-    return;
-}
-
-bool IEEE802154_security_isConfigured() {
-    return TRUE;
 }
 
 uint8_t IEEE802154_security_getSecurityLevel(OpenQueueEntry_t *msg) {

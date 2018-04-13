@@ -38,7 +38,7 @@ int main(void) {
 
 //=========================== public ==========================================
 
-void board_init() {
+void board_init(void) {
    uint8_t eui[8];
    
    // disable watchdog timer
@@ -99,11 +99,11 @@ void board_init() {
    }
 }
 
-void board_sleep() {
+void board_sleep(void) {
    __bis_SR_register(GIE+LPM3_bits);             // sleep, but leave ACLK on
 }
 
-void board_reset() {
+void board_reset(void) {
    WDTCTL = (WDTPW+0x1200) + WDTHOLD; // writing a wrong watchdog password to causes handler to reset
 }
 

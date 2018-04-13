@@ -11,7 +11,7 @@
 #include "idmanager.h"
 #include "openqueue.h"
 #include "neighbors.h"
-#include "sf0.h"
+#include "msf.h"
 
 //=========================== defines =========================================
 
@@ -36,7 +36,7 @@ void    c6t_sendDone(
 
 //=========================== public ==========================================
 
-void c6t_init() {
+void c6t_init(void) {
    if(idmanager_getIsDAGroot()==TRUE) return; 
    
    // prepare the resource descriptor for the /6t path
@@ -94,37 +94,28 @@ owerror_t c6t_receive(OpenQueueEntry_t* msg,
             break;
          }
          
-         if (sixtop_setHandler(SIX_HANDLER_SF0)==FALSE){
-            // one sixtop transcation is happening, only one instance at one time
-            
-            // set the CoAP header
-            outcome                       = E_FAIL;
-            coap_header->Code             = COAP_CODE_RESP_CHANGED;
-            break;
-         }
-         if (sf0_candidateAddCellList(celllist_add,1)==FALSE){
+         if (msf_candidateAddCellList(celllist_add,1)==FALSE){
             // set the CoAP header
             outcome                       = E_FAIL;
             coap_header->Code             = COAP_CODE_RESP_CHANGED;
             break;
          }
          // call sixtop
-         sixtop_request(
+         outcome = sixtop_request(
             IANA_6TOP_CMD_ADD,                  // code
             &neighbor,                          // neighbor
             1,                                  // number cells
-            LINKOPTIONS_TX,                     // cellOptions
+            CELLOPTIONS_TX,                     // cellOptions
             celllist_add,                       // celllist to add
             NULL,                               // celllist to delete (not used)
-            sf0_getsfid(),                      // sfid
+            msf_getsfid(),                      // sfid
             0,                                  // list command offset (not used)
             0                                   // list command maximum celllist (not used)
          );
          
          // set the CoAP header
          coap_header->Code             = COAP_CODE_RESP_CHANGED;
-         
-         outcome                       = E_SUCCESS;
+
          break;
       
       case COAP_CODE_REQ_DELETE:
@@ -142,39 +133,28 @@ owerror_t c6t_receive(OpenQueueEntry_t* msg,
             break;
          }
          
-         if (sixtop_setHandler(SIX_HANDLER_SF0)==FALSE){
-            // one sixtop transcation is happening, only one instance at one time
-            
-            // set the CoAP header
-            coap_header->Code             = COAP_CODE_RESP_CHANGED;
-           
-            outcome                       = E_FAIL;
-            break;
-         }
          // call sixtop
-         if (sf0_candidateRemoveCellList(celllist_delete,&neighbor,1)==FALSE){
+         if (msf_candidateRemoveCellList(celllist_delete,&neighbor,1)==FALSE){
             // set the CoAP header
             outcome                       = E_FAIL;
             coap_header->Code             = COAP_CODE_RESP_CHANGED;
             break;
          }
          // call sixtop
-         sixtop_request(
+         outcome = sixtop_request(
             IANA_6TOP_CMD_ADD,                  // code
             &neighbor,                          // neighbor
             1,                                  // number cells
-            LINKOPTIONS_TX,                     // cellOptions
+            CELLOPTIONS_TX,                     // cellOptions
             celllist_add,                       // celllist to add
             NULL,                               // celllist to delete (not used)
-            sf0_getsfid(),                      // sfid
+            msf_getsfid(),                      // sfid
             0,                                  // list command offset (not used)
             0                                   // list command maximum celllist (not used)
          );
          
          // set the CoAP header
          coap_header->Code             = COAP_CODE_RESP_CHANGED;
-         
-         outcome                       = E_SUCCESS;
          break;
          
       default:

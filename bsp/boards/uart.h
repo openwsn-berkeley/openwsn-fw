@@ -48,7 +48,7 @@ void    uart_clearTxInterrupts(void);
 void    uart_setCTS(bool state);
 void    uart_writeByte(uint8_t byteToWrite);
 #ifdef FASTSIM
-void    uart_writeCircularBuffer_FASTSIM(uint8_t* buffer, uint8_t* outputBufIdxR, uint8_t* outputBufIdxW);
+void    uart_writeCircularBuffer_FASTSIM(uint8_t* buffer, uint16_t* outputBufIdxR, uint16_t* outputBufIdxW);
 #endif
 uint8_t uart_readByte(void);
 

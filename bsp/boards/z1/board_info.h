@@ -58,6 +58,8 @@ to return the board's description.
 
 //===== IEEE802154E timing
 
+#define SLOTDURATION 15 // in miliseconds
+
 // time-slot related
 #define PORT_TsSlotDuration                 491   // counter counts one extra count, see datasheet
 // execution speed related

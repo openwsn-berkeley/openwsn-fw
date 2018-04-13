@@ -10,6 +10,10 @@
 
 #include "opendefs.h"
 
+#include <stdio.h>
+#include <stdarg.h>
+#include <string.h>
+
 /**
 \addtogroup drivers
 \{
@@ -25,7 +29,8 @@
 \warning should be exactly 256 so wrap-around on the index does not require
          the use of a slow modulo operator.
 */
-#define SERIAL_OUTPUT_BUFFER_SIZE 256 // leave at 256!
+#define SERIAL_OUTPUT_BUFFER_SIZE 1024 // leave at 256!
+#define OUTPUT_BUFFER_MASK       0x3FF
 
 /**
 \brief Number of bytes of the serial input buffer, in bytes.
@@ -42,6 +47,7 @@
 #define SERFRAME_MOTE2PC_ERROR                   ((uint8_t)'E')
 #define SERFRAME_MOTE2PC_CRITICAL                ((uint8_t)'C')
 #define SERFRAME_MOTE2PC_SNIFFED_PACKET          ((uint8_t)'P')
+#define SERFRAME_MOTE2PC_PRINTF                  ((uint8_t)'F')
 
 // frames sent PC->mote
 #define SERFRAME_PC2MOTE_SETROOT                 ((uint8_t)'R')
@@ -104,8 +110,8 @@ typedef struct {
     bool                hdlcInputEscaping;
     // output
     uint8_t             outputBuf[SERIAL_OUTPUT_BUFFER_SIZE];
-    uint8_t             outputBufIdxW;
-    uint8_t             outputBufIdxR;
+    uint16_t            outputBufIdxW;
+    uint16_t            outputBufIdxR;
     bool                fBusyFlushing;
     uint16_t            hdlcOutputCrc;
 } openserial_vars_t;
@@ -148,6 +154,8 @@ owerror_t openserial_printSniffedPacket(
     uint8_t             channel
 );
 void openserial_triggerDebugprint(void);
+owerror_t openserial_print_str(char* buffer, uint8_t length);
+owerror_t openserial_print_uint32_t(uint32_t value);
 
 // receiving
 uint8_t   openserial_getInputBufferFillLevel(void);

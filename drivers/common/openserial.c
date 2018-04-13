@@ -4,6 +4,9 @@
 \author Fabien Chraim <chraim@eecs.berkeley.edu>, March 2012.
 \author Thomas Watteyne <thomas.watteyne@inria.fr>, August 2016.
 */
+#include <stdio.h>
+#include <stdarg.h>
+#include <string.h>
 
 #include "opendefs.h"
 #include "openserial.h"
@@ -22,13 +25,17 @@
 #include "schedule.h"
 #include "icmpv6rpl.h"
 #include "icmpv6echo.h"
-#include "sf0.h"
+#include "msf.h"
 #include "debugpins.h"
 
 //=========================== variables =======================================
 
 openserial_vars_t openserial_vars;
 
+enum{
+    TYPE_STR = 0,       //subtype for the printf message
+    TYPE_INT = 1
+};
 //=========================== prototypes ======================================
 
 extern void sniffer_setListeningChannel(uint8_t channel);
@@ -68,7 +75,7 @@ void sniffer_setListeningChannel(uint8_t channel);
 
 //===== admin
 
-void openserial_init() {
+void openserial_init(void) {
     // reset variable
     memset(&openserial_vars,0,sizeof(openserial_vars_t));
     
@@ -171,6 +178,7 @@ owerror_t openserial_printCritical(
 ) {
     opentimers_id_t id; 
     uint32_t         reference;
+
     // blink error LED, this is serious
     leds_error_blink();
     
@@ -205,8 +213,8 @@ owerror_t openserial_printData(uint8_t* buffer, uint8_t length) {
     
     outputHdlcOpen();
     outputHdlcWrite(SERFRAME_MOTE2PC_DATA);
-    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
     outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
+    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
     outputHdlcWrite(asn[0]);
     outputHdlcWrite(asn[1]);
     outputHdlcWrite(asn[2]);
@@ -228,8 +236,8 @@ owerror_t openserial_printSniffedPacket(uint8_t* buffer, uint8_t length, uint8_t
     
     outputHdlcOpen();
     outputHdlcWrite(SERFRAME_MOTE2PC_SNIFFED_PACKET);
-    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
     outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
+    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
     for (i=0;i<length;i++){
        outputHdlcWrite(buffer[i]);
     }
@@ -242,6 +250,60 @@ owerror_t openserial_printSniffedPacket(uint8_t* buffer, uint8_t length, uint8_t
     return E_SUCCESS;
 }
 
+owerror_t openserial_print_uint32_t(uint32_t value) {
+#ifdef OPENSERIAL_PRINTF
+   uint8_t  i;
+   uint8_t  pvalue[4];
+   INTERRUPT_DECLARATION();
+
+   DISABLE_INTERRUPTS();
+   openserial_vars.outputBufFilled  = TRUE;
+   outputHdlcOpen();
+   outputHdlcWrite(SERFRAME_MOTE2PC_PRINTF);
+   outputHdlcWrite(TYPE_INT);
+   memcpy(pvalue, &value, 4);
+   for (i=0;i<4;i++)
+      outputHdlcWrite(pvalue[i]);
+   outputHdlcClose();
+   ENABLE_INTERRUPTS();
+
+#endif
+
+   return E_SUCCESS;
+}
+
+owerror_t openserial_print_str(char* buffer, uint8_t length) {
+#ifdef OPENSERIAL_PRINTF
+   uint8_t  i;
+   uint8_t  asn[5];
+   INTERRUPT_DECLARATION();
+
+   // retrieve ASN
+   ieee154e_getAsn(asn);
+
+   DISABLE_INTERRUPTS();
+   openserial_vars.outputBufFilled  = TRUE;
+   outputHdlcOpen();
+   outputHdlcWrite(SERFRAME_MOTE2PC_PRINTF);
+   outputHdlcWrite(TYPE_STR);
+   outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
+   outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+   for(i=0; i<5;i++)
+       outputHdlcWrite(asn[i]);
+   for (i=0;i<length;i++)
+      outputHdlcWrite(buffer[i]);
+   outputHdlcClose();
+   ENABLE_INTERRUPTS();
+
+#endif
+
+   return E_SUCCESS;
+}
+
+//===== retrieving inputBuffer
+
+uint8_t openserial_getInputBufferFilllevel(void) {
+    uint8_t inputBufFill;
 void openserial_triggerDebugprint() {
     uint8_t debugPrintCounter;
     INTERRUPT_DECLARATION();
@@ -402,7 +464,7 @@ void openserial_flush(void) {
                         &openserial_vars.outputBufIdxW
                     );
 #else
-                    uart_writeByte(openserial_vars.outputBuf[openserial_vars.outputBufIdxR++]);
+        uart_writeByte(openserial_vars.outputBuf[OUTPUT_BUFFER_MASK & (openserial_vars.outputBufIdxR++)]);
                     openserial_vars.fBusyFlushing = TRUE;
 #endif
                 }
@@ -442,7 +504,7 @@ void openserial_inhibitStop(void) {
 #endif
     ENABLE_INTERRUPTS();
     //>>>>>>>>>>>>>>>>>>>>>>>
-    
+
     // it's openserial_flush() which will set CTS
     openserial_flush();
 }
@@ -457,7 +519,7 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_outBufferIndexes() {
+bool debugPrint_outBufferIndexes(void) {
     uint16_t temp_buffer[2];
     INTERRUPT_DECLARATION();
     
@@ -552,6 +614,7 @@ void openserial_handleEcho(uint8_t* buf, uint8_t bufLen){
 
 void openserial_get6pInfo(uint8_t commandId, uint8_t* code,uint8_t* cellOptions,uint8_t* numCells,cellInfo_ht* celllist_add,cellInfo_ht* celllist_delete,uint8_t* listOffset,uint8_t* maxListLen,uint8_t ptr, uint8_t commandLen){
     uint8_t i; 
+    uint8_t celllistLen;
     
     // clear command
     if (commandId == COMMAND_SET_6P_CLEAR){
@@ -588,9 +651,10 @@ void openserial_get6pInfo(uint8_t commandId, uint8_t* code,uint8_t* cellOptions,
         *code = IANA_6TOP_CMD_ADD;
         // retrieve cell list
         i = 0;
-        while(commandLen>0){
+        celllistLen = commandLen/2;
+        while(commandLen>celllistLen){
             celllist_add[i].slotoffset     = openserial_vars.inputBuf[ptr];
-            celllist_add[i].channeloffset  = DEFAULT_CHANNEL_OFFSET;
+            celllist_add[i].channeloffset  = openserial_vars.inputBuf[ptr+celllistLen];
             celllist_add[i].isUsed         = TRUE;
             ptr         += 1;
             commandLen  -= 1;
@@ -602,10 +666,12 @@ void openserial_get6pInfo(uint8_t commandId, uint8_t* code,uint8_t* cellOptions,
     // delete command
     if (commandId == COMMAND_SET_6P_DELETE){
         *code = IANA_6TOP_CMD_DELETE;
+        // retrieve cell list
         i = 0;
-        while(commandLen>0){
+        celllistLen = commandLen/2;
+        while(commandLen>celllistLen){
             celllist_delete[i].slotoffset     = openserial_vars.inputBuf[ptr];
-            celllist_delete[i].channeloffset  = DEFAULT_CHANNEL_OFFSET;
+            celllist_delete[i].channeloffset  = openserial_vars.inputBuf[ptr+celllistLen];
             celllist_delete[i].isUsed         = TRUE;
             ptr         += 1;
             commandLen  -= 1;
@@ -621,17 +687,20 @@ void openserial_get6pInfo(uint8_t commandId, uint8_t* code,uint8_t* cellOptions,
         i = 0;
         while(i<*numCells){
             celllist_delete[i].slotoffset     = openserial_vars.inputBuf[ptr];
-            celllist_delete[i].channeloffset  = DEFAULT_CHANNEL_OFFSET;
+            celllist_delete[i].channeloffset  = openserial_vars.inputBuf[ptr+*numCells];
             celllist_delete[i].isUsed         = TRUE;
             ptr         += 1;
-            commandLen  -= 1;
             i++;
         }
+
+        commandLen      -= (*numCells) * 2;
+        ptr             += *numCells;
         // retrieve cell list to be relocated
         i = 0;
-        while(commandLen>0){
+        celllistLen = commandLen/2;
+        while(commandLen>celllistLen){
             celllist_add[i].slotoffset     = openserial_vars.inputBuf[ptr];
-            celllist_add[i].channeloffset  = DEFAULT_CHANNEL_OFFSET;
+            celllist_add[i].channeloffset  = openserial_vars.inputBuf[ptr+celllistLen];
             celllist_add[i].isUsed         = TRUE;
             ptr         += 1;
             commandLen  -= 1;
@@ -648,7 +717,7 @@ void openserial_handleCommands(void){
     uint8_t  commandLen;
     uint8_t  comandParam_8;
     uint16_t comandParam_16;
-   
+
     uint8_t  code,cellOptions,numCell,listOffset,maxListLen;
     uint8_t  ptr;
     cellInfo_ht celllist_add[CELLLIST_MAX_LEN];
@@ -660,7 +729,7 @@ void openserial_handleCommands(void){
     ptr = 0;
     memset(celllist_add,0,CELLLIST_MAX_LEN*sizeof(cellInfo_ht));
     memset(celllist_delete,0,CELLLIST_MAX_LEN*sizeof(cellInfo_ht));
-   
+
    numDataBytes = openserial_getInputBufferFillLevel();
    //copying the buffer
     openserial_getInputBuffer(&(input_buffer[ptr]),numDataBytes);
@@ -726,10 +795,6 @@ void openserial_handleCommands(void){
             if (foundNeighbor==FALSE) {
                 break;
             }
-            if (sixtop_setHandler(SIX_HANDLER_SF0)==FALSE){
-                // one sixtop transcation is happening, only one instance at one time
-                return;
-                }
             // the following sequence of bytes are, slotframe, cellOption, numCell, celllist
             openserial_get6pInfo(commandId,&code,&cellOptions,&numCell,celllist_add,celllist_delete,&listOffset,&maxListLen,ptr,commandLen);
             sixtop_request(
@@ -739,7 +804,7 @@ void openserial_handleCommands(void){
                 cellOptions,       // cellOptions
                 celllist_add,      // celllist to add
                 celllist_delete,   // celllist to delete (not used)
-                sf0_getsfid(),     // sfid
+                msf_getsfid(),     // sfid
                 listOffset,        // list command offset (not used)
                 maxListLen         // list command maximum celllist (not used)
             );
@@ -764,7 +829,7 @@ void openserial_handleCommands(void){
             break;
         case COMMAND_SET_UINJECTPERIOD:
             comandParam_8 = openserial_vars.inputBuf[ptr];
-            sf0_appPktPeriod(comandParam_8);
+            msf_appPktPeriod(comandParam_8);
             break;
         case COMMAND_SET_ECHO_REPLY_STATUS:
             comandParam_8 = openserial_vars.inputBuf[ptr];
@@ -792,6 +857,7 @@ void openserial_handleCommands(void){
 //===== misc
 
 void openserial_board_reset_cb(opentimers_id_t id) {
+    (void)id;
     board_reset();
 }
 
@@ -800,7 +866,7 @@ void openserial_board_reset_cb(opentimers_id_t id) {
 /**
 \brief Start an HDLC frame in the output buffer.
 */
-port_INLINE void outputHdlcOpen() {
+port_INLINE void outputHdlcOpen(void) {
     INTERRUPT_DECLARATION();
     
     //<<<<<<<<<<<<<<<<<<<<<<<
@@ -811,7 +877,7 @@ port_INLINE void outputHdlcOpen() {
     openserial_vars.hdlcOutputCrc                                    = HDLC_CRCINIT;
     
     // write the opening HDLC flag
-    openserial_vars.outputBuf[openserial_vars.outputBufIdxW++]       = HDLC_FLAG;
+    openserial_vars.outputBuf[OUTPUT_BUFFER_MASK & (openserial_vars.outputBufIdxW++)]       = HDLC_FLAG;
     
     ENABLE_INTERRUPTS();
     //>>>>>>>>>>>>>>>>>>>>>>>
@@ -830,10 +896,10 @@ port_INLINE void outputHdlcWrite(uint8_t b) {
     
     // add byte to buffer
     if (b==HDLC_FLAG || b==HDLC_ESCAPE) {
-        openserial_vars.outputBuf[openserial_vars.outputBufIdxW++]   = HDLC_ESCAPE;
+        openserial_vars.outputBuf[OUTPUT_BUFFER_MASK & (openserial_vars.outputBufIdxW++)]   = HDLC_ESCAPE;
         b                                                            = b^HDLC_ESCAPE_MASK;
     }
-    openserial_vars.outputBuf[openserial_vars.outputBufIdxW++]       = b;
+    openserial_vars.outputBuf[OUTPUT_BUFFER_MASK & (openserial_vars.outputBufIdxW++)]       = b;
     
     ENABLE_INTERRUPTS();
     //>>>>>>>>>>>>>>>>>>>>>>>
@@ -841,7 +907,7 @@ port_INLINE void outputHdlcWrite(uint8_t b) {
 /**
 \brief Finalize the outgoing HDLC frame.
 */
-port_INLINE void outputHdlcClose() {
+port_INLINE void outputHdlcClose(void) {
     uint16_t   finalCrc;
     INTERRUPT_DECLARATION();
     
@@ -856,7 +922,7 @@ port_INLINE void outputHdlcClose() {
     outputHdlcWrite((finalCrc>>8)&0xff);
 
     // write the closing HDLC flag
-    openserial_vars.outputBuf[openserial_vars.outputBufIdxW++]       = HDLC_FLAG;
+    openserial_vars.outputBuf[OUTPUT_BUFFER_MASK & (openserial_vars.outputBufIdxW++)]       = HDLC_FLAG;
     
     ENABLE_INTERRUPTS();
     //>>>>>>>>>>>>>>>>>>>>>>>
@@ -867,7 +933,7 @@ port_INLINE void outputHdlcClose() {
 /**
 \brief Start an HDLC frame in the input buffer.
 */
-port_INLINE void inputHdlcOpen() {
+port_INLINE void inputHdlcOpen(void) {
     // reset the input buffer index
     openserial_vars.inputBufFillLevel                                = 0;
 
@@ -897,7 +963,7 @@ port_INLINE void inputHdlcWrite(uint8_t b) {
 /**
 \brief Finalize the incoming HDLC frame.
 */
-port_INLINE void inputHdlcClose() {
+port_INLINE void inputHdlcClose(void) {
     
     // verify the validity of the frame
     if (openserial_vars.hdlcInputCrc==HDLC_CRCGOOD) {
@@ -916,7 +982,7 @@ port_INLINE void inputHdlcClose() {
 //=========================== interrupt handlers ==============================
 
 // executed in ISR, called from scheduler.c
-void isr_openserial_tx() {
+void isr_openserial_tx(void) {
     if (openserial_vars.ctsStateChanged==TRUE) {
         // set CTS
         
@@ -937,7 +1003,7 @@ void isr_openserial_tx() {
         if (openserial_vars.outputBufIdxW!=openserial_vars.outputBufIdxR) {
             // I have some bytes to transmit
             
-            uart_writeByte(openserial_vars.outputBuf[openserial_vars.outputBufIdxR++]);
+                uart_writeByte(openserial_vars.outputBuf[OUTPUT_BUFFER_MASK & (openserial_vars.outputBufIdxR++)]);
             openserial_vars.fBusyFlushing = TRUE;
         } else {
             // I'm done sending bytes
@@ -952,7 +1018,7 @@ void isr_openserial_tx() {
 
 \returns 1 if don't receiving frame, 0 if not
 */
-uint8_t isr_openserial_rx() {
+uint8_t isr_openserial_rx(void) {
     uint8_t rxbyte;
     uint8_t returnVal;
     

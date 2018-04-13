@@ -61,7 +61,9 @@ void                radio_setFrequency(uint8_t frequency);
 void                radio_rfOn(void);
 void                radio_rfOff(void);
 // TX
-void                radio_loadPacket_prepare(uint8_t* packet, uint8_t len);
+#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
+void                radio_loadPacket_prepare(uint8_t* packet, uint16_t len);
+#endif
 void                radio_loadPacket(uint8_t* packet, uint16_t len);
 void                radio_txEnable(void);
 void                radio_txNow(void);

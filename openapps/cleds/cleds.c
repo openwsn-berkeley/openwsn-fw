@@ -31,7 +31,7 @@ void     cleds_sendDone(
 
 //=========================== public ==========================================
 
-void cleds__init() {
+void cleds__init(void) {
    
    // prepare the resource descriptor for the /l path
    cleds_vars.desc.path0len            = sizeof(cleds_path0)-1;

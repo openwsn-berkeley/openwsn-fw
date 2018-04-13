@@ -56,7 +56,7 @@ void forwarding_createDeadlineOption(
 /**
 \brief Initialize this module.
 */
-void forwarding_init() {
+void forwarding_init(void) {
 }
 
 /**

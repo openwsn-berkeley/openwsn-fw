@@ -44,7 +44,7 @@ void radio_isr_internal(void);
 
 //===== admin
 
-void radio_init() {
+void radio_init(void) {
 
 	// clear variables
 	memset(&radio_vars, 0, sizeof(radio_vars_t));
@@ -85,7 +85,7 @@ void radio_setEndFrameCb(radiotimer_capture_cbt cb) {
 
 //===== reset
 
-void radio_reset() {
+void radio_reset(void) {
 
 }
 
@@ -95,7 +95,7 @@ void radio_startTimer(PORT_TIMER_WIDTH period) {
 	radiotimer_start(period);
 }
 
-PORT_TIMER_WIDTH radio_getTimerValue() {
+PORT_TIMER_WIDTH radio_getTimerValue(void) {
 	return radiotimer_getValue();
 }
 
@@ -103,7 +103,7 @@ void radio_setTimerPeriod(PORT_TIMER_WIDTH period) {
 	radiotimer_setPeriod(period);
 }
 
-PORT_TIMER_WIDTH radio_getTimerPeriod() {
+PORT_TIMER_WIDTH radio_getTimerPeriod(void) {
 	return radiotimer_getPeriod();
 }
 
@@ -117,11 +117,11 @@ void radio_setFrequency(uint8_t frequency) {
 	radio_vars.state = RADIOSTATE_FREQUENCY_SET;
 }
 
-void radio_rfOn() {
+void radio_rfOn(void) {
 
 }
 
-void radio_rfOff() {
+void radio_rfOff(void) {
 
 	// change state
 	radio_vars.state = RADIOSTATE_TURNING_OFF;
@@ -150,7 +150,7 @@ void radio_loadPacket(uint8_t* packet, uint8_t len) {
 	radio_vars.state = RADIOSTATE_PACKET_LOADED;
 }
 
-void radio_txEnable() {
+void radio_txEnable(void) {
 
 	// change state
 	radio_vars.state = RADIOSTATE_ENABLING_TX;
@@ -166,7 +166,7 @@ void radio_txEnable() {
 	radio_vars.state = RADIOSTATE_TX_ENABLED;
 }
 
-void radio_txNow() {
+void radio_txNow(void) {
 	PORT_TIMER_WIDTH count;
 
 	// change state
@@ -183,7 +183,7 @@ void radio_txNow() {
 
 //===== RX
 
-void radio_rxEnable() {
+void radio_rxEnable(void) {
 
 	// change state
 	radio_vars.state = RADIOSTATE_ENABLING_RX;
@@ -199,7 +199,7 @@ void radio_rxEnable() {
 	radio_vars.state = RADIOSTATE_LISTENING;
 }
 
-void radio_rxNow() {
+void radio_rxNow(void) {
 	//empty buffer before receiving
 
 	//enable radio interrupts
@@ -245,7 +245,7 @@ void radio_off(void) {
  to be processed). Otherwise, the CPU is kept in sleep mode without even
  reaching the main loop.
  */
-kick_scheduler_t radio_isr() {
+kick_scheduler_t radio_isr(void) {
 	return DO_NOT_KICK_SCHEDULER;
 }
 

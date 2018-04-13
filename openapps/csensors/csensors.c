@@ -71,7 +71,7 @@ void csensors_sendDone(
 /**
    \brief Initialize csensors and registers opensensors resources.
 */
-void csensors_init() {
+void csensors_init(void) {
    uint8_t i;
    uint8_t numSensors;
 
@@ -305,7 +305,7 @@ void csensors_timer_cb(opentimers_id_t id){
 /**
    \brief   Called back from scheduler, when a task must be executed.
 */
-void csensors_task_cb() {
+void csensors_task_cb(void) {
    OpenQueueEntry_t*          pkt;
    owerror_t                  outcome;
    uint8_t                    id;
@@ -322,7 +322,6 @@ void csensors_task_cb() {
          (errorparameter_t)0,
          (errorparameter_t)0
       );
-      openqueue_freePacketBuffer(pkt);
       return;
    }
 

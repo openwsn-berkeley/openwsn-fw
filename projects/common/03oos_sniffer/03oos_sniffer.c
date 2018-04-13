@@ -14,7 +14,7 @@
 #include "idmanager.h"
 #include "sixtop.h"
 #include "neighbors.h"
-#include "sf0.h"
+#include "msf.h"
 #include "openrandom.h"
 
 //=========================== defines =========================================
@@ -22,7 +22,7 @@
 #define LENGTH_PACKET   125+LENGTH_CRC ///< maximum length is 127 bytes
 #define CHANNEL         20             ///< 20=2.450GHz
 #define ID              0x99           ///< byte sent in the packets
-#define TIMER_PERIOD    0x1fff  
+#define TIMER_PERIOD    0x1ff
 
 //=========================== variables =======================================
 
@@ -152,7 +152,7 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
 }
 
 void cb_timer(opentimers_id_t id) {
-  
+
    // schedule again
    opentimers_scheduleIn(
         app_vars.timerId,     // timerId
@@ -166,7 +166,7 @@ void cb_timer(opentimers_id_t id) {
 }
 
 // ================================ task =======================================
-void task_uploadPacket(){
+void task_uploadPacket(void) {
     openserial_printSniffedPacket(
         &(app_vars.packet[0]),
         app_vars.packet_len,
@@ -185,7 +185,7 @@ void schedule_startDAGroot(void)                        {return;}
 void schedule_setFrameLength(uint16_t frameLength)      {return;}
 
 void sixtop_setEBPeriod(uint8_t ebPeriod)                                 {return;}
-void sixtop_request(
+owerror_t sixtop_request(
     uint8_t      code, 
     open_addr_t* neighbor, 
     uint8_t      numCells, 
@@ -195,12 +195,11 @@ void sixtop_request(
     uint8_t      sfid,
     uint16_t     listingOffset,
     uint16_t     listingMaxNumCells
-)                                                                           {return;}
-bool sixtop_setHandler(six2six_handler_t handler)                           {return TRUE;}
+)                                                                         {return E_FAIL;}
 void sixtop_setIsResponseEnabled(bool isEnabled)                          {return;}
 void sixtop_setKaPeriod(uint16_t kaPeriod)                                  {return;}
-void sf0_appPktPeriod(uint8_t numAppPacketsPerSlotFrame)                    {return;}
-uint8_t  sf0_getsfid(void)                                                  {return 0;}
+void msf_appPktPeriod(uint8_t numAppPacketsPerSlotFrame)                  {return;}
+uint8_t  msf_getsfid(void)                                                {return 0;}
 
 void openbridge_triggerData(void)                                           {return;}
 
