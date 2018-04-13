@@ -266,10 +266,8 @@ owerror_t openserial_print_uint32_t(uint32_t value) {
 
     // start TX'ing
     openserial_flush();
-
-    ENABLE_INTERRUPTS();
 #endif
-   return E_SUCCESS;
+    return E_SUCCESS;
 }
 
 owerror_t openserial_print_str(char* buffer, uint8_t length) {
@@ -295,8 +293,6 @@ owerror_t openserial_print_str(char* buffer, uint8_t length) {
 
     // start TX'ing
     openserial_flush();
-
-    ENABLE_INTERRUPTS();
 #endif
    return E_SUCCESS;
 }
