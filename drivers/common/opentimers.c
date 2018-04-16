@@ -356,9 +356,11 @@ void opentimers_timer_callback(void){
     PORT_TIMER_WIDTH timerGap;
     PORT_TIMER_WIDTH tempTimerGap;
     PORT_TIMER_WIDTH tempLastTimeout = opentimers_vars.currentTimeout;
+	opentimers_vars.running = FALSE;
     // 1. find the expired timer
     for (i=0;i<MAX_NUM_TIMERS;i++){
         if (opentimers_vars.timersBuf[i].isrunning==TRUE){
+			opentimers_vars.running = TRUE;
             // all timers in the past within TIMERTHRESHOLD ticks
             // (probably with low priority) will mared as Expired.
             if ((PORT_TIMER_WIDTH)(opentimers_vars.currentTimeout-opentimers_vars.timersBuf[i].currentCompareValue) <= TIMERTHRESHOLD){
@@ -369,9 +371,7 @@ void opentimers_timer_callback(void){
                     tempLastTimeout = opentimers_vars.timersBuf[i].currentCompareValue;
                 }
             }
-        } else if (i==(MAX_NUM_TIMERS-1)) {
-			opentimers_vars.running = FALSE;
-		}
+        }
     }
     
     // update lastTimeout
