@@ -1913,7 +1913,7 @@
     <group>
       <name>boards</name>
       <group>
-        <name>openmote-CC2538</name>
+        <name>openmote-cc2538</name>
         <group>
           <name>headers</name>
           <file>
@@ -2144,7 +2144,6 @@
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\cryptoengine.c</name>
-
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\debugpins.c</name>
