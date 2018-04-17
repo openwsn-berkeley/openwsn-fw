@@ -19,15 +19,6 @@
 //=========================== define ==========================================
 
 
-//===== sctimer scheduling
-// the timer with higher priority can be scheduled in advance even if
-// there is a timer being scheduled early than the higher priority timer
-// but within TIMERTHRESHOLD.
-// E.g if priority of timer0 > priority of timer1: if timer0 schedules timer at
-// 100 and timer 1 schedules timer at 95 and current timer count is 80,
-// then timer0 will be scheduled first than timer1.
-#define TIMERTHRESHOLD 10
-
 /// Maximum number of timers that can run concurrently
 #define MAX_NUM_TIMERS             10
 #define MAX_TICKS_IN_SINGLE_CLOCK  (uint32_t)(((PORT_TIMER_WIDTH)0xFFFFFFFF)>>1)

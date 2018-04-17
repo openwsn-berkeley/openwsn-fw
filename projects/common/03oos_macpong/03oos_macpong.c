@@ -66,15 +66,15 @@ void macpong_initSend(opentimers_id_t id) {
         TIMER_ONESHOT,        // timer_type
         macpong_initSend      // callback
    );
-  
-  
+
+
    if (idmanager_getIsDAGroot()==TRUE) {
       return;
    }
    if (ieee154e_isSynch()==TRUE && neighbors_getNumNeighbors()==1) {
       if (timeToSend){
           // send packet
-           macpong_send(0);   
+           macpong_send(0);
           // cancel timer
           opentimers_cancel(macpong_vars.timerId);
       }
@@ -84,7 +84,7 @@ void macpong_initSend(opentimers_id_t id) {
 void macpong_send(uint8_t payloadCtr) {
    OpenQueueEntry_t* pkt;
    uint8_t i;
-   
+
    pkt = openqueue_getFreePacketBuffer(COMPONENT_UECHO);
    if (pkt==NULL) {
       openserial_printError(
@@ -97,7 +97,7 @@ void macpong_send(uint8_t payloadCtr) {
    }
    pkt->creator                   = COMPONENT_IPHC;
    pkt->owner                     = COMPONENT_IPHC;
-   
+
    neighbors_getNeighborEui64(&pkt->l2_nextORpreviousHop,ADDR_64B,0);
    packetfunctions_reserveHeaderSize(pkt,LEN_PAYLOAD);
    ((uint8_t*)pkt->payload)[0]    = payloadCtr;
@@ -112,7 +112,7 @@ void macpong_send(uint8_t payloadCtr) {
 //===== IPHC
 
 void iphc_init(void) {
-    macpong_vars.timerId = opentimers_create();
+    macpong_vars.timerId = opentimers_create(DEFAULT_PRIORITY);
     opentimers_scheduleIn(
         macpong_vars.timerId,   // timerId
         1000,                   // duration
@@ -155,17 +155,17 @@ void icmpv6rpl_trigger(void)                                         { return; }
 void icmpv6rpl_writeDODAGid(uint8_t* dodagid)                        { return; }
 void icmpv6rpl_setDIOPeriod(uint16_t dioPeriod)                      { return; }
 void icmpv6rpl_setDAOPeriod(uint16_t daoPeriod)                      { return; }
-bool icmpv6rpl_getPreferredParentIndex(uint8_t* indexptr)            { 
-    return FALSE; 
+bool icmpv6rpl_getPreferredParentIndex(uint8_t* indexptr)            {
+    return FALSE;
 }
-bool icmpv6rpl_getPreferredParentEui64(open_addr_t* addressToWrite)  { 
-    return FALSE; 
+bool icmpv6rpl_getPreferredParentEui64(open_addr_t* addressToWrite)  {
+    return FALSE;
 }
-bool icmpv6rpl_isPreferredParent(open_addr_t* address)               { 
-    return FALSE; 
+bool icmpv6rpl_isPreferredParent(open_addr_t* address)               {
+    return FALSE;
 }
-dagrank_t icmpv6rpl_getMyDAGrank(void)                               { 
-    return 0; 
+dagrank_t icmpv6rpl_getMyDAGrank(void)                               {
+    return 0;
 }
 bool icmpv6rpl_daoSent(void) {
     return TRUE;
