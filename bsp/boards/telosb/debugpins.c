@@ -19,11 +19,11 @@ void debugpins_init(void) {
    P6DIR |=  0x40;      // frame       [P6.6]
    P6DIR |=  0x80;      // slot        [P6.7]
    P2DIR |=  0x08;      // fsm         [P2.3]
-   P2DIR |=  0x40;      // radio       [P2.6]
-   
-   P6DIR |=  0x01;      // task        [P6.0]
-   P6DIR |=  0x02;      // isr         [P6.1]
-   
+   P2DIR |=  0x40;      // task        [P2.6]
+
+   P6DIR |=  0x01;      // isr         [P6.0]
+   P6DIR |=  0x02;      // radio       [P6.1]
+
    P3DIR |=  0x20;      // isruarttx   [P3.5]
    P3DIR |=  0x10;      // isruartrx   [P3.4]
    P6DIR |=  0x08;      // intdisabled [P6.3]
@@ -59,35 +59,35 @@ void debugpins_fsm_clr(void) {
 void debugpins_fsm_set(void) {
    P2OUT |=  0x08;
 }
-// radio       [P2.6]
-void debugpins_radio_toggle(void) {
+// task       [P2.6]
+void debugpins_task_toggle(void) {
    P2OUT ^=  0x40;
 }
-void debugpins_radio_clr(void) {
+void debugpins_task_clr(void) {
    P2OUT &= ~0x40;
 }
-void debugpins_radio_set(void) {
+void debugpins_task_set(void) {
    P2OUT |=  0x40;
 }
 
-// task        [P6.0]
-void debugpins_task_toggle(void) {
+// isr        [P6.0]
+void debugpins_isr_toggle(void) {
    P6OUT ^=  0x01;
 }
-void debugpins_task_clr(void) {
+void debugpins_isr_clr(void) {
    P6OUT &= ~0x01;
 }
-void debugpins_task_set(void) {
+void debugpins_isr_set(void) {
    P6OUT |=  0x01;
 }
-// isr         [P6.1]
-void debugpins_isr_toggle(void) {
+// radio      [P6.1]
+void debugpins_radio_toggle(void) {
    P6OUT ^=  0x02;
 }
-void debugpins_isr_clr(void) {
+void debugpins_radio_clr(void) {
    P6OUT &= ~0x02;
 }
-void debugpins_isr_set(void) {
+void debugpins_radio_set(void) {
    P6OUT |=  0x02;
 }
 
