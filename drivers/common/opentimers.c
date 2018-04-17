@@ -44,16 +44,26 @@ void opentimers_init(void){
 /**
 \brief create a timer by assigning an entry from timer buffer.
 
-create a timer by assigning an Id for the timer.
+create a timer by assigning an Id and priority for the timer
 
 \returns the id of the timer will be returned
  */
-opentimers_id_t opentimers_create(void){
+opentimers_id_t opentimers_create(uint8_t priority){
     uint8_t id;
-    for (id=0;id<MAX_NUM_TIMERS;id++){
-        if (opentimers_vars.timersBuf[id].isUsed  == FALSE){
-            opentimers_vars.timersBuf[id].isUsed   = TRUE;
-            return id;
+
+    if (priority==0){
+        if (opentimers_vars.timersBuf[0].isUsed  == FALSE){
+            opentimers_vars.timersBuf[0].isUsed   = TRUE;
+            opentimers_vars.timersBuf[0].priority = 0;
+            return 0;
+        }
+    } else {
+        for (id=1;id<MAX_NUM_TIMERS;id++){
+            if (opentimers_vars.timersBuf[id].isUsed  == FALSE){
+                opentimers_vars.timersBuf[id].isUsed   = TRUE;
+                opentimers_vars.timersBuf[0].priority  = priority;
+                return id;
+            }
         }
     }
     // there is no available buffer for this timer
@@ -322,25 +332,10 @@ bool opentimers_isRunning(opentimers_id_t id){
     return opentimers_vars.timersBuf[id].isrunning;
 }
 
-
-/**
-\brief set the priority of given timer
-
-\param[in] id indicates the timer to be assigned.
-\param[in] priority indicates the priority of given timer.
- */
-void opentimers_setPriority(opentimers_id_t id, uint8_t priority){
-    if (opentimers_vars.timersBuf[id].isUsed  == TRUE){
-        opentimers_vars.timersBuf[id].priority = priority;
-    } else {
-        // the given timer is not used, do nothing.
-    }
-}
-
 // ========================== callback ========================================
 
 /**
-\brief this is the callback function of opentimer2.
+\brief this is the callback function of opentimer.
 
 This function is called when sctimer interrupt happens. The function looks the
 whole timer buffer and find out the correct timer responding to the interrupt

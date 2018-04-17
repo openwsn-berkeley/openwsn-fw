@@ -151,7 +151,7 @@ void csensors_register(
          csensors_resource->desc.path1len   = sizeof(csensors_default_path1)-1;
          csensors_resource->desc.path1val   = (uint8_t*)(&csensors_default_path1);
          break;
-         
+
    }
    csensors_resource->desc.componentID      = COMPONENT_CSENSORS;
    csensors_resource->desc.discoverable     = TRUE;
@@ -276,7 +276,7 @@ owerror_t csensors_receive(
 }
 
 /**
-   \brief   Called back from opentimers when a CoAP message is received for this resource. 
+   \brief   Called back from opentimers when a CoAP message is received for this resource.
       Timer fired, but we don't want to execute task in ISR mode.
       Instead, push task to scheduler with COAP priority, and let scheduler take care of it.
    \param[in] id The opentimer identifier used to resolve the csensor resource associated
@@ -284,15 +284,15 @@ owerror_t csensors_receive(
 */
 void csensors_timer_cb(opentimers_id_t id){
    uint8_t i;
-   
+
    for(i=0;i<csensors_vars.numCsensors;i++) {
       if (csensors_vars.csensors_resource[i].timerId == i) {
          csensors_vars.cb_list[csensors_vars.cb_put] = i;
          csensors_vars.cb_put = (csensors_vars.cb_put+1)%CSENSORSTASKLIST;
          opentimers_scheduleIn(
-             csensors_vars.csensors_resource[i].timerId, 
+             csensors_vars.csensors_resource[i].timerId,
              csensors_vars.csensors_resource[i].period,
-             TIME_MS, 
+             TIME_MS,
              TIMER_ONESHOT,
              csensors_timer_cb
          );
@@ -392,27 +392,27 @@ void csensors_setPeriod(uint32_t period,
       csensors_vars.csensors_resource[id].period = period;
       if (opentimers_isRunning(csensors_vars.csensors_resource[id].timerId)) {
          opentimers_scheduleIn(
-             csensors_vars.csensors_resource[id].timerId, 
+             csensors_vars.csensors_resource[id].timerId,
              (uint32_t)((period*openrandom_get16b())/0xffff),
-             TIME_MS, 
+             TIME_MS,
              TIMER_ONESHOT,
              csensors_timer_cb
          );
          if (old_period==0) {
              opentimers_scheduleIn(
-                 csensors_vars.csensors_resource[id].timerId, 
+                 csensors_vars.csensors_resource[id].timerId,
                  (uint32_t)((period*openrandom_get16b())/0xffff),
-                 TIME_MS, 
+                 TIME_MS,
                  TIMER_ONESHOT,
                  csensors_timer_cb
              );
          }
       } else {
-         csensors_vars.csensors_resource[id].timerId = opentimers_create();
+         csensors_vars.csensors_resource[id].timerId = opentimers_create(DEFAULT_PRIORITY);
          opentimers_scheduleIn(
-             csensors_vars.csensors_resource[id].timerId, 
+             csensors_vars.csensors_resource[id].timerId,
              (uint32_t)((period*openrandom_get16b())/0xffff),
-             TIME_MS, 
+             TIME_MS,
              TIMER_ONESHOT,
              csensors_timer_cb
          );
@@ -434,12 +434,12 @@ void csensors_setPeriod(uint32_t period,
 */
 void csensors_fillpayload(OpenQueueEntry_t* msg,
       uint8_t id) {
-   
+
    uint16_t              value;
 
    value=csensors_vars.csensors_resource[id].opensensors_resource->callbackRead();
    packetfunctions_reserveHeaderSize(msg,2);
-   
+
    // add value
    msg->payload[0]                  = (value>>8) & 0x00ff;
    msg->payload[1]                  = value & 0x00ff;

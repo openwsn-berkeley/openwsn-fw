@@ -69,12 +69,12 @@ void cjoin_init(void) {
    cjoin_vars.desc.discoverable                    = TRUE;
    cjoin_vars.desc.callbackRx                      = &cjoin_receive;
    cjoin_vars.desc.callbackSendDone                = &cjoin_sendDone;
-  
-   cjoin_vars.isJoined                             = FALSE;   
+
+   cjoin_vars.isJoined                             = FALSE;
 
    opencoap_register(&cjoin_vars.desc);
 
-   cjoin_vars.timerId = opentimers_create();
+   cjoin_vars.timerId = opentimers_create(DEFAULT_PRIORITY);
 
    idmanager_setJoinKey((uint8_t *) masterSecret);
 
@@ -91,9 +91,9 @@ void cjoin_init_security_context(void) {
    recipientID[8] = 0x01; // construct recipient ID according to the minimal-security-03 draft
 
    idmanager_getJoinKey(&joinKey);
-   
-   openoscoap_init_security_context(&cjoin_vars.context, 
-                                senderID, 
+
+   openoscoap_init_security_context(&cjoin_vars.context,
+                                senderID,
                                 sizeof(senderID),
                                 recipientID,
                                 sizeof(recipientID),
@@ -105,13 +105,13 @@ void cjoin_init_security_context(void) {
 
 void cjoin_schedule(void) {
     uint16_t delay;
-    
+
     if (cjoin_getIsJoined() == FALSE) {
         delay = openrandom_get16b();
-        
+
         opentimers_scheduleIn(cjoin_vars.timerId,
                 (uint32_t) delay, // random wait from 0 to 65535ms
-                TIME_MS, 
+                TIME_MS,
                 TIMER_PERIODIC,
                 cjoin_timer_cb
         );
@@ -132,7 +132,7 @@ owerror_t cjoin_receive(OpenQueueEntry_t* msg,
     opentimers_cancel(cjoin_vars.timerId); // cancel the retransmission timer
 
     if (coap_header->Code != COAP_CODE_RESP_CONTENT) {
-        return E_FAIL;        
+        return E_FAIL;
     }
 
     ret = cbor_parse_join_response(&join_response, msg->payload, msg->length);
@@ -170,13 +170,13 @@ void cjoin_retransmission_task_cb(void) {
       );
         return;
     }
- 
+
     cjoin_sendJoinRequest(joinProxy);
 }
 
 void cjoin_task_cb(void) {
     open_addr_t *joinProxy;
-  
+
     // don't run if not synch
     if (ieee154e_isSynch() == FALSE) return;
 
@@ -190,7 +190,7 @@ void cjoin_task_cb(void) {
     if(joinProxy == NULL) {
         return;
     }
-    
+
     // cancel the startup timer but do not destroy it as we reuse it for retransmissions
     opentimers_cancel(cjoin_vars.timerId);
 
@@ -216,7 +216,7 @@ owerror_t cjoin_sendJoinRequest(open_addr_t* joinProxy) {
     // immediately arm the retransmission timer
     opentimers_scheduleIn(cjoin_vars.timerId,
             (uint32_t) TIMEOUT,
-            TIME_MS, 
+            TIME_MS,
             TIMER_ONESHOT,
             cjoin_retransmission_cb
     );
@@ -240,7 +240,7 @@ owerror_t cjoin_sendJoinRequest(open_addr_t* joinProxy) {
    options[0].type = COAP_OPTION_NUM_URIHOST;
    options[0].length = sizeof(jrcHostName)-1;
    options[0].pValue = (uint8_t *)jrcHostName;
-   
+
    // location-path option
    options[1].type = COAP_OPTION_NUM_URIPATH;
    options[1].length = sizeof(cjoin_path0)-1;
@@ -254,14 +254,14 @@ owerror_t cjoin_sendJoinRequest(open_addr_t* joinProxy) {
    options[3].type = COAP_OPTION_NUM_PROXYSCHEME;
    options[3].length = sizeof(proxyScheme)-1;
    options[3].pValue = (uint8_t *)proxyScheme;
- 
+
    // metadata
    pkt->l4_destination_port       = WKP_UDP_COAP;
    pkt->l3_destinationAdd.type    = ADDR_128B;
    prefix = idmanager_getMyID(ADDR_PREFIX); // at this point, this is link-local prefix
    memcpy(&pkt->l3_destinationAdd.addr_128b[0],prefix->prefix,8);
    memcpy(&pkt->l3_destinationAdd.addr_128b[8],joinProxy->addr_64b,8); // set host to eui-64 of the join proxy
- 
+
    // send
    outcome = opencoap_send(
       pkt,
@@ -272,7 +272,7 @@ owerror_t cjoin_sendJoinRequest(open_addr_t* joinProxy) {
       4, // options len
       &cjoin_vars.desc
    );
-   
+
    // avoid overflowing the queue if fails
    if (outcome==E_FAIL) {
       openqueue_freePacketBuffer(pkt);
@@ -282,10 +282,10 @@ owerror_t cjoin_sendJoinRequest(open_addr_t* joinProxy) {
   return E_SUCCESS;
 }
 
-bool cjoin_getIsJoined(void) {   
+bool cjoin_getIsJoined(void) {
    bool res;
    INTERRUPT_DECLARATION();
-   
+
    DISABLE_INTERRUPTS();
    res=cjoin_vars.isJoined;
    ENABLE_INTERRUPTS();

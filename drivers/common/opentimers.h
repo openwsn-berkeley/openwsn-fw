@@ -31,10 +31,12 @@
 /// Maximum number of timers that can run concurrently
 #define MAX_NUM_TIMERS             10
 #define MAX_TICKS_IN_SINGLE_CLOCK  (uint32_t)(((PORT_TIMER_WIDTH)0xFFFFFFFF)>>1)
-//#define MAX_TICKS_IN_SINGLE_CLOCK  0x7FFF
 #define ERROR_NO_AVAILABLE_ENTRIES 255
 #define MAX_DURATION_ISR           33 // 33@32768Hz = 1ms
 #define opentimers_id_t            uint8_t
+
+#define HIGHEST_PRIORITY           0
+#define DEFAULT_PRIORITY           255
 
 typedef void (*opentimers_cbt)(opentimers_id_t id);
 
@@ -78,7 +80,7 @@ typedef struct {
 //=========================== prototypes ======================================
 
 void             opentimers_init(void);
-opentimers_id_t  opentimers_create(void);
+opentimers_id_t  opentimers_create(uint8_t priority);
 void             opentimers_scheduleIn(opentimers_id_t      id,
                                        uint32_t            duration,
                                        time_type_t         uint_type,
@@ -95,7 +97,6 @@ bool             opentimers_destroy(opentimers_id_t id);
 PORT_TIMER_WIDTH opentimers_getValue(void);
 PORT_TIMER_WIDTH opentimers_getCurrentTimeout(void);
 bool             opentimers_isRunning(opentimers_id_t id);
-void             opentimers_setPriority(opentimers_id_t id, uint8_t priority);
 /**
 \}
 \}

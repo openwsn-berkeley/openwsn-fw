@@ -42,7 +42,7 @@ void    cexample_sendDone(OpenQueueEntry_t* msg,
 //=========================== public ==========================================
 
 void cexample_init(void) {
-   
+
     // prepare the resource descriptor for the /ex path
     cexample_vars.desc.path0len             = sizeof(cexample_path0)-1;
     cexample_vars.desc.path0val             = (uint8_t*)(&cexample_path0);
@@ -53,14 +53,14 @@ void cexample_init(void) {
     cexample_vars.desc.discoverable         = TRUE;
     cexample_vars.desc.callbackRx           = &cexample_receive;
     cexample_vars.desc.callbackSendDone     = &cexample_sendDone;
-    
-    
+
+
     opencoap_register(&cexample_vars.desc);
-    cexample_vars.timerId    = opentimers_create();
+    cexample_vars.timerId    = opentimers_create(DEFAULT_PRIORITY);
     opentimers_scheduleIn(
-        cexample_vars.timerId, 
-        CEXAMPLEPERIOD, 
-        TIME_MS, 
+        cexample_vars.timerId,
+        CEXAMPLEPERIOD,
+        TIME_MS,
         TIMER_PERIODIC,
         cexample_timer_cb
     );
@@ -88,27 +88,27 @@ void cexample_task_cb(void) {
    owerror_t            outcome;
    uint8_t              i;
    coap_option_iht      options[2];
-   
+
    uint16_t             x_int       = 0;
    uint16_t             sum         = 0;
    uint16_t             avg         = 0;
    uint8_t              N_avg       = 10;
    uint8_t              medtype;
-   
+
    // don't run if not synch
    if (ieee154e_isSynch() == FALSE) return;
-   
+
    // don't run on dagroot
    if (idmanager_getIsDAGroot()) {
       opentimers_destroy(cexample_vars.timerId);
       return;
    }
-   
+
    for (i = 0; i < N_avg; i++) {
       sum += x_int;
    }
    avg = sum/N_avg;
-   
+
    // create a CoAP RD packet
    pkt = openqueue_getFreePacketBuffer(COMPONENT_CEXAMPLE);
    if (pkt==NULL) {
@@ -142,12 +142,12 @@ void cexample_task_cb(void) {
    options[1].type = COAP_OPTION_NUM_CONTENTFORMAT;
    options[1].length = 1;
    options[1].pValue = &medtype;
-   
+
    // metadata
    pkt->l4_destination_port       = WKP_UDP_COAP;
    pkt->l3_destinationAdd.type    = ADDR_128B;
    memcpy(&pkt->l3_destinationAdd.addr_128b[0],&ipAddr_motesEecs,16);
-   
+
    // send
    outcome = opencoap_send(
       pkt,
@@ -158,12 +158,12 @@ void cexample_task_cb(void) {
       2, // options len
       &cexample_vars.desc
    );
-   
+
    // avoid overflowing the queue if fails
    if (outcome==E_FAIL) {
       openqueue_freePacketBuffer(pkt);
    }
-   
+
    return;
 }
 
