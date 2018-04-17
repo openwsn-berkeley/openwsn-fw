@@ -18,21 +18,21 @@
 
 //=========================== define ==========================================
 
-                                            
+
 //===== sctimer scheduling
-// the timer with higher priority can be scheduled in advance even if 
+// the timer with higher priority can be scheduled in advance even if
 // there is a timer being scheduled early than the higher priority timer
-// but within TIMERTHRESHOLD. 
-// E.g if priority of timer0 > priority of timer1: if timer0 schedules timer at 
-// 100 and timer 1 schedules timer at 95 and current timer count is 80, 
-// then timer0 will be scheduled first than timer1. 
+// but within TIMERTHRESHOLD.
+// E.g if priority of timer0 > priority of timer1: if timer0 schedules timer at
+// 100 and timer 1 schedules timer at 95 and current timer count is 80,
+// then timer0 will be scheduled first than timer1.
 #define TIMERTHRESHOLD 10
 
 /// Maximum number of timers that can run concurrently
 #define MAX_NUM_TIMERS             10
 #define MAX_TICKS_IN_SINGLE_CLOCK  (uint32_t)(((PORT_TIMER_WIDTH)0xFFFFFFFF)>>1)
 //#define MAX_TICKS_IN_SINGLE_CLOCK  0x7FFF
-#define TOO_MANY_TIMERS_ERROR      255
+#define ERROR_NO_AVAILABLE_ENTRIES 255
 #define MAX_DURATION_ISR           33 // 33@32768Hz = 1ms
 #define opentimers_id_t            uint8_t
 
@@ -79,15 +79,15 @@ typedef struct {
 
 void             opentimers_init(void);
 opentimers_id_t  opentimers_create(void);
-void             opentimers_scheduleIn(opentimers_id_t      id, 
+void             opentimers_scheduleIn(opentimers_id_t      id,
                                        uint32_t            duration,
-                                       time_type_t         uint_type, 
-                                       timer_type_t        timer_type, 
+                                       time_type_t         uint_type,
+                                       timer_type_t        timer_type,
                                        opentimers_cbt      cb);
-void             opentimers_scheduleAbsolute(opentimers_id_t      id, 
-                                              uint32_t            duration, 
-                                              PORT_TIMER_WIDTH    reference , 
-                                              time_type_t         uint_type, 
+void             opentimers_scheduleAbsolute(opentimers_id_t      id,
+                                              uint32_t            duration,
+                                              PORT_TIMER_WIDTH    reference ,
+                                              time_type_t         uint_type,
                                               opentimers_cbt      cb);
 void             opentimers_cancel(opentimers_id_t id);
 bool             opentimers_destroy(opentimers_id_t id);
