@@ -9,6 +9,8 @@
 #include "IEEE802154E.h"
 #include "icmpv6rpl.h"
 #include "neighbors.h"
+// telosb need debugpins to indicate the ISR activity
+#include "debugpins.h"
 
 //=========================== definition ======================================
 
@@ -31,7 +33,7 @@ void schedule_resetEntry(scheduleEntry_t* pScheduleEntry);
 */
 void schedule_init(void) {
     uint8_t running_slotOffset;
- 
+
     // reset local variables
     memset(&schedule_vars,0,sizeof(schedule_vars_t));
     for (running_slotOffset=0;running_slotOffset<MAXACTIVESLOTS;running_slotOffset++) {
@@ -39,7 +41,7 @@ void schedule_init(void) {
     }
     schedule_vars.backoffExponenton   = MINBE-1;
     schedule_vars.maxActiveSlots = MAXACTIVESLOTS;
-   
+
     if (idmanager_getIsDAGroot()==TRUE) {
         schedule_startDAGroot();
     }
@@ -52,7 +54,7 @@ void schedule_startDAGroot(void) {
    slotOffset_t    start_slotOffset;
    slotOffset_t    running_slotOffset;
    open_addr_t     temp_neighbor;
-   
+
    start_slotOffset = SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;
    // set frame length, handle and number (default 1 by now)
    if (schedule_vars.frameLength == 0) {
@@ -63,7 +65,7 @@ void schedule_startDAGroot(void) {
    }
    schedule_setFrameHandle(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE);
    schedule_setFrameNumber(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_NUMBER);
-   
+
    // shared TXRX anycast slot(s)
    memset(&temp_neighbor,0,sizeof(temp_neighbor));
    temp_neighbor.type             = ADDR_ANYCAST;
@@ -88,10 +90,10 @@ status information about several modules in the OpenWSN stack.
 */
 bool debugPrint_schedule(void) {
    debugScheduleEntry_t temp;
-   
+
    // increment the row just printed
    schedule_vars.debugPrintRow         = (schedule_vars.debugPrintRow+1)%schedule_vars.maxActiveSlots;
-   
+
    // gather status data
    temp.row                            = schedule_vars.debugPrintRow;
    temp.slotOffset                     = \
@@ -118,14 +120,14 @@ bool debugPrint_schedule(void) {
       &schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].lastUsedAsn,
       sizeof(asn_t)
    );
-   
+
    // send status data over serial port
    openserial_printStatus(
       STATUS_SCHEDULE,
       (uint8_t*)&temp,
       sizeof(debugScheduleEntry_t)
    );
-   
+
    return TRUE;
 }
 
@@ -139,18 +141,18 @@ status information about several modules in the OpenWSN stack.
 */
 bool debugPrint_backoff(void) {
    uint8_t temp[2];
-   
+
    // gather status data
    temp[0] = schedule_vars.backoffExponenton;
    temp[1] = schedule_vars.backoff;
-   
+
    // send status data over serial port
    openserial_printStatus(
       STATUS_BACKOFF,
       (uint8_t*)&temp,
       sizeof(temp)
    );
-   
+
    return TRUE;
 }
 
@@ -162,10 +164,10 @@ bool debugPrint_backoff(void) {
 \param newFrameLength The new frame length.
 */
 void schedule_setFrameLength(frameLength_t newFrameLength) {
-   
+
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
-   
+
    schedule_vars.frameLength = newFrameLength;
    if (newFrameLength <= MAXACTIVESLOTS) {
       schedule_vars.maxActiveSlots = newFrameLength;
@@ -179,12 +181,12 @@ void schedule_setFrameLength(frameLength_t newFrameLength) {
 \param frameHandle The new frame handle.
 */
 void schedule_setFrameHandle(uint8_t frameHandle) {
-   
+
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
-   
+
    schedule_vars.frameHandle = frameHandle;
-   
+
    ENABLE_INTERRUPTS();
 }
 
@@ -194,12 +196,12 @@ void schedule_setFrameHandle(uint8_t frameHandle) {
 \param frameNumber The new frame number.
 */
 void schedule_setFrameNumber(uint8_t frameNumber) {
-   
+
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
-   
+
    schedule_vars.frameNumber = frameNumber;
-   
+
    ENABLE_INTERRUPTS();
 }
 
@@ -215,9 +217,9 @@ void  schedule_getSlotInfo(
    open_addr_t*         neighbor,
    slotinfo_element_t*  info
 ){
-   
+
    scheduleEntry_t* slotContainer;
-  
+
    // find an empty schedule entry container
    slotContainer = &schedule_vars.scheduleBuf[0];
    while (slotContainer<=&schedule_vars.scheduleBuf[schedule_vars.maxActiveSlots-1]) {
@@ -234,7 +236,7 @@ void  schedule_getSlotInfo(
    // return cell type off
    info->link_type                 = CELLTYPE_OFF;
    info->shared                    = FALSE;
-   info->channelOffset             = 0;//set to zero if not set.                          
+   info->channelOffset             = 0;//set to zero if not set.
 }
 
 /**
@@ -258,10 +260,10 @@ owerror_t schedule_addActiveSlot(
    scheduleEntry_t* slotContainer;
    scheduleEntry_t* previousSlotWalker;
    scheduleEntry_t* nextSlotWalker;
-   
+
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
-   
+
    // find an empty schedule entry container
    slotContainer = &schedule_vars.scheduleBuf[0];
    while (
@@ -270,7 +272,7 @@ owerror_t schedule_addActiveSlot(
       ) {
       slotContainer++;
    }
-   
+
    // abort it schedule overflow
    if (slotContainer>&schedule_vars.scheduleBuf[schedule_vars.maxActiveSlots-1]) {
       ENABLE_INTERRUPTS();
@@ -281,32 +283,32 @@ owerror_t schedule_addActiveSlot(
       );
       return E_FAIL;
    }
-   
+
    // fill that schedule entry with parameters passed
    slotContainer->slotOffset                = slotOffset;
    slotContainer->type                      = type;
    slotContainer->shared                    = shared;
    slotContainer->channelOffset             = channelOffset;
    memcpy(&slotContainer->neighbor,neighbor,sizeof(open_addr_t));
-   
+
    // fill that schedule entry with current asn
    ieee154e_getAsn(&(asn[0]));
    slotContainer->lastUsedAsn.bytes0and1 = 256*asn[1]+asn[0];
    slotContainer->lastUsedAsn.bytes2and3 = 256*asn[3]+asn[2];
    slotContainer->lastUsedAsn.byte4      = asn[4];
-   
+
    // insert in circular list
    if (schedule_vars.currentScheduleEntry==NULL) {
       // this is the first active slot added
-      
+
       // the next slot of this slot is this slot
       slotContainer->next                   = slotContainer;
-      
+
       // current slot points to this slot
       schedule_vars.currentScheduleEntry    = slotContainer;
    } else  {
       // this is NOT the first active slot added
-      
+
       // find position in schedule
       previousSlotWalker                    = schedule_vars.currentScheduleEntry;
       while (1) {
@@ -351,7 +353,7 @@ owerror_t schedule_addActiveSlot(
       previousSlotWalker->next              = slotContainer;
       slotContainer->next                   = nextSlotWalker;
    }
-   
+
    ENABLE_INTERRUPTS();
    return E_SUCCESS;
 }
@@ -366,10 +368,10 @@ owerror_t schedule_addActiveSlot(
 owerror_t schedule_removeActiveSlot(slotOffset_t slotOffset, open_addr_t* neighbor) {
    scheduleEntry_t* slotContainer;
    scheduleEntry_t* previousSlotWalker;
-   
+
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
-   
+
    // find the schedule entry
    slotContainer = &schedule_vars.scheduleBuf[0];
    while (slotContainer<=&schedule_vars.scheduleBuf[schedule_vars.maxActiveSlots-1]) {
@@ -382,7 +384,7 @@ owerror_t schedule_removeActiveSlot(slotOffset_t slotOffset, open_addr_t* neighb
       }
       slotContainer++;
    }
-   
+
    // abort it could not find
    if (slotContainer>&schedule_vars.scheduleBuf[schedule_vars.maxActiveSlots-1]) {
       ENABLE_INTERRUPTS();
@@ -393,59 +395,59 @@ owerror_t schedule_removeActiveSlot(slotOffset_t slotOffset, open_addr_t* neighb
       );
       return E_FAIL;
    }
-   
+
    // remove from linked list
    if (slotContainer->next==slotContainer) {
       // this is the last active slot
-      
+
       // the next slot of this slot is NULL
       slotContainer->next                   = NULL;
-      
+
       // current slot points to this slot
       schedule_vars.currentScheduleEntry    = NULL;
    } else  {
       // this is NOT the last active slot
-      
+
       // find the previous in the schedule
       previousSlotWalker                    = schedule_vars.currentScheduleEntry;
-      
+
       while (1) {
          if (previousSlotWalker->next==slotContainer){
             break;
          }
          previousSlotWalker                 = previousSlotWalker->next;
       }
-      
+
       // remove this element from the linked list, i.e. have the previous slot
       // "jump" to slotContainer's next
       previousSlotWalker->next              = slotContainer->next;
-      
+
       // update current slot if points to slot I just removed
       if (schedule_vars.currentScheduleEntry==slotContainer) {
          schedule_vars.currentScheduleEntry = slotContainer->next;
       }
    }
-   
+
    // reset removed schedule entry
    schedule_resetEntry(slotContainer);
-   
+
    ENABLE_INTERRUPTS();
-   
+
    return E_SUCCESS;
 }
 
 bool schedule_isSlotOffsetAvailable(uint16_t slotOffset){
-   
+
    scheduleEntry_t* scheduleWalker;
-   
+
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
-   
+
    if (slotOffset>=schedule_vars.frameLength){
       ENABLE_INTERRUPTS();
       return FALSE;
    }
-   
+
    scheduleWalker = schedule_vars.currentScheduleEntry;
    do {
       if(slotOffset == scheduleWalker->slotOffset){
@@ -454,9 +456,9 @@ bool schedule_isSlotOffsetAvailable(uint16_t slotOffset){
       }
       scheduleWalker = scheduleWalker->next;
    }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
-   
+
    ENABLE_INTERRUPTS();
-   
+
    return TRUE;
 }
 
@@ -478,25 +480,25 @@ void schedule_removeAllCells(
 }
 
 uint8_t schedule_getNumberOfFreeEntries(){
-    uint8_t i; 
+    uint8_t i;
     uint8_t counter;
 
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
-    
+
     counter = 0;
     for(i=0;i<MAXACTIVESLOTS;i++) {
         if(schedule_vars.scheduleBuf[i].type == CELLTYPE_OFF){
             counter++;
         }
      }
-   
+
      ENABLE_INTERRUPTS();
     return counter;
 }
 
 uint8_t schedule_getNumberOfDedicatedCells(open_addr_t* neighbor){
-    uint8_t i; 
+    uint8_t i;
     uint8_t counter;
 
     INTERRUPT_DECLARATION();
@@ -517,7 +519,7 @@ uint8_t schedule_getNumberOfDedicatedCells(open_addr_t* neighbor){
 }
 
 open_addr_t* schedule_getNonParentNeighborWithDedicatedCells(open_addr_t* neighbor){
-    uint8_t i; 
+    uint8_t i;
 
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
@@ -539,7 +541,7 @@ open_addr_t* schedule_getNonParentNeighborWithDedicatedCells(open_addr_t* neighb
 bool schedule_isNumTxWrapped(open_addr_t* neighbor){
     uint8_t i;
     bool    returnVal;
-    
+
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
 
@@ -565,10 +567,10 @@ bool schedule_getCellsToBeRelocated(open_addr_t* neighbor, cellInfo_ht* celllist
 
     uint16_t    highestPDR;
     uint16_t    cellPDR;
-    
+
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
-    
+
     highestPDR = 0;
     // found the cell with higest PDR
     for(i=0;i<MAXACTIVESLOTS;i++) {
@@ -588,7 +590,7 @@ bool schedule_getCellsToBeRelocated(open_addr_t* neighbor, cellInfo_ht* celllist
         // no cell to relocate
         return FALSE;
     }
-    
+
     for(i=0;i<MAXACTIVESLOTS;i++) {
         if(
             packetfunctions_sameAddress(&schedule_vars.scheduleBuf[i].neighbor, neighbor) == TRUE
@@ -604,18 +606,18 @@ bool schedule_getCellsToBeRelocated(open_addr_t* neighbor, cellInfo_ht* celllist
             }
         }
     }
-    
+
     ENABLE_INTERRUPTS();
-    
+
     return FALSE;
 }
 
 bool schedule_hasDedicatedCellToNeighbor(open_addr_t* neighbor){
     uint8_t i;
-    
+
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
-    
+
     for(i=0;i<MAXACTIVESLOTS;i++) {
         if(
             schedule_vars.scheduleBuf[i].neighbor.type == ADDR_64B &&
@@ -624,7 +626,7 @@ bool schedule_hasDedicatedCellToNeighbor(open_addr_t* neighbor){
             return TRUE;
         }
     }
-    
+
     ENABLE_INTERRUPTS();
     return FALSE;
 }
@@ -632,14 +634,14 @@ bool schedule_hasDedicatedCellToNeighbor(open_addr_t* neighbor){
 //=== from IEEE802154E: reading the schedule and updating statistics
 
 void schedule_syncSlotOffset(slotOffset_t targetSlotOffset) {
-   
+
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
-   
+
    while (schedule_vars.currentScheduleEntry->slotOffset!=targetSlotOffset) {
       schedule_advanceSlot();
    }
-   
+
    ENABLE_INTERRUPTS();
 }
 
@@ -659,15 +661,15 @@ void schedule_advanceSlot(void) {
 \brief return slotOffset of next active slot
 */
 slotOffset_t schedule_getNextActiveSlotOffset(void) {
-    slotOffset_t res;   
-    
+    slotOffset_t res;
+
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
-    
+
     res = ((scheduleEntry_t*)(schedule_vars.currentScheduleEntry->next))->slotOffset;
-    
+
     ENABLE_INTERRUPTS();
-    
+
     return res;
 }
 
@@ -678,14 +680,14 @@ slotOffset_t schedule_getNextActiveSlotOffset(void) {
 */
 frameLength_t schedule_getFrameLength(void) {
     frameLength_t returnVal;
-    
+
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
-    
+
     returnVal = schedule_vars.frameLength;
-    
+
     ENABLE_INTERRUPTS();
-    
+
     return returnVal;
 }
 
@@ -746,7 +748,7 @@ channelOffset_t schedule_getChannelOffset(void) {
 
 This function is called at the beginning of every TX slot.
 If the slot is *not* a shared slot, it always return TRUE.
-If the slot is a shared slot, it decrements the backoff counter and returns 
+If the slot is a shared slot, it decrements the backoff counter and returns
 TRUE only if it hits 0.
 
 Note that the backoff counter is global, not per slot.
@@ -755,13 +757,13 @@ Note that the backoff counter is global, not per slot.
 */
 bool schedule_getOkToSend(void) {
     bool returnVal;
-    
+
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
-    
+
     if (schedule_vars.currentScheduleEntry->shared==FALSE) {
         // non-shared slot: backoff does not apply
-        
+
         returnVal = TRUE;
     } else {
         // shared slot: check backoff before answering
@@ -771,7 +773,7 @@ bool schedule_getOkToSend(void) {
             if (schedule_vars.backoff>0) {
                 schedule_vars.backoff--;
             }
-            
+
             // only return TRUE if backoff hit 0
             if (schedule_vars.backoff==0) {
                 returnVal = TRUE;
@@ -781,13 +783,13 @@ bool schedule_getOkToSend(void) {
         } else {
             // this is a dedicated cell
             neighbors_decreaseBackoff(&schedule_vars.currentScheduleEntry->neighbor);
-            
+
             returnVal = neighbors_backoffHitZero(&schedule_vars.currentScheduleEntry->neighbor);
         }
     }
-    
+
     ENABLE_INTERRUPTS();
-    
+
     return returnVal;
 }
 
@@ -795,15 +797,15 @@ bool schedule_getOkToSend(void) {
 \brief Reset the backoff and backoffExponent.
 */
 void schedule_resetBackoff(void) {
-   
+
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
-    
+
     // reset backoffExponent
     schedule_vars.backoffExponenton   = MINBE-1;
     // reset backoff
     schedule_vars.backoff             = 0;
-    
+
     ENABLE_INTERRUPTS();
 }
 
@@ -831,7 +833,7 @@ void schedule_indicateTx(asn_t* asnTimestamp, bool succesfullTx) {
 
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
-    
+
     // increment usage statistics
     if (schedule_vars.currentScheduleEntry->numTx==0xFF) {
         schedule_vars.currentScheduleEntry->numTx/=2;
@@ -869,7 +871,7 @@ void schedule_indicateTx(asn_t* asnTimestamp, bool succesfullTx) {
             }
         }
     }
-    
+
     ENABLE_INTERRUPTS();
 }
 
@@ -880,7 +882,7 @@ bool schedule_getOneCellAfterOffset(uint8_t metadata,uint8_t offset,open_addr_t*
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
 
-    // translate cellOptions to cell type 
+    // translate cellOptions to cell type
     if (cellOptions == CELLOPTIONS_TX){
         type = CELLTYPE_TX;
     }
@@ -890,7 +892,7 @@ bool schedule_getOneCellAfterOffset(uint8_t metadata,uint8_t offset,open_addr_t*
     if (cellOptions == (CELLOPTIONS_TX | CELLOPTIONS_RX | CELLOPTIONS_SHARED)){
         type = CELLTYPE_TXRX;
     }
-    
+
     returnVal      = FALSE;
     scheduleWalker = &schedule_vars.scheduleBuf[0]; // fisrt entry record slotoffset 0
     do {
@@ -902,9 +904,9 @@ bool schedule_getOneCellAfterOffset(uint8_t metadata,uint8_t offset,open_addr_t*
         }
         scheduleWalker = scheduleWalker->next;
    }while(scheduleWalker!=&schedule_vars.scheduleBuf[0]);
-   
+
     ENABLE_INTERRUPTS();
-   
+
    return returnVal;
 }
 

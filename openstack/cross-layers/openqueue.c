@@ -5,6 +5,8 @@
 #include "IEEE802154E.h"
 #include "IEEE802154_security.h"
 #include "sixtop.h"
+// telosb need debugpins to indicate ISR activity
+#include "debugpins.h"
 
 //=========================== defination =====================================
 
