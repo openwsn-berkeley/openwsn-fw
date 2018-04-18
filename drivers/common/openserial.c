@@ -66,9 +66,6 @@ void inputHdlcOpen(void);
 void inputHdlcWrite(uint8_t b);
 void inputHdlcClose(void);
 
-// sniffer
-void sniffer_setListeningChannel(uint8_t channel);
-
 //=========================== public ==========================================
 
 //===== admin
@@ -740,8 +737,6 @@ void openserial_handleCommands(void){
            comandParam_8 = openserial_vars.inputBuf[ptr];
            // set communication channel for protocol stack
            ieee154e_setSingleChannel(comandParam_8); // one byte
-           // set listenning channel for sniffer
-           sniffer_setListeningChannel(comandParam_8); // one byte
            break;
         case COMMAND_SET_KAPERIOD: // two bytes, in slots
             comandParam_16 = (openserial_vars.inputBuf[ptr] & 0x00ff) | \

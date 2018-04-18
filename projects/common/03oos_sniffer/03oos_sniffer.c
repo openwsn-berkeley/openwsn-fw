@@ -181,7 +181,9 @@ void task_uploadPacket(void) {
 }
 // ================================= stubbing ==================================
 
-void ieee154e_setSingleChannel(uint8_t channel)                           {return;}
+void ieee154e_setSingleChannel(uint8_t channel) {
+    sniffer_setListeningChannel(channel);
+}
 void ieee154e_setIsSecurityEnabled(bool isEnabled)                        {return;}
 void ieee154e_setSlotDuration(uint16_t duration)                          {return;}
 void ieee154e_setIsAckEnabled(bool isEnabled)                             {return;}
