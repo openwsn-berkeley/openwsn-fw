@@ -16,13 +16,8 @@ int mote_main(void) {
    scheduler_init();
    openstack_init();
    
-   // indicate
-   
    // start
    scheduler_start();
    return 0; // this line should never be reached
 }
-
-void sniffer_setListeningChannel(uint8_t channel){return;}
-
 
