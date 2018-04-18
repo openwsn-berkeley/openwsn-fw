@@ -9,8 +9,10 @@ at most MAX_NUM_TIMERS timers.
 
 #include "opendefs.h"
 #include "opentimers.h"
+// some dsp modules are required
 #include "sctimer.h"
-#include "leds.h"
+#include "debugpins.h"
+// kernel module is required
 #include "scheduler.h"
 
 //=========================== define ==========================================
@@ -52,6 +54,9 @@ create a timer by assigning an Id and priority for the timer
 opentimers_id_t opentimers_create(uint8_t priority){
     uint8_t id;
 
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+
     if (priority==0){
         if (opentimers_vars.timersBuf[0].isUsed  == FALSE){
             opentimers_vars.timersBuf[0].isUsed   = TRUE;
@@ -67,6 +72,9 @@ opentimers_id_t opentimers_create(uint8_t priority){
             }
         }
     }
+
+    ENABLE_INTERRUPTS();
+
     // there is no available buffer for this timer
     return ERROR_NO_AVAILABLE_ENTRIES;
 }
@@ -92,6 +100,10 @@ void opentimers_scheduleIn(opentimers_id_t    id,
     uint8_t  idToSchedule;
     PORT_TIMER_WIDTH timerGap;
     PORT_TIMER_WIDTH tempTimerGap;
+
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+
     // 1. make sure the timer exist
     for (i=0;i<MAX_NUM_TIMERS;i++){
         if (opentimers_vars.timersBuf[i].isUsed && i == id){
@@ -152,6 +164,8 @@ void opentimers_scheduleIn(opentimers_id_t    id,
         sctimer_setCompare(opentimers_vars.currentCompareValue);
     }
     opentimers_vars.running        = TRUE;
+
+    ENABLE_INTERRUPTS();
 }
 
 /**
@@ -176,6 +190,9 @@ void opentimers_scheduleAbsolute(opentimers_id_t    id,
     uint8_t idToSchedule;
     PORT_TIMER_WIDTH timerGap;
     PORT_TIMER_WIDTH tempTimerGap;
+
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
 
     // 1. make sure the timer exist
     for (i=0;i<MAX_NUM_TIMERS;i++){
@@ -238,6 +255,8 @@ void opentimers_scheduleAbsolute(opentimers_id_t    id,
         sctimer_setCompare(opentimers_vars.currentCompareValue);
     }
     opentimers_vars.running = TRUE;
+
+    ENABLE_INTERRUPTS();
 }
 
 /**
@@ -249,8 +268,14 @@ isrunning as false. The timer may be recover later.
 \param[in] id the timer id
  */
 void opentimers_cancel(opentimers_id_t id){
+
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+
     opentimers_vars.timersBuf[id].isrunning = FALSE;
     opentimers_vars.timersBuf[id].callback  = NULL;
+
+    ENABLE_INTERRUPTS();
 }
 
 /**
