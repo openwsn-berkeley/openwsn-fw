@@ -108,17 +108,17 @@ void opentimers_scheduleIn(opentimers_id_t    id,
     // 2. updat the timer content
     switch (uint_type){
     case TIME_MS:
-        opentimers_vars.timersBuf[id].totalTimerPeriod = duration*PORT_TICS_PER_MS;
+        opentimers_vars.timersBuf[id].duration = duration*PORT_TICS_PER_MS;
         opentimers_vars.timersBuf[id].wraps_remaining  = (uint32_t)(duration*PORT_TICS_PER_MS)/MAX_TICKS_IN_SINGLE_CLOCK;
         break;
     case TIME_TICS:
-        opentimers_vars.timersBuf[id].totalTimerPeriod = duration;
+        opentimers_vars.timersBuf[id].duration = duration;
         opentimers_vars.timersBuf[id].wraps_remaining  = (uint32_t)(duration)/MAX_TICKS_IN_SINGLE_CLOCK;
         break;
     }
 
     if (opentimers_vars.timersBuf[id].wraps_remaining==0){
-        opentimers_vars.timersBuf[id].currentCompareValue = opentimers_vars.timersBuf[id].totalTimerPeriod+sctimer_readCounter();
+        opentimers_vars.timersBuf[id].currentCompareValue = opentimers_vars.timersBuf[id].duration+sctimer_readCounter();
     } else {
         opentimers_vars.timersBuf[id].currentCompareValue = MAX_TICKS_IN_SINGLE_CLOCK+sctimer_readCounter();
     }
@@ -128,17 +128,17 @@ void opentimers_scheduleIn(opentimers_id_t    id,
 
     // 3. find the next timer to fire
 
-    // only execute update the currenttimeout if I am not inside of ISR or the ISR itself will do this.
+    // only execute update the currentCompareValue if I am not inside of ISR or the ISR itself will do this.
     if (opentimers_vars.insideISR==FALSE){
         i = 0;
         while (opentimers_vars.timersBuf[i].isrunning==FALSE){
             i++;
         }
-        timerGap     = opentimers_vars.timersBuf[i].currentCompareValue-opentimers_vars.lastTimeout;
+        timerGap     = opentimers_vars.timersBuf[i].currentCompareValue-opentimers_vars.lastCompareValue;
         idToSchedule = i;
         for (i=idToSchedule+1;i<MAX_NUM_TIMERS;i++){
             if (opentimers_vars.timersBuf[i].isrunning){
-                tempTimerGap = opentimers_vars.timersBuf[i].currentCompareValue-opentimers_vars.lastTimeout;
+                tempTimerGap = opentimers_vars.timersBuf[i].currentCompareValue-opentimers_vars.lastCompareValue;
                 if (tempTimerGap < timerGap){
                     // timer "i" is more close to lastCompare value
                     timerGap     = tempTimerGap;
@@ -148,8 +148,8 @@ void opentimers_scheduleIn(opentimers_id_t    id,
         }
 
         // if I got here, assign the next to be fired timer to given timer
-        opentimers_vars.currentTimeout = opentimers_vars.timersBuf[idToSchedule].currentCompareValue;
-        sctimer_setCompare(opentimers_vars.currentTimeout);
+        opentimers_vars.currentCompareValue = opentimers_vars.timersBuf[idToSchedule].currentCompareValue;
+        sctimer_setCompare(opentimers_vars.currentCompareValue);
     }
     opentimers_vars.running        = TRUE;
 }
@@ -176,6 +176,7 @@ void opentimers_scheduleAbsolute(opentimers_id_t    id,
     uint8_t idToSchedule;
     PORT_TIMER_WIDTH timerGap;
     PORT_TIMER_WIDTH tempTimerGap;
+
     // 1. make sure the timer exist
     for (i=0;i<MAX_NUM_TIMERS;i++){
         if (opentimers_vars.timersBuf[i].isUsed && i == id){
@@ -193,37 +194,37 @@ void opentimers_scheduleAbsolute(opentimers_id_t    id,
     // 2. updat the timer content
     switch (uint_type){
     case TIME_MS:
-        opentimers_vars.timersBuf[id].totalTimerPeriod = duration*PORT_TICS_PER_MS;
+        opentimers_vars.timersBuf[id].duration = duration*PORT_TICS_PER_MS;
         opentimers_vars.timersBuf[id].wraps_remaining  = (uint32_t)(duration*PORT_TICS_PER_MS)/MAX_TICKS_IN_SINGLE_CLOCK;;
         break;
     case TIME_TICS:
-        opentimers_vars.timersBuf[id].totalTimerPeriod = duration;
+        opentimers_vars.timersBuf[id].duration = duration;
         opentimers_vars.timersBuf[id].wraps_remaining  = (uint32_t)duration/MAX_TICKS_IN_SINGLE_CLOCK;
         break;
     }
 
     if (opentimers_vars.timersBuf[id].wraps_remaining==0){
-        opentimers_vars.timersBuf[id].currentCompareValue = opentimers_vars.timersBuf[id].totalTimerPeriod+reference;
+        opentimers_vars.timersBuf[id].currentCompareValue = opentimers_vars.timersBuf[id].duration+reference;
     } else {
         opentimers_vars.timersBuf[id].currentCompareValue = MAX_TICKS_IN_SINGLE_CLOCK+reference;
     }
 
-    opentimers_vars.timersBuf[id].isrunning           = TRUE;
-    opentimers_vars.timersBuf[id].callback            = cb;
+    opentimers_vars.timersBuf[id].isrunning = TRUE;
+    opentimers_vars.timersBuf[id].callback  = cb;
 
     // 3. find the next timer to fire
 
-    // only execute update the currenttimeout if I am not inside of ISR or the ISR itself will do this.
+    // only execute update the currentCompareValue if I am not inside of ISR or the ISR itself will do this.
     if (opentimers_vars.insideISR==FALSE){
         i = 0;
         while (opentimers_vars.timersBuf[i].isrunning==FALSE){
             i++;
         }
-        timerGap     = opentimers_vars.timersBuf[i].currentCompareValue-opentimers_vars.lastTimeout;
+        timerGap     = opentimers_vars.timersBuf[i].currentCompareValue-opentimers_vars.lastCompareValue;
         idToSchedule = i;
         for (i=idToSchedule+1;i<MAX_NUM_TIMERS;i++){
             if (opentimers_vars.timersBuf[i].isrunning){
-                tempTimerGap = opentimers_vars.timersBuf[i].currentCompareValue-opentimers_vars.lastTimeout;
+                tempTimerGap = opentimers_vars.timersBuf[i].currentCompareValue-opentimers_vars.lastCompareValue;
                 if (tempTimerGap < timerGap){
                     // timer "i" is more close to lastCompare value
                     timerGap     = tempTimerGap;
@@ -233,10 +234,10 @@ void opentimers_scheduleAbsolute(opentimers_id_t    id,
         }
 
         // if I got here, assign the next to be fired timer to given timer
-        opentimers_vars.currentTimeout = opentimers_vars.timersBuf[idToSchedule].currentCompareValue;
-        sctimer_setCompare(opentimers_vars.currentTimeout);
+        opentimers_vars.currentCompareValue = opentimers_vars.timersBuf[idToSchedule].currentCompareValue;
+        sctimer_setCompare(opentimers_vars.currentCompareValue);
     }
-    opentimers_vars.running        = TRUE;
+    opentimers_vars.running = TRUE;
 }
 
 /**
@@ -280,12 +281,12 @@ PORT_TIMER_WIDTH opentimers_getValue(void){
 }
 
 /**
-\brief get the currentTimeout variable of opentimer2.
+\brief get the currentCompareValue variable of opentimer2.
 
-\returns currentTimeout.
+\returns currentCompareValue.
  */
-PORT_TIMER_WIDTH opentimers_getCurrentTimeout(void){
-    return opentimers_vars.currentTimeout;
+PORT_TIMER_WIDTH opentimers_getCurrentCompareValue(void){
+    return opentimers_vars.currentCompareValue;
 }
 
 /**
@@ -316,7 +317,7 @@ void opentimers_timer_callback(void){
     opentimers_vars.insideISR = TRUE;
     for (i=0;i<MAX_NUM_TIMERS;i++){
         if (opentimers_vars.timersBuf[i].isrunning==TRUE){
-            if (opentimers_vars.currentTimeout == opentimers_vars.timersBuf[i].currentCompareValue){
+            if (opentimers_vars.currentCompareValue == opentimers_vars.timersBuf[i].currentCompareValue){
                 // this timer expired, mark as expired
                 opentimers_vars.timersBuf[i].lastCompareValue    = opentimers_vars.timersBuf[i].currentCompareValue;
                 if (opentimers_vars.timersBuf[i].wraps_remaining==0){
@@ -329,7 +330,7 @@ void opentimers_timer_callback(void){
                         if (opentimers_vars.timersBuf[i].timerType==TIMER_PERIODIC){
                             opentimers_scheduleIn(
                                 i,
-                                opentimers_vars.timersBuf[i].totalTimerPeriod,
+                                opentimers_vars.timersBuf[i].duration,
                                 TIME_TICS,
                                 TIMER_PERIODIC,
                                 opentimers_vars.timersBuf[i].callback
@@ -339,7 +340,7 @@ void opentimers_timer_callback(void){
                 } else {
                     opentimers_vars.timersBuf[i].wraps_remaining--;
                     if (opentimers_vars.timersBuf[i].wraps_remaining == 0){
-                        opentimers_vars.timersBuf[i].currentCompareValue = (opentimers_vars.timersBuf[i].totalTimerPeriod+opentimers_vars.timersBuf[i].lastCompareValue) & MAX_TICKS_IN_SINGLE_CLOCK;
+                        opentimers_vars.timersBuf[i].currentCompareValue = (opentimers_vars.timersBuf[i].duration+opentimers_vars.timersBuf[i].lastCompareValue) & MAX_TICKS_IN_SINGLE_CLOCK;
                     } else {
                         opentimers_vars.timersBuf[i].currentCompareValue = opentimers_vars.timersBuf[i].lastCompareValue + MAX_TICKS_IN_SINGLE_CLOCK;
                     }
@@ -347,7 +348,7 @@ void opentimers_timer_callback(void){
             }
         }
     }
-    opentimers_vars.lastTimeout = opentimers_vars.currentTimeout;
+    opentimers_vars.lastCompareValue = opentimers_vars.currentCompareValue;
 
     // find the next timer to be fired
     i = 0;
@@ -355,11 +356,11 @@ void opentimers_timer_callback(void){
         i++;
     }
     if(i<MAX_NUM_TIMERS){
-        timerGap     = opentimers_vars.timersBuf[i].currentCompareValue+opentimers_vars.timersBuf[i].wraps_remaining*MAX_TICKS_IN_SINGLE_CLOCK-opentimers_vars.lastTimeout;
+        timerGap     = opentimers_vars.timersBuf[i].currentCompareValue+opentimers_vars.timersBuf[i].wraps_remaining*MAX_TICKS_IN_SINGLE_CLOCK-opentimers_vars.lastCompareValue;
         idToSchedule = i;
         for (i=idToSchedule+1;i<MAX_NUM_TIMERS;i++){
             if (opentimers_vars.timersBuf[i].isrunning){
-                tempTimerGap = opentimers_vars.timersBuf[i].currentCompareValue-opentimers_vars.lastTimeout;
+                tempTimerGap = opentimers_vars.timersBuf[i].currentCompareValue-opentimers_vars.lastCompareValue;
                 if (tempTimerGap < timerGap){
                     timerGap     = tempTimerGap;
                     idToSchedule = i;
@@ -368,10 +369,10 @@ void opentimers_timer_callback(void){
         }
 
         // reschedule the timer
-        opentimers_vars.currentTimeout = opentimers_vars.timersBuf[idToSchedule].currentCompareValue;
-        opentimers_vars.lastCompare[opentimers_vars.index] = opentimers_vars.currentTimeout;
+        opentimers_vars.currentCompareValue = opentimers_vars.timersBuf[idToSchedule].currentCompareValue;
+        opentimers_vars.lastCompare[opentimers_vars.index] = opentimers_vars.currentCompareValue;
         opentimers_vars.index = (opentimers_vars.index+1)&0x0F;
-        sctimer_setCompare(opentimers_vars.currentTimeout);
+        sctimer_setCompare(opentimers_vars.currentCompareValue);
         opentimers_vars.running        = TRUE;
     } else {
         opentimers_vars.running        = FALSE;

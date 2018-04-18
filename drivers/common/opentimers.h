@@ -18,7 +18,6 @@
 
 //=========================== define ==========================================
 
-
 /// Maximum number of timers that can run concurrently
 #define MAX_NUM_TIMERS             10
 #define MAX_TICKS_IN_SINGLE_CLOCK  (uint32_t)(((PORT_TIMER_WIDTH)0xFFFFFFFF)>>1)
@@ -44,7 +43,7 @@ typedef enum {
 } time_type_t;
 
 typedef struct {
-   uint32_t             totalTimerPeriod;   // the total period of timer
+   uint32_t             duration;           // the duration that set by timer, in ticks
    PORT_TIMER_WIDTH     currentCompareValue;// the current compare value
    uint16_t             wraps_remaining;    // the number of wraps timer is going to be fired after
    PORT_TIMER_WIDTH     lastCompareValue;   // the previous compare value
@@ -61,8 +60,8 @@ typedef struct {
 typedef struct {
    opentimers_t         timersBuf[MAX_NUM_TIMERS];
    bool                 running;
-   PORT_TIMER_WIDTH     currentTimeout;     // current timeout, in ticks
-   PORT_TIMER_WIDTH     lastTimeout;        // last timeout, in ticks. This is the reference time to calculate the next to be expired timer.
+   PORT_TIMER_WIDTH     currentCompareValue;// current timeout, in ticks
+   PORT_TIMER_WIDTH     lastCompareValue;   // last timeout, in ticks. This is the reference time to calculate the next to be expired timer.
    PORT_TIMER_WIDTH     lastCompare[16];    // for debugging purpose
    uint8_t              index;              // index for lastCompare array
    bool                 insideISR;          // whether the function of opentimer is called inside of ISR or not
@@ -86,7 +85,7 @@ void             opentimers_cancel(opentimers_id_t id);
 bool             opentimers_destroy(opentimers_id_t id);
 
 PORT_TIMER_WIDTH opentimers_getValue(void);
-PORT_TIMER_WIDTH opentimers_getCurrentTimeout(void);
+PORT_TIMER_WIDTH opentimers_getCurrentCompareValue(void);
 bool             opentimers_isRunning(opentimers_id_t id);
 /**
 \}

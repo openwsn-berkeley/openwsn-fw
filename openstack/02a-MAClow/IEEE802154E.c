@@ -280,7 +280,7 @@ This function executes in ISR mode, when the new slot timer fires.
 */
 void isr_ieee154e_newSlot(opentimers_id_t id) {
 
-    ieee154e_vars.startOfSlotReference = opentimers_getCurrentTimeout();
+    ieee154e_vars.startOfSlotReference = opentimers_getCurrentCompareValue();
     opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                  // timerId
         TsSlotDuration,                         // duration

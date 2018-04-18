@@ -107,7 +107,7 @@ void cinrared_turnOnOrOff(uint8_t turnOnOrOff){
     switch(cinfrared_vars.state){
     case APP_STATE_START:
         pwm_enable();
-        cinfrared_vars.startOfSlot = opentimers_getCurrentTimeout();
+        cinfrared_vars.startOfSlot = opentimers_getCurrentCompareValue();
         if (turnOnOrOff){
             opentimers_scheduleAbsolute(
                 cinfrared_vars.timerId,
