@@ -364,6 +364,7 @@ void opentimers_timer_callback(void){
                                 opentimers_vars.timersBuf[i].isrunning  = FALSE;
                                 scheduler_push_task((task_cbt)(opentimers_vars.timersBuf[i].callback),TASKPRIO_OPENTIMERS);
                                 if (opentimers_vars.timersBuf[i].timerType==TIMER_PERIODIC){
+                                    opentimers_vars.insideISR = TRUE;
                                     opentimers_scheduleIn(
                                         i,
                                         opentimers_vars.timersBuf[i].duration,
@@ -371,6 +372,7 @@ void opentimers_timer_callback(void){
                                         TIMER_PERIODIC,
                                         opentimers_vars.timersBuf[i].callback
                                     );
+                                    opentimers_vars.insideISR = FALSE;
                                 }
                             } else {
                                 opentimers_vars.timersBuf[i].wraps_remaining--;
