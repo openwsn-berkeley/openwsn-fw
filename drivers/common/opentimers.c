@@ -44,7 +44,7 @@ void opentimers_init(void){
 /**
 \brief create a timer by assigning an entry from timer buffer.
 
-create a timer by assigning an Id and priority for the timer
+create a timer with given id or assigning one if it's general purpose timer
 
 \returns the id of the timer will be returned
  */

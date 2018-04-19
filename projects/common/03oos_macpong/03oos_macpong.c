@@ -39,14 +39,14 @@ void macpong_send(uint8_t payloadCtr);
 //=========================== initialization ==================================
 
 int mote_main(void) {
-   board_init();
-   scheduler_init();
-   openstack_init();
+    board_init();
+    scheduler_init();
+    openstack_init();
    if (idmanager_getMyID(ADDR_64B)->addr_64b[7]==0x16) {
       idmanager_setIsDAGroot(TRUE);
    }
-   scheduler_start();
-   return 0; // this line should never be reached
+    scheduler_start();
+    return 0; // this line should never be reached
 }
 
 void macpong_initSend(opentimers_id_t id) {
@@ -58,27 +58,27 @@ void macpong_initSend(opentimers_id_t id) {
             break;
         default:
             break;
-   }
-   opentimers_scheduleIn(
+    }
+    opentimers_scheduleIn(
         macpong_vars.timerId, // id
         1000,                 // duration
         TIME_MS,              // time_type
         TIMER_ONESHOT,        // timer_type
         macpong_initSend      // callback
-   );
+    );
 
 
-   if (idmanager_getIsDAGroot()==TRUE) {
-      return;
-   }
-   if (ieee154e_isSynch()==TRUE && neighbors_getNumNeighbors()==1) {
-      if (timeToSend){
-          // send packet
-           macpong_send(0);
-          // cancel timer
-          opentimers_cancel(macpong_vars.timerId);
-      }
-   }
+    if (idmanager_getIsDAGroot()==TRUE) {
+        return;
+    }
+    if (ieee154e_isSynch()==TRUE && neighbors_getNumNeighbors()==1) {
+        if (timeToSend){
+            // send packet
+            macpong_send(0);
+            // cancel timer
+            opentimers_cancel(macpong_vars.timerId);
+        }
+    }
 }
 
 void macpong_send(uint8_t payloadCtr) {
@@ -112,7 +112,7 @@ void macpong_send(uint8_t payloadCtr) {
 //===== IPHC
 
 void iphc_init(void) {
-    macpong_vars.timerId = opentimers_create(DEFAULT_PRIORITY);
+    macpong_vars.timerId = opentimers_create(TIMER_GENERAL_PURPOSE);
     opentimers_scheduleIn(
         macpong_vars.timerId,   // timerId
         1000,                   // duration
