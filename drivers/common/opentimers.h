@@ -25,11 +25,11 @@
 #define MAX_DURATION_ISR           33 // 33@32768Hz = 1ms
 #define opentimers_id_t            uint8_t
 
-#define INHIBITE_TIMER_PRIORITY   0
+#define INHIBIT_TIMER_PRIORITY   0
 #define TSCH_TIMER_PRIORITY       1
 #define DEFAULT_PRIORITY          255
 
-#define INHIBITE_TIMER_ID         0
+#define INHIBIT_TIMER_ID         0
 #define TSCH_TIMER_ID             1
 
 #define SPLITE_TIMER_DURATION     15 // in ticks
