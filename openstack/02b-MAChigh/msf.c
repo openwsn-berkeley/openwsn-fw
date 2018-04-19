@@ -45,7 +45,7 @@ void msf_init(void) {
         (sixtop_sf_translatemetadata)msf_translateMetadata,
         (sixtop_sf_handle_callback)msf_handleRCError
     );
-    msf_vars.housekeepingTimerId = opentimers_create(DEFAULT_PRIORITY);
+    msf_vars.housekeepingTimerId = opentimers_create(TIMER_GENERAL_PURPOSE);
     msf_vars.housekeepingPeriod  = HOUSEKEEPING_PERIOD;
     opentimers_scheduleIn(
         msf_vars.housekeepingTimerId,
@@ -54,7 +54,7 @@ void msf_init(void) {
         TIMER_ONESHOT,
         msf_timer_housekeeping_cb
     );
-    msf_vars.waitretryTimerId    = opentimers_create(DEFAULT_PRIORITY);
+    msf_vars.waitretryTimerId    = opentimers_create(TIMER_GENERAL_PURPOSE);
 }
 
 // called by schedule

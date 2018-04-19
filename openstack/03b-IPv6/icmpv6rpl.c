@@ -84,7 +84,7 @@ void icmpv6rpl_init(void) {
     memcpy(&icmpv6rpl_vars.dioDestination.addr_128b[0],all_routers_multicast,sizeof(all_routers_multicast));
 
     icmpv6rpl_vars.dioPeriod                 = DIO_PERIOD;
-    icmpv6rpl_vars.timerIdDIO                = opentimers_create(DEFAULT_PRIORITY);
+    icmpv6rpl_vars.timerIdDIO                = opentimers_create(TIMER_GENERAL_PURPOSE);
 
     //initialize PIO -> move this to dagroot code
     icmpv6rpl_vars.pio.type                  = RPL_OPTION_PIO;
@@ -169,7 +169,7 @@ void icmpv6rpl_init(void) {
     icmpv6rpl_vars.dao_target.prefixLength   = 0;
 
     icmpv6rpl_vars.daoPeriod                 = DAO_PERIOD;
-    icmpv6rpl_vars.timerIdDAO                = opentimers_create(DEFAULT_PRIORITY);
+    icmpv6rpl_vars.timerIdDAO                = opentimers_create(TIMER_GENERAL_PURPOSE);
     opentimers_scheduleIn(
         icmpv6rpl_vars.timerIdDAO,
         openrandom_getRandomizePeriod(icmpv6rpl_vars.daoPeriod, NUM_CHANNELS*SLOTFRAME_LENGTH*SLOTDURATION),

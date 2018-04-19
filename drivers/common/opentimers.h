@@ -25,12 +25,11 @@
 #define MAX_DURATION_ISR           33 // 33@32768Hz = 1ms
 #define opentimers_id_t            uint8_t
 
-#define INHIBIT_TIMER_PRIORITY   0
-#define TSCH_TIMER_PRIORITY       1
-#define DEFAULT_PRIORITY          255
+#define TIMER_INHIBIT              0
+#define TIMER_TSCH                 1
+#define TIMER_GENERAL_PURPOSE      255
 
-#define INHIBIT_TIMER_ID         0
-#define TSCH_TIMER_ID             1
+#define TIMER_NUMBER_NON_GENERAL   2
 
 #define SPLITE_TIMER_DURATION     15 // in ticks
 
@@ -57,7 +56,6 @@ typedef struct {
    bool                 isUsed;             // true when this entry is occupied
    timer_type_t         timerType;          // the timer type
    bool                 hasExpired;         // in case there are more than one interrupt occur at same time
-   uint8_t              priority;           // high priority timer could take over the compare timer scheduled early than it for TIMERTHRESHOLD ticks.
    opentimers_cbt       callback;           // function to call when elapses
 } opentimers_t;
 

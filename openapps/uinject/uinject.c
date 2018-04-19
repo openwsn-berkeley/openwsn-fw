@@ -37,7 +37,7 @@ void uinject_init(void) {
 
     uinject_vars.period = UINJECT_PERIOD_MS;
     // start periodic timer
-    uinject_vars.timerId = opentimers_create(DEFAULT_PRIORITY);
+    uinject_vars.timerId = opentimers_create(TIMER_GENERAL_PURPOSE);
     opentimers_scheduleIn(
         uinject_vars.timerId,
         UINJECT_PERIOD_MS,

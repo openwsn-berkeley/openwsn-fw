@@ -53,7 +53,7 @@ void cinfrared_init(void) {
 
     opencoap_register(&cinfrared_vars.desc);
 
-    cinfrared_vars.timerId          = opentimers_create(DEFAULT_PRIORITY);
+    cinfrared_vars.timerId          = opentimers_create(TIMER_GENERAL_PURPOSE);
 }
 
 //=========================== private =========================================

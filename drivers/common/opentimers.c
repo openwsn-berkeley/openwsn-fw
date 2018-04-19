@@ -33,13 +33,10 @@ void  opentimers_timer_callback(void);
 Initializes data structures and hardware timer.
  */
 void opentimers_init(void){
-    uint8_t i;
+
     // initialize local variables
     memset(&opentimers_vars,0,sizeof(opentimers_vars_t));
-    for (i=0;i<MAX_NUM_TIMERS;i++){
-        // by default, all timers have the priority of 0xff (lowest priority)
-        opentimers_vars.timersBuf[i].priority = 0xff;
-    }
+
     // set callback for sctimer module
     sctimer_set_callback(opentimers_timer_callback);
 }
@@ -51,32 +48,24 @@ create a timer by assigning an Id and priority for the timer
 
 \returns the id of the timer will be returned
  */
-opentimers_id_t opentimers_create(uint8_t priority){
+opentimers_id_t opentimers_create(uint8_t timer_id){
     uint8_t id;
 
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
 
-    if (priority==TSCH_TIMER_PRIORITY){
-        if (opentimers_vars.timersBuf[TSCH_TIMER_ID].isUsed  == FALSE){
-            opentimers_vars.timersBuf[TSCH_TIMER_ID].isUsed   = TRUE;
-            opentimers_vars.timersBuf[TSCH_TIMER_ID].priority = TSCH_TIMER_PRIORITY;
-            return TSCH_TIMER_ID;
+    if (timer_id==TIMER_TSCH || timer_id==TIMER_INHIBIT){
+        if (opentimers_vars.timersBuf[timer_id].isUsed  == FALSE){
+            opentimers_vars.timersBuf[timer_id].isUsed   = TRUE;
+            return timer_id;
         }
-    } else {
-        if (priority==INHIBIT_TIMER_PRIORITY){
-            if (opentimers_vars.timersBuf[INHIBIT_TIMER_ID].isUsed  == FALSE){
-                opentimers_vars.timersBuf[INHIBIT_TIMER_ID].isUsed   = TRUE;
-                opentimers_vars.timersBuf[INHIBIT_TIMER_ID].priority = INHIBIT_TIMER_PRIORITY;
-                return INHIBIT_TIMER_ID;
-            }
-        } else {
-            for (id=2;id<MAX_NUM_TIMERS;id++){
-                if (opentimers_vars.timersBuf[id].isUsed  == FALSE){
-                    opentimers_vars.timersBuf[id].isUsed   = TRUE;
-                    opentimers_vars.timersBuf[id].priority  = priority;
-                    return id;
-                }
+    }
+
+    if (timer_id==TIMER_GENERAL_PURPOSE){
+        for (id=TIMER_NUMBER_NON_GENERAL;id<MAX_NUM_TIMERS;id++){
+            if (opentimers_vars.timersBuf[id].isUsed  == FALSE){
+                opentimers_vars.timersBuf[id].isUsed   = TRUE;
+                return id;
             }
         }
     }
@@ -349,12 +338,12 @@ void opentimers_timer_callback(void){
 
     if (opentimers_vars.timerSplited==FALSE){
         if (
-            opentimers_vars.timersBuf[INHIBIT_TIMER_ID].isrunning==TRUE &&
-            opentimers_vars.currentCompareValue == opentimers_vars.timersBuf[INHIBIT_TIMER_ID].currentCompareValue
+            opentimers_vars.timersBuf[TIMER_INHIBIT].isrunning==TRUE &&
+            opentimers_vars.currentCompareValue == opentimers_vars.timersBuf[TIMER_INHIBIT].currentCompareValue
         ){
-            opentimers_vars.timersBuf[INHIBIT_TIMER_ID].lastCompareValue    = opentimers_vars.timersBuf[INHIBIT_TIMER_ID].currentCompareValue;
-            opentimers_vars.timersBuf[INHIBIT_TIMER_ID].isrunning  = FALSE;
-            opentimers_vars.timersBuf[INHIBIT_TIMER_ID].callback(INHIBIT_TIMER_ID);
+            opentimers_vars.timersBuf[TIMER_INHIBIT].lastCompareValue    = opentimers_vars.timersBuf[TIMER_INHIBIT].currentCompareValue;
+            opentimers_vars.timersBuf[TIMER_INHIBIT].isrunning  = FALSE;
+            opentimers_vars.timersBuf[TIMER_INHIBIT].callback(TIMER_INHIBIT);
             opentimers_vars.timerSplited = TRUE;
             // the next timer selection will be done after SPLITE_TIMER_DURATION ticks
             sctimer_setCompare(sctimer_readCounter()+SPLITE_TIMER_DURATION);
@@ -365,7 +354,7 @@ void opentimers_timer_callback(void){
                     if (opentimers_vars.currentCompareValue == opentimers_vars.timersBuf[i].currentCompareValue){
                         // this timer expired, mark as expired
                         opentimers_vars.timersBuf[i].lastCompareValue    = opentimers_vars.timersBuf[i].currentCompareValue;
-                        if (i==TSCH_TIMER_ID){
+                        if (i==TIMER_TSCH){
                             opentimers_vars.insideISR = TRUE;
                             opentimers_vars.timersBuf[i].isrunning  = FALSE;
                             opentimers_vars.timersBuf[i].callback(i);

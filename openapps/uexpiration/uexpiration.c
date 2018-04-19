@@ -68,9 +68,9 @@ void uexpiration_receive(OpenQueueEntry_t* request) {
 
    seqno = 0; // Reinitialize on next trigger
 
-	 uexpiration_vars.period = pkt_interval;
-	 // start periodic timer
-   uexpiration_vars.timerId = opentimers_create(DEFAULT_PRIORITY);
+    uexpiration_vars.period = pkt_interval;
+    // start periodic timer
+   uexpiration_vars.timerId = opentimers_create(TIMER_GENERAL_PURPOSE);
    opentimers_scheduleIn(
        uexpiration_vars.timerId,
        uexpiration_vars.period,
