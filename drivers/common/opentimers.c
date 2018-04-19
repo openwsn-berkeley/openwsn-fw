@@ -57,18 +57,26 @@ opentimers_id_t opentimers_create(uint8_t priority){
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
 
-    if (priority==0){
-        if (opentimers_vars.timersBuf[0].isUsed  == FALSE){
-            opentimers_vars.timersBuf[0].isUsed   = TRUE;
-            opentimers_vars.timersBuf[0].priority = 0;
-            return 0;
+    if (priority==TSCH_TIMER_PRIORITY){
+        if (opentimers_vars.timersBuf[TSCH_TIMER_ID].isUsed  == FALSE){
+            opentimers_vars.timersBuf[TSCH_TIMER_ID].isUsed   = TRUE;
+            opentimers_vars.timersBuf[TSCH_TIMER_ID].priority = TSCH_TIMER_PRIORITY;
+            return TSCH_TIMER_ID;
         }
     } else {
-        for (id=1;id<MAX_NUM_TIMERS;id++){
-            if (opentimers_vars.timersBuf[id].isUsed  == FALSE){
-                opentimers_vars.timersBuf[id].isUsed   = TRUE;
-                opentimers_vars.timersBuf[id].priority  = priority;
-                return id;
+        if (priority==INHIBIT_TIMER_PRIORITY){
+            if (opentimers_vars.timersBuf[INHIBIT_TIMER_ID].isUsed  == FALSE){
+                opentimers_vars.timersBuf[INHIBIT_TIMER_ID].isUsed   = TRUE;
+                opentimers_vars.timersBuf[INHIBIT_TIMER_ID].priority = INHIBIT_TIMER_PRIORITY;
+                return INHIBIT_TIMER_ID;
+            }
+        } else {
+            for (id=2;id<MAX_NUM_TIMERS;id++){
+                if (opentimers_vars.timersBuf[id].isUsed  == FALSE){
+                    opentimers_vars.timersBuf[id].isUsed   = TRUE;
+                    opentimers_vars.timersBuf[id].priority  = priority;
+                    return id;
+                }
             }
         }
     }
@@ -339,41 +347,59 @@ void opentimers_timer_callback(void){
     PORT_TIMER_WIDTH timerGap;
     PORT_TIMER_WIDTH tempTimerGap;
 
-    opentimers_vars.insideISR = TRUE;
-    for (i=0;i<MAX_NUM_TIMERS;i++){
-        if (opentimers_vars.timersBuf[i].isrunning==TRUE){
-            if (opentimers_vars.currentCompareValue == opentimers_vars.timersBuf[i].currentCompareValue){
-                // this timer expired, mark as expired
-                opentimers_vars.timersBuf[i].lastCompareValue    = opentimers_vars.timersBuf[i].currentCompareValue;
-                if (opentimers_vars.timersBuf[i].wraps_remaining==0){
-                    opentimers_vars.timersBuf[i].isrunning  = FALSE;
-                    opentimers_vars.timersBuf[i].hasExpired = FALSE;
-                    if (i==0){
-                        opentimers_vars.timersBuf[0].callback(0);
-                    } else {
-                        scheduler_push_task((task_cbt)(opentimers_vars.timersBuf[i].callback),TASKPRIO_OPENTIMERS);
-                        if (opentimers_vars.timersBuf[i].timerType==TIMER_PERIODIC){
-                            opentimers_scheduleIn(
-                                i,
-                                opentimers_vars.timersBuf[i].duration,
-                                TIME_TICS,
-                                TIMER_PERIODIC,
-                                opentimers_vars.timersBuf[i].callback
-                            );
+    if (opentimers_vars.timerSplited==FALSE){
+        if (
+            opentimers_vars.timersBuf[INHIBIT_TIMER_ID].isrunning==TRUE &&
+            opentimers_vars.currentCompareValue == opentimers_vars.timersBuf[INHIBIT_TIMER_ID].currentCompareValue
+        ){
+            opentimers_vars.timersBuf[INHIBIT_TIMER_ID].lastCompareValue    = opentimers_vars.timersBuf[INHIBIT_TIMER_ID].currentCompareValue;
+            opentimers_vars.timersBuf[INHIBIT_TIMER_ID].isrunning  = FALSE;
+            opentimers_vars.timersBuf[INHIBIT_TIMER_ID].callback(INHIBIT_TIMER_ID);
+            opentimers_vars.timerSplited = TRUE;
+            // the next timer selection will be done after SPLITE_TIMER_DURATION ticks
+            sctimer_setCompare(sctimer_readCounter()+SPLITE_TIMER_DURATION);
+            return;
+        } else {
+            for (i=0;i<MAX_NUM_TIMERS;i++){
+                if (opentimers_vars.timersBuf[i].isrunning==TRUE){
+                    if (opentimers_vars.currentCompareValue == opentimers_vars.timersBuf[i].currentCompareValue){
+                        // this timer expired, mark as expired
+                        opentimers_vars.timersBuf[i].lastCompareValue    = opentimers_vars.timersBuf[i].currentCompareValue;
+                        if (i==TSCH_TIMER_ID){
+                            opentimers_vars.insideISR = TRUE;
+                            opentimers_vars.timersBuf[i].isrunning  = FALSE;
+                            opentimers_vars.timersBuf[i].callback(i);
+                            opentimers_vars.insideISR = FALSE;
+                        } else {
+                            if (opentimers_vars.timersBuf[i].wraps_remaining==0){
+                                opentimers_vars.timersBuf[i].isrunning  = FALSE;
+                                scheduler_push_task((task_cbt)(opentimers_vars.timersBuf[i].callback),TASKPRIO_OPENTIMERS);
+                                if (opentimers_vars.timersBuf[i].timerType==TIMER_PERIODIC){
+                                    opentimers_scheduleIn(
+                                        i,
+                                        opentimers_vars.timersBuf[i].duration,
+                                        TIME_TICS,
+                                        TIMER_PERIODIC,
+                                        opentimers_vars.timersBuf[i].callback
+                                    );
+                                }
+                            } else {
+                                opentimers_vars.timersBuf[i].wraps_remaining--;
+                                if (opentimers_vars.timersBuf[i].wraps_remaining == 0){
+                                    opentimers_vars.timersBuf[i].currentCompareValue = (opentimers_vars.timersBuf[i].duration+opentimers_vars.timersBuf[i].lastCompareValue) & MAX_TICKS_IN_SINGLE_CLOCK;
+                                } else {
+                                    opentimers_vars.timersBuf[i].currentCompareValue = opentimers_vars.timersBuf[i].lastCompareValue + MAX_TICKS_IN_SINGLE_CLOCK;
+                                }
+                            }
                         }
-                    }
-                } else {
-                    opentimers_vars.timersBuf[i].wraps_remaining--;
-                    if (opentimers_vars.timersBuf[i].wraps_remaining == 0){
-                        opentimers_vars.timersBuf[i].currentCompareValue = (opentimers_vars.timersBuf[i].duration+opentimers_vars.timersBuf[i].lastCompareValue) & MAX_TICKS_IN_SINGLE_CLOCK;
-                    } else {
-                        opentimers_vars.timersBuf[i].currentCompareValue = opentimers_vars.timersBuf[i].lastCompareValue + MAX_TICKS_IN_SINGLE_CLOCK;
                     }
                 }
             }
         }
+        opentimers_vars.lastCompareValue = opentimers_vars.currentCompareValue;
+    } else {
+        opentimers_vars.timerSplited = FALSE;
     }
-    opentimers_vars.lastCompareValue = opentimers_vars.currentCompareValue;
 
     // find the next timer to be fired
     i = 0;
@@ -381,7 +407,7 @@ void opentimers_timer_callback(void){
         i++;
     }
     if(i<MAX_NUM_TIMERS){
-        timerGap     = opentimers_vars.timersBuf[i].currentCompareValue+opentimers_vars.timersBuf[i].wraps_remaining*MAX_TICKS_IN_SINGLE_CLOCK-opentimers_vars.lastCompareValue;
+        timerGap     = opentimers_vars.timersBuf[i].currentCompareValue-opentimers_vars.lastCompareValue;
         idToSchedule = i;
         for (i=idToSchedule+1;i<MAX_NUM_TIMERS;i++){
             if (opentimers_vars.timersBuf[i].isrunning){
@@ -395,12 +421,8 @@ void opentimers_timer_callback(void){
 
         // reschedule the timer
         opentimers_vars.currentCompareValue = opentimers_vars.timersBuf[idToSchedule].currentCompareValue;
-        opentimers_vars.lastCompare[opentimers_vars.index] = opentimers_vars.currentCompareValue;
-        opentimers_vars.index = (opentimers_vars.index+1)&0x0F;
         sctimer_setCompare(opentimers_vars.currentCompareValue);
-        opentimers_vars.running        = TRUE;
     } else {
         opentimers_vars.running        = FALSE;
     }
-    opentimers_vars.insideISR      = FALSE;
 }

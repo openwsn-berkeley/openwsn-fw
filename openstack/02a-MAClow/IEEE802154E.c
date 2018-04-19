@@ -153,7 +153,7 @@ void ieee154e_init(void) {
     radio_setStartFrameCb(ieee154e_startOfFrame);
     radio_setEndFrameCb(ieee154e_endOfFrame);
     // have the radio start its timer and assign ieee802154e timer with highest priority
-    ieee154e_vars.timerId = opentimers_create(HIGHEST_PRIORITY);
+    ieee154e_vars.timerId = opentimers_create(TSCH_TIMER_PRIORITY);
     opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,          // timerId
         ieee154e_vars.slotDuration,     // duration
@@ -163,7 +163,7 @@ void ieee154e_init(void) {
     );
     // radiotimer_start(ieee154e_vars.slotDuration);
     IEEE802154_security_init();
-    ieee154e_vars.serialInhibitTimerId = opentimers_create(DEFAULT_PRIORITY);
+    ieee154e_vars.serialInhibitTimerId = opentimers_create(INHIBIT_TIMER_PRIORITY);
 }
 
 //=========================== public ==========================================

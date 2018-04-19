@@ -25,8 +25,14 @@
 #define MAX_DURATION_ISR           33 // 33@32768Hz = 1ms
 #define opentimers_id_t            uint8_t
 
-#define HIGHEST_PRIORITY           0
-#define DEFAULT_PRIORITY           255
+#define INHIBITE_TIMER_PRIORITY   0
+#define TSCH_TIMER_PRIORITY       1
+#define DEFAULT_PRIORITY          255
+
+#define INHIBITE_TIMER_ID         0
+#define TSCH_TIMER_ID             1
+
+#define SPLITE_TIMER_DURATION     15 // in ticks
 
 typedef void (*opentimers_cbt)(opentimers_id_t id);
 
@@ -62,9 +68,8 @@ typedef struct {
    bool                 running;
    PORT_TIMER_WIDTH     currentCompareValue;// current timeout, in ticks
    PORT_TIMER_WIDTH     lastCompareValue;   // last timeout, in ticks. This is the reference time to calculate the next to be expired timer.
-   PORT_TIMER_WIDTH     lastCompare[16];    // for debugging purpose
-   uint8_t              index;              // index for lastCompare array
    bool                 insideISR;          // whether the function of opentimer is called inside of ISR or not
+   bool                 timerSplited;
 } opentimers_vars_t;
 
 //=========================== prototypes ======================================
