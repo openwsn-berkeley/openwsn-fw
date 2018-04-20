@@ -47,6 +47,10 @@ owerror_t openserial_printInfoErrorCritical(
     errorparameter_t arg1,
     errorparameter_t arg2
 );
+owerror_t openserial_ackReply(
+    bool positiveAck,
+    bool hasFrameFollowed
+);
 
 // command handlers
 void openserial_handleRxFrame(void);
@@ -241,6 +245,27 @@ owerror_t openserial_printSniffedPacket(uint8_t* buffer, uint8_t length, uint8_t
 
     // start TX'ing
     openserial_flush();
+
+    return E_SUCCESS;
+}
+
+
+owerror_t openserial_ackReply(bool positiveAck, bool hasFrameFollowed) {
+
+    outputHdlcOpen();
+    outputHdlcWrite(SERFRAME_MOTE2PC_ACKREPLY);
+    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
+    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+    outputHdlcWrite(positiveAck);
+    outputHdlcClose();
+
+    if (hasFrameFollowed){
+        // there are frames following the ack,
+        // the openserial_flush will be called when sending next frame.
+    } else {
+        // start TX'ing
+        openserial_flush();
+    }
 
     return E_SUCCESS;
 }
@@ -571,20 +596,24 @@ void openserial_handleRxFrame() {
     switch (cmdByte) {
         case SERFRAME_PC2MOTE_SETROOT:
             idmanager_triggerAboutRoot();
+            openserial_ackReply(TRUE,FALSE);
             break;
         case SERFRAME_PC2MOTE_RESET:
             board_reset();
             break;
         case SERFRAME_PC2MOTE_DATA:
             openbridge_triggerData();
+            openserial_ackReply(TRUE,FALSE);
             break;
         case SERFRAME_PC2MOTE_TRIGGERSERIALECHO:
+            openserial_ackReply(TRUE,TRUE);
             openserial_handleEcho(
                 &openserial_vars.inputBuf[1],
                 openserial_vars.inputBufFillLevel-1
             );
             break;
         case SERFRAME_PC2MOTE_COMMAND:
+            openserial_ackReply(TRUE,FALSE);
             openserial_handleCommands();
             break;
     }
@@ -1060,6 +1089,10 @@ uint8_t isr_openserial_rx(void) {
         openserial_vars.hdlcBusyReceiving      = FALSE;
 
         if (openserial_vars.inputBufFillLevel==0){
+
+            // this is a negative ack and error message is following to sent
+            openserial_ackReply(FALSE,TRUE);
+
             // invalid HDLC frame
             openserial_printError(
                 COMPONENT_OPENSERIAL,
