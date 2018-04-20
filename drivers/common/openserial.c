@@ -81,7 +81,6 @@ void openserial_init(void) {
     openserial_vars.debugPrintCounter  = 0;
 
     // input
-    openserial_vars.hdlcLastRxByte     = HDLC_FLAG;
     openserial_vars.hdlcBusyReceiving  = FALSE;
     openserial_vars.hdlcInputEscaping  = FALSE;
     openserial_vars.inputBufFillLevel  = 0;
@@ -455,7 +454,7 @@ void openserial_flush(void) {
                         &openserial_vars.outputBufIdxW
                     );
 #else
-        uart_writeByte(openserial_vars.outputBuf[OUTPUT_BUFFER_MASK & (openserial_vars.outputBufIdxR++)]);
+                    uart_writeByte(openserial_vars.outputBuf[OUTPUT_BUFFER_MASK & (openserial_vars.outputBufIdxR++)]);
                     openserial_vars.fBusyFlushing = TRUE;
 #endif
                 }
@@ -992,7 +991,7 @@ void isr_openserial_tx(void) {
         if (openserial_vars.outputBufIdxW!=openserial_vars.outputBufIdxR) {
             // I have some bytes to transmit
 
-                uart_writeByte(openserial_vars.outputBuf[OUTPUT_BUFFER_MASK & (openserial_vars.outputBufIdxR++)]);
+            uart_writeByte(openserial_vars.outputBuf[OUTPUT_BUFFER_MASK & (openserial_vars.outputBufIdxR++)]);
             openserial_vars.fBusyFlushing = TRUE;
         } else {
             // I'm done sending bytes
