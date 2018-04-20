@@ -65,8 +65,6 @@ void     activity_rie6(void);
 void     activity_ri9(PORT_TIMER_WIDTH capturedTime);
 // inhibit serial
 void     activity_inhibitSerial(void);
-void     activity_handleSerial_start(void);
-void     activity_handleSerial_stop(void);
 
 // frame validity check
 bool     isValidRxFrame(ieee802154_header_iht* ieee802514_header);
@@ -381,10 +379,7 @@ void isr_ieee154e_timer(opentimers_id_t id) {
             activity_inhibitSerial();
             break;
         case S_SYNCLISTEN:
-            activity_handleSerial_start();
-            break;
-        case S_SYNCRXSERSTART:
-            activity_handleSerial_stop();
+            activity_inhibitSerial();
             break;
         default:
             // log the error
@@ -542,20 +537,10 @@ bool debugPrint_macStats(void) {
 
 port_INLINE void activity_synchronize_newSlot(void) {
 
-    openserial_inhibitStart();
-
     // I'm in the middle of receiving a packet
     if (ieee154e_vars.state==S_SYNCRX) {
         return;
     }
-
-    opentimers_scheduleAbsolute(
-        ieee154e_vars.serialInhibitTimerId,     // timerId
-        DURATION_si0,                           // duration
-        ieee154e_vars.startOfSlotReference,     // reference
-        TIME_TICS,                              // timetype
-        isr_ieee154e_timer                      // callback
-    );
 
     ieee154e_vars.radioOnInit=sctimer_readCounter();
     ieee154e_vars.radioOnThisSlot=TRUE;
@@ -608,13 +593,23 @@ port_INLINE void activity_synchronize_newSlot(void) {
     if ( (ieee154e_vars.asn.bytes0and1&0x000f) ==0x0000) {
         openserial_triggerDebugprint(); // FIXME: replace by task
     }
+
+    opentimers_scheduleAbsolute(
+        ieee154e_vars.serialInhibitTimerId,     // timerId
+        DURATION_si,                            // duration
+        ieee154e_vars.startOfSlotReference,     // reference
+        TIME_TICS,                              // timetype
+        isr_ieee154e_timer                      // callback
+    );
+
+    openserial_inhibitStop();
 }
 
 port_INLINE void activity_synchronize_startOfFrame(PORT_TIMER_WIDTH capturedTime) {
 
     // don't care about packet if I'm not listening
     // in case serial rx is started, we don't want to loss this packet because of wrong state machine, so capture the state here
-    if (ieee154e_vars.state!=S_SYNCLISTEN && ieee154e_vars.state!=S_SYNCRXSERSTART) {
+    if (ieee154e_vars.state!=S_SYNCLISTEN) {
         return;
     }
 
@@ -795,6 +790,8 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
 
    // return to listening state
    changeState(S_SYNCLISTEN);
+
+   openserial_inhibitStop();
 }
 
 port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
@@ -2220,25 +2217,6 @@ port_INLINE void activity_inhibitSerial(void) {
     openserial_inhibitStart(); // activity_inhibitSerial
 }
 
-port_INLINE void activity_handleSerial_start(void){
-    changeState(S_SYNCRXSERSTART);
-
-    openserial_inhibitStop(); // activity_inhibitSerial
-
-    opentimers_scheduleAbsolute(
-        ieee154e_vars.serialInhibitTimerId,     // timerId
-        DURATION_si1,                           // duration
-        ieee154e_vars.startOfSlotReference,     // reference
-        TIME_TICS,                              // timetype
-        isr_ieee154e_timer                      // callback
-    );
-}
-
-port_INLINE void activity_handleSerial_stop(void){
-    openserial_inhibitStart();
-    changeState(S_SYNCLISTEN);
-}
-
 //======= frame validity check
 
 /**
@@ -2860,7 +2838,6 @@ void changeState(ieee154e_state_t newstate) {
             break;
         case S_SLEEP:
         case S_RXDATAOFFSET:
-        case S_SYNCRXSERSTART:
             debugpins_fsm_clr();
             break;
         case S_SYNCRX:
@@ -2995,11 +2972,11 @@ void endSlot(void) {
     // change state
     changeState(S_SLEEP);
 
-    // arm serialInhibit timer (if we are still BEFORE DURATION_si1)
+    // arm serialInhibit timer (if we are still BEFORE DURATION_si)
     if (ieee154e_vars.isSync==TRUE) {
         opentimers_scheduleAbsolute(
             ieee154e_vars.serialInhibitTimerId,     // timerId
-            DURATION_si1,                           // duration
+            DURATION_si,                            // duration
             ieee154e_vars.startOfSlotReference,     // reference
             TIME_TICS,                              // timetype
             isr_ieee154e_timer                      // callback
@@ -3007,7 +2984,7 @@ void endSlot(void) {
     }
 
     // resume serial activity (if we are still BEFORE DURATION_si)
-    if (DURATION_si1+ieee154e_vars.startOfSlotReference-opentimers_getValue()<ieee154e_vars.slotDuration) {
+    if (DURATION_si+ieee154e_vars.startOfSlotReference-opentimers_getValue()<ieee154e_vars.slotDuration) {
         openserial_inhibitStop(); // end of slot
     }
 }

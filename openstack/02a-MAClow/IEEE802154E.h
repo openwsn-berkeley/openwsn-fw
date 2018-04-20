@@ -147,7 +147,6 @@ typedef enum {
    S_TXACKDELAY              = 0x17,   // 'go' signal given, waiting for SFD Tx ACK
    S_TXACK                   = 0x18,   // Tx ACK SFD received, sending bytes
    S_RXPROC                  = 0x19,   // processing received data
-   S_SYNCRXSERSTART          = 0x1a,   // stop serial port activity
 } ieee154e_state_t;
 
 #define  TIMESLOT_TEMPLATE_ID         0x00
@@ -218,8 +217,7 @@ enum ieee154e_linkOption_enum {
 #define DURATION_rt7 ieee154e_vars.lastCapturedTime+TsTxAckDelay-delayTx+wdRadioTx
 #define DURATION_rt8 ieee154e_vars.lastCapturedTime+wdAckDuration
 // serialInhibit
-#define DURATION_si0 ieee154e_vars.slotDuration-2*SERIALINHIBITGUARD
-#define DURATION_si1 ieee154e_vars.slotDuration-SERIALINHIBITGUARD
+#define DURATION_si  ieee154e_vars.slotDuration-SERIALINHIBITGUARD
 
 //=========================== typedef =========================================
 
