@@ -336,7 +336,7 @@ void opentimers_timer_callback(void){
     PORT_TIMER_WIDTH timerGap;
     PORT_TIMER_WIDTH tempTimerGap;
 
-    if (opentimers_vars.timerSplited==FALSE){
+    if (opentimers_vars.splitTimer==FALSE){
         if (
             opentimers_vars.timersBuf[TIMER_INHIBIT].isrunning==TRUE &&
             opentimers_vars.currentCompareValue == opentimers_vars.timersBuf[TIMER_INHIBIT].currentCompareValue
@@ -344,7 +344,7 @@ void opentimers_timer_callback(void){
             opentimers_vars.timersBuf[TIMER_INHIBIT].lastCompareValue    = opentimers_vars.timersBuf[TIMER_INHIBIT].currentCompareValue;
             opentimers_vars.timersBuf[TIMER_INHIBIT].isrunning  = FALSE;
             opentimers_vars.timersBuf[TIMER_INHIBIT].callback(TIMER_INHIBIT);
-            opentimers_vars.timerSplited = TRUE;
+            opentimers_vars.splitTimer = TRUE;
             // the next timer selection will be done after SPLITE_TIMER_DURATION ticks
             sctimer_setCompare(sctimer_readCounter()+SPLITE_TIMER_DURATION);
             return;
@@ -389,7 +389,7 @@ void opentimers_timer_callback(void){
         }
         opentimers_vars.lastCompareValue = opentimers_vars.currentCompareValue;
     } else {
-        opentimers_vars.timerSplited = FALSE;
+        opentimers_vars.splitTimer = FALSE;
     }
 
     // find the next timer to be fired

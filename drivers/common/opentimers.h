@@ -67,7 +67,7 @@ typedef struct {
    PORT_TIMER_WIDTH     currentCompareValue;// current timeout, in ticks
    PORT_TIMER_WIDTH     lastCompareValue;   // last timeout, in ticks. This is the reference time to calculate the next to be expired timer.
    bool                 insideISR;          // whether the function of opentimer is called inside of ISR or not
-   bool                 timerSplited;
+   bool                 splitTimer;         // indicate whether the previous opentimer callback is splitted.
 } opentimers_vars_t;
 
 //=========================== prototypes ======================================
