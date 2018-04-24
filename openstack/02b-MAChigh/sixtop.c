@@ -1564,147 +1564,135 @@ void sixtop_six2six_notifyReceive(
     }
 
     if (type == SIXTOP_CELL_RESPONSE) {
-        // this is a 6p response message
-        neighbors_updateSequenceNumber(&(pkt->l2_nextORpreviousHop));
+    	// this is a 6p response message
+    	neighbors_updateSequenceNumber(&(pkt->l2_nextORpreviousHop));
+    	// if the code is SUCCESS
+    	if (code == IANA_6TOP_RC_SUCCESS || code == IANA_6TOP_RC_EOL){
+    		switch(sixtop_vars.six2six_state){
+    		case SIX_STATE_WAIT_ADDRESPONSE:
+    			i = 0;
+    			memset(pkt->l2_sixtop_celllist_add,0,sizeof(pkt->l2_sixtop_celllist_add));
+    			while(pktLen>0){
+    				pkt->l2_sixtop_celllist_add[i].slotoffset     =  *((uint8_t*)(pkt->payload)+ptr);
+    				pkt->l2_sixtop_celllist_add[i].slotoffset    |= (*((uint8_t*)(pkt->payload)+ptr+1))<<8;
+    				pkt->l2_sixtop_celllist_add[i].channeloffset  =  *((uint8_t*)(pkt->payload)+ptr+2);
+    				pkt->l2_sixtop_celllist_add[i].channeloffset |= (*((uint8_t*)(pkt->payload)+ptr+3))<<8;
+    				pkt->l2_sixtop_celllist_add[i].isUsed         = TRUE;
+    				ptr    += 4;
+    				pktLen -= 4;
+    				i++;
+    			}
+    			sixtop_addCells(
+    					sixtop_vars.cb_sf_getMetadata(),     // frame id
+						pkt->l2_sixtop_celllist_add,  // celllist to be added
+						&(pkt->l2_nextORpreviousHop), // neighbor that cells to be added to
+						sixtop_vars.cellOptions       // cell options
+    			);
+    			openserial_stat6Pcmd(CELLADD_REP, RCVD, &(pkt->l2_nextORpreviousHop), pkt->l2_sixtop_celllist_add, SCHEDULEIEMAXNUMCELLS);
 
-        // if the code is SUCCESS
-        if (code == IANA_6TOP_RC_SUCCESS || code == IANA_6TOP_RC_EOL){
-            switch(sixtop_vars.six2six_state){
-            case SIX_STATE_WAIT_ADDRESPONSE:
-                i = 0;
-                memset(pkt->l2_sixtop_celllist_add,0,sizeof(pkt->l2_sixtop_celllist_add));
-                while(pktLen>0){
-                    pkt->l2_sixtop_celllist_add[i].slotoffset     =  *((uint8_t*)(pkt->payload)+ptr);
-                    pkt->l2_sixtop_celllist_add[i].slotoffset    |= (*((uint8_t*)(pkt->payload)+ptr+1))<<8;
-                    pkt->l2_sixtop_celllist_add[i].channeloffset  =  *((uint8_t*)(pkt->payload)+ptr+2);
-                    pkt->l2_sixtop_celllist_add[i].channeloffset |= (*((uint8_t*)(pkt->payload)+ptr+3))<<8;
-                    pkt->l2_sixtop_celllist_add[i].isUsed         = TRUE;
-                    ptr    += 4;
-                    pktLen -= 4;
-                    i++;
-                }
+    			break;
+    		case SIX_STATE_WAIT_DELETERESPONSE:
+    			sixtop_removeCells(
+    					sixtop_vars.cb_sf_getMetadata(),
+						sixtop_vars.celllist_toDelete,
+						&(pkt->l2_nextORpreviousHop),
+						sixtop_vars.cellOptions
+    			);
+    			openserial_stat6Pcmd(CELLDEL_REP, RCVD, &(pkt->l2_nextORpreviousHop), sixtop_vars.celllist_toDelete, SCHEDULEIEMAXNUMCELLS);
 
-                if (
-                    sixtop_addCells(
-                        sixtop_vars.cb_sf_getMetadata(),     // frame id 
-                        pkt->l2_sixtop_celllist_add,  // celllist to be added
-                        &(pkt->l2_nextORpreviousHop), // neighbor that cells to be added to
-                        sixtop_vars.cellOptions       // cell options
-                    ) == TRUE
-                ) { 
-                    neighbors_updateGeneration(&(pkt->l2_nextORpreviousHop));
-                }
-               
-                openserial_stat6Pcmd(CELLADD_REP, RCVD, &(pkt->l2_nextORpreviousHop), pkt->l2_sixtop_celllist_add, SCHEDULEIEMAXNUMCELLS);
+    			break;
+    		case SIX_STATE_WAIT_RELOCATERESPONSE:
+    			i = 0;
+    			memset(pkt->l2_sixtop_celllist_add,0,sizeof(pkt->l2_sixtop_celllist_add));
+    			while(pktLen>0){
+    				pkt->l2_sixtop_celllist_add[i].slotoffset     =  *((uint8_t*)(pkt->payload)+ptr);
+    				pkt->l2_sixtop_celllist_add[i].slotoffset    |= (*((uint8_t*)(pkt->payload)+ptr+1))<<8;
+    				pkt->l2_sixtop_celllist_add[i].channeloffset  =  *((uint8_t*)(pkt->payload)+ptr+2);
+    				pkt->l2_sixtop_celllist_add[i].channeloffset |= (*((uint8_t*)(pkt->payload)+ptr+3))<<8;
+    				pkt->l2_sixtop_celllist_add[i].isUsed         = TRUE;
+    				ptr    += 4;
+    				pktLen -= 4;
+    				i++;
+    			}
 
-                break;
-            case SIX_STATE_WAIT_DELETERESPONSE:
-                if (
-                    sixtop_removeCells(
-                        sixtop_vars.cb_sf_getMetadata(),
-                        sixtop_vars.celllist_toDelete,
-                        &(pkt->l2_nextORpreviousHop),
-                        sixtop_vars.cellOptions
-                    ) == TRUE
-                ) {
-                    neighbors_updateGeneration(&(pkt->l2_nextORpreviousHop));
-                }
-                openserial_stat6Pcmd(CELLDEL_REP, RCVD, &(pkt->l2_nextORpreviousHop), sixtop_vars.celllist_toDelete, SCHEDULEIEMAXNUMCELLS);
+    			sixtop_removeCells(
+    					sixtop_vars.cb_sf_getMetadata(),
+						sixtop_vars.celllist_toDelete,
+						&(pkt->l2_nextORpreviousHop),
+						sixtop_vars.cellOptions
+    			);
+    			sixtop_addCells(
+    					sixtop_vars.cb_sf_getMetadata(),     // frame id
+						pkt->l2_sixtop_celllist_add,  // celllist to be added
+						&(pkt->l2_nextORpreviousHop), // neighbor that cells to be added to
+						sixtop_vars.cellOptions       // cell options
+    			);
 
+    			openserial_stat6Pcmd(CELLDEL_REP, RCVD, &(pkt->l2_nextORpreviousHop), sixtop_vars.celllist_toDelete, SCHEDULEIEMAXNUMCELLS);
+    			openserial_stat6Pcmd(CELLADD_REP, RCVD, &(pkt->l2_nextORpreviousHop), pkt->l2_sixtop_celllist_add, SCHEDULEIEMAXNUMCELLS);
 
-                break;
-            case SIX_STATE_WAIT_RELOCATERESPONSE:
-                i = 0;
-                memset(pkt->l2_sixtop_celllist_add,0,sizeof(pkt->l2_sixtop_celllist_add));
-                while(pktLen>0){
-                    pkt->l2_sixtop_celllist_add[i].slotoffset     =  *((uint8_t*)(pkt->payload)+ptr);
-                    pkt->l2_sixtop_celllist_add[i].slotoffset    |= (*((uint8_t*)(pkt->payload)+ptr+1))<<8;
-                    pkt->l2_sixtop_celllist_add[i].channeloffset  =  *((uint8_t*)(pkt->payload)+ptr+2);
-                    pkt->l2_sixtop_celllist_add[i].channeloffset |= (*((uint8_t*)(pkt->payload)+ptr+3))<<8;
-                    pkt->l2_sixtop_celllist_add[i].isUsed         = TRUE;
-                    ptr    += 4;
-                    pktLen -= 4;
-                    i++;
-                }
-                scheduleChanged  = sixtop_removeCells(
-                                        sixtop_vars.cb_sf_getMetadata(),
-                                        sixtop_vars.celllist_toDelete,
-                                        &(pkt->l2_nextORpreviousHop),
-                                        sixtop_vars.cellOptions
-                                   );
-                scheduleChanged |= sixtop_addCells(
-                                        sixtop_vars.cb_sf_getMetadata(),     // frame id 
-                                        pkt->l2_sixtop_celllist_add,  // celllist to be added
-                                        &(pkt->l2_nextORpreviousHop), // neighbor that cells to be added to
-                                        sixtop_vars.cellOptions       // cell options
-                                   );
-                if (scheduleChanged) {
-                    neighbors_updateGeneration(&(pkt->l2_nextORpreviousHop));
-                }
-                openserial_stat6Pcmd(CELLDEL_REP, RCVD, &(pkt->l2_nextORpreviousHop), sixtop_vars.celllist_toDelete, SCHEDULEIEMAXNUMCELLS);
-                openserial_stat6Pcmd(CELLADD_REP, RCVD, &(pkt->l2_nextORpreviousHop), pkt->l2_sixtop_celllist_add, SCHEDULEIEMAXNUMCELLS);
+    			break;
 
-                break;
-            case SIX_STATE_WAIT_COUNTRESPONSE:
-                numCells  = *((uint8_t*)(pkt->payload)+ptr);
-                numCells |= (*((uint8_t*)(pkt->payload)+ptr+1))<<8;
-                ptr += 2;
-                openserial_printInfo(
-                    COMPONENT_SIXTOP,
-                    ERR_SIXTOP_COUNT,
-                    (errorparameter_t)numCells,
-                    (errorparameter_t)sixtop_vars.six2six_state
-                );
-                openserial_stat6Pcmd(CELLCOUNT_REP, RCVD, &(pkt->l2_nextORpreviousHop), NULL, 0);
-               
-                break;
-            case SIX_STATE_WAIT_LISTRESPONSE:
-                i = 0;
-                memset(celllist_list,0,CELLLIST_MAX_LEN*sizeof(cellInfo_ht));
-                while(pktLen>0){
-                    celllist_list[i].slotoffset     =  *((uint8_t*)(pkt->payload)+ptr);
-                    celllist_list[i].slotoffset    |= (*((uint8_t*)(pkt->payload)+ptr+1))<<8;
-                    celllist_list[i].channeloffset  =  *((uint8_t*)(pkt->payload)+ptr+2);
-                    celllist_list[i].channeloffset |= (*((uint8_t*)(pkt->payload)+ptr+3))<<8;
-                    celllist_list[i].isUsed         = TRUE;
-                    ptr    += 4;
-                    pktLen -= 4;
-                    i++;
-                }
-                // print out first two cells in the list
-                openserial_printInfo(
-                    COMPONENT_SIXTOP,
-                    ERR_SIXTOP_LIST,
-                    (errorparameter_t)celllist_list[0].slotoffset,
-                    (errorparameter_t)celllist_list[1].slotoffset
-                );
-               
-                openserial_stat6Pcmd(CELLLIST_REP, RCVD, &(pkt->l2_nextORpreviousHop), celllist_list, 0);
-                break;
-            case SIX_STATE_WAIT_CLEARRESPONSE:
-                schedule_removeAllCells(
-                    sixtop_vars.cb_sf_getMetadata(),
-                    &(pkt->l2_nextORpreviousHop)
-                );
-                neighbors_resetSequenceNumber(&(pkt->l2_nextORpreviousHop));
-                openserial_stat6Pcmd(CELLCLEAR_REP, RCVD, &(pkt->l2_nextORpreviousHop), NULL, 0);
-                break;
-            default:
-                // should neven happen
-                break;
-            }
-        } else {
-            sixtop_vars.cb_sf_handleRCError(code, &(pkt->l2_nextORpreviousHop));
-        }
-        openserial_printInfo(
-            COMPONENT_SIXTOP,
-            ERR_SIXTOP_RETURNCODE,
-            (errorparameter_t)code,
-            (errorparameter_t)sixtop_vars.six2six_state
-        );
-        memset(&sixtop_vars.neighborToClearCells,0,sizeof(open_addr_t));
-        sixtop_vars.six2six_state   = SIX_STATE_IDLE;
-        opentimers_cancel(sixtop_vars.timeoutTimerId);
+    		case SIX_STATE_WAIT_COUNTRESPONSE:
+    			numCells  = *((uint8_t*)(pkt->payload)+ptr);
+    			numCells |= (*((uint8_t*)(pkt->payload)+ptr+1))<<8;
+    			ptr += 2;
+    			openserial_printInfo(
+    					COMPONENT_SIXTOP,
+						ERR_SIXTOP_COUNT,
+						(errorparameter_t)numCells,
+						(errorparameter_t)sixtop_vars.six2six_state
+    			);
+    			openserial_stat6Pcmd(CELLCOUNT_REP, RCVD, &(pkt->l2_nextORpreviousHop), NULL, 0);
+
+    			break;
+    		case SIX_STATE_WAIT_LISTRESPONSE:
+    			i = 0;
+    			memset(celllist_list,0,CELLLIST_MAX_LEN*sizeof(cellInfo_ht));
+    			while(pktLen>0){
+    				celllist_list[i].slotoffset     =  *((uint8_t*)(pkt->payload)+ptr);
+    				celllist_list[i].slotoffset    |= (*((uint8_t*)(pkt->payload)+ptr+1))<<8;
+    				celllist_list[i].channeloffset  =  *((uint8_t*)(pkt->payload)+ptr+2);
+    				celllist_list[i].channeloffset |= (*((uint8_t*)(pkt->payload)+ptr+3))<<8;
+    				celllist_list[i].isUsed         = TRUE;
+    				ptr    += 4;
+    				pktLen -= 4;
+    				i++;
+    			}
+    			// print out first two cells in the list
+				openserial_printInfo(
+						COMPONENT_SIXTOP,
+						ERR_SIXTOP_LIST,
+						(errorparameter_t)celllist_list[0].slotoffset,
+						(errorparameter_t)celllist_list[1].slotoffset
+				);
+    			openserial_stat6Pcmd(CELLLIST_REP, RCVD, &(pkt->l2_nextORpreviousHop), celllist_list, 0);
+
+    			break;
+    		case SIX_STATE_WAIT_CLEARRESPONSE:
+    			schedule_removeAllCells(
+    					sixtop_vars.cb_sf_getMetadata(),
+						&(pkt->l2_nextORpreviousHop)
+    			);
+    			openserial_stat6Pcmd(CELLCLEAR_REP, RCVD, &(pkt->l2_nextORpreviousHop), NULL, 0);
+    			neighbors_resetSequenceNumber(&(pkt->l2_nextORpreviousHop));
+    			break;
+    		default:
+    			// should neven happen
+				break;
+    		}
+    	} else {
+    		sixtop_vars.cb_sf_handleRCError(code, &(pkt->l2_nextORpreviousHop));
+    	}
+    	openserial_printInfo(
+    			COMPONENT_SIXTOP,
+				ERR_SIXTOP_RETURNCODE,
+				(errorparameter_t)code,
+				(errorparameter_t)sixtop_vars.six2six_state
+    	);
+    	memset(&sixtop_vars.neighborToClearCells,0,sizeof(open_addr_t));
+    	sixtop_vars.six2six_state   = SIX_STATE_IDLE;
+    	opentimers_cancel(sixtop_vars.timeoutTimerId);
     }
 }
 
