@@ -790,8 +790,6 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
 
    // return to listening state
    changeState(S_SYNCLISTEN);
-
-   openserial_inhibitStop();
 }
 
 port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
