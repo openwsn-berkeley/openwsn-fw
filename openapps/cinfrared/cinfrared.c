@@ -37,7 +37,7 @@ void cinrared_turnOnOrOff(uint8_t turnOnOrOff);
 
 //=========================== public ==========================================
 
-void cinfrared_init() {
+void cinfrared_init(void) {
     if(idmanager_getIsDAGroot()==TRUE) return; 
 
     // prepare the resource descriptor for the /6t path

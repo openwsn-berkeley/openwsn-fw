@@ -6,6 +6,7 @@
 #include "openserial.h"
 #include "IEEE802154E.h"
 #include "openrandom.h"
+#include "msf.h"
 
 //=========================== variables =======================================
 
@@ -33,7 +34,7 @@ bool isThisRowMatching(
 /**
 \brief Initializes this module.
 */
-void neighbors_init() {
+void neighbors_init(void) {
    
    // clear module variables
    memset(&neighbors_vars,0,sizeof(neighbors_vars_t));
@@ -48,7 +49,7 @@ void neighbors_init() {
 
 \returns The number of neighbors this mote's currently knows of.
 */
-uint8_t neighbors_getNumNeighbors() {
+uint8_t neighbors_getNumNeighbors(void) {
    uint8_t i;
    uint8_t returnVal;
    
@@ -65,6 +66,13 @@ dagrank_t neighbors_getNeighborRank(uint8_t index) {
    return neighbors_vars.neighbors[index].DAGrank;
 }
 
+int8_t neighbors_getRssi(uint8_t index){
+   return neighbors_vars.neighbors[index].rssi;
+}
+
+uint8_t neighbors_getNumTx(uint8_t index){
+   return neighbors_vars.neighbors[index].numTx;
+}
 /**
 \brief Find neighbor to which to send KA.
 
@@ -104,7 +112,7 @@ with lowest join priority metric to send join traffic through.
 
 \returns A pointer to the neighbor's address, or NULL if no join proxy is found.
 */
-open_addr_t* neighbors_getJoinProxy() {
+open_addr_t* neighbors_getJoinProxy(void) {
    uint8_t i;
    uint8_t joinPrioMinimum;
    open_addr_t* joinProxy;
@@ -126,14 +134,8 @@ bool neighbors_getNeighborNoResource(uint8_t index){
     return neighbors_vars.neighbors[index].f6PNORES;
 }
 
-uint8_t neighbors_getGeneration(open_addr_t* address){
-    uint8_t i;
-    for (i=0;i<MAXNUMNEIGHBORS;i++){
-        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b)){
-            break;
-        }
-    }
-    return neighbors_vars.neighbors[i].generation;
+bool neighbors_getNeighborIsInBlacklist(uint8_t index){
+    return neighbors_vars.neighbors[index].inBlacklist;
 }
 
 uint8_t neighbors_getSequenceNumber(open_addr_t* address){
@@ -240,27 +242,6 @@ bool neighbors_isInsecureNeighbor(open_addr_t* address) {
 
 \param[in] index The index of that neighbor in the neighbor table.
 
-\returns TRUE if that neighbor is in use and has a lower DAG rank than me, FALSE otherwise.
-*/
-bool neighbors_isNeighborWithLowerDAGrank(uint8_t index) {
-   bool    returnVal;
-   
-   if (neighbors_vars.neighbors[index].used==TRUE &&
-       neighbors_vars.neighbors[index].DAGrank < icmpv6rpl_getMyDAGrank()) { 
-      returnVal = TRUE;
-   } else {
-      returnVal = FALSE;
-   }
-   
-   return returnVal;
-}
-
-
-/**
-\brief Indicate whether some neighbor has a lower DAG rank that me.
-
-\param[in] index The index of that neighbor in the neighbor table.
-
 \returns TRUE if that neighbor is in use and has a higher DAG rank than me, FALSE otherwise.
 */
 bool neighbors_isNeighborWithHigherDAGrank(uint8_t index) {
@@ -276,13 +257,13 @@ bool neighbors_isNeighborWithHigherDAGrank(uint8_t index) {
    return returnVal;
 }
 
-bool neighbors_reachedMaxTransmission(uint8_t index){
+bool neighbors_reachedMinimalTransmission(uint8_t index){
     bool    returnVal;
     
     if (
-        neighbors_vars.neighbors[index].used     == TRUE            &&
-        neighbors_vars.neighbors[index].numTx    >  DEFAULTLINKCOST
-    ) { 
+        neighbors_vars.neighbors[index].used  == TRUE &&
+        neighbors_vars.neighbors[index].numTx >  MINIMAL_NUM_TX
+    ) {
         returnVal = TRUE;
     } else {
         returnVal = FALSE;
@@ -395,70 +376,62 @@ The fields which are updated are:
    on final transmission attempt.
 \param[in] asnTs ASN of the last transmission attempt.
 */
-void neighbors_indicateTx(open_addr_t* l2_dest,
-                          uint8_t      numTxAttempts,
-                          bool         was_finally_acked,
-                          asn_t*       asnTs) {
-   uint8_t i;
-   // don't run through this function if packet was sent to broadcast address
-   if (packetfunctions_isBroadcastMulticast(l2_dest)==TRUE) {
-      return;
-   }
-   
-   // loop through neighbor table
-   for (i=0;i<MAXNUMNEIGHBORS;i++) {
-      if (isThisRowMatching(l2_dest,i)) {
-         // handle roll-over case
-        
-          if (neighbors_vars.neighbors[i].numTx>(0xff-numTxAttempts)) {
-              neighbors_vars.neighbors[i].numWraps++; //counting the number of times that tx wraps.
-              neighbors_vars.neighbors[i].numTx/=2;
-              neighbors_vars.neighbors[i].numTxACK/=2;
-           }
-         // update statistics
-        neighbors_vars.neighbors[i].numTx += numTxAttempts; 
-        
-        if (was_finally_acked==TRUE) {
-            neighbors_vars.neighbors[i].numTxACK++;
-            memcpy(&neighbors_vars.neighbors[i].asn,asnTs,sizeof(asn_t));
+void neighbors_indicateTx(
+    open_addr_t* l2_dest,
+    uint8_t      numTxAttempts,
+    bool         was_finally_acked,
+    asn_t*       asnTs
+) {
+    uint8_t i;
+    // don't run through this function if packet was sent to broadcast address
+    if (packetfunctions_isBroadcastMulticast(l2_dest)==TRUE) {
+        return;
+    }
+    
+    // loop through neighbor table
+    for (i=0;i<MAXNUMNEIGHBORS;i++) {
+        if (isThisRowMatching(l2_dest,i)) {
+            // handle roll-over case
+            
+            if (neighbors_vars.neighbors[i].numTx>(0xff-numTxAttempts)) {
+                neighbors_vars.neighbors[i].numWraps++; //counting the number of times that tx wraps.
+                neighbors_vars.neighbors[i].numTx/=2;
+                neighbors_vars.neighbors[i].numTxACK/=2;
+            }
+            // update statistics
+            neighbors_vars.neighbors[i].numTx += numTxAttempts; 
+            
+            if (was_finally_acked==TRUE) {
+                neighbors_vars.neighbors[i].numTxACK++;
+                memcpy(&neighbors_vars.neighbors[i].asn,asnTs,sizeof(asn_t));
+            }
+            
+            // numTx and numTxAck changed,, update my rank
+            icmpv6rpl_updateMyDAGrankAndParentSelection();
+            break;
         }
-        // #TODO : investigate this TX wrap thing! @incorrect in the meantime
-        // DB (Nov 2015) I believe this is correct. The ratio numTx/numTxAck is still a correct approximation
-        // of ETX after scaling down by a factor 2. Obviously, each one of numTx and numTxAck is no longer an
-        // accurate count of the related events, so don't rely of them to keep track of frames sent and ack received,
-        // and don't use numTx as a frame sequence number!
-        // The scaling means that older events have less weight when the scaling occurs. It is a way of progressively
-        // forgetting about the ancient past and giving more importance to recent observations.
-        break;
-      }
-   }
+    }
 }
 
 void neighbors_updateSequenceNumber(open_addr_t* address){
     uint8_t i;
     for (i=0;i<MAXNUMNEIGHBORS;i++){
         if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b)){
-            neighbors_vars.neighbors[i].sequenceNumber = (neighbors_vars.neighbors[i].sequenceNumber+1) & 0x0F;
+            neighbors_vars.neighbors[i].sequenceNumber = (neighbors_vars.neighbors[i].sequenceNumber+1) & 0xFF;
+            // rollover from 0xff to 0x01
+            if (neighbors_vars.neighbors[i].sequenceNumber == 0){
+                neighbors_vars.neighbors[i].sequenceNumber = 1;
+            }
             break;
         }
     }
 }
 
-void neighbors_updateGeneration(open_addr_t* address){
+void neighbors_resetSequenceNumber(open_addr_t* address){
     uint8_t i;
     for (i=0;i<MAXNUMNEIGHBORS;i++){
         if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b)){
-            neighbors_vars.neighbors[i].generation = (neighbors_vars.neighbors[i].generation+1)%9;
-            break;
-        }
-    }
-}
-
-void neighbors_resetGeneration(open_addr_t* address){
-    uint8_t i;
-    for (i=0;i<MAXNUMNEIGHBORS;i++){
-        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b)){
-            neighbors_vars.neighbors[i].generation = 0;
+            neighbors_vars.neighbors[i].sequenceNumber = 0;
             break;
         }
     }
@@ -552,6 +525,7 @@ void neighbors_setNeighborNoResource(open_addr_t* address){
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
       if (isThisRowMatching(address,i)) {
           neighbors_vars.neighbors[i].f6PNORES = TRUE;
+          icmpv6rpl_updateMyDAGrankAndParentSelection();
           break;
       }
    }
@@ -576,10 +550,14 @@ uint16_t neighbors_getLinkMetric(uint8_t index) {
     // we assume that this neighbor has already been checked for being in use         
     // calculate link cost to this neighbor
     if (neighbors_vars.neighbors[index].numTxACK==0) {
-        if (neighbors_vars.neighbors[index].numTx<=DEFAULTLINKCOST){
-            rankIncrease = (3*DEFAULTLINKCOST-2)*MINHOPRANKINCREASE;
+        if (neighbors_vars.neighbors[index].numTx > DEFAULTLINKCOST){
+            if (neighbors_vars.neighbors[index].numTx < MINIMAL_NUM_TX){
+                rankIncrease = (3*neighbors_vars.neighbors[index].numTx-2)*MINHOPRANKINCREASE;
+            } else {
+                rankIncrease = 65535;
+            }
         } else {
-            rankIncrease = (3*LARGESTLINKCOST-2)*MINHOPRANKINCREASE;
+            rankIncrease = (3*DEFAULTLINKCOST-2)*MINHOPRANKINCREASE;
         }
     } else {
         //6TiSCH minimal draft using OF0 for rank computation: ((3*numTx/numTxAck)-2)*minHopRankIncrease
@@ -594,112 +572,52 @@ uint16_t neighbors_getLinkMetric(uint8_t index) {
         } else {
             rankIncrease = (uint16_t)(rankIncreaseIntermediary >> 10);
         }
+        
+        if (
+            rankIncrease>(3*DEFAULTLINKCOST-2)*MINHOPRANKINCREASE &&
+            neighbors_vars.neighbors[index].numTx > MINIMAL_NUM_TX
+        ){
+            // PDR too low, put the neighbor in blacklist
+            neighbors_vars.neighbors[index].inBlacklist = TRUE;
+        }
     }
     return rankIncrease;
 }
 
 //===== maintenance
 
-void  neighbors_removeOld() {
+void  neighbors_removeOld(void) {
     uint8_t    i, j;
     bool       haveParent;
-    uint8_t    neighborIndexWithLowestRank[3];
-    dagrank_t  lowestRank;
     PORT_TIMER_WIDTH timeSinceHeard;
+    open_addr_t addressToWrite;
+
+    if (
+        icmpv6rpl_getPreferredParentEui64(&addressToWrite) == FALSE      ||
+        (
+            icmpv6rpl_getPreferredParentEui64(&addressToWrite)           &&
+            schedule_hasDedicatedCellToNeighbor(&addressToWrite)== FALSE
+        )
+    ) {
+        return;
+    }
     
     // remove old neighbor
     for (i=0;i<MAXNUMNEIGHBORS;i++) {
         if (neighbors_vars.neighbors[i].used==1) {
             timeSinceHeard = ieee154e_asnDiff(&neighbors_vars.neighbors[i].asn);
             if (timeSinceHeard>DESYNCTIMEOUT) {
-                haveParent = icmpv6rpl_getPreferredParentIndex(&j);
-                if (haveParent && (i==j)) { // this is our preferred parent, carefully!
-                    icmpv6rpl_killPreferredParent();
-                    removeNeighbor(i);
-                    icmpv6rpl_updateMyDAGrankAndParentSelection();
-                } else {
-                    removeNeighbor(i);
-                }
-            }
-        }
-    }
-    
-    // neighbors marked as NO_RES will never removed.
-    
-    // first round
-    lowestRank = MAXDAGRANK;
-    for (i=0;i<MAXNUMNEIGHBORS;i++) {
-        if (neighbors_vars.neighbors[i].used==1) {
-            if (
-                lowestRank>neighbors_vars.neighbors[i].DAGrank && 
-                neighbors_vars.neighbors[i].f6PNORES == FALSE
-            ){
-                lowestRank = neighbors_vars.neighbors[i].DAGrank;
-                neighborIndexWithLowestRank[0] = i;
-            }
-        }
-    }
-    
-    if (lowestRank==MAXDAGRANK){
-        // none of the neighbors have rank yet
-        return;
-    }
-   
-    // second round
-    lowestRank = MAXDAGRANK;
-    for (i=0;i<MAXNUMNEIGHBORS;i++) {
-        if (neighbors_vars.neighbors[i].used==1) {
-            if (
-                lowestRank>neighbors_vars.neighbors[i].DAGrank &&
-                i != neighborIndexWithLowestRank[0]           && 
-                neighbors_vars.neighbors[i].f6PNORES == FALSE
-            ){
-                lowestRank = neighbors_vars.neighbors[i].DAGrank;
-                neighborIndexWithLowestRank[1] = i;
-            }
-        }
-    }
-   
-    if (lowestRank==MAXDAGRANK){
-        // only one neighbor has rank
-        return;
-    }
-   
-    // third round
-    lowestRank = MAXDAGRANK;
-    for (i=0;i<MAXNUMNEIGHBORS;i++) {
-        if (neighbors_vars.neighbors[i].used==1) {
-            if (
-                lowestRank>neighbors_vars.neighbors[i].DAGrank &&
-                i != neighborIndexWithLowestRank[0]           &&
-                i != neighborIndexWithLowestRank[1]           && 
-                neighbors_vars.neighbors[i].f6PNORES == FALSE
-            ){
-                lowestRank = neighbors_vars.neighbors[i].DAGrank;
-                neighborIndexWithLowestRank[2] = i;
-            }
-        }
-    }
-    
-    if (lowestRank==MAXDAGRANK){
-        // only two neighbors have rank
-        return;
-    }
-    
-    // remove all neighbors except the ones that f6PNORES flag is set or is recorded as lowest 3 rank neighbors
-    for (i=0;i<MAXNUMNEIGHBORS;i++) {
-        if (neighbors_vars.neighbors[i].used==1) {
-            if (
-                i!= neighborIndexWithLowestRank[0] &&
-                i!= neighborIndexWithLowestRank[1] &&
-                i!= neighborIndexWithLowestRank[2]
-            ) {
+                msf_trigger6pClear(&neighbors_vars.neighbors[i].addr_64b);
                 haveParent = icmpv6rpl_getPreferredParentIndex(&j);
                 if (haveParent && (i==j)) { // this is our preferred parent, carefully!
                     icmpv6rpl_killPreferredParent();
                     icmpv6rpl_updateMyDAGrankAndParentSelection();
                 }
-                if (neighbors_vars.neighbors[i].f6PNORES == FALSE){
+                // keep the NORES neighbor in the table
+                if (
+                    neighbors_vars.neighbors[i].f6PNORES    == FALSE &&
+                    neighbors_vars.neighbors[i].inBlacklist == FALSE
+                ){
                     removeNeighbor(i);
                 }
             }
@@ -717,7 +635,7 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_neighbors() {
+bool debugPrint_neighbors(void) {
     debugNeighborEntry_t temp;
     neighbors_vars.debugRow=(neighbors_vars.debugRow+1)%MAXNUMNEIGHBORS;
     temp.row=neighbors_vars.debugRow;
@@ -747,6 +665,9 @@ void registerNewNeighbor(open_addr_t* address,
       i=0;
       while(i<MAXNUMNEIGHBORS) {
          if (neighbors_vars.neighbors[i].used==FALSE) {
+            if (rssi < BADNEIGHBORMAXRSSI){
+                break;
+            }
             // add this neighbor
             neighbors_vars.neighbors[i].used                   = TRUE;
             neighbors_vars.neighbors[i].insecure               = insecure;
@@ -762,6 +683,8 @@ void registerNewNeighbor(open_addr_t* address,
             neighbors_vars.neighbors[i].numTx                  = 0;
             neighbors_vars.neighbors[i].numTxACK               = 0;
             memcpy(&neighbors_vars.neighbors[i].asn,asnTimestamp,sizeof(asn_t));
+            neighbors_vars.neighbors[i].backoffExponenton      = MINBE-1;;
+            neighbors_vars.neighbors[i].backoff                = 0;
             //update jp
             if (joinPrioPresent==TRUE){
                neighbors_vars.neighbors[i].joinPrio=joinPrio;
@@ -808,6 +731,8 @@ void removeNeighbor(uint8_t neighborIndex) {
    neighbors_vars.neighbors[neighborIndex].asn.byte4                 = 0;
    neighbors_vars.neighbors[neighborIndex].f6PNORES                  = FALSE;
    neighbors_vars.neighbors[neighborIndex].sequenceNumber            = 0;
+   neighbors_vars.neighbors[neighborIndex].backoffExponenton         = MINBE-1;;
+   neighbors_vars.neighbors[neighborIndex].backoff                   = 0;
 }
 
 //=========================== helpers =========================================

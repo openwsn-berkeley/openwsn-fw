@@ -11,6 +11,10 @@
 #include "opendefs.h"
 #include "schedule.h"
 
+#include <stdio.h>
+#include <stdarg.h>
+#include <string.h>
+
 /**
 \addtogroup drivers
 \{
@@ -53,6 +57,8 @@ enum {
 #define SERFRAME_MOTE2PC_REQUEST                 ((uint8_t)'R')
 #define SERFRAME_MOTE2PC_SNIFFED_PACKET          ((uint8_t)'P')
 #define SERFRAME_MOTE2PC_STAT                    ((uint8_t)'T')
+#define SERFRAME_MOTE2PC_PRINTF                  ((uint8_t)'F')
+
 
 // frames sent PC->mote
 #define SERFRAME_PC2MOTE_SETROOT                 ((uint8_t)'R')
@@ -278,6 +284,8 @@ void    openserial_statPktDropped(uint8_t status, OpenQueueEntry_t* msg);
 void    openserial_statDIO(uint8_t status, uint8_t rplinstanceId, dagrank_t rank, uint8_t *DODAGID);
 void    openserial_statDAO(uint8_t status, uint8_t *parent, uint8_t *DODAGID);
 void    openserial_stat6Pcmd(uint8_t command, uint8_t status, open_addr_t *neigh, cellInfo_ht* cells, uint8_t nbCells);
+owerror_t openserial_print_str(char* buffer, uint8_t length);
+owerror_t openserial_print_uint32_t(uint32_t value);
 
 // retrieving inputBuffer
 uint8_t   openserial_getInputBufferFilllevel(void);

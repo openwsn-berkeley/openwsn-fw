@@ -66,7 +66,7 @@ SPI instance initialisation
 
 */
 
-void spi_init(){
+void spi_init(void) {
 
   /* HFXO 48MHz, divided by 1 */
   CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFXO);

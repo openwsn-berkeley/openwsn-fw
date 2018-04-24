@@ -60,7 +60,7 @@ void     radio_isr_internal(void);
 
 //===== admin
 
-void radio_init() {
+void radio_init(void) {
    
    // clear variables
    memset(&radio_vars,0,sizeof(radio_vars_t));
@@ -164,7 +164,7 @@ void radio_setEndFrameCb(radio_capture_cbt cb) {
 
 //===== reset
 
-void radio_reset() {
+void radio_reset(void) {
    /* Wait for ongoing TX to complete (e.g. this could be an outgoing ACK) */
    while(HWREG(RFCORE_XREG_FSMSTAT1) & RFCORE_XREG_FSMSTAT1_TX_ACTIVE);
    
@@ -202,11 +202,11 @@ void radio_setFrequency(uint8_t frequency) {
    radio_vars.state = RADIOSTATE_FREQUENCY_SET;
 }
 
-void radio_rfOn() {
+void radio_rfOn(void) {
    //radio_on();
 }
 
-void radio_rfOff() {
+void radio_rfOff(void) {
    
    // change state
    radio_vars.state = RADIOSTATE_TURNING_OFF;
@@ -249,7 +249,7 @@ void radio_loadPacket(uint8_t* packet, uint16_t len) {
    radio_vars.state = RADIOSTATE_PACKET_LOADED;
 }
 
-void radio_txEnable() {
+void radio_txEnable(void) {
    
    // change state
    radio_vars.state = RADIOSTATE_ENABLING_TX;
@@ -265,7 +265,7 @@ void radio_txEnable() {
    radio_vars.state = RADIOSTATE_TX_ENABLED;
 }
 
-void radio_txNow() {
+void radio_txNow(void) {
    PORT_TIMER_WIDTH count;
    
    // change state
@@ -289,7 +289,7 @@ void radio_txNow() {
 
 //===== RX
 
-void radio_rxEnable() {
+void radio_rxEnable(void) {
    
    // change state
    radio_vars.state = RADIOSTATE_ENABLING_RX;
@@ -305,7 +305,7 @@ void radio_rxEnable() {
    radio_vars.state = RADIOSTATE_LISTENING;
 }
 
-void radio_rxNow() {
+void radio_rxNow(void) {
    //empty buffer before receiving
    //CC2538_RF_CSP_ISFLUSHRX();
    
@@ -429,7 +429,7 @@ the scheduler will always be kicked in after servicing an interrupt. This
 behaviour can be changed by modifying the SLEEPEXIT field in the SYSCTRL
 regiser (see page 131 of the CC2538 manual).
 */
-kick_scheduler_t radio_isr() {
+kick_scheduler_t radio_isr(void) {
    return DO_NOT_KICK_SCHEDULER;
 }
 

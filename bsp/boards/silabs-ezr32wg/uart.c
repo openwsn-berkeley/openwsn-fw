@@ -53,7 +53,7 @@ static void uart_isr_private(void);
 
 //=========================== public ==========================================
 
-void uart_init() { 
+void uart_init(void) { 
    // reset local variables
    memset(&uart_vars,0,sizeof(uart_vars_t));
    /* Enable peripheral clocks */
@@ -121,23 +121,23 @@ void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb) {
     
 }
 
-void uart_enableInterrupts(){
+void uart_enableInterrupts(void) {
 	USART_IntEnable(UART_UART, USART_IF_RXDATAV);
 	//USART_IntEnable(UART_UART, USART_IF_TXBL);
         USART_IntEnable(UART_UART, USART_IF_TXC);
 }
 
-void uart_disableInterrupts(){
+void uart_disableInterrupts(void) {
 	USART_IntDisable(UART_UART, USART_IF_RXDATAV);
 	//USART_IntDisable(UART_UART, USART_IF_TXBL);
         USART_IntDisable(UART_UART, USART_IF_TXC);
 }
 
-void uart_clearRxInterrupts(){
+void uart_clearRxInterrupts(void) {
 	USART_IntClear(UART_UART, USART_IF_RXDATAV);
 }
 
-void uart_clearTxInterrupts(){
+void uart_clearTxInterrupts(void) {
 	//USART_IntClear(UART_UART, USART_IF_TXBL);
         USART_IntClear(UART_UART, USART_IF_TXC);
 }
@@ -146,7 +146,7 @@ void  uart_writeByte(uint8_t byteToWrite){
 	USART_Tx(UART_UART, byteToWrite);
 }
 
-uint8_t uart_readByte(){
+uint8_t uart_readByte(void) {
 	 //int32_t i32Char = 0;
 	 //i32Char = USART_Rx(UART_UART);
 	 //return (uint8_t)(i32Char & 0xFF);
@@ -177,7 +177,7 @@ static void uart_isr_private(void){
 	debugpins_isr_clr();
 }
 
-kick_scheduler_t uart_tx_isr() {
+kick_scheduler_t uart_tx_isr(void) {
 /*   uart_clearTxInterrupts();
    if (uart_vars.txCb != NULL) {
        uart_vars.txCb();
@@ -187,7 +187,7 @@ kick_scheduler_t uart_tx_isr() {
    return DO_NOT_KICK_SCHEDULER;
 }
 
-kick_scheduler_t uart_rx_isr() {
+kick_scheduler_t uart_rx_isr(void) {
  /*  uart_clearRxInterrupts();
    if (uart_vars.rxCb != NULL) {
        uart_vars.rxCb();

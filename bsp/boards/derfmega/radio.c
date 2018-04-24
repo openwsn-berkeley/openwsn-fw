@@ -41,7 +41,7 @@ uint8_t radio_trx_end_isr();
 
 //===== admin
 
-void radio_init() {
+void radio_init(void) {
 	// turn on radio power and reset
    PRR1 &= ~(1<<PRTRX24);
    TRXPR |= 0x01;
@@ -87,7 +87,7 @@ void radio_setEndFrameCb(radiotimer_capture_cbt cb) {
 
 //===== reset
 
-void radio_reset() {
+void radio_reset(void) {
    TRXPR |= 0x01; // force tranceiver reset
 }
 
@@ -97,7 +97,7 @@ void radio_startTimer(PORT_TIMER_WIDTH period) {
    radiotimer_start(period);
 }
 
-PORT_TIMER_WIDTH radio_getTimerValue() {
+PORT_TIMER_WIDTH radio_getTimerValue(void) {
    return radiotimer_getValue();
 }
 
@@ -106,7 +106,7 @@ void radio_setTimerPeriod(PORT_TIMER_WIDTH period) {
    radiotimer_setPeriod(period);
 }
 
-PORT_TIMER_WIDTH radio_getTimerPeriod() {
+PORT_TIMER_WIDTH radio_getTimerPeriod(void) {
    return radiotimer_getPeriod();
 }
 
@@ -123,11 +123,11 @@ void radio_setFrequency(uint8_t frequency) {
    radio_vars.state = RADIOSTATE_FREQUENCY_SET;
 }
 
-void radio_rfOn() {
+void radio_rfOn(void) {
    PRR1 &= ~_BV(PRTRX24);
 }
 
-void radio_rfOff() {
+void radio_rfOff(void) {
    // change state
    radio_vars.state = RADIOSTATE_TURNING_OFF;
    // turn radio off
@@ -156,7 +156,7 @@ void radio_loadPacket(uint8_t* packet, uint16_t len) {
    radio_vars.state = RADIOSTATE_PACKET_LOADED;
 }
 
-void radio_txEnable() {
+void radio_txEnable(void) {
    // change state
    radio_vars.state = RADIOSTATE_ENABLING_TX;
    
@@ -172,7 +172,7 @@ void radio_txEnable() {
    radio_vars.state = RADIOSTATE_TX_ENABLED;
 }
 
-void radio_txNow() {
+void radio_txNow(void) {
    // change state
    radio_vars.state = RADIOSTATE_TRANSMITTING;
    
@@ -193,7 +193,7 @@ void radio_txNow() {
 
 //===== RX
 
-void radio_rxEnable() {
+void radio_rxEnable(void) {
    // change state
    radio_vars.state = RADIOSTATE_ENABLING_RX;
    
@@ -210,7 +210,7 @@ void radio_rxEnable() {
    radio_vars.state = RADIOSTATE_LISTENING;
 }
 
-void radio_rxNow() {
+void radio_rxNow(void) {
    // nothing to do
 }
 
@@ -265,12 +265,12 @@ void radio_internalReadRxFifo(uint8_t* pBufRead,
 
 //=========================== interrupt handlers ==============================
 
-uint8_t radio_isr() {
+uint8_t radio_isr(void) {
 	// should not be called
 	return 0;
 }
 
-uint8_t radio_rx_start_isr() {
+uint8_t radio_rx_start_isr(void) {
    PORT_TIMER_WIDTH capturedTime;
    // capture the time
    capturedTime = radiotimer_getCapturedTime();	
@@ -284,7 +284,7 @@ uint8_t radio_rx_start_isr() {
 	return 0;
 }
 
-uint8_t radio_trx_end_isr() {
+uint8_t radio_trx_end_isr(void) {
    PORT_TIMER_WIDTH capturedTime;
    // capture the time
    capturedTime = radiotimer_getCapturedTime();	

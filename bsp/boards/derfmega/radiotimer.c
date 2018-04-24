@@ -27,7 +27,7 @@ uint8_t radiotimer_compare_isr();
 
 //===== admin
 
-void radiotimer_init() {
+void radiotimer_init(void) {
    // clear local variables
    memset(&radiotimer_vars,0,sizeof(radiotimer_vars_t));
 }
@@ -76,7 +76,7 @@ void radiotimer_start(PORT_RADIOTIMER_WIDTH period) {
 
 //===== direct access
 
-PORT_RADIOTIMER_WIDTH radiotimer_getValue() {
+PORT_RADIOTIMER_WIDTH radiotimer_getValue(void) {
    return radiotimer_getCapturedTime();
 }
 
@@ -87,7 +87,7 @@ void radiotimer_setPeriod(PORT_RADIOTIMER_WIDTH period) {
 	SCOCR3LL = (uint8_t)period;
 }
 
-PORT_RADIOTIMER_WIDTH radiotimer_getPeriod() {
+PORT_RADIOTIMER_WIDTH radiotimer_getPeriod(void) {
 	return *((PORT_RADIOTIMER_WIDTH *)(&SCOCR3LL));
 }
 
@@ -106,7 +106,7 @@ void radiotimer_schedule(PORT_RADIOTIMER_WIDTH offset) {
    SCIRQM |= _BV(1);
 }
 
-void radiotimer_cancel() {
+void radiotimer_cancel(void) {
    // reset value
    *((PORT_RADIOTIMER_WIDTH *)(&SCOCR2LL)) = 0;
    SCOCR2LL = 0;
@@ -117,7 +117,7 @@ void radiotimer_cancel() {
 
 //===== capture
 
-inline PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime() {
+inline PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime(void) {
    return *((PORT_RADIOTIMER_WIDTH *)(&SCCNTLL)) - *((PORT_RADIOTIMER_WIDTH *)(&SCBTSRLL));
 }
 
@@ -125,11 +125,11 @@ inline PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime() {
 
 //=========================== interrupt handlers ==============================
 
-uint8_t radiotimer_isr() {
+uint8_t radiotimer_isr(void) {
 	while(1);
 }
 
-uint8_t radiotimer_compare_isr() {
+uint8_t radiotimer_compare_isr(void) {
          if (radiotimer_vars.compare_cb!=NULL) {
 	         // call the callback
 	         radiotimer_vars.compare_cb();
@@ -139,7 +139,7 @@ uint8_t radiotimer_compare_isr() {
 		 return 0;
 }
 
-uint8_t radiotimer_overflow_isr() {
+uint8_t radiotimer_overflow_isr(void) {
 		SCCR0 |= _BV(SCMBTS);
          if (radiotimer_vars.overflow_cb!=NULL) {
 	         // call the callback

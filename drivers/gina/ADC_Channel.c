@@ -8,7 +8,7 @@ bool ADC_configured = FALSE;
 
 //===================================== public ================================
 
-void ADC_init() {
+void ADC_init(void) {
   volatile int i;
   
   // enable accelerometer and filter
@@ -38,10 +38,10 @@ void ADC_init() {
   ADC_configured = TRUE;
 }
 
-void ADC_disable() {
+void ADC_disable(void) {
   P6OUT   &=  ~0x08;   //Turn off P6.3 to disable accelerometer and filter
 }
-void ADC_get_config() {
+void ADC_get_config(void) {
   if (ADC_configured==TRUE) {
   }
 }

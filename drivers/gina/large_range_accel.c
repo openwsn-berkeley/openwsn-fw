@@ -15,7 +15,7 @@ large_range_accel_vars_t large_range_accel_vars;
 
 //=========================== public ==========================================
 
-void large_range_accel_init() {
+void large_range_accel_init(void) {
    uint8_t reg[]={LARGE_RANGE_ACCEL_REG_CTRL_REGC_ADDR,LARGE_RANGE_ACCEL_REG_CTRL_REGC_SETTING};
    large_range_accel_vars.configured = FALSE;
    P5OUT |=  0x10;                               // set P5.4 as output
@@ -27,12 +27,12 @@ void large_range_accel_init() {
    large_range_accel_vars.configured = TRUE;
 }
 
-void large_range_accel_disable() {
+void large_range_accel_disable(void) {
    uint8_t reg[]={LARGE_RANGE_ACCEL_REG_CTRL_REGB_ADDR,LARGE_RANGE_ACCEL_REG_CTRL_REGB_SLEEP};
    i2c_write_register(1,LARGE_RANGE_ACCEL_I2C_ADDR, sizeof(reg), reg);
 }
 
-void large_range_accel_get_config() {
+void large_range_accel_get_config(void) {
    if (large_range_accel_vars.configured==TRUE) {
       i2c_read_registers(1,LARGE_RANGE_ACCEL_I2C_ADDR,
             LARGE_RANGE_ACCEL_REG_CTRL_REGC_ADDR,

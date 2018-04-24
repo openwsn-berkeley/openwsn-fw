@@ -105,7 +105,7 @@ void sctimer_disable(void){
 /**
 \brief TimerB CCR1-6 interrupt service routine
 */
-kick_scheduler_t sctimer_isr() {
+kick_scheduler_t sctimer_isr(void) {
    PORT_TIMER_WIDTH tbiv_local;
    
    // reading TBIV returns the value of the highest pending interrupt flag

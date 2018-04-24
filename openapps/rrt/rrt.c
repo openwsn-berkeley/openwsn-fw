@@ -46,7 +46,7 @@ void rrt_sendCoAPMsg(char actionMsg, uint8_t *ipv6mote);
 /**
 \brief Initialize this module.
 */
-void rrt_init() {
+void rrt_init(void) {
    
    // do not run if DAGroot
    if(idmanager_getIsDAGroot()==TRUE) return; 

@@ -73,6 +73,8 @@ typedef uint32_t irqflags_t;
 #define PORT_PIN_RADIO_RESET_HIGH()            //RST_HIGH()   
 #define PORT_PIN_RADIO_RESET_LOW()             //RST_LOW()
 
+#define SLOTDURATION 15 // in miliseconds
+
 //===== IEEE802154E timing
 // time-slot related
 #define PORT_TsSlotDuration                 491

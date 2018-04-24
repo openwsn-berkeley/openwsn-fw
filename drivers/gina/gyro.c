@@ -19,7 +19,7 @@ gyro_vars_t gyro_vars;
 
 //=========================== public ==========================================
 
-void gyro_init() {
+void gyro_init(void) {
    uint8_t reg[]={GYRO_REG_SMPLRT_DIV_ADDR,GYRO_REG_SMPLRT_DIV_SETTING};
    
    gyro_vars.configured = FALSE;
@@ -37,12 +37,12 @@ void gyro_init() {
    gyro_vars.configured = TRUE;
 }
 
-void gyro_disable() {
+void gyro_disable(void) {
    uint8_t reg[]={GYRO_REG_PWR_MGM_ADDR,GYRO_REG_PWR_MGM_SLEEP};
    i2c_write_register(1,GYRO_I2C_ADDR, sizeof(reg), reg);
 }
 
-void gyro_get_config() {
+void gyro_get_config(void) {
    if (gyro_vars.configured==TRUE) {
       i2c_read_registers(1,GYRO_I2C_ADDR, GYRO_REG_WHO_AM_I_ADDR   ,1,&gyro_vars.reg_WHO_AM_I);
       i2c_read_registers(1,GYRO_I2C_ADDR, GYRO_REG_SMPLRT_DIV_ADDR ,1,&gyro_vars.reg_SMPLRT_DIV);

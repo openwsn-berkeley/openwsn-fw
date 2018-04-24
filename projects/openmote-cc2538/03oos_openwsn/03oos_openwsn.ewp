@@ -2144,12 +2144,6 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\board_info.h</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\bsp_timer.c</name>
-          <excluded>
-            <configuration>Debug</configuration>
-          </excluded>
-        </file>
-        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\cc2538rf.h</name>
         </file>
         <file>
@@ -2177,12 +2171,6 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\radio.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\radiotimer.c</name>
-          <excluded>
-            <configuration>Debug</configuration>
-          </excluded>
-        </file>
-        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\sctimer.c</name>
         </file>
         <file>
@@ -2197,12 +2185,6 @@
       </group>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\board.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</name>
-        <excluded>
-          <configuration>Debug</configuration>
-        </excluded>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\cryptoengine.h</name>
@@ -2221,12 +2203,6 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</name>
-        <excluded>
-          <configuration>Debug</configuration>
-        </excluded>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\sctimer.h</name>
@@ -2535,9 +2511,6 @@
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154_security.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\ieee802154_security_driver.h</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154E.c</name>
       </file>
       <file>
@@ -2553,6 +2526,12 @@
     <group>
       <name>02b-MAChigh</name>
       <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\msf.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\msf.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\neighbors.c</name>
       </file>
       <file>
@@ -2563,12 +2542,6 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\schedule.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sf0.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sf0.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sixtop.c</name>

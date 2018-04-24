@@ -14,13 +14,13 @@ icmpv6echo_vars_t icmpv6echo_vars;
 
 //=========================== public ==========================================
 
-void icmpv6echo_init() {
+void icmpv6echo_init(void) {
    icmpv6echo_vars.busySending    = FALSE;
    icmpv6echo_vars.seq            = 0;
    icmpv6echo_vars.isReplyEnabled = TRUE;
 }
 
-void icmpv6echo_trigger() {
+void icmpv6echo_trigger(void) {
    uint8_t number_bytes_from_input_buffer;
    uint8_t input_buffer[16];
    OpenQueueEntry_t* msg;

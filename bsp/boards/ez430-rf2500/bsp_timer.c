@@ -34,7 +34,7 @@ bsp_timer_vars_t bsp_timer_vars;
 This functions starts the timer, i.e. the counter increments, but doesn't set
 any compare registers, so no interrupt will fire.
 */
-void bsp_timer_init() {
+void bsp_timer_init(void) {
    
    // clear local variables
    memset(&bsp_timer_vars,0,sizeof(bsp_timer_vars_t));
@@ -65,7 +65,7 @@ void bsp_timer_set_callback(bsp_timer_cbt cb) {
 This function does not stop the timer, it rather resets the value of the
 counter, and cancels a possible pending compare event.
 */
-void bsp_timer_reset() {
+void bsp_timer_reset(void) {
    // reset compare
    TBCCR0               =  0;
    TBCCTL0              =  0;
@@ -116,7 +116,7 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
 /**
 \brief Cancel a running compare.
 */
-void bsp_timer_cancel_schedule() {
+void bsp_timer_cancel_schedule(void) {
    TBCCR0               =  0;
    TBCCTL0             &= ~CCIE;
 }
@@ -126,7 +126,7 @@ void bsp_timer_cancel_schedule() {
 
 \returns The current value of the timer's counter.
 */
-PORT_TIMER_WIDTH bsp_timer_get_currentValue() {
+PORT_TIMER_WIDTH bsp_timer_get_currentValue(void) {
    return TBR;
 }
 
@@ -134,7 +134,7 @@ PORT_TIMER_WIDTH bsp_timer_get_currentValue() {
 
 //=========================== interrupt handlers ==============================
 
-uint8_t bsp_timer_isr() {
+uint8_t bsp_timer_isr(void) {
    // call the callback
    bsp_timer_vars.cb();
    // kick the OS

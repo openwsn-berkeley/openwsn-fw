@@ -65,7 +65,7 @@ void IEEE802154_security_setDataKey(uint8_t index, uint8_t* value) {
     memcpy(ieee802154_security_vars.k2.value, value, 16);
 }
 
-bool IEEE802154_security_isConfigured() {
+bool IEEE802154_security_isConfigured(void) {
     if (ieee802154_security_vars.dynamicKeying == FALSE) {
         return TRUE;
     }
@@ -77,7 +77,7 @@ bool IEEE802154_security_isConfigured() {
     return FALSE;
 }
 
-void IEEE802154_security_setDynamicKeying() {
+void IEEE802154_security_setDynamicKeying(void) {
     ieee802154_security_vars.dynamicKeying = TRUE;
 }
 
