@@ -359,7 +359,7 @@ owerror_t openserial_printStat(uint8_t type, uint8_t *buffer, uint8_t length) {
     outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
     outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
     for(i=0;i<5;i++)
-    		outputHdlcWrite(asn[i]);
+        outputHdlcWrite(asn[i]);
     outputHdlcWrite(type);
     for (i=0;i<length;i++){
         outputHdlcWrite(buffer[i]);
@@ -423,12 +423,10 @@ void openserial_statTx(OpenQueueEntry_t* msg){
 #ifdef OPENSERIAL_STAT
    evtPktTx_t evt;
    evt.length                      = msg->length;
-   evt.txPower                     = msg->l1_txPower;
-   evt.numTxAttempts               = msg->l2_numTxAttempts;
    evt.frame_type                  = msg->l2_frameType;
    evt.slotOffset                  = schedule_getSlotOffset();
    evt.frequency                   = calculateFrequency(schedule_getChannelOffset());
-   evt.txpower                     = msg->txpower;
+   evt.txPower                     = msg->l1_txPower;
    evt.numTxAttempts               = msg->l2_numTxAttempts;
     
    //addrs
@@ -474,6 +472,7 @@ void openserial_statDAO(uint8_t status, uint8_t *parent, uint8_t *DODAGID){
 
 //push an event for linkrep/req/rem
 void openserial_stat6Pcmd(uint8_t sixtop_command, uint8_t status, open_addr_t *neighbor, cellInfo_ht* cells, uint8_t nb){
+
 #ifdef OPENSERIAL_STAT
     evt6PCmd_t     info;
     
