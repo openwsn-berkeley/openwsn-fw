@@ -79,11 +79,10 @@ enum{
     SERTYPE_PKT_RX             = 0x02,
     SERTYPE_CELL               = 0x03,
     SERTYPE_ACK                = 0x04,
-    SERTYPE_PKT_DROPPED        = 0x05,
-    SERTYPE_DIO                = 0x06,
-    SERTYPE_DAO                = 0x07,
-    SERTYPE_NODESTATE          = 0x08,
-    SERTYPE_6PCMD              = 0x09,
+    SERTYPE_DIO                = 0x05,
+    SERTYPE_DAO                = 0x06,
+    SERTYPE_NODESTATE          = 0x07,
+    SERTYPE_6PCMD              = 0x08,
 };
 
 enum{
@@ -116,9 +115,9 @@ typedef struct{
     uint8_t     frame_type;
     slotOffset_t slotOffset;
     uint8_t     frequency;
-    uint8_t     l2Dest[8];
     uint8_t     txPower;
     uint8_t     numTxAttempts;
+    uint8_t     l2Dest[8];
     uint8_t     l3_destinationAdd[16];
     uint8_t     l3_sourceAdd[16];
 } evtPktTx_t;

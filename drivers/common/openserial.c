@@ -29,6 +29,7 @@
 
 
 
+
 //=========================== variables =======================================
 
 openserial_vars_t openserial_vars;
@@ -405,14 +406,14 @@ void openserial_statAck(uint8_t code, open_addr_t *l2addr){
 void openserial_statRx(OpenQueueEntry_t* msg){
 #ifdef OPENSERIAL_STAT
    evtPktRx_t evt;
-   evt->length                      = msg->length;
-   evt->rssi                        = msg->l1_rssi;
-   evt->lqi                         = msg->l1_lqi;
-   evt->crc                         = msg->l1_crc;
-   evt->frame_type                  = msg->l2_frameType;
-   evt->slotOffset                  = schedule_getSlotOffset();
-   evt->frequency                   = calculateFrequency(schedule_getChannelOffset());
-   memcpy(evt->l2Src,   msg->l2_nextORpreviousHop.addr_64b, 8);
+   evt.length                      = msg->length;
+   evt.rssi                        = msg->l1_rssi;
+   evt.lqi                         = msg->l1_lqi;
+   evt.crc                         = msg->l1_crc;
+   evt.frame_type                  = msg->l2_frameType;
+   evt.slotOffset                  = schedule_getSlotOffset();
+   evt.frequency                   = calculateFrequency(schedule_getChannelOffset());
+   memcpy(&(evt.l2Src),   msg->l2_nextORpreviousHop.addr_64b, 8);
    openserial_printStat(SERTYPE_PKT_RX, (uint8_t*)&evt, sizeof(evtPktRx_t));
 #endif
 }
@@ -421,17 +422,19 @@ void openserial_statRx(OpenQueueEntry_t* msg){
 void openserial_statTx(OpenQueueEntry_t* msg){
 #ifdef OPENSERIAL_STAT
    evtPktTx_t evt;
-   evt->length                      = msg->length;
-   evt->txPower                     = msg->l1_txPower;
-   evt->numTxAttempts               = msg->l2_numTxAttempts;
-   evt->frame_type                  = msg->l2_frameType;
-   evt->slotOffset                  = schedule_getSlotOffset();
-   evt->frequency                   = calculateFrequency(schedule_getChannelOffset());
-   
+   evt.length                      = msg->length;
+   evt.txPower                     = msg->l1_txPower;
+   evt.numTxAttempts               = msg->l2_numTxAttempts;
+   evt.frame_type                  = msg->l2_frameType;
+   evt.slotOffset                  = schedule_getSlotOffset();
+   evt.frequency                   = calculateFrequency(schedule_getChannelOffset());
+   evt.txpower                     = msg->txpower;
+   evt.numTxAttempts               = msg->l2_numTxAttempts;
+    
    //addrs
-   memcpy(evt->l2Dest,              msg->l2_nextORpreviousHop.addr_64b, 8);
-   memcpy(evt->l3_destinationAdd,   msg->l3_destinationAdd.addr_128b, 16);
-   memcpy(evt->l3_sourceAdd,        msg->l3_sourceAdd.addr_128b, 16);
+   memcpy(&(evt.l2Dest),            msg->l2_nextORpreviousHop.addr_64b, 8);
+   memcpy(&(evt.l3_destinationAdd), msg->l3_destinationAdd.addr_128b, 16);
+   memcpy(&(evt.l3_sourceAdd),      msg->l3_sourceAdd.addr_128b, 16);
    openserial_printStat(SERTYPE_PKT_TX, (uint8_t*)&evt, sizeof(evtPktTx_t));
 #endif
     

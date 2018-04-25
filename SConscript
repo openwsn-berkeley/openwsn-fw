@@ -48,6 +48,8 @@ if env['l2_security']==1:
     env.Append(CPPDEFINES    = 'L2_SECURITY_ACTIVE')
 if env['printf']==1:
     env.Append(CPPDEFINES    = 'OPENSERIAL_PRINTF')
+if env['stat']==1:
+    env.Append(CPPDEFINES    = 'OPENSERIAL_STAT')
 if env['deadline_option']==1:
     env.Append(CPPDEFINES    = 'DEADLINE_OPTION_ENABLED')
 
