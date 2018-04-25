@@ -426,6 +426,8 @@ elif env['toolchain']=='armgcc':
         env.Append(CCFLAGS       = '-mfpu=fpv4-sp-d16')
         env.Append(CCFLAGS       = '-mfloat-abi=softfp')
         env.Append(CCFLAGS       = '-DNRF52840_XXAA=1')
+        env.Append(CCFLAGS       = '-D__FPU_PRESENT=1')
+#        env.Append(CCFLAGS       = os.path.join('bsp','boards',env['board'],'sdk','modules','nrfx','mdk','gcc_startup_nrf52840.S'))
 
         # assembler
         env.Replace(AS           = 'arm-none-eabi-as')
@@ -433,7 +435,8 @@ elif env['toolchain']=='armgcc':
         env.Append(ASFLAGS       = '-DNRF52840_XXAA=1')
         
         # linker
-        env.Append(LINKFLAGS     = '-g -gdwarf-2 -mcpu=cortex-m4 -mthumb -Tbsp/boards/nrf52840dk/nrfx/mdk/nrf52840_xxaa.ld')
+        env.Append(LINKFLAGS     = '-Lbsp/boards/nrf52840dk/sdk/modules/nrfx/mdk')
+        env.Append(LINKFLAGS     = '-g -gdwarf-2 -mcpu=cortex-m4 -mthumb -Tbsp/boards/nrf52840dk/nrf52840_xxaa.ld')
         env.Append(LINKFLAGS     = '-Xlinker --gc-sections -Xlinker')
         env.Append(LINKFLAGS     = '-Map=${TARGET.base}.map')
         
@@ -441,6 +444,7 @@ elif env['toolchain']=='armgcc':
         #--specs=nano.specs
         #env.Append(LINKFLAGS     = '-lgcc -lc -lnosys')
         env.Append(LINKFLAGS     = '-Wl,--start-group -lgcc -lc -lg -lm -lnosys -Wl,--end-group')
+        env.Append(LINKFLAGS       = os.path.join('build',env['board']+'_armgcc','bsp','boards',env['board'],'sdk','modules','nrfx','mdk','gcc_startup_nrf52840.o'))
         
         # object manipulation
         env.Replace(OBJCOPY      = 'arm-none-eabi-objcopy')

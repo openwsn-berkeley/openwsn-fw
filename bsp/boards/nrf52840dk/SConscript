@@ -9,30 +9,31 @@ Import('env')
 localEnv = env.Clone()
 
 source   = \
-    [file for file in Glob('*.c') if file.name.find('iar')==-1] + \
-    Glob('nrfx/*.c') + \
-    Glob('nrfx/drivers/src/*.c') + \
-    Glob('nrfx/drivers/src/prs/*.c') + \
-    Glob('nrfx/hal/*.c') + \
-    Glob('nrfx/mdk/*.c') + \
-    Glob('nrfx/mdk/*.s') + \
-    Glob('nrfx/mdk/*.S')
+    Glob('sdk/modules/nrfx/mdk/gcc_startup_nrf52840.S') + \
+    Glob('sdk/modules/nrfx/mdk/system_nrf52840.c') + \
+    Glob('*.c')
 
 localEnv.Append(
     CPPPATH =  [
         os.path.join('#','bsp','boards','nrf52840dk'),
-        os.path.join('#','bsp','boards','nrf52840dk','nrfx'),
-        os.path.join('#','bsp','boards','nrf52840dk','nrfx','drivers'),
-        os.path.join('#','bsp','boards','nrf52840dk','nrfx','drivers','include'),
-        os.path.join('#','bsp','boards','nrf52840dk','nrfx','drivers','src'),
-        os.path.join('#','bsp','boards','nrf52840dk','nrfx','drivers','src','prs'),
-        os.path.join('#','bsp','boards','nrf52840dk','nrfx','hal'),
-        os.path.join('#','bsp','boards','nrf52840dk','nrfx','mdk'),
-        os.path.join('#','bsp','boards','nrf52840dk','nrfx','soc'),
-        os.path.join('#','bsp','boards','nrf52840dk','nrfx','templates'),
-        os.path.join('#','bsp','boards','nrf52840dk','nrfx','templates','nRF52840'),
+        os.path.join('#','bsp','boards','nrf52840dk','sdk','integration','nrfx'),
+        os.path.join('#','bsp','boards','nrf52840dk','sdk','components','toolchain','cmsis','include'),
+        os.path.join('#','bsp','boards','nrf52840dk','sdk','components','drivers_nrf','nrf_soc_nosd'),
+        os.path.join('#','bsp','boards','nrf52840dk','sdk','components','libraries','util'),
+        os.path.join('#','bsp','boards','nrf52840dk','sdk','modules','nrfx'),
+        os.path.join('#','bsp','boards','nrf52840dk','sdk','modules','nrfx','drivers'),
+        os.path.join('#','bsp','boards','nrf52840dk','sdk','modules','nrfx','drivers','include'),
+        os.path.join('#','bsp','boards','nrf52840dk','sdk','modules','nrfx','drivers','src'),
+        os.path.join('#','bsp','boards','nrf52840dk','sdk','modules','nrfx','drivers','src','prs'),
+        os.path.join('#','bsp','boards','nrf52840dk','sdk','modules','nrfx','hal'),
+        os.path.join('#','bsp','boards','nrf52840dk','sdk','modules','nrfx','mdk'),
+        os.path.join('#','bsp','boards','nrf52840dk','sdk','modules','nrfx','soc'),
+        os.path.join('#','bsp','boards','nrf52840dk','sdk','modules','nrfx','templates'),
+        os.path.join('#','bsp','boards','nrf52840dk','sdk','modules','nrfx','templates','nRF52840'),
     ],
 )
+
+# print localEnv['CPPPATH']
 
 board  = localEnv.Object(source=source)
 
