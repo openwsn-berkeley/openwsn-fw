@@ -196,6 +196,7 @@ frameLength_t      schedule_getFrameLength(void);
 cellType_t         schedule_getType(void);
 void               schedule_getNeighbor(open_addr_t* addrToWrite);
 channelOffset_t    schedule_getChannelOffset(void);
+slotOffset_t       schedule_getSlotOffset(void);
 bool               schedule_getOkToSend(void);
 void               schedule_resetBackoff(void);
 void               schedule_indicateRx(asn_t*   asnTimestamp);

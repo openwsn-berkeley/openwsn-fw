@@ -81,6 +81,8 @@ project:
                   0 (off), 1 (on)
     printf        Sends the string messages to openvisualizer  
                   0 (off ), 1 (on, default)
+    stat          Sends statistic messages to openvisualizer  
+                  0 (off ), 1 (on, default)
     ide           qtcreator
 
     Common variables:
@@ -141,6 +143,7 @@ command_line_options = {
     'noadaptivesync':   ['0','1'],
     'l2_security':      ['0','1'],
     'printf':           ['1','0'],          # 1=on (default),  0=off
+    'stat':             ['0','1'],          # 1=on,  0=off (default)
     'deadline_option':  ['0','1'],
     'ide':              ['none','qtcreator'],
     'revision':         ['']
@@ -292,6 +295,13 @@ command_line_vars.AddVariables(
         'printf',                                          # key
         '',                                                # help
         command_line_options['printf'][0],                 # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+   (
+        'stat',                                            # key
+        '',                                                # help
+        command_line_options['stat'][0],                   # default
         validate_option,                                   # validator
         int,                                               # converter
     ),

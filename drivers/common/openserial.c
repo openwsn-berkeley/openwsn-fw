@@ -29,6 +29,7 @@
 
 
 
+
 //=========================== variables =======================================
 
 openserial_vars_t openserial_vars;
@@ -339,6 +340,163 @@ uint8_t openserial_getInputBuffer(uint8_t* bufferToWrite, uint8_t maxNumBytes) {
 
     return numBytesWritten;
 }
+
+//===== Statistics
+
+owerror_t openserial_printStat(uint8_t type, uint8_t *buffer, uint8_t length) {
+#ifdef OPENSERIAL_STAT
+    uint8_t i;
+    uint8_t  asn[5];
+    
+    // retrieve ASN
+    INTERRUPT_DECLARATION();
+    ieee154e_getAsn(asn);
+    
+    DISABLE_INTERRUPTS();
+    openserial_vars.outputBufFilled  = TRUE;
+    outputHdlcOpen();
+    outputHdlcWrite(SERFRAME_MOTE2PC_STAT);
+    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
+    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+    for(i=0;i<5;i++)
+        outputHdlcWrite(asn[i]);
+    outputHdlcWrite(type);
+    for (i=0;i<length;i++){
+        outputHdlcWrite(buffer[i]);
+    }
+    outputHdlcClose();
+    ENABLE_INTERRUPTS();
+#endif
+    
+    return E_SUCCESS;
+}
+
+
+//===== Statistics - Schedule
+
+
+//a cell was inserted in the schedule
+void openserial_statCell(uint8_t code, scheduleEntry_t* slotContainer){
+#ifdef OPENSERIAL_STAT
+    evtCell_t evt;
+    evt.code          = code;
+    evt.slotOffset      = slotContainer->slotOffset;
+    evt.type            = slotContainer->type;
+    evt.shared          = slotContainer->shared;
+    evt.channelOffset   = slotContainer->channelOffset;
+    memcpy(evt.neighbor,      slotContainer->neighbor.addr_64b, 8);
+    openserial_printStat(SERTYPE_CELL, (uint8_t*)&evt, sizeof(evt));
+#endif
+}
+
+
+//===== Statistics - Packets
+
+//a ack was txed or rcvd
+void openserial_statAck(uint8_t code, open_addr_t *l2addr){
+#ifdef OPENSERIAL_STAT
+    evtAck_t evt;
+    evt.code = code;
+    memcpy(evt.l2addr,      l2addr->addr_64b, 8);
+    openserial_printStat(SERTYPE_ACK, (uint8_t*)&evt, sizeof(evt));
+#endif
+}
+
+//push an event to track received frames
+void openserial_statRx(OpenQueueEntry_t* msg){
+#ifdef OPENSERIAL_STAT
+   evtPktRx_t evt;
+   memcpy(&(evt.l2Src),            msg->l2_nextORpreviousHop.addr_64b, 8);
+   evt.length                      = msg->length;
+   evt.frame_type                  = msg->l2_frameType;
+   evt.slotOffset                  = schedule_getSlotOffset();
+   evt.frequency                   = calculateFrequency(schedule_getChannelOffset());
+   evt.rssi                        = msg->l1_rssi;
+   evt.lqi                         = msg->l1_lqi;
+   evt.crc                         = msg->l1_crc;
+   openserial_printStat(SERTYPE_PKT_RX, (uint8_t*)&evt, sizeof(evtPktRx_t));
+#endif
+}
+
+//push an event to track transmitted frames
+void openserial_statTx(OpenQueueEntry_t* msg){
+#ifdef OPENSERIAL_STAT
+   evtPktTx_t evt;
+   memcpy(&(evt.l2Dest),            msg->l2_nextORpreviousHop.addr_64b, 8);
+   evt.length                      = msg->length;
+   evt.frame_type                  = msg->l2_frameType;
+   evt.slotOffset                  = schedule_getSlotOffset();
+   evt.frequency                   = calculateFrequency(schedule_getChannelOffset());
+   evt.txPower                     = msg->l1_txPower;
+   evt.numTxAttempts               = msg->l2_numTxAttempts;
+    
+   //addrs
+   memcpy(&(evt.l3_destinationAdd), msg->l3_destinationAdd.addr_128b, 16);
+   memcpy(&(evt.l3_sourceAdd),      msg->l3_sourceAdd.addr_128b, 16);
+   openserial_printStat(SERTYPE_PKT_TX, (uint8_t*)&evt, sizeof(evtPktTx_t));
+#endif
+    
+}
+
+
+
+
+//===== Statistics - RPL
+
+//push an event to track DIO
+void openserial_statDIO(uint8_t status, uint8_t rplinstanceId, dagrank_t rank, uint8_t *DODAGID){
+#ifdef OPENSERIAL_STAT
+    evtDIO_t     evt;
+    evt.status          = status;
+    evt.rplinstanceId   = rplinstanceId;
+    evt.rank            = rank;
+    memcpy(evt.DODAGID, DODAGID, 16);
+    openserial_printStat(SERTYPE_DIO, (uint8_t*)&evt, sizeof(evt));
+#endif
+    
+}
+
+//push an event to track DAO
+void openserial_statDAO(uint8_t status, uint8_t *parent, uint8_t *DODAGID){
+#ifdef OPENSERIAL_STAT
+    evtDAO_t          evt;
+    //info
+    evt.status          = status;
+    memcpy(evt.parent, parent, 8);
+    memcpy(evt.DODAGID, DODAGID, 16);
+    openserial_printStat(SERTYPE_DAO, (uint8_t*)&evt, sizeof(evt));
+#endif
+}
+
+//===== Statistics - 6P
+
+//push an event for linkrep/req/rem
+void openserial_stat6Pcmd(uint8_t sixtop_command, uint8_t status, open_addr_t *neighbor, cellInfo_ht* cells, uint8_t nb){
+
+#ifdef OPENSERIAL_STAT
+    evt6PCmd_t     info;
+    
+    //wrong arguments
+    if (neighbor->type != ADDR_64B){
+        openserial_printError(COMPONENT_OPENSERIAL, ERR_WRONG_ADDR_TYPE, neighbor->type, 7);
+        return;
+    }
+    
+    //upper bound
+    if (nb > OPENSERIALMAXNUMCELLS)
+        nb = OPENSERIALMAXNUMCELLS;
+    
+    //info
+    info.sixtop_command  = sixtop_command;
+    info.status          = status;
+    memcpy(info.neighbor, neighbor->addr_64b, 8);
+    memcpy(info.cells, cells, sizeof(cellInfo_ht) * nb);
+    
+    //push
+    openserial_printStat(SERTYPE_6PCMD, (uint8_t*)&info, 10 + sizeof(cellInfo_ht) * nb);
+#endif
+}
+
 
 //===== scheduling
 
