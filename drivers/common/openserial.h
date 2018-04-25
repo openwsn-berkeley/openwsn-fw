@@ -111,13 +111,13 @@ END_PACK
 
 BEGIN_PACK
 typedef struct{
+    uint8_t     l2Dest[8];
     uint8_t     length;
     uint8_t     frame_type;
     slotOffset_t slotOffset;
     uint8_t     frequency;
     uint8_t     txPower;
     uint8_t     numTxAttempts;
-    uint8_t     l2Dest[8];
     uint8_t     l3_destinationAdd[16];
     uint8_t     l3_sourceAdd[16];
 } evtPktTx_t;
@@ -125,11 +125,11 @@ END_PACK
 
 BEGIN_PACK
 typedef struct{
+    uint8_t     l2Src[8];
     uint8_t     length;
     uint8_t     frame_type;
     slotOffset_t slotOffset;
     uint8_t     frequency;
-    uint8_t     l2Src[8];
     uint8_t     rssi;
     uint8_t     lqi;
     uint8_t     crc;
