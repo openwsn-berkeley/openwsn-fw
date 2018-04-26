@@ -197,7 +197,7 @@ elif env['toolchain']=='iar-proj':
     
 elif env['toolchain']=='armgcc':
     
-    if env['board'] not in ['silabs-ezr32wg','openmote-cc2538','openmote-b','iot-lab_M3','iot-lab_A8-M3','openmotestm', 'samr21_xpro']:
+    if env['board'] not in ['silabs-ezr32wg','openmote-cc2538','openmote-b','iot-lab_M3','iot-lab_A8-M3','openmotestm','samr21_xpro','nrf52840dk']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     if   env['board'] in ['openmote-cc2538','openmote-b']:
@@ -390,6 +390,89 @@ elif env['toolchain']=='armgcc':
         # misc
         env.Replace(NM           = 'arm-none-eabi-nm')
         env.Replace(SIZE         = 'arm-none-eabi-size')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+    elif env['board']=='nrf52840dk':
+        # compiler (C)
+        env.Replace(CC           = 'arm-none-eabi-gcc')
+        env.Append(CCFLAGS       = '-O0')
+        env.Append(CCFLAGS       = '-Wall')
+        env.Append(CCFLAGS       = '-Wa,-adhlns=${TARGET.base}.lst')
+        env.Append(CCFLAGS       = '-c')
+        env.Append(CCFLAGS       = '-fmessage-length=0')
+        env.Append(CCFLAGS       = '-mcpu=cortex-m4')
+        env.Append(CCFLAGS       = '-mthumb')
+        env.Append(CCFLAGS       = '-g')
+        env.Append(CCFLAGS       = '-std=gnu99')
+        env.Append(CCFLAGS       = '-O0')
+        env.Append(CCFLAGS       = '-Wall')
+        env.Append(CCFLAGS       = '-Wstrict-prototypes')
+        env.Append(CCFLAGS       = '-ffunction-sections')
+        env.Append(CCFLAGS       = '-fdata-sections')
+        env.Append(CCFLAGS       = '-mfpu=fpv4-sp-d16')
+        env.Append(CCFLAGS       = '-mfloat-abi=softfp')
+        env.Append(CCFLAGS       = '-DNRF52840_XXAA=1')
+        env.Append(CCFLAGS       = '-D__FPU_PRESENT=1')
+#        env.Append(CCFLAGS       = os.path.join('bsp','boards',env['board'],'sdk','modules','nrfx','mdk','gcc_startup_nrf52840.S'))
+
+        # assembler
+        env.Replace(AS           = 'arm-none-eabi-as')
+        env.Append(ASFLAGS       = '-g -gdwarf-2 -mcpu=cortex-m4 -mthumb -c -x assembler-with-cpp ')
+        env.Append(ASFLAGS       = '-DNRF52840_XXAA=1')
+        
+        # linker
+        env.Append(LINKFLAGS     = '-Lbsp/boards/nrf52840dk/sdk/modules/nrfx/mdk')
+        env.Append(LINKFLAGS     = '-g -gdwarf-2 -mcpu=cortex-m4 -mthumb -Tbsp/boards/nrf52840dk/nrf52840_xxaa.ld')
+        env.Append(LINKFLAGS     = '-Xlinker --gc-sections -Xlinker')
+        env.Append(LINKFLAGS     = '-Map=${TARGET.base}.map')
+        
+        env.Append(LINKFLAGS     = '-mfpu=fpv4-sp-d16 -mfloat-abi=softfp --specs=nosys.specs')
+        #--specs=nano.specs
+        #env.Append(LINKFLAGS     = '-lgcc -lc -lnosys')
+        env.Append(LINKFLAGS     = '-Wl,--start-group -lgcc -lc -lg -lm -lnosys -Wl,--end-group')
+        env.Append(LINKFLAGS       = os.path.join('build',env['board']+'_armgcc','bsp','boards',env['board'],'sdk','modules','nrfx','mdk','gcc_startup_nrf52840.o'))
+        
+        # object manipulation
+        env.Replace(OBJCOPY      = 'arm-none-eabi-objcopy')
+        env.Replace(OBJDUMP      = 'arm-none-eabi-objdump')
+        # archiver
+        env.Replace(AR           = 'arm-none-eabi-ar')
+        env.Append(ARFLAGS       = '')
+        env.Replace(RANLIB       = 'arm-none-eabi-ranlib')
+        env.Append(RANLIBFLAGS   = '')
+        # misc
+        env.Replace(NM           = 'arm-none-eabi-nm')
+        env.Replace(SIZE         = 'arm-none-eabi-size')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         
     else:
         raise SystemError('unexpected board={0}'.format(env['board']))

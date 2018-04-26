@@ -37,7 +37,7 @@ project:
     
     board          Board to build for. 'python' is for software simulation.
                    telosb, wsn430v14, wsn430v13b, gina, z1, python,
-                   iot-lab_M3, iot-lab_A8-M3
+                   iot-lab_M3, iot-lab_A8-M3, nrf52840dk
 
     version        Board version
         
@@ -108,13 +108,15 @@ command_line_options = {
         'z1',
         # Cortex-M3
         'openmote-cc2538',
-		'openmote-b',
+        'openmote-b',
         'silabs-ezr32wg',
         'openmotestm',
         'iot-lab_M3',
         'iot-lab_A8-M3',
         'agilefox',
         'samr21_xpro',
+        # Cortex-M4
+        'nrf52840dk',
         # misc.
         'python',
     ],

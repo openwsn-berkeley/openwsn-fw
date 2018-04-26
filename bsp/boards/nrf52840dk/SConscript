@@ -1,0 +1,40 @@
+import os
+
+# for debugging
+# import pdb
+# pdb.set_trace()
+
+Import('env')
+
+localEnv = env.Clone()
+
+source   = \
+    Glob('sdk/modules/nrfx/mdk/gcc_startup_nrf52840.S') + \
+    Glob('sdk/modules/nrfx/mdk/system_nrf52840.c') + \
+    Glob('*.c')
+
+localEnv.Append(
+    CPPPATH =  [
+        os.path.join('#','bsp','boards','nrf52840dk'),
+        os.path.join('#','bsp','boards','nrf52840dk','sdk','integration','nrfx'),
+        os.path.join('#','bsp','boards','nrf52840dk','sdk','components','toolchain','cmsis','include'),
+        os.path.join('#','bsp','boards','nrf52840dk','sdk','components','drivers_nrf','nrf_soc_nosd'),
+        os.path.join('#','bsp','boards','nrf52840dk','sdk','components','libraries','util'),
+        os.path.join('#','bsp','boards','nrf52840dk','sdk','modules','nrfx'),
+        os.path.join('#','bsp','boards','nrf52840dk','sdk','modules','nrfx','drivers'),
+        os.path.join('#','bsp','boards','nrf52840dk','sdk','modules','nrfx','drivers','include'),
+        os.path.join('#','bsp','boards','nrf52840dk','sdk','modules','nrfx','drivers','src'),
+        os.path.join('#','bsp','boards','nrf52840dk','sdk','modules','nrfx','drivers','src','prs'),
+        os.path.join('#','bsp','boards','nrf52840dk','sdk','modules','nrfx','hal'),
+        os.path.join('#','bsp','boards','nrf52840dk','sdk','modules','nrfx','mdk'),
+        os.path.join('#','bsp','boards','nrf52840dk','sdk','modules','nrfx','soc'),
+        os.path.join('#','bsp','boards','nrf52840dk','sdk','modules','nrfx','templates'),
+        os.path.join('#','bsp','boards','nrf52840dk','sdk','modules','nrfx','templates','nRF52840'),
+    ],
+)
+
+# print localEnv['CPPPATH']
+
+board  = localEnv.Object(source=source)
+
+Return('board')
