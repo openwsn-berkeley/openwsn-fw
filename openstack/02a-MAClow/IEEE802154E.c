@@ -2275,7 +2275,7 @@ port_INLINE void incrementAsnOffset(void) {
    } else {
       ieee154e_vars.slotOffset  = (ieee154e_vars.slotOffset+1)%frameLength;
    }
-   ieee154e_vars.asnOffset   = (ieee154e_vars.asnOffset+1)%16;
+   ieee154e_vars.asnOffset   = (ieee154e_vars.asnOffset+1)% NUM_CHANNELS;
 }
 
 port_INLINE void ieee154e_resetAsn(void) {
