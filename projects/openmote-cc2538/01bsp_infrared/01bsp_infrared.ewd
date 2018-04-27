@@ -45,7 +45,7 @@
         </option>
         <option>
           <name>MemFile</name>
-          <state>$TOOLKIT_DIR$\CONFIG\debugger\ST\STM32F103xE.ddf</state>
+          <state>$TOOLKIT_DIR$\CONFIG\debugger\TexasInstruments\CM2538SF53.ddf</state>
         </option>
         <option>
           <name>RunToEnable</name>
@@ -85,7 +85,7 @@
         </option>
         <option>
           <name>OCDynDriverList</name>
-          <state>GDBSERVER_ID</state>
+          <state>JLINK_ID</state>
         </option>
         <option>
           <name>OCLastSavedByProductVersion</name>
@@ -97,7 +97,7 @@
         </option>
         <option>
           <name>UseFlashLoader</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>CLowLevel</name>
@@ -117,7 +117,7 @@
         </option>
         <option>
           <name>FlashLoadersV3</name>
-          <state>$TOOLKIT_DIR$\config\flashloader\ST\FlashSTM32F10xxE.board</state>
+          <state>$TOOLKIT_DIR$\config\flashloader\TexasInstruments\FlashCC2538RAM32K.board</state>
         </option>
         <option>
           <name>OCImagesSuppressCheck1</name>
@@ -433,7 +433,7 @@
         </option>
         <option>
           <name>TCPIP</name>
-          <state>localhost,3333</state>
+          <state>aaa.bbb.ccc.ddd</state>
         </option>
         <option>
           <name>DoLogfile</name>
@@ -803,7 +803,7 @@
         <option>
           <name>CCJLinkResetList</name>
           <version>6</version>
-          <state>5</state>
+          <state>7</state>
         </option>
         <option>
           <name>CCJLinkInterfaceCmdLine</name>

@@ -28,7 +28,7 @@ int main(void) {
 
 //=========================== public ==========================================
 
-void board_init() {
+void board_init(void) {
     uint8_t eui[8];
 
     // initialize bsp modules
@@ -40,11 +40,11 @@ void board_init() {
     eui64_get(eui);
 }
 
-void board_sleep() {
+void board_sleep(void) {
     // not sure how to enter a sleep mode
 }
 
-void board_reset() {
+void board_reset(void) {
     // not sure how the reset is triggered
 }
 

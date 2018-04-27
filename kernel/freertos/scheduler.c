@@ -19,11 +19,11 @@ scheduler_dbg_t  scheduler_dbg;
 
 //=========================== public ==========================================
 
-void scheduler_init() {   
+void scheduler_init(void) {   
    // TODO: fill in as part of FW-16.
 }
 
-void scheduler_start() {
+void scheduler_start(void) {
    // TODO: fill in as part of FW-16.
 }
 

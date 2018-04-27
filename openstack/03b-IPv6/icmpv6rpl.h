@@ -12,8 +12,8 @@
 
 //=========================== define ==========================================
 
-#define DIO_PORTION               6   // The portion of minimal cells that used for sending DIO.
-#define TIMER_DAO_TIMEOUT         60  // seconds
+#define DIO_PERIOD             10000   // in miliseconds
+#define DAO_PERIOD             60000   // in miliseconds
 
 // Non-Storing Mode of Operation (1)
 #define MOP_DIO_A                 0<<5
@@ -94,7 +94,7 @@ typedef struct {
    uint8_t         DTSN;
    uint8_t         flags;
    uint8_t         reserved;
-   uint8_t         DODAGID[16];    
+   uint8_t         DODAGID[16];
 } icmpv6rpl_dio_ht;
 END_PACK
 
@@ -124,7 +124,7 @@ typedef struct {
    uint16_t minHopRankIncrease; //256
    uint16_t OCP; // 0 OF0
    uint8_t reserved;
-   uint8_t defLifetime; // limit for DAO period  -> 0xff 
+   uint8_t defLifetime; // limit for DAO period  -> 0xff
    uint16_t lifetimeUnit; // 0xffff
 }icmpv6rpl_config_ht;
 END_PACK
@@ -153,8 +153,8 @@ typedef struct {
    uint8_t         optionLength;
    uint8_t         E_flags;
    uint8_t         PathControl;
-   uint8_t         PathSequence;   
-   uint8_t         PathLifetime;   
+   uint8_t         PathSequence;
+   uint8_t         PathLifetime;
 } icmpv6rpl_dao_transit_ht;
 END_PACK
 
@@ -166,7 +166,7 @@ typedef struct {
    uint8_t         type;               ///< set by the DODAG root.
    uint8_t         optionLength;
    uint8_t         flags;
-   uint8_t         prefixLength;  
+   uint8_t         prefixLength;
 } icmpv6rpl_dao_target_ht;
 END_PACK
 
@@ -218,14 +218,14 @@ uint8_t  icmpv6rpl_getRPLIntanceID(void);
 owerror_t icmpv6rpl_getRPLDODAGid(uint8_t* address_128b);
 void     icmpv6rpl_setDIOPeriod(uint16_t dioPeriod);
 void     icmpv6rpl_setDAOPeriod(uint16_t daoPeriod);
-bool     icmpv6rpl_getPreferredParentIndex(uint8_t* indexptr);           // new DB
-bool     icmpv6rpl_getPreferredParentEui64(open_addr_t* addressToWrite); // new DB
-bool     icmpv6rpl_isPreferredParent(open_addr_t* address);              // new DB
-dagrank_t icmpv6rpl_getMyDAGrank(void);                                  // new DB
-void     icmpv6rpl_setMyDAGrank(dagrank_t rank);                         // new DB
-void     icmpv6rpl_killPreferredParent(void);                            // new DB
-void     icmpv6rpl_updateMyDAGrankAndParentSelection(void);              // new DB
-void     icmpv6rpl_indicateRxDIO(OpenQueueEntry_t* msg);                 // new DB
+bool     icmpv6rpl_getPreferredParentIndex(uint8_t* indexptr);
+bool     icmpv6rpl_getPreferredParentEui64(open_addr_t* addressToWrite);
+bool     icmpv6rpl_isPreferredParent(open_addr_t* address);
+dagrank_t icmpv6rpl_getMyDAGrank(void);
+void     icmpv6rpl_setMyDAGrank(dagrank_t rank);
+void     icmpv6rpl_killPreferredParent(void);
+void     icmpv6rpl_updateMyDAGrankAndParentSelection(void);
+void     icmpv6rpl_indicateRxDIO(OpenQueueEntry_t* msg);
 bool     icmpv6rpl_daoSent(void);
 
 

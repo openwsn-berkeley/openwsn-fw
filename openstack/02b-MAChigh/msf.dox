@@ -1,0 +1,10 @@
+/**
+\defgroup msf msf
+
+\brief Implementation of 6TiSCH Minimal Scheduling Function.
+
+MSF is defined in the following draft:
+- https://tools.ietf.org/html/draft-chang-6tisch-msf-00
+
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, July 2014.
+*/

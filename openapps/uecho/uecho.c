@@ -12,7 +12,7 @@ uecho_vars_t uecho_vars;
 
 //=========================== public ==========================================
 
-void uecho_init() {
+void uecho_init(void) {
    // clear local variables
    memset(&uecho_vars,0,sizeof(uecho_vars_t));
 
@@ -65,7 +65,7 @@ void uecho_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }
 
-bool uecho_debugPrint() {
+bool uecho_debugPrint(void) {
    return FALSE;
 }
 

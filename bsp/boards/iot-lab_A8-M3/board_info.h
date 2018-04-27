@@ -50,6 +50,9 @@ to return the board's description.
 #define PORT_PIN_RADIO_RESET_LOW()        //GPIOC->ODR &= ~0X0040;// nothing
 
 //===== IEEE802154E timing
+
+#define SLOTDURATION 15 // in miliseconds
+
 // time-slot related
 #define PORT_TsSlotDuration                 491   // counter counts one extra count, see datasheet
 // execution speed related

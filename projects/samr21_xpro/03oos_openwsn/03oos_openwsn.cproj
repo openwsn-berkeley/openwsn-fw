@@ -409,9 +409,9 @@
       <SubType>compile</SubType>
       <Link>openstack\02b-MAChigh\neighbors.c</Link>
     </Compile>
-    <Compile Include="..\..\..\openstack\02b-MAChigh\sf0.c">
+    <Compile Include="..\..\..\openstack\02b-MAChigh\msf.c">
       <SubType>compile</SubType>
-      <Link>openstack\02b-MAChigh\sf0.c</Link>
+      <Link>openstack\02b-MAChigh\msf.c</Link>
     </Compile>
     <Compile Include="..\..\..\openstack\02b-MAChigh\schedule.c">
       <SubType>compile</SubType>

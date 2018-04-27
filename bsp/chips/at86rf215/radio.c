@@ -67,7 +67,7 @@ void radio_change_size(uint16_t* size){
     *size = sizes[i%4];
     i++;
 }
-void radio_change_modulation(){
+void radio_change_modulation(void) {
     static int mod_list = 1;
     at86rf215_spiStrobe(CMD_RF_TRXOFF);
     while(at86rf215_status() != RF_STATE_TRXOFF);
@@ -234,7 +234,7 @@ void radio_read_isr(uint8_t* rf09_isr){
 //=========================== callbacks =======================================
 
 //=========================== interrupt handlers ==============================
-kick_scheduler_t radio_isr() {
+kick_scheduler_t radio_isr(void) {
     PORT_TIMER_WIDTH capturedTime;
     // capture the time
     capturedTime = radiotimer_getCapturedTime();

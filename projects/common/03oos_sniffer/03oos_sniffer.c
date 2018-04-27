@@ -14,7 +14,7 @@
 #include "idmanager.h"
 #include "sixtop.h"
 #include "neighbors.h"
-#include "sf0.h"
+#include "msf.h"
 #include "openrandom.h"
 
 //=========================== defines =========================================
@@ -172,7 +172,7 @@ void cb_timer(opentimers_id_t id) {
 }
 
 // ================================ task =======================================
-void task_uploadPacket(){
+void task_uploadPacket(void) {
     openserial_printSniffedPacket(
         &(app_vars.packet[0]),
         app_vars.packet_len,
@@ -181,7 +181,9 @@ void task_uploadPacket(){
 }
 // ================================= stubbing ==================================
 
-void ieee154e_setSingleChannel(uint8_t channel)                           {return;}
+void ieee154e_setSingleChannel(uint8_t channel) {
+    sniffer_setListeningChannel(channel);
+}
 void ieee154e_setIsSecurityEnabled(bool isEnabled)                        {return;}
 void ieee154e_setSlotDuration(uint16_t duration)                          {return;}
 void ieee154e_setIsAckEnabled(bool isEnabled)                             {return;}
@@ -204,8 +206,8 @@ owerror_t sixtop_request(
 )                                                                         {return E_FAIL;}
 void sixtop_setIsResponseEnabled(bool isEnabled)                          {return;}
 void sixtop_setKaPeriod(uint16_t kaPeriod)                                {return;}
-void sf0_appPktPeriod(uint8_t numAppPacketsPerSlotFrame)                  {return;}
-uint8_t  sf0_getsfid(void)                                                {return 0;}
+void msf_appPktPeriod(uint8_t numAppPacketsPerSlotFrame)                  {return;}
+uint8_t  msf_getsfid(void)                                                {return 0;}
 
 void openbridge_triggerData(void)                                         {return;}
 

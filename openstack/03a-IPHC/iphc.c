@@ -62,7 +62,7 @@ uint8_t iphc_getAsnLen(
 
 //=========================== public ==========================================
 
-void      iphc_init() {
+void      iphc_init(void) {
 }
 
 // send from upper layer: I need to add 6LoWPAN header

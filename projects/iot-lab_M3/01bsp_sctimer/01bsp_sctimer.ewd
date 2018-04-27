@@ -45,7 +45,7 @@
         </option>
         <option>
           <name>MemFile</name>
-          <state></state>
+          <state>$TOOLKIT_DIR$\CONFIG\debugger\ST\STM32F103xE.ddf</state>
         </option>
         <option>
           <name>RunToEnable</name>
@@ -97,7 +97,7 @@
         </option>
         <option>
           <name>UseFlashLoader</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>CLowLevel</name>
@@ -117,7 +117,7 @@
         </option>
         <option>
           <name>FlashLoadersV3</name>
-          <state>$TOOLKIT_DIR$\config\flashloader\</state>
+          <state>$TOOLKIT_DIR$\config\flashloader\ST\FlashSTM32F10xxE.board</state>
         </option>
         <option>
           <name>OCImagesSuppressCheck1</name>
@@ -433,7 +433,7 @@
         </option>
         <option>
           <name>TCPIP</name>
-          <state>aaa.bbb.ccc.ddd</state>
+          <state>localhost,3333</state>
         </option>
         <option>
           <name>DoLogfile</name>

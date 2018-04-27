@@ -22,7 +22,7 @@
 #include "schedule.h"
 #include "sixtop.h"
 #include "neighbors.h"
-#include "sf0.h"
+#include "msf.h"
 //-- 03a-IPHC
 #include "openbridge.h"
 #include "iphc.h"
@@ -45,10 +45,10 @@
 //=========================== private =========================================
 
 void openstack_init(void) {
-   
+
    //===== drivers
    openserial_init();
-   
+
    //===== stack
    //-- cross-layer
    idmanager_init();    // call first since initializes EUI64 and isDAGroot
@@ -62,7 +62,7 @@ void openstack_init(void) {
    schedule_init();
    sixtop_init();
    neighbors_init();
-   sf0_init();
+   msf_init();
    //-- 03a-IPHC
    openbridge_init();
    iphc_init();
@@ -73,10 +73,10 @@ void openstack_init(void) {
    icmpv6rpl_init();
    //-- 04-TRAN
    openudp_init();
-   
+
    //===== applications
    openapps_init();
-   
+
    openserial_printInfo(
       COMPONENT_OPENWSN,ERR_BOOTED,
       (errorparameter_t)0,

@@ -31,7 +31,7 @@ radiotimer_vars_t radiotimer_vars;
 
 //===== admin
 
-void radiotimer_init() {
+void radiotimer_init(void) {
     // clear local variables
     memset(&radiotimer_vars,0,sizeof(radiotimer_vars_t));
 }
@@ -69,7 +69,7 @@ void radiotimer_start(PORT_RADIOTIMER_WIDTH period) {
 
 //===== direct access
 
-PORT_RADIOTIMER_WIDTH radiotimer_getValue() {
+PORT_RADIOTIMER_WIDTH radiotimer_getValue(void) {
     return TIMER_COUTER_CONVERT_500K_TO_32K(RFTIMER_REG__COUNTER);
 }
 
@@ -77,7 +77,7 @@ void radiotimer_setPeriod(PORT_RADIOTIMER_WIDTH period) {
     RFTIMER_REG__MAX_COUNT          = TIMER_COUTER_CONVERT_32K_TO_500K(period);
 }
 
-PORT_RADIOTIMER_WIDTH radiotimer_getPeriod() {
+PORT_RADIOTIMER_WIDTH radiotimer_getPeriod(void) {
     return TIMER_COUTER_CONVERT_500K_TO_32K(RFTIMER_REG__MAX_COUNT);
 }
 
@@ -222,7 +222,7 @@ void radiotimer_schedule(PORT_RADIOTIMER_WIDTH offset) {
                                       RFTIMER_COMPARE_INTERRUPT_ENABLE;
 }
 
-void radiotimer_cancel() {
+void radiotimer_cancel(void) {
     // disable compare interrupt
     RFTIMER_REG__COMPARE2_CONTROL = 0x00;
 }
@@ -230,7 +230,7 @@ void radiotimer_cancel() {
 
 //===== capture
 
-PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime() {
+PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime(void) {
     return TIMER_COUTER_CONVERT_500K_TO_32K(RFTIMER_REG__COUNTER);
 }
 
@@ -238,7 +238,7 @@ PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime() {
 
 //=========================== interrupt handlers ==============================
 
-kick_scheduler_t radiotimer_isr() {
+kick_scheduler_t radiotimer_isr(void) {
     PORT_RADIOTIMER_WIDTH interrupt_flag = RFTIMER_REG__INT;
     debugpins_isr_set();
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT

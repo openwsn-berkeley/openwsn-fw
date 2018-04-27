@@ -29,7 +29,7 @@ void    cwellknown_sendDone(
 
 //=========================== public ==========================================
 
-void cwellknown_init() {
+void cwellknown_init(void) {
    if(idmanager_getIsDAGroot()==TRUE) return; 
    
    // prepare the resource descriptor for the /.well-known/core path
