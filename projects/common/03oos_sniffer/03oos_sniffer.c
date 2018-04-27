@@ -162,7 +162,7 @@ void cb_timer(opentimers_id_t id) {
         cb_timer              // callback
    );
    app_vars.outputOrInput = (app_vars.outputOrInput+1)%2;
-   openserial_triggerDebugprint(); // FIXME: replace by task
+   scheduler_push_task(task_openserial_debugPrint,TASKPRIO_OPENSERIAL);
 }
 
 // ================================ task =======================================
