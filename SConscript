@@ -407,6 +407,9 @@ elif env['toolchain']=='armgcc':
 
         
     elif env['board']=='nrf52840dk':
+
+        # @note: a few changes have been made to the sdk config file[s], these need to be removed and the corresponding defines be made here!
+
         # compiler (C)
         env.Replace(CC           = 'arm-none-eabi-gcc')
         env.Append(CCFLAGS       = '-O0')
@@ -418,16 +421,15 @@ elif env['toolchain']=='armgcc':
         env.Append(CCFLAGS       = '-mthumb')
         env.Append(CCFLAGS       = '-g')
         env.Append(CCFLAGS       = '-std=gnu99')
-        env.Append(CCFLAGS       = '-O0')
-        env.Append(CCFLAGS       = '-Wall')
         env.Append(CCFLAGS       = '-Wstrict-prototypes')
         env.Append(CCFLAGS       = '-ffunction-sections')
         env.Append(CCFLAGS       = '-fdata-sections')
         env.Append(CCFLAGS       = '-mfpu=fpv4-sp-d16')
         env.Append(CCFLAGS       = '-mfloat-abi=softfp')
-        env.Append(CCFLAGS       = '-DNRF52840_XXAA=1')
         env.Append(CCFLAGS       = '-D__FPU_PRESENT=1')
-#        env.Append(CCFLAGS       = os.path.join('bsp','boards',env['board'],'sdk','modules','nrfx','mdk','gcc_startup_nrf52840.S'))
+        env.Append(CCFLAGS       = '-D__FPU_PRESENT=1')
+        env.Append(CCFLAGS       = '-DNRF52840_XXAA=1')       # set the CPU to nRF52840 (ARM Cortex M4f)
+        env.Append(CCFLAGS       = '-DBOARD_PCA10056=1')      # set the board to be the nRF52840 Development Kit
 
         # assembler
         env.Replace(AS           = 'arm-none-eabi-as')
@@ -436,13 +438,20 @@ elif env['toolchain']=='armgcc':
         
         # linker
         env.Append(LINKFLAGS     = '-Lbsp/boards/nrf52840dk/sdk/modules/nrfx/mdk')
-        env.Append(LINKFLAGS     = '-g -gdwarf-2 -mcpu=cortex-m4 -mthumb -Tbsp/boards/nrf52840dk/nrf52840_xxaa.ld')
+        env.Append(LINKFLAGS     = '-g -gdwarf-2 -mcpu=cortex-m4 -mthumb')
+
+        # @todo: Decide which linker script to use
+        # env.Append(LINKFLAGS     = '-Tbsp/boards/nrf52840dk/nrf52840_xxaa.ld')
+        env.Append(LINKFLAGS     = '-Tbsp/boards/nrf52840dk/sdk/config/nrf52840/armgcc/generic_gcc_nrf52.ld')
+
+        # env.Append(LINKFLAGS     = '--strip-debug')
+
         env.Append(LINKFLAGS     = '-Xlinker --gc-sections -Xlinker')
         env.Append(LINKFLAGS     = '-Map=${TARGET.base}.map')
         
         env.Append(LINKFLAGS     = '-mfpu=fpv4-sp-d16 -mfloat-abi=softfp --specs=nosys.specs')
+
         #--specs=nano.specs
-        #env.Append(LINKFLAGS     = '-lgcc -lc -lnosys')
         env.Append(LINKFLAGS     = '-Wl,--start-group -lgcc -lc -lg -lm -lnosys -Wl,--end-group')
         env.Append(LINKFLAGS       = os.path.join('build',env['board']+'_armgcc','bsp','boards',env['board'],'sdk','modules','nrfx','mdk','gcc_startup_nrf52840.o'))
         

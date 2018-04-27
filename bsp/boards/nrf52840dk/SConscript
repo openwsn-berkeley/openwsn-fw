@@ -11,14 +11,28 @@ localEnv = env.Clone()
 source   = \
     Glob('sdk/modules/nrfx/mdk/gcc_startup_nrf52840.S') + \
     Glob('sdk/modules/nrfx/mdk/system_nrf52840.c') + \
+    Glob('sdk/components/boards/boards.c') + \
+    Glob('sdk/modules/nrfx/drivers/src/nrfx_clock.c') + \
+    Glob('sdk/modules/nrfx/drivers/src/nrfx_power.c') + \
+    Glob('sdk/components/libraries/experimental_section_vars/*.c') + \
+    Glob('sdk/components/libraries/pwr_mgmt/*.c') + \
+    Glob('sdk/components/libraries/uart/*.c') + \
     Glob('*.c')
 
 localEnv.Append(
     CPPPATH =  [
         os.path.join('#','bsp','boards','nrf52840dk'),
+        os.path.join('#','bsp','boards','nrf52840dk','sdk','config','nrf52840','config'),
         os.path.join('#','bsp','boards','nrf52840dk','sdk','integration','nrfx'),
         os.path.join('#','bsp','boards','nrf52840dk','sdk','components','toolchain','cmsis','include'),
         os.path.join('#','bsp','boards','nrf52840dk','sdk','components','drivers_nrf','nrf_soc_nosd'),
+        os.path.join('#','bsp','boards','nrf52840dk','sdk','components','libraries','atomic'),
+        os.path.join('#','bsp','boards','nrf52840dk','sdk','components','libraries','balloc'),
+        os.path.join('#','bsp','boards','nrf52840dk','sdk','components','libraries','experimental_log'),
+        os.path.join('#','bsp','boards','nrf52840dk','sdk','components','libraries','experimental_log','src'),
+        os.path.join('#','bsp','boards','nrf52840dk','sdk','components','libraries','experimental_memobj'),
+        os.path.join('#','bsp','boards','nrf52840dk','sdk','components','libraries','experimental_section_vars'),
+        os.path.join('#','bsp','boards','nrf52840dk','sdk','components','libraries','mutex'),
         os.path.join('#','bsp','boards','nrf52840dk','sdk','components','libraries','util'),
         os.path.join('#','bsp','boards','nrf52840dk','sdk','modules','nrfx'),
         os.path.join('#','bsp','boards','nrf52840dk','sdk','modules','nrfx','drivers'),
@@ -29,7 +43,7 @@ localEnv.Append(
         os.path.join('#','bsp','boards','nrf52840dk','sdk','modules','nrfx','mdk'),
         os.path.join('#','bsp','boards','nrf52840dk','sdk','modules','nrfx','soc'),
         os.path.join('#','bsp','boards','nrf52840dk','sdk','modules','nrfx','templates'),
-        os.path.join('#','bsp','boards','nrf52840dk','sdk','modules','nrfx','templates','nRF52840'),
+#        os.path.join('#','bsp','boards','nrf52840dk','sdk','modules','nrfx','templates','nRF52840'),
     ],
 )
 
