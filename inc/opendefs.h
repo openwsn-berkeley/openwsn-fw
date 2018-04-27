@@ -243,7 +243,7 @@ enum {
    ERR_INVALIDSERIALFRAME              = 0x36, // invalid serial frame
    ERR_INVALIDPACKETFROMRADIO          = 0x37, // invalid packet frome radio, length {1} (code location {0})
    ERR_BUSY_RECEIVING                  = 0x38, // busy receiving when stop of serial activity, buffer input length {1} (code location {0})
-   ERR_WRONG_CRC_INPUT                 = 0x39, // wrong CRC in input Buffer (input length {0})
+   ERR_WRONG_CRC_INPUT                 = 0x39, // wrong CRC in input Buffer
    ERR_PACKET_SYNC                     = 0x3a, // synchronized when received a packet
    ERR_SECURITY                        = 0x3b, // security error on frameType {0}, code location {1}
    ERR_SIXTOP_RETURNCODE               = 0x3c, // sixtop return code {0} at sixtop state {1}

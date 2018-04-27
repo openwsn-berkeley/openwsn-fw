@@ -10,6 +10,7 @@
 
 #include "opendefs.h"
 #include "openserial.h"
+#include "scheduler.h"
 #include "IEEE802154E.h"
 #include "neighbors.h"
 #include "sixtop.h"
@@ -67,6 +68,10 @@ void outputHdlcClose(void);
 void inputHdlcOpen(void);
 void inputHdlcWrite(uint8_t b);
 void inputHdlcClose(void);
+
+// task
+void task_printWrongCRCInput(void);
+void task_printInputBufferOverflow(void);
 
 //=========================== public ==========================================
 
@@ -985,6 +990,28 @@ port_INLINE void inputHdlcClose(void) {
     }
 }
 
+//=========================== task ============================================
+
+void task_printInputBufferOverflow(void){
+    // input buffer overflow
+    openserial_printError(
+        COMPONENT_OPENSERIAL,
+        ERR_INPUT_BUFFER_OVERFLOW,
+        (errorparameter_t)0,
+        (errorparameter_t)0
+    );
+}
+
+void task_printWrongCRCInput(void){
+    // invalid HDLC frame
+    openserial_printError(
+        COMPONENT_OPENSERIAL,
+        ERR_WRONG_CRC_INPUT,
+        (errorparameter_t)0,
+        (errorparameter_t)0
+    );
+}
+
 //=========================== interrupt handlers ==============================
 
 // executed in ISR, called from scheduler.c
@@ -1024,6 +1051,7 @@ void isr_openserial_tx(void) {
 
 \returns 1 if don't receiving frame, 0 if not
 */
+
 uint8_t isr_openserial_rx(void) {
     uint8_t rxbyte;
     uint8_t returnVal;
@@ -1057,13 +1085,8 @@ uint8_t isr_openserial_rx(void) {
         // add the byte just received
         inputHdlcWrite(rxbyte);
         if (openserial_vars.inputBufFillLevel+1>SERIAL_INPUT_BUFFER_SIZE){
-            // input buffer overflow
-            openserial_printError(
-                COMPONENT_OPENSERIAL,
-                ERR_INPUT_BUFFER_OVERFLOW,
-                (errorparameter_t)0,
-                (errorparameter_t)0
-            );
+            // push task
+            scheduler_push_task(task_printInputBufferOverflow,TASKPRIO_OPENSERIAL);
             openserial_vars.inputBufFillLevel      = 0;
             openserial_vars.hdlcBusyReceiving      = FALSE;
         }
@@ -1078,13 +1101,8 @@ uint8_t isr_openserial_rx(void) {
         openserial_vars.hdlcBusyReceiving      = FALSE;
 
         if (openserial_vars.inputBufFillLevel==0){
-            // invalid HDLC frame
-            openserial_printError(
-                COMPONENT_OPENSERIAL,
-                ERR_WRONG_CRC_INPUT,
-                (errorparameter_t)openserial_vars.inputBufFillLevel,
-                (errorparameter_t)0
-            );
+            // push task
+            scheduler_push_task(task_printWrongCRCInput,TASKPRIO_OPENSERIAL);
         } else {
             openserial_handleRxFrame();
             openserial_vars.inputBufFillLevel = 0;
