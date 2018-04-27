@@ -165,7 +165,7 @@ elif env['toolchain']=='iar':
 
 elif env['toolchain']=='iar-proj':
     
-    if env['board'] not in ['telosb','gina','wsn430v13b','wsn430v14','z1','openmotestm','agilefox','openmote-cc2538','openmote-b','iot-lab_M3']:
+    if env['board'] not in ['telosb','gina','wsn430v13b','wsn430v14','z1','openmotestm','agilefox','openmote-cc2538','mimsy2-cc2538','openmote-b','iot-lab_M3']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     env['IAR_EW430_INSTALLDIR'] = os.environ['IAR_EW430_INSTALLDIR']
@@ -195,10 +195,10 @@ elif env['toolchain']=='iar-proj':
     
 elif env['toolchain']=='armgcc':
     
-    if env['board'] not in ['silabs-ezr32wg','openmote-cc2538','openmote-b','iot-lab_M3','iot-lab_A8-M3','openmotestm', 'samr21_xpro']:
+    if env['board'] not in ['silabs-ezr32wg','openmote-cc2538','mimsy2-cc2538','openmote-b','iot-lab_M3','iot-lab_A8-M3','openmotestm', 'samr21_xpro']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
-    if   env['board'] in ['openmote-cc2538','openmote-b']:
+    if   env['board'] in ['openmote-cc2538','openmote-b','mimsy2-cc2538']:
         if env['revision'] == "A1":
             linker_file = 'cc2538sf23.lds'
             print "*** OPENMOTE CC2538 REV. A1 ***\n"
@@ -216,6 +216,8 @@ elif env['toolchain']=='armgcc':
         env.Append(CCFLAGS       = '-mthumb')
         env.Append(CCFLAGS       = '-g3')
         env.Append(CCFLAGS       = '-Wstrict-prototypes')
+        #if env['board'] == "mimsy2-cc2538":
+            # env.Append(CCFLAGS       = '-lm')  #added to hopefully prevent a linker overlap between .ARM.exidx and .data
         if env['revision'] == "A1":
             env.Append(CCFLAGS   = '-DREVA1=1')
             
@@ -228,10 +230,18 @@ elif env['toolchain']=='armgcc':
         # linker
         env.Append(LINKFLAGS     = '-Tbsp/boards/'+env['board']+'/' + linker_file)
         env.Append(LINKFLAGS     = '-nostartfiles')
+        #if env['board'] == "mimsy2-cc2538":
+            #env.Replace(LIBLINKPREFIX     = 'lib')
+            #env.Replace(LIBLINKSUFFIX     = '.a')
+            #env.Replace(LIBS     = 'm')
+            #env.Append(LIBLINKSUFFIXES='.a')
+            #env.Append(LIBPATH='#C:\Program Files (x86)\GNU Tools ARM Embedded\5.4 2016q3\arm-none-eabi\lib\armv7-m')
         env.Append(LINKFLAGS     = '-Wl,-Map,${TARGET.base}.map')
         env.Append(LINKFLAGS     = '-mcpu=cortex-m3')
         env.Append(LINKFLAGS     = '-mthumb')
         env.Append(LINKFLAGS     = '-g3')
+
+
         if env['revision'] == "A1":
             env.Append(LINKFLAGS   = '-DREVA1=1')
 		
@@ -732,7 +742,7 @@ def BootloadFunc():
             suffix      = '.phonyupload',
             src_suffix  = '.ihex',
         )
-    elif env['board'] in ['openmote-cc2538','openmote-b'] :
+    elif env['board'] in ['openmote-cc2538','openmote-b','mimsy2-cc2538'] :
         return Builder(
             action      = OpenMoteCC2538_bootload,
             suffix      = '.phonyupload',
@@ -777,7 +787,7 @@ def buildLibs(projectDir):
         '00std': [                                                              ],
         '01bsp': [                                                      'libbsp'],
         '02drv': [                             'libkernel','libdrivers','libbsp'],
-        '03oos': ['libopenstack','libopenapps','libopenstack','libkernel','libdrivers','libbsp'], # this order needed for mspgcc
+        '03oos': ['libm','libopenstack','libopenapps','libopenstack','libkernel','libdrivers','libbsp'], # this order needed for mspgcc
     }
     
     returnVal = None
@@ -864,6 +874,7 @@ def project_finder(localEnv):
                 source  = source,
                 LIBS    = libs,
             )
+
             targetAction = localEnv.PostBuildExtras(exe)
             
             Alias(targetName, [targetAction])
@@ -1052,3 +1063,6 @@ buildEnv.SConscript(
     exports        = {'env': buildEnv},
     variant_dir    = projectsVarDir,
 )
+
+buildEnv.Append(LIBPATH = '#C:\Program Files (x86)\GNU Tools ARM Embedded\5.4 2016q3\arm-none-eabi\lib\armv7-m')
+buildEnv.Append(LIBS = "libm")
