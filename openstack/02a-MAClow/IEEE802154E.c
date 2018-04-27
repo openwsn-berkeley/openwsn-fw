@@ -63,8 +63,6 @@ void     activity_rie5(void);
 void     activity_ri8(PORT_TIMER_WIDTH capturedTime);
 void     activity_rie6(void);
 void     activity_ri9(PORT_TIMER_WIDTH capturedTime);
-// inhibit serial
-void     activity_inhibitSerial(void);
 
 // frame validity check
 bool     isValidRxFrame(ieee802154_header_iht* ieee802514_header);
@@ -101,6 +99,7 @@ bool     debugPrint_isSync(void);
 // interrupts
 void     isr_ieee154e_newSlot(opentimers_id_t id);
 void     isr_ieee154e_timer(opentimers_id_t id);
+void     isr_ieee154e_inhibitStart(opentimers_id_t id);
 
 //=========================== admin ===========================================
 
@@ -375,12 +374,6 @@ void isr_ieee154e_timer(opentimers_id_t id) {
             break;
         case S_SYNCRX:
             break;
-        case S_SLEEP:
-            activity_inhibitSerial();
-            break;
-        case S_SYNCLISTEN:
-            activity_inhibitSerial();
-            break;
         default:
             // log the error
             openserial_printCritical(
@@ -394,6 +387,18 @@ void isr_ieee154e_timer(opentimers_id_t id) {
             break;
     }
     ieee154e_dbg.num_timer++;
+}
+
+/**
+\brief Inhibit the serial activity.
+
+This needs to happen
+
+This function executes in ISR mode.
+*/
+void isr_ieee154e_inhibitStart(opentimers_id_t id) {
+    // inhibit serial activity
+    openserial_inhibitStart(); // activity_inhibitSerial
 }
 
 /**
@@ -599,7 +604,7 @@ port_INLINE void activity_synchronize_newSlot(void) {
         DURATION_si,                            // duration
         ieee154e_vars.startOfSlotReference,     // reference
         TIME_TICS,                              // timetype
-        isr_ieee154e_timer                      // callback
+        isr_ieee154e_inhibitStart               // callback
     );
 
     openserial_inhibitStop();
@@ -2203,18 +2208,6 @@ port_INLINE void activity_ri9(PORT_TIMER_WIDTH capturedTime) {
     endSlot();
 }
 
-/**
-\brief Inhibit the serial activity.
-
-This needs to happen
-
-This function executes in ISR mode.
-*/
-port_INLINE void activity_inhibitSerial(void) {
-    // inhibit serial activity
-    openserial_inhibitStart(); // activity_inhibitSerial
-}
-
 //======= frame validity check
 
 /**
@@ -2977,7 +2970,7 @@ void endSlot(void) {
             DURATION_si,                            // duration
             ieee154e_vars.startOfSlotReference,     // reference
             TIME_TICS,                              // timetype
-            isr_ieee154e_timer                      // callback
+            isr_ieee154e_inhibitStart               // callback
         );
     }
 
