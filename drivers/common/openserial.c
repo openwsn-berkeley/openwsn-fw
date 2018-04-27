@@ -310,7 +310,7 @@ owerror_t openserial_print_str(char* buffer, uint8_t length) {
 
 //===== retrieving inputBuffer
 
-void openserial_triggerDebugprint() {
+void task_openserial_debugPrint(void) {
     uint8_t debugPrintCounter;
     INTERRUPT_DECLARATION();
 
@@ -323,7 +323,6 @@ void openserial_triggerDebugprint() {
     if (openserial_vars.outputBufIdxW!=openserial_vars.outputBufIdxR) {
         return;
     }
-    // FIX: remove when openserial_triggerDebugprint called in a task...
 
     debugPrintCounter++;
     if (debugPrintCounter==STATUS_MAX) {
