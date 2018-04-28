@@ -231,12 +231,7 @@ elif env['toolchain']=='armgcc':
         # linker
         env.Append(LINKFLAGS     = '-Tbsp/boards/'+env['board']+'/' + linker_file)
         env.Append(LINKFLAGS     = '-nostartfiles')
-        #if env['board'] == "mimsy2-cc2538":
-            #env.Replace(LIBLINKPREFIX     = 'lib')
-            #env.Replace(LIBLINKSUFFIX     = '.a')
-            #env.Replace(LIBS     = 'm')
-            #env.Append(LIBLINKSUFFIXES='.a')
-            #env.Append(LIBPATH='#C:\Program Files (x86)\GNU Tools ARM Embedded\5.4 2016q3\arm-none-eabi\lib\armv7-m')
+
         env.Append(LINKFLAGS     = '-Wl,-Map,${TARGET.base}.map')
         env.Append(LINKFLAGS     = '-mcpu=cortex-m3')
         env.Append(LINKFLAGS     = '-mthumb')
@@ -1065,5 +1060,5 @@ buildEnv.SConscript(
     variant_dir    = projectsVarDir,
 )
 
-buildEnv.Append(LIBPATH = '#C:\Program Files (x86)\GNU Tools ARM Embedded\5.4 2016q3\arm-none-eabi\lib\armv7-m')
+
 buildEnv.Append(LIBS = "libm")
