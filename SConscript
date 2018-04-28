@@ -218,8 +218,7 @@ elif env['toolchain']=='armgcc':
         env.Append(CCFLAGS       = '-mthumb')
         env.Append(CCFLAGS       = '-g3')
         env.Append(CCFLAGS       = '-Wstrict-prototypes')
-        #if env['board'] == "mimsy2-cc2538":
-            # env.Append(CCFLAGS       = '-lm')  #added to hopefully prevent a linker overlap between .ARM.exidx and .data
+
         if env['revision'] == "A1":
             env.Append(CCFLAGS   = '-DREVA1=1')
             
