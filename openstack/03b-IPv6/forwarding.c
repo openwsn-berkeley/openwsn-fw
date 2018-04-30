@@ -116,8 +116,6 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
         dac = IPHC_DAC_STATELESS;
     } else {
         myprefix = idmanager_getMyID(ADDR_PREFIX);
-        sac = IPHC_SAC_STATEFUL;
-        dac = IPHC_DAC_STATEFUL;
     }
     memcpy(&(msg->l3_sourceAdd.addr_128b[0]),myprefix->prefix,8);
     memcpy(&(msg->l3_sourceAdd.addr_128b[8]),myadd64->addr_64b,8);
@@ -151,6 +149,8 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
     //XV -poipoi we want to check if the source address prefix is the same as destination prefix
     if (packetfunctions_sameAddress(&temp_dest_prefix,&temp_src_prefix)) {
          // same prefix use 64B address
+         sac = IPHC_SAC_STATEFUL;
+         dac = IPHC_DAC_STATEFUL;
          sam = IPHC_SAM_64B;
          dam = IPHC_DAM_64B;
          p_dest = &temp_dest_mac64b;      
@@ -159,6 +159,8 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
         //not the same prefix. so the packet travels to another network
         //check if this is a source routing pkt. in case it is then the DAM is elided as it is in the SrcRouting header.
         if (packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE){
+            sac = IPHC_SAC_STATELESS;
+            dac = IPHC_DAC_STATELESS;
             sam = IPHC_SAM_128B;
             dam = IPHC_DAM_128B;
             p_dest = &(msg->l3_destinationAdd);
