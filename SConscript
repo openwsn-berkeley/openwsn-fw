@@ -427,7 +427,7 @@ elif env['toolchain']=='armgcc':
         env.Append(CCFLAGS       = '-mfpu=fpv4-sp-d16')
         env.Append(CCFLAGS       = '-mfloat-abi=softfp')
         env.Append(CCFLAGS       = '-D__FPU_PRESENT=1')
-        env.Append(CCFLAGS       = '-D__FPU_PRESENT=1')
+        env.Append(CCFLAGS       = '-DUSE_APP_CONFIG=1')
         env.Append(CCFLAGS       = '-DNRF52840_XXAA=1')       # set the CPU to nRF52840 (ARM Cortex M4f)
         env.Append(CCFLAGS       = '-DBOARD_PCA10056=1')      # set the board to be the nRF52840 Development Kit
 

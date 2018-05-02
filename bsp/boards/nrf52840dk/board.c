@@ -4,7 +4,6 @@
  * Description: nRF52840-specific definition of the "board" bsp module.
  */
 
-
 #include "sdk/modules/nrfx/hal/nrf_power.h"
 #include "sdk/modules/nrfx/drivers/include/nrfx_clock.h"
 #include "sdk/components/libraries/pwr_mgmt/nrf_pwr_mgmt.h"
