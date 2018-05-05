@@ -8,8 +8,8 @@
 #include "sdk/components/boards/pca10056.h"
 #include "sdk/components/boards/boards.h"
 #include "sdk/components/libraries/delay/nrf_delay.h"
-#include "sdk/integration/nrfx/legacy/nrf_drv_spi.h"
-#include "sdk/components/libraries/util/app_error.h"
+#include "sdk/modules/nrfx/drivers/include/nrfx_spi.h"
+//#include "sdk/components/libraries/util/app_error.h"
 
 #include <string.h>
 #include "stdint.h"
@@ -27,23 +27,23 @@
 #define BUF_SIZE 20
 
 //=========================== variables =======================================
-static const nrf_drv_spi_t spi = NRF_DRV_SPI_INSTANCE(SPI_INSTANCE);  /**< SPI instance. */
+static const nrf_spi_t spi = NRF_SPI_INSTANCE(SPI_INSTANCE);  /**< SPI instance. */
 static volatile bool spi_xfer_done;  /**< Flag used to indicate that SPI instance completed the transfer. */
 static uint8_t m_rx_buf[BUF_SIZE];
 //=========================== prototypes ======================================
-void spi_event_handler(nrf_drv_spi_evt_t const * p_event,
-                       void *                    p_context);
+void spi_event_handler(nrf_spi_evt_t const * p_event,
+                       void *                p_context);
 //=========================== public ==========================================
 void spi_init(void)
 {
-	nrf_drv_spi_config_t spi_config = NRF_DRV_SPI_DEFAULT_CONFIG;
+	nrf_spi_config_t spi_config = NRF_SPI_DEFAULT_CONFIG;
 
     spi_config.ss_pin   = SPI_SS_PIN;
     spi_config.miso_pin = SPI_MISO_PIN;
     spi_config.mosi_pin = SPI_MOSI_PIN;
     spi_config.sck_pin  = SPI_SCK_PIN;
 
-    APP_ERROR_CHECK(nrf_drv_spi_init(&spi, &spi_config, spi_event_handler, NULL));
+    APP_ERROR_CHECK(nrf_spi_init(&spi, &spi_config, spi_event_handler, NULL));
 	
 }
  
@@ -69,8 +69,8 @@ void    spi_txrx(uint8_t*     bufTx,
  * @brief SPI user event handler.
  * @param event
  */
-void spi_event_handler(nrf_drv_spi_evt_t const * p_event,
-                       void *                    p_context)
+void spi_event_handler(nrf_spi_evt_t const * p_event,
+                       void *                p_context)
 {
     spi_xfer_done = true;
     //NRF_LOG_INFO("Transfer completed.");

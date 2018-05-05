@@ -20,7 +20,7 @@
 #define NRFX_SPI_ENABLED
 #define NRFX_SPI0_ENABLED
 #define NRFX_SPIM0_ENABLED
-// #define SPI_ENABLED
+#define SPI_ENABLED
 // #define SPI0_ENABLED
 
 // power management 
