@@ -9,13 +9,17 @@
 #include "sdk/components/boards/boards.h"
 #include "sdk/components/libraries/delay/nrf_delay.h"
 #include "sdk/modules/nrfx/drivers/include/nrfx_spi.h"
-//#include "sdk/components/libraries/util/app_error.h"
 
-#include <string.h>
-#include "stdint.h"
+#include "app_config.h"
+#include "leds.h"
 #include "spi.h"
 #include "board.h"
 #include "board_info.h"
+#include "debugpins.h"
+
+#include <string.h>
+#include <stdint.h>
+#include <stdio.h>
 
 //=========================== defines =========================================
 #define SPI_SS_PIN 29
@@ -27,36 +31,39 @@
 #define BUF_SIZE 20
 
 //=========================== variables =======================================
-static const nrf_spi_t spi = NRF_SPI_INSTANCE(SPI_INSTANCE);  /**< SPI instance. */
+static const nrfx_spi_t spi = NRFX_SPI_INSTANCE(SPI_INSTANCE);  /**< SPI instance. */
 static volatile bool spi_xfer_done;  /**< Flag used to indicate that SPI instance completed the transfer. */
 static uint8_t m_rx_buf[BUF_SIZE];
 //=========================== prototypes ======================================
-void spi_event_handler(nrf_spi_evt_t const * p_event,
-                       void *                p_context);
+void spi_event_handler(nrfx_spi_evt_t const * p_event,void * p_context);
 //=========================== public ==========================================
 void spi_init(void)
 {
-	nrf_spi_config_t spi_config = NRF_SPI_DEFAULT_CONFIG;
+	nrfx_spi_config_t spi_config = NRFX_SPI_DEFAULT_CONFIG;
 
     spi_config.ss_pin   = SPI_SS_PIN;
     spi_config.miso_pin = SPI_MISO_PIN;
     spi_config.mosi_pin = SPI_MOSI_PIN;
     spi_config.sck_pin  = SPI_SCK_PIN;
 
-    APP_ERROR_CHECK(nrf_spi_init(&spi, &spi_config, spi_event_handler, NULL));
+    if(NRF_SUCCESS != nrfx_spi_init(&spi, &spi_config, spi_event_handler, NULL))
+    {
+        leds_error_blink();
+        board_reset();
+    }
 	
 }
  
-void    spi_txrx(uint8_t*     bufTx,
-                 uint8_t      lenbufTx,
-                 spi_return_t returnType,
-                 uint8_t*     bufRx,
-                 uint8_t      maxLenBufRx,
-                 spi_first_t  isFirst,
-                 spi_last_t   isLast)
-{
+//void    spi_txrx(uint8_t*     bufTx,
+//                 uint8_t      lenbufTx,
+//                 spi_return_t returnType,
+//                 uint8_t*     bufRx,
+//                 uint8_t      maxLenBufRx,
+//                 spi_first_t  isFirst,
+//                 spi_last_t   isLast)
+//{
 
-}
+//}
 
 // interrupt handlers
 //kick_scheduler_t spi_isr(void)
@@ -69,7 +76,7 @@ void    spi_txrx(uint8_t*     bufTx,
  * @brief SPI user event handler.
  * @param event
  */
-void spi_event_handler(nrf_spi_evt_t const * p_event,
+void spi_event_handler(nrfx_spi_evt_t const * p_event,              
                        void *                p_context)
 {
     spi_xfer_done = true;

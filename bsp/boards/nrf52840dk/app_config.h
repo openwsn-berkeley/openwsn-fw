@@ -17,11 +17,12 @@
 #define UART0_CONFIG_USE_EASY_DMA 0
 
 // SPI
-#define NRFX_SPI_ENABLED
-#define NRFX_SPI0_ENABLED
-#define NRFX_SPIM0_ENABLED
+//#define NRFX_SPI_ENABLED
+//#define NRFX_SPI0_ENABLED
+//#define NRFX_SPIM0_ENABLED
 #define SPI_ENABLED
-// #define SPI0_ENABLED
+#define SPI0_ENABLED 1
+#define SPI0_USE_EASY_DMA 0
 
 // power management 
 #define NRF_PWR_MGMT_ENABLED 1
