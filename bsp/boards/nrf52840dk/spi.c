@@ -22,6 +22,7 @@
 #include <stdio.h>
 
 //=========================== defines =========================================
+
 #define SPI_SS_PIN 29
 #define SPI_MISO_PIN 28
 #define SPI_MOSI_PIN 4
@@ -31,12 +32,17 @@
 #define BUF_SIZE 20
 
 //=========================== variables =======================================
+
 static const nrfx_spi_t spi = NRFX_SPI_INSTANCE(SPI_INSTANCE);  /**< SPI instance. */
 static volatile bool spi_xfer_done;  /**< Flag used to indicate that SPI instance completed the transfer. */
-static uint8_t m_rx_buf[BUF_SIZE];
+//static uint8_t m_rx_buf[BUF_SIZE];
+
 //=========================== prototypes ======================================
+
 void spi_event_handler(nrfx_spi_evt_t const * p_event,void * p_context);
+
 //=========================== public ==========================================
+
 void spi_init(void)
 {
 	nrfx_spi_config_t spi_config = NRFX_SPI_DEFAULT_CONFIG;
@@ -54,22 +60,42 @@ void spi_init(void)
 	
 }
  
-//void    spi_txrx(uint8_t*     bufTx,
-//                 uint8_t      lenbufTx,
-//                 spi_return_t returnType,
-//                 uint8_t*     bufRx,
-//                 uint8_t      maxLenBufRx,
-//                 spi_first_t  isFirst,
-//                 spi_last_t   isLast)
-//{
+void    spi_txrx(uint8_t*     bufTx,
+                 uint8_t      lenbufTx,
+                 spi_return_t returnType,
+                 uint8_t*     bufRx,
+                 uint8_t      maxLenBufRx,
+                 spi_first_t  isFirst,
+                 spi_last_t   isLast)
+{
 
-//}
+        // Fill in transfer descriptor
+    nrfx_spi_xfer_desc_t nrfx_spi_xfer_desc;
+
+    nrfx_spi_xfer_desc.p_tx_buffer = bufTx;
+    nrfx_spi_xfer_desc.tx_length = lenbufTx;
+    nrfx_spi_xfer_desc.p_rx_buffer = bufRx;
+    nrfx_spi_xfer_desc.rx_length = maxLenBufRx;
+
+    memset(bufRx, 0, maxLenBufRx);
+
+    spi_xfer_done = false;
+
+    if (NRFX_SUCCESS != nrfx_spi_xfer(&spi, &nrfx_spi_xfer_desc, 0))
+    {
+        leds_error_blink();
+    }
+
+    while (!spi_xfer_done){
+        __WFE();
+    }
+}
 
 // interrupt handlers
-//kick_scheduler_t spi_isr(void)
-//{
-
-//}
+kick_scheduler_t spi_isr(void)
+{
+    return DO_NOT_KICK_SCHEDULER;
+}
 //=========================== private =========================================
 
 /**
@@ -80,10 +106,4 @@ void spi_event_handler(nrfx_spi_evt_t const * p_event,
                        void *                p_context)
 {
     spi_xfer_done = true;
-    //NRF_LOG_INFO("Transfer completed.");
-    if (m_rx_buf[0] != 0)
-    {
-        //NRF_LOG_INFO(" Received:");
-        //NRF_LOG_HEXDUMP_INFO(m_rx_buf, strlen((const char *)m_rx_buf));
-    }
 }
