@@ -24,6 +24,11 @@
 #define SPI0_ENABLED 1
 #define SPI0_USE_EASY_DMA 0
 
+// TIMER
+#define TIMER_ENABLED
+#define TIMER0_ENABLED 1
+#define TIMER0_USE_EASY_DMA 0
+
 // power management 
 #define NRF_PWR_MGMT_ENABLED 1
 

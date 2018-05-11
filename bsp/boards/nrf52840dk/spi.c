@@ -7,7 +7,6 @@
 
 #include "sdk/components/boards/pca10056.h"
 #include "sdk/components/boards/boards.h"
-#include "sdk/components/libraries/delay/nrf_delay.h"
 #include "sdk/modules/nrfx/drivers/include/nrfx_spi.h"
 
 #include "app_config.h"
