@@ -27,7 +27,7 @@
 #include "sctimer.h"
 #include "uart.h"
 #include "cryptoengine.h"
-#include "uart_mimsy.h"
+#include "pwm.h"
 
 //=========================== variables =======================================
 
@@ -73,16 +73,17 @@ void board_init(void) {
    
    gpio_init();
    clock_init();
-   //board_timer_init(); changed for inchwrom code
-   //leds_init(); changed for incworm code
-   //debugpins_init(); changed for inchworm code
-   //button_init();
-   //sctimer_init(); changed for inchworm code
-   //uart_init(); changed for inchwrom code
-   //radio_init(); changed for incwhorm code
-   //i2c_init(); changed for inchworm code
-  // sensors_init();
-  // cryptoengine_init();
+   board_timer_init();
+   leds_init();
+   debugpins_init();
+   button_init();
+   sctimer_init();
+   uart_init();
+   radio_init();
+   i2c_init();
+   sensors_init();
+   cryptoengine_init();
+   pwm_init();
 }
 
 /**
@@ -187,6 +188,7 @@ static void clock_init(void) {
     SysCtrlSleepSetting();
     SysCtrlDeepSleepSetting();
     SysCtrlWakeupSetting();
+
     /* Re-enable interrupt if initially enabled */
     if (!bIntDisabled) {
         IntMasterEnable();
@@ -238,6 +240,7 @@ static void SysCtrlRunSetting(void) {
 
   /* Enable UART0 and RFC when running */
   SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_GPT2);
+  SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_GPT3);
   SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_UART0);
   SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_RFC);
 }
@@ -262,6 +265,7 @@ static void SysCtrlSleepSetting(void) {
 
   /* Enable UART and RFC during sleep */
   SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_GPT2);
+  SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_GPT3);
   SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_UART0);
   SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_RFC);
 }

@@ -1,6 +1,6 @@
 #include "i2c_mimsy.h"
 #include "i2c.h"
-#include "MPU9250_RegisterMap.h"
+#include "headers/MPU9250_RegisterMap.h"
 #include "flash_mimsy.h" //TODO: mive imu_data type to a new mimsy.h file
 #include "gptimer.h"
 #include "hw_gptimer.h"

@@ -47,8 +47,6 @@ void sctimer_set_callback(sctimer_cbt cb){
 \brief set compare interrupt
 */
 void sctimer_setCompare(uint32_t val){
-    uint32_t val_debug;
-    val_debug = SleepModeTimerCountGet();
     IntEnable(INT_SMTIM);
     if (SleepModeTimerCountGet() - val < TIMERLOOP_THRESHOLD){
         // the timer is already late, schedule the ISR right now manually 

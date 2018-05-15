@@ -28,9 +28,9 @@ source   = \
 
 localEnv.Append(
     CPPPATH =  [
-        os.path.join('#','bsp','boards','mimsy2-cc2538'),
-        os.path.join('#','bsp','boards','mimsy2-cc2538','headers'),
-        os.path.join('#','bsp','boards','mimsy2-cc2538','source'),    
+        os.path.join('#','bsp','boards','openmote-cc2538'),
+        os.path.join('#','bsp','boards','openmote-cc2538','headers'),
+        os.path.join('#','bsp','boards','openmote-cc2538','source'),
         os.path.join('#','bsp','chips','adxl346'),
         os.path.join('#','bsp','chips','max44009'),
         os.path.join('#','bsp','chips','sht21'),

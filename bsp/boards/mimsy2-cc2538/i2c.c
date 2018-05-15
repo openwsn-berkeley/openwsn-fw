@@ -20,12 +20,11 @@
 //=========================== define ==========================================
 
 #define I2C_PERIPHERAL          ( SYS_CTRL_PERIPH_I2C )
-#define I2C_BASE                ( GPIO_D_BASE )
-#define I2C_SCL                 ( GPIO_PIN_4 )
-#define I2C_SDA                 ( GPIO_PIN_5 )
-#define I2C_BAUDRATE            ( 400000 )
-#define I2C_MAX_DELAY_US        ( 1000000 )
-
+#define I2C_BASE                ( GPIO_B_BASE )
+#define I2C_SCL                 ( GPIO_PIN_3 )
+#define I2C_SDA                 ( GPIO_PIN_4 )
+#define I2C_BAUDRATE            ( 100000 )
+#define I2C_MAX_DELAY_US        ( 100000 )
 
 //=========================== variables =======================================
 
@@ -50,14 +49,11 @@ void i2c_init(void) {
 
     // Configure the SCL pin
     GPIOPinTypeI2C(I2C_BASE, I2C_SCL);
-    IOCPadConfigSet(I2C_BASE, I2C_SCL,IOC_OVERRIDE_PUE); // enables pins as outputs, necessary for this code to work correctly
-
     IOCPinConfigPeriphInput(I2C_BASE, I2C_SCL, IOC_I2CMSSCL);
     IOCPinConfigPeriphOutput(I2C_BASE, I2C_SCL, IOC_MUX_OUT_SEL_I2C_CMSSCL);
 
     // Configure the SDA pin
     GPIOPinTypeI2C(I2C_BASE, I2C_SDA);
-    IOCPadConfigSet(I2C_BASE, I2C_SDA,IOC_OVERRIDE_PUE); // enables pins as outputs, necessary for this code to work correctly
     IOCPinConfigPeriphInput(I2C_BASE, I2C_SDA, IOC_I2CMSSDA);
     IOCPinConfigPeriphOutput(I2C_BASE, I2C_SDA, IOC_MUX_OUT_SEL_I2C_CMSSDA);
 
@@ -94,7 +90,6 @@ bool i2c_read_byte(uint8_t address, uint8_t* byte) {
     return true;
 }
 
-
 uint32_t i2c_read_bytes(uint8_t address, uint8_t* buffer, uint32_t length) {
     uint32_t future = I2C_MAX_DELAY_US;
     
@@ -117,16 +112,14 @@ uint32_t i2c_read_bytes(uint8_t address, uint8_t* buffer, uint32_t length) {
         
         // Read data from I2C
         *buffer++ = I2CMasterDataGet();
-
+        length--;
 
         // Check if it's the last byte
         if (length == 1) I2CMasterControl(I2C_MASTER_CMD_BURST_RECEIVE_FINISH);
         else             I2CMasterControl(I2C_MASTER_CMD_BURST_RECEIVE_CONT);
-        length--;
     }
     
     // Return bytes read
-
     return length;
 }
 
