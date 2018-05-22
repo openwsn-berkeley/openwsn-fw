@@ -82,18 +82,19 @@ void    spi_txrx(uint8_t*     bufTx,
 
     if (NRFX_SUCCESS != nrfx_spi_xfer(&spi, &nrfx_spi_xfer_desc, 0))
     {
-        leds_error_blink();
+      leds_error_blink();
     }
 
-    while (!spi_xfer_done){
-        __WFE();
+    while (!spi_xfer_done)
+    {
+      __WFE();
     }
 }
 
 // interrupt handlers
 kick_scheduler_t spi_isr(void)
 {
-    return DO_NOT_KICK_SCHEDULER;
+  return DO_NOT_KICK_SCHEDULER;
 }
 //=========================== private =========================================
 

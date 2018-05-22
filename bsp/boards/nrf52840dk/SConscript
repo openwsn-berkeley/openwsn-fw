@@ -14,6 +14,7 @@ source   = \
     Glob('sdk/components/boards/boards.c') + \
     Glob('sdk/modules/nrfx/drivers/src/nrfx_clock.c') + \
     Glob('sdk/modules/nrfx/drivers/src/nrfx_power.c') + \
+    Glob('sdk/modules/nrfx/drivers/src/nrfx_spi.c') + \
     Glob('sdk/components/libraries/experimental_section_vars/*.c') + \
     Glob('sdk/components/libraries/pwr_mgmt/*.c') + \
     Glob('sdk/components/libraries/uart/*.c') + \
