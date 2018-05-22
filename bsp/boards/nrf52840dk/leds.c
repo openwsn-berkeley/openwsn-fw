@@ -37,7 +37,7 @@ void leds_init()
     nrf_gpio_cfg_output(m_board_led_list[l]);
   }
 
-  bsp_board_leds_off();  
+  bsp_board_leds_off();
 }
 
 

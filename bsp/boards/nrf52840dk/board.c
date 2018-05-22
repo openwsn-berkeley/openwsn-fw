@@ -67,13 +67,14 @@ void board_init(void)
   // initialize boards with LEDs and buttons
   bsp_board_init(BSP_INIT_LEDS | BSP_INIT_BUTTONS);
   
-//   button_init();
-//   debugpins_init();
-//   bsp_timer_init();
-//   radiotimer_init();
-//   uart_init();
-//   radio_init();
-//   spi_init();
+  button_init();
+  leds_init();
+  debugpins_init();
+//  bsp_timer_init();
+//  radiotimer_init();
+//  uart_init();
+//  radio_init();
+//  spi_init();
 }
 
 /**

@@ -441,8 +441,8 @@ elif env['toolchain']=='armgcc':
         env.Append(LINKFLAGS     = '-g -gdwarf-2 -mcpu=cortex-m4 -mthumb')
 
         # @todo: Decide which linker script to use
-        # env.Append(LINKFLAGS     = '-Tbsp/boards/nrf52840dk/nrf52840_xxaa.ld')
-        env.Append(LINKFLAGS     = '-Tbsp/boards/nrf52840dk/sdk/config/nrf52840/armgcc/generic_gcc_nrf52.ld')
+        env.Append(LINKFLAGS     = '-Tbsp/boards/nrf52840dk/nrf52840_xxaa.ld') 
+        # env.Append(LINKFLAGS     = '-Tbsp/boards/nrf52840dk/sdk/config/nrf52840/armgcc/generic_gcc_nrf52.ld')
 
         # env.Append(LINKFLAGS     = '--strip-debug')
 
