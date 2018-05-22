@@ -87,7 +87,7 @@ void    spi_txrx(uint8_t*     bufTx,
 
     while (!spi_xfer_done)
     {
-      __WFE();
+      board_sleep();
     }
 }
 
