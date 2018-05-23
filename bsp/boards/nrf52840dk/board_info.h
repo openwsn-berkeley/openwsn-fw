@@ -24,7 +24,7 @@
 
 //===== timer
 
-#define PORT_TIMER_WIDTH                    uint16_t
+#define PORT_TIMER_WIDTH                    uint32_t      ///< actually, 24 bit
 #define PORT_RADIOTIMER_WIDTH               uint32_t
 
 #define PORT_SIGNED_INT_WIDTH               int32_t

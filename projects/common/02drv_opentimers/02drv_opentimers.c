@@ -64,7 +64,7 @@ int mote_main(void) {
         TIMER_PERIODIC,        // timer_type
         timer0_cb              // callback
     );
-    
+
     app_vars.timer1_id = opentimers_create();
     opentimers_scheduleIn    (
         app_vars.timer1_id,    // id
@@ -82,7 +82,7 @@ int mote_main(void) {
         TIMER_PERIODIC,        // timer_type
         timer2_cb              // callback
     );
-    
+
     while(1) {
         board_sleep();
     }

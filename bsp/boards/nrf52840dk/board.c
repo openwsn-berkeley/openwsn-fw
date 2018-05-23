@@ -18,7 +18,8 @@
 
 #include "board.h"
 #include "leds.h"
-// #include "bsp_timer.h"
+// #include "bsp_timer.h"   ///< OBSOLETE, use sctimer instead
+#include "sctimer.h"
 // #include "radiotimer.h"
 #include "debugpins.h"
 #include "uart.h"
@@ -70,11 +71,14 @@ void board_init(void)
   button_init();
   leds_init();
   debugpins_init();
-//  bsp_timer_init();
+//  bsp_timer_init();   ///< OBSOLETE, use sctimer instead
+  sctimer_init();
 //  radiotimer_init();
-//  uart_init();
+  uart_init();
 //  radio_init();
 //  spi_init();
+
+  uart_writeByte('S');    ///< DEBUG, REMOVE ME!
 }
 
 /**

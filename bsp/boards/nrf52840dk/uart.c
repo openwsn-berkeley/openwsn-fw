@@ -56,11 +56,11 @@ void uart_init(void)
   {
     .rx_pin_no= RX_PIN_NUMBER,
     .tx_pin_no= TX_PIN_NUMBER,
-    .rts_pin_no= RTS_PIN_NUMBER,
-    .cts_pin_no= CTS_PIN_NUMBER,
+    .rts_pin_no= RTS_PIN_NUMBER,                // defaults to UART_PIN_DISCONNECTED
+    .cts_pin_no= CTS_PIN_NUMBER,                // defaults to UART_PIN_DISCONNECTED
     .baud_rate= UART_DEFAULT_CONFIG_BAUDRATE,
     .use_parity= (UART_DEFAULT_CONFIG_PARITY != 0) ? (true) : (false),
-    .flow_control= HWFC
+    .flow_control= HWFC                         // defaults to false
   };
   
   // if UART cannot be initialized, blink error LED for 10s, and then reset
@@ -118,6 +118,7 @@ void uart_event_handler(app_uart_evt_t * p_event)
   if ((p_event->evt_type == APP_UART_COMMUNICATION_ERROR) || (p_event->evt_type == APP_UART_FIFO_ERROR) || (p_event->evt_type == APP_UART_FIFO_ERROR))
   {
     // handle error ...
+    leds_error_blink();
   }
   else if ((p_event->evt_type == APP_UART_DATA) || (p_event->evt_type == APP_UART_DATA_READY))
   {
