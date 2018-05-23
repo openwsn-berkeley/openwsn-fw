@@ -572,6 +572,12 @@ def jtagUploadFunc(location):
                 suffix      = '.phonyupload',
                 src_suffix  = '.ihex',
             )
+        if env['board']=='nrf52840dk':
+            return Builder(
+                action      = os.path.join('bsp','boards',env['board'],'tools','flash.sh') + " $SOURCE",
+                suffix      = '.phonyupload',
+                src_suffix  = '.elf',
+            )
     else:
         if env['fet_version']==2:
             # MSP-FET430uif is running v2 Firmware
@@ -855,10 +861,14 @@ if env['bootload']:
 def extras(env, source):
     returnVal  = []
     returnVal += [env.PrintSize(source=source)]
-    returnVal += [env.Elf2iHex(source=source)]
-    returnVal += [env.Elf2iBin(source=source)]
+    if env['board'] != 'nrf52840dk':
+        returnVal += [env.Elf2iHex(source=source)]
+        returnVal += [env.Elf2iBin(source=source)]
     if   env['jtag']:
-        returnVal += [env.JtagUpload(env.Elf2iHex(source))]
+        if env['board'] == 'nrf52840dk' and env['jtag'] == 'bflash':
+            returnVal += [env.JtagUpload(source)]
+        else:
+            returnVal += [env.JtagUpload(env.Elf2iHex(source))]
     elif env['bootload']:
         returnVal += [env.Bootload(env.Elf2iHex(source))]
     return returnVal
