@@ -76,7 +76,7 @@ void board_init(void)
 //  radiotimer_init();
   uart_init();
 //  radio_init();
-//  spi_init();
+  spi_init();
 
   uart_writeByte('S');    ///< DEBUG, REMOVE ME!
 }
