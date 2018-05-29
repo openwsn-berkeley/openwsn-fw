@@ -1,8 +1,0 @@
-{
-  "files.associations": {
-    "nrfx_clock.h": "c",
-    "nrf52840.h": "c",
-    "nrf_pwr_mgmt.h": "c",
-    "app_uart.h": "c"
-  }
-}

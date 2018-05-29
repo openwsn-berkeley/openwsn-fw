@@ -7,6 +7,7 @@
 #include "sdk/modules/nrfx/hal/nrf_power.h"
 #include "sdk/modules/nrfx/drivers/include/nrfx_clock.h"
 #include "sdk/components/libraries/pwr_mgmt/nrf_pwr_mgmt.h"
+#include "sdk/components/libraries/delay/nrf_delay.h"
 
 #include "sdk/modules/nrfx/mdk/nrf52840.h"
 #include "sdk/modules/nrfx/drivers/nrfx_common.h"
@@ -67,18 +68,28 @@ void board_init(void)
 
   // initialize boards with LEDs and buttons
   bsp_board_init(BSP_INIT_LEDS | BSP_INIT_BUTTONS);
+  uart_init();          ///< we can use the UART for simple debugging
   
   button_init();
+
   leds_init();
+  uart_writeByte('L'); nrf_delay_ms(10);   ///< DEBUG, REMOVE ME!
+  uart_writeByte(48+LEDS_NUMBER);  nrf_delay_ms(10);
+
   debugpins_init();
+  uart_writeByte('D'); nrf_delay_ms(10);   ///< DEBUG, REMOVE ME!
+
 //  bsp_timer_init();   ///< OBSOLETE, use sctimer instead
   sctimer_init();
-//  radiotimer_init();
-  uart_init();
-//  radio_init();
-  spi_init();
+  uart_writeByte('T'); nrf_delay_ms(10);   ///< DEBUG, REMOVE ME!
 
-  uart_writeByte('S');    ///< DEBUG, REMOVE ME!
+//  radiotimer_init();
+//  radio_init();
+
+  spi_init();
+  uart_writeByte('S'); nrf_delay_ms(10);   ///< DEBUG, REMOVE ME!
+
+  uart_writeByte('~');    ///< DEBUG, REMOVE ME!
 }
 
 /**

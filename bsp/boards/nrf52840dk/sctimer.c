@@ -1,13 +1,13 @@
 /**
  * brief A timer module with only a single compare value. 
  *
- * Author: Adam Sedmak (1, adam.sedmak@gmail.com) and Tamas Harczos (2, tamas.harczos@imms.de)
- * Company: (1) Faculty of Electronics and Computing, Zagreb, Croatia
- *          (2) Institut für Mikroelektronik- und Mechatronik-Systeme gemeinnützige GmbH (IMMS GmbH)
- * Date:   Apr 2018
+ * Authors: Tamas Harczos (1, tamas.harczos@imms.de) and Adam Sedmak (2, adam.sedmak@gmail.com)
+ * Company: (1) Institut für Mikroelektronik- und Mechatronik-Systeme gemeinnützige GmbH (IMMS GmbH)
+ *          (2) Faculty of Electronics and Computing, Zagreb, Croatia
+ * Date:   May 2018
 */
 
-#include "sdk/components/libraries/timer/app_timer.h"  ///< the implementation is based on the Nordic's AppTimer, which uses RTC1 (Real-Time Counter)
+#include "sdk/modules/nrfx/drivers/include/nrfx_rtc.h"  ///< the implementation is based on Nordic's Real-Time Counter (RTC)
 #include "sdk/components/libraries/delay/nrf_delay.h"
 
 #include "sdk/components/boards/pca10056.h"
@@ -22,7 +22,9 @@
 
 // ========================== define ==========================================
 
-#define MINIMUM_COMPAREVALE_ADVANCE  APP_TIMER_MIN_TIMEOUT_TICKS  // defaults to 5
+#define MINIMUM_COMPAREVALE_ADVANCE 5
+#define MAX_RTC_TASKS_DELAY 153               // Maximum delay in us until an RTC task is executed
+#define CC_TIMER 0                            // CC channel used for the timer's compare value
 
 
 // ========================== variable ========================================
@@ -33,16 +35,19 @@ typedef struct
   sctimer_capture_cbt startFrameCb;
   sctimer_capture_cbt endFrameCb;
   uint8_t             f_SFDreceived;
+  uint32_t            counter_MSB;      ///< the first 8 bits of the 32 bit counter (which do not exist in the physical timer)
+  uint32_t            cc32bit_MSB;      ///< the first 8 bits of the 32 bit CC (capture and compare) value, set
 } sctimer_vars_t;
 
-sctimer_vars_t sctimer_vars;
+sctimer_vars_t sctimer_vars= {0};
 
-APP_TIMER_DEF(m_timer);   ///< instantiate app_timer
+static nrfx_rtc_t m_timer= NRFX_RTC_INSTANCE(0);
+
 
 
 // ========================== prototypes========================================
 
-static void timer_event_handler(void *p_context);
+static void timer_event_handler(nrfx_rtc_int_type_t int_type);
 
 
 // ========================== protocol =========================================
@@ -52,17 +57,36 @@ static void timer_event_handler(void *p_context);
 */
 void sctimer_init(void)
 {
+  nrfx_err_t retVal= NRFX_SUCCESS;
   memset(&sctimer_vars, 0, sizeof(sctimer_vars_t));
 
-  // initialize app_timer, default configuration conveniently uses the 32kHz clock without prescaler
-  app_timer_init();
+  nrfx_rtc_config_t const rtc_cfg=
+  {
+    .prescaler= RTC_FREQ_TO_PRESCALER(NRFX_RTC_DEFAULT_CONFIG_FREQUENCY),
+    .interrupt_priority= 2, // NRFX_RTC_DEFAULT_CONFIG_IRQ_PRIORITY,
+    .tick_latency= NRFX_RTC_US_TO_TICKS(NRFX_RTC_MAXIMUM_LATENCY_US, NRFX_RTC_DEFAULT_CONFIG_FREQUENCY),
+    .reliable= NRFX_RTC_DEFAULT_CONFIG_RELIABLE
+  };
 
-    if (NRF_SUCCESS != app_timer_create(&m_timer, APP_TIMER_MODE_SINGLE_SHOT, timer_event_handler))
-    {
-      leds_error_blink();
-      board_reset();
-    }
+  // initialize RTC, we use the 32768 Hz clock without prescaler
+  retVal= nrfx_rtc_init(&m_timer, &rtc_cfg, timer_event_handler);
+  if (NRFX_SUCCESS != retVal)
+  {
+    uart_writeByte(retVal);   ///< DEBUG ONLY, REMOVE ME! 
+    leds_error_blink();
+    board_reset();
+  }
+  nrf_delay_us(MAX_RTC_TASKS_DELAY);
 
+  // enable interrupts for overflow event
+  nrfx_rtc_overflow_enable(&m_timer, true);
+
+  // reset counter
+  nrfx_rtc_counter_clear(&m_timer);
+  nrf_delay_us(MAX_RTC_TASKS_DELAY);
+
+  // from this on, the RTC will run, but also draw electrical current
+  sctimer_enable();
 }
 
 void sctimer_set_callback(sctimer_cbt cb)
@@ -85,25 +109,48 @@ void sctimer_setEndFrameCb(sctimer_capture_cbt cb)
 */
 void sctimer_setCompare(PORT_TIMER_WIDTH val)
 {
-   uint32_t retVal;
+  nrfx_err_t retVal= NRFX_SUCCESS;
 
-  // It seems sctimer_setCompare() explicitly wants to set the compare value, whereas app_timer_start()
-  // is "intelligent enough" to require a timeout value, that's why the subtraction is needed.
-  // Furthermore, if the timeout is too soon, we will need to round up to the shortes possible delay.
-  uint32_t relTick= val-sctimer_readCounter();
-  if (relTick < APP_TIMER_MIN_TIMEOUT_TICKS)
+  uint32_t counter_current= sctimer_readCounter();
+  uint32_t counter_distance, counter_demanded;
+
+  if (val >= counter_current)
   {
-    relTick= APP_TIMER_MIN_TIMEOUT_TICKS;
+    counter_distance= val - counter_current;
+    if (counter_distance >= MINIMUM_COMPAREVALE_ADVANCE)
+    {
+      counter_demanded= val;
+    }
+    else
+    {
+      counter_demanded= (counter_current + MINIMUM_COMPAREVALE_ADVANCE) & 0xFFFFFFFF;
+    }
   }
-  retVal= app_timer_start(m_timer, relTick, NULL);
+  else
+  {
+    if (0xFFFFFFFF-counter_current+1+val >= MINIMUM_COMPAREVALE_ADVANCE)
+    {
+      counter_demanded= val;
+    }
+    else
+    {
+      counter_demanded= (counter_current + MINIMUM_COMPAREVALE_ADVANCE) & 0xFFFFFFFF;
+    }
+  }
 
-  if (retVal != NRF_SUCCESS)
+  // set MSB of CC
+  sctimer_vars.cc32bit_MSB= counter_demanded & 0xFF000000;
+
+  // set 3 LSBs of CC
+  retVal= nrfx_rtc_cc_set(&m_timer, CC_TIMER, counter_demanded & 0x00FFFFFF, true);
+  nrf_delay_us(MAX_RTC_TASKS_DELAY);
+
+  if (retVal != NRFX_SUCCESS)
   {
     uart_writeByte(retVal);    ///< DEBUG, REMOVE ME!
-
     leds_error_blink();
     board_reset();
-  }
+  }  
 }
 
 /**
@@ -113,28 +160,37 @@ void sctimer_setCompare(PORT_TIMER_WIDTH val)
 */
 PORT_TIMER_WIDTH sctimer_readCounter(void)
 {
-  return app_timer_cnt_get();
+  return( sctimer_vars.counter_MSB | nrfx_rtc_counter_get(&m_timer) );
 }
 
 void sctimer_enable(void)
 {
-  app_timer_resume();
+  // power on RTC instance
+  nrfx_rtc_enable(&m_timer);
+  nrf_delay_us(MAX_RTC_TASKS_DELAY);
 }
 
 void sctimer_disable(void)
 {
-  app_timer_pause();
+  // power down RTC instance
+  nrfx_rtc_disable(&m_timer);
+  nrf_delay_us(MAX_RTC_TASKS_DELAY);
 }
 
 
 //=========================== interrupt handler ===============================
 
-static void timer_event_handler(void *p_context)
+static void timer_event_handler(nrfx_rtc_int_type_t int_type)
 {
   debugpins_isr_set();
-  
-  // if a callback was specified, call it now
-  if (sctimer_vars.cb != 0)
+
+  if (int_type == NRFX_RTC_INT_OVERFLOW)
+  {
+    sctimer_vars.counter_MSB += 0x01000000;
+  }
+
+  // if we reached the specified CC value within the current wrap AND it is the right wrap, call callback
+  else if ((int_type == NRFX_RTC_INT_COMPARE0) && (sctimer_vars.cc32bit_MSB == sctimer_vars.counter_MSB) && (sctimer_vars.cb != 0))
   {
     sctimer_vars.cb();  
   }

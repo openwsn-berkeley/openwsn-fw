@@ -11,20 +11,21 @@
 #include <string.h>
 
 #include "sdk/modules/nrfx/templates/nRF52840/nrfx_config.h"
+// #include "sdk/components/toolchain/cmsis/include/core_cmFunc.h"
 #include "opendefs.h"
+
 
 //=========================== defines =========================================
 
 //===== interrupt state
 
 #define INTERRUPT_DECLARATION()
-#define DISABLE_INTERRUPTS() IntMasterDisable()
-
-#define ENABLE_INTERRUPTS() IntMasterEnable()
+#define DISABLE_INTERRUPTS() __asm volatile ("cpsid i" : : : "memory")    ///< or use __disable_irq() from core_cmFunc.h
+#define ENABLE_INTERRUPTS() __asm volatile ("cpsie i" : : : "memory")     ///< or use __enable_irq() from core_cmFunc.h
 
 //===== timer
 
-#define PORT_TIMER_WIDTH                    uint32_t      ///< actually, 24 bit
+#define PORT_TIMER_WIDTH                    uint32_t      ///< actually, 24 bit, but we will virtualize the 32 bit timer
 #define PORT_RADIOTIMER_WIDTH               uint32_t
 
 #define PORT_SIGNED_INT_WIDTH               int32_t

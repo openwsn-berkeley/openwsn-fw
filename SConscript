@@ -862,8 +862,8 @@ if env['bootload']:
 def extras(env, source):
     returnVal  = []
     returnVal += [env.PrintSize(source=source)]
+    returnVal += [env.Elf2iHex(source=source)]
     if env['board'] != 'nrf52840dk':
-        returnVal += [env.Elf2iHex(source=source)]
         returnVal += [env.Elf2iBin(source=source)]
     if   env['jtag']:
         if env['board'] == 'nrf52840dk' and env['jtag'] == 'bflash':
