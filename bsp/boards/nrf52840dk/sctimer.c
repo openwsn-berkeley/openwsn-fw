@@ -17,14 +17,14 @@
 #include "board.h"
 #include "leds.h"
 #include "debugpins.h"
-#include "uart.h"           ///< for debuggin only, REMOVE ME
 
 
 // ========================== define ==========================================
 
 #define MINIMUM_COMPAREVALE_ADVANCE 5
-#define MAX_RTC_TASKS_DELAY 153               // Maximum delay in us until an RTC task is executed
-#define CC_TIMER 0                            // CC channel used for the timer's compare value
+#define COMPAREVALE_ADVANCE_STEP 2
+#define MAX_RTC_TASKS_DELAY 47          // maximum delay in us until an RTC config task is executed
+#define CC_TIMER 0                      // CC channel used for the timer's compare value
 
 
 // ========================== variable ========================================
@@ -63,16 +63,15 @@ void sctimer_init(void)
   nrfx_rtc_config_t const rtc_cfg=
   {
     .prescaler= RTC_FREQ_TO_PRESCALER(NRFX_RTC_DEFAULT_CONFIG_FREQUENCY),
-    .interrupt_priority= 2, // NRFX_RTC_DEFAULT_CONFIG_IRQ_PRIORITY,
+    .interrupt_priority= NRFX_RTC_DEFAULT_CONFIG_IRQ_PRIORITY,
     .tick_latency= NRFX_RTC_US_TO_TICKS(NRFX_RTC_MAXIMUM_LATENCY_US, NRFX_RTC_DEFAULT_CONFIG_FREQUENCY),
-    .reliable= NRFX_RTC_DEFAULT_CONFIG_RELIABLE
+    .reliable= 1 // NRFX_RTC_DEFAULT_CONFIG_RELIABLE
   };
 
   // initialize RTC, we use the 32768 Hz clock without prescaler
   retVal= nrfx_rtc_init(&m_timer, &rtc_cfg, timer_event_handler);
   if (NRFX_SUCCESS != retVal)
   {
-    uart_writeByte(retVal);   ///< DEBUG ONLY, REMOVE ME! 
     leds_error_blink();
     board_reset();
   }
@@ -111,8 +110,21 @@ void sctimer_setCompare(PORT_TIMER_WIDTH val)
 {
   nrfx_err_t retVal= NRFX_SUCCESS;
 
-  uint32_t counter_current= sctimer_readCounter();
+  // make sure that no other CC match event will interrupt this block
+  uint32_t int_mask= RTC_CHANNEL_INT_MASK(CC_TIMER);
+  nrf_rtc_event_t event= RTC_CHANNEL_EVENT_ADDR(CC_TIMER);
+  nrf_rtc_event_disable(m_timer.p_reg, int_mask);
+  nrf_rtc_int_disable(m_timer.p_reg, int_mask);  
+
+  uint32_t counter_current;
   uint32_t counter_distance, counter_demanded;
+
+  uint8_t restart_count= 0;
+  uint8_t const max_restart_count= 3;
+
+restart:
+
+  counter_current= sctimer_readCounter();
 
   if (val >= counter_current)
   {
@@ -142,12 +154,25 @@ void sctimer_setCompare(PORT_TIMER_WIDTH val)
   sctimer_vars.cc32bit_MSB= counter_demanded & 0xFF000000;
 
   // set 3 LSBs of CC
-  retVal= nrfx_rtc_cc_set(&m_timer, CC_TIMER, counter_demanded & 0x00FFFFFF, true);
-  nrf_delay_us(MAX_RTC_TASKS_DELAY);
+  retVal= nrfx_rtc_cc_set(&m_timer, CC_TIMER, counter_demanded & 0x00FFFFFF, false);
+  // nrf_delay_us(MAX_RTC_TASKS_DELAY);
+
+  // nrfx_rtc_cc_set() will return NRFX_ERROR_TIMEOUT if the demanded CC value cannot be safely made by the timer.
+  // In that case, we reschedule the next event.
+  if ((NRFX_ERROR_TIMEOUT == retVal) && (restart_count < max_restart_count))
+  {
+    val += COMPAREVALE_ADVANCE_STEP;
+    restart_count++;
+    goto restart;
+  }
+
+  // re-enable CC event and interrupt
+  nrf_rtc_event_clear(m_timer.p_reg,event);
+  nrf_rtc_int_enable(m_timer.p_reg, int_mask);
+  nrf_rtc_event_enable(m_timer.p_reg,int_mask);
 
   if (retVal != NRFX_SUCCESS)
   {
-    uart_writeByte(retVal);    ///< DEBUG, REMOVE ME!
     leds_error_blink();
     board_reset();
   }  
