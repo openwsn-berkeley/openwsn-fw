@@ -1,7 +1,7 @@
 /*e
 \brief A minimal CBOR parser implementation of draft-6tisch-minimal-security-02.
 */
-#include "cbor.h"
+#include "cojp_cbor.h"
 //=========================== defines =========================================
 // number of bytes in 802.15.4 short address
 #define ASN_LENGTH              5
