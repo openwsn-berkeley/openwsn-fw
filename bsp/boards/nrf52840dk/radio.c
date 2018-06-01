@@ -8,9 +8,12 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "sdk/components/boards/pca10056.h"
 #include "sdk/components/boards/boards.h"
+#include "sdk/components/drivers_nrf/radio_config/radio_config.h"
+#include "sdk/modules/nrfx/mdk/nrf52840.h"
 
 #include "app_config.h"
 #include "leds.h"
@@ -18,6 +21,7 @@
 #include "board.h"
 #include "board_info.h"
 #include "debugpins.h"
+#include "sctimer.h"
 
 //=========================== defines =========================================
 
@@ -30,6 +34,8 @@
 //#define CHECKSUM_LEN 2
 
 //=========================== variables =======================================
+
+bool radio_on;
 
 typedef struct {
    radio_capture_cbt         startFrame_cb;
@@ -50,6 +56,10 @@ void radio_init(void) {
    // clear variables
    memset(&radio_vars,0,sizeof(radio_vars_t));
 
+   radio_configure();
+
+   radio_on = true;
+
 }
 
 void radio_setStartFrameCb(radio_capture_cbt cb) {
@@ -63,13 +73,19 @@ void radio_setEndFrameCb(radio_capture_cbt cb) {
 //===== reset
 
 void radio_reset(void) {
+
+
 }
 
 //===== RF admin
 
 void radio_setFrequency(uint8_t frequency) {
 
-   
+   radio_vars.state = RADIOSTATE_SETTING_FREQUENCY;
+
+   NRF_RADIO->FREQUENCY = frequency;
+
+   radio_vars.state = RADIOSTATE_FREQUENCY_SET;
 }
 
 void radio_rfOn(void) {
@@ -84,11 +100,21 @@ void radio_rfOff(void) {
 
 void radio_loadPacket(uint8_t* packet, uint16_t len) {
    
+   radio_vars.state = RADIOSTATE_LOADING_PACKET;
+
+   NRF_RADIO->PACKETPTR = (uint32_t)packet;
+
+   radio_vars.state = RADIOSTATE_PACKET_LOADED;
+
 }
 
 void radio_txEnable(void) {
-   
+
+   radio_vars.state = RADIOSTATE_ENABLING_TX;
+   NRF_RADIO->TASKS_TXEN = 1U;
+   radio_vars.state = RADIOSTATE_TX_ENABLED;
 }
+
 
 void radio_txNow(void) {
    
@@ -97,8 +123,9 @@ void radio_txNow(void) {
 //===== RX
 
 void radio_rxEnable(void) {
-   
-   
+   radio_vars.state = RADIOSTATE_ENABLING_RX;
+   NRF_RADIO->TASKS_RXEN = 1U;
+   radio_vars.state = RADIOSTATE_LISTENING;
 }
 
 void radio_rxNow(void) {
@@ -111,6 +138,8 @@ void radio_getReceivedFrame(uint8_t* pBufRead,
                              int8_t* pRssi,
                             uint8_t* pLqi,
                                bool* pCrc) {
+   
+   
    
 }
 
