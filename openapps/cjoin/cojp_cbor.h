@@ -80,6 +80,7 @@ typedef struct {
 } cojp_link_layer_key_t;
 
 typedef struct {
+    uint8_t                         num_keys;
     cojp_link_layer_key_t           key[KEYSET_MAX_NUM_KEYS];
 } cojp_link_layer_keyset_t;
 

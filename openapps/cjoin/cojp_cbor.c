@@ -186,6 +186,7 @@ owerror_t cojp_cbor_decode_link_layer_keyset(uint8_t *buf, uint8_t* len, cojp_li
         current_key_index++;
     }
 
+    keyset->num_keys = current_key_index;
     *len = (uint8_t) (tmp - buf);
     return E_SUCCESS;
 }
