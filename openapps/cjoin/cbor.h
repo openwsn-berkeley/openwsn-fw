@@ -11,17 +11,19 @@
 //=========================== define ==========================================
 
 // max number of keys supported in COSE_KeySet
-#define COSE_KEYSET_MAX_NUM_KEYS          2
+#define KEYSET_MAX_NUM_KEYS               2
 // CBOR additional info mask
 #define CBOR_ADDINFO_MASK                 0x1F
-// max number of pairs in COSE symmetric key struct
-#define COSE_SYMKEY_MAXNUMPAIRS           6    
-// 802.15.4 short address
-#define SHORT_ADDRESS_LENGTH              2
 // symmetric key length
-#define COSE_SYMKEY_LENGTH                16
-// key id length
-#define COSE_SYMKEY_KEYID_LENGTH          1
+#define AES128_KEY_LENGTH                 16
+// IEEE 802.15.4 key id length
+#define IEEE802154_KEYID_LENGTH           1
+// IEEE 802.15.4 short address
+#define IEEE802154_SHORT_ADDRESS_LENGTH   2
+// CoJP Configuration object constants
+#define COJP_CONFIGURATION_MAX_NUM_PARAMS 3 // TODO we don't support 6LBR joining for now
+// CoJP Min num elements in a key
+#define COJP_KEY_MIN_NUM_ELEMS            2
 //=========================== typedef =========================================
 
 // CBOR major types
@@ -34,49 +36,65 @@ typedef enum {
     CBOR_MAJORTYPE_MAP                  = 5,
 } cbor_majortype_t;
 
-// COSE key map labels
 typedef enum {
-    COSE_KEY_LABEL_KTY                  = 1,
-    COSE_KEY_LABEL_KID                  = 2,
-    COSE_KEY_LABEL_ALG                  = 3,
-    COSE_KEY_LABEL_KEYOPS               = 4,
-    COSE_KEY_LABEL_BASEIV               = 5,
-    COSE_KEY_LABEL_K                    = 32, // -1
-} cose_key_label_t;
+    COJP_PARAMETERS_LABELS_ROLE           = 1, // Identifies the role parameter
+    COJP_PARAMETERS_LABELS_LLKEYSET       = 2, // Identifies the array carrying one or more link-layer cryptographic keys
+    COJP_PARAMETERS_LABELS_LLSHORTADDRESS = 3, // Identifies the assigned link-layer short address
+    COJP_PARAMETERS_LABELS_JRCADDRESS     = 4, // Identifies the IPv6 address of the JRC
+    COJP_PARAMETERS_LABELS_NETID          = 5, // Identifies the network identifier (PAN ID)
+    COJP_PARAMETERS_LABELS_NETPREFIX      = 6, // Identifies the IPv6 prefix of the network
+} cojp_parameters_labels_t;
 
-// COSE key type values
 typedef enum {
-    COSE_KEY_VALUE_OKP                  = 1,
-    COSE_KEY_VALUE_EC2                  = 2,
-    COSE_KEY_VALUE_SYMMETRIC            = 4,
-} cose_key_value_t;
+    COJP_ROLE_VALUE_6N                    = 0, // 6TiSCH Node
+    COJP_ROLE_VALUE_6LBR                  = 1, // 6LBR Node
+} cojp_role_values_t;
+
+typedef enum {
+    COJP_KEY_USAGE_6TiSCH_K1K2_ENC_MIC32  = 0,
+    COJP_KEY_USAGE_6TiSCH_K1K2_ENC_MIC64  = 1,
+    COJP_KEY_USAGE_6TiSCH_K1K2_ENC_MIC128 = 2,
+    COJP_KEY_USAGE_6TiSCH_K1K2_MIC32      = 3,
+    COJP_KEY_USAGE_6TiSCH_K1K2_MIC64      = 4,
+    COJP_KEY_USAGE_6TiSCH_K1K2_MIC128     = 5,
+    COJP_KEY_USAGE_6TiSCH_K1_MIC32        = 6,
+    COJP_KEY_USAGE_6TiSCH_K1_MIC64        = 7,
+    COJP_KEY_USAGE_6TiSCH_K1_MIC128       = 8,
+    COJP_KEY_USAGE_6TiSCH_K2_MIC32        = 9,
+    COJP_KEY_USAGE_6TiSCH_K2_MIC64        = 10,
+    COJP_KEY_USAGE_6TiSCH_K2_MIC128       = 11,
+    COJP_KEY_USAGE_6TiSCH_K2_ENC_MIC32    = 12,
+    COJP_KEY_USAGE_6TiSCH_K2_ENC_MIC64    = 13,
+    COJP_KEY_USAGE_6TiSCH_K2_ENC_MIC128   = 14,
+} cojp_key_usage_values_t;
 
 typedef struct {
-    uint8_t                 address[SHORT_ADDRESS_LENGTH];
-    asn_t                   lease_asn;
-} short_address_t;
+    uint8_t                         address[IEEE802154_SHORT_ADDRESS_LENGTH];
+    uint32_t                        lease_time;
+} cojp_link_layer_short_address_t;
 
 typedef struct {
-    cose_key_value_t        kty;
-    uint8_t                 kid[COSE_SYMKEY_KEYID_LENGTH];
-    uint8_t                 k[COSE_SYMKEY_LENGTH];
-} COSE_symmetric_key_t;
+    uint8_t                         key_index;
+    cojp_key_usage_values_t         key_usage;
+    uint8_t                         key_value[AES128_KEY_LENGTH];
+} cojp_link_layer_key_t;
 
 typedef struct {
-    COSE_symmetric_key_t   key[COSE_KEYSET_MAX_NUM_KEYS];
-} COSE_keyset_t;
+    cojp_link_layer_key_t           key[KEYSET_MAX_NUM_KEYS];
+} cojp_link_layer_keyset_t;
 
 typedef struct {
-    COSE_keyset_t           keyset;
-    short_address_t         short_address;
-} join_response_t;
+    cojp_link_layer_keyset_t        keyset;
+    cojp_link_layer_short_address_t short_address;
+    open_addr_t                     jrc_address;
+} cojp_configuration_object_t;
 
 
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
 
-owerror_t cbor_parse_join_response(join_response_t *, uint8_t *, uint8_t);
+owerror_t cojp_cbor_decode_configuration_object(uint8_t *buf, uint8_t len, cojp_configuration_object_t *configuration);
 
 /**
 \}
