@@ -18,8 +18,8 @@ openoscoap_vars_t openoscoap_vars;
 
 //=========================== prototype =======================================
 owerror_t hkdf_derive_parameter(uint8_t* buffer,
-        uint8_t* masterSecret, 
-        uint8_t masterSecretLen, 
+        uint8_t* masterSecret,
+        uint8_t masterSecretLen,
         uint8_t* masterSalt,
         uint8_t masterSaltLen,
         uint8_t* identifier,
@@ -31,8 +31,8 @@ owerror_t hkdf_derive_parameter(uint8_t* buffer,
 
 bool is_request(uint8_t code);
 
-uint8_t openoscoap_construct_aad(uint8_t* buffer, 
-        uint8_t version, 
+uint8_t openoscoap_construct_aad(uint8_t* buffer,
+        uint8_t version,
         uint8_t code,
         uint8_t* optionsSerialized,
         uint8_t optionsSerializedLen,
@@ -43,9 +43,9 @@ uint8_t openoscoap_construct_aad(uint8_t* buffer,
         uint8_t requestSeqLen
         );
 
-void openoscoap_encode_compressed_COSE(OpenQueueEntry_t* msg, 
-        uint8_t* requestSeq, uint8_t requestSeqLen, 
-        uint8_t* requestKid, 
+void openoscoap_encode_compressed_COSE(OpenQueueEntry_t* msg,
+        uint8_t* requestSeq, uint8_t requestSeqLen,
+        uint8_t* requestKid,
         uint8_t requestKidLen);
 
 void xor_arrays(uint8_t* s1, uint8_t* s2, uint8_t* dst, uint8_t len);
@@ -55,7 +55,7 @@ void flip_first_bit(uint8_t* source, uint8_t* dst, uint8_t len);
 bool replay_window_check(oscoap_security_context_t *context, uint16_t sequenceNumber);
 void replay_window_update(oscoap_security_context_t *context, uint16_t sequenceNumber);
 
-uint8_t openoscoap_convert_sequence_number(uint16_t sequenceNumber, uint8_t** buffer); 
+uint8_t openoscoap_convert_sequence_number(uint16_t sequenceNumber, uint8_t** buffer);
 //=========================== public ==========================================
 
 
@@ -76,8 +76,8 @@ security context.
 \param[in] Length of the Master Salt byte array in bytes.
 */
 
-void openoscoap_init_security_context(oscoap_security_context_t *ctx, 
-                                uint8_t* senderID, 
+void openoscoap_init_security_context(oscoap_security_context_t *ctx,
+                                uint8_t* senderID,
                                 uint8_t senderIDLen,
                                 uint8_t* recipientID,
                                 uint8_t recipientIDLen,
@@ -85,23 +85,23 @@ void openoscoap_init_security_context(oscoap_security_context_t *ctx,
                                 uint8_t masterSecretLen,
                                 uint8_t* masterSalt,
                                 uint8_t masterSaltLen) {
-    
-    if (senderIDLen > OSCOAP_MAX_ID_LEN || 
+
+    if (senderIDLen > OSCOAP_MAX_ID_LEN ||
             recipientIDLen > OSCOAP_MAX_ID_LEN) {
         return;
     }
 
     // common context
-    ctx->aeadAlgorithm = AES_CCM_16_64_128; 
+    ctx->aeadAlgorithm = AES_CCM_16_64_128;
 
     // sender context
     memcpy(ctx->senderID, senderID, senderIDLen);
     ctx->senderIDLen = senderIDLen;
     // invoke HKDF to get sender Key
     hkdf_derive_parameter(ctx->senderKey,
-            masterSecret, 
+            masterSecret,
             masterSecretLen,
-            masterSalt, 
+            masterSalt,
             masterSaltLen,
             senderID,
             senderIDLen,
@@ -110,16 +110,16 @@ void openoscoap_init_security_context(oscoap_security_context_t *ctx,
             AES_CCM_16_64_128_KEY_LEN);
     // invoke HKDF to get sender IV
     hkdf_derive_parameter(ctx->senderIV,
-            masterSecret, 
+            masterSecret,
             masterSecretLen,
-            masterSalt, 
+            masterSalt,
             masterSaltLen,
             senderID,
             senderIDLen,
             AES_CCM_16_64_128,
             OSCOAP_DERIVATION_TYPE_IV,
             AES_CCM_16_64_128_IV_LEN);
-   
+
     ctx->sequenceNumber = 0;
 
     // recipient context
@@ -127,9 +127,9 @@ void openoscoap_init_security_context(oscoap_security_context_t *ctx,
     ctx->recipientIDLen = recipientIDLen;
     // invoke HKDF to get recipient Key
     hkdf_derive_parameter(ctx->recipientKey,
-            masterSecret, 
+            masterSecret,
             masterSecretLen,
-            masterSalt, 
+            masterSalt,
             masterSaltLen,
             recipientID,
             recipientIDLen,
@@ -139,24 +139,24 @@ void openoscoap_init_security_context(oscoap_security_context_t *ctx,
 
     // invoke HKDF to get recipient IV
     hkdf_derive_parameter(ctx->recipientIV,
-            masterSecret, 
+            masterSecret,
             masterSecretLen,
-            masterSalt, 
+            masterSalt,
             masterSaltLen,
             recipientID,
             recipientIDLen,
             AES_CCM_16_64_128,
             OSCOAP_DERIVATION_TYPE_IV,
             AES_CCM_16_64_128_IV_LEN);
- 
+
     ctx->window.bitArray = 0x01; // LSB set
     ctx->window.rightEdge = 0;
 
 }
 
 owerror_t openoscoap_protect_message(
-        oscoap_security_context_t *context, 
-        uint8_t version, 
+        oscoap_security_context_t *context,
+        uint8_t version,
         uint8_t code,
         coap_option_iht* incomingOptions,
         uint8_t incomingOptionsLen,
@@ -214,9 +214,9 @@ owerror_t openoscoap_protect_message(
     }
 
     // encode the options to the openqueue payload buffer
-    opencoap_options_encode(msg, 
-            incomingOptions, 
-            incomingOptionsLen, 
+    opencoap_options_encode(msg,
+            incomingOptions,
+            incomingOptionsLen,
             COAP_OPTION_CLASS_E);
 
     payload = &msg->payload[0];
@@ -247,10 +247,10 @@ owerror_t openoscoap_protect_message(
         );
         return E_FAIL;
     }
-    
-    // construct nonce 
+
+    // construct nonce
     if (is_request(code)) {
-        xor_arrays(context->senderIV, partialIV, nonce, AES_CCM_16_64_128_IV_LEN); 
+        xor_arrays(context->senderIV, partialIV, nonce, AES_CCM_16_64_128_IV_LEN);
     }
     else {
         flip_first_bit(context->senderIV, nonce, AES_CCM_16_64_128_IV_LEN);
@@ -297,14 +297,14 @@ owerror_t openoscoap_protect_message(
 }
 
 owerror_t openoscoap_unprotect_message(
-        oscoap_security_context_t *context, 
-        uint8_t version, 
+        oscoap_security_context_t *context,
+        uint8_t version,
         uint8_t code,
         coap_option_iht* incomingOptions,
         uint8_t* incomingOptionsLen,
         OpenQueueEntry_t* msg,
         uint16_t sequenceNumber) {
- 
+
     uint8_t nonce[AES_CCM_16_64_128_IV_LEN];
     uint8_t partialIV[AES_CCM_16_64_128_IV_LEN];
     uint8_t *requestKid;
@@ -386,16 +386,16 @@ owerror_t openoscoap_unprotect_message(
         );
         return E_FAIL;
     }
- 
-    // construct nonce 
+
+    // construct nonce
     if (is_request(code)) {
-        xor_arrays(context->recipientIV, partialIV, nonce, AES_CCM_16_64_128_IV_LEN); 
+        xor_arrays(context->recipientIV, partialIV, nonce, AES_CCM_16_64_128_IV_LEN);
     }
     else {
         flip_first_bit(context->recipientIV, nonce, AES_CCM_16_64_128_IV_LEN);
         xor_arrays(nonce, partialIV, nonce, AES_CCM_16_64_128_IV_LEN);
     }
-    
+
     decStatus = cryptoengine_aes_ccms_dec(aad,
                                     aadLen,
                                     ciphertext,
@@ -485,7 +485,7 @@ uint8_t openoscoap_parse_compressed_COSE(uint8_t *buffer,
     }
 
     if (index > bufferLen) {
-        return 0; 
+        return 0;
     }
 
     return index;
@@ -495,8 +495,8 @@ uint8_t openoscoap_parse_compressed_COSE(uint8_t *buffer,
 //=========================== private =========================================
 
 owerror_t hkdf_derive_parameter(uint8_t* buffer,
-        uint8_t* masterSecret, 
-        uint8_t masterSecretLen, 
+        uint8_t* masterSecret,
+        uint8_t masterSecretLen,
         uint8_t* masterSalt,
         uint8_t masterSaltLen,
         uint8_t* identifier,
@@ -505,32 +505,29 @@ owerror_t hkdf_derive_parameter(uint8_t* buffer,
         oscoap_derivation_t type,
         uint8_t length
         ){
-   
+
     const uint8_t iv[] = "IV";
     const uint8_t key[] = "Key";
     uint8_t info[20];
     uint8_t infoLen;
-    uint8_t *temp;
     uint8_t ret;
 
-    temp = info;
-
     infoLen = 0;
-    infoLen += cborencoder_put_array(&temp, 4);
-    infoLen += cborencoder_put_bytes(&temp, identifierLen, identifier);
-    infoLen += cborencoder_put_unsigned(&temp, algorithm);
+    infoLen += cborencoder_put_array(&info[infoLen], 4);
+    infoLen += cborencoder_put_bytes(&info[infoLen], identifier, identifierLen);
+    infoLen += cborencoder_put_unsigned(&info[infoLen], algorithm);
 
     if (type == OSCOAP_DERIVATION_TYPE_KEY) {
-        infoLen += cborencoder_put_text(&temp, (char *) key, sizeof(key)-1);
-    } 
+        infoLen += cborencoder_put_text(&info[infoLen], (char *) key, sizeof(key)-1);
+    }
     else if (type == OSCOAP_DERIVATION_TYPE_IV) {
-        infoLen += cborencoder_put_text(&temp, (char *) iv, sizeof(iv)-1);
+        infoLen += cborencoder_put_text(&info[infoLen], (char *) iv, sizeof(iv)-1);
     }
     else {
         return E_FAIL;
     }
-    
-    infoLen += cborencoder_put_unsigned(&temp, length);
+
+    infoLen += cborencoder_put_unsigned(&info[infoLen], length);
 
     ret = hkdf(SHA256, masterSalt, masterSaltLen, masterSecret, masterSecretLen, info, infoLen, buffer, length);
 
@@ -552,8 +549,8 @@ bool is_request(uint8_t code) {
    }
 }
 
-uint8_t openoscoap_construct_aad(uint8_t* buffer, 
-        uint8_t version, 
+uint8_t openoscoap_construct_aad(uint8_t* buffer,
+        uint8_t version,
         uint8_t code,
         uint8_t* optionsSerialized,
         uint8_t optionsSerializedLen,
@@ -563,7 +560,6 @@ uint8_t openoscoap_construct_aad(uint8_t* buffer,
         uint8_t* requestSeq,
         uint8_t requestSeqLen
         ) {
-    uint8_t* ptr;
     uint8_t externalAAD[EAAD_MAX_LEN];
     uint8_t externalAADLen;
     uint8_t ret;
@@ -572,14 +568,13 @@ uint8_t openoscoap_construct_aad(uint8_t* buffer,
     ret = 0;
     externalAADLen = 0;
 
-    ptr = externalAAD;
-    externalAADLen += cborencoder_put_array(&ptr, 6);
-    externalAADLen += cborencoder_put_unsigned(&ptr, version);
-    externalAADLen += cborencoder_put_unsigned(&ptr, code);
-    externalAADLen += cborencoder_put_bytes(&ptr, optionsSerializedLen, optionsSerialized);
-    externalAADLen += cborencoder_put_unsigned(&ptr, aeadAlgorithm);
-    externalAADLen += cborencoder_put_bytes(&ptr, requestKidLen, requestKid);
-    externalAADLen += cborencoder_put_bytes(&ptr, requestSeqLen, requestSeq);
+    externalAADLen += cborencoder_put_array(&externalAAD[externalAADLen], 6);
+    externalAADLen += cborencoder_put_unsigned(&externalAAD[externalAADLen], version);
+    externalAADLen += cborencoder_put_unsigned(&externalAAD[externalAADLen], code);
+    externalAADLen += cborencoder_put_bytes(&externalAAD[externalAADLen], optionsSerialized, optionsSerializedLen);
+    externalAADLen += cborencoder_put_unsigned(&externalAAD[externalAADLen], aeadAlgorithm);
+    externalAADLen += cborencoder_put_bytes(&externalAAD[externalAADLen], requestKid, requestKidLen);
+    externalAADLen += cborencoder_put_bytes(&externalAAD[externalAADLen], requestSeq, requestSeqLen);
 
     if (externalAADLen > EAAD_MAX_LEN) {
         // corruption
@@ -591,21 +586,20 @@ uint8_t openoscoap_construct_aad(uint8_t* buffer,
         return 0;
     }
 
-    ptr = buffer;
-    ret += cborencoder_put_array(&ptr, 3); // COSE Encrypt0 structure with 3 elements
+    ret += cborencoder_put_array(&buffer[ret], 3); // COSE Encrypt0 structure with 3 elements
     // first element: "Encrypt0"
-    ret += cborencoder_put_text(&ptr, (char *) encrypt0, sizeof(encrypt0) - 1); 
+    ret += cborencoder_put_text(&buffer[ret], (char *) encrypt0, sizeof(encrypt0) - 1);
     // second element: empty byte string
-    ret += cborencoder_put_bytes(&ptr, 0, NULL); 
+    ret += cborencoder_put_bytes(&buffer[ret], NULL, 0);
     // third element: external AAD from OSCOAP
-    ret += cborencoder_put_bytes(&ptr, externalAADLen, externalAAD);
-    
+    ret += cborencoder_put_bytes(&buffer[ret], externalAAD, externalAADLen);
+
     return ret;
 }
 
-void openoscoap_encode_compressed_COSE(OpenQueueEntry_t* msg, 
-        uint8_t* partialIV, uint8_t partialIVLen, 
-        uint8_t* kid, 
+void openoscoap_encode_compressed_COSE(OpenQueueEntry_t* msg,
+        uint8_t* partialIV, uint8_t partialIVLen,
+        uint8_t* kid,
         uint8_t kidLen) {
     // ciphertext is already encoded and of length msg->length
     uint8_t kidFlag;
@@ -647,12 +641,12 @@ void flip_first_bit(uint8_t* source, uint8_t* dst, uint8_t len){
 
 bool replay_window_check(oscoap_security_context_t *context, uint16_t sequenceNumber) {
     uint16_t delta;
-    
+
     // packets lower than the left edge are rejected
     if ((int)sequenceNumber < (int)(context->window.rightEdge - 31)) {
         return FALSE;
     }
- 
+
     // packets higher than the right edge are accepted
     if (sequenceNumber > context->window.rightEdge) {
         return TRUE;
@@ -673,7 +667,7 @@ void replay_window_update(oscoap_security_context_t *context, uint16_t sequenceN
     if (replay_window_check(context, sequenceNumber) == FALSE) {
         return;
     }
-    
+
     if (sequenceNumber > context->window.rightEdge) {
         delta = sequenceNumber - context->window.rightEdge;
         context->window.rightEdge = sequenceNumber;
