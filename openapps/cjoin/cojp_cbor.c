@@ -116,13 +116,13 @@ uint8_t cojp_cbor_encode_join_request_object(uint8_t *buf, cojp_join_request_obj
         elements = 2;
     }
 
-    len += cborencoder_put_map(buf, elements);
+    len += cborencoder_put_map(&buf[len], elements);
     if (elements == 2) {
-        len += cborencoder_put_unsigned(buf, (uint8_t) COJP_PARAMETERS_LABELS_ROLE);
-        len += cborencoder_put_unsigned(buf, (uint8_t) join_request->role);
+        len += cborencoder_put_unsigned(&buf[len], (uint8_t) COJP_PARAMETERS_LABELS_ROLE);
+        len += cborencoder_put_unsigned(&buf[len], (uint8_t) join_request->role);
     }
-    len += cborencoder_put_unsigned(buf, (uint8_t) COJP_PARAMETERS_LABELS_NETID);
-    len += cborencoder_put_bytes(buf, (join_request->pan_id)->panid, LENGTH_ADDR16b);
+    len += cborencoder_put_unsigned(&buf[len], (uint8_t) COJP_PARAMETERS_LABELS_NETID);
+    len += cborencoder_put_bytes(&buf[len], (join_request->pan_id)->panid, LENGTH_ADDR16b);
 
     return len;
 }
