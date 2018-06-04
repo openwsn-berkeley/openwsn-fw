@@ -729,7 +729,13 @@ owerror_t opencoap_send(
       }
       class = COAP_OPTION_CLASS_U;
    }
-      
+
+    // add payload marker
+    if (msg->length) {
+        packetfunctions_reserveHeaderSize(msg, 1);
+        msg->payload[0] = COAP_PAYLOAD_MARKER;
+    }
+
    // once header is reserved, encode the options to the openqueue payload buffer
    opencoap_options_encode(msg, 
            options, 
