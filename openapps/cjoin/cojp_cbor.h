@@ -90,12 +90,17 @@ typedef struct {
     open_addr_t                     jrc_address;
 } cojp_configuration_object_t;
 
+typedef struct {
+    cojp_role_values_t              role;
+    open_addr_t *                   pan_id;;
+} cojp_join_request_object_t;
 
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
 
 owerror_t cojp_cbor_decode_configuration_object(uint8_t *buf, uint8_t len, cojp_configuration_object_t *configuration);
+uint8_t cojp_cbor_encode_join_request_object(uint8_t *buf, cojp_join_request_object_t *join_request);
 
 /**
 \}

@@ -1,7 +1,9 @@
 /*e
-\brief A minimal CBOR parser implementation of draft-6tisch-minimal-security-02.
+\brief CBOR helper functions implementing decoding and encoding of structures defined in draft-6tisch-minimal-security-06.
 */
 #include "cojp_cbor.h"
+#include "cborencoder.h"
+
 //=========================== defines =========================================
 // number of bytes in 802.15.4 short address
 #define ASN_LENGTH              5
@@ -91,6 +93,39 @@ owerror_t cojp_cbor_decode_configuration_object(uint8_t *buf, uint8_t len, cojp_
     return E_SUCCESS;
 }
 
+/**
+\brief Encode a Join_Request object.
+
+This functions encodes the cojp_join_request_object_t structure into a byte string.
+
+
+\param[out] buf The output buffer.
+\param[in] join_request The cojp_join_request_object_t data structure containing the Join_Request parameters.
+\return Length of the encoded object..
+*/
+uint8_t cojp_cbor_encode_join_request_object(uint8_t *buf, cojp_join_request_object_t *join_request) {
+    uint8_t len;
+    uint8_t elements;
+
+    len = 0;
+    elements = 0;
+
+    if (join_request->role == COJP_ROLE_VALUE_6N) {
+        elements = 1;
+    } else {
+        elements = 2;
+    }
+
+    len += cborencoder_put_map(buf, elements);
+    if (elements == 2) {
+        len += cborencoder_put_unsigned(buf, (uint8_t) COJP_PARAMETERS_LABELS_ROLE);
+        len += cborencoder_put_unsigned(buf, (uint8_t) join_request->role);
+    }
+    len += cborencoder_put_unsigned(buf, (uint8_t) COJP_PARAMETERS_LABELS_NETID);
+    len += cborencoder_put_bytes(buf, (join_request->pan_id)->panid, LENGTH_ADDR16b);
+
+    return len;
+}
 
 //=========================== private =========================================
 
