@@ -25,8 +25,8 @@
 
 const uint8_t cjoin_path0[] = "j";
 
-static const uint8_t masterSecret[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, \
-                                     0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
+static const uint8_t masterSecret[] = {0xde, 0xad, 0xbe, 0xef, 0xca, 0xfe, 0xde, 0xad, \
+                                     0xbe, 0xef, 0xca, 0xfe, 0xde, 0xad, 0xbe, 0xef};
 
 static const uint8_t jrcHostName[] = "6tisch.arpa";
 
@@ -82,16 +82,18 @@ void cjoin_init(void) {
 }
 
 void cjoin_init_security_context(void) {
-   uint8_t senderID[9];     // needs to hold EUI-64 + 1 byte
-   uint8_t recipientID[9];  // needs to hold EUI-64 + 1 byte
+   uint8_t senderID[1];     // 1 dummy byte
+   uint8_t recipientID[3];  // 3 byte fixed value
+   uint8_t id_context[8];
    uint8_t* joinKey;
-   eui64_get(senderID);
-   senderID[8] = 0x00;      // construct sender ID according to the minimal-security-03 draft
+   eui64_get(id_context);
+   senderID[0] = 0x00;      // construct sender ID according to the minimal-security-06 draft
    eui64_get(recipientID);
-   recipientID[8] = 0x01; // construct recipient ID according to the minimal-security-03 draft
+   recipientID[] = {0x4a, 0x52, 0x43}; // construct recipient ID according to the minimal-security-06 draft
 
    idmanager_getJoinKey(&joinKey);
 
+   // TODO Pass id_context to the routine
    openoscoap_init_security_context(&cjoin_vars.context,
                                 senderID,
                                 sizeof(senderID),
