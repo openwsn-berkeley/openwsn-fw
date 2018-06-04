@@ -86,10 +86,13 @@ void cjoin_init_security_context(void) {
    uint8_t recipientID[3];  // 3 byte fixed value
    uint8_t id_context[8];
    uint8_t* joinKey;
+
    eui64_get(id_context);
    senderID[0] = 0x00;      // construct sender ID according to the minimal-security-06 draft
-   eui64_get(recipientID);
-   recipientID[] = {0x4a, 0x52, 0x43}; // construct recipient ID according to the minimal-security-06 draft
+   // construct recipient ID according to the minimal-security-06 draft
+   recipientID[0] = 0x4a; // "J"
+   recipientID[1] = 0x52; // "R"
+   recipientID[2] = 0x43; // "C"
 
    idmanager_getJoinKey(&joinKey);
 
@@ -215,12 +218,17 @@ void cjoin_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 }
 
 owerror_t cjoin_sendJoinRequest(open_addr_t* joinProxy) {
-   OpenQueueEntry_t*    pkt;
-   open_addr_t*         prefix;
-   owerror_t            outcome;
-   coap_option_iht      options[5];
+   OpenQueueEntry_t*            pkt;
+   open_addr_t*                 prefix;
+   owerror_t                    outcome;
+   coap_option_iht              options[5];
+   uint8_t                      tmp[10];
+   uint8_t                      payload_len;
+   cojp_join_request_object_t   join_request;
 
-    // immediately arm the retransmission timer
+   payload_len = 0;
+
+   // immediately arm the retransmission timer
     opentimers_scheduleIn(cjoin_vars.timerId,
             (uint32_t) TIMEOUT,
             TIME_MS,
@@ -269,11 +277,18 @@ owerror_t cjoin_sendJoinRequest(open_addr_t* joinProxy) {
    memcpy(&pkt->l3_destinationAdd.addr_128b[0],prefix->prefix,8);
    memcpy(&pkt->l3_destinationAdd.addr_128b[8],joinProxy->addr_64b,8); // set host to eui-64 of the join proxy
 
+   // encode Join_Request object in the payload
+   join_request.role = COJP_ROLE_VALUE_6N; // regular non-6LBR node
+   join_request.pan_id = idmanager_getMyID(ADDR_PANID); // pre-configured PAN ID
+   payload_len = cojp_cbor_encode_join_request_object(tmp, &join_request);
+   packetfunctions_reserveHeaderSize(pkt, payload_len);
+   memcpy(pkt->payload, tmp, payload_len);
+
    // send
    outcome = opencoap_send(
       pkt,
-      COAP_TYPE_CON,
-      COAP_CODE_REQ_GET,
+      COAP_TYPE_NON,
+      COAP_CODE_REQ_POST,
       0, // token len
       options,
       4, // options len
