@@ -21,8 +21,8 @@
 
 // ========================== define ==========================================
 
-#define MINIMUM_COMPAREVALE_ADVANCE 5
-#define COMPAREVALE_ADVANCE_STEP 2
+#define MINIMUM_COMPAREVALE_ADVANCE 2   // 5
+#define COMPAREVALE_ADVANCE_STEP 1      // 2
 #define MAX_RTC_TASKS_DELAY 47          // maximum delay in us until an RTC config task is executed
 #define CC_TIMER 0                      // CC channel used for the timer's compare value
 
