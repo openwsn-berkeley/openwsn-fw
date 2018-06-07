@@ -22,6 +22,8 @@ source   = \
     Glob('sdk/modules/nrfx/drivers/src/nrfx_uart.c') + \
     Glob('sdk/modules/nrfx/mdk/gcc_startup_nrf52840.S') + \
     Glob('sdk/modules/nrfx/mdk/system_nrf52840.c') + \
+    Glob('sdk/components/drivers_nrf/radio_config/radio_config.c') + \
+    Glob('sdk/components/proprietary_rf/esb/nrf_esb.c') + \
     Glob('*.c')
 
 localEnv.Append(
@@ -51,6 +53,8 @@ localEnv.Append(
         os.path.join('#','bsp','boards','nrf52840dk','sdk','modules','nrfx','mdk'),
         os.path.join('#','bsp','boards','nrf52840dk','sdk','modules','nrfx','soc'),
         os.path.join('#','bsp','boards','nrf52840dk','sdk','modules','nrfx','templates'),
+        os.path.join('#','bsp','boards','nrf52840dk','sdk','components','drivers_nrf','radio_config'),
+        os.path.join('#','bsp','boards','nrf52840dk','sdk','components','proprietary_rf','esb'),
 #        os.path.join('#','bsp','boards','nrf52840dk','sdk','modules','nrfx','templates','nRF52840'),
     ],
 )

@@ -83,7 +83,7 @@ extern "C" {
 
 // Hardcoded parameters - change if necessary
 #ifndef NRF_ESB_MAX_PAYLOAD_LENGTH
-#define     NRF_ESB_MAX_PAYLOAD_LENGTH          32                  //!< The maximum size of the payload. Valid values are 1 to 252.
+#define     NRF_ESB_MAX_PAYLOAD_LENGTH          252                  //!< The maximum size of the payload. Valid values are 1 to 252.
 #endif
 
 #define     NRF_ESB_TX_FIFO_SIZE                8                   //!< The size of the transmission first-in, first-out buffer.
@@ -216,7 +216,7 @@ typedef enum {
 typedef enum {
     NRF_ESB_BITRATE_2MBPS     = RADIO_MODE_MODE_Nrf_2Mbit,      /**< 2 Mb radio mode.                                                */
     NRF_ESB_BITRATE_1MBPS     = RADIO_MODE_MODE_Nrf_1Mbit,      /**< 1 Mb radio mode.                                                */
-    NRF_ESB_BITRATE_250KBPS   = RADIO_MODE_MODE_Nrf_250Kbit,    /**< 250 Kb radio mode.                                              */
+    //NRF_ESB_BITRATE_250KBPS   = RADIO_MODE_MODE_Nrf_250Kbit,    /**< 250 Kb radio mode.                                              */
     NRF_ESB_BITRATE_1MBPS_BLE = RADIO_MODE_MODE_Ble_1Mbit,      /**< 1 Mb radio mode using @e Bluetooth low energy radio parameters. */
 #if defined(NRF52)
     NRF_ESB_BITRATE_2MBPS_BLE = 4                               /**< 2 Mb radio mode using @e Bluetooth low energy radio parameters. */

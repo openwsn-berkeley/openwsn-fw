@@ -12,7 +12,9 @@
 
 #include "sdk/components/boards/pca10056.h"
 #include "sdk/components/boards/boards.h"
+#include "sdk/components/proprietary_rf/esb/nrf_esb.h"
 #include "sdk/components/drivers_nrf/radio_config/radio_config.h"
+#include "sdk/components/proprietary_rf/esb/nrf_esb_error_codes.h"
 #include "sdk/modules/nrfx/mdk/nrf52840.h"
 
 #include "app_config.h"
@@ -35,8 +37,6 @@
 
 //=========================== variables =======================================
 
-bool radio_on;
-
 typedef struct {
    radio_capture_cbt         startFrame_cb;
    radio_capture_cbt         endFrame_cb;
@@ -44,6 +44,9 @@ typedef struct {
 } radio_vars_t;
 
 radio_vars_t radio_vars;
+
+nrf_esb_payload_t tx_payload;
+nrf_esb_payload_t rx_payload;
 
 //=========================== prototypes ======================================
 
@@ -53,12 +56,12 @@ radio_vars_t radio_vars;
 
 void radio_init(void) {
    
+   nrf_esb_config_t esb_config = NRF_ESB_DEFAULT_CONFIG;
+
    // clear variables
    memset(&radio_vars,0,sizeof(radio_vars_t));
-
    radio_configure();
-
-   radio_on = true;
+   nrf_esb_init(&esb_config);
 
 }
 
@@ -73,7 +76,6 @@ void radio_setEndFrameCb(radio_capture_cbt cb) {
 //===== reset
 
 void radio_reset(void) {
-
 
 }
 
@@ -100,31 +102,53 @@ void radio_rfOff(void) {
 
 void radio_loadPacket(uint8_t* packet, uint16_t len) {
    
-   radio_vars.state = RADIOSTATE_LOADING_PACKET;
+  radio_vars.state = RADIOSTATE_LOADING_PACKET;
 
-   NRF_RADIO->PACKETPTR = (uint32_t)packet;
+  if (len > 252)
+  {
+    leds_sync_toggle();
+  } 
+  else 
+  {
 
-   radio_vars.state = RADIOSTATE_PACKET_LOADED;
+    nrf_esb_stop_rx();
+    nrf_esb_disable();
+    
+    tx_payload.noack = true;
+    tx_payload.pipe = 0;
+    tx_payload.length = len;
+    memcpy(tx_payload.data, packet, len);
 
+    if(nrf_esb_write_payload(&tx_payload) == NRF_SUCCESS){
+      leds_radio_toggle();
+      radio_vars.state = RADIOSTATE_PACKET_LOADED;
+    }
+  }
 }
 
 void radio_txEnable(void) {
 
    radio_vars.state = RADIOSTATE_ENABLING_TX;
-   NRF_RADIO->TASKS_TXEN = 1U;
+
+   NRF_RADIO->TASKS_TXEN = 1;
+
    radio_vars.state = RADIOSTATE_TX_ENABLED;
 }
 
 
 void radio_txNow(void) {
-   
+
+   radio_vars.state = RADIOSTATE_TRANSMITTING;
+
+   if (nrf_esb_start_tx() != NRF_SUCCESS)
+      leds_debug_toggle();   
 }
 
 //===== RX
 
 void radio_rxEnable(void) {
    radio_vars.state = RADIOSTATE_ENABLING_RX;
-   NRF_RADIO->TASKS_RXEN = 1U;
+
    radio_vars.state = RADIOSTATE_LISTENING;
 }
 
@@ -139,7 +163,10 @@ void radio_getReceivedFrame(uint8_t* pBufRead,
                             uint8_t* pLqi,
                                bool* pCrc) {
    
-   
+   radio_vars.state = RADIOSTATE_RECEIVING;
+
+
+   radio_vars.state = RADIOSTATE_TXRX_DONE; 
    
 }
 

@@ -42,4 +42,7 @@
 // power management 
 #define NRF_PWR_MGMT_ENABLED 1
 
+// radio
+//#define NRF52
+
 #endif // BSP_NRF52480_SDK_CONFIG_H

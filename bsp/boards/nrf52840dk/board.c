@@ -26,6 +26,7 @@
 #include "uart.h"
 #include "radio.h"
 #include "spi.h"
+#include "radio.h"
 
 //=========================== variables =======================================
 
@@ -88,6 +89,8 @@ void board_init(void)
 
   spi_init();
   uart_writeByte('S'); nrf_delay_ms(10);   ///< DEBUG, REMOVE ME!
+
+  radio_init();
 
   uart_writeByte('~');    ///< DEBUG, REMOVE ME!
 }
