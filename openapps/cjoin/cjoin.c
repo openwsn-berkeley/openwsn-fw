@@ -65,7 +65,8 @@ void cjoin_init(void) {
    cjoin_vars.desc.path1len                        = 0;
    cjoin_vars.desc.path1val                        = NULL;
    cjoin_vars.desc.componentID                     = COMPONENT_CJOIN;
-   cjoin_vars.desc.securityContext                 = &cjoin_vars.context;
+//   cjoin_vars.desc.securityContext                 = &cjoin_vars.context;
+   cjoin_vars.desc.securityContext                 = NULL;
    cjoin_vars.desc.discoverable                    = TRUE;
    cjoin_vars.desc.callbackRx                      = &cjoin_receive;
    cjoin_vars.desc.callbackSendDone                = &cjoin_sendDone;
@@ -208,7 +209,7 @@ void cjoin_task_cb(void) {
 
     // init the security context only here in order to use the latest joinKey
     // that may be set over the serial
-    cjoin_init_security_context();
+//    cjoin_init_security_context();
 
     cjoin_sendJoinRequest(joinProxy);
 
@@ -265,12 +266,12 @@ owerror_t cjoin_sendJoinRequest(open_addr_t* joinProxy) {
 
    // object security option
    // length and value are set by the CoAP library
-   options[2].type = COAP_OPTION_NUM_OBJECTSECURITY;
+//   options[2].type = COAP_OPTION_NUM_OBJECTSECURITY;
 
    // ProxyScheme set to "coap"
-   options[3].type = COAP_OPTION_NUM_PROXYSCHEME;
-   options[3].length = sizeof(proxyScheme)-1;
-   options[3].pValue = (uint8_t *)proxyScheme;
+   options[2].type = COAP_OPTION_NUM_PROXYSCHEME;
+   options[2].length = sizeof(proxyScheme)-1;
+   options[2].pValue = (uint8_t *)proxyScheme;
 
    // metadata
    pkt->l4_destination_port       = WKP_UDP_COAP;
@@ -293,7 +294,7 @@ owerror_t cjoin_sendJoinRequest(open_addr_t* joinProxy) {
       COAP_CODE_REQ_POST,
       0, // token len
       options,
-      4, // options len
+      3, // options len
       &cjoin_vars.desc
    );
 
