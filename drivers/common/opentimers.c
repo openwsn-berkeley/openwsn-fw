@@ -92,6 +92,7 @@ void opentimers_scheduleIn(opentimers_id_t    id,
         return;
     }
 
+    INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
 
     opentimers_vars.timersBuf[id].timerType = timer_type;
