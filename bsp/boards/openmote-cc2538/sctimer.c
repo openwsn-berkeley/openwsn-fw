@@ -1,5 +1,5 @@
 /**
-\brief A timer module with only a single compare value. 
+\brief A timer module with only a single compare value.
 
 \author Tengfei Chang     <tengfei.chang@inria.fr> April 2017
 */
@@ -13,7 +13,10 @@
 // ========================== define ==========================================
 
 #define TIMERLOOP_THRESHOLD          0xffffff     // 511 seconds @ 32768Hz clock
-#define MINIMUM_COMPAREVALE_ADVANCE  10
+// refer to SWRU319C cc2538 user's guide: section 13.2:
+// -- When setting a new compare value, the value must be at least 5 more than the
+// -- current sleep timer value. Otherwise, the timer compare event may be lost.
+#define MINIMUM_COMPAREVALE_ADVANCE  5
 
 // ========================== variable ========================================
 
@@ -49,7 +52,7 @@ void sctimer_set_callback(sctimer_cbt cb){
 void sctimer_setCompare(uint32_t val){
     IntEnable(INT_SMTIM);
     if (SleepModeTimerCountGet() - val < TIMERLOOP_THRESHOLD){
-        // the timer is already late, schedule the ISR right now manually 
+        // the timer is already late, schedule the ISR right now manually
         IntPendSet(INT_SMTIM);
     } else {
         if (val-SleepModeTimerCountGet()<MINIMUM_COMPAREVALE_ADVANCE){
