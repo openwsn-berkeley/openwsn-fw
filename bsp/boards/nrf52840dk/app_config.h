@@ -33,7 +33,7 @@
 // #define TIMER0_USE_EASY_DMA 0
 
 // enable the app_timer library (based on RTC1 [Real Time Counter]) to be used as TIMER
-// #define APP_TIMER_ENABLED 1
+#define APP_TIMER_ENABLED 1
 #define RTC_ENABLED 1         // solely for legacy driver calls (if any)
 #define RTC0_ENABLED 1        // solely for legacy driver calls (if any)
 #define NRFX_RTC_ENABLED 1

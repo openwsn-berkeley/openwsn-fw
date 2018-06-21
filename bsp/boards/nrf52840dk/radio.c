@@ -12,10 +12,9 @@
 
 #include "sdk/components/boards/pca10056.h"
 #include "sdk/components/boards/boards.h"
-#include "sdk/components/proprietary_rf/esb/nrf_esb.h"
 #include "sdk/components/drivers_nrf/radio_config/radio_config.h"
-#include "sdk/components/proprietary_rf/esb/nrf_esb_error_codes.h"
 #include "sdk/modules/nrfx/mdk/nrf52840.h"
+#include "sdk/components/libraries/timer/app_timer.h"
 
 #include "app_config.h"
 #include "leds.h"
@@ -38,31 +37,60 @@
 //=========================== variables =======================================
 
 typedef struct {
-   radio_capture_cbt         startFrame_cb;
-   radio_capture_cbt         endFrame_cb;
-   radio_state_t             state; 
+  radio_capture_cbt         startFrame_cb;
+  radio_capture_cbt         endFrame_cb;
+  radio_state_t             state; 
 } radio_vars_t;
 
-radio_vars_t radio_vars;
+typedef struct {
+  uint16_t                  length;
+  uint8_t*                  packet;
+} nrf_tx_payload;
 
-nrf_esb_payload_t tx_payload;
-nrf_esb_payload_t rx_payload;
+typedef struct {
+  uint8_t* pBufRead;
+  uint8_t* pLenRead;
+  uint8_t  maxBufLen;
+  int8_t* pRssi;
+  uint8_t* pLqi;
+  bool* pCrc;
+} nrf_rx_payload;
+
+radio_vars_t radio_vars;
+nrf_tx_payload tx_payload;
+nrf_rx_payload rx_payload;
 
 //=========================== prototypes ======================================
 
+
 //=========================== public ==========================================
 
-//===== admin
 
 void radio_init(void) {
    
-   nrf_esb_config_t esb_config = NRF_ESB_DEFAULT_CONFIG;
+  /* Start 16 MHz crystal oscillator */
+  //NRF_CLOCK->EVENTS_HFCLKSTARTED = 0;
+  //NRF_CLOCK->TASKS_HFCLKSTART    = 1;
+  
+  /* Wait for the external oscillator to start up */
+  //while (NRF_CLOCK->EVENTS_HFCLKSTARTED == 0)
+  //{
+      // Do nothing.
+  //}
 
-   // clear variables
-   memset(&radio_vars,0,sizeof(radio_vars_t));
-   radio_configure();
-   nrf_esb_init(&esb_config);
+  /* Start low frequency crystal oscillator for app_timer(used by bsp)*/
+  //NRF_CLOCK->LFCLKSRC            = (CLOCK_LFCLKSRC_SRC_Xtal << CLOCK_LFCLKSRC_SRC_Pos);
+  //NRF_CLOCK->EVENTS_LFCLKSTARTED = 0;
+  //NRF_CLOCK->TASKS_LFCLKSTART    = 1;
 
+  //while (NRF_CLOCK->EVENTS_LFCLKSTARTED == 0)
+  //{
+      // Do nothing.
+  //}
+
+  //sctimer_init();
+
+  radio_configure();
 }
 
 void radio_setStartFrameCb(radio_capture_cbt cb) {
@@ -104,25 +132,16 @@ void radio_loadPacket(uint8_t* packet, uint16_t len) {
    
   radio_vars.state = RADIOSTATE_LOADING_PACKET;
 
-  if (len > 252)
+  if (len < 128)
   {
-    leds_sync_toggle();
-  } 
-  else 
-  {
-
-    nrf_esb_stop_rx();
-    nrf_esb_disable();
-    
-    tx_payload.noack = true;
-    tx_payload.pipe = 0;
     tx_payload.length = len;
-    memcpy(tx_payload.data, packet, len);
+    tx_payload.packet = packet;
 
-    if(nrf_esb_write_payload(&tx_payload) == NRF_SUCCESS){
-      leds_radio_toggle();
-      radio_vars.state = RADIOSTATE_PACKET_LOADED;
-    }
+    NRF_RADIO->PACKETPTR = (uint32_t)&tx_payload;
+
+    radio_vars.state = RADIOSTATE_PACKET_LOADED;
+  //} else {
+    //leds_error_toggle();
   }
 }
 
@@ -130,6 +149,7 @@ void radio_txEnable(void) {
 
    radio_vars.state = RADIOSTATE_ENABLING_TX;
 
+   NRF_RADIO->EVENTS_READY = 0U;
    NRF_RADIO->TASKS_TXEN = 1;
 
    radio_vars.state = RADIOSTATE_TX_ENABLED;
@@ -139,20 +159,81 @@ void radio_txEnable(void) {
 void radio_txNow(void) {
 
    radio_vars.state = RADIOSTATE_TRANSMITTING;
+   
+   while (NRF_RADIO->EVENTS_READY == 0U)
+    {
+        // wait
+    }
+    NRF_RADIO->EVENTS_END  = 0U;
+    NRF_RADIO->TASKS_START = 1U;
+    
 
-   if (nrf_esb_start_tx() != NRF_SUCCESS)
-      leds_debug_toggle();   
+    while (NRF_RADIO->EVENTS_END == 0U)
+    {
+        // wait
+    }
+
+    //leds_sync_on();
+
+    NRF_RADIO->EVENTS_DISABLED = 0U;
+    // Disable radio
+    NRF_RADIO->TASKS_DISABLE = 1U;
+
+    while (NRF_RADIO->EVENTS_DISABLED == 0U)
+    {
+        // wait
+    }
+
+    //leds_radio_toggle();
+
+    radio_vars.state = RADIOSTATE_TXRX_DONE;
 }
 
 //===== RX
 
 void radio_rxEnable(void) {
    radio_vars.state = RADIOSTATE_ENABLING_RX;
+ 
+   NRF_RADIO->EVENTS_READY = 0U;
+   // Enable radio and wait for ready
+   NRF_RADIO->TASKS_RXEN = 1;
 
    radio_vars.state = RADIOSTATE_LISTENING;
 }
 
 void radio_rxNow(void) {
+
+  radio_vars.state = RADIOSTATE_RECEIVING;
+
+   while (NRF_RADIO->EVENTS_READY == 0U)
+    {
+        // wait
+    }
+    NRF_RADIO->EVENTS_END = 0U;
+    // Start listening and wait for address received event
+    NRF_RADIO->TASKS_START = 1U;
+
+    // Wait for end of packet or buttons state changed
+    while (NRF_RADIO->EVENTS_END == 0U)
+    {
+        // wait
+    }
+
+    if (NRF_RADIO->CRCSTATUS == 1U)
+    {
+        //result = packet;
+    }
+    NRF_RADIO->EVENTS_DISABLED = 0U;
+    // Disable radio
+    NRF_RADIO->TASKS_DISABLE = 1U;
+
+    while (NRF_RADIO->EVENTS_DISABLED == 0U)
+    {
+        // wait
+    }
+
+
+   radio_vars.state = RADIOSTATE_TXRX_DONE;
   
 }
 
@@ -163,10 +244,7 @@ void radio_getReceivedFrame(uint8_t* pBufRead,
                             uint8_t* pLqi,
                                bool* pCrc) {
    
-   radio_vars.state = RADIOSTATE_RECEIVING;
 
-
-   radio_vars.state = RADIOSTATE_TXRX_DONE; 
    
 }
 
