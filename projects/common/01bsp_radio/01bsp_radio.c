@@ -109,6 +109,7 @@ int mote_main(void) {
    app_vars.flags |= APP_FLAG_TIMER;
    
    while (1) {
+
       
       // sleep while waiting for at least one of the flags to be set
       while (app_vars.flags==0x00) {
@@ -129,13 +130,13 @@ int mote_main(void) {
                   // started receiving a packet
                   
                   // led
-                  leds_error_on();
+                  leds_error_toggle();
                   break;
                case APP_STATE_TX:
                   // started sending a packet
                   
+                  leds_sync_toggle();
                   // led
-                  leds_sync_on();
                   break;
             }
             
@@ -167,7 +168,7 @@ int mote_main(void) {
                   );
                   
                   // led
-                  leds_error_off();
+                  //leds_error_off();
                   break;
                case APP_STATE_TX:
                   // done sending a packet
@@ -177,7 +178,7 @@ int mote_main(void) {
                   app_vars.state = APP_STATE_RX;
                   
                   // led
-                  leds_sync_off();
+                  //leds_sync_off();
                   break;
             }
             // clear flag
@@ -189,7 +190,6 @@ int mote_main(void) {
          
          if (app_vars.flags & APP_FLAG_TIMER) {
             // timer fired
-            
             if (app_vars.state==APP_STATE_RX) {
                // stop listening
                radio_rfOff();

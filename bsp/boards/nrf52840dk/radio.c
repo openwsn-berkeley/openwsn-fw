@@ -34,6 +34,10 @@
 //#define RSSI_OFFSET 73
 //#define CHECKSUM_LEN 2
 
+/* For calculating frequency */
+#define FREQUENCY_OFFSET  10
+#define FREQUENCY_STEP    5
+
 //=========================== variables =======================================
 
 typedef struct {
@@ -43,7 +47,7 @@ typedef struct {
 } radio_vars_t;
 
 typedef struct {
-  uint16_t                  length;
+  uint8_t                   length;
   uint8_t*                  packet;
 } nrf_tx_payload;
 
@@ -59,6 +63,7 @@ typedef struct {
 radio_vars_t radio_vars;
 nrf_tx_payload tx_payload;
 nrf_rx_payload rx_payload;
+PORT_TIMER_WIDTH capturedTime;
 
 //=========================== prototypes ======================================
 
@@ -67,30 +72,10 @@ nrf_rx_payload rx_payload;
 
 
 void radio_init(void) {
-   
-  /* Start 16 MHz crystal oscillator */
-  //NRF_CLOCK->EVENTS_HFCLKSTARTED = 0;
-  //NRF_CLOCK->TASKS_HFCLKSTART    = 1;
-  
-  /* Wait for the external oscillator to start up */
-  //while (NRF_CLOCK->EVENTS_HFCLKSTARTED == 0)
-  //{
-      // Do nothing.
-  //}
-
-  /* Start low frequency crystal oscillator for app_timer(used by bsp)*/
-  //NRF_CLOCK->LFCLKSRC            = (CLOCK_LFCLKSRC_SRC_Xtal << CLOCK_LFCLKSRC_SRC_Pos);
-  //NRF_CLOCK->EVENTS_LFCLKSTARTED = 0;
-  //NRF_CLOCK->TASKS_LFCLKSTART    = 1;
-
-  //while (NRF_CLOCK->EVENTS_LFCLKSTARTED == 0)
-  //{
-      // Do nothing.
-  //}
-
-  //sctimer_init();
 
   radio_configure();
+  NRF_RADIO->MODE      = (RADIO_MODE_MODE_Ieee802154_250Kbit << RADIO_MODE_MODE_Pos);
+
 }
 
 void radio_setStartFrameCb(radio_capture_cbt cb) {
@@ -113,7 +98,7 @@ void radio_setFrequency(uint8_t frequency) {
 
    radio_vars.state = RADIOSTATE_SETTING_FREQUENCY;
 
-   NRF_RADIO->FREQUENCY = frequency;
+   NRF_RADIO->FREQUENCY = (frequency - FREQUENCY_OFFSET) * FREQUENCY_STEP;
 
    radio_vars.state = RADIOSTATE_FREQUENCY_SET;
 }
@@ -123,7 +108,8 @@ void radio_rfOn(void) {
 }
 
 void radio_rfOff(void) {
-   
+   // Disable radio
+    NRF_RADIO->TASKS_DISABLE = 1U;
 }
 
 //===== TX
@@ -134,14 +120,12 @@ void radio_loadPacket(uint8_t* packet, uint16_t len) {
 
   if (len < 128)
   {
-    tx_payload.length = len;
+    tx_payload.length = (uint8_t)len;
     tx_payload.packet = packet;
 
     NRF_RADIO->PACKETPTR = (uint32_t)&tx_payload;
 
     radio_vars.state = RADIOSTATE_PACKET_LOADED;
-  //} else {
-    //leds_error_toggle();
   }
 }
 
@@ -166,14 +150,22 @@ void radio_txNow(void) {
     }
     NRF_RADIO->EVENTS_END  = 0U;
     NRF_RADIO->TASKS_START = 1U;
-    
+
+    while (NRF_RADIO->STATE != RADIO_STATE_STATE_Tx)
+    {
+      // wait untill radio enters TX state so we can call callback
+    }
+    capturedTime = sctimer_readCounter();
+    radio_vars.startFrame_cb(capturedTime);
 
     while (NRF_RADIO->EVENTS_END == 0U)
     {
         // wait
     }
 
-    //leds_sync_on();
+    capturedTime = sctimer_readCounter();
+    radio_vars.endFrame_cb(capturedTime);
+
 
     NRF_RADIO->EVENTS_DISABLED = 0U;
     // Disable radio
@@ -183,7 +175,6 @@ void radio_txNow(void) {
     {
         // wait
     }
-
     //leds_radio_toggle();
 
     radio_vars.state = RADIOSTATE_TXRX_DONE;
@@ -203,8 +194,20 @@ void radio_rxEnable(void) {
 
 void radio_rxNow(void) {
 
+  
+  
+}
+
+void radio_getReceivedFrame(uint8_t* pBufRead,
+                            uint8_t* pLenRead,
+                            uint8_t  maxBufLen,
+                             int8_t* pRssi,
+                            uint8_t* pLqi,
+                               bool* pCrc) {
+   
   radio_vars.state = RADIOSTATE_RECEIVING;
 
+  leds_radio_toggle();
    while (NRF_RADIO->EVENTS_READY == 0U)
     {
         // wait
@@ -218,6 +221,7 @@ void radio_rxNow(void) {
     {
         // wait
     }
+
 
     if (NRF_RADIO->CRCSTATUS == 1U)
     {
@@ -234,17 +238,6 @@ void radio_rxNow(void) {
 
 
    radio_vars.state = RADIOSTATE_TXRX_DONE;
-  
-}
-
-void radio_getReceivedFrame(uint8_t* pBufRead,
-                            uint8_t* pLenRead,
-                            uint8_t  maxBufLen,
-                             int8_t* pRssi,
-                            uint8_t* pLqi,
-                               bool* pCrc) {
-   
-
    
 }
 
@@ -255,5 +248,5 @@ void radio_getReceivedFrame(uint8_t* pBufRead,
 //=========================== interrupt handlers ==============================
 
 kick_scheduler_t radio_isr(void) {
-   return DO_NOT_KICK_SCHEDULER;
+  return DO_NOT_KICK_SCHEDULER;
 }
