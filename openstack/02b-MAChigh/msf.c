@@ -59,7 +59,7 @@ void msf_init(void) {
 
 // called by schedule
 void    msf_updateCellsPassed(open_addr_t* neighbor){
-
+#ifdef MSF_ADAPTING_TO_TRAFFIC
     if (icmpv6rpl_isPreferredParent(neighbor)==FALSE){
         return;
     }
@@ -75,6 +75,7 @@ void    msf_updateCellsPassed(open_addr_t* neighbor){
         msf_vars.numCellsPassed = 0;
         msf_vars.numCellsUsed   = 0;
     }
+#endif
 }
 
 void    msf_updateCellsUsed(open_addr_t* neighbor){
