@@ -161,7 +161,7 @@ enum ieee154e_atomicdurations_enum {
    TsTxOffset                =   70,                  //  2120us
    TsLongGT                  =   36,                  //  1100us
    TsTxAckDelay              =   33,                  //  1000us
-   TsShortGT                 =    9,                  //   500us, The standardlized value for this is 400/2=200us(7ticks). Currectly 7 doesn't work for short packet, change it back to 7 when found the problem.
+   TsShortGT                 =   13,                  //   500us, The standardlized value for this is 400/2=200us(7ticks). Currectly 7 doesn't work for short packet, change it back to 7 when found the problem.
 #endif
 #if SLOTDURATION==15
    TsTxOffset                =  131,                  //  4000us
@@ -181,9 +181,10 @@ enum ieee154e_atomicdurations_enum {
    // radio watchdog
    wdRadioTx                 =   33,                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 43 is tested and works)
    wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
-#ifdef SLOTDURATION_10MS
+#if SLOTDURATION==10
    wdAckDuration             =   80,                  //  2400us (measured 1000us)
-#else
+#endif
+#if SLOTDURATION==15
    wdAckDuration             =   98,                  //  3000us (measured 1000us)
 #endif
 };

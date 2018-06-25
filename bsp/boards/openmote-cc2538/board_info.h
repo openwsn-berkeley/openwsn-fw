@@ -73,7 +73,7 @@
     #ifdef L2_SECURITY_ACTIVE
     #define PORT_delayTx                        14    //  366us (measured xxxus)
     #else
-    #define PORT_delayTx                        12    //  366us (measured xxxus)
+    #define PORT_delayTx                         8    //  366us (measured xxxus)
     #endif
     #define PORT_delayRx                         0    //    0us (can not measure)
     // radio watchdog
