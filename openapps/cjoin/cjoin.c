@@ -131,12 +131,13 @@ owerror_t cjoin_receive(OpenQueueEntry_t* msg,
         coap_option_iht*  coap_outgoingOptions,
         uint8_t*          coap_outgoingOptionsLen) {
 
+
     cojp_configuration_object_t configuration;
     owerror_t ret;
 
     opentimers_cancel(cjoin_vars.timerId); // cancel the retransmission timer
 
-    if (coap_header->Code != COAP_CODE_RESP_CONTENT) {
+    if (coap_header->Code != COAP_CODE_RESP_CHANGED) {
         return E_FAIL;
     }
 
