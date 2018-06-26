@@ -368,7 +368,9 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
                 memcmp(&coap_header.token[0],&temp_desc->last_request.token[0],coap_header.TKL)==0
             ) {
 
-            if (coap_header.T==COAP_TYPE_ACK || coap_header.T==COAP_TYPE_RES) {
+            if (coap_header.T==COAP_TYPE_ACK        ||
+                    coap_header.T==COAP_TYPE_RES    ||
+                    coap_header.TKL == 0) {
                 if (coap_header.messageID==temp_desc->last_request.messageID) {
                     found=TRUE;
                 }
@@ -396,7 +398,6 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
                         return;
                     }
                 }
-
                temp_desc->callbackRx(msg,&coap_header,&coap_incomingOptions[0], NULL, NULL);
             }
          }
