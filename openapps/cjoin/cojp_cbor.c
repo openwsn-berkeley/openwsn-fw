@@ -189,7 +189,7 @@ owerror_t cojp_cbor_decode_link_layer_keyset(uint8_t *buf, uint8_t* len, cojp_li
             i++; // moving on to the next element
 
             major_type = (cbor_majortype_t) *tmp >> 5;
-            l = *buf & CBOR_ADDINFO_MASK;
+            l = *tmp & CBOR_ADDINFO_MASK;
 
             if (major_type == CBOR_MAJORTYPE_UINT) { // optional key usage as a uint is present
                 ret = cbor_decode_uint(tmp, &tmp_key_usage);
@@ -198,7 +198,7 @@ owerror_t cojp_cbor_decode_link_layer_keyset(uint8_t *buf, uint8_t* len, cojp_li
                 i++;
 
                 major_type = (cbor_majortype_t) *tmp >> 5;
-                l = *buf & CBOR_ADDINFO_MASK;
+                l = *tmp & CBOR_ADDINFO_MASK;
             } else { // key usage is not present, implies the default value
                 current_key->key_usage = COJP_KEY_USAGE_6TiSCH_K1K2_ENC_MIC32;
             }
