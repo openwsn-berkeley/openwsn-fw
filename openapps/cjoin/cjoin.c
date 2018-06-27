@@ -267,10 +267,16 @@ owerror_t cjoin_sendJoinRequest(open_addr_t* joinProxy) {
    // length and value are set by the CoAP library
 //   options[2].type = COAP_OPTION_NUM_OBJECTSECURITY;
 
+   // FIXME content format is needed for testing with F-Interop
+   cjoin_vars.medType = COAP_MEDTYPE_APPCBOR;
+   options[2].type = COAP_OPTION_NUM_CONTENTFORMAT;
+   options[2].length = 1;
+   options[2].pValue = &cjoin_vars.medType;
+
    // ProxyScheme set to "coap"
-   options[2].type = COAP_OPTION_NUM_PROXYSCHEME;
-   options[2].length = sizeof(proxyScheme)-1;
-   options[2].pValue = (uint8_t *)proxyScheme;
+   options[3].type = COAP_OPTION_NUM_PROXYSCHEME;
+   options[3].length = sizeof(proxyScheme)-1;
+   options[3].pValue = (uint8_t *)proxyScheme;
 
    // metadata
    pkt->l4_destination_port       = WKP_UDP_COAP;
@@ -294,7 +300,7 @@ owerror_t cjoin_sendJoinRequest(open_addr_t* joinProxy) {
       COAP_CODE_REQ_POST,
       0, // token len
       options,
-      3, // options len
+      4, // options len
       &cjoin_vars.desc
    );
 

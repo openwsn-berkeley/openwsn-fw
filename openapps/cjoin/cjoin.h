@@ -19,6 +19,7 @@ typedef struct {
     opentimers_id_t          timerId;
     bool                     isJoined;
     oscoap_security_context_t context;
+    uint8_t medType;
 } cjoin_vars_t;
 
 //=========================== variables =======================================
