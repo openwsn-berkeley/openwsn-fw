@@ -149,13 +149,14 @@ owerror_t cjoin_receive(OpenQueueEntry_t* msg,
             // set the L2 keys as per the parsed value
             IEEE802154_security_setBeaconKey(configuration.keyset.key[0].key_index, configuration.keyset.key[0].key_value);
             IEEE802154_security_setDataKey(configuration.keyset.key[0].key_index, configuration.keyset.key[0].key_value);
+            cjoin_setIsJoined(TRUE); // declare join is over
+            return E_SUCCESS;
     } else {
         // TODO not supported for now
     }
 
-    cjoin_setIsJoined(TRUE); // declare join is over
 
-    return E_SUCCESS;
+    return E_FAIL;
 }
 
 //timer fired, but we don't want to execute task in ISR mode
