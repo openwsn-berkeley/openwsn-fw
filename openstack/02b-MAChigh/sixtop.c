@@ -779,6 +779,9 @@ port_INLINE void sixtop_sendEB(void) {
         eb->payload[1] = (uint8_t)((temp16b & 0xff00)>>8);
     }
 
+    eb->payload[EB_SLOTFRAME_LEN_OFFSET]   = (uint8_t)(0x00FF & (schedule_getFrameLength()));
+    eb->payload[EB_SLOTFRAME_LEN_OFFSET+1] = (uint8_t)(0x00FF & (schedule_getFrameLength()>>8));
+
     // Keep a pointer to where the ASN will be
     // Note: the actual value of the current ASN and JP will be written by the
     //    IEEE802.15.4e when transmitting
