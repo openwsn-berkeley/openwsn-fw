@@ -32,15 +32,15 @@
 void openapps_init(void) {
    //-- 04-TRAN
    opencoap_init();     // initialize before any of the CoAP applications
-   
+
    // CoAP
    //c6t_init();
    cinfo_init();
    cleds__init();
-   //cjoin_init();
+   cjoin_init();
    cwellknown_init();
    //rrt_init();
-   
+
    // UDP
    //uecho_init();
    //uinject_init();
