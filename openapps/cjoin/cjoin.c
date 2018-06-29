@@ -1,5 +1,5 @@
 /**
-\brief CoAP application implementing Simple Join Protocol from minimal-security-02 draft.
+\brief Implementation of Constrained Join Protocol (CoJP) from minimal-security-06 draft.
 */
 
 #include "opendefs.h"
