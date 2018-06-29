@@ -103,9 +103,9 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
     msg->l3_sourceAdd.type=ADDR_128B;
 
     packetfunctions_ip128bToMac64b(&(msg->l3_destinationAdd),&temp_dest_prefix,&temp_dest_mac64b);
-    //xv poipoi -- get the src prefix as well
-    packetfunctions_ip128bToMac64b(&(msg->l3_sourceAdd),&temp_src_prefix,&temp_src_mac64b);
-    //XV -poipoi we want to check if the source address prefix is the same as destination prefix
+    // at this point, we still haven't written in the packet the source prefix
+    // that we will use - it depends whether the destination address is link-local or not
+
     // if we are sending to a link-local address set the source prefix to link-local
     if (packetfunctions_isLinkLocal(&msg->l3_destinationAdd)                ||
             packetfunctions_isAllRoutersMulticast(&msg->l3_destinationAdd)  ||
@@ -117,7 +117,7 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
         myprefix = &temp_src_prefix;
         sac = IPHC_SAC_STATELESS;
         dac = IPHC_DAC_STATELESS;
-    } else if (packetfunctions_sameAddress(&temp_dest_prefix,&temp_src_prefix)==FALSE && packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE) {
+    } else if (packetfunctions_sameAddress(&temp_dest_prefix,idmanager_getMyID(ADDR_PREFIX))==FALSE && packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE) {
         myprefix = idmanager_getMyID(ADDR_PREFIX);
         sac = IPHC_SAC_STATELESS;
         dac = IPHC_DAC_STATELESS;
@@ -126,6 +126,7 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
         sac = IPHC_SAC_STATEFUL;
         dac = IPHC_DAC_STATEFUL;
     }
+    // myprefix now contains the pointer to the correct prefix to use (link-local or global)
     memcpy(&(msg->l3_sourceAdd.addr_128b[0]),myprefix->prefix,8);
     memcpy(&(msg->l3_sourceAdd.addr_128b[8]),myadd64->addr_64b,8);
 
