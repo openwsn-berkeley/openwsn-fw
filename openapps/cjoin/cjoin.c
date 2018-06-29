@@ -37,7 +37,7 @@ static const uint8_t proxyScheme[] = "coap";
 cjoin_vars_t cjoin_vars;
 
 //=========================== prototypes ======================================
-void        cjoin_init_security_context();
+void        cjoin_init_security_context(void);
 
 owerror_t   cjoin_receive(OpenQueueEntry_t* msg,
                           coap_header_iht*  coap_header,

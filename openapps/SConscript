@@ -6,7 +6,7 @@ localEnv      = env.Clone()
 
 #===== retrieve the list of apps to build
 
-defaultApps   = []
+defaultApps   = ['cjoin']
 if localEnv['board']=='python':
     defaultApps  += [
         'c6t',
@@ -21,7 +21,6 @@ if localEnv['board']=='python':
         'rrt',
         'cexample',
         'cstorm',
-        'cjoin',
     ]
 
 # source files that should be included in the build other than
@@ -54,11 +53,11 @@ else:
 # union of default and additional apps (without duplicates)
 apps      = ['opencoap']
 apps     += sorted(list(set(defaultApps+userApps)))
+
+appsInit  = ['opencoap'] # make sure opencoap is initialized first
+appsInit += ['cjoin']    # enable cjoin by defualt
 if userApps:
-    appsInit  = ['opencoap'] # make sure opencoap is initialized first
     appsInit += sorted(list(set(userApps)))
-else:
-    appsInit = []
 
 #===== rule to create a (temporary) openapps_dyn.c file
 
