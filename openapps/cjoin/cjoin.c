@@ -222,7 +222,6 @@ void cjoin_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 
 owerror_t cjoin_sendJoinRequest(open_addr_t* joinProxy) {
    OpenQueueEntry_t*            pkt;
-   open_addr_t*                 prefix;
    owerror_t                    outcome;
    coap_option_iht              options[5];
    uint8_t                      tmp[10];
@@ -276,8 +275,9 @@ owerror_t cjoin_sendJoinRequest(open_addr_t* joinProxy) {
    // metadata
    pkt->l4_destination_port       = WKP_UDP_COAP;
    pkt->l3_destinationAdd.type    = ADDR_128B;
-   prefix = idmanager_getMyID(ADDR_PREFIX); // at this point, this is link-local prefix
-   memcpy(&pkt->l3_destinationAdd.addr_128b[0],prefix->prefix,8);
+   pkt->l3_destinationAdd.addr_128b[0] = 0xfe;
+   pkt->l3_destinationAdd.addr_128b[1] = 0x80;
+   memset(&pkt->l3_destinationAdd.addr_128b[2], 0x00, 6);
    memcpy(&pkt->l3_destinationAdd.addr_128b[8],joinProxy->addr_64b,8); // set host to eui-64 of the join proxy
 
    // encode Join_Request object in the payload
