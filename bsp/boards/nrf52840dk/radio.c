@@ -56,7 +56,7 @@ typedef struct
   bool event_end;
 } radio_vars_t;
 
-radio_vars_t radio_vars= {0};
+static radio_vars_t radio_vars; // = {0};
 
 
 //=========================== prototypes ======================================
@@ -231,11 +231,21 @@ void radio_rfOff(void)
 
 void radio_loadPacket(uint8_t* packet, uint16_t len)
 {
+#if 0  
+  if ((uint32_t) radio_vars.payload % 4)
+  {
+    leds_debug_toggle();
+  }
+#endif  
+
   if ((len > 0) && (len <= MAX_PACKET_SIZE))      ///< note: 1st byte should be the payload size (for Nordic), and the two last bytes are used by the MAC layer for CRC
   {
     radio_vars.payload[0]= len;
     memcpy(&radio_vars.payload[1], packet, len);
   }
+
+  // (re)set payload pointer
+  NRF_RADIO->PACKETPTR = (uint32_t) &radio_vars.payload[0];
 }
 
 
@@ -264,7 +274,12 @@ void radio_txNow(void)
 {
   if (radio_vars.transciever_state != TS_TX) { return; }
 
-  radio_vars.startFrame_cb(sctimer_readCounter());
+#if 0
+  if (radio_vars.startFrame_cb)
+  {
+    radio_vars.startFrame_cb(sctimer_readCounter());
+  }
+#endif  
 
   radio_vars.event_end= false;
   NRF_RADIO->EVENTS_END  = 0U;
