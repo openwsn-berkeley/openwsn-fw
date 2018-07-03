@@ -73,7 +73,7 @@ len=17  num=84  rssi=-81  lqi=108 crc=1
 //=========================== defines =========================================
 
 #define LENGTH_PACKET        125+LENGTH_CRC ///< maximum length is 127 bytes
-#define CHANNEL              11             ///< 11 = 2.405GHz
+#define CHANNEL              13             ///< 11 = 2.405GHz
 #define LENGTH_SERIAL_FRAME  8              ///< length of the serial frame
 
 //=========================== variables =======================================
@@ -128,8 +128,8 @@ int mote_main(void) {
    board_init();
    
    // add callback functions radio
-   sctimer_setStartFrameCb(cb_startFrame);
-   sctimer_setEndFrameCb(cb_endFrame);
+   radio_setStartFrameCb(cb_startFrame);
+   radio_setEndFrameCb(cb_endFrame);
    
    // setup UART
    uart_setCallbacks(cb_uartTxDone,cb_uartRxCb);
@@ -140,11 +140,15 @@ int mote_main(void) {
    
    // switch in RX
    radio_rxEnable();
+   radio_rxNow();
    
    while (1) {
       
       // sleep while waiting for at least one of the rxpk_done to be set
       app_vars.rxpk_done = 0;
+
+      leds_debug_toggle();
+
       while (app_vars.rxpk_done==0) {
          board_sleep();
       }
@@ -176,7 +180,7 @@ int mote_main(void) {
       uart_writeByte(app_vars.uart_txFrame[app_vars.uart_lastTxByte]);
       while (app_vars.uart_done==0); // busy wait to finish
       uart_disableInterrupts();
-      
+
       // led
       leds_error_off();
    }
@@ -187,20 +191,20 @@ int mote_main(void) {
 //===== radio
 
 void cb_startFrame(PORT_TIMER_WIDTH timestamp) {
-   
+
+   leds_sync_on();
+
    // update debug stats
    app_dbg.num_startFrame++;
 }
 
 void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
-   
+
    // update debug stats
    app_dbg.num_endFrame++;
    // indicate I just received a packet
    app_vars.rxpk_done = 1;
    
-   leds_sync_on();
-
    // get packet from radio
    radio_getReceivedFrame(
       app_vars.rxpk_buf,
