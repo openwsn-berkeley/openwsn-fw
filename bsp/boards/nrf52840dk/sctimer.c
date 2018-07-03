@@ -32,8 +32,6 @@
 typedef struct
 {
   sctimer_cbt         cb;
-  sctimer_capture_cbt startFrameCb;
-  sctimer_capture_cbt endFrameCb;
   uint8_t             f_SFDreceived;
   uint32_t            counter_MSB;      ///< the first 8 bits of the 32 bit counter (which do not exist in the physical timer)
   uint32_t            cc32bit_MSB;      ///< the first 8 bits of the 32 bit CC (capture and compare) value, set
@@ -91,16 +89,6 @@ void sctimer_init(void)
 void sctimer_set_callback(sctimer_cbt cb)
 {
   sctimer_vars.cb= cb;
-}
-
-void sctimer_setStartFrameCb(sctimer_capture_cbt cb)
-{
-  sctimer_vars.startFrameCb= cb;
-}
-
-void sctimer_setEndFrameCb(sctimer_capture_cbt cb)
-{
-  sctimer_vars.endFrameCb= cb;
 }
 
 /**
