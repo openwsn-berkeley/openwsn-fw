@@ -18,11 +18,12 @@ remainder of the packet contains an incrementing bytes.
 #include "radio.h"
 #include "leds.h"
 #include "sctimer.h"
+#include "uart.h"
 
 //=========================== defines =========================================
 
 #define LENGTH_PACKET   125+LENGTH_CRC // maximum length is 127 bytes
-#define CHANNEL         11             // 11 = 2.405GHz
+#define CHANNEL         13             // 11 = 2.405GHz
 #define TIMER_PERIOD    (32768>>1)     // (32768>>1) = 500ms @ 32kHz
 
 //=========================== variables =======================================
@@ -65,7 +66,7 @@ int mote_main(void) {
    
    // initialize board
    board_init();
-   
+
    // add radio callback functions
    sctimer_set_callback(cb_radioTimerOverflows);
    radio_setStartFrameCb(cb_startFrame);
@@ -77,30 +78,32 @@ int mote_main(void) {
    radio_rfOff();
    
    // start periodic overflow
-   sctimer_setCompare(TIMER_PERIOD);
+   sctimer_setCompare(sctimer_readCounter()+TIMER_PERIOD);
    sctimer_enable();
    
-   while(1) {
-      
+   while(1)
+   {
       // wait for timer to elapse
       app_vars.txpk_txNow = 0;
-      while (app_vars.txpk_txNow==0) {
+      while (app_vars.txpk_txNow==0)
+      {
          board_sleep();
       }
       
       // led
-      leds_error_toggle();
+      leds_radio_toggle();
       
       // prepare packet
       app_vars.txpk_num++;
       app_vars.txpk_len           = sizeof(app_vars.txpk_buf);
       app_vars.txpk_buf[0]        = app_vars.txpk_num;
-      for (i=1;i<app_vars.txpk_len;i++) {
+      for (i=1;i<app_vars.txpk_len;i++)
+      {
          app_vars.txpk_buf[i] = i;
       }
       
       // send packet
-      radio_loadPacket(app_vars.txpk_buf,app_vars.txpk_len);
+      radio_loadPacket(app_vars.txpk_buf, app_vars.txpk_len);
       radio_txEnable();
       radio_txNow();
    }
@@ -114,13 +117,17 @@ void cb_radioTimerCompare(void) {
    app_dbg.num_radioTimerCompare++;
 }
 
-void cb_radioTimerOverflows(void) {
-   
+void cb_radioTimerOverflows(void)
+{
+   // leds_debug_toggle();
+
    // update debug vals
    app_dbg.num_radioTimerOverflows++;
    
    // ready to send next packet
    app_vars.txpk_txNow = 1;
+
+   sctimer_setCompare(sctimer_readCounter()+TIMER_PERIOD);
 }
 
 void cb_startFrame(PORT_TIMER_WIDTH timestamp) {
