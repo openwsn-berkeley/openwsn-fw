@@ -5,8 +5,8 @@
  */
 
 #include "sdk/modules/nrfx/hal/nrf_power.h"
-#include "sdk/modules/nrfx/drivers/include/nrfx_clock.h"
 #include "sdk/components/libraries/pwr_mgmt/nrf_pwr_mgmt.h"
+#include "sdk/integration/nrfx/legacy/nrf_drv_clock.h"
 #include "sdk/components/libraries/delay/nrf_delay.h"
 
 #include "sdk/modules/nrfx/mdk/nrf52840.h"
@@ -33,7 +33,10 @@
 //=========================== prototypes ======================================
 
 static void button_init(void);
+
+#if 0
 static void clock_event_handler(nrfx_clock_evt_type_t event);
+#endif
 
 //=========================== main ============================================
 
@@ -49,20 +52,20 @@ int main(void)
 void board_init(void)
 {
   // start low-frequency clock (LFCLK)
-  nrfx_clock_init(clock_event_handler);
-  nrfx_clock_lfclk_start();
+  nrf_drv_clock_init();
+  nrf_drv_clock_lfclk_request(NULL);
+  while (!nrf_drv_clock_lfclk_is_running()) { }
 
   // put low-frequency clock into ultra low power (ULP) mode (will NOT work on the older nRF52832)
-  NRF_CLOCK->LFRCMODE= (CLOCK_LFRCMODE_MODE_ULP & CLOCK_LFRCMODE_MODE_Msk) << CLOCK_LFRCMODE_MODE_Pos;
+  // NRF_CLOCK->LFRCMODE= (CLOCK_LFRCMODE_MODE_ULP & CLOCK_LFRCMODE_MODE_Msk) << CLOCK_LFRCMODE_MODE_Pos;
+
+  leds_init();
   
   // enable on-board DC-DC converter to reduce overall consumption (this also disables the LDO [low-dropout] regulator)
   // This only works if the required coil and condenser are properly connected to the pins DCC and DEC4, which is the
   // case with the development kit, but not with some other nRF52840-based boards. (If enabled without the proper 
   // circuitry, the CPU will hang.)
   nrf_power_dcdcen_set(true);
-
-  // start high frequency clock (HFCLK) ///< @todo: Revise, whether it is really needed.
-  nrfx_clock_hfclk_start();
 
   // initialize power management library
   nrf_pwr_mgmt_init();
@@ -73,26 +76,23 @@ void board_init(void)
   
   button_init();
 
-  leds_init();
-  uart_writeByte('L'); nrf_delay_ms(10);   ///< DEBUG, REMOVE ME!
-  uart_writeByte(48+LEDS_NUMBER);  nrf_delay_ms(10);
+  // uart_writeByte('L'); nrf_delay_ms(10);   ///< DEBUG, REMOVE ME!
+  // uart_writeByte(48+LEDS_NUMBER);  nrf_delay_ms(10);
 
   debugpins_init();
-  uart_writeByte('D'); nrf_delay_ms(10);   ///< DEBUG, REMOVE ME!
+  // uart_writeByte('D'); nrf_delay_ms(10);   ///< DEBUG, REMOVE ME!
 
 //  bsp_timer_init();   ///< OBSOLETE, use sctimer instead
   sctimer_init();
-  uart_writeByte('T'); nrf_delay_ms(10);   ///< DEBUG, REMOVE ME!
+  // uart_writeByte('T'); nrf_delay_ms(10);   ///< DEBUG, REMOVE ME!
 
 //  radiotimer_init();
-//  radio_init();
-
-  spi_init();
-  uart_writeByte('S'); nrf_delay_ms(10);   ///< DEBUG, REMOVE ME!
-
   radio_init();
 
-  uart_writeByte('~');    ///< DEBUG, REMOVE ME!
+  spi_init();
+  // uart_writeByte('S'); nrf_delay_ms(10);   ///< DEBUG, REMOVE ME!
+
+  // uart_writeByte('~');    ///< DEBUG, REMOVE ME!
 }
 
 /**
@@ -139,6 +139,7 @@ static void button_init(void)
 
 //=========================== interrupt handlers ==============================
 
+#if 0
 static void clock_event_handler(nrfx_clock_evt_type_t event)
 {
   switch(event)
@@ -162,3 +163,4 @@ static void clock_event_handler(nrfx_clock_evt_type_t event)
     
   }
 }
+#endif
