@@ -60,7 +60,7 @@ void uart_init(void)
     .cts_pin_no= CTS_PIN_NUMBER,                // defaults to UART_PIN_DISCONNECTED
     .baud_rate= UART_DEFAULT_CONFIG_BAUDRATE,
     .use_parity= (UART_DEFAULT_CONFIG_PARITY != 0) ? (true) : (false),
-    .flow_control= HWFC                         // defaults to false
+    .flow_control= UART_DEFAULT_CONFIG_HWFC     // defaults to false
   };
   
   // if UART cannot be initialized, blink error LED for 10s, and then reset
@@ -113,7 +113,7 @@ uint8_t uart_readByte(void)
 
 void uart_event_handler(app_uart_evt_t * p_event)
 {
-	debugpins_isr_set();
+// debugpins_isr_set();
 
   if ((p_event->evt_type == APP_UART_COMMUNICATION_ERROR) || (p_event->evt_type == APP_UART_FIFO_ERROR) || (p_event->evt_type == APP_UART_FIFO_ERROR))
   {
@@ -131,7 +131,7 @@ void uart_event_handler(app_uart_evt_t * p_event)
     uart_tx_isr();
   }
 
-	debugpins_isr_clr();
+//  debugpins_isr_clr();
 }
 
 
