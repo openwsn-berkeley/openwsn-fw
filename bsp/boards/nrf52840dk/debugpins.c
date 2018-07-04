@@ -18,8 +18,8 @@
 // board debug PINS defines (Note that all of them are from port 0, i.e., 0.26, 0.27, etc. This is assumed in the below functions.)
 #define GPIO_DEBUGPIN_FRAME  26
 #define GPIO_DEBUGPIN_SLOT   27
-#define GPIO_DEBUGPIN_FSM    28
-#define GPIO_DEBUGPIN_TASK   29
+#define GPIO_DEBUGPIN_FSM    29 // 28
+#define GPIO_DEBUGPIN_TASK   28 // 29
 #define GPIO_DEBUGPIN_ISR    30
 #define GPIO_DEBUGPIN_RADIO  31
 

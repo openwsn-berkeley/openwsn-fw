@@ -123,7 +123,7 @@ void board_sleep(void)
  */
 void board_reset(void)
 {
-	NVIC_SystemReset();
+  NVIC_SystemReset();
 }
 
 

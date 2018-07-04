@@ -89,7 +89,7 @@
 
 //===== adaptive_sync accuracy
 
-#define SYNC_ACCURACY                       1     // ticks
+#define SYNC_ACCURACY                           1     // ticks
 
 //===== per-board number of sensors
 
