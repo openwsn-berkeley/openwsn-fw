@@ -10585,7 +10585,6 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define RADIO_MODE_MODE_Msk (0xFUL << RADIO_MODE_MODE_Pos) /*!< Bit mask of MODE field. */
 #define RADIO_MODE_MODE_Nrf_1Mbit (0UL) /*!< 1 Mbit/s Nordic proprietary radio mode */
 #define RADIO_MODE_MODE_Nrf_2Mbit (1UL) /*!< 2 Mbit/s Nordic proprietary radio mode */
-#define RADIO_MODE_MODE_Nrf_250Kbit (2UL) /*!< Deprecated enumerator -  250 kbit/s Nordic proprietary radio mode */
 #define RADIO_MODE_MODE_Ble_1Mbit (3UL) /*!< 1 Mbit/s BLE */
 #define RADIO_MODE_MODE_Ble_2Mbit (4UL) /*!< 2 Mbit/s BLE */
 #define RADIO_MODE_MODE_Ble_LR125Kbit (5UL) /*!< Long range 125 kbit/s TX, 125 kbit/s and 500 kbit/s RX */
