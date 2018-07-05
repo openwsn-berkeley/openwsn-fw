@@ -226,6 +226,10 @@ void radio_rfOff(void)
 #endif // WAIT_FOR_RADIO_DISABLE == 1
 
   radio_vars.transciever_state = TS_OFF;
+
+  // ease debugging
+  debugpins_radio_clr();
+  leds_radio_off();  
 }
 
 
@@ -267,6 +271,10 @@ void radio_txEnable(void)
 #endif // WAIT_FOR_RADIO_ENABLE == 1
 
   radio_vars.transciever_state = TS_TX;
+
+  // ease debugging
+  debugpins_radio_set();
+  leds_radio_on();    
 }
 
 
@@ -314,6 +322,10 @@ void radio_rxEnable(void)
 #endif // WAIT_FOR_RADIO_ENABLE == 1
 
   radio_vars.transciever_state = TS_RX;
+
+  // ease debugging
+  debugpins_radio_set();
+  leds_radio_on();  
 }
 
 
@@ -394,6 +406,8 @@ kick_scheduler_t radio_isr(void)
 
 void RADIO_IRQHandler(void)
 {
+  debugpins_isr_set();
+
   if (NRF_RADIO->EVENTS_READY && (NRF_RADIO->INTENSET & RADIO_INTENSET_READY_Msk))
   {
     NRF_RADIO->EVENTS_READY = 0;
@@ -421,4 +435,6 @@ void RADIO_IRQHandler(void)
       radio_vars.endFrame_cb(sctimer_readCounter());
     }
   }
+
+  debugpins_isr_clr();
 }
