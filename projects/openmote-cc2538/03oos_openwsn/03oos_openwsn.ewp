@@ -168,7 +168,7 @@
         <debug>1</debug>
         <option>
           <name>CCDefines</name>
-          <state></state>
+          <state>L2_SECURITY_ACTIVE</state>
         </option>
         <option>
           <name>CCPreprocFile</name>
@@ -2334,16 +2334,16 @@
     <group>
       <name>cjoin</name>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cbor.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cbor.h</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cjoin.c</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cjoin.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cojp_cbor.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cojp_cbor.h</name>
       </file>
     </group>
     <group>

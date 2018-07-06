@@ -92,7 +92,7 @@ typedef struct {
 
 typedef struct {
     cojp_role_values_t              role;
-    open_addr_t *                   pan_id;;
+    open_addr_t *                   pan_id;
 } cojp_join_request_object_t;
 
 //=========================== variables =======================================

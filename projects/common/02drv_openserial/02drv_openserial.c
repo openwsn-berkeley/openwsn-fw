@@ -51,13 +51,13 @@ in order to echo chunks of bytes, each chunk needs to start with character 'H' a
 openserial takes different actions according to the initial character of the stream.
 */
 int mote_main(void) {
-   
+
    board_init();
    openserial_init();
-   
+
    sctimer_set_callback(cb_compare);
    sctimer_setCompare(sctimer_readCounter()+SCTIMER_PERIOD);
-   
+
    while(1) {
       board_sleep();
       debugpins_slot_toggle();
@@ -95,30 +95,41 @@ void ieee154e_getAsn(uint8_t* array) {
    array[4]   = 0x04;
 }
 
-void idmanager_setJoinKey(void) {}
+void idmanager_setJoinKey(uint8_t *key) {}
 void idmanager_triggerAboutRoot(void) {}
 void openbridge_triggerData(void) {}
 void tcpinject_trigger(void) {}
 void udpinject_trigger(void) {}
 void icmpv6echo_trigger(void) {}
-void icmpv6rpl_setDIOPeriod(void){}
-void icmpv6rpl_setDAOPeriod(void){}
+void icmpv6rpl_setDIOPeriod(uint16_t dioPeriod){};
+void icmpv6rpl_setDAOPeriod(uint16_t daoPeriod){};
 void icmpv6echo_setIsReplyEnabled(bool isEnabled){}
-void sixtop_setEBPeriod(void){}
-void sixtop_setKaPeriod(void){}
+void sixtop_setEBPeriod(uint8_t ebPeriod){}
+void sixtop_setKaPeriod(uint16_t kaPeriod){}
 void sixtop_setHandler(void){}
-void sixtop_request(void){}
+owerror_t sixtop_request(
+    uint8_t      code,
+    open_addr_t* neighbor,
+    uint8_t      numCells,
+    uint8_t      cellOptions,
+    cellInfo_ht* celllist_toBeAdded,
+    cellInfo_ht* celllist_toBeDeleted,
+    uint8_t      sfid,
+    uint16_t     listingOffset,
+    uint16_t     listingMaxNumCells
+){return 0;}
 void sixtop_addORremoveCellByInfo(void){}
-void sixtop_setIsResponseEnabled(void){}
-void icmpv6rpl_setMyDAGrank(void){}
-void icmpv6rpl_getPreferredParentEui64(void){}
-void schedule_setFrameLength(void){}
-void ieee154e_setSlotDuration(void){}
-void ieee154e_setIsSecurityEnabled(void){}
-void ieee154e_setIsAckEnabled(void){}
-void ieee154e_setSingleChannel(void){}
-void sniffer_setListeningChannel(void){}
-void msf_appPktPeriod(void){}
+void sixtop_setIsResponseEnabled(bool isEnabled){}
+void icmpv6rpl_setMyDAGrank(dagrank_t rank){}
+bool icmpv6rpl_getPreferredParentIndex(uint8_t* indexptr){return TRUE;}
+bool icmpv6rpl_getPreferredParentEui64(open_addr_t* addressToWrite){return TRUE;}
+void schedule_setFrameLength(uint16_t newFrameLength){}
+void ieee154e_setSlotDuration(uint16_t duration){}
+void ieee154e_setIsSecurityEnabled(bool isEnabled){}
+void ieee154e_setIsAckEnabled(bool isEnabled){}
+void ieee154e_setSingleChannel(uint8_t channel){}
+void sniffer_setListeningChannel(uint8_t channel){}
+void msf_appPktPeriod(uint8_t numAppPacketsPerSlotFrame){}
 uint8_t msf_getsfid(void) {return 0;}
 
 bool debugPrint_isSync(void) {
