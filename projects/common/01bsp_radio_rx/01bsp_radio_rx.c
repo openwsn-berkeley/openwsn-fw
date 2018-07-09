@@ -68,7 +68,7 @@ len=17  num=84  rssi=-81  lqi=108 crc=1
 #include "radio.h"
 #include "leds.h"
 #include "uart.h"
-#include "sctimer.h"
+//#include "sctimer.h"
 
 //=========================== defines =========================================
 
@@ -128,8 +128,8 @@ int mote_main(void) {
    board_init();
    
    // add callback functions radio
-   sctimer_setStartFrameCb(cb_startFrame);
-   sctimer_setEndFrameCb(cb_endFrame);
+   radio_setStartFrameCb(cb_startFrame);
+   radio_setEndFrameCb(cb_endFrame);
    
    // setup UART
    uart_setCallbacks(cb_uartTxDone,cb_uartRxCb);
