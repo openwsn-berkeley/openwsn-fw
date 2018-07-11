@@ -28,6 +28,11 @@
 #include "spi.h"
 #include "radio.h"
 
+#if (ENABLE_SEGGER_SYSVIEW == 1)
+#include "SEGGER_SYSVIEW.h"
+#endif // (ENABLE_SEGGER_SYSVIEW == 1)
+
+
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
@@ -44,6 +49,10 @@ extern int mote_main(void);
 
 int main(void)
 {
+#if (ENABLE_SEGGER_SYSVIEW == 1)
+   SEGGER_SYSVIEW_Conf();
+   SEGGER_SYSVIEW_Start();
+#endif // (ENABLE_SEGGER_SYSVIEW == 1)
    return mote_main();
 }
 
@@ -60,39 +69,30 @@ void board_init(void)
   // NRF_CLOCK->LFRCMODE= (CLOCK_LFRCMODE_MODE_ULP & CLOCK_LFRCMODE_MODE_Msk) << CLOCK_LFRCMODE_MODE_Pos;
 
   leds_init();
-  
+
   // enable on-board DC-DC converter to reduce overall consumption (this also disables the LDO [low-dropout] regulator)
   // This only works if the required coil and condenser are properly connected to the pins DCC and DEC4, which is the
   // case with the development kit, but not with some other nRF52840-based boards. (If enabled without the proper 
   // circuitry, the CPU will hang.)
   nrf_power_dcdcen_set(true);
+  nrf_power_dcdcen_vddh_set(true);
 
   // initialize power management library
   nrf_pwr_mgmt_init();
 
-  // initialize boards with LEDs and buttons
+  // initialize board with LEDs and buttons
   bsp_board_init(BSP_INIT_LEDS | BSP_INIT_BUTTONS);
-  uart_init();          ///< we can use the UART for simple debugging
-  
   button_init();
 
-  // uart_writeByte('L'); nrf_delay_ms(10);   ///< DEBUG, REMOVE ME!
-  // uart_writeByte(48+LEDS_NUMBER);  nrf_delay_ms(10);
+  uart_init();
 
   debugpins_init();
-  // uart_writeByte('D'); nrf_delay_ms(10);   ///< DEBUG, REMOVE ME!
 
-//  bsp_timer_init();   ///< OBSOLETE, use sctimer instead
-  sctimer_init();
-  // uart_writeByte('T'); nrf_delay_ms(10);   ///< DEBUG, REMOVE ME!
+  sctimer_init();  ///<  bsp_timer_init() and radiotimer_init() were OBSOLETE, we use sctimer instead
 
-//  radiotimer_init();
   radio_init();
 
   spi_init();
-  // uart_writeByte('S'); nrf_delay_ms(10);   ///< DEBUG, REMOVE ME!
-
-  // uart_writeByte('~');    ///< DEBUG, REMOVE ME!
 }
 
 /**
@@ -100,10 +100,13 @@ void board_init(void)
  */
 void board_sleep(void)
 {
+#if (ENABLE_SEGGER_SYSVIEW == 1)
+  SEGGER_SYSVIEW_OnIdle();
+#endif // (ENABLE_SEGGER_SYSVIEW == 1)
   nrf_pwr_mgmt_run();
 
-/*  @note: Below code could be an alternative without using the power management library
-
+/*
+  // @note: Below code could be an alternative without using the power management library
   // power management command (waiting for the next NVIC event)
   #ifdef __GNUC__
   static void __INLINE cpu_wfe(void)
@@ -115,7 +118,7 @@ void board_sleep(void)
     __SEV();
     __WFE();
   }
-*/  
+*/
 }
 
 /**

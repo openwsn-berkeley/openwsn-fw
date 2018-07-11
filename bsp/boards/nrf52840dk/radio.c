@@ -1,9 +1,11 @@
 /**
- * Author: Xavier Vilajosana (xvilajosana@eecs.berkeley.edu)
- *         Pere Tuset (peretuset@openmote.com)
- * Date:   July 2013
- * Description: CC2538-specific definition of the "radio" bsp module.
- */
+ * brief An nRF52840-specific definition of the "radio" bsp module.
+ *
+ * Authors: Tamas Harczos (1, tamas.harczos@imms.de) and Adam Sedmak (2, adam.sedmak@gmail.com)
+ * Company: (1) Institut fuer Mikroelektronik- und Mechatronik-Systeme gemeinnuetzige GmbH (IMMS GmbH)
+ *          (2) Faculty of Electronics and Computing, Zagreb, Croatia
+ * Date:   June 2018
+*/
 
 #include <stdio.h>
 #include <stdint.h>
@@ -26,6 +28,11 @@
 #include "board_info.h"
 #include "debugpins.h"
 #include "sctimer.h"
+
+#if (ENABLE_SEGGER_SYSVIEW == 1)
+#include "SEGGER_SYSVIEW.h"
+#endif // (ENABLE_SEGGER_SYSVIEW == 1)
+
 
 //=========================== defines =========================================
 
@@ -56,7 +63,7 @@ typedef struct
   bool event_end;
 } radio_vars_t;
 
-static radio_vars_t radio_vars; // = {0};
+static radio_vars_t radio_vars;
 
 
 //=========================== prototypes ======================================
@@ -182,6 +189,7 @@ void radio_rfOn(void)
   {
     nrf_drv_clock_hfclk_request(NULL);
     while (!nrf_drv_clock_hfclk_is_running()) { };
+    radio_vars.hfc_started= true;
   }
 
   // set up interrupts
@@ -204,12 +212,13 @@ void radio_rfOff(void)
   NRF_RADIO->SHORTS= 0;
 
   // disable radio interrupt
-	NVIC_DisableIRQ(RADIO_IRQn);  
+  NVIC_DisableIRQ(RADIO_IRQn);  
 
   // release the high frequency clock
   if (radio_vars.hfc_started)
   {
     nrf_drv_clock_hfclk_release();
+    radio_vars.hfc_started= false;
   }
 
   if (radio_vars.transciever_state == TS_OFF) { return; }
@@ -226,10 +235,7 @@ void radio_rfOff(void)
 #endif // WAIT_FOR_RADIO_DISABLE == 1
 
   radio_vars.transciever_state = TS_OFF;
-
-  // ease debugging
-  debugpins_radio_clr();
-  leds_radio_off();  
+  leds_radio_off();
 }
 
 
@@ -257,6 +263,7 @@ void radio_txEnable(void)
 {
   if (radio_vars.transciever_state == TS_TX) { return; }
 
+  leds_radio_on();
   radio_rfOn();
 
 #if (WAIT_FOR_RADIO_ENABLE == 1)
@@ -271,10 +278,6 @@ void radio_txEnable(void)
 #endif // WAIT_FOR_RADIO_ENABLE == 1
 
   radio_vars.transciever_state = TS_TX;
-
-  // ease debugging
-  debugpins_radio_set();
-  leds_radio_on();    
 }
 
 
@@ -304,6 +307,7 @@ void radio_rxEnable(void)
 {
   if (radio_vars.transciever_state == TS_RX) { return; }
 
+  leds_radio_on();
   radio_rfOn();
 
   // enable shortcut (as soon as a packet was received, the radio prepares itself for the next one)
@@ -322,10 +326,6 @@ void radio_rxEnable(void)
 #endif // WAIT_FOR_RADIO_ENABLE == 1
 
   radio_vars.transciever_state = TS_RX;
-
-  // ease debugging
-  debugpins_radio_set();
-  leds_radio_on();  
 }
 
 
@@ -406,7 +406,10 @@ kick_scheduler_t radio_isr(void)
 
 void RADIO_IRQHandler(void)
 {
-  debugpins_isr_set();
+#if (ENABLE_SEGGER_SYSVIEW == 1)
+  SEGGER_SYSVIEW_RecordEnterISR();
+#endif // (ENABLE_SEGGER_SYSVIEW == 1)
+
 
   if (NRF_RADIO->EVENTS_READY && (NRF_RADIO->INTENSET & RADIO_INTENSET_READY_Msk))
   {
@@ -436,5 +439,7 @@ void RADIO_IRQHandler(void)
     }
   }
 
-  debugpins_isr_clr();
+#if (ENABLE_SEGGER_SYSVIEW == 1)
+  SEGGER_SYSVIEW_RecordExitISR();
+#endif // (ENABLE_SEGGER_SYSVIEW == 1)
 }

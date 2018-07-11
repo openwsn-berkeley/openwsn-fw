@@ -53,9 +53,9 @@
 
 //===== IEEE802154E timing
 
-#define SLOTDURATION 10 // in miliseconds
+#define SLOTDURATION 15 // in miliseconds
 
-#if SLOTDURATION==10
+#if (SLOTDURATION==10)
     // time-slot related
     #define PORT_TsSlotDuration                 328   // counter counts one extra count, see datasheet
     // execution speed related

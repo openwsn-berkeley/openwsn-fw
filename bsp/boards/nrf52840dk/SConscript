@@ -21,7 +21,6 @@ source   = \
     Glob('sdk/modules/nrfx/drivers/src/nrfx_clock.c') + \
     Glob('sdk/integration/nrfx/legacy/nrf_drv_clock.c') + \
     Glob('sdk/modules/nrfx/drivers/src/nrfx_power.c') + \
-    Glob('sdk/modules/nrfx/drivers/src/nrfx_rtc.c') + \
     Glob('sdk/modules/nrfx/drivers/src/nrfx_spi.c') + \
     Glob('sdk/modules/nrfx/drivers/src/nrfx_uart.c') + \
     Glob('sdk/modules/nrfx/mdk/gcc_startup_nrf52840.S') + \

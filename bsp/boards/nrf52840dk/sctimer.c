@@ -2,12 +2,14 @@
  * brief A timer module with only a single compare value. 
  *
  * Authors: Tamas Harczos (1, tamas.harczos@imms.de) and Adam Sedmak (2, adam.sedmak@gmail.com)
- * Company: (1) Institut für Mikroelektronik- und Mechatronik-Systeme gemeinnützige GmbH (IMMS GmbH)
+ * Company: (1) Institut fuer Mikroelektronik- und Mechatronik-Systeme gemeinnuetzige GmbH (IMMS GmbH)
  *          (2) Faculty of Electronics and Computing, Zagreb, Croatia
- * Date:   May 2018
+ *    Date: May 2018
+ *
+ *    Note: We use RTC0 hardware with its CC0 register.
 */
 
-#include "sdk/modules/nrfx/drivers/include/nrfx_rtc.h"  ///< the implementation is based on Nordic's Real-Time Counter (RTC)
+#include "nrfx_rtc_hack.h"                    ///< the implementation is based on the hacked version of Nordic's Real-Time Counter (RTC) driver
 #include "sdk/components/libraries/delay/nrf_delay.h"
 
 #include "sdk/components/boards/pca10056.h"
@@ -18,13 +20,16 @@
 #include "leds.h"
 #include "debugpins.h"
 
+#if (ENABLE_SEGGER_SYSVIEW == 1)
+#include "SEGGER_SYSVIEW.h"
+#endif // (ENABLE_SEGGER_SYSVIEW == 1)
+
 
 // ========================== define ==========================================
 
-#define MINIMUM_COMPAREVALE_ADVANCE 5   // 5 (2)
-#define COMPAREVALE_ADVANCE_STEP 2      // 2 (1)
-#define MAX_RTC_TASKS_DELAY 47          // maximum delay in us until an RTC config task is executed
-#define CC_TIMER 0                      // CC channel used for the timer's compare value
+#define MINIMUM_COMPAREVALE_ADVANCE 10        ///< equal to TIMERTHRESHOLD of opentimers
+#define TIMERLOOP_THRESHOLD         0x20000   ///< 3s, if sctimer_setCompare() is late by max that many ticks, we still issue the ISR 
+#define MAX_RTC_TASKS_DELAY         47        ///< maximum delay in us until an RTC config task is executed
 
 
 // ========================== variable ========================================
@@ -39,7 +44,7 @@ typedef struct
 
 sctimer_vars_t sctimer_vars= {0};
 
-static nrfx_rtc_t m_timer= NRFX_RTC_INSTANCE(0); // we use RTC0
+static nrfx_rtc_t m_timer= NRFX_RTC_INSTANCE(0);
 
 
 
@@ -63,7 +68,7 @@ void sctimer_init(void)
     .prescaler= RTC_FREQ_TO_PRESCALER(NRFX_RTC_DEFAULT_CONFIG_FREQUENCY),
     .interrupt_priority= NRFX_RTC_DEFAULT_CONFIG_IRQ_PRIORITY,
     .tick_latency= NRFX_RTC_US_TO_TICKS(NRFX_RTC_MAXIMUM_LATENCY_US, NRFX_RTC_DEFAULT_CONFIG_FREQUENCY),
-    .reliable= 1 // NRFX_RTC_DEFAULT_CONFIG_RELIABLE
+    .reliable= 0
   };
 
   // initialize RTC, we use the 32768 Hz clock without prescaler
@@ -96,76 +101,61 @@ void sctimer_set_callback(sctimer_cbt cb)
 */
 void sctimer_setCompare(PORT_TIMER_WIDTH val)
 {
-#define STOP_ON_RTC_ERROR 0
-
-  nrfx_err_t retVal= NRFX_SUCCESS;
-
-  // make sure that no other CC match event will interrupt this block
-  uint32_t int_mask= RTC_CHANNEL_INT_MASK(CC_TIMER);
-  nrf_rtc_event_disable(m_timer.p_reg, int_mask);
-  nrf_rtc_int_disable(m_timer.p_reg, int_mask);  
-
   uint32_t counter_current;
-  uint32_t counter_distance, counter_demanded;
-
-  uint8_t restart_count= 0;
-  uint8_t const max_restart_count= 10;
-
-restart:
+  uint32_t distance_straight, distance_wrapped;
 
   counter_current= sctimer_readCounter();
+#if (ENABLE_SEGGER_SYSVIEW == 1)
+	uint32_t cc_current= NRF_RTC0->CC[0];
+#endif
 
   if (val >= counter_current)
   {
-    counter_distance= val - counter_current;
-    if (counter_distance >= MINIMUM_COMPAREVALE_ADVANCE)
+    distance_straight= val - counter_current;
+    distance_wrapped= (0xFFFFFFFF-val+1) + counter_current;
+
+    if ( (distance_wrapped < TIMERLOOP_THRESHOLD) ||                ///< val is higher, but actually counter is ahead and already in the next wrap
+         (distance_straight < MINIMUM_COMPAREVALE_ADVANCE) )        ///< val is ahead, but the difference is not enough for the timer to make it in time
     {
-      counter_demanded= val;
+#if (ENABLE_SEGGER_SYSVIEW == 1)
+      SEGGER_SYSVIEW_PrintfHost("setIntPending_RTC0_CC0()");
+#endif // (ENABLE_SEGGER_SYSVIEW == 1)
+      setIntPending_RTC0_CC0();
     }
-    else
+
+    else                                                            ///< other cases are not problematic
     {
-      counter_demanded= (counter_current + MINIMUM_COMPAREVALE_ADVANCE) & 0xFFFFFFFF;
+#if (ENABLE_SEGGER_SYSVIEW == 1)
+      SEGGER_SYSVIEW_PrintfHost("Counter=%u, CC_old=%u, CC_new=%u", counter_current, cc_current, val);
+#endif // (ENABLE_SEGGER_SYSVIEW == 1)
+      sctimer_vars.cc32bit_MSB= val & 0xFF000000;                   ///< set MSB of CC 
+      nrfx_rtc_cc_set(&m_timer, 0, val & 0x00FFFFFF, true);         ///< set 3 LSBs of CC
     }
   }
+
   else
   {
-    if (0xFFFFFFFF-counter_current+1+val >= MINIMUM_COMPAREVALE_ADVANCE)
+    distance_straight= counter_current - val;
+    distance_wrapped= (0xFFFFFFFF-counter_current+1) + val;
+
+    if ( (distance_wrapped < MINIMUM_COMPAREVALE_ADVANCE) ||  ///< val is ahead, but the difference is not enough for the timer to make it in time
+         (distance_straight < TIMERLOOP_THRESHOLD) )          ///< val is lagging, but within TIMERLOOP limits
     {
-      counter_demanded= val;
+#if (ENABLE_SEGGER_SYSVIEW == 1)
+      SEGGER_SYSVIEW_PrintfHost("setIntPending_RTC0_CC0()");
+#endif // (ENABLE_SEGGER_SYSVIEW == 1)
+      setIntPending_RTC0_CC0();
     }
-    else
+
+    else                                                      ///< other cases are not problematic
     {
-      counter_demanded= (counter_current + MINIMUM_COMPAREVALE_ADVANCE) & 0xFFFFFFFF;
+#if (ENABLE_SEGGER_SYSVIEW == 1)
+      SEGGER_SYSVIEW_PrintfHost("Counter=%u, CC_old=%u, CC_new=%u", counter_current, cc_current, val);
+#endif // (ENABLE_SEGGER_SYSVIEW == 1)
+      sctimer_vars.cc32bit_MSB= val & 0xFF000000;                   ///< set MSB of CC 
+      nrfx_rtc_cc_set(&m_timer, 0, val & 0x00FFFFFF, true);         ///< set 3 LSBs of CC
     }
   }
-
-  // set MSB of CC
-  sctimer_vars.cc32bit_MSB= counter_demanded & 0xFF000000;
-
-  // set 3 LSBs of CC
-  retVal= nrfx_rtc_cc_set(&m_timer, CC_TIMER, counter_demanded & 0x00FFFFFF, false);
-  // nrf_delay_us(MAX_RTC_TASKS_DELAY);
-
-  // if in the init() we defined reliable==1, then nrfx_rtc_cc_set() will return NRFX_ERROR_TIMEOUT if the
-  // demanded CC value cannot be safely made by the timer. In that case, we reschedule the next event.
-  if ((NRFX_ERROR_TIMEOUT == retVal) && (restart_count < max_restart_count))
-  {
-    val += COMPAREVALE_ADVANCE_STEP;
-    restart_count++;
-    goto restart;
-  }
-
-  // re-enable CC event and interrupt
-  nrf_rtc_int_enable(m_timer.p_reg, int_mask);
-  nrf_rtc_event_enable(m_timer.p_reg,int_mask);
-
-#if (STOP_ON_RTC_ERROR == 1)
-  if (retVal != NRFX_SUCCESS)
-  {
-    leds_error_blink();
-    board_reset();
-  }  
-#endif // (STOP_ON_RTC_ERROR != 0)
 }
 
 /**
@@ -197,6 +187,9 @@ void sctimer_disable(void)
 
 static void timer_event_handler(nrfx_rtc_int_type_t int_type)
 {
+#if (ENABLE_SEGGER_SYSVIEW == 1)
+  SEGGER_SYSVIEW_RecordEnterISR();
+#endif
   debugpins_isr_set();
 
   if (int_type == NRFX_RTC_INT_OVERFLOW)
@@ -211,4 +204,7 @@ static void timer_event_handler(nrfx_rtc_int_type_t int_type)
   }
 
   debugpins_isr_clr();
+#if (ENABLE_SEGGER_SYSVIEW == 1)
+  SEGGER_SYSVIEW_RecordExitISR();
+#endif
 }

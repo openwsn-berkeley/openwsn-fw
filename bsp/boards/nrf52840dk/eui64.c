@@ -2,7 +2,7 @@
  * brief nrf52840dk-specific definition of the "eui64" bsp module.
  *
  * Authors: Tamas Harczos (1, tamas.harczos@imms.de) and Adam Sedmak (2, adam.sedmak@gmail.com)
- * Company: (1) Institut für Mikroelektronik- und Mechatronik-Systeme gemeinnützige GmbH (IMMS GmbH)
+ * Company: (1) Institut fuer Mikroelektronik- und Mechatronik-Systeme gemeinnuetzige GmbH (IMMS GmbH)
  *          (2) Faculty of Electronics and Computing, Zagreb, Croatia
  * Date:   May 2018
 */

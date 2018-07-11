@@ -46,8 +46,8 @@ static void uart_event_handler(app_uart_evt_t * p_event);
 
 void uart_init(void)
 { 
-   // reset local variables
-   memset(&uart_vars,0,sizeof(uart_vars_t));
+  // reset local variables
+  memset(&uart_vars,0,sizeof(uart_vars_t));
    
   // for the case that the UART has previously been initialized, uninitialize it first  
   app_uart_close();
