@@ -73,7 +73,7 @@ len=17  num=84  rssi=-81  lqi=108 crc=1
 //=========================== defines =========================================
 
 #define LENGTH_PACKET        125+LENGTH_CRC ///< maximum length is 127 bytes
-#define CHANNEL              11             ///< 11 = 2.405GHz
+#define CHANNEL              16             ///< 11 = 2.405GHz
 #define LENGTH_SERIAL_FRAME  8              ///< length of the serial frame
 
 //=========================== variables =======================================
@@ -140,14 +140,18 @@ int mote_main(void) {
    
    // switch in RX
    radio_rxEnable();
+   radio_rxNow();
    
    while (1) {
       
       // sleep while waiting for at least one of the rxpk_done to be set
+     
+
       app_vars.rxpk_done = 0;
       while (app_vars.rxpk_done==0) {
          board_sleep();
       }
+      leds_debug_off();
       
       // if I get here, I just received a packet
       
@@ -187,9 +191,10 @@ int mote_main(void) {
 //===== radio
 
 void cb_startFrame(PORT_TIMER_WIDTH timestamp) {
-   
+   leds_debug_on();
    // update debug stats
    app_dbg.num_startFrame++;
+   
 }
 
 void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
