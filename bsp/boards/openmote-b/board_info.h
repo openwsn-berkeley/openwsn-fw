@@ -2,7 +2,7 @@
  * Author: Xavier Vilajosana (xvilajosana@eecs.berkeley.edu)
  *         Pere Tuset (peretuset@openmote.com)
  * Modified: Tengfei Chang (tengfei.chang@eecs.berkeley.edu)
- * Date:   July 2013
+ * Date:   July 2018
  * Description: CC2538-specific board information bsp module.
  */
 
@@ -98,14 +98,9 @@
 //===== per-board number of sensors
 
 #define NUMSENSORS      7
-
-//====== Antenna options ====
-#define BSP_ANTENNA_BASE            GPIO_D_BASE
-#define BSP_ANTENNA_CC2538_24GHZ    GPIO_PIN_4      //!< PD4 -- 2.4ghz
-#define BSP_ANTENNA_AT215_24GHZ     GPIO_PIN_3      //!< PD3 -- subghz
  
+//===== number of radios in this board
 
-// number of radios in this board.
 #define MAX_NUM_RADIOS         2
 
 //#define DAGROOT
@@ -128,7 +123,10 @@ static const uint8_t infoRadioName[]        = "CC2538 SoC";
 //=========================== prototypes ======================================
 
 //=========================== public ==========================================
-void eraseFlash(void);
+
+void antenna_2d4_c2538(void);
+void antenna_2d4_at86rf215(void);
+
 //=========================== private =========================================
 
 #endif

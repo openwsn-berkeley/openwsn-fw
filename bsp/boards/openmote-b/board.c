@@ -1,7 +1,7 @@
 /**
  * Author: Xavier Vilajosana (xvilajosana@eecs.berkeley.edu)
  *         Pere Tuset (peretuset@openmote.com)
- * Date:   July 2013
+ * Date:   July 208
  * Description: CC2538-specific definition of the "board" bsp module.
  */
 
@@ -17,7 +17,6 @@
 #include <source/gpio.h>
 #include <source/gptimer.h>
 #include <source/sys_ctrl.h>
-
 
 #include "board.h"
 #include "board_info.h"
@@ -38,11 +37,10 @@
 #define BSP_BUTTON_BASE                 ( GPIO_D_BASE )
 #define BSP_BUTTON_USER                 ( GPIO_PIN_5 )
 
-#ifdef REVA1 //Rev.A1 uses SF23 cc2538 which start at diffferent location
-    #define CC2538_FLASH_ADDRESS            ( 0x0023F800 )
-#else
-    #define CC2538_FLASH_ADDRESS            ( 0x0027F800 )
-#endif
+#define BSP_ANTENNA_BASE                ( GPIO_D_BASE )
+#define BSP_ANTENNA_CC2538_24GHZ        ( GPIO_PIN_3 )     //!< PD4 -- Sub-GHz
+#define BSP_ANTENNA_AT215_24GHZ         ( GPIO_PIN_4 )     //!< PD3 -- 2.4-GHz
+
 //=========================== prototypes ======================================
 
 void board_timer_init(void);
@@ -52,7 +50,8 @@ bool board_timer_expired(uint32_t future);
 static void clock_init(void);
 static void gpio_init(void);
 static void button_init(void);
-static void antenna_init(void);
+
+static void antenna_2d4_init(void);
 
 static void SysCtrlDeepSleepSetting(void);
 static void SysCtrlSleepSetting(void);
@@ -60,8 +59,6 @@ static void SysCtrlRunSetting(void);
 static void SysCtrlWakeupSetting(void);
 
 static void GPIO_D_Handler(void);
-
-bool user_button_initialized;
 
 //=========================== main ============================================
 
@@ -74,14 +71,11 @@ int main(void) {
 //=========================== public ==========================================
 
 void board_init(void) {
-
     radio_functions_t* radio_functions;
-
-    user_button_initialized = FALSE;
 
     gpio_init();
     clock_init();
-    antenna_init();
+    antenna_2d4_init();
     board_timer_init();
     leds_init();
     debugpins_init();
@@ -89,7 +83,6 @@ void board_init(void) {
     sctimer_init();
     uart_init();
     i2c_init();
-
 
     // initialize radios
     openradios_getFunctions(&radio_functions);
@@ -99,14 +92,24 @@ void board_init(void) {
     radio_subghz_init();
     radio_subghz_setFunctions(&radio_functions[RADIOTPYE_SUBGHZ]);
 
-//    sensors_init();
+    sensors_init();
     cryptoengine_init();
 }
 
-void antenna_init(void) {
-   //use cc2538 2.4ghz radio
+static void antenna_2d4_init(void) {
+   // By default use CC2538 2.4 GHz radio
    GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_CC2538_24GHZ, BSP_ANTENNA_CC2538_24GHZ);
    GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_AT215_24GHZ, 0);
+}
+
+void antenna_2d4_c2538(void) {
+   GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_CC2538_24GHZ, BSP_ANTENNA_CC2538_24GHZ);
+   GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_AT215_24GHZ, 0);
+}
+
+void antenna_2d4_at86rf215(void) {
+   GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_CC2538_24GHZ, 0);
+   GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_AT215_24GHZ, BSP_ANTENNA_AT215_24GHZ);
 }
 
 /**
@@ -239,7 +242,6 @@ static void button_init(void) {
     /* Clear and enable the interrupt */
     GPIOPinIntClear(BSP_BUTTON_BASE, BSP_BUTTON_USER);
     GPIOPinIntEnable(BSP_BUTTON_BASE, BSP_BUTTON_USER);
-    user_button_initialized = TRUE;
 }
 
 static void SysCtrlRunSetting(void) {
@@ -320,29 +322,7 @@ static void SysCtrlWakeupSetting(void) {
 //=========================== interrupt handlers ==============================
 
 /**
- * GPIO_C interrupt handler. User button is GPIO_D
- * Erases a Flash sector to trigger the bootloader backdoor
+ * GPIO_D interrupt handler.
  */
 static void GPIO_D_Handler(void) {
-    GPIOPinIntClear(BSP_BUTTON_BASE, BSP_BUTTON_USER);
-    if (!user_button_initialized) return;
-    /* Disable the interrupts */
-    eraseFlash();
-}
-
-/**
-* Erase the flash so bootloader is load after reboot
-*/
-void eraseFlash(){
-    /* Disable the interrupts */
-    IntMasterDisable();
-    leds_all_off();
-
-    /* Eras the CCA flash page */
-    FlashMainPageErase(CC2538_FLASH_ADDRESS);
-
-    leds_circular_shift();
-
-    /* Reset the board */
-    SysCtrlReset();
 }
