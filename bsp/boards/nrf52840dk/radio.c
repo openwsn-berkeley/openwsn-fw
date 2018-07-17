@@ -1,10 +1,10 @@
 /**
- * brief An nRF52840-specific definition of the "radio" bsp module.
+ * brief Nordic nRF52840-specific definition of the "radio" bsp module. 
  *
  * Authors: Tamas Harczos (1, tamas.harczos@imms.de) and Adam Sedmak (2, adam.sedmak@gmail.com)
  * Company: (1) Institut fuer Mikroelektronik- und Mechatronik-Systeme gemeinnuetzige GmbH (IMMS GmbH)
  *          (2) Faculty of Electronics and Computing, Zagreb, Croatia
- * Date:   June 2018
+ *    Date: June 2018
 */
 
 #include <stdio.h>
@@ -44,7 +44,7 @@
 #define MAX_PACKET_SIZE           (127)       ///< maximal size of radio packet (one more byte at the beginning needed to store the length)
 #define CRC_POLYNOMIAL            (0x11021)   ///< polynomial used for CRC calculation in 802.15.4 frames (x^16 + x^12 + x^5 + 1)
 
-#define WAIT_FOR_RADIO_DISABLE    (1)         ///< whether the driver shall wait until the radio is disabled upon calling radio_rfOff()
+#define WAIT_FOR_RADIO_DISABLE    (0)         ///< whether the driver shall wait until the radio is disabled upon calling radio_rfOff()
 #define WAIT_FOR_RADIO_ENABLE     (1)         ///< whether the driver shall wait until the radio is enabled upon calling radio_txEnable() or radio_rxEnable()
 
 
@@ -124,7 +124,7 @@ void radio_init(void)
   NRF_RADIO->PCNF0 |= ((uint32_t) RADIO_PCNF0_PLEN_32bitZero << RADIO_PCNF0_PLEN_Pos);
 
 #if 0
-  // set fast radio ramp-up mode - shortens ramp-up to 40 µs from 140 µs while increasing required current, see http://infocenter.nordicsemi.com/topic/com.nordic.infocenter.nrf52840.ps/radio.html?cp=2_0_0_5_19_14_7#unique_1302685657
+  // [MADE THE RADIO UNUSABLE IN FIRST TESTS] set fast radio ramp-up mode - shortens ramp-up to 40 about us from about 140 us while increasing required current, see http://infocenter.nordicsemi.com/topic/com.nordic.infocenter.nrf52840.ps/radio.html?cp=2_0_0_5_19_14_7#unique_1302685657
   NRF_RADIO->PCNF0 &= (~RADIO_MODECNF0_RU_Msk);
   NRF_RADIO->PCNF0 |= ((uint32_t) RADIO_MODECNF0_RU_Fast << RADIO_MODECNF0_RU_Pos);
 #endif  
@@ -184,7 +184,7 @@ void radio_setFrequency(uint8_t frequency)
 
 void radio_rfOn(void)
 {
-  // as a prerequisite for the radio, we start the high frequency clock now, if not yet running
+  // as a prerequisite for the radio, we start the high frequency clock now, if not yet running, this can take up to 250 us!
   if (!radio_vars.hfc_started)
   {
     nrf_drv_clock_hfclk_request(NULL);
@@ -197,9 +197,9 @@ void radio_rfOn(void)
                         RADIO_INTENSET_ADDRESS_Enabled << RADIO_INTENSET_ADDRESS_Pos |
                         RADIO_INTENSET_END_Enabled << RADIO_INTENSET_END_Pos; 
     
-	NVIC_SetPriority(RADIO_IRQn, 1);
-	NVIC_ClearPendingIRQ(RADIO_IRQn);
-	NVIC_EnableIRQ(RADIO_IRQn);    
+  NVIC_SetPriority(RADIO_IRQn, 1);
+  NVIC_ClearPendingIRQ(RADIO_IRQn);
+  NVIC_EnableIRQ(RADIO_IRQn);    
 
    // RF can only be turned on in TX or RX mode, so the actual
    // code has been moved to txEnable and rxEnable, respectively
@@ -236,18 +236,13 @@ void radio_rfOff(void)
 
   radio_vars.transciever_state = TS_OFF;
   leds_radio_off();
+  debugpins_radio_clr();
+
 }
 
 
 void radio_loadPacket(uint8_t* packet, uint16_t len)
 {
-#if 0  
-  if ((uint32_t) radio_vars.payload % 4)
-  {
-    leds_debug_toggle();
-  }
-#endif  
-
   if ((len > 0) && (len <= MAX_PACKET_SIZE))      ///< note: 1st byte should be the payload size (for Nordic), and the two last bytes are used by the MAC layer for CRC
   {
     radio_vars.payload[0]= len;
@@ -277,29 +272,18 @@ void radio_txEnable(void)
   while (!radio_vars.event_ready) { }
 #endif // WAIT_FOR_RADIO_ENABLE == 1
 
+  debugpins_radio_set();
   radio_vars.transciever_state = TS_TX;
 }
 
 
 void radio_txNow(void)
 {
-  if (radio_vars.transciever_state != TS_TX) { return; }
-
-#if 0
-  if (radio_vars.startFrame_cb)
-  {
-    radio_vars.startFrame_cb(sctimer_readCounter());
-  }
-#endif  
+  if (radio_vars.transciever_state != TS_TX) { return; } 
 
   radio_vars.event_end= false;
   NRF_RADIO->EVENTS_END  = 0U;
   NRF_RADIO->TASKS_START = 1U;
-
-#if 0
-  while (!radio_vars.event_end) { }
-  radio_vars.endFrame_cb(sctimer_readCounter());
-#endif  
 }
 
 
@@ -325,6 +309,7 @@ void radio_rxEnable(void)
   while (!radio_vars.event_ready) { }
 #endif // WAIT_FOR_RADIO_ENABLE == 1
 
+  debugpins_radio_set();
   radio_vars.transciever_state = TS_RX;
 }
 
