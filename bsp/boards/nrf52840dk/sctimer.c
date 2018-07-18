@@ -6,10 +6,10 @@
  *          (2) Faculty of Electronics and Computing, Zagreb, Croatia
  *    Date: May 2018
  *
- *    Note: We use RTC0 hardware with its CC0 register.
+ *    Note: We use RTC0 peripheral with its CC0 register.
 */
 
-#include "nrfx_rtc_hack.h"                    ///< the implementation is based on the hacked version of Nordic's Real-Time Counter (RTC) driver
+#include "nrfx_rtc_hack.h" ///< the implementation is based on the hacked version of Nordic's Real-Time Counter (RTC) driver, which allows us to schedule an RTC0 interrupt with CC0 event, triggered "by hand"
 #include "sdk/components/libraries/delay/nrf_delay.h"
 
 #include "sdk/components/boards/pca10056.h"
@@ -27,7 +27,7 @@
 
 // ========================== define ==========================================
 
-#define MINIMUM_COMPAREVALE_ADVANCE 10        ///< equal to TIMERTHRESHOLD of opentimers
+#define MINIMUM_ISR_ADVANCE         3         ///< number of ticks to set CC ahead to make sure the RTC will fire (should this be equal to TIMERTHRESHOLD of opentimers?)
 #define TIMERLOOP_THRESHOLD         0x20000   ///< 3s, if sctimer_setCompare() is late by max that many ticks, we still issue the ISR 
 #define MAX_RTC_TASKS_DELAY         47        ///< maximum delay in us until an RTC config task is executed
 
@@ -51,6 +51,13 @@ static nrfx_rtc_t m_timer= NRFX_RTC_INSTANCE(0);
 // ========================== prototypes========================================
 
 static void timer_event_handler(nrfx_rtc_int_type_t int_type);
+
+#if (ENABLE_SEGGER_SYSVIEW == 1)
+#define SEGGER_PRINTF(f_, ...) SEGGER_SYSVIEW_PrintfHost((f_), __VA_ARGS__)
+#else
+#define SEGGER_PRINTF(f_, ...) do {} while(0)
+#endif // (ENABLE_SEGGER_SYSVIEW == 1)
+
 
 
 // ========================== protocol =========================================
@@ -101,35 +108,41 @@ void sctimer_set_callback(sctimer_cbt cb)
 */
 void sctimer_setCompare(PORT_TIMER_WIDTH val)
 {
-  uint32_t counter_current;
-  uint32_t distance_straight, distance_wrapped;
+  uint32_t counter_current= sctimer_readCounter();
 
-  counter_current= sctimer_readCounter();
 #if (ENABLE_SEGGER_SYSVIEW == 1)
-	uint32_t cc_current= NRF_RTC0->CC[0];
+  uint32_t cc_current= NRF_RTC0->CC[0];
 #endif
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+#if 0
+  uint32_t distance_straight, distance_wrapped;
 
   if (val >= counter_current)
   {
     distance_straight= val - counter_current;
     distance_wrapped= (0xFFFFFFFF-val+1) + counter_current;
 
-    if ( (distance_wrapped < TIMERLOOP_THRESHOLD) ||                ///< val is higher, but actually counter is ahead and already in the next wrap
-         (distance_straight < MINIMUM_COMPAREVALE_ADVANCE) )        ///< val is ahead, but the difference is not enough for the timer to make it in time
+    if (distance_wrapped < TIMERLOOP_THRESHOLD)                     ///< val is higher, but actually counter is ahead and already in the next wrap
     {
-#if (ENABLE_SEGGER_SYSVIEW == 1)
-      SEGGER_SYSVIEW_PrintfHost("setIntPending_RTC0_CC0()");
-#endif // (ENABLE_SEGGER_SYSVIEW == 1)
+      SEGGER_PRINTF("Counter=%u, CC_old=%u, CC_new=%u [LATE; CC not set; ISR scheduled]", counter_current, cc_current, val);
       setIntPending_RTC0_CC0();
+    }
+
+    else if (distance_straight < MINIMUM_ISR_ADVANCE)               ///< val is ahead, but the difference is not enough for the timer to make it in time
+    {
+      uint32_t oldVal= val;
+      val= (counter_current + MINIMUM_ISR_ADVANCE) & 0xFFFFFFFF;
+      sctimer_vars.cc32bit_MSB= val & 0xFF000000;                   ///< set MSB of CC 
+      nrfx_rtc_cc_set(&m_timer, 0, val & 0x00FFFFFF, true);         ///< set 3 LSBs of CC
+      SEGGER_PRINTF("Counter=%u, CC_old=%u, CC_new=%u [FIXED from %u]", counter_current, cc_current, val, oldVal);
     }
 
     else                                                            ///< other cases are not problematic
     {
-#if (ENABLE_SEGGER_SYSVIEW == 1)
-      SEGGER_SYSVIEW_PrintfHost("Counter=%u, CC_old=%u, CC_new=%u", counter_current, cc_current, val);
-#endif // (ENABLE_SEGGER_SYSVIEW == 1)
       sctimer_vars.cc32bit_MSB= val & 0xFF000000;                   ///< set MSB of CC 
       nrfx_rtc_cc_set(&m_timer, 0, val & 0x00FFFFFF, true);         ///< set 3 LSBs of CC
+      // SEGGER_PRINTF("Counter=%u, CC_old=%u, CC_new=%u", counter_current, cc_current, val);
     }
   }
 
@@ -138,24 +151,60 @@ void sctimer_setCompare(PORT_TIMER_WIDTH val)
     distance_straight= counter_current - val;
     distance_wrapped= (0xFFFFFFFF-counter_current+1) + val;
 
-    if ( (distance_wrapped < MINIMUM_COMPAREVALE_ADVANCE) ||  ///< val is ahead, but the difference is not enough for the timer to make it in time
-         (distance_straight < TIMERLOOP_THRESHOLD) )          ///< val is lagging, but within TIMERLOOP limits
+    if (distance_straight < TIMERLOOP_THRESHOLD)               ///< val is lagging, but within TIMERLOOP limits
     {
-#if (ENABLE_SEGGER_SYSVIEW == 1)
-      SEGGER_SYSVIEW_PrintfHost("setIntPending_RTC0_CC0()");
-#endif // (ENABLE_SEGGER_SYSVIEW == 1)
+      SEGGER_PRINTF("Counter=%u, CC_old=%u, CC_new=%u [LATE; CC not set; ISR scheduled]", counter_current, cc_current, val);
       setIntPending_RTC0_CC0();
+    }
+
+    else if (distance_wrapped < MINIMUM_ISR_ADVANCE)                     ///< val is ahead, but the difference is not enough for the timer to make it in time
+    {
+      uint32_t oldVal= val;
+      val= (counter_current + MINIMUM_ISR_ADVANCE) & 0xFFFFFFFF;
+      sctimer_vars.cc32bit_MSB= val & 0xFF000000;                   ///< set MSB of CC 
+      nrfx_rtc_cc_set(&m_timer, 0, val & 0x00FFFFFF, true);         ///< set 3 LSBs of CC
+      SEGGER_PRINTF("Counter=%u, CC_old=%u, CC_new=%u [FIXED from %u]", counter_current, cc_current, val, oldVal);
     }
 
     else                                                      ///< other cases are not problematic
     {
-#if (ENABLE_SEGGER_SYSVIEW == 1)
-      SEGGER_SYSVIEW_PrintfHost("Counter=%u, CC_old=%u, CC_new=%u", counter_current, cc_current, val);
-#endif // (ENABLE_SEGGER_SYSVIEW == 1)
       sctimer_vars.cc32bit_MSB= val & 0xFF000000;                   ///< set MSB of CC 
       nrfx_rtc_cc_set(&m_timer, 0, val & 0x00FFFFFF, true);         ///< set 3 LSBs of CC
+      // SEGGER_PRINTF("Counter=%u, CC_old=%u, CC_new=%u", counter_current, cc_current, val);
     }
   }
+#endif
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+// #if 0
+  if (counter_current - val < TIMERLOOP_THRESHOLD)
+  {
+    // the timer is already late, schedule the ISR right now manually 
+    sctimer_vars.cc32bit_MSB= val & 0xFF000000;                     ///< set MSB of CC 
+    setIntPending_RTC0_CC0();
+    SEGGER_PRINTF("Counter=%u, CC_old=%u, CC_new=%u [LATE; CC not set; ISR scheduled]", counter_current, cc_current, val);
+  }
+  else
+  {
+    if (val-counter_current<MINIMUM_ISR_ADVANCE)
+    {
+      // there is hardware limitation to schedule the timer within TIMERTHRESHOLD ticks schedule ISR right now manually
+      sctimer_vars.cc32bit_MSB= val & 0xFF000000;                   ///< set MSB of CC 
+      setIntPending_RTC0_CC0();
+      SEGGER_PRINTF("Counter=%u, CC_old=%u, CC_new=%u [HWLIM; CC not set; ISR scheduled]", counter_current, cc_current, val);
+    }
+    else
+    {
+      // schedule the timer at val
+      sctimer_vars.cc32bit_MSB= val & 0xFF000000;                   ///< set MSB of CC 
+      nrfx_rtc_cc_set(&m_timer, 0, val & 0x00FFFFFF, true);         ///< set 3 LSBs of CC
+      // SEGGER_PRINTF("Counter=%u, CC_old=%u, CC_new=%u", counter_current, cc_current, val);
+    }
+  }
+// #endif
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
 }
 
 /**
