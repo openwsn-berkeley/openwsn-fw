@@ -81,6 +81,15 @@ owerror_t cauthz_receive(
 
    switch (coap_header->Code) {
       case COAP_CODE_REQ_POST:
+         //=== reset packet payload (we will reuse this packetBuffer)
+         msg->payload                     = &(msg->packet[127]);
+         msg->length                      = 0;
+
+         //=== prepare  CoAP response
+
+         // set the CoAP header
+         coap_header->Code                = COAP_CODE_RESP_CREATED;
+
          outcome                          = E_SUCCESS;
          break;
       default:
