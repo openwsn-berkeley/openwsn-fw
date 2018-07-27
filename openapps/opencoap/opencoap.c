@@ -452,7 +452,6 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
       msg->payload                     = &(msg->packet[127]);
       msg->length                      = 0;
       // set the CoAP header
-      coap_header.TKL                  = 0;
       if (securityReturnCode) {
          coap_header.Code              = securityReturnCode;
       }
@@ -466,7 +465,6 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
       msg->payload                     = &(msg->packet[127]);
       msg->length                      = 0;
       // set the CoAP header
-      coap_header.TKL                  = 0;
       coap_header.Code                 = securityReturnCode;
    }
 
