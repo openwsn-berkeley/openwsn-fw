@@ -10,6 +10,7 @@
 #include "opencoap.h"
 #include "c6t.h"
 #include "cinfo.h"
+#include "cauthz.h"
 #include "cleds.h"
 #include "cjoin.h"
 #include "cwellknown.h"
@@ -36,6 +37,7 @@ void openapps_init(void) {
    // CoAP
    //c6t_init();
    cinfo_init();
+   cauthz_init();
    cleds__init();
    cjoin_init();
    cwellknown_init();

@@ -11,6 +11,7 @@ if localEnv['board']=='python':
     defaultApps  += [
         'c6t',
         'cinfo',
+        'cauthz',
         'cleds',
         'cwellknown',
         'uecho',
