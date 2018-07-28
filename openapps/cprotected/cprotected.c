@@ -78,12 +78,17 @@ owerror_t cprotected_receive(
         uint8_t*          coap_outgoingOptionsLen
 ) {
    owerror_t outcome;
+   const uint8_t text[] = " __ _  ______\n(_ |_)/ \\|(_\n__)|  \\_/|__)";
 
    switch (coap_header->Code) {
       case COAP_CODE_REQ_GET:
          //=== reset packet payload (we will reuse this packetBuffer)
          msg->payload                     = &(msg->packet[127]);
          msg->length                      = 0;
+
+        // copy payload
+         packetfunctions_reserveHeaderSize(msg,sizeof(text)-1);
+         memcpy(&msg->payload[0],&text,sizeof(text)-1);
 
          //=== prepare  CoAP response
 
