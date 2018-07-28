@@ -38,6 +38,7 @@ void openapps_init(void) {
    //c6t_init();
    cinfo_init();
    cauthz_init();
+   cprotected_init();
    cleds__init();
    cjoin_init();
    cwellknown_init();

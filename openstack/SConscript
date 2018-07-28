@@ -106,6 +106,7 @@ else:
             os.path.join('#','openapps','cexample'),
             os.path.join('#','openapps','cinfo'),
             os.path.join('#','openapps','cauthz'),
+            os.path.join('#','openapps','cprotected'),
             os.path.join('#','openapps','cleds'),
             os.path.join('#','openapps','cstorm'),
             os.path.join('#','openapps','cwellknown'),

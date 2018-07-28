@@ -12,6 +12,7 @@ if localEnv['board']=='python':
         'c6t',
         'cinfo',
         'cauthz',
+        'cprotected',
         'cleds',
         'cwellknown',
         'uecho',
