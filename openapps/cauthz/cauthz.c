@@ -22,17 +22,19 @@ cauthz_vars_t cauthz_vars;
 
 //=========================== prototypes ======================================
 
-owerror_t     cauthz_receive(
+owerror_t cauthz_receive(
         OpenQueueEntry_t* msg,
         coap_header_iht*  coap_header,
         coap_option_iht*  coap_incomingOptions,
         coap_option_iht*  coap_outgoingOptions,
         uint8_t*          coap_outgoingOptionsLen
 );
-void          cauthz_sendDone(
+void cauthz_sendDone(
    OpenQueueEntry_t* msg,
    owerror_t error
 );
+
+owerror_t cauthz_cbor_decode_access_token(uint8_t *buf, uint8_t len, cauthz_access_token_t* token);
 
 //=========================== public ==========================================
 
@@ -81,16 +83,37 @@ owerror_t cauthz_receive(
 
    switch (coap_header->Code) {
       case COAP_CODE_REQ_POST:
-         //=== reset packet payload (we will reuse this packetBuffer)
-         msg->payload                     = &(msg->packet[127]);
-         msg->length                      = 0;
+            // fail on outcome returns METHODNOTALLOWED. we don't want that
+            // rather, we want to handle errors explicitly in the app code
+            // we return E_SUCCESS in all cases, sometimes returning errors as needed
+            outcome                          = E_SUCCESS;
 
-         //=== prepare  CoAP response
+         // === decode and decrypt access token presented in the payload
+         if (cauthz_cbor_decode_access_token(msg->payload, msg->length, &cauthz_vars.accessToken[0]) == E_SUCCESS) {
 
-         // set the CoAP header
-         coap_header->Code                = COAP_CODE_RESP_CREATED;
+             // invoke opencoap to install the context for a given resource
+             opencoap_set_resource_security_context(cauthz_vars.accessToken[0].path0len,
+                     cauthz_vars.accessToken[0].path0val,
+                     cauthz_vars.accessToken[0].path1len,
+                     cauthz_vars.accessToken[0].path1val,
+                     &cauthz_vars.accessToken[0].context);
 
-         outcome                          = E_SUCCESS;
+            //=== reset packet payload (we will reuse this packetBuffer)
+            msg->payload                     = &(msg->packet[127]);
+            msg->length                      = 0;
+
+            //=== prepare  CoAP response
+
+            // set the CoAP header
+            coap_header->Code                = COAP_CODE_RESP_CREATED;
+         } else {
+            //=== reset packet payload (we will reuse this packetBuffer)
+            msg->payload                     = &(msg->packet[127]);
+            msg->length                      = 0;
+
+            // set the CoAP header
+            coap_header->Code                = COAP_CODE_RESP_BADREQ;
+         }
          break;
       default:
          // return an error message
@@ -109,3 +132,9 @@ owerror_t cauthz_receive(
 void cauthz_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }
+
+owerror_t cauthz_cbor_decode_access_token(uint8_t *buf, uint8_t len, cauthz_access_token_t* token) {
+
+    return E_SUCCESS;
+}
+
