@@ -913,6 +913,42 @@ uint8_t opencoap_find_option(coap_option_iht* array, uint8_t arrayLen, coap_opti
 
 }
 
+owerror_t opencoap_set_resource_security_context(uint8_t path0len, uint8_t* path0val, uint8_t path1len, uint8_t* path1val, oscoap_security_context_t* context) {
+    bool found;
+    coap_resource_desc_t* temp_desc;
+
+    found = FALSE;
+
+    // start with the first resource in the linked list
+    temp_desc = opencoap_vars.resources;
+
+    // iterate until matching resource found, or no match
+    while (found==FALSE) {
+
+        if (
+                path0len==temp_desc->path0len                                       &&
+                path1len==temp_desc->path1len                                       &&
+                memcmp(path0val,temp_desc->path0val,temp_desc->path0len)==0         &&
+                memcmp(path1val, temp_desc->path1val, temp_desc->path1len)==0
+                )
+        {
+            found = TRUE;
+            break;
+        }
+        if (temp_desc->next != NULL) {
+            temp_desc = temp_desc->next;
+        } else {
+            break;
+        }
+    }
+
+    if (found == TRUE) {
+        temp_desc->securityContext = context;
+        return E_SUCCESS;
+    }
+    return E_FAIL;
+}
+
 //=========================== private =========================================
 
 uint8_t opencoap_options_parse(
