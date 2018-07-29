@@ -12,8 +12,6 @@
 
 // max number of keys supported in COSE_KeySet
 #define KEYSET_MAX_NUM_KEYS               2
-// CBOR additional info mask
-#define CBOR_ADDINFO_MASK                 0x1F
 // symmetric key length
 #define AES128_KEY_LENGTH                 16
 // IEEE 802.15.4 key id length
@@ -26,15 +24,6 @@
 #define COJP_KEY_MIN_NUM_ELEMS            2
 //=========================== typedef =========================================
 
-// CBOR major types
-typedef enum {
-    CBOR_MAJORTYPE_UINT                 = 0,
-    CBOR_MAJORTYPE_NINT                 = 1,
-    CBOR_MAJORTYPE_BSTR                 = 2,
-    CBOR_MAJORTYPE_TSTR                 = 3,
-    CBOR_MAJORTYPE_ARRAY                = 4,
-    CBOR_MAJORTYPE_MAP                  = 5,
-} cbor_majortype_t;
 
 typedef enum {
     COJP_PARAMETERS_LABELS_ROLE           = 1, // Identifies the role parameter

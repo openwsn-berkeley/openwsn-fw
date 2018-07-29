@@ -90,3 +90,42 @@ cbor_dump_map(uint8_t *buffer, uint8_t elements) {
     return ret;
 }
 
+/**
+\brief Decode a CBOR unsigned integer. Only supports 8-bit values.
+
+This functions attempts to decode a byte string buf into a CBOR unsigned integer.
+
+
+\param[in] buf The input buffer.
+\param[out] value The 8-bit decoded value.
+\return Length of the decoded unsigned integer, 0 if error.
+*/
+uint8_t cbor_load_uint(uint8_t *buf, uint8_t *value) {
+    uint8_t major_type;
+    uint8_t add_info;
+
+    major_type = (cbor_majortype_t) *buf >> 5;
+    add_info = *buf & CBOR_ADDINFO_MASK;
+
+    // assert
+    if (major_type != CBOR_MAJORTYPE_UINT) {
+        return 0;
+    }
+
+    if (add_info < 23) {
+        *value = add_info;
+        return 0 + 1;
+    } else if (add_info == 24) { // uint8_t follows
+        *value = buf[1];
+        return 1 + 1;
+    } else if (add_info == 25) { // uint16_t follows
+        return 1 + 2;
+    } else if (add_info == 26) { // uint32_t follows
+        return 1 + 4;
+    } else if (add_info == 27) { // uint64_t follows
+        return 1 + 8;
+    }
+
+    return 0;
+}
+
