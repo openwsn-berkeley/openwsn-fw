@@ -1,13 +1,13 @@
 /**
-\brief CBOR encoding functions.
+\brief Generic CBOR encoding and decoding functions.
 \Author Martin Gunnarsson <martin.gunnarsson@ri.se>
 \author Modified by Malisa Vucinic <malishav@gmail.com>
 */
 
-#include "cborencoder.h"
+#include "cbor.h"
 
 uint8_t
-cborencoder_put_text(uint8_t *buffer, const char *text, uint8_t text_len) {
+cbor_dump_text(uint8_t *buffer, const char *text, uint8_t text_len) {
     uint8_t ret = 0;
 
     if(text_len > 23 ){
@@ -26,7 +26,7 @@ cborencoder_put_text(uint8_t *buffer, const char *text, uint8_t text_len) {
 }
 
 uint8_t
-cborencoder_put_array(uint8_t *buffer, uint8_t elements) {
+cbor_dump_array(uint8_t *buffer, uint8_t elements) {
     uint8_t ret = 0;
 
     if(elements > 15){
@@ -38,7 +38,7 @@ cborencoder_put_array(uint8_t *buffer, uint8_t elements) {
 }
 
 uint8_t
-cborencoder_put_bytes(uint8_t *buffer, const uint8_t *bytes, uint8_t bytes_len) {
+cbor_dump_bytes(uint8_t *buffer, const uint8_t *bytes, uint8_t bytes_len) {
     uint8_t ret = 0;
 
     if(bytes_len > 23){
@@ -57,7 +57,7 @@ cborencoder_put_bytes(uint8_t *buffer, const uint8_t *bytes, uint8_t bytes_len) 
 }
 
 uint8_t
-cborencoder_put_unsigned(uint8_t *buffer, uint8_t value) {
+cbor_dump_unsigned(uint8_t *buffer, uint8_t value) {
     uint8_t ret = 0;
 
     if(value > 0x17 ){
@@ -71,7 +71,7 @@ cborencoder_put_unsigned(uint8_t *buffer, uint8_t value) {
 }
 
 uint8_t
-cborencoder_put_null(uint8_t *buffer) {
+cbor_dump_null(uint8_t *buffer) {
     uint8_t ret = 0;
 
     buffer[ret++] = 0xf6;
@@ -79,7 +79,7 @@ cborencoder_put_null(uint8_t *buffer) {
 }
 
 uint8_t
-cborencoder_put_map(uint8_t *buffer, uint8_t elements) {
+cbor_dump_map(uint8_t *buffer, uint8_t elements) {
     uint8_t ret = 0;
 
     if(elements > 15){

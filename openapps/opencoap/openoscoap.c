@@ -2,7 +2,7 @@
 #include "openserial.h"
 #include "packetfunctions.h"
 #include "openoscoap.h"
-#include "cborencoder.h"
+#include "cbor.h"
 #include "cryptoengine.h"
 #include "sha.h"
 
@@ -513,21 +513,21 @@ owerror_t hkdf_derive_parameter(uint8_t* buffer,
     uint8_t ret;
 
     infoLen = 0;
-    infoLen += cborencoder_put_array(&info[infoLen], 4);
-    infoLen += cborencoder_put_bytes(&info[infoLen], identifier, identifierLen);
-    infoLen += cborencoder_put_unsigned(&info[infoLen], algorithm);
+    infoLen += cbor_dump_array(&info[infoLen], 4);
+    infoLen += cbor_dump_bytes(&info[infoLen], identifier, identifierLen);
+    infoLen += cbor_dump_unsigned(&info[infoLen], algorithm);
 
     if (type == OSCOAP_DERIVATION_TYPE_KEY) {
-        infoLen += cborencoder_put_text(&info[infoLen], (char *) key, sizeof(key)-1);
+        infoLen += cbor_dump_text(&info[infoLen], (char *) key, sizeof(key)-1);
     }
     else if (type == OSCOAP_DERIVATION_TYPE_IV) {
-        infoLen += cborencoder_put_text(&info[infoLen], (char *) iv, sizeof(iv)-1);
+        infoLen += cbor_dump_text(&info[infoLen], (char *) iv, sizeof(iv)-1);
     }
     else {
         return E_FAIL;
     }
 
-    infoLen += cborencoder_put_unsigned(&info[infoLen], length);
+    infoLen += cbor_dump_unsigned(&info[infoLen], length);
 
     ret = hkdf(SHA256, masterSalt, masterSaltLen, masterSecret, masterSecretLen, info, infoLen, buffer, length);
 
@@ -568,13 +568,13 @@ uint8_t openoscoap_construct_aad(uint8_t* buffer,
     ret = 0;
     externalAADLen = 0;
 
-    externalAADLen += cborencoder_put_array(&externalAAD[externalAADLen], 6);
-    externalAADLen += cborencoder_put_unsigned(&externalAAD[externalAADLen], version);
-    externalAADLen += cborencoder_put_unsigned(&externalAAD[externalAADLen], code);
-    externalAADLen += cborencoder_put_bytes(&externalAAD[externalAADLen], optionsSerialized, optionsSerializedLen);
-    externalAADLen += cborencoder_put_unsigned(&externalAAD[externalAADLen], aeadAlgorithm);
-    externalAADLen += cborencoder_put_bytes(&externalAAD[externalAADLen], requestKid, requestKidLen);
-    externalAADLen += cborencoder_put_bytes(&externalAAD[externalAADLen], requestSeq, requestSeqLen);
+    externalAADLen += cbor_dump_array(&externalAAD[externalAADLen], 6);
+    externalAADLen += cbor_dump_unsigned(&externalAAD[externalAADLen], version);
+    externalAADLen += cbor_dump_unsigned(&externalAAD[externalAADLen], code);
+    externalAADLen += cbor_dump_bytes(&externalAAD[externalAADLen], optionsSerialized, optionsSerializedLen);
+    externalAADLen += cbor_dump_unsigned(&externalAAD[externalAADLen], aeadAlgorithm);
+    externalAADLen += cbor_dump_bytes(&externalAAD[externalAADLen], requestKid, requestKidLen);
+    externalAADLen += cbor_dump_bytes(&externalAAD[externalAADLen], requestSeq, requestSeqLen);
 
     if (externalAADLen > EAAD_MAX_LEN) {
         // corruption
@@ -586,13 +586,13 @@ uint8_t openoscoap_construct_aad(uint8_t* buffer,
         return 0;
     }
 
-    ret += cborencoder_put_array(&buffer[ret], 3); // COSE Encrypt0 structure with 3 elements
+    ret += cbor_dump_array(&buffer[ret], 3); // COSE Encrypt0 structure with 3 elements
     // first element: "Encrypt0"
-    ret += cborencoder_put_text(&buffer[ret], (char *) encrypt0, sizeof(encrypt0) - 1);
+    ret += cbor_dump_text(&buffer[ret], (char *) encrypt0, sizeof(encrypt0) - 1);
     // second element: empty byte string
-    ret += cborencoder_put_bytes(&buffer[ret], NULL, 0);
+    ret += cbor_dump_bytes(&buffer[ret], NULL, 0);
     // third element: external AAD from OSCOAP
-    ret += cborencoder_put_bytes(&buffer[ret], externalAAD, externalAADLen);
+    ret += cbor_dump_bytes(&buffer[ret], externalAAD, externalAADLen);
 
     return ret;
 }

@@ -12,7 +12,7 @@
 #include "board.h"
 #include "idmanager.h"
 #include "icmpv6rpl.h"
-#include "cborencoder.h"
+#include "cbor.h"
 
 //=========================== defines =========================================
 
@@ -215,9 +215,9 @@ uint8_t cprotected_get_as_info(uint8_t* buf) {
         uriLen += sizeof(token)-1;
 
         // Now, create CBOR AS Info object
-        len += cborencoder_put_map(&buf[len], 1);
-        len += cborencoder_put_unsigned(&buf[len], (uint8_t) AS_INFO_LABEL_AS);
-        len += cborencoder_put_text(&buf[len], (char *) uri, uriLen);
+        len += cbor_dump_map(&buf[len], 1);
+        len += cbor_dump_unsigned(&buf[len], (uint8_t) AS_INFO_LABEL_AS);
+        len += cbor_dump_text(&buf[len], (char *) uri, uriLen);
 
         return len;
     }

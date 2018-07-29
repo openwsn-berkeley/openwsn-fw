@@ -2,7 +2,7 @@
 \brief CBOR helper functions implementing decoding and encoding of structures defined in draft-6tisch-minimal-security-06.
 */
 #include "cojp_cbor.h"
-#include "cborencoder.h"
+#include "cbor.h"
 
 //=========================== defines =========================================
 // number of bytes in 802.15.4 short address
@@ -116,13 +116,13 @@ uint8_t cojp_cbor_encode_join_request_object(uint8_t *buf, cojp_join_request_obj
         elements = 2;
     }
 
-    len += cborencoder_put_map(&buf[len], elements);
+    len += cbor_dump_map(&buf[len], elements);
     if (elements == 2) {
-        len += cborencoder_put_unsigned(&buf[len], (uint8_t) COJP_PARAMETERS_LABELS_ROLE);
-        len += cborencoder_put_unsigned(&buf[len], (uint8_t) join_request->role);
+        len += cbor_dump_unsigned(&buf[len], (uint8_t) COJP_PARAMETERS_LABELS_ROLE);
+        len += cbor_dump_unsigned(&buf[len], (uint8_t) join_request->role);
     }
-    len += cborencoder_put_unsigned(&buf[len], (uint8_t) COJP_PARAMETERS_LABELS_NETID);
-    len += cborencoder_put_bytes(&buf[len], (join_request->pan_id)->panid, LENGTH_ADDR16b);
+    len += cbor_dump_unsigned(&buf[len], (uint8_t) COJP_PARAMETERS_LABELS_NETID);
+    len += cbor_dump_bytes(&buf[len], (join_request->pan_id)->panid, LENGTH_ADDR16b);
 
     return len;
 }
