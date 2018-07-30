@@ -178,7 +178,8 @@ typedef owerror_t (*callbackRx_cbt)(OpenQueueEntry_t* msg,
                                 coap_header_iht*  coap_header,
                                 coap_option_iht*  coap_incomingOptions,
                                 coap_option_iht*  coap_outgoingOptions,
-                                uint8_t*          coap_outgoingOptionsLen);
+                                uint8_t*          coap_outgoingOptionsLen,
+                                bool              security);
 typedef void (*callbackSendDone_cbt)(OpenQueueEntry_t* msg,
                                       owerror_t error);
 

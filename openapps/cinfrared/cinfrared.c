@@ -26,7 +26,8 @@ owerror_t cinfrared_receive(OpenQueueEntry_t* msg,
     coap_header_iht*  coap_header,
     coap_option_iht*  coap_incomingOptions,
     coap_option_iht*  coap_outgoingOptions,
-    uint8_t*          coap_outgoingOptionsLen
+    uint8_t*          coap_outgoingOptionsLen,
+    bool              security
 );
 void cinfrared_sendDone(
     OpenQueueEntry_t* msg,
@@ -38,7 +39,7 @@ void cinrared_turnOnOrOff(uint8_t turnOnOrOff);
 //=========================== public ==========================================
 
 void cinfrared_init(void) {
-    if(idmanager_getIsDAGroot()==TRUE) return; 
+    if(idmanager_getIsDAGroot()==TRUE) return;
 
     // prepare the resource descriptor for the /6t path
     cinfrared_vars.desc.path0len            = sizeof(cinfrared_path0)-1;
@@ -52,7 +53,7 @@ void cinfrared_init(void) {
     cinfrared_vars.desc.callbackSendDone    = &cinfrared_sendDone;
 
     opencoap_register(&cinfrared_vars.desc);
-    
+
     cinfrared_vars.timerId          = opentimers_create();
 }
 
@@ -72,17 +73,18 @@ owerror_t cinfrared_receive(OpenQueueEntry_t* msg,
     coap_header_iht*  coap_header,
     coap_option_iht*  coap_incomingOptions,
     coap_option_iht*  coap_outgoingOptions,
-    uint8_t*          coap_outgoingOptionsLen
+    uint8_t*          coap_outgoingOptionsLen,
+    bool              security
 ) {
     owerror_t            outcome;
-   
+
     switch (coap_header->Code) {
         case COAP_CODE_REQ_PUT:
-          
+
             cinfrared_vars.state = APP_STATE_START;
             // change the infrared's state
             cinrared_turnOnOrOff(msg->payload[0]);
-            
+
             // reset packet payload
             msg->payload                     = &(msg->packet[127]);
             msg->length                      = 0;
@@ -210,10 +212,10 @@ void cinrared_turnOnOrOff(uint8_t turnOnOrOff){
         pwm_disable();
         break;
     }
-    
+
     if (cinfrared_vars.state==APP_STATE_END){
         cinfrared_vars.state = APP_STATE_START;
     } else {
         cinfrared_vars.state++;
-    }   
+    }
 }

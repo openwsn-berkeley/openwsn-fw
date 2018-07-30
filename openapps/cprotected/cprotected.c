@@ -29,7 +29,8 @@ owerror_t cprotected_receive(
         coap_header_iht*  coap_header,
         coap_option_iht*  coap_incomingOptions,
         coap_option_iht*  coap_outgoingOptions,
-        uint8_t*          coap_outgoingOptionsLen
+        uint8_t*          coap_outgoingOptionsLen,
+        bool              security
 );
 void cprotected_sendDone(
         OpenQueueEntry_t* msg,
@@ -79,28 +80,19 @@ owerror_t cprotected_receive(
         coap_header_iht*  coap_header,
         coap_option_iht*  coap_incomingOptions,
         coap_option_iht*  coap_outgoingOptions,
-        uint8_t*          coap_outgoingOptionsLen
+        uint8_t*          coap_outgoingOptionsLen,
+        bool              security
 ) {
     owerror_t outcome;
-    uint8_t i;
-    bool found;
     uint8_t asInfo[60];    // buffer holding CBOR serialization of AS info object
     uint8_t asInfoLen;
     const uint8_t text[] = " __ _  ______\n(_ |_)/ \\|(_\n__)|  \\_/|__)";
 
-    i = 0;
     asInfoLen = 0;
-    found = FALSE;
-
-    while (coap_incomingOptions[i].type != COAP_OPTION_NONE) {
-        if (coap_incomingOptions[i].type == COAP_OPTION_NUM_OBJECTSECURITY) {
-            found = TRUE;
-        }
-        i++;
-    }
 
     // if received over unprotected channel (no OSCORE), return unauthorized
-    if (!found) {
+    if (!security) {
+        printf("object sec not found\n");
         //=== reset packet payload (we will reuse this packetBuffer)
         msg->payload                     = &(msg->packet[127]);
         msg->length                      = 0;

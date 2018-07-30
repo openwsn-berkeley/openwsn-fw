@@ -28,7 +28,8 @@ owerror_t     rrt_receive(
         coap_header_iht*  coap_header,
         coap_option_iht*  coap_incomingOptions,
         coap_option_iht*  coap_outgoingOptions,
-        uint8_t*          coap_outgoingOptionsLen
+        uint8_t*          coap_outgoingOptionsLen,
+        bool              security
 );
 void          rrt_sendDone(
    OpenQueueEntry_t* msg,
@@ -36,7 +37,7 @@ void          rrt_sendDone(
 );
 void rrt_setGETRespMsg(
    OpenQueueEntry_t* msg,
-   uint8_t discovered   
+   uint8_t discovered
 );
 
 void rrt_sendCoAPMsg(char actionMsg, uint8_t *ipv6mote);
@@ -47,10 +48,10 @@ void rrt_sendCoAPMsg(char actionMsg, uint8_t *ipv6mote);
 \brief Initialize this module.
 */
 void rrt_init(void) {
-   
+
    // do not run if DAGroot
-   if(idmanager_getIsDAGroot()==TRUE) return; 
-   
+   if(idmanager_getIsDAGroot()==TRUE) return;
+
    // prepare the resource descriptor for the /rt path
    rrt_vars.desc.path0len             = sizeof(rrt_path0)-1;
    rrt_vars.desc.path0val             = (uint8_t*)(&rrt_path0);
@@ -63,7 +64,7 @@ void rrt_init(void) {
    rrt_vars.desc.callbackSendDone     = &rrt_sendDone;
 
    rrt_vars.discovered                = 0; //if this mote has been discovered by ringmaster
-   
+
    // register with the CoAP module
    opencoap_register(&rrt_vars.desc);
 }
@@ -85,7 +86,8 @@ owerror_t     rrt_receive(
         coap_header_iht*  coap_header,
         coap_option_iht*  coap_incomingOptions,
         coap_option_iht*  coap_outgoingOptions,
-        uint8_t*          coap_outgoingOptionsLen
+        uint8_t*          coap_outgoingOptionsLen,
+        bool              security
 ) {
    owerror_t outcome;
    uint8_t mssgRecvd;
@@ -94,23 +96,23 @@ owerror_t     rrt_receive(
 
    switch (coap_header->Code) {
       case COAP_CODE_REQ_GET:
-         
+
          //=== reset packet payload (we will reuse this packetBuffer)
          msg->payload                     = &(msg->packet[127]);
          msg->length                      = 0;
-         
+
          //=== prepare  CoAP response
          rrt_setGETRespMsg(msg, rrt_vars.discovered);
-         
+
          // set the CoAP header
          coap_header->Code                = COAP_CODE_RESP_CONTENT;
-         
+
          outcome                          = E_SUCCESS;
          break;
       case COAP_CODE_REQ_PUT:
       case COAP_CODE_REQ_POST:
          mssgRecvd = msg->payload[0];
-         
+
          if (mssgRecvd == 'C') {
             rrt_vars.discovered = 1;
          } else if (mssgRecvd == 'B' && rrt_vars.discovered == 1) {
@@ -133,18 +135,18 @@ owerror_t     rrt_receive(
          coap_header->Code                = COAP_CODE_RESP_CONTENT;
 
          outcome                          = E_SUCCESS;
-         
+
          break;
       case COAP_CODE_REQ_DELETE:
          msg->payload                     = &(msg->packet[127]);
          msg->length                      = 0;
-         
+
          //unregister the current mote as 'discovered' by ringmaster
-         rrt_vars.discovered = 0; 
-         
+         rrt_vars.discovered = 0;
+
          // set the CoAP header
          coap_header->Code                = COAP_CODE_RESP_CONTENT;
-         
+
          outcome                          = E_SUCCESS;
          break;
 
@@ -152,7 +154,7 @@ owerror_t     rrt_receive(
          // return an error message
          outcome = E_FAIL;
    }
-   
+
    return outcome;
 }
 
@@ -217,7 +219,7 @@ void rrt_sendCoAPMsg(char actionMsg, uint8_t *ipv6mote) {
       options[0].type = COAP_OPTION_NUM_URIPATH;
       options[0].length = sizeof(rrt_path0) - 1;
       options[0].pValue = (uint8_t *) rrt_path0;
-      
+
        // content-type option
       medType = COAP_MEDTYPE_APPOCTETSTREAM;
       options[1].type = COAP_OPTION_NUM_CONTENTFORMAT;
@@ -225,7 +227,7 @@ void rrt_sendCoAPMsg(char actionMsg, uint8_t *ipv6mote) {
       options[1].pValue = &medType;
 
       //metada
-      pkt->l4_destination_port   = WKP_UDP_RINGMASTER; 
+      pkt->l4_destination_port   = WKP_UDP_RINGMASTER;
       pkt->l3_destinationAdd.type = ADDR_128B;
       // set destination address here
       if (!ipv6mote) {  //if mote ptr is NULL, then send to ringmaster
@@ -244,7 +246,7 @@ void rrt_sendCoAPMsg(char actionMsg, uint8_t *ipv6mote) {
               2, // options len
               &rrt_vars.desc
               );
-      
+
 
       if (outcome == E_FAIL) {
         openqueue_freePacketBuffer(pkt);

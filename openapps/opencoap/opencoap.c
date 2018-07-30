@@ -398,7 +398,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
                         return;
                     }
                 }
-               temp_desc->callbackRx(msg,&coap_header,&coap_incomingOptions[0], NULL, NULL);
+               temp_desc->callbackRx(msg,&coap_header,&coap_incomingOptions[0], NULL, NULL, objectSecurity != NULL ? TRUE : FALSE);
             }
          }
 
@@ -424,11 +424,11 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    if (found==TRUE && securityReturnCode==COAP_CODE_EMPTY) {
 
       // call the resource's callback
-      outcome = temp_desc->callbackRx(msg,&coap_header,&coap_incomingOptions[0], coap_outgoingOptions, &coap_outgoingOptionsLen);
+      outcome = temp_desc->callbackRx(msg,&coap_header,&coap_incomingOptions[0], coap_outgoingOptions, &coap_outgoingOptionsLen, objectSecurity != NULL ? TRUE : FALSE);
       if (outcome == E_FAIL) {
             securityReturnCode = COAP_CODE_RESP_METHODNOTALLOWED;
       }
-    if (temp_desc->securityContext != NULL) {
+    if (temp_desc->securityContext != NULL && objectSecurity) {
         coap_outgoingOptions[coap_outgoingOptionsLen++].type = COAP_OPTION_NUM_OBJECTSECURITY;
         if (coap_outgoingOptionsLen > MAX_COAP_OPTIONS) {
             securityReturnCode = COAP_CODE_RESP_SERVERERROR; // no space for object security option

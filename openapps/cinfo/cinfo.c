@@ -27,7 +27,8 @@ owerror_t     cinfo_receive(
         coap_header_iht*  coap_header,
         coap_option_iht*  coap_incomingOptions,
         coap_option_iht*  coap_outgoingOptions,
-        uint8_t*          coap_outgoingOptionsLen
+        uint8_t*          coap_outgoingOptionsLen,
+        bool              security
 );
 void          cinfo_sendDone(
    OpenQueueEntry_t* msg,
@@ -41,8 +42,8 @@ void          cinfo_sendDone(
 */
 void cinfo_init(void) {
    // do not run if DAGroot
-   if(idmanager_getIsDAGroot()==TRUE) return; 
-   
+   if(idmanager_getIsDAGroot()==TRUE) return;
+
    // prepare the resource descriptor for the /i path
    cinfo_vars.desc.path0len             = sizeof(cinfo_path0)-1;
    cinfo_vars.desc.path0val             = (uint8_t*)(&cinfo_path0);
@@ -53,7 +54,7 @@ void cinfo_init(void) {
    cinfo_vars.desc.discoverable         = TRUE;
    cinfo_vars.desc.callbackRx           = &cinfo_receive;
    cinfo_vars.desc.callbackSendDone     = &cinfo_sendDone;
-   
+
    // register with the CoAP module
    opencoap_register(&cinfo_vars.desc);
 }
@@ -75,34 +76,35 @@ owerror_t cinfo_receive(
         coap_header_iht*  coap_header,
         coap_option_iht*  coap_incomingOptions,
         coap_option_iht*  coap_outgoingOptions,
-        uint8_t*          coap_outgoingOptionsLen
+        uint8_t*          coap_outgoingOptionsLen,
+        bool              security
 ) {
    owerror_t outcome;
-   
+
    switch (coap_header->Code) {
       case COAP_CODE_REQ_GET:
          //=== reset packet payload (we will reuse this packetBuffer)
          msg->payload                     = &(msg->packet[127]);
          msg->length                      = 0;
-         
+
          //=== prepare  CoAP response
-         
+
          // radio name
          packetfunctions_reserveHeaderSize(msg,sizeof(infoRadioName)-1);
          memcpy(&msg->payload[0],&infoRadioName,sizeof(infoRadioName)-1);
-         
+
          // uC name
          packetfunctions_reserveHeaderSize(msg,1);
          msg->payload[0] = '\n';
          packetfunctions_reserveHeaderSize(msg,sizeof(infouCName)-1);
          memcpy(&msg->payload[0],&infouCName,sizeof(infouCName)-1);
-         
+
          // board name
          packetfunctions_reserveHeaderSize(msg,1);
          msg->payload[0] = '\n';
          packetfunctions_reserveHeaderSize(msg,sizeof(infoBoardname)-1);
          memcpy(&msg->payload[0],&infoBoardname,sizeof(infoBoardname)-1);
-         
+
          // stack name and version
          packetfunctions_reserveHeaderSize(msg,1);
          msg->payload[0] = '\n';
@@ -114,17 +116,17 @@ owerror_t cinfo_receive(
          msg->payload[sizeof(infoStackName)-1+6-3] = '0'+OPENWSN_VERSION_MINOR % 10;
          msg->payload[sizeof(infoStackName)-1+6-2] = '.';
          msg->payload[sizeof(infoStackName)-1+6-1] = '0'+OPENWSN_VERSION_PATCH;
-         
+
          // set the CoAP header
          coap_header->Code                = COAP_CODE_RESP_CONTENT;
-         
+
          outcome                          = E_SUCCESS;
          break;
       default:
          // return an error message
          outcome = E_FAIL;
    }
-   
+
    return outcome;
 }
 
