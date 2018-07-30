@@ -38,7 +38,8 @@ void cauthz_sendDone(
    owerror_t error
 );
 
-owerror_t cauthz_cbor_decode_access_token(uint8_t *buf, uint8_t len, cauthz_access_token_t* token);
+owerror_t cauthz_cbor_decode_access_token(uint8_t* buf, uint8_t len, cauthz_oscore_cwt_t* token);
+owerror_t cauthz_cbor_decode_cwt(uint8_t* ciphertext, uint8_t ciphertextLen, cauthz_oscore_cwt_t* token);
 
 //=========================== public ==========================================
 
@@ -63,7 +64,7 @@ void cauthz_init(void) {
    cauthz_vars.desc.callbackRx           = &cauthz_receive;
    cauthz_vars.desc.callbackSendDone     = &cauthz_sendDone;
 
-   memset(cauthz_vars.accessToken, 0x00, sizeof(cauthz_access_token_t));
+   memset(cauthz_vars.accessToken, 0x00, sizeof(cauthz_oscore_cwt_t));
 
    eui64_get(myId);
    idmanager_getJoinKey(&joinKey);
@@ -157,7 +158,7 @@ void cauthz_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }
 
-owerror_t cauthz_cbor_decode_access_token(uint8_t *buf, uint8_t len, cauthz_access_token_t* token) {
+owerror_t cauthz_cbor_decode_access_token(uint8_t *buf, uint8_t len, cauthz_oscore_cwt_t* token) {
     owerror_t decStatus;
     cbor_majortype_t major_type;
     uint8_t add_info;
@@ -255,8 +256,13 @@ owerror_t cauthz_cbor_decode_access_token(uint8_t *buf, uint8_t len, cauthz_acce
                                     AES_CCM_16_64_128_TAG_LEN);
 
     if (decStatus == E_SUCCESS) {
-        return E_SUCCESS;
+        return cauthz_cbor_decode_cwt(ciphertext, ciphertextLen, token);
     }
+
+    return E_FAIL;
+}
+
+owerror_t cauthz_cbor_decode_cwt(uint8_t* ciphertext, uint8_t ciphertextLen, cauthz_oscore_cwt_t* token) {
 
     return E_FAIL;
 }

@@ -29,11 +29,11 @@ typedef struct {
     uint8_t                    path0val[10];
     uint8_t                    path1len;
     uint8_t                    path1val[10];
-} cauthz_access_token_t;
+} cauthz_oscore_cwt_t;
 
 typedef struct {
    coap_resource_desc_t         desc;
-   cauthz_access_token_t        accessToken[1];
+   cauthz_oscore_cwt_t          accessToken[1];
    uint8_t                      appKey[16];
 } cauthz_vars_t;
 
