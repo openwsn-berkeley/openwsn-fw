@@ -17,18 +17,6 @@
 openoscoap_vars_t openoscoap_vars;
 
 //=========================== prototype =======================================
-owerror_t hkdf_derive_parameter(uint8_t* buffer,
-        uint8_t* masterSecret,
-        uint8_t masterSecretLen,
-        uint8_t* masterSalt,
-        uint8_t masterSaltLen,
-        uint8_t* identifier,
-        uint8_t identifierLen,
-        uint8_t algorithm,
-        oscoap_derivation_t type,
-        uint8_t length
-        );
-
 bool is_request(uint8_t code);
 
 uint8_t openoscoap_construct_aad(uint8_t* buffer,
@@ -98,7 +86,7 @@ void openoscoap_init_security_context(oscoap_security_context_t *ctx,
     memcpy(ctx->senderID, senderID, senderIDLen);
     ctx->senderIDLen = senderIDLen;
     // invoke HKDF to get sender Key
-    hkdf_derive_parameter(ctx->senderKey,
+    openoscoap_hkdf_derive_parameter(ctx->senderKey,
             masterSecret,
             masterSecretLen,
             masterSalt,
@@ -109,7 +97,7 @@ void openoscoap_init_security_context(oscoap_security_context_t *ctx,
             OSCOAP_DERIVATION_TYPE_KEY,
             AES_CCM_16_64_128_KEY_LEN);
     // invoke HKDF to get sender IV
-    hkdf_derive_parameter(ctx->senderIV,
+    openoscoap_hkdf_derive_parameter(ctx->senderIV,
             masterSecret,
             masterSecretLen,
             masterSalt,
@@ -126,7 +114,7 @@ void openoscoap_init_security_context(oscoap_security_context_t *ctx,
     memcpy(ctx->recipientID, recipientID, recipientIDLen);
     ctx->recipientIDLen = recipientIDLen;
     // invoke HKDF to get recipient Key
-    hkdf_derive_parameter(ctx->recipientKey,
+    openoscoap_hkdf_derive_parameter(ctx->recipientKey,
             masterSecret,
             masterSecretLen,
             masterSalt,
@@ -138,7 +126,7 @@ void openoscoap_init_security_context(oscoap_security_context_t *ctx,
             AES_CCM_16_64_128_KEY_LEN);
 
     // invoke HKDF to get recipient IV
-    hkdf_derive_parameter(ctx->recipientIV,
+    openoscoap_hkdf_derive_parameter(ctx->recipientIV,
             masterSecret,
             masterSecretLen,
             masterSalt,
@@ -491,10 +479,7 @@ uint8_t openoscoap_parse_compressed_COSE(uint8_t *buffer,
     return index;
 }
 
-
-//=========================== private =========================================
-
-owerror_t hkdf_derive_parameter(uint8_t* buffer,
+owerror_t openoscoap_hkdf_derive_parameter(uint8_t* buffer,
         uint8_t* masterSecret,
         uint8_t masterSecretLen,
         uint8_t* masterSalt,
@@ -508,6 +493,7 @@ owerror_t hkdf_derive_parameter(uint8_t* buffer,
 
     const uint8_t iv[] = "IV";
     const uint8_t key[] = "Key";
+    const uint8_t ace[] = "ACE";
     uint8_t info[20];
     uint8_t infoLen;
     uint8_t ret;
@@ -523,6 +509,9 @@ owerror_t hkdf_derive_parameter(uint8_t* buffer,
     else if (type == OSCOAP_DERIVATION_TYPE_IV) {
         infoLen += cbor_dump_text(&info[infoLen], (char *) iv, sizeof(iv)-1);
     }
+    else if (type == OSCOAP_DERIVATION_TYPE_ACE) {
+        infoLen += cbor_dump_text(&info[infoLen], (char *) ace, sizeof(ace)-1);
+    }
     else {
         return E_FAIL;
     }
@@ -536,6 +525,8 @@ owerror_t hkdf_derive_parameter(uint8_t* buffer,
     }
     return E_FAIL;
 }
+
+//=========================== private =========================================
 
 bool is_request(uint8_t code) {
    if ( code == (uint8_t) COAP_CODE_REQ_GET     ||
