@@ -19,6 +19,7 @@
 //=========================== defines =========================================
 
 const uint8_t cauthz_path0[] = "authz-info";
+const uint8_t cauthz_default_scope[] = "resource1";
 
 //=========================== variables =======================================
 
@@ -31,7 +32,8 @@ owerror_t cauthz_receive(
         coap_header_iht*  coap_header,
         coap_option_iht*  coap_incomingOptions,
         coap_option_iht*  coap_outgoingOptions,
-        uint8_t*          coap_outgoingOptionsLen
+        uint8_t*          coap_outgoingOptionsLen,
+        bool              security
 );
 void cauthz_sendDone(
    OpenQueueEntry_t* msg,
@@ -64,7 +66,7 @@ void cauthz_init(void) {
    cauthz_vars.desc.callbackRx           = &cauthz_receive;
    cauthz_vars.desc.callbackSendDone     = &cauthz_sendDone;
 
-   memset(cauthz_vars.accessToken, 0x00, sizeof(cauthz_oscore_cwt_t));
+   memset(&cauthz_vars.accessToken, 0x00, sizeof(cauthz_oscore_cwt_t));
 
    eui64_get(myId);
    idmanager_getJoinKey(&joinKey);
@@ -102,7 +104,8 @@ owerror_t cauthz_receive(
         coap_header_iht*  coap_header,
         coap_option_iht*  coap_incomingOptions,
         coap_option_iht*  coap_outgoingOptions,
-        uint8_t*          coap_outgoingOptionsLen
+        uint8_t*          coap_outgoingOptionsLen,
+        bool              security
 ) {
    owerror_t outcome;
 
@@ -114,14 +117,28 @@ owerror_t cauthz_receive(
             outcome                          = E_SUCCESS;
 
          // === decode and decrypt access token presented in the payload
-         if (cauthz_cbor_decode_access_token(msg->payload, msg->length, &cauthz_vars.accessToken[0]) == E_SUCCESS) {
+         if (cauthz_cbor_decode_access_token(msg->payload, msg->length, &cauthz_vars.accessToken) == E_SUCCESS) {
 
-             // invoke opencoap to install the context for a given resource
-             opencoap_set_resource_security_context(cauthz_vars.accessToken[0].path0len,
-                     cauthz_vars.accessToken[0].path0val,
-                     cauthz_vars.accessToken[0].path1len,
-                     cauthz_vars.accessToken[0].path1val,
-                     &cauthz_vars.accessToken[0].context);
+             if (cauthz_vars.accessToken.path0len == 0 && cauthz_vars.accessToken.path1len == 0) {
+                 // invoke opencoap to install the context for the implied scopee
+                 opencoap_set_resource_security_context(
+                         sizeof(cauthz_default_scope)-1,
+                         (uint8_t*)(&cauthz_default_scope),
+                         0,
+                         NULL,
+                         &cauthz_vars.accessToken.context
+                         );
+
+             } else {
+                 // invoke opencoap to install the context for the explicitly signaled resource
+                 opencoap_set_resource_security_context(
+                         cauthz_vars.accessToken.path0len,
+                         cauthz_vars.accessToken.path0val,
+                         cauthz_vars.accessToken.path1len,
+                         cauthz_vars.accessToken.path1val,
+                         &cauthz_vars.accessToken.context
+                         );
+            }
 
             //=== reset packet payload (we will reuse this packetBuffer)
             msg->payload                     = &(msg->packet[127]);
@@ -262,8 +279,144 @@ owerror_t cauthz_cbor_decode_access_token(uint8_t *buf, uint8_t len, cauthz_osco
     return E_FAIL;
 }
 
-owerror_t cauthz_cbor_decode_cwt(uint8_t* ciphertext, uint8_t ciphertextLen, cauthz_oscore_cwt_t* token) {
+owerror_t cauthz_cbor_decode_cwt(uint8_t* buf, uint8_t len, cauthz_oscore_cwt_t* token) {
+    cbor_majortype_t major_type;
+    uint8_t add_info;
+    uint8_t i;
+    uint8_t *tmp;
+    uint8_t label;
+    uint8_t num_elems;
+    uint8_t master_secret[AES128_KEY_LENGTH];
+    uint8_t master_secret_len;
+    uint8_t master_salt[AES128_KEY_LENGTH];
+    uint8_t master_salt_len;
+    uint8_t client_id[OSCOAP_MAX_ID_LEN];
+    uint8_t client_id_len;
+    uint8_t server_id[OSCOAP_MAX_ID_LEN];
+    uint8_t server_id_len;
 
-    return E_FAIL;
+    i = 0;
+    label = 0;
+    tmp = buf;
+    master_secret_len = 0;
+    master_salt_len = 0;
+    client_id_len = 0;
+    server_id_len = 0;
+
+    // assert
+    if (*tmp != 0xa1) {  // not a map with a single element (cnf)
+        return E_FAIL;
+    }
+
+    tmp++;
+
+    // expecting a uint
+    tmp += cbor_load_uint(tmp, &label);
+
+    if (label != ACE_PARAMETERS_LABELS_CNF) {
+        return E_FAIL;
+    }
+
+    // assert
+    if (*tmp != 0xa1) {  // not a map with a single element (COSE_Key)
+        return E_FAIL;  // TODO extend to support scope parameter
+    }
+
+    tmp++;
+
+    tmp += cbor_load_uint(tmp, &label);
+
+    if (label != ACE_CWT_CNF_COSE_KEY) {
+        return E_FAIL;
+    }
+
+    // now, we are actually at the useful part
+
+    major_type = (cbor_majortype_t) *tmp >> 5;
+    num_elems = *tmp & CBOR_ADDINFO_MASK;
+
+    if (major_type != CBOR_MAJORTYPE_MAP && num_elems >= 23) {
+        return E_FAIL;
+    }
+
+   tmp++;
+   for (i = 0; i < num_elems; i++) {
+        switch((cose_key_parameters_labels_t) *tmp) {
+            case COSE_KEY_LABEL_KTY:
+                tmp++;
+                if (*tmp != COSE_KEY_VALUE_SYMMETRIC) {
+                    // unsupported, fail immediately
+                    return E_FAIL;
+                }
+                tmp++;
+                break;
+            case COSE_KEY_LABEL_K:  // OSCORE Master Secret
+                tmp++;
+                major_type = (cbor_majortype_t) *tmp >> 5;
+                add_info = *tmp & CBOR_ADDINFO_MASK;
+                if (major_type != CBOR_MAJORTYPE_BSTR && add_info > AES128_KEY_LENGTH) {
+                    return E_FAIL;
+                }
+                tmp++;
+                memcpy(master_secret, tmp, add_info);
+                master_secret_len = add_info;
+                tmp += add_info;
+                break;
+            case COSE_KEY_LABEL_SLT:  // OSCORE Master Salt
+                tmp++;
+                major_type = (cbor_majortype_t) *tmp >> 5;
+                add_info = *tmp & CBOR_ADDINFO_MASK;
+                if (major_type != CBOR_MAJORTYPE_BSTR && add_info > AES128_KEY_LENGTH) {
+                    return E_FAIL;
+                }
+                tmp++;
+                memcpy(master_secret, tmp, add_info);
+                master_salt_len = add_info;
+                tmp += add_info;
+                break;
+            case COSE_KEY_LABEL_CLIENT_ID:
+                tmp++;
+                major_type = (cbor_majortype_t) *tmp >> 5;
+                add_info = *tmp & CBOR_ADDINFO_MASK;
+                if (major_type != CBOR_MAJORTYPE_BSTR && add_info > OSCOAP_MAX_ID_LEN) {
+                    return E_FAIL;
+                }
+                tmp++;
+                memcpy(client_id, tmp, add_info);
+                client_id_len = add_info;
+                tmp += add_info;
+                break;
+            case COSE_KEY_LABEL_SERVER_ID:
+                tmp++;
+                major_type = (cbor_majortype_t) *tmp >> 5;
+                add_info = *tmp & CBOR_ADDINFO_MASK;
+                if (major_type != CBOR_MAJORTYPE_BSTR && add_info > OSCOAP_MAX_ID_LEN) {
+                    return E_FAIL;
+                }
+                tmp++;
+                memcpy(server_id, tmp, add_info);
+                server_id_len = add_info;
+                tmp += add_info;
+                break;
+            default:
+                // reject any unsupported parameter
+                return E_FAIL;
+        }
+    }
+
+    openoscoap_init_security_context(&token->context,
+            server_id,
+            server_id_len,
+            client_id,
+            client_id_len,
+            master_secret,
+            master_secret_len,
+            master_salt,
+            master_salt_len);
+
+    token->path0len = 0;
+    token->path1len = 0;
+
+    return E_SUCCESS;
 }
 

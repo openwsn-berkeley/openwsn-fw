@@ -92,7 +92,6 @@ owerror_t cprotected_receive(
 
     // if received over unprotected channel (no OSCORE), return unauthorized
     if (!security) {
-        printf("object sec not found\n");
         //=== reset packet payload (we will reuse this packetBuffer)
         msg->payload                     = &(msg->packet[127]);
         msg->length                      = 0;
