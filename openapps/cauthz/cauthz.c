@@ -11,6 +11,10 @@
 #include "openrandom.h"
 #include "board.h"
 #include "idmanager.h"
+#include "eui64.h"
+#include "cbor.h"
+#include "cryptoengine.h"
+#include "openoscoap.h"
 
 //=========================== defines =========================================
 
@@ -42,6 +46,9 @@ owerror_t cauthz_cbor_decode_access_token(uint8_t *buf, uint8_t len, cauthz_acce
 \brief Initialize this module.
 */
 void cauthz_init(void) {
+    uint8_t myId[8];
+    uint8_t *joinKey;
+
    // do not run if DAGroot
    if(idmanager_getIsDAGroot()==TRUE) return;
 
@@ -55,6 +62,23 @@ void cauthz_init(void) {
    cauthz_vars.desc.discoverable         = TRUE;
    cauthz_vars.desc.callbackRx           = &cauthz_receive;
    cauthz_vars.desc.callbackSendDone     = &cauthz_sendDone;
+
+   memset(cauthz_vars.accessToken, 0x00, sizeof(cauthz_access_token_t));
+
+   eui64_get(myId);
+   idmanager_getJoinKey(&joinKey);
+
+   // derive appKey
+   openoscoap_hkdf_derive_parameter(cauthz_vars.appKey,
+           joinKey,
+           16,
+           NULL,
+           0,
+           myId,
+           8,
+           AES_CCM_16_64_128,
+           OSCOAP_DERIVATION_TYPE_ACE,
+           AES_CCM_16_64_128_KEY_LEN);
 
    // register with the CoAP module
    opencoap_register(&cauthz_vars.desc);
@@ -134,7 +158,106 @@ void cauthz_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 }
 
 owerror_t cauthz_cbor_decode_access_token(uint8_t *buf, uint8_t len, cauthz_access_token_t* token) {
+    owerror_t decStatus;
+    cbor_majortype_t major_type;
+    uint8_t add_info;
+    uint8_t i;
+    uint8_t *tmp;
+    uint8_t ciphertextLen;
+    uint8_t *ciphertext;
+    uint8_t nonce[13];
+    // CBOR serialization of ["Encrypt0", h'', h'']
+    const uint8_t aad[] = {0x83, 0x68, 0x45, 0x6e, 0x63, 0x72, 0x79, 0x70, 0x74, 0x30, 0x40, 0x40};
 
-    return E_SUCCESS;
+    i = 0;
+
+    memset(nonce, 0x00, 13);
+
+    // expecting COSE_Encrypt0 array
+    // [ protected, unprotected, ciphertext ]
+
+    tmp = buf;
+    major_type = (cbor_majortype_t) *buf >> 5;
+    add_info = *buf & CBOR_ADDINFO_MASK;
+
+    // assert
+    if (major_type != CBOR_MAJORTYPE_ARRAY) {  // not COSE_Encrypt0
+        return E_FAIL;
+    }
+
+    // sanity check
+    if (add_info != 3) {   // not COSE_Encrypt0
+        return E_FAIL;
+    }
+
+    tmp++;
+
+    // Step 1. Decode protected bucket, expecting an empty string
+    if (*tmp != 0x40) { // protected bucket is not empty
+        return E_FAIL;
+    }
+
+    // Step 2. Moving on to the unprotected bucket
+    tmp++;
+
+    if (*tmp != 0xa1) {
+        return E_FAIL; // expecting a map with a single element: PIV
+    }
+
+    // expected label is PIV
+    tmp++;
+    if (*tmp != COSE_COMMON_HEADER_PARAMETERS_PIV) {
+        return E_FAIL;
+    }
+
+    // expected value of PIV is an uint8_t
+    tmp++;
+    if (cbor_load_uint(tmp, &nonce[12]) != 1) {
+        return E_FAIL;
+    }
+
+    tmp++;
+
+    // Step 3. Ciphertext
+    major_type = (cbor_majortype_t) *tmp >> 5;
+    add_info = *tmp & CBOR_ADDINFO_MASK;
+
+    if (major_type != CBOR_MAJORTYPE_BSTR) {
+        return E_FAIL;
+    }
+
+    if (add_info < AES_CCM_16_64_128_TAG_LEN) {
+        return E_FAIL;
+    }
+
+    if (add_info <= 23) {
+        ciphertextLen = add_info;
+    } else if (add_info == 24) {
+        tmp++;
+        ciphertextLen = *tmp;
+    } else {
+        return E_FAIL;
+    }
+    ciphertext = ++tmp;
+    tmp += ciphertextLen;
+
+    if (tmp - buf != len) {
+        return E_FAIL;
+    }
+
+    decStatus = cryptoengine_aes_ccms_dec( (uint8_t *) aad,
+                                    sizeof(aad),
+                                    ciphertext,
+                                    &ciphertextLen,
+                                    nonce,
+                                    2,
+                                    cauthz_vars.appKey,
+                                    AES_CCM_16_64_128_TAG_LEN);
+
+    if (decStatus == E_SUCCESS) {
+        return E_SUCCESS;
+    }
+
+    return E_FAIL;
 }
 
