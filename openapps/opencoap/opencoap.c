@@ -263,7 +263,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
                 }
                 temp_desc = temp_desc->next;
             }
-            while (temp_desc->next!=NULL);
+            while (temp_desc!=NULL);
 
             if (blindContext) {
                     coap_incomingOptionsLen = MAX_COAP_OPTIONS;
