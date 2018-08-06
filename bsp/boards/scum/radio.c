@@ -115,7 +115,7 @@ void radio_rfOff(void) {
 
     // turn SCuM radio off
     RFCONTROLLER_REG__CONTROL   = RX_STOP;
-
+    
     // wiggle debug pin
     debugpins_radio_clr();
     leds_radio_off();
@@ -249,10 +249,10 @@ kick_scheduler_t radio_isr(void) {
     
     PORT_TIMER_WIDTH capturedTime;
     
-    debugpins_isr_set();
-    
     PORT_TIMER_WIDTH irq_status = RFCONTROLLER_REG__INT;
     PORT_TIMER_WIDTH irq_error  = RFCONTROLLER_REG__ERROR;
+    
+    debugpins_isr_set();
     
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
 #else
