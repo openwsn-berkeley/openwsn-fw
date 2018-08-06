@@ -165,3 +165,14 @@
 
 #define GPIO_REG__INPUT                 *(unsigned int*)(APB_GPIO_BASE + 0x000000)
 #define GPIO_REG__OUTPUT                *(unsigned int*)(APB_GPIO_BASE + 0x040000)
+    
+// ========================== Analog Configure Registers
+
+#define ANALOG_CFG_REG__0               *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x000000)
+#define ANALOG_CFG_REG__22              *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x580000)
+    
+#define ACFG_LO__ADDR                   *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x001C0000)
+#define ACFG_LO__ADDR_2                 *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x00200000)
+
+#define ISER                            *(unsigned int*)(0xE000E100)
+#define ICER                            *(unsigned int*)(0xE000E180)

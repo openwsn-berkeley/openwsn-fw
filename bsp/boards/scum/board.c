@@ -13,6 +13,7 @@
 #include "radio.h"
 #include "eui64.h"
 #include "sctimer.h"
+#include "scm3_hardware_interface.h"
 
 //=========================== variables =======================================
 
@@ -31,6 +32,9 @@ int main(void) {
 void board_init(void) {
     uint8_t eui[8];
 
+    // initialize the scan chain
+    initialize_ASC();
+    
     // initialize bsp modules
     debugpins_init();
     leds_init();
