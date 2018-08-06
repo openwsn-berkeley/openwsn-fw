@@ -61,7 +61,7 @@ Reset_Handler   PROC
         ENTRY
         
         LDR     R1, =0xE000E100         ;Interrupt Set Enable Register
-        LDR     R0, =0xFF               ;<- REMEMBER TO ENABLE THE INTERRUPTS!!
+        LDR     R0, =0xC1               ;<- REMEMBER TO ENABLE THE INTERRUPTS!!
         STR     R0, [R1]
         
         IMPORT  __main
