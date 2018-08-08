@@ -480,6 +480,16 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\bsp\boards\scum\sctimer.c</FilePath>
             </File>
+            <File>
+              <FileName>scm3_hardware_interface.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\bsp\boards\scum\scm3_hardware_interface.c</FilePath>
+            </File>
+            <File>
+              <FileName>scm3_hardware_interface.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\bsp\boards\scum\scm3_hardware_interface.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
