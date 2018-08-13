@@ -35,6 +35,10 @@ void board_init(void) {
     // initialize the scan chain
     initialize_ASC();
     
+    IPR0 = 0xFF;    // uart has lowest priority
+    IPR6 = 0x0F;    // priority for radio
+    IPR7 = 0x00;    // priority for rf_timer
+    
     // initialize bsp modules
     debugpins_init();
     leds_init();

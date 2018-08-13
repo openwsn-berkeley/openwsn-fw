@@ -166,7 +166,7 @@
 #define GPIO_REG__INPUT                 *(unsigned int*)(APB_GPIO_BASE + 0x000000)
 #define GPIO_REG__OUTPUT                *(unsigned int*)(APB_GPIO_BASE + 0x040000)
     
-// ========================== Analog Configure Registers
+// ========================== Analog Configure Registers ======================
 
 #define ANALOG_CFG_REG__0               *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x000000)
 #define ANALOG_CFG_REG__22              *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x580000)
@@ -176,3 +176,9 @@
 
 #define ISER                            *(unsigned int*)(0xE000E100)
 #define ICER                            *(unsigned int*)(0xE000E180)
+    
+// =========================== Priority Registers =============================
+
+#define IPR0 *(unsigned int*)( 0xE000E400 )
+#define IPR6 *(unsigned int*)( 0xE000E418 )
+#define IPR7 *(unsigned int*)( 0xE000E41C )
