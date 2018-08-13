@@ -38,12 +38,19 @@ to return the board's description.
 * two different frequency clocks. 500000/32768 is approximately 61/4.
 **/
 
+// with the setup of FPGA board +teensy, the sys clock is 2.5MHz, so the 
+// following time converting is between 32KHz and 2.5MHz
+
 // this is called when require to WRITE the RFTIMER counter/compare registers,
 // where the value is going to be multiplied.
-#define TIMER_COUNTER_CONVERT_32K_TO_500K(value)    value*61/4 
+#define TIMER_COUNTER_CONVERT_32K_TO_SYS_CLK(value)    value*305/4
 // this is called when require to READ  the RFTIMER counter/compare registers,
 // where the value is going to be divided.
-#define TIMER_COUNTER_CONVERT_500K_TO_32K(value)    value*4/61
+#define TIMER_COUNTER_CONVERT_SYS_CLK_TO_32K(value)    value*4/305
+
+/** 
+* End
+**/
 
 //===== radio
 

@@ -381,9 +381,9 @@
           <GroupName>application</GroupName>
           <Files>
             <File>
-              <FileName>01bsp_leds.c</FileName>
+              <FileName>01bsp_debugpins.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\common\01bsp_leds\01bsp_leds.c</FilePath>
+              <FilePath>..\..\common\01bsp_debugpins\01bsp_debugpins.c</FilePath>
             </File>
           </Files>
         </Group>
