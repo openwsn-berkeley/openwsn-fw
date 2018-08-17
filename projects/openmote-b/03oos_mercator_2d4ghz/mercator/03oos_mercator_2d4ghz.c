@@ -11,20 +11,20 @@
 //=========================== initialization ==================================
 
 int mote_main(void) {
-   
+
    memset(&mercator_vars,0,sizeof(mercator_vars_t));
    mercator_vars.status = ST_IDLE;
-   
+
    board_init();
    scheduler_init();
    opentimers_init();
    mercator_vars.sendTimerId = opentimers_create();
 
    leds_all_off();
-   
+
    // get mac
    eui64_get(mercator_vars.mac);
-   
+
    // initial radio
    radio_2d4ghz_setStartFrameCb(cb_startFrame);
    radio_2d4ghz_setEndFrameCb(cb_endFrame);
@@ -36,7 +36,7 @@ int mote_main(void) {
    );
    serial_enable();
    scheduler_push_task(serial_tx_IND_UP,TASK_PRIO_SERIAL);
-   
+
    scheduler_start();
    return 0; // this line should never be reached
 }
@@ -52,21 +52,21 @@ void serial_enable(void) {
 }
 
 void serial_flushtx(void) {
-   
+
    // abort if nothing to print
    if (mercator_vars.uartbuftxfill==0) {
       return;
    }
-   
+
    // update stats
    mercator_vars.uartNumTx++;
-   
+
    // initialize HDLC variables
    mercator_vars.uarttxcrc             = HDLC_CRCINIT;
    mercator_vars.uartbufrdidx          = 0;
    mercator_vars.uarttxcrcAdded        = 0;
    mercator_vars.uarttxclosingSent     = 0;
-   
+
    // start sending over UART
    uart_writeByte(HDLC_FLAG);
 }
@@ -76,7 +76,7 @@ void serial_rx_all(void) {
     if (mercator_vars.uartbufrxindex<1){
        // update stats
        mercator_vars.serialNumRxWrongLength++;
-    } else {    
+    } else {
       switch(mercator_vars.uartbufrx[0]) {
          case TYPE_REQ_ST:
             serial_rx_REQ_ST();
@@ -105,16 +105,16 @@ void serial_rx_REQ_ST(void) {
       mercator_vars.serialNumRxWrongLength++;
       return;
    }
-   
+
    // trigger a RESP_ST transmission
    scheduler_push_task(serial_tx_RESP_ST,TASK_PRIO_SERIAL);
 }
 
 void serial_tx_RESP_ST(void) {
    RESP_ST_ht* resp;
-   
+
    resp = (RESP_ST_ht*)mercator_vars.uartbuftx;
-   
+
    resp->type                     = TYPE_RESP_ST;
    resp->status                   = mercator_vars.status;
    resp->numnotifications         = htons(mercator_vars.numnotifications);
@@ -122,7 +122,7 @@ void serial_tx_RESP_ST(void) {
    memcpy(resp->mac, mercator_vars.mac, MAC_LEN);
 
    mercator_vars.uartbuftxfill    = sizeof(RESP_ST_ht);
-   
+
    serial_flushtx();
 }
 
@@ -144,6 +144,9 @@ void serial_rx_REQ_IDLE(void) {
 void serial_rx_REQ_TX(void) {
    uint16_t transctr;
    uint16_t pkctr;
+   uint16_t   channel_spacing;
+   uint32_t   frequency_0;
+   uint16_t   channel;
    REQ_TX_ht* req;
 
    if (mercator_vars.uartbufrxindex!=sizeof(REQ_TX_ht)){
@@ -170,23 +173,27 @@ void serial_rx_REQ_TX(void) {
    pkctr = htons(mercator_vars.txpk_numpk);
    memcpy(&mercator_vars.rfbuftx[offsetof(RF_PACKET_ht, pkctr)],
           &pkctr, sizeof(((mercator_vars_t){0}).txpk_numpk));
-  
+
    // fill remaining packet space
-   memset(&mercator_vars.rfbuftx[offsetof(RF_PACKET_ht, txfillbyte)], req->txfillbyte, 
+   memset(&mercator_vars.rfbuftx[offsetof(RF_PACKET_ht, txfillbyte)], req->txfillbyte,
           mercator_vars.txpk_len - offsetof(RF_PACKET_ht, txfillbyte) - LENGTH_CRC);
+
+   channel_spacing      = htons(req->channel_spacing);
+   frequency_0          = htonl(req->frequency_0);
+   channel              = htons(req->channel);
 
    // prepare radio
    radio_2d4ghz_rfOn();
-   radio_2d4ghz_setFrequency(req->channel_spacing,req->frequency_0,req->channel);
-   
+   radio_2d4ghz_setFrequency(channel_spacing,frequency_0,channel);
+
    // TODO set TX Power
 
    // init opentimers to send packets periodically
    opentimers_scheduleIn(
       mercator_vars.sendTimerId,
       htons(req->txifdur),
-      TIMER_PERIODIC,
       TIME_MS,
+      TIMER_PERIODIC,
       cb_sendPacket
    );
 
@@ -194,6 +201,9 @@ void serial_rx_REQ_TX(void) {
 }
 
 void serial_rx_REQ_RX(void) {
+   uint16_t   channel_spacing;
+   uint32_t   frequency_0;
+   uint16_t   channel;
    REQ_RX_ht* req;
    if (mercator_vars.uartbufrxindex!=sizeof(REQ_RX_ht)){
       // update stats
@@ -206,16 +216,19 @@ void serial_rx_REQ_RX(void) {
    mercator_vars.rxpk_txfillbyte = req->txfillbyte;
    memcpy(mercator_vars.rxpk_srcmac, req->srcmac, 8);
 
-
    // reset notifications counter
    mercator_vars.numnotifications = 0;
+
+   channel_spacing      = htons(req->channel_spacing);
+   frequency_0          = htonl(req->frequency_0);
+   channel              = htons(req->channel);
 
    // turn on radio leds
    leds_radio_on();
 
    // prepare radio
    radio_2d4ghz_rfOn();
-   radio_2d4ghz_setFrequency(req->channel_spacing,req->frequency_0,req->channel);
+   radio_2d4ghz_setFrequency(channel_spacing,frequency_0,channel);
 
    // switch in RX
    radio_2d4ghz_rxEnable();
@@ -228,20 +241,25 @@ void serial_rx_REQ_RX(void) {
 
 void serial_tx_IND_UP(void) {
    IND_UP_ht* resp;
-   
+
    resp = (IND_UP_ht*)mercator_vars.uartbuftx;
-   
+
    resp->type                     = TYPE_IND_UP;
 
    mercator_vars.uartbuftxfill    = sizeof(IND_UP_ht);
-   
+
    serial_flushtx();
 }
 
 //===== helpers
 
 uint16_t htons(uint16_t val) {
-   return (((uint16_t)(val>>0)&0xff)<<8) | (((uint16_t)(val>>8)&0xff)<<0);
+    return (((uint16_t)(val>>0)&0xff)<<8) | (((uint16_t)(val>>8)&0xff)<<0);
+}
+
+uint32_t htonl(uint32_t val) {
+    return (((uint32_t)(val>>0)&0xff)<<24) | (((uint32_t)(val>>8)&0xff)<<16) |\
+           (((uint32_t)(val>>16)&0xff)<<8) | (((uint32_t)(val>>24)&0xff)<<0);
 }
 
 //===== interrupt handlers
@@ -250,10 +268,10 @@ uint16_t htons(uint16_t val) {
 void isr_openserial_tx_mod(void) {
    uint8_t  b;
    uint16_t finalCrc;
-   
+
    // led
    leds_sync_on();
-   
+
    // write next byte, if any
    if (mercator_vars.uartbuftxfill>0) {
       b = mercator_vars.uartbuftx[mercator_vars.uartbufrdidx];
@@ -273,11 +291,11 @@ void isr_openserial_tx_mod(void) {
       if (mercator_vars.uartbuftxfill==0 && mercator_vars.uarttxcrcAdded==0) {
           // finalize the calculation of the CRC
           finalCrc   = ~mercator_vars.uarttxcrc;
-          
+
           // write the CRC value
           mercator_vars.uartbuftx[mercator_vars.uartbufrdidx]   = (finalCrc>>0)&0xff;
           mercator_vars.uartbuftx[mercator_vars.uartbufrdidx+1] = (finalCrc>>8)&0xff;
-          
+
           mercator_vars.uartbuftxfill += 2;
           mercator_vars.uarttxcrcAdded = 1;
       }
@@ -287,7 +305,7 @@ void isr_openserial_tx_mod(void) {
          uart_writeByte(HDLC_FLAG);
       }
    }
-   
+
    // led
    leds_sync_off();
 }
@@ -300,11 +318,11 @@ void inputHdlcWriteMod(uint8_t b) {
          b                             = b^HDLC_ESCAPE_MASK;
          mercator_vars.uartrxescaping = FALSE;
       }
-      
+
       // add byte to input buffer
       mercator_vars.uartbufrx[mercator_vars.uartbufrxindex] = b;
       mercator_vars.uartbufrxindex++;
-      
+
       // iterate through CRC calculator
       mercator_vars.uartrxcrc = crcIteration(mercator_vars.uartrxcrc,b);
    }
@@ -313,13 +331,13 @@ void inputHdlcWriteMod(uint8_t b) {
 // executed in ISR, called from scheduler.c
 void isr_openserial_rx_mod(void) {
    uint8_t rxbyte;
-   
+
    // led
    leds_sync_on();
-   
+
    // read byte just received
    rxbyte = uart_readByte();
-   
+
    // handle byte
    if (
          mercator_vars.uartrxbusy==FALSE  &&
@@ -327,16 +345,16 @@ void isr_openserial_rx_mod(void) {
          rxbyte!=HDLC_FLAG
       ) {
       // start of frame
-      
+
       // I'm now receiving
       mercator_vars.uartrxbusy           = TRUE;
-      
+
       // reset the input buffer index
       mercator_vars.uartbufrxindex            = 0;
-      
+
       // initialize the value of the CRC
       mercator_vars.uartrxcrc                = HDLC_CRCINIT;
-      
+
       // add the byte just received
       inputHdlcWriteMod(rxbyte);
    } else if (
@@ -344,10 +362,10 @@ void isr_openserial_rx_mod(void) {
          rxbyte!=HDLC_FLAG
       ) {
       // middle of frame
-      
+
       // add the byte just received
       inputHdlcWriteMod(rxbyte);
-      
+
       // reset buffer if frame too long
       if (mercator_vars.uartbufrxindex+1>UART_BUF_LEN){
          mercator_vars.uartbufrxindex         = 0;
@@ -358,35 +376,35 @@ void isr_openserial_rx_mod(void) {
          rxbyte==HDLC_FLAG
       ) {
          // end of frame
-         
+
          // verify the validity of the frame
          if (mercator_vars.uartrxcrc==HDLC_CRCGOOD) {
             // the CRC is correct
-            
+
             // update stats
             mercator_vars.uartNumRxCrcOk++;
-            
+
             // remove the CRC from the input buffer
             mercator_vars.uartbufrxindex    -= 2;
-                        
+
             // schedule task to handle frame
             scheduler_push_task(serial_rx_all,TASK_PRIO_SERIAL);
-            
+
             // wakeup the scheduler
             SCHEDULER_WAKEUP();
          } else {
             // the CRC is incorrect
-            
+
             // update stats
             mercator_vars.uartNumRxCrcWrong++;
          }
-         
+
          mercator_vars.uartrxbusy      = FALSE;
    }
-   
+
    // store byte
    mercator_vars.uartlastRxByte = rxbyte;
-   
+
    // led
    leds_sync_off();
 }
@@ -408,11 +426,11 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
    RF_PACKET_ht* rx_temp;
    bool         is_expected = TRUE;
    IND_RX_ht*   resp;
-   
+
    radio_2d4ghz_rfOff();
-   
+
    if (mercator_vars.status == ST_RX){
-      
+
       // get packet from radio
       radio_2d4ghz_getReceivedFrame(
          mercator_vars.rxpk_buf,
@@ -467,7 +485,7 @@ void cb_sendPacket(opentimers_id_t id){
    IND_TXDONE_ht* resp;
    uint16_t pkctr;
    uint8_t pkctr_offset = 10; // srcmac[8] + transctr[2]
-   
+
    // send packet
    leds_error_on();
 
