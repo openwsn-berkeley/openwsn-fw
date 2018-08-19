@@ -110,13 +110,15 @@ command_line_options = {
         'z1',
         # Cortex-M3
         'openmote-cc2538',
-		'openmote-b',
+        'openmote-b',
         'silabs-ezr32wg',
         'openmotestm',
         'iot-lab_M3',
         'iot-lab_A8-M3',
         'agilefox',
         'samr21_xpro',
+        # Cortex-M0
+        'scum',
         # misc.
         'python',
     ],
