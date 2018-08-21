@@ -403,7 +403,6 @@ elif env['toolchain']=='armgcc':
         env.Append(CCFLAGS       = '-mthumb')
         env.Append(CCFLAGS       = '-g')
         env.Append(CCFLAGS       = '-Ibsp/boards/scum')
-        env.Append(CCFLAGS       = '-std=c99')
         env.Append(CCFLAGS       = '-ffunction-sections')
         env.Append(CCFLAGS       = '-fdata-sections')
         # assembler
@@ -763,6 +762,52 @@ def IotLabM3_bootload(target, source, env):
     for t in bootloadThreads:
         countingSem.acquire()
         
+class scum_bootloadThread(threading.Thread):
+    def __init__(self,comPort,binaryFile,countingSem):
+        
+        # store params
+        self.comPort         = comPort
+        self.binaryFile      = binaryFile
+        self.countingSem     = countingSem
+        
+        # initialize parent class
+        threading.Thread.__init__(self)
+        self.name            = 'scum_bootloadThread{0}'.format(self.comPort)
+    
+    def run(self):
+        print 'starting bootloading on {0}'.format(self.comPort)
+        subprocess.call(
+            'python '+ os.path.join('bootloader','scum','scum_bootloader.py' + ' -p {0} {1}'.format(self.comPort, self.binaryFile)),
+            shell=True
+        )
+        print 'done bootloading on {0}'.format(self.comPort)
+        
+        # indicate done
+        self.countingSem.release()
+        
+def scum_bootload(target, source, env):
+    bootloadThreads = []
+    countingSem     = threading.Semaphore(0)
+    # create threads
+    for comPort in env['bootload'].split(','):
+        if os.name=='nt':
+            suffix = '.bin'
+        else:
+            suffix = ''
+        bootloadThreads += [
+            scum_bootloadThread(
+                comPort      = comPort,
+                binaryFile   = source[0].path.split('.')[0]+suffix,
+                countingSem  = countingSem,
+            )
+        ]
+    # start threads
+    for t in bootloadThreads:
+        t.start()
+    # wait for threads to finish
+    for t in bootloadThreads:
+        countingSem.acquire()
+        
 # bootload
 def BootloadFunc():
     if   env['board']=='telosb':
@@ -789,6 +834,12 @@ def BootloadFunc():
             suffix      = '.phonyupload',
             src_suffix  = '.bin'
          )
+    elif env['board']=='scum':
+         return Builder(
+            action      = scum_bootload,
+            suffix      = '.phonyupload',
+            src_suffix  = '.bin'
+     )
     else:
         raise SystemError('bootloading on board={0} unsupported.'.format(env['board']))
 if env['bootload']:

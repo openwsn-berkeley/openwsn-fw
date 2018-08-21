@@ -6,7 +6,7 @@
 #ifdef __STACK_SIZE
     .equ    Stack_Size, __STACK_SIZE
 #else
-    .equ    Stack_Size, 0x00000800
+    .equ    Stack_Size, 0x800
 #endif
     .globl    __StackTop
     .globl    __StackLimit
@@ -21,7 +21,7 @@ __StackTop:
 #ifdef __HEAP_SIZE
     .equ    Heap_Size, __HEAP_SIZE
 #else
-    .equ    Heap_Size, 0x00000400
+    .equ    Heap_Size, 0x400
 #endif
     .globl    __HeapBase
     .globl    __HeapLimit
@@ -34,12 +34,10 @@ __HeapLimit:
     .size    __HeapLimit, . - __HeapLimit
 
     .section .vectors
-    .align 4
     .globl    __Vectors
 __Vectors:
     .long    __StackTop            /* Top of Stack */
     .long    Reset_Handler         /* Reset Handler */
-    .long    0                     /* Reserved*/
     .long    0                     /* Reserved */
     .long    0                     /* Reserved */
     .long    0                     /* Reserved */
@@ -48,10 +46,11 @@ __Vectors:
     .long    0                     /* Reserved */
     .long    0                     /* Reserved */
     .long    0                     /* Reserved */
-    .long    0                     /* Reserved*/
     .long    0                     /* Reserved */
     .long    0                     /* Reserved */
-    .long    0                     /* Reserved*/
+    .long    0                     /* Reserved */
+    .long    0                     /* Reserved */
+    .long    0                     /* Reserved */
     .long    0                     /* Reserved */
 
     /* External interrupts */
