@@ -17,8 +17,10 @@ to return the board's description.
 
 #define INTERRUPT_DECLARATION()
 
-#define DISABLE_INTERRUPTS()                __disable_irq();
-#define ENABLE_INTERRUPTS()                 __enable_irq();
+#define DISABLE_INTERRUPTS()                __asm__( "MOVS   R0, #1;" \
+                                                     "MSR    PRIMASK, R0;");
+#define ENABLE_INTERRUPTS()                 __asm__( "MOVS   R0, #0;" \
+                                                     "MSR    PRIMASK, R0;");
 
 //===== timer
 
