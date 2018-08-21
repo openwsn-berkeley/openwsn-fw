@@ -9,22 +9,8 @@ MEMORY
     RAM (rwx) : ORIGIN = 0x20000000, LENGTH = 64K
 }
 
-stack_size = 2048;
-heap_size = 1024;
-
-_stack_start = ORIGIN(RAM)+LENGTH(RAM);
-_stack_end = _stack_start - stack_size;
-
 SECTIONS
 {
-    /* The startup code goes first into ROM */
-    .isr_vector :
-    {
-        . = ALIGN(4);
-        KEEP(*(.isr_vector)) /* Startup code */
-        . = ALIGN(4);
-    } >ROM
-
     /* The program code and other data goes into ROM */
     .text :
     {
@@ -53,8 +39,11 @@ SECTIONS
         KEEP(*(.eh_frame*))
     } > ROM
 
-    .ARM.extab   : { *(.ARM.extab* .gnu.linkonce.armextab.*) } >ROM
-    
+    .ARM.extab :
+    {
+        *(.ARM.extab* .gnu.linkonce.armextab.*)
+    } > ROM
+
     __exidx_start = .;
     .ARM.exidx :
     {
@@ -64,10 +53,6 @@ SECTIONS
 
     __etext = .;
 
-    /* used by the startup to initialize data */
-    _sidata = .;
-
-    /* Initialized data sections goes into RAM, load LMA copy after code */
     .data : AT (__etext)
     {
         __data_start__ = .;
@@ -102,7 +87,6 @@ SECTIONS
 
     } > RAM
 
-    /* Uninitialized data section */
     .bss :
     {
         . = ALIGN(4);
@@ -120,7 +104,7 @@ SECTIONS
         *(.heap*)
         __HeapLimit = .;
     } > RAM
-    
+
     /* .stack_dummy section doesn't contains any symbols. It is only
      * used for linker to calculate size of stack sections, and assign
      * values to stack symbols later */

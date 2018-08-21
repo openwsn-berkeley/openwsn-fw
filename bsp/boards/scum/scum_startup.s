@@ -33,9 +33,10 @@ __HeapBase:
 __HeapLimit:
     .size    __HeapLimit, . - __HeapLimit
 
-    .section .vectors
-    .globl    __Vectors
-__Vectors:
+    .section .isr_vector
+    .align    2
+    .globl    __isr_vector
+__isr_vector:
     .long    __StackTop            /* Top of Stack */
     .long    Reset_Handler         /* Reset Handler */
     .long    0                     /* Reserved */
@@ -71,7 +72,7 @@ __Vectors:
     .long    0                     /* 14: Reserved                   */
     .long    0                     /* 15: Reserved                   */
 
-    .size    __Vectors, . - __Vectors
+    .size    __isr_vector, . - __isr_vector
 
 /* Reset Handler */
     .text
