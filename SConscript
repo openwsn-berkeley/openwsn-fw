@@ -397,28 +397,25 @@ elif env['toolchain']=='armgcc':
         
         # compiler (C)
         env.Replace(CC           = 'arm-none-eabi-gcc')
-        env.Append(CCFLAGS       = '-O0')
+        env.Append(CCFLAGS       = '-O3')
         env.Append(CCFLAGS       = '-Wall')
-        env.Append(CCFLAGS       = '-c')
-        env.Append(CCFLAGS       = '-fmessage-length=0')
         env.Append(CCFLAGS       = '-mcpu=cortex-m0')
         env.Append(CCFLAGS       = '-mthumb')
-        env.Append(CCFLAGS       = '-mthumb-interwork')
-        env.Append(CCFLAGS       = '-g3')
-        env.Append(CCFLAGS       = '-Wstrict-prototypes')
+        env.Append(CCFLAGS       = '-g')
         env.Append(CCFLAGS       = '-Ibsp/boards/scum')
         env.Append(CCFLAGS       = '-std=c99')
-        env.Append(CCFLAGS       = '-nostartfiles')
+        env.Append(CCFLAGS       = '-ffunction-sections')
+        env.Append(CCFLAGS       = '-fdata-sections')
         # assembler
         env.Replace(AS           = 'arm-none-eabi-as')
-        env.Append(ASFLAGS       = '-ggdb -g3 -mcpu=cortex-m0 -mlittle-endian -mapcs-32')
+        env.Append(ASFLAGS       = '-ggdb -g3 -mcpu=cortex-m0 -mlittle-endian -mthumb')
         # linker
         env.Append(LINKFLAGS     = '-Tbsp/boards/scum/scum_linker.ld')
-        #env.Append(LINKFLAGS     = '-nostartfiles')
-        env.Append(LINKFLAGS     = '-mcpu=cortex-m0')
-        env.Append(LINKFLAGS     = '-mthumb')
+        env.Append(LINKFLAGS     = '-nostartfiles')
+        env.Append(LINKFLAGS     = '-Wl,--gc-sections')
         env.Append(LINKFLAGS     = '-specs=nosys.specs')
-        env.Append(LINKFLAGS     = '-g3')
+        env.Append(LINKFLAGS     = '-D__STACK_SIZE=0x800')
+        env.Append(LINKFLAGS     = '-D__HEAP_SIZE=0x400')
         # object manipulation
         env.Replace(OBJCOPY      = 'arm-none-eabi-objcopy')
         env.Replace(OBJDUMP      = 'arm-none-eabi-objdump')
@@ -430,7 +427,6 @@ elif env['toolchain']=='armgcc':
         # misc
         env.Replace(NM           = 'arm-none-eabi-nm')
         env.Replace(SIZE         = 'arm-none-eabi-size')
-
         
     else:
         raise SystemError('unexpected board={0}'.format(env['board']))
