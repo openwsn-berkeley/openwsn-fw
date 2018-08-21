@@ -109,7 +109,7 @@ void analog_scan_chain_write(unsigned int* scan_bits) {
     }
 }
 
-void analog_scan_chain_load() {
+void analog_scan_chain_load(void) {
     
     // Assert load signal (and cfg<357>)
     ANALOG_CFG_REG__22 = 0x0028;
@@ -121,7 +121,7 @@ void analog_scan_chain_load() {
 
 
 /* Prints the value of the 2MHz dac.*/
-void print_2MHz_DAC() {
+void print_2MHz_DAC(void) {
     int ind;
     // print the DAC settings
     //printf("2MHz DAC: ");
@@ -204,7 +204,7 @@ void set_2M_RC_frequency(int coarse1, int coarse2, int coarse3, int fine, int su
 
 
 /* Initializes the 2MHz DAC with values set in the dac_2M_settings array. */
-void initialize_2M_DAC() {
+void initialize_2M_DAC(void) {
     set_2M_RC_frequency(dac_2M_settings[0], dac_2M_settings[1], dac_2M_settings[2], dac_2M_settings[3], dac_2M_settings[4]);
     // printf("Initialized 2MHz DAC\n");
     // print_2MHz_DAC();
@@ -240,7 +240,7 @@ int valid_2M_read(int counter) {
 
 /* Returns 1 if rolling_average_2M is within the calibration window (cal not needed).
 Otherwise, returns 0.*/
-int is_2M_within_cal_window() {
+int is_2M_within_cal_window(void) {
     if ((rolling_average_2M < calibration_threshold_min) || 
         (rolling_average_2M > calibration_threshold_max)) {
             return 0;
@@ -254,7 +254,7 @@ which is the number of ticks of the clock in 100ms.
 
 Returns 0 if no calibration occurs, 1 if the DAC was changed.
 */
-int cal_2M_RC() {
+int cal_2M_RC(void) {
     int ind;
     int counter_dif;
     //printf("Calibrating 2M oscillator.\n");
@@ -529,7 +529,7 @@ If any value in the array is 0, it is not counted.
 
 If the rolling average is outside the calibration threshold, we calibrate the dac.
 */
-void compute_2M_rolling_average() {
+void compute_2M_rolling_average(void) {
     int index;
     double average;
     int sum = 0;
@@ -554,7 +554,7 @@ void compute_2M_rolling_average() {
 }
 
 
-void initialize_ASC(){
+void initialize_ASC(void){
     
     // The meaning of each bit is explained in scm3_ASC_v9.m script
 
