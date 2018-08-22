@@ -103,19 +103,19 @@
 #define BSP_ANTENNA_BASE            GPIO_D_BASE
 #define BSP_ANTENNA_CC2538_24GHZ    GPIO_PIN_4      //!< PD4 -- 2.4ghz
 #define BSP_ANTENNA_AT215_24GHZ     GPIO_PIN_3      //!< PD3 -- subghz
- 
+
 
 // number of radios in this board.
 #define MAX_NUM_RADIOS         2
 
 //#define DAGROOT
-   
+
 //=========================== typedef  ========================================
 
 typedef enum {
    RADIOTPYE_2D4GHZ          = 0,
    RADIOTPYE_SUBGHZ          = 1,
-   RADIOTPYE_ANY             = 2  
+   RADIOTPYE_ANY             = 2
 } radioType_t;
 
 //=========================== variables =======================================
