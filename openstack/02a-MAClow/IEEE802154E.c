@@ -288,7 +288,7 @@ void isr_ieee154e_newSlot(opentimers_id_t id) {
     ieee154e_vars.startOfSlotReference = opentimers_getCurrentTimeout();
     opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                  // timerId
-        TsSlotDuration,                         // duration
+        ieee154e_vars.slotDuration,             // duration
         ieee154e_vars.startOfSlotReference,     // reference
         TIME_TICS,                              // timetype
         isr_ieee154e_newSlot                    // callback
@@ -930,6 +930,13 @@ port_INLINE void activity_ti1ORri1(void) {
 
             // check whether we can send
             if (schedule_getOkToSend()) {
+                // this is minimal cell
+                ieee154e_vars.radioType = schedule_getRadioType();
+
+                // get the delayTx and delayRx for used radio
+                ieee154e_vars.delayTx   = ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_getDelayTx_cb();
+                ieee154e_vars.delayRx   = ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_getDelayRx_cb();
+
                 if (packetfunctions_isBroadcastMulticast(&neighbor)==FALSE){
                     // this is a dedicated cell
                     ieee154e_vars.dataToSend = openqueue_macGetDedicatedPacket(&neighbor);
@@ -939,13 +946,6 @@ port_INLINE void activity_ti1ORri1(void) {
                     }
                     msf_updateCellsPassed(&neighbor);
                 } else {
-                    // this is minimal cell
-                    ieee154e_vars.radioType = schedule_getRadioType();
-
-                    // get the delayTx and delayRx for used radio
-                    ieee154e_vars.delayTx   = ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_getDelayTx_cb();
-                    ieee154e_vars.delayRx   = ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_getDelayRx_cb();
-
                     // freq according to the used radio . calculate the frequency to transmit on
                     ieee154e_vars.channel = ieee154e_calculateFrequency(schedule_getChannelOffset());
 
