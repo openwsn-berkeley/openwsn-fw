@@ -412,6 +412,7 @@ elif env['toolchain']=='armgcc':
         env.Append(LINKFLAGS     = '-Tbsp/boards/scum/scum_linker.ld')
         env.Append(LINKFLAGS     = '-nostartfiles')
         env.Append(LINKFLAGS     = '-Wl,--gc-sections')
+        env.Append(LINKFLAGS     = '-Wl,-Map,${TARGET.base}.map')
         env.Append(LINKFLAGS     = '-specs=nosys.specs')
         env.Append(LINKFLAGS     = '-D__STACK_SIZE=0x800')
         env.Append(LINKFLAGS     = '-D__HEAP_SIZE=0x400')
