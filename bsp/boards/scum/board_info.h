@@ -34,25 +34,20 @@ to return the board's description.
 
 // ==== SCuM RF timer specific 
 
-/** 
-* since SCuM uses 500kHz, but the stack protocol is designed for 32kHz.
-* the following two marcos are used to convert the counter value bewteen
-* two different frequency clocks. 500000/32768 is approximately 61/4.
-**/
-
-// with the setup of FPGA board +teensy, the sys clock is 2.5MHz, so the 
-// following time converting is between 32KHz and 2.5MHz
+// with the setup of FPGA board +teensy, the rftimer clock is 
+// 20MHz divided by 255 (around 78431Hz), the following code is converting 
+// between 32768Hz and 78431Hz, the ratio between them is around 
+// the radio bewteen 23 and 55 
+// NOTICE: 
+// 1) 255 is the maxium value can be divided. 
+// 2) on FPGA, 20MHz clock can't be slow down.
 
 // this is called when require to WRITE the RFTIMER counter/compare registers,
 // where the value is going to be multiplied.
-#define TIMER_COUNTER_CONVERT_32K_TO_SYS_CLK(value)    value*305/4
+#define TIMER_COUNTER_CONVERT_32K_TO_SYS_CLK(value)    value*55/23
 // this is called when require to READ  the RFTIMER counter/compare registers,
 // where the value is going to be divided.
-#define TIMER_COUNTER_CONVERT_SYS_CLK_TO_32K(value)    value*4/305
-
-/** 
-* End
-**/
+#define TIMER_COUNTER_CONVERT_SYS_CLK_TO_32K(value)    value*23/55
 
 //===== radio
 
