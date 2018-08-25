@@ -44,10 +44,10 @@ to return the board's description.
 
 // this is called when require to WRITE the RFTIMER counter/compare registers,
 // where the value is going to be multiplied.
-#define TIMER_COUNTER_CONVERT_32K_TO_SYS_CLK(value)    value*55/23
+#define TIMER_COUNTER_CONVERT_32K_TO_RFTIMER_CLK(value)    value*55/23
 // this is called when require to READ  the RFTIMER counter/compare registers,
 // where the value is going to be divided.
-#define TIMER_COUNTER_CONVERT_SYS_CLK_TO_32K(value)    value*23/55
+#define TIMER_COUNTER_CONVERT_RFTIMER_CLK_TO_32K(value)    value*23/55
 
 //===== radio
 
