@@ -42,6 +42,11 @@ to return the board's description.
 // 1) 255 is the maxium value can be divided. 
 // 2) on FPGA, 20MHz clock can't be slow down.
 
+// NOTE: 
+// This convert has a problem that when multiple the value, it may exceeds 
+// 0xffffffff, resulting a wrong converting. Resolve this problem when the 
+// frequency of rftimer is determined finally.
+
 // this is called when require to WRITE the RFTIMER counter/compare registers,
 // where the value is going to be multiplied.
 #define TIMER_COUNTER_CONVERT_32K_TO_RFTIMER_CLK(value)    value*55/23
