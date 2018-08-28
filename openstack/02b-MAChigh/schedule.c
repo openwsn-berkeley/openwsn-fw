@@ -544,6 +544,7 @@ open_addr_t* schedule_getNonParentNeighborWithDedicatedCells(open_addr_t* neighb
          schedule_vars.scheduleBuf[i].neighbor.type == ADDR_64B &&
          packetfunctions_sameAddress(&schedule_vars.scheduleBuf[i].neighbor, neighbor) == FALSE
       ){
+         ENABLE_INTERRUPTS();
          return &schedule_vars.scheduleBuf[i].neighbor;
       }
    }
@@ -602,6 +603,7 @@ bool schedule_getCellsToBeRelocated(open_addr_t* neighbor, cellInfo_ht* celllist
     
     if (highestPDR==0){
         // no cell to relocate
+        ENABLE_INTERRUPTS();
         return FALSE;
     }
     
@@ -615,6 +617,7 @@ bool schedule_getCellsToBeRelocated(open_addr_t* neighbor, cellInfo_ht* celllist
                     celllist->isUsed            = TRUE;
                     celllist->slotoffset        = schedule_vars.scheduleBuf[i].slotOffset;
                     celllist->channeloffset     = schedule_vars.scheduleBuf[i].channelOffset;
+                    ENABLE_INTERRUPTS();
                     return TRUE;
                 }
             }
@@ -637,6 +640,7 @@ bool schedule_hasDedicatedCellToNeighbor(open_addr_t* neighbor){
             schedule_vars.scheduleBuf[i].neighbor.type == ADDR_64B &&
             packetfunctions_sameAddress(neighbor,&schedule_vars.scheduleBuf[i].neighbor)
         ){
+            ENABLE_INTERRUPTS();
             return TRUE;
         }
     }
