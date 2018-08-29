@@ -557,6 +557,15 @@ port_INLINE void activity_synchronize_newSlot(void) {
         // I'm listening last slot
         ieee154e_stats.numTicsOn    += ieee154e_vars.slotDuration;
         ieee154e_stats.numTicsTotal += ieee154e_vars.slotDuration;
+        
+#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
+        sctimer_setCapture(ACTION_RX_SFD_DONE);
+        sctimer_setCapture(ACTION_RX_DONE);       
+#endif
+        
+        // switch on the radio in Rx mode.
+        radio_rxEnable();
+        radio_rxNow();
     }
     
     // if I'm already in S_SYNCLISTEN, while not synchronized,
