@@ -161,7 +161,7 @@ void serial_rx_REQ_TX(void) {
 
    mercator_vars.txpk_numpk         = 0;
    mercator_vars.txpk_len           = req->txlength;
-   mercator_vars.txpk_totalnumpk    = htons(req->txnumpk);
+   mercator_vars.txpk_totalnumpk    = htons(req->txnumpk)-1;
 
    // prepare packet
    memcpy(mercator_vars.rfbuftx, mercator_vars.mac, MAC_LEN);
@@ -232,6 +232,7 @@ void serial_rx_REQ_RX(void) {
 
    // switch in RX
    radio_2d4ghz_rxEnable();
+   radio_2d4ghz_rxNow();
 
    // change status to RX
    mercator_vars.status = ST_RX;
@@ -472,12 +473,12 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
         mercator_vars.uartbuftxfill = sizeof(IND_RX_ht);
 
         serial_flushtx();
+        mercator_vars.numnotifications++;
       }
-
-      mercator_vars.numnotifications++;
 
       radio_2d4ghz_rfOn();
       radio_2d4ghz_rxEnable();
+      radio_2d4ghz_rxNow();
    }
 }
 
