@@ -17,18 +17,18 @@
 //=========================== public ==========================================
 
 void leds_init(void) {
-    GPIO_REG__OUTPUT    &= ~0xF00;    // GPIO_REG__OUTPUT = 0bxxxx00000000, all LEDs off
+//    GPIO_REG__OUTPUT    &= ~0xF00;    // GPIO_REG__OUTPUT = 0bxxxx00000000, all LEDs off
 }
 
 // 0 <H17>
 void    leds_error_on(void) {
-    GPIO_REG__OUTPUT    |=  0x100;
+//    GPIO_REG__OUTPUT    |=  0x100;
 }
 void    leds_error_off(void) {
-    GPIO_REG__OUTPUT    &= ~0x100;
+//    GPIO_REG__OUTPUT    &= ~0x100;
 }
 void    leds_error_toggle(void) {
-    GPIO_REG__OUTPUT    ^=  0x100;
+//    GPIO_REG__OUTPUT    ^=  0x100;
 }
 uint8_t leds_error_isOn(void) {
     return (uint8_t)(GPIO_REG__OUTPUT & 0x100);
@@ -36,13 +36,13 @@ uint8_t leds_error_isOn(void) {
 
 // 1 <K15>
 void    leds_radio_on(void) {
-    GPIO_REG__OUTPUT    |=  0x200;
+//    GPIO_REG__OUTPUT    |=  0x200;
 }
 void    leds_radio_off(void) {
-    GPIO_REG__OUTPUT    &= ~0x200;
+//    GPIO_REG__OUTPUT    &= ~0x200;
 }
 void    leds_radio_toggle(void) {
-    GPIO_REG__OUTPUT    ^=  0x200;
+//    GPIO_REG__OUTPUT    ^=  0x200;
 }
 uint8_t leds_radio_isOn(void) {
     return (uint8_t)(GPIO_REG__OUTPUT & 0x200)>>1;

@@ -23,15 +23,15 @@ void debugpins_init(void) {
 }
 
 void debugpins_frame_toggle(void) {
-    GPIO_REG__OUTPUT    ^=  0x1000;
+    // GPIO_REG__OUTPUT    ^=  0x1000;
 }
 
 void debugpins_frame_clr(void) {
-    GPIO_REG__OUTPUT    &= ~0x1000;
+     // GPIO_REG__OUTPUT    &= ~0x1000;
 }
 
 void debugpins_frame_set(void) {
-    GPIO_REG__OUTPUT    |=  0x1000;
+    //GPIO_REG__OUTPUT    |=  0x1000;
 }
 
 void debugpins_slot_toggle(void) {
@@ -47,15 +47,18 @@ void debugpins_slot_set(void) {
 }
 
 void debugpins_fsm_toggle(void) {
-    GPIO_REG__OUTPUT    ^=  0x4000;
+//    GPIO_REG__OUTPUT    ^=  0x4000;
+    GPIO_REG__OUTPUT    ^=  0x100;
 }
 
 void debugpins_fsm_clr(void) {
-    GPIO_REG__OUTPUT    &= ~0x4000;
+//    GPIO_REG__OUTPUT    &= ~0x4000;
+    GPIO_REG__OUTPUT    &=  ~0x100;
 }
 
 void debugpins_fsm_set(void) {
-    GPIO_REG__OUTPUT    |=  0x4000;
+//    GPIO_REG__OUTPUT    |=  0x4000;
+    GPIO_REG__OUTPUT    |=  0x100;
 }
 
 // no enough pin for debugpins task
@@ -73,15 +76,18 @@ void debugpins_task_set(void) {
 }
 
 void debugpins_isr_toggle(void) {
-    GPIO_REG__OUTPUT    ^=  0x8000;
+//    GPIO_REG__OUTPUT    ^=  0x1000;
+    GPIO_REG__OUTPUT    ^=  0x200;
 }
 
 void debugpins_isr_clr(void) {
-    GPIO_REG__OUTPUT    &= ~0x8000;
+//    GPIO_REG__OUTPUT    &= ~0x1000;
+    GPIO_REG__OUTPUT    &=  ~0x200;
 }
 
 void debugpins_isr_set(void) {
-    GPIO_REG__OUTPUT    |=  0x8000;
+//    GPIO_REG__OUTPUT    |=  0x1000;
+    GPIO_REG__OUTPUT    |=  0x200;
 }
 
 // no enough pin for debugpins radio
