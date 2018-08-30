@@ -169,6 +169,13 @@
 // ========================== Analog Configure Registers ======================
 
 #define ANALOG_CFG_REG__0               *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x000000)
+#define ANALOG_CFG_REG__1               *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x040000)
+#define ANALOG_CFG_REG__2               *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x080000)
+#define ANALOG_CFG_REG__3               *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x0C0000)
+#define ANALOG_CFG_REG__4               *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x100000)
+#define ANALOG_CFG_REG__9               *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x240000)
+#define ANALOG_CFG_REG__10              *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x280000)
+#define ANALOG_CFG_REG__11              *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x2C0000)
 #define ANALOG_CFG_REG__22              *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x580000)
     
 #define ACFG_LO__ADDR                   *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x001C0000)

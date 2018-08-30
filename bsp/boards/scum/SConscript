@@ -1,0 +1,29 @@
+import os
+
+Import('env')
+
+localEnv = env.Clone()
+
+# scons doesn't let us look to parent directories for source, so the
+# bsp/chips/at86rf231/radio.c is off limits from this file. To keep things
+# simple, each SConscript file in bsp/chips/* will return a list of objects
+# which can be appended to the source list. Don't forget to specify a variant_dir,
+# or else the build will occur directly in the chips directory.
+
+source = [
+    'board.c',
+    'scum_startup.s',
+    'cryptoengine.c',
+    'debugpins.c',
+    'eui64.c',
+    'leds.c',
+    'radio.c',
+    'scm3_hardware_interface.c',
+    'sctimer.c',
+    'uart.c',
+    'interrupts.c'
+]
+
+board  = localEnv.Object(source=source)
+
+Return('board')

@@ -109,7 +109,7 @@ void analog_scan_chain_write(unsigned int* scan_bits) {
     }
 }
 
-void analog_scan_chain_load() {
+void analog_scan_chain_load(void) {
     
     // Assert load signal (and cfg<357>)
     ANALOG_CFG_REG__22 = 0x0028;
@@ -121,7 +121,7 @@ void analog_scan_chain_load() {
 
 
 /* Prints the value of the 2MHz dac.*/
-void print_2MHz_DAC() {
+void print_2MHz_DAC(void) {
     int ind;
     // print the DAC settings
     //printf("2MHz DAC: ");
@@ -204,7 +204,7 @@ void set_2M_RC_frequency(int coarse1, int coarse2, int coarse3, int fine, int su
 
 
 /* Initializes the 2MHz DAC with values set in the dac_2M_settings array. */
-void initialize_2M_DAC() {
+void initialize_2M_DAC(void) {
     set_2M_RC_frequency(dac_2M_settings[0], dac_2M_settings[1], dac_2M_settings[2], dac_2M_settings[3], dac_2M_settings[4]);
     // printf("Initialized 2MHz DAC\n");
     // print_2MHz_DAC();
@@ -240,7 +240,7 @@ int valid_2M_read(int counter) {
 
 /* Returns 1 if rolling_average_2M is within the calibration window (cal not needed).
 Otherwise, returns 0.*/
-int is_2M_within_cal_window() {
+int is_2M_within_cal_window(void) {
     if ((rolling_average_2M < calibration_threshold_min) || 
         (rolling_average_2M > calibration_threshold_max)) {
             return 0;
@@ -254,7 +254,7 @@ which is the number of ticks of the clock in 100ms.
 
 Returns 0 if no calibration occurs, 1 if the DAC was changed.
 */
-int cal_2M_RC() {
+int cal_2M_RC(void) {
     int ind;
     int counter_dif;
     //printf("Calibrating 2M oscillator.\n");
@@ -529,7 +529,7 @@ If any value in the array is 0, it is not counted.
 
 If the rolling average is outside the calibration threshold, we calibrate the dac.
 */
-void compute_2M_rolling_average() {
+void compute_2M_rolling_average(void) {
     int index;
     double average;
     int sum = 0;
@@ -554,48 +554,49 @@ void compute_2M_rolling_average() {
 }
 
 
-void initialize_ASC(){
+void initialize_ASC(void){
+    
+    ANALOG_CFG_REG__11 = 0x0080;
     
     // The meaning of each bit is explained in scm3_ASC_v9.m script
 
-    ASC[0] = 0xC0000000;   //0-31
-    ASC[1] = 0x00000000;   //32-63
+    ASC[0] = 0xFF800000;   //0-31
+    ASC[1] = 0x00400000;   //32-63
     ASC[2] = 0x00000000;   //64-95
-    ASC[3] = 0x00000000;   //96-127
-    ASC[4] = 0x00000000;   //128-159
+    ASC[3] = 0x000E0006;   //96-127
+    ASC[4] = 0x48000000;   //128-159
     ASC[5] = 0x00000000;   //160-191
-    ASC[6] = 0x00000000;   //192-223
-    ASC[7] = 0x00000033;   //224-255
-    ASC[8] = 0x2207FFFF;   //256-287
-    ASC[9] = 0xE0C66388;   //288-319
-    ASC[10] = 0x88040020;   //320-351
-    ASC[11] = 0x000C0000;   //352-383
-    ASC[12] = 0x00180000;   //384-415
-    ASC[13] = 0x03D04000;   //416-447
-    ASC[14] = 0x200100FF;   //448-479
-    ASC[15] = 0xFBF02857;   //480-511
-    ASC[16] = 0x97FFFF00;   //512-543
-    ASC[17] = 0x22300080;   //544-575
-    ASC[18] = 0x010205F9;   //576-607
-    ASC[19] = 0x0506E7E8;   //608-639
-    ASC[20] = 0x10200040;   //640-671
-    ASC[21] = 0x03111810;   //672-703
-    ASC[22] = 0x2FFFFC00;   //704-735
-    ASC[23] = 0x20000000;   //736-767
+    ASC[6] = 0x00001000;   //192-223
+    ASC[7] = 0x0003012B;   //224-255
+    ASC[8] = 0x3306FC00;   //256-287
+    ASC[9] = 0x00422188;   //288-319
+    ASC[10] = 0x88040031;   //320-351
+    ASC[11] = 0x113F4081;   //352-383
+    ASC[12] = 0x027E8102;   //384-415
+    ASC[13] = 0x02605844;   //416-447
+    ASC[14] = 0x60010000;   //448-479
+    ASC[15] = 0x07EF0803;   //480-511
+    ASC[16] = 0x00000000;   //512-543
+    ASC[17] = 0x00000000;   //544-575
+    ASC[18] = 0x00000000;   //576-607
+    ASC[19] = 0x00000000;   //608-639
+    ASC[20] = 0x00000000;   //640-671
+    ASC[21] = 0x00000000;   //672-703
+    ASC[22] = 0x00000000;   //704-735
+    ASC[23] = 0x00000000;   //736-767
     ASC[24] = 0x00007CFC;   //768-799
-    ASC[25] = 0x20000018;   //800-831
-    ASC[26] = 0x02800000;   //832-863
+    ASC[25] = 0x20000000;   //800-831
+    ASC[26] = 0x00000000;   //832-863
     ASC[27] = 0x00000000;   //864-895
-    ASC[28] = 0x00000000;   //896-927
-    ASC[29] = 0x00000000;   //928-959
-    ASC[30] = 0x00000000;   //960-991
-    ASC[31] = 0x000007FC;   //992-1023
-    ASC[32] = 0x80000012;   //1024-1055
-    ASC[33] = 0xC004B000;   //1056-1087 
-    ASC[34] = 0x7C000015;   //1088-1119 enable GPIO 
-    ASC[35] = 0x4AAAAAA0;   //GPIO 0- 3 in
-    
-    ASC[36] = 0x00000000;   //1152-1183
+    ASC[28] = 0x00000810;   //896-927
+    ASC[29] = 0x007824DB;   //928-959
+    ASC[30] = 0x48000807;   //960-991
+    ASC[31] = 0xF0300805;   //992-1023
+    ASC[32] = 0x7028E07E;   //1024-1055
+    ASC[33] = 0x19A4B0C4;   //1056-1087
+    ASC[34] = 0x7FFF6840;   //1088-1119
+    ASC[35] = 0x00078000;   //1120-1151
+    ASC[36] = 0x08000000;   //1152-1183
     ASC[37] = 0x00000000;
     
     analog_scan_chain_write(&ASC[0]);

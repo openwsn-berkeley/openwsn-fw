@@ -199,7 +199,7 @@ elif env['toolchain']=='iar-proj':
     
 elif env['toolchain']=='armgcc':
     
-    if env['board'] not in ['silabs-ezr32wg','openmote-cc2538','openmote-b','iot-lab_M3','iot-lab_A8-M3','openmotestm', 'samr21_xpro']:
+    if env['board'] not in ['silabs-ezr32wg','openmote-cc2538','openmote-b','iot-lab_M3','iot-lab_A8-M3','openmotestm', 'samr21_xpro', 'scum']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     if   env['board'] in ['openmote-cc2538','openmote-b']:
@@ -381,6 +381,41 @@ elif env['toolchain']=='armgcc':
         env.Append(LINKFLAGS     = '-mcpu=cortex-m0plus')
         env.Append(LINKFLAGS     = '-mthumb')
         env.Append(LINKFLAGS     = '-g3')
+        # object manipulation
+        env.Replace(OBJCOPY      = 'arm-none-eabi-objcopy')
+        env.Replace(OBJDUMP      = 'arm-none-eabi-objdump')
+        # archiver
+        env.Replace(AR           = 'arm-none-eabi-ar')
+        env.Append(ARFLAGS       = '')
+        env.Replace(RANLIB       = 'arm-none-eabi-ranlib')
+        env.Append(RANLIBFLAGS   = '')
+        # misc
+        env.Replace(NM           = 'arm-none-eabi-nm')
+        env.Replace(SIZE         = 'arm-none-eabi-size')
+        
+    elif   env['board']=='scum':
+        
+        # compiler (C)
+        env.Replace(CC           = 'arm-none-eabi-gcc')
+        env.Append(CCFLAGS       = '-O3')
+        env.Append(CCFLAGS       = '-Wall')
+        env.Append(CCFLAGS       = '-mcpu=cortex-m0')
+        env.Append(CCFLAGS       = '-mthumb')
+        env.Append(CCFLAGS       = '-g')
+        env.Append(CCFLAGS       = '-Ibsp/boards/scum')
+        env.Append(CCFLAGS       = '-ffunction-sections')
+        env.Append(CCFLAGS       = '-fdata-sections')
+        # assembler
+        env.Replace(AS           = 'arm-none-eabi-as')
+        env.Append(ASFLAGS       = '-ggdb -g3 -mcpu=cortex-m0 -mlittle-endian -mthumb')
+        # linker
+        env.Append(LINKFLAGS     = '-Tbsp/boards/scum/scum_linker.ld')
+        env.Append(LINKFLAGS     = '-nostartfiles')
+        env.Append(LINKFLAGS     = '-Wl,--gc-sections')
+        env.Append(LINKFLAGS     = '-Wl,-Map,${TARGET.base}.map')
+        env.Append(LINKFLAGS     = '-specs=nosys.specs')
+        env.Append(LINKFLAGS     = '-D__STACK_SIZE=0x800')
+        env.Append(LINKFLAGS     = '-D__HEAP_SIZE=0x400')
         # object manipulation
         env.Replace(OBJCOPY      = 'arm-none-eabi-objcopy')
         env.Replace(OBJDUMP      = 'arm-none-eabi-objdump')
@@ -728,6 +763,52 @@ def IotLabM3_bootload(target, source, env):
     for t in bootloadThreads:
         countingSem.acquire()
         
+class scum_bootloadThread(threading.Thread):
+    def __init__(self,comPort,binaryFile,countingSem):
+        
+        # store params
+        self.comPort         = comPort
+        self.binaryFile      = binaryFile
+        self.countingSem     = countingSem
+        
+        # initialize parent class
+        threading.Thread.__init__(self)
+        self.name            = 'scum_bootloadThread{0}'.format(self.comPort)
+    
+    def run(self):
+        print 'starting bootloading on {0}'.format(self.comPort)
+        subprocess.call(
+            'python '+ os.path.join('bootloader','scum','scum_bootloader.py' + ' -p {0} {1}'.format(self.comPort, self.binaryFile)),
+            shell=True
+        )
+        print 'done bootloading on {0}'.format(self.comPort)
+        
+        # indicate done
+        self.countingSem.release()
+        
+def scum_bootload(target, source, env):
+    bootloadThreads = []
+    countingSem     = threading.Semaphore(0)
+    # create threads
+    for comPort in env['bootload'].split(','):
+        if os.name=='nt':
+            suffix = '.bin'
+        else:
+            suffix = ''
+        bootloadThreads += [
+            scum_bootloadThread(
+                comPort      = comPort,
+                binaryFile   = source[0].path.split('.')[0]+suffix,
+                countingSem  = countingSem,
+            )
+        ]
+    # start threads
+    for t in bootloadThreads:
+        t.start()
+    # wait for threads to finish
+    for t in bootloadThreads:
+        countingSem.acquire()
+        
 # bootload
 def BootloadFunc():
     if   env['board']=='telosb':
@@ -754,6 +835,12 @@ def BootloadFunc():
             suffix      = '.phonyupload',
             src_suffix  = '.bin'
          )
+    elif env['board']=='scum':
+         return Builder(
+            action      = scum_bootload,
+            suffix      = '.phonyupload',
+            src_suffix  = '.bin'
+     )
     else:
         raise SystemError('bootloading on board={0} unsupported.'.format(env['board']))
 if env['bootload']:
