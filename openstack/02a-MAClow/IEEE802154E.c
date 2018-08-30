@@ -937,6 +937,9 @@ port_INLINE void activity_ti1ORri1(void) {
                 ieee154e_vars.delayTx   = ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_getDelayTx_cb();
                 ieee154e_vars.delayRx   = ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_getDelayRx_cb();
 
+                // freq according to the used radio . calculate the frequency to transmit on
+                ieee154e_vars.channel = ieee154e_calculateFrequency(schedule_getChannelOffset());
+
                 if (packetfunctions_isBroadcastMulticast(&neighbor)==FALSE){
                     // this is a dedicated cell
                     ieee154e_vars.dataToSend = openqueue_macGetDedicatedPacket(&neighbor);
@@ -946,8 +949,6 @@ port_INLINE void activity_ti1ORri1(void) {
                     }
                     msf_updateCellsPassed(&neighbor);
                 } else {
-                    // freq according to the used radio . calculate the frequency to transmit on
-                    ieee154e_vars.channel = ieee154e_calculateFrequency(schedule_getChannelOffset());
 
                     //get the radiotype
                     ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor,ieee154e_vars.radioType);
