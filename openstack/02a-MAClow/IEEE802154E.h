@@ -39,8 +39,8 @@ static const uint8_t ebIEsBytestream[] = {
 #define EB_IE_LEN                   28
 
 #define NUM_CHANNELS                16 // number of channels to channel hop on
-#define DEFAULT_CH_SPACING           1200 // default channel spacing for subghz
-#define DEFAULT_FREQUENCY_CENTER     863625 // defualt freque
+#define DEFAULT_CH_SPACING          200 // default channel spacing for subghz
+#define DEFAULT_FREQUENCY_CENTER    863125 // defualt freque
 #define TXRETRIES                    3 // number of MAC retries before declaring failed
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to successfully synchronize

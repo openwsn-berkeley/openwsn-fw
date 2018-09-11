@@ -152,8 +152,8 @@ void radio_subghz_init(void) {
         while(1); //UNKNOWN DEVICE, FINISH
     }
     // Write registers to radio -- default configuration OFDM 400kbps
-    for( i = 0; i < (sizeof(basic_settings_ofdm_1_mcs2)/sizeof(registerSetting_t)); i++) {
-        at86rf215_spiWriteReg( basic_settings_ofdm_1_mcs2[i].addr, basic_settings_ofdm_1_mcs2[i].data);
+    for( i = 0; i < (sizeof(basic_settings_fsk_option1)/sizeof(registerSetting_t)); i++) {
+        at86rf215_spiWriteReg( basic_settings_fsk_option1[i].addr, basic_settings_fsk_option1[i].data);
     };
 
     radio_subghz_read_isr();
