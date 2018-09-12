@@ -59,7 +59,7 @@
 
 //===== IEEE802154E timing
 
-//#define SLOTDURATION_10MS // by default, we use 10ms time slot
+// #define SLOTDURATION_10MS // by default, we use 10ms time slot
 
 #ifdef SLOTDURATION_10MS
 // time-slot related
@@ -77,16 +77,16 @@
 #endif
 #define PORT_delayRx                         0    //    0us (can not measure)
 // radio watchdog
-#else
+#else // 40 ms
 // time-slot related
-#define PORT_TsSlotDuration                 492   // counter counts one extra count, see datasheet
+#define PORT_TsSlotDuration                 1300   // counter counts one extra count, see datasheet
 // execution speed related
-#define PORT_maxTxDataPrepare               66    // 2014us (measured 746us)
-#define PORT_maxRxAckPrepare                30    //  305us (measured  83us)
-#define PORT_maxRxDataPrepare               33    // 1007us (measured  84us)
-#define PORT_maxTxAckPrepare                32    //  305us (measured 219us)
+#define PORT_maxTxDataPrepare               130    // 2014us (measured 746us)
+#define PORT_maxRxAckPrepare                60    //  305us (measured  83us)
+#define PORT_maxRxDataPrepare               66    // 1007us (measured  84us)
+#define PORT_maxTxAckPrepare                64    //  305us (measured 219us)
 // radio speed related
-#define PORT_delayTx                        42    //  214us (measured 219us)
+#define PORT_delayTx                        70    //  214us (measured 219us)
 #define PORT_delayRx                        0     //    0us (can not measure)
 // radio watchdog
 #endif
