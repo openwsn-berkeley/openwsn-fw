@@ -167,10 +167,10 @@ enum ieee154e_atomicdurations_enum {
    TsTxAckDelay              =   33,                  //  1000us
    TsShortGT                 =    9,                  //   500us, The standardlized value for this is 400/2=200us(7ticks). Currectly 7 doesn't work for short packet, change it back to 7 when found the problem.
 #else
-   TsTxOffset                =  131,                  //  4000us
-   TsLongGT                  =   43,                  //  1300us
-   TsTxAckDelay              =  151,                  //  4606us
-   TsShortGT                 =   16,                  //   500us
+   TsTxOffset                =  260,                  //  4000us
+   TsLongGT                  =   86,                  //  1300us
+   TsTxAckDelay              =  300,                  //  4606us
+   TsShortGT                 =   80,                  //   500us
 #endif
    TsSlotDuration            =  PORT_TsSlotDuration,  // 10000us
    // execution speed related
@@ -182,12 +182,18 @@ enum ieee154e_atomicdurations_enum {
 //   delayTx                   =  PORT_delayTx,         // between GO signal and SFD
 //   delayRx                   =  PORT_delayRx,         // between GO signal and start listening
    // radio watchdog
+#ifdef SLOTDURATION_10MS
    wdRadioTx                 =   33,                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 43 is tested and works)
    wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
+#else
+   wdRadioTx                 =   80,                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 43 is tested and works)
+   wdDataDuration            =  690,                  //  23000us (measured 4280us with max payload)   
+#endif
+
 #ifdef SLOTDURATION_10MS
    wdAckDuration             =   80,                  //  2400us (measured 1000us)
 #else
-   wdAckDuration             =   98,                  //  3000us (measured 1000us)
+   wdAckDuration             =  240,                  //  5400us using 50 kbps
 #endif
 };
 
