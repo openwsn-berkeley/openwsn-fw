@@ -38,11 +38,6 @@
 #define BSP_BUTTON_BASE                 ( GPIO_D_BASE )
 #define BSP_BUTTON_USER                 ( GPIO_PIN_5 )
 
-#ifdef REVA1 //Rev.A1 uses SF23 cc2538 which start at diffferent location
-    #define CC2538_FLASH_ADDRESS            ( 0x0023F800 )
-#else
-    #define CC2538_FLASH_ADDRESS            ( 0x0027F800 )
-#endif
 //=========================== prototypes ======================================
 
 void board_timer_init(void);
@@ -59,10 +54,6 @@ static void SysCtrlSleepSetting(void);
 static void SysCtrlRunSetting(void);
 static void SysCtrlWakeupSetting(void);
 
-static void GPIO_D_Handler(void);
-
-bool user_button_initialized;
-
 //=========================== main ============================================
 
 extern int mote_main(void);
@@ -77,8 +68,6 @@ void board_init(void) {
 
     radio_functions_t* radio_functions;
 
-    user_button_initialized = FALSE;
-
     gpio_init();
     clock_init();
     antenna_init();
@@ -89,7 +78,6 @@ void board_init(void) {
     sctimer_init();
     uart_init();
     i2c_init();
-
 
     // initialize radios
     openradios_getFunctions(&radio_functions);
@@ -104,7 +92,7 @@ void board_init(void) {
 }
 
 void antenna_init(void) {
-   //use cc2538 2.4ghz radio
+   // By default use CC2538 2.4 GHz radio
    GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_CC2538_24GHZ, BSP_ANTENNA_CC2538_24GHZ);
    GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_AT215_24GHZ, 0);
 }
@@ -233,13 +221,9 @@ static void button_init(void) {
 
     GPIOPinIntClear(BSP_BUTTON_BASE, BSP_BUTTON_USER);
 
-    /* Register the interrupt */
-    GPIOPortIntRegister(BSP_BUTTON_BASE, GPIO_D_Handler);
-
     /* Clear and enable the interrupt */
     GPIOPinIntClear(BSP_BUTTON_BASE, BSP_BUTTON_USER);
     GPIOPinIntEnable(BSP_BUTTON_BASE, BSP_BUTTON_USER);
-    user_button_initialized = TRUE;
 }
 
 static void SysCtrlRunSetting(void) {
@@ -318,31 +302,3 @@ static void SysCtrlWakeupSetting(void) {
 }
 
 //=========================== interrupt handlers ==============================
-
-/**
- * GPIO_C interrupt handler. User button is GPIO_D
- * Erases a Flash sector to trigger the bootloader backdoor
- */
-static void GPIO_D_Handler(void) {
-    GPIOPinIntClear(BSP_BUTTON_BASE, BSP_BUTTON_USER);
-    if (!user_button_initialized) return;
-    /* Disable the interrupts */
-    eraseFlash();
-}
-
-/**
-* Erase the flash so bootloader is load after reboot
-*/
-void eraseFlash(){
-    /* Disable the interrupts */
-    IntMasterDisable();
-    leds_all_off();
-
-    /* Eras the CCA flash page */
-    FlashMainPageErase(CC2538_FLASH_ADDRESS);
-
-    leds_circular_shift();
-
-    /* Reset the board */
-    SysCtrlReset();
-}
