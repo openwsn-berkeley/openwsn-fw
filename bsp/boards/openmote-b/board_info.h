@@ -101,8 +101,8 @@
 
 //====== Antenna options ====
 #define BSP_ANTENNA_BASE            GPIO_D_BASE
-#define BSP_ANTENNA_CC2538_24GHZ    GPIO_PIN_3      //!< PD4 -- 2.4ghz
-#define BSP_ANTENNA_AT215_24GHZ     GPIO_PIN_4      //!< PD3 -- subghz
+#define BSP_ANTENNA_CC2538_24GHZ    GPIO_PIN_4      //!< PD4 -- 2.4ghz
+#define BSP_ANTENNA_AT215_24GHZ     GPIO_PIN_3      //!< PD3 -- subghz
 
 
 // number of radios in this board.
