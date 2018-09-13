@@ -19,7 +19,7 @@
 
 #define LENGTH_CRC_SUBGHZ    4
 #define NUM_CHANNELS_SUBGHZ  4 // number of channels to channel hop on
-#define delayTx_SUBGHZ      40
+#define delayTx_SUBGHZ      66
 #define delayRx_SUBGHZ       0
 
 //=========================== typedef =========================================

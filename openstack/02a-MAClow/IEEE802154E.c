@@ -531,7 +531,7 @@ bool debugPrint_macStats(void) {
 //======= SYNCHRONIZING
 
 port_INLINE void activity_synchronize_newSlot(void) {
-    // using only 2.4Ghz radio to synchronize.
+    // using only sub-GHz radio to synchronize.
 
     // I'm in the middle of receiving a packet
     if (ieee154e_vars.state==S_SYNCRX) {

@@ -11,7 +11,7 @@
             <name>General</name>
             <archiveVersion>3</archiveVersion>
             <data>
-                <version>28</version>
+                <version>29</version>
                 <wantNonLocal>1</wantNonLocal>
                 <debug>1</debug>
                 <option>
@@ -66,7 +66,7 @@
                 </option>
                 <option>
                     <name>OGLastSavedByProductVersion</name>
-                    <state>8.11.1.13270</state>
+                    <state>8.20.1.14181</state>
                 </option>
                 <option>
                     <name>GeneralEnableMisra</name>
@@ -116,7 +116,7 @@
                 </option>
                 <option>
                     <name>GBECoreSlave</name>
-                    <version>25</version>
+                    <version>26</version>
                     <state>38</state>
                 </option>
                 <option>
@@ -133,7 +133,7 @@
                 </option>
                 <option>
                     <name>CoreVariant</name>
-                    <version>25</version>
+                    <version>26</version>
                     <state>38</state>
                 </option>
                 <option>
@@ -156,7 +156,7 @@
                 </option>
                 <option>
                     <name>GFPUCoreSlave2</name>
-                    <version>25</version>
+                    <version>26</version>
                     <state>38</state>
                 </option>
                 <option>
@@ -195,6 +195,10 @@
                 <option>
                     <name>GenLocaleDisplayOnly</name>
                     <state></state>
+                </option>
+                <option>
+                    <name>DSPExtension</name>
+                    <state>0</state>
                 </option>
             </data>
         </settings>
@@ -1055,7 +1059,7 @@
             <name>General</name>
             <archiveVersion>3</archiveVersion>
             <data>
-                <version>28</version>
+                <version>29</version>
                 <wantNonLocal>1</wantNonLocal>
                 <debug>0</debug>
                 <option>
@@ -1160,7 +1164,7 @@
                 </option>
                 <option>
                     <name>GBECoreSlave</name>
-                    <version>25</version>
+                    <version>26</version>
                     <state>1</state>
                 </option>
                 <option>
@@ -1177,7 +1181,7 @@
                 </option>
                 <option>
                     <name>CoreVariant</name>
-                    <version>25</version>
+                    <version>26</version>
                     <state>0</state>
                 </option>
                 <option>
@@ -1200,7 +1204,7 @@
                 </option>
                 <option>
                     <name>GFPUCoreSlave2</name>
-                    <version>25</version>
+                    <version>26</version>
                     <state>0</state>
                 </option>
                 <option>
@@ -1239,6 +1243,10 @@
                 <option>
                     <name>GenLocaleDisplayOnly</name>
                     <state></state>
+                </option>
+                <option>
+                    <name>DSPExtension</name>
+                    <state>0</state>
                 </option>
             </data>
         </settings>
@@ -2311,9 +2319,6 @@
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\leds.c</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\radio.c</name>
-                </file>
-                <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\radio_subghz.c</name>
                 </file>
                 <file>
@@ -2358,9 +2363,6 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</name>
@@ -2513,6 +2515,12 @@
         <group>
             <name>02b-MAChigh</name>
             <file>
+                <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\msf.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\msf.h</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\neighbors.c</name>
             </file>
             <file>
@@ -2526,12 +2534,6 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\schedule.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\msf.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\msf.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sixtop.c</name>
