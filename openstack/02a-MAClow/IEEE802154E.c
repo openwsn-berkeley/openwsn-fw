@@ -116,7 +116,7 @@ void ieee154e_init(void) {
     memset(&ieee154e_dbg,0,sizeof(ieee154e_dbg_t));
 
     // set singleChannel to 0 to enable channel hopping.
-    ieee154e_vars.singleChannel     = 26;
+    ieee154e_vars.singleChannel     = 0;
     ieee154e_vars.isAckEnabled      = TRUE;
     ieee154e_vars.isSecurityEnabled = FALSE;
     ieee154e_vars.slotDuration      = TsSlotDuration;
@@ -2835,7 +2835,7 @@ port_INLINE uint8_t ieee154e_calculateFrequency(uint8_t channelOffset) {
         }
     } else {
         if (ieee154e_vars.radioType == RADIOTPYE_SUBGHZ){
-            return ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_calculateFrequency_cb(channelOffset,ieee154e_vars.asnOffset, NUM_CHANNELS,  ieee154e_vars.chTemplate, TRUE);
+            return ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_calculateFrequency_cb(channelOffset,ieee154e_vars.asnOffset, NUM_CHANNELS,  ieee154e_vars.chTemplate, FALSE);
         }
     }
 }

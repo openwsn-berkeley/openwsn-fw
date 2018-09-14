@@ -17,8 +17,12 @@
 //=========================== debug define ====================================
 
 //=========================== static ==========================================
+//static const uint8_t chTemplate_default[] = {
+//    5,6,12,7,15,4,14,11,8,0,1,2,13,3,9,10
+//};
+
 static const uint8_t chTemplate_default[] = {
-    5,6,12,7,15,4,14,11,8,0,1,2,13,3,9,10
+    0,1
 };
 
 // refer to RFC8180: https://tools.ietf.org/html/rfc8180#appendix-A.1
@@ -38,7 +42,7 @@ static const uint8_t ebIEsBytestream[] = {
 
 #define EB_IE_LEN                   28
 
-#define NUM_CHANNELS                16 // number of channels to channel hop on
+#define NUM_CHANNELS                2 // number of channels to channel hop on
 #define DEFAULT_CH_SPACING          200 // default channel spacing for subghz
 #define DEFAULT_FREQUENCY_CENTER    863125 // defualt freque
 #define TXRETRIES                    3 // number of MAC retries before declaring failed
