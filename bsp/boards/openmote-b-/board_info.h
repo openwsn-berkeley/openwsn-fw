@@ -57,7 +57,7 @@
 #define PORT_PIN_RADIO_RESET_HIGH()    // nothing
 #define PORT_PIN_RADIO_RESET_LOW()     // nothing
 
-#define SLOTDURATION 10                // in miliseconds
+#define SLOTDURATION 15                // in miliseconds
 
 //===== IEEE802154E timing
 
@@ -84,9 +84,9 @@
     #define PORT_TsSlotDuration                 492   // counter counts one extra count, see datasheet
     // execution speed related
     #define PORT_maxTxDataPrepare               66    // 2014us (measured 746us)
-    #define PORT_maxRxAckPrepare                10    //  305us (measured  83us)
+    #define PORT_maxRxAckPrepare                30    //  305us (measured  83us)
     #define PORT_maxRxDataPrepare               33    // 1007us (measured  84us)
-    #define PORT_maxTxAckPrepare                22    //  305us (measured 219us)
+    #define PORT_maxTxAckPrepare                32    //  305us (measured 219us)
     // radio speed related
     #define PORT_delayTx                        12    //  214us (measured 219us)
     #define PORT_delayRx                        0     //    0us (can not measure)
@@ -101,6 +101,12 @@
 
 #define NUMSENSORS      7
 
+//====== Antenna options ====
+#define BSP_ANTENNA_BASE            GPIO_D_BASE
+#define BSP_ANTENNA_CC2538_24GHZ    GPIO_PIN_4      //!< PD4 -- 2.4ghz
+#define BSP_ANTENNA_AT215_24GHZ     GPIO_PIN_3      //!< PD3 -- subghz
+//#define DAGROOT
+
 //=========================== typedef  ========================================
 
 //=========================== variables =======================================
@@ -113,7 +119,7 @@ static const uint8_t infoRadioName[]        = "CC2538 SoC";
 //=========================== prototypes ======================================
 
 //=========================== public ==========================================
-
+void eraseFlash(void);
 //=========================== private =========================================
 
 #endif
