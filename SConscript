@@ -674,6 +674,58 @@ def OpenMoteCC2538_bootload(target, source, env):
     # wait for threads to finish
     for t in bootloadThreads:
         countingSem.acquire()
+        
+        
+class opentestbed_bootloadThread(threading.Thread):
+    def __init__(self,mote,hexFile,countingSem):
+        
+        # store params
+        self.mote            = mote
+        self.hexFile         = hexFile
+        self.countingSem     = countingSem
+        
+        # initialize parent class
+        threading.Thread.__init__(self)
+        self.name            = 'OpenMoteCC2538_bootloadThread_{0}'.format(self.mote)
+    
+    def run(self):
+        print 'starting bootloading on {0}'.format(self.mote)
+        if self.mote == 'testbed':
+            target  = 'all'
+        else:
+            target  = self.mote
+        subprocess.call(
+            'python '+os.path.join('bootloader','openmote-cc2538','ot_program.py')+' -a {0} {1}'.format(target,self.hexFile),
+            shell=True
+        )
+        print 'done bootloading on {0}'.format(self.mote)
+        
+        # indicate done
+        self.countingSem.release()
+        
+def opentestbed_bootload(target, source, env):
+    bootloadThreads = []
+    countingSem     = threading.Semaphore(0)
+        
+    # Enumerate ports
+    motes = env['bootload'].split(',')
+
+    # create threads
+    for mote in motes:
+        bootloadThreads += [
+            opentestbed_bootloadThread(
+                mote         = mote,
+                hexFile      = source[0].path.split('.')[0]+'.ihex',
+                countingSem  = countingSem,
+            )
+        ]
+    # start threads
+    for t in bootloadThreads:
+        t.start()
+    # wait for threads to finish
+    for t in bootloadThreads:
+        countingSem.acquire()
+
 
 class openmotestm_bootloadThread(threading.Thread):
     def __init__(self,comPort,binaryFile,countingSem):
@@ -818,11 +870,18 @@ def BootloadFunc():
             src_suffix  = '.ihex',
         )
     elif env['board'] in ['openmote-cc2538','openmote-b','openmote-b-'] :
-        return Builder(
-            action      = OpenMoteCC2538_bootload,
-            suffix      = '.phonyupload',
-            src_suffix  = '.bin',
-        )
+        if 'testbed' in env['bootload'] or len(env['bootload'].split(',')[0].split('-'))==8:
+            return Builder(
+                action      = opentestbed_bootload,
+                suffix      = '.phonyupload',
+                src_suffix  = '.ihex',
+            )
+        else:
+            return Builder(
+                action      = OpenMoteCC2538_bootload,
+                suffix      = '.phonyupload',
+                src_suffix  = '.bin',
+            )
     elif env['board']=='iot-lab_M3':
          return Builder(
             action      = IotLabM3_bootload,
