@@ -85,6 +85,7 @@ void  radio_subghz_setFunctions(radio_functions_t * funcs) {
     funcs->radio_calculateFrequency_cb = radio_subghz_calculateFrequency;
     funcs->radio_getDelayTx_cb         = radio_subghz_getDelayTx;
     funcs->radio_getDelayRx_cb         = radio_subghz_getDelayRx;
+    funcs->radio_getChInitOffset_cb    = radio_getChInitOffset;
 }
 
 void radio_subghz_powerOn(void) {
@@ -192,6 +193,7 @@ void radio_subghz_setEndFrameCb(radio_capture_cbt cb) {
 //frequency_0 in kHz
 //frequency_nb integer
 void radio_subghz_setFrequency(uint16_t channel_spacing, uint32_t frequency_0, uint16_t channel) {
+
     frequency_0 = (frequency_0/25);
     at86rf215_spiWriteReg(RG_RF09_CS, (uint8_t)(channel_spacing/25));
     at86rf215_spiWriteReg(RG_RF09_CCF0L, (uint8_t)(frequency_0%256));
@@ -200,6 +202,7 @@ void radio_subghz_setFrequency(uint16_t channel_spacing, uint32_t frequency_0, u
     at86rf215_spiWriteReg(RG_RF09_CNM, (uint8_t)(channel/256));
     // change state
     radio_subghz_vars.state = RADIOSTATE_FREQUENCY_SET;
+
 }
 
 void radio_subghz_rfOn(void) {
@@ -231,6 +234,7 @@ void radio_subghz_loadPacket(uint8_t* packet, uint16_t len) {
     // change state
     radio_subghz_vars.state = RADIOSTATE_PACKET_LOADED;
     //at86rf215_readBurst(0x0306, packet, len);
+    
 }
 
 radio_state_t radio_subghz_getState(void){
@@ -321,6 +325,10 @@ uint8_t radio_subghz_getDelayTx(void){
 
 uint8_t radio_subghz_getDelayRx(void){
     return delayRx_SUBGHZ;
+}
+
+uint8_t radio_getChInitOffset(void){
+    return ChInitOffset;
 }
 
 //=========================== private =========================================

@@ -94,6 +94,7 @@ typedef uint8_t             (*radio_calculateFrequency_cbt)(
 );
 typedef uint8_t             (*radio_getDelayTx_cbt)(void);
 typedef uint8_t             (*radio_getDelayRx_cbt)(void);
+typedef uint8_t             (*radio_getChInitOffset_cbt)(void);
 
 typedef struct {
     radio_powerOn_cbt             radio_powerOn_cb;
@@ -124,6 +125,7 @@ typedef struct {
     radio_calculateFrequency_cbt  radio_calculateFrequency_cb;
     radio_getDelayTx_cbt          radio_getDelayTx_cb;
     radio_getDelayRx_cbt          radio_getDelayRx_cb;
+    radio_getChInitOffset_cbt     radio_getChInitOffset_cb;
 } radio_functions_t;
 
 typedef struct {

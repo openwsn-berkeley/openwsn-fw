@@ -22,7 +22,7 @@
 //};
 
 static const uint8_t chTemplate_default[] = {
-    0,1
+    4,8,15
 };
 
 // refer to RFC8180: https://tools.ietf.org/html/rfc8180#appendix-A.1
@@ -42,7 +42,7 @@ static const uint8_t ebIEsBytestream[] = {
 
 #define EB_IE_LEN                   28
 
-#define NUM_CHANNELS                2 // number of channels to channel hop on
+#define NUM_CHANNELS                3 // number of channels to channel hop on
 #define DEFAULT_CH_SPACING          200 // default channel spacing for subghz
 #define DEFAULT_FREQUENCY_CENTER    863125 // defualt freque
 #define TXRETRIES                    3 // number of MAC retries before declaring failed
@@ -171,9 +171,9 @@ enum ieee154e_atomicdurations_enum {
    TsTxAckDelay              =   33,                  //  1000us
    TsShortGT                 =    9,                  //   500us, The standardlized value for this is 400/2=200us(7ticks). Currectly 7 doesn't work for short packet, change it back to 7 when found the problem.
 #else
-   TsTxOffset                =  180,                  //  4000us
+   TsTxOffset                =  120,                  //  4000us
    TsLongGT                  =   86,                  //  1300us
-   TsTxAckDelay              =  180,                  //  4606us
+   TsTxAckDelay              =  120,                  //  4606us
    TsShortGT                 =   80,                  //   500us
 #endif
    TsSlotDuration            =  PORT_TsSlotDuration,  // 10000us
@@ -190,14 +190,14 @@ enum ieee154e_atomicdurations_enum {
    wdRadioTx                 =   33,                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 43 is tested and works)
    wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
 #else
-   wdRadioTx                 =  120,                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 43 is tested and works)
+   wdRadioTx                 =  140,                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 43 is tested and works)
    wdDataDuration            =  754,                  //  23000us (measured 4280us with max payload)   
 #endif
 
 #ifdef SLOTDURATION_10MS
    wdAckDuration             =   80,                  //  2400us (measured 1000us)
 #else
-   wdAckDuration             =  240,                  //  5400us using 50 kbps
+   wdAckDuration             =  260,                  //  5400us using 50 kbps
 #endif
 };
 
@@ -283,6 +283,7 @@ typedef struct {
     uint32_t                  startOfSlotReference;    // the time refer to the beginning of slot
     uint8_t                   delayTx;                 // radio specific tx delay
     uint8_t                   delayRx;                 // radio specific rx delay
+    uint8_t                   ChInitOffset;            // first channel, e.g., for O-QPSK 2006 is 11
 
    radio_functions_t*        radio_functions;
 } ieee154e_vars_t;

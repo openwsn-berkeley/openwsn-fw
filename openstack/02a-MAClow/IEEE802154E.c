@@ -116,7 +116,7 @@ void ieee154e_init(void) {
     memset(&ieee154e_dbg,0,sizeof(ieee154e_dbg_t));
 
     // set singleChannel to 0 to enable channel hopping.
-    ieee154e_vars.singleChannel     = 0;
+    ieee154e_vars.singleChannel     = TRUE;
     ieee154e_vars.isAckEnabled      = TRUE;
     ieee154e_vars.isSecurityEnabled = FALSE;
     ieee154e_vars.slotDuration      = TsSlotDuration;
@@ -552,8 +552,11 @@ port_INLINE void activity_synchronize_newSlot(void) {
         ieee154e_vars.radio_functions[RADIOTPYE_SUBGHZ].radio_setStartFrameCb_cb(ieee154e_startOfFrame);
         ieee154e_vars.radio_functions[RADIOTPYE_SUBGHZ].radio_setEndFrameCb_cb(ieee154e_endOfFrame);
 
+        //get first channel number offset
+        ieee154e_vars.ChInitOffset = ieee154e_vars.radio_functions[RADIOTPYE_SUBGHZ].radio_getChInitOffset_cb();
+        
         // update record of current channel
-        ieee154e_vars.channel = (openrandom_get16b()&0x0F) + 11;
+        ieee154e_vars.channel = (openrandom_get16b()&0x0F) + ieee154e_vars.ChInitOffset;
 
         ieee154e_vars.channel = 0;
 
@@ -802,8 +805,12 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
         infer the asnOffset based on the fact that
         ieee154e_vars.channel = 11 + (asnOffset + channelOffset)%16
         */
+        
+        //get first channel number offset
+        ieee154e_vars.ChInitOffset = ieee154e_vars.radio_functions[RADIOTPYE_SUBGHZ].radio_getChInitOffset_cb();
+        
         for (i=0;i<NUM_CHANNELS;i++){
-            if ((ieee154e_vars.channel - 11)==ieee154e_vars.chTemplate[i]){
+            if ((ieee154e_vars.channel - ieee154e_vars.ChInitOffset)==ieee154e_vars.chTemplate[i]){
                 break;
             }
         }
@@ -1165,7 +1172,7 @@ port_INLINE void activity_ti1ORri1(void) {
 }
 
 port_INLINE void activity_ti2(void) {
-
+    debugpins_frame_toggle();
     // change state
     changeState(S_TXDATAPREPARE);
 
@@ -1210,6 +1217,7 @@ port_INLINE void activity_ti2(void) {
     ieee154e_vars.radioOnThisSlot=TRUE;
     // change state
     changeState(S_TXDATAREADY);
+    debugpins_frame_toggle();
 }
 
 port_INLINE void activity_tie1(void) {
@@ -2578,8 +2586,11 @@ port_INLINE void ieee154e_syncSlotOffset(void) {
     infer the asnOffset based on the fact that
     ieee154e_vars.channel = 11 + (asnOffset + channelOffset)%16
     */
+    //get first channel number offset
+    ieee154e_vars.ChInitOffset = ieee154e_vars.radio_functions[RADIOTPYE_SUBGHZ].radio_getChInitOffset_cb();
+    
     for (i=0;i<NUM_CHANNELS;i++){
-        if ((ieee154e_vars.channel - 11)==ieee154e_vars.chTemplate[i]){
+        if ((ieee154e_vars.channel - ieee154e_vars.ChInitOffset)==ieee154e_vars.chTemplate[i]){
             break;
         }
     }
@@ -2826,6 +2837,7 @@ different channel offsets in the same slot.
 \returns The calculated frequency channel, an integer between 11 and 26.
 */
 port_INLINE uint8_t ieee154e_calculateFrequency(uint8_t channelOffset) {
+  
     if (ieee154e_vars.radioType == RADIOTPYE_2D4GHZ){
         if (ieee154e_vars.singleChannel >= 11 && ieee154e_vars.singleChannel <= 26 ) {
             return ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_calculateFrequency_cb(ieee154e_vars.singleChannel,ieee154e_vars.asnOffset, NUM_CHANNELS,  ieee154e_vars.chTemplate, TRUE); // single channel
@@ -2835,7 +2847,7 @@ port_INLINE uint8_t ieee154e_calculateFrequency(uint8_t channelOffset) {
         }
     } else {
         if (ieee154e_vars.radioType == RADIOTPYE_SUBGHZ){
-            return ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_calculateFrequency_cb(channelOffset,ieee154e_vars.asnOffset, NUM_CHANNELS,  ieee154e_vars.chTemplate, FALSE);
+           return ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_calculateFrequency_cb(channelOffset,ieee154e_vars.asnOffset, NUM_CHANNELS,  ieee154e_vars.chTemplate, TRUE);
         }
     }
 }

@@ -77,14 +77,14 @@
     #endif
     #define PORT_delayRx                         0    //    0us (can not measure)
     // radio watchdog
-#else // 40 ms
+#else // 35 ms
     // time-slot related
-    #define PORT_TsSlotDuration                 1300   // counter counts one extra count, see datasheet
+    #define PORT_TsSlotDuration                 1147   // counter counts one extra count, see datasheet
     // execution speed related
-    #define PORT_maxTxDataPrepare               66    // 2014us (measured 746us)
+    #define PORT_maxTxDataPrepare               40    // 2014us (measured 746us)
     #define PORT_maxRxAckPrepare                30    //  305us (measured  83us)
-    #define PORT_maxRxDataPrepare               33    // 1007us (measured  84us)
-    #define PORT_maxTxAckPrepare                32    //  305us (measured 219us)
+    #define PORT_maxRxDataPrepare               30    // 1007us (measured  84us)
+    #define PORT_maxTxAckPrepare                40    //  305us (measured 219us)
     // radio speed related
     #define PORT_delayTx                        27    //  214us (measured 219us)
     #define PORT_delayRx                        0     //    0us (can not measure)
