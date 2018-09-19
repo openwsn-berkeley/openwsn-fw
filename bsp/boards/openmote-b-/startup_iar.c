@@ -181,20 +181,33 @@ extern void uDMAErrIntHandler(void);
 // Image Valid bytes (bytes 2008 -2011)
 //
 //*****************************************************************************
-typedef struct
-{
-    uint32_t ui32BootldrCfg;
-    uint32_t ui32ImageValid;
-    uint32_t ui32ImageVectorAddr;
-}
-lockPageCCA_t;
 
-__root const lockPageCCA_t __cca @ ".flashcca" =
-{
-  BOOTLOADER_BACKDOOR_ENABLE,    // Bootloader backdoor enabled
-  0,                            // Image valid bytes
-  FLASH_START_ADDR              // Vector table located at flash start address
-};
+// NOTE: we do NOT configure the flash CCA part since this will result large binary file to program.
+// The reason is that the binary output format has no support for holes so every address in the range must be given a value.
+// (ref: https://www.iar.com/support/tech-notes/linker/huge-binary-file/)
+
+// Without CCA configuration, you need make sure it's pre-configured in the flash of the mote.
+// In case not, you can uncomment the following CCA configuration code and program your mote and next time
+// you can comment out the following code to reduce the image size.
+
+// =================== CCA configuration ======================================
+
+// typedef struct
+// {
+    // uint32_t ui32BootldrCfg;
+    // uint32_t ui32ImageValid;
+    // uint32_t ui32ImageVectorAddr;
+// }
+// lockPageCCA_t;
+
+// __root const lockPageCCA_t __cca @ ".flashcca" =
+// {
+  // BOOTLOADER_BACKDOOR_ENABLE,    // Bootloader backdoor enabled
+  // 0,                            // Image valid bytes
+  // FLASH_START_ADDR              // Vector table located at flash start address
+// };
+
+// =================== End ====================================================
 
 
 //*****************************************************************************
