@@ -211,7 +211,7 @@ elif env['toolchain']=='armgcc':
         
         # compiler (C)
         env.Replace(CC           = 'arm-none-eabi-gcc')
-        env.Append(CCFLAGS       = '-O0')
+        env.Append(CCFLAGS       = '-Os')
         env.Append(CCFLAGS       = '-Wall')
         env.Append(CCFLAGS       = '-Wa,-adhlns=${TARGET.base}.lst')
         env.Append(CCFLAGS       = '-c')
@@ -626,11 +626,11 @@ def telosb_bootload(target, source, env):
         countingSem.acquire()
 
 class OpenMoteCC2538_bootloadThread(threading.Thread):
-    def __init__(self,comPort,hexFile,countingSem):
+    def __init__(self,comPort,binFile,countingSem):
         
         # store params
         self.comPort         = comPort
-        self.hexFile         = hexFile
+        self.binFile         = binFile
         self.countingSem     = countingSem
         
         # initialize parent class
@@ -640,7 +640,7 @@ class OpenMoteCC2538_bootloadThread(threading.Thread):
     def run(self):
         print 'starting bootloading on {0}'.format(self.comPort)
         subprocess.call(
-            'python '+os.path.join('bootloader','openmote-cc2538','cc2538-bsl.py')+' -e --bootloader-invert-lines -w -b 400000 -p {0} {1}'.format(self.comPort,self.hexFile),
+            'python '+os.path.join('bootloader','openmote-cc2538','cc2538-bsl.py')+' -e --bootloader-invert-lines -w -b 400000 -p {0} {1}'.format(self.comPort,self.binFile),
             shell=True
         )
         print 'done bootloading on {0}'.format(self.comPort)
@@ -663,8 +663,7 @@ def OpenMoteCC2538_bootload(target, source, env):
         bootloadThreads += [
             OpenMoteCC2538_bootloadThread(
                 comPort      = comPort,
-                #hexFile      = os.path.split(source[0].path)[1].split('.')[0]+'.bin',
-                hexFile      = source[0].path.split('.')[0]+'.ihex',
+                binFile      = source[0].path.split('.')[0]+'.bin',
                 countingSem  = countingSem,
             )
         ]
@@ -677,11 +676,11 @@ def OpenMoteCC2538_bootload(target, source, env):
         
         
 class opentestbed_bootloadThread(threading.Thread):
-    def __init__(self,mote,hexFile,countingSem):
+    def __init__(self,mote,binFile,countingSem):
         
         # store params
         self.mote            = mote
-        self.hexFile         = hexFile
+        self.binFile         = binFile
         self.countingSem     = countingSem
         
         # initialize parent class
@@ -695,7 +694,7 @@ class opentestbed_bootloadThread(threading.Thread):
         else:
             target  = self.mote
         subprocess.call(
-            'python '+os.path.join('bootloader','openmote-cc2538','ot_program.py')+' -a {0} {1}'.format(target,self.hexFile),
+            'python '+os.path.join('bootloader','openmote-cc2538','ot_program.py')+' -a {0} {1}'.format(target,self.binFile),
             shell=True
         )
         print 'done bootloading on {0}'.format(self.mote)
@@ -715,7 +714,7 @@ def opentestbed_bootload(target, source, env):
         bootloadThreads += [
             opentestbed_bootloadThread(
                 mote         = mote,
-                hexFile      = source[0].path.split('.')[0]+'.ihex',
+                binFile      = source[0].path.split('.')[0]+'.bin',
                 countingSem  = countingSem,
             )
         ]
