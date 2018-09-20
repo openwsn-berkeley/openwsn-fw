@@ -104,7 +104,7 @@ class program_over_testbed(object):
     #======================== public ==========================================
     def is_response_success(self):
         print "--------------------------------------------------------------"
-        print "messges repsonded by {0} motes, {1} motes report with success".format(
+        print "Try to program {0} motes, {1} motes report with success".format(
             self.response_success['message_counter'],
             self.response_success['success_counter']
         )
