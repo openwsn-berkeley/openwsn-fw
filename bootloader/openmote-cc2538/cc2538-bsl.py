@@ -236,7 +236,7 @@ class CommandInterface(object):
         # it has actually entered its bootloader mode.
         #
 
-        time.sleep(0.1)
+        time.sleep(0.002)
 
     def close(self):
         self.sp.close()
@@ -710,11 +710,8 @@ class CC2538(Chip):
         mdebug(5, "Primary IEEE Address: %s" % (':'.join('%02X' % x for x in ieee_addr)))
 
     def erase(self):
-        # do not erase the last page, which including the CCA configuration
-        # the minimal size to erase is one page size(check the erase command: http://www.ti.com/lit/ug/swru333a/swru333a.pdf )
-        one_page_size = 2048
-        mdebug(5, "Erasing %s bytes starting at address 0x%08X" % (self.size-one_page_size, self.flash_start_addr))
-        return self.command_interface.cmdEraseMemory(self.flash_start_addr, self.size-one_page_size)
+        mdebug(5, "Erasing %s bytes starting at address 0x%08X" % (self.size, self.flash_start_addr))
+        return self.command_interface.cmdEraseMemory(self.flash_start_addr, self.size)
 
     def read_memory(self, addr):
         # CC2538's COMMAND_MEMORY_READ sends each 4-byte number in inverted
