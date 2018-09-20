@@ -8,7 +8,7 @@ import random
 
 #============================ defines =========================================
 BROKER_ADDRESS          = "argus.paris.inria.fr"
-NUMBER_OF_MOTES         = 80
+NUMBER_OF_MOTES         = 80 - 4 # 4 motes are used for local test
 
 #============================ classes =========================================
 class program_over_testbed(object):
