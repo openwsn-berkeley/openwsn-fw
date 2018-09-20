@@ -169,7 +169,7 @@ elif env['toolchain']=='iar':
 
 elif env['toolchain']=='iar-proj':
     
-    if env['board'] not in ['telosb','gina','wsn430v13b','wsn430v14','z1','openmotestm','agilefox','openmote-cc2538','openmote-b','openmote-b-','iot-lab_M3']:
+    if env['board'] not in ['telosb','gina','wsn430v13b','wsn430v14','z1','openmotestm','agilefox','openmote-cc2538','openmote-b','openmote-b-24ghz','iot-lab_M3']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     env['IAR_EW430_INSTALLDIR'] = os.environ['IAR_EW430_INSTALLDIR']
@@ -199,10 +199,10 @@ elif env['toolchain']=='iar-proj':
     
 elif env['toolchain']=='armgcc':
     
-    if env['board'] not in ['silabs-ezr32wg','openmote-cc2538','openmote-b','openmote-b-','iot-lab_M3','iot-lab_A8-M3','openmotestm', 'samr21_xpro', 'scum']:
+    if env['board'] not in ['silabs-ezr32wg','openmote-cc2538','openmote-b','openmote-b-24ghz','iot-lab_M3','iot-lab_A8-M3','openmotestm', 'samr21_xpro', 'scum']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
-    if   env['board'] in ['openmote-cc2538','openmote-b','openmote-b-']:
+    if   env['board'] in ['openmote-cc2538','openmote-b','openmote-b-24ghz']:
         if env['revision'] == "A1":
             linker_file = 'cc2538sf23.lds'
             print "*** OPENMOTE CC2538 REV. A1 ***\n"
@@ -869,7 +869,7 @@ def BootloadFunc():
             suffix      = '.phonyupload',
             src_suffix  = '.ihex',
         )
-    elif env['board'] in ['openmote-cc2538','openmote-b','openmote-b-'] :
+    elif env['board'] in ['openmote-cc2538','openmote-b','openmote-b-24ghz'] :
         if 'testbed' in env['bootload'] or len(env['bootload'].split(',')[0].split('-'))==8:
             return Builder(
                 action      = opentestbed_bootload,

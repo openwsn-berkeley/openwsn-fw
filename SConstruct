@@ -111,7 +111,7 @@ command_line_options = {
         # Cortex-M3
         'openmote-cc2538',
         'openmote-b',
-        'openmote-b-',
+        'openmote-b-24ghz',
         'silabs-ezr32wg',
         'openmotestm',
         'iot-lab_M3',

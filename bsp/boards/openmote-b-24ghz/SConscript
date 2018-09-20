@@ -16,9 +16,9 @@ source   = \
 
 localEnv.Append(
     CPPPATH =  [
-        os.path.join('#','bsp','boards','openmote-b-'),
-        os.path.join('#','bsp','boards','openmote-b-','headers'),
-        os.path.join('#','bsp','boards','openmote-b-','source'),
+        os.path.join('#','bsp','boards','openmote-b-24ghz'),
+        os.path.join('#','bsp','boards','openmote-b-24ghz','headers'),
+        os.path.join('#','bsp','boards','openmote-b-24ghz','source'),
         os.path.join('#','bsp','chips','si70x'),
     ],
 )
