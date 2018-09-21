@@ -1,13 +1,18 @@
 #!/bin/bash
 
-FILE=$(echo $1 | sed "s/.*\/.*\/.*\/.*\/\([0-9]\+\)/\1/")
-DIR=$(dirname $1)
-#echo -e "Direktirij $DIR"
-echo -e "\n\t FLASHING $FILE to nrf52840dk (needs nrfjprog tools in nrf52840/tools/nrfjprog folder)\n"
+if [ -d "./bsp/boards/nrf52840/tools/nrfjprog" ]; then
 
-cd $DIR
-arm-none-eabi-objcopy -O ihex $FILE out.ihex
-./../../../../bsp/boards/nrf52840/tools/nrfjprog/nrfjprog -f nrf52 --program out.ihex --sectorerase
-./../../../../bsp/boards/nrf52840/tools/nrfjprog/nrfjprog -f nrf52 --reset
+  echo -e "\n\t FLASHING $1 to nrf52840dk\n"
 
-cd ../../../..
+  ./bsp/boards/nrf52840/tools/nrfjprog/nrfjprog -f nrf52 --program $1 --sectorerase
+  ./bsp/boards/nrf52840/tools/nrfjprog/nrfjprog -f nrf52 --reset
+
+else
+
+  echo -e "\n\n[WARNING]\n"
+  echo -e "To be able to flash the Nordic nRF52840 Development Kit you will need to install"
+  echo -e "both the latest JLink Software (https://www.segger.com/downloads/jlink/) and"
+  echo -e "nRF5x-Command-Line-Tools (https://www.nordicsemi.com/eng/Products/nRF52840#Downloads)"
+  echo -e "into the directory './bsp/boards/nrf52840/tools/nrfjprog'.\n"
+
+fi
