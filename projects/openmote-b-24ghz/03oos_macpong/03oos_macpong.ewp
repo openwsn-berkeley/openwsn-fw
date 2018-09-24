@@ -32,11 +32,11 @@
                 </option>
                 <option>
                     <name>Input description</name>
-                    <state>Automatic choice of formatter, without multibyte support.</state>
+                    <state>Automatic choice of formatter.</state>
                 </option>
                 <option>
                     <name>Output description</name>
-                    <state>Automatic choice of formatter, without multibyte support.</state>
+                    <state>Automatic choice of formatter.</state>
                 </option>
                 <option>
                     <name>GOutputBinary</name>
@@ -336,6 +336,9 @@
                     <state>$PROJ_DIR$\..\..\..\bsp\</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\boards\</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\boards\common\</state>
+                    <state>$PROJ_DIR$\..\..\..\bsp\chips\adxl346\</state>
+                    <state>$PROJ_DIR$\..\..\..\bsp\chips\max44009\</state>
+                    <state>$PROJ_DIR$\..\..\..\bsp\chips\sht21\</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\chips\si70x\</state>
                     <state>$PROJ_DIR$\..\..\..\kernel\</state>
                     <state>$PROJ_DIR$\..\..\..\drivers\common\</state>
@@ -350,25 +353,18 @@
                     <state>$PROJ_DIR$\..\..\..\openstack\cross-layers\</state>
                     <state>$PROJ_DIR$\..\..\..\openapps\</state>
                     <state>$PROJ_DIR$\..\..\..\openapps\c6t\</state>
-                    <state>$PROJ_DIR$\..\..\..\openapps\cexample\</state>
                     <state>$PROJ_DIR$\..\..\..\openapps\cinfo\</state>
-                    <state>$PROJ_DIR$\..\..\..\openapps\cjoin\</state>
                     <state>$PROJ_DIR$\..\..\..\openapps\cleds\</state>
-                    <state>$PROJ_DIR$\..\..\..\openapps\csensors\</state>
                     <state>$PROJ_DIR$\..\..\..\openapps\cwellknown\</state>
-                    <state>$PROJ_DIR$\..\..\..\openapps\opencoap\</state>
                     <state>$PROJ_DIR$\..\..\..\openapps\techo\</state>
                     <state>$PROJ_DIR$\..\..\..\openapps\tohlone\</state>
                     <state>$PROJ_DIR$\..\..\..\openapps\uecho\</state>
                     <state>$PROJ_DIR$\..\..\..\openapps\cstorm\</state>
                     <state>$PROJ_DIR$\..\..\..\openapps\rrt\</state>
                     <state>$PROJ_DIR$\..\..\..\openapps\uinject\</state>
-                    <state>$PROJ_DIR$\..\..\..\openapps\uexpiration\</state>
-                    <state>$PROJ_DIR$\..\..\..\openapps\uexpiration_monitor\</state>
-                    <state>$PROJ_DIR$\..\..\..\openapps\userialbridge\</state>
-                    <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\</state>
-                    <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\headers\</state>
-                    <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\</state>
+                    <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\</state>
+                    <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\headers\</state>
+                    <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\</state>
                     <state>$PROJ_DIR$\..\..\..\projects\common\03oos_openwsn</state>
                 </option>
                 <option>
@@ -619,7 +615,7 @@
                 </option>
                 <option>
                     <name>AOutputFile</name>
-                    <state>$FILE_BNAME$.o</state>
+                    <state></state>
                 </option>
                 <option>
                     <name>ALimitErrorsCheck</name>
@@ -661,15 +657,15 @@
                 <option>
                     <name>OOCOutputFormat</name>
                     <version>3</version>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>OCOutputOverride</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>OOCOutputFile</name>
-                    <state>03oos_openwsn.hex</state>
+                    <state></state>
                 </option>
                 <option>
                     <name>OOCCommandLineProducer</name>
@@ -677,7 +673,7 @@
                 </option>
                 <option>
                     <name>OOCObjCopyEnable</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
             </data>
         </settings>
@@ -724,7 +720,7 @@
                 </option>
                 <option>
                     <name>IlinkOutputFile</name>
-                    <state>03oos_openwsn.out</state>
+                    <state>03oos_macpong.out</state>
                 </option>
                 <option>
                     <name>IlinkDebugInfoEnable</name>
@@ -760,7 +756,7 @@
                 </option>
                 <option>
                     <name>IlinkMapFile</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>IlinkLogFile</name>
@@ -2061,10 +2057,10 @@
     <group>
         <name>application</name>
         <file>
-            <name>$PROJ_DIR$\..\..\common\03oos_openwsn\03oos_openwsn.c</name>
+            <name>$PROJ_DIR$\..\..\common\03oos_macpong\03oos_macpong.c</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\common\03oos_openwsn\03oos_openwsn.h</name>
+            <name>$PROJ_DIR$\..\..\common\03oos_macpong\03oos_macpong.h</name>
         </file>
     </group>
     <group>
@@ -2072,268 +2068,274 @@
         <group>
             <name>boards</name>
             <group>
-                <name>openmote-b</name>
+                <name>openmote-b-24ghz</name>
                 <group>
                     <name>headers</name>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\headers\hw_aes.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\headers\hw_aes.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\headers\hw_ana_regs.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\headers\hw_ana_regs.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\headers\hw_cctest.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\headers\hw_cctest.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\headers\hw_flash_ctrl.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\headers\hw_flash_ctrl.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\headers\hw_gpio.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\headers\hw_gpio.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\headers\hw_gptimer.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\headers\hw_gptimer.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\headers\hw_i2cm.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\headers\hw_i2cm.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\headers\hw_i2cs.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\headers\hw_i2cs.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\headers\hw_ints.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\headers\hw_ints.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\headers\hw_ioc.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\headers\hw_ioc.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\headers\hw_memmap.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\headers\hw_memmap.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\headers\hw_nvic.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\headers\hw_nvic.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\headers\hw_pka.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\headers\hw_pka.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\headers\hw_rfcore_ffsm.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\headers\hw_rfcore_ffsm.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\headers\hw_rfcore_sfr.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\headers\hw_rfcore_sfr.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\headers\hw_rfcore_xreg.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\headers\hw_rfcore_xreg.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\headers\hw_smwdthrosc.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\headers\hw_smwdthrosc.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\headers\hw_soc_adc.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\headers\hw_soc_adc.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\headers\hw_ssi.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\headers\hw_ssi.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\headers\hw_sys_ctrl.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\headers\hw_sys_ctrl.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\headers\hw_types.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\headers\hw_types.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\headers\hw_uart.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\headers\hw_uart.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\headers\hw_udma.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\headers\hw_udma.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\headers\hw_udmachctl.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\headers\hw_udmachctl.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\headers\hw_usb.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\headers\hw_usb.h</name>
                     </file>
                 </group>
                 <group>
                     <name>source</name>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\adc.c</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\adc.c</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\adc.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\adc.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\aes.c</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\aes.c</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\aes.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\aes.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\bl_commands.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\bl_commands.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\ccm.c</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\ccm.c</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\ccm.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\ccm.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\cpu.c</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\cpu.c</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\cpu.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\cpu.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\debug.c</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\debug.c</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\debug.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\debug.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\ecc_curveinfo.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\ecc_curveinfo.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\flash.c</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\flash.c</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\flash.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\flash.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\gpio.c</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\gpio.c</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\gpio.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\gpio.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\gptimer.c</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\gptimer.c</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\gptimer.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\gptimer.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\i2c_lib.c</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\i2c_lib.c</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\i2c_lib.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\i2c_lib.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\interrupt.c</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\interrupt.c</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\interrupt.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\interrupt.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\ioc.c</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\ioc.c</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\ioc.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\ioc.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\pka.c</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\pka.c</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\pka.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\pka.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\rom.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\rom.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\sha256.c</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\sha256.c</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\sha256.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\sha256.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\sleepmode.c</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\sleepmode.c</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\sleepmode.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\sleepmode.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\ssi.c</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\ssi.c</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\ssi.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\ssi.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\sys_ctrl.c</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\sys_ctrl.c</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\sys_ctrl.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\sys_ctrl.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\systick.c</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\systick.c</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\systick.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\systick.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\uarthal.c</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\uarthal.c</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\uarthal.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\uarthal.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\udma.c</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\udma.c</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\udma.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\udma.h</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\watchdog.c</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\watchdog.c</name>
                     </file>
                     <file>
-                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\watchdog.h</name>
+                        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\watchdog.h</name>
                     </file>
                 </group>
                 <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\adc_sensor.c</name>
+                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\adc_sensor.c</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\adc_sensor.h</name>
+                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\adc_sensor.h</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\board.c</name>
+                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\board.c</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\board_info.h</name>
+                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\board_info.h</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\cc2538rf.h</name>
+                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\cc2538rf.h</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\cryptoengine.c</name>
+                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\cryptoengine.c</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\debugpins.c</name>
+                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\debugpins.c</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\eui64.c</name>
+                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\eui64.c</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\i2c.c</name>
+                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\i2c.c</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\leds.c</name>
+                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\leds.c</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\radio.c</name>
+                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\radio.c</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\sctimer.c</name>
+                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\sctimer.c</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\sensors.c</name>
+                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\sensors.c</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\startup_iar.c</name>
+                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\startup_gcc.c</name>
+                    <excluded>
+                        <configuration>Debug</configuration>
+                    </excluded>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\uart.c</name>
+                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\startup_iar.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\uart.c</name>
                 </file>
             </group>
             <file>
                 <name>$PROJ_DIR$\..\..\..\bsp\boards\board.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\bsp\boards\cryptoengine.h</name>
+                <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\bsp\boards\debugpins.h</name>
@@ -2351,7 +2353,13 @@
                 <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\..\..\bsp\boards\sctimer.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\..\bsp\boards\sensors.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\bsp\boards\spi.h</name>
@@ -2365,6 +2373,33 @@
         </group>
         <group>
             <name>chips</name>
+            <group>
+                <name>adxl346</name>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\adxl346\adxl346.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\adxl346\adxl346.h</name>
+                </file>
+            </group>
+            <group>
+                <name>max44009</name>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\max44009\max44009.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\max44009\max44009.h</name>
+                </file>
+            </group>
+            <group>
+                <name>sht21</name>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\sht21\sht21.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\sht21\sht21.h</name>
+                </file>
+            </group>
             <group>
                 <name>si70x</name>
                 <file>
@@ -2422,186 +2457,6 @@
         </file>
     </group>
     <group>
-        <name>openapps</name>
-        <group>
-            <name>c6t</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\c6t\c6t.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\c6t\c6t.h</name>
-            </file>
-        </group>
-        <group>
-            <name>cexample</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\cexample\cexample.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\cexample\cexample.h</name>
-            </file>
-        </group>
-        <group>
-            <name>cinfo</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\cinfo\cinfo.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\cinfo\cinfo.h</name>
-            </file>
-        </group>
-        <group>
-            <name>cjoin</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cjoin.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cjoin.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cojp_cbor.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cojp_cbor.h</name>
-            </file>
-        </group>
-        <group>
-            <name>cleds</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\cleds\cleds.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\cleds\cleds.h</name>
-            </file>
-        </group>
-        <group>
-            <name>csensors</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\csensors\csensors.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\csensors\csensors.h</name>
-            </file>
-        </group>
-        <group>
-            <name>cstorm</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\cstorm\cstorm.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\cstorm\cstorm.h</name>
-            </file>
-        </group>
-        <group>
-            <name>cwellknow</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\cwellknown\cwellknown.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\cwellknown\cwellknown.h</name>
-            </file>
-        </group>
-        <group>
-            <name>opencoap</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\opencoap\cborencoder.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\opencoap\cborencoder.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\opencoap\hkdf.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\opencoap\hmac.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\opencoap\opencoap.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\opencoap\opencoap.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\opencoap\openoscoap.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\opencoap\openoscoap.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\opencoap\sha-private.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\opencoap\sha.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\opencoap\sha224-256.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\opencoap\usha.c</name>
-            </file>
-        </group>
-        <group>
-            <name>rrt</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\rrt\rrt.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\rrt\rrt.h</name>
-            </file>
-        </group>
-        <group>
-            <name>uecho</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\uecho\uecho.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\uecho\uecho.h</name>
-            </file>
-        </group>
-        <group>
-            <name>uexpiration</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\uexpiration\uexpiration.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\uexpiration\uexpiration.h</name>
-            </file>
-        </group>
-        <group>
-            <name>uexpiration_monitor</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\uexpiration_monitor\uexpiration_monitor.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\uexpiration_monitor\uexpiration_monitor.h</name>
-            </file>
-        </group>
-        <group>
-            <name>uinject</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\uinject\uinject.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\uinject\uinject.h</name>
-            </file>
-        </group>
-        <group>
-            <name>userialbridge</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\userialbridge\userialbridge.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\userialbridge\userialbridge.h</name>
-            </file>
-        </group>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\openapps\openapps.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\openapps\openapps.h</name>
-        </file>
-    </group>
-    <group>
         <name>openstack</name>
         <group>
             <name>02a-MAClow</name>
@@ -2628,9 +2483,6 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154_security.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\ieee802154_security_driver.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154E.c</name>
@@ -2660,6 +2512,9 @@
                 <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\neighbors.h</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\processIE.h</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\schedule.c</name>
             </file>
             <file>
@@ -2670,57 +2525,6 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sixtop.h</name>
-            </file>
-        </group>
-        <group>
-            <name>03a-IPHC</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\iphc.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\iphc.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\openbridge.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\openbridge.h</name>
-            </file>
-        </group>
-        <group>
-            <name>03b-IPv6</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\forwarding.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\forwarding.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\icmpv6.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\icmpv6.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\icmpv6echo.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\icmpv6echo.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\icmpv6rpl.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\icmpv6rpl.h</name>
-            </file>
-        </group>
-        <group>
-            <name>04-TRAN</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\openudp.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\openudp.h</name>
             </file>
         </group>
         <group>

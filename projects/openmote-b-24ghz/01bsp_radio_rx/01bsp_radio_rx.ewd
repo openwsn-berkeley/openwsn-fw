@@ -76,7 +76,7 @@
                 </option>
                 <option>
                     <name>OCDownloadVerifyAll</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>OCProductVersion</name>
@@ -658,7 +658,7 @@
                 </option>
                 <option>
                     <name>OCProbeConfig</name>
-                    <state>$TOOLKIT_DIR$\config\debugger\TexasInstruments\CC2538.ProbeConfig</state>
+                    <state></state>
                 </option>
                 <option>
                     <name>IjetProbeConfigRadio</name>
@@ -1094,7 +1094,7 @@
                 <debug>1</debug>
                 <option>
                     <name>CThirdPartyDriverDll</name>
-                    <state>###Uninitialized###</state>
+                    <state>Browse to your third-party driver</state>
                 </option>
                 <option>
                     <name>CThirdPartyLogFileCheck</name>
@@ -1198,11 +1198,11 @@
                 </option>
                 <option>
                     <name>TIPackage</name>
-                    <state></state>
+                    <state>C:\ti\ccsv5\ccs_base</state>
                 </option>
                 <option>
                     <name>BoardFile</name>
-                    <state></state>
+                    <state>Browse to your board file</state>
                 </option>
                 <option>
                     <name>DoLogfile</name>
@@ -1337,7 +1337,7 @@
                 <option>
                     <name>CCXds100ProbeList</name>
                     <version>0</version>
-                    <state>0</state>
+                    <state>3</state>
                 </option>
                 <option>
                     <name>CCXds100SWOPortRadio</name>

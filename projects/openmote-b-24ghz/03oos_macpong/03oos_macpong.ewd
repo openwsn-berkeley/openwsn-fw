@@ -76,7 +76,7 @@
                 </option>
                 <option>
                     <name>OCDownloadVerifyAll</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>OCProductVersion</name>
@@ -88,7 +88,7 @@
                 </option>
                 <option>
                     <name>OCLastSavedByProductVersion</name>
-                    <state>8.11.1.13270</state>
+                    <state>6.60.2.5494</state>
                 </option>
                 <option>
                     <name>UseFlashLoader</name>
@@ -180,7 +180,7 @@
                 </option>
                 <option>
                     <name>OCMulticoreNrOfCores</name>
-                    <state>1</state>
+                    <state></state>
                 </option>
                 <option>
                     <name>OCMulticoreMaster</name>
@@ -658,7 +658,7 @@
                 </option>
                 <option>
                     <name>OCProbeConfig</name>
-                    <state>$TOOLKIT_DIR$\config\debugger\TexasInstruments\CC2538.ProbeConfig</state>
+                    <state></state>
                 </option>
                 <option>
                     <name>IjetProbeConfigRadio</name>
