@@ -7,7 +7,7 @@ Import('env')
 
 localEnv = env.Clone()
 
-source = ['radio.c']
-rf231  = localEnv.Object(source=source)
+source = ['radio.c', 'at86rf215.c']
+rf215  = localEnv.Object(source=source)
 
-Return('rf231')
+Return('rf215')
