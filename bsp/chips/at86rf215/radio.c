@@ -81,6 +81,8 @@ void radio_init(void) {
     //power it on and configure pins
     radio_powerOn();
 
+    spi_init();
+
     // clear variables
     memset(&radio_vars,0,sizeof(radio_vars_t));
 
@@ -180,7 +182,7 @@ void radio_rfOff(void) {
     at86rf215_spiStrobe(CMD_RF_TRXOFF);
     // wiggle debug pin
     debugpins_radio_clr();
-    leds_debug_off();
+    leds_radio_off();
 
     // change state
     radio_vars.state = RADIOSTATE_RFOFF;
@@ -208,7 +210,7 @@ void radio_txEnable(void) {
     at86rf215_spiStrobe(CMD_RF_TXPREP);
     // wiggle debug pin
     debugpins_radio_set();
-    leds_debug_on();
+    leds_radio_on();
 }
 
 void radio_txNow(void) {
@@ -241,7 +243,7 @@ void radio_rxEnable(void) {
     radio_vars.state = RADIOSTATE_ENABLING_RX;
     // wiggle debug pin
     debugpins_radio_set();
-    leds_debug_on();
+    leds_radio_on();
     at86rf215_spiStrobe(CMD_RF_RX);
 
     // change state
