@@ -2321,6 +2321,9 @@
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-subghz\sensors.c</name>
                 </file>
                 <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-subghz\spi.c</name>
+                </file>
+                <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-subghz\startup_iar.c</name>
                 </file>
                 <file>
@@ -2376,12 +2379,6 @@
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\radio.h</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\spi.c</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\spi.h</name>
                 </file>
             </group>
             <group>
