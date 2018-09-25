@@ -72,9 +72,9 @@ len=17  num=84  rssi=-81  lqi=108 crc=1
 
 //=========================== defines =========================================
 
-#define LENGTH_PACKET        125+LENGTH_CRC ///< maximum length is 127 bytes
-#define CHANNEL              16             ///< 11 = 2.405GHz
-#define LENGTH_SERIAL_FRAME  8              ///< length of the serial frame
+#define LENGTH_PACKET        125+LENGTH_CRC // maximum length is 127 bytes
+#define CHANNEL              16             // 24ghz: 11 = 2.405GHz, subghz: 0 = 863.125 in  FSK operating mode #1
+#define LENGTH_SERIAL_FRAME  8              // length of the serial frame
 
 //=========================== variables =======================================
 
@@ -191,7 +191,7 @@ int mote_main(void) {
 
 void cb_startFrame(PORT_TIMER_WIDTH timestamp) {
 
-    leds_debug_on();
+    leds_sync_on();
     // update debug stats
     app_dbg.num_startFrame++;
 }
@@ -203,8 +203,6 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
     // indicate I just received a packet
     app_vars.rxpk_done = 1;
 
-    leds_sync_on();
-
     // get packet from radio
     radio_getReceivedFrame(
         app_vars.rxpk_buf,
@@ -214,6 +212,10 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
         &app_vars.rxpk_lqi,
         &app_vars.rxpk_crc
     );
+
+    // keep listening (needed for at86rf215 radio)
+    radio_rxEnable();
+    radio_rxNow();
 
     // read the packet number
     app_vars.rxpk_num = app_vars.rxpk_buf[0];

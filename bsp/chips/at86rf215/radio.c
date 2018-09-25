@@ -30,6 +30,9 @@
 
 //=========================== defines =========================================
 
+#define DEFAULT_CHANNEL_SPACING_FSK_OPTION_1    200     // kHz
+#define DEFAULT_CENTER_FREQUENCY_0_FSK_OPTION_1 863125  // Hz
+
 //=========================== variables =======================================
 
 typedef struct {
@@ -157,9 +160,11 @@ void radio_setEndFrameCb(radio_capture_cbt cb) {
 //channel spacing in KHz
 //frequency_0 in kHz
 //frequency_nb integer
-void radio_setFrequency(uint16_t channel_spacing, uint32_t frequency_0, uint16_t channel) {
-    frequency_0 = (frequency_0/25);
-    at86rf215_spiWriteReg(RG_RF09_CS, (uint8_t)(channel_spacing/25));
+void radio_setFrequency(uint16_t channel) {
+    uint16_t frequency_0;
+
+    frequency_0 = (DEFAULT_CENTER_FREQUENCY_0_FSK_OPTION_1/25);
+    at86rf215_spiWriteReg(RG_RF09_CS, (uint8_t)(DEFAULT_CHANNEL_SPACING_FSK_OPTION_1/25));
     at86rf215_spiWriteReg(RG_RF09_CCF0L, (uint8_t)(frequency_0%256));
     at86rf215_spiWriteReg(RG_RF09_CCF0H, (uint8_t)(frequency_0/256));
     at86rf215_spiWriteReg(RG_RF09_CNL, (uint8_t)(channel%256));
@@ -208,6 +213,10 @@ void radio_txEnable(void) {
     // change state
     radio_vars.state = RADIOSTATE_ENABLING_TX;
     at86rf215_spiStrobe(CMD_RF_TXPREP);
+
+    // check radio state transit to TRX PREPARE
+    while (radio_vars.state != RADIOSTATE_TX_ENABLED);
+
     // wiggle debug pin
     debugpins_radio_set();
     leds_radio_on();
@@ -216,12 +225,6 @@ void radio_txEnable(void) {
 void radio_txNow(void) {
 
     PORT_TIMER_WIDTH capturedTime;
-
-    // check radio state transit to TRX PREPARE
-    if (radio_vars.state != RADIOSTATE_TX_ENABLED){
-        // return directly
-        return;
-    }
 
     // change state
     radio_vars.state = RADIOSTATE_TRANSMITTING;

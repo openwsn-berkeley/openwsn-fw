@@ -22,7 +22,7 @@ remainder of the packet contains an incrementing bytes.
 //=========================== defines =========================================
 
 #define LENGTH_PACKET   125+LENGTH_CRC // maximum length is 127 bytes
-#define CHANNEL         16             // 11 = 2.405GHz
+#define CHANNEL         16             // 24ghz: 11 = 2.405GHz, subghz: 0 = 863.125 in  FSK operating mode #1
 #define TIMER_PERIOD    (32768>>1)     // (32768>>1) = 500ms @ 32kHz
 
 //=========================== variables =======================================
@@ -88,6 +88,7 @@ int mote_main(void) {
             board_sleep();
         }
         radio_setFrequency(CHANNEL);
+        radio_rfOff();
         // led
         leds_error_toggle();
 
