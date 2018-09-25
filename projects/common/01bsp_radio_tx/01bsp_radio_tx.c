@@ -28,19 +28,19 @@ remainder of the packet contains an incrementing bytes.
 //=========================== variables =======================================
 
 typedef struct {
-   uint8_t              num_radioTimerCompare;
-   uint8_t              num_radioTimerOverflows;
-   uint8_t              num_startFrame;
-   uint8_t              num_endFrame;
+    uint8_t              num_radioTimerCompare;
+    uint8_t              num_radioTimerOverflows;
+    uint8_t              num_startFrame;
+    uint8_t              num_endFrame;
 } app_dbg_t;
 
 app_dbg_t app_dbg;
 
 typedef struct {
-   uint8_t              txpk_txNow;
-   uint8_t              txpk_buf[LENGTH_PACKET];
-   uint8_t              txpk_len;
-   uint8_t              txpk_num;
+    uint8_t              txpk_txNow;
+    uint8_t              txpk_buf[LENGTH_PACKET];
+    uint8_t              txpk_len;
+    uint8_t              txpk_num;
 } app_vars_t;
 
 app_vars_t app_vars;
@@ -58,88 +58,87 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp);
 \brief The program starts executing here.
 */
 int mote_main(void) {
-   uint8_t  i;
-   
-   // clear local variables
-   memset(&app_vars,0,sizeof(app_vars_t));
-   
-   // initialize board
-   board_init();
+    uint8_t  i;
 
-   // add radio callback functions
-   sctimer_set_callback(cb_radioTimerOverflows);
-   radio_setStartFrameCb(cb_startFrame);
-   radio_setEndFrameCb(cb_endFrame);
-   
-   // prepare radio
-   radio_rfOn();
-   radio_setFrequency(CHANNEL); 
-   radio_rfOff();
-   
-   // start periodic overflow
-   sctimer_setCompare(sctimer_readCounter()+ TIMER_PERIOD);
-   sctimer_enable();
-   
- while(1) {   
-      
-      // wait for timer to elapse
-      app_vars.txpk_txNow = 0;
-      while (app_vars.txpk_txNow==0) {
-        board_sleep();
-      }
-        radio_setFrequency(CHANNEL); 
-      // led
-      leds_error_toggle();
-      
-      // prepare packet
-      app_vars.txpk_num++;
-      app_vars.txpk_len           = sizeof(app_vars.txpk_buf);
-      app_vars.txpk_buf[0]        = app_vars.txpk_num;
-      for (i=1;i<app_vars.txpk_len;i++) {
-         app_vars.txpk_buf[i] = i;
-      }
-      
-      // send packet
-      radio_loadPacket(app_vars.txpk_buf,app_vars.txpk_len);
-      radio_txEnable();
-      radio_txNow();
-   }
+    // clear local variables
+    memset(&app_vars,0,sizeof(app_vars_t));
+
+    // initialize board
+    board_init();
+
+    // add radio callback functions
+    sctimer_set_callback(cb_radioTimerOverflows);
+    radio_setStartFrameCb(cb_startFrame);
+    radio_setEndFrameCb(cb_endFrame);
+
+    // prepare radio
+    radio_rfOn();
+    radio_setFrequency(CHANNEL);
+    radio_rfOff();
+
+    // start periodic overflow
+    sctimer_setCompare(sctimer_readCounter()+ TIMER_PERIOD);
+    sctimer_enable();
+
+    while(1) {
+
+        // wait for timer to elapse
+        app_vars.txpk_txNow = 0;
+        while (app_vars.txpk_txNow==0) {
+            board_sleep();
+        }
+        radio_setFrequency(CHANNEL);
+        // led
+        leds_error_toggle();
+
+        // prepare packet
+        app_vars.txpk_num++;
+        app_vars.txpk_len           = sizeof(app_vars.txpk_buf);
+        app_vars.txpk_buf[0]        = app_vars.txpk_num;
+        for (i=1;i<app_vars.txpk_len;i++) {
+            app_vars.txpk_buf[i] = i;
+        }
+
+        // send packet
+        radio_loadPacket(app_vars.txpk_buf,app_vars.txpk_len);
+        radio_txEnable();
+        radio_txNow();
+    }
 }
 
 //=========================== callbacks =======================================
 
 void cb_radioTimerCompare(void) {
-   
+
    // update debug vals
    app_dbg.num_radioTimerCompare++;
 }
 
 void cb_radioTimerOverflows(void) {
-   
+
    // update debug vals
    app_dbg.num_radioTimerOverflows++;
    // ready to send next packet
    app_vars.txpk_txNow = 1;
-// schedule again
+    // schedule again
    sctimer_setCompare(sctimer_readCounter()+ TIMER_PERIOD);
-   
+
 }
 
 void cb_startFrame(PORT_TIMER_WIDTH timestamp) {
-   
+
    // update debug vals
    app_dbg.num_startFrame++;
-   
+
    // led
    leds_sync_on();
-   
+
 }
 
-void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
-   
+void cb_endFrame(PORT_TIMER_WIDTH timestamp) {1
    // update debug vals
    app_dbg.num_endFrame++;
-   
+
    // led
    leds_sync_off();
 }
