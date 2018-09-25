@@ -3990,7 +3990,7 @@ static const registerSetting_t basic_settings_fsk_option1 []={
   {RG_RF09_EDD,       0x7A},
   {RG_RF09_TXCUTC,    0xC0},
   {RG_RF09_TXDFE,     0x98},
-  {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
+  {RG_RF09_PAC,       0x1F},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
   {RG_BBC0_IRQM,      0x1F},// TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
   {RG_BBC1_IRQM,      0x00},
   {RG_BBC0_PC,        0x1D},// No FCS filter, 32 bits FCS, FSK.

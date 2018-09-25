@@ -115,9 +115,9 @@ void radio_init(void) {
     if ((at86rf215_spiReadReg(RG_RF_PN) != 0x34) | (at86rf215_spiReadReg(RG_RF_VN) != 0x03)) {
         while(1); //UNKNOWN DEVICE, FINISH
     }
-    // Write registers to radio -- default configuration OFDM 400kbps
+    // Write registers to radio -- configuration 2-FSK-50kbps
     for( i = 0; i < (sizeof(basic_settings_ofdm_1_mcs2)/sizeof(registerSetting_t)); i++) {
-        at86rf215_spiWriteReg( basic_settings_ofdm_1_mcs2[i].addr, basic_settings_ofdm_1_mcs2[i].data);
+        at86rf215_spiWriteReg( basic_settings_fsk_option1[i].addr, basic_settings_fsk_option1[i].data);
     };
 
     radio_read_isr();
