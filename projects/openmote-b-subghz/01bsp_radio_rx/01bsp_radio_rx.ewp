@@ -2282,13 +2282,13 @@
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-subghz\leds.c</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-subghz\radio.c</name>
-                </file>
-                <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-subghz\sctimer.c</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-subghz\sensors.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-subghz\spi.c</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-subghz\startup_iar.c</name>
@@ -2299,12 +2299,6 @@
             </group>
             <file>
                 <name>$PROJ_DIR$\..\..\..\bsp\boards\board.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</name>
-                <excluded>
-                    <configuration>Debug</configuration>
-                </excluded>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\bsp\boards\crypto_engine.h</name>
@@ -2323,12 +2317,6 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</name>
-                <excluded>
-                    <configuration>Debug</configuration>
-                </excluded>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\bsp\boards\sctimer.h</name>
@@ -2355,6 +2343,21 @@
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\chips\adxl346\adxl346.h</name>
+                </file>
+            </group>
+            <group>
+                <name>at86rf215</name>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\at86rf215.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\at86rf215.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\radio.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\radio.h</name>
                 </file>
             </group>
             <group>

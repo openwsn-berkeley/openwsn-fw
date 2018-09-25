@@ -2326,12 +2326,6 @@
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-subghz\radio.c</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
-                </file>
-                <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-subghz\sctimer.c</name>
                 </file>
                 <file>
@@ -2342,6 +2336,9 @@
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\sensors.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-subghz\spi.c</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\spi.h</name>
@@ -2369,6 +2366,21 @@
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\chips\adxl346\adxl346.h</name>
+                </file>
+            </group>
+            <group>
+                <name>at86rf215</name>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\at86rf215.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\at86rf215.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\radio.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\radio.h</name>
                 </file>
             </group>
             <group>
