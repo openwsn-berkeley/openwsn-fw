@@ -337,6 +337,7 @@
                     <state>$PROJ_DIR$\..\..\..\bsp\boards\</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\boards\common\</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\chips\si70x\</state>
+                    <state>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\</state>
                     <state>$PROJ_DIR$\..\..\..\kernel\</state>
                     <state>$PROJ_DIR$\..\..\..\drivers\common\</state>
                     <state>$PROJ_DIR$\..\..\..\inc\</state>
@@ -2314,9 +2315,6 @@
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-subghz\leds.c</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-subghz\radio.c</name>
-                </file>
-                <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-subghz\sctimer.c</name>
                 </file>
                 <file>
@@ -2365,6 +2363,27 @@
         </group>
         <group>
             <name>chips</name>
+            <group>
+                <name>at86rf215</name>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\at86rf215.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\at86rf215.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\radio.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\radio.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\spi.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\spi.h</name>
+                </file>
+            </group>
             <group>
                 <name>si70x</name>
                 <file>
