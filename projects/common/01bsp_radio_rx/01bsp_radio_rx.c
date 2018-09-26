@@ -150,7 +150,6 @@ int mote_main(void) {
         while (app_vars.rxpk_done==0) {
             board_sleep();
         }
-        leds_debug_off();
 
         // if I get here, I just received a packet
 
@@ -197,6 +196,8 @@ void cb_startFrame(PORT_TIMER_WIDTH timestamp) {
 }
 
 void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
+    uint8_t  i;
+    bool     expectedFrame;
 
     // update debug stats
     app_dbg.num_endFrame++;
@@ -219,6 +220,20 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
 
     // read the packet number
     app_vars.rxpk_num = app_vars.rxpk_buf[0];
+
+    // check the frame is sent by radio_tx project
+    expectedFrame = TRUE;
+    for(i=1;i<10;i++){
+        if(app_vars.rxpk_buf[i]!=i){
+            expectedFrame = FALSE;
+            break;
+        }
+    }
+
+    // toggle led if the frame is expected
+    if (expectedFrame){
+        leds_debug_toggle();
+    }
 
     // led
     leds_sync_off();
@@ -244,7 +259,4 @@ void cb_uartRxCb(void) {
 
     //  uint8_t byte;
     uart_clearRxInterrupts();
-
-    // toggle LED
-    leds_debug_toggle();
 }
