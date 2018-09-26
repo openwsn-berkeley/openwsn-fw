@@ -1,0 +1,35 @@
+import os
+
+Import('env')
+
+localEnv = env.Clone()
+
+si70x = localEnv.SConscript(
+    os.path.join('#','bsp','chips','si70x','SConscript'),
+    variant_dir = 'si70x',
+    exports     = {'env': env},
+)
+
+rf215 = localEnv.SConscript(
+    os.path.join('#','bsp','chips','at86rf215','SConscript'),
+    variant_dir = 'rf215',
+    exports     = {'env': env},
+)
+
+source   = \
+    [file for file in Glob('*.c') if file.name.find('iar')==-1] + \
+    Glob('source/*.c')
+
+localEnv.Append(
+    CPPPATH =  [
+        os.path.join('#','bsp','boards','openmote-b-subghz'),
+        os.path.join('#','bsp','boards','openmote-b-subghz','headers'),
+        os.path.join('#','bsp','boards','openmote-b-subghz','source'),
+        os.path.join('#','bsp','chips','si70x'),
+        os.path.join('#','bsp','chips','rf215'),
+    ],
+)
+
+board  = localEnv.Object(source=source) + si70x + rf215
+
+Return('board')

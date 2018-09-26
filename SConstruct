@@ -112,6 +112,7 @@ command_line_options = {
         'openmote-cc2538',
         'openmote-b',
         'openmote-b-24ghz',
+        'openmote-b-subghz',
         'silabs-ezr32wg',
         'openmotestm',
         'iot-lab_M3',
