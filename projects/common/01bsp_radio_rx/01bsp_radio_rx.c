@@ -167,6 +167,15 @@ int mote_main(void) {
         app_vars.rxpk_counter++;
         if (!(app_vars.rxpk_previous < app_vars.rxpk_num)) {
             app_vars.rxpk_lqi      = 1;
+            // format frame to send over serial port
+            app_vars.uart_txFrame[0] = app_vars.rxpk_counter;  // packet counter
+            app_vars.uart_txFrame[1] = app_vars.rxpk_num;      // packet number
+            app_vars.uart_txFrame[2] = app_vars.rxpk_rssi;     // RSSI
+            app_vars.uart_txFrame[3] = app_vars.rxpk_lqi;      // LQI
+            app_vars.uart_txFrame[4] = app_vars.rxpk_crc;      // CRC
+            app_vars.uart_txFrame[5] = 0xff;                   // closing flag
+            app_vars.uart_txFrame[6] = 0xff;                   // closing flag
+            app_vars.uart_txFrame[7] = 0xff;                   // closing flag
         }
         app_vars.rxpk_previous = app_vars.rxpk_num;
         //if (app_vars.rxpk_previous < app_vars.rxpk_num) {
@@ -176,21 +185,10 @@ int mote_main(void) {
         //    app_vars.rxpk_previous = app_vars.rxpk_num;
         //    app_vars.rxpk_lqi      = 1;
         //}
-        
-        // format frame to send over serial port
-        app_vars.uart_txFrame[0] = app_vars.rxpk_counter;  // packet counter
-        app_vars.uart_txFrame[1] = app_vars.rxpk_num;      // packet number
-        app_vars.uart_txFrame[2] = app_vars.rxpk_rssi;     // RSSI
-        app_vars.uart_txFrame[3] = app_vars.rxpk_lqi;      // LQI
-        app_vars.uart_txFrame[4] = app_vars.rxpk_crc;      // CRC
-        app_vars.uart_txFrame[5] = 0xff;                   // closing flag
-        app_vars.uart_txFrame[6] = 0xff;                   // closing flag
-        app_vars.uart_txFrame[7] = 0xff;                   // closing flag
-
-        app_vars.uart_done          = 0;
-        app_vars.uart_lastTxByte    = 0;
 
         if (app_vars.rxpk_lqi == 1){
+            app_vars.uart_done          = 0;
+            app_vars.uart_lastTxByte    = 0;
             // send app_vars.uart_txFrame over UART
             uart_clearTxInterrupts();
             uart_clearRxInterrupts();

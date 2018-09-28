@@ -106,7 +106,7 @@ int mote_main(void) {
         radio_loadPacket(app_vars.txpk_buf,app_vars.txpk_len);
         radio_txEnable();
         radio_txNow();
-        for (j=0;j<100000;j++) {
+        for (j=0;j<150000;j++) {
             j++;
         }
         // reset the counter

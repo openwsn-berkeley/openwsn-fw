@@ -3985,25 +3985,26 @@ static const registerSetting_t basic_settings_fsk_option1 []={
   {RG_RF09_IRQM,      0x1F}, // TRXERR, BATLOW, EDC, TRXRDY, WAKEUP interrupts enabled
   {RG_RF24_IRQM,      0x00},
   {RG_RF09_RXBWC,     0x00},
-  {RG_RF09_RXDFE,     0x1A},
+  {RG_RF09_RXDFE,     0x2A}, // RCUT = 1 , SR = 10
   {RG_RF09_AGCC,      0x01},
+  {RG_RF09_AGCS,      0x37},
   {RG_RF09_EDD,       0x7A},
   {RG_RF09_TXCUTC,    0xC0},
   {RG_RF09_TXDFE,     0x98},
-  {RG_RF09_PAC,       0x1F},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
+  {RG_RF09_PAC,       0x7F},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
   {RG_BBC0_IRQM,      0x1F},// TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
   {RG_BBC1_IRQM,      0x00},
-  {RG_BBC0_PC,        0x1D},// No FCS filter, 32 bits FCS, FSK.
+  {RG_BBC0_PC,        0x15},// No FCS filter, 16 bits FCS, FSK.
   {RG_BBC0_FSKDM,     0x01},//Direct modulation and preemphasis enabled.
   {RG_BBC0_FSKC0,     0xD6},
   {RG_BBC0_FSKC1,     0x00},
-  {RG_BBC0_FSKC2,     0x40},
+  //{RG_BBC0_FSKC2,     0x40},
   {RG_BBC0_FSKC3,     0x85},
-  {RG_BBC0_FSKC4,     0x0A}, //FEC enabled. IEEE MODE
-  {RG_BBC0_FSKPE0,    0x74},
-  {RG_BBC0_FSKPE1,    0x7F},
-  {RG_BBC0_FSKPE2,    0x80},
-  {RG_BBC0_FSKPHRTX,  0x00},// No data whitening SFD0 used.
+  {RG_BBC0_FSKC4,     0x00}, //FEC disabled. IEEE MODE
+  {RG_BBC0_FSKPE0,    0x02},
+  {RG_BBC0_FSKPE1,    0x03},
+  {RG_BBC0_FSKPE2,    0xFC},
+  {RG_BBC0_FSKPHRTX,  0x08},// No data whitening SFD0 used.
 };
 
 static const registerSetting_t basic_settings_fsk_option2 []={
