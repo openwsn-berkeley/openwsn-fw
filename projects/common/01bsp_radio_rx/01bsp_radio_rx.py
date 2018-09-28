@@ -79,7 +79,7 @@ while True:
         
         (rxpk_len,rxpk_num,rxpk_rssi,rxpk_lqi,rxpk_crc) = \
             struct.unpack('>BBbBB', ''.join([chr(b) for b in rawFrame[-8:-3]]))
-        print 'len={0:<3} num={1:<3} rssi={2:<4} lqi={3:<3} crc={4}'.format(
+        print 'PDR={0:<3} num={1:<3} rssi={2:<4} lqi={3:<3} crc={4}'.format(
             rxpk_len,
             rxpk_num,
             rxpk_rssi,

@@ -21,9 +21,9 @@ remainder of the packet contains an incrementing bytes.
 
 //=========================== defines =========================================
 
-#define LENGTH_PACKET   125+LENGTH_CRC // maximum length is 127 bytes
+#define LENGTH_PACKET   18+LENGTH_CRC // maximum length is 127 bytes
 #define CHANNEL         16             // 24ghz: 11 = 2.405GHz, subghz: 0 = 863.125 in  FSK operating mode #1
-#define TIMER_PERIOD    (32768>>1)     // (32768>>1) = 500ms @ 32kHz
+#define TIMER_PERIOD    (32768>>6)     // (32768>>1) = 500ms @ 32kHz
 
 //=========================== variables =======================================
 
@@ -59,6 +59,7 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp);
 */
 int mote_main(void) {
     uint8_t  i;
+    uint32_t j;
 
     // clear local variables
     memset(&app_vars,0,sizeof(app_vars_t));
@@ -77,23 +78,24 @@ int mote_main(void) {
     radio_rfOff();
 
     // start periodic overflow
-    sctimer_setCompare(sctimer_readCounter()+ TIMER_PERIOD);
-    sctimer_enable();
-
+    //sctimer_setCompare(sctimer_readCounter()+ TIMER_PERIOD);
+    //sctimer_enable();
+    app_vars.txpk_num = 0;
     while(1) {
 
         // wait for timer to elapse
-        app_vars.txpk_txNow = 0;
-        while (app_vars.txpk_txNow==0) {
-            board_sleep();
-        }
-        radio_setFrequency(CHANNEL);
+        //app_vars.txpk_txNow = 1;
+        //while (app_vars.txpk_txNow==0) {
+         //   board_sleep();
+        //}
+        //radio_setFrequency(CHANNEL);
         radio_rfOff();
         // led
         leds_error_toggle();
 
         // prepare packet
         app_vars.txpk_num++;
+        
         app_vars.txpk_len           = sizeof(app_vars.txpk_buf);
         app_vars.txpk_buf[0]        = app_vars.txpk_num;
         for (i=1;i<app_vars.txpk_len;i++) {
@@ -104,6 +106,13 @@ int mote_main(void) {
         radio_loadPacket(app_vars.txpk_buf,app_vars.txpk_len);
         radio_txEnable();
         radio_txNow();
+        for (j=0;j<100000;j++) {
+            j++;
+        }
+        // reset the counter
+        if (app_vars.txpk_num == 100){
+          app_vars.txpk_num = 0;
+        }
     }
 }
 
