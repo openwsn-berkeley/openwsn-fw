@@ -97,6 +97,7 @@ typedef struct {
                 uint8_t    rxpk_previous;
                 uint8_t    rxpk_counter;
                 bool       rxpk_crc;
+                bool       rxpk_send_uart;
     // uart
                 uint8_t    uart_txFrame[LENGTH_SERIAL_FRAME];
                 uint8_t    uart_lastTxByte;
@@ -126,9 +127,9 @@ int mote_main(void) {
     // clear local variables
     memset(&app_vars,0,sizeof(app_vars_t));
     
-    app_vars.rxpk_previous = 0;
-    app_vars.rxpk_counter  = 0;
-    app_vars.rxpk_lqi      = 0;
+    app_vars.rxpk_previous       = 0;
+    app_vars.rxpk_counter        = 0;
+    app_vars.rxpk_send_uart      = FALSE;
 
     // initialize board
     board_init();
@@ -166,7 +167,7 @@ int mote_main(void) {
         leds_error_on();
         app_vars.rxpk_counter++;
         if (!(app_vars.rxpk_previous < app_vars.rxpk_num)) {
-            app_vars.rxpk_lqi      = 1;
+            app_vars.rxpk_send_uart      = TRUE;
             // format frame to send over serial port
             app_vars.uart_txFrame[0] = app_vars.rxpk_counter;  // packet counter
             app_vars.uart_txFrame[1] = app_vars.rxpk_num;      // packet number
@@ -177,16 +178,10 @@ int mote_main(void) {
             app_vars.uart_txFrame[6] = 0xff;                   // closing flag
             app_vars.uart_txFrame[7] = 0xff;                   // closing flag
         }
+        
         app_vars.rxpk_previous = app_vars.rxpk_num;
-        //if (app_vars.rxpk_previous < app_vars.rxpk_num) {
-        //    app_vars.rxpk_previous = app_vars.rxpk_num;
-        //}
-        //else {
-        //    app_vars.rxpk_previous = app_vars.rxpk_num;
-        //    app_vars.rxpk_lqi      = 1;
-        //}
 
-        if (app_vars.rxpk_lqi == 1){
+        if (app_vars.rxpk_send_uart){
             app_vars.uart_done          = 0;
             app_vars.uart_lastTxByte    = 0;
             // send app_vars.uart_txFrame over UART
@@ -196,8 +191,8 @@ int mote_main(void) {
             uart_writeByte(app_vars.uart_txFrame[app_vars.uart_lastTxByte]);
             while (app_vars.uart_done==0); // busy wait to finish
             uart_disableInterrupts();
-            app_vars.rxpk_lqi = 0;
             app_vars.rxpk_counter = 0;
+            app_vars.rxpk_send_uart = FALSE;
         }
         // led
         leds_error_off();
@@ -221,8 +216,6 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
 
     // update debug stats
     app_dbg.num_endFrame++;
-    // indicate I just received a packet
-    app_vars.rxpk_done = 1;
 
     // get packet from radio
     radio_getReceivedFrame(
@@ -234,6 +227,18 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
         &app_vars.rxpk_crc
     );
     
+    // check the frame is sent by radio_tx project
+    expectedFrame = TRUE;
+    for(i=1;i<10;i++){
+        if(app_vars.rxpk_buf[i]!=i){
+            expectedFrame = FALSE;
+            break;
+        } else {
+            // indicate I just received a packet
+            app_vars.rxpk_done = 1;
+        }
+    }
+
     // keep listening (needed for at86rf215 radio)
     radio_rxEnable();
     radio_rxNow();
@@ -241,14 +246,7 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
     // read the packet number
     app_vars.rxpk_num = app_vars.rxpk_buf[0];
 
-    // check the frame is sent by radio_tx project
-    expectedFrame = TRUE;
-    for(i=1;i<10;i++){
-        if(app_vars.rxpk_buf[i]!=i){
-            expectedFrame = FALSE;
-            break;
-        }
-    }
+
 
     // toggle led if the frame is expected
     if (expectedFrame){

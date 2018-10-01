@@ -88,7 +88,7 @@ int mote_main(void) {
         //while (app_vars.txpk_txNow==0) {
          //   board_sleep();
         //}
-        //radio_setFrequency(CHANNEL);
+        radio_setFrequency(CHANNEL);
         radio_rfOff();
         // led
         leds_error_toggle();
