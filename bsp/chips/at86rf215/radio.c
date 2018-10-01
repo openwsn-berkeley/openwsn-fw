@@ -209,8 +209,7 @@ radio_state_t radio_getState(void){
 }
 
 void radio_txEnable(void) {
-  
-  //if (!at86rf215_status() & IRQS_TRXRDY_MASK){
+
     // change state
     radio_vars.state = RADIOSTATE_ENABLING_TX;
     at86rf215_spiStrobe(CMD_RF_TXPREP);
@@ -221,7 +220,6 @@ void radio_txEnable(void) {
     // wiggle debug pin
     debugpins_radio_set();
     leds_radio_on();
-  //}
 }
 
 void radio_txNow(void) {
