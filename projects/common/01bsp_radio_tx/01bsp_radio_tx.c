@@ -78,11 +78,10 @@ int mote_main(void) {
     // start periodic overflow
     sctimer_setCompare(sctimer_readCounter()+ TIMER_PERIOD);
     sctimer_enable();
-    app_vars.txpk_num = 0;
     while(1) {
 
         // wait for timer to elapse
-        app_vars.txpk_txNow = 1;
+        app_vars.txpk_txNow = 0;
         while (app_vars.txpk_txNow==0) {
             board_sleep();
         }
@@ -93,7 +92,6 @@ int mote_main(void) {
 
         // prepare packet
         app_vars.txpk_num++;
-
         app_vars.txpk_len           = sizeof(app_vars.txpk_buf);
         app_vars.txpk_buf[0]        = app_vars.txpk_num;
         for (i=1;i<app_vars.txpk_len;i++) {
