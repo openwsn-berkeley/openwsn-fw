@@ -202,6 +202,8 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
     // update debug stats
     app_dbg.num_endFrame++;
 
+    memset(&app_vars.rxpk_buf[0],0,LENGTH_PACKET);
+
     // get packet from radio
     radio_getReceivedFrame(
         app_vars.rxpk_buf,
