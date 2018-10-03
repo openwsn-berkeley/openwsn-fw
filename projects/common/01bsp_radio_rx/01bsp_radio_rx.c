@@ -201,8 +201,8 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
 
     // update debug stats
     app_dbg.num_endFrame++;
-    // indicate I just received a packet
-    app_vars.rxpk_done = 1;
+
+    memset(&app_vars.rxpk_buf[0],0,LENGTH_PACKET);
 
     // get packet from radio
     radio_getReceivedFrame(
@@ -214,13 +214,6 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
         &app_vars.rxpk_crc
     );
 
-    // keep listening (needed for at86rf215 radio)
-    radio_rxEnable();
-    radio_rxNow();
-
-    // read the packet number
-    app_vars.rxpk_num = app_vars.rxpk_buf[0];
-
     // check the frame is sent by radio_tx project
     expectedFrame = TRUE;
     for(i=1;i<10;i++){
@@ -230,10 +223,20 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
         }
     }
 
+    // read the packet number
+    app_vars.rxpk_num = app_vars.rxpk_buf[0];
+
     // toggle led if the frame is expected
     if (expectedFrame){
+        // indicate I just received a packet from bsp_radio_tx mote
+        app_vars.rxpk_done = 1;
+
         leds_debug_toggle();
     }
+
+    // keep listening (needed for at86rf215 radio)
+    radio_rxEnable();
+    radio_rxNow();
 
     // led
     leds_sync_off();
