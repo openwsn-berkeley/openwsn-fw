@@ -64,7 +64,9 @@ else:
 
 #============================ read ============================================
 
-rawFrame = []
+rawFrame        = []
+previousFrame   = 0
+frameCounter    = 0
 
 while True:
     
@@ -77,6 +79,8 @@ while True:
     
     if rawFrame[-3:]==[0xff]*3 and len(rawFrame)>=8:
         
+        frameCounter += 1
+        
         (rxpk_len,rxpk_num,rxpk_rssi,rxpk_lqi,rxpk_crc) = \
             struct.unpack('>BBbBB', ''.join([chr(b) for b in rawFrame[-8:-3]]))
         print 'len={0:<3} num={1:<3} rssi={2:<4} lqi={3:<3} crc={4}'.format(
@@ -86,6 +90,13 @@ while True:
             rxpk_lqi,
             rxpk_crc
         )
+        
+        if previousFrame>rxpk_num:
+            print "frameCounter={0:<3}".format(frameCounter)
+            previousFrame = 0
+            frameCounter  = 0
+        else:
+            previousFrame = rxpk_num
         
         if rxpk_len>127:
             print "ERROR: frame too long.\a"
