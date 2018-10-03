@@ -82,6 +82,7 @@ int main(void) {
     volatile uint32_t delay;
     uint8_t partNumber;
     uint8_t versionNumber;
+    uint16_t i,j;
 
     //======================= gpio init =======================================
     /* Configure all GPIO as input */
@@ -235,6 +236,10 @@ int main(void) {
             UARTCharPut(UART0_BASE, 'F');
         }
         UARTCharPut(UART0_BASE, ' ');
+
+        for(i=0;i<0xff;i++){
+            for(j=0;j<0xfff;j++);
+        }
     }
 }
 

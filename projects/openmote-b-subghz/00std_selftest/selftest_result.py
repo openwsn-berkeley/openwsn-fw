@@ -33,8 +33,13 @@ class mqtt_client(object):
         mqttclient.loop_stop()
         
         with open("result.txt".format(time.time()),'w') as f:
+            f.write("Output format:\n")
+            f.write("00-11-22-33-44-55-66-77: xy xy xy\n")
+            f.write("           (mote eui64): (x: partnumber check result; y: version number check result)\n")
+            f.write("                         (P: passed, F: Failed)\n")
+            f.write("==================================\n")
             for item, value in self.result.items():
-                f.write("{0}: {1}".format(item,value))
+                f.write("{0}: {1}".format(item,''.join([chr(i) for i in value])))
                 f.write('\n')
     
     def _on_mqtt_connect(self, client, userdata, flags, rc):
@@ -54,7 +59,7 @@ class mqtt_client(object):
             
 #============================ main function ===================================
 mqtt_client().connect_to_mqtt()
-raw_input('press any key to return')
+raw_input('press Enter to return')
     
     
     
