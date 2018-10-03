@@ -86,6 +86,8 @@ void radio_init(void) {
 
     spi_init();
 
+    at86rf215_status();
+
     // clear variables
     memset(&radio_vars,0,sizeof(radio_vars_t));
 
