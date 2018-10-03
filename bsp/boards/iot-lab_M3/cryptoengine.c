@@ -1,5 +1,5 @@
 /**
-\brief Dummy implementation of cryptoengine.
+\brief Implementation of cryptoengine based on AT86RF231's hardware accelerator.
 */
 
 #include <stdint.h>
@@ -14,10 +14,9 @@ owerror_t at86rf231_crypto_load_key(uint8_t key[16]);
 owerror_t at86rf231_crypto_opt_ecb(uint8_t* buffer);
 static owerror_t aes_cbc_mac(uint8_t* a, uint8_t len_a, uint8_t* m, uint8_t len_m, uint8_t* nonce, uint8_t* mac, uint8_t len_mac, uint8_t l);
 static owerror_t aes_ctr_enc(uint8_t* m, uint8_t len_m, uint8_t* nonce, uint8_t* mac, uint8_t len_mac, uint8_t l);
-owerror_t aes_cbc_enc_raw(uint8_t* buffer, uint8_t len, uint8_t iv[16]); 
+owerror_t aes_cbc_enc_raw(uint8_t* buffer, uint8_t len, uint8_t iv[16]);
 owerror_t aes_ctr_enc_raw(uint8_t* buffer, uint8_t len, uint8_t iv[16]);
-static void inc_counter(uint8_t* counter); 
-
+static void inc_counter(uint8_t* counter);
 
 //=========================== public ==========================================
 
@@ -136,7 +135,7 @@ owerror_t at86rf231_crypto_opt_ecb(uint8_t* buffer) {
             sizeof(spi_rx_buffer),
             SPI_NOTFIRST,
             SPI_LAST);
-    
+
     // Prepare to read the AES status register
     spi_tx_buffer[0] = 0x00;
     spi_tx_buffer[1] = RG_AES_STATUS;
@@ -178,7 +177,7 @@ owerror_t at86rf231_crypto_opt_ecb(uint8_t* buffer) {
                 16,
                 SPI_NOTFIRST,
                 SPI_LAST);
-    
+
     return E_SUCCESS;
 }
 
@@ -211,13 +210,13 @@ owerror_t at86rf231_crypto_load_key(uint8_t key[16]) {
 }
 
 /**
-\brief Raw AES-CBC encryption omitting everything but the last block. Assumes key 
+\brief Raw AES-CBC encryption omitting everything but the last block. Assumes key
     is already loaded in the engine.
 \param[in,out] buffer Message to be encrypted. First and last block will be overwritten.
 \param[in] len Message length. Must be multiple of 16 octets.
 \param[in] iv Buffer containing the Initialization Vector (16 octets).
 
-\returns E_SUCCESS when the encryption was successful. 
+\returns E_SUCCESS when the encryption was successful.
 */
 owerror_t aes_cbc_enc_raw(uint8_t* buffer, uint8_t len, uint8_t iv[16]) {
     uint8_t  n;
@@ -270,7 +269,7 @@ owerror_t aes_cbc_enc_raw(uint8_t* buffer, uint8_t len, uint8_t iv[16]) {
                 sizeof(spi_rx_buffer),
                 SPI_NOTFIRST,
                 SPI_LAST);
-    
+
         // Prepare to read the AES status register
         spi_tx_buffer[0] = 0x00;
         spi_tx_buffer[1] = RG_AES_STATUS;
@@ -329,7 +328,7 @@ engine.
 \param[in] len_mac Length of the CBC-MAC tag. Must be 4, 8 or 16 octets.
 \param[in] l CCM parameter L that allows selection of different nonce length.
 
-\returns E_SUCCESS when the generation was successful, E_FAIL otherwise. 
+\returns E_SUCCESS when the generation was successful, E_FAIL otherwise.
 */
 static owerror_t aes_cbc_mac(uint8_t* a,
          uint8_t len_a,
@@ -339,7 +338,7 @@ static owerror_t aes_cbc_mac(uint8_t* a,
          uint8_t* mac,
          uint8_t len_mac,
          uint8_t l) {
-   
+
    uint8_t  pad_len;
    uint8_t  len;
    uint8_t  cbc_mac_iv[16];
@@ -367,7 +366,7 @@ static owerror_t aes_cbc_mac(uint8_t* a,
    // (len_mac - 2)/2 shifted left es corresponds to (len_mac - 2) << 2
    buffer[0] |= len_mac == 0 ? 0 : (0x07 & (len_mac - 2)) << 2; // field M
    buffer[0] |= len_a != 0 ? 0x40 : 0; // field Adata
-   
+
    memcpy(&buffer[1], nonce, 13);
 
    if (l == 3) {
@@ -423,7 +422,7 @@ loaded in the engine.
 \param[in] len_mac Length of the CBC-MAC tag. Must be 4, 8 or 16 octets.
 \param[in] l CCM parameter L that allows selection of different nonce length.
 
-\returns E_SUCCESS when the encryption was successful, E_FAIL otherwise. 
+\returns E_SUCCESS when the encryption was successful, E_FAIL otherwise.
 */
 static owerror_t aes_ctr_enc(uint8_t* m,
          uint8_t len_m,
@@ -482,7 +481,7 @@ static owerror_t aes_ctr_enc(uint8_t* m,
 \param[in] len Message length. Must be multiple of 16 octets.
 \param[in] iv Buffer containing the Initialization Vector (16 octets).
 
-\returns E_SUCCESS when the encryption was successful. 
+\returns E_SUCCESS when the encryption was successful.
 */
 owerror_t aes_ctr_enc_raw(uint8_t* buffer, uint8_t len, uint8_t iv[16]) {
    uint8_t n;
