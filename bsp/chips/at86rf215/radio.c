@@ -86,8 +86,6 @@ void radio_init(void) {
 
     spi_init();
 
-    at86rf215_status();
-
     // clear variables
     memset(&radio_vars,0,sizeof(radio_vars_t));
 
@@ -164,6 +162,10 @@ void radio_setEndFrameCb(radio_capture_cbt cb) {
 //frequency_nb integer
 void radio_setFrequency(uint16_t channel) {
     uint16_t frequency_0;
+
+    // frequency has to be updated in TRXOFF status (datatsheet: 6.3.2).
+    at86rf215_spiStrobe(CMD_RF_TRXOFF);
+    while(at86rf215_status() != RF_STATE_TRXOFF);
 
     frequency_0 = (DEFAULT_CENTER_FREQUENCY_0_FSK_OPTION_1/25);
     at86rf215_spiWriteReg(RG_RF09_CS, (uint8_t)(DEFAULT_CHANNEL_SPACING_FSK_OPTION_1/25));
