@@ -176,7 +176,7 @@ void radio_setFrequency(uint16_t channel) {
 void radio_rfOn(void) {
     //put the radio in the TRXPREP state
     at86rf215_spiStrobe(CMD_RF_TRXOFF);
-    //while(radio_vars.state != RADIOSTATE_TX_ENABLED);
+    while(at86rf215_status() != RF_STATE_TRXOFF);
 }
 
 void radio_rfOff(void) {
@@ -185,6 +185,7 @@ void radio_rfOff(void) {
     radio_vars.state = RADIOSTATE_TURNING_OFF;
 
     at86rf215_spiStrobe(CMD_RF_TRXOFF);
+    while(at86rf215_status() != RF_STATE_TRXOFF);
     // wiggle debug pin
     debugpins_radio_clr();
     leds_radio_off();
