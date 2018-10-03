@@ -221,17 +221,20 @@ int main(void) {
     partNumber    = at86rf215_spiReadReg(RG_RF_PN);
     versionNumber = at86rf215_spiReadReg(RG_RF_VN);
 
-    //==== return the result
-    if (partNumber == AT86RF215_PART_NUMBER){
-        UARTCharPut(UART0_BASE, 'P');
-    } else {
-        UARTCharPut(UART0_BASE, 'F');
-    }
+    while(1){
+        //==== return the result
+        if (partNumber == AT86RF215_PART_NUMBER){
+            UARTCharPut(UART0_BASE, 'P');
+        } else {
+            UARTCharPut(UART0_BASE, 'F');
+        }
 
-    if (versionNumber == AT86RF215_VERSION_NUMBER){
-        UARTCharPut(UART0_BASE, 'P');
-    } else {
-        UARTCharPut(UART0_BASE, 'F');
+        if (versionNumber == AT86RF215_VERSION_NUMBER){
+            UARTCharPut(UART0_BASE, 'P');
+        } else {
+            UARTCharPut(UART0_BASE, 'F');
+        }
+        UARTCharPut(UART0_BASE, ' ');
     }
 }
 
