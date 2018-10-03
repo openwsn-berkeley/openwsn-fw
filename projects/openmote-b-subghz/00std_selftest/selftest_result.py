@@ -1,11 +1,6 @@
 import paho.mqtt.client as mqtt
 import json
-import base64
 import time
-import sys, getopt
-import Queue
-import random
-import struct
 
 #============================ defines =========================================
 BROKER_ADDRESS        = "argus.paris.inria.fr"
@@ -55,19 +50,8 @@ class mqtt_client(object):
         try:
             self.result.update({message.topic.split('/')[4]: payload['serialbytes'][:10]})
         except:
-            print "something wrong"
+            print "something wrong! message payload : {0}".format(payload)
             
-#============================ main function ===================================
+#============================ main ===================================
 mqtt_client().connect_to_mqtt()
 raw_input('press Enter to return')
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
