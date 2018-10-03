@@ -25,6 +25,7 @@ tests passed. If there was an error, we use the Error LED to signal.
 #define TEST_AES_CCMS_AUTH_FORWARD     1
 #define TEST_AES_CCMS_AUTH_INVERSE     1
 #define TEST_BENCHMARK_CCMS            1
+#define TEST_ECDSA_VERIFY              1
 
 typedef struct {
    uint8_t key[16];
@@ -70,6 +71,19 @@ typedef struct
     uint8_t l;
     uint8_t expected_ciphertext[8];
 } aes_ccms_auth_forward_suite_t;
+
+typedef struct{
+    tECCCurveInfo grp;
+    tECPt Q;
+	uint32_t Qx[12];
+    uint32_t Qy[12];
+    uint32_t s[12];
+    uint32_t s_length;
+    uint32_t r[12];
+    uint32_t r_length;
+    uint32_t hash[12];
+    uint8_t  h_length;
+} ecdsa_verify_suite_t;
 
 static int hang(uint8_t error_code) {
 
@@ -196,6 +210,27 @@ static owerror_t run_aes_ccms_auth_inverse_suite(aes_ccms_auth_forward_suite_t* 
    return success == test_suite_len ? E_SUCCESS : E_FAIL; 
 }
 #endif /* TEST_AES_CCMS_AUTH_INVERSE */
+
+#if TEST_ECDSA_VERIFY
+static owerror_t run_ecdsa_verify_suite(ecdsa_verify_suite_t* suite, uint8_t test_suite_len ){
+   uint8_t i = 0;
+   uint8_t success = 0;
+
+   for(i = 0; i < test_suite_len; i++) {
+	  // load the appropriate ec group
+	  cryptoengine_load_group( SECP256R1 , &(suite[i].grp) );
+	  suite[i].Q.pui32X = suite[i].Qx;
+	  suite[i].Q.pui32Y = suite[i].Qy;
+
+	  //launch the signature verification
+      if(cryptoengine_ecdsa_verify(&suite[i].grp, &suite[i].Q, suite[i].s, suite[i].s_length, suite[i].r, suite[i].r_length, suite[i].hash, suite[i].h_length) == E_SUCCESS) {
+         success++;
+      }
+   }
+
+   return success == test_suite_len ? E_SUCCESS : E_FAIL;
+}
+#endif /* TEST_ECDSA_VERIFY */
 
 /**
 \brief The program starts executing here.
@@ -333,6 +368,24 @@ int mote_main(void) {
 };
 #endif /* TEST_AES_CCMS_AUTH_INVERSE */
 
+#if TEST_ECDSA_VERIFY
+   ecdsa_verify_suite_t ecdsa_verify_suite[] =
+   {
+      {
+		{ NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL },	//group info (name, group size, prime, order, a, b, gx, gy)
+		{NULL, NULL}, // Q
+		{ 0x5fa58f52, 0xe47cfbf2, 0x300c28c5, 0x6375ba10, 0x62684e91, 0xda0a9a8f, 0xf9f2ed29, 0x36dfe2c6, 0x0, 0x0, 0x0, 0x0 },  // Qx
+		{ 0xc772f829, 0x4fabc36f, 0x09daed0b, 0xe93f9872, 0x35a7cfab, 0x5a3c7869, 0xde1ab878, 0x71a0d4fc, 0x0, 0x0, 0x0, 0x0 },  // Qy
+		{ 0x5366B1AB, 0x0F1DBF46, 0xB0C8D3C4, 0xDB755B6F, 0xB9BF9243, 0xE644A8BE, 0x55159A59, 0x6F9E52A6, 0x0, 0x0, 0x0, 0x0 },  // s
+		8,	// s_lenght
+		{ 0xC3B4035F, 0x515AD0A6, 0xBF375DCA, 0x0CC1E997, 0x7F54FDCD, 0x04D3FECA, 0xB9E396B9, 0x515C3D6E, 0x0, 0x0, 0x0, 0x0 },  // r
+		8,	// r_lenght
+		{ 0x65637572, 0x20612073, 0x68206F66, 0x20686173, 0x69732061, 0x68697320, 0x6F2C2054, 0x48616C6C, 0x0, 0x0, 0x0, 0x0 },  // hash
+		8,	// h_lenght
+	  },
+   };
+#endif /* TEST_ECDSA_VERIFY */
+
    board_init();
    
 #if TEST_AES_ECB
@@ -366,6 +419,13 @@ int mote_main(void) {
       fail++;
    }
 #endif /* TEST_AES_CCMS_AUTH_INVERSE */
+
+#if TEST_ECDSA_VERIFY
+   if (run_ecdsa_verify_suite(ecdsa_verify_suite,
+            sizeof(ecdsa_verify_suite)/sizeof(ecdsa_verify_suite[0])) == E_FAIL) {
+      fail++;
+   }
+#endif /* TEST_ECDSA_VERIFY */
 
 #if TEST_BENCHMARK_CCMS
 
