@@ -234,6 +234,11 @@ owerror_t cryptoengine_aes_ccms_enc(uint8_t* a,
    return E_FAIL;
 }
 
+owerror_t cryptoengine_ecdsa_verify( ecdsa_verify_state_t* ecdsa_state )
+{
+    return E_FAIL;
+}
+
 //=========================== private =========================================
 
 /**

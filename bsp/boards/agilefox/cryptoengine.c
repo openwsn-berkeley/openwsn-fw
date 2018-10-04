@@ -38,3 +38,8 @@ owerror_t cryptoengine_init(void) {
    return E_SUCCESS;
 }
 
+
+owerror_t cryptoengine_ecdsa_verify( ecdsa_verify_state_t* ecdsa_state )
+{
+    return E_FAIL;
+}
