@@ -9,19 +9,21 @@
 #define __CRYPTO_ENGINE_H__
 
 #include "opendefs.h"
-#include "source/pka.h"
 
 //=========================== define ==========================================
 
 #define CBC_MAX_MAC_SIZE  16
-#define ECC_MAX_MUL_SIZE  24
-
+#define ECC_MAX_POINT_SIZE 12
+#define ECC_MAX_MUL_SIZE  ( ECC_MAX_POINT_SIZE * 2)
 
 /* Elliptic Curve groups supported */
 
 enum EC_GROUPS {
     SECP256R1    = 1,
 };
+
+
+#define CHECK_RET(f) do { if( ( ret = f ) != 0 ) goto end; } while( 0 )
 
 //=========================== module variables ================================
 
@@ -39,6 +41,22 @@ static const uint32_t nist_p_256_x[8] = { 0xD898C296, 0xF4A13945, 0x2DEB33A0, 0x
                                           0x63A440F2, 0xF8BCE6E5, 0xE12C4247, 0x6B17D1F2 };
 static const uint32_t nist_p_256_y[8] = { 0x37BF51F5, 0xCBB64068, 0x6B315ECE, 0x2BCE3357,
                                           0x7C0F9E16, 0x8EE7EB4A, 0xFE1A7F9B, 0x4FE342E2 };
+typedef struct{
+    uint32_t x[ECC_MAX_POINT_SIZE];
+    uint32_t y[ECC_MAX_POINT_SIZE];
+} ecc_point_t;
+
+
+typedef struct {
+    uint8_t curve;
+    uint32_t s[ECC_MAX_POINT_SIZE];
+    uint8_t s_length;
+    uint32_t r[ECC_MAX_POINT_SIZE];
+    uint8_t r_length;
+    uint32_t hash[ECC_MAX_POINT_SIZE];
+    uint8_t h_length;
+    ecc_point_t publicQ;
+} ecdsa_verify_state_t;
 
 //============================ module methods =================================
 
@@ -52,7 +70,7 @@ static const uint32_t nist_p_256_y[8] = { 0x37BF51F5, 0xCBB64068, 0x6B315ECE, 0x
     the added authentication tag of len_mac octets on return.
 \param[in] nonce Buffer containing nonce (max 13 octets).
 \param[in] l CCM parameter L that allows selection of different nonce length which is (15 - L).
-    For example, l = 2 selects 13-octet long nonce which is used for IEEE 802.15.4 security. 
+    For example, l = 2 selects 13-octet long nonce which is used for IEEE 802.15.4 security.
 \param[in] key Buffer containing the secret key (16 octets).
 \param[in] len_mac Length of the authentication tag.
 */
@@ -87,7 +105,7 @@ owerror_t cryptoengine_aes_ccms_dec(uint8_t* a,
       uint8_t* nonce,
       uint8_t l,
       uint8_t key[16],
-      uint8_t len_mac);  
+      uint8_t len_mac);
 
 
 
@@ -102,31 +120,15 @@ owerror_t cryptoengine_aes_ccms_dec(uint8_t* a,
 \param[in] hash the hash of the message that was signed.
 \param[in] h_length number of uint32_t blocks used for the hash.
  */
-owerror_t cryptoengine_ecdsa_verify(
-      tECCCurveInfo* grp,
-      tECPt* Q,
-      uint32_t* s,
-      uint8_t s_length,
-      uint32_t* r,
-      uint8_t r_length,
-      uint32_t* hash,
-      uint8_t h_lenght);
+owerror_t cryptoengine_ecdsa_verify( ecdsa_verify_state_t* ecdsa_state );
 
-
-/**
-\brief Loads the information on the requested group
-\param[in] group Integer denoting the requested group
-\param[in, out] grp Pointer to a struct of type tECCCurveInfo,
-    struct gets initialized with the correct parameters.
-*/
-owerror_t cryptoengine_load_group(uint8_t group, tECCCurveInfo *grp);
 /**
 \brief Basic AES encryption of a single 16-octet block.
 \param[in,out] buffer Single block plaintext (16 octets). Will be overwritten by ciphertext.
 \param[in] key Buffer containing the secret key (16 octets).
  */
 owerror_t cryptoengine_aes_ecb_enc(uint8_t buffer[16], uint8_t key[16]);
-    
+
 /**
 \brief Initialization of the cryptoengine module.
 */
