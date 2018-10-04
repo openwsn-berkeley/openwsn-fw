@@ -43,6 +43,7 @@ typedef struct {
     uint8_t                     rf24_isr;
     uint8_t                     bb0_isr;
     uint8_t                     bb1_isr;
+    bool                        trx_ready;
 } radio_vars_t;
 
 radio_vars_t radio_vars;
@@ -163,6 +164,10 @@ void radio_setEndFrameCb(radio_capture_cbt cb) {
 void radio_setFrequency(uint16_t channel) {
     uint16_t frequency_0;
 
+    // frequency has to be updated in TRXOFF status (datatsheet: 6.3.2).
+    at86rf215_spiStrobe(CMD_RF_TRXOFF);
+    while(at86rf215_status() != RF_STATE_TRXOFF);
+
     frequency_0 = (DEFAULT_CENTER_FREQUENCY_0_FSK_OPTION_1/25);
     at86rf215_spiWriteReg(RG_RF09_CS, (uint8_t)(DEFAULT_CHANNEL_SPACING_FSK_OPTION_1/25));
     at86rf215_spiWriteReg(RG_RF09_CCF0L, (uint8_t)(frequency_0%256));
@@ -176,7 +181,7 @@ void radio_setFrequency(uint16_t channel) {
 void radio_rfOn(void) {
     //put the radio in the TRXPREP state
     at86rf215_spiStrobe(CMD_RF_TRXOFF);
-    //while(radio_vars.state != RADIOSTATE_TX_ENABLED);
+    while(at86rf215_status() != RF_STATE_TRXOFF);
 }
 
 void radio_rfOff(void) {
@@ -185,6 +190,7 @@ void radio_rfOff(void) {
     radio_vars.state = RADIOSTATE_TURNING_OFF;
 
     at86rf215_spiStrobe(CMD_RF_TRXOFF);
+    while(at86rf215_status() != RF_STATE_TRXOFF);
     // wiggle debug pin
     debugpins_radio_clr();
     leds_radio_off();
@@ -212,14 +218,19 @@ void radio_txEnable(void) {
 
     // change state
     radio_vars.state = RADIOSTATE_ENABLING_TX;
-    at86rf215_spiStrobe(CMD_RF_TXPREP);
 
-    // check radio state transit to TRX PREPARE
-    while (radio_vars.state != RADIOSTATE_TX_ENABLED);
+    if(at86rf215_status() != RF_STATE_TXPREP){
+        radio_vars.trx_ready = FALSE;
+        // change status to TXPREP
+        at86rf215_spiStrobe(CMD_RF_TXPREP);
+        while(!radio_vars.trx_ready);
+    }
 
     // wiggle debug pin
     debugpins_radio_set();
     leds_radio_on();
+
+    radio_vars.state = RADIOSTATE_TX_ENABLED;
 }
 
 void radio_txNow(void) {
@@ -307,8 +318,8 @@ void radio_isr(void) {
     radio_read_isr();
 
     if (radio_vars.rf09_isr & IRQS_TRXRDY_MASK){
-        radio_vars.state = RADIOSTATE_TX_ENABLED;
-        // result = DO_NOT_KICK_SCHEDULER;
+        // trx_ready
+        radio_vars.trx_ready = TRUE;
     }
 
     if (radio_vars.bb0_isr & IRQS_RXFS_MASK){

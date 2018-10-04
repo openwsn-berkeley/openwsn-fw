@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <workspace>
     <project>
+        <path>$WS_DIR$\00std_selftest\00std_selftest.ewp</path>
+    </project>
+    <project>
         <path>$WS_DIR$\01bsp_radio_rx\01bsp_radio_rx.ewp</path>
     </project>
     <project>

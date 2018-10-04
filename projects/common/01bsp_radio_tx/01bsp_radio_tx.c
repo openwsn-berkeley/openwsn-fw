@@ -86,7 +86,6 @@ int mote_main(void) {
             board_sleep();
         }
         radio_setFrequency(CHANNEL);
-        radio_rfOff();
         // led
         leds_error_toggle();
 
