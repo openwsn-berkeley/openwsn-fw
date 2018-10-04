@@ -65,7 +65,7 @@ typedef struct
     uint8_t len_tag;
     uint8_t nonce[13];
     uint8_t a[26];
-    uint8_t m[8];               
+    uint8_t m[8];
     uint8_t len_a;
     uint8_t len_m;
     uint8_t l;
@@ -73,16 +73,7 @@ typedef struct
 } aes_ccms_auth_forward_suite_t;
 
 typedef struct{
-    tECCCurveInfo grp;
-    tECPt Q;
-	uint32_t Qx[12];
-    uint32_t Qy[12];
-    uint32_t s[12];
-    uint32_t s_length;
-    uint32_t r[12];
-    uint32_t r_length;
-    uint32_t hash[12];
-    uint8_t  h_length;
+    ecdsa_verify_state_t ecdsa_state;
 } ecdsa_verify_suite_t;
 
 static int hang(uint8_t error_code) {
@@ -90,7 +81,7 @@ static int hang(uint8_t error_code) {
    error_code ? leds_error_on() : leds_radio_on();
 
    while (1);
-   
+
    return 0;
 }
 
@@ -98,7 +89,7 @@ static int hang(uint8_t error_code) {
 static owerror_t run_aes_ecb_suite(aes_ecb_suite_t* suite, uint8_t test_suite_len) {
    uint8_t i = 0;
    uint8_t success = 0;
-   
+
    for(i = 0; i < test_suite_len; i++) {
       if(cryptoengine_aes_ecb_enc(suite[i].buffer, suite[i].key) == E_SUCCESS) {
          if (memcmp(suite[i].buffer, suite[i].expected_ciphertext, 16) == 0) {
@@ -106,8 +97,8 @@ static owerror_t run_aes_ecb_suite(aes_ecb_suite_t* suite, uint8_t test_suite_le
          }
       }
    }
-   
-   return success == test_suite_len ? E_SUCCESS : E_FAIL; 
+
+   return success == test_suite_len ? E_SUCCESS : E_FAIL;
 }
 #endif /* TEST_AES_ECB */
 
@@ -125,13 +116,13 @@ static owerror_t run_aes_ccms_enc_suite(aes_ccms_enc_suite_t* suite, uint8_t tes
                   suite[i].l,
                   suite[i].key,
                   suite[i].len_tag) == E_SUCCESS) {
-         
+
          if(memcmp(suite[i].m, suite[i].expected_ciphertext, suite[i].len_m) == 0) {
             success++;
          }
       }
    }
-   return success == test_suite_len ? E_SUCCESS : E_FAIL; 
+   return success == test_suite_len ? E_SUCCESS : E_FAIL;
 }
 #endif /* TEST_AES_CCMS_ENC */
 
@@ -142,7 +133,7 @@ static owerror_t run_aes_ccms_dec_suite(aes_ccms_dec_suite_t* suite, uint8_t tes
 
    for(i = 0; i < test_suite_len; i++) {
 
-	   if(cryptoengine_aes_ccms_dec(suite[i].a,
+       if(cryptoengine_aes_ccms_dec(suite[i].a,
                        suite[i].len_a,
                        suite[i].c,
                        &suite[i].len_c,
@@ -150,13 +141,13 @@ static owerror_t run_aes_ccms_dec_suite(aes_ccms_dec_suite_t* suite, uint8_t tes
                        suite[i].l,
                        suite[i].key,
                        suite[i].len_tag) == E_SUCCESS) {
-         
+
          if(memcmp(suite[i].c, suite[i].expected_plaintext, suite[i].len_c) == 0) {
             success++;
          }
       }
    }
-   return success == test_suite_len ? E_SUCCESS : E_FAIL; 
+   return success == test_suite_len ? E_SUCCESS : E_FAIL;
 }
 #endif /* TEST_AES_CCMS_DEC */
 
@@ -175,13 +166,13 @@ static owerror_t run_aes_ccms_auth_forward_suite(aes_ccms_auth_forward_suite_t* 
                   suite[i].l,
                   suite[i].key,
                   suite[i].len_tag) == E_SUCCESS) {
-         
+
          if(memcmp(suite[i].m, suite[i].expected_ciphertext, suite[i].len_tag) == 0) {
             success++;
          }
       }
    }
-   return success == test_suite_len ? E_SUCCESS : E_FAIL; 
+   return success == test_suite_len ? E_SUCCESS : E_FAIL;
 }
 #endif /* TEST_AES_CCMS_AUTH_FORWARD */
 
@@ -193,7 +184,7 @@ static owerror_t run_aes_ccms_auth_inverse_suite(aes_ccms_auth_forward_suite_t* 
 
    for(i = 0; i < test_suite_len; i++) {
 
-	   if(cryptoengine_aes_ccms_dec(suite[i].a,
+       if(cryptoengine_aes_ccms_dec(suite[i].a,
                        suite[i].len_a,
                        suite[i].m,
                        &suite[i].len_m,
@@ -201,13 +192,13 @@ static owerror_t run_aes_ccms_auth_inverse_suite(aes_ccms_auth_forward_suite_t* 
                        suite[i].l,
                        suite[i].key,
                        suite[i].len_tag) == E_SUCCESS) {
-         
+
          if(memcmp(suite[i].m, suite[i].expected_ciphertext, suite[i].len_tag) == 0) {
             success++;
          }
       }
    }
-   return success == test_suite_len ? E_SUCCESS : E_FAIL; 
+   return success == test_suite_len ? E_SUCCESS : E_FAIL;
 }
 #endif /* TEST_AES_CCMS_AUTH_INVERSE */
 
@@ -217,13 +208,8 @@ static owerror_t run_ecdsa_verify_suite(ecdsa_verify_suite_t* suite, uint8_t tes
    uint8_t success = 0;
 
    for(i = 0; i < test_suite_len; i++) {
-	  // load the appropriate ec group
-	  cryptoengine_load_group( SECP256R1 , &(suite[i].grp) );
-	  suite[i].Q.pui32X = suite[i].Qx;
-	  suite[i].Q.pui32Y = suite[i].Qy;
-
-	  //launch the signature verification
-      if(cryptoengine_ecdsa_verify(&suite[i].grp, &suite[i].Q, suite[i].s, suite[i].s_length, suite[i].r, suite[i].r_length, suite[i].hash, suite[i].h_length) == E_SUCCESS) {
+      //launch the signature verification
+      if(cryptoengine_ecdsa_verify(&(suite[i].ecdsa_state)) == E_SUCCESS) {
          success++;
       }
    }
@@ -288,7 +274,7 @@ int mote_main(void) {
       {
          { 0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, /* key */
             4, /* tag_len */
-         { 0x00, 0x00, 0xf0, 0xe0, 0xd0, 0xc0, 0xb0, 0xa0, 0x00, 0x00, 0x00, 0x00, 0x05 }, /* nonce */ 
+         { 0x00, 0x00, 0xf0, 0xe0, 0xd0, 0xc0, 0xb0, 0xa0, 0x00, 0x00, 0x00, 0x00, 0x05 }, /* nonce */
          { 0x69, 0x98, 0x03, 0x33, 0x63, 0xbb, 0xaa, 0x01, 0x00, 0x0d, 0x00, 0x00, 0x00, 0x00, 0x03}, /* a vector */
          { 0x14, 0xaa, 0xbb, 0x00, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b,
             0x0c, 0x0d, 0x0e, 0x0f, 0x00, 0x00, 0x00, 0x00 }, /* m vector + 4 octets for authentication tag */
@@ -304,7 +290,7 @@ int mote_main(void) {
 #if TEST_AES_CCMS_DEC
    aes_ccms_dec_suite_t aes_ccms_dec_suite[] = {
 
-    { 
+    {
         { 0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, /* key */
         0, /* tag len */
         { 0x00, 0x00, 0xf0, 0xe0, 0xd0, 0xc0, 0xb0, 0xa0, 0x00, 0x00, 0x00, 0x00, 0x05 }, /* nonce */
@@ -353,7 +339,7 @@ int mote_main(void) {
 
 #if TEST_AES_CCMS_AUTH_INVERSE
    aes_ccms_auth_forward_suite_t aes_ccms_auth_inverse_suite[] = {
-    { 
+    {
         {0xC0, 0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7, 0xC8, 0xC9, 0xCA, 0xCB, 0xCC, 0xCD, 0xCE, 0xCF}, /* key */
         8, /* tag len */
         {0xAC, 0xDE, 0x48, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x05, 0x02}, /* nonce */
@@ -372,22 +358,25 @@ int mote_main(void) {
    ecdsa_verify_suite_t ecdsa_verify_suite[] =
    {
       {
-		{ NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL },	//group info (name, group size, prime, order, a, b, gx, gy)
-		{NULL, NULL}, // Q
-		{ 0x5fa58f52, 0xe47cfbf2, 0x300c28c5, 0x6375ba10, 0x62684e91, 0xda0a9a8f, 0xf9f2ed29, 0x36dfe2c6, 0x0, 0x0, 0x0, 0x0 },  // Qx
-		{ 0xc772f829, 0x4fabc36f, 0x09daed0b, 0xe93f9872, 0x35a7cfab, 0x5a3c7869, 0xde1ab878, 0x71a0d4fc, 0x0, 0x0, 0x0, 0x0 },  // Qy
-		{ 0x5366B1AB, 0x0F1DBF46, 0xB0C8D3C4, 0xDB755B6F, 0xB9BF9243, 0xE644A8BE, 0x55159A59, 0x6F9E52A6, 0x0, 0x0, 0x0, 0x0 },  // s
-		8,	// s_lenght
-		{ 0xC3B4035F, 0x515AD0A6, 0xBF375DCA, 0x0CC1E997, 0x7F54FDCD, 0x04D3FECA, 0xB9E396B9, 0x515C3D6E, 0x0, 0x0, 0x0, 0x0 },  // r
-		8,	// r_lenght
-		{ 0x65637572, 0x20612073, 0x68206F66, 0x20686173, 0x69732061, 0x68697320, 0x6F2C2054, 0x48616C6C, 0x0, 0x0, 0x0, 0x0 },  // hash
-		8,	// h_lenght
-	  },
+        {
+          SECP256R1,    //group info (name, group size, prime, order, a, b, gx, gy)
+          { 0x5366B1AB, 0x0F1DBF46, 0xB0C8D3C4, 0xDB755B6F, 0xB9BF9243, 0xE644A8BE, 0x55159A59, 0x6F9E52A6, 0x0, 0x0, 0x0, 0x0 },  // s
+          8,    // s_lenght
+          { 0xC3B4035F, 0x515AD0A6, 0xBF375DCA, 0x0CC1E997, 0x7F54FDCD, 0x04D3FECA, 0xB9E396B9, 0x515C3D6E, 0x0, 0x0, 0x0, 0x0 },  // r
+          8,    // r_lenght
+          { 0x65637572, 0x20612073, 0x68206F66, 0x20686173, 0x69732061, 0x68697320, 0x6F2C2054, 0x48616C6C, 0x0, 0x0, 0x0, 0x0 },  // hash
+          8,    // h_lenght
+          {
+              { 0x5fa58f52, 0xe47cfbf2, 0x300c28c5, 0x6375ba10, 0x62684e91, 0xda0a9a8f, 0xf9f2ed29, 0x36dfe2c6, 0x0, 0x0, 0x0, 0x0 },  // Qx
+              { 0xc772f829, 0x4fabc36f, 0x09daed0b, 0xe93f9872, 0x35a7cfab, 0x5a3c7869, 0xde1ab878, 0x71a0d4fc, 0x0, 0x0, 0x0, 0x0 },  // Qy
+          }
+        }
+      },
    };
 #endif /* TEST_ECDSA_VERIFY */
 
    board_init();
-   
+
 #if TEST_AES_ECB
    if (run_aes_ecb_suite(aes_ecb_suite, sizeof(aes_ecb_suite)/sizeof(aes_ecb_suite[0])) == E_FAIL) {
       fail++;
@@ -407,14 +396,14 @@ int mote_main(void) {
 #endif /* TEST_AES_CCMS_DEC */
 
 #if TEST_AES_CCMS_AUTH_FORWARD
-   if (run_aes_ccms_auth_forward_suite(aes_ccms_auth_forward_suite, 
+   if (run_aes_ccms_auth_forward_suite(aes_ccms_auth_forward_suite,
             sizeof(aes_ccms_auth_forward_suite)/sizeof(aes_ccms_auth_forward_suite[0])) == E_FAIL) {
       fail++;
    }
 #endif /* TEST_AES_CCMS_AUTH_FORWARD */
 
 #if TEST_AES_CCMS_AUTH_INVERSE
-   if (run_aes_ccms_auth_inverse_suite(aes_ccms_auth_inverse_suite, 
+   if (run_aes_ccms_auth_inverse_suite(aes_ccms_auth_inverse_suite,
             sizeof(aes_ccms_auth_inverse_suite)/sizeof(aes_ccms_auth_inverse_suite[0])) == E_FAIL) {
       fail++;
    }
@@ -443,7 +432,7 @@ int mote_main(void) {
 
    memset(a, 0xfe, A_LEN);
    memset(m, 0xab, M_LEN);
-   
+
    PORT_TIMER_WIDTH time1 = 0;
    PORT_TIMER_WIDTH time2 = 0;
    PORT_TIMER_WIDTH enc = 0;
