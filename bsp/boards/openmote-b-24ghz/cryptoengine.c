@@ -17,10 +17,31 @@
 
 #define DEFAULT_KEY_AREA KEY_AREA_0
 
+//=========================== variables ======================================
+
+/* global variables - internal representation of the hardware types, not visible to the applications */
+tECCCurveInfo grp = {
+    .name = NULL,
+    .ui8Size = 0,
+    .pui32Prime = NULL,
+    .pui32N = NULL,
+    .pui32A = NULL,
+    .pui32B = NULL,
+    .pui32Gx = NULL,
+    .pui32Gy = NULL,
+};
+
+tECPt publicQ = {
+    .pui32X = NULL,
+    .pui32Y = NULL,
+};
 
 //=========================== prototypes ======================================
 
 static owerror_t load_key(uint8_t key[16], uint8_t* /* out */ key_location);
+static owerror_t load_group( uint8_t grp );
+static owerror_t load_ecc_point( ecc_point_t* point, tECPt* point_repr );
+static owerror_t ecdsa_verify_internal( ecdsa_verify_state_t* ecdsa_state );
 
 
 //=========================== public ==========================================
