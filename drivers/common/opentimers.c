@@ -7,6 +7,8 @@ at most MAX_NUM_TIMERS timers.
 \author Tengfei Chang <tengfei.chang@inria.fr>, April 2017.
  */
 
+#include <string.h>
+
 #include "opendefs.h"
 #include "opentimers.h"
 #include "sctimer.h"
@@ -357,12 +359,14 @@ void opentimers_timer_callback(void){
     PORT_TIMER_WIDTH timerGap;
     PORT_TIMER_WIDTH tempTimerGap;
     PORT_TIMER_WIDTH tempLastTimeout = opentimers_vars.currentTimeout;
+    opentimers_vars.running = FALSE;
     // 1. find the expired timer
     for (i=0;i<MAX_NUM_TIMERS;i++){
         if (opentimers_vars.timersBuf[i].isrunning==TRUE){
+            opentimers_vars.running = TRUE;
             // all timers in the past within TIMERTHRESHOLD ticks
             // (probably with low priority) will mared as Expired.
-            if (opentimers_vars.currentTimeout-opentimers_vars.timersBuf[i].currentCompareValue <= TIMERTHRESHOLD){
+            if ((PORT_TIMER_WIDTH)(opentimers_vars.currentTimeout-opentimers_vars.timersBuf[i].currentCompareValue) <= TIMERTHRESHOLD){
                 // this timer expired, mark as expired
                 opentimers_vars.timersBuf[i].hasExpired = TRUE;
                 // find the fired timer who has the smallest currentTimeout as last Timeout
@@ -455,7 +459,7 @@ void opentimers_timer_callback(void){
                 // and its compare value is larger than timer "i" no more than TIMERTHRESHOLD ticks,
                 // replace candidate timer by timer "i".
                 if (opentimers_vars.timersBuf[i].priority < opentimers_vars.timersBuf[idToSchedule].priority){
-                    if (tempTimerGap - timerGap < TIMERTHRESHOLD){
+                    if ((PORT_TIMER_WIDTH)(tempTimerGap - timerGap) < TIMERTHRESHOLD){
                         timerGap     = tempTimerGap;
                         idToSchedule = i;
                     }
@@ -465,9 +469,10 @@ void opentimers_timer_callback(void){
     }
 
     // 4. reschedule the timer
-    opentimers_vars.currentTimeout = opentimers_vars.timersBuf[idToSchedule].currentCompareValue;
-    opentimers_vars.lastCompare[opentimers_vars.index] = opentimers_vars.currentTimeout;
-    opentimers_vars.index = (opentimers_vars.index+1)&0x0F;
-    sctimer_setCompare(opentimers_vars.currentTimeout);
-    opentimers_vars.running        = TRUE;
+    if (opentimers_vars.running==TRUE){
+        opentimers_vars.currentTimeout = opentimers_vars.timersBuf[idToSchedule].currentCompareValue;
+        opentimers_vars.lastCompare[opentimers_vars.index] = opentimers_vars.currentTimeout;
+        opentimers_vars.index = (opentimers_vars.index + 1) & 0x0F;
+        sctimer_setCompare(opentimers_vars.currentTimeout);
+    }
 }
