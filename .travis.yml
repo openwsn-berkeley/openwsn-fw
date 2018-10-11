@@ -29,10 +29,11 @@ script:
 - scons board=openmote-cc2538     goldenImage=sniffer toolchain=armgcc verbose=1 oos_sniffer
 - scons board=openmote-cc2538     goldenImage=root    toolchain=armgcc verbose=1 oos_openwsn
 - scons board=openmote-b                              toolchain=armgcc verbose=1 oos_openwsn
+- scons board=openmote-b-24ghz                        toolchain=armgcc verbose=1 oos_openwsn
 # - scons board=wsn430v14                               toolchain=mspgcc verbose=1 oos_openwsn
 # - scons board=wsn430v13b                              toolchain=mspgcc verbose=1 oos_openwsn
-- scons board=gina                                    toolchain=mspgcc verbose=1 oos_openwsn
-- scons board=z1                                      toolchain=mspgcc verbose=1 oos_openwsn
+# - scons board=gina                                    toolchain=mspgcc verbose=1 oos_openwsn
+# - scons board=z1                                      toolchain=mspgcc verbose=1 oos_openwsn
 - scons board=python                                  toolchain=gcc    verbose=1 oos_openwsn
 - scons board=iot-lab_M3                              toolchain=armgcc verbose=1 oos_openwsn
 - scons board=iot-lab_A8-M3                           toolchain=armgcc verbose=1 oos_openwsn

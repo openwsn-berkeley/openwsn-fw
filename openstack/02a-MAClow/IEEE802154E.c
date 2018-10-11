@@ -565,6 +565,11 @@ port_INLINE void activity_synchronize_newSlot(void) {
         // configure the radio to listen to the default synchronizing channel
         radio_setFrequency(ieee154e_vars.freq);
 
+#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
+        sctimer_setCapture(ACTION_RX_SFD_DONE);
+        sctimer_setCapture(ACTION_RX_DONE);       
+#endif
+        
         // switch on the radio in Rx mode.
         radio_rxEnable();
         radio_rxNow();
@@ -572,6 +577,15 @@ port_INLINE void activity_synchronize_newSlot(void) {
         // I'm listening last slot
         ieee154e_stats.numTicsOn    += ieee154e_vars.slotDuration;
         ieee154e_stats.numTicsTotal += ieee154e_vars.slotDuration;
+        
+#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
+        sctimer_setCapture(ACTION_RX_SFD_DONE);
+        sctimer_setCapture(ACTION_RX_DONE);       
+#endif
+        
+        // switch on the radio in Rx mode.
+        radio_rxEnable();
+        radio_rxNow();
     }
 
     // if I'm already in S_SYNCLISTEN, while not synchronized,
@@ -587,6 +601,11 @@ port_INLINE void activity_synchronize_newSlot(void) {
         // configure the radio to listen to the default synchronizing channel
         radio_setFrequency(ieee154e_vars.freq);
 
+#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
+        sctimer_setCapture(ACTION_RX_SFD_DONE);
+        sctimer_setCapture(ACTION_RX_DONE);       
+#endif
+        
         // switch on the radio in Rx mode.
         radio_rxEnable();
         radio_rxNow();
@@ -613,7 +632,6 @@ port_INLINE void activity_synchronize_newSlot(void) {
 port_INLINE void activity_synchronize_startOfFrame(PORT_TIMER_WIDTH capturedTime) {
 
     // don't care about packet if I'm not listening
-    // in case serial rx is started, we don't want to loss this packet because of wrong state machine, so capture the state here
     if (ieee154e_vars.state!=S_SYNCLISTEN) {
         return;
     }
@@ -2285,11 +2303,12 @@ port_INLINE void incrementAsnOffset(void) {
 
     // increment the offsets
     frameLength = schedule_getFrameLength();
-    ieee154e_vars.slotOffset++;
-    if (ieee154e_vars.slotOffset>=frameLength) {
-        ieee154e_vars.slotOffset=0;
+    if (frameLength == 0) {
+        ieee154e_vars.slotOffset++;
+    } else {
+        ieee154e_vars.slotOffset  = (ieee154e_vars.slotOffset+1)%frameLength;
     }
-    ieee154e_vars.asnOffset   = (ieee154e_vars.asnOffset+1)&0x0f;
+   ieee154e_vars.asnOffset   = (ieee154e_vars.asnOffset+1)% NUM_CHANNELS;
 }
 
 port_INLINE void ieee154e_resetAsn(void) {

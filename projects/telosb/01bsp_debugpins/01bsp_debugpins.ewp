@@ -2021,9 +2021,6 @@
   </configuration>
   <group>
     <name>bsp</name>
-    <excluded>
-      <configuration>Debug</configuration>
-    </excluded>
     <group>
       <name>boards</name>
       <group>
@@ -2137,12 +2134,6 @@
     <name>inc</name>
     <file>
       <name>$PROJ_DIR$\..\..\..\inc\opendefs.h</name>
-    </file>
-  </group>
-  <group>
-    <name>libs</name>
-    <file>
-      <name>$PROJ_DIR$\..\lib_bsp\Debug\Exe\lib_bsp.r43</name>
     </file>
   </group>
   <group>

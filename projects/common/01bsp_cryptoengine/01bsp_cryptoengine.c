@@ -162,7 +162,7 @@ static owerror_t run_aes_ccms_auth_forward_suite(aes_ccms_auth_forward_suite_t* 
                   suite[i].key,
                   suite[i].len_tag) == E_SUCCESS) {
          
-         if(memcmp(suite[i].m, suite[i].expected_ciphertext, suite[i].len_m) == 0) {
+         if(memcmp(suite[i].m, suite[i].expected_ciphertext, suite[i].len_tag) == 0) {
             success++;
          }
       }
@@ -188,7 +188,7 @@ static owerror_t run_aes_ccms_auth_inverse_suite(aes_ccms_auth_forward_suite_t* 
                        suite[i].key,
                        suite[i].len_tag) == E_SUCCESS) {
          
-         if(memcmp(suite[i].m, suite[i].expected_ciphertext, suite[i].len_m) == 0) {
+         if(memcmp(suite[i].m, suite[i].expected_ciphertext, suite[i].len_tag) == 0) {
             success++;
          }
       }

@@ -2039,21 +2039,6 @@
     <group>
       <name>boards</name>
       <group>
-        <name>common</name>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\openaes.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\openaes.h</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\openccms.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\openccms.h</name>
-        </file>
-      </group>
-      <group>
         <name>telosb</name>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\adc_sensor.c</name>

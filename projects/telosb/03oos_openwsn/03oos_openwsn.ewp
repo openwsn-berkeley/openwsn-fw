@@ -336,6 +336,7 @@
           <state>$PROJ_DIR$\..\..\..\openapps\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\c6t\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\cexample\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\cjoin\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\cinfo\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\cleds\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\csensors\</state>
@@ -2228,6 +2229,21 @@
       </file>
     </group>
     <group>
+      <name>cjoin</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cjoin.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cjoin.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cojp_cbor.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cojp_cbor.h</name>
+      </file>
+    </group>
+    <group>
       <name>cleds</name>
       <file>
         <name>$PROJ_DIR$\..\..\..\openapps\cleds\cleds.c</name>
@@ -2266,10 +2282,40 @@
     <group>
       <name>opencoap</name>
       <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\opencoap\cborencoder.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\opencoap\cborencoder.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\opencoap\hkdf.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\opencoap\hmac.c</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\openapps\opencoap\opencoap.c</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openapps\opencoap\opencoap.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\opencoap\openoscoap.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\opencoap\openoscoap.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\opencoap\sha-private.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\opencoap\sha.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\opencoap\sha224-256.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\opencoap\usha.c</name>
       </file>
     </group>
     <group>
@@ -2380,6 +2426,12 @@
     <group>
       <name>02b-MAChigh</name>
       <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\msf.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\msf.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\neighbors.c</name>
       </file>
       <file>
@@ -2390,12 +2442,6 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\schedule.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\msf.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\msf.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sixtop.c</name>

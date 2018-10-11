@@ -13,21 +13,23 @@
 */
 
 /*
-\modifications to implement the IEEE 802.15.4-SUN 
+\modifications to implement the IEEE 802.15.4-SUN
 \done by Jonathan Munoz <jonathan.munoz@inria.fr>
 */
 
-#include "radiotimer.h"
+#include "at86rf215.h"
 
 //=========================== define ==========================================
 
 #define LENGTH_CRC 4
 
+//=========================== typedef =========================================
+
 /**
 \brief Current state of the radio.
 
 \note This radio driver is very minimal in that it does not follow a state machine.
-      It is up to the MAC layer to ensure that the different radio operations 
+      It is up to the MAC layer to ensure that the different radio operations
       are called in the righr order. The radio keeps a state for debugging purposes only.
 */
 typedef enum {
@@ -47,30 +49,24 @@ typedef enum {
    RADIOSTATE_TURNING_OFF         = 0x0d,   ///< Turning the RF chain off.
 } radio_state_t;
 
-//=========================== typedef =========================================
+typedef void (*radio_capture_cbt)(PORT_TIMER_WIDTH timestamp);
 
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
 
 // admin
+void     radio_powerOn(void);
 void     radio_init(void);
-void     radio_setOverflowCb(radiotimer_compare_cbt cb);
-void     radio_setCompareCb(radiotimer_compare_cbt cb);
-void     radio_setStartFrameCb(radiotimer_capture_cbt cb);
-void     radio_setEndFrameCb(radiotimer_capture_cbt cb);
+void     radio_setStartFrameCb(radio_capture_cbt cb);
+void     radio_setEndFrameCb(radio_capture_cbt cb);
 // reset
 void     radio_reset(void);
-// timer
-void     radio_startTimer(PORT_TIMER_WIDTH period);
-PORT_TIMER_WIDTH radio_getTimerValue(void);
-void     radio_setTimerPeriod(PORT_TIMER_WIDTH period);
-PORT_TIMER_WIDTH radio_getTimerPeriod(void);
 // RF admin
-void     radio_setFrequency(uint16_t channel_spacing, uint32_t frequency_0, uint16_t channel);
+void     radio_setFrequency(uint16_t channel);
 void     radio_rfOn(void);
 void     radio_rfOff(void);
-void     radio_change_modulation();
+void     radio_change_modulation(registerSetting_t * mod);
 void     radio_change_size(uint16_t* size);
 // TX
 void     radio_loadPacket(uint8_t* packet, uint16_t len);
@@ -87,9 +83,8 @@ void     radio_getReceivedFrame(uint8_t* bufRead,
                                    bool* crc,
                                    uint8_t* mcs);
 
-
 // interrupt handlers
-kick_scheduler_t   radio_isr(void);
+void    radio_isr(void);
 
 /**
 \}

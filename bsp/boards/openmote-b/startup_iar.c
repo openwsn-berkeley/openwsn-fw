@@ -39,6 +39,7 @@
 #include <stdint.h>
 
 #define FLASH_START_ADDR                0x00200000
+#define BOOTLOADER_BACKDOOR_ENABLE      0xF7FFFFFF // ENABLED: PORT A, PIN 6, LOW
 #define BOOTLOADER_BACKDOOR_DISABLE     0xEFFFFFFF
 #define SYS_CTRL_EMUOVR                 0x400D20B4
 #define SYS_CTRL_I_MAP                  0x400D2098
@@ -190,7 +191,7 @@ lockPageCCA_t;
 
 __root const lockPageCCA_t __cca @ ".flashcca" =
 {
-  BOOTLOADER_BACKDOOR_DISABLE,  // Bootloader backdoor disabled
+  BOOTLOADER_BACKDOOR_ENABLE,  // Bootloader backdoor disabled
   0,                            // Image valid bytes
   FLASH_START_ADDR              // Vector table located at flash start address
 };

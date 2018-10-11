@@ -10,13 +10,13 @@
       <TargetName>Target SCuM</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>5060528::V5.06 update 5 (build 528)::ARMCC</pCCUsed>
+      <pCCUsed>5060750::V5.06 update 6 (build 750)::ARMCC</pCCUsed>
       <uAC6>0</uAC6>
       <TargetOption>
         <TargetCommonOption>
           <Device>ARMCM0</Device>
           <Vendor>ARM</Vendor>
-          <PackID>ARM.CMSIS.5.0.1</PackID>
+          <PackID>ARM.CMSIS.5.3.0</PackID>
           <PackURL>http://www.keil.com/pack/</PackURL>
           <Cpu>IRAM(0x20000000,0x20000) IROM(0x00000000,0x40000) CPUTYPE("Cortex-M0") CLOCK(12000000) ESEL ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -324,6 +324,7 @@
             <uThumb>0</uThumb>
             <uSurpInc>0</uSurpInc>
             <uC99>0</uC99>
+            <uGnu>0</uGnu>
             <useXO>0</useXO>
             <v6Lang>1</v6Lang>
             <v6LangP>1</v6LangP>
@@ -481,9 +482,14 @@
               <FilePath>..\..\..\bsp\boards\scum\debugpins.c</FilePath>
             </File>
             <File>
-              <FileName>retarget.c</FileName>
+              <FileName>scm3_hardware_interface.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\bsp\boards\scum\retarget.c</FilePath>
+              <FilePath>..\..\..\bsp\boards\scum\scm3_hardware_interface.c</FilePath>
+            </File>
+            <File>
+              <FileName>scm3_hardware_interface.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\bsp\boards\scum\scm3_hardware_interface.h</FilePath>
             </File>
           </Files>
         </Group>

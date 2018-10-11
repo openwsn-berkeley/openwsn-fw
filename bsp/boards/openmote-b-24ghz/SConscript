@@ -1,0 +1,28 @@
+import os
+
+Import('env')
+
+localEnv = env.Clone()
+
+si70x = localEnv.SConscript(
+    os.path.join('#','bsp','chips','si70x','SConscript'),
+    variant_dir = 'si70x',
+    exports     = {'env': env},
+)
+
+source   = \
+    [file for file in Glob('*.c') if file.name.find('iar')==-1] + \
+    Glob('source/*.c')
+
+localEnv.Append(
+    CPPPATH =  [
+        os.path.join('#','bsp','boards','openmote-b-24ghz'),
+        os.path.join('#','bsp','boards','openmote-b-24ghz','headers'),
+        os.path.join('#','bsp','boards','openmote-b-24ghz','source'),
+        os.path.join('#','bsp','chips','si70x'),
+    ],
+)
+
+board  = localEnv.Object(source=source) + si70x
+
+Return('board')

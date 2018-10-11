@@ -2114,6 +2114,21 @@
       </file>
     </group>
     <group>
+      <name>cjoin</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cjoin.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cjoin.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cojp_cbor.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cojp_cbor.h</name>
+      </file>
+    </group>
+    <group>
       <name>cleds</name>
       <file>
         <name>$PROJ_DIR$\..\..\..\openapps\cleds\cleds.c</name>
@@ -2227,13 +2242,13 @@
     <group>
       <name>02b-MAChigh</name>
       <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\msf.c</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\neighbors.c</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\schedule.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\msf.c</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sixtop.c</name>
