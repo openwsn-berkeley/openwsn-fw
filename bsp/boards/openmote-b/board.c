@@ -85,7 +85,7 @@ void board_init(void) {
     radio_subghz_init();
     radio_subghz_setFunctions(&radio_functions[RADIOTPYE_SUBGHZ]);
 
-    // sensors_init();
+    sensors_init();
     cryptoengine_init();
 }
 

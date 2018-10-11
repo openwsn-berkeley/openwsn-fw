@@ -13,7 +13,7 @@
 
 //=========================== define ==========================================
 
-#define SI70X_ADDRESS                   ( 0x80 )
+#define SI70X_ADDRESS                   ( 0x40 )
 
 #define SI70X_USER_REG_READ             ( 0xE7 )
 #define SI70X_USER_REG_WRITE            ( 0xE6 )
