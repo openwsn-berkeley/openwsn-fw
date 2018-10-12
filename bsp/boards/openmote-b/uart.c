@@ -142,8 +142,6 @@ void uart_setCTS(bool state){
 static void uart_isr_private(void){
     uint32_t reg;
 
-    debugpins_isr_set();
-
     // Read interrupt source
     reg = UARTIntStatus(UART0_BASE, true);
 
@@ -151,15 +149,18 @@ static void uart_isr_private(void){
     IntPendClear(INT_UART0);
     // Process TX interrupt
     if(reg & UART_INT_TX){
+        debugpins_isruarttx_set();
         uart_tx_isr();
+        debugpins_isruarttx_clr();
     }
+
 
     // Process RX interrupt
     if((reg & (UART_INT_RX)) || (reg & (UART_INT_RT))) {
+        debugpins_isruartrx_set();
         uart_rx_isr();
+        debugpins_isruartrx_clr();
     }
-
-    debugpins_isr_clr();
 }
 
 kick_scheduler_t uart_tx_isr(void) {
