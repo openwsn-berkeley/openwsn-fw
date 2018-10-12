@@ -2,7 +2,7 @@
 #include "openserial.h"
 #include "packetfunctions.h"
 #include "openoscoap.h"
-#include "cborencoder.h"
+#include "cbor.h"
 #include "cryptoengine.h"
 #include "sha.h"
 
@@ -17,18 +17,6 @@
 openoscoap_vars_t openoscoap_vars;
 
 //=========================== prototype =======================================
-owerror_t hkdf_derive_parameter(uint8_t* buffer,
-        uint8_t* masterSecret,
-        uint8_t masterSecretLen,
-        uint8_t* masterSalt,
-        uint8_t masterSaltLen,
-        uint8_t* identifier,
-        uint8_t identifierLen,
-        uint8_t algorithm,
-        oscoap_derivation_t type,
-        uint8_t length
-        );
-
 bool is_request(uint8_t code);
 
 uint8_t openoscoap_construct_aad(uint8_t* buffer,
@@ -98,7 +86,7 @@ void openoscoap_init_security_context(oscoap_security_context_t *ctx,
     memcpy(ctx->senderID, senderID, senderIDLen);
     ctx->senderIDLen = senderIDLen;
     // invoke HKDF to get sender Key
-    hkdf_derive_parameter(ctx->senderKey,
+    openoscoap_hkdf_derive_parameter(ctx->senderKey,
             masterSecret,
             masterSecretLen,
             masterSalt,
@@ -109,7 +97,7 @@ void openoscoap_init_security_context(oscoap_security_context_t *ctx,
             OSCOAP_DERIVATION_TYPE_KEY,
             AES_CCM_16_64_128_KEY_LEN);
     // invoke HKDF to get sender IV
-    hkdf_derive_parameter(ctx->senderIV,
+    openoscoap_hkdf_derive_parameter(ctx->senderIV,
             masterSecret,
             masterSecretLen,
             masterSalt,
@@ -126,7 +114,7 @@ void openoscoap_init_security_context(oscoap_security_context_t *ctx,
     memcpy(ctx->recipientID, recipientID, recipientIDLen);
     ctx->recipientIDLen = recipientIDLen;
     // invoke HKDF to get recipient Key
-    hkdf_derive_parameter(ctx->recipientKey,
+    openoscoap_hkdf_derive_parameter(ctx->recipientKey,
             masterSecret,
             masterSecretLen,
             masterSalt,
@@ -138,7 +126,7 @@ void openoscoap_init_security_context(oscoap_security_context_t *ctx,
             AES_CCM_16_64_128_KEY_LEN);
 
     // invoke HKDF to get recipient IV
-    hkdf_derive_parameter(ctx->recipientIV,
+    openoscoap_hkdf_derive_parameter(ctx->recipientIV,
             masterSecret,
             masterSecretLen,
             masterSalt,
@@ -491,10 +479,7 @@ uint8_t openoscoap_parse_compressed_COSE(uint8_t *buffer,
     return index;
 }
 
-
-//=========================== private =========================================
-
-owerror_t hkdf_derive_parameter(uint8_t* buffer,
+owerror_t openoscoap_hkdf_derive_parameter(uint8_t* buffer,
         uint8_t* masterSecret,
         uint8_t masterSecretLen,
         uint8_t* masterSalt,
@@ -508,26 +493,30 @@ owerror_t hkdf_derive_parameter(uint8_t* buffer,
 
     const uint8_t iv[] = "IV";
     const uint8_t key[] = "Key";
+    const uint8_t ace[] = "ACE";
     uint8_t info[20];
     uint8_t infoLen;
     uint8_t ret;
 
     infoLen = 0;
-    infoLen += cborencoder_put_array(&info[infoLen], 4);
-    infoLen += cborencoder_put_bytes(&info[infoLen], identifier, identifierLen);
-    infoLen += cborencoder_put_unsigned(&info[infoLen], algorithm);
+    infoLen += cbor_dump_array(&info[infoLen], 4);
+    infoLen += cbor_dump_bytes(&info[infoLen], identifier, identifierLen);
+    infoLen += cbor_dump_unsigned(&info[infoLen], algorithm);
 
     if (type == OSCOAP_DERIVATION_TYPE_KEY) {
-        infoLen += cborencoder_put_text(&info[infoLen], (char *) key, sizeof(key)-1);
+        infoLen += cbor_dump_text(&info[infoLen], (char *) key, sizeof(key)-1);
     }
     else if (type == OSCOAP_DERIVATION_TYPE_IV) {
-        infoLen += cborencoder_put_text(&info[infoLen], (char *) iv, sizeof(iv)-1);
+        infoLen += cbor_dump_text(&info[infoLen], (char *) iv, sizeof(iv)-1);
+    }
+    else if (type == OSCOAP_DERIVATION_TYPE_ACE) {
+        infoLen += cbor_dump_text(&info[infoLen], (char *) ace, sizeof(ace)-1);
     }
     else {
         return E_FAIL;
     }
 
-    infoLen += cborencoder_put_unsigned(&info[infoLen], length);
+    infoLen += cbor_dump_unsigned(&info[infoLen], length);
 
     ret = hkdf(SHA256, masterSalt, masterSaltLen, masterSecret, masterSecretLen, info, infoLen, buffer, length);
 
@@ -536,6 +525,8 @@ owerror_t hkdf_derive_parameter(uint8_t* buffer,
     }
     return E_FAIL;
 }
+
+//=========================== private =========================================
 
 bool is_request(uint8_t code) {
    if ( code == (uint8_t) COAP_CODE_REQ_GET     ||
@@ -568,13 +559,13 @@ uint8_t openoscoap_construct_aad(uint8_t* buffer,
     ret = 0;
     externalAADLen = 0;
 
-    externalAADLen += cborencoder_put_array(&externalAAD[externalAADLen], 6);
-    externalAADLen += cborencoder_put_unsigned(&externalAAD[externalAADLen], version);
-    externalAADLen += cborencoder_put_unsigned(&externalAAD[externalAADLen], code);
-    externalAADLen += cborencoder_put_bytes(&externalAAD[externalAADLen], optionsSerialized, optionsSerializedLen);
-    externalAADLen += cborencoder_put_unsigned(&externalAAD[externalAADLen], aeadAlgorithm);
-    externalAADLen += cborencoder_put_bytes(&externalAAD[externalAADLen], requestKid, requestKidLen);
-    externalAADLen += cborencoder_put_bytes(&externalAAD[externalAADLen], requestSeq, requestSeqLen);
+    externalAADLen += cbor_dump_array(&externalAAD[externalAADLen], 6);
+    externalAADLen += cbor_dump_unsigned(&externalAAD[externalAADLen], version);
+    externalAADLen += cbor_dump_unsigned(&externalAAD[externalAADLen], code);
+    externalAADLen += cbor_dump_bytes(&externalAAD[externalAADLen], optionsSerialized, optionsSerializedLen);
+    externalAADLen += cbor_dump_unsigned(&externalAAD[externalAADLen], aeadAlgorithm);
+    externalAADLen += cbor_dump_bytes(&externalAAD[externalAADLen], requestKid, requestKidLen);
+    externalAADLen += cbor_dump_bytes(&externalAAD[externalAADLen], requestSeq, requestSeqLen);
 
     if (externalAADLen > EAAD_MAX_LEN) {
         // corruption
@@ -586,13 +577,13 @@ uint8_t openoscoap_construct_aad(uint8_t* buffer,
         return 0;
     }
 
-    ret += cborencoder_put_array(&buffer[ret], 3); // COSE Encrypt0 structure with 3 elements
+    ret += cbor_dump_array(&buffer[ret], 3); // COSE Encrypt0 structure with 3 elements
     // first element: "Encrypt0"
-    ret += cborencoder_put_text(&buffer[ret], (char *) encrypt0, sizeof(encrypt0) - 1);
+    ret += cbor_dump_text(&buffer[ret], (char *) encrypt0, sizeof(encrypt0) - 1);
     // second element: empty byte string
-    ret += cborencoder_put_bytes(&buffer[ret], NULL, 0);
+    ret += cbor_dump_bytes(&buffer[ret], NULL, 0);
     // third element: external AAD from OSCOAP
-    ret += cborencoder_put_bytes(&buffer[ret], externalAAD, externalAADLen);
+    ret += cbor_dump_bytes(&buffer[ret], externalAAD, externalAADLen);
 
     return ret;
 }

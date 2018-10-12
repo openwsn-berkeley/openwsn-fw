@@ -22,7 +22,8 @@ owerror_t cleds_receive(OpenQueueEntry_t* msg,
         coap_header_iht*  coap_header,
         coap_option_iht*  coap_incomingOptions,
         coap_option_iht*  coap_outgoingOptions,
-        uint8_t*          coap_outgoingOptionsLen);
+        uint8_t*          coap_outgoingOptionsLen,
+        bool              security);
 
 void     cleds_sendDone(
    OpenQueueEntry_t* msg,
@@ -32,7 +33,7 @@ void     cleds_sendDone(
 //=========================== public ==========================================
 
 void cleds__init(void) {
-   
+
    // prepare the resource descriptor for the /l path
    cleds_vars.desc.path0len            = sizeof(cleds_path0)-1;
    cleds_vars.desc.path0val            = (uint8_t*)(&cleds_path0);
@@ -43,7 +44,7 @@ void cleds__init(void) {
    cleds_vars.desc.discoverable        = TRUE;
    cleds_vars.desc.callbackRx          = &cleds_receive;
    cleds_vars.desc.callbackSendDone    = &cleds_sendDone;
-   
+
    // register with the CoAP module
    opencoap_register(&cleds_vars.desc);
 }
@@ -64,15 +65,16 @@ owerror_t cleds_receive(OpenQueueEntry_t* msg,
         coap_header_iht*  coap_header,
         coap_option_iht*  coap_incomingOptions,
         coap_option_iht*  coap_outgoingOptions,
-        uint8_t*          coap_outgoingOptionsLen) {
+        uint8_t*          coap_outgoingOptionsLen,
+        bool              security) {
    owerror_t outcome;
-   
+
    switch (coap_header->Code) {
       case COAP_CODE_REQ_GET:
          // reset packet payload
          msg->payload                     = &(msg->packet[127]);
          msg->length                      = 0;
-         
+
          // add CoAP payload
          packetfunctions_reserveHeaderSize(msg,1);
 
@@ -81,15 +83,15 @@ owerror_t cleds_receive(OpenQueueEntry_t* msg,
          } else {
             msg->payload[0]               = '0';
          }
-            
+
          // set the CoAP header
          coap_header->Code                = COAP_CODE_RESP_CONTENT;
-         
+
          outcome                          = E_SUCCESS;
          break;
-      
+
       case COAP_CODE_REQ_PUT:
-      
+
          // change the LED's state
          if (msg->payload[0]=='1') {
             leds_error_on();
@@ -98,22 +100,22 @@ owerror_t cleds_receive(OpenQueueEntry_t* msg,
          } else {
             leds_error_off();
          }
-         
+
          // reset packet payload
          msg->payload                     = &(msg->packet[127]);
          msg->length                      = 0;
-         
+
          // set the CoAP header
          coap_header->Code                = COAP_CODE_RESP_CHANGED;
-         
+
          outcome                          = E_SUCCESS;
          break;
-         
+
       default:
          outcome                          = E_FAIL;
          break;
    }
-   
+
    return outcome;
 }
 

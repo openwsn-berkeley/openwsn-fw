@@ -16,6 +16,7 @@
 typedef enum {
    OSCOAP_DERIVATION_TYPE_KEY           = 0,
    OSCOAP_DERIVATION_TYPE_IV            = 1,
+   OSCOAP_DERIVATION_TYPE_ACE           = 2,
 } oscoap_derivation_t;
 
 //=========================== module variables ================================
@@ -26,8 +27,8 @@ typedef struct {
 
 //=========================== prototypes ======================================
 
-void openoscoap_init_security_context(oscoap_security_context_t *ctx, 
-                                uint8_t* senderID, 
+void openoscoap_init_security_context(oscoap_security_context_t *ctx,
+                                uint8_t* senderID,
                                 uint8_t senderIDLen,
                                 uint8_t* recipientID,
                                 uint8_t recipientIDLen,
@@ -37,8 +38,8 @@ void openoscoap_init_security_context(oscoap_security_context_t *ctx,
                                 uint8_t masterSaltLen);
 
 owerror_t openoscoap_protect_message(
-        oscoap_security_context_t *context, 
-        uint8_t version, 
+        oscoap_security_context_t *context,
+        uint8_t version,
         uint8_t code,
         coap_option_iht* options,
         uint8_t optionsLen,
@@ -46,8 +47,8 @@ owerror_t openoscoap_protect_message(
         uint16_t sequenceNumber);
 
 owerror_t openoscoap_unprotect_message(
-        oscoap_security_context_t *context, 
-        uint8_t version, 
+        oscoap_security_context_t *context,
+        uint8_t version,
         uint8_t code,
         coap_option_iht* options,
         uint8_t* optionsLen,
@@ -61,7 +62,19 @@ uint8_t openoscoap_parse_compressed_COSE(uint8_t *buffer,
         uint16_t* sequenceNumber,
         uint8_t** kid,
         uint8_t* kidLen);
+
+owerror_t openoscoap_hkdf_derive_parameter(uint8_t* buffer,
+        uint8_t* masterSecret,
+        uint8_t masterSecretLen,
+        uint8_t* masterSalt,
+        uint8_t masterSaltLen,
+        uint8_t* identifier,
+        uint8_t identifierLen,
+        uint8_t algorithm,
+        oscoap_derivation_t type,
+        uint8_t length);
 /**
+ *
 \}
 \}
 */

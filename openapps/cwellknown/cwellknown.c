@@ -19,7 +19,8 @@ owerror_t cwellknown_receive(OpenQueueEntry_t* msg,
         coap_header_iht*  coap_header,
         coap_option_iht*  coap_incomingOptions,
         coap_option_iht*  coap_outgoingOptions,
-        uint8_t*          coap_outgoingOptionsLen
+        uint8_t*          coap_outgoingOptionsLen,
+        bool              security
 );
 
 void    cwellknown_sendDone(
@@ -30,8 +31,8 @@ void    cwellknown_sendDone(
 //=========================== public ==========================================
 
 void cwellknown_init(void) {
-   if(idmanager_getIsDAGroot()==TRUE) return; 
-   
+   if(idmanager_getIsDAGroot()==TRUE) return;
+
    // prepare the resource descriptor for the /.well-known/core path
    cwellknown_vars.desc.path0len            = sizeof(cwellknown_path0)-1;
    cwellknown_vars.desc.path0val            = (uint8_t*)(&cwellknown_path0);
@@ -42,7 +43,7 @@ void cwellknown_init(void) {
    cwellknown_vars.desc.discoverable        = FALSE;
    cwellknown_vars.desc.callbackRx          = &cwellknown_receive;
    cwellknown_vars.desc.callbackSendDone    = &cwellknown_sendDone;
-   
+
    opencoap_register(&cwellknown_vars.desc);
 }
 
@@ -52,37 +53,38 @@ owerror_t cwellknown_receive(OpenQueueEntry_t* msg,
         coap_header_iht*  coap_header,
         coap_option_iht*  coap_incomingOptions,
         coap_option_iht*  coap_outgoingOptions,
-        uint8_t*          coap_outgoingOptionsLen) {
-   
+        uint8_t*          coap_outgoingOptionsLen,
+        bool              security) {
+
     owerror_t outcome;
-   
+
    switch(coap_header->Code) {
       case COAP_CODE_REQ_GET:
          // reset packet payload
          msg->payload        = &(msg->packet[127]);
          msg->length         = 0;
-         
+
          // have CoAP module write links to all resources
          opencoap_writeLinks(msg,COMPONENT_CWELLKNOWN);
-         
+
          // add return option
          cwellknown_vars.medType = COAP_MEDTYPE_APPLINKFORMAT;
          coap_outgoingOptions[0].type = COAP_OPTION_NUM_CONTENTFORMAT;
          coap_outgoingOptions[0].length = 1;
          coap_outgoingOptions[0].pValue = &cwellknown_vars.medType;
          *coap_outgoingOptionsLen = 1;
-         
+
          // set the CoAP header
          coap_header->Code   = COAP_CODE_RESP_CONTENT;
-         
+
          outcome             = E_SUCCESS;
-         
+
          break;
       default:
          outcome             = E_FAIL;
          break;
    }
-   
+
    return outcome;
 }
 

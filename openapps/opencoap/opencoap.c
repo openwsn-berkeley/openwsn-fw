@@ -263,7 +263,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
                 }
                 temp_desc = temp_desc->next;
             }
-            while (temp_desc->next!=NULL);
+            while (temp_desc!=NULL);
 
             if (blindContext) {
                     coap_incomingOptionsLen = MAX_COAP_OPTIONS;
@@ -398,7 +398,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
                         return;
                     }
                 }
-               temp_desc->callbackRx(msg,&coap_header,&coap_incomingOptions[0], NULL, NULL);
+               temp_desc->callbackRx(msg,&coap_header,&coap_incomingOptions[0], NULL, NULL, objectSecurity != NULL ? TRUE : FALSE);
             }
          }
 
@@ -424,11 +424,11 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    if (found==TRUE && securityReturnCode==COAP_CODE_EMPTY) {
 
       // call the resource's callback
-      outcome = temp_desc->callbackRx(msg,&coap_header,&coap_incomingOptions[0], coap_outgoingOptions, &coap_outgoingOptionsLen);
+      outcome = temp_desc->callbackRx(msg,&coap_header,&coap_incomingOptions[0], coap_outgoingOptions, &coap_outgoingOptionsLen, objectSecurity != NULL ? TRUE : FALSE);
       if (outcome == E_FAIL) {
             securityReturnCode = COAP_CODE_RESP_METHODNOTALLOWED;
       }
-    if (temp_desc->securityContext != NULL) {
+    if (temp_desc->securityContext != NULL && objectSecurity) {
         coap_outgoingOptions[coap_outgoingOptionsLen++].type = COAP_OPTION_NUM_OBJECTSECURITY;
         if (coap_outgoingOptionsLen > MAX_COAP_OPTIONS) {
             securityReturnCode = COAP_CODE_RESP_SERVERERROR; // no space for object security option
@@ -452,7 +452,6 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
       msg->payload                     = &(msg->packet[127]);
       msg->length                      = 0;
       // set the CoAP header
-      coap_header.TKL                  = 0;
       if (securityReturnCode) {
          coap_header.Code              = securityReturnCode;
       }
@@ -466,7 +465,6 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
       msg->payload                     = &(msg->packet[127]);
       msg->length                      = 0;
       // set the CoAP header
-      coap_header.TKL                  = 0;
       coap_header.Code                 = securityReturnCode;
    }
 
@@ -913,6 +911,42 @@ uint8_t opencoap_find_option(coap_option_iht* array, uint8_t arrayLen, coap_opti
 
   return j;
 
+}
+
+owerror_t opencoap_set_resource_security_context(uint8_t path0len, uint8_t* path0val, uint8_t path1len, uint8_t* path1val, oscoap_security_context_t* context) {
+    bool found;
+    coap_resource_desc_t* temp_desc;
+
+    found = FALSE;
+
+    // start with the first resource in the linked list
+    temp_desc = opencoap_vars.resources;
+
+    // iterate until matching resource found, or no match
+    while (found==FALSE) {
+
+        if (
+                path0len==temp_desc->path0len                                       &&
+                path1len==temp_desc->path1len                                       &&
+                memcmp(path0val,temp_desc->path0val,temp_desc->path0len)==0         &&
+                memcmp(path1val, temp_desc->path1val, temp_desc->path1len)==0
+                )
+        {
+            found = TRUE;
+            break;
+        }
+        if (temp_desc->next != NULL) {
+            temp_desc = temp_desc->next;
+        } else {
+            break;
+        }
+    }
+
+    if (found == TRUE) {
+        temp_desc->securityContext = context;
+        return E_SUCCESS;
+    }
+    return E_FAIL;
 }
 
 //=========================== private =========================================

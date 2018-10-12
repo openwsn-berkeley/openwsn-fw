@@ -33,7 +33,9 @@
 // applications
 #include "c6t_obj.h"
 #include "cexample_obj.h"
+#include "cauthz_obj.h"
 #include "cjoin_obj.h"
+#include "cprotected_obj.h"
 #include "cinfo_obj.h"
 #include "cleds_obj.h"
 #include "cstorm_obj.h"
@@ -227,6 +229,8 @@ struct OpenMote {
    openoscoap_vars_t    openoscoap_vars;
    c6t_vars_t           c6t_vars;
    cexample_vars_t      cexample_vars;
+   cauthz_vars_t        cauthz_vars;
+   cprotected_vars_t    cprotected_vars;
    cinfo_vars_t         cinfo_vars;
    cleds_vars_t         cleds_vars;
    cstorm_vars_t        cstorm_vars;

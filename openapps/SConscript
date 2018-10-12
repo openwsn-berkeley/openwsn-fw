@@ -11,6 +11,8 @@ if localEnv['board']=='python':
     defaultApps  += [
         'c6t',
         'cinfo',
+        'cauthz',
+        'cprotected',
         'cleds',
         'cwellknown',
         'uecho',
@@ -31,7 +33,7 @@ additionalSourceFiles = [
     os.path.join('opencoap','hkdf.c'),
     os.path.join('opencoap','hmac.c'),
     os.path.join('opencoap','sha224-256.c'),
-    os.path.join('opencoap','cborencoder.c'),
+    os.path.join('opencoap','cbor.c'),
     os.path.join('cjoin','cojp_cbor.c'),
 ]
 
@@ -40,7 +42,7 @@ additionalSourceFiles = [
 additionalHeaderFiles = [
     os.path.join('opencoap','openoscoap.h'),
     os.path.join('opencoap','sha.h'),
-    os.path.join('opencoap','cborencoder.h'),
+    os.path.join('opencoap','cbor.h'),
     os.path.join('cjoin','cojp_cbor.h'),
 ]
 

@@ -43,7 +43,8 @@ owerror_t   cjoin_receive(OpenQueueEntry_t* msg,
                           coap_header_iht*  coap_header,
                           coap_option_iht*  coap_incomingOptions,
                           coap_option_iht*  coap_outgoingOptions,
-                          uint8_t*          coap_outgoingOptionsLen);
+                          uint8_t*          coap_outgoingOptionsLen,
+                          bool              security);
 void        cjoin_timer_cb(opentimers_id_t id);
 void        cjoin_task_cb(void);
 void        cjoin_sendDone(OpenQueueEntry_t* msg,
@@ -130,7 +131,8 @@ owerror_t cjoin_receive(OpenQueueEntry_t* msg,
         coap_header_iht*  coap_header,
         coap_option_iht*  coap_incomingOptions,
         coap_option_iht*  coap_outgoingOptions,
-        uint8_t*          coap_outgoingOptionsLen) {
+        uint8_t*          coap_outgoingOptionsLen,
+        bool              security) {
 
 
     cojp_configuration_object_t configuration;

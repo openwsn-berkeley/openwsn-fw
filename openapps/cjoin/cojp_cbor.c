@@ -2,7 +2,7 @@
 \brief CBOR helper functions implementing decoding and encoding of structures defined in draft-6tisch-minimal-security-06.
 */
 #include "cojp_cbor.h"
-#include "cborencoder.h"
+#include "cbor.h"
 
 //=========================== defines =========================================
 // number of bytes in 802.15.4 short address
@@ -13,8 +13,6 @@
 owerror_t cojp_cbor_decode_link_layer_keyset(uint8_t *, uint8_t *, cojp_link_layer_keyset_t *);
 owerror_t cojp_cbor_decode_link_layer_short_address(uint8_t *, uint8_t *, cojp_link_layer_short_address_t *);
 owerror_t cojp_cbor_decode_ipv6_address(uint8_t *, uint8_t *, open_addr_t *);
-
-uint8_t cbor_decode_uint(uint8_t *buf, uint8_t *value);
 
 //=========================== public ==========================================
 /**
@@ -116,13 +114,13 @@ uint8_t cojp_cbor_encode_join_request_object(uint8_t *buf, cojp_join_request_obj
         elements = 2;
     }
 
-    len += cborencoder_put_map(&buf[len], elements);
+    len += cbor_dump_map(&buf[len], elements);
     if (elements == 2) {
-        len += cborencoder_put_unsigned(&buf[len], (uint8_t) COJP_PARAMETERS_LABELS_ROLE);
-        len += cborencoder_put_unsigned(&buf[len], (uint8_t) join_request->role);
+        len += cbor_dump_unsigned(&buf[len], (uint8_t) COJP_PARAMETERS_LABELS_ROLE);
+        len += cbor_dump_unsigned(&buf[len], (uint8_t) join_request->role);
     }
-    len += cborencoder_put_unsigned(&buf[len], (uint8_t) COJP_PARAMETERS_LABELS_NETID);
-    len += cborencoder_put_bytes(&buf[len], (join_request->pan_id)->panid, LENGTH_ADDR16b);
+    len += cbor_dump_unsigned(&buf[len], (uint8_t) COJP_PARAMETERS_LABELS_NETID);
+    len += cbor_dump_bytes(&buf[len], (join_request->pan_id)->panid, LENGTH_ADDR16b);
 
     return len;
 }
@@ -184,7 +182,7 @@ owerror_t cojp_cbor_decode_link_layer_keyset(uint8_t *buf, uint8_t* len, cojp_li
 
             current_key = (cojp_link_layer_key_t *) &(keyset->key[current_key_index]);
 
-            ret = cbor_decode_uint(tmp, &current_key->key_index);
+            ret = cbor_load_uint(tmp, &current_key->key_index);
             tmp += ret;
             i++; // moving on to the next element
 
@@ -192,7 +190,7 @@ owerror_t cojp_cbor_decode_link_layer_keyset(uint8_t *buf, uint8_t* len, cojp_li
             l = *tmp & CBOR_ADDINFO_MASK;
 
             if (major_type == CBOR_MAJORTYPE_UINT) { // optional key usage as a uint is present
-                ret = cbor_decode_uint(tmp, &tmp_key_usage);
+                ret = cbor_load_uint(tmp, &tmp_key_usage);
                 current_key->key_usage = (cojp_key_usage_values_t) tmp_key_usage;
                 tmp += ret;
                 i++;
@@ -316,44 +314,5 @@ owerror_t cojp_cbor_decode_ipv6_address(uint8_t *buf, uint8_t *len, open_addr_t 
 
     *len = (uint8_t) (tmp - buf);;
     return E_SUCCESS;
-}
-
-/**
-\brief Decode a CBOR unsigned integer. Only supports 8-bit values.
-
-This functions attempts to decode a byte string buf into a CBOR unsigned integer.
-
-
-\param[in] buf The input buffer.
-\param[out] value The 8-bit decoded value.
-\return Length of the decoded unsigned integer, 0 if error.
-*/
-uint8_t cbor_decode_uint(uint8_t *buf, uint8_t *value) {
-    uint8_t major_type;
-    uint8_t add_info;
-
-    major_type = (cbor_majortype_t) *buf >> 5;
-    add_info = *buf & CBOR_ADDINFO_MASK;
-
-    // assert
-    if (major_type != CBOR_MAJORTYPE_UINT) {
-        return 0;
-    }
-
-    if (add_info < 23) {
-        *value = add_info;
-        return 0 + 1;
-    } else if (add_info == 24) { // uint8_t follows
-        *value = buf[1];
-        return 1 + 1;
-    } else if (add_info == 25) { // uint16_t follows
-        return 1 + 2;
-    } else if (add_info == 26) { // uint32_t follows
-        return 1 + 4;
-    } else if (add_info == 27) { // uint64_t follows
-        return 1 + 8;
-    }
-
-    return 0;
 }
 
