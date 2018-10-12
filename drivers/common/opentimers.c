@@ -335,6 +335,7 @@ void opentimers_timer_callback(void){
     uint8_t idToSchedule;
     PORT_TIMER_WIDTH timerGap;
     PORT_TIMER_WIDTH tempTimerGap;
+    PORT_TIMER_WIDTH tempDuration;
 
     if (
         opentimers_vars.timersBuf[TIMER_INHIBIT].isrunning==TRUE &&
@@ -347,6 +348,22 @@ void opentimers_timer_callback(void){
         sctimer_setCompare(sctimer_readCounter()+SPLITE_TIMER_DURATION);
         return;
     } else {
+        if (opentimers_vars.timersBuf[TIMER_INHIBIT].lastCompareValue == opentimers_vars.currentCompareValue){
+            for (i=0;i<MAX_NUM_TIMERS;i++){
+                if (opentimers_vars.timersBuf[i].isrunning==TRUE){
+                    if (i!=TIMER_TSCH && i!=TIMER_INHIBIT && opentimers_vars.timersBuf[i].currentCompareValue - opentimers_vars.currentCompareValue < 497){
+                        tempDuration = opentimers_vars.timersBuf[i].currentCompareValue - opentimers_vars.currentCompareValue;
+                        opentimers_vars.timersBuf[i].currentCompareValue = opentimers_vars.currentCompareValue;
+                        if (opentimers_vars.timersBuf[i].wraps_remaining >0){
+                            if (MAX_TICKS_IN_SINGLE_CLOCK - opentimers_vars.timersBuf[i].lastCompareValue < tempDuration) {
+                                opentimers_vars.timersBuf[i].wraps_remaining++;
+                            }
+                            opentimers_vars.timersBuf[i].lastCompareValue = (opentimers_vars.timersBuf[i].lastCompareValue + tempDuration) & MAX_TICKS_IN_SINGLE_CLOCK;
+                        }
+                    }
+                }
+            }
+        }
         for (i=0;i<MAX_NUM_TIMERS;i++){
             if (opentimers_vars.timersBuf[i].isrunning==TRUE){
                 if (opentimers_vars.currentCompareValue == opentimers_vars.timersBuf[i].currentCompareValue){
