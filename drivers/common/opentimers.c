@@ -335,7 +335,6 @@ void opentimers_timer_callback(void){
     uint8_t idToSchedule;
     PORT_TIMER_WIDTH timerGap;
     PORT_TIMER_WIDTH tempTimerGap;
-    PORT_TIMER_WIDTH tempDuration;
 
     if (
         opentimers_vars.timersBuf[TIMER_INHIBIT].isrunning==TRUE &&
@@ -351,15 +350,8 @@ void opentimers_timer_callback(void){
         if (opentimers_vars.timersBuf[TIMER_INHIBIT].lastCompareValue == opentimers_vars.currentCompareValue){
             for (i=0;i<MAX_NUM_TIMERS;i++){
                 if (opentimers_vars.timersBuf[i].isrunning==TRUE){
-                    if (i!=TIMER_TSCH && i!=TIMER_INHIBIT && opentimers_vars.timersBuf[i].currentCompareValue - opentimers_vars.currentCompareValue < 497){
-                        tempDuration = opentimers_vars.timersBuf[i].currentCompareValue - opentimers_vars.currentCompareValue;
+                    if (i!=TIMER_TSCH && i!=TIMER_INHIBIT && opentimers_vars.timersBuf[i].currentCompareValue - opentimers_vars.currentCompareValue < PRE_CALL_TIMER_WINDOW){
                         opentimers_vars.timersBuf[i].currentCompareValue = opentimers_vars.currentCompareValue;
-                        if (opentimers_vars.timersBuf[i].wraps_remaining >0){
-                            if (MAX_TICKS_IN_SINGLE_CLOCK - opentimers_vars.timersBuf[i].lastCompareValue < tempDuration) {
-                                opentimers_vars.timersBuf[i].wraps_remaining++;
-                            }
-                            opentimers_vars.timersBuf[i].lastCompareValue = (opentimers_vars.timersBuf[i].lastCompareValue + tempDuration) & MAX_TICKS_IN_SINGLE_CLOCK;
-                        }
                     }
                 }
             }
@@ -393,6 +385,21 @@ void opentimers_timer_callback(void){
                             opentimers_vars.timersBuf[i].wraps_remaining--;
                             if (opentimers_vars.timersBuf[i].wraps_remaining == 0){
                                 opentimers_vars.timersBuf[i].currentCompareValue = (opentimers_vars.timersBuf[i].duration+opentimers_vars.timersBuf[i].lastCompareValue) & MAX_TICKS_IN_SINGLE_CLOCK;
+                                if (opentimers_vars.timersBuf[i].currentCompareValue - opentimers_vars.currentCompareValue < PRE_CALL_TIMER_WINDOW){
+                                    opentimers_vars.timersBuf[i].isrunning  = FALSE;
+                                    scheduler_push_task((task_cbt)(opentimers_vars.timersBuf[i].callback),TASKPRIO_OPENTIMERS);
+                                    if (opentimers_vars.timersBuf[i].timerType==TIMER_PERIODIC){
+                                        opentimers_vars.insideISR = TRUE;
+                                        opentimers_scheduleIn(
+                                            i,
+                                            opentimers_vars.timersBuf[i].duration,
+                                            TIME_TICS,
+                                            TIMER_PERIODIC,
+                                            opentimers_vars.timersBuf[i].callback
+                                        );
+                                        opentimers_vars.insideISR = FALSE;
+                                    }
+                                }
                             } else {
                                 opentimers_vars.timersBuf[i].currentCompareValue = opentimers_vars.timersBuf[i].lastCompareValue + MAX_TICKS_IN_SINGLE_CLOCK;
                             }
