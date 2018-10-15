@@ -486,17 +486,15 @@ void openserial_flush(void) {
 }
 
 void openserial_inhibitStart(void) {
-    INTERRUPT_DECLARATION();
+    // this function needs to run in non-interrupt mode
+    // since the inhibitStart is always called in an interrupt mode,
+    // DISABLE_INTERRUPT is not necessary here.
 
-    //<<<<<<<<<<<<<<<<<<<<<<<
-    DISABLE_INTERRUPTS();
     openserial_vars.fInhibited      = TRUE;
 #ifdef FASTSIM
 #else
     openserial_vars.ctsStateChanged = TRUE;
 #endif
-    ENABLE_INTERRUPTS();
-    //>>>>>>>>>>>>>>>>>>>>>>>
 
     // it's openserial_flush() which will set CTS
     openserial_flush();
