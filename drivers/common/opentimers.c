@@ -340,14 +340,14 @@ void opentimers_timer_callback(void){
         opentimers_vars.timersBuf[TIMER_INHIBIT].isrunning==TRUE &&
         opentimers_vars.currentCompareValue == opentimers_vars.timersBuf[TIMER_INHIBIT].currentCompareValue
     ){
-        opentimers_vars.timersBuf[TIMER_INHIBIT].lastCompareValue    = opentimers_vars.timersBuf[TIMER_INHIBIT].currentCompareValue;
         opentimers_vars.timersBuf[TIMER_INHIBIT].isrunning  = FALSE;
         opentimers_vars.timersBuf[TIMER_INHIBIT].callback(TIMER_INHIBIT);
         // the next timer selection will be done after SPLITE_TIMER_DURATION ticks
         sctimer_setCompare(sctimer_readCounter()+SPLITE_TIMER_DURATION);
         return;
     } else {
-        if (opentimers_vars.timersBuf[TIMER_INHIBIT].lastCompareValue == opentimers_vars.currentCompareValue){
+        if (opentimers_vars.timersBuf[TIMER_INHIBIT].currentCompareValue == opentimers_vars.currentCompareValue){
+            // this is the timer interrupt right after inhibit timer, pre call the non-tsch, non-inhibit timer interrupt here to avoid interrupt during receiving serial bytes
             for (i=0;i<MAX_NUM_TIMERS;i++){
                 if (opentimers_vars.timersBuf[i].isrunning==TRUE){
                     if (i!=TIMER_TSCH && i!=TIMER_INHIBIT && opentimers_vars.timersBuf[i].currentCompareValue - opentimers_vars.currentCompareValue < PRE_CALL_TIMER_WINDOW){
@@ -386,6 +386,7 @@ void opentimers_timer_callback(void){
                             if (opentimers_vars.timersBuf[i].wraps_remaining == 0){
                                 opentimers_vars.timersBuf[i].currentCompareValue = (opentimers_vars.timersBuf[i].duration+opentimers_vars.timersBuf[i].lastCompareValue) & MAX_TICKS_IN_SINGLE_CLOCK;
                                 if (opentimers_vars.timersBuf[i].currentCompareValue - opentimers_vars.currentCompareValue < PRE_CALL_TIMER_WINDOW){
+                                    // pre-call the timer here if it will be fired within PRE_CALL_TIMER_WINDOW, when wraps_remaining decrease to 0
                                     opentimers_vars.timersBuf[i].isrunning  = FALSE;
                                     scheduler_push_task((task_cbt)(opentimers_vars.timersBuf[i].callback),TASKPRIO_OPENTIMERS);
                                     if (opentimers_vars.timersBuf[i].timerType==TIMER_PERIODIC){
