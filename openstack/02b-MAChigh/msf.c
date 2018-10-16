@@ -51,7 +51,7 @@ void msf_init(void) {
         msf_vars.housekeepingTimerId,
         openrandom_getRandomizePeriod(msf_vars.housekeepingPeriod, msf_vars.housekeepingPeriod),
         TIME_MS,
-        TIMER_ONESHOT,
+        TIMER_PERIODIC,
         msf_timer_housekeeping_cb
     );
     msf_vars.waitretryTimerId    = opentimers_create(TIMER_GENERAL_PURPOSE);
@@ -163,15 +163,12 @@ void msf_timer_waitretry_cb(opentimers_id_t id){
 }
 
 void msf_timer_housekeeping_cb(opentimers_id_t id){
+    PORT_TIMER_WIDTH newDuration;
+
     scheduler_push_task(msf_timer_housekeeping_task,TASKPRIO_MSF);
-    // update the period
-    opentimers_scheduleIn(
-        msf_vars.housekeepingTimerId,
-        openrandom_getRandomizePeriod(msf_vars.housekeepingPeriod, msf_vars.housekeepingPeriod),
-        TIME_MS,
-        TIMER_ONESHOT,
-        msf_timer_housekeeping_cb
-    );
+
+    newDuration = openrandom_getRandomizePeriod(msf_vars.housekeepingPeriod, msf_vars.housekeepingPeriod),
+    opentimers_updateDuration(msf_vars.housekeepingTimerId, newDuration);
 }
 
 void msf_timer_housekeeping_task(void){

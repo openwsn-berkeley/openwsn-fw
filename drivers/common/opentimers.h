@@ -84,6 +84,8 @@ void             opentimers_scheduleAbsolute(opentimers_id_t      id,
                                               PORT_TIMER_WIDTH    reference ,
                                               time_type_t         uint_type,
                                               opentimers_cbt      cb);
+void             opentimers_updateDuration(opentimers_id_t id,
+                                           PORT_TIMER_WIDTH duration);
 void             opentimers_cancel(opentimers_id_t id);
 bool             opentimers_destroy(opentimers_id_t id);
 

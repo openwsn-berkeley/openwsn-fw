@@ -59,14 +59,6 @@ void macpong_initSend(opentimers_id_t id) {
         default:
             break;
     }
-    opentimers_scheduleIn(
-        macpong_vars.timerId, // id
-        1000,                 // duration
-        TIME_MS,              // time_type
-        TIMER_ONESHOT,        // timer_type
-        macpong_initSend      // callback
-    );
-
 
     if (idmanager_getIsDAGroot()==TRUE) {
         return;
@@ -117,8 +109,8 @@ void iphc_init(void) {
         macpong_vars.timerId,   // timerId
         1000,                   // duration
         TIME_MS,                // timetype
-        TIMER_ONESHOT,          // timertype
-        macpong_initSend       // callback
+        TIMER_PERIODIC,         // timertype
+        macpong_initSend        // callback
     );
 }
 

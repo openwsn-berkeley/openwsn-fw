@@ -99,8 +99,6 @@ void opentimers_scheduleIn(opentimers_id_t    id,
     PORT_TIMER_WIDTH tempTimerGap;
 
     INTERRUPT_DECLARATION();
-    DISABLE_INTERRUPTS();
-
     // 1. make sure the timer exist
     for (i=0;i<MAX_NUM_TIMERS;i++){
         if (opentimers_vars.timersBuf[i].isUsed && i == id){
@@ -111,6 +109,8 @@ void opentimers_scheduleIn(opentimers_id_t    id,
         // doesn't find the timer
         return;
     }
+
+    DISABLE_INTERRUPTS();
 
     opentimers_vars.timersBuf[id].timerType = timer_type;
 
@@ -189,7 +189,6 @@ void opentimers_scheduleAbsolute(opentimers_id_t    id,
     PORT_TIMER_WIDTH tempTimerGap;
 
     INTERRUPT_DECLARATION();
-    DISABLE_INTERRUPTS();
 
     // 1. make sure the timer exist
     for (i=0;i<MAX_NUM_TIMERS;i++){
@@ -201,6 +200,8 @@ void opentimers_scheduleAbsolute(opentimers_id_t    id,
         // doesn't find the timer
         return;
     }
+
+    DISABLE_INTERRUPTS();
 
     // absolute scheduling is for one shot timer
     opentimers_vars.timersBuf[id].timerType = TIMER_ONESHOT;
@@ -252,6 +253,24 @@ void opentimers_scheduleAbsolute(opentimers_id_t    id,
         sctimer_setCompare(opentimers_vars.currentCompareValue);
     }
     opentimers_vars.running = TRUE;
+
+    ENABLE_INTERRUPTS();
+}
+
+/**
+\brief update the duration of timer.
+
+This function should be called in the callback of the timer interrupt.
+
+\param[in] id the timer id
+\param[in] duration the timer duration
+ */
+void             opentimers_updateDuration(opentimers_id_t id,
+                                           PORT_TIMER_WIDTH duration){
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+
+    opentimers_vars.timersBuf[id].duration = duration;
 
     ENABLE_INTERRUPTS();
 }
