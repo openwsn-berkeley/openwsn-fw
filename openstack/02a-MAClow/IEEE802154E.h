@@ -164,10 +164,10 @@ enum ieee154e_atomicdurations_enum {
    TsTxAckDelay              =   33,                  //  1000us
    TsShortGT                 =   13,                  //   500us, The standardlized value for this is 400/2=200us(7ticks). Currectly 7 doesn't work for short packet, change it back to 7 when found the problem.
 #endif
-#if SLOTDURATION==15
-   TsTxOffset                =  131,                  //  4000us
+#if SLOTDURATION==20
+   TsTxOffset                =  171,                  //  5215us
    TsLongGT                  =   43,                  //  1300us
-   TsTxAckDelay              =  151,                  //  4606us
+   TsTxAckDelay              =  181,                  //  5521us
    TsShortGT                 =   16,                  //   500us
 #endif
    TsSlotDuration            =  PORT_TsSlotDuration,  // 10000us
@@ -185,7 +185,7 @@ enum ieee154e_atomicdurations_enum {
 #if SLOTDURATION==10
    wdAckDuration             =   80,                  //  2400us (measured 1000us)
 #endif
-#if SLOTDURATION==15
+#if SLOTDURATION==20
    wdAckDuration             =   98,                  //  3000us (measured 1000us)
 #endif
 };

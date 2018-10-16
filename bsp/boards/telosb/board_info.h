@@ -52,23 +52,23 @@ to this board.
 #define PORT_PIN_RADIO_VREG_LOW()           P4OUT &= ~0x20;
 // [P4.6] radio RESET
 #define PORT_PIN_RADIO_RESET_HIGH()         P4OUT |=  0x40;
-#define PORT_PIN_RADIO_RESET_LOW()          P4OUT &= ~0x40;  
+#define PORT_PIN_RADIO_RESET_LOW()          P4OUT &= ~0x40;
 
 //===== IEEE802154E timing
 
-#define SLOTDURATION 15 // in miliseconds
+#define SLOTDURATION 20 // in miliseconds
 
 // time-slot related
-#define PORT_TsSlotDuration                 492   // counter counts one extra count, see datasheet
+#define PORT_TsSlotDuration                 655   //    20ms
 
 // execution speed related
-#define PORT_maxTxDataPrepare               100   //  2899us (measured 2516us)
-#define PORT_maxRxAckPrepare                20    //   610us (measured  474us)
+#define PORT_maxTxDataPrepare               110   //  3355us (measured 2989us)
+#define PORT_maxRxAckPrepare                20    //   610us (measured  409us)
 #define PORT_maxRxDataPrepare               33    //  1000us (measured  477us)
-#define PORT_maxTxAckPrepare                45    //  1372us (measured 1328us)- cannot be bigger than 28.. is the limit for telosb as actvitiy_rt5 is executed almost there.
+#define PORT_maxTxAckPrepare                50    //  1525us (measured 1405us)
 
 // radio speed related
-#define PORT_delayTx                        16    //   488us (measured  473us)
+#define PORT_delayTx                        18    //   488us (measured  539us)
 #define PORT_delayRx                        0     //     0us (can not measure)
 
 //===== adaptive_sync accuracy
