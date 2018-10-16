@@ -51,6 +51,8 @@ int mote_main(void) {
 
 void macpong_initSend(opentimers_id_t id) {
     bool timeToSend = FALSE;
+    open_addr_t  temp;
+
     macpong_vars.macpongCounter = (macpong_vars.macpongCounter+1)%5;
     switch (macpong_vars.macpongCounter) {
         case 0:
@@ -64,11 +66,14 @@ void macpong_initSend(opentimers_id_t id) {
         return;
     }
     if (ieee154e_isSynch()==TRUE && neighbors_getNumNeighbors()==1) {
-        if (timeToSend){
-            // send packet
-            macpong_send(0);
-            // cancel timer
-            opentimers_cancel(macpong_vars.timerId);
+        neighbors_getNeighborEui64(&temp,ADDR_64B,0);
+        if (schedule_hasDedicatedCellToNeighbor(&temp)){
+            if (timeToSend){
+                // send packet
+                macpong_send(0);
+                // cancel timer
+                opentimers_cancel(macpong_vars.timerId);
+            }
         }
     }
 }
@@ -151,10 +156,29 @@ bool icmpv6rpl_getPreferredParentIndex(uint8_t* indexptr)            {
     return FALSE;
 }
 bool icmpv6rpl_getPreferredParentEui64(open_addr_t* addressToWrite)  {
-    return FALSE;
+
+    if (idmanager_getIsDAGroot()==TRUE) {
+        return FALSE;
+    }
+
+    if (ieee154e_isSynch()==TRUE && neighbors_getNumNeighbors()==1) {
+        neighbors_getNeighborEui64(addressToWrite,ADDR_64B,0);
+    }
+    return TRUE;
 }
 bool icmpv6rpl_isPreferredParent(open_addr_t* address)               {
-    return FALSE;
+
+    open_addr_t  temp;
+    if (idmanager_getIsDAGroot()==TRUE) {
+        return FALSE;
+    }
+
+   if (address->type == ADDR_64B) {
+        neighbors_getNeighborEui64(&temp,ADDR_64B,0);
+        return packetfunctions_sameAddress(address,&temp);
+   } else {
+        return FALSE;
+   }
 }
 dagrank_t icmpv6rpl_getMyDAGrank(void)                               {
     return 0;
