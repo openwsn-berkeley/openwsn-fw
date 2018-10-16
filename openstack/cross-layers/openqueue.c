@@ -190,7 +190,7 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor, radioType_
     for (i=0;i<QUEUELENGTH;i++) {
         //check that the packet can be send through the radio associated to the cell
         if (
-            (openqueue_vars.queue[i].l2_radioType == RADIOTPYE_ANY ) ||
+            (openqueue_vars.queue[i].l2_radioType == RADIOTYPE_ANY ) ||
             (openqueue_vars.queue[i].l2_radioType ==rtype)
         ){
             // check if there is data to be send to that neighbor
@@ -213,7 +213,7 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor, radioType_
         for (i=0;i<QUEUELENGTH;i++) {
             //check that the packet can be send through the radio associated to the cell
             if (
-                (openqueue_vars.queue[i].l2_radioType == RADIOTPYE_ANY ) ||
+                (openqueue_vars.queue[i].l2_radioType == RADIOTYPE_ANY ) ||
                 (openqueue_vars.queue[i].l2_radioType ==rtype)
             ){
                 if (
@@ -231,7 +231,7 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor, radioType_
         for (i=0;i<QUEUELENGTH;i++) {
             //check that the packet can be send through the radio associated to the cell
             if (
-                (openqueue_vars.queue[i].l2_radioType == RADIOTPYE_ANY ) ||
+                (openqueue_vars.queue[i].l2_radioType == RADIOTYPE_ANY ) ||
                 (openqueue_vars.queue[i].l2_radioType ==rtype)
             ){
                 if (
@@ -283,7 +283,7 @@ OpenQueueEntry_t* openqueue_macGetEBPacket(radioType_t rType) {
     for (i=0;i<QUEUELENGTH;i++) {
         //check that the packet can be send through the radio associated to the cell
         if (
-            (openqueue_vars.queue[i].l2_radioType == RADIOTPYE_ANY ) ||
+            (openqueue_vars.queue[i].l2_radioType == RADIOTYPE_ANY ) ||
             (openqueue_vars.queue[i].l2_radioType == rType)
         ){
             if (
@@ -379,5 +379,5 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry) {
    entry->l2_payloadIEpresent          = 0;
    //l2-security
    entry->l2_securityLevel             = 0;
-   entry->l2_radioType                 = RADIOTPYE_2D4GHZ;
+   entry->l2_radioType                 = RADIOTYPE_2D4GHZ;
 }

@@ -77,9 +77,9 @@
     #endif
     #define PORT_delayRx                         0    //    0us (can not measure)
     // radio watchdog
-#else // 35 ms
+#else // 40 ms
     // time-slot related
-    #define PORT_TsSlotDuration                 1147   // counter counts one extra count, see datasheet
+    #define PORT_TsSlotDuration                 1310   // counter counts one extra count, see datasheet
     // execution speed related
     #define PORT_maxTxDataPrepare               40    // 2014us (measured 746us)
     #define PORT_maxRxAckPrepare                30    //  305us (measured  83us)
@@ -113,9 +113,9 @@
 //=========================== typedef  ========================================
 
 typedef enum {
-   RADIOTPYE_2D4GHZ          = 0,
-   RADIOTPYE_SUBGHZ          = 1,
-   RADIOTPYE_ANY             = 2
+   RADIOTYPE_2D4GHZ          = 0,
+   RADIOTYPE_SUBGHZ          = 1,
+   RADIOTYPE_ANY             = 2
 } radioType_t;
 
 //=========================== variables =======================================

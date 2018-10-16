@@ -57,7 +57,7 @@ void schedule_init(void) {
          FALSE,                                 // shared?
          0,                                     // channel offset
          &temp_neighbor,                        // neighbor
-         RADIOTPYE_ANY                          // not used for serialrx
+         RADIOTYPE_ANY                          // not used for serialrx
       );
    }
 }

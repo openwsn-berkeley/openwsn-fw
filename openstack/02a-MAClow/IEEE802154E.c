@@ -548,12 +548,12 @@ port_INLINE void activity_synchronize_newSlot(void) {
         changeState(S_SYNCLISTEN);
 
         // turn off the radio (in case it wasn't yet)
-        ieee154e_vars.radio_functions[RADIOTPYE_SUBGHZ].radio_rfOff_cb();
-        ieee154e_vars.radio_functions[RADIOTPYE_SUBGHZ].radio_setStartFrameCb_cb(ieee154e_startOfFrame);
-        ieee154e_vars.radio_functions[RADIOTPYE_SUBGHZ].radio_setEndFrameCb_cb(ieee154e_endOfFrame);
+        ieee154e_vars.radio_functions[RADIOTYPE_SUBGHZ].radio_rfOff_cb();
+        ieee154e_vars.radio_functions[RADIOTYPE_SUBGHZ].radio_setStartFrameCb_cb(ieee154e_startOfFrame);
+        ieee154e_vars.radio_functions[RADIOTYPE_SUBGHZ].radio_setEndFrameCb_cb(ieee154e_endOfFrame);
 
         //get first channel number offset
-        ieee154e_vars.ChInitOffset = ieee154e_vars.radio_functions[RADIOTPYE_SUBGHZ].radio_getChInitOffset_cb();
+        ieee154e_vars.ChInitOffset = ieee154e_vars.radio_functions[RADIOTYPE_SUBGHZ].radio_getChInitOffset_cb();
         
         // update record of current channel
         ieee154e_vars.channel = (openrandom_get16b()&0x0F) + ieee154e_vars.ChInitOffset;
@@ -562,12 +562,12 @@ port_INLINE void activity_synchronize_newSlot(void) {
 
         // configure the radio to listen to the default synchronizing channel
         //(uint16_t channel_spacing, uint32_t frequency_0, uint16_t channel);
-        ieee154e_vars.radio_functions[RADIOTPYE_SUBGHZ].radio_setFrequency_cb(DEFAULT_CH_SPACING,DEFAULT_FREQUENCY_CENTER,ieee154e_vars.channel);
+        ieee154e_vars.radio_functions[RADIOTYPE_SUBGHZ].radio_setFrequency_cb(DEFAULT_CH_SPACING,DEFAULT_FREQUENCY_CENTER,ieee154e_vars.channel);
 
 
       // switch on the radio in Rx mode.
-        ieee154e_vars.radio_functions[RADIOTPYE_SUBGHZ].radio_rxEnable_cb();
-        ieee154e_vars.radio_functions[RADIOTPYE_SUBGHZ].radio_rxNow_cb();
+        ieee154e_vars.radio_functions[RADIOTYPE_SUBGHZ].radio_rxEnable_cb();
+        ieee154e_vars.radio_functions[RADIOTYPE_SUBGHZ].radio_rxNow_cb();
     } else {
         // I'm listening last slot
         ieee154e_stats.numTicsOn    += ieee154e_vars.slotDuration;
@@ -579,17 +579,17 @@ port_INLINE void activity_synchronize_newSlot(void) {
     // change the synchronizing channel
     if ((ieee154e_vars.state==S_SYNCLISTEN) && (ieee154e_vars.singleChannelChanged == TRUE)) {
         // turn off the radio (in case it wasn't yet)
-        ieee154e_vars.radio_functions[RADIOTPYE_SUBGHZ].radio_rfOff_cb();
+        ieee154e_vars.radio_functions[RADIOTYPE_SUBGHZ].radio_rfOff_cb();
 
         // update record of current channel
         ieee154e_vars.channel = ieee154e_calculateFrequency(ieee154e_vars.singleChannel);
 
         // configure the radio to listen to the default synchronizing channel
-        ieee154e_vars.radio_functions[RADIOTPYE_SUBGHZ].radio_setFrequency_cb(ieee154e_vars.ch_spacing,ieee154e_vars.frequency,ieee154e_vars.channel);
+        ieee154e_vars.radio_functions[RADIOTYPE_SUBGHZ].radio_setFrequency_cb(ieee154e_vars.ch_spacing,ieee154e_vars.frequency,ieee154e_vars.channel);
 
         // switch on the radio in Rx mode.
-        ieee154e_vars.radio_functions[RADIOTPYE_SUBGHZ].radio_rxEnable_cb();
-        ieee154e_vars.radio_functions[RADIOTPYE_SUBGHZ].radio_rxNow_cb();
+        ieee154e_vars.radio_functions[RADIOTYPE_SUBGHZ].radio_rxEnable_cb();
+        ieee154e_vars.radio_functions[RADIOTYPE_SUBGHZ].radio_rxNow_cb();
         ieee154e_vars.singleChannelChanged = FALSE;
     }
 
@@ -674,7 +674,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
 
       // retrieve the received data frame from the radio's Rx buffer
       ieee154e_vars.dataReceived->payload = &(ieee154e_vars.dataReceived->packet[FIRST_FRAME_BYTE]);
-      ieee154e_vars.radio_functions[RADIOTPYE_SUBGHZ].radio_getReceivedFrame_cb(ieee154e_vars.dataReceived->payload,
+      ieee154e_vars.radio_functions[RADIOTYPE_SUBGHZ].radio_getReceivedFrame_cb(ieee154e_vars.dataReceived->payload,
                                    &ieee154e_vars.dataReceived->length,
                              sizeof(ieee154e_vars.dataReceived->packet),
                                    &ieee154e_vars.dataReceived->l1_rssi,
@@ -683,7 +683,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
                                    &ieee154e_vars.dataReceived->l1_mcs);
 
       // break if packet too short
-      if (ieee154e_vars.dataReceived->length<ieee154e_vars.radio_functions[RADIOTPYE_SUBGHZ].radio_getCRCLen_cb() || ieee154e_vars.dataReceived->length>LENGTH_IEEE154_MAX) {
+      if (ieee154e_vars.dataReceived->length<ieee154e_vars.radio_functions[RADIOTYPE_SUBGHZ].radio_getCRCLen_cb() || ieee154e_vars.dataReceived->length>LENGTH_IEEE154_MAX) {
          // break from the do-while loop and execute abort code below
           openserial_printError(COMPONENT_IEEE802154E,ERR_INVALIDPACKETFROMRADIO,
                             (errorparameter_t)0,
@@ -692,7 +692,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
       }
 
       // toss CRC (2 last bytes)
-      packetfunctions_tossFooter(ieee154e_vars.dataReceived, ieee154e_vars.radio_functions[RADIOTPYE_SUBGHZ].radio_getCRCLen_cb());
+      packetfunctions_tossFooter(ieee154e_vars.dataReceived, ieee154e_vars.radio_functions[RADIOTYPE_SUBGHZ].radio_getCRCLen_cb());
 
       // break if invalid CRC
       if (ieee154e_vars.dataReceived->l1_crc==FALSE) {
@@ -751,7 +751,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
       }
 
       // turn off the radio
-      ieee154e_vars.radio_functions[RADIOTPYE_SUBGHZ].radio_rfOff_cb();
+      ieee154e_vars.radio_functions[RADIOTYPE_SUBGHZ].radio_rfOff_cb();
 
       // compute radio duty cycle
       ieee154e_vars.radioOnTics += (sctimer_readCounter()-ieee154e_vars.radioOnInit);
@@ -807,7 +807,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
         */
         
         //get first channel number offset
-        ieee154e_vars.ChInitOffset = ieee154e_vars.radio_functions[RADIOTPYE_SUBGHZ].radio_getChInitOffset_cb();
+        ieee154e_vars.ChInitOffset = ieee154e_vars.radio_functions[RADIOTYPE_SUBGHZ].radio_getChInitOffset_cb();
         
         for (i=0;i<NUM_CHANNELS;i++){
             if ((ieee154e_vars.channel - ieee154e_vars.ChInitOffset)==ieee154e_vars.chTemplate[i]){
@@ -2587,7 +2587,7 @@ port_INLINE void ieee154e_syncSlotOffset(void) {
     ieee154e_vars.channel = 11 + (asnOffset + channelOffset)%16
     */
     //get first channel number offset
-    ieee154e_vars.ChInitOffset = ieee154e_vars.radio_functions[RADIOTPYE_SUBGHZ].radio_getChInitOffset_cb();
+    ieee154e_vars.ChInitOffset = ieee154e_vars.radio_functions[RADIOTYPE_SUBGHZ].radio_getChInitOffset_cb();
     
     for (i=0;i<NUM_CHANNELS;i++){
         if ((ieee154e_vars.channel - ieee154e_vars.ChInitOffset)==ieee154e_vars.chTemplate[i]){
@@ -2838,7 +2838,7 @@ different channel offsets in the same slot.
 */
 port_INLINE uint8_t ieee154e_calculateFrequency(uint8_t channelOffset) {
   
-    if (ieee154e_vars.radioType == RADIOTPYE_2D4GHZ){
+    if (ieee154e_vars.radioType == RADIOTYPE_2D4GHZ){
         if (ieee154e_vars.singleChannel >= 11 && ieee154e_vars.singleChannel <= 26 ) {
             return ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_calculateFrequency_cb(ieee154e_vars.singleChannel,ieee154e_vars.asnOffset, NUM_CHANNELS,  ieee154e_vars.chTemplate, TRUE); // single channel
         } else {
@@ -2846,7 +2846,7 @@ port_INLINE uint8_t ieee154e_calculateFrequency(uint8_t channelOffset) {
             return ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_calculateFrequency_cb(channelOffset,ieee154e_vars.asnOffset, NUM_CHANNELS,  ieee154e_vars.chTemplate, FALSE);
         }
     } else {
-        if (ieee154e_vars.radioType == RADIOTPYE_SUBGHZ){
+        if (ieee154e_vars.radioType == RADIOTYPE_SUBGHZ){
            return ieee154e_vars.radio_functions[ieee154e_vars.radioType].radio_calculateFrequency_cb(channelOffset,ieee154e_vars.asnOffset, NUM_CHANNELS,  ieee154e_vars.chTemplate, TRUE);
         }
     }
