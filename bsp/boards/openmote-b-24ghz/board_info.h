@@ -83,13 +83,13 @@
     #define PORT_TsSlotDuration                 655   //    20ms
 
     // execution speed related
-    #define PORT_maxTxDataPrepare               110   //  3355us (measured 2989us)
-    #define PORT_maxRxAckPrepare                20    //   610us (measured  409us)
-    #define PORT_maxRxDataPrepare               33    //  1000us (measured  477us)
-    #define PORT_maxTxAckPrepare                50    //  1525us (measured 1405us)
+    #define PORT_maxTxDataPrepare                15   //   458us (measured  213us)
+    #define PORT_maxRxAckPrepare                 10   //   305us (measured   86us)
+    #define PORT_maxRxDataPrepare                10   //   305us (measured   88us)
+    #define PORT_maxTxAckPrepare                 15   //   458us (measured  211us)
 
     // radio speed related
-    #define PORT_delayTx                        12    //   488us (measured  539us)
+    #define PORT_delayTx                        13    //   397us (measured  388us)
     #define PORT_delayRx                        0     //     0us (can not measure)
 #endif
 
