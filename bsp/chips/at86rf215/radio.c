@@ -43,7 +43,6 @@ typedef struct {
     uint8_t                     rf24_isr;
     uint8_t                     bb0_isr;
     uint8_t                     bb1_isr;
-    bool                        trx_ready;
 } radio_vars_t;
 
 radio_vars_t radio_vars;
@@ -219,12 +218,8 @@ void radio_txEnable(void) {
     // change state
     radio_vars.state = RADIOSTATE_ENABLING_TX;
 
-    if(at86rf215_status() != RF_STATE_TXPREP){
-        radio_vars.trx_ready = FALSE;
-        // change status to TXPREP
-        at86rf215_spiStrobe(CMD_RF_TXPREP);
-        while(!radio_vars.trx_ready);
-    }
+    at86rf215_spiStrobe(CMD_RF_TXPREP);
+    while(at86rf215_status() != RF_STATE_TXPREP);
 
     // wiggle debug pin
     debugpins_radio_set();
@@ -316,11 +311,6 @@ void radio_isr(void) {
     capturedTime = sctimer_readCounter();
     //get isr that happened from radio
     radio_read_isr();
-
-    if (radio_vars.rf09_isr & IRQS_TRXRDY_MASK){
-        // trx_ready
-        radio_vars.trx_ready = TRUE;
-    }
 
     if (radio_vars.bb0_isr & IRQS_RXFS_MASK){
         radio_vars.state = RADIOSTATE_RECEIVING;
