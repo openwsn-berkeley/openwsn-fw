@@ -68,7 +68,7 @@ to this board.
 #define PORT_maxTxAckPrepare                50    //  1525us (measured 1405us)
 
 // radio speed related
-#define PORT_delayTx                        18    //   488us (measured  539us)
+#define PORT_delayTx                        18    //   549us (measured  539us)
 #define PORT_delayRx                        0     //     0us (can not measure)
 
 //===== adaptive_sync accuracy
