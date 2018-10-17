@@ -11,7 +11,7 @@
             <name>C-SPY</name>
             <archiveVersion>2</archiveVersion>
             <data>
-                <version>29</version>
+                <version>28</version>
                 <wantNonLocal>1</wantNonLocal>
                 <debug>1</debug>
                 <option>
@@ -44,7 +44,7 @@
                 </option>
                 <option>
                     <name>MemFile</name>
-                    <state>$TOOLKIT_DIR$\CONFIG\debugger\TexasInstruments\CC2538SF53.ddf</state>
+                    <state></state>
                 </option>
                 <option>
                     <name>RunToEnable</name>
@@ -80,19 +80,19 @@
                 </option>
                 <option>
                     <name>OCProductVersion</name>
-                    <state>6.60.2.5494</state>
+                    <state>8.11.1.13270</state>
                 </option>
                 <option>
                     <name>OCDynDriverList</name>
-                    <state>JLINK_ID</state>
+                    <state>ARMSIM_ID</state>
                 </option>
                 <option>
                     <name>OCLastSavedByProductVersion</name>
-                    <state>8.20.1.14181</state>
+                    <state></state>
                 </option>
                 <option>
                     <name>UseFlashLoader</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>CLowLevel</name>
@@ -112,7 +112,7 @@
                 </option>
                 <option>
                     <name>FlashLoadersV3</name>
-                    <state>$TOOLKIT_DIR$\config\flashloader\TexasInstruments\FlashCC2538RAM32K.board</state>
+                    <state></state>
                 </option>
                 <option>
                     <name>OCImagesSuppressCheck1</name>
@@ -180,7 +180,7 @@
                 </option>
                 <option>
                     <name>OCMulticoreNrOfCores</name>
-                    <state>1</state>
+                    <state></state>
                 </option>
                 <option>
                     <name>OCMulticoreMaster</name>
@@ -208,10 +208,6 @@
                 </option>
                 <option>
                     <name>OCAttachSlave</name>
-                    <state>0</state>
-                </option>
-                <option>
-                    <name>MassEraseBeforeFlashing</name>
                     <state>0</state>
                 </option>
             </data>
@@ -1367,10 +1363,6 @@
                 <loadFlag>0</loadFlag>
             </plugin>
             <plugin>
-                <file>$TOOLKIT_DIR$\plugins\rtos\Mbed\MbedArmPlugin.ENU.ewplugin</file>
-                <loadFlag>0</loadFlag>
-            </plugin>
-            <plugin>
                 <file>$TOOLKIT_DIR$\plugins\rtos\OpenRTOS\OpenRTOSPlugin.ewplugin</file>
                 <loadFlag>0</loadFlag>
             </plugin>
@@ -1407,10 +1399,6 @@
                 <loadFlag>0</loadFlag>
             </plugin>
             <plugin>
-                <file>$EW_DIR$\common\plugins\TargetAccessServer\TargetAccessServer.ENU.ewplugin</file>
-                <loadFlag>0</loadFlag>
-            </plugin>
-            <plugin>
                 <file>$EW_DIR$\common\plugins\uCProbe\uCProbePlugin.ENU.ewplugin</file>
                 <loadFlag>0</loadFlag>
             </plugin>
@@ -1426,7 +1414,7 @@
             <name>C-SPY</name>
             <archiveVersion>2</archiveVersion>
             <data>
-                <version>29</version>
+                <version>28</version>
                 <wantNonLocal>1</wantNonLocal>
                 <debug>0</debug>
                 <option>
@@ -1495,7 +1483,7 @@
                 </option>
                 <option>
                     <name>OCProductVersion</name>
-                    <state>6.60.2.5494</state>
+                    <state>8.11.1.13270</state>
                 </option>
                 <option>
                     <name>OCDynDriverList</name>
@@ -1507,7 +1495,7 @@
                 </option>
                 <option>
                     <name>UseFlashLoader</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>CLowLevel</name>
@@ -1623,10 +1611,6 @@
                 </option>
                 <option>
                     <name>OCAttachSlave</name>
-                    <state>0</state>
-                </option>
-                <option>
-                    <name>MassEraseBeforeFlashing</name>
                     <state>0</state>
                 </option>
             </data>
@@ -2782,10 +2766,6 @@
                 <loadFlag>0</loadFlag>
             </plugin>
             <plugin>
-                <file>$TOOLKIT_DIR$\plugins\rtos\Mbed\MbedArmPlugin.ENU.ewplugin</file>
-                <loadFlag>0</loadFlag>
-            </plugin>
-            <plugin>
                 <file>$TOOLKIT_DIR$\plugins\rtos\OpenRTOS\OpenRTOSPlugin.ewplugin</file>
                 <loadFlag>0</loadFlag>
             </plugin>
@@ -2819,10 +2799,6 @@
             </plugin>
             <plugin>
                 <file>$EW_DIR$\common\plugins\Orti\Orti.ENU.ewplugin</file>
-                <loadFlag>0</loadFlag>
-            </plugin>
-            <plugin>
-                <file>$EW_DIR$\common\plugins\TargetAccessServer\TargetAccessServer.ENU.ewplugin</file>
                 <loadFlag>0</loadFlag>
             </plugin>
             <plugin>

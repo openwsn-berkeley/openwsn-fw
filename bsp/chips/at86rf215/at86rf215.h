@@ -3982,7 +3982,7 @@ void at86rf215_readBurst(uint16_t reg, uint8_t* regValueRead, uint16_t size);
 
 static const registerSetting_t basic_settings_fsk_option1 []={
   {RG_RF09_CMD,       0x02}, // we make sure we are in the trxoff state
-  {RG_RF09_IRQM,      0x1F}, // TRXERR, BATLOW, EDC, TRXRDY, WAKEUP interrupts enabled
+  {RG_RF09_IRQM,      0x00}, // TRXERR, BATLOW, EDC, TRXRDY, WAKEUP interrupts disabled
   {RG_RF24_IRQM,      0x00},
   {RG_RF09_RXBWC,     0x00},
   {RG_RF09_RXDFE,     0x2A}, // RCUT = 1 , SR = 10
@@ -4009,7 +4009,7 @@ static const registerSetting_t basic_settings_fsk_option1 []={
 
 static const registerSetting_t basic_settings_fsk_option2 []={
   {RG_RF09_CMD,       0x02}, //we make sure we are in the trxoff state
-  {RG_RF09_IRQM,      0x1F}, // TRXERR, BATLOW, EDC, TRXRDY, WAKEUP interrupts enabled
+  {RG_RF09_IRQM,      0x00}, // TRXERR, BATLOW, EDC, TRXRDY, WAKEUP interrupts disabled
   {RG_RF24_IRQM,      0x00},
   {RG_RF09_RXBWC,     0x03},
   {RG_RF09_RXDFE,     0x15},
@@ -4035,7 +4035,7 @@ static const registerSetting_t basic_settings_fsk_option2 []={
 
 static const registerSetting_t basic_settings_fsk_option3 []={  //DO NOT USE
   {RG_RF09_CMD,       0x02}, //we make sure we are in the trxoff state
-  {RG_RF09_IRQM,      0x1F}, // TRXERR, BATLOW, EDC, TRXRDY, WAKEUP interrupts enabled
+  {RG_RF09_IRQM,      0x00}, // TRXERR, BATLOW, EDC, TRXRDY, WAKEUP interrupts disabled
   {RG_RF24_IRQM,      0x00},
   {RG_RF09_RXBWC,     0x03}, //IF shift, 200 kHz bandwidth
   {RG_RF09_RXDFE,     0x24}, //find the right values
@@ -4068,7 +4068,7 @@ static const registerSetting_t basic_settings_oqpsk_rate1[] = {
 //  {RG_BBC0_OQPSKC3,   0x00},  // legacy OQPSK, search for SFD_1 only
     {RG_BBC0_IRQM,      0x13},  // TXFE, RXFE, RXFS interrupts enabled
     {RG_BBC1_IRQM,      0x00},
-    {RG_RF09_IRQM,      0x12},  // TRXERR, TRXRDY interrupts enabled
+    {RG_RF09_IRQM,      0x00},  // TRXERR, BATLOW, EDC, TRXRDY, WAKEUP interrupts disabled
     {RG_RF24_IRQM,      0x00},
     {RG_RF09_RXBWC,     0x00},  //  Rx BW 160kHz, IF 250kHz
     {RG_RF09_RXDFE,     0x2A},  //
@@ -4089,7 +4089,7 @@ static const registerSetting_t basic_settings_oqpsk_rate2[] = {
 //  {RG_BBC0_OQPSKC3,   0x00},  // legacy OQPSK, search for SFD_1 only
     {RG_BBC0_IRQM,      0x13},  // TXFE, RXFE, RXFS interrupts enabled
     {RG_BBC1_IRQM,      0x00},
-    {RG_RF09_IRQM,      0x12},  // TRXERR, TRXRDY interrupts enabled
+    {RG_RF09_IRQM,      0x00},  // TRXERR, BATLOW, EDC, TRXRDY, WAKEUP interrupts disabled
     {RG_RF24_IRQM,      0x00},
     {RG_RF09_RXBWC,     0x00},  //  Rx BW 160kHz, IF 250kHz
     {RG_RF09_RXDFE,     0x2A},  //
@@ -4110,7 +4110,7 @@ static const registerSetting_t basic_settings_oqpsk_rate3[] = {
 //  {RG_BBC0_OQPSKC3,   0x00},  // legacy OQPSK, search for SFD_1 only
     {RG_BBC0_IRQM,      0x13},  // TXFE, RXFE, RXFS interrupts enabled
     {RG_BBC1_IRQM,      0x00},
-    {RG_RF09_IRQM,      0x12},  // TRXERR, TRXRDY interrupts enabled
+    {RG_RF09_IRQM,      0x00},  // TRXERR, BATLOW, EDC, TRXRDY, WAKEUP interrupts disabled
     {RG_RF24_IRQM,      0x00},
     {RG_RF09_RXBWC,     0x00},  //  Rx BW 160kHz, IF 250kHz
     {RG_RF09_RXDFE,     0x2A},  //
@@ -4131,7 +4131,7 @@ static const registerSetting_t basic_settings_oqpsk_rate4[] = {
 //  {RG_BBC0_OQPSKC3,   0x00},  // legacy OQPSK, search for SFD_1 only
     {RG_BBC0_IRQM,      0x13},  // TXFE, RXFE, RXFS interrupts enabled
     {RG_BBC1_IRQM,      0x00},
-    {RG_RF09_IRQM,      0x12},  // TRXERR, TRXRDY interrupts enabled
+    {RG_RF09_IRQM,      0x00},  // TRXERR, BATLOW, EDC, TRXRDY, WAKEUP interrupts disabled
     {RG_RF24_IRQM,      0x00},
     {RG_RF09_RXBWC,     0x00},  //  Rx BW 160kHz, IF 250kHz
     {RG_RF09_RXDFE,     0x2A},  //
@@ -4147,9 +4147,9 @@ static const registerSetting_t basic_settings_oqpsk_rate4[] = {
 
 static const registerSetting_t basic_settings_ofdm_1_mcs0[] = {
   {RG_RF09_CMD,       0x02},
-  {RG_RF09_IRQM,      0x1F},
+  {RG_RF09_IRQM,      0x00},
   {RG_RF24_IRQM,      0x00},
-  {RG_RF09_RXBWC,     0x19},
+  {RG_RF09_RXBWC,     0x00},
   {RG_RF09_RXDFE,     0x83},
   {RG_RF09_AGCC,      0x11},
   {RG_RF09_EDD,       0x7A},
@@ -4165,7 +4165,7 @@ static const registerSetting_t basic_settings_ofdm_1_mcs0[] = {
 
 static const registerSetting_t basic_settings_ofdm_1_mcs1[] = {
   {RG_RF09_CMD,       0x02},
-  {RG_RF09_IRQM,      0x1F},
+  {RG_RF09_IRQM,      0x00},
   {RG_RF24_IRQM,      0x00},
   {RG_RF09_RXBWC,     0x19},
   {RG_RF09_RXDFE,     0x83},
@@ -4183,7 +4183,7 @@ static const registerSetting_t basic_settings_ofdm_1_mcs1[] = {
 
 static const registerSetting_t basic_settings_ofdm_1_mcs2[] = {
   {RG_RF09_CMD,       0x02},
-  {RG_RF09_IRQM,      0x1F},
+  {RG_RF09_IRQM,      0x00},
   {RG_RF24_IRQM,      0x00},
   {RG_RF09_RXBWC,     0x19},
   {RG_RF09_RXDFE,     0x83},
@@ -4201,7 +4201,7 @@ static const registerSetting_t basic_settings_ofdm_1_mcs2[] = {
 
 static const registerSetting_t basic_settings_ofdm_1_mcs3[] = {  //TODO
   {RG_RF09_CMD,       0x02},
-  {RG_RF09_IRQM,      0x1F},
+  {RG_RF09_IRQM,      0x00},
   {RG_RF24_IRQM,      0x00},
   {RG_RF09_RXBWC,     0x19},
   {RG_RF09_RXDFE,     0x83},
@@ -4219,7 +4219,7 @@ static const registerSetting_t basic_settings_ofdm_1_mcs3[] = {  //TODO
 
 static const registerSetting_t basic_settings_ofdm_2_mcs0[] = {
   {RG_RF09_CMD,       0x02},
-  {RG_RF09_IRQM,      0x1F},
+  {RG_RF09_IRQM,      0x00},
   {RG_RF24_IRQM,      0x00},
   {RG_RF09_RXBWC,     0x17},
   {RG_RF09_RXDFE,     0x43},
@@ -4237,7 +4237,7 @@ static const registerSetting_t basic_settings_ofdm_2_mcs0[] = {
 
 static const registerSetting_t basic_settings_ofdm_2_mcs1[] = {
   {RG_RF09_CMD,       0x02},
-  {RG_RF09_IRQM,      0x1F},
+  {RG_RF09_IRQM,      0x00},
   {RG_RF24_IRQM,      0x00},
   {RG_RF09_RXBWC,     0x17},
   {RG_RF09_RXDFE,     0x43},
@@ -4255,7 +4255,7 @@ static const registerSetting_t basic_settings_ofdm_2_mcs1[] = {
 
 static const registerSetting_t basic_settings_ofdm_2_mcs2[] = {
   {RG_RF09_CMD,       0x02},
-  {RG_RF09_IRQM,      0x1F},
+  {RG_RF09_IRQM,      0x00},
   {RG_RF24_IRQM,      0x00},
   {RG_RF09_RXBWC,     0x17},
   {RG_RF09_RXDFE,     0x43},
@@ -4273,7 +4273,7 @@ static const registerSetting_t basic_settings_ofdm_2_mcs2[] = {
 
 static const registerSetting_t basic_settings_ofdm_2_mcs3[] = {
   {RG_RF09_CMD,       0x02},
-  {RG_RF09_IRQM,      0x1F},
+  {RG_RF09_IRQM,      0x00},
   {RG_RF24_IRQM,      0x00},
   {RG_RF09_RXBWC,     0x17},
   {RG_RF09_RXDFE,     0x43},
@@ -4291,7 +4291,7 @@ static const registerSetting_t basic_settings_ofdm_2_mcs3[] = {
 
 static const registerSetting_t basic_settings_ofdm_2_mcs4[] = {
   {RG_RF09_CMD,       0x02},
-  {RG_RF09_IRQM,      0x1F},
+  {RG_RF09_IRQM,      0x00},
   {RG_RF24_IRQM,      0x00},
   {RG_RF09_RXBWC,     0x17},
   {RG_RF09_RXDFE,     0x43},
@@ -4309,7 +4309,7 @@ static const registerSetting_t basic_settings_ofdm_2_mcs4[] = {
 
 static const registerSetting_t basic_settings_ofdm_2_mcs5[] = {
   {RG_RF09_CMD,       0x02},
-  {RG_RF09_IRQM,      0x1F},
+  {RG_RF09_IRQM,      0x00},
   {RG_RF24_IRQM,      0x00},
   {RG_RF09_RXBWC,     0x17},
   {RG_RF09_RXDFE,     0x43},
@@ -4327,7 +4327,7 @@ static const registerSetting_t basic_settings_ofdm_2_mcs5[] = {
 
 static const registerSetting_t basic_settings_ofdm_3_mcs1[] = {     //TODO
   {RG_RF09_CMD,       0x02},
-  {RG_RF09_IRQM,      0x1F},
+  {RG_RF09_IRQM,      0x00},
   {RG_RF24_IRQM,      0x00},
   {RG_RF09_RXBWC,     0x04},
   {RG_RF09_RXDFE,     0x46},
@@ -4345,7 +4345,7 @@ static const registerSetting_t basic_settings_ofdm_3_mcs1[] = {     //TODO
 
 static const registerSetting_t basic_settings_ofdm_3_mcs2[] = {     //TODO
   {RG_RF09_CMD,       0x02},
-  {RG_RF09_IRQM,      0x1F},
+  {RG_RF09_IRQM,      0x00},
   {RG_RF24_IRQM,      0x00},
   {RG_RF09_RXBWC,     0x04},
   {RG_RF09_RXDFE,     0x46},
@@ -4363,7 +4363,7 @@ static const registerSetting_t basic_settings_ofdm_3_mcs2[] = {     //TODO
 
 static const registerSetting_t basic_settings_ofdm_3_mcs3[] = {     //TODO
   {RG_RF09_CMD,       0x02},
-  {RG_RF09_IRQM,      0x1F},
+  {RG_RF09_IRQM,      0x00},
   {RG_RF24_IRQM,      0x00},
   {RG_RF09_RXBWC,     0x04},
   {RG_RF09_RXDFE,     0x46},
@@ -4381,7 +4381,7 @@ static const registerSetting_t basic_settings_ofdm_3_mcs3[] = {     //TODO
 
 static const registerSetting_t basic_settings_ofdm_3_mcs4[] = {     //TODO
   {RG_RF09_CMD,       0x02},
-  {RG_RF09_IRQM,      0x1F},
+  {RG_RF09_IRQM,      0x00},
   {RG_RF24_IRQM,      0x00},
   {RG_RF09_RXBWC,     0x04},
   {RG_RF09_RXDFE,     0x46},
@@ -4399,7 +4399,7 @@ static const registerSetting_t basic_settings_ofdm_3_mcs4[] = {     //TODO
 
 static const registerSetting_t basic_settings_ofdm_3_mcs5[] = {     //TODO
   {RG_RF09_CMD,       0x02},
-  {RG_RF09_IRQM,      0x1F},
+  {RG_RF09_IRQM,      0x00},
   {RG_RF24_IRQM,      0x00},
   {RG_RF09_RXBWC,     0x04},
   {RG_RF09_RXDFE,     0x46},
@@ -4417,7 +4417,7 @@ static const registerSetting_t basic_settings_ofdm_3_mcs5[] = {     //TODO
 
 static const registerSetting_t basic_settings_ofdm_3_mcs6[] = {     //TODO
   {RG_RF09_CMD,       0x02},
-  {RG_RF09_IRQM,      0x1F},
+  {RG_RF09_IRQM,      0x00},
   {RG_RF24_IRQM,      0x00},
   {RG_RF09_RXBWC,     0x04},
   {RG_RF09_RXDFE,     0x46},
@@ -4435,7 +4435,7 @@ static const registerSetting_t basic_settings_ofdm_3_mcs6[] = {     //TODO
 
 static const registerSetting_t basic_settings_ofdm_4_mcs2[] = {  //TODO
   {RG_RF09_CMD,       0x02},
-  {RG_RF09_IRQM,      0x1F},
+  {RG_RF09_IRQM,      0x00},
   {RG_RF24_IRQM,      0x00},
   {RG_RF09_RXBWC,     0x12},
   {RG_RF09_RXDFE,     0x26},
@@ -4453,7 +4453,7 @@ static const registerSetting_t basic_settings_ofdm_4_mcs2[] = {  //TODO
 
 static const registerSetting_t basic_settings_ofdm_4_mcs3[] = {  //TODO
   {RG_RF09_CMD,       0x02},
-  {RG_RF09_IRQM,      0x1F},
+  {RG_RF09_IRQM,      0x00},
   {RG_RF24_IRQM,      0x00},
   {RG_RF09_RXBWC,     0x12},
   {RG_RF09_RXDFE,     0x26},
@@ -4471,7 +4471,7 @@ static const registerSetting_t basic_settings_ofdm_4_mcs3[] = {  //TODO
 
 static const registerSetting_t basic_settings_ofdm_4_mcs4[] = {  //TODO
   {RG_RF09_CMD,       0x02},
-  {RG_RF09_IRQM,      0x1F},
+  {RG_RF09_IRQM,      0x00},
   {RG_RF24_IRQM,      0x00},
   {RG_RF09_RXBWC,     0x12},
   {RG_RF09_RXDFE,     0x26},
@@ -4489,7 +4489,7 @@ static const registerSetting_t basic_settings_ofdm_4_mcs4[] = {  //TODO
 
 static const registerSetting_t basic_settings_ofdm_4_mcs5[] = {  //TODO
   {RG_RF09_CMD,       0x02},
-  {RG_RF09_IRQM,      0x1F},
+  {RG_RF09_IRQM,      0x00},
   {RG_RF24_IRQM,      0x00},
   {RG_RF09_RXBWC,     0x12},
   {RG_RF09_RXDFE,     0x26},
@@ -4507,7 +4507,7 @@ static const registerSetting_t basic_settings_ofdm_4_mcs5[] = {  //TODO
 
 static const registerSetting_t basic_settings_ofdm_4_mcs6[] = {  //TODO
   {RG_RF09_CMD,       0x02},
-  {RG_RF09_IRQM,      0x1F},
+  {RG_RF09_IRQM,      0x00},
   {RG_RF24_IRQM,      0x00},
   {RG_RF09_RXBWC,     0x12},
   {RG_RF09_RXDFE,     0x26},
