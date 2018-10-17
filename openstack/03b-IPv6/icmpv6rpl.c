@@ -172,7 +172,7 @@ void icmpv6rpl_init(void) {
     icmpv6rpl_vars.timerIdDAO                = opentimers_create(TIMER_GENERAL_PURPOSE);
     opentimers_scheduleIn(
         icmpv6rpl_vars.timerIdDAO,
-        openrandom_getRandomizePeriod(icmpv6rpl_vars.daoPeriod, NUM_CHANNELS*SLOTFRAME_LENGTH*SLOTDURATION),
+        icmpv6rpl_vars.daoPeriod,
         TIME_MS,
         TIMER_PERIODIC,
         icmpv6rpl_timer_DAO_cb
@@ -767,12 +767,7 @@ void sendDIO(void) {
    task.
 */
 void icmpv6rpl_timer_DAO_cb(opentimers_id_t id) {
-    PORT_TIMER_WIDTH newDuration;
-
     scheduler_push_task(icmpv6rpl_timer_DAO_task,TASKPRIO_RPL);
-
-    newDuration = openrandom_getRandomizePeriod(icmpv6rpl_vars.daoPeriod, NUM_CHANNELS*SLOTFRAME_LENGTH*SLOTDURATION);
-    opentimers_updateDuration(icmpv6rpl_vars.timerIdDAO, newDuration);
 }
 
 /**
