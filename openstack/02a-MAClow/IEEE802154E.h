@@ -182,12 +182,7 @@ enum ieee154e_atomicdurations_enum {
    // radio watchdog
    wdRadioTx                 =   45,                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
    wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
-#if SLOTDURATION==10
-   wdAckDuration             =   80,                  //  2400us (measured 1000us)
-#endif
-#if SLOTDURATION==20
    wdAckDuration             =   98,                  //  3000us (measured 1000us)
-#endif
 };
 
 //shift of bytes in the linkOption bitmap: draft-ietf-6tisch-minimal-10.txt: page 6
