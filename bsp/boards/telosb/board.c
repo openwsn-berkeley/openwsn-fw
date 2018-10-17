@@ -18,14 +18,19 @@
 
 //=========================== prototypes ======================================
 
-// these are part of the TelosB port only, so not present in debugpins.h, only
-// in debugpins.c. We therefore need to extern them.
-extern void debugpins_isruarttx_toggle(void);
-extern void debugpins_isruarttx_clr(void);
-extern void debugpins_isruarttx_set(void);
-extern void debugpins_isruartrx_toggle(void);
-extern void debugpins_isruartrx_clr(void);
-extern void debugpins_isruartrx_set(void);
+
+//=========================== low-level init ==================================
+
+#if defined(__GNUC__) && (__GNUC__==4)  && (__GNUC_MINOR__<=5) && defined(__MSP430__)
+
+#else
+    // tell IAR NOT to intialize all variables
+    // see https://www.iar.com/support/tech-notes/general/my-msp430-does-not-start-up/
+int __low_level_init(void) {
+    WDTCTL = WDTPW + WDTHOLD;
+    return 1;
+}
+#endif
 
 //=========================== main ============================================
 
@@ -68,19 +73,6 @@ void board_sleep(void) {
 
 void board_reset(void) {
    WDTCTL = (WDTPW+0x1200) + WDTHOLD; // writing a wrong watchdog password to causes handler to reset
-}
-
-// during startup process before executing main function, 
-// all variables need to be initialized, which may take long time
-// and watchdog may be triggered during this period. 
-// Using __low_level_init to disable the watchdog to avoid this situation.
-int __low_level_init(void)
-{
-  // stop WDT
-  WDTCTL = WDTPW + WDTHOLD;
- 
-  // Perform data segment initialization
-  return 1;
 }
 
 //=========================== private =========================================

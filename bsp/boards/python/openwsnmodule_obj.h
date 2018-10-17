@@ -152,14 +152,15 @@ enum {
    MOTE_NOTIF_uart_writeCircularBuffer_FASTSIM,
    MOTE_NOTIF_uart_writeBufferByLen_FASTSIM,
    MOTE_NOTIF_uart_readByte,
+   MOTE_NOTIF_uart_setCTS,
    // last
    MOTE_NOTIF_LAST
 };
 
 //=========================== typedef =========================================
 
-typedef void (*uart_tx_cbt)(OpenMote* self);
-typedef void (*uart_rx_cbt)(OpenMote* self);
+typedef void    (*uart_tx_cbt)(OpenMote* self);
+typedef uint8_t (*uart_rx_cbt)(OpenMote* self);
 
 typedef struct {
    uart_tx_cbt     txCb;

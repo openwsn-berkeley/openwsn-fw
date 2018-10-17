@@ -42,7 +42,7 @@ typedef struct {
    uint8_t              flag;
    uint8_t              packet[LENGTH_PACKET];
    uint8_t              packet_len;
-   int8_t               rxpk_rssi;
+    int8_t              rxpk_rssi;
    uint8_t              rxpk_lqi;
    bool                 rxpk_crc;
    uint8_t              channel;
@@ -83,7 +83,7 @@ int mote_main(void) {
    radio_setEndFrameCb(cb_endFrame);
 
    // start timer
-   app_vars.timerId = opentimers_create();
+   app_vars.timerId = opentimers_create(TIMER_GENERAL_PURPOSE);
    reference        = opentimers_getValue();
    opentimers_scheduleAbsolute(
         app_vars.timerId,      // timerId
@@ -162,13 +162,7 @@ void cb_timer(opentimers_id_t id) {
         cb_timer              // callback
    );
    app_vars.outputOrInput = (app_vars.outputOrInput+1)%2;
-   if (app_vars.outputOrInput == 1) {
-       openserial_stop();
-       openserial_startOutput();
-   } else {
-       openserial_stop();
-       openserial_startInput();
-   }
+   scheduler_push_task(task_openserial_debugPrint,TASKPRIO_OPENSERIAL);
 }
 
 // ================================ task =======================================
@@ -184,13 +178,13 @@ void task_uploadPacket(void) {
 void ieee154e_setSingleChannel(uint8_t channel) {
     sniffer_setListeningChannel(channel);
 }
-void ieee154e_setIsSecurityEnabled(bool isEnabled)                        {return;}
-void ieee154e_setSlotDuration(uint16_t duration)                          {return;}
-void ieee154e_setIsAckEnabled(bool isEnabled)                             {return;}
-void ieee154e_getAsn(uint8_t* array)                                      {return;}
+void ieee154e_setIsSecurityEnabled(bool isEnabled)      {return;}
+void ieee154e_setSlotDuration(uint16_t duration)        {return;}
+void ieee154e_setIsAckEnabled(bool isEnabled)           {return;}
+void ieee154e_getAsn(uint8_t* array)                    {return;}
 
-void schedule_startDAGroot(void)                                          {return;}
-void schedule_setFrameLength(uint16_t frameLength)                        {return;}
+void schedule_startDAGroot(void)                        {return;}
+void schedule_setFrameLength(uint16_t frameLength)      {return;}
 
 void sixtop_setEBPeriod(uint8_t ebPeriod)                                 {return;}
 owerror_t sixtop_request(
@@ -205,11 +199,11 @@ owerror_t sixtop_request(
     uint16_t     listingMaxNumCells
 )                                                                         {return E_FAIL;}
 void sixtop_setIsResponseEnabled(bool isEnabled)                          {return;}
-void sixtop_setKaPeriod(uint16_t kaPeriod)                                {return;}
+void sixtop_setKaPeriod(uint16_t kaPeriod)                                  {return;}
 void msf_appPktPeriod(uint8_t numAppPacketsPerSlotFrame)                  {return;}
 uint8_t  msf_getsfid(void)                                                {return 0;}
 
-void openbridge_triggerData(void)                                         {return;}
+void openbridge_triggerData(void)                                           {return;}
 
 void icmpv6rpl_setDIOPeriod(uint16_t dioPeriod)                           {return;}
 void icmpv6rpl_setDAOPeriod(uint16_t daoPeriod)                           {return;}
@@ -217,17 +211,17 @@ void icmpv6rpl_setMyDAGrank(uint16_t rank)                                {retur
 void icmpv6rpl_writeDODAGid(uint8_t* dodagid)                             {return;}
 void icmpv6rpl_updateMyDAGrankAndParentSelection(void)                    {return;}
 bool icmpv6rpl_getPreferredParentEui64(open_addr_t* neighbor)             {return TRUE;}
-void icmpv6echo_setIsReplyEnabled(bool isEnabled)                         {return;}
+void icmpv6echo_setIsReplyEnabled(bool isEnabled)                           {return;}
 
-bool debugPrint_asn(void)                                                 {return TRUE;}
-bool debugPrint_isSync(void)                                              {return TRUE;}
-bool debugPrint_macStats(void)                                            {return TRUE;}
-bool debugPrint_schedule(void)                                            {return TRUE;}
-bool debugPrint_backoff(void)                                             {return TRUE;}
-bool debugPrint_queue(void)                                               {return TRUE;}
-bool debugPrint_neighbors(void)                                           {return TRUE;}
-bool debugPrint_myDAGrank(void)                                           {return TRUE;}
-bool debugPrint_kaPeriod(void)                                            {return TRUE;}
+bool debugPrint_asn(void)       {return TRUE;}
+bool debugPrint_isSync(void)    {return TRUE;}
+bool debugPrint_macStats(void)  {return TRUE;}
+bool debugPrint_schedule(void)  {return TRUE;}
+bool debugPrint_backoff(void)   {return TRUE;}
+bool debugPrint_queue(void)     {return TRUE;}
+bool debugPrint_neighbors(void) {return TRUE;}
+bool debugPrint_myDAGrank(void) {return TRUE;}
+bool debugPrint_kaPeriod(void)  {return TRUE;}
 
 void IEEE802154_security_setBeaconKey(uint8_t index, uint8_t* value)      {return;}
 void IEEE802154_security_setDataKey(uint8_t index, uint8_t* value)        {return;}

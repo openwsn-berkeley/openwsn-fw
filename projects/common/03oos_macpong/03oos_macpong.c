@@ -39,18 +39,20 @@ void macpong_send(uint8_t payloadCtr);
 //=========================== initialization ==================================
 
 int mote_main(void) {
-   board_init();
-   scheduler_init();
-   openstack_init();
-   if (idmanager_getMyID(ADDR_64B)->addr_64b[7]==0x16) {
-      idmanager_setIsDAGroot(TRUE);
-   }
-   scheduler_start();
-   return 0; // this line should never be reached
+    board_init();
+    scheduler_init();
+    openstack_init();
+    if (idmanager_getMyID(ADDR_64B)->addr_64b[7]==0x16) {
+        idmanager_setIsDAGroot(TRUE);
+    }
+    scheduler_start();
+    return 0; // this line should never be reached
 }
 
 void macpong_initSend(opentimers_id_t id) {
     bool timeToSend = FALSE;
+    open_addr_t  temp;
+
     macpong_vars.macpongCounter = (macpong_vars.macpongCounter+1)%5;
     switch (macpong_vars.macpongCounter) {
         case 0:
@@ -58,33 +60,28 @@ void macpong_initSend(opentimers_id_t id) {
             break;
         default:
             break;
-   }
-   opentimers_scheduleIn(
-        macpong_vars.timerId, // id
-        1000,                 // duration
-        TIME_MS,              // time_type
-        TIMER_ONESHOT,        // timer_type
-        macpong_initSend      // callback
-   );
-  
-  
-   if (idmanager_getIsDAGroot()==TRUE) {
-      return;
-   }
-   if (ieee154e_isSynch()==TRUE && neighbors_getNumNeighbors()==1) {
-      if (timeToSend){
-          // send packet
-           macpong_send(0);   
-          // cancel timer
-          opentimers_cancel(macpong_vars.timerId);
-      }
-   }
+    }
+
+    if (idmanager_getIsDAGroot()==TRUE) {
+        return;
+    }
+    if (ieee154e_isSynch()==TRUE && neighbors_getNumNeighbors()==1) {
+        neighbors_getNeighborEui64(&temp,ADDR_64B,0);
+        if (schedule_hasDedicatedCellToNeighbor(&temp)){
+            if (timeToSend){
+                // send packet
+                macpong_send(0);
+                // cancel timer
+                opentimers_cancel(macpong_vars.timerId);
+            }
+        }
+    }
 }
 
 void macpong_send(uint8_t payloadCtr) {
    OpenQueueEntry_t* pkt;
    uint8_t i;
-   
+
    pkt = openqueue_getFreePacketBuffer(COMPONENT_UECHO);
    if (pkt==NULL) {
       openserial_printError(
@@ -97,7 +94,7 @@ void macpong_send(uint8_t payloadCtr) {
    }
    pkt->creator                   = COMPONENT_IPHC;
    pkt->owner                     = COMPONENT_IPHC;
-   
+
    neighbors_getNeighborEui64(&pkt->l2_nextORpreviousHop,ADDR_64B,0);
    packetfunctions_reserveHeaderSize(pkt,LEN_PAYLOAD);
    ((uint8_t*)pkt->payload)[0]    = payloadCtr;
@@ -112,15 +109,13 @@ void macpong_send(uint8_t payloadCtr) {
 //===== IPHC
 
 void iphc_init(void) {
-    PORT_TIMER_WIDTH       reference;
-    reference            = opentimers_getValue();
-    macpong_vars.timerId = opentimers_create();
-    opentimers_scheduleAbsolute(
-        macpong_vars.timerId,  // timerId
-        1000,                  // duration
-        reference,             // reference
-        TIME_MS,               // timetype
-        macpong_initSend       // callback
+    macpong_vars.timerId = opentimers_create(TIMER_GENERAL_PURPOSE);
+    opentimers_scheduleIn(
+        macpong_vars.timerId,   // timerId
+        1000,                   // duration
+        TIME_MS,                // timetype
+        TIMER_PERIODIC,         // timertype
+        macpong_initSend        // callback
     );
 }
 
@@ -157,17 +152,36 @@ void icmpv6rpl_trigger(void)                                         { return; }
 void icmpv6rpl_writeDODAGid(uint8_t* dodagid)                        { return; }
 void icmpv6rpl_setDIOPeriod(uint16_t dioPeriod)                      { return; }
 void icmpv6rpl_setDAOPeriod(uint16_t daoPeriod)                      { return; }
-bool icmpv6rpl_getPreferredParentIndex(uint8_t* indexptr)            { 
-    return FALSE; 
+bool icmpv6rpl_getPreferredParentIndex(uint8_t* indexptr)            {
+    return FALSE;
 }
-bool icmpv6rpl_getPreferredParentEui64(open_addr_t* addressToWrite)  { 
-    return FALSE; 
+bool icmpv6rpl_getPreferredParentEui64(open_addr_t* addressToWrite)  {
+
+    if (idmanager_getIsDAGroot()==TRUE) {
+        return FALSE;
+    }
+
+    if (ieee154e_isSynch()==TRUE && neighbors_getNumNeighbors()==1) {
+        neighbors_getNeighborEui64(addressToWrite,ADDR_64B,0);
+    }
+    return TRUE;
 }
-bool icmpv6rpl_isPreferredParent(open_addr_t* address)               { 
-    return FALSE; 
+bool icmpv6rpl_isPreferredParent(open_addr_t* address)               {
+
+    open_addr_t  temp;
+    if (idmanager_getIsDAGroot()==TRUE) {
+        return FALSE;
+    }
+
+   if (address->type == ADDR_64B) {
+        neighbors_getNeighborEui64(&temp,ADDR_64B,0);
+        return packetfunctions_sameAddress(address,&temp);
+   } else {
+        return FALSE;
+   }
 }
-dagrank_t icmpv6rpl_getMyDAGrank(void)                               { 
-    return 0; 
+dagrank_t icmpv6rpl_getMyDAGrank(void)                               {
+    return 0;
 }
 bool icmpv6rpl_daoSent(void) {
     return TRUE;

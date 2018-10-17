@@ -15,7 +15,7 @@ static const uint8_t uinject_payload[]    = "uinject";
 static const uint8_t uinject_dst_addr[]   = {
    0xbb, 0xbb, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01
-}; 
+};
 
 //=========================== prototypes ======================================
 
@@ -25,7 +25,7 @@ void uinject_task_cb(void);
 //=========================== public ==========================================
 
 void uinject_init(void) {
-   
+
     // clear local variables
     memset(&uinject_vars,0,sizeof(uinject_vars_t));
 
@@ -37,7 +37,7 @@ void uinject_init(void) {
 
     uinject_vars.period = UINJECT_PERIOD_MS;
     // start periodic timer
-    uinject_vars.timerId = opentimers_create();
+    uinject_vars.timerId = opentimers_create(TIMER_GENERAL_PURPOSE);
     opentimers_scheduleIn(
         uinject_vars.timerId,
         UINJECT_PERIOD_MS,
@@ -52,9 +52,9 @@ void uinject_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 }
 
 void uinject_receive(OpenQueueEntry_t* pkt) {
-   
+
    openqueue_freePacketBuffer(pkt);
-   
+
    openserial_printError(
       COMPONENT_UINJECT,
       ERR_RCVD_ECHO_REPLY,
@@ -70,25 +70,25 @@ void uinject_receive(OpenQueueEntry_t* pkt) {
    task to scheduler with CoAP priority, and let scheduler take care of it.
 */
 void uinject_timer_cb(opentimers_id_t id){
-   
+
    scheduler_push_task(uinject_task_cb,TASKPRIO_COAP);
 }
 
 void uinject_task_cb(void) {
    OpenQueueEntry_t*    pkt;
    uint8_t              asnArray[5];
-   
+
    // don't run if not synch
    if (ieee154e_isSynch() == FALSE) return;
-   
+
    // don't run on dagroot
    if (idmanager_getIsDAGroot()) {
       opentimers_destroy(uinject_vars.timerId);
       return;
    }
-   
+
    // if you get here, send a packet
-   
+
    // get a free packet buffer
    pkt = openqueue_getFreePacketBuffer(COMPONENT_UINJECT);
    if (pkt==NULL) {
@@ -100,7 +100,7 @@ void uinject_task_cb(void) {
       );
       return;
    }
-   
+
    pkt->owner                         = COMPONENT_UINJECT;
    pkt->creator                       = COMPONENT_UINJECT;
    pkt->l4_protocol                   = IANA_UDP;
@@ -108,16 +108,16 @@ void uinject_task_cb(void) {
    pkt->l4_sourcePortORicmpv6Type     = WKP_UDP_INJECT;
    pkt->l3_destinationAdd.type        = ADDR_128B;
    memcpy(&pkt->l3_destinationAdd.addr_128b[0],uinject_dst_addr,16);
-   
+
    // add payload
    packetfunctions_reserveHeaderSize(pkt,sizeof(uinject_payload)-1);
    memcpy(&pkt->payload[0],uinject_payload,sizeof(uinject_payload)-1);
-   
+
    packetfunctions_reserveHeaderSize(pkt,sizeof(uint16_t));
    pkt->payload[1] = (uint8_t)((uinject_vars.counter & 0xff00)>>8);
    pkt->payload[0] = (uint8_t)(uinject_vars.counter & 0x00ff);
    uinject_vars.counter++;
-   
+
    packetfunctions_reserveHeaderSize(pkt,sizeof(asn_t));
    ieee154e_getAsn(asnArray);
    pkt->payload[0] = asnArray[0];
@@ -125,7 +125,7 @@ void uinject_task_cb(void) {
    pkt->payload[2] = asnArray[2];
    pkt->payload[3] = asnArray[3];
    pkt->payload[4] = asnArray[4];
-   
+
    if ((openudp_send(pkt))==E_FAIL) {
       openqueue_freePacketBuffer(pkt);
    }

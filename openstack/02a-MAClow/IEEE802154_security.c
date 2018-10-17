@@ -46,7 +46,7 @@ void IEEE802154_security_init(void) {
    // invalidate data key (key 2)
    ieee802154_security_vars.k2.index = IEEE802154_SECURITY_KEYINDEX_INVALID;
    memset(&ieee802154_security_vars.k2.value[0], 0x00, 16);
-}
+      }
 
 uint8_t IEEE802154_security_getBeaconKeyIndex(void) {
     return ieee802154_security_vars.k1.index;
@@ -147,7 +147,7 @@ void IEEE802154_security_prependAuxiliarySecurityHeader(OpenQueueEntry_t* msg){
    temp8b |= msg->l2_keyIdMode << IEEE154_ASH_SCF_KEY_IDENTIFIER_MODE;//2b
    temp8b |= frameCounterSuppression << IEEE154_ASH_SCF_FRAME_CNT_MODE; //1b
 
-   temp8b |= 1 << IEEE154_ASH_SCF_FRAME_CNT_SIZE; //1b
+      temp8b |= 1 << IEEE154_ASH_SCF_FRAME_CNT_SIZE; //1b
 
    temp8b |= 0 << 1;//1b reserved
    *((uint8_t*)(msg->payload)) = temp8b;
@@ -216,13 +216,13 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
    //Encryption and/or authentication
    // cryptoengine overwrites m[] with ciphertext and appends the MIC
    outStatus = cryptoengine_aes_ccms_enc(a,
-                                    len_a,
-                                    m,
-                                    &len_m,
-                                    nonce,
-                                    2, // L=2 in 15.4 std
-                                    key,
-                                    msg->l2_authenticationLength);
+                                          len_a,
+                                          m,
+                                          &len_m,
+                                          nonce,
+                                          2, // L=2 in 15.4 std
+                                          key,
+                                          msg->l2_authenticationLength);
 
    //verify that no errors occurred
    if (outStatus != E_SUCCESS) {
@@ -230,7 +230,7 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
       (errorparameter_t)msg->l2_frameType,
       (errorparameter_t)3);
    }
-   
+
    return outStatus;
 }
 
@@ -272,7 +272,7 @@ void IEEE802154_security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t*      
    tempheader->headerLength++;
 
    //Frame Counter field
-   if (frameCnt_Suppression == IEEE154_ASH_FRAMECOUNTER_PRESENT) { //the frame counter is here
+   if (frameCnt_Suppression == IEEE154_ASH_FRAMECOUNTER_PRESENT){//the frame counter is here
       //the frame counter size can be 4 or 5 bytes
       for (i=0;i<frameCnt_Size;i++){
           receivedASN[i] = *((uint8_t*)(msg->payload)+tempheader->headerLength);
@@ -344,11 +344,11 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t* msg){
    uint8_t* c;
    uint8_t len_c;
    uint8_t *key;
-   
+
    key = msg->l2_frameType == IEEE154_TYPE_BEACON ? ieee802154_security_vars.k1.value : ieee802154_security_vars.k2.value;
 
    // First 8 bytes of the nonce are always the source address of the frame
-   memcpy(&nonce[0],msg->l2_nextORpreviousHop.addr_64b, 8);
+   memcpy(&nonce[0],msg->l2_nextORpreviousHop.addr_64b,8);
    // Fill last 5 bytes with ASN part of the nonce
    ieee154e_getAsn(&nonce[8]);
    packetfunctions_reverseArrayByteOrder(&nonce[8], 5);  // reverse ASN bytes to big endian 
@@ -389,13 +389,13 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t* msg){
 
    //decrypt and/or verify authenticity of the frame
    outStatus = cryptoengine_aes_ccms_dec(a,
-                                    len_a,
-                                    c,
-                                    &len_c,
-                                    nonce,
-                                    2,
+                                          len_a,
+                                          c,
+                                          &len_c,
+                                          nonce,
+                                          2,
                                     key,
-                                    msg->l2_authenticationLength);
+                                          msg->l2_authenticationLength);
 
    //verify if any error occurs
    if (outStatus != E_SUCCESS){
@@ -481,17 +481,17 @@ uint8_t IEEE802154_security_auxLengthChecking(uint8_t KeyIdMode,
 uint8_t IEEE802154_security_getSecurityLevel(OpenQueueEntry_t *msg) {
     if (IEEE802154_security_isConfigured() == FALSE) {
         return IEEE154_ASH_SLF_TYPE_NOSEC;
-    }
-    
+}
+
     if (packetfunctions_isBroadcastMulticast(&msg->l2_nextORpreviousHop)) {
         return IEEE802154_SECURITY_LEVEL;
-    }
+      }
 
     if(neighbors_isInsecureNeighbor(&msg->l2_nextORpreviousHop) &&
        ieee802154_security_vars.joinPermitted == TRUE) {
         return IEEE154_ASH_SLF_TYPE_NOSEC;
-    }
-    
+      }
+
     return IEEE802154_SECURITY_LEVEL;
 }
 
@@ -499,7 +499,7 @@ bool IEEE802154_security_acceptableLevel(OpenQueueEntry_t* msg, ieee802154_heade
     if (IEEE802154_security_isConfigured() == FALSE     &&
         msg->l2_securityLevel == IEEE154_ASH_SLF_TYPE_NOSEC) {
         return TRUE;
-    }
+         }
 
     if (IEEE802154_security_isConfigured() == FALSE             &&
         msg->l2_frameType == IEEE154_TYPE_BEACON                &&
@@ -507,14 +507,14 @@ bool IEEE802154_security_acceptableLevel(OpenQueueEntry_t* msg, ieee802154_heade
          msg->l2_securityLevel == IEEE154_ASH_SLF_TYPE_MIC_64   ||
          msg->l2_securityLevel == IEEE154_ASH_SLF_TYPE_MIC_128)) {
         return TRUE;
-    }
-    
+}
+
     if (IEEE802154_security_isConfigured()               == TRUE &&
         msg->l2_securityLevel == IEEE154_ASH_SLF_TYPE_NOSEC      &&
         ieee802154_security_vars.joinPermitted           == TRUE &&
         neighbors_isInsecureNeighbor(&parsedHeader->src) == TRUE) {
         return TRUE;
-    }
+             }
 
     if (IEEE802154_security_isConfigured() == TRUE              &&
         msg->l2_frameType == IEEE154_TYPE_BEACON                &&
@@ -522,8 +522,8 @@ bool IEEE802154_security_acceptableLevel(OpenQueueEntry_t* msg, ieee802154_heade
          msg->l2_securityLevel == IEEE154_ASH_SLF_TYPE_MIC_64   ||
          msg->l2_securityLevel == IEEE154_ASH_SLF_TYPE_MIC_128)) {
         return TRUE;
-    }
- 
+         }
+
     if (IEEE802154_security_isConfigured() == TRUE                  &&
         (msg->l2_frameType == IEEE154_TYPE_DATA                     ||
          msg->l2_frameType == IEEE154_TYPE_ACK                      ||
@@ -532,9 +532,9 @@ bool IEEE802154_security_acceptableLevel(OpenQueueEntry_t* msg, ieee802154_heade
          msg->l2_securityLevel == IEEE154_ASH_SLF_TYPE_ENC_MIC_64   ||
          msg->l2_securityLevel == IEEE154_ASH_SLF_TYPE_ENC_MIC_128)) {
         return TRUE;
-    }
+            }
     return FALSE;
-}
+         }
 
 #else /* L2_SECURITY_ACTIVE */
 

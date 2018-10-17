@@ -18,8 +18,8 @@
 //=========================== define ==========================================
 
 typedef enum {
-   DO_NOT_KICK_SCHEDULER,
-   KICK_SCHEDULER,
+   DO_NOT_KICK_SCHEDULER = 0,
+   KICK_SCHEDULER        = 1,
 } kick_scheduler_t;
 
 //=========================== typedef =========================================

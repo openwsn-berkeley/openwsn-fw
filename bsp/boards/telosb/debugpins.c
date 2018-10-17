@@ -16,17 +16,20 @@
 //=========================== public ==========================================
 
 void debugpins_init(void) {
-   P6DIR |=  0x40;      // frame     [P6.6]
-   P6DIR |=  0x80;      // slot      [P6.7]
-   P2DIR |=  0x08;      // fsm       [P2.3]
-   P2DIR |=  0x40;      // task      [P2.6]
-   P6DIR |=  0x01;      // isr       [P6.0]
-   P3DIR |=  0x20;      // isruarttx [P3.5]
-   P3DIR |=  0x10;      // isruartrx [P3.4]
-   P6DIR |=  0x02;      // radio     [P6.1]
+   P6DIR |=  0x40;      // frame       [P6.6]
+   P6DIR |=  0x80;      // slot        [P6.7]
+   P2DIR |=  0x08;      // fsm         [P2.3]
+   P2DIR |=  0x40;      // task        [P2.6]
+
+   P6DIR |=  0x01;      // isr         [P6.0]
+   P6DIR |=  0x02;      // radio       [P6.1]
+
+   P3DIR |=  0x20;      // isruarttx   [P3.5]
+   P3DIR |=  0x10;      // isruartrx   [P3.4]
+   P6DIR |=  0x08;      // intdisabled [P6.3]
 }
 
-// P6.6
+// frame       [P6.6]
 void debugpins_frame_toggle(void) {
    P6OUT ^=  0x40;
 }
@@ -36,8 +39,7 @@ void debugpins_frame_clr(void) {
 void debugpins_frame_set(void) {
    P6OUT |=  0x40;
 }
-
-// P6.7
+// slot        [P6.7]
 void debugpins_slot_toggle(void) {
    P6OUT ^=  0x80;
 }
@@ -47,8 +49,7 @@ void debugpins_slot_clr(void) {
 void debugpins_slot_set(void) {
    P6OUT |=  0x80;
 }
-
-// P2.3
+// fsm         [P2.3]
 void debugpins_fsm_toggle(void) {
    P2OUT ^=  0x08;
 }
@@ -58,8 +59,7 @@ void debugpins_fsm_clr(void) {
 void debugpins_fsm_set(void) {
    P2OUT |=  0x08;
 }
-
-// P2.6
+// task       [P2.6]
 void debugpins_task_toggle(void) {
    P2OUT ^=  0x40;
 }
@@ -70,7 +70,7 @@ void debugpins_task_set(void) {
    P2OUT |=  0x40;
 }
 
-// P6.0
+// isr        [P6.0]
 void debugpins_isr_toggle(void) {
    P6OUT ^=  0x01;
 }
@@ -80,8 +80,18 @@ void debugpins_isr_clr(void) {
 void debugpins_isr_set(void) {
    P6OUT |=  0x01;
 }
+// radio      [P6.1]
+void debugpins_radio_toggle(void) {
+   P6OUT ^=  0x02;
+}
+void debugpins_radio_clr(void) {
+   P6OUT &= ~0x02;
+}
+void debugpins_radio_set(void) {
+   P6OUT |=  0x02;
+}
 
-// P3.5
+// isruarttx   [P3.5]
 void debugpins_isruarttx_toggle(void) {
    P3OUT ^=  0x20;
 }
@@ -91,8 +101,7 @@ void debugpins_isruarttx_clr(void) {
 void debugpins_isruarttx_set(void) {
    P3OUT |=  0x20;
 }
-
-// P3.4
+// isruartrx   [P3.4]
 void debugpins_isruartrx_toggle(void) {
    P3OUT ^=  0x10;
 }
@@ -102,16 +111,15 @@ void debugpins_isruartrx_clr(void) {
 void debugpins_isruartrx_set(void) {
    P3OUT |=  0x10;
 }
-
-// P6.1
-void debugpins_radio_toggle(void) {
-   P6OUT ^=  0x02;
+// intdisabled [P6.3]
+void debugpins_intdisabled_toggle(void) {
+   P6OUT ^=  0x08;
 }
-void debugpins_radio_clr(void) {
-   P6OUT &= ~0x02;
+void debugpins_intdisabled_clr(void) {
+   P6OUT &= ~0x08;
 }
-void debugpins_radio_set(void) {
-   P6OUT |=  0x02;
+void debugpins_intdisabled_set(void) {
+   P6OUT |=  0x08;
 }
 
 //=========================== private =========================================

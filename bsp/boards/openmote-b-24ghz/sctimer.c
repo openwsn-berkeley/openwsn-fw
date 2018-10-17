@@ -13,7 +13,7 @@
 // ========================== define ==========================================
 
 #define TIMERLOOP_THRESHOLD          0xffffff     // 511 seconds @ 32768Hz clock
-#define MINIMUM_COMPAREVALE_ADVANCE  10
+#define MINIMUM_COMPAREVALE_ADVANCE  5
 
 // ========================== variable ========================================
 
@@ -56,7 +56,7 @@ void sctimer_setCompare(uint32_t val){
     } else {
         if (val-SleepModeTimerCountGet()<MINIMUM_COMPAREVALE_ADVANCE){
             // there is hardware limitation to schedule the timer within TIMERTHRESHOLD ticks
-            // schedule ISR right now manually
+            // schedule ISR right now manually (see user guide 13.2)
             IntPendSet(INT_SMTIM);
         } else {
             // schedule the timer at val

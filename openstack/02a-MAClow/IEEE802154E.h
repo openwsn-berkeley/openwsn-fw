@@ -47,6 +47,7 @@ static const uint8_t ebIEsBytestream[] = {
 #define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"
 #define LENGTH_IEEE154_MAX         128 // max length of a valid radio packet
 #define DUTY_CYCLE_WINDOW_LIMIT    (0xFFFFFFFF>>1) // limit of the dutycycle window
+#define SERIALINHIBITGUARD          32 // 32@32kHz ~ 1ms
 
 //15.4e information elements related
 #define IEEE802154E_PAYLOAD_DESC_LEN_SHIFT                 0x04
@@ -163,10 +164,10 @@ enum ieee154e_atomicdurations_enum {
    TsTxAckDelay              =   33,                  //  1000us
    TsShortGT                 =   13,                  //   500us, The standardlized value for this is 400/2=200us(7ticks). Currectly 7 doesn't work for short packet, change it back to 7 when found the problem.
 #endif
-#if SLOTDURATION==15
-   TsTxOffset                =  131,                  //  4000us
+#if SLOTDURATION==20
+   TsTxOffset                =  171,                  //  5215us
    TsLongGT                  =   43,                  //  1300us
-   TsTxAckDelay              =  151,                  //  4606us
+   TsTxAckDelay              =  181,                  //  5521us
    TsShortGT                 =   16,                  //   500us
 #endif
    TsSlotDuration            =  PORT_TsSlotDuration,  // 10000us
@@ -181,12 +182,7 @@ enum ieee154e_atomicdurations_enum {
    // radio watchdog
    wdRadioTx                 =   45,                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
    wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
-#if SLOTDURATION==10
-   wdAckDuration             =   80,                  //  2400us (measured 1000us)
-#endif
-#if SLOTDURATION==15
    wdAckDuration             =   98,                  //  3000us (measured 1000us)
-#endif
 };
 
 //shift of bytes in the linkOption bitmap: draft-ietf-6tisch-minimal-10.txt: page 6
@@ -216,6 +212,8 @@ enum ieee154e_linkOption_enum {
 #define DURATION_rt6 ieee154e_vars.lastCapturedTime+TsTxAckDelay-delayTx
 #define DURATION_rt7 ieee154e_vars.lastCapturedTime+TsTxAckDelay-delayTx+wdRadioTx
 #define DURATION_rt8 ieee154e_vars.lastCapturedTime+wdAckDuration
+// serialInhibit
+#define DURATION_si  ieee154e_vars.slotDuration-SERIALINHIBITGUARD
 
 //=========================== typedef =========================================
 
@@ -266,6 +264,7 @@ typedef struct {
    uint16_t                  slotDuration;            // duration of slot
    opentimers_id_t           timerId;                 // id of timer used for implementing TSCH slot FSM
    uint32_t                  startOfSlotReference;    // the time refer to the beginning of slot
+   opentimers_id_t           serialInhibitTimerId;    // id of serial inhibit timer used for scheduling serial output
 } ieee154e_vars_t;
 
 BEGIN_PACK

@@ -21,6 +21,8 @@ When you run the application, you should see the LEDs "counting".
 #include "leds.h"
 // driver modules required
 #include "opentimers.h"
+// kernel modules required
+#include "scheduler.h"
 
 //=========================== defines =========================================
 
@@ -50,22 +52,23 @@ void timer2_cb(opentimers_id_t id);
 \brief The program starts executing here.
 */
 int mote_main(void) {
-    
+
     memset(&app_vars,0,sizeof(app_vars_t));
-    
+
     board_init();
+    scheduler_init();
     opentimers_init();
-    
-    app_vars.timer0_id = opentimers_create();
-    opentimers_scheduleIn    (
-        app_vars.timer0_id,    // id
-        TIMER0_PERIOD_MS,      // duration
-        TIME_MS,               // time_type
-        TIMER_PERIODIC,        // timer_type
-        timer0_cb              // callback
+
+    app_vars.timer0_id = opentimers_create(HIGHEST_PRIORITY);
+    opentimers_scheduleAbsolute    (
+        app_vars.timer0_id,             // id
+        TIMER0_PERIOD_MS,               // duration
+        opentimers_getCurrentTimeout(), // reference
+        TIME_MS,                        // time_type
+        timer0_cb                       // callback
     );
-    
-    app_vars.timer1_id = opentimers_create();
+
+    app_vars.timer1_id = opentimers_create(DEFAULT_PRIORITY);
     opentimers_scheduleIn    (
         app_vars.timer1_id,    // id
         TIMER1_PERIOD_MS,      // duration
@@ -73,8 +76,8 @@ int mote_main(void) {
         TIMER_PERIODIC,        // timer_type
         timer1_cb              // callback
     );
-    
-    app_vars.timer2_id = opentimers_create();
+
+    app_vars.timer2_id = opentimers_create(DEFAULT_PRIORITY);
     opentimers_scheduleIn    (
         app_vars.timer2_id,    // id
         TIMER2_PERIOD_MS,      // duration
@@ -82,16 +85,23 @@ int mote_main(void) {
         TIMER_PERIODIC,        // timer_type
         timer2_cb              // callback
     );
-    
-    while(1) {
-        board_sleep();
-    }
+
+    scheduler_start();
+
+    return 0;
 }
 
 //=========================== callbacks =======================================
 
 void timer0_cb(opentimers_id_t id) {
     leds_error_toggle();
+    opentimers_scheduleAbsolute    (
+        app_vars.timer0_id,             // id
+        TIMER0_PERIOD_MS,               // duration
+        opentimers_getCurrentTimeout(), // reference
+        TIME_MS,                        // time_type
+        timer0_cb                       // callback
+    );
 }
 
 void timer1_cb(opentimers_id_t id) {

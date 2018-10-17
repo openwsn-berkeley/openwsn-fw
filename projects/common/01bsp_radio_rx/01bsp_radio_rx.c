@@ -98,7 +98,7 @@ typedef struct {
     // uart
                 uint8_t    uart_txFrame[LENGTH_SERIAL_FRAME];
                 uint8_t    uart_lastTxByte;
-    volatile   uint8_t    uart_done;
+    volatile    uint8_t    uart_done;
 } app_vars_t;
 
 app_vars_t app_vars;

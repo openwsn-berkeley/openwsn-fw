@@ -241,7 +241,6 @@ void forwarding_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 
       // indicate sendDone to upper layer
       switch(msg->l4_protocol) {
-            break;
          case IANA_UDP:
             openudp_sendDone(msg,error);
             break;
@@ -286,7 +285,7 @@ void forwarding_receive(
 
     // take ownership
     msg->owner                     = COMPONENT_FORWARDING;
-
+   
 
     // determine L4 protocol
     // get information from ipv6_header
@@ -296,7 +295,7 @@ void forwarding_receive(
     // populate packets metadata with L3 information
     memcpy(&(msg->l3_destinationAdd),&ipv6_inner_header->dest, sizeof(open_addr_t));
     memcpy(&(msg->l3_sourceAdd),     &ipv6_inner_header->src,  sizeof(open_addr_t));
-
+   
     if (
         (
             idmanager_isMyAddress(&(msg->l3_destinationAdd))
@@ -313,7 +312,6 @@ void forwarding_receive(
         packetfunctions_tossHeader(msg,ipv6_inner_header->header_length);
         // indicate received packet to upper layer
         switch(msg->l4_protocol) {
-            break;
         case IANA_UDP:
             openudp_receive(msg);
             break;
@@ -465,12 +463,12 @@ void forwarding_getNextHop(open_addr_t* destination128b, open_addr_t* addressToW
 /**
 \brief Send a packet using the routing table to find the next hop.
 
-\param[in,out] msg               The packet to send.
+\param[in,out] msg             The packet to send.
 \param[in]     ipv6_outer_header The packet's IPv6 outer header.
 \param[in]     ipv6_inner_header The packet's IPv6 inner header.
-\param[in]     rpl_option        The hop-by-hop option to add in this packet.
-\param[in]     flow_label        The flowlabel to add in the 6LoWPAN header.
-\param[in]     fw_SendOrfw_Rcv   The packet is originating from this mote
+\param[in]     rpl_option      The hop-by-hop option to add in this packet.
+\param[in]     flow_label      The flowlabel to add in the 6LoWPAN header.
+\param[in]     fw_SendOrfw_Rcv The packet is originating from this mote
    (PCKTSEND), or forwarded (PCKTFORWARD).
 */
 owerror_t forwarding_send_internal_RoutingTable(
@@ -525,7 +523,7 @@ owerror_t forwarding_send_internal_RoutingTable(
 How to process the routing header is detailed in
 http://tools.ietf.org/html/rfc6554#page-9.
 
-\param[in,out] msg               The packet to send.
+\param[in,out] msg             The packet to send.
 \param[in]     ipv6_outer_header The packet's IPv6 outer header.
 \param[in]     ipv6_inner_header The packet's IPv6 inner header.
 \param[in]     rpl_option        The hop-by-hop option to add in this packet.
