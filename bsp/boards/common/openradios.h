@@ -129,7 +129,7 @@ typedef struct {
 } radio_functions_t;
 
 typedef struct {
-    radio_functions_t radio_funct[MAX_NUM_RADIOS];
+    radio_functions_t radio_funct[MAX_NUM_MODEM];
 } openradios_vars_t;
 
 //=========================== variables =======================================

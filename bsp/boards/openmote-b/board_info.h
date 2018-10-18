@@ -106,16 +106,23 @@
 
 
 // number of radios in this board.
-#define MAX_NUM_RADIOS         2
-
+#define MAX_NUM_MODEM         2    // sub-GHz and 2.4 GHz interfaces or modem
+#define MAX_NUM_RADIOS        2    // amount of active PHYs.         
 //#define DAGROOT
 
 //=========================== typedef  ========================================
 
 typedef enum {
-   RADIOTYPE_2D4GHZ          = 0,
-   RADIOTYPE_SUBGHZ          = 1,
-   RADIOTYPE_ANY             = 2
+   MODEM_2D4GHZ          = 0,
+   MODEM_SUBGHZ          = 1,
+   FREQBAND_ANY          = 2
+} modem_t;
+
+typedef enum {
+    RADIOTYPE_2D4GHZ             = 0,
+    RADIOTYPE_SUBGHZ_OFDM_1_800  = 1,
+    RADIOTYPE_SUBGHZ_2FSK_50     = 2,
+    RADIOTYPE_ANY                = 3
 } radioType_t;
 
 //=========================== variables =======================================

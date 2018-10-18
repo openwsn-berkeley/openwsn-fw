@@ -283,9 +283,9 @@ typedef struct {
     uint32_t                  startOfSlotReference;    // the time refer to the beginning of slot
     uint8_t                   delayTx;                 // radio specific tx delay
     uint8_t                   delayRx;                 // radio specific rx delay
-    uint8_t                   ChInitOffset;            // first channel, e.g., for O-QPSK 2006 is 11
-
-   radio_functions_t*        radio_functions;
+    uint8_t                   ChInitOffset;            // first channel, e.g., for O-QPSK 2006 is 11, for 2fsk is 0
+    modem_t                   modem;                   // either sub-GHz or 2.4 GHz
+    radio_functions_t*        radio_functions;
 } ieee154e_vars_t;
 
 BEGIN_PACK
