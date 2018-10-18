@@ -22,7 +22,7 @@
 static const uint8_t infoStackName[] = "OpenWSN ";
 #define OPENWSN_VERSION_MAJOR     1
 #define OPENWSN_VERSION_MINOR     21
-#define OPENWSN_VERSION_PATCH     1
+#define OPENWSN_VERSION_PATCH     2
 
 #ifndef TRUE
 #define TRUE 1

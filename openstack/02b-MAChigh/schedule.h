@@ -92,9 +92,7 @@ typedef enum {
    CELLTYPE_OFF              = 0,
    CELLTYPE_TX               = 1,
    CELLTYPE_RX               = 2,
-   CELLTYPE_TXRX             = 3,
-   CELLTYPE_SERIALRX         = 4,
-   CELLTYPE_MORESERIALRX     = 5
+   CELLTYPE_TXRX             = 3
 } cellType_t;
 
 typedef struct {
