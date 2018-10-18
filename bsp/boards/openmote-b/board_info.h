@@ -59,36 +59,38 @@
 
 //===== IEEE802154E timing
 
-//#define SLOTDURATION_10MS // by default, we use 10ms time slot
+// #define SLOTDURATION_10MS // by default, we use 10ms time slot
 
 #ifdef SLOTDURATION_10MS
-// time-slot related
-#define PORT_TsSlotDuration                 328   // counter counts one extra count, see datasheet
-// execution speed related
-#define PORT_maxTxDataPrepare               10    //  305us (measured  82us)
-#define PORT_maxRxAckPrepare                10    //  305us (measured  83us)
-#define PORT_maxRxDataPrepare                4    //  122us (measured  22us)
-#define PORT_maxTxAckPrepare                10    //  122us (measured  94us)
-// radio speed related
-#ifdef L2_SECURITY_ACTIVE
-#define PORT_delayTx                        14    //  366us (measured xxxus)
-#else
-#define PORT_delayTx                        12    //  366us (measured xxxus)
-#endif
-#define PORT_delayRx                         0    //    0us (can not measure)
-// radio watchdog
-#else
-// time-slot related
-#define PORT_TsSlotDuration                 492   // counter counts one extra count, see datasheet
-// execution speed related
-#define PORT_maxTxDataPrepare               66    // 2014us (measured 746us)
-#define PORT_maxRxAckPrepare                30    //  305us (measured  83us)
-#define PORT_maxRxDataPrepare               33    // 1007us (measured  84us)
-#define PORT_maxTxAckPrepare                32    //  305us (measured 219us)
-// radio speed related
-#define PORT_delayTx                        42    //  214us (measured 219us)
-#define PORT_delayRx                        0     //    0us (can not measure)
-// radio watchdog
+    // time-slot related
+    #define PORT_TsSlotDuration                 328   // counter counts one extra count, see datasheet
+    // execution speed related
+    #define PORT_maxTxDataPrepare               10    //  305us (measured  82us)
+    #define PORT_maxRxAckPrepare                10    //  305us (measured  83us)
+    #define PORT_maxRxDataPrepare                4    //  122us (measured  22us)
+    #define PORT_maxTxAckPrepare                10    //  122us (measured  94us)
+    // radio speed related
+    #ifdef L2_SECURITY_ACTIVE
+    #define PORT_delayTx                        14    //  366us (measured xxxus)
+    #else
+    #define PORT_delayTx                        12    //  366us (measured xxxus)
+    #endif
+    #define PORT_delayRx                         0    //    0us (can not measure)
+    // radio watchdog
+#else // 40 ms
+    // time-slot related
+    #define PORT_TsSlotDuration                 1310   // counter counts one extra count, see datasheet
+    // execution speed related
+    #define PORT_maxTxDataPrepare               40    // 2014us (measured 746us)
+    #define PORT_maxRxAckPrepare                30    //  305us (measured  83us)
+    #define PORT_maxRxDataPrepare               30    // 1007us (measured  84us)
+    #define PORT_maxTxAckPrepare                40    //  305us (measured 219us)
+    // radio speed related
+    #define delayTx_2FSK_50                     67
+    #define delayTx_OFDM1                       40       
+
+    #define PORT_wdAckDuration                 260
+    // radio watchdog
 #endif
 
 //===== adaptive_sync accuracy
@@ -106,16 +108,32 @@
 
 
 // number of radios in this board.
-#define MAX_NUM_RADIOS         2
-
+#define MAX_NUM_MODEM         2    // sub-GHz and 2.4 GHz interfaces or modem
+#define MAX_NUM_RADIOS        2    // amount of active PHYs.         
 //#define DAGROOT
+   
+
+//#define wdAckDuration              260                  //  5400us using 50 kbps
+#define NUM_CHANNELS                3 // number of channels to channel hop on
+#define DEFAULT_CH_SPACING          200 // default channel spacing for subghz
+#define DEFAULT_FREQUENCY_CENTER    863125 // defualt freque   
+#define delayTx_SUBGHZ              67
+#define delayRx_SUBGHZ              0
+#define NUM_CHANNELS_SUBGHZ         3
 
 //=========================== typedef  ========================================
 
 typedef enum {
-   RADIOTPYE_2D4GHZ          = 0,
-   RADIOTPYE_SUBGHZ          = 1,
-   RADIOTPYE_ANY             = 2
+   MODEM_2D4GHZ          = 0,
+   MODEM_SUBGHZ          = 1,
+   FREQBAND_ANY          = 2
+} modem_t;
+
+typedef enum {
+    RADIOTYPE_2D4GHZ             = 0,
+    RADIOTYPE_SUBGHZ_OFDM_1_800  = 1,
+    RADIOTYPE_SUBGHZ_2FSK_50     = 2,
+    RADIOTYPE_ANY                = 3
 } radioType_t;
 
 //=========================== variables =======================================

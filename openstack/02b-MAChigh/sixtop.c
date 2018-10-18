@@ -631,7 +631,7 @@ owerror_t sixtop_send_internal(
 //        msg->l2_radioType = (radioType_t)(msg->l2_dsn&0x01);
 //    }
 
-    msg->l2_radioType = 0;
+    msg->l2_radioType = 1;
 
     // change owner to IEEE802154E fetches it from queue
     msg->owner  = COMPONENT_SIXTOP_TO_IEEE802154E;

@@ -37,10 +37,6 @@ static const uint8_t ebIEsBytestream[] = {
 #define EB_SLOTFRAME_NUMLINK_OFFSET 22
 
 #define EB_IE_LEN                   28
-
-#define NUM_CHANNELS                16 // number of channels to channel hop on
-#define DEFAULT_CH_SPACING           1200 // default channel spacing for subghz
-#define DEFAULT_FREQUENCY_CENTER     863625 // defualt freque
 #define TXRETRIES                    3 // number of MAC retries before declaring failed
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to successfully synchronize
@@ -167,10 +163,10 @@ enum ieee154e_atomicdurations_enum {
    TsTxAckDelay              =   33,                  //  1000us
    TsShortGT                 =    9,                  //   500us, The standardlized value for this is 400/2=200us(7ticks). Currectly 7 doesn't work for short packet, change it back to 7 when found the problem.
 #else
-   TsTxOffset                =  131,                  //  4000us
-   TsLongGT                  =   43,                  //  1300us
-   TsTxAckDelay              =  151,                  //  4606us
-   TsShortGT                 =   16,                  //   500us
+   TsTxOffset                =  120,                  //  4000us
+   TsLongGT                  =   86,                  //  1300us
+   TsTxAckDelay              =  140,                  //  4606us
+   TsShortGT                 =   80,                  //   500us
 #endif
    TsSlotDuration            =  PORT_TsSlotDuration,  // 10000us
    // execution speed related
@@ -182,13 +178,14 @@ enum ieee154e_atomicdurations_enum {
 //   delayTx                   =  PORT_delayTx,         // between GO signal and SFD
 //   delayRx                   =  PORT_delayRx,         // between GO signal and start listening
    // radio watchdog
+#ifdef SLOTDURATION_10MS
    wdRadioTx                 =   33,                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 43 is tested and works)
    wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
-#ifdef SLOTDURATION_10MS
-   wdAckDuration             =   80,                  //  2400us (measured 1000us)
 #else
-   wdAckDuration             =   98,                  //  3000us (measured 1000us)
+   wdRadioTx                 =  140,                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 43 is tested and works)
+   wdDataDuration            =  754,                  //  23000us (measured 4280us with max payload)   
 #endif
+   wdAckDuration             =   PORT_wdAckDuration,                  //  2400us (measured 1000us)
 };
 
 //shift of bytes in the linkOption bitmap: draft-ietf-6tisch-minimal-10.txt: page 6
@@ -273,8 +270,9 @@ typedef struct {
     uint32_t                  startOfSlotReference;    // the time refer to the beginning of slot
     uint8_t                   delayTx;                 // radio specific tx delay
     uint8_t                   delayRx;                 // radio specific rx delay
-
-   radio_functions_t*        radio_functions;
+    uint8_t                   ChInitOffset;            // first channel, e.g., for O-QPSK 2006 is 11, for 2fsk is 0
+    modem_t                   modem;                   // either sub-GHz or 2.4 GHz
+    radio_functions_t*        radio_functions;
 } ieee154e_vars_t;
 
 BEGIN_PACK

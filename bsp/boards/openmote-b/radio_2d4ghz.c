@@ -71,7 +71,6 @@ void radio_2d4ghz_setFunctions(radio_functions_t* funcs){
     funcs->radio_rfOff_cb              = radio_2d4ghz_rfOff;
     funcs->radio_setFrequency_cb       = radio_2d4ghz_setFrequency;
     funcs->radio_change_modulation_cb  = radio_2d4ghz_change_modulation;
-    funcs->radio_change_size_cb        = radio_2d4ghz_change_size;
     // reset
     funcs->radio_reset_cb              = radio_2d4ghz_reset;
     // TX

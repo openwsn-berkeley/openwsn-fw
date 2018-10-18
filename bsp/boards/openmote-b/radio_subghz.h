@@ -18,9 +18,10 @@
 //=========================== define ==========================================
 
 #define LENGTH_CRC_SUBGHZ    4
-#define NUM_CHANNELS_SUBGHZ  4 // number of channels to channel hop on
-#define delayTx_SUBGHZ      40
-#define delayRx_SUBGHZ       0
+//#define NUM_CHANNELS_SUBGHZ  3 // number of channels to channel hop on
+//#define delayTx_SUBGHZ      67
+//#define delayRx_SUBGHZ       0
+#define ChInitOffset         0
 
 //=========================== typedef =========================================
 //=========================== variables =======================================
@@ -41,7 +42,6 @@ void     radio_subghz_setFrequency(uint16_t channel_spacing, uint32_t frequency_
 void     radio_subghz_rfOn(void);
 void     radio_subghz_rfOff(void);
 void     radio_subghz_change_modulation(registerSetting_t * mod);
-void     radio_subghz_change_size(uint16_t* size);
 // TX
 void     radio_subghz_loadPacket(uint8_t* packet, uint16_t len);
 void     radio_subghz_txEnable(void);
@@ -71,6 +71,7 @@ uint8_t radio_subghz_getCRCLen(void);
 uint8_t radio_subghz_calculateFrequency(uint8_t channelOffset, uint8_t asnOffset, uint8_t numChannels, uint8_t* hopSeq, bool singleChannel);
 uint8_t radio_subghz_getDelayTx(void);
 uint8_t radio_subghz_getDelayRx(void);
+uint8_t radio_getChInitOffset(void);
 /**
 \}
 \}
