@@ -48,7 +48,6 @@ owerror_t openserial_printInfoErrorCritical(
     errorparameter_t arg1,
     errorparameter_t arg2
 );
-owerror_t openserial_ackReply(void);
 
 // command handlers
 void openserial_handleRxFrame(void);
@@ -243,21 +242,6 @@ owerror_t openserial_printSniffedPacket(uint8_t* buffer, uint8_t length, uint8_t
        outputHdlcWrite(buffer[i]);
     }
     outputHdlcWrite(channel);
-    outputHdlcClose();
-
-    // start TX'ing
-    openserial_flush();
-
-    return E_SUCCESS;
-}
-
-
-owerror_t openserial_ackReply(void) {
-
-    outputHdlcOpen();
-    outputHdlcWrite(SERFRAME_MOTE2PC_ACKREPLY);
-    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
-    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
     outputHdlcClose();
 
     // start TX'ing
@@ -589,14 +573,12 @@ void openserial_handleRxFrame() {
     switch (cmdByte) {
         case SERFRAME_PC2MOTE_SETROOT:
             idmanager_triggerAboutRoot();
-            openserial_ackReply();
             break;
         case SERFRAME_PC2MOTE_RESET:
             board_reset();
             break;
         case SERFRAME_PC2MOTE_DATA:
             openbridge_triggerData();
-            openserial_ackReply();
             break;
         case SERFRAME_PC2MOTE_TRIGGERSERIALECHO:
             openserial_handleEcho(
@@ -605,7 +587,6 @@ void openserial_handleRxFrame() {
             );
             break;
         case SERFRAME_PC2MOTE_COMMAND:
-            openserial_ackReply();
             openserial_handleCommands();
             break;
     }
