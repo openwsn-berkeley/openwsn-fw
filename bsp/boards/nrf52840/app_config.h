@@ -9,6 +9,9 @@
 
 // clock 
 #define CLOCK_ENABLED 1
+// FIFO
+#define APP_FIFO_ENABLED 1
+
 
 // UART 
 #define UART_ENABLED 1

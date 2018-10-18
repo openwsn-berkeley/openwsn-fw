@@ -7,6 +7,9 @@
 
 #include "sdk/components/boards/boards.h"
 #include "sdk/components/libraries/uart/app_uart.h"
+#include "sdk/modules/nrfx/hal/nrf_uart.h"
+#include "sdk/integration/nrfx/legacy/nrf_drv_clock.h"
+#include "sdk/modules/nrfx/drivers/include/nrfx_systick.h"
 
 #include "board.h"
 #include "leds.h"
@@ -47,31 +50,61 @@ static void uart_event_handler(app_uart_evt_t * p_event);
 
 //=========================== public ==========================================
 
-void uart_init(void)
+static app_uart_comm_params_t const app_config =
+{
+  .rx_pin_no= RX_PIN_NUMBER,
+  .tx_pin_no= TX_PIN_NUMBER,
+  .rts_pin_no= RTS_PIN_NUMBER,                // defaults to UART_PIN_DISCONNECTED
+  .cts_pin_no= CTS_PIN_NUMBER,                // defaults to UART_PIN_DISCONNECTED
+  .baud_rate= UART_DEFAULT_CONFIG_BAUDRATE,
+  .use_parity= (UART_DEFAULT_CONFIG_PARITY != 0) ? (true) : (false),
+  .flow_control= UART_DEFAULT_CONFIG_HWFC     // defaults to false
+};
+
+static void uart_reinit(void)
 { 
-  // reset local variables
-  memset(&uart_vars,0,sizeof(uart_vars_t));
-   
   // for the case that the UART has previously been initialized, uninitialize it first  
   app_uart_close();
 
-  app_uart_comm_params_t const app_config =
+  #define APP_UART_BUF_SIZE 128
+
+  static uint8_t rx_buf[APP_UART_BUF_SIZE];
+  static uint8_t tx_buf[APP_UART_BUF_SIZE];
+  static app_uart_buffers_t app_uart_buffers=
   {
-    .rx_pin_no= RX_PIN_NUMBER,
-    .tx_pin_no= TX_PIN_NUMBER,
-    .rts_pin_no= RTS_PIN_NUMBER,                // defaults to UART_PIN_DISCONNECTED
-    .cts_pin_no= CTS_PIN_NUMBER,                // defaults to UART_PIN_DISCONNECTED
-    .baud_rate= UART_DEFAULT_CONFIG_BAUDRATE,
-    .use_parity= (UART_DEFAULT_CONFIG_PARITY != 0) ? (true) : (false),
-    .flow_control= UART_DEFAULT_CONFIG_HWFC     // defaults to false
+    .rx_buf= rx_buf,
+    .tx_buf= tx_buf,
+    .rx_buf_size= sizeof(rx_buf),
+    .tx_buf_size= sizeof(tx_buf)
   };
-  
+
+  memset(rx_buf, 0, sizeof(rx_buf));
+  memset(tx_buf, 0, sizeof(tx_buf));
+
   // if UART cannot be initialized, blink error LED for 10s, and then reset
-  if (NRF_SUCCESS != app_uart_init(&app_config, NULL, uart_event_handler, (app_irq_priority_t) NRFX_UART_DEFAULT_CONFIG_IRQ_PRIORITY))
+  if (NRF_SUCCESS != app_uart_init(&app_config, &app_uart_buffers, uart_event_handler, (app_irq_priority_t) NRFX_UART_DEFAULT_CONFIG_IRQ_PRIORITY))
   {
     leds_error_blink();
     board_reset();
   }
+}
+
+void uart_init(void)
+{ 
+  // reset local variables
+  memset(&uart_vars,0,sizeof(uart_vars_t));
+
+  // UART baudrate accuracy depends on HFCLK
+  // see radio.c for details on enabling HFCLK
+  #define hfclk_request_timeout_us 380
+  {
+    nrfx_systick_state_t systick_time;
+    nrfx_systick_get(&systick_time);
+    nrf_drv_clock_hfclk_request(NULL);
+    while ((!nrf_drv_clock_hfclk_is_running()) && (!nrfx_systick_test(&systick_time, hfclk_request_timeout_us))) {}
+  }
+
+  uart_reinit();  
 }
 
 void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb)
@@ -118,11 +151,12 @@ void uart_event_handler(app_uart_evt_t * p_event)
 {
 // debugpins_isr_set();
 
-  if ((p_event->evt_type == APP_UART_COMMUNICATION_ERROR) || (p_event->evt_type == APP_UART_FIFO_ERROR) || (p_event->evt_type == APP_UART_FIFO_ERROR))
+  if ((p_event->evt_type == APP_UART_COMMUNICATION_ERROR) || (p_event->evt_type == APP_UART_FIFO_ERROR))
   {
     // handle error ...
     // leds_error_blink();
     leds_error_toggle();
+    uart_reinit();  
   }
   else if ((p_event->evt_type == APP_UART_DATA) || (p_event->evt_type == APP_UART_DATA_READY))
   {
@@ -163,4 +197,8 @@ kick_scheduler_t uart_rx_isr(void)
   return DO_NOT_KICK_SCHEDULER;
 }
 
+void app_error_fault_handler(uint32_t id, uint32_t pc, uint32_t info)
+{
+  // handle error ...
+}
 #endif // UART_DISABLED  
