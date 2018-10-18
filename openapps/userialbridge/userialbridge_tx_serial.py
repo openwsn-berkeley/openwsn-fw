@@ -15,7 +15,7 @@ log.addHandler(ch)
 
 #============================ defines =========================================
 
-COMPORT = 'COM3'
+COMPORT = 'COM5'
 MODE    = 'udp' # 'periodic' or 'udp'
 
 #============================ classes =========================================
@@ -53,6 +53,14 @@ class UdpTransmitter(threading.Thread):
             self.moteProbe.send('B'+msgRx)
 
 class MoteProbe(threading.Thread):
+    
+    XOFF           = 0x13
+    XON            = 0x11
+    XONXOFF_ESCAPE = 0x12
+    XONXOFF_MASK   = 0x10
+    # XOFF            is transmitted as [XONXOFF_ESCAPE,           XOFF^XONXOFF_MASK]==[0x12,0x13^0x10]==[0x12,0x03]
+    # XON             is transmitted as [XONXOFF_ESCAPE,            XON^XONXOFF_MASK]==[0x12,0x11^0x10]==[0x12,0x01]
+    # XONXOFF_ESCAPE  is transmitted as [XONXOFF_ESCAPE, XONXOFF_ESCAPE^XONXOFF_MASK]==[0x12,0x12^0x10]==[0x12,0x02]
     
     def __init__(self,serialport=None):
         
@@ -105,7 +113,11 @@ class MoteProbe(threading.Thread):
             
             while self.goOn:     # open serial port
                 
-                self.serial = serial.Serial(self.serialport,115200)
+                self.serial = serial.Serial(
+                    port     = self.serialport,
+                    baudrate = 115200,
+                    xonxoff  = True,
+                )
                 
                 while self.goOn: # read bytes from serial port
                     try:
@@ -122,22 +134,23 @@ class MoteProbe(threading.Thread):
                                 ):
                             # start of frame
                             self.busyReceiving       = True
+                            self.xonxoffEscaping     = False
                             self.inputBuf            = self.hdlc.HDLC_FLAG
-                            self.inputBuf           += rxByte
+                            self._addToInputBuf(rxByte)
                         elif    (
                                     self.busyReceiving                   and
                                     rxByte!=self.hdlc.HDLC_FLAG
                                 ):
                             # middle of frame
                             
-                            self.inputBuf           += rxByte
+                            self._addToInputBuf(rxByte)
                         elif    (
                                     self.busyReceiving                   and
                                     rxByte==self.hdlc.HDLC_FLAG
                                 ):
                             # end of frame
                             self.busyReceiving       = False
-                            self.inputBuf           += rxByte
+                            self._addToInputBuf(rxByte)
                             
                             log.debug('RX: '+self.formatBuf(self.inputBuf))
                             
@@ -147,7 +160,7 @@ class MoteProbe(threading.Thread):
                             except Exception as err:
                                 log.error('{0}: invalid serial frame: {2} {1}'.format(self.name, err, tempBuf))
                             else:
-                                self.handle_input(self.inputBuf)
+                                self._handle_input(self.inputBuf)
                         
                         self.lastRxByte = rxByte
         
@@ -157,26 +170,33 @@ class MoteProbe(threading.Thread):
     #======================== public ==========================================
     
     def send(self,outputBuf):
-        with self.dataLock:
-            self.dataToSend = outputBuf
+        # frame with HDLC
+        hdlcData = self.hdlc.hdlcify(outputBuf)
+        
+        # write to serial
+        self.serial.write(hdlcData)
     
     def close(self):
         self.goOn = False
     
     #======================== private =========================================
     
-    def handle_input(self,inputBuf):
-        
-        log.debug('input: '+self.formatBuf(inputBuf))
-        
-        if inputBuf[0]==ord('R'):
-            with self.dataLock:
-                if self.dataToSend:
-                    outputToWrite  = self.dataToSend
-                    outputBufHdlc  = self.hdlc.hdlcify(outputToWrite)
-                    self.serial.write(outputBufHdlc)
-                    log.info('TX: {0}...'.format(self.formatBuf(outputBufHdlc[:10])))
-                    self.dataToSend = None
+    def _addToInputBuf(self,byte):
+        if byte==chr(self.XONXOFF_ESCAPE):
+            self.xonxoffEscaping = True
+        else:
+            if self.xonxoffEscaping==True:
+                self.inputBuf += chr(ord(byte)^self.XONXOFF_MASK)
+                self.xonxoffEscaping=False
+            else:
+                self.inputBuf += byte
+    
+    def _handle_input(self,inputBuf):
+        if inputBuf[0] == ord('E'):
+            if inputBuf[4]==0x39:
+                print '{0}: CRC error'.format(time.time())
+            else:
+                print inputBuf
 
 class OpenHdlc(object):
     

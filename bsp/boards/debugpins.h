@@ -42,9 +42,21 @@ void debugpins_isr_toggle(void);
 void debugpins_isr_clr(void);
 void debugpins_isr_set(void);
 
+void debugpins_isruarttx_toggle(void);
+void debugpins_isruarttx_clr(void);
+void debugpins_isruarttx_set(void);
+
+void debugpins_isruartrx_toggle(void);
+void debugpins_isruartrx_clr(void);
+void debugpins_isruartrx_set(void);
+
 void debugpins_radio_toggle(void);
 void debugpins_radio_clr(void);
 void debugpins_radio_set(void);
+
+void debugpins_intdisabled_toggle(void);
+void debugpins_intdisabled_clr(void);
+void debugpins_intdisabled_set(void);
 
 #ifdef OPENSIM
 void debugpins_ka_clr(void);

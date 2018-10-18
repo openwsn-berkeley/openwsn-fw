@@ -133,6 +133,18 @@ void uart_clearTxInterrupts(void)
   // is handled within app_uart
 }
 
+void uart_setCTS(bool state)
+{
+  if (state==0x01)
+  {
+    app_uart_put(XON);
+  }
+  else
+  {
+    app_uart_put(XOFF);
+  }
+}
+
 void uart_writeByte(uint8_t byteToWrite)
 {
   app_uart_put(byteToWrite);

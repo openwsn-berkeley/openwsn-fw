@@ -168,7 +168,7 @@
         <debug>1</debug>
         <option>
           <name>CCDefines</name>
-          <state></state>
+          <state>L2_SECURITY_ACTIVE</state>
         </option>
         <option>
           <name>CCPreprocFile</name>
@@ -2132,7 +2132,7 @@
           </file>
         </group>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\adc_sensor.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\adc_sensor.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\adc_sensor.h</name>
@@ -2150,13 +2150,13 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\cryptoengine.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\debugpins.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\debugpins.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\eui64.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\eui64.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\i2c.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\i2c.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\leds.c</name>
@@ -2174,13 +2174,13 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\sctimer.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\sensors.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\sensors.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\startup_iar.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\startup_iar.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\uart.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\uart.c</name>
         </file>
       </group>
       <file>
@@ -2334,16 +2334,16 @@
     <group>
       <name>cjoin</name>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cbor.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cbor.h</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cjoin.c</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cjoin.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cojp_cbor.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cojp_cbor.h</name>
       </file>
     </group>
     <group>

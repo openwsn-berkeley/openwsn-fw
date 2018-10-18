@@ -77,6 +77,8 @@ typedef struct {
    uint8_t              rxpk_lqi;
    bool                 rxpk_crc;
    uint32_t             startOfSlotReference;
+    uint8_t             debug[10];
+    uint8_t             debug_index;
 } app_vars_t;
 
 app_vars_t app_vars;
@@ -127,7 +129,7 @@ int mote_main(void) {
         // send dummy text
         uart_writeByte('*');
         // reduce the usage of UART
-//        for (i=0;i<0xff;i++);
+        for (i=0;i<0xff;i++);
     }
 }
 
@@ -145,6 +147,7 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
 
 void cb_timer(void) {
     
+    uint8_t i;
     debugpins_slot_toggle();
     
     app_vars.startOfSlotReference = sctimer_readCounter();
@@ -156,11 +159,19 @@ void cb_timer(void) {
     }
     debugpins_fsm_clr();
     
+    for (i=0;i<10;i++){
+        uart_writeByte(app_vars.debug[i]);
+    }
+    
+    memset(&app_vars.debug[0],0,10);
+    app_vars.debug[8] = '\r';
+    app_vars.debug[9] = '\n';
+    
+    app_vars.debug_index = 0;
     // time slot starts, use the register here
-    uart_writeByte('S');
-    uart_writeByte('S');
+    app_vars.debug[app_vars.debug_index++] = 'S';
     // change {0-9} to char
-    uart_writeByte(0x30 + app_vars.state);
+    app_vars.debug[app_vars.debug_index++] = 0x30 + app_vars.state;
     
     app_vars.state = APP_STATE_RXDATAOFFSET;
     
@@ -172,10 +183,10 @@ void cb_timer(void) {
 
 void cb_action_timer(void){
     
-    // change the state
-    uart_writeByte('C');
-    uart_writeByte('S');
-    uart_writeByte(0x30 + app_vars.state);
+    // time slot starts, use the register here
+    app_vars.debug[app_vars.debug_index++] = 'C';
+    // change {0-9} to char
+    app_vars.debug[app_vars.debug_index++] = 0x30 + app_vars.state;
     
     debugpins_fsm_toggle();
     

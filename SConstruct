@@ -79,6 +79,8 @@ project:
     noadaptivesync Do not use adaptive synchronization.
     l2_security   Use hop-by-hop encryption and authentication.
                   0 (off), 1 (on)
+    msf_adapting_to_traffic enable/disable MSF for adding/deleting cell to adapt to traffic
+                  0 (disable), 1 (enable)
     printf        Sends the string messages to openvisualizer  
                   0 (off ), 1 (on, default)
     ide           qtcreator
@@ -109,12 +111,16 @@ command_line_options = {
         # Cortex-M3
         'openmote-cc2538',
         'openmote-b',
+        'openmote-b-24ghz',
+        'openmote-b-subghz',
         'silabs-ezr32wg',
         'openmotestm',
         'iot-lab_M3',
         'iot-lab_A8-M3',
         'agilefox',
         'samr21_xpro',
+        # Cortex-M0
+        'scum',
         # Nordic nRF52840 (Cortex-M4), use revision=DK or revision=DONGLE
         'nrf52840',
         # misc.
@@ -131,21 +137,22 @@ command_line_options = {
         'openos',
         'freertos',
     ],
-    'fet_version':      ['2','3'],
-    'verbose':          ['0','1'],
-    'fastsim':          ['1','0'],
-    'simhost':          ['amd64-linux','x86-linux','amd64-windows','x86-windows'],
-    'simhostpy':        [''],                               # No reasonable default
-    'panid':            [''],
-    'dagroot':          ['0','1'],
-    'forcetopology':    ['0','1'],
-    'debug':            ['0','1'],
-    'noadaptivesync':   ['0','1'],
-    'l2_security':      ['0','1'],
-    'printf':           ['1','0'],          # 1=on (default),  0=off
-    'deadline_option':  ['0','1'],
-    'ide':              ['none','qtcreator'],
-    'revision':         ['']
+    'fet_version':              ['2','3'],
+    'verbose':                  ['0','1'],
+    'fastsim':                  ['1','0'],
+    'simhost':                  ['amd64-linux','x86-linux','amd64-windows','x86-windows'],
+    'simhostpy':                [''],                               # No reasonable default
+    'panid':                    [''],
+    'dagroot':                  ['0','1'],
+    'forcetopology':            ['0','1'],
+    'debug':                    ['0','1'],
+    'noadaptivesync':           ['0','1'],
+    'l2_security':              ['0','1'],
+    'msf_adapting_to_traffic':  ['0','1'],
+    'printf':                   ['1','0'],          # 1=on (default),  0=off
+    'deadline_option':          ['0','1'],
+    'ide':                      ['none','qtcreator'],
+    'revision':                 ['']
 }
 
 def validate_option(key, value, env):
@@ -184,6 +191,118 @@ command_line_vars.AddVariables(
         command_line_options['board'][0],                  # default
         validate_option,                                   # validator
         None,                                              # converter
+    ),
+    (
+        'toolchain',                                       # key
+        '',                                                # help
+        command_line_options['toolchain'][0],              # default
+        validate_option,                                   # validator
+        None,                                              # converter
+    ),
+    (
+        'kernel',                                          # key
+        '',                                                # help
+        command_line_options['kernel'][0],                 # default
+        validate_option,                                   # validator
+        None,                                              # converter
+    ),
+    (
+        'jtag',                                            # key
+        '',                                                # help
+        '',                                                # default
+        None,                                              # validator
+        None,                                              # converter
+    ),
+    (
+        'fet_version',                                     # key
+        '',                                                # help
+        command_line_options['fet_version'][0],            # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
+        'bootload',                                        # key
+        '',                                                # help
+        '',                                                # default
+        None,                                              # validator
+        None,                                              # converter
+    ),
+    (
+        'verbose',                                         # key
+        '',                                                # help
+        command_line_options['verbose'][0],                # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
+        'fastsim',                                         # key
+        '',                                                # help
+        command_line_options['fastsim'][0],                # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
+        'simhost',                                         # key
+        '',                                                # help
+        command_line_options['simhost'][defaultHost],      # default
+        validate_option,                                   # validator
+        None,                                              # converter
+    ),
+    (
+        'simhostpy',                                       # key
+        '',                                                # help
+        command_line_options['simhostpy'][0],              # default
+        None,                                              # validator
+        None,                                              # converter
+    ),
+    (
+        'panid',                                           # key
+        '0xFFFF',                                          # help
+        command_line_options['panid'][0],                  # default
+        None,                                              # validator
+        None,                                              # converter
+    ),
+    (
+        'dagroot',                                         # key
+        '',                                                # help
+        command_line_options['dagroot'][0],                # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
+        'forcetopology',                                   # key
+        '',                                                # help
+        command_line_options['forcetopology'][0],          # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
+        'debug',                                           # key
+        '',                                                # help
+        command_line_options['debug'][0],                  # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
+        'noadaptivesync',                                  # key
+        '',                                                # help
+        command_line_options['noadaptivesync'][0],         # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
+        'l2_security',                                     # key
+        '',                                                # help
+        command_line_options['l2_security'][0],            # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
+        'msf_adapting_to_traffic',                         # key
+        '',                                                # help
+        command_line_options['msf_adapting_to_traffic'][1],# default
+        validate_option,                                   # validator
+        int,                                               # converter
     ),
     (
         'toolchain',                                       # key

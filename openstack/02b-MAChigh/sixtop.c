@@ -107,7 +107,7 @@ void sixtop_init(void) {
     sixtop_vars.isResponseEnabled  = TRUE;
     sixtop_vars.six2six_state      = SIX_STATE_IDLE;
 
-    sixtop_vars.ebSendingTimerId   = opentimers_create();
+    sixtop_vars.ebSendingTimerId   = opentimers_create(TIMER_GENERAL_PURPOSE);
     opentimers_scheduleIn(
         sixtop_vars.ebSendingTimerId,
         SLOTFRAME_LENGTH*SLOTDURATION,
@@ -116,7 +116,7 @@ void sixtop_init(void) {
         sixtop_sendingEb_timer_cb
     );
 
-    sixtop_vars.maintenanceTimerId   = opentimers_create();
+    sixtop_vars.maintenanceTimerId   = opentimers_create(TIMER_GENERAL_PURPOSE);
     opentimers_scheduleIn(
         sixtop_vars.maintenanceTimerId,
         sixtop_vars.periodMaintenance,
@@ -125,7 +125,7 @@ void sixtop_init(void) {
         sixtop_maintenance_timer_cb
     );
 
-    sixtop_vars.timeoutTimerId      =  opentimers_create();
+    sixtop_vars.timeoutTimerId      =  opentimers_create(TIMER_GENERAL_PURPOSE);
 }
 
 void sixtop_setKaPeriod(uint16_t kaPeriod) {
@@ -778,6 +778,9 @@ port_INLINE void sixtop_sendEB(void) {
         eb->payload[0] = (uint8_t)(temp16b & 0x00ff);
         eb->payload[1] = (uint8_t)((temp16b & 0xff00)>>8);
     }
+
+    eb->payload[EB_SLOTFRAME_LEN_OFFSET]   = (uint8_t)(0x00FF & (schedule_getFrameLength()));
+    eb->payload[EB_SLOTFRAME_LEN_OFFSET+1] = (uint8_t)(0x00FF & (schedule_getFrameLength()>>8));
 
     // Keep a pointer to where the ASN will be
     // Note: the actual value of the current ASN and JP will be written by the

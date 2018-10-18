@@ -5,6 +5,8 @@
 #include "IEEE802154E.h"
 #include "IEEE802154_security.h"
 #include "sixtop.h"
+// telosb need debugpins to indicate ISR activity
+#include "debugpins.h"
 
 //=========================== defination =====================================
 
@@ -68,27 +70,27 @@ OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
    uint8_t i;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
-   
+
    // refuse to allocate if we're not in sync
    if (ieee154e_isSynch()==FALSE && creator > COMPONENT_IEEE802154E){
      ENABLE_INTERRUPTS();
      return NULL;
    }
-   
+
    // if you get here, I will try to allocate a buffer for you
-   
+
    // if there is no space left for high priority queue, don't reserve
    if (openqueue_isHighPriorityEntryEnough()==FALSE && creator>COMPONENT_SIXTOP_RES){
       ENABLE_INTERRUPTS();
       return NULL;
    }
-   
+
    // walk through queue and find free entry
    for (i=0;i<QUEUELENGTH;i++) {
       if (openqueue_vars.queue[i].owner==COMPONENT_NULL) {
          openqueue_vars.queue[i].creator=creator;
          openqueue_vars.queue[i].owner=COMPONENT_OPENQUEUE;
-         ENABLE_INTERRUPTS(); 
+         ENABLE_INTERRUPTS();
          return &openqueue_vars.queue[i];
       }
    }
@@ -182,9 +184,9 @@ OpenQueueEntry_t* openqueue_sixtopGetReceivedPacket(void) {
 //======= called by IEEE80215E
 
 OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
-    uint8_t i;
-    INTERRUPT_DECLARATION();
-    DISABLE_INTERRUPTS();
+   uint8_t i;
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
 
     // first to look the sixtop RES packet
     for (i=0;i<QUEUELENGTH;i++) {
@@ -202,74 +204,74 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
           return &openqueue_vars.queue[i];
        }
     }
-    
-    if (toNeighbor->type==ADDR_64B) {
-        // a neighbor is specified, look for a packet unicast to that neigbhbor
-        for (i=0;i<QUEUELENGTH;i++) {
-            if (openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
-                packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)
-            ) {
-                ENABLE_INTERRUPTS();
-                return &openqueue_vars.queue[i];
-            }
-        }
-    } else if (toNeighbor->type==ADDR_ANYCAST) {
-        // anycast case: look for a packet which is either not created by RES
-        // or an KA (created by RES, but not broadcast)
-        for (i=0;i<QUEUELENGTH;i++) {
-            if (openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
-                ( openqueue_vars.queue[i].creator!=COMPONENT_SIXTOP ||
-                    (
-                    openqueue_vars.queue[i].creator==COMPONENT_SIXTOP &&
-                    packetfunctions_isBroadcastMulticast(&(openqueue_vars.queue[i].l2_nextORpreviousHop))==FALSE
-                    )
+
+   if (toNeighbor->type==ADDR_64B) {
+      // a neighbor is specified, look for a packet unicast to that neigbhbor
+      for (i=0;i<QUEUELENGTH;i++) {
+         if (openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
+            packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)
+          ) {
+            ENABLE_INTERRUPTS();
+            return &openqueue_vars.queue[i];
+         }
+      }
+   } else if (toNeighbor->type==ADDR_ANYCAST) {
+      // anycast case: look for a packet which is either not created by RES
+      // or an KA (created by RES, but not broadcast)
+      for (i=0;i<QUEUELENGTH;i++) {
+         if (openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
+             ( openqueue_vars.queue[i].creator!=COMPONENT_SIXTOP ||
+                (
+                   openqueue_vars.queue[i].creator==COMPONENT_SIXTOP &&
+                   packetfunctions_isBroadcastMulticast(&(openqueue_vars.queue[i].l2_nextORpreviousHop))==FALSE
                 )
+             )
             ) {
-                ENABLE_INTERRUPTS();
-                return &openqueue_vars.queue[i];
-            }
-        }
-    }
-    ENABLE_INTERRUPTS();
-    return NULL;
+            ENABLE_INTERRUPTS();
+            return &openqueue_vars.queue[i];
+         }
+      }
+   }
+   ENABLE_INTERRUPTS();
+   return NULL;
 }
 
 bool openqueue_isHighPriorityEntryEnough(void) {
-   uint8_t i;
-   uint8_t numberOfEntry;
+    uint8_t i;
+    uint8_t numberOfEntry;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
-   
-   numberOfEntry = 0;
-   for (i=0;i<QUEUELENGTH;i++) {
-     if(openqueue_vars.queue[i].creator>COMPONENT_SIXTOP_RES){
-        numberOfEntry++;
-     }
-   }
-   
-   if (numberOfEntry>QUEUELENGTH-HIGH_PRIORITY_QUEUE_ENTRY){
+
+    numberOfEntry = 0;
+    for (i=0;i<QUEUELENGTH;i++) {
+        if(openqueue_vars.queue[i].creator>COMPONENT_SIXTOP_RES){
+            numberOfEntry++;
+        }
+    }
+
+    if (numberOfEntry>QUEUELENGTH-HIGH_PRIORITY_QUEUE_ENTRY){
       ENABLE_INTERRUPTS();
-      return FALSE;
-   } else {
+        return FALSE;
+    } else {
       ENABLE_INTERRUPTS();
-      return TRUE;
-   }
+        return TRUE;
+    }
 }
 
 OpenQueueEntry_t* openqueue_macGetEBPacket(void) {
-    uint8_t i;
-    INTERRUPT_DECLARATION();
-    DISABLE_INTERRUPTS();
-    for (i=0;i<QUEUELENGTH;i++) {
-        if (openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
-            openqueue_vars.queue[i].creator==COMPONENT_SIXTOP              &&
-            packetfunctions_isBroadcastMulticast(&(openqueue_vars.queue[i].l2_nextORpreviousHop))) {
-            ENABLE_INTERRUPTS();
-            return &openqueue_vars.queue[i];
-        }
-    }
-    ENABLE_INTERRUPTS();
-    return NULL;
+   uint8_t i;
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   for (i=0;i<QUEUELENGTH;i++) {
+      if (openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
+          openqueue_vars.queue[i].creator==COMPONENT_SIXTOP              &&
+          packetfunctions_isBroadcastMulticast(&(openqueue_vars.queue[i].l2_nextORpreviousHop))) {
+         ENABLE_INTERRUPTS();
+         return &openqueue_vars.queue[i];
+      }
+   }
+   ENABLE_INTERRUPTS();
+   return NULL;
 }
 
 OpenQueueEntry_t*  openqueue_macGetDIOPacket(){
@@ -293,7 +295,7 @@ OpenQueueEntry_t*  openqueue_macGetDedicatedPacket(open_addr_t* toNeighbor){
     uint8_t packet_index;
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
-    
+
     packet_index = QUEUELENGTH;
     // first to look the sixtop RES packet
     for (i=0;i<QUEUELENGTH;i++) {
@@ -302,10 +304,10 @@ OpenQueueEntry_t*  openqueue_macGetDedicatedPacket(open_addr_t* toNeighbor){
            (
                toNeighbor->type==ADDR_64B &&
                packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)
-           ) && // sixtop response with SEQNUM_ERR shouldn't be send on dedicated cell
+           ) && // sixtop response with SEQNUM_ERR will fail on dedicated cell since schedule inconsistency.
             (
                 openqueue_vars.queue[i].creator                 != COMPONENT_SIXTOP_RES ||
-                openqueue_vars.queue[i].l2_sixtop_returnCode    != IANA_6TOP_RC_SEQNUM_ERR 
+                openqueue_vars.queue[i].l2_sixtop_returnCode    != IANA_6TOP_RC_SEQNUM_ERR
             )
        ){
             if (packet_index==QUEUELENGTH){
@@ -317,7 +319,7 @@ OpenQueueEntry_t*  openqueue_macGetDedicatedPacket(open_addr_t* toNeighbor){
             }
        }
     }
-    
+
     if (packet_index == QUEUELENGTH){
         ENABLE_INTERRUPTS();
         return NULL;

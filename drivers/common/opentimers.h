@@ -18,23 +18,21 @@
 
 //=========================== define ==========================================
 
-                                            
-//===== sctimer scheduling
-// the timer with higher priority can be scheduled in advance even if 
-// there is a timer being scheduled early than the higher priority timer
-// but within TIMERTHRESHOLD. 
-// E.g if priority of timer0 > priority of timer1: if timer0 schedules timer at 
-// 100 and timer 1 schedules timer at 95 and current timer count is 80, 
-// then timer0 will be scheduled first than timer1. 
-#define TIMERTHRESHOLD 10
-
 /// Maximum number of timers that can run concurrently
 #define MAX_NUM_TIMERS             10
 #define MAX_TICKS_IN_SINGLE_CLOCK  (uint32_t)(((PORT_TIMER_WIDTH)0xFFFFFFFF)>>1)
-//#define MAX_TICKS_IN_SINGLE_CLOCK  0x7FFF
-#define TOO_MANY_TIMERS_ERROR      255
+#define ERROR_NO_AVAILABLE_ENTRIES 255
 #define MAX_DURATION_ISR           33 // 33@32768Hz = 1ms
 #define opentimers_id_t            uint8_t
+
+#define TIMER_INHIBIT              0
+#define TIMER_TSCH                 1
+#define TIMER_GENERAL_PURPOSE      255
+
+#define TIMER_NUMBER_NON_GENERAL   2
+
+#define SPLITE_TIMER_DURATION     15 // in ticks
+#define PRE_CALL_TIMER_WINDOW     PORT_TsSlotDuration
 
 typedef void (*opentimers_cbt)(opentimers_id_t id);
 
@@ -51,7 +49,7 @@ typedef enum {
 } time_type_t;
 
 typedef struct {
-   uint32_t             totalTimerPeriod;   // the total period of timer
+   uint32_t             duration;           // the duration that set by timer, in ticks
    PORT_TIMER_WIDTH     currentCompareValue;// the current compare value
    uint16_t             wraps_remaining;    // the number of wraps timer is going to be fired after
    PORT_TIMER_WIDTH     lastCompareValue;   // the previous compare value
@@ -59,7 +57,6 @@ typedef struct {
    bool                 isUsed;             // true when this entry is occupied
    timer_type_t         timerType;          // the timer type
    bool                 hasExpired;         // in case there are more than one interrupt occur at same time
-   uint8_t              priority;           // high priority timer could take over the compare timer scheduled early than it for TIMERTHRESHOLD ticks.
    opentimers_cbt       callback;           // function to call when elapses
 } opentimers_t;
 
@@ -68,34 +65,33 @@ typedef struct {
 typedef struct {
    opentimers_t         timersBuf[MAX_NUM_TIMERS];
    bool                 running;
-   PORT_TIMER_WIDTH     currentTimeout;     // current timeout, in ticks
-   PORT_TIMER_WIDTH     lastTimeout;        // last timeout, in ticks. This is the reference time to calculate the next to be expired timer.
-   PORT_TIMER_WIDTH     lastCompare[16];    // for debugging purpose
-   uint8_t              index;              // index for lastCompare array
+   PORT_TIMER_WIDTH     currentCompareValue;// current timeout, in ticks
+   PORT_TIMER_WIDTH     lastCompareValue;   // last timeout, in ticks. This is the reference time to calculate the next to be expired timer.
    bool                 insideISR;          // whether the function of opentimer is called inside of ISR or not
 } opentimers_vars_t;
 
 //=========================== prototypes ======================================
 
 void             opentimers_init(void);
-opentimers_id_t  opentimers_create(void);
-void             opentimers_scheduleIn(opentimers_id_t      id, 
+opentimers_id_t  opentimers_create(uint8_t priority);
+void             opentimers_scheduleIn(opentimers_id_t      id,
                                        uint32_t            duration,
-                                       time_type_t         uint_type, 
-                                       timer_type_t        timer_type, 
+                                       time_type_t         uint_type,
+                                       timer_type_t        timer_type,
                                        opentimers_cbt      cb);
-void             opentimers_scheduleAbsolute(opentimers_id_t      id, 
-                                              uint32_t            duration, 
-                                              PORT_TIMER_WIDTH    reference , 
-                                              time_type_t         uint_type, 
+void             opentimers_scheduleAbsolute(opentimers_id_t      id,
+                                              uint32_t            duration,
+                                              PORT_TIMER_WIDTH    reference ,
+                                              time_type_t         uint_type,
                                               opentimers_cbt      cb);
+void             opentimers_updateDuration(opentimers_id_t id,
+                                           PORT_TIMER_WIDTH duration);
 void             opentimers_cancel(opentimers_id_t id);
 bool             opentimers_destroy(opentimers_id_t id);
 
 PORT_TIMER_WIDTH opentimers_getValue(void);
-PORT_TIMER_WIDTH opentimers_getCurrentTimeout(void);
+PORT_TIMER_WIDTH opentimers_getCurrentCompareValue(void);
 bool             opentimers_isRunning(opentimers_id_t id);
-void             opentimers_setPriority(opentimers_id_t id, uint8_t priority);
 /**
 \}
 \}

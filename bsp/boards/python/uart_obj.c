@@ -289,6 +289,35 @@ uint8_t uart_readByte(OpenMote* self) {
    return returnVal;
 }
 
+#ifdef FASTSIM
+void uart_setCTS(OpenMote* self, bool state) {
+   printf("[CRITICAL] uart_setCTS() should not be called\r\n");
+}
+#else
+void uart_setCTS(OpenMote* self, bool state) {
+   PyObject*   result;
+   PyObject*   arglist;
+   
+#ifdef TRACE_ON
+   printf("C@0x%x: uart_setCTS()... \n",self);
+#endif
+   
+   // forward to Python
+   arglist    = Py_BuildValue("(i)",state);
+   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_uart_setCTS],arglist);
+   if (result == NULL) {
+      printf("[CRITICAL] uart_setCTS() returned NULL\r\n");
+      return;
+   }
+   Py_DECREF(result);
+   Py_DECREF(arglist);
+   
+#ifdef TRACE_ON
+   printf("C@0x%x: ...done.\n",self);
+#endif
+}
+#endif
+
 //=========================== interrupt handlers ==============================
 
 void uart_intr_tx(OpenMote* self) {

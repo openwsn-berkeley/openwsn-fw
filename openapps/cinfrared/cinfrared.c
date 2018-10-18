@@ -38,7 +38,7 @@ void cinrared_turnOnOrOff(uint8_t turnOnOrOff);
 //=========================== public ==========================================
 
 void cinfrared_init(void) {
-    if(idmanager_getIsDAGroot()==TRUE) return; 
+    if(idmanager_getIsDAGroot()==TRUE) return;
 
     // prepare the resource descriptor for the /6t path
     cinfrared_vars.desc.path0len            = sizeof(cinfrared_path0)-1;
@@ -52,8 +52,8 @@ void cinfrared_init(void) {
     cinfrared_vars.desc.callbackSendDone    = &cinfrared_sendDone;
 
     opencoap_register(&cinfrared_vars.desc);
-    
-    cinfrared_vars.timerId          = opentimers_create();
+
+    cinfrared_vars.timerId          = opentimers_create(TIMER_GENERAL_PURPOSE);
 }
 
 //=========================== private =========================================
@@ -75,14 +75,14 @@ owerror_t cinfrared_receive(OpenQueueEntry_t* msg,
     uint8_t*          coap_outgoingOptionsLen
 ) {
     owerror_t            outcome;
-   
+
     switch (coap_header->Code) {
         case COAP_CODE_REQ_PUT:
-          
+
             cinfrared_vars.state = APP_STATE_START;
             // change the infrared's state
             cinrared_turnOnOrOff(msg->payload[0]);
-            
+
             // reset packet payload
             msg->payload                     = &(msg->packet[127]);
             msg->length                      = 0;
@@ -107,7 +107,7 @@ void cinrared_turnOnOrOff(uint8_t turnOnOrOff){
     switch(cinfrared_vars.state){
     case APP_STATE_START:
         pwm_enable();
-        cinfrared_vars.startOfSlot = opentimers_getCurrentTimeout();
+        cinfrared_vars.startOfSlot = opentimers_getCurrentCompareValue();
         if (turnOnOrOff){
             opentimers_scheduleAbsolute(
                 cinfrared_vars.timerId,
@@ -210,10 +210,10 @@ void cinrared_turnOnOrOff(uint8_t turnOnOrOff){
         pwm_disable();
         break;
     }
-    
+
     if (cinfrared_vars.state==APP_STATE_END){
         cinfrared_vars.state = APP_STATE_START;
     } else {
         cinfrared_vars.state++;
-    }   
+    }
 }

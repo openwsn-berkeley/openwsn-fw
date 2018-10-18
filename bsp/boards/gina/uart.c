@@ -15,8 +15,10 @@
 //=========================== variables =======================================
 
 typedef struct {
-   uart_tx_cbt txCb;
-   uart_rx_cbt rxCb;
+    uart_tx_cbt txCb;
+    uart_rx_cbt rxCb;
+    bool        fXonXoffEscaping;
+    uint8_t     xonXoffEscapedByte;
 } uart_vars_t;
 
 uart_vars_t uart_vars;
@@ -26,59 +28,79 @@ uart_vars_t uart_vars;
 //=========================== public ==========================================
 
 void uart_init(void) {
-   // reset local variables
-   memset(&uart_vars,0,sizeof(uart_vars_t));
-   
-   //initialize UART openserial_vars.mode
-   P3SEL    |=  0xC0;                             // P3.6,7 = USCI_A1 TXD/RXD
-   UCA1CTL1 |=  UCSSEL_2;                         // CLK = SMCL
-   UCA1BR0   =  0x8a;                             // 115200 baud if SMCLK@16MHz
-   UCA1BR1   =  0x00;
-   UCA1MCTL  =  UCBRS_7;                          // Modulation UCBRSx = 7
-   UCA1CTL1 &= ~UCSWRST;                          // Initialize USCI state machine
-   //UC1IFG   &= ~(UCA1TXIFG | UCA1RXIFG);          // clear possible pending interrupts
-   //UC1IE    |=  (UCA1RXIE  | UCA1TXIE);           // Enable USCI_A1 TX & RX interrupt  
+    // reset local variables
+    memset(&uart_vars,0,sizeof(uart_vars_t));
+    
+    //initialize UART openserial_vars.mode
+    P3SEL    |=  0xC0;                             // P3.6,7 = USCI_A1 TXD/RXD
+    UCA1CTL1 |=  UCSSEL_2;                         // CLK = SMCL
+    UCA1BR0   =  0x8a;                             // 115200 baud if SMCLK@16MHz
+    UCA1BR1   =  0x00;
+    UCA1MCTL  =  UCBRS_7;                          // Modulation UCBRSx = 7
+    UCA1CTL1 &= ~UCSWRST;                          // Initialize USCI state machine
+    //UC1IFG   &= ~(UCA1TXIFG | UCA1RXIFG);          // clear possible pending interrupts
+    //UC1IE    |=  (UCA1RXIE  | UCA1TXIE);           // Enable USCI_A1 TX & RX interrupt  
 }
 
 void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb) {
-   uart_vars.txCb = txCb;
-   uart_vars.rxCb = rxCb;
+    uart_vars.txCb = txCb;
+    uart_vars.rxCb = rxCb;
 }
 
 void    uart_enableInterrupts(void) {
-  UC1IE    |=  (UCA1RXIE  | UCA1TXIE);  
+    UC1IE    |=  (UCA1RXIE  | UCA1TXIE);  
 }
 
 void    uart_disableInterrupts(void) {
-  UC1IE &= ~(UCA1RXIE | UCA1TXIE);
+    UC1IE &= ~(UCA1RXIE | UCA1TXIE);
 }
 
 void    uart_clearRxInterrupts(void) {
-  UC1IFG   &= ~(UCA1RXIFG);
+    UC1IFG   &= ~(UCA1RXIFG);
 }
 
 void    uart_clearTxInterrupts(void) {
-  UC1IFG   &= ~(UCA1TXIFG);
+    UC1IFG   &= ~(UCA1TXIFG);
+}
+
+void    uart_setCTS(bool state) {
+    if (state==0x01) {
+        UCA1TXBUF = XON;
+    } else {
+        UCA1TXBUF = XOFF;
+    }
 }
 
 void    uart_writeByte(uint8_t byteToWrite){
-  UCA1TXBUF = byteToWrite;
+    if (byteToWrite==XON || byteToWrite==XOFF || byteToWrite==XONXOFF_ESCAPE) {
+        uart_vars.fXonXoffEscaping     = 0x01;
+        uart_vars.xonXoffEscapedByte   = byteToWrite;
+        UCA1TXBUF = XONXOFF_ESCAPE;
+    } else {
+        UCA1TXBUF = byteToWrite;
+    }
 }
 
 uint8_t uart_readByte(void) {
-  return UCA1RXBUF;
+    return UCA1RXBUF;
 }
 
 //=========================== interrupt handlers ==============================
 
 kick_scheduler_t uart_tx_isr(void) {
-   uart_clearTxInterrupts(); // TODO: do not clear, but disable when done
-   uart_vars.txCb();
-   return DO_NOT_KICK_SCHEDULER;
+    uart_clearTxInterrupts(); // TODO: do not clear, but disable when done
+    uart_vars.txCb();
+    if (uart_vars.fXonXoffEscaping==0x01) {
+        uart_vars.fXonXoffEscaping = 0x00;
+        UCA1TXBUF = uart_vars.xonXoffEscapedByte^XONXOFF_MASK;
+    } else {
+        uart_vars.txCb();
+    }
+    return DO_NOT_KICK_SCHEDULER;
 }
 
 kick_scheduler_t uart_rx_isr(void) {
-   uart_clearRxInterrupts(); // TODO: do not clear, but disable when done
-   uart_vars.rxCb();
-   return DO_NOT_KICK_SCHEDULER;
+    uart_clearRxInterrupts(); // TODO: do not clear, but disable when done
+    uart_vars.rxCb();
+    return DO_NOT_KICK_SCHEDULER;
 }

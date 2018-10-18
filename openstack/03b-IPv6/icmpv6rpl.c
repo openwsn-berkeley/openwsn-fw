@@ -84,7 +84,7 @@ void icmpv6rpl_init(void) {
     memcpy(&icmpv6rpl_vars.dioDestination.addr_128b[0],all_routers_multicast,sizeof(all_routers_multicast));
 
     icmpv6rpl_vars.dioPeriod                 = DIO_PERIOD;
-    icmpv6rpl_vars.timerIdDIO                = opentimers_create();
+    icmpv6rpl_vars.timerIdDIO                = opentimers_create(TIMER_GENERAL_PURPOSE);
 
     //initialize PIO -> move this to dagroot code
     icmpv6rpl_vars.pio.type                  = RPL_OPTION_PIO;
@@ -169,12 +169,12 @@ void icmpv6rpl_init(void) {
     icmpv6rpl_vars.dao_target.prefixLength   = 0;
 
     icmpv6rpl_vars.daoPeriod                 = DAO_PERIOD;
-    icmpv6rpl_vars.timerIdDAO                = opentimers_create();
+    icmpv6rpl_vars.timerIdDAO                = opentimers_create(TIMER_GENERAL_PURPOSE);
     opentimers_scheduleIn(
         icmpv6rpl_vars.timerIdDAO,
-        openrandom_getRandomizePeriod(icmpv6rpl_vars.daoPeriod, NUM_CHANNELS*SLOTFRAME_LENGTH*SLOTDURATION),
+        icmpv6rpl_vars.daoPeriod,
         TIME_MS,
-        TIMER_ONESHOT,
+        TIMER_PERIODIC,
         icmpv6rpl_timer_DAO_cb
     );
 }
@@ -530,7 +530,14 @@ void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t* msg) {
      case RPL_OPTION_CONFIG:
        // configuration option
        icmpv6rpl_vars.incomingConf = (icmpv6rpl_config_ht*)(current);
+
+       icmpv6rpl_vars.incomingConf->maxRankIncrease    = (icmpv6rpl_vars.incomingConf->maxRankIncrease << 8)     | (icmpv6rpl_vars.incomingConf->maxRankIncrease >>8); //  2048
+       icmpv6rpl_vars.incomingConf->minHopRankIncrease = (icmpv6rpl_vars.incomingConf->minHopRankIncrease << 8)  | (icmpv6rpl_vars.incomingConf->minHopRankIncrease >>8); //256
+       icmpv6rpl_vars.incomingConf->OCP                = (icmpv6rpl_vars.incomingConf->OCP << 8)                 | (icmpv6rpl_vars.incomingConf->OCP >>8); // 0 OF0
+       icmpv6rpl_vars.incomingConf->lifetimeUnit       = (icmpv6rpl_vars.incomingConf->lifetimeUnit << 8)        | (icmpv6rpl_vars.incomingConf->lifetimeUnit >>8); // 0xffff
+
        memcpy(&icmpv6rpl_vars.conf,icmpv6rpl_vars.incomingConf, sizeof(icmpv6rpl_config_ht));
+
        // do whatever needs to be done with the configuration option of RPL
        optionsLen = optionsLen - current[1] - 2;
        current = current + current[1] + 2;
@@ -632,111 +639,116 @@ void icmpv6rpl_timer_DIO_task(void) {
 \brief Prepare and a send a RPL DIO.
 */
 void sendDIO(void) {
-   OpenQueueEntry_t*    msg;
+    OpenQueueEntry_t*    msg;
 
-   // stop if I'm not sync'ed
-   if (ieee154e_isSynch()==FALSE) {
+    // stop if I'm not sync'ed
+    if (ieee154e_isSynch()==FALSE) {
 
-      // remove packets genereted by this module (DIO and DAO) from openqueue
-      openqueue_removeAllCreatedBy(COMPONENT_ICMPv6RPL);
+        // remove packets genereted by this module (DIO and DAO) from openqueue
+        openqueue_removeAllCreatedBy(COMPONENT_ICMPv6RPL);
 
-      // I'm not busy sending a DIO/DAO
-      icmpv6rpl_vars.busySendingDIO  = FALSE;
-      icmpv6rpl_vars.busySendingDAO  = FALSE;
+        // I'm not busy sending a DIO/DAO
+        icmpv6rpl_vars.busySendingDIO  = FALSE;
+        icmpv6rpl_vars.busySendingDAO  = FALSE;
 
-      // stop here
+        // stop here
+        return;
+    }
+
+    // do not send DIO if I have the default DAG rank
+    if (icmpv6rpl_getMyDAGrank()==DEFAULTDAGRANK) {
       return;
-   }
+    }
 
-   // do not send DIO if I have the default DAG rank
-   if (icmpv6rpl_getMyDAGrank()==DEFAULTDAGRANK) {
-      return;
-   }
+    // do not send DIO if I'm already busy sending
+    if (icmpv6rpl_vars.busySendingDIO==TRUE) {
+        return;
+    }
 
-   // do not send DIO if I'm already busy sending
-   if (icmpv6rpl_vars.busySendingDIO==TRUE) {
-      return;
-   }
+    // if you get here, all good to send a DIO
 
-   // if you get here, all good to send a DIO
-
-   // reserve a free packet buffer for DIO
-   msg = openqueue_getFreePacketBuffer(COMPONENT_ICMPv6RPL);
-   if (msg==NULL) {
-      openserial_printError(COMPONENT_ICMPv6RPL,ERR_NO_FREE_PACKET_BUFFER,
+    // reserve a free packet buffer for DIO
+    msg = openqueue_getFreePacketBuffer(COMPONENT_ICMPv6RPL);
+    if (msg==NULL) {
+        openserial_printError(COMPONENT_ICMPv6RPL,ERR_NO_FREE_PACKET_BUFFER,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
 
-      return;
-   }
+        return;
+    }
 
-   // take ownership
-   msg->creator                             = COMPONENT_ICMPv6RPL;
-   msg->owner                               = COMPONENT_ICMPv6RPL;
+    // take ownership
+    msg->creator                             = COMPONENT_ICMPv6RPL;
+    msg->owner                               = COMPONENT_ICMPv6RPL;
 
-   // set transport information
-   msg->l4_protocol                         = IANA_ICMPv6;
-   msg->l4_protocol_compressed              = FALSE;
-   msg->l4_sourcePortORicmpv6Type           = IANA_ICMPv6_RPL;
+    // set transport information
+    msg->l4_protocol                         = IANA_ICMPv6;
+    msg->l4_protocol_compressed              = FALSE;
+    msg->l4_sourcePortORicmpv6Type           = IANA_ICMPv6_RPL;
 
-   // set DIO destination
-   memcpy(&(msg->l3_destinationAdd),&icmpv6rpl_vars.dioDestination,sizeof(open_addr_t));
+    // set DIO destination
+    memcpy(&(msg->l3_destinationAdd),&icmpv6rpl_vars.dioDestination,sizeof(open_addr_t));
 
-   //===== Configuration option
-   packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_config_ht));
-
-   //copy the PIO in the packet
-   memcpy(
-      ((icmpv6rpl_pio_t*)(msg->payload)),
-      &(icmpv6rpl_vars.conf),
-      sizeof(icmpv6rpl_config_ht)
-   );
-
-   //===== PIO payload
-
-   packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_pio_t));
-
-   // copy my prefix into the PIO
-
-   memcpy(
-      &(icmpv6rpl_vars.pio.prefix[0]),
-      idmanager_getMyID(ADDR_PREFIX)->prefix,
-      sizeof(idmanager_getMyID(ADDR_PREFIX)->prefix)
-   );
-   // host address is not needed. Only prefix.
-   /* memcpy(
-      &(icmpv6rpl_vars.pio.prefix[8]),
-      idmanager_getMyID(ADDR_64B)->addr_64b,
-      sizeof(idmanager_getMyID(ADDR_64B)->addr_64b)
-   );*/
+    //===== Configuration option
+    packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_config_ht));
 
    //copy the PIO in the packet
-   memcpy(
-      ((icmpv6rpl_pio_t*)(msg->payload)),
-      &(icmpv6rpl_vars.pio),
-      sizeof(icmpv6rpl_pio_t)
-   );
+    memcpy(
+       ((icmpv6rpl_config_ht*)(msg->payload)),
+       &(icmpv6rpl_vars.conf),
+       sizeof(icmpv6rpl_config_ht)
+    );
+
+    ((icmpv6rpl_config_ht*)(msg->payload))->maxRankIncrease    = (icmpv6rpl_vars.conf.maxRankIncrease << 8)     | (icmpv6rpl_vars.conf.maxRankIncrease >>8); //  2048
+    ((icmpv6rpl_config_ht*)(msg->payload))->minHopRankIncrease = (icmpv6rpl_vars.conf.minHopRankIncrease << 8)  | (icmpv6rpl_vars.conf.minHopRankIncrease >>8); //256
+    ((icmpv6rpl_config_ht*)(msg->payload))->OCP                = (icmpv6rpl_vars.conf.OCP << 8)                 | (icmpv6rpl_vars.conf.OCP >>8); // 0 OF0
+    ((icmpv6rpl_config_ht*)(msg->payload))->lifetimeUnit       = (icmpv6rpl_vars.conf.lifetimeUnit << 8)        | (icmpv6rpl_vars.conf.lifetimeUnit >>8); // 0xffff
+
+    //===== PIO payload
+
+    packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_pio_t));
+
+    // copy my prefix into the PIO
+
+    memcpy(
+        &(icmpv6rpl_vars.pio.prefix[0]),
+        idmanager_getMyID(ADDR_PREFIX)->prefix,
+        sizeof(idmanager_getMyID(ADDR_PREFIX)->prefix)
+    );
+    // host address is not needed. Only prefix.
+    /* memcpy(
+        &(icmpv6rpl_vars.pio.prefix[8]),
+        idmanager_getMyID(ADDR_64B)->addr_64b,
+        sizeof(idmanager_getMyID(ADDR_64B)->addr_64b)
+    );*/
+
+    //copy the PIO in the packet
+    memcpy(
+        ((icmpv6rpl_pio_t*)(msg->payload)),
+        &(icmpv6rpl_vars.pio),
+        sizeof(icmpv6rpl_pio_t)
+    );
 
 
-   //===== DIO payload
-   // note: DIO is already mostly populated
-   icmpv6rpl_vars.dio.rank                  = icmpv6rpl_getMyDAGrank();
-   packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_dio_ht));
-   memcpy(
-      ((icmpv6rpl_dio_ht*)(msg->payload)),
-      &(icmpv6rpl_vars.dio),
-      sizeof(icmpv6rpl_dio_ht)
-   );
+    //===== DIO payload
+    // note: DIO is already mostly populated
+    icmpv6rpl_vars.dio.rank                  = icmpv6rpl_getMyDAGrank();
+    packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_dio_ht));
+    memcpy(
+        ((icmpv6rpl_dio_ht*)(msg->payload)),
+        &(icmpv6rpl_vars.dio),
+        sizeof(icmpv6rpl_dio_ht)
+    );
 
-   // reverse the rank bytes order in Big Endian
-   *(msg->payload+2) = (icmpv6rpl_vars.dio.rank >> 8) & 0xFF;
-   *(msg->payload+3) = icmpv6rpl_vars.dio.rank        & 0xFF;
+    // reverse the rank bytes order in Big Endian
+    *(msg->payload+2) = (icmpv6rpl_vars.dio.rank >> 8) & 0xFF;
+    *(msg->payload+3) = icmpv6rpl_vars.dio.rank        & 0xFF;
 
-   //===== ICMPv6 header
-   packetfunctions_reserveHeaderSize(msg,sizeof(ICMPv6_ht));
-   ((ICMPv6_ht*)(msg->payload))->type       = msg->l4_sourcePortORicmpv6Type;
-   ((ICMPv6_ht*)(msg->payload))->code       = IANA_ICMPv6_RPL_DIO;
-   packetfunctions_calculateChecksum(msg,(uint8_t*)&(((ICMPv6_ht*)(msg->payload))->checksum));//call last
+    //===== ICMPv6 header
+    packetfunctions_reserveHeaderSize(msg,sizeof(ICMPv6_ht));
+    ((ICMPv6_ht*)(msg->payload))->type       = msg->l4_sourcePortORicmpv6Type;
+    ((ICMPv6_ht*)(msg->payload))->code       = IANA_ICMPv6_RPL_DIO;
+    packetfunctions_calculateChecksum(msg,(uint8_t*)&(((ICMPv6_ht*)(msg->payload))->checksum));//call last
 
     //send
     if (icmpv6_send(msg)==E_SUCCESS) {
@@ -755,16 +767,7 @@ void sendDIO(void) {
    task.
 */
 void icmpv6rpl_timer_DAO_cb(opentimers_id_t id) {
-
     scheduler_push_task(icmpv6rpl_timer_DAO_task,TASKPRIO_RPL);
-    // update the period
-    opentimers_scheduleIn(
-        icmpv6rpl_vars.timerIdDAO,
-        openrandom_getRandomizePeriod(icmpv6rpl_vars.daoPeriod, NUM_CHANNELS*SLOTFRAME_LENGTH*SLOTDURATION),
-        TIME_MS,
-        TIMER_ONESHOT,
-        icmpv6rpl_timer_DAO_cb
-    );
 }
 
 /**

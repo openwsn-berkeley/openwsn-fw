@@ -45,21 +45,21 @@ void msf_init(void) {
         (sixtop_sf_translatemetadata)msf_translateMetadata,
         (sixtop_sf_handle_callback)msf_handleRCError
     );
-    msf_vars.housekeepingTimerId = opentimers_create();
+    msf_vars.housekeepingTimerId = opentimers_create(TIMER_GENERAL_PURPOSE);
     msf_vars.housekeepingPeriod  = HOUSEKEEPING_PERIOD;
     opentimers_scheduleIn(
         msf_vars.housekeepingTimerId,
         openrandom_getRandomizePeriod(msf_vars.housekeepingPeriod, msf_vars.housekeepingPeriod),
         TIME_MS,
-        TIMER_ONESHOT,
+        TIMER_PERIODIC,
         msf_timer_housekeeping_cb
     );
-    msf_vars.waitretryTimerId    = opentimers_create();
+    msf_vars.waitretryTimerId    = opentimers_create(TIMER_GENERAL_PURPOSE);
 }
 
 // called by schedule
 void    msf_updateCellsPassed(open_addr_t* neighbor){
-
+#ifdef MSF_ADAPTING_TO_TRAFFIC
     if (icmpv6rpl_isPreferredParent(neighbor)==FALSE){
         return;
     }
@@ -75,6 +75,7 @@ void    msf_updateCellsPassed(open_addr_t* neighbor){
         msf_vars.numCellsPassed = 0;
         msf_vars.numCellsUsed   = 0;
     }
+#endif
 }
 
 void    msf_updateCellsUsed(open_addr_t* neighbor){
@@ -162,15 +163,12 @@ void msf_timer_waitretry_cb(opentimers_id_t id){
 }
 
 void msf_timer_housekeeping_cb(opentimers_id_t id){
+    PORT_TIMER_WIDTH newDuration;
+
     scheduler_push_task(msf_timer_housekeeping_task,TASKPRIO_MSF);
-    // update the period
-    opentimers_scheduleIn(
-        msf_vars.housekeepingTimerId,
-        openrandom_getRandomizePeriod(msf_vars.housekeepingPeriod, msf_vars.housekeepingPeriod),
-        TIME_MS,
-        TIMER_ONESHOT,
-        msf_timer_housekeeping_cb
-    );
+
+    newDuration = openrandom_getRandomizePeriod(msf_vars.housekeepingPeriod, msf_vars.housekeepingPeriod),
+    opentimers_updateDuration(msf_vars.housekeepingTimerId, newDuration);
 }
 
 void msf_timer_housekeeping_task(void){

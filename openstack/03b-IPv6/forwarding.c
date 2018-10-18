@@ -27,7 +27,7 @@ owerror_t forwarding_send_internal_RoutingTable(
    rpl_option_ht*       rpl_option,
 #ifdef DEADLINE_OPTION_ENABLED
    deadline_option_ht*	deadline_option,
-#endif   
+#endif
    uint32_t*             flow_label,
    uint8_t              fw_SendOrfw_Rcv
 );
@@ -37,7 +37,7 @@ owerror_t forwarding_send_internal_SourceRouting(
    ipv6_header_iht*     ipv6_inner_header,
 #ifdef DEADLINE_OPTION_ENABLED
    deadline_option_ht*	deadline_option,
-#endif   
+#endif
    rpl_option_ht*       rpl_option
 );
 void      forwarding_createRplOption(
@@ -71,10 +71,9 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
     ipv6_header_iht      ipv6_outer_header;
     ipv6_header_iht      ipv6_inner_header;
     rpl_option_ht        rpl_option;
-    open_addr_t          link_local_prefix;
 #ifdef DEADLINE_OPTION_ENABLED
     deadline_option_ht   deadline_option;
-#endif    
+#endif
     open_addr_t*         myprefix;
     open_addr_t*         myadd64;
     uint32_t             flow_label = 0;
@@ -82,7 +81,7 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
     open_addr_t          temp_dest_prefix;
     open_addr_t          temp_dest_mac64b;
     open_addr_t*         p_dest;
-    open_addr_t*         p_src;  
+    open_addr_t*         p_src;
     open_addr_t          temp_src_prefix;
     open_addr_t          temp_src_mac64b;
     bool                 sac;
@@ -103,15 +102,23 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
     // set source address (me)
     msg->l3_sourceAdd.type=ADDR_128B;
 
+    packetfunctions_ip128bToMac64b(&(msg->l3_destinationAdd),&temp_dest_prefix,&temp_dest_mac64b);
+    // at this point, we still haven't written in the packet the source prefix
+    // that we will use - it depends whether the destination address is link-local or not
+
     // if we are sending to a link-local address set the source prefix to link-local
     if (packetfunctions_isLinkLocal(&msg->l3_destinationAdd)                ||
             packetfunctions_isAllRoutersMulticast(&msg->l3_destinationAdd)  ||
             packetfunctions_isAllHostsMulticast(&msg->l3_destinationAdd)) {
-        memset(&link_local_prefix, 0x00, sizeof(open_addr_t));
-        link_local_prefix.type = ADDR_PREFIX;
-        link_local_prefix.prefix[0] = 0xfe;
-        link_local_prefix.prefix[1] = 0x80;
-        myprefix = &link_local_prefix;
+        memset(&temp_src_prefix, 0x00, sizeof(open_addr_t));
+        temp_src_prefix.type = ADDR_PREFIX;
+        temp_src_prefix.prefix[0] = 0xfe;
+        temp_src_prefix.prefix[1] = 0x80;
+        myprefix = &temp_src_prefix;
+        sac = IPHC_SAC_STATELESS;
+        dac = IPHC_DAC_STATELESS;
+    } else if (packetfunctions_sameAddress(&temp_dest_prefix,idmanager_getMyID(ADDR_PREFIX))==FALSE && packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE) {
+        myprefix = idmanager_getMyID(ADDR_PREFIX);
         sac = IPHC_SAC_STATELESS;
         dac = IPHC_DAC_STATELESS;
     } else {
@@ -119,6 +126,7 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
         sac = IPHC_SAC_STATEFUL;
         dac = IPHC_DAC_STATEFUL;
     }
+    // myprefix now contains the pointer to the correct prefix to use (link-local or global)
     memcpy(&(msg->l3_sourceAdd.addr_128b[0]),myprefix->prefix,8);
     memcpy(&(msg->l3_sourceAdd.addr_128b[8]),myadd64->addr_64b,8);
 
@@ -138,23 +146,19 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
       &rpl_option,      // rpl_option to fill in
       0x00              // flags
     );
-    
+
 #ifdef DEADLINE_OPTION_ENABLED
     forwarding_createDeadlineOption(
       &deadline_option
     );
-#endif    
+#endif
 
-    packetfunctions_ip128bToMac64b(&(msg->l3_destinationAdd),&temp_dest_prefix,&temp_dest_mac64b);
-    //xv poipoi -- get the src prefix as well
-    packetfunctions_ip128bToMac64b(&(msg->l3_sourceAdd),&temp_src_prefix,&temp_src_mac64b);
-    //XV -poipoi we want to check if the source address prefix is the same as destination prefix
-    if (packetfunctions_sameAddress(&temp_dest_prefix,&temp_src_prefix)) {
+    if (packetfunctions_sameAddress(&temp_dest_prefix, myprefix)) {
          // same prefix use 64B address
          sam = IPHC_SAM_64B;
          dam = IPHC_DAM_64B;
-         p_dest = &temp_dest_mac64b;      
-         p_src  = &temp_src_mac64b; 
+         p_dest = &temp_dest_mac64b;
+         p_src  = &temp_src_mac64b;
     } else {
         //not the same prefix. so the packet travels to another network
         //check if this is a source routing pkt. in case it is then the DAM is elided as it is in the SrcRouting header.
@@ -163,7 +167,7 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
             dam = IPHC_DAM_128B;
             p_dest = &(msg->l3_destinationAdd);
             p_src = &(msg->l3_sourceAdd);
-            
+
             ipv6_outer_header.src.type = ADDR_128B;
             memcpy(&ipv6_outer_header.src,p_src,sizeof(open_addr_t));
             ipv6_outer_header.hop_limit = IPHC_DEFAULT_HOP_LIMIT;
@@ -197,8 +201,8 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
                 dac,
                 dam,
                 p_dest,
-                p_src,            
-                PCKTSEND  
+                p_src,
+                PCKTSEND
                 );
     // both of them are compressed
     ipv6_outer_header.next_header_compressed = TRUE;
@@ -210,7 +214,7 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
         &rpl_option,
 #ifdef DEADLINE_OPTION_ENABLED
         &deadline_option,
-#endif        
+#endif
         &flow_label,
         PCKTSEND
     );
@@ -223,21 +227,20 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
 \param[in]     error The outcome of sending it.
 */
 void forwarding_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
-   
+
    // take ownership
    msg->owner = COMPONENT_FORWARDING;
-   
+
    if (msg->creator==COMPONENT_RADIO || msg->creator==COMPONENT_FORWARDING) {
       // this is a relayed packet
-      
+
       // free packet
       openqueue_freePacketBuffer(msg);
    } else {
       // this is a packet created by this mote
-      
+
       // indicate sendDone to upper layer
       switch(msg->l4_protocol) {
-            break;
          case IANA_UDP:
             openudp_sendDone(msg,error);
             break;
@@ -245,7 +248,7 @@ void forwarding_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
             icmpv6_sendDone(msg,error);
             break;
          default:
-            
+
             // log error
             openserial_printCritical(
                COMPONENT_FORWARDING,
@@ -253,7 +256,7 @@ void forwarding_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
                (errorparameter_t)msg->l4_protocol,
                (errorparameter_t)0
             );
-            
+
             // free packet
             openqueue_freePacketBuffer(msg);
       }
@@ -272,27 +275,27 @@ void forwarding_receive(
       OpenQueueEntry_t*      msg,
       ipv6_header_iht*       ipv6_outer_header,
       ipv6_header_iht*       ipv6_inner_header,
-#ifdef DEADLINE_OPTION_ENABLED      
+#ifdef DEADLINE_OPTION_ENABLED
       deadline_option_ht*	 	 deadline_option,
-#endif      
+#endif
       rpl_option_ht*         rpl_option
     ) {
     uint8_t flags;
     uint16_t senderRank;
-   
+
     // take ownership
     msg->owner                     = COMPONENT_FORWARDING;
-
+   
 
     // determine L4 protocol
     // get information from ipv6_header
     msg->l4_protocol            = ipv6_inner_header->next_header;
     msg->l4_protocol_compressed = ipv6_inner_header->next_header_compressed;
-   
+
     // populate packets metadata with L3 information
     memcpy(&(msg->l3_destinationAdd),&ipv6_inner_header->dest, sizeof(open_addr_t));
     memcpy(&(msg->l3_sourceAdd),     &ipv6_inner_header->src,  sizeof(open_addr_t));
-
+   
     if (
         (
             idmanager_isMyAddress(&(msg->l3_destinationAdd))
@@ -309,7 +312,6 @@ void forwarding_receive(
         packetfunctions_tossHeader(msg,ipv6_inner_header->header_length);
         // indicate received packet to upper layer
         switch(msg->l4_protocol) {
-            break;
         case IANA_UDP:
             openudp_receive(msg);
             break;
@@ -323,33 +325,33 @@ void forwarding_receive(
                 (errorparameter_t)msg->l4_protocol,
                 (errorparameter_t)1
             );
-            
+
             // free packet
             openqueue_freePacketBuffer(msg);
         }
     } else {
         // this packet is not for me: relay
-      
+
         // change the creator of the packet
         msg->creator = COMPONENT_FORWARDING;
-        
+
 #ifdef DEADLINE_OPTION_ENABLED
-        if (deadline_option != NULL) {       
-            // Deadline Option : Drop 
-            if( (deadline_option->time_left <= 0) && (deadline_option->d_flag == 1) ) { // packet expired  
-               deadline_option->time_left = 0;         
+        if (deadline_option != NULL) {
+            // Deadline Option : Drop
+            if( (deadline_option->time_left <= 0) && (deadline_option->d_flag == 1) ) { // packet expired
+               deadline_option->time_left = 0;
                openserial_printError(
                          COMPONENT_FORWARDING,
                          ERR_6LORH_DEADLINE_DROPPED,
                          (errorparameter_t)0,
                          (errorparameter_t)0
-               );           
+               );
                openqueue_freePacketBuffer(msg);
                return;
            }
        }
-#endif        
-        
+#endif
+
         if(openqueue_isHighPriorityEntryEnough()==FALSE){
           // after change the creator to COMPONENT_FORWARDING,
           // there is no space for high priority packet, drop this message
@@ -357,7 +359,7 @@ void forwarding_receive(
           openqueue_freePacketBuffer(msg);
           return;
         }
-      
+
         if (ipv6_outer_header->next_header!=IANA_IPv6ROUTE) {
             flags = rpl_option->flags;
             senderRank = rpl_option->senderRank;
@@ -384,12 +386,12 @@ void forwarding_receive(
                 );
             }
             forwarding_createRplOption(rpl_option, rpl_option->flags);
-            
+
 #ifdef DEADLINE_OPTION_ENABLED
             if (deadline_option != NULL)
                 forwarding_createDeadlineOption(deadline_option);
 #endif
-            
+
             // resend as if from upper layer
             if (
                 forwarding_send_internal_RoutingTable(
@@ -399,9 +401,9 @@ void forwarding_receive(
                     rpl_option,
 #ifdef DEADLINE_OPTION_ENABLED
                     deadline_option,
-#endif                    
+#endif
                     &(ipv6_outer_header->flow_label),
-                    PCKTFORWARD 
+                    PCKTFORWARD
                 )==E_FAIL
             ) {
                 openqueue_freePacketBuffer(msg);
@@ -415,7 +417,7 @@ void forwarding_receive(
                     ipv6_inner_header,
 #ifdef DEADLINE_OPTION_ENABLED
                     deadline_option,
-#endif                    
+#endif
                     rpl_option
                 )==E_FAIL
             ) {
@@ -442,7 +444,7 @@ void forwarding_receive(
 void forwarding_getNextHop(open_addr_t* destination128b, open_addr_t* addressToWrite64b) {
    uint8_t         i;
    open_addr_t     temp_prefix64btoWrite;
-   
+
    if (packetfunctions_isBroadcastMulticast(destination128b)) {
       // IP destination is broadcast, send to 0xffffffffffffffff
       addressToWrite64b->type = ADDR_64B;
@@ -461,12 +463,12 @@ void forwarding_getNextHop(open_addr_t* destination128b, open_addr_t* addressToW
 /**
 \brief Send a packet using the routing table to find the next hop.
 
-\param[in,out] msg               The packet to send.
+\param[in,out] msg             The packet to send.
 \param[in]     ipv6_outer_header The packet's IPv6 outer header.
 \param[in]     ipv6_inner_header The packet's IPv6 inner header.
-\param[in]     rpl_option        The hop-by-hop option to add in this packet.
-\param[in]     flow_label        The flowlabel to add in the 6LoWPAN header.
-\param[in]     fw_SendOrfw_Rcv   The packet is originating from this mote
+\param[in]     rpl_option      The hop-by-hop option to add in this packet.
+\param[in]     flow_label      The flowlabel to add in the 6LoWPAN header.
+\param[in]     fw_SendOrfw_Rcv The packet is originating from this mote
    (PCKTSEND), or forwarded (PCKTFORWARD).
 */
 owerror_t forwarding_send_internal_RoutingTable(
@@ -476,11 +478,11 @@ owerror_t forwarding_send_internal_RoutingTable(
       rpl_option_ht*         rpl_option,
 #ifdef DEADLINE_OPTION_ENABLED
       deadline_option_ht*    deadline_option,
-#endif      
+#endif
       uint32_t*              flow_label,
       uint8_t                fw_SendOrfw_Rcv
    ) {
-   
+
    // retrieve the next hop from the routing table
    forwarding_getNextHop(&(msg->l3_destinationAdd),&(msg->l2_nextORpreviousHop));
    if (msg->l2_nextORpreviousHop.type==ADDR_NONE) {
@@ -492,11 +494,11 @@ owerror_t forwarding_send_internal_RoutingTable(
       );
       return E_FAIL;
    }
-   
+
    if (ipv6_outer_header->src.type != ADDR_NONE){
       packetfunctions_tossHeader(msg,ipv6_outer_header->header_length);
    }
-   
+
    // send to next lower layer
    return iphc_sendFromForwarding(
       msg,
@@ -505,7 +507,7 @@ owerror_t forwarding_send_internal_RoutingTable(
       rpl_option,
 #ifdef DEADLINE_OPTION_ENABLED
       deadline_option,
-#endif      
+#endif
       flow_label,
       NULL,  // no rh3
       0,
@@ -521,7 +523,7 @@ owerror_t forwarding_send_internal_RoutingTable(
 How to process the routing header is detailed in
 http://tools.ietf.org/html/rfc6554#page-9.
 
-\param[in,out] msg               The packet to send.
+\param[in,out] msg             The packet to send.
 \param[in]     ipv6_outer_header The packet's IPv6 outer header.
 \param[in]     ipv6_inner_header The packet's IPv6 inner header.
 \param[in]     rpl_option        The hop-by-hop option to add in this packet.
@@ -532,7 +534,7 @@ owerror_t forwarding_send_internal_SourceRouting(
     ipv6_header_iht*  ipv6_inner_header,
 #ifdef DEADLINE_OPTION_ENABLED
     deadline_option_ht*	 	 deadline_option,
-#endif    
+#endif
     rpl_option_ht*    rpl_option
     ) {
     uint8_t              temp_8b;
@@ -545,14 +547,14 @@ owerror_t forwarding_send_internal_SourceRouting(
     open_addr_t          nextAddr;
     open_addr_t          temp_prefix;
     open_addr_t          temp_addr64;
-    
+
     uint8_t              rpi_length;
     uint8_t              flags;
     uint16_t             senderRank;
-    
+
     uint8_t              RH_copy[127];
     uint8_t              RH_length;
-    
+
     uint8_t				 RH3_length;
 
     uint8_t sizeRH=0;
@@ -562,7 +564,7 @@ owerror_t forwarding_send_internal_SourceRouting(
     RH_length = 0;
     memcpy(&msg->l3_destinationAdd,&ipv6_inner_header->dest,sizeof(open_addr_t));
     memcpy(&msg->l3_sourceAdd,&ipv6_inner_header->src,sizeof(open_addr_t));
-    
+
     // initial first Address by compression reference
     firstAddr.type = ADDR_128B;
     if (ipv6_outer_header->src.type != ADDR_NONE){
@@ -572,12 +574,12 @@ owerror_t forwarding_send_internal_SourceRouting(
     } else {
         memcpy(&firstAddr,&ipv6_inner_header->src,sizeof(open_addr_t));
     }
-    
+
     hlen = 0;
-    
+
     temp_8b = *((uint8_t*)(msg->payload)+hlen);
     type    = *((uint8_t*)(msg->payload)+hlen+1);
-    
+
     //copy and toss any unknown 6LoRHE
     while((temp_8b&FORMAT_6LORH_MASK) == ELECTIVE_6LoRH){
         sizeRH = temp_8b & IPINIP_LEN_6LORH_MASK;
@@ -613,7 +615,7 @@ owerror_t forwarding_send_internal_SourceRouting(
         hlen += 16;
         break;
     }
-    
+
     packetfunctions_ip128bToMac64b(&firstAddr,&temp_prefix,&temp_addr64);
     if (
         packetfunctions_sameAddress(&temp_prefix,idmanager_getMyID(ADDR_PREFIX)) &&
@@ -621,8 +623,8 @@ owerror_t forwarding_send_internal_SourceRouting(
     ){
         size = temp_8b & RH3_6LOTH_SIZE_MASK;
         if (size > 0){
-            // there are at least 2 entries in the header, 
-            // the router removes the first entry and decrements the Size (by 1) 
+            // there are at least 2 entries in the header,
+            // the router removes the first entry and decrements the Size (by 1)
             size -= 1;
             packetfunctions_tossHeader(msg,hlen);
             packetfunctions_reserveHeaderSize(msg,2);
@@ -775,19 +777,19 @@ owerror_t forwarding_send_internal_SourceRouting(
         memcpy(&RH_copy[RH_length],msg->payload,RH3_length);
         packetfunctions_tossHeader(msg,RH3_length);
         RH_length += RH3_length;
-        
+
         // retrieve hop-by-hop header (includes RPL option)
         rpi_length = iphc_retrieveIPv6HopByHopHeader(
                           msg,
                           rpl_option
                      );
-     
+
         // toss the headers
         packetfunctions_tossHeader(
             msg,
             rpi_length
         );
-      
+
         flags = rpl_option->flags;
         senderRank = rpl_option->senderRank;
         if ((flags & O_FLAG)!=O_FLAG){
@@ -813,18 +815,18 @@ owerror_t forwarding_send_internal_SourceRouting(
             );
         }
         forwarding_createRplOption(rpl_option, rpl_option->flags);
-        
+
 #ifdef DEADLINE_OPTION_ENABLED
         if (deadline_option != NULL)
             forwarding_createDeadlineOption(deadline_option);
 #endif
-        
+
         // toss the IP in IP 6LoRH
         packetfunctions_tossHeader(msg, ipv6_outer_header->header_length);
     } else {
         RH3_length = 0;
     }
-    
+
     // send to next lower layer
     return iphc_sendFromForwarding(
         msg,
@@ -833,7 +835,7 @@ owerror_t forwarding_send_internal_SourceRouting(
         rpl_option,
 #ifdef DEADLINE_OPTION_ENABLED
         deadline_option,
-#endif        
+#endif
         &ipv6_outer_header->flow_label,
         &RH_copy[0],
         RH_length,
@@ -853,19 +855,19 @@ void forwarding_createRplOption(rpl_option_ht* rpl_option, uint8_t flags) {
     rpl_option->optionType         = RPL_HOPBYHOP_HEADER_OPTION_TYPE;
     rpl_option->rplInstanceID      = icmpv6rpl_getRPLIntanceID();
     rpl_option->senderRank         = icmpv6rpl_getMyDAGrank();
-   
+
     if (rpl_option->rplInstanceID == 0){
        I = 1;
     } else {
        I = 0;
     }
-    
+
     if ((rpl_option->senderRank & 0x00FF) == 0){
         K = 1;
     } else {
         K = 0;
     }
-    
+
     rpl_option->flags = (flags & ~I_FLAG & ~K_FLAG) | (I<<1) | K;
 }
 

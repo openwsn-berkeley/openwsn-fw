@@ -4,6 +4,152 @@ import struct
 import binascii
 import socket
 
+#============================ defines =========================================
+
+COMPORT = 'COM3'
+
+#============================ helper ==========================================
+
+def buf2hex(buf):
+    try:
+       return '-'.join(['%02x'%ord(b) for b in buf])
+    except:
+       return '-'.join(['%02x'%b      for b in buf])
+
+#============================ classes =========================================
+
+class moteProbe(threading.Thread):
+    
+    CMD_SET_DAGROOT = '7e5259bbbb0000000000000c347e'
+    
+    XOFF           = 0x13
+    XON            = 0x11
+    XONXOFF_ESCAPE = 0x12
+    XONXOFF_MASK   = 0x10
+    # XOFF            is transmitted as [XONXOFF_ESCAPE,           XOFF^XONXOFF_MASK]==[0x12,0x13^0x10]==[0x12,0x03]
+    # XON             is transmitted as [XONXOFF_ESCAPE,            XON^XONXOFF_MASK]==[0x12,0x11^0x10]==[0x12,0x01]
+    # XONXOFF_ESCAPE  is transmitted as [XONXOFF_ESCAPE, XONXOFF_ESCAPE^XONXOFF_MASK]==[0x12,0x12^0x10]==[0x12,0x02]
+    
+    def __init__(self,serialport=None):
+        
+        # store params
+        self.serialport           = serialport
+        
+        # local variables
+        self.hdlc                 = OpenHdlc()
+        self.lastRxByte           = self.hdlc.HDLC_FLAG
+        self.busyReceiving        = False
+        self.inputBuf             = ''
+        self.last_counter         = None
+        self.outputBuf            = [binascii.unhexlify(self.CMD_SET_DAGROOT)]
+        self.outputBufLock        = threading.RLock()
+        self.dataLock             = threading.Lock()
+        
+        # [pendulum] create socket
+        self.sock = socket.socket(
+            socket.AF_INET,       # IPv4
+            socket.SOCK_DGRAM,    # UDP
+        )
+        
+        # flag to permit exit from read loop
+        self.goOn                 = True
+        
+        # initialize the parent class
+        threading.Thread.__init__(self)
+        
+        # give this thread a name
+        self.name                 = 'moteProbe@'+self.serialport
+        
+        # start myself
+        self.start()
+    
+    #======================== thread ==========================================
+    
+    def run(self):
+        try:
+            
+            while self.goOn:     # open serial port
+                
+                self.serial = serial.Serial(
+                    port     = self.serialport,
+                    baudrate = 115200,
+                    xonxoff  = True,
+                )
+                
+                while self.goOn: # read bytes from serial port
+                    try:
+                        rxByte = self.serial.read(1)
+                    except Exception as err:
+                        print err
+                        time.sleep(1)
+                        break
+                    else:
+                        if      (
+                                    (not self.busyReceiving)             and 
+                                    self.lastRxByte==self.hdlc.HDLC_FLAG and
+                                    rxByte!=self.hdlc.HDLC_FLAG
+                                ):
+                            # start of frame
+                            self.busyReceiving       = True
+                            self.xonxoffEscaping     = False
+                            self.inputBuf            = self.hdlc.HDLC_FLAG
+                            self._addToInputBuf(rxByte)
+                        elif    (
+                                    self.busyReceiving                   and
+                                    rxByte!=self.hdlc.HDLC_FLAG
+                                ):
+                            # middle of frame
+                            
+                            self._addToInputBuf(rxByte)
+                        elif    (
+                                    self.busyReceiving                   and
+                                    rxByte==self.hdlc.HDLC_FLAG
+                                ):
+                            # end of frame
+                            self.busyReceiving       = False
+                            self._addToInputBuf(rxByte)
+                            
+                            try:
+                                tempBuf              = self.inputBuf
+                                self.inputBuf        = self.hdlc.dehdlcify(self.inputBuf)
+                            except Exception as err:
+                                print '{0}: invalid serial frame: {1}'.format(self.name, buf2hex(tempBuf))
+                            else:
+                                if self.inputBuf[0]==ord('D'):
+                                    
+                                    # [pendulum] send to Matlab
+                                    if len(self.inputBuf)==87:
+                                        dataForMatlab = ''.join(chr(b) for b in self.inputBuf[-32:])
+                                        self.sock.sendto(dataForMatlab, ('127.0.0.1', 3001))
+                                        #print 'sent to Matlab: {0}'.format(dataForMatlab)
+                                    else:
+                                        print 'dropped DATA frame of length {0}: {1}'.format(len(self.inputBuf),buf2hex(self.inputBuf))
+                                
+                                elif self.inputBuf[0]==ord('E'):
+                                    print inputBuf
+                                
+                        self.lastRxByte = rxByte
+                    
+        except Exception as err:
+            print err
+    
+    #======================== public ==========================================
+    
+    def close(self):
+        self.goOn = False
+    
+    #======================== private =========================================
+    
+    def _addToInputBuf(self,byte):
+        if byte==chr(self.XONXOFF_ESCAPE):
+            self.xonxoffEscaping = True
+        else:
+            if self.xonxoffEscaping==True:
+                self.inputBuf += chr(ord(byte)^self.XONXOFF_MASK)
+                self.xonxoffEscaping=False
+            else:
+                self.inputBuf += byte
+
 class OpenHdlc(object):
     
     HDLC_FLAG              = '\x7e'
@@ -117,114 +263,10 @@ class OpenHdlc(object):
     def _crcIteration(self,crc,b):
         return (crc>>8)^self.FCS16TAB[((crc^(ord(b))) & 0xff)]
 
-class moteProbe(threading.Thread):
-    
-    CMD_SET_DAGROOT = '7e5259bbbb0000000000000c347e'
-    
-    def __init__(self,serialport=None):
-        
-        # store params
-        self.serialport           = serialport
-        
-        # local variables
-        self.hdlc                 = OpenHdlc()
-        self.lastRxByte           = self.hdlc.HDLC_FLAG
-        self.busyReceiving        = False
-        self.inputBuf             = ''
-        self.last_counter         = None
-        self.outputBuf            = [binascii.unhexlify(self.CMD_SET_DAGROOT)]
-        self.outputBufLock        = threading.RLock()
-        self.dataLock             = threading.Lock()
-        
-        # [pendulum] create socket
-        self.sock = socket.socket(
-            socket.AF_INET,       # IPv4
-            socket.SOCK_DGRAM,    # UDP
-        )
-        
-        # flag to permit exit from read loop
-        self.goOn                 = True
-        
-        # initialize the parent class
-        threading.Thread.__init__(self)
-        
-        # give this thread a name
-        self.name                 = 'moteProbe@'+self.serialport
-        
-        # start myself
-        self.start()
-    
-    #======================== thread ==========================================
-    
-    def run(self):
-        try:
-            
-            while self.goOn:     # open serial port
-                
-                self.serial = serial.Serial(self.serialport,'115200')
-                
-                while self.goOn: # read bytes from serial port
-                    try:
-                        rxByte = self.serial.read(1)
-                    except Exception as err:
-                        print err
-                        time.sleep(1)
-                        break
-                    else:
-                        if      (
-                                    (not self.busyReceiving)             and 
-                                    self.lastRxByte==self.hdlc.HDLC_FLAG and
-                                    rxByte!=self.hdlc.HDLC_FLAG
-                                ):
-                            # start of frame
-                            self.busyReceiving       = True
-                            self.inputBuf            = self.hdlc.HDLC_FLAG
-                            self.inputBuf           += rxByte
-                        elif    (
-                                    self.busyReceiving                   and
-                                    rxByte!=self.hdlc.HDLC_FLAG
-                                ):
-                            # middle of frame
-                            
-                            self.inputBuf           += rxByte
-                        elif    (
-                                    self.busyReceiving                   and
-                                    rxByte==self.hdlc.HDLC_FLAG
-                                ):
-                            # end of frame
-                            self.busyReceiving       = False
-                            self.inputBuf           += rxByte
-                            
-                            try:
-                                tempBuf              = self.inputBuf
-                                self.inputBuf        = self.hdlc.dehdlcify(self.inputBuf)
-                            except Exception as err:
-                                print '{0}: invalid serial frame: {2} {1}'.format(self.name, err, tempBuf)
-                            else:
-                                if self.inputBuf[0]==ord('D'):
-                                    
-                                    # [pendulum] send to Matlab
-                                    if len(self.inputBuf)==87:
-                                        dataForMatlab = ''.join(chr(b) for b in self.inputBuf[-32:])
-                                        self.sock.sendto(dataForMatlab, ('127.0.0.1', 3001))
-                                        print 'sent to Matlab: {0}'.format(dataForMatlab)
-                                
-                        self.lastRxByte = rxByte
-                    
-        except Exception as err:
-            print err
-    
-    #======================== public ==========================================
-    
-    def close(self):
-        self.goOn = False
-    
-    #======================== private =========================================
-
 #============================ main ============================================
 
 def main():
-    moteProbe('COM4')
+    moteProbe(COMPORT)
 
 if __name__=="__main__":
     main()

@@ -10,12 +10,13 @@
       <TargetName>Target SCuM</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>5060183::V5.06 update 2 (build 183)::ARMCC</pCCUsed>
+      <pCCUsed>5060750::V5.06 update 6 (build 750)::ARMCC</pCCUsed>
+      <uAC6>0</uAC6>
       <TargetOption>
         <TargetCommonOption>
           <Device>ARMCM0</Device>
           <Vendor>ARM</Vendor>
-          <PackID>ARM.CMSIS.4.5.0</PackID>
+          <PackID>ARM.CMSIS.5.3.0</PackID>
           <PackURL>http://www.keil.com/pack/</PackURL>
           <Cpu>IRAM(0x20000000,0x20000) IROM(0x00000000,0x40000) CPUTYPE("Cortex-M0") CLOCK(12000000) ESEL ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -323,6 +324,7 @@
             <uThumb>0</uThumb>
             <uSurpInc>0</uSurpInc>
             <uC99>0</uC99>
+            <uGnu>0</uGnu>
             <useXO>0</useXO>
             <v6Lang>1</v6Lang>
             <v6LangP>1</v6LangP>
@@ -330,11 +332,12 @@
             <vShortWch>1</vShortWch>
             <v6Lto>0</v6Lto>
             <v6WtE>0</v6WtE>
+            <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls>--gnu</MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\bsp\boards;..\..\..\bsp\boards\scum;..\..\..\drivers\common;..\..\..\inc;..\..\..\openstack\02a-MAClow;..\..\..\openstack\02b-MAChigh;..\..\..\openstack\03a-IPHC;..\..\..\openstack\03b-IPv6;..\..\..\openstack\04-TRAN;..\..\..\openstack\cross-layers;..\..\..\kernel;..\..\..\openapps;..\..\..\openstack;..\..\..\bsp\boards\common;..\..\..\openapps\c6t;..\..\..\openapps\uinject;..\..\..\openapps\techo;..\..\..\openapps\uecho;..\..\..\openapps\cinfo;..\..\..\openapps\cleds;..\..\..\openapps\rrt;..\..\..\openapps\cexample;..\..\..\openapps\cstorm;..\..\..\openapps\cwellknown;..\..\..\openapps\userialbridge</IncludePath>
+              <IncludePath>..\..\..\bsp\boards;..\..\..\bsp\boards\scum;..\..\..\drivers\common;..\..\..\inc;..\..\..\openstack\02a-MAClow;..\..\..\openstack\02b-MAChigh;..\..\..\openstack\03a-IPHC;..\..\..\openstack\03b-IPv6;..\..\..\openstack\04-TRAN;..\..\..\openstack\cross-layers;..\..\..\kernel;..\..\..\openapps;..\..\..\openstack;..\..\..\bsp\boards\common;..\..\..\openapps\c6t;..\..\..\openapps\uinject;..\..\..\openapps\techo;..\..\..\openapps\uecho;..\..\..\openapps\cinfo;..\..\..\openapps\cleds;..\..\..\openapps\rrt;..\..\..\openapps\cexample;..\..\..\openapps\cstorm;..\..\..\openapps\cwellknown;..\..\..\openapps\userialbridge;..\..\..\openapps\opencoap;..\..\..\openapps\cjoin;..\..\..\openapps\uexpiration;..\..\..\openapps\uexpiration_monitor</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -347,6 +350,7 @@
             <NoWarn>0</NoWarn>
             <uSurpInc>0</uSurpInc>
             <useXO>0</useXO>
+            <uClangAs>0</uClangAs>
             <VariousControls>
               <MiscControls></MiscControls>
               <Define></Define>
@@ -413,19 +417,14 @@
               <FilePath>..\..\..\bsp\boards\radio.h</FilePath>
             </File>
             <File>
-              <FileName>radiotimer.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\bsp\boards\radiotimer.h</FilePath>
-            </File>
-            <File>
               <FileName>uart.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\..\bsp\boards\uart.h</FilePath>
             </File>
             <File>
-              <FileName>bsp_timer.h</FileName>
+              <FileName>sctimer.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\..\..\bsp\boards\bsp_timer.h</FilePath>
+              <FilePath>..\..\..\bsp\boards\sctimer.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -463,16 +462,6 @@
               <FilePath>..\..\..\bsp\boards\scum\uart.c</FilePath>
             </File>
             <File>
-              <FileName>bsp_timer.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\bsp\boards\scum\bsp_timer.c</FilePath>
-            </File>
-            <File>
-              <FileName>radiotimer.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\bsp\boards\scum\radiotimer.c</FilePath>
-            </File>
-            <File>
               <FileName>debugpins.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\bsp\boards\scum\debugpins.c</FilePath>
@@ -488,9 +477,24 @@
               <FilePath>..\..\..\bsp\boards\scum\eui64.c</FilePath>
             </File>
             <File>
-              <FileName>dummy_crypto_engine.c</FileName>
+              <FileName>scm3_hardware_interface.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\bsp\boards\common\dummy_crypto_engine.c</FilePath>
+              <FilePath>..\..\..\bsp\boards\scum\scm3_hardware_interface.c</FilePath>
+            </File>
+            <File>
+              <FileName>scm3_hardware_interface.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\bsp\boards\scum\scm3_hardware_interface.h</FilePath>
+            </File>
+            <File>
+              <FileName>sctimer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\bsp\boards\scum\sctimer.c</FilePath>
+            </File>
+            <File>
+              <FileName>cryptoengine.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\bsp\boards\scum\cryptoengine.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -543,19 +547,9 @@
           <GroupName>02a-MAClow</GroupName>
           <Files>
             <File>
-              <FileName>adaptive_sync.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\openstack\02a-MAClow\adaptive_sync.c</FilePath>
-            </File>
-            <File>
               <FileName>IEEE802154.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\openstack\02a-MAClow\IEEE802154.c</FilePath>
-            </File>
-            <File>
-              <FileName>IEEE802154_dummy_security.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\openstack\02a-MAClow\IEEE802154_dummy_security.c</FilePath>
             </File>
             <File>
               <FileName>IEEE802154_security.c</FileName>
@@ -581,11 +575,6 @@
               <FileName>neighbors.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\openstack\02b-MAChigh\neighbors.c</FilePath>
-            </File>
-            <File>
-              <FileName>processIE.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\openstack\02b-MAChigh\processIE.c</FilePath>
             </File>
             <File>
               <FileName>schedule.c</FileName>
@@ -683,16 +672,6 @@
           <GroupName>04-TRAN</GroupName>
           <Files>
             <File>
-              <FileName>opencoap.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\openstack\04-TRAN\opencoap.c</FilePath>
-            </File>
-            <File>
-              <FileName>opentcp.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\openstack\04-TRAN\opentcp.c</FilePath>
-            </File>
-            <File>
               <FileName>openudp.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\openstack\04-TRAN\openudp.c</FilePath>
@@ -716,16 +695,6 @@
               <FileName>c6t.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\openapps\c6t\c6t.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>techo</GroupName>
-          <Files>
-            <File>
-              <FileName>techo.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\openapps\techo\techo.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -809,8 +778,134 @@
             </File>
           </Files>
         </Group>
+        <Group>
+          <GroupName>opencoap</GroupName>
+          <Files>
+            <File>
+              <FileName>cborencoder.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\openapps\opencoap\cborencoder.c</FilePath>
+            </File>
+            <File>
+              <FileName>cborencoder.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\openapps\opencoap\cborencoder.h</FilePath>
+            </File>
+            <File>
+              <FileName>hkdf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\openapps\opencoap\hkdf.c</FilePath>
+            </File>
+            <File>
+              <FileName>hmac.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\openapps\opencoap\hmac.c</FilePath>
+            </File>
+            <File>
+              <FileName>opencoap.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\openapps\opencoap\opencoap.c</FilePath>
+            </File>
+            <File>
+              <FileName>opencoap.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\openapps\opencoap\opencoap.h</FilePath>
+            </File>
+            <File>
+              <FileName>openoscoap.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\openapps\opencoap\openoscoap.c</FilePath>
+            </File>
+            <File>
+              <FileName>openoscoap.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\openapps\opencoap\openoscoap.h</FilePath>
+            </File>
+            <File>
+              <FileName>sha.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\openapps\opencoap\sha.h</FilePath>
+            </File>
+            <File>
+              <FileName>sha224-256.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\openapps\opencoap\sha224-256.c</FilePath>
+            </File>
+            <File>
+              <FileName>sha-private.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\openapps\opencoap\sha-private.h</FilePath>
+            </File>
+            <File>
+              <FileName>usha.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\openapps\opencoap\usha.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>uexpiration</GroupName>
+          <Files>
+            <File>
+              <FileName>uexpiration.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\openapps\uexpiration\uexpiration.c</FilePath>
+            </File>
+            <File>
+              <FileName>uexpiration.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\openapps\uexpiration\uexpiration.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>uexpiration_monitor</GroupName>
+          <Files>
+            <File>
+              <FileName>uexpiration_monitor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\openapps\uexpiration_monitor\uexpiration_monitor.c</FilePath>
+            </File>
+            <File>
+              <FileName>uexpiration_monitor.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\openapps\uexpiration_monitor\uexpiration_monitor.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>cjoin</GroupName>
+          <Files>
+            <File>
+              <FileName>cjoin.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\openapps\cjoin\cjoin.c</FilePath>
+            </File>
+            <File>
+              <FileName>cjoin.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\openapps\cjoin\cjoin.h</FilePath>
+            </File>
+            <File>
+              <FileName>cojp_cbor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\openapps\cjoin\cojp_cbor.c</FilePath>
+            </File>
+            <File>
+              <FileName>cojp_cbor.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\openapps\cjoin\cojp_cbor.h</FilePath>
+            </File>
+          </Files>
+        </Group>
       </Groups>
     </Target>
   </Targets>
+
+  <RTE>
+    <apis/>
+    <components/>
+    <files/>
+  </RTE>
 
 </Project>

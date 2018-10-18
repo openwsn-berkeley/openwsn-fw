@@ -19,7 +19,7 @@
 // ==== default crc check result and rssi value
 
 #define DEFAULT_CRC_CHECK       0x01    // this is an arbitrary value for now
-#define DEFAULT_RSSI            -91     // this is an arbitrary value for now
+#define DEFAULT_RSSI            -50     // this is an arbitrary value for now
 
 //=========================== variables =======================================
 
@@ -115,7 +115,7 @@ void radio_rfOff(void) {
 
     // turn SCuM radio off
     RFCONTROLLER_REG__CONTROL   = RX_STOP;
-
+    
     // wiggle debug pin
     debugpins_radio_clr();
     leds_radio_off();
@@ -249,10 +249,10 @@ kick_scheduler_t radio_isr(void) {
     
     PORT_TIMER_WIDTH capturedTime;
     
-    debugpins_isr_set();
-    
     PORT_TIMER_WIDTH irq_status = RFCONTROLLER_REG__INT;
     PORT_TIMER_WIDTH irq_error  = RFCONTROLLER_REG__ERROR;
+    
+    debugpins_isr_set();
     
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
 #else
@@ -264,7 +264,7 @@ kick_scheduler_t radio_isr(void) {
         if (irq_status & TX_SFD_DONE_INT) {
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
             // get the capture Time from capture register
-            capturedTime = TIMER_COUNTER_CONVERT_500K_TO_32K(RFTIMER_REG__CAPTURE0);
+            capturedTime = TIMER_COUNTER_CONVERT_RFTIMER_CLK_TO_32K(RFTIMER_REG__CAPTURE0);
 #endif
             RFCONTROLLER_REG__INT_CLEAR = TX_SFD_DONE_INT;
             // a SFD is just sent, update radio state
@@ -273,7 +273,7 @@ kick_scheduler_t radio_isr(void) {
         if (irq_status & RX_SFD_DONE_INT) {
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
             // get the capture Time from capture register
-            capturedTime = TIMER_COUNTER_CONVERT_500K_TO_32K(RFTIMER_REG__CAPTURE1);
+            capturedTime = TIMER_COUNTER_CONVERT_RFTIMER_CLK_TO_32K(RFTIMER_REG__CAPTURE1);
 #endif
             RFCONTROLLER_REG__INT_CLEAR = RX_SFD_DONE_INT;
             // a SFD is just received, update radio state
@@ -292,14 +292,14 @@ kick_scheduler_t radio_isr(void) {
         if (irq_status & TX_SEND_DONE_INT) {
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
             // get the capture Time from capture register
-            capturedTime = TIMER_COUNTER_CONVERT_500K_TO_32K(RFTIMER_REG__CAPTURE2);
+            capturedTime = TIMER_COUNTER_CONVERT_RFTIMER_CLK_TO_32K(RFTIMER_REG__CAPTURE2);
 #endif
             RFCONTROLLER_REG__INT_CLEAR = TX_SEND_DONE_INT;
         }
         if (irq_status & RX_DONE_INT) {
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
             // get the capture Time from capture register
-            capturedTime = TIMER_COUNTER_CONVERT_500K_TO_32K(RFTIMER_REG__CAPTURE3);
+            capturedTime = TIMER_COUNTER_CONVERT_RFTIMER_CLK_TO_32K(RFTIMER_REG__CAPTURE3);
 #endif
             RFCONTROLLER_REG__INT_CLEAR = RX_DONE_INT;
         }

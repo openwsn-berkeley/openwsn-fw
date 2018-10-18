@@ -2,9 +2,6 @@
 
 <workspace>
   <project>
-    <path>$WS_DIR$\lib_bsp\lib_bsp.ewp</path>
-  </project>
-  <project>
     <path>$WS_DIR$\00std_button\00std_button.ewp</path>
   </project>
   <project>

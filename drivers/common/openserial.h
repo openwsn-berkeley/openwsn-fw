@@ -40,22 +40,15 @@
 */
 #define SERIAL_INPUT_BUFFER_SIZE  200
 
-/// Modes of the openserial module.
-enum {
-   MODE_OFF    = 0, ///< The module is off, no serial activity.
-   MODE_INPUT  = 1, ///< The serial is listening or receiving bytes.
-   MODE_OUTPUT = 2  ///< The serial is transmitting bytes.
-};
-
 // frames sent mote->PC
 #define SERFRAME_MOTE2PC_DATA                    ((uint8_t)'D')
 #define SERFRAME_MOTE2PC_STATUS                  ((uint8_t)'S')
 #define SERFRAME_MOTE2PC_INFO                    ((uint8_t)'I')
 #define SERFRAME_MOTE2PC_ERROR                   ((uint8_t)'E')
 #define SERFRAME_MOTE2PC_CRITICAL                ((uint8_t)'C')
-#define SERFRAME_MOTE2PC_REQUEST                 ((uint8_t)'R')
 #define SERFRAME_MOTE2PC_SNIFFED_PACKET          ((uint8_t)'P')
 #define SERFRAME_MOTE2PC_PRINTF                  ((uint8_t)'F')
+#define SERFRAME_MOTE2PC_ACKREPLY                ((uint8_t)'A')
 
 // frames sent PC->mote
 #define SERFRAME_PC2MOTE_SETROOT                 ((uint8_t)'R')
@@ -105,31 +98,30 @@ typedef struct _openserial_rsvpt {
 
 typedef struct {
     // admin
-    uint8_t             mode;
+    uint8_t             fInhibited;
+    uint8_t             ctsStateChanged;
     uint8_t             debugPrintCounter;
     openserial_rsvpt*   registeredCmd;
     // input
-    uint8_t             reqFrame[1+1+2+1]; // flag (1B), command (2B), CRC (2B), flag (1B)
-    uint8_t             reqFrameIdx;
-    uint8_t             lastRxByte;
-    bool                busyReceiving;
-    bool                inputEscaping;
-    uint16_t            inputCrc;
-    uint8_t             inputBufFill;
     uint8_t             inputBuf[SERIAL_INPUT_BUFFER_SIZE];
+    uint8_t             inputBufFillLevel;
+    uint8_t             hdlcLastRxByte;
+    bool                hdlcBusyReceiving;
+    uint16_t            hdlcInputCrc;
+    bool                hdlcInputEscaping;
     // output
-    bool                outputBufFilled;
-    uint16_t            outputCrc;
+    uint8_t             outputBuf[SERIAL_OUTPUT_BUFFER_SIZE];
     uint16_t            outputBufIdxW;
     uint16_t            outputBufIdxR;
-    uint8_t             outputBuf[SERIAL_OUTPUT_BUFFER_SIZE];
+    bool                fBusyFlushing;
+    uint16_t            hdlcOutputCrc;
 } openserial_vars_t;
 
 // admin
-void      openserial_init(void);
-void      openserial_register(openserial_rsvpt* rsvp);
+void openserial_init(void);
+void openserial_register(openserial_rsvpt* rsvp);
 
-// printing
+// transmitting
 owerror_t openserial_printStatus(
     uint8_t             statusElement,
     uint8_t*            buffer,
@@ -153,25 +145,35 @@ owerror_t openserial_printCritical(
     errorparameter_t    arg1,
     errorparameter_t    arg2
 );
-owerror_t openserial_printData(uint8_t* buffer, uint8_t length);
-owerror_t openserial_printSniffedPacket(uint8_t* buffer, uint8_t length, uint8_t channel);
+owerror_t openserial_printData(
+    uint8_t*            buffer,
+    uint8_t             length
+);
+owerror_t openserial_printSniffedPacket(
+    uint8_t*            buffer,
+    uint8_t             length,
+    uint8_t             channel
+);
+
+void      task_openserial_debugPrint(void);
+
 owerror_t openserial_print_str(char* buffer, uint8_t length);
 owerror_t openserial_print_uint32_t(uint32_t value);
 
-// retrieving inputBuffer
-uint8_t   openserial_getInputBufferFilllevel(void);
+// receiving
+uint8_t   openserial_getInputBufferFillLevel(void);
 uint8_t   openserial_getInputBuffer(uint8_t* bufferToWrite, uint8_t maxNumBytes);
 
 // scheduling
-void      openserial_startInput(void);
-void      openserial_startOutput(void);
-void      openserial_stop(void);
+void      openserial_flush(void);
+void      openserial_inhibitStart(void);
+void      openserial_inhibitStop(void);
 
 // debugprint
 bool      debugPrint_outBufferIndexes(void);
 
 // interrupt handlers
-void      isr_openserial_rx(void);
+uint8_t   isr_openserial_rx(void);
 void      isr_openserial_tx(void);
 
 /**

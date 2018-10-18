@@ -58,7 +58,7 @@ void sctimer_setCompare(PORT_TIMER_WIDTH val){
     
     PORT_TIMER_WIDTH currentTime;
 
-    currentTime = TIMER_COUNTER_CONVERT_500K_TO_32K(RFTIMER_REG__COUNTER);
+    currentTime = TIMER_COUNTER_CONVERT_RFTIMER_CLK_TO_32K(RFTIMER_REG__COUNTER);
     
     sctimer_enable();
     if (currentTime - val < TIMERLOOP_THRESHOLD){
@@ -75,7 +75,7 @@ void sctimer_setCompare(PORT_TIMER_WIDTH val){
         } else {
             // mark clear the flag here
             // schedule the timer at val
-            RFTIMER_REG__COMPARE0           = (PORT_TIMER_WIDTH)(TIMER_COUNTER_CONVERT_32K_TO_500K(val) & RFTIMER_MAX_COUNT);
+            RFTIMER_REG__COMPARE0           = (PORT_TIMER_WIDTH)(TIMER_COUNTER_CONVERT_32K_TO_RFTIMER_CLK(val) & RFTIMER_MAX_COUNT);
             RFTIMER_REG__COMPARE0_CONTROL   = RFTIMER_COMPARE_ENABLE |   \
                                               RFTIMER_COMPARE_INTERRUPT_ENABLE;
         }
@@ -88,7 +88,7 @@ void sctimer_setCompare(PORT_TIMER_WIDTH val){
  \returns The current value of the timer's counter.
 */
 PORT_TIMER_WIDTH sctimer_readCounter(void){
-    return TIMER_COUNTER_CONVERT_500K_TO_32K(RFTIMER_REG__COUNTER);
+    return TIMER_COUNTER_CONVERT_RFTIMER_CLK_TO_32K(RFTIMER_REG__COUNTER);
 }
 
 void sctimer_enable(void){
@@ -111,7 +111,7 @@ void sctimer_scheduleActionIn(uint8_t type,PORT_RADIOTIMER_WIDTH offset){
     switch(type){
         case ACTION_LOAD_PACKET:
             // offset when to fire
-            RFTIMER_REG__COMPARE3           = TIMER_COUNTER_CONVERT_32K_TO_500K(offset);
+            RFTIMER_REG__COMPARE3           = TIMER_COUNTER_CONVERT_32K_TO_RFTIMER_CLK(offset);
             
             // enable compare and tx load interrupt (this also cancels any pending interrupts)
             RFTIMER_REG__COMPARE3_CONTROL   = RFTIMER_COMPARE_ENABLE           |\
@@ -120,7 +120,7 @@ void sctimer_scheduleActionIn(uint8_t type,PORT_RADIOTIMER_WIDTH offset){
             break;
         case ACTION_SEND_PACKET:
             // offset when to fire
-            RFTIMER_REG__COMPARE4           = TIMER_COUNTER_CONVERT_32K_TO_500K(offset);
+            RFTIMER_REG__COMPARE4           = TIMER_COUNTER_CONVERT_32K_TO_RFTIMER_CLK(offset);
             
             // enable compare and tx send interrupt (this also cancels any pending interrupts)
             RFTIMER_REG__COMPARE4_CONTROL   = RFTIMER_COMPARE_ENABLE           |\
@@ -129,7 +129,7 @@ void sctimer_scheduleActionIn(uint8_t type,PORT_RADIOTIMER_WIDTH offset){
             break;
         case ACTION_RADIORX_ENABLE:
             // offset when to fire
-            RFTIMER_REG__COMPARE5           = TIMER_COUNTER_CONVERT_32K_TO_500K(offset);
+            RFTIMER_REG__COMPARE5           = TIMER_COUNTER_CONVERT_32K_TO_RFTIMER_CLK(offset);
             
             // enable compare and rx start interrupt (this also cancels any pending interrupts)
             RFTIMER_REG__COMPARE5_CONTROL   = RFTIMER_COMPARE_ENABLE           |\
@@ -138,7 +138,7 @@ void sctimer_scheduleActionIn(uint8_t type,PORT_RADIOTIMER_WIDTH offset){
             break;
         case ACTION_SET_TIMEOUT:
             // offset when to fire
-            RFTIMER_REG__COMPARE2           = TIMER_COUNTER_CONVERT_32K_TO_500K(offset);
+            RFTIMER_REG__COMPARE2           = TIMER_COUNTER_CONVERT_32K_TO_RFTIMER_CLK(offset);
             
             // enable compare interrupt (this also cancels any pending interrupts)
             RFTIMER_REG__COMPARE2_CONTROL   = RFTIMER_COMPARE_ENABLE           |\
