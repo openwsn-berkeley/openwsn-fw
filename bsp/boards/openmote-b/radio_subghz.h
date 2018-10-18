@@ -18,9 +18,9 @@
 //=========================== define ==========================================
 
 #define LENGTH_CRC_SUBGHZ    4
-#define NUM_CHANNELS_SUBGHZ  3 // number of channels to channel hop on
-#define delayTx_SUBGHZ      67
-#define delayRx_SUBGHZ       0
+//#define NUM_CHANNELS_SUBGHZ  3 // number of channels to channel hop on
+//#define delayTx_SUBGHZ      67
+//#define delayRx_SUBGHZ       0
 #define ChInitOffset         0
 
 //=========================== typedef =========================================
@@ -42,7 +42,6 @@ void     radio_subghz_setFrequency(uint16_t channel_spacing, uint32_t frequency_
 void     radio_subghz_rfOn(void);
 void     radio_subghz_rfOff(void);
 void     radio_subghz_change_modulation(registerSetting_t * mod);
-void     radio_subghz_change_size(uint16_t* size);
 // TX
 void     radio_subghz_loadPacket(uint8_t* packet, uint16_t len);
 void     radio_subghz_txEnable(void);

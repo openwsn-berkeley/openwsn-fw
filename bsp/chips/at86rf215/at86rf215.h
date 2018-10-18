@@ -35,6 +35,30 @@ typedef struct
     uint16_t    channel;
 }frequencySetting_t;
 
+
+typedef struct {
+	registerSetting_t const *  phy_conf;             // modulation configuration
+    uint16_t                   channel_spacing;
+    uint32_t                   center_freq_0;
+	uint8_t                    size_config;          // amount of registers to write to set the modulation
+	uint8_t                    delayTX;              // 
+    uint16_t                   num_channels;          //
+	uint16_t                   chTemplate;            // 
+} phy_tsch_config_t;
+
+static const uint8_t chTemplate_default_2fsk50[] = {       // 34 channels available in 2-FSK 50 kbps
+    4,8,15
+};
+
+static const uint8_t chTemplate_default_OFDM1[] = {       // 34 channels available in 2-FSK 50 kbps
+    0,2,4
+};
+/*
+#define wdAckDuration              260                  //  5400us using 50 kbps
+#define NUM_CHANNELS                3 // number of channels to channel hop on
+#define DEFAULT_CH_SPACING          200 // default channel spacing for subghz
+#define DEFAULT_FREQUENCY_CENTER    863125 // defualt freque
+*/
 /* === MACROS ============================================================== */
 #define FLAG_WRITE        0x80
 #define FLAG_READ         0x00
@@ -3978,7 +4002,9 @@ void at86rf215_readBurst(uint16_t reg, uint8_t* regValueRead, uint16_t size);
 
 //------------------------------------ FSK --------------------------------//
 
-static const registerSetting_t basic_settings_fsk_option1 []={
+
+
+static const registerSetting_t basic_settings_fsk_option1_subghz []={
   {RG_RF09_CMD,       0x02}, //we make sure we are in the trxoff state
   {RG_RF09_IRQM,      0x1F}, // TRXERR, BATLOW, EDC, TRXRDY, WAKEUP interrupts enabled
   {RG_RF24_IRQM,      0x00},
@@ -4197,7 +4223,7 @@ static const registerSetting_t basic_settings_ofdm_1_mcs2[] = {
   {RG_BBC0_OFDMPHRTX, 0x02},
 };
 
-static const registerSetting_t basic_settings_ofdm_1_mcs3[] = {  //TODO
+static const registerSetting_t basic_settings_ofdm_1_mcs3_subghz[] = {  //TODO
   {RG_RF09_CMD,       0x02},
   {RG_RF09_IRQM,      0x1F},
   {RG_RF24_IRQM,      0x00},

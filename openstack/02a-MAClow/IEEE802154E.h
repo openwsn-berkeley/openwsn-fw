@@ -17,12 +17,8 @@
 //=========================== debug define ====================================
 
 //=========================== static ==========================================
-//static const uint8_t chTemplate_default[] = {
-//    5,6,12,7,15,4,14,11,8,0,1,2,13,3,9,10
-//};
-
 static const uint8_t chTemplate_default[] = {
-    4,8,15
+    5,6,12,7,15,4,14,11,8,0,1,2,13,3,9,10
 };
 
 // refer to RFC8180: https://tools.ietf.org/html/rfc8180#appendix-A.1
@@ -41,10 +37,6 @@ static const uint8_t ebIEsBytestream[] = {
 #define EB_SLOTFRAME_NUMLINK_OFFSET 22
 
 #define EB_IE_LEN                   28
-
-#define NUM_CHANNELS                3 // number of channels to channel hop on
-#define DEFAULT_CH_SPACING          200 // default channel spacing for subghz
-#define DEFAULT_FREQUENCY_CENTER    863125 // defualt freque
 #define TXRETRIES                    3 // number of MAC retries before declaring failed
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to successfully synchronize
@@ -193,12 +185,7 @@ enum ieee154e_atomicdurations_enum {
    wdRadioTx                 =  140,                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 43 is tested and works)
    wdDataDuration            =  754,                  //  23000us (measured 4280us with max payload)   
 #endif
-
-#ifdef SLOTDURATION_10MS
-   wdAckDuration             =   80,                  //  2400us (measured 1000us)
-#else
-   wdAckDuration             =  260,                  //  5400us using 50 kbps
-#endif
+   wdAckDuration             =   PORT_wdAckDuration,                  //  2400us (measured 1000us)
 };
 
 //shift of bytes in the linkOption bitmap: draft-ietf-6tisch-minimal-10.txt: page 6

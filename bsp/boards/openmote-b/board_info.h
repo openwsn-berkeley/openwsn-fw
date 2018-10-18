@@ -86,8 +86,10 @@
     #define PORT_maxRxDataPrepare               30    // 1007us (measured  84us)
     #define PORT_maxTxAckPrepare                40    //  305us (measured 219us)
     // radio speed related
-    #define PORT_delayTx                        27    //  214us (measured 219us)
-    #define PORT_delayRx                        0     //    0us (can not measure)
+    #define delayTx_2FSK_50                     67
+    #define delayTx_OFDM1                       40       
+
+    #define PORT_wdAckDuration                 260
     // radio watchdog
 #endif
 
@@ -109,6 +111,15 @@
 #define MAX_NUM_MODEM         2    // sub-GHz and 2.4 GHz interfaces or modem
 #define MAX_NUM_RADIOS        2    // amount of active PHYs.         
 //#define DAGROOT
+   
+
+//#define wdAckDuration              260                  //  5400us using 50 kbps
+#define NUM_CHANNELS                3 // number of channels to channel hop on
+#define DEFAULT_CH_SPACING          200 // default channel spacing for subghz
+#define DEFAULT_FREQUENCY_CENTER    863125 // defualt freque   
+#define delayTx_SUBGHZ              67
+#define delayRx_SUBGHZ              0
+#define NUM_CHANNELS_SUBGHZ         3
 
 //=========================== typedef  ========================================
 

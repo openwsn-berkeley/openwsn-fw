@@ -1173,7 +1173,7 @@ port_INLINE void activity_ti1ORri1(void) {
 }
 
 port_INLINE void activity_ti2(void) {
-    debugpins_frame_toggle();
+
     // change state
     changeState(S_TXDATAPREPARE);
 
@@ -1218,7 +1218,7 @@ port_INLINE void activity_ti2(void) {
     ieee154e_vars.radioOnThisSlot=TRUE;
     // change state
     changeState(S_TXDATAREADY);
-    debugpins_frame_toggle();
+
 }
 
 port_INLINE void activity_tie1(void) {

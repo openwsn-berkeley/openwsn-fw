@@ -107,7 +107,6 @@ typedef struct {
     radio_rfOff_cbt               radio_rfOff_cb;
     radio_setFrequency_cbt        radio_setFrequency_cb;
     radio_change_modulation_cbt   radio_change_modulation_cb;
-    radio_change_size_cbt         radio_change_size_cb;
         // reset
     radio_reset_cbt               radio_reset_cb;
         // TX
