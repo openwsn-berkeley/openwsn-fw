@@ -42,11 +42,11 @@
 void board_timer_init(void);
 uint32_t board_timer_get(void);
 bool board_timer_expired(uint32_t future);
+void antenna_init(void);
 
 static void clock_init(void);
 static void gpio_init(void);
 static void button_init(void);
-static void antenna_init(void);
 
 static void SysCtrlDeepSleepSetting(void);
 static void SysCtrlSleepSetting(void);
@@ -68,23 +68,24 @@ void board_init(void) {
 
     gpio_init();
     clock_init();
-    antenna_init();
-    board_timer_init();
     leds_init();
     debugpins_init();
     button_init();
+    antenna_init();
+    
+    board_timer_init();
     sctimer_init();
     uart_init();
+    spi_init();
     i2c_init();
-
+    
     // initialize radios
     openradios_getFunctions(&radio_functions);
-    radio_2d4ghz_init();
     radio_2d4ghz_setFunctions(&radio_functions[RADIOTPYE_2D4GHZ]);
-    spi_init();
-    radio_subghz_init();
+    radio_2d4ghz_init();
     radio_subghz_setFunctions(&radio_functions[RADIOTPYE_SUBGHZ]);
-
+    // radio_subghz_init();
+    
     sensors_init();
     cryptoengine_init();
 }
