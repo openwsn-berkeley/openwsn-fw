@@ -87,6 +87,7 @@ void schedule_startDAGroot(void) {
    temp_neighbor.type             = ADDR_ANYCAST;
    for (running_slotOffset=start_slotOffset;running_slotOffset<start_slotOffset+SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;running_slotOffset++) {
       rt=(radioType_t)running_slotOffset; // this is a little trick to get each minimal cell use a different radio
+//      if (running_slotOffset > 0) {rt=(radioType_t)1;} 
       schedule_addActiveSlot(
          running_slotOffset,                 // slot offset
          CELLTYPE_TXRX,                      // type of slot

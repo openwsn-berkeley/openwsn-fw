@@ -90,6 +90,8 @@
     #define delayTx_OFDM1                       40       
 
     #define PORT_wdAckDuration                 260
+    #define PORT_wdRadioTx                     140      //  for 2FSK 50 kbps 
+    #define PORT_wdDataDuration                754      //  for 2FSK 50 kbps 
     // radio watchdog
 #endif
 
@@ -109,7 +111,7 @@
 
 // number of radios in this board.
 #define MAX_NUM_MODEM         2    // sub-GHz and 2.4 GHz interfaces or modem
-#define MAX_NUM_RADIOS        2    // amount of active PHYs.         
+#define MAX_NUM_RADIOS        3    // amount of active PHYs.         
 //#define DAGROOT
    
 
@@ -117,6 +119,7 @@
 #define NUM_CHANNELS                3 // number of channels to channel hop on
 #define DEFAULT_CH_SPACING          200 // default channel spacing for subghz
 #define DEFAULT_FREQUENCY_CENTER    863125 // defualt freque   
+//#define delayTx_SUBGHZ              67
 #define delayTx_SUBGHZ              67
 #define delayRx_SUBGHZ              0
 #define NUM_CHANNELS_SUBGHZ         3
@@ -125,8 +128,7 @@
 
 typedef enum {
    MODEM_2D4GHZ          = 0,
-   MODEM_SUBGHZ          = 1,
-   FREQBAND_ANY          = 2
+   MODEM_SUBGHZ          = 1
 } modem_t;
 
 typedef enum {

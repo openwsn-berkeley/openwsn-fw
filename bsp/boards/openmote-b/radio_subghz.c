@@ -42,13 +42,19 @@ typedef struct {
     uint8_t                     rf24_isr;
     uint8_t                     bb0_isr;
     uint8_t                     bb1_isr;
+    phy_tsch_config_t           phy_tsch_config_current;
+    phy_tsch_config_t           phy_list[MAX_NUM_RADIOS];
+    //uint8_t                     delayTx;
+    //uint16_t                    channel_spacing;
+    //uint32_t                    center_freq_0;
+    //uint16_t                    num_channels;
+    //uint16_t                    chTemplate;
 } radio_subghz_vars_t;
 
 radio_subghz_vars_t radio_subghz_vars;
 
 phy_tsch_config_t              phy_tsch_config_2fsk_50_subGHz;
 phy_tsch_config_t              phy_tsch_config_ofdm_1_800_subGHz;
-phy_tsch_config_t              phy_list[3];
 
 //=========================== public ==========================================
 static void radio_subghz_read_isr(void);
@@ -62,7 +68,6 @@ void config_2fsk_50_subGHz(void);
 //===== admin
 
 void  radio_subghz_setFunctions(radio_functions_t * funcs) {
-    funcs->radio_change_modulation_cb  = radio_subghz_change_modulation;
     funcs->radio_powerOn_cb            = radio_subghz_powerOn;
     // RF admin
     funcs->radio_init_cb               = radio_subghz_init;
@@ -72,7 +77,7 @@ void  radio_subghz_setFunctions(radio_functions_t * funcs) {
     funcs->radio_rfOn_cb               = radio_subghz_rfOn;
     funcs->radio_rfOff_cb              = radio_subghz_rfOff;
     funcs->radio_setFrequency_cb       = radio_subghz_setFrequency;
-    funcs->radio_change_modulation_cb  = radio_subghz_change_modulation;
+    funcs->radio_load_phy_cb           = radio_subghz_load_phy;
     // reset
     funcs->radio_reset_cb              = radio_subghz_reset;
     // TX
@@ -90,7 +95,10 @@ void  radio_subghz_setFunctions(radio_functions_t * funcs) {
     funcs->radio_calculateFrequency_cb = radio_subghz_calculateFrequency;
     funcs->radio_getDelayTx_cb         = radio_subghz_getDelayTx;
     funcs->radio_getDelayRx_cb         = radio_subghz_getDelayRx;
-    funcs->radio_getChInitOffset_cb    = radio_getChInitOffset;
+    funcs->radio_getChInitOffset_cb    = radio_subghz_getChInitOffset;
+    funcs->radio_getCh_spacing_cb      = radio_subghz_getCh_spacing_cb;
+    funcs->radio_getNumOfChannels_cb   = radio_subghz_getNumOfChannels_cb;
+    funcs->radio_getCenterFreq_cb      = radio_subghz_getCenterFreq_cb;
 }
 
 void radio_subghz_powerOn(void) {
@@ -164,21 +172,29 @@ void radio_subghz_init(void) {
     radio_subghz_read_isr();
     config_ofdm_1_800_subGHz();
     config_2fsk_50_subGHz();
-    
+    radio_subghz_vars.phy_list[0]           = phy_tsch_config_2fsk_50_subGHz;
+    radio_subghz_vars.phy_list[1]           = phy_tsch_config_2fsk_50_subGHz;
+    radio_subghz_vars.phy_list[2]           = phy_tsch_config_ofdm_1_800_subGHz;
 }
 
-void radio_subghz_change_modulation(registerSetting_t * mod){
-    static int mod_list = 1;
-    uint16_t i;
-
-at86rf215_spiStrobe(CMD_RF_TRXOFF);
+//void radio_subghz_load_phy(registerSetting_t * mod, uint8_t size, uint8_t phy_index){
+void radio_subghz_load_phy(uint8_t phy_index){
+    uint8_t i;
+    at86rf215_spiStrobe(CMD_RF_TRXOFF);
     while(at86rf215_status() != RF_STATE_TRXOFF);
 
-    for( i = 0; i < (sizeof(*mod)/sizeof(registerSetting_t)); i++) {
-        at86rf215_spiWriteReg( mod[i].addr, mod[i].data);
+//    for( i = 0; i < size; i++) {
+//        at86rf215_spiWriteReg( mod[i].addr, mod[i].data);
+//    };
+    for (i=0; i < radio_subghz_vars.phy_list[phy_index].size_config; i++){
+        at86rf215_spiWriteReg(radio_subghz_vars.phy_list[phy_index].phy_conf[i].addr, radio_subghz_vars.phy_list[phy_index].phy_conf[i].data);
     };
+    
     radio_subghz_read_isr();
-    mod_list++;
+    //radio_subghz_vars.delayTx = radio_subghz_vars.phy_list[phy_index].delayTX;
+    radio_subghz_vars.phy_tsch_config_current = radio_subghz_vars.phy_list[phy_index];   
+    // radio_subghz_setFrequency(radio_subghz_vars.phy_list[phy_index].channel_spacing, radio_subghz_vars.phy_list[phy_index].center_freq_0, radio_subghz_vars.phy_list[phy_index])
+    
 }
 
 void radio_subghz_setStartFrameCb(radio_capture_cbt cb) {
@@ -321,17 +337,31 @@ uint8_t  radio_subghz_getCRCLen(void){
 }
 
 uint8_t radio_subghz_getDelayTx(void){
-    return delayTx_SUBGHZ;
+    //return delayTx_SUBGHZ;
+    return radio_subghz_vars.phy_tsch_config_current.delayTX;
 }
 
 uint8_t radio_subghz_getDelayRx(void){
-    return delayRx_SUBGHZ;
+    //return delayRx_SUBGHZ;
+    return radio_subghz_vars.phy_tsch_config_current.delayRX;
 }
 
-uint8_t radio_getChInitOffset(void){
-    return ChInitOffset;
+uint8_t radio_subghz_getChInitOffset(void){
+    //return ChInitOffset;
+    return radio_subghz_vars.phy_tsch_config_current.chInitOffset;
 }
 
+uint16_t radio_subghz_getNumOfChannels_cb(void){
+    return radio_subghz_vars.phy_tsch_config_current.num_channels;
+}
+
+uint16_t radio_subghz_getCh_spacing_cb(void){
+    return radio_subghz_vars.phy_tsch_config_current.channel_spacing;
+}
+
+uint32_t radio_subghz_getCenterFreq_cb(void){
+    return radio_subghz_vars.phy_tsch_config_current.center_freq_0;
+}
 //=========================== private =========================================
 
 void radio_subghz_read_isr(){
@@ -427,8 +457,10 @@ void config_2fsk_50_subGHz(){
     phy_tsch_config_2fsk_50_subGHz.center_freq_0   = 863125;
     phy_tsch_config_2fsk_50_subGHz.size_config     = (sizeof(basic_settings_fsk_option1_subghz)/sizeof(registerSetting_t));
     phy_tsch_config_2fsk_50_subGHz.delayTX         = delayTx_2FSK_50;
+    phy_tsch_config_2fsk_50_subGHz.delayRX         = delayRx_SUBGHZ;
     phy_tsch_config_2fsk_50_subGHz.chTemplate      = chTemplate_default_2fsk50[0]; //
     phy_tsch_config_2fsk_50_subGHz.num_channels    = 34;
+    phy_tsch_config_2fsk_50_subGHz.chInitOffset    = 0;
 }
 
 void config_ofdm_1_800_subGHz(){
@@ -438,9 +470,10 @@ void config_ofdm_1_800_subGHz(){
     phy_tsch_config_ofdm_1_800_subGHz.center_freq_0   = 863625;
     phy_tsch_config_ofdm_1_800_subGHz.size_config     = (sizeof(basic_settings_ofdm_1_mcs3_subghz)/sizeof(registerSetting_t));
     phy_tsch_config_ofdm_1_800_subGHz.delayTX         = delayTx_OFDM1;
+    phy_tsch_config_ofdm_1_800_subGHz.delayRX         = delayRx_SUBGHZ;
     phy_tsch_config_ofdm_1_800_subGHz.chTemplate      = chTemplate_default_OFDM1[0];
     phy_tsch_config_ofdm_1_800_subGHz.num_channels    = 5;
-
+    phy_tsch_config_ofdm_1_800_subGHz.chInitOffset    = 0;
 }
 
 // ==== not used for subghz radio
