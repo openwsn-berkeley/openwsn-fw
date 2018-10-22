@@ -81,7 +81,7 @@
     // time-slot related
     #define PORT_TsSlotDuration                 1310   // counter counts one extra count, see datasheet
     // execution speed related
-    #define PORT_maxTxDataPrepare               40    // 2014us (measured 746us)
+    #define PORT_maxTxDataPrepare               40    // 2014us (measured 746us) 40
     #define PORT_maxRxAckPrepare                30    //  305us (measured  83us)
     #define PORT_maxRxDataPrepare               30    // 1007us (measured  84us)
     #define PORT_maxTxAckPrepare                40    //  305us (measured 219us)
@@ -90,7 +90,7 @@
     #define delayTx_OFDM1                       40       
 
     #define PORT_wdAckDuration                 260
-    #define PORT_wdRadioTx                     140      //  for 2FSK 50 kbps 
+    #define PORT_wdRadioTx                     140      //  for 2FSK 50 kbps 140
     #define PORT_wdDataDuration                754      //  for 2FSK 50 kbps 
     // radio watchdog
 #endif
@@ -111,7 +111,7 @@
 
 // number of radios in this board.
 #define MAX_NUM_MODEM         2    // sub-GHz and 2.4 GHz interfaces or modem
-#define MAX_NUM_RADIOS        3    // amount of active PHYs.         
+#define MAX_NUM_RADIOS        3    // amount of active PHYs.  3        
 //#define DAGROOT
    
 

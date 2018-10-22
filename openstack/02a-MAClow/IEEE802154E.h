@@ -163,7 +163,7 @@ enum ieee154e_atomicdurations_enum {
    TsTxAckDelay              =   33,                  //  1000us
    TsShortGT                 =    9,                  //   500us, The standardlized value for this is 400/2=200us(7ticks). Currectly 7 doesn't work for short packet, change it back to 7 when found the problem.
 #else
-   TsTxOffset                =  120,                  //  4000us
+   TsTxOffset                =  200,                  //  4000us
    TsLongGT                  =   86,                  //  1300us
    TsTxAckDelay              =  140,                  //  4606us
    TsShortGT                 =   80,                  //   500us

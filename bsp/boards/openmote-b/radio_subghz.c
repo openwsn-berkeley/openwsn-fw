@@ -173,8 +173,8 @@ void radio_subghz_init(void) {
     config_ofdm_1_800_subGHz();
     config_2fsk_50_subGHz();
     radio_subghz_vars.phy_list[0]           = phy_tsch_config_2fsk_50_subGHz;
-    radio_subghz_vars.phy_list[1]           = phy_tsch_config_2fsk_50_subGHz;
-    radio_subghz_vars.phy_list[2]           = phy_tsch_config_ofdm_1_800_subGHz;
+    radio_subghz_vars.phy_list[1]           = phy_tsch_config_ofdm_1_800_subGHz;
+    radio_subghz_vars.phy_list[2]           = phy_tsch_config_2fsk_50_subGHz;
 }
 
 //void radio_subghz_load_phy(registerSetting_t * mod, uint8_t size, uint8_t phy_index){

@@ -628,7 +628,7 @@ owerror_t sixtop_send_internal(
 
 //    if (MAX_NUM_RADIOS==2){
 //        //one EB with every radio
-      msg->l2_radioType = (radioType_t)(((msg->l2_dsn)&0x01)+0x01);
+    msg->l2_radioType = (radioType_t)(((msg->l2_dsn)&0x01)+0x01);
 //    }
 
     //msg->l2_radioType = 1;
