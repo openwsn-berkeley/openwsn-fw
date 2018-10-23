@@ -115,9 +115,9 @@
 
 //#define wdAckDuration              260                  //  5400us using 50 kbps
 #define NUM_CHANNELS                3 // number of channels to channel hop on
-#define DEFAULT_CH_SPACING          200 // default channel spacing for subghz
-#define DEFAULT_FREQUENCY_CENTER    863125 // defualt freque   
-#define delayTx_SUBGHZ              67
+#define DEFAULT_CH_SPACING          1200 // default channel spacing for subghz
+#define DEFAULT_FREQUENCY_CENTER    863625 // defualt freque   
+#define delayTx_SUBGHZ              delayTx_OFDM1
 #define delayRx_SUBGHZ              0
 #define NUM_CHANNELS_SUBGHZ         3
 
