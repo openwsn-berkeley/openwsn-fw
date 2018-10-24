@@ -63,7 +63,8 @@ void idmanager_init(void) {
    
    // my64bID
    idmanager_vars.my64bID.type         = ADDR_64B;
-   eui64_get(idmanager_vars.my64bID.addr_64b);
+   //eui64_get(idmanager_vars.my64bID.addr_64b);
+   eui64_get(idmanager_vars.my64bID.addr_64b.addr_64b);
    
    // my16bID
    packetfunctions_mac64bToMac16b(&idmanager_vars.my64bID,&idmanager_vars.my16bID);
@@ -249,7 +250,7 @@ void idmanager_triggerAboutRoot(void) {
   
    // indicate DODAGid to RPL
    memcpy(&dodagid[0],idmanager_vars.myPrefix.prefix,8);  // prefix
-   memcpy(&dodagid[8],idmanager_vars.my64bID.addr_64b,8); // eui64
+   memcpy(&dodagid[8],idmanager_vars.my64bID.addr_64b.addr_64b,8); // eui64
    icmpv6rpl_writeDODAGid(dodagid);
 
    // store L2 security key index and key value
@@ -288,8 +289,8 @@ bool debugPrint_id(void) {
    
    output.isDAGroot = idmanager_vars.isDAGroot;
    memcpy(output.myPANID,idmanager_vars.myPANID.panid,2);
-   memcpy(output.my16bID,idmanager_vars.my16bID.addr_16b,2);
-   memcpy(output.my64bID,idmanager_vars.my64bID.addr_64b,8);
+   memcpy(output.my16bID,idmanager_vars.my16bID.addr_16b.addr_16b,2);
+   memcpy(output.my64bID,idmanager_vars.my64bID.addr_64b.addr_64b,8);
    memcpy(output.myPrefix,idmanager_vars.myPrefix.prefix,8);
    
    openserial_printStatus(STATUS_ID,(uint8_t*)&output,sizeof(debugIDManagerEntry_t));

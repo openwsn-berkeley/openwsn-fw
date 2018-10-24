@@ -120,7 +120,7 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
         dac = IPHC_DAC_STATEFUL;
     }
     memcpy(&(msg->l3_sourceAdd.addr_128b[0]),myprefix->prefix,8);
-    memcpy(&(msg->l3_sourceAdd.addr_128b[8]),myadd64->addr_64b,8);
+    memcpy(&(msg->l3_sourceAdd.addr_128b[8]),myadd64->addr_64b.addr_64b,8);
 
     // initialize IPv6 header
     memset(&ipv6_outer_header,0,sizeof(ipv6_header_iht));
@@ -447,7 +447,8 @@ void forwarding_getNextHop(open_addr_t* destination128b, open_addr_t* addressToW
       // IP destination is broadcast, send to 0xffffffffffffffff
       addressToWrite64b->type = ADDR_64B;
       for (i=0;i<8;i++) {
-         addressToWrite64b->addr_64b[i] = 0xff;
+         //addressToWrite64b->addr_64b[i] = 0xff;
+        addressToWrite64b->addr_64b.addr_64b[i] = 0xff;
       }
    } else if (neighbors_isStableNeighbor(destination128b)) {
       // IP destination is 1-hop neighbor, send directly
@@ -762,7 +763,7 @@ owerror_t forwarding_send_internal_SourceRouting(
             COMPONENT_IPHC,
             ERR_6LOWPAN_UNSUPPORTED,
             (errorparameter_t)16,
-            (errorparameter_t)(temp_addr64.addr_64b[7])
+            (errorparameter_t)(temp_addr64.addr_64b.addr_64b[7])
         );
     }
     // copy RH3s before toss them

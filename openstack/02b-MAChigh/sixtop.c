@@ -824,8 +824,8 @@ port_INLINE void sixtop_sendEB(void) {
     // some l2 information about this packet
     eb->l2_frameType                     = IEEE154_TYPE_BEACON;
     eb->l2_nextORpreviousHop.type        = ADDR_16B;
-    eb->l2_nextORpreviousHop.addr_16b[0] = 0xff;
-    eb->l2_nextORpreviousHop.addr_16b[1] = 0xff;
+    eb->l2_nextORpreviousHop.addr_16b.addr_16b[0] = 0xff;
+    eb->l2_nextORpreviousHop.addr_16b.addr_16b[1] = 0xff;
 
     //I has an IE in my payload
     eb->l2_payloadIEpresent = TRUE;
