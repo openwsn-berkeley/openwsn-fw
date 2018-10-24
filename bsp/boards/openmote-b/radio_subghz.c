@@ -166,8 +166,8 @@ void radio_subghz_init(void) {
         while(1); //UNKNOWN DEVICE, FINISH
     }
     // Write registers to radio -- default configuration 2fsk-50
-    for( i = 0; i < (sizeof(basic_settings_fsk_option1_subghz)/sizeof(registerSetting_t)); i++) {
-        at86rf215_spiWriteReg( basic_settings_fsk_option1_subghz[i].addr, basic_settings_fsk_option1_subghz[i].data);
+    for( i = 0; i < (sizeof(basic_settings_ofdm_1_mcs3_subghz)/sizeof(registerSetting_t)); i++) {
+        at86rf215_spiWriteReg( basic_settings_ofdm_1_mcs3_subghz[i].addr, basic_settings_ofdm_1_mcs3_subghz[i].data);
     };
     radio_subghz_read_isr();
     config_ofdm_1_800_subGHz();

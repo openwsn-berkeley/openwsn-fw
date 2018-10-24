@@ -27,7 +27,7 @@ void packetfunctions_ip128bToMac64b(
    prefix64btoWrite->type=ADDR_PREFIX;
    memcpy(prefix64btoWrite->prefix, &(ip128b->addr_128b[0]), 8);
    mac64btoWrite->type=ADDR_64B;
-   memcpy(mac64btoWrite->addr_64b , &(ip128b->addr_128b[8]), 8);
+   memcpy(mac64btoWrite->addr_64b.addr_64b , &(ip128b->addr_128b[8]), 8);
 }
 void packetfunctions_mac64bToIp128b(
       open_addr_t* prefix64b,
@@ -42,7 +42,7 @@ void packetfunctions_mac64bToIp128b(
    }
    ip128bToWrite->type=ADDR_128B;
    memcpy(&(ip128bToWrite->addr_128b[0]), &(prefix64b->prefix[0]), 8);
-   memcpy(&(ip128bToWrite->addr_128b[8]), &(mac64b->addr_64b[0]),  8);
+   memcpy(&(ip128bToWrite->addr_128b[8]), &(mac64b->addr_64b.addr_64b[0]),  8);
 }
 
 //assuming an mac16b is lower 2B of mac64b
@@ -55,8 +55,8 @@ void packetfunctions_mac64bToMac16b(open_addr_t* mac64b, open_addr_t* mac16btoWr
       return;
    }
    mac16btoWrite->type = ADDR_16B;
-   mac16btoWrite->addr_16b[0] = mac64b->addr_64b[6];
-   mac16btoWrite->addr_16b[1] = mac64b->addr_64b[7];
+   mac16btoWrite->addr_16b.addr_16b[0] = mac64b->addr_64b.addr_64b[6];
+   mac16btoWrite->addr_16b.addr_16b[1] = mac64b->addr_64b.addr_64b[7];
 }
 void packetfunctions_mac16bToMac64b(open_addr_t* mac16b, open_addr_t* mac64btoWrite) {
    if (mac16b->type!=ADDR_16B) {
@@ -67,14 +67,14 @@ void packetfunctions_mac16bToMac64b(open_addr_t* mac16b, open_addr_t* mac64btoWr
       return;
    }
    mac64btoWrite->type = ADDR_64B;
-   mac64btoWrite->addr_64b[0] = 0;
-   mac64btoWrite->addr_64b[1] = 0;
-   mac64btoWrite->addr_64b[2] = 0;
-   mac64btoWrite->addr_64b[3] = 0;
-   mac64btoWrite->addr_64b[4] = 0;
-   mac64btoWrite->addr_64b[5] = 0;
-   mac64btoWrite->addr_64b[6] = mac16b->addr_16b[0];
-   mac64btoWrite->addr_64b[7] = mac16b->addr_16b[1];
+   mac64btoWrite->addr_64b.addr_64b[0] = 0;
+   mac64btoWrite->addr_64b.addr_64b[1] = 0;
+   mac64btoWrite->addr_64b.addr_64b[2] = 0;
+   mac64btoWrite->addr_64b.addr_64b[3] = 0;
+   mac64btoWrite->addr_64b.addr_64b[4] = 0;
+   mac64btoWrite->addr_64b.addr_64b[5] = 0;
+   mac64btoWrite->addr_64b.addr_64b[6] = mac16b->addr_16b.addr_16b[0];
+   mac64btoWrite->addr_64b.addr_64b[7] = mac16b->addr_16b.addr_16b[1];
 }
 
 //======= address recognition
@@ -421,8 +421,8 @@ void packetfunctions_calculateChecksum(OpenQueueEntry_t* msg, uint8_t* checksum_
         onesComplementSum(temp_checksum,(uint8_t*)linklocalprefix,8);
         memcpy(&localscopeAddress,idmanager_getMyID(ADDR_64B),sizeof(open_addr_t));
         // invert 'u' bit (section 2.5.1 at https://www.ietf.org/rfc/rfc2373.txt)
-        localscopeAddress.addr_64b[0] ^= 0x02;
-        onesComplementSum(temp_checksum,localscopeAddress.addr_64b,8);
+        localscopeAddress.addr_64b.addr_64b[0] ^= 0x02;
+        onesComplementSum(temp_checksum,localscopeAddress.addr_64b.addr_64b,8);
         
         // boardcast destination address
         onesComplementSum(temp_checksum,msg->l3_destinationAdd.addr_128b,16);
@@ -431,7 +431,7 @@ void packetfunctions_calculateChecksum(OpenQueueEntry_t* msg, uint8_t* checksum_
       
         // source address
         onesComplementSum(temp_checksum,(idmanager_getMyID(ADDR_PREFIX))->prefix,8);
-        onesComplementSum(temp_checksum,(idmanager_getMyID(ADDR_64B))->addr_64b,8);
+        onesComplementSum(temp_checksum,(idmanager_getMyID(ADDR_64B))->addr_64b.addr_64b,8);
         // destination address
         onesComplementSum(temp_checksum,msg->l3_destinationAdd.addr_128b,16);
     }

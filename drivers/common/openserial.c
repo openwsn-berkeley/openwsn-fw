@@ -129,8 +129,8 @@ owerror_t openserial_printStatus(
     openserial_vars.outputBufFilled  = TRUE;
     outputHdlcOpen();
     outputHdlcWrite(SERFRAME_MOTE2PC_STATUS);
-    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
-    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b.addr_16b[0]);
+    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b.addr_16b[1]);
     outputHdlcWrite(statusElement);
     for (i=0;i<length;i++){
         outputHdlcWrite(buffer[i]);
@@ -218,8 +218,8 @@ owerror_t openserial_printData(uint8_t* buffer, uint8_t length) {
     openserial_vars.outputBufFilled  = TRUE;
     outputHdlcOpen();
     outputHdlcWrite(SERFRAME_MOTE2PC_DATA);
-    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
-    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b.addr_16b[0]);
+    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b.addr_16b[1]);
     outputHdlcWrite(asn[0]);
     outputHdlcWrite(asn[1]);
     outputHdlcWrite(asn[2]);
@@ -242,8 +242,8 @@ owerror_t openserial_printSniffedPacket(uint8_t* buffer, uint8_t length, uint8_t
     openserial_vars.outputBufFilled  = TRUE;
     outputHdlcOpen();
     outputHdlcWrite(SERFRAME_MOTE2PC_SNIFFED_PACKET);
-    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
-    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b.addr_16b[0]);
+    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b.addr_16b[1]);
     for (i=0;i<length;i++){
        outputHdlcWrite(buffer[i]);
     }
@@ -291,8 +291,8 @@ owerror_t openserial_print_str(char* buffer, uint8_t length) {
    outputHdlcOpen();
    outputHdlcWrite(SERFRAME_MOTE2PC_PRINTF);
    outputHdlcWrite(TYPE_STR);
-   outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
-   outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+   outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b.addr_16b[0]);
+   outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b.addr_16b[1]);
    for(i=0; i<5;i++)
        outputHdlcWrite(asn[i]);
    for (i=0;i<length;i++)
@@ -580,8 +580,8 @@ owerror_t openserial_printInfoErrorCritical(
     openserial_vars.outputBufFilled  = TRUE;
     outputHdlcOpen();
     outputHdlcWrite(severity);
-    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
-    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b.addr_16b[0]);
+    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b.addr_16b[1]);
     outputHdlcWrite(calling_component);
     outputHdlcWrite(error_code);
     outputHdlcWrite((uint8_t)((arg1 & 0xff00)>>8));

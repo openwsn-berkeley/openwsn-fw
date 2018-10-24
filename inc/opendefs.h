@@ -282,6 +282,13 @@ typedef struct {
 } asn_t;
 END_PACK
 
+typedef enum {
+    RADIOTYPE_2D4GHZ             = 0,
+    RADIOTYPE_SUBGHZ_OFDM_1_800  = 1,
+    RADIOTYPE_SUBGHZ_2FSK_50     = 2,
+    RADIOTYPE_ANY                = 3
+} radioType_t;
+
 typedef asn_t  macFrameCounter_t;
 
 BEGIN_PACK
@@ -292,11 +299,21 @@ typedef struct {
     uint16_t  channeloffset;
 } cellInfo_ht;
 
+typedef struct {
+    uint8_t addr_64b[8];
+    radioType_t rtype;
+} addr_64b_t;
+
+typedef struct {
+    uint8_t addr_16b[2];
+    radioType_t rtype;    
+} addr_16b_t;
+
 typedef struct {                                 // always written big endian, i.e. MSB in addr[0]
-   uint8_t type;
+   uint8_t type;                           
    union {
-      uint8_t addr_16b[2];
-      uint8_t addr_64b[8];
+      addr_16b_t addr_16b;
+      addr_64b_t addr_64b;
       uint8_t addr_128b[16];
       uint8_t panid[2];
       uint8_t prefix[8];
@@ -390,7 +407,6 @@ typedef struct {
    uint8_t          backoff;
 } neighborRow_t;
 END_PACK
-
 
 //=========================== variables =======================================
 

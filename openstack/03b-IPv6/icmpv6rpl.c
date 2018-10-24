@@ -37,7 +37,7 @@ void icmpv6rpl_init(void) {
    
    // retrieve my prefix and EUI64
    memcpy(&dodagid[0],idmanager_getMyID(ADDR_PREFIX)->prefix,8); // prefix
-   memcpy(&dodagid[8],idmanager_getMyID(ADDR_64B)->addr_64b,8);  // eui64
+   memcpy(&dodagid[8],idmanager_getMyID(ADDR_64B)->addr_64b.addr_64b,8);  // eui64
    
    //===== reset local variables
    memset(&icmpv6rpl_vars,0,sizeof(icmpv6rpl_vars_t));
@@ -101,7 +101,7 @@ void icmpv6rpl_init(void) {
      );
       memcpy(
         &(icmpv6rpl_vars.pio.prefix[8]),
-        idmanager_getMyID(ADDR_64B)->addr_64b,
+        idmanager_getMyID(ADDR_64B)->addr_64b.addr_64b,
         sizeof(idmanager_getMyID(ADDR_64B)->addr_64b)
      );
    }

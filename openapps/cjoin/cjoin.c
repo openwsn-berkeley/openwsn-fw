@@ -260,7 +260,7 @@ owerror_t cjoin_sendJoinRequest(open_addr_t* joinProxy) {
    pkt->l3_destinationAdd.type    = ADDR_128B;
    prefix = idmanager_getMyID(ADDR_PREFIX); // at this point, this is link-local prefix
    memcpy(&pkt->l3_destinationAdd.addr_128b[0],prefix->prefix,8);
-   memcpy(&pkt->l3_destinationAdd.addr_128b[8],joinProxy->addr_64b,8); // set host to eui-64 of the join proxy
+   memcpy(&pkt->l3_destinationAdd.addr_128b[8],joinProxy->addr_64b.addr_64b,8); // set host to eui-64 of the join proxy
  
    // send
    outcome = opencoap_send(

@@ -1099,7 +1099,7 @@ void opencoap_handle_stateless_proxy(OpenQueueEntry_t *msg,
         return;
     }
     eui64.type = ADDR_64B;
-    memcpy(eui64.addr_64b, statelessProxy->pValue, 8);
+    memcpy(eui64.addr_64b.addr_64b, statelessProxy->pValue, 8);
 
     // use link-local prefix to forward the response
     memset(&link_local_prefix, 0x00, sizeof(open_addr_t));
