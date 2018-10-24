@@ -182,8 +182,10 @@ enum ieee154e_atomicdurations_enum {
    wdRadioTx                 =   33,                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 43 is tested and works)
    wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
 #else
-   wdRadioTx                 =  140,                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 43 is tested and works)
-   wdDataDuration            =  754,                  //  23000us (measured 4280us with max payload)   
+   wdRadioTx                 = PORT_wdRadioTx,
+   wdDataDuration            = PORT_wdDataDuration,            
+   //wdRadioTx                 =  140,                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 43 is tested and works)
+   //wdDataDuration            =  754,                  //  23000us (measured 4280us with max payload)   
 #endif
    wdAckDuration             =   PORT_wdAckDuration,                  //  2400us (measured 1000us)
 };
@@ -250,7 +252,8 @@ typedef struct {
     uint8_t                   asnOffset;               // offset inside the frame
     uint8_t                   singleChannel;           // the single channel used for transmission
     bool                      singleChannelChanged;    // detect id singleChannelChanged
-    uint8_t                   chTemplate[NUM_CHANNELS];// storing the template of hopping sequence
+    uint8_t                   chTemplate[NUM_CHANNELS];// storing the template of hopping sequence -> needs to be changed to a pointer to the channel hopping sequence
+    uint16_t                  numOfChannels;           // the amount of channels to channel hop onto
     // template ID
     uint8_t                   tsTemplateId;            // timeslot template id
     uint8_t                   chTemplateId;            // channel hopping tempalte id

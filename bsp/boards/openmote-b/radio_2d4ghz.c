@@ -70,7 +70,7 @@ void radio_2d4ghz_setFunctions(radio_functions_t* funcs){
     funcs->radio_rfOn_cb               = radio_2d4ghz_rfOn;
     funcs->radio_rfOff_cb              = radio_2d4ghz_rfOff;
     funcs->radio_setFrequency_cb       = radio_2d4ghz_setFrequency;
-    funcs->radio_change_modulation_cb  = radio_2d4ghz_change_modulation;
+    funcs->radio_load_phy_cb           = radio_2d4ghz_load_phy;
     // reset
     funcs->radio_reset_cb              = radio_2d4ghz_reset;
     // TX
@@ -88,6 +88,10 @@ void radio_2d4ghz_setFunctions(radio_functions_t* funcs){
     funcs->radio_calculateFrequency_cb = radio_2d4ghz_calculateFrequency;
     funcs->radio_getDelayTx_cb         = radio_2d4ghz_getDelayTx;
     funcs->radio_getDelayRx_cb         = radio_2d4ghz_getDelayRx;
+    funcs->radio_getChInitOffset_cb    = radio_2d4ghz_getChInitOffset;
+    funcs->radio_getCh_spacing_cb      = radio_2d4ghz_getCh_spacing_cb;
+    funcs->radio_getNumOfChannels_cb   = radio_2d4ghz_getNumOfChannels_cb;
+    funcs->radio_getCenterFreq_cb      = radio_2d4ghz_getCenterFreq_cb;
 }
 
 void radio_2d4ghz_init() {
@@ -590,8 +594,13 @@ uint8_t radio_2d4ghz_calculateFrequency(uint8_t channelOffset, uint8_t asnOffset
 
 // not used by 2.4ghz radio
 void  radio_2d4ghz_powerOn(void){}
-void  radio_2d4ghz_change_modulation(registerSetting_t * mod){}
+//void  radio_2d4ghz_load_phy(registerSetting_t * mod, uint8_t size){}
+void  radio_2d4ghz_load_phy(uint8_t phy_index){}
 void  radio_2d4ghz_change_size(uint16_t* size){}
 void  radio_2d4ghz_loadPacket_prepare(uint8_t* packet, uint8_t len){}
 void  radio_2d4ghz_rxPacket_prepare(void){}
 void  radio_2d4ghz_rxEnable_scum(void){}
+uint8_t radio_2d4ghz_getChInitOffset(void){}
+uint16_t radio_2d4ghz_getNumOfChannels_cb(void){}
+uint16_t radio_2d4ghz_getCh_spacing_cb(void){}
+uint32_t radio_2d4ghz_getCenterFreq_cb(void){}

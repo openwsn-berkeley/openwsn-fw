@@ -41,7 +41,8 @@ void     radio_subghz_reset(void);
 void     radio_subghz_setFrequency(uint16_t channel_spacing, uint32_t frequency_0, uint16_t channel);
 void     radio_subghz_rfOn(void);
 void     radio_subghz_rfOff(void);
-void     radio_subghz_change_modulation(registerSetting_t * mod);
+//void     radio_subghz_change_modulation(registerSetting_t * mod, uint8_t size);
+void     radio_subghz_load_phy(uint8_t phy_index);
 // TX
 void     radio_subghz_loadPacket(uint8_t* packet, uint16_t len);
 void     radio_subghz_txEnable(void);
@@ -71,7 +72,10 @@ uint8_t radio_subghz_getCRCLen(void);
 uint8_t radio_subghz_calculateFrequency(uint8_t channelOffset, uint8_t asnOffset, uint8_t numChannels, uint8_t* hopSeq, bool singleChannel);
 uint8_t radio_subghz_getDelayTx(void);
 uint8_t radio_subghz_getDelayRx(void);
-uint8_t radio_getChInitOffset(void);
+uint8_t radio_subghz_getChInitOffset(void);
+uint16_t radio_subghz_getCh_spacing_cb(void);
+uint16_t radio_subghz_getNumOfChannels_cb(void);
+uint32_t radio_subghz_getCenterFreq_cb(void);
 /**
 \}
 \}

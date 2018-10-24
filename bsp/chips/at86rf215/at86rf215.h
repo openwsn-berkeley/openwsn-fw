@@ -42,8 +42,10 @@ typedef struct {
     uint32_t                   center_freq_0;
 	uint8_t                    size_config;          // amount of registers to write to set the modulation
 	uint8_t                    delayTX;              // 
+    uint8_t                    delayRX;
     uint16_t                   num_channels;          //
 	uint16_t                   chTemplate;            // 
+    uint8_t                    chInitOffset;    
 } phy_tsch_config_t;
 
 static const uint8_t chTemplate_default_2fsk50[] = {       // 34 channels available in 2-FSK 50 kbps

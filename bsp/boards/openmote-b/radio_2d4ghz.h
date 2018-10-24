@@ -45,8 +45,8 @@ void                radio_2d4ghz_setEndFrameCb(radio_capture_cbt cb);
 void                radio_2d4ghz_rfOn(void);
 void                radio_2d4ghz_rfOff(void);
 void                radio_2d4ghz_setFrequency(uint16_t channel_spacing, uint32_t frequency_0, uint16_t channel);
-void                radio_2d4ghz_change_modulation(registerSetting_t * mod);
-void                radio_2d4ghz_change_size(uint16_t* size);
+//void                radio_2d4ghz_load_phy(registerSetting_t * mod, uint8_t size);
+void                radio_2d4ghz_load_phy(uint8_t phy_index);
 // reset
 void                radio_2d4ghz_reset(void);
 // TX
@@ -70,6 +70,10 @@ uint8_t             radio_2d4ghz_getCRCLen(void);
 uint8_t             radio_2d4ghz_calculateFrequency(uint8_t channelOffset, uint8_t asnOffset, uint8_t numChannels, uint8_t* hopSeq, bool singleChannel);
 uint8_t             radio_2d4ghz_getDelayTx(void);
 uint8_t             radio_2d4ghz_getDelayRx(void);
+uint8_t             radio_2d4ghz_getChInitOffset(void);
+uint16_t            radio_2d4ghz_getNumOfChannels_cb(void);
+uint16_t            radio_2d4ghz_getCh_spacing_cb(void);
+uint32_t            radio_2d4ghz_getCenterFreq_cb(void);
 // interrupt handlers
 kick_scheduler_t    radio_2d4ghz_isr(void);
 

@@ -941,14 +941,29 @@ port_INLINE void activity_ti1ORri1(void) {
             if (schedule_getOkToSend()) {
                 // this is minimal cell
                 ieee154e_vars.radioType = schedule_getRadioType();
+                
+                // get the modem to be used
+                if (ieee154e_vars.radioType > 0) ieee154e_vars.modem = MODEM_SUBGHZ;  
+                else {
+                  ieee154e_vars.modem = MODEM_2D4GHZ;
+                };
+                
+                // configure the radio front-end with the corresponding PHY
+                ieee154e_vars.radio_functions[ieee154e_vars.modem].radio_load_phy_cb((uint8_t)ieee154e_vars.radioType);
 
                 // get the delayTx and delayRx for used radio
                 ieee154e_vars.delayTx   = ieee154e_vars.radio_functions[ieee154e_vars.modem].radio_getDelayTx_cb();
                 ieee154e_vars.delayRx   = ieee154e_vars.radio_functions[ieee154e_vars.modem].radio_getDelayRx_cb();
+                
+                // get the channelisation values corresponding to the current PHY
+                ieee154e_vars.numOfChannels = ieee154e_vars.radio_functions[ieee154e_vars.modem].radio_getNumOfChannels_cb();
+                ieee154e_vars.ch_spacing    = ieee154e_vars.radio_functions[ieee154e_vars.modem].radio_getCh_spacing_cb();
+                ieee154e_vars.frequency     = ieee154e_vars.radio_functions[ieee154e_vars.modem].radio_getCenterFreq_cb();
+                
 
                 // freq according to the used radio . calculate the frequency to transmit on
                 ieee154e_vars.channel = ieee154e_calculateFrequency(schedule_getChannelOffset());
-
+                
                 if (packetfunctions_isBroadcastMulticast(&neighbor)==FALSE){
                     // this is a dedicated cell
                     ieee154e_vars.dataToSend = openqueue_macGetDedicatedPacket(&neighbor);
@@ -1076,6 +1091,14 @@ port_INLINE void activity_ti1ORri1(void) {
 
             // assign radio type for RX
             ieee154e_vars.radioType = schedule_getRadioType();
+            
+            // configure the radio front-end with the corresponding PHY
+            ieee154e_vars.radio_functions[ieee154e_vars.modem].radio_load_phy_cb((uint8_t)ieee154e_vars.radioType);
+            
+            // get the channelisation values corresponding to the current PHY
+            ieee154e_vars.numOfChannels = ieee154e_vars.radio_functions[ieee154e_vars.modem].radio_getNumOfChannels_cb();
+            ieee154e_vars.ch_spacing    = ieee154e_vars.radio_functions[ieee154e_vars.modem].radio_getCh_spacing_cb();
+            ieee154e_vars.frequency     = ieee154e_vars.radio_functions[ieee154e_vars.modem].radio_getCenterFreq_cb();
 
             // get the delayTx and delayRx for used radio
             ieee154e_vars.delayTx   = ieee154e_vars.radio_functions[ieee154e_vars.modem].radio_getDelayTx_cb();
@@ -1170,6 +1193,8 @@ port_INLINE void activity_ti1ORri1(void) {
             endSlot();
             break;
     }
+    
+    //debugpins_frame_toggle();
 }
 
 port_INLINE void activity_ti2(void) {

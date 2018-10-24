@@ -61,7 +61,8 @@ typedef void                (*radio_setEndFrameCb_cbt)(radio_capture_cbt cb);
 typedef void                (*radio_rfOn_cbt)(void);
 typedef void                (*radio_rfOff_cbt)(void);
 typedef void                (*radio_setFrequency_cbt)(uint16_t channel_spacing, uint32_t frequency_0, uint16_t channel);
-typedef void                (*radio_change_modulation_cbt)(registerSetting_t * mod);
+//typedef void                (*radio_load_phy_cbt)(registerSetting_t * mod, uint8_t size);
+typedef void                (*radio_load_phy_cbt)(uint8_t phy_index);
 typedef void                (*radio_change_size_cbt)(uint16_t* size);
     // reset
 typedef void                (*radio_reset_cbt)(void);
@@ -95,6 +96,9 @@ typedef uint8_t             (*radio_calculateFrequency_cbt)(
 typedef uint8_t             (*radio_getDelayTx_cbt)(void);
 typedef uint8_t             (*radio_getDelayRx_cbt)(void);
 typedef uint8_t             (*radio_getChInitOffset_cbt)(void);
+typedef uint16_t            (*radio_getNumOfChannels_cbt)(void);
+typedef uint16_t            (*radio_getCh_spacing_cbt)(void);
+typedef uint32_t            (*radio_getCenterFreq_cbt)(void);       
 
 typedef struct {
     radio_powerOn_cbt             radio_powerOn_cb;
@@ -106,7 +110,7 @@ typedef struct {
     radio_rfOn_cbt                radio_rfOn_cb;
     radio_rfOff_cbt               radio_rfOff_cb;
     radio_setFrequency_cbt        radio_setFrequency_cb;
-    radio_change_modulation_cbt   radio_change_modulation_cb;
+    radio_load_phy_cbt            radio_load_phy_cb;
         // reset
     radio_reset_cbt               radio_reset_cb;
         // TX
@@ -125,6 +129,9 @@ typedef struct {
     radio_getDelayTx_cbt          radio_getDelayTx_cb;
     radio_getDelayRx_cbt          radio_getDelayRx_cb;
     radio_getChInitOffset_cbt     radio_getChInitOffset_cb;
+    radio_getNumOfChannels_cbt    radio_getNumOfChannels_cb;
+    radio_getCh_spacing_cbt       radio_getCh_spacing_cb;
+    radio_getCenterFreq_cbt       radio_getCenterFreq_cb;
 } radio_functions_t;
 
 typedef struct {

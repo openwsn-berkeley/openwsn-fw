@@ -17,7 +17,7 @@
 
 The superframe reappears over time and can be arbitrarily long.
 */
-#define SLOTFRAME_LENGTH    31 //should be 101, using 31 so the network synchs faster
+#define SLOTFRAME_LENGTH    101 //should be 101, using 31 so the network synchs faster
 
 //draft-ietf-6tisch-minimal-06
 #define SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS                      MAX_NUM_RADIOS
@@ -39,7 +39,8 @@ The superframe reappears over time and can be arbitrarily long.
   for serial port to transmit data to dagroot.
 */
 
-#define NUMSLOTSOFF          30
+//#define NUMSLOTSOFF          30
+#define NUMSLOTSOFF          (SLOTFRAME_LENGTH-NUMSERIALRX-SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS) //
 
 /**
 \brief Maximum number of active slots in a superframe.
