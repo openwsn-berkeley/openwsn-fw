@@ -41,7 +41,7 @@
 //===== IEEE802154E timing
 // 1 clock tick = 30.5 us
 
-#define SLOTDURATION 15 // in miliseconds
+#define SLOTDURATION 20 // in miliseconds
 
 #if SLOTDURATION==10
     // time-slot related
@@ -101,6 +101,35 @@
 
 #endif // SLOTDURATION==15
 
+
+#if SLOTDURATION==20
+    // time-slot related
+    #define PORT_TsSlotDuration                 656   // counter counts one extra count, see datasheet
+
+#if BOARD_PCA10056
+// nrf52840-DK
+    #define PORT_maxTxDataPrepare               13    // ~397us (measured 364us)
+    #define PORT_maxRxAckPrepare                13    // ~397us (measured 364us)
+    #define PORT_maxRxDataPrepare               13    // ~397us (measured 364us)
+    #define PORT_maxTxAckPrepare                13    // ~397us (measured 364us)
+
+    // radio speed related
+    #define PORT_delayTx                        10    //  305us (measured 282us; radio_txNow() to RADIO_IRQHandler() / NRF_RADIO->EVENTS_READY)
+    #define PORT_delayRx                         5    // ~153us (measured 147us; radio_rxNow() to RADIO_IRQHandler() / NRF_RADIO->EVENTS_READY)
+#endif
+#if BOARD_PCA10059
+// nrf52840-DONGLE
+    #define PORT_maxTxDataPrepare               13    // ~397us (measured 345us)
+    #define PORT_maxRxAckPrepare                13    // ~397us (measured 345us)
+    #define PORT_maxRxDataPrepare               13    // ~397us (measured 345us)
+    #define PORT_maxTxAckPrepare                13    // ~397us (measured 345us)
+
+    // radio speed related
+    #define PORT_delayTx                        10    //  305us (measured 282us; radio_txNow() to RADIO_IRQHandler() / NRF_RADIO->EVENTS_READY)
+    #define PORT_delayRx                         5    // ~153us (measured 136us; radio_rxNow() to RADIO_IRQHandler() / NRF_RADIO->EVENTS_READY)
+#endif
+
+#endif // SLOTDURATION==20
 
 //===== adaptive_sync accuracy
 
