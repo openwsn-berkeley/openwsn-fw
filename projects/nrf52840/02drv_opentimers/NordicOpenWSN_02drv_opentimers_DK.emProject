@@ -37,7 +37,7 @@
       project_type="Executable" />
     <folder Name="Application">
       <file file_name="../../../bsp/boards/nrf52840/app_config.h" />
-      <file file_name="../../../projects/common/02drv_opentimers/02drv_opentimers.c" />
+      <file file_name="drv_opentimers.c" />
     </folder>
     <folder Name="Segger ES Specific">
       <file file_name="../../../bsp/boards/nrf52840/sdk/modules/nrfx/mdk/ses_nRF_Startup.s" />
