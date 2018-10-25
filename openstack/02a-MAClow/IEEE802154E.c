@@ -567,9 +567,9 @@ port_INLINE void activity_synchronize_newSlot(void) {
 
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
         sctimer_setCapture(ACTION_RX_SFD_DONE);
-        sctimer_setCapture(ACTION_RX_DONE);       
+        sctimer_setCapture(ACTION_RX_DONE);
 #endif
-        
+
         // switch on the radio in Rx mode.
         radio_rxEnable();
         radio_rxNow();
@@ -577,12 +577,12 @@ port_INLINE void activity_synchronize_newSlot(void) {
         // I'm listening last slot
         ieee154e_stats.numTicsOn    += ieee154e_vars.slotDuration;
         ieee154e_stats.numTicsTotal += ieee154e_vars.slotDuration;
-        
+
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
         sctimer_setCapture(ACTION_RX_SFD_DONE);
-        sctimer_setCapture(ACTION_RX_DONE);       
+        sctimer_setCapture(ACTION_RX_DONE);
 #endif
-        
+
         // switch on the radio in Rx mode.
         radio_rxEnable();
         radio_rxNow();
@@ -603,9 +603,9 @@ port_INLINE void activity_synchronize_newSlot(void) {
 
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
         sctimer_setCapture(ACTION_RX_SFD_DONE);
-        sctimer_setCapture(ACTION_RX_DONE);       
+        sctimer_setCapture(ACTION_RX_DONE);
 #endif
-        
+
         // switch on the radio in Rx mode.
         radio_rxEnable();
         radio_rxNow();
@@ -1087,56 +1087,6 @@ port_INLINE void activity_ti1ORri1(void) {
             );
             // radiotimer_schedule(DURATION_rt1);
 #endif
-            break;
-        case CELLTYPE_SERIALRX:
-
-            // this is to emulate a set of serial input slots without having the slotted structure.
-
-            // skip the serial rx slots
-            ieee154e_vars.numOfSleepSlots = NUMSERIALRX;
-
-            //increase ASN by NUMSERIALRX-1 slots as at this slot is already incremented by 1
-            for (i=0;i<NUMSERIALRX-1;i++){
-                incrementAsnOffset();
-                // advance the schedule
-                schedule_advanceSlot();
-                // find the next one
-                ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
-            }
-            // possibly skip additional slots if enabled
-            if (idmanager_getIsSlotSkip() && idmanager_getIsDAGroot()==FALSE) {
-                if (ieee154e_vars.nextActiveSlotOffset>ieee154e_vars.slotOffset) {
-                    ieee154e_vars.numOfSleepSlots = ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset+NUMSERIALRX-1;
-                } else {
-                    ieee154e_vars.numOfSleepSlots = schedule_getFrameLength()+ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset+NUMSERIALRX-1;
-                }
-
-                //only increase ASN by numOfSleepSlots-NUMSERIALRX
-                for (i=0;i<ieee154e_vars.numOfSleepSlots-NUMSERIALRX;i++){
-                    incrementAsnOffset();
-                }
-            }
-            // set the timer based on calcualted number of slots to skip
-            opentimers_scheduleAbsolute(
-                ieee154e_vars.timerId,                            // timerId
-                TsSlotDuration*(ieee154e_vars.numOfSleepSlots),   // duration
-                ieee154e_vars.startOfSlotReference,               // reference
-                TIME_TICS,                                        // timetype
-                isr_ieee154e_newSlot                              // callback
-            );
-            ieee154e_vars.slotDuration = TsSlotDuration*(ieee154e_vars.numOfSleepSlots);
-            // radiotimer_setPeriod(TsSlotDuration*(ieee154e_vars.numOfSleepSlots));
-
-#ifdef ADAPTIVE_SYNC
-            // deal with the case when schedule multi slots
-            adaptive_sync_countCompensationTimeout_compoundSlots(NUMSERIALRX-1);
-#endif
-            // abort the slot
-            endSlot();
-
-            break;
-        case CELLTYPE_MORESERIALRX:
-            // do nothing (not even endSlot())
             break;
         default:
 

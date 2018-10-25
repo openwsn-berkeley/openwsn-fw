@@ -5,6 +5,7 @@ import time
 import sys, getopt
 import Queue
 import random
+import os
 
 #============================ defines =========================================
 BROKER_ADDRESS          = "argus.paris.inria.fr"
@@ -27,7 +28,10 @@ class program_over_testbed(object):
         self.image_name = ''
         with open(image_path,'rb') as f:
             self.image = base64.b64encode(f.read())
-        self.image_name = image_path.split('/')[-1]
+        if os.name=='nt':       # Windows
+            self.image_name = image_path.split('\\')[-1]
+        elif os.name=='posix':  # Linux
+            self.image_name = image_path.split('/')[-1]
         
         # initialize statistic result
         self.response_success = {
