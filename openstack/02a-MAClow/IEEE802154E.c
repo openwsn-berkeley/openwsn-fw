@@ -614,9 +614,7 @@ port_INLINE void activity_synchronize_newSlot(void) {
 
     // increment dummy ASN to trigger debugprint every now and then
     ieee154e_vars.asn.bytes0and1++;
-    if ( (ieee154e_vars.asn.bytes0and1&0x000f) ==0x0000) {
-        scheduler_push_task(task_openserial_debugPrint,TASKPRIO_OPENSERIAL);
-    }
+    scheduler_push_task(task_openserial_debugPrint,TASKPRIO_OPENSERIAL);
 
     opentimers_scheduleAbsolute(
         ieee154e_vars.serialInhibitTimerId,     // timerId
