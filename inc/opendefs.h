@@ -405,6 +405,7 @@ typedef struct {
    uint8_t          sequenceNumber;
    uint8_t          backoffExponenton;
    uint8_t          backoff;
+   radioType_t      radioType;
 } neighborRow_t;
 END_PACK
 

@@ -475,6 +475,9 @@ void task_sixtopNotifReceive(void) {
 
     // take ownership
     msg->owner = COMPONENT_SIXTOP;
+    
+    // added the radio type to the nextORpreviousHop
+    msg->l2_nextORpreviousHop.addr_64b.rtype = msg->l2_radioType;
 
     // update neighbor statistics
     neighbors_indicateRx(

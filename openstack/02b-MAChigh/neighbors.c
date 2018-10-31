@@ -319,6 +319,8 @@ void neighbors_indicateRx(open_addr_t* l2_src,
          neighbors_vars.neighbors[i].numRx++;
          neighbors_vars.neighbors[i].rssi=rssi;
          memcpy(&neighbors_vars.neighbors[i].asn,asnTs,sizeof(asn_t));
+         neighbors_vars.neighbors[i].addr_64b.addr_64b.rtype = l2_src->addr_64b.rtype;
+         neighbors_vars.neighbors[i].radioType               = l2_src->addr_64b.rtype;
          //update jp
          if (joinPrioPresent==TRUE){
             neighbors_vars.neighbors[i].joinPrio=joinPrio;
@@ -447,7 +449,7 @@ bool  neighbors_getNeighborEui64(open_addr_t* address, uint8_t addr_type, uint8_
    bool ReturnVal = FALSE;
    switch(addr_type) {
       case ADDR_64B:
-         memcpy(&(address->addr_64b),&(neighbors_vars.neighbors[index].addr_64b.addr_64b),LENGTH_ADDR64b);
+         memcpy(&(address->addr_64b.addr_64b),&(neighbors_vars.neighbors[index].addr_64b.addr_64b),LENGTH_ADDR64b);
          address->type=ADDR_64B;
          ReturnVal=neighbors_vars.neighbors[index].used;
          break;
@@ -685,6 +687,9 @@ void registerNewNeighbor(open_addr_t* address,
             memcpy(&neighbors_vars.neighbors[i].asn,asnTimestamp,sizeof(asn_t));
             neighbors_vars.neighbors[i].backoffExponenton      = MINBE-1;;
             neighbors_vars.neighbors[i].backoff                = 0;
+            //added radioType
+            neighbors_vars.neighbors[i].radioType              = address->addr_64b.rtype;
+            neighbors_vars.neighbors[i].addr_64b.addr_64b.rtype = address->addr_64b.rtype;
             //update jp
             if (joinPrioPresent==TRUE){
                neighbors_vars.neighbors[i].joinPrio=joinPrio;
@@ -741,7 +746,9 @@ bool isThisRowMatching(open_addr_t* address, uint8_t rowNumber) {
    switch (address->type) {
       case ADDR_64B:
          return neighbors_vars.neighbors[rowNumber].used &&
-                packetfunctions_sameAddress(address,&neighbors_vars.neighbors[rowNumber].addr_64b);
+                packetfunctions_sameAddress(address,&neighbors_vars.neighbors[rowNumber].addr_64b)&&
+                (neighbors_vars.neighbors[rowNumber].radioType == address->addr_64b.rtype)  ;
+    //    };
       default:
          openserial_printCritical(COMPONENT_NEIGHBORS,ERR_WRONG_ADDR_TYPE,
                                (errorparameter_t)address->type,
