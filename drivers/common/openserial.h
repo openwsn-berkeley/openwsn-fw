@@ -101,6 +101,7 @@ typedef struct {
     uint8_t             ctsStateChanged;
     uint8_t             debugPrintCounter;
     openserial_rsvpt*   registeredCmd;
+    uint8_t             debugPrint_timerId;
     // input
     uint8_t             inputBuf[SERIAL_INPUT_BUFFER_SIZE];
     uint8_t             inputBufFillLevel;
