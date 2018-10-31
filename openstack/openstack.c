@@ -46,6 +46,7 @@
 void openstack_init(void) {
 
    //===== drivers
+   opentimers_init();
    openserial_init();
 
    //===== stack
@@ -53,7 +54,7 @@ void openstack_init(void) {
    idmanager_init();    // call first since initializes EUI64 and isDAGroot
    openqueue_init();
    openrandom_init();
-   opentimers_init();
+
    //-- 02a-TSCH
 //   adaptive_sync_init();
    ieee154e_init();
