@@ -8,7 +8,7 @@
 #ifndef __OPENSERIAL_H
 #define __OPENSERIAL_H
 
-#include "opendefs.h"
+#include "opentimers.h"
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -101,6 +101,7 @@ typedef struct {
     uint8_t             ctsStateChanged;
     uint8_t             debugPrintCounter;
     openserial_rsvpt*   registeredCmd;
+    opentimers_id_t     debugPrint_timerId;
     // input
     uint8_t             inputBuf[SERIAL_INPUT_BUFFER_SIZE];
     uint8_t             inputBufFillLevel;
