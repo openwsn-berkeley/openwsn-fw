@@ -451,6 +451,7 @@ bool  neighbors_getNeighborEui64(open_addr_t* address, uint8_t addr_type, uint8_
       case ADDR_64B:
          memcpy(&(address->addr_64b.addr_64b),&(neighbors_vars.neighbors[index].addr_64b.addr_64b),LENGTH_ADDR64b);
          address->type=ADDR_64B;
+         address->addr_64b.rtype = neighbors_vars.neighbors[index].addr_64b.addr_64b.rtype;
          ReturnVal=neighbors_vars.neighbors[index].used;
          break;
       default:
