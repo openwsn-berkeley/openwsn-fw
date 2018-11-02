@@ -2617,11 +2617,15 @@ void synchronizePacket(PORT_TIMER_WIDTH timeReceived) {
 
     // log a large timeCorrection
     if (
-        ieee154e_vars.isSync==TRUE
+        ieee154e_vars.isSync==TRUE &&
+        (
+            timeCorrection<-LIMITLARGETIMECORRECTION ||
+            timeCorrection> LIMITLARGETIMECORRECTION
+        )
     ) {
         openserial_printError(COMPONENT_IEEE802154E,ERR_LARGE_TIMECORRECTION,
-                            (errorparameter_t)timeCorrection,
-                            (errorparameter_t)0);
+                              (errorparameter_t)timeCorrection,
+                              (errorparameter_t)0);
     }
 
     // update the stats
@@ -2661,11 +2665,15 @@ void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
 #endif
     // log a large timeCorrection
     if (
-        ieee154e_vars.isSync==TRUE
+        ieee154e_vars.isSync==TRUE &&
+        (
+            timeCorrection<-LIMITLARGETIMECORRECTION ||
+            timeCorrection> LIMITLARGETIMECORRECTION
+        )
     ) {
         openserial_printError(COMPONENT_IEEE802154E,ERR_LARGE_TIMECORRECTION,
-                            (errorparameter_t)timeCorrection,
-                            (errorparameter_t)1);
+                              (errorparameter_t)timeCorrection,
+                              (errorparameter_t)1);
     }
 
     // update the stats
