@@ -203,6 +203,8 @@ owerror_t sixtop_request(
     pkt->owner   = COMPONENT_SIXTOP_RES;
 
     memcpy(&(pkt->l2_nextORpreviousHop),neighbor,sizeof(open_addr_t));
+    //select radiotype
+    pkt->l2_radioType = neighbor->addr_64b.rtype;
     if (celllist_toBeDeleted != NULL){
         memcpy(sixtop_vars.celllist_toDelete,celllist_toBeDeleted,CELLLIST_MAX_LEN*sizeof(cellInfo_ht));
     }
@@ -631,10 +633,12 @@ owerror_t sixtop_send_internal(
 
 //    if (MAX_NUM_RADIOS==2){
 //        //one EB with every radio
-    msg->l2_radioType = (radioType_t)(((msg->l2_dsn)&0x01)+0x01);
+//    msg->l2_radioType = (radioType_t)(((msg->l2_dsn)&0x01)+0x01);
 //    }
 
-    //msg->l2_radioType = 1;
+    if (msg->l2_radioType == (radioType_t)0){
+        msg->l2_radioType = 1;
+    };
 
     // change owner to IEEE802154E fetches it from queue
     msg->owner  = COMPONENT_SIXTOP_TO_IEEE802154E;
@@ -837,6 +841,9 @@ port_INLINE void sixtop_sendEB(void) {
     eb->l2_securityLevel   = IEEE802154_SECURITY_LEVEL_BEACON;
     eb->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE;
     eb->l2_keyIndex        = IEEE802154_security_getBeaconKeyIndex();
+    
+    // Select the radioType on which the EB will be sent
+    eb->l2_radioType = (radioType_t)(sixtop_vars.dsn&0x01)+0x01;
 
     // put in queue for MAC to handle
     sixtop_send_internal(eb,eb->l2_payloadIEpresent);
