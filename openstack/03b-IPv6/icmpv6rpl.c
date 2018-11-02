@@ -15,6 +15,7 @@
 //=========================== variables =======================================
 
 icmpv6rpl_vars_t             icmpv6rpl_vars;
+uint8_t                      helper_counter; // helps to send DIOs on different radiotypes
 
 //=========================== prototypes ======================================
 
@@ -41,6 +42,7 @@ void icmpv6rpl_init(void) {
    
    //===== reset local variables
    memset(&icmpv6rpl_vars,0,sizeof(icmpv6rpl_vars_t));
+   helper_counter = 0;
    
    //=== routing
    icmpv6rpl_vars.haveParent=FALSE;
@@ -568,7 +570,7 @@ void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t* msg) {
    // update rank of that neighbor in table
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
       if (neighbors_getNeighborEui64(&NeighborAddress, ADDR_64B, i)) { // this neighbor entry is in use
-         if (packetfunctions_sameAddress(&(msg->l2_nextORpreviousHop),&NeighborAddress)) { // matching address
+         if (packetfunctions_sameAddress(&(msg->l2_nextORpreviousHop),&NeighborAddress) && (msg->l2_nextORpreviousHop.addr_64b.rtype == NeighborAddress.addr_64b.rtype)) { // matching address
             neighborRank=neighbors_getNeighborRank(i);
             if (
               (icmpv6rpl_vars.incomingDio->rank > neighborRank) &&
@@ -704,6 +706,9 @@ void sendDIO(void) {
    
    // set DIO destination
    memcpy(&(msg->l3_destinationAdd),&icmpv6rpl_vars.dioDestination,sizeof(open_addr_t));
+   
+   // add radio type ((msg->l2_dsn)&0x01)+0x01);
+   msg->l2_radioType = (radioType_t)((++helper_counter&0x01)+0x01);
    
    //===== Configuration option
    packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_config_ht));
