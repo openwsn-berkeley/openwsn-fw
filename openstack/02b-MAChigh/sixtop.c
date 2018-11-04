@@ -635,7 +635,7 @@ owerror_t sixtop_send_internal(
 //        //one EB with every radio
 //    msg->l2_radioType = (radioType_t)(((msg->l2_dsn)&0x01)+0x01);
 //    }
-
+//    check if there is no assoaciated radioType to tx    
     if (msg->l2_radioType == (radioType_t)0){
         msg->l2_radioType = 1;
     };

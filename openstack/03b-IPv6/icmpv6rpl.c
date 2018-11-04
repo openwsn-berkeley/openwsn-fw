@@ -881,6 +881,8 @@ void sendDAO(void) {
    //getting only preferred parent as transit
    numTransitParents=0;
    icmpv6rpl_getPreferredParentEui64(&address);
+   //add radio type
+   msg->l2_radioType = address.addr_64b.rtype;
    packetfunctions_writeAddress(msg,&address,OW_BIG_ENDIAN);
    prefix=idmanager_getMyID(ADDR_PREFIX);
    packetfunctions_writeAddress(msg,prefix,OW_BIG_ENDIAN);
