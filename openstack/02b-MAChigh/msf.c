@@ -48,10 +48,10 @@ void msf_init(void) {
     );
 
     schedule_addActiveSlot(
-        msf_hashFunction_getSlotoffset(),     // slot offset
+        msf_hashFunction_getSlotoffset(256*idmanager_getMyID(ADDR_64B)->addr_64b[6]+idmanager_getMyID(ADDR_64B)->addr_64b[7]),     // slot offset
         CELLTYPE_RX,                          // type of slot
         FALSE,                                // shared?
-        msf_hashFunction_getChanneloffset(),  // channel offset
+        msf_hashFunction_getChanneloffset(256*idmanager_getMyID(ADDR_64B)->addr_64b[6]+idmanager_getMyID(ADDR_64B)->addr_64b[7]),  // channel offset
         idmanager_getMyID(ADDR_64B)           // neighbor
     );
 
@@ -401,23 +401,13 @@ void msf_housekeeping(void){
     }
 }
 
-uint16_t msf_hashFunction_getSlotoffset(void){
-
-    uint16_t moteId;
-
-    moteId = 256*idmanager_getMyID(ADDR_64B)->addr_64b[6]+\
-             idmanager_getMyID(ADDR_64B)->addr_64b[7];
+uint16_t msf_hashFunction_getSlotoffset(uint16_t moteId){
 
     return SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS + \
             (moteId%(SLOTFRAME_LENGTH-SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS));
 }
 
-uint8_t msf_hashFunction_getChanneloffset(void){
-
-    uint16_t moteId;
-
-    moteId = 256*idmanager_getMyID(ADDR_64B)->addr_64b[6]+\
-             idmanager_getMyID(ADDR_64B)->addr_64b[7];
+uint8_t msf_hashFunction_getChanneloffset(uint16_t moteId){
 
     return moteId%NUM_CHANNELS;
 }
