@@ -81,7 +81,7 @@
     // time-slot related
     #define PORT_TsSlotDuration                 1310   // counter counts one extra count, see datasheet
     // execution speed related
-    #define PORT_maxTxDataPrepare               40    // 2014us (measured 746us) 40
+    #define PORT_maxTxDataPrepare               60    // 2014us (measured 746us) 40
     #define PORT_maxRxAckPrepare                30    //  305us (measured  83us)
     #define PORT_maxRxDataPrepare               30    // 1007us (measured  84us)
     #define PORT_maxTxAckPrepare                40    //  305us (measured 219us)
