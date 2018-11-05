@@ -13,7 +13,7 @@
 //=========================== define ==========================================
 
 #define IANA_6TISCH_SFID_MSF    0
-#define CELLOPTIONS_MSF         CELLOPTIONS_TX | CELLOPTIONS_RX | CELLOPTIONS_SHARED
+#define CELLOPTIONS_MSF         CELLOPTIONS_TX
 #define NUMCELLS_MSF            1
 
 #define MAX_NUMCELLS                   16

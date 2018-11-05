@@ -99,7 +99,7 @@ void    msf_updateCellsUsed(open_addr_t* neighbor){
 
 void    msf_trigger6pClear(open_addr_t* neighbor){
 
-    if (schedule_hasDedicatedCellToNeighbor(neighbor)>0){
+    if (schedule_hasNonSharedDedicatedCellToNeighbor(neighbor)>0){
         sixtop_request(
             IANA_6TOP_CMD_CLEAR,                // code
             neighbor,                           // neighbor
@@ -366,10 +366,6 @@ void msf_housekeeping(void){
 
     foundNeighbor = icmpv6rpl_getPreferredParentEui64(&parentNeighbor);
     if (foundNeighbor==FALSE) {
-        return;
-    }
-    if (schedule_getNumberOfDedicatedCells(&parentNeighbor)==0){
-        msf_trigger6pAdd();
         return;
     }
 

@@ -184,6 +184,7 @@ uint8_t           schedule_getNumberOfDedicatedCells(open_addr_t* neighbor);
 bool              schedule_isNumTxWrapped(open_addr_t* neighbor);
 bool              schedule_getCellsToBeRelocated(open_addr_t* neighbor, cellInfo_ht* celllist);
 bool              schedule_hasDedicatedCellToNeighbor(open_addr_t* neighbor);
+bool              schedule_hasNonSharedDedicatedCellToNeighbor(open_addr_t* neighbor);
 open_addr_t*      schedule_getNonParentNeighborWithDedicatedCells(open_addr_t* neighbor);
 
 // from IEEE802154E

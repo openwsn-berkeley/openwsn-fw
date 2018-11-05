@@ -519,7 +519,7 @@ uint8_t schedule_getNumberOfDedicatedCells(open_addr_t* neighbor){
 }
 
 open_addr_t* schedule_getNonParentNeighborWithDedicatedCells(open_addr_t* neighbor){
-    uint8_t i; 
+    uint8_t i;
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
 
@@ -532,9 +532,9 @@ open_addr_t* schedule_getNonParentNeighborWithDedicatedCells(open_addr_t* neighb
             return &schedule_vars.scheduleBuf[i].neighbor;
         }
     }
-   
+
     ENABLE_INTERRUPTS();
-   
+
     return NULL;
 }
 
@@ -622,6 +622,27 @@ bool schedule_hasDedicatedCellToNeighbor(open_addr_t* neighbor){
 
     for(i=0;i<MAXACTIVESLOTS;i++) {
         if(
+            schedule_vars.scheduleBuf[i].neighbor.type == ADDR_64B &&
+            packetfunctions_sameAddress(neighbor,&schedule_vars.scheduleBuf[i].neighbor)
+        ){
+            ENABLE_INTERRUPTS();
+            return TRUE;
+        }
+    }
+
+    ENABLE_INTERRUPTS();
+    return FALSE;
+}
+
+bool schedule_hasNonSharedDedicatedCellToNeighbor(open_addr_t* neighbor){
+    uint8_t i;
+
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+
+    for(i=0;i<MAXACTIVESLOTS;i++) {
+        if(
+            schedule_vars.scheduleBuf[i].shared == FALSE &&
             schedule_vars.scheduleBuf[i].neighbor.type == ADDR_64B &&
             packetfunctions_sameAddress(neighbor,&schedule_vars.scheduleBuf[i].neighbor)
         ){
