@@ -637,7 +637,7 @@ owerror_t sixtop_send_internal(
 //    }
 //    check if there is no assoaciated radioType to tx    
     if (msg->l2_radioType == (radioType_t)0){
-        msg->l2_radioType = 1;
+        msg->l2_radioType = (radioType_t)1;
     };
 
     // change owner to IEEE802154E fetches it from queue

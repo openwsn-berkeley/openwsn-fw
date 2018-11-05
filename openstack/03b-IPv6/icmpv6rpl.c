@@ -707,7 +707,7 @@ void sendDIO(void) {
    // set DIO destination
    memcpy(&(msg->l3_destinationAdd),&icmpv6rpl_vars.dioDestination,sizeof(open_addr_t));
    
-   // add radio type ((msg->l2_dsn)&0x01)+0x01);
+   // add radiotype ((msg->l2_dsn)&0x01)+0x01);
    msg->l2_radioType = (radioType_t)((++helper_counter&0x01)+0x01);
    
    //===== Configuration option
