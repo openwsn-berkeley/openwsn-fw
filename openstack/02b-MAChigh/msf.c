@@ -37,6 +37,7 @@ void msf_housekeeping(void);
 //=========================== public ==========================================
 
 void msf_init(void) {
+
     memset(&msf_vars,0,sizeof(msf_vars_t));
     msf_vars.numAppPacketsPerSlotFrame = 0;
     sixtop_setSFcallback(
@@ -45,6 +46,15 @@ void msf_init(void) {
         (sixtop_sf_translatemetadata)msf_translateMetadata,
         (sixtop_sf_handle_callback)msf_handleRCError
     );
+
+    schedule_addActiveSlot(
+        msf_hashFunction_getSlotoffset(),     // slot offset
+        CELLTYPE_RX,                          // type of slot
+        FALSE,                                // shared?
+        msf_hashFunction_getChanneloffset(),  // channel offset
+        idmanager_getMyID(ADDR_64B)           // neighbor
+    );
+
     msf_vars.housekeepingTimerId = opentimers_create(TIMER_GENERAL_PURPOSE);
     msf_vars.housekeepingPeriod  = HOUSEKEEPING_PERIOD;
     opentimers_scheduleIn(
@@ -170,6 +180,8 @@ void msf_timer_housekeeping_cb(opentimers_id_t id){
     newDuration = openrandom_getRandomizePeriod(msf_vars.housekeepingPeriod, msf_vars.housekeepingPeriod),
     opentimers_updateDuration(msf_vars.housekeepingTimerId, newDuration);
 }
+
+//=========================== tasks ============================================
 
 void msf_timer_housekeeping_task(void){
 
@@ -387,4 +399,25 @@ void msf_housekeeping(void){
             0                         // list command maximum celllist (not used)
         );
     }
+}
+
+uint16_t msf_hashFunction_getSlotoffset(void){
+
+    uint16_t moteId;
+
+    moteId = 256*idmanager_getMyID(ADDR_64B)->addr_64b[6]+\
+             idmanager_getMyID(ADDR_64B)->addr_64b[7];
+
+    return SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS + \
+            (moteId%(SLOTFRAME_LENGTH-SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS));
+}
+
+uint8_t msf_hashFunction_getChanneloffset(void){
+
+    uint16_t moteId;
+
+    moteId = 256*idmanager_getMyID(ADDR_64B)->addr_64b[6]+\
+             idmanager_getMyID(ADDR_64B)->addr_64b[7];
+
+    return moteId%NUM_CHANNELS;
 }
