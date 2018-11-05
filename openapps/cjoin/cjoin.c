@@ -210,7 +210,6 @@ void cjoin_task_cb(void) {
     // init the security context only here in order to use the latest joinKey
     // that may be set over the serial
 //    cjoin_init_security_context();
-
     cjoin_sendJoinRequest(joinProxy);
 
     return;
@@ -249,6 +248,7 @@ owerror_t cjoin_sendJoinRequest(open_addr_t* joinProxy) {
       );
       return E_FAIL;
    }
+
    // take ownership over that packet
    pkt->creator                   = COMPONENT_CJOIN;
    pkt->owner                     = COMPONENT_CJOIN;
@@ -292,7 +292,6 @@ owerror_t cjoin_sendJoinRequest(open_addr_t* joinProxy) {
    payload_len = cojp_cbor_encode_join_request_object(tmp, &join_request);
    packetfunctions_reserveHeaderSize(pkt, payload_len);
    memcpy(pkt->payload, tmp, payload_len);
-
    // send
    outcome = opencoap_send(
       pkt,
@@ -310,7 +309,7 @@ owerror_t cjoin_sendJoinRequest(open_addr_t* joinProxy) {
       return E_FAIL;
    }
 
-  return E_SUCCESS;
+   return E_SUCCESS;
 }
 
 bool cjoin_getIsJoined(void) {
