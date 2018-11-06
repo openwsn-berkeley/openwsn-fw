@@ -534,6 +534,8 @@ void neighbors_setNeighborNoResource(open_addr_t* address){
 void neighbors_setPreferredParent(uint8_t index, bool isPreferred){
 
     uint16_t moteId;
+    uint16_t slotoffset;
+    uint8_t  channeloffset;
 
     neighbors_vars.neighbors[index].parentPreference = isPreferred;
 
