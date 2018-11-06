@@ -532,7 +532,34 @@ void neighbors_setNeighborNoResource(open_addr_t* address){
 }
 
 void neighbors_setPreferredParent(uint8_t index, bool isPreferred){
+
+    uint16_t moteId;
+
     neighbors_vars.neighbors[index].parentPreference = isPreferred;
+
+    moteId = 256*neighbors_vars.neighbors[index].addr_64b.addr_64b[6]+\
+             neighbors_vars.neighbors[index].addr_64b.addr_64b[7];
+    slotoffset          = msf_hashFunction_getSlotoffset(moteId);
+    channeloffset       = msf_hashFunction_getChanneloffset(moteId);
+
+    if (isPreferred){
+        // the neighbor is selected as parent
+        // reserve the autonomous cell to this neighbor
+        schedule_addActiveSlot(
+            slotoffset,                                 // slot offset
+            CELLTYPE_TX,                                // type of slot
+            TRUE,                                       // shared?
+            channeloffset,                              // channel offset
+            &(neighbors_vars.neighbors[index].addr_64b) // neighbor
+        );
+    } else {
+        // the neighbor is de-selected as parent
+        // remove the autonomous cell to this neighbor
+        schedule_removeActiveSlot(
+            slotoffset,                                 // slot offset
+            &(neighbors_vars.neighbors[index].addr_64b) // neighbor
+        );
+    }
 }
 
 //===== managing routing info
@@ -692,15 +719,6 @@ void registerNewNeighbor(open_addr_t* address,
                 if (joinPrioPresent==TRUE){
                     neighbors_vars.neighbors[i].joinPrio=joinPrio;
                 }
-                slotoffset          = msf_hashFunction_getSlotoffset(256*address->addr_64b[6]+address->addr_64b[7]);
-                channeloffset       = msf_hashFunction_getChanneloffset(256*address->addr_64b[6]+address->addr_64b[7]);
-                schedule_addActiveSlot(
-                    slotoffset,                     // slot offset
-                    CELLTYPE_TX,                    // type of slot
-                    TRUE,                           // shared?
-                    channeloffset,                  // channel offset
-                    address                         // neighbor
-                );
                 break;
             }
             i++;
@@ -743,12 +761,6 @@ void removeNeighbor(uint8_t neighborIndex) {
     neighbors_vars.neighbors[neighborIndex].sequenceNumber            = 0;
     neighbors_vars.neighbors[neighborIndex].backoffExponenton         = MINBE-1;;
     neighbors_vars.neighbors[neighborIndex].backoff                   = 0;
-
-    slotoffset = msf_hashFunction_getSlotoffset(256*neighbors_vars.neighbors[neighborIndex].addr_64b.addr_64b[6]+neighbors_vars.neighbors[neighborIndex].addr_64b.addr_64b[7]);
-    schedule_removeActiveSlot(
-        slotoffset,                                             // slot offset
-        &(neighbors_vars.neighbors[neighborIndex].addr_64b)     // neighbor
-    );
     neighbors_vars.neighbors[neighborIndex].addr_64b.type             = ADDR_NONE;
 }
 
