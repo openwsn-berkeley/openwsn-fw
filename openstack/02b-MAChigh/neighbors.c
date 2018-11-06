@@ -557,10 +557,12 @@ void neighbors_setPreferredParent(uint8_t index, bool isPreferred){
     } else {
         // the neighbor is de-selected as parent
         // remove the autonomous cell to this neighbor
-        schedule_removeActiveSlot(
-            slotoffset,                                 // slot offset
-            &(neighbors_vars.neighbors[index].addr_64b) // neighbor
-        );
+        if (schedule_hasDedicatedCellToNeighbor(&(neighbors_vars.neighbors[index].addr_64b))){
+            schedule_removeActiveSlot(
+                slotoffset,                                 // slot offset
+                &(neighbors_vars.neighbors[index].addr_64b) // neighbor
+            );
+        }
     }
 }
 
