@@ -15,6 +15,7 @@
 #include "IEEE802154_security.h"
 #include "idmanager.h"
 #include "schedule.h"
+#include "msf.h"
 
 //=========================== define ==========================================
 
@@ -351,6 +352,8 @@ owerror_t sixtop_request(
 
 owerror_t sixtop_send(OpenQueueEntry_t *msg) {
 
+    uint16_t slotoffset, moteId;
+    uint8_t  channeloffset;
     open_addr_t addressToWrite;
 
     if (
@@ -369,6 +372,30 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
     ){
         return E_FAIL;
     }
+
+    if (
+        idmanager_getIsDAGroot() == TRUE ||
+        (
+            idmanager_getIsDAGroot() == FALSE &&
+            icmpv6rpl_getPreferredParentEui64(&addressToWrite) &&
+            packetfunctions_sameAddress(&addressToWrite, &msg->l2_nextORpreviousHop)== FALSE
+        )
+    ) {
+        if (schedule_hasAutonomousTxCellToNeighbor(&msg->l2_nextORpreviousHop)==FALSE){
+            moteId = 256*msg->l2_nextORpreviousHop.addr_64b[6]+\
+                         msg->l2_nextORpreviousHop.addr_64b[7];
+            slotoffset          = msf_hashFunction_getSlotoffset(moteId);
+            channeloffset       = msf_hashFunction_getChanneloffset(moteId);
+            schedule_addActiveSlot(
+                slotoffset,                                 // slot offset
+                CELLTYPE_TX,                                // type of slot
+                TRUE,                                       // shared?
+                channeloffset,                              // channel offset
+                &(msg->l2_nextORpreviousHop)                // neighbor
+            );
+        }
+    }
+
 
     // set metadata
     msg->owner        = COMPONENT_SIXTOP;

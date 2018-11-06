@@ -745,11 +745,13 @@ bool isNeighbor(open_addr_t* neighbor) {
 }
 
 void removeNeighbor(uint8_t neighborIndex) {
+
+    uint16_t moteId, slotoffset;
+
     neighbors_vars.neighbors[neighborIndex].used                      = FALSE;
     neighbors_vars.neighbors[neighborIndex].parentPreference          = 0;
     neighbors_vars.neighbors[neighborIndex].stableNeighbor            = FALSE;
     neighbors_vars.neighbors[neighborIndex].switchStabilityCounter    = 0;
-    neighbors_vars.neighbors[neighborIndex].addr_64b.type             = ADDR_NONE;
     neighbors_vars.neighbors[neighborIndex].DAGrank                   = DEFAULTDAGRANK;
     neighbors_vars.neighbors[neighborIndex].rssi                      = 0;
     neighbors_vars.neighbors[neighborIndex].numRx                     = 0;
@@ -762,6 +764,18 @@ void removeNeighbor(uint8_t neighborIndex) {
     neighbors_vars.neighbors[neighborIndex].sequenceNumber            = 0;
     neighbors_vars.neighbors[neighborIndex].backoffExponenton         = MINBE-1;;
     neighbors_vars.neighbors[neighborIndex].backoff                   = 0;
+
+    if (schedule_hasAutonomousTxCellToNeighbor(&(neighbors_vars.neighbors[neighborIndex].addr_64b))){
+        moteId = 256*neighbors_vars.neighbors[neighborIndex].addr_64b.addr_64b[6]+\
+                     neighbors_vars.neighbors[neighborIndex].addr_64b.addr_64b[7];
+        slotoffset = msf_hashFunction_getSlotoffset(moteId);
+        schedule_removeActiveSlot(
+            slotoffset,                                 // slot offset
+            &(neighbors_vars.neighbors[neighborIndex].addr_64b) // neighbor
+        );
+    }
+
+    neighbors_vars.neighbors[neighborIndex].addr_64b.type             = ADDR_NONE;
 }
 
 //=========================== helpers =========================================
