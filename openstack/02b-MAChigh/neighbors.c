@@ -557,7 +557,7 @@ void neighbors_setPreferredParent(uint8_t index, bool isPreferred){
     } else {
         // the neighbor is de-selected as parent
         // remove the autonomous cell to this neighbor
-        if (schedule_hasDedicatedCellToNeighbor(&(neighbors_vars.neighbors[index].addr_64b))){
+        if (schedule_hasAutonomousTxCellToNeighbor(&(neighbors_vars.neighbors[index].addr_64b))){
             schedule_removeActiveSlot(
                 slotoffset,                                 // slot offset
                 &(neighbors_vars.neighbors[index].addr_64b) // neighbor
@@ -627,7 +627,7 @@ void  neighbors_removeOld(void) {
         icmpv6rpl_getPreferredParentEui64(&addressToWrite) == FALSE      ||
         (
             icmpv6rpl_getPreferredParentEui64(&addressToWrite)           &&
-            schedule_hasDedicatedCellToNeighbor(&addressToWrite)== FALSE
+            schedule_hasAutonomousTxCellToNeighbor(&addressToWrite)== FALSE
         )
     ) {
         return;
@@ -749,6 +749,7 @@ void removeNeighbor(uint8_t neighborIndex) {
     neighbors_vars.neighbors[neighborIndex].parentPreference          = 0;
     neighbors_vars.neighbors[neighborIndex].stableNeighbor            = FALSE;
     neighbors_vars.neighbors[neighborIndex].switchStabilityCounter    = 0;
+    neighbors_vars.neighbors[neighborIndex].addr_64b.type             = ADDR_NONE;
     neighbors_vars.neighbors[neighborIndex].DAGrank                   = DEFAULTDAGRANK;
     neighbors_vars.neighbors[neighborIndex].rssi                      = 0;
     neighbors_vars.neighbors[neighborIndex].numRx                     = 0;
@@ -761,7 +762,6 @@ void removeNeighbor(uint8_t neighborIndex) {
     neighbors_vars.neighbors[neighborIndex].sequenceNumber            = 0;
     neighbors_vars.neighbors[neighborIndex].backoffExponenton         = MINBE-1;;
     neighbors_vars.neighbors[neighborIndex].backoff                   = 0;
-    neighbors_vars.neighbors[neighborIndex].addr_64b.type             = ADDR_NONE;
 }
 
 //=========================== helpers =========================================

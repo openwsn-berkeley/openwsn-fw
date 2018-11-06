@@ -362,7 +362,7 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
                 icmpv6rpl_getPreferredParentEui64(&addressToWrite) == FALSE      ||
                 (
                     icmpv6rpl_getPreferredParentEui64(&addressToWrite)           &&
-                    schedule_hasDedicatedCellToNeighbor(&addressToWrite)== FALSE
+                    schedule_hasAutonomousTxCellToNeighbor(&addressToWrite)== FALSE
                 )
             )
         )
@@ -716,7 +716,7 @@ port_INLINE void sixtop_sendEB(void) {
             icmpv6rpl_getPreferredParentEui64(&addressToWrite) == FALSE ||
             (
                 icmpv6rpl_getPreferredParentEui64(&addressToWrite) &&
-                schedule_hasDedicatedCellToNeighbor(&addressToWrite) == FALSE
+                schedule_hasAutonomousTxCellToNeighbor(&addressToWrite) == FALSE
             )
         )
     ){
@@ -844,7 +844,7 @@ port_INLINE void sixtop_sendKA(void) {
         return;
     }
 
-    if (schedule_hasDedicatedCellToNeighbor(kaNeighAddr) == FALSE){
+    if (schedule_hasAutonomousTxCellToNeighbor(kaNeighAddr) == FALSE){
         // delete packets genereted by this module (EB and KA) from openqueue
         openqueue_removeAllCreatedBy(COMPONENT_SIXTOP);
 

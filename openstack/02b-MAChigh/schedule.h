@@ -180,12 +180,11 @@ void              schedule_removeAllCells(
    open_addr_t*   previousHop
 );
 uint8_t           schedule_getNumberOfFreeEntries(void);
-uint8_t           schedule_getNumberOfDedicatedCells(open_addr_t* neighbor);
+uint8_t           schedule_getNumberOfManagedTxCells(open_addr_t* neighbor);
 bool              schedule_isNumTxWrapped(open_addr_t* neighbor);
 bool              schedule_getCellsToBeRelocated(open_addr_t* neighbor, cellInfo_ht* celllist);
-bool              schedule_hasDedicatedCellToNeighbor(open_addr_t* neighbor);
-bool              schedule_hasNonSharedDedicatedCellToNeighbor(open_addr_t* neighbor);
-open_addr_t*      schedule_getNonParentNeighborWithDedicatedCells(open_addr_t* neighbor);
+bool              schedule_hasAutonomousTxCellToNeighbor(open_addr_t* neighbor);
+bool              schedule_hasManagedTxCellToNeighbor(open_addr_t* neighbor);
 
 // from IEEE802154E
 void               schedule_syncSlotOffset(slotOffset_t targetSlotOffset);
@@ -193,6 +192,7 @@ void               schedule_advanceSlot(void);
 slotOffset_t       schedule_getNextActiveSlotOffset(void);
 frameLength_t      schedule_getFrameLength(void);
 cellType_t         schedule_getType(void);
+bool               schedule_getShared(void);
 void               schedule_getNeighbor(open_addr_t* addrToWrite);
 channelOffset_t    schedule_getChannelOffset(void);
 bool               schedule_getOkToSend(void);

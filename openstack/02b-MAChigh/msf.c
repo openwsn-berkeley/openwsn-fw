@@ -99,7 +99,7 @@ void    msf_updateCellsUsed(open_addr_t* neighbor){
 
 void    msf_trigger6pClear(open_addr_t* neighbor){
 
-    if (schedule_hasNonSharedDedicatedCellToNeighbor(neighbor)>0){
+    if (schedule_hasManagedTxCellToNeighbor(neighbor)){
         sixtop_request(
             IANA_6TOP_CMD_CLEAR,                // code
             neighbor,                           // neighbor
@@ -269,8 +269,8 @@ void msf_trigger6pDelete(void){
         return;
     }
 
-    if (schedule_getNumberOfDedicatedCells(&neighbor)<=1){
-        // at least one dedicated cell presents
+    if (schedule_getNumberOfManagedTxCells(&neighbor)<=1){
+        // at least one managed Tx cell presents
         return;
     }
 
@@ -366,6 +366,11 @@ void msf_housekeeping(void){
 
     foundNeighbor = icmpv6rpl_getPreferredParentEui64(&parentNeighbor);
     if (foundNeighbor==FALSE) {
+        return;
+    }
+
+    if (schedule_getNumberOfManagedTxCells(&parentNeighbor)==0){
+        msf_trigger6pAdd();
         return;
     }
 
