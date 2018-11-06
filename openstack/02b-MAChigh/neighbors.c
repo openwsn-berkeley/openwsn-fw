@@ -682,8 +682,6 @@ void registerNewNeighbor(open_addr_t* address,
                          uint8_t      joinPrio,
                          bool         insecure) {
     uint8_t  i;
-    uint16_t slotoffset;
-    uint8_t  channeloffset;
 
     // filter errors
     if (address->type!=ADDR_64B) {
@@ -745,8 +743,6 @@ bool isNeighbor(open_addr_t* neighbor) {
 }
 
 void removeNeighbor(uint8_t neighborIndex) {
-    uint16_t slotoffset;
-
     neighbors_vars.neighbors[neighborIndex].used                      = FALSE;
     neighbors_vars.neighbors[neighborIndex].parentPreference          = 0;
     neighbors_vars.neighbors[neighborIndex].stableNeighbor            = FALSE;
