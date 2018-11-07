@@ -67,7 +67,7 @@ does not use any backoff mechanism when a transmission fails.
 
 See MINBE for an explanation of backoff.
 */
-#define MAXBE                8 // the standard compliant range of MAXBE is 3-8
+#define MAXBE                5 // the standard compliant range of MAXBE is 3-8
 
 /**
 \brief a threshold used for triggering the maintaining process.uint: percent
