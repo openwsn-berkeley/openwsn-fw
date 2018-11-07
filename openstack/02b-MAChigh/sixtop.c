@@ -636,9 +636,9 @@ owerror_t sixtop_send_internal(
 //    msg->l2_radioType = (radioType_t)(((msg->l2_dsn)&0x01)+0x01);
 //    }
 //    check if there is no assoaciated radioType to tx    
-    if (msg->l2_radioType == (radioType_t)0){
-        msg->l2_radioType = (radioType_t)1;
-    };
+//    if (msg->l2_radioType == (radioType_t)0){
+//        msg->l2_radioType = (radioType_t)1;
+//    };
 
     // change owner to IEEE802154E fetches it from queue
     msg->owner  = COMPONENT_SIXTOP_TO_IEEE802154E;
@@ -843,7 +843,8 @@ port_INLINE void sixtop_sendEB(void) {
     eb->l2_keyIndex        = IEEE802154_security_getBeaconKeyIndex();
     
     // Select the radioType on which the EB will be sent
-    eb->l2_radioType = (radioType_t)(sixtop_vars.dsn&0x01)+0x01;
+    //eb->l2_radioType = (radioType_t)(sixtop_vars.dsn&0x01)+0x01;
+    eb->l2_radioType = (radioType_t)(sixtop_vars.dsn%SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS);
 
     // put in queue for MAC to handle
     sixtop_send_internal(eb,eb->l2_payloadIEpresent);
