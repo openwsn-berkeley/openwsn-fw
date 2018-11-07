@@ -596,7 +596,7 @@ bool schedule_getCellsToBeRelocated(open_addr_t* neighbor, cellInfo_ht* celllist
     return FALSE;
 }
 
-bool schedule_hasAutonomousTxCellToNeighbor(open_addr_t* neighbor){
+bool schedule_hasAutonomousTxRxCellUnicast(open_addr_t* neighbor){
     uint8_t i;
 
     INTERRUPT_DECLARATION();
@@ -604,9 +604,9 @@ bool schedule_hasAutonomousTxCellToNeighbor(open_addr_t* neighbor){
 
     for(i=0;i<MAXACTIVESLOTS;i++) {
         if(
-            schedule_vars.scheduleBuf[i].type          == CELLTYPE_TX &&
-            schedule_vars.scheduleBuf[i].shared                       &&
-            schedule_vars.scheduleBuf[i].neighbor.type == ADDR_64B    &&
+            schedule_vars.scheduleBuf[i].type          == CELLTYPE_TXRX &&
+            schedule_vars.scheduleBuf[i].shared                         &&
+            schedule_vars.scheduleBuf[i].neighbor.type == ADDR_64B      &&
             packetfunctions_sameAddress(neighbor,&schedule_vars.scheduleBuf[i].neighbor)
         ){
             ENABLE_INTERRUPTS();

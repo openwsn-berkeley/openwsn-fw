@@ -549,7 +549,7 @@ void neighbors_setPreferredParent(uint8_t index, bool isPreferred){
         // reserve the autonomous cell to this neighbor
         schedule_addActiveSlot(
             slotoffset,                                 // slot offset
-            CELLTYPE_TX,                                // type of slot
+            CELLTYPE_TXRX,                              // type of slot
             TRUE,                                       // shared?
             channeloffset,                              // channel offset
             &(neighbors_vars.neighbors[index].addr_64b) // neighbor
@@ -557,7 +557,7 @@ void neighbors_setPreferredParent(uint8_t index, bool isPreferred){
     } else {
         // the neighbor is de-selected as parent
         // remove the autonomous cell to this neighbor
-        if (schedule_hasAutonomousTxCellToNeighbor(&(neighbors_vars.neighbors[index].addr_64b))){
+        if (schedule_hasAutonomousTxRxCellUnicast(&(neighbors_vars.neighbors[index].addr_64b))){
             schedule_removeActiveSlot(
                 slotoffset,                                 // slot offset
                 &(neighbors_vars.neighbors[index].addr_64b) // neighbor
@@ -627,7 +627,7 @@ void  neighbors_removeOld(void) {
         icmpv6rpl_getPreferredParentEui64(&addressToWrite) == FALSE      ||
         (
             icmpv6rpl_getPreferredParentEui64(&addressToWrite)           &&
-            schedule_hasAutonomousTxCellToNeighbor(&addressToWrite)== FALSE
+            schedule_hasAutonomousTxRxCellUnicast(&addressToWrite)== FALSE
         )
     ) {
         return;
@@ -638,18 +638,16 @@ void  neighbors_removeOld(void) {
         if (neighbors_vars.neighbors[i].used==1) {
             timeSinceHeard = ieee154e_asnDiff(&neighbors_vars.neighbors[i].asn);
             if (timeSinceHeard>DESYNCTIMEOUT) {
-                msf_trigger6pClear(&neighbors_vars.neighbors[i].addr_64b);
-                haveParent = icmpv6rpl_getPreferredParentIndex(&j);
-                if (haveParent && (i==j)) { // this is our preferred parent, carefully!
-                    icmpv6rpl_killPreferredParent();
-                    icmpv6rpl_updateMyDAGrankAndParentSelection();
-                }
-                // keep the NORES neighbor in the table
                 if (
                     neighbors_vars.neighbors[i].f6PNORES    == FALSE &&
                     neighbors_vars.neighbors[i].inBlacklist == FALSE
                 ){
                     removeNeighbor(i);
+                }
+                haveParent = icmpv6rpl_getPreferredParentIndex(&j);
+                if (haveParent && (i==j)) { // this is our preferred parent, carefully!
+                    icmpv6rpl_killPreferredParent();
+                    icmpv6rpl_updateMyDAGrankAndParentSelection();
                 }
             }
         }
@@ -697,7 +695,7 @@ void registerNewNeighbor(open_addr_t* address,
         i=0;
         while(i<MAXNUMNEIGHBORS) {
             if (neighbors_vars.neighbors[i].used==FALSE) {
-                if (rssi < BADNEIGHBORMAXRSSI){
+                if (rssi < GOODNEIGHBORMINRSSI){
                     break;
                 }
                 // add this neighbor
@@ -765,12 +763,12 @@ void removeNeighbor(uint8_t neighborIndex) {
     neighbors_vars.neighbors[neighborIndex].backoffExponenton         = MINBE-1;;
     neighbors_vars.neighbors[neighborIndex].backoff                   = 0;
 
-    if (schedule_hasAutonomousTxCellToNeighbor(&(neighbors_vars.neighbors[neighborIndex].addr_64b))){
+    if (schedule_hasAutonomousTxRxCellUnicast(&(neighbors_vars.neighbors[neighborIndex].addr_64b))){
         moteId = 256*neighbors_vars.neighbors[neighborIndex].addr_64b.addr_64b[6]+\
                      neighbors_vars.neighbors[neighborIndex].addr_64b.addr_64b[7];
         slotoffset = msf_hashFunction_getSlotoffset(moteId);
         schedule_removeActiveSlot(
-            slotoffset,                                 // slot offset
+            slotoffset,                                         // slot offset
             &(neighbors_vars.neighbors[neighborIndex].addr_64b) // neighbor
         );
     }

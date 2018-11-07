@@ -954,7 +954,7 @@ port_INLINE void activity_ti1ORri1(void) {
                 if (packetfunctions_isBroadcastMulticast(&neighbor)==FALSE){
 
                     if (schedule_getShared()){
-                        // this is an autonomous Tx cell
+                        // this is an autonomous TxRx cell (unicast)
                         ieee154e_vars.dataToSend = openqueue_macGet6PandJoinPacket(&neighbor);
                     } else {
                         // this is a managed Tx cell
@@ -971,25 +971,17 @@ port_INLINE void activity_ti1ORri1(void) {
                         msf_updateCellsPassed(&neighbor);
                     }
                 } else {
-                    // this is minimal cell
-                    ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor);
-                    if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX)) {
-                        couldSendEB=TRUE;
-                        // look for an EB packet in the queue
-                        ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
-                    } else {
-                        // there is a packet to send
-                        if (
-                            schedule_hasAutonomousTxCellToNeighbor(&ieee154e_vars.dataToSend->l2_nextORpreviousHop)
-                        ) {
-                            // leave the packet to be sent on autonomous Tx Cell cell and pick up a broadcast packet.
-                            ieee154e_vars.dataToSend = openqueue_macGetDIOPacket();
-                            if (ieee154e_vars.dataToSend==NULL){
-                                couldSendEB=TRUE;
-                                // look for an EB packet in the queue
-                                ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
-                            }
+                    if (schedule_getShared()) {
+                        // this is minimal cell
+                        ieee154e_vars.dataToSend = openqueue_macGetDIOPacket();
+                        if (ieee154e_vars.dataToSend==NULL){
+                            couldSendEB=TRUE;
+                            // look for an EB packet in the queue
+                            ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
                         }
+                    } else {
+                        // this is autonomous TXRX cell (anycast)
+                        ieee154e_vars.dataToSend = openqueue_macGetDownStreamPacket(&neighbor);
                     }
                 }
             }

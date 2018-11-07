@@ -9,6 +9,7 @@
 #include "idmanager.h"
 #include "icmpv6rpl.h"
 #include "IEEE802154E.h"
+#include "openqueue.h"
 
 //=========================== definition =====================================
 
@@ -38,6 +39,8 @@ void msf_housekeeping(void);
 
 void msf_init(void) {
 
+    open_addr_t     temp_neighbor;
+
     memset(&msf_vars,0,sizeof(msf_vars_t));
     msf_vars.numAppPacketsPerSlotFrame = 0;
     sixtop_setSFcallback(
@@ -47,12 +50,14 @@ void msf_init(void) {
         (sixtop_sf_handle_callback)msf_handleRCError
     );
 
+    memset(&temp_neighbor,0,sizeof(temp_neighbor));
+    temp_neighbor.type             = ADDR_ANYCAST;
     schedule_addActiveSlot(
         msf_hashFunction_getSlotoffset(256*idmanager_getMyID(ADDR_64B)->addr_64b[6]+idmanager_getMyID(ADDR_64B)->addr_64b[7]),     // slot offset
-        CELLTYPE_RX,                          // type of slot
+        CELLTYPE_TXRX,                        // type of slot
         FALSE,                                // shared?
         msf_hashFunction_getChanneloffset(256*idmanager_getMyID(ADDR_64B)->addr_64b[6]+idmanager_getMyID(ADDR_64B)->addr_64b[7]),  // channel offset
-        idmanager_getMyID(ADDR_64B)           // neighbor
+        &temp_neighbor                        // neighbor
     );
 
     msf_vars.housekeepingTimerId = opentimers_create(TIMER_GENERAL_PURPOSE);

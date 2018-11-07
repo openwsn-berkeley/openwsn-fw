@@ -365,7 +365,7 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
                 icmpv6rpl_getPreferredParentEui64(&addressToWrite) == FALSE      ||
                 (
                     icmpv6rpl_getPreferredParentEui64(&addressToWrite)           &&
-                    schedule_hasAutonomousTxCellToNeighbor(&addressToWrite)== FALSE
+                    schedule_hasAutonomousTxRxCellUnicast(&addressToWrite)== FALSE
                 )
             )
         )
