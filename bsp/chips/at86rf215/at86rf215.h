@@ -4069,7 +4069,7 @@ static const registerSetting_t basic_settings_fsk_option3 []={  //DO NOT USE
   {RG_RF09_EDD,       0x7A},
   {RG_RF09_TXCUTC,    0x84}, //find the right values
   {RG_RF09_TXDFE,     0x12}, //find the right values
-  {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
+  {RG_RF09_PAC,       0x7F},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
   {RG_BBC0_IRQM,      0x1F},// TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
   {RG_BBC1_IRQM,      0x00},
   {RG_BBC0_PC,        0x15},// No FCS filter, 32 bits FCS, FSK.
@@ -4103,7 +4103,7 @@ static const registerSetting_t basic_settings_oqpsk_rate1[] = {
     {RG_RF09_AGCS,      0x77},
     {RG_RF09_TXCUTC,    0xC7},  // .PARAMP = 3, .LPFCUT = 7
     {RG_RF09_TXDFE,     0x7A},  // .SR = 0xA, .RCUT = 3
-    {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
+    {RG_RF09_PAC,       0x7F},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
 };
 
 static const registerSetting_t basic_settings_oqpsk_rate2[] = {
@@ -4124,7 +4124,7 @@ static const registerSetting_t basic_settings_oqpsk_rate2[] = {
     {RG_RF09_AGCS,      0x77},
     {RG_RF09_TXCUTC,    0xC7},  // .PARAMP = 3, .LPFCUT = 7
     {RG_RF09_TXDFE,     0x7A},  // .SR = 0xA, .RCUT = 3
-    {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
+    {RG_RF09_PAC,       0x7F},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
 };
 
 static const registerSetting_t basic_settings_oqpsk_rate3[] = {
@@ -4145,7 +4145,7 @@ static const registerSetting_t basic_settings_oqpsk_rate3[] = {
     {RG_RF09_AGCS,      0x77},
     {RG_RF09_TXCUTC,    0xC7},  // .PARAMP = 3, .LPFCUT = 7
     {RG_RF09_TXDFE,     0x7A},  // .SR = 0xA, .RCUT = 3
-    {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
+    {RG_RF09_PAC,       0x7F},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
 };
 
 static const registerSetting_t basic_settings_oqpsk_rate4[] = {
@@ -4166,7 +4166,7 @@ static const registerSetting_t basic_settings_oqpsk_rate4[] = {
     {RG_RF09_AGCS,      0x77},
     {RG_RF09_TXCUTC,    0xC7},  // .PARAMP = 3, .LPFCUT = 7
     {RG_RF09_TXDFE,     0x7A},  // .SR = 0xA, .RCUT = 3
-    {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
+    {RG_RF09_PAC,       0x7F},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
 };
 //------------------------------------ OFDM -----------------------------------//
 /** Preferred settings for OFDM */
@@ -4181,7 +4181,7 @@ static const registerSetting_t basic_settings_ofdm_1_mcs0[] = {
   {RG_RF09_EDD,       0x7A},
   {RG_RF09_TXCUTC,    0x0A},//recommended value (0x0B)
   {RG_RF09_TXDFE,     0x83},
-  {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. // 0x64 - 0dBm  mettre 0x7F
+  {RG_RF09_PAC,       0x7F},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. // 0x64 - 0dBm  mettre 0x7F
   {RG_BBC0_IRQM,      0x1F},
   {RG_BBC1_IRQM,      0x00},
   {RG_BBC0_PC,        0x16},//NO FCS FILTER
@@ -4199,7 +4199,7 @@ static const registerSetting_t basic_settings_ofdm_1_mcs1[] = {
   {RG_RF09_EDD,       0x7A},
   {RG_RF09_TXCUTC,    0x0A},//recommended value (0x0B)
   {RG_RF09_TXDFE,     0x83},
-  {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. // 0x64 - 0dBm  mettre 0x7F
+  {RG_RF09_PAC,       0x7F},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. // 0x64 - 0dBm  mettre 0x7F
   {RG_BBC0_IRQM,      0x1F},
   {RG_BBC1_IRQM,      0x00},
   {RG_BBC0_PC,        0x16},//NO FCS FILTER
@@ -4217,7 +4217,7 @@ static const registerSetting_t basic_settings_ofdm_1_mcs2[] = {
   {RG_RF09_EDD,       0x7A},
   {RG_RF09_TXCUTC,    0x0A},//recommended value (0x0B)
   {RG_RF09_TXDFE,     0x83},
-  {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. // 0x64 - 0dBm  mettre 0x7F
+  {RG_RF09_PAC,       0x7F},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. // 0x64 - 0dBm  mettre 0x7F
   {RG_BBC0_IRQM,      0x1F},
   {RG_BBC1_IRQM,      0x00},
   {RG_BBC0_PC,        0x16},//NO FCS FILTER
@@ -4235,7 +4235,7 @@ static const registerSetting_t basic_settings_ofdm_1_mcs3_subghz[] = {  //TODO
   {RG_RF09_EDD,       0x7A},
   {RG_RF09_TXCUTC,    0x0A},//recommended value (0x0B)
   {RG_RF09_TXDFE,     0x83},
-  {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. // 0x64 - 0dBm  mettre 0x7F
+  {RG_RF09_PAC,       0x7F},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. // 0x64 - 0dBm  mettre 0x7F
   {RG_BBC0_IRQM,      0x1F},
   {RG_BBC1_IRQM,      0x00},
   {RG_BBC0_PC,        0x16},//NO FCS FILTER
