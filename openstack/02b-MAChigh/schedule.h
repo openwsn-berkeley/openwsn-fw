@@ -26,8 +26,6 @@ The superframe reappears over time and can be arbitrarily long.
 #define SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE          0 //id of slotframe
 #define SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_NUMBER          1 //1 slotframe by default.
 
-#define NUMSERIALRX          3
-
 /*
   NUMSLOTSOFF is the max number of cells that the mote can add into schedule,
   besides 6TISCH_ACTIVE_CELLS and NUMSERIALRX Cell. Initially those cells are
@@ -39,7 +37,7 @@ The superframe reappears over time and can be arbitrarily long.
   for serial port to transmit data to dagroot.
 */
 
-#define NUMSLOTSOFF          10
+#define NUMSLOTSOFF          20
 
 /**
 \brief Maximum number of active slots in a superframe.
@@ -51,7 +49,7 @@ in that table; a slot is "active" when it is not of type CELLTYPE_OFF.
 Set this number to the exact number of active slots you are planning on having
 in your schedule, so not to waste RAM.
 */
-#define MAXACTIVESLOTS       11
+#define MAXACTIVESLOTS       SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS+NUMSLOTSOFF
 
 /**
 \brief Minimum backoff exponent.
@@ -183,7 +181,7 @@ uint8_t           schedule_getNumberOfFreeEntries(void);
 uint8_t           schedule_getNumberOfManagedTxCells(open_addr_t* neighbor);
 bool              schedule_isNumTxWrapped(open_addr_t* neighbor);
 bool              schedule_getCellsToBeRelocated(open_addr_t* neighbor, cellInfo_ht* celllist);
-bool              schedule_hasAutonomousTxCellToNeighbor(open_addr_t* neighbor);
+bool              schedule_hasAutonomousTxRxCellUnicast(open_addr_t* neighbor);
 bool              schedule_hasManagedTxCellToNeighbor(open_addr_t* neighbor);
 
 // from IEEE802154E
