@@ -373,28 +373,6 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
         return E_FAIL;
     }
 
-    if (
-        idmanager_getIsDAGroot() == TRUE ||
-        (
-            idmanager_getIsDAGroot() == FALSE &&
-            icmpv6rpl_getPreferredParentEui64(&addressToWrite) &&
-            packetfunctions_sameAddress(&addressToWrite, &msg->l2_nextORpreviousHop)== FALSE
-        )
-    ) {
-        if (schedule_hasAutonomousTxCellToNeighbor(&msg->l2_nextORpreviousHop)==FALSE){
-            moteId = 256*msg->l2_nextORpreviousHop.addr_64b[6]+\
-                         msg->l2_nextORpreviousHop.addr_64b[7];
-            slotoffset          = msf_hashFunction_getSlotoffset(moteId);
-            channeloffset       = msf_hashFunction_getChanneloffset(moteId);
-            schedule_addActiveSlot(
-                slotoffset,                                 // slot offset
-                CELLTYPE_TX,                                // type of slot
-                TRUE,                                       // shared?
-                channeloffset,                              // channel offset
-                &(msg->l2_nextORpreviousHop)                // neighbor
-            );
-        }
-    }
 
 
     // set metadata
@@ -737,26 +715,6 @@ port_INLINE void sixtop_sendEB(void) {
         return;
     }
 
-    if (
-        idmanager_getIsDAGroot() == FALSE &&
-        (
-            icmpv6rpl_getPreferredParentEui64(&addressToWrite) == FALSE ||
-            (
-                icmpv6rpl_getPreferredParentEui64(&addressToWrite) &&
-                schedule_hasAutonomousTxCellToNeighbor(&addressToWrite) == FALSE
-            )
-        )
-    ){
-        // delete packets genereted by this module (EB and KA) from openqueue
-        openqueue_removeAllCreatedBy(COMPONENT_SIXTOP);
-
-        // I'm not busy sending an EB or KA
-        sixtop_vars.busySendingEB = FALSE;
-        sixtop_vars.busySendingKA = FALSE;
-
-        return;
-    }
-
     if (sixtop_vars.busySendingEB==TRUE) {
         // don't continue if I'm still sending a previous EB
         return;
@@ -871,7 +829,7 @@ port_INLINE void sixtop_sendKA(void) {
         return;
     }
 
-    if (schedule_hasAutonomousTxCellToNeighbor(kaNeighAddr) == FALSE){
+    if (schedule_hasManagedTxCellToNeighbor(kaNeighAddr) == FALSE){
         // delete packets genereted by this module (EB and KA) from openqueue
         openqueue_removeAllCreatedBy(COMPONENT_SIXTOP);
 
