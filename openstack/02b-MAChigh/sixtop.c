@@ -352,8 +352,6 @@ owerror_t sixtop_request(
 
 owerror_t sixtop_send(OpenQueueEntry_t *msg) {
 
-    uint16_t slotoffset, moteId;
-    uint8_t  channeloffset;
     open_addr_t addressToWrite;
 
     if (
