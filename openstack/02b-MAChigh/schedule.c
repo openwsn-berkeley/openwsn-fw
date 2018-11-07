@@ -726,7 +726,7 @@ cellType_t schedule_getType(void) {
 \returns The isShared of the current schedule entry.
 */
 bool schedule_getShared(void) {
-    cellType_t returnVal;
+    bool returnVal;
 
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
