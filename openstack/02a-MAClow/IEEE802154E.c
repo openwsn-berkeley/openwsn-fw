@@ -960,6 +960,10 @@ port_INLINE void activity_ti1ORri1(void) {
                         // this is a managed Tx cell
                         ieee154e_vars.dataToSend = openqueue_macGetNonJoinIPv6Packet(&neighbor);
 
+                        if (ieee154e_vars.dataToSend == NULL){
+                            ieee154e_vars.dataToSend = openqueue_macGetKaPacket(&neighbor);
+                        }
+
                         // update numcellpassed and numcellused on managed Tx cell
                         if (ieee154e_vars.dataToSend!=NULL) {
                             msf_updateCellsUsed(&neighbor);
@@ -1930,7 +1934,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
                     icmpv6rpl_getPreferredParentEui64(&addressToWrite)      == FALSE ||
                     (
                         icmpv6rpl_getPreferredParentEui64(&addressToWrite)           &&
-                        schedule_hasAutonomousTxCellToNeighbor(&addressToWrite)== FALSE
+                        schedule_hasManagedTxCellToNeighbor(&addressToWrite)== FALSE
                     )
                 )
             ) {

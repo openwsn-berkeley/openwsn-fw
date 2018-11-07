@@ -274,6 +274,24 @@ OpenQueueEntry_t* openqueue_macGetEBPacket(void) {
    return NULL;
 }
 
+OpenQueueEntry_t* openqueue_macGetKaPacket(open_addr_t* toNeighbor) {
+    uint8_t i;
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+    for (i=0;i<QUEUELENGTH;i++) {
+        if (openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
+            openqueue_vars.queue[i].creator==COMPONENT_SIXTOP              &&
+            toNeighbor->type==ADDR_64B                                     &&
+            packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)
+        ) {
+            ENABLE_INTERRUPTS();
+            return &openqueue_vars.queue[i];
+        }
+    }
+    ENABLE_INTERRUPTS();
+    return NULL;
+}
+
 OpenQueueEntry_t*  openqueue_macGetDIOPacket(){
     uint8_t i;
     INTERRUPT_DECLARATION();

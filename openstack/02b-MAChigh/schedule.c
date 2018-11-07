@@ -627,6 +627,7 @@ bool schedule_hasManagedTxCellToNeighbor(open_addr_t* neighbor){
     for(i=0;i<MAXACTIVESLOTS;i++) {
         if(
             schedule_vars.scheduleBuf[i].shared == FALSE &&
+            schedule_vars.scheduleBuf[i].type   == CELLTYPE_TX &&
             schedule_vars.scheduleBuf[i].neighbor.type == ADDR_64B &&
             packetfunctions_sameAddress(neighbor,&schedule_vars.scheduleBuf[i].neighbor)
         ){
