@@ -708,8 +708,9 @@ void sendDIO(void) {
    memcpy(&(msg->l3_destinationAdd),&icmpv6rpl_vars.dioDestination,sizeof(open_addr_t));
    
    // add radiotype ((msg->l2_dsn)&0x01)+0x01);
-   msg->l2_radioType = (radioType_t)((++helper_counter&0x01)+0x01);
-   
+   //msg->l2_radioType = (radioType_t)((++helper_counter&0x01)+0x01);SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS
+   msg->l2_radioType = (radioType_t)(++helper_counter%SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS);
+     
    //===== Configuration option
    packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_config_ht));
     
