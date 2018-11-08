@@ -141,7 +141,7 @@ bool neighbors_getNeighborIsInBlacklist(uint8_t index){
 uint8_t neighbors_getSequenceNumber(open_addr_t* address){
     uint8_t i;
     for (i=0;i<MAXNUMNEIGHBORS;i++){
-        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b)){
+        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b) && address->addr_64b.rtype == neighbors_vars.neighbors[i].radioType){
             break;
         }
     }
@@ -418,7 +418,7 @@ void neighbors_indicateTx(
 void neighbors_updateSequenceNumber(open_addr_t* address){
     uint8_t i;
     for (i=0;i<MAXNUMNEIGHBORS;i++){
-        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b)){
+        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b) && address->addr_64b.rtype == neighbors_vars.neighbors[i].radioType){
             neighbors_vars.neighbors[i].sequenceNumber = (neighbors_vars.neighbors[i].sequenceNumber+1) & 0xFF;
             // rollover from 0xff to 0x01
             if (neighbors_vars.neighbors[i].sequenceNumber == 0){
@@ -432,7 +432,7 @@ void neighbors_updateSequenceNumber(open_addr_t* address){
 void neighbors_resetSequenceNumber(open_addr_t* address){
     uint8_t i;
     for (i=0;i<MAXNUMNEIGHBORS;i++){
-        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b)){
+        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b) && address->addr_64b.rtype == neighbors_vars.neighbors[i].radioType){
             neighbors_vars.neighbors[i].sequenceNumber = 0;
             break;
         }
@@ -549,18 +549,18 @@ This really belongs to icmpv6rpl but it would require a much more complex interf
 uint16_t neighbors_getLinkMetric(uint8_t index) {
     uint16_t  rankIncrease;
     uint32_t  rankIncreaseIntermediary; // stores intermediary results of rankIncrease calculation
-
+  
     // we assume that this neighbor has already been checked for being in use         
     // calculate link cost to this neighbor
     if (neighbors_vars.neighbors[index].numTxACK==0) {
         if (neighbors_vars.neighbors[index].numTx > DEFAULTLINKCOST){
             if (neighbors_vars.neighbors[index].numTx < MINIMAL_NUM_TX){
-                rankIncrease = (3*neighbors_vars.neighbors[index].numTx-2)*MINHOPRANKINCREASE;
+              rankIncrease = (3*neighbors_vars.neighbors[index].numTx-2)*MINHOPRANKINCREASE;
             } else {
                 rankIncrease = 65535;
             }
         } else {
-            rankIncrease = (3*DEFAULTLINKCOST-2)*MINHOPRANKINCREASE;
+          rankIncrease = (3*DEFAULTLINKCOST-2)*MINHOPRANKINCREASE;
         }
     } else {
         //6TiSCH minimal draft using OF0 for rank computation: ((3*numTx/numTxAck)-2)*minHopRankIncrease

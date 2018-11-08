@@ -98,7 +98,8 @@ typedef uint8_t             (*radio_getDelayRx_cbt)(void);
 typedef uint8_t             (*radio_getChInitOffset_cbt)(void);
 typedef uint16_t            (*radio_getNumOfChannels_cbt)(void);
 typedef uint16_t            (*radio_getCh_spacing_cbt)(void);
-typedef uint32_t            (*radio_getCenterFreq_cbt)(void);       
+typedef uint32_t            (*radio_getCenterFreq_cbt)(void);   
+typedef uint8_t             (*radio_getRadioStatus_cbt)(void);
 
 typedef struct {
     radio_powerOn_cbt             radio_powerOn_cb;
@@ -132,6 +133,7 @@ typedef struct {
     radio_getNumOfChannels_cbt    radio_getNumOfChannels_cb;
     radio_getCh_spacing_cbt       radio_getCh_spacing_cb;
     radio_getCenterFreq_cbt       radio_getCenterFreq_cb;
+    radio_getRadioStatus_cbt      radio_getRadioStatus_cb;
 } radio_functions_t;
 
 typedef struct {

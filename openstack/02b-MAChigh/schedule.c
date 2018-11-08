@@ -645,7 +645,8 @@ bool schedule_hasDedicatedCellToNeighbor(open_addr_t* neighbor){
    for(i=0;i<MAXACTIVESLOTS;i++) {
         if(
             schedule_vars.scheduleBuf[i].neighbor.type == ADDR_64B &&
-            packetfunctions_sameAddress(neighbor,&schedule_vars.scheduleBuf[i].neighbor)
+            packetfunctions_sameAddress(neighbor,&schedule_vars.scheduleBuf[i].neighbor) &&
+            schedule_vars.scheduleBuf[i].neighbor.addr_64b.rtype == neighbor->addr_64b.rtype 
         ){
             return TRUE;
       }
