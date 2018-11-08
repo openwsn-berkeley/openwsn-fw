@@ -99,6 +99,7 @@ void  radio_subghz_setFunctions(radio_functions_t * funcs) {
     funcs->radio_getCh_spacing_cb      = radio_subghz_getCh_spacing_cb;
     funcs->radio_getNumOfChannels_cb   = radio_subghz_getNumOfChannels_cb;
     funcs->radio_getCenterFreq_cb      = radio_subghz_getCenterFreq_cb;
+    funcs->radio_getRadioStatus_cb     = radio_subghz_getRadioStatus_cb;
 }
 
 void radio_subghz_powerOn(void) {
@@ -299,19 +300,20 @@ void radio_subghz_rxEnable(void) {
     // wiggle debug pin
     debugpins_radio_set();
     leds_debug_on();
+    //at86rf215_spiStrobe(CMD_RF_TXPREP);
     at86rf215_spiStrobe(CMD_RF_RX);
-
     // change state
     radio_subghz_vars.state = RADIOSTATE_LISTENING;
 }
 
 void radio_subghz_rxNow(void) {
+
+    //at86rf215_spiStrobe(CMD_RF_RX);
     //nothing to do
     if(at86rf215_status() != RF_STATE_RX){
         leds_error_toggle();
         return;
     }
-
 
 }
 
@@ -361,6 +363,10 @@ uint16_t radio_subghz_getCh_spacing_cb(void){
 
 uint32_t radio_subghz_getCenterFreq_cb(void){
     return radio_subghz_vars.phy_tsch_config_current.center_freq_0;
+}
+
+uint8_t radio_subghz_getRadioStatus_cb(void){
+    return at86rf215_status();
 }
 //=========================== private =========================================
 
@@ -422,6 +428,8 @@ void radio_subghz_isr() {
                 if (radio_subghz_vars.endFrame_cb!=NULL) {
                     // call the callback
                     radio_subghz_vars.endFrame_cb(capturedTime);
+                    // put the radio to listen
+                    radio_subghz_rxEnable();
                     // kick the OS
                     //result = KICK_SCHEDULER;
                 } else {

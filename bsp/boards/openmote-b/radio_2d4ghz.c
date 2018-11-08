@@ -92,6 +92,7 @@ void radio_2d4ghz_setFunctions(radio_functions_t* funcs){
     funcs->radio_getCh_spacing_cb      = radio_2d4ghz_getCh_spacing_cb;
     funcs->radio_getNumOfChannels_cb   = radio_2d4ghz_getNumOfChannels_cb;
     funcs->radio_getCenterFreq_cb      = radio_2d4ghz_getCenterFreq_cb;
+    funcs->radio_getRadioStatus_cb     = radio_2d4ghz_getRadioStatus_cb;
 }
 
 void radio_2d4ghz_init() {
@@ -604,3 +605,4 @@ uint8_t radio_2d4ghz_getChInitOffset(void){}
 uint16_t radio_2d4ghz_getNumOfChannels_cb(void){}
 uint16_t radio_2d4ghz_getCh_spacing_cb(void){}
 uint32_t radio_2d4ghz_getCenterFreq_cb(void){}
+uint8_t radio_2d4ghz_getRadioStatus_cb(void){}

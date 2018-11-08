@@ -74,6 +74,7 @@ uint8_t             radio_2d4ghz_getChInitOffset(void);
 uint16_t            radio_2d4ghz_getNumOfChannels_cb(void);
 uint16_t            radio_2d4ghz_getCh_spacing_cb(void);
 uint32_t            radio_2d4ghz_getCenterFreq_cb(void);
+uint8_t             radio_2d4ghz_getRadioStatus_cb(void);
 // interrupt handlers
 kick_scheduler_t    radio_2d4ghz_isr(void);
 

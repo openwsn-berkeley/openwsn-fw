@@ -76,6 +76,7 @@ uint8_t radio_subghz_getChInitOffset(void);
 uint16_t radio_subghz_getCh_spacing_cb(void);
 uint16_t radio_subghz_getNumOfChannels_cb(void);
 uint32_t radio_subghz_getCenterFreq_cb(void);
+uint8_t radio_subghz_getRadioStatus_cb(void);
 /**
 \}
 \}
