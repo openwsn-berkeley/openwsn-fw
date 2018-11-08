@@ -116,7 +116,7 @@ void ieee154e_init(void) {
     memset(&ieee154e_dbg,0,sizeof(ieee154e_dbg_t));
 
     // set singleChannel to 0 to enable channel hopping.
-    ieee154e_vars.singleChannel     = TRUE;
+    ieee154e_vars.singleChannel     = 11;
     ieee154e_vars.isAckEnabled      = TRUE;
     ieee154e_vars.isSecurityEnabled = FALSE;
     ieee154e_vars.slotDuration      = TsSlotDuration;
@@ -125,7 +125,7 @@ void ieee154e_init(void) {
     ieee154e_vars.ch_spacing        = DEFAULT_CH_SPACING;
     ieee154e_vars.frequency         = DEFAULT_FREQUENCY_CENTER;
     ieee154e_vars.modem             = MODEM_SUBGHZ;
-    ieee154e_vars.radioType         = RADIOTYPE_SUBGHZ_2FSK_50;
+    ieee154e_vars.radioType         = RADIOTYPE_SUBGHZ_OFDM_1_800;
     
     // default hopping template
     memcpy(
@@ -552,6 +552,9 @@ port_INLINE void activity_synchronize_newSlot(void) {
         ieee154e_vars.radio_functions[MODEM_SUBGHZ].radio_rfOff_cb();
         ieee154e_vars.radio_functions[MODEM_SUBGHZ].radio_setStartFrameCb_cb(ieee154e_startOfFrame);
         ieee154e_vars.radio_functions[MODEM_SUBGHZ].radio_setEndFrameCb_cb(ieee154e_endOfFrame);
+
+        // configure the radio front-end with the corresponding PHY
+        ieee154e_vars.radio_functions[ieee154e_vars.modem].radio_load_phy_cb((uint8_t)ieee154e_vars.radioType);
 
         //get first channel number offset
         ieee154e_vars.ChInitOffset = ieee154e_vars.radio_functions[MODEM_SUBGHZ].radio_getChInitOffset_cb();
