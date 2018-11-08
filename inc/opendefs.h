@@ -253,7 +253,7 @@ enum {
    ERR_UNSUPPORTED_FORMAT              = 0x40, // the received packet format is not supported {code location {0}}
    ERR_UNSUPPORTED_METADATA            = 0x41, // the metadata type is not suppored
    //l3
-   ERR_6LORH_DEADLINE_EXPIRED	       = 0x42, // the received packet has expired
+   ERR_6LORH_DEADLINE_EXPIRED          = 0x42, // the received packet has expired
    ERR_6LORH_DEADLINE_DROPPED          = 0x43, // packet expiry time reached, dropped
    // join and OSCOAP
    ERR_JOINED                          = 0x44, // node joined
@@ -308,9 +308,9 @@ typedef struct {
    uint8_t*      payload;                                       // pointer to the start of the payload within 'packet'
    uint8_t       length;                                        // length in bytes of the payload
    //l7
-   uint16_t      max_delay;                      // Max delay in milliseconds before which the packet should be delivered to the receiver
-   bool		     orgination_time_flag;
-   bool 	     drop_flag;
+   uint16_t      max_delay;                                     // Max delay in milliseconds before which the packet should be delivered to the receiver
+   bool          orgination_time_flag;
+   bool          drop_flag;
    bool          is_cjoin_response;
    //l4
    uint8_t       l4_protocol;                                   // l4 protocol to be used
