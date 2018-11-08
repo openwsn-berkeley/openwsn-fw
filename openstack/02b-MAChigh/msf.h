@@ -13,7 +13,7 @@
 //=========================== define ==========================================
 
 #define IANA_6TISCH_SFID_MSF    0
-#define CELLOPTIONS_MSF         CELLOPTIONS_TX | CELLOPTIONS_RX | CELLOPTIONS_SHARED
+#define CELLOPTIONS_MSF         CELLOPTIONS_TX
 #define NUMCELLS_MSF            1
 
 #define MAX_NUMCELLS                   16
@@ -60,6 +60,9 @@ void    msf_updateCellsPassed(open_addr_t* neighbor);
 void    msf_updateCellsUsed(open_addr_t* neighbor);
 // called by icmpv6rpl, where parent changed
 void    msf_trigger6pClear(open_addr_t* neighbor);
+
+uint16_t msf_hashFunction_getSlotoffset(uint16_t moteId);
+uint8_t msf_hashFunction_getChanneloffset(uint16_t moteId);
 /**
 \}
 \}

@@ -183,10 +183,10 @@ OpenQueueEntry_t* openqueue_sixtopGetReceivedPacket(void) {
 
 //======= called by IEEE80215E
 
-OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
-   uint8_t i;
-   INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
+OpenQueueEntry_t* openqueue_macGetDownStreamPacket(open_addr_t* toNeighbor) {
+    uint8_t i;
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
 
     // first to look the sixtop RES packet
     for (i=0;i<QUEUELENGTH;i++) {
@@ -198,42 +198,40 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
                    toNeighbor->type==ADDR_64B &&
                    packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)
                ) || toNeighbor->type==ADDR_ANYCAST
-           )
+           ) &&
+           openqueue_vars.queue[i].l2_sixtop_messageType == SIXTOP_CELL_RESPONSE
        ){
           ENABLE_INTERRUPTS();
           return &openqueue_vars.queue[i];
        }
     }
 
-   if (toNeighbor->type==ADDR_64B) {
-      // a neighbor is specified, look for a packet unicast to that neigbhbor
-      for (i=0;i<QUEUELENGTH;i++) {
-         if (openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
-            packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)
-          ) {
-            ENABLE_INTERRUPTS();
-            return &openqueue_vars.queue[i];
-         }
-      }
-   } else if (toNeighbor->type==ADDR_ANYCAST) {
-      // anycast case: look for a packet which is either not created by RES
-      // or an KA (created by RES, but not broadcast)
-      for (i=0;i<QUEUELENGTH;i++) {
-         if (openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
-             ( openqueue_vars.queue[i].creator!=COMPONENT_SIXTOP ||
-                (
-                   openqueue_vars.queue[i].creator==COMPONENT_SIXTOP &&
-                   packetfunctions_isBroadcastMulticast(&(openqueue_vars.queue[i].l2_nextORpreviousHop))==FALSE
-                )
-             )
+    if (toNeighbor->type==ADDR_64B) {
+        // a neighbor is specified, look for a packet unicast to that neigbhbor
+        for (i=0;i<QUEUELENGTH;i++) {
+            if (openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
+                packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)
             ) {
-            ENABLE_INTERRUPTS();
-            return &openqueue_vars.queue[i];
-         }
-      }
-   }
-   ENABLE_INTERRUPTS();
-   return NULL;
+                ENABLE_INTERRUPTS();
+                return &openqueue_vars.queue[i];
+            }
+        }
+    } else if (toNeighbor->type==ADDR_ANYCAST) {
+        // anycast case: look for a packet which is either from openbridge or forwarding component by source routing (ToDo)
+        for (i=0;i<QUEUELENGTH;i++) {
+            if (
+                openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
+                (
+                    openqueue_vars.queue[i].creator==COMPONENT_OPENBRIDGE
+                )
+            ) {
+                ENABLE_INTERRUPTS();
+                return &openqueue_vars.queue[i];
+            }
+        }
+    }
+    ENABLE_INTERRUPTS();
+    return NULL;
 }
 
 bool openqueue_isHighPriorityEntryEnough(void) {
@@ -274,6 +272,24 @@ OpenQueueEntry_t* openqueue_macGetEBPacket(void) {
    return NULL;
 }
 
+OpenQueueEntry_t* openqueue_macGetKaPacket(open_addr_t* toNeighbor) {
+    uint8_t i;
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+    for (i=0;i<QUEUELENGTH;i++) {
+        if (openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
+            openqueue_vars.queue[i].creator==COMPONENT_SIXTOP              &&
+            toNeighbor->type==ADDR_64B                                     &&
+            packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)
+        ) {
+            ENABLE_INTERRUPTS();
+            return &openqueue_vars.queue[i];
+        }
+    }
+    ENABLE_INTERRUPTS();
+    return NULL;
+}
+
 OpenQueueEntry_t*  openqueue_macGetDIOPacket(){
     uint8_t i;
     INTERRUPT_DECLARATION();
@@ -290,7 +306,7 @@ OpenQueueEntry_t*  openqueue_macGetDIOPacket(){
     return NULL;
 }
 
-OpenQueueEntry_t*  openqueue_macGetDedicatedPacket(open_addr_t* toNeighbor){
+OpenQueueEntry_t*  openqueue_macGetNonJoinIPv6Packet(open_addr_t* toNeighbor){
     uint8_t i;
     uint8_t packet_index;
     INTERRUPT_DECLARATION();
@@ -304,11 +320,9 @@ OpenQueueEntry_t*  openqueue_macGetDedicatedPacket(open_addr_t* toNeighbor){
            (
                toNeighbor->type==ADDR_64B &&
                packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)
-           ) && // sixtop response with SEQNUM_ERR will fail on dedicated cell since schedule inconsistency.
-            (
-                openqueue_vars.queue[i].creator                 != COMPONENT_SIXTOP_RES ||
-                openqueue_vars.queue[i].l2_sixtop_returnCode    != IANA_6TOP_RC_SEQNUM_ERR
-            )
+           ) &&
+           openqueue_vars.queue[i].creator >= COMPONENT_OPENBRIDGE &&
+           openqueue_vars.queue[i].creator != COMPONENT_CJOIN
        ){
             if (packet_index==QUEUELENGTH){
                 packet_index = i;
@@ -327,6 +341,33 @@ OpenQueueEntry_t*  openqueue_macGetDedicatedPacket(open_addr_t* toNeighbor){
         ENABLE_INTERRUPTS();
         return &openqueue_vars.queue[packet_index];
     }
+}
+
+OpenQueueEntry_t*  openqueue_macGet6PandJoinPacket(open_addr_t* toNeighbor){
+    uint8_t i;
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+
+    // first to look the sixtop RES packet
+    for (i=0;i<QUEUELENGTH;i++) {
+       if (
+           openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
+           (
+               toNeighbor->type==ADDR_64B &&
+               packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)
+           ) &&
+           (
+               openqueue_vars.queue[i].creator == COMPONENT_SIXTOP_RES ||
+               openqueue_vars.queue[i].creator == COMPONENT_CJOIN
+           )
+       ){
+            ENABLE_INTERRUPTS();
+            return &openqueue_vars.queue[i];
+       }
+    }
+
+    ENABLE_INTERRUPTS();
+    return NULL;
 }
 
 

@@ -99,7 +99,8 @@ void openserial_init(void) {
     openserial_vars.outputBufIdxW      = 0;
     openserial_vars.fBusyFlushing      = FALSE;
 
-    openserial_vars.debugPrint_timerId   = opentimers_create(TIMER_GENERAL_PURPOSE);
+    openserial_vars.reset_timerId      = opentimers_create(TIMER_GENERAL_PURPOSE);
+    openserial_vars.debugPrint_timerId = opentimers_create(TIMER_GENERAL_PURPOSE);
     opentimers_scheduleIn(
         openserial_vars.debugPrint_timerId,
         DEBUGPRINT_PERIOD,
@@ -189,17 +190,15 @@ owerror_t openserial_printCritical(
     errorparameter_t    arg1,
     errorparameter_t    arg2
 ) {
-    opentimers_id_t id;
     uint32_t         reference;
 
     // blink error LED, this is serious
     leds_error_blink();
 
     // schedule for the mote to reboot in 10s
-    id        = opentimers_create(TIMER_GENERAL_PURPOSE);
     reference = opentimers_getValue();
     opentimers_scheduleAbsolute(
-        id,                             // timerId
+        openserial_vars.reset_timerId,  // timerId
         10000,                          // duration
         reference,                      // reference
         TIME_MS,                        // timetype

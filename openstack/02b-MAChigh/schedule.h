@@ -26,8 +26,6 @@ The superframe reappears over time and can be arbitrarily long.
 #define SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE          0 //id of slotframe
 #define SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_NUMBER          1 //1 slotframe by default.
 
-#define NUMSERIALRX          3
-
 /*
   NUMSLOTSOFF is the max number of cells that the mote can add into schedule,
   besides 6TISCH_ACTIVE_CELLS and NUMSERIALRX Cell. Initially those cells are
@@ -39,7 +37,7 @@ The superframe reappears over time and can be arbitrarily long.
   for serial port to transmit data to dagroot.
 */
 
-#define NUMSLOTSOFF          10
+#define NUMSLOTSOFF          20
 
 /**
 \brief Maximum number of active slots in a superframe.
@@ -51,7 +49,7 @@ in that table; a slot is "active" when it is not of type CELLTYPE_OFF.
 Set this number to the exact number of active slots you are planning on having
 in your schedule, so not to waste RAM.
 */
-#define MAXACTIVESLOTS       11
+#define MAXACTIVESLOTS       SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS+NUMSLOTSOFF
 
 /**
 \brief Minimum backoff exponent.
@@ -60,14 +58,14 @@ Backoff is used only in slots that are marked as shared in the schedule. When
 not shared, the mote assumes that schedule is collision-free, and therefore
 does not use any backoff mechanism when a transmission fails.
 */
-#define MINBE                2
+#define MINBE                2 // the standard compliant range of MAXBE is 0-MAXBE
 
 /**
 \brief Maximum backoff exponent.
 
 See MINBE for an explanation of backoff.
 */
-#define MAXBE                4
+#define MAXBE                5 // the standard compliant range of MAXBE is 3-8
 
 /**
 \brief a threshold used for triggering the maintaining process.uint: percent
@@ -180,11 +178,11 @@ void              schedule_removeAllCells(
    open_addr_t*   previousHop
 );
 uint8_t           schedule_getNumberOfFreeEntries(void);
-uint8_t           schedule_getNumberOfDedicatedCells(open_addr_t* neighbor);
+uint8_t           schedule_getNumberOfManagedTxCells(open_addr_t* neighbor);
 bool              schedule_isNumTxWrapped(open_addr_t* neighbor);
 bool              schedule_getCellsToBeRelocated(open_addr_t* neighbor, cellInfo_ht* celllist);
-bool              schedule_hasDedicatedCellToNeighbor(open_addr_t* neighbor);
-open_addr_t*      schedule_getNonParentNeighborWithDedicatedCells(open_addr_t* neighbor);
+bool              schedule_hasAutonomousTxRxCellUnicast(open_addr_t* neighbor);
+bool              schedule_hasManagedTxCellToNeighbor(open_addr_t* neighbor);
 
 // from IEEE802154E
 void               schedule_syncSlotOffset(slotOffset_t targetSlotOffset);
@@ -192,6 +190,7 @@ void               schedule_advanceSlot(void);
 slotOffset_t       schedule_getNextActiveSlotOffset(void);
 frameLength_t      schedule_getFrameLength(void);
 cellType_t         schedule_getType(void);
+bool               schedule_getShared(void);
 void               schedule_getNeighbor(open_addr_t* addrToWrite);
 channelOffset_t    schedule_getChannelOffset(void);
 bool               schedule_getOkToSend(void);
