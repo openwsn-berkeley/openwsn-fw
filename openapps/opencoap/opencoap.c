@@ -1105,6 +1105,9 @@ void opencoap_handle_stateless_proxy(OpenQueueEntry_t *msg,
     if (statelessProxy->length < 8) {
         return;
     }
+
+    msg->is_cjoin_response      = TRUE;
+
     eui64.type = ADDR_64B;
     memcpy(eui64.addr_64b, statelessProxy->pValue, 8);
 
@@ -1211,6 +1214,7 @@ void opencoap_forward_message(OpenQueueEntry_t *msg,
     // take ownership over that packet and set destination IP and port
     outgoingPacket->creator                   = COMPONENT_OPENCOAP;
     outgoingPacket->owner                     = COMPONENT_OPENCOAP;
+    outgoingPacket->is_cjoin_response         = msg->is_cjoin_response;
     outgoingPacket->l4_destination_port       = destPortNumber;
     outgoingPacket->l3_destinationAdd.type    = ADDR_128B;
     memcpy(outgoingPacket->l3_destinationAdd.addr_128b,destIP->addr_128b,16);

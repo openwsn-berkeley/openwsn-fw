@@ -482,7 +482,10 @@ owerror_t forwarding_send_internal_RoutingTable(
     open_addr_t     temp_prefix64btoWrite;
 
     // retrieve the next hop from the routing table
-    if (msg->creator==COMPONENT_CJOIN){
+    if (
+        msg->is_cjoin_response ||
+        msg->creator==COMPONENT_CJOIN
+    ){
         if (neighbors_isStableNeighbor(&(msg->l3_destinationAdd))) {
             // IP destination is 1-hop neighbor, send directly
             packetfunctions_ip128bToMac64b(&(msg->l3_destinationAdd),&temp_prefix64btoWrite,&(msg->l2_nextORpreviousHop));
@@ -490,6 +493,7 @@ owerror_t forwarding_send_internal_RoutingTable(
     } else {
         forwarding_getNextHop(&(msg->l3_destinationAdd),&(msg->l2_nextORpreviousHop));
     }
+
     if (msg->l2_nextORpreviousHop.type==ADDR_NONE) {
         openserial_printError(
             COMPONENT_FORWARDING,
@@ -831,6 +835,8 @@ owerror_t forwarding_send_internal_SourceRouting(
     } else {
         RH3_length = 0;
     }
+
+    msg->l3_useSourceRouting = TRUE;
 
     // send to next lower layer
     return iphc_sendFromForwarding(

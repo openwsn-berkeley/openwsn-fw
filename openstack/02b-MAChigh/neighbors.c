@@ -113,21 +113,42 @@ with lowest join priority metric to send join traffic through.
 \returns A pointer to the neighbor's address, or NULL if no join proxy is found.
 */
 open_addr_t* neighbors_getJoinProxy(void) {
-   uint8_t i;
-   uint8_t joinPrioMinimum;
-   open_addr_t* joinProxy;
+    uint8_t i;
+    uint8_t joinPrioMinimum;
+    open_addr_t* joinProxy;
 
-   joinPrioMinimum = 0xff;
-   joinProxy = NULL;
-   for (i=0;i<MAXNUMNEIGHBORS;i++) {
-      if (neighbors_vars.neighbors[i].used==TRUE &&
-              neighbors_vars.neighbors[i].stableNeighbor==TRUE &&
-              neighbors_vars.neighbors[i].joinPrio <= joinPrioMinimum) {
-          joinProxy = &(neighbors_vars.neighbors[i].addr_64b);
-          joinPrioMinimum = neighbors_vars.neighbors[i].joinPrio;
-      }
-   }
-   return joinProxy;
+    uint16_t moteId;
+    uint16_t slotoffset;
+    uint8_t  channeloffset;
+
+    joinPrioMinimum = 0xff;
+    joinProxy = NULL;
+    for (i=0;i<MAXNUMNEIGHBORS;i++) {
+        if (
+            neighbors_vars.neighbors[i].used==TRUE &&
+            neighbors_vars.neighbors[i].stableNeighbor==TRUE &&
+            neighbors_vars.neighbors[i].joinPrio <= joinPrioMinimum
+        ) {
+            joinProxy = &(neighbors_vars.neighbors[i].addr_64b);
+            joinPrioMinimum = neighbors_vars.neighbors[i].joinPrio;
+        }
+    }
+
+    if (joinProxy){
+        moteId = 256*joinProxy->addr_64b[6]+joinProxy->addr_64b[7];
+        slotoffset          = msf_hashFunction_getSlotoffset(moteId);
+        channeloffset       = msf_hashFunction_getChanneloffset(moteId);
+        // reserve the autonomous cell to joinproxy
+        schedule_addActiveSlot(
+            slotoffset,                                 // slot offset
+            CELLTYPE_TXRX,                              // type of slot
+            TRUE,                                       // shared?
+            channeloffset,                              // channel offset
+            joinProxy                                   // neighbor
+        );
+    }
+
+    return joinProxy;
 }
 
 bool neighbors_getNeighborNoResource(uint8_t index){
@@ -564,6 +585,20 @@ void neighbors_setPreferredParent(uint8_t index, bool isPreferred){
             );
         }
     }
+}
+
+void neighbor_removeAutonomousTxRxCellUnicast(open_addr_t* address){
+
+    uint16_t moteId;
+    uint16_t slotoffset;
+
+    moteId = 256*address->addr_64b[6]+address->addr_64b[7];
+    slotoffset          = msf_hashFunction_getSlotoffset(moteId);
+
+    schedule_removeActiveSlot(
+        slotoffset,             // slot offset
+        address                 // neighbor
+    );
 }
 
 //===== managing routing info

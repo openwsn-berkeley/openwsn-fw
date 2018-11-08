@@ -309,8 +309,9 @@ typedef struct {
    uint8_t       length;                                        // length in bytes of the payload
    //l7
    uint16_t      max_delay;                      // Max delay in milliseconds before which the packet should be delivered to the receiver
-   bool					 orgination_time_flag;
-   bool 				 drop_flag;
+   bool		     orgination_time_flag;
+   bool 	     drop_flag;
+   bool          is_cjoin_response;
    //l4
    uint8_t       l4_protocol;                                   // l4 protocol to be used
    bool          l4_protocol_compressed;                        // is the l4 protocol header compressed?
@@ -321,6 +322,7 @@ typedef struct {
    //l3
    open_addr_t   l3_destinationAdd;                             // 128b IPv6 destination (down stack)
    open_addr_t   l3_sourceAdd;                                  // 128b IPv6 source address
+   bool          l3_useSourceRouting;                           // TRUE when the packet goes downstream
    //l2
    owerror_t     l2_sendDoneError;                              // outcome of trying to send this packet
    open_addr_t   l2_nextORpreviousHop;                          // 64b IEEE802.15.4 next (down stack) or previous (up) hop address
