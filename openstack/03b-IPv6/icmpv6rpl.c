@@ -686,11 +686,6 @@ void sendDIO(void) {
         return;
     }
 
-    // do not send DIO if I'm already busy sending
-    if (icmpv6rpl_vars.busySendingDIO==TRUE) {
-        return;
-    }
-
     // if you get here, all good to send a DIO
 
     // reserve a free packet buffer for DIO
