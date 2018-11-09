@@ -462,18 +462,36 @@ bool schedule_isSlotOffsetAvailable(uint16_t slotOffset){
    return TRUE;
 }
 
-void schedule_removeAllCells(
+void schedule_removeAllCellsToNeighbor(
     uint8_t        slotframeID,
-    open_addr_t*   previousHop
+    open_addr_t*   neighbor
     ){
     uint8_t i;
 
     // remove all entries in schedule with previousHop address
     for(i=0;i<MAXACTIVESLOTS;i++){
-        if (packetfunctions_sameAddress(&(schedule_vars.scheduleBuf[i].neighbor),previousHop)){
+        if (packetfunctions_sameAddress(&(schedule_vars.scheduleBuf[i].neighbor),neighbor)){
            schedule_removeActiveSlot(
               schedule_vars.scheduleBuf[i].slotOffset,
-              previousHop
+              neighbor
+           );
+        }
+    }
+}
+
+void schedule_removeAllAutonomousTxRxCellUnicast(void){
+    uint8_t i;
+
+    // remove all entries in schedule with previousHop address
+    for(i=0;i<MAXACTIVESLOTS;i++){
+        if (
+            schedule_vars.scheduleBuf[i].type          == CELLTYPE_TXRX &&
+            schedule_vars.scheduleBuf[i].shared                         &&
+            schedule_vars.scheduleBuf[i].neighbor.type == ADDR_64B
+        ){
+           schedule_removeActiveSlot(
+              schedule_vars.scheduleBuf[i].slotOffset,
+              &(schedule_vars.scheduleBuf[i].neighbor)
            );
         }
     }

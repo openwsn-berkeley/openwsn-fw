@@ -217,12 +217,14 @@ OpenQueueEntry_t* openqueue_macGetDownStreamPacket(open_addr_t* toNeighbor) {
             }
         }
     } else if (toNeighbor->type==ADDR_ANYCAST) {
-        // anycast case: look for a packet which is either from openbridge or forwarding component by source routing (ToDo)
+        // anycast case: look for a packet which is either from openbridge or forwarding component by source routing
         for (i=0;i<QUEUELENGTH;i++) {
             if (
                 openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
                 (
-                    openqueue_vars.queue[i].creator==COMPONENT_OPENBRIDGE
+                    openqueue_vars.queue[i].creator==COMPONENT_OPENBRIDGE ||
+                    openqueue_vars.queue[i].l3_useSourceRouting == TRUE   ||
+                    openqueue_vars.queue[i].is_cjoin_response
                 )
             ) {
                 ENABLE_INTERRUPTS();
@@ -379,12 +381,14 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry) {
    entry->owner                        = COMPONENT_NULL;
    entry->payload                      = &(entry->packet[127 - IEEE802154_SECURITY_TAG_LEN]); // Footer is longer if security is used
    entry->length                       = 0;
+   entry->is_cjoin_response            = FALSE;
    //l4
    entry->l4_protocol                  = IANA_UNDEFINED;
    entry->l4_protocol_compressed       = FALSE;
    //l3
    entry->l3_destinationAdd.type       = ADDR_NONE;
    entry->l3_sourceAdd.type            = ADDR_NONE;
+   entry->l3_useSourceRouting          = FALSE;
    //l2
    entry->l2_nextORpreviousHop.type    = ADDR_NONE;
    entry->l2_frameType                 = IEEE154_TYPE_UNDEFINED;

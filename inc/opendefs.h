@@ -196,7 +196,7 @@ enum {
    ERR_UNEXPECTED_DAO                  = 0x0a, // unexpected DAO (code location {0}). A change maybe happened on dagroot node.
    ERR_UNSUPPORTED_ICMPV6_TYPE         = 0x0b, // unsupported ICMPv6 type {0} (code location {1})
    ERR_6LOWPAN_UNSUPPORTED             = 0x0c, // unsupported 6LoWPAN parameter {1} at location {0}
-   ERR_NO_NEXTHOP                      = 0x0d, // no next hop
+   ERR_NO_NEXTHOP                      = 0x0d, // no next hop for layer 3 destination {0:x}{1:x}
    ERR_INVALID_PARAM                   = 0x0e, // invalid parameter
    ERR_INVALID_FWDMODE                 = 0x0f, // invalid forward mode
    ERR_LARGE_DAGRANK                   = 0x10, // large DAGrank {0}, set to {1}
@@ -253,7 +253,7 @@ enum {
    ERR_UNSUPPORTED_FORMAT              = 0x40, // the received packet format is not supported {code location {0}}
    ERR_UNSUPPORTED_METADATA            = 0x41, // the metadata type is not suppored
    //l3
-   ERR_6LORH_DEADLINE_EXPIRED	       = 0x42, // the received packet has expired
+   ERR_6LORH_DEADLINE_EXPIRED          = 0x42, // the received packet has expired
    ERR_6LORH_DEADLINE_DROPPED          = 0x43, // packet expiry time reached, dropped
    // join and OSCOAP
    ERR_JOINED                          = 0x44, // node joined
@@ -308,9 +308,10 @@ typedef struct {
    uint8_t*      payload;                                       // pointer to the start of the payload within 'packet'
    uint8_t       length;                                        // length in bytes of the payload
    //l7
-   uint16_t      max_delay;                      // Max delay in milliseconds before which the packet should be delivered to the receiver
-   bool					 orgination_time_flag;
-   bool 				 drop_flag;
+   uint16_t      max_delay;                                     // Max delay in milliseconds before which the packet should be delivered to the receiver
+   bool          orgination_time_flag;
+   bool          drop_flag;
+   bool          is_cjoin_response;
    //l4
    uint8_t       l4_protocol;                                   // l4 protocol to be used
    bool          l4_protocol_compressed;                        // is the l4 protocol header compressed?
@@ -321,6 +322,7 @@ typedef struct {
    //l3
    open_addr_t   l3_destinationAdd;                             // 128b IPv6 destination (down stack)
    open_addr_t   l3_sourceAdd;                                  // 128b IPv6 source address
+   bool          l3_useSourceRouting;                           // TRUE when the packet goes downstream
    //l2
    owerror_t     l2_sendDoneError;                              // outcome of trying to send this packet
    open_addr_t   l2_nextORpreviousHop;                          // 64b IEEE802.15.4 next (down stack) or previous (up) hop address

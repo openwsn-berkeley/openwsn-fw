@@ -150,6 +150,7 @@ owerror_t cjoin_receive(OpenQueueEntry_t* msg,
             // set the L2 keys as per the parsed value
             IEEE802154_security_setBeaconKey(configuration.keyset.key[0].key_index, configuration.keyset.key[0].key_value);
             IEEE802154_security_setDataKey(configuration.keyset.key[0].key_index, configuration.keyset.key[0].key_value);
+            neighbor_removeAutonomousTxRxCellUnicast(&(msg->l2_nextORpreviousHop));
             cjoin_setIsJoined(TRUE); // declare join is over
             return E_SUCCESS;
     } else {

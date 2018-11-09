@@ -172,10 +172,11 @@ owerror_t          schedule_removeActiveSlot(
    slotOffset_t         slotOffset,
    open_addr_t*         neighbor
 );
-bool               schedule_isSlotOffsetAvailable(uint16_t slotOffset);
-void              schedule_removeAllCells(
+void              schedule_removeAllAutonomousTxRxCellUnicast(void);
+bool              schedule_isSlotOffsetAvailable(uint16_t slotOffset);
+void              schedule_removeAllCellsToNeighbor(
    uint8_t        slotframeID,
-   open_addr_t*   previousHop
+   open_addr_t*   neighbor
 );
 uint8_t           schedule_getNumberOfFreeEntries(void);
 uint8_t           schedule_getNumberOfManagedTxCells(open_addr_t* neighbor);
