@@ -70,6 +70,7 @@ void          neighbors_setNeighborRank(uint8_t index, dagrank_t rank);
 void          neighbors_setNeighborNoResource(open_addr_t* address);
 void          neighbors_setPreferredParent(uint8_t index, bool isPreferred);
 void          neighbor_removeAutonomousTxRxCellUnicast(open_addr_t* address);
+void          neighbor_removeAllAutonomousTxRxCellUnicast(void);
 // interrogators
 bool          neighbors_isStableNeighbor(open_addr_t* address);
 bool          neighbors_isStableNeighborByIndex(uint8_t index);

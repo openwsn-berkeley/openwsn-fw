@@ -10,6 +10,7 @@
 #include "idmanager.h"
 #include "opentimers.h"
 #include "IEEE802154E.h"
+#include "IEEE802154_security.h"
 #include "schedule.h"
 #include "msf.h"
 
@@ -265,6 +266,11 @@ void icmpv6rpl_receive(OpenQueueEntry_t* msg) {
             // stop here if I'm in the DAG root
             break; // break, don't return
          }
+
+         if (IEEE802154_security_isConfigured()==FALSE) {
+            // this DIO is not able to be parsed if the mote is not secure yet
+            break;
+         }
          // update routing info for that neighbor
          icmpv6rpl_indicateRxDIO(msg);
 
@@ -376,8 +382,6 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection(void) {
     dagrank_t neighborRank;
     uint32_t  tentativeDAGrank;
 
-    open_addr_t addressToWrite;
-
     // if I'm a DAGroot, my DAGrank is always MINHOPRANKINCREASE
     if ((idmanager_getIsDAGroot())==TRUE) {
         // the dagrank is not set through setting command, set rank to MINHOPRANKINCREASE here
@@ -473,8 +477,6 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection(void) {
                 neighbors_setPreferredParent(prevParentIndex, FALSE);
                 // set neighbors as preferred parent
                 neighbors_setPreferredParent(icmpv6rpl_vars.ParentIndex, TRUE);
-                // get prepare parent address
-                neighbors_getNeighborEui64(&addressToWrite,ADDR_64B,prevParentIndex);
             }
         }
     } else {

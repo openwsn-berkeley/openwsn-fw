@@ -135,6 +135,8 @@ open_addr_t* neighbors_getJoinProxy(void) {
     }
 
     if (joinProxy){
+        // remove all previous installed autonomous cell
+        neighbor_removeAllAutonomousTxRxCellUnicast();
         moteId = 256*joinProxy->addr_64b[6]+joinProxy->addr_64b[7];
         slotoffset          = msf_hashFunction_getSlotoffset(moteId);
         channeloffset       = msf_hashFunction_getChanneloffset(moteId);
@@ -599,6 +601,11 @@ void neighbor_removeAutonomousTxRxCellUnicast(open_addr_t* address){
         slotoffset,             // slot offset
         address                 // neighbor
     );
+}
+
+void neighbor_removeAllAutonomousTxRxCellUnicast(void){
+
+    schedule_removeAllAutonomousTxRxCellUnicast();
 }
 
 //===== managing routing info
