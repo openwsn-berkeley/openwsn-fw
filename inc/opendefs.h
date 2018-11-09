@@ -196,7 +196,7 @@ enum {
    ERR_UNEXPECTED_DAO                  = 0x0a, // unexpected DAO (code location {0}). A change maybe happened on dagroot node.
    ERR_UNSUPPORTED_ICMPV6_TYPE         = 0x0b, // unsupported ICMPv6 type {0} (code location {1})
    ERR_6LOWPAN_UNSUPPORTED             = 0x0c, // unsupported 6LoWPAN parameter {1} at location {0}
-   ERR_NO_NEXTHOP                      = 0x0d, // no next hop
+   ERR_NO_NEXTHOP                      = 0x0d, // no next hop for layer 3 destination {0:x}{1:x}
    ERR_INVALID_PARAM                   = 0x0e, // invalid parameter
    ERR_INVALID_FWDMODE                 = 0x0f, // invalid forward mode
    ERR_LARGE_DAGRANK                   = 0x10, // large DAGrank {0}, set to {1}
