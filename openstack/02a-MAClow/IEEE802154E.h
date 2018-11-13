@@ -276,6 +276,8 @@ typedef struct {
     uint8_t                   ChInitOffset;            // first channel, e.g., for O-QPSK 2006 is 11, for 2fsk is 0
     modem_t                   modem;                   // either sub-GHz or 2.4 GHz
     radio_functions_t*        radio_functions;
+    //uint8_t                   radio_state;             // state of the radio
+    //bool                      wasIinEndofSlot;          // helper
 } ieee154e_vars_t;
 
 BEGIN_PACK
