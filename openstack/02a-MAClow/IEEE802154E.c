@@ -550,8 +550,8 @@ port_INLINE void activity_synchronize_newSlot(void) {
 
         // turn off the radio (in case it wasn't yet)
         ieee154e_vars.radio_functions[MODEM_SUBGHZ].radio_rfOff_cb();
-        ieee154e_vars.radio_functions[MODEM_SUBGHZ].radio_setStartFrameCb_cb(ieee154e_startOfFrame);
-        ieee154e_vars.radio_functions[MODEM_SUBGHZ].radio_setEndFrameCb_cb(ieee154e_endOfFrame);
+        //ieee154e_vars.radio_functions[MODEM_SUBGHZ].radio_setStartFrameCb_cb(ieee154e_startOfFrame);
+        //ieee154e_vars.radio_functions[MODEM_SUBGHZ].radio_setEndFrameCb_cb(ieee154e_endOfFrame);
 
         // configure the radio front-end with the corresponding PHY
         ieee154e_vars.radio_functions[ieee154e_vars.modem].radio_load_phy_cb((uint8_t)ieee154e_vars.radioType);
@@ -2942,7 +2942,7 @@ function should already have been done. If this is not the case, this function
 will do that for you, but assume that something went wrong.
 */
 void endSlot(void) {
-
+    //ieee154e_vars.wasIinEndofSlot = TRUE;
     // turn off the radio
     ieee154e_vars.radio_functions[ieee154e_vars.modem].radio_rfOff_cb();
 
@@ -3033,9 +3033,12 @@ void endSlot(void) {
         // reset local variable
         ieee154e_vars.ackReceived = NULL;
     }
-
+    //ieee154e_vars.radio_state = ieee154e_vars.radio_functions[ieee154e_vars.modem].radio_getRadioStatus_cb();
+    
     // change state
     changeState(S_SLEEP);
+    
+    //ieee154e_vars.wasIinEndofSlot = FALSE;
 }
 
 bool ieee154e_isSynch(void) {

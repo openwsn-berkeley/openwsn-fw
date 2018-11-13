@@ -426,10 +426,10 @@ void radio_subghz_isr() {
             if ((radio_subghz_vars.bb0_isr & IRQS_RXFE_MASK)){
                 radio_subghz_vars.state = RADIOSTATE_TXRX_DONE;
                 if (radio_subghz_vars.endFrame_cb!=NULL) {
+                    // put again the radio to listen
+                    at86rf215_spiStrobe(CMD_RF_RX);
                     // call the callback
                     radio_subghz_vars.endFrame_cb(capturedTime);
-                    // put the radio to listen
-                    radio_subghz_rxEnable();
                     // kick the OS
                     //result = KICK_SCHEDULER;
                 } else {
