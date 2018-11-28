@@ -3994,7 +3994,7 @@ static const registerSetting_t basic_settings_fsk_option1 []={
   {RG_RF09_PAC,       0x7F},// 0x7F=> bit6-5(0b11):  No power amplifier current reduction (max. transmit small signal gain) bit 4-0(0b11111): maxmium tx power
   {RG_BBC0_IRQM,      0x1F},// TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
   {RG_BBC1_IRQM,      0x00},
-  {RG_BBC0_PC,        0x1D},// No FCS filter, 32 bits FCS, FSK.
+  {RG_BBC0_PC,        0x15},// No FCS filter, 32 bits FCS, FSK.
   {RG_BBC0_FSKDM,     0x01},// Direct modulation and preemphasis enabled.
   {RG_BBC0_FSKC0,     0xD6},
   {RG_BBC0_FSKC1,     0x00},
@@ -4142,6 +4142,27 @@ static const registerSetting_t basic_settings_oqpsk_rate4[] = {
     {RG_RF09_TXDFE,     0x7A},  // .SR = 0xA, .RCUT = 3
     {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
 };
+
+static const registerSetting_t basic_settings_oqpsk_250kpbs[] = {
+    (RG_BBC1_PC,         0x1F),
+    (RG_BBC1_OQPSKPHRTX, 0x09),  // QPSK - legacy
+    (RG_BBC1_OQPSKC0,    0x03),  // 2000 kchips/s
+    (RG_BBC1_OQPSKC1,    0x47),  // MINIMUM preamble-detection sensitivities, rx-override enabled
+    (RG_BBC1_OQPSKC2,    0x05),  // FCS type legacy (16bit) & listen for LEG-OQPSK frames only
+    (RG_BBC1_OQPSKC3,    0x00),  // legacy OQPSK, search for SFD_1 only
+    (RG_BBC0_IRQM,       0x00),  // TXFE, RXFE, RXFS interrupts enabled
+    (RG_BBC1_IRQM,       0x13),  // TXFE, RXFE, RXFS interrupts enabled
+    (RG_RF09_IRQM,       0x00),  // TRXERR, TRXRDY interrupts enabled
+    (RG_RF24_IRQM,       0x12),  // TRXERR, TRXRDY interrupts enabled
+    (RG_RF24_RXBWC,      0x0B),  //  Rx BW 2000kHz, IF 2000kHz
+    (RG_RF24_RXDFE,      0x41),  //
+    (RG_RF24_AGCC,       0x01),
+    (RG_RF24_EDD,        0x13),
+    (RG_RF24_AGCS,       0x77),
+    (RG_RF24_TXCUTC,     0x0B),  // .PARAMP = 3, .LPFCUT = 7
+    (RG_RF24_TXDFE,      0x81),  // .SR = 0xA, .RCUT = 3
+    (RG_RF24_PAC,        0x7F)], // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x15~8dBm
+}
 //------------------------------------ OFDM -----------------------------------//
 /** Preferred settings for OFDM */
 
