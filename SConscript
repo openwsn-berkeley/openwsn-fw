@@ -42,7 +42,7 @@ if env['dagroot']==1:
     env.Append(CPPDEFINES    = 'DAGROOT')
 if env['forcetopology']==1:
     env.Append(CPPDEFINES    = 'FORCETOPOLOGY')
-if env['use24ghz']==1:
+if env['atmel_24ghz']==1:
     env.Append(CPPDEFINES    = 'ATMEL_24GHZ')
 if env['noadaptivesync']==1:
     env.Append(CPPDEFINES    = 'NOADAPTIVESYNC')
