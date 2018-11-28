@@ -24,7 +24,6 @@ remainder of the packet contains an incrementing bytes.
 #define LENGTH_PACKET   125+LENGTH_CRC // maximum length is 127 bytes
 #define CHANNEL         16             // 24ghz: 11 = 2.405GHz, subghz: 0 = 863.125 in  FSK operating mode #1
 #define TIMER_PERIOD    (32768>>4)     // (32768>>1) = 500ms @ 32kHz
-#define SN_OVERFLOW     100            // sequence number resets to 0 when hit SN_OVERFLOW
 
 //=========================== variables =======================================
 
@@ -101,11 +100,6 @@ int mote_main(void) {
         radio_loadPacket(app_vars.txpk_buf,app_vars.txpk_len);
         radio_txEnable();
         radio_txNow();
-
-        // reset the sequence number
-        if (app_vars.txpk_num == SN_OVERFLOW){
-            app_vars.txpk_num = 0;
-        }
     }
 }
 

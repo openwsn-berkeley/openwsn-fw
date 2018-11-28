@@ -121,7 +121,7 @@ void radio_init(void) {
         while(1); //UNKNOWN DEVICE, FINISH
     }
     // Write registers to radio -- configuration 2-FSK-50kbps
-    for( i = 0; i < (sizeof(basic_settings_ofdm_1_mcs2)/sizeof(registerSetting_t)); i++) {
+    for( i = 0; i < (sizeof(basic_settings_fsk_option1)/sizeof(registerSetting_t)); i++) {
         at86rf215_spiWriteReg( basic_settings_fsk_option1[i].addr, basic_settings_fsk_option1[i].data);
     };
 

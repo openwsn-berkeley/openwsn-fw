@@ -112,7 +112,7 @@ void cb_startFrame(PORT_TIMER_WIDTH timestamp);
 void cb_endFrame(PORT_TIMER_WIDTH timestamp);
 // uart
 void cb_uartTxDone(void);
-void cb_uartRxCb(void);
+uint8_t cb_uartRxCb(void);
 
 //=========================== main ============================================
 
@@ -258,8 +258,9 @@ void cb_uartTxDone(void) {
     }
 }
 
-void cb_uartRxCb(void) {
+uint8_t cb_uartRxCb(void) {
 
     //  uint8_t byte;
     uart_clearRxInterrupts();
+    return 1;
 }
