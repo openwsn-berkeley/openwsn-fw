@@ -25,6 +25,8 @@ XON            = 0x11
 XONXOFF_ESCAPE = 0x12
 XONXOFF_MASK   = 0x10
 
+MAX_NUM_PACKET = 256 
+
 def mote_connect(motename=None , serialport= None, baudrate='115200'):
     try:
         if (motename):
@@ -94,19 +96,20 @@ while True:
                     xonxoffEscaping=False
                 elif byte!=XON and byte!=XOFF:
                     rawFrame_decoded += [byte]
-        
         (rxpk_len,rxpk_num,rxpk_rssi,rxpk_lqi,rxpk_crc) = \
             struct.unpack('>BBbBB', ''.join([chr(b) for b in rawFrame_decoded[-8:-3]]))
-        print 'len={0:<3} num={1:<3} rssi={2:<4} lqi={3:<3} crc={4}'.format(
-            rxpk_len,
-            rxpk_num,
-            rxpk_rssi,
-            rxpk_lqi,
-            rxpk_crc
-        )
+            
+        # debug info
+        # print 'len={0:<3} num={1:<3} rssi={2:<4} lqi={3:<3} crc={4}'.format(
+            # rxpk_len,
+            # rxpk_num,
+            # rxpk_rssi,
+            # rxpk_lqi,
+            # rxpk_crc
+        # )
         
         if previousFrame>rxpk_num:
-            print "frameCounter={0:<3}".format(frameCounter)
+            print "frameCounter={0:<3}, PDR={1}%".format(frameCounter, frameCounter*100/MAX_NUM_PACKET)
             frameCounter  = 0
 
         frameCounter += 1
