@@ -24,6 +24,13 @@
 /* === EXTERNALS =========================================================== */
 
 /* === TYPES =============================================================== */
+
+enum
+{
+   FREQ_SUGHZ                    = 0,
+   FREQ_24GHZ                    = 1,
+};
+
 typedef struct
 {
     uint16_t  addr;
@@ -3968,14 +3975,17 @@ typedef enum bb_irq_tag
 } bb_irq_t;
 
 /* ========================== prototypes =================================== */
-void at86rf215_spiStrobe      (uint8_t strobe);
+void at86rf215_spiStrobe      (uint8_t strobe, uint8_t frequency_type);
+
 void at86rf215_spiWriteReg    (uint16_t reg, uint8_t regValueToWrite);
 uint8_t at86rf215_spiReadReg  (uint16_t regAddr16);
-void at86rf215_spiWriteFifo   (uint8_t* bufToWrite, uint16_t len);
-void at86rf215_spiReadRxFifo  (uint8_t* pBufRead,
-                                    uint16_t* lenRead);
-uint8_t at86rf215_status      (void);
-void at86rf215_read_isr       (uint8_t* rf09_isr);
+
+void at86rf215_spiWriteFifo   (uint8_t* bufToWrite, uint16_t len, uint8_t frequency_type);
+void at86rf215_spiReadRxFifo  (uint8_t* pBufRead, uint16_t* lenRead, uint8_t frequency_type);
+
+uint8_t at86rf215_status      (uint8_t frequency_type);
+
+void at86rf215_read_isr       (uint8_t* rf09_isr, uint8_t frequency_type);
 void at86rf215_readBurst(uint16_t reg, uint8_t* regValueRead, uint16_t size);
 
 //------------------------------------ FSK --------------------------------//
@@ -4143,7 +4153,7 @@ static const registerSetting_t basic_settings_oqpsk_rate4[] = {
     {RG_RF09_PAC,       0x64},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
 };
 
-static const registerSetting_t basic_settings_oqpsk_250kpbs[] = {
+static const registerSetting_t basic_settings_oqpsk_250kbps[] = {
     {RG_BBC1_PC,         0x1F},
     {RG_BBC1_OQPSKPHRTX, 0x09},  // QPSK - legacy
     {RG_BBC1_OQPSKC0,    0x03},  // 2000 kchips/s

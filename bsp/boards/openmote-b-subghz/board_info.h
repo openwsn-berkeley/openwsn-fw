@@ -101,6 +101,11 @@
 
 #define NUMSENSORS      7
 
+// frequency to use for atmel radio
+
+#define ATMEL_FREQUENCY_TYPE     0         //    FEQ_SUGHZ                    = 0,
+// #define FREQUENCY_TYPE  FEQ_24GHZ       //    FEQ_24GHZ                    = 1,
+
 //====== Antenna options ====
 #define BSP_ANTENNA_BASE            GPIO_D_BASE
 #define BSP_ANTENNA_CC2538_24GHZ    GPIO_PIN_4      //!< PD4 -- 2.4ghz

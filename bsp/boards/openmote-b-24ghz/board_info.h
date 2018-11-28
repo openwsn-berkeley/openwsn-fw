@@ -101,6 +101,10 @@
 
 #define NUMSENSORS      7
 
+// frequency to use for atmel radio
+
+#define ATMEL_FREQUENCY_TYPE     0         //    make sure cc2538 has the 2.4ghz antenna 
+
 //====== Antenna options ====
 #define BSP_ANTENNA_BASE            GPIO_D_BASE
 #define BSP_ANTENNA_CC2538_24GHZ    GPIO_PIN_4      //!< PD4 -- 2.4ghz
