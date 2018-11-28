@@ -37,6 +37,12 @@
 #define DEFAULT_CHANNEL_SPACING_OQPSK_24GHZ    5000    // kHz
 #define DEFAULT_CENTER_FREQUENCY_0_OQPSK_24GHZ 850000  // Hz
 
+#ifdef ATMEL_24GHZ
+    #define ATMEL_FREQUENCY_TYPE FREQ_24GHZ
+#else
+    #define ATMEL_FREQUENCY_TYPE FREQ_SUGHZ
+#endif
+
 //=========================== variables =======================================
 
 typedef struct {

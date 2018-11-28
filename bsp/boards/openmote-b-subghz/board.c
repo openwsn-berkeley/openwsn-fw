@@ -86,13 +86,13 @@ void antenna_init(void) {
     GPIOPinTypeGPIOOutput(BSP_ANTENNA_BASE, BSP_ANTENNA_CC2538_24GHZ);
     GPIOPinTypeGPIOOutput(BSP_ANTENNA_BASE, BSP_ANTENNA_AT215_24GHZ);
 
-    if (ATMEL_FREQUENCY_TYPE == 0){
-        // atmel is not using 2.4ghz, connect antenna to cc2538
-        antenna_cc2538();
-    } {
-        // atmel is using 2.4ghz, connect antenna to atrf215
-        antenna_at86rf215();
-    }
+#ifdef ATMEL_24GHZ
+    // atmel is using 2.4ghz, connect antenna to atrf215
+    antenna_at86rf215();
+#else
+    // atmel is not using 2.4ghz, connect antenna to cc2538
+    antenna_cc2538();
+#endif
 }
 
 void antenna_cc2538(void) {
