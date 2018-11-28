@@ -302,14 +302,26 @@ void radio_getReceivedFrame(
     uint16_t  maxBufLen,
     int8_t*  rssi,
     uint8_t* lqi,
-    bool*    crc,
-    uint8_t* mcs
+    bool*    crc
 ) {
+
+    uint16_t register_edv;
+    uint16_t register_bbc_pc;
+
+    if (ATMEL_FREQUENCY_TYPE==FREQ_SUGHZ){
+        // subghz
+        register_edv     = RG_RF09_EDV;
+        register_bbc_pc  = RG_BBC0_PC;
+    } else {
+        register_edv     = RG_RF24_EDV;
+        register_bbc_pc  = RG_BBC1_PC;
+    }
+
     // read the received packet from the RXFIFO
     at86rf215_spiReadRxFifo(bufRead, lenRead, ATMEL_FREQUENCY_TYPE);
-    *rssi   = at86rf215_spiReadReg(RG_RF09_EDV);
-    *crc    = (at86rf215_spiReadReg(RG_BBC0_PC)>>5);
-    *mcs    = (at86rf215_spiReadReg(RG_BBC0_OFDMPHRRX)&OFDMPHRRX_MCS_MASK);
+
+    *rssi   = at86rf215_spiReadReg(register_edv);
+    *crc    = (at86rf215_spiReadReg(register_bbc_pc)>>5);
 }
 
 //=========================== private =========================================

@@ -80,8 +80,7 @@ void     radio_getReceivedFrame(uint8_t* bufRead,
                                 uint16_t  maxBufLen,
                                  int8_t* rssi,
                                 uint8_t* lqi,
-                                   bool* crc,
-                                   uint8_t* mcs);
+                                   bool* crc);
 
 // interrupt handlers
 void    radio_isr(void);
