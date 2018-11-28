@@ -4161,9 +4161,9 @@ static const registerSetting_t basic_settings_oqpsk_250kbps[] = {
     {RG_BBC1_OQPSKC2,    0x05},  // FCS type legacy (16bit) & listen for LEG-OQPSK frames only
     {RG_BBC1_OQPSKC3,    0x00},  // legacy OQPSK, search for SFD_1 only
     {RG_BBC0_IRQM,       0x00},  // TXFE, RXFE, RXFS interrupts enabled
-    {RG_BBC1_IRQM,       0x13},  // TXFE, RXFE, RXFS interrupts enabled
+    {RG_BBC1_IRQM,       0x1F},  // TXFE, RXFE, RXFS interrupts enabled
     {RG_RF09_IRQM,       0x00},  // TRXERR, TRXRDY interrupts enabled
-    {RG_RF24_IRQM,       0x12},  // TRXERR, TRXRDY interrupts enabled
+    {RG_RF24_IRQM,       0x00},  // TRXERR, TRXRDY interrupts enabled
     {RG_RF24_RXBWC,      0x0B},  //  Rx BW 2000kHz, IF 2000kHz
     {RG_RF24_RXDFE,      0x41},  //
     {RG_RF24_AGCC,       0x01},
@@ -4171,7 +4171,7 @@ static const registerSetting_t basic_settings_oqpsk_250kbps[] = {
     {RG_RF24_AGCS,       0x77},
     {RG_RF24_TXCUTC,     0x0B},  // .PARAMP = 3, .LPFCUT = 7
     {RG_RF24_TXDFE,      0x81},  // .SR = 0xA, .RCUT = 3
-    {RG_RF24_PAC,        0x7F}, // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x15~8dBm
+    {RG_RF24_PAC,        0x7F},  // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F. # 0x15~8dBm
 };
 //------------------------------------ OFDM -----------------------------------//
 /** Preferred settings for OFDM */
