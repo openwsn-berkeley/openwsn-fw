@@ -33,6 +33,16 @@
 #define DEFAULT_CHANNEL_SPACING_FSK_OPTION_1    200     // kHz
 #define DEFAULT_CENTER_FREQUENCY_0_FSK_OPTION_1 863125  // Hz
 
+
+#define DEFAULT_CHANNEL_SPACING_OQPSK_24GHZ    5000    // kHz
+#define DEFAULT_CENTER_FREQUENCY_0_OQPSK_24GHZ 850000  // Hz
+
+#ifdef ATMEL_24GHZ
+    #define ATMEL_FREQUENCY_TYPE FREQ_24GHZ
+#else
+    #define ATMEL_FREQUENCY_TYPE FREQ_SUGHZ
+#endif
+
 //=========================== variables =======================================
 
 typedef struct {
@@ -95,8 +105,8 @@ void radio_init(void) {
     // reset radio
     radio_reset();
 
-    at86rf215_spiStrobe(CMD_RF_TRXOFF);
-    while(at86rf215_status() != RF_STATE_TRXOFF);
+    at86rf215_spiStrobe(CMD_RF_TRXOFF, ATMEL_FREQUENCY_TYPE);
+    while(at86rf215_status(ATMEL_FREQUENCY_TYPE) != RF_STATE_TRXOFF);
 
     // change state
     radio_vars.state          = RADIOSTATE_RFOFF;
@@ -121,9 +131,16 @@ void radio_init(void) {
         while(1); //UNKNOWN DEVICE, FINISH
     }
     // Write registers to radio -- configuration 2-FSK-50kbps
-    for( i = 0; i < (sizeof(basic_settings_ofdm_1_mcs2)/sizeof(registerSetting_t)); i++) {
-        at86rf215_spiWriteReg( basic_settings_fsk_option1[i].addr, basic_settings_fsk_option1[i].data);
-    };
+    if (ATMEL_FREQUENCY_TYPE==FREQ_SUGHZ){
+        for( i = 0; i < (sizeof(basic_settings_fsk_option1)/sizeof(registerSetting_t)); i++) {
+            at86rf215_spiWriteReg( basic_settings_fsk_option1[i].addr, basic_settings_fsk_option1[i].data);
+        };
+    } else {
+        for( i = 0; i < (sizeof(basic_settings_oqpsk_250kbps)/sizeof(registerSetting_t)); i++) {
+            at86rf215_spiWriteReg( basic_settings_oqpsk_250kbps[i].addr, basic_settings_oqpsk_250kbps[i].data);
+        };
+    }
+
 
     radio_read_isr();
 }
@@ -138,8 +155,8 @@ void radio_change_modulation(registerSetting_t * mod){
     static int mod_list = 1;
     uint16_t i;
 
-    at86rf215_spiStrobe(CMD_RF_TRXOFF);
-    while(at86rf215_status() != RF_STATE_TRXOFF);
+    at86rf215_spiStrobe(CMD_RF_TRXOFF, ATMEL_FREQUENCY_TYPE);
+    while(at86rf215_status(ATMEL_FREQUENCY_TYPE) != RF_STATE_TRXOFF);
 
     for( i = 0; i < (sizeof(*mod)/sizeof(registerSetting_t)); i++) {
         at86rf215_spiWriteReg( mod[i].addr, mod[i].data);
@@ -161,26 +178,38 @@ void radio_setEndFrameCb(radio_capture_cbt cb) {
 //frequency_0 in kHz
 //frequency_nb integer
 void radio_setFrequency(uint16_t channel) {
+
     uint16_t frequency_0;
 
     // frequency has to be updated in TRXOFF status (datatsheet: 6.3.2).
-    at86rf215_spiStrobe(CMD_RF_TRXOFF);
-    while(at86rf215_status() != RF_STATE_TRXOFF);
+    at86rf215_spiStrobe(CMD_RF_TRXOFF, ATMEL_FREQUENCY_TYPE);
+    while(at86rf215_status(ATMEL_FREQUENCY_TYPE) != RF_STATE_TRXOFF);
 
-    frequency_0 = (DEFAULT_CENTER_FREQUENCY_0_FSK_OPTION_1/25);
-    at86rf215_spiWriteReg(RG_RF09_CS, (uint8_t)(DEFAULT_CHANNEL_SPACING_FSK_OPTION_1/25));
-    at86rf215_spiWriteReg(RG_RF09_CCF0L, (uint8_t)(frequency_0%256));
-    at86rf215_spiWriteReg(RG_RF09_CCF0H, (uint8_t)(frequency_0/256));
-    at86rf215_spiWriteReg(RG_RF09_CNL, (uint8_t)(channel%256));
-    at86rf215_spiWriteReg(RG_RF09_CNM, (uint8_t)(channel/256));
+    if(ATMEL_FREQUENCY_TYPE==0){
+
+        frequency_0 = (DEFAULT_CENTER_FREQUENCY_0_FSK_OPTION_1/25);
+        at86rf215_spiWriteReg(RG_RF09_CS, (uint8_t)(DEFAULT_CHANNEL_SPACING_FSK_OPTION_1/25));
+        at86rf215_spiWriteReg(RG_RF09_CCF0L, (uint8_t)(frequency_0%256));
+        at86rf215_spiWriteReg(RG_RF09_CCF0H, (uint8_t)(frequency_0/256));
+        at86rf215_spiWriteReg(RG_RF09_CNL, (uint8_t)(channel%256));
+        at86rf215_spiWriteReg(RG_RF09_CNM, (uint8_t)(channel/256));
+    } else {
+        frequency_0 = (DEFAULT_CENTER_FREQUENCY_0_OQPSK_24GHZ/25);
+        at86rf215_spiWriteReg(RG_RF24_CS, (uint8_t)(DEFAULT_CHANNEL_SPACING_OQPSK_24GHZ/25));
+        at86rf215_spiWriteReg(RG_RF24_CCF0L, (uint8_t)(frequency_0%256));
+        at86rf215_spiWriteReg(RG_RF24_CCF0H, (uint8_t)(frequency_0/256));
+        at86rf215_spiWriteReg(RG_RF24_CNL, (uint8_t)(channel%256));
+        at86rf215_spiWriteReg(RG_RF24_CNM, (uint8_t)(channel/256));
+    }
+
     // change state
     radio_vars.state = RADIOSTATE_FREQUENCY_SET;
 }
 
 void radio_rfOn(void) {
     //put the radio in the TRXPREP state
-    at86rf215_spiStrobe(CMD_RF_TRXOFF);
-    while(at86rf215_status() != RF_STATE_TRXOFF);
+    at86rf215_spiStrobe(CMD_RF_TRXOFF, ATMEL_FREQUENCY_TYPE);
+    while(at86rf215_status(ATMEL_FREQUENCY_TYPE) != RF_STATE_TRXOFF);
 }
 
 void radio_rfOff(void) {
@@ -188,8 +217,8 @@ void radio_rfOff(void) {
     // change state
     radio_vars.state = RADIOSTATE_TURNING_OFF;
 
-    at86rf215_spiStrobe(CMD_RF_TRXOFF);
-    while(at86rf215_status() != RF_STATE_TRXOFF);
+    at86rf215_spiStrobe(CMD_RF_TRXOFF, ATMEL_FREQUENCY_TYPE);
+    while(at86rf215_status(ATMEL_FREQUENCY_TYPE) != RF_STATE_TRXOFF);
     // wiggle debug pin
     debugpins_radio_clr();
     leds_radio_off();
@@ -203,7 +232,7 @@ void radio_rfOff(void) {
 void radio_loadPacket(uint8_t* packet, uint16_t len) {
 
     radio_vars.state = RADIOSTATE_LOADING_PACKET;
-    at86rf215_spiWriteFifo(packet, len);
+    at86rf215_spiWriteFifo(packet, len, ATMEL_FREQUENCY_TYPE);
     // change state
     radio_vars.state = RADIOSTATE_PACKET_LOADED;
     //at86rf215_readBurst(0x0306, packet, len);
@@ -218,8 +247,8 @@ void radio_txEnable(void) {
     // change state
     radio_vars.state = RADIOSTATE_ENABLING_TX;
 
-    at86rf215_spiStrobe(CMD_RF_TXPREP);
-    while(at86rf215_status() != RF_STATE_TXPREP);
+    at86rf215_spiStrobe(CMD_RF_TXPREP, ATMEL_FREQUENCY_TYPE);
+    while(at86rf215_status(ATMEL_FREQUENCY_TYPE) != RF_STATE_TXPREP);
 
     // wiggle debug pin
     debugpins_radio_set();
@@ -235,7 +264,7 @@ void radio_txNow(void) {
     // change state
     radio_vars.state = RADIOSTATE_TRANSMITTING;
 
-    at86rf215_spiStrobe(CMD_RF_TX);
+    at86rf215_spiStrobe(CMD_RF_TX, ATMEL_FREQUENCY_TYPE);
 
     if (radio_vars.startFrame_cb!=NULL) {
         // capture the time
@@ -253,7 +282,7 @@ void radio_rxEnable(void) {
     // wiggle debug pin
     debugpins_radio_set();
     leds_radio_on();
-    at86rf215_spiStrobe(CMD_RF_RX);
+    at86rf215_spiStrobe(CMD_RF_RX, ATMEL_FREQUENCY_TYPE);
 
     // change state
     radio_vars.state = RADIOSTATE_LISTENING;
@@ -261,7 +290,7 @@ void radio_rxEnable(void) {
 
 void radio_rxNow(void) {
     //nothing to do
-    if(at86rf215_status() != RF_STATE_RX){
+    if(at86rf215_status(ATMEL_FREQUENCY_TYPE) != RF_STATE_RX){
         leds_error_toggle();
         return;
     }
@@ -273,21 +302,33 @@ void radio_getReceivedFrame(
     uint16_t  maxBufLen,
     int8_t*  rssi,
     uint8_t* lqi,
-    bool*    crc,
-    uint8_t* mcs
+    bool*    crc
 ) {
+
+    uint16_t register_edv;
+    uint16_t register_bbc_pc;
+
+    if (ATMEL_FREQUENCY_TYPE==FREQ_SUGHZ){
+        // subghz
+        register_edv     = RG_RF09_EDV;
+        register_bbc_pc  = RG_BBC0_PC;
+    } else {
+        register_edv     = RG_RF24_EDV;
+        register_bbc_pc  = RG_BBC1_PC;
+    }
+
     // read the received packet from the RXFIFO
-    at86rf215_spiReadRxFifo(bufRead, lenRead);
-    *rssi   = at86rf215_spiReadReg(RG_RF09_EDV);
-    *crc    = (at86rf215_spiReadReg(RG_BBC0_PC)>>5);
-    *mcs    = (at86rf215_spiReadReg(RG_BBC0_OFDMPHRRX)&OFDMPHRRX_MCS_MASK);
+    at86rf215_spiReadRxFifo(bufRead, lenRead, ATMEL_FREQUENCY_TYPE);
+
+    *rssi   = at86rf215_spiReadReg(register_edv);
+    *crc    = (at86rf215_spiReadReg(register_bbc_pc)>>5);
 }
 
 //=========================== private =========================================
 
 void radio_read_isr(void){
     uint8_t flags[4];
-    at86rf215_read_isr(flags);
+    at86rf215_read_isr(flags, ATMEL_FREQUENCY_TYPE);
 
     radio_vars.rf09_isr = flags[0];
     radio_vars.rf24_isr = flags[1];

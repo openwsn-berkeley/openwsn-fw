@@ -37,6 +37,9 @@ enum{
     TYPE_STR = 0,       //subtype for the printf message
     TYPE_INT = 1
 };
+
+#define DEBUGPRINT_PERIOD 100 // in ms
+
 //=========================== prototypes ======================================
 
 
@@ -56,6 +59,7 @@ void openserial_get6pInfo(uint8_t commandId, uint8_t* code,uint8_t* cellOptions,
 void openserial_handleCommands(void);
 
 // misc
+void openserial_debugPrint_timer_cb(opentimers_id_t id);
 void openserial_board_reset_cb(opentimers_id_t id);
 
 // HDLC output
@@ -94,6 +98,16 @@ void openserial_init(void) {
     openserial_vars.outputBufIdxR      = 0;
     openserial_vars.outputBufIdxW      = 0;
     openserial_vars.fBusyFlushing      = FALSE;
+
+    openserial_vars.reset_timerId      = opentimers_create(TIMER_GENERAL_PURPOSE);
+    openserial_vars.debugPrint_timerId = opentimers_create(TIMER_GENERAL_PURPOSE);
+    opentimers_scheduleIn(
+        openserial_vars.debugPrint_timerId,
+        DEBUGPRINT_PERIOD,
+        TIME_MS,
+        TIMER_PERIODIC,
+        openserial_debugPrint_timer_cb
+    );
 
     // UART
     uart_setCallbacks(
@@ -176,17 +190,15 @@ owerror_t openserial_printCritical(
     errorparameter_t    arg1,
     errorparameter_t    arg2
 ) {
-    opentimers_id_t id;
     uint32_t         reference;
 
     // blink error LED, this is serious
     leds_error_blink();
 
     // schedule for the mote to reboot in 10s
-    id        = opentimers_create(TIMER_GENERAL_PURPOSE);
     reference = opentimers_getValue();
     opentimers_scheduleAbsolute(
-        id,                             // timerId
+        openserial_vars.reset_timerId,  // timerId
         10000,                          // duration
         reference,                      // reference
         TIME_MS,                        // timetype
@@ -845,6 +857,10 @@ void openserial_handleCommands(void){
 }
 
 //===== misc
+
+void openserial_debugPrint_timer_cb(opentimers_id_t id){
+    scheduler_push_task(task_openserial_debugPrint,TASKPRIO_OPENSERIAL);
+}
 
 void openserial_board_reset_cb(opentimers_id_t id) {
     (void)id;

@@ -10,6 +10,7 @@
 #include "idmanager.h"
 #include "opentimers.h"
 #include "IEEE802154E.h"
+#include "IEEE802154_security.h"
 #include "schedule.h"
 #include "msf.h"
 
@@ -265,6 +266,11 @@ void icmpv6rpl_receive(OpenQueueEntry_t* msg) {
             // stop here if I'm in the DAG root
             break; // break, don't return
          }
+
+         if (IEEE802154_security_isConfigured()==FALSE) {
+            // this DIO is not able to be parsed if the mote is not secure yet
+            break;
+         }
          // update routing info for that neighbor
          icmpv6rpl_indicateRxDIO(msg);
 
@@ -376,8 +382,6 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection(void) {
     dagrank_t neighborRank;
     uint32_t  tentativeDAGrank;
 
-    open_addr_t addressToWrite;
-
     // if I'm a DAGroot, my DAGrank is always MINHOPRANKINCREASE
     if ((idmanager_getIsDAGroot())==TRUE) {
         // the dagrank is not set through setting command, set rank to MINHOPRANKINCREASE here
@@ -473,8 +477,6 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection(void) {
                 neighbors_setPreferredParent(prevParentIndex, FALSE);
                 // set neighbors as preferred parent
                 neighbors_setPreferredParent(icmpv6rpl_vars.ParentIndex, TRUE);
-                // get prepare parent address
-                neighbors_getNeighborEui64(&addressToWrite,ADDR_64B,prevParentIndex);
             }
         }
     } else {
@@ -639,7 +641,11 @@ void icmpv6rpl_timer_DIO_task(void) {
 \brief Prepare and a send a RPL DIO.
 */
 void sendDIO(void) {
+
     OpenQueueEntry_t*    msg;
+    open_addr_t addressToWrite;
+
+    memset(&addressToWrite,0,sizeof(open_addr_t));
 
     // stop if I'm not sync'ed
     if (ieee154e_isSynch()==FALSE) {
@@ -660,8 +666,23 @@ void sendDIO(void) {
       return;
     }
 
-    // do not send DIO if I'm already busy sending
-    if (icmpv6rpl_vars.busySendingDIO==TRUE) {
+    if (
+        idmanager_getIsDAGroot() == FALSE &&
+        (
+            icmpv6rpl_getPreferredParentEui64(&addressToWrite) == FALSE ||
+            (
+                icmpv6rpl_getPreferredParentEui64(&addressToWrite) &&
+                schedule_hasManagedTxCellToNeighbor(&addressToWrite) == FALSE
+            )
+        )
+    ){
+        // delete packets genereted by this module (EB and KA) from openqueue
+        openqueue_removeAllCreatedBy(COMPONENT_ICMPv6RPL);
+
+        // I'm not busy sending a DIO/DAO
+        icmpv6rpl_vars.busySendingDIO  = FALSE;
+        icmpv6rpl_vars.busySendingDAO  = FALSE;
+
         return;
     }
 
@@ -790,6 +811,8 @@ void sendDAO(void) {
    open_addr_t         address;
    open_addr_t*        prefix;
 
+   memset(&address,0,sizeof(open_addr_t));
+
    if (ieee154e_isSynch()==FALSE) {
       // I'm not sync'ed
 
@@ -813,6 +836,25 @@ void sendDAO(void) {
    if (icmpv6rpl_getMyDAGrank()==DEFAULTDAGRANK) {
        return;
    }
+
+   if (
+        icmpv6rpl_getPreferredParentEui64(&address) == FALSE ||
+        (
+            icmpv6rpl_getPreferredParentEui64(&address) &&
+            schedule_hasManagedTxCellToNeighbor(&address) == FALSE
+        )
+    ){
+        // delete packets genereted by this module (EB and KA) from openqueue
+        openqueue_removeAllCreatedBy(COMPONENT_ICMPv6RPL);
+
+        // I'm not busy sending a DIO/DAO
+        icmpv6rpl_vars.busySendingDIO  = FALSE;
+        icmpv6rpl_vars.busySendingDAO  = FALSE;
+
+        return;
+    }
+
+   memset(&address,0,sizeof(open_addr_t));
 
    // dont' send a DAO if you're still busy sending the previous one
    if (icmpv6rpl_vars.busySendingDAO==TRUE) {

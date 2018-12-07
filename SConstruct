@@ -146,6 +146,7 @@ command_line_options = {
     'dagroot':                  ['0','1'],
     'forcetopology':            ['0','1'],
     'debug':                    ['0','1'],
+    'atmel_24ghz':              ['0','1'],
     'noadaptivesync':           ['0','1'],
     'l2_security':              ['0','1'],
     'msf_adapting_to_traffic':  ['0','1'],
@@ -280,6 +281,13 @@ command_line_vars.AddVariables(
         'debug',                                           # key
         '',                                                # help
         command_line_options['debug'][0],                  # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
+        'atmel_24ghz',                                     # key
+        '',                                                # help
+        command_line_options['atmel_24ghz'][0],            # default
         validate_option,                                   # validator
         int,                                               # converter
     ),

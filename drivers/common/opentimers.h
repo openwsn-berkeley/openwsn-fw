@@ -19,7 +19,7 @@
 //=========================== define ==========================================
 
 /// Maximum number of timers that can run concurrently
-#define MAX_NUM_TIMERS             10
+#define MAX_NUM_TIMERS             15
 #define MAX_TICKS_IN_SINGLE_CLOCK  (uint32_t)(((PORT_TIMER_WIDTH)0xFFFFFFFF)>>1)
 #define ERROR_NO_AVAILABLE_ENTRIES 255
 #define MAX_DURATION_ISR           33 // 33@32768Hz = 1ms

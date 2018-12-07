@@ -67,7 +67,7 @@ void macpong_initSend(opentimers_id_t id) {
     }
     if (ieee154e_isSynch()==TRUE && neighbors_getNumNeighbors()==1) {
         neighbors_getNeighborEui64(&temp,ADDR_64B,0);
-        if (schedule_hasDedicatedCellToNeighbor(&temp)){
+        if (schedule_hasManagedTxCellToNeighbor(&temp)){
             if (timeToSend){
                 // send packet
                 macpong_send(0);

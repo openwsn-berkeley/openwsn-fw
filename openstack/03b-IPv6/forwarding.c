@@ -285,7 +285,7 @@ void forwarding_receive(
 
     // take ownership
     msg->owner                     = COMPONENT_FORWARDING;
-   
+
 
     // determine L4 protocol
     // get information from ipv6_header
@@ -295,7 +295,7 @@ void forwarding_receive(
     // populate packets metadata with L3 information
     memcpy(&(msg->l3_destinationAdd),&ipv6_inner_header->dest, sizeof(open_addr_t));
     memcpy(&(msg->l3_sourceAdd),     &ipv6_inner_header->src,  sizeof(open_addr_t));
-   
+
     if (
         (
             idmanager_isMyAddress(&(msg->l3_destinationAdd))
@@ -443,7 +443,6 @@ void forwarding_receive(
 */
 void forwarding_getNextHop(open_addr_t* destination128b, open_addr_t* addressToWrite64b) {
    uint8_t         i;
-   open_addr_t     temp_prefix64btoWrite;
 
    if (packetfunctions_isBroadcastMulticast(destination128b)) {
       // IP destination is broadcast, send to 0xffffffffffffffff
@@ -451,9 +450,6 @@ void forwarding_getNextHop(open_addr_t* destination128b, open_addr_t* addressToW
       for (i=0;i<8;i++) {
          addressToWrite64b->addr_64b[i] = 0xff;
       }
-   } else if (neighbors_isStableNeighbor(destination128b)) {
-      // IP destination is 1-hop neighbor, send directly
-      packetfunctions_ip128bToMac64b(destination128b,&temp_prefix64btoWrite,addressToWrite64b);
    } else {
       // destination is remote, send to preferred parent
       icmpv6rpl_getPreferredParentEui64(addressToWrite64b);
@@ -472,47 +468,60 @@ void forwarding_getNextHop(open_addr_t* destination128b, open_addr_t* addressToW
    (PCKTSEND), or forwarded (PCKTFORWARD).
 */
 owerror_t forwarding_send_internal_RoutingTable(
-      OpenQueueEntry_t*      msg,
-      ipv6_header_iht*       ipv6_outer_header,
-      ipv6_header_iht*       ipv6_inner_header,
-      rpl_option_ht*         rpl_option,
+    OpenQueueEntry_t*      msg,
+    ipv6_header_iht*       ipv6_outer_header,
+    ipv6_header_iht*       ipv6_inner_header,
+    rpl_option_ht*         rpl_option,
 #ifdef DEADLINE_OPTION_ENABLED
-      deadline_option_ht*    deadline_option,
+    deadline_option_ht*    deadline_option,
 #endif
-      uint32_t*              flow_label,
-      uint8_t                fw_SendOrfw_Rcv
-   ) {
+    uint32_t*              flow_label,
+    uint8_t                fw_SendOrfw_Rcv
+) {
 
-   // retrieve the next hop from the routing table
-   forwarding_getNextHop(&(msg->l3_destinationAdd),&(msg->l2_nextORpreviousHop));
-   if (msg->l2_nextORpreviousHop.type==ADDR_NONE) {
-      openserial_printError(
-         COMPONENT_FORWARDING,
-         ERR_NO_NEXTHOP,
-         (errorparameter_t)0,
-         (errorparameter_t)0
-      );
-      return E_FAIL;
-   }
+    open_addr_t     temp_prefix64btoWrite;
 
-   if (ipv6_outer_header->src.type != ADDR_NONE){
-      packetfunctions_tossHeader(msg,ipv6_outer_header->header_length);
-   }
+    // retrieve the next hop from the routing table
+    if (
+        msg->is_cjoin_response ||
+        msg->creator==COMPONENT_CJOIN
+    ){
+        if (neighbors_isStableNeighbor(&(msg->l3_destinationAdd))) {
+            // IP destination is 1-hop neighbor, send directly
+            packetfunctions_ip128bToMac64b(&(msg->l3_destinationAdd),&temp_prefix64btoWrite,&(msg->l2_nextORpreviousHop));
+        }
+    } else {
+        forwarding_getNextHop(&(msg->l3_destinationAdd),&(msg->l2_nextORpreviousHop));
+    }
 
-   // send to next lower layer
-   return iphc_sendFromForwarding(
-      msg,
-      ipv6_outer_header,
-      ipv6_inner_header,
-      rpl_option,
+    if (msg->l2_nextORpreviousHop.type==ADDR_NONE) {
+        openserial_printError(
+            COMPONENT_FORWARDING,
+            ERR_NO_NEXTHOP,
+            (errorparameter_t)msg->l3_destinationAdd.addr_128b[6],
+            (errorparameter_t)msg->l3_destinationAdd.addr_128b[7]
+        );
+        return E_FAIL;
+    }
+
+    if (ipv6_outer_header->src.type != ADDR_NONE){
+        packetfunctions_tossHeader(msg,ipv6_outer_header->header_length);
+    }
+
+    // send to next lower layer
+    return iphc_sendFromForwarding(
+        msg,
+        ipv6_outer_header,
+        ipv6_inner_header,
+        rpl_option,
 #ifdef DEADLINE_OPTION_ENABLED
-      deadline_option,
+        deadline_option,
 #endif
-      flow_label,
-      NULL,  // no rh3
-      0,
-      fw_SendOrfw_Rcv
-   );
+        flow_label,
+        NULL,  // no rh3
+        0,
+        fw_SendOrfw_Rcv
+    );
 }
 
 /**
@@ -826,6 +835,8 @@ owerror_t forwarding_send_internal_SourceRouting(
     } else {
         RH3_length = 0;
     }
+
+    msg->l3_useSourceRouting = TRUE;
 
     // send to next lower layer
     return iphc_sendFromForwarding(

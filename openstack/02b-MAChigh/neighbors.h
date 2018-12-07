@@ -13,10 +13,10 @@
 //=========================== define ==========================================
 
 #define MAXPREFERENCE             2
-#define BADNEIGHBORMAXRSSI        -80 //dBm
-#define GOODNEIGHBORMINRSSI       -90 //dBm
+#define BADNEIGHBORMAXRSSI        -70 //dBm
+#define GOODNEIGHBORMINRSSI       -80 //dBm
 #define SWITCHSTABILITYTHRESHOLD  3
-#define DEFAULTLINKCOST           4   // this value has too be no greater than 6, when MAXEB is 4 and MAXRETRIES is 4
+#define DEFAULTLINKCOST           8   // this value has too be no greater than 6, when MAXEB is 4 and MAXRETRIES is 4
 #define MINIMAL_NUM_TX            16
 
 #define MAXDAGRANK                0xffff
@@ -38,12 +38,12 @@ typedef struct {
    int8_t          rssi;
    uint8_t         parentPreference;
    dagrank_t       DAGrank;
-   uint16_t        asn; 
+   uint16_t        asn;
 } netDebugNeigborEntry_t;
 END_PACK
 
 //=========================== module variables ================================
-   
+
 typedef struct {
    neighborRow_t        neighbors[MAXNUMNEIGHBORS];
    dagrank_t            myDAGrank;
@@ -69,6 +69,8 @@ uint8_t       neighbors_getSequenceNumber(open_addr_t* address);
 void          neighbors_setNeighborRank(uint8_t index, dagrank_t rank);
 void          neighbors_setNeighborNoResource(open_addr_t* address);
 void          neighbors_setPreferredParent(uint8_t index, bool isPreferred);
+void          neighbor_removeAutonomousTxRxCellUnicast(open_addr_t* address);
+void          neighbor_removeAllAutonomousTxRxCellUnicast(void);
 // interrogators
 bool          neighbors_isStableNeighbor(open_addr_t* address);
 bool          neighbors_isStableNeighborByIndex(uint8_t index);

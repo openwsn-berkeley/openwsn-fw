@@ -20,6 +20,12 @@ banner += [""]
 banner  = '\n'.join(banner)
 print banner
 
+XOFF           = 0x13
+XON            = 0x11
+XONXOFF_ESCAPE = 0x12
+XONXOFF_MASK   = 0x10
+
+MAX_NUM_PACKET = 256 
 
 def mote_connect(motename=None , serialport= None, baudrate='115200'):
     try:
@@ -64,9 +70,11 @@ else:
 
 #============================ read ============================================
 
-rawFrame        = []
-previousFrame   = 0
-frameCounter    = 0
+rawFrame         = []
+rawFrame_decoded = []
+previousFrame    = 0
+frameCounter     = 0
+xonxoffEscaping  = False
 
 while True:
     
@@ -79,26 +87,36 @@ while True:
     
     if rawFrame[-3:]==[0xff]*3 and len(rawFrame)>=8:
         
-        frameCounter += 1
-        
+        for byte in rawFrame:
+            if byte==XONXOFF_ESCAPE:
+                xonxoffEscaping = True
+            else:
+                if xonxoffEscaping==True:
+                    rawFrame_decoded += [byte^XONXOFF_MASK]
+                    xonxoffEscaping=False
+                elif byte!=XON and byte!=XOFF:
+                    rawFrame_decoded += [byte]
         (rxpk_len,rxpk_num,rxpk_rssi,rxpk_lqi,rxpk_crc) = \
-            struct.unpack('>BBbBB', ''.join([chr(b) for b in rawFrame[-8:-3]]))
-        print 'len={0:<3} num={1:<3} rssi={2:<4} lqi={3:<3} crc={4}'.format(
-            rxpk_len,
-            rxpk_num,
-            rxpk_rssi,
-            rxpk_lqi,
-            rxpk_crc
-        )
+            struct.unpack('>BBbBB', ''.join([chr(b) for b in rawFrame_decoded[-8:-3]]))
+            
+        # debug info
+        # print 'len={0:<3} num={1:<3} rssi={2:<4} lqi={3:<3} crc={4}'.format(
+            # rxpk_len,
+            # rxpk_num,
+            # rxpk_rssi,
+            # rxpk_lqi,
+            # rxpk_crc
+        # )
         
         if previousFrame>rxpk_num:
-            print "frameCounter={0:<3}".format(frameCounter)
-            previousFrame = 0
+            print "frameCounter={0:<3}, PDR={1}%".format(frameCounter, frameCounter*100/MAX_NUM_PACKET)
             frameCounter  = 0
-        else:
-            previousFrame = rxpk_num
+
+        frameCounter += 1
+        previousFrame = rxpk_num
         
         if rxpk_len>127:
             print "ERROR: frame too long.\a"
         
-        rawFrame = []
+        rawFrame         = []
+        rawFrame_decoded = []

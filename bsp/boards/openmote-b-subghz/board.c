@@ -43,7 +43,10 @@ bool board_timer_expired(uint32_t future);
 static void clock_init(void);
 static void gpio_init(void);
 static void button_init(void);
+
 static void antenna_init(void);
+void antenna_cc2538(void);
+void antenna_at86rf215(void);
 
 static void SysCtrlDeepSleepSetting(void);
 static void SysCtrlSleepSetting(void);
@@ -79,24 +82,28 @@ void board_init(void) {
 }
 
 void antenna_init(void) {
-  /* Configure GPIO as output */
-  GPIOPinTypeGPIOOutput(BSP_ANTENNA_BASE, BSP_ANTENNA_CC2538_24GHZ);
-  GPIOPinTypeGPIOOutput(BSP_ANTENNA_BASE, BSP_ANTENNA_AT215_24GHZ);
+    /* Configure GPIO as output */
+    GPIOPinTypeGPIOOutput(BSP_ANTENNA_BASE, BSP_ANTENNA_CC2538_24GHZ);
+    GPIOPinTypeGPIOOutput(BSP_ANTENNA_BASE, BSP_ANTENNA_AT215_24GHZ);
 
-  /* Use CC2538 antenna by default */
-  GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_CC2538_24GHZ, 0);
-  GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_AT215_24GHZ, BSP_ANTENNA_AT215_24GHZ);
+#ifdef ATMEL_24GHZ
+    // atmel is using 2.4ghz, connect antenna to atrf215
+    antenna_at86rf215();
+#else
+    // atmel is not using 2.4ghz, connect antenna to cc2538
+    antenna_cc2538();
+#endif
 }
 
 void antenna_cc2538(void) {
   GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_CC2538_24GHZ, 0);
-  GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_AT215_24GHZ, BSP_ANTENNA_AT215_24GHZ);  
+  GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_AT215_24GHZ, BSP_ANTENNA_AT215_24GHZ);
 }
 
 void antenna_at86rf215(void) {
   GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_AT215_24GHZ, 0);
   GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_CC2538_24GHZ, BSP_ANTENNA_CC2538_24GHZ);
-}  
+}
 
 /**
  * Puts the board to sleep

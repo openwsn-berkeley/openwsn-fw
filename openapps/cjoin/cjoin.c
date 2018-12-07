@@ -65,8 +65,7 @@ void cjoin_init(void) {
    cjoin_vars.desc.path1len                        = 0;
    cjoin_vars.desc.path1val                        = NULL;
    cjoin_vars.desc.componentID                     = COMPONENT_CJOIN;
-//   cjoin_vars.desc.securityContext                 = &cjoin_vars.context;
-   cjoin_vars.desc.securityContext                 = NULL;
+   cjoin_vars.desc.securityContext                 = &cjoin_vars.context;
    cjoin_vars.desc.discoverable                    = TRUE;
    cjoin_vars.desc.callbackRx                      = &cjoin_receive;
    cjoin_vars.desc.callbackSendDone                = &cjoin_sendDone;
@@ -83,17 +82,15 @@ void cjoin_init(void) {
 }
 
 void cjoin_init_security_context(void) {
-   uint8_t senderID[1];     // 1 dummy byte
-   uint8_t recipientID[3];  // 3 byte fixed value
-   uint8_t id_context[8];
+   uint8_t senderID[9];
+   uint8_t recipientID[9];
    uint8_t* joinKey;
 
-   eui64_get(id_context);
-   senderID[0] = 0x00;      // construct sender ID according to the minimal-security-06 draft
-   // construct recipient ID according to the minimal-security-06 draft
-   recipientID[0] = 0x4a; // "J"
-   recipientID[1] = 0x52; // "R"
-   recipientID[2] = 0x43; // "C"
+   eui64_get(senderID);
+   senderID[8] = 0x00;      // EUI-64 || 0x00 [minimal-security-03]
+
+   eui64_get(recipientID);
+   recipientID[8] = 0x01;   // EUI-64 || 0x01 [minimal-security-03]
 
    idmanager_getJoinKey(&joinKey);
 
@@ -150,6 +147,7 @@ owerror_t cjoin_receive(OpenQueueEntry_t* msg,
             // set the L2 keys as per the parsed value
             IEEE802154_security_setBeaconKey(configuration.keyset.key[0].key_index, configuration.keyset.key[0].key_value);
             IEEE802154_security_setDataKey(configuration.keyset.key[0].key_index, configuration.keyset.key[0].key_value);
+            neighbor_removeAutonomousTxRxCellUnicast(&(msg->l2_nextORpreviousHop));
             cjoin_setIsJoined(TRUE); // declare join is over
             return E_SUCCESS;
     } else {
@@ -209,7 +207,7 @@ void cjoin_task_cb(void) {
 
     // init the security context only here in order to use the latest joinKey
     // that may be set over the serial
-//    cjoin_init_security_context();
+    cjoin_init_security_context();
 
     cjoin_sendJoinRequest(joinProxy);
 
@@ -249,6 +247,7 @@ owerror_t cjoin_sendJoinRequest(open_addr_t* joinProxy) {
       );
       return E_FAIL;
    }
+
    // take ownership over that packet
    pkt->creator                   = COMPONENT_CJOIN;
    pkt->owner                     = COMPONENT_CJOIN;
@@ -265,13 +264,7 @@ owerror_t cjoin_sendJoinRequest(open_addr_t* joinProxy) {
 
    // object security option
    // length and value are set by the CoAP library
-//   options[2].type = COAP_OPTION_NUM_OBJECTSECURITY;
-
-   // FIXME content format is needed for testing with F-Interop
-   cjoin_vars.medType = COAP_MEDTYPE_APPCBOR;
-   options[2].type = COAP_OPTION_NUM_CONTENTFORMAT;
-   options[2].length = 1;
-   options[2].pValue = &cjoin_vars.medType;
+   options[2].type = COAP_OPTION_NUM_OBJECTSECURITY;
 
    // ProxyScheme set to "coap"
    options[3].type = COAP_OPTION_NUM_PROXYSCHEME;
@@ -292,7 +285,6 @@ owerror_t cjoin_sendJoinRequest(open_addr_t* joinProxy) {
    payload_len = cojp_cbor_encode_join_request_object(tmp, &join_request);
    packetfunctions_reserveHeaderSize(pkt, payload_len);
    memcpy(pkt->payload, tmp, payload_len);
-
    // send
    outcome = opencoap_send(
       pkt,
@@ -310,7 +302,7 @@ owerror_t cjoin_sendJoinRequest(open_addr_t* joinProxy) {
       return E_FAIL;
    }
 
-  return E_SUCCESS;
+   return E_SUCCESS;
 }
 
 bool cjoin_getIsJoined(void) {

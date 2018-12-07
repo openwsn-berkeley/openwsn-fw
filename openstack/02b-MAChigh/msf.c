@@ -9,6 +9,7 @@
 #include "idmanager.h"
 #include "icmpv6rpl.h"
 #include "IEEE802154E.h"
+#include "openqueue.h"
 
 //=========================== definition =====================================
 
@@ -37,6 +38,9 @@ void msf_housekeeping(void);
 //=========================== public ==========================================
 
 void msf_init(void) {
+
+    open_addr_t     temp_neighbor;
+
     memset(&msf_vars,0,sizeof(msf_vars_t));
     msf_vars.numAppPacketsPerSlotFrame = 0;
     sixtop_setSFcallback(
@@ -45,6 +49,17 @@ void msf_init(void) {
         (sixtop_sf_translatemetadata)msf_translateMetadata,
         (sixtop_sf_handle_callback)msf_handleRCError
     );
+
+    memset(&temp_neighbor,0,sizeof(temp_neighbor));
+    temp_neighbor.type             = ADDR_ANYCAST;
+    schedule_addActiveSlot(
+        msf_hashFunction_getSlotoffset(256*idmanager_getMyID(ADDR_64B)->addr_64b[6]+idmanager_getMyID(ADDR_64B)->addr_64b[7]),     // slot offset
+        CELLTYPE_TXRX,                        // type of slot
+        FALSE,                                // shared?
+        msf_hashFunction_getChanneloffset(256*idmanager_getMyID(ADDR_64B)->addr_64b[6]+idmanager_getMyID(ADDR_64B)->addr_64b[7]),  // channel offset
+        &temp_neighbor                        // neighbor
+    );
+
     msf_vars.housekeepingTimerId = opentimers_create(TIMER_GENERAL_PURPOSE);
     msf_vars.housekeepingPeriod  = HOUSEKEEPING_PERIOD;
     opentimers_scheduleIn(
@@ -89,7 +104,7 @@ void    msf_updateCellsUsed(open_addr_t* neighbor){
 
 void    msf_trigger6pClear(open_addr_t* neighbor){
 
-    if (schedule_hasDedicatedCellToNeighbor(neighbor)>0){
+    if (schedule_hasManagedTxCellToNeighbor(neighbor)){
         sixtop_request(
             IANA_6TOP_CMD_CLEAR,                // code
             neighbor,                           // neighbor
@@ -170,6 +185,8 @@ void msf_timer_housekeeping_cb(opentimers_id_t id){
     newDuration = openrandom_getRandomizePeriod(msf_vars.housekeepingPeriod, msf_vars.housekeepingPeriod),
     opentimers_updateDuration(msf_vars.housekeepingTimerId, newDuration);
 }
+
+//=========================== tasks ============================================
 
 void msf_timer_housekeeping_task(void){
 
@@ -257,8 +274,8 @@ void msf_trigger6pDelete(void){
         return;
     }
 
-    if (schedule_getNumberOfDedicatedCells(&neighbor)<=1){
-        // at least one dedicated cell presents
+    if (schedule_getNumberOfManagedTxCells(&neighbor)<=1){
+        // at least one managed Tx cell presents
         return;
     }
 
@@ -356,7 +373,8 @@ void msf_housekeeping(void){
     if (foundNeighbor==FALSE) {
         return;
     }
-    if (schedule_getNumberOfDedicatedCells(&parentNeighbor)==0){
+
+    if (schedule_getNumberOfManagedTxCells(&parentNeighbor)==0){
         msf_trigger6pAdd();
         return;
     }
@@ -387,4 +405,15 @@ void msf_housekeeping(void){
             0                         // list command maximum celllist (not used)
         );
     }
+}
+
+uint16_t msf_hashFunction_getSlotoffset(uint16_t moteId){
+
+    return SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS + \
+            (moteId%(SLOTFRAME_LENGTH-SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS));
+}
+
+uint8_t msf_hashFunction_getChanneloffset(uint16_t moteId){
+
+    return moteId%NUM_CHANNELS;
 }

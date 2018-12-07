@@ -614,9 +614,6 @@ port_INLINE void activity_synchronize_newSlot(void) {
 
     // increment dummy ASN to trigger debugprint every now and then
     ieee154e_vars.asn.bytes0and1++;
-    if ( (ieee154e_vars.asn.bytes0and1&0x000f) ==0x0000) {
-        scheduler_push_task(task_openserial_debugPrint,TASKPRIO_OPENSERIAL);
-    }
 
     opentimers_scheduleAbsolute(
         ieee154e_vars.serialInhibitTimerId,     // timerId
@@ -936,9 +933,6 @@ port_INLINE void activity_ti1ORri1(void) {
     } else {
         // this is NOT the next active slot, abort
 
-        // trigger debug prints
-        scheduler_push_task(task_openserial_debugPrint,TASKPRIO_OPENSERIAL);
-
         // abort the slot
         endSlot();
 
@@ -958,39 +952,36 @@ port_INLINE void activity_ti1ORri1(void) {
             // check whether we can send
             if (schedule_getOkToSend()) {
                 if (packetfunctions_isBroadcastMulticast(&neighbor)==FALSE){
-                    // this is a dedicated cell
-                    ieee154e_vars.dataToSend = openqueue_macGetDedicatedPacket(&neighbor);
-                    // update numcellpassed and numcellused on dedicated cell
-                    if (ieee154e_vars.dataToSend!=NULL) {
-                        msf_updateCellsUsed(&neighbor);
-                    }
-                    msf_updateCellsPassed(&neighbor);
-                } else {
-                    // this is minimal cell
-                    ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor);
-                    if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX)) {
-                        couldSendEB=TRUE;
-                        // look for an EB packet in the queue
-                        ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
+
+                    if (schedule_getShared()){
+                        // this is an autonomous TxRx cell (unicast)
+                        ieee154e_vars.dataToSend = openqueue_macGet6PandJoinPacket(&neighbor);
                     } else {
-                        // there is a packet to send
-                        if (
-                            schedule_hasDedicatedCellToNeighbor(&ieee154e_vars.dataToSend->l2_nextORpreviousHop)
-                        ) {
-                            // allow sixtop response with SEQNUM_ERR return code send on minimal cell
-                            if (
-                                ieee154e_vars.dataToSend->creator!=COMPONENT_SIXTOP_RES ||
-                                ieee154e_vars.dataToSend->l2_sixtop_returnCode != IANA_6TOP_RC_SEQNUM_ERR
-                            ) {
-                                // leave the packet to be sent on dedicated cell and pick up a broadcast packet.
-                                ieee154e_vars.dataToSend = openqueue_macGetDIOPacket();
-                                if (ieee154e_vars.dataToSend==NULL){
-                                    couldSendEB=TRUE;
-                                    // look for an EB packet in the queue
-                                    ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
-                                }
-                            }
+                        // this is a managed Tx cell
+                        ieee154e_vars.dataToSend = openqueue_macGetNonJoinIPv6Packet(&neighbor);
+
+                        if (ieee154e_vars.dataToSend == NULL){
+                            ieee154e_vars.dataToSend = openqueue_macGetKaPacket(&neighbor);
                         }
+
+                        // update numcellpassed and numcellused on managed Tx cell
+                        if (ieee154e_vars.dataToSend!=NULL) {
+                            msf_updateCellsUsed(&neighbor);
+                        }
+                        msf_updateCellsPassed(&neighbor);
+                    }
+                } else {
+                    if (schedule_getShared()) {
+                        // this is minimal cell
+                        ieee154e_vars.dataToSend = openqueue_macGetDIOPacket();
+                        if (ieee154e_vars.dataToSend==NULL){
+                            couldSendEB=TRUE;
+                            // look for an EB packet in the queue
+                            ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
+                        }
+                    } else {
+                        // this is autonomous TXRX cell (anycast)
+                        ieee154e_vars.dataToSend = openqueue_macGetDownStreamPacket(&neighbor);
                     }
                 }
             }
@@ -1926,7 +1917,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
         } else {
             // synchronize to the received packet if I'm not a DAGroot and this is my preferred parent
             // or in case I'm in the middle of the join process when parent is not yet selected
-            // or in case I don't have a dedicated cell to my parent yet
+            // or in case I don't have an autonomous Tx cell cell to my parent yet
             if (
                 idmanager_getIsDAGroot()                                    == FALSE &&
                 (
@@ -1935,7 +1926,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
                     icmpv6rpl_getPreferredParentEui64(&addressToWrite)      == FALSE ||
                     (
                         icmpv6rpl_getPreferredParentEui64(&addressToWrite)           &&
-                        schedule_hasDedicatedCellToNeighbor(&addressToWrite)== FALSE
+                        schedule_hasManagedTxCellToNeighbor(&addressToWrite)== FALSE
                     )
                 )
             ) {
@@ -2623,11 +2614,15 @@ void synchronizePacket(PORT_TIMER_WIDTH timeReceived) {
 
     // log a large timeCorrection
     if (
-        ieee154e_vars.isSync==TRUE
+        ieee154e_vars.isSync==TRUE &&
+        (
+            timeCorrection<-LIMITLARGETIMECORRECTION ||
+            timeCorrection> LIMITLARGETIMECORRECTION
+        )
     ) {
         openserial_printError(COMPONENT_IEEE802154E,ERR_LARGE_TIMECORRECTION,
-                            (errorparameter_t)timeCorrection,
-                            (errorparameter_t)0);
+                              (errorparameter_t)timeCorrection,
+                              (errorparameter_t)0);
     }
 
     // update the stats
@@ -2667,11 +2662,15 @@ void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
 #endif
     // log a large timeCorrection
     if (
-        ieee154e_vars.isSync==TRUE
+        ieee154e_vars.isSync==TRUE &&
+        (
+            timeCorrection<-LIMITLARGETIMECORRECTION ||
+            timeCorrection> LIMITLARGETIMECORRECTION
+        )
     ) {
         openserial_printError(COMPONENT_IEEE802154E,ERR_LARGE_TIMECORRECTION,
-                            (errorparameter_t)timeCorrection,
-                            (errorparameter_t)1);
+                              (errorparameter_t)timeCorrection,
+                              (errorparameter_t)1);
     }
 
     // update the stats

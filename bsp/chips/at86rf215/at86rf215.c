@@ -14,11 +14,24 @@
 #include "radio.h"
 
 
-void at86rf215_spiStrobe(uint8_t strobe) {
+void at86rf215_spiStrobe(uint8_t strobe, uint8_t type) {
     uint8_t  spi_tx_buffer[3];
+    uint16_t register_cmd;
 
-    spi_tx_buffer[0]     = ((FLAG_WRITE) | (uint8_t)(RG_RF09_CMD/256));
-    spi_tx_buffer[1]     = (uint8_t)(RG_RF09_CMD%256);
+    switch(type){
+    case FREQ_SUGHZ:
+        register_cmd = RG_RF09_CMD;
+        break;
+    case FREQ_24GHZ:
+        register_cmd = RG_RF24_CMD;
+        break;
+    default:
+        return;
+    }
+
+
+    spi_tx_buffer[0]     = ((FLAG_WRITE) | (uint8_t)(register_cmd/256));
+    spi_tx_buffer[1]     = (uint8_t)(register_cmd%256);
     spi_tx_buffer[2]     = strobe;
 
     spi_txrx(
@@ -73,12 +86,27 @@ uint8_t at86rf215_spiReadReg(uint16_t regAddr16) {
     return spi_rx_buffer[2];
 }
 
-void at86rf215_spiWriteFifo(uint8_t* bufToWrite, uint16_t len) {
+void at86rf215_spiWriteFifo(uint8_t* bufToWrite, uint16_t len, uint8_t type) {
     uint8_t              spi_tx_buffer[4];
+    uint16_t             register_bbc_txfll;
+    uint16_t             register_bbc_fbtxs;
+
+    switch(type){
+    case FREQ_SUGHZ:
+        register_bbc_txfll = RG_BBC0_TXFLL;
+        register_bbc_fbtxs = RG_BBC0_FBTXS;
+        break;
+    case FREQ_24GHZ:
+        register_bbc_txfll = RG_BBC1_TXFLL;
+        register_bbc_fbtxs = RG_BBC1_FBTXS;
+        break;
+    default:
+        return;
+    }
 
     // step 1. send packet length.
-    spi_tx_buffer[0]     = (FLAG_WRITE | (uint8_t)(RG_BBC0_TXFLL >> 8));
-    spi_tx_buffer[1]     = (uint8_t)(RG_BBC0_TXFLL & 0xFF);
+    spi_tx_buffer[0]     = (FLAG_WRITE | (uint8_t)(register_bbc_txfll >> 8));
+    spi_tx_buffer[1]     = (uint8_t)(register_bbc_txfll & 0xFF);
     spi_tx_buffer[2]     = (uint8_t)(len & 0xFF);       // low byte of packet-length -> TXFLL
     spi_tx_buffer[3]     = (uint8_t)(len >> 8) & 0x07;  // high byte of packet-length -> TXFLH
 
@@ -92,8 +120,8 @@ void at86rf215_spiWriteFifo(uint8_t* bufToWrite, uint16_t len) {
         SPI_LAST                    // isLast
     );
 
-    spi_tx_buffer[0]     = (FLAG_WRITE | (uint8_t)(RG_BBC0_FBTXS >> 8));
-    spi_tx_buffer[1]     = (uint8_t)(RG_BBC0_FBTXS& 0xFF);
+    spi_tx_buffer[0]     = (FLAG_WRITE | (uint8_t)(register_bbc_fbtxs >> 8));
+    spi_tx_buffer[1]     = (uint8_t)(register_bbc_fbtxs& 0xFF);
 
     // step 2. send the address to the Tx buffer.
     spi_txrx(
@@ -119,15 +147,30 @@ void at86rf215_spiWriteFifo(uint8_t* bufToWrite, uint16_t len) {
 
 }
 
-void at86rf215_spiReadRxFifo( uint8_t* pBufRead, uint16_t* lenRead) {
+void at86rf215_spiReadRxFifo( uint8_t* pBufRead, uint16_t* lenRead, uint8_t type) {
 
     uint8_t spi_tx_buffer[4];
     uint8_t spi_rx_buffer[4];
     uint16_t length;
+    uint16_t             register_bbc_rxfll;
+    uint16_t             register_bbc_fbrxs;
+
+    switch(type){
+    case FREQ_SUGHZ:
+        register_bbc_rxfll = RG_BBC0_RXFLL;
+        register_bbc_fbrxs = BASE_ADDR_BBC0_FB0;
+        break;
+    case FREQ_24GHZ:
+        register_bbc_rxfll = RG_BBC1_RXFLL;
+        register_bbc_fbrxs = BASE_ADDR_BBC1_FB1;
+        break;
+    default:
+        return;
+    }
 
     // step 1 - read packet length from RG_BBC0_RXFLL/_RXFLH:
-    spi_tx_buffer[0] = (FLAG_READ | (uint8_t)(RG_BBC0_RXFLL >> 8));
-    spi_tx_buffer[1] = (uint8_t)(RG_BBC0_RXFLL & 0xFF);
+    spi_tx_buffer[0] = (FLAG_READ | (uint8_t)(register_bbc_rxfll >> 8));
+    spi_tx_buffer[1] = (uint8_t)(register_bbc_rxfll & 0xFF);
     spi_tx_buffer[2] = 0x00;
     spi_tx_buffer[3] = 0x00;
 
@@ -144,8 +187,8 @@ void at86rf215_spiReadRxFifo( uint8_t* pBufRead, uint16_t* lenRead) {
     length = (uint16_t)spi_rx_buffer[2]             // RXFLL
                     | ((uint16_t)(spi_rx_buffer[3] & 0x07) << 8);  // RXFLH
 
-    spi_tx_buffer[0]    = (FLAG_READ | (uint8_t)(BASE_ADDR_BBC0_FB0/256));
-    spi_tx_buffer[1]    = (uint8_t)(BASE_ADDR_BBC0_FB0%256);
+    spi_tx_buffer[0]    = (FLAG_READ | (uint8_t)(register_bbc_fbrxs/256));
+    spi_tx_buffer[1]    = (uint8_t)(register_bbc_fbrxs%256);
     //read FIFO
     spi_txrx(
         spi_tx_buffer,              // bufTx
@@ -169,12 +212,24 @@ void at86rf215_spiReadRxFifo( uint8_t* pBufRead, uint16_t* lenRead) {
     *(lenRead) = length;
 }
 
-uint8_t at86rf215_status (void){
+uint8_t at86rf215_status (uint8_t type){
     uint8_t spi_tx_buffer[3];
     uint8_t spi_rx_buffer[3];
+    uint16_t register_state;
 
-    spi_tx_buffer[0] = (FLAG_READ | (uint8_t)(RG_RF09_STATE/256));
-    spi_tx_buffer[1] = (uint8_t)(RG_RF09_STATE%256);
+    switch(type){
+    case FREQ_SUGHZ:
+        register_state = RG_RF09_STATE;
+        break;
+    case FREQ_24GHZ:
+        register_state = RG_RF24_STATE;
+        break;
+    default:
+        return 0;
+    }
+
+    spi_tx_buffer[0] = (FLAG_READ | (uint8_t)(register_state/256));
+    spi_tx_buffer[1] = (uint8_t)(register_state%256);
     spi_tx_buffer[2] = 0x00;
 
     spi_txrx(
@@ -190,14 +245,26 @@ uint8_t at86rf215_status (void){
     return spi_rx_buffer[2];
 }
 
-void at86rf215_read_isr (uint8_t* rf09_isr){
+void at86rf215_read_isr (uint8_t* rf09_isr, uint8_t type){
     uint8_t spi_tx[6];
     uint8_t spi_rx[6];
+    uint16_t register_irqs;
+
+    switch(type){
+    case FREQ_SUGHZ:
+        register_irqs = RG_RF09_IRQS;
+        break;
+    case FREQ_24GHZ:
+        register_irqs = RG_RF24_IRQS;
+        break;
+    default:
+        return;
+    }
 
     memset(&spi_tx[0],0,sizeof(spi_tx));
     memset(&spi_rx[0],0,sizeof(spi_rx));
-    spi_tx[0] = (FLAG_READ | (uint8_t)(RG_RF09_IRQS >> 8));
-    spi_tx[1] = (uint8_t)(RG_RF09_IRQS & 0xFF);
+    spi_tx[0] = (FLAG_READ | (uint8_t)(register_irqs >> 8));
+    spi_tx[1] = (uint8_t)(register_irqs & 0xFF);
 
     spi_txrx(
         spi_tx,                     // bufTx

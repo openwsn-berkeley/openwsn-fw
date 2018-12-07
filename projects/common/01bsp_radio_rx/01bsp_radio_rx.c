@@ -73,7 +73,7 @@ len=17  num=84  rssi=-81  lqi=108 crc=1
 //=========================== defines =========================================
 
 #define LENGTH_PACKET        125+LENGTH_CRC // maximum length is 127 bytes
-#define CHANNEL              16             // 24ghz: 11 = 2.405GHz, subghz: 0 = 863.125 in  FSK operating mode #1
+#define CHANNEL              26             // 24ghz: 11 = 2.405GHz, subghz: 0 = 863.125 in  FSK operating mode #1
 #define LENGTH_SERIAL_FRAME  8              // length of the serial frame
 
 //=========================== variables =======================================
@@ -112,7 +112,7 @@ void cb_startFrame(PORT_TIMER_WIDTH timestamp);
 void cb_endFrame(PORT_TIMER_WIDTH timestamp);
 // uart
 void cb_uartTxDone(void);
-void cb_uartRxCb(void);
+uint8_t cb_uartRxCb(void);
 
 //=========================== main ============================================
 
@@ -258,8 +258,9 @@ void cb_uartTxDone(void) {
     }
 }
 
-void cb_uartRxCb(void) {
+uint8_t cb_uartRxCb(void) {
 
     //  uint8_t byte;
     uart_clearRxInterrupts();
+    return 1;
 }

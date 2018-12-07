@@ -15,6 +15,7 @@
 #include "IEEE802154_security.h"
 #include "idmanager.h"
 #include "schedule.h"
+#include "msf.h"
 
 //=========================== define ==========================================
 
@@ -362,13 +363,15 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
                 icmpv6rpl_getPreferredParentEui64(&addressToWrite) == FALSE      ||
                 (
                     icmpv6rpl_getPreferredParentEui64(&addressToWrite)           &&
-                    schedule_hasDedicatedCellToNeighbor(&addressToWrite)== FALSE
+                    schedule_hasAutonomousTxRxCellUnicast(&addressToWrite)== FALSE
                 )
             )
         )
     ){
         return E_FAIL;
     }
+
+
 
     // set metadata
     msg->owner        = COMPONENT_SIXTOP;
@@ -710,26 +713,6 @@ port_INLINE void sixtop_sendEB(void) {
         return;
     }
 
-    if (
-        idmanager_getIsDAGroot() == FALSE &&
-        (
-            icmpv6rpl_getPreferredParentEui64(&addressToWrite) == FALSE ||
-            (
-                icmpv6rpl_getPreferredParentEui64(&addressToWrite) &&
-                schedule_hasDedicatedCellToNeighbor(&addressToWrite) == FALSE
-            )
-        )
-    ){
-        // delete packets genereted by this module (EB and KA) from openqueue
-        openqueue_removeAllCreatedBy(COMPONENT_SIXTOP);
-
-        // I'm not busy sending an EB or KA
-        sixtop_vars.busySendingEB = FALSE;
-        sixtop_vars.busySendingKA = FALSE;
-
-        return;
-    }
-
     if (sixtop_vars.busySendingEB==TRUE) {
         // don't continue if I'm still sending a previous EB
         return;
@@ -844,7 +827,7 @@ port_INLINE void sixtop_sendKA(void) {
         return;
     }
 
-    if (schedule_hasDedicatedCellToNeighbor(kaNeighAddr) == FALSE){
+    if (schedule_hasManagedTxCellToNeighbor(kaNeighAddr) == FALSE){
         // delete packets genereted by this module (EB and KA) from openqueue
         openqueue_removeAllCreatedBy(COMPONENT_SIXTOP);
 
@@ -900,7 +883,7 @@ void timer_sixtop_six2six_timeout_fired(void) {
 
     if (sixtop_vars.six2six_state == SIX_STATE_WAIT_CLEARRESPONSE){
         // no response for the 6p clear, just clear locally
-        schedule_removeAllCells(
+        schedule_removeAllCellsToNeighbor(
             sixtop_vars.cb_sf_getMetadata(),
             &sixtop_vars.neighborToClearCells
         );
@@ -997,7 +980,7 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
                 }
 
                 if ( msg->l2_sixtop_command == IANA_6TOP_CMD_CLEAR){
-                    schedule_removeAllCells(
+                    schedule_removeAllCellsToNeighbor(
                         msg->l2_sixtop_frameID,
                         &(msg->l2_nextORpreviousHop)
                     );
@@ -1557,7 +1540,7 @@ void sixtop_six2six_notifyReceive(
                 );
                 break;
             case SIX_STATE_WAIT_CLEARRESPONSE:
-                schedule_removeAllCells(
+                schedule_removeAllCellsToNeighbor(
                     sixtop_vars.cb_sf_getMetadata(),
                     &(pkt->l2_nextORpreviousHop)
                 );
