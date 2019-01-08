@@ -343,6 +343,12 @@
                     <state>$PROJ_DIR$\..\..\..\drivers\common\</state>
                     <state>$PROJ_DIR$\..\..\..\inc\</state>
                     <state>$PROJ_DIR$\..\..\..\kernel\</state>
+                    <state>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\</state>
+                    <state>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\</state>
+                    <state>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\</state>
+                    <state>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\</state>
+                    <state>$PROJ_DIR$\..\..\..\openstack\04-TRAN\</state>
+                    <state>$PROJ_DIR$\..\..\..\openstack\cross-layers\</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\headers\</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\</state>
@@ -700,7 +706,7 @@
                 </option>
                 <option>
                     <name>IlinkOutputFile</name>
-                    <state>02drv_opentimers.out</state>
+                    <state>02drv_openserial.out</state>
                 </option>
                 <option>
                     <name>IlinkDebugInfoEnable</name>
@@ -2415,15 +2421,9 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\drivers\common\openserial.c</name>
-                <excluded>
-                    <configuration>Debug</configuration>
-                </excluded>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\drivers\common\openserial.h</name>
-                <excluded>
-                    <configuration>Debug</configuration>
-                </excluded>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.c</name>
@@ -2440,25 +2440,13 @@
         </file>
     </group>
     <group>
-        <name>kernel</name>
-        <group>
-            <name>openos</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\kernel\openos\scheduler.c</name>
-            </file>
-        </group>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\kernel\scheduler.h</name>
-        </file>
-    </group>
-    <group>
         <name>projects</name>
         <group>
             <name>common</name>
             <group>
-                <name>02drv_opentimers</name>
+                <name>02drv_openserial</name>
                 <file>
-                    <name>$PROJ_DIR$\..\..\common\02drv_opentimers\02drv_opentimers.c</name>
+                    <name>$PROJ_DIR$\..\..\common\02drv_openserial\02drv_openserial.c</name>
                 </file>
             </group>
         </group>

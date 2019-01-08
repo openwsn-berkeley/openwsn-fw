@@ -32,11 +32,11 @@
                 </option>
                 <option>
                     <name>Input description</name>
-                    <state>Automatic choice of formatter.</state>
+                    <state>Automatic choice of formatter, without multibyte support.</state>
                 </option>
                 <option>
                     <name>Output description</name>
-                    <state>Automatic choice of formatter.</state>
+                    <state>Automatic choice of formatter, without multibyte support.</state>
                 </option>
                 <option>
                     <name>GOutputBinary</name>
@@ -340,12 +340,13 @@
                     <state>$PROJ_DIR$\..\..\..\bsp\chips\max44009\</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\chips\sht21\</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\chips\si70x\</state>
+                    <state>$PROJ_DIR$\..\..\..\kernel\</state>
                     <state>$PROJ_DIR$\..\..\..\drivers\common\</state>
                     <state>$PROJ_DIR$\..\..\..\inc\</state>
-                    <state>$PROJ_DIR$\..\..\..\kernel\</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\headers\</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\source\</state>
+                    <state>$PROJ_DIR$\..\..\..\projects\common\03oos_openwsn</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
@@ -595,7 +596,7 @@
                 </option>
                 <option>
                     <name>AOutputFile</name>
-                    <state></state>
+                    <state>$FILE_BNAME$.o</state>
                 </option>
                 <option>
                     <name>ALimitErrorsCheck</name>
@@ -645,7 +646,7 @@
                 </option>
                 <option>
                     <name>OOCOutputFile</name>
-                    <state></state>
+                    <state>01bsp_leds.srec</state>
                 </option>
                 <option>
                     <name>OOCCommandLineProducer</name>
@@ -700,7 +701,7 @@
                 </option>
                 <option>
                     <name>IlinkOutputFile</name>
-                    <state>02drv_opentimers.out</state>
+                    <state>01bsp_leds.out</state>
                 </option>
                 <option>
                     <name>IlinkDebugInfoEnable</name>
@@ -2263,12 +2264,6 @@
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\board_info.h</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\bsp_timer.c</name>
-                    <excluded>
-                        <configuration>Debug</configuration>
-                    </excluded>
-                </file>
-                <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\cc2538rf.h</name>
                 </file>
                 <file>
@@ -2288,12 +2283,6 @@
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\radio.c</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\radiotimer.c</name>
-                    <excluded>
-                        <configuration>Debug</configuration>
-                    </excluded>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b-24ghz\sctimer.c</name>
@@ -2398,57 +2387,9 @@
         </group>
     </group>
     <group>
-        <name>drivers</name>
-        <group>
-            <name>common</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\drivers\common\openhdlc.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\drivers\common\openhdlc.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\drivers\common\opensensors.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\drivers\common\opensensors.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\drivers\common\openserial.c</name>
-                <excluded>
-                    <configuration>Debug</configuration>
-                </excluded>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\drivers\common\openserial.h</name>
-                <excluded>
-                    <configuration>Debug</configuration>
-                </excluded>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.h</name>
-            </file>
-        </group>
-    </group>
-    <group>
         <name>inc</name>
         <file>
             <name>$PROJ_DIR$\..\..\..\inc\opendefs.h</name>
-        </file>
-    </group>
-    <group>
-        <name>kernel</name>
-        <group>
-            <name>openos</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\kernel\openos\scheduler.c</name>
-            </file>
-        </group>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\kernel\scheduler.h</name>
         </file>
     </group>
     <group>
@@ -2456,9 +2397,9 @@
         <group>
             <name>common</name>
             <group>
-                <name>02drv_opentimers</name>
+                <name>0bsp_sctimer</name>
                 <file>
-                    <name>$PROJ_DIR$\..\..\common\02drv_opentimers\02drv_opentimers.c</name>
+                    <name>$PROJ_DIR$\..\..\common\01bsp_leds\01bsp_leds.c</name>
                 </file>
             </group>
         </group>
