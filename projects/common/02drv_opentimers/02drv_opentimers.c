@@ -59,16 +59,16 @@ int mote_main(void) {
     scheduler_init();
     opentimers_init();
 
-    app_vars.timer0_id = opentimers_create(HIGHEST_PRIORITY);
+    app_vars.timer0_id = opentimers_create(TIMER_GENERAL_PURPOSE);
     opentimers_scheduleAbsolute    (
         app_vars.timer0_id,             // id
         TIMER0_PERIOD_MS,               // duration
-        opentimers_getCurrentTimeout(), // reference
+        opentimers_getValue(), // reference
         TIME_MS,                        // time_type
         timer0_cb                       // callback
     );
 
-    app_vars.timer1_id = opentimers_create(DEFAULT_PRIORITY);
+    app_vars.timer1_id = opentimers_create(TIMER_GENERAL_PURPOSE);
     opentimers_scheduleIn    (
         app_vars.timer1_id,    // id
         TIMER1_PERIOD_MS,      // duration
@@ -77,7 +77,7 @@ int mote_main(void) {
         timer1_cb              // callback
     );
 
-    app_vars.timer2_id = opentimers_create(DEFAULT_PRIORITY);
+    app_vars.timer2_id = opentimers_create(TIMER_GENERAL_PURPOSE);
     opentimers_scheduleIn    (
         app_vars.timer2_id,    // id
         TIMER2_PERIOD_MS,      // duration
@@ -98,7 +98,7 @@ void timer0_cb(opentimers_id_t id) {
     opentimers_scheduleAbsolute    (
         app_vars.timer0_id,             // id
         TIMER0_PERIOD_MS,               // duration
-        opentimers_getCurrentTimeout(), // reference
+        opentimers_getValue(), // reference
         TIME_MS,                        // time_type
         timer0_cb                       // callback
     );
