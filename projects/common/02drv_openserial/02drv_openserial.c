@@ -27,9 +27,17 @@ sure all is well.
 
 //=========================== defines =========================================
 
-#define SCTIMER_PERIOD 328           // 328@32kHz ~ 10ms
+#define SCTIMER_PERIOD 328          // 328@32kHz ~ 10ms
+static char stringToPrint[]       = "02drv_openserial\r\n";
 
 //=========================== variables =======================================
+
+typedef void (*task_cbt)(void);
+
+typedef enum {
+   TASKPRIO_NONE                  = 0x00,
+   TASKPRIO_MAX                   = 0x01,
+} task_prio_t;
 
 typedef struct {
    bool        timerFired;
@@ -53,7 +61,7 @@ openserial takes different actions according to the initial character of the str
 int mote_main(void) {
 
    memset(&app_vars,0,sizeof(app_vars_t));
-   
+
    board_init();
    openserial_init();
 
@@ -65,7 +73,7 @@ int mote_main(void) {
       debugpins_task_set();
       if (app_vars.timerFired==TRUE) {
          app_vars.timerFired = FALSE;
-         openserial_triggerDebugprint();
+         openserial_print_str(stringToPrint, sizeof(stringToPrint));
          if (app_vars.fInhibit==TRUE) {
             debugpins_slot_clr();
             openserial_inhibitStart();
@@ -92,6 +100,8 @@ void cb_compare(void) {
 open_addr_t* idmanager_getMyID(uint8_t type) {
    return &app_vars.addr;
 }
+
+void scheduler_push_task(task_cbt task_cb, task_prio_t prio){}
 
 void ieee154e_getAsn(uint8_t* array) {
    array[0]   = 0x00;
