@@ -21,7 +21,7 @@
 #define TYPE_REQ_IDLE        3
 #define TYPE_REQ_TX          4
 #define TYPE_IND_TXDONE      5
-#define TYPE_REQ_RX          6 
+#define TYPE_REQ_RX          6
 #define TYPE_IND_RX          7
 #define TYPE_IND_UP          8
 
@@ -113,11 +113,11 @@ END_PACK
 
 typedef struct {
    opentimers_id_t  sendTimerId;             ///< Each time expires, a packet is sent.
-   
+
    //=== state machine
    uint8_t         status;
    uint16_t        numnotifications;
-   
+
    //=== UART
    // tx
    uint8_t         uartbuftx[UART_BUF_LEN];
@@ -134,7 +134,7 @@ typedef struct {
    uint8_t         uartrxescaping;
    uint16_t        uartrxcrc;
    uint8_t         uartrxbusy;
-   
+
    //=== stats
    uint16_t        uartNumRxCrcOk;
    uint16_t        uartNumRxCrcWrong;
@@ -142,7 +142,7 @@ typedef struct {
    uint16_t        serialNumRxOk;
    uint16_t        serialNumRxWrongLength;
    uint16_t        serialNumRxUnknownRequest;
-   
+
    //=== RF
    // tx
    uint8_t         rfbuftx[RF_BUF_LEN];
@@ -159,7 +159,7 @@ typedef struct {
       bool         rxpk_crc;
    uint8_t         rxpk_txfillbyte;
    uint8_t         rxpk_srcmac[MAC_LEN];
-   uint16_t        rxpk_transctr;   
+   uint16_t        rxpk_transctr;
 } mercator_vars_t;
 
 mercator_vars_t mercator_vars;
@@ -179,7 +179,7 @@ void serial_rx_REQ_RX(void);
 void serial_tx_IND_UP(void);
 
 void isr_openserial_tx_mod(void);
-void isr_openserial_rx_mod(void);
+uint8_t isr_openserial_rx_mod(void);
 
 uint16_t htons(uint16_t val);
 
