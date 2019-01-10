@@ -22,7 +22,7 @@ remainder of the packet contains an incrementing bytes.
 //=========================== defines =========================================
 
 #define LENGTH_PACKET   20+LENGTH_CRC // maximum length is 127 bytes
-#define CHANNEL         26             // 24ghz: 11 = 2.405GHz, subghz: 0 = 863.125 in  FSK operating mode #1
+#define CHANNEL         11            // 24ghz: 11 = 2.405GHz, subghz: 11 = 865.325 in  FSK operating mode #1
 #define TIMER_PERIOD    (32768>>4)    // (32768>>1) = 500ms @ 32kHz
 
 //=========================== variables =======================================

@@ -73,7 +73,7 @@ len=17  num=84  rssi=-81  lqi=108 crc=1
 //=========================== defines =========================================
 
 #define LENGTH_PACKET        125+LENGTH_CRC // maximum length is 127 bytes
-#define CHANNEL              26             // 24ghz: 11 = 2.405GHz, subghz: 0 = 863.125 in  FSK operating mode #1
+#define CHANNEL              11             // 24ghz: 11 = 2.405GHz, subghz: 11 = 865.325 in  FSK operating mode #1
 #define LENGTH_SERIAL_FRAME  8              // length of the serial frame
 
 //=========================== variables =======================================
