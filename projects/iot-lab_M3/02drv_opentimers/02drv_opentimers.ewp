@@ -2023,6 +2023,15 @@
       <name>$PROJ_DIR$\..\..\..\inc\opendefs.h</name>
     </file>
   </group>
+  <group>
+    <name>kernel</name>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\kernel\openos\scheduler.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\kernel\scheduler.h</name>
+    </file>
+  </group>
 </project>
 
 
