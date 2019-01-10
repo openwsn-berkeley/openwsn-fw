@@ -100,17 +100,25 @@ while True:
             struct.unpack('>BBbBB', ''.join([chr(b) for b in rawFrame_decoded[-8:-3]]))
             
         # debug info
-        # print 'len={0:<3} num={1:<3} rssi={2:<4} lqi={3:<3} crc={4}'.format(
-            # rxpk_len,
-            # rxpk_num,
-            # rxpk_rssi,
-            # rxpk_lqi,
-            # rxpk_crc
-        # )
+        output = 'len={0:<3} num={1:<3} rssi={2:<4} lqi={3:<3} crc={4}'.format(
+            rxpk_len,
+            rxpk_num,
+            rxpk_rssi,
+            rxpk_lqi,
+            rxpk_crc
+        )
+        
+        print output
+        
+        with open('log.txt','a') as f:
+            f.write(output+'\n')
         
         if previousFrame>rxpk_num:
-            print "frameCounter={0:<3}, PDR={1}%".format(frameCounter, frameCounter*100/MAX_NUM_PACKET)
+            output = "frameCounter={0:<3}, PDR={1}%".format(frameCounter, frameCounter*100/MAX_NUM_PACKET)
+            print output
             frameCounter  = 0
+            with open('log.txt','a') as f:
+                f.write(output+'\n')
 
         frameCounter += 1
         previousFrame = rxpk_num
