@@ -42,7 +42,7 @@ app_vars_t app_vars;
 
 void cb_compare(void);
 void cb_uartTxDone(void);
-void cb_uartRxCb(void);
+uint8_t cb_uartRxCb(void);
 
 //=========================== main ============================================
 
@@ -101,7 +101,7 @@ void cb_uartTxDone(void) {
    }
 }
 
-void cb_uartRxCb(void) {
+uint8_t cb_uartRxCb(void) {
    uint8_t byte;
    
    // toggle LED
@@ -112,4 +112,6 @@ void cb_uartRxCb(void) {
    
    // echo that byte over serial
    uart_writeByte(byte);
+   
+   return 0;
 }
