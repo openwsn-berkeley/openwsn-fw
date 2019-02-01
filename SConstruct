@@ -140,7 +140,7 @@ command_line_options = {
     'fastsim':                  ['1','0'],
     'simhost':                  ['amd64-linux','x86-linux','amd64-windows','x86-windows'],
     'simhostpy':                [''],               # No reasonable default
-    'network_config':           [''],
+    'network_config':           ['config.json'],
     'panid':                    [''],
     'dagroot':                  ['0','1'],
     'forcetopology':            ['0','1'],
