@@ -38,8 +38,6 @@ enum{
     TYPE_INT = 1
 };
 
-#define DEBUGPRINT_PERIOD 100 // in ms
-
 //=========================== prototypes ======================================
 
 

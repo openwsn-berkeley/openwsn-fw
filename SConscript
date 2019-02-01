@@ -7,6 +7,7 @@ import distutils.sysconfig
 import sconsUtils
 import glob
 from tools import qtcreator as q
+import json
 
 Import('env')
 
@@ -36,6 +37,17 @@ dummyFunc = Builder(
     action = '',
     suffix = '.ihex',
 )
+
+def parse_network_config(config_file):
+    
+    with open(config_file,'r') as f:
+        config_json = json.loads(f.read())
+        for k, v in config_json.items():
+            if k is "admin_configure_name":
+                pass
+            else:
+                env.Append(CPPDEFINES    = {v[0] : v[1]})
+
 if env['panid']:
     env.Append(CPPDEFINES    = {'PANID_DEFINED' : env['panid']})
 if env['dagroot']==1:
@@ -54,6 +66,8 @@ if env['printf']==1:
     env.Append(CPPDEFINES    = 'OPENSERIAL_PRINTF')
 if env['deadline_option']==1:
     env.Append(CPPDEFINES    = 'DEADLINE_OPTION_ENABLED')
+if env['network_config']:
+    parse_network_config(env['network_config'])
 
 if env['toolchain']=='mspgcc':
     

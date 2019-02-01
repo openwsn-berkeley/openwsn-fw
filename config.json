@@ -1,0 +1,25 @@
+{
+    "admin_configure_name"                          :   "config_example",
+    
+    "general_panid"                                 :   ["PANID_DEFINED"                        ,   51966],
+    
+    "driver_openserial_debugprint_period_in_ms"     :   ["DEBUGPRINT_PERIOD"                    ,   100],
+    
+    "cross-layers_openqueue_queue_length"           :   ["QUEUELENGTH"                          ,   10],
+    
+    "maclow_ieee154e_txretries"                     :   ["TXRETRIES"                            ,   3],
+    
+    "machigh_schedule_slotframe_length"             :   ["SLOTFRAME_LENGTH"                     ,   101],
+    "machigh_schedule_num_minimal_cells"            :   ["SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS" ,   1],
+    "machigh_schedule_max_active_slots"             :   ["MAXACTIVESLOTS"                       ,   21],
+    "machigh_schedule_max_backoff_exponent"         :   ["MAXBE"                                ,   2],
+    "machigh_schedule_min_backoff_exponent"         :   ["MINBE"                                ,   5],
+    "machigh_msf_housekeeping_period_in_ms"         :   ["HOUSEKEEPING_PERIOD"                  ,   30000],
+    "machigh_neighbor_default_link_cost"            :   ["DEFAULTLINKCOST"                      ,   8],
+    "machigh_neighbor_bad_neighbor_max_rssi_in_dbm" :   ["BADNEIGHBORMAXRSSI"                   ,   -70],
+    "machigh_neighbor_good_neighbor_min_rssi_in_dbm":   ["GOODNEIGHBORMINRSSI"                  ,   -80],
+    "machigh_neighbor_max_neighbors"                :   ["MAXNUMNEIGHBORS"                      ,   30],
+    
+    "ipv6_dio_period_in_ms"                         :   ["DIO_PERIOD"                           ,   10000],
+    "ipv6_dao_period_in_ms"                         :   ["DAO_PERIOD"                           ,   60000]
+}

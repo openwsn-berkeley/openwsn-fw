@@ -12,9 +12,6 @@
 
 //=========================== define ==========================================
 
-#define DIO_PERIOD             10000   // in miliseconds
-#define DAO_PERIOD             60000   // in miliseconds
-
 // Non-Storing Mode of Operation (1)
 #define MOP_DIO_A                 0<<5
 #define MOP_DIO_B                 0<<4
