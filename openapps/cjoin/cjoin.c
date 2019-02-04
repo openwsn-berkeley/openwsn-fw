@@ -171,6 +171,10 @@ void cjoin_retransmission_cb(opentimers_id_t id) {
 void cjoin_retransmission_task_cb(void) {
     open_addr_t* joinProxy;
 
+    if (ieee154e_isSynch() == FALSE){
+        return;
+    }
+
     joinProxy = neighbors_getJoinProxy();
     if(joinProxy == NULL) {
       openserial_printError(
@@ -189,7 +193,9 @@ void cjoin_task_cb(void) {
     open_addr_t *joinProxy;
 
     // don't run if not synch
-    if (ieee154e_isSynch() == FALSE) return;
+    if (ieee154e_isSynch() == FALSE){
+        return;
+    }
 
     // don't run if DAG root
     if (idmanager_getIsDAGroot() == TRUE) {
