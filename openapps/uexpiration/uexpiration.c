@@ -70,7 +70,7 @@ void uexpiration_receive(OpenQueueEntry_t* request) {
 
     uexpiration_vars.period = pkt_interval;
     // start periodic timer
-   uexpiration_vars.timerId = opentimers_create(TIMER_GENERAL_PURPOSE);
+   uexpiration_vars.timerId = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_UDP);
    opentimers_scheduleIn(
        uexpiration_vars.timerId,
        uexpiration_vars.period,

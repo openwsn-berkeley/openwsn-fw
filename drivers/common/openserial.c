@@ -99,8 +99,8 @@ void openserial_init(void) {
     openserial_vars.outputBufIdxW      = 0;
     openserial_vars.fBusyFlushing      = FALSE;
 
-    openserial_vars.reset_timerId      = opentimers_create(TIMER_GENERAL_PURPOSE);
-    openserial_vars.debugPrint_timerId = opentimers_create(TIMER_GENERAL_PURPOSE);
+    openserial_vars.reset_timerId      = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_OPENSERIAL);
+    openserial_vars.debugPrint_timerId = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_OPENSERIAL);
     opentimers_scheduleIn(
         openserial_vars.debugPrint_timerId,
         DEBUGPRINT_PERIOD,

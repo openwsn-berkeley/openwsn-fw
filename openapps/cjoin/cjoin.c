@@ -74,7 +74,7 @@ void cjoin_init(void) {
 
    opencoap_register(&cjoin_vars.desc);
 
-   cjoin_vars.timerId = opentimers_create(TIMER_GENERAL_PURPOSE);
+   cjoin_vars.timerId = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_COAP);
 
    idmanager_setJoinKey((uint8_t *) masterSecret);
 

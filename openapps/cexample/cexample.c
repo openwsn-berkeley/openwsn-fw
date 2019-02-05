@@ -56,7 +56,7 @@ void cexample_init(void) {
 
 
     opencoap_register(&cexample_vars.desc);
-    cexample_vars.timerId    = opentimers_create(TIMER_GENERAL_PURPOSE);
+    cexample_vars.timerId    = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_COAP);
     opentimers_scheduleIn(
         cexample_vars.timerId,
         CEXAMPLEPERIOD,
