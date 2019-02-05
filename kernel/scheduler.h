@@ -20,17 +20,18 @@ typedef enum {
     // tasks triggered by timers
     TASKPRIO_OPENTIMERS            = 0x03,
     TASKPRIO_SIXTOP                = 0x04,
-    TASKPRIO_RPL                   = 0x05,
-    TASKPRIO_UDP                   = 0x06,
-    TASKPRIO_COAP                  = 0x07,
-    TASKPRIO_ADAPTIVE_SYNC         = 0x08,
-    TASKPRIO_MSF                   = 0x09,
+    TASKPRIO_IPHC                  = 0x05,
+    TASKPRIO_RPL                   = 0x06,
+    TASKPRIO_UDP                   = 0x07,
+    TASKPRIO_COAP                  = 0x08,
+    TASKPRIO_ADAPTIVE_SYNC         = 0x09,
+    TASKPRIO_MSF                   = 0x0a,
     // tasks trigger by other interrupts
-    TASKPRIO_BUTTON                = 0x0a,
-    TASKPRIO_SIXTOP_TIMEOUT        = 0x0b,
-    TASKPRIO_SNIFFER               = 0x0c,
-    TASKPRIO_OPENSERIAL            = 0X0d,
-    TASKPRIO_MAX                   = 0x0e,
+    TASKPRIO_BUTTON                = 0x0b,
+    TASKPRIO_SIXTOP_TIMEOUT        = 0x0c,
+    TASKPRIO_SNIFFER               = 0x0d,
+    TASKPRIO_OPENSERIAL            = 0X0e,
+    TASKPRIO_MAX                   = 0x0f,
 } task_prio_t;
 
 #define TASK_LIST_DEPTH           10

@@ -83,7 +83,7 @@ int mote_main(void) {
    radio_setEndFrameCb(cb_endFrame);
 
    // start timer
-   app_vars.timerId = opentimers_create(TIMER_GENERAL_PURPOSE);
+   app_vars.timerId = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_SNIFFER);
    reference        = opentimers_getValue();
    opentimers_scheduleAbsolute(
         app_vars.timerId,      // timerId

@@ -109,7 +109,7 @@ void macpong_send(uint8_t payloadCtr) {
 //===== IPHC
 
 void iphc_init(void) {
-    macpong_vars.timerId = opentimers_create(TIMER_GENERAL_PURPOSE);
+    macpong_vars.timerId = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_IPHC);
     opentimers_scheduleIn(
         macpong_vars.timerId,   // timerId
         1000,                   // duration
