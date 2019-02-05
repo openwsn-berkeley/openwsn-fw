@@ -60,7 +60,7 @@ void msf_init(void) {
         &temp_neighbor                        // neighbor
     );
 
-    msf_vars.housekeepingTimerId = opentimers_create(TIMER_GENERAL_PURPOSE);
+    msf_vars.housekeepingTimerId = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_MSF);
     msf_vars.housekeepingPeriod  = HOUSEKEEPING_PERIOD;
     opentimers_scheduleIn(
         msf_vars.housekeepingTimerId,
@@ -69,7 +69,7 @@ void msf_init(void) {
         TIMER_PERIODIC,
         msf_timer_housekeeping_cb
     );
-    msf_vars.waitretryTimerId    = opentimers_create(TIMER_GENERAL_PURPOSE);
+    msf_vars.waitretryTimerId    = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_MSF);
 }
 
 // called by schedule

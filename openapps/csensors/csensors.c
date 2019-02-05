@@ -408,7 +408,7 @@ void csensors_setPeriod(uint32_t period,
              );
          }
       } else {
-         csensors_vars.csensors_resource[id].timerId = opentimers_create(TIMER_GENERAL_PURPOSE);
+         csensors_vars.csensors_resource[id].timerId = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_COAP);
          opentimers_scheduleIn(
              csensors_vars.csensors_resource[id].timerId,
              (uint32_t)((period*openrandom_get16b())/0xffff),

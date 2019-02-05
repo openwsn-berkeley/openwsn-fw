@@ -57,7 +57,7 @@ void cstorm_init(void) {
    //comment : not running by default
    cstorm_vars.period           = 6553;
 
-   cstorm_vars.timerId          = opentimers_create(DEFAULT_PRIORITY);
+   cstorm_vars.timerId          = opentimers_create(DEFAULT_PRIORITY, TASKPRIO_COAP);
    opentimers_scheduleIn(
        cstorm_vars.timerId,
        cstorm_vars.period,
