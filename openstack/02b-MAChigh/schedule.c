@@ -462,7 +462,7 @@ bool schedule_isSlotOffsetAvailable(uint16_t slotOffset){
    return TRUE;
 }
 
-void schedule_removeAllCellsToNeighbor(
+void schedule_removeAllManagedUnicastCellsToNeighbor(
     uint8_t        slotframeID,
     open_addr_t*   neighbor
     ){
@@ -470,7 +470,13 @@ void schedule_removeAllCellsToNeighbor(
 
     // remove all entries in schedule with previousHop address
     for(i=0;i<MAXACTIVESLOTS;i++){
-        if (packetfunctions_sameAddress(&(schedule_vars.scheduleBuf[i].neighbor),neighbor)){
+        if (
+            packetfunctions_sameAddress(&(schedule_vars.scheduleBuf[i].neighbor),neighbor) &&
+            (
+                schedule_vars.scheduleBuf[i].type == CELLTYPE_TX ||
+                schedule_vars.scheduleBuf[i].type == CELLTYPE_RX
+            )
+        ){
            schedule_removeActiveSlot(
               schedule_vars.scheduleBuf[i].slotOffset,
               neighbor
