@@ -23,6 +23,8 @@
 #define DEFAULTDAGRANK            MAXDAGRANK
 #define MINHOPRANKINCREASE        256  //default value in RPL and Minimal 6TiSCH draft
 
+#define DEFAULTJOINPRIORITY       0xff
+
 //=========================== typedef =========================================
 
 BEGIN_PACK

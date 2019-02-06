@@ -760,6 +760,8 @@ void registerNewNeighbor(open_addr_t* address,
                 //update jp
                 if (joinPrioPresent==TRUE){
                     neighbors_vars.neighbors[i].joinPrio=joinPrio;
+                } else {
+                    neighbors_vars.neighbors[i].joinPrio=DEFAULTJOINPRIORITY;
                 }
                 break;
             }
