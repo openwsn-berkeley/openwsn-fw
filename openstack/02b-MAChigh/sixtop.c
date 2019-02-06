@@ -992,6 +992,15 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
             }
         } else {
             // doesn't receive the ACK of response packet from request side after maximum retries.
+
+            // if the response is for CLEAR command, remove all the cells and reset seqnum regardless NO ack received.
+            if ( msg->l2_sixtop_command == IANA_6TOP_CMD_CLEAR){
+                schedule_removeAllManagedUnicastCellsToNeighbor(
+                    msg->l2_sixtop_frameID,
+                    &(msg->l2_nextORpreviousHop)
+                );
+                neighbors_resetSequenceNumber(&(msg->l2_nextORpreviousHop));
+            }
         }
     }
     // free the buffer
