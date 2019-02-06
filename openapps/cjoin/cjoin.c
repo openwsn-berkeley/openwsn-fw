@@ -133,8 +133,6 @@ owerror_t cjoin_receive(OpenQueueEntry_t* msg,
     cojp_configuration_object_t configuration;
     owerror_t ret;
 
-    opentimers_cancel(cjoin_vars.timerId); // cancel the retransmission timer
-
     if (coap_header->Code != COAP_CODE_RESP_CHANGED) {
         return E_FAIL;
     }
@@ -149,11 +147,11 @@ owerror_t cjoin_receive(OpenQueueEntry_t* msg,
             IEEE802154_security_setDataKey(configuration.keyset.key[0].key_index, configuration.keyset.key[0].key_value);
             neighbor_removeAutonomousTxRxCellUnicast(&(msg->l2_nextORpreviousHop));
             cjoin_setIsJoined(TRUE); // declare join is over
+            opentimers_cancel(cjoin_vars.timerId); // cancel the retransmission timer
             return E_SUCCESS;
     } else {
         // TODO not supported for now
     }
-
 
     return E_FAIL;
 }
@@ -184,6 +182,13 @@ void cjoin_retransmission_task_cb(void) {
 
     joinProxy = neighbors_getJoinProxy();
     if(joinProxy == NULL) {
+        // keep the retransmission timer, in case it synchronized at next time
+        opentimers_scheduleIn(cjoin_vars.timerId,
+                (uint32_t) TIMEOUT,
+                TIME_MS,
+                TIMER_ONESHOT,
+                cjoin_retransmission_cb
+        );
         openserial_printError(
             COMPONENT_CJOIN,
             ERR_ABORT_JOIN_PROCESS,
