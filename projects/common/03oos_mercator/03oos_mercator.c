@@ -18,7 +18,7 @@ int mote_main(void) {
    board_init();
    scheduler_init();
    opentimers_init();
-   mercator_vars.sendTimerId = opentimers_create(TIMER_GENERAL_PURPOSE);
+   mercator_vars.sendTimerId = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_NONE);
 
    leds_all_off();
 

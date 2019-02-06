@@ -133,8 +133,6 @@ owerror_t cjoin_receive(OpenQueueEntry_t* msg,
     cojp_configuration_object_t configuration;
     owerror_t ret;
 
-    opentimers_cancel(cjoin_vars.timerId); // cancel the retransmission timer
-
     if (coap_header->Code != COAP_CODE_RESP_CHANGED) {
         return E_FAIL;
     }
@@ -149,11 +147,11 @@ owerror_t cjoin_receive(OpenQueueEntry_t* msg,
             IEEE802154_security_setDataKey(configuration.keyset.key[0].key_index, configuration.keyset.key[0].key_value);
             neighbor_removeAutonomousTxRxCellUnicast(&(msg->l2_nextORpreviousHop));
             cjoin_setIsJoined(TRUE); // declare join is over
+            opentimers_cancel(cjoin_vars.timerId); // cancel the retransmission timer
             return E_SUCCESS;
     } else {
         // TODO not supported for now
     }
-
 
     return E_FAIL;
 }
@@ -172,17 +170,31 @@ void cjoin_retransmission_task_cb(void) {
     open_addr_t* joinProxy;
 
     if (ieee154e_isSynch() == FALSE){
+        // keep the retransmission timer, in case it synchronized at next time
+        opentimers_scheduleIn(cjoin_vars.timerId,
+                (uint32_t) TIMEOUT,
+                TIME_MS,
+                TIMER_ONESHOT,
+                cjoin_retransmission_cb
+        );
         return;
     }
 
     joinProxy = neighbors_getJoinProxy();
     if(joinProxy == NULL) {
-      openserial_printError(
-         COMPONENT_CJOIN,
-         ERR_ABORT_JOIN_PROCESS,
-         (errorparameter_t)0,
-         (errorparameter_t)0
-      );
+        // keep the retransmission timer, in case it synchronized at next time
+        opentimers_scheduleIn(cjoin_vars.timerId,
+                (uint32_t) TIMEOUT,
+                TIME_MS,
+                TIMER_ONESHOT,
+                cjoin_retransmission_cb
+        );
+        openserial_printError(
+            COMPONENT_CJOIN,
+            ERR_ABORT_JOIN_PROCESS,
+            (errorparameter_t)0,
+            (errorparameter_t)0
+        );
         return;
     }
 
@@ -221,20 +233,20 @@ void cjoin_task_cb(void) {
 }
 
 void cjoin_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
-   openqueue_freePacketBuffer(msg);
+    openqueue_freePacketBuffer(msg);
 }
 
 owerror_t cjoin_sendJoinRequest(open_addr_t* joinProxy) {
-   OpenQueueEntry_t*            pkt;
-   owerror_t                    outcome;
-   coap_option_iht              options[5];
-   uint8_t                      tmp[10];
-   uint8_t                      payload_len;
-   cojp_join_request_object_t   join_request;
+    OpenQueueEntry_t*            pkt;
+    owerror_t                    outcome;
+    coap_option_iht              options[5];
+    uint8_t                      tmp[10];
+    uint8_t                      payload_len;
+    cojp_join_request_object_t   join_request;
 
-   payload_len = 0;
+    payload_len = 0;
 
-   // immediately arm the retransmission timer
+    // immediately arm the retransmission timer
     opentimers_scheduleIn(cjoin_vars.timerId,
             (uint32_t) TIMEOUT,
             TIME_MS,
@@ -242,73 +254,73 @@ owerror_t cjoin_sendJoinRequest(open_addr_t* joinProxy) {
             cjoin_retransmission_cb
     );
 
-   // create a CoAP RD packet
-   pkt = openqueue_getFreePacketBuffer(COMPONENT_CJOIN);
-   if (pkt==NULL) {
-      openserial_printError(
-         COMPONENT_CJOIN,
-         ERR_NO_FREE_PACKET_BUFFER,
-         (errorparameter_t)0,
-         (errorparameter_t)0
-      );
-      return E_FAIL;
-   }
+    // create a CoAP RD packet
+    pkt = openqueue_getFreePacketBuffer(COMPONENT_CJOIN);
+    if (pkt==NULL) {
+        openserial_printError(
+            COMPONENT_CJOIN,
+            ERR_NO_FREE_PACKET_BUFFER,
+            (errorparameter_t)0,
+            (errorparameter_t)0
+        );
+        return E_FAIL;
+    }
 
-   // take ownership over that packet
-   pkt->creator                   = COMPONENT_CJOIN;
-   pkt->owner                     = COMPONENT_CJOIN;
+    // take ownership over that packet
+    pkt->creator                   = COMPONENT_CJOIN;
+    pkt->owner                     = COMPONENT_CJOIN;
 
-   // uri-host set to 6tisch.arpa
-   options[0].type = COAP_OPTION_NUM_URIHOST;
-   options[0].length = sizeof(jrcHostName)-1;
-   options[0].pValue = (uint8_t *)jrcHostName;
+    // uri-host set to 6tisch.arpa
+    options[0].type = COAP_OPTION_NUM_URIHOST;
+    options[0].length = sizeof(jrcHostName)-1;
+    options[0].pValue = (uint8_t *)jrcHostName;
 
-   // location-path option
-   options[1].type = COAP_OPTION_NUM_URIPATH;
-   options[1].length = sizeof(cjoin_path0)-1;
-   options[1].pValue = (uint8_t *)cjoin_path0;
+    // location-path option
+    options[1].type = COAP_OPTION_NUM_URIPATH;
+    options[1].length = sizeof(cjoin_path0)-1;
+    options[1].pValue = (uint8_t *)cjoin_path0;
 
-   // object security option
-   // length and value are set by the CoAP library
-   options[2].type = COAP_OPTION_NUM_OBJECTSECURITY;
+    // object security option
+    // length and value are set by the CoAP library
+    options[2].type = COAP_OPTION_NUM_OBJECTSECURITY;
 
-   // ProxyScheme set to "coap"
-   options[3].type = COAP_OPTION_NUM_PROXYSCHEME;
-   options[3].length = sizeof(proxyScheme)-1;
-   options[3].pValue = (uint8_t *)proxyScheme;
+    // ProxyScheme set to "coap"
+    options[3].type = COAP_OPTION_NUM_PROXYSCHEME;
+    options[3].length = sizeof(proxyScheme)-1;
+    options[3].pValue = (uint8_t *)proxyScheme;
 
-   // metadata
-   pkt->l4_destination_port       = WKP_UDP_COAP;
-   pkt->l3_destinationAdd.type    = ADDR_128B;
-   pkt->l3_destinationAdd.addr_128b[0] = 0xfe;
-   pkt->l3_destinationAdd.addr_128b[1] = 0x80;
-   memset(&pkt->l3_destinationAdd.addr_128b[2], 0x00, 6);
-   memcpy(&pkt->l3_destinationAdd.addr_128b[8],joinProxy->addr_64b,8); // set host to eui-64 of the join proxy
+    // metadata
+    pkt->l4_destination_port       = WKP_UDP_COAP;
+    pkt->l3_destinationAdd.type    = ADDR_128B;
+    pkt->l3_destinationAdd.addr_128b[0] = 0xfe;
+    pkt->l3_destinationAdd.addr_128b[1] = 0x80;
+    memset(&pkt->l3_destinationAdd.addr_128b[2], 0x00, 6);
+    memcpy(&pkt->l3_destinationAdd.addr_128b[8],joinProxy->addr_64b,8); // set host to eui-64 of the join proxy
 
-   // encode Join_Request object in the payload
-   join_request.role = COJP_ROLE_VALUE_6N; // regular non-6LBR node
-   join_request.pan_id = idmanager_getMyID(ADDR_PANID); // pre-configured PAN ID
-   payload_len = cojp_cbor_encode_join_request_object(tmp, &join_request);
-   packetfunctions_reserveHeaderSize(pkt, payload_len);
-   memcpy(pkt->payload, tmp, payload_len);
-   // send
-   outcome = opencoap_send(
-      pkt,
-      COAP_TYPE_NON,
-      COAP_CODE_REQ_POST,
-      0, // token len
-      options,
-      4, // options len
-      &cjoin_vars.desc
-   );
+    // encode Join_Request object in the payload
+    join_request.role = COJP_ROLE_VALUE_6N; // regular non-6LBR node
+    join_request.pan_id = idmanager_getMyID(ADDR_PANID); // pre-configured PAN ID
+    payload_len = cojp_cbor_encode_join_request_object(tmp, &join_request);
+    packetfunctions_reserveHeaderSize(pkt, payload_len);
+    memcpy(pkt->payload, tmp, payload_len);
+    // send
+    outcome = opencoap_send(
+        pkt,
+        COAP_TYPE_NON,
+        COAP_CODE_REQ_POST,
+        0, // token len
+        options,
+        4, // options len
+        &cjoin_vars.desc
+    );
 
-   // avoid overflowing the queue if fails
-   if (outcome==E_FAIL) {
-      openqueue_freePacketBuffer(pkt);
-      return E_FAIL;
-   }
+    // avoid overflowing the queue if fails
+    if (outcome==E_FAIL) {
+        openqueue_freePacketBuffer(pkt);
+        return E_FAIL;
+    }
 
-   return E_SUCCESS;
+    return E_SUCCESS;
 }
 
 bool cjoin_getIsJoined(void) {
