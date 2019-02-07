@@ -28,14 +28,15 @@
 //=========================== typedef =========================================
 
 typedef struct {
-   uint8_t              numAppPacketsPerSlotFrame;
-   uint8_t              backoff;
-   uint8_t              numCellsPassed;
-   uint8_t              numCellsUsed;
-   opentimers_id_t      housekeepingTimerId;
-   uint16_t             housekeepingPeriod;
-   opentimers_id_t      waitretryTimerId;
-   bool                 waitretry;
+    bool                 f_hashCollision;
+    uint8_t              numAppPacketsPerSlotFrame;
+    uint8_t              backoff;
+    uint8_t              numCellsPassed;
+    uint8_t              numCellsUsed;
+    opentimers_id_t      housekeepingTimerId;
+    uint16_t             housekeepingPeriod;
+    opentimers_id_t      waitretryTimerId;
+    bool                 waitretry;
 } msf_vars_t;
 
 //=========================== module variables ================================
@@ -63,6 +64,9 @@ void    msf_trigger6pClear(open_addr_t* neighbor);
 
 uint16_t msf_hashFunction_getSlotoffset(uint16_t moteId);
 uint8_t msf_hashFunction_getChanneloffset(uint16_t moteId);
+
+void    msf_setHashCollisionFlag(bool isCollision);
+bool    msf_getHashCollisionFlag(void);
 /**
 \}
 \}

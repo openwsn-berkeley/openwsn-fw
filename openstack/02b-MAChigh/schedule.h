@@ -184,6 +184,7 @@ bool              schedule_isNumTxWrapped(open_addr_t* neighbor);
 bool              schedule_getCellsToBeRelocated(open_addr_t* neighbor, cellInfo_ht* celllist);
 bool              schedule_hasAutonomousTxRxCellUnicast(open_addr_t* neighbor);
 bool              schedule_hasManagedTxCellToNeighbor(open_addr_t* neighbor);
+bool              schedule_getAutonomousTxRxCellAnycast(uint16_t* slotoffset);
 
 // from IEEE802154E
 void               schedule_syncSlotOffset(slotOffset_t targetSlotOffset);

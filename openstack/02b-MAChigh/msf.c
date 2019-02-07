@@ -417,3 +417,10 @@ uint8_t msf_hashFunction_getChanneloffset(uint16_t moteId){
 
     return moteId%NUM_CHANNELS;
 }
+
+void    msf_setHashCollisionFlag(bool isCollision){
+    msf_vars.f_hashCollision = isCollision;
+}
+bool    msf_getHashCollisionFlag(void){
+    return msf_vars.f_hashCollision;
+}

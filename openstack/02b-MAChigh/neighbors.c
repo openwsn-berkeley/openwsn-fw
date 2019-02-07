@@ -120,6 +120,7 @@ open_addr_t* neighbors_getJoinProxy(void) {
     uint16_t moteId;
     uint16_t slotoffset;
     uint8_t  channeloffset;
+    uint16_t temp_slotoffset;
 
     joinPrioMinimum = 0xff;
     joinProxy = NULL;
@@ -140,14 +141,21 @@ open_addr_t* neighbors_getJoinProxy(void) {
         moteId = 256*joinProxy->addr_64b[6]+joinProxy->addr_64b[7];
         slotoffset          = msf_hashFunction_getSlotoffset(moteId);
         channeloffset       = msf_hashFunction_getChanneloffset(moteId);
-        // reserve the autonomous cell to joinproxy
-        schedule_addActiveSlot(
-            slotoffset,                                 // slot offset
-            CELLTYPE_TXRX,                              // type of slot
-            TRUE,                                       // shared?
-            channeloffset,                              // channel offset
-            joinProxy                                   // neighbor
-        );
+        if (
+            schedule_getAutonomousTxRxCellAnycast(&temp_slotoffset) &&
+            temp_slotoffset == slotoffset
+        ){
+            msf_setHashCollisionFlag(TRUE);
+        } else {
+            // reserve the autonomous cell to joinproxy
+            schedule_addActiveSlot(
+                slotoffset,                                 // slot offset
+                CELLTYPE_TXRX,                              // type of slot
+                TRUE,                                       // shared?
+                channeloffset,                              // channel offset
+                joinProxy                                   // neighbor
+            );
+        }
     }
 
     return joinProxy;
@@ -558,6 +566,7 @@ void neighbors_setPreferredParent(uint8_t index, bool isPreferred){
 
     uint16_t moteId;
     uint16_t slotoffset;
+    uint16_t temp_slotoffset;
     uint8_t  channeloffset;
 
     neighbors_vars.neighbors[index].parentPreference = isPreferred;
@@ -569,22 +578,38 @@ void neighbors_setPreferredParent(uint8_t index, bool isPreferred){
 
     if (isPreferred){
         // the neighbor is selected as parent
-        // reserve the autonomous cell to this neighbor
-        schedule_addActiveSlot(
-            slotoffset,                                 // slot offset
-            CELLTYPE_TXRX,                              // type of slot
-            TRUE,                                       // shared?
-            channeloffset,                              // channel offset
-            &(neighbors_vars.neighbors[index].addr_64b) // neighbor
-        );
-    } else {
-        // the neighbor is de-selected as parent
-        // remove the autonomous cell to this neighbor
-        if (schedule_hasAutonomousTxRxCellUnicast(&(neighbors_vars.neighbors[index].addr_64b))){
-            schedule_removeActiveSlot(
+        if (
+            schedule_getAutonomousTxRxCellAnycast(&temp_slotoffset) &&
+            temp_slotoffset == slotoffset
+        ){
+            msf_setHashCollisionFlag(TRUE);
+        } else {
+            // reserve the autonomous cell to this neighbor
+            schedule_addActiveSlot(
                 slotoffset,                                 // slot offset
+                CELLTYPE_TXRX,                              // type of slot
+                TRUE,                                       // shared?
+                channeloffset,                              // channel offset
                 &(neighbors_vars.neighbors[index].addr_64b) // neighbor
             );
+        }
+    } else {
+        // the neighbor is de-selected as parent
+        if (
+            schedule_getAutonomousTxRxCellAnycast(&temp_slotoffset) &&
+            temp_slotoffset == slotoffset
+        ){
+            msf_setHashCollisionFlag(FALSE);
+        } else {
+            // remove the autonomous cell to this neighbor
+            if (
+                schedule_hasAutonomousTxRxCellUnicast(&(neighbors_vars.neighbors[index].addr_64b))
+            ){
+                schedule_removeActiveSlot(
+                    slotoffset,                                 // slot offset
+                    &(neighbors_vars.neighbors[index].addr_64b) // neighbor
+                );
+            }
         }
     }
 }
@@ -593,14 +618,22 @@ void neighbor_removeAutonomousTxRxCellUnicast(open_addr_t* address){
 
     uint16_t moteId;
     uint16_t slotoffset;
+    uint16_t temp_slotoffset;
 
     moteId = 256*address->addr_64b[6]+address->addr_64b[7];
     slotoffset          = msf_hashFunction_getSlotoffset(moteId);
 
-    schedule_removeActiveSlot(
-        slotoffset,             // slot offset
-        address                 // neighbor
-    );
+    if (
+        schedule_getAutonomousTxRxCellAnycast(&temp_slotoffset) &&
+        temp_slotoffset == slotoffset
+    ){
+        msf_setHashCollisionFlag(FALSE);
+    } else {
+        schedule_removeActiveSlot(
+            slotoffset,             // slotoffset
+            address                 // neighbor
+        );
+    }
 }
 
 void neighbor_removeAllAutonomousTxRxCellUnicast(void){
@@ -788,7 +821,9 @@ bool isNeighbor(open_addr_t* neighbor) {
 
 void removeNeighbor(uint8_t neighborIndex) {
 
-    uint16_t moteId, slotoffset;
+    uint16_t moteId;
+    uint16_t slotoffset;
+    uint16_t temp_slotoffset;
 
     neighbors_vars.neighbors[neighborIndex].used                      = FALSE;
     neighbors_vars.neighbors[neighborIndex].parentPreference          = 0;
@@ -807,14 +842,23 @@ void removeNeighbor(uint8_t neighborIndex) {
     neighbors_vars.neighbors[neighborIndex].backoffExponenton         = MINBE-1;;
     neighbors_vars.neighbors[neighborIndex].backoff                   = 0;
 
-    if (schedule_hasAutonomousTxRxCellUnicast(&(neighbors_vars.neighbors[neighborIndex].addr_64b))){
+    if (
+        schedule_hasAutonomousTxRxCellUnicast(&(neighbors_vars.neighbors[neighborIndex].addr_64b))
+    ){
         moteId = 256*neighbors_vars.neighbors[neighborIndex].addr_64b.addr_64b[6]+\
                      neighbors_vars.neighbors[neighborIndex].addr_64b.addr_64b[7];
         slotoffset = msf_hashFunction_getSlotoffset(moteId);
-        schedule_removeActiveSlot(
-            slotoffset,                                         // slot offset
-            &(neighbors_vars.neighbors[neighborIndex].addr_64b) // neighbor
-        );
+        if (
+            schedule_getAutonomousTxRxCellAnycast(&temp_slotoffset) &&
+            slotoffset == temp_slotoffset
+        ) {
+            msf_setHashCollisionFlag(FALSE);
+        } else {
+            schedule_removeActiveSlot(
+                slotoffset,                                         // slot offset
+                &(neighbors_vars.neighbors[neighborIndex].addr_64b) // neighbor
+            );
+        }
     }
 
     neighbors_vars.neighbors[neighborIndex].addr_64b.type             = ADDR_NONE;
