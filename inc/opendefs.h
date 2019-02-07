@@ -250,7 +250,7 @@ enum {
    ERR_SIXTOP_COUNT                    = 0x3d, // there are {0} cells to request mote
    ERR_SIXTOP_LIST                     = 0x3e, // the cells reserved to request mote contains slot {0} and slot {1}
    ERR_SCHEDULE_ADDDUPLICATESLOT       = 0x3f, // the slot {0} to be added is already in schedule
-   ERR_UNSUPPORTED_FORMAT              = 0x40, // the received packet format is not supported {code location {0}}
+   ERR_UNSUPPORTED_FORMAT              = 0x40, // the received packet format is not supported (code location {0})
    ERR_UNSUPPORTED_METADATA            = 0x41, // the metadata type is not suppored
    //l3
    ERR_6LORH_DEADLINE_EXPIRED          = 0x42, // the received packet has expired
@@ -258,10 +258,10 @@ enum {
    // join and OSCOAP
    ERR_JOINED                          = 0x44, // node joined
    ERR_SEQUENCE_NUMBER_OVERFLOW        = 0x45, // OSCOAP sequence number reached maximum value
-   ERR_BUFFER_OVERFLOW                 = 0x46, // OSCOAP buffer overflow detected {code location {0}}
+   ERR_BUFFER_OVERFLOW                 = 0x46, // OSCOAP buffer overflow detected (code location {0})
    ERR_REPLAY_FAILED                   = 0x47, // OSCOAP replay protection failed
    ERR_DECRYPTION_FAILED               = 0x48, // OSCOAP decryption and tag verification failed
-   ERR_ABORT_JOIN_PROCESS              = 0x49, // Aborted join process {code location {0}}
+   ERR_ABORT_JOIN_PROCESS              = 0x49, // Aborted join process (code location {0})
 };
 
 //=========================== typedef =========================================
