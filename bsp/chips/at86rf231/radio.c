@@ -20,10 +20,27 @@
 typedef struct {
    radio_capture_cbt         startFrame_cb;
    radio_capture_cbt         endFrame_cb;
-   radio_state_t             state; 
+   radio_state_t             state;
 } radio_vars_t;
 
 radio_vars_t radio_vars;
+
+/* TX Power dBm lookup table. Rounded values from AT86RF231 datasheet */
+static const radio_output_power_config_t at86rf231_output_power[] = {
+   {   3,  0x00  },
+   {   2,  0x02  },  // 2.3 dBm
+   {   1,  0x04  },  // 1.3 dBm
+   {   0,  0x06  },
+   {  -1,  0x07  },
+   {  -2,  0x08  },
+   {  -3,  0x09  },
+   {  -4,  0x0a  },
+   {  -5,  0x0b  },
+   {  -7,  0x0c  },
+   {  -9,  0x0d  },
+   {  -12, 0x0e  },
+   {  -17, 0x0f  },
+};
 
 //=========================== prototypes ======================================
 
@@ -44,13 +61,13 @@ void radio_init(void) {
 
    // clear variables
    memset(&radio_vars,0,sizeof(radio_vars_t));
-   
+
    // change state
    radio_vars.state          = RADIOSTATE_STOPPED;
-  
+
    // configure the radio
    radio_spiWriteReg(RG_TRX_STATE, CMD_FORCE_TRX_OFF);    // turn radio off
-  
+
    radio_spiWriteReg(RG_IRQ_MASK,
                      (AT_IRQ_RX_START| AT_IRQ_TRX_END));  // tell radio to fire interrupt on TRX_END and RX_START
    radio_spiReadReg(RG_IRQ_STATUS);                       // deassert the interrupt pin in case is high
@@ -63,9 +80,9 @@ void radio_init(void) {
    radio_spiWriteReg(RG_PHY_TX_PWR, (0x3<<6)|INIT_TX_POWER);
 
    //busy wait until radio status is TRX_OFF
-  
+
    while((radio_spiReadReg(RG_TRX_STATUS) & 0x1F) != TRX_OFF);
-   
+
    // change state
    radio_vars.state          = RADIOSTATE_RFOFF;
 }
@@ -89,12 +106,31 @@ void radio_reset(void) {
 void radio_setFrequency(uint8_t frequency) {
    // change state
    radio_vars.state = RADIOSTATE_SETTING_FREQUENCY;
-   
+
    // configure the radio to the right frequecy
    radio_spiWriteReg(RG_PHY_CC_CCA,0x20+frequency);
-   
+
    // change state
    radio_vars.state = RADIOSTATE_FREQUENCY_SET;
+}
+
+// configure the radio to output at least @power dBm, or the maximum available power
+void radio_setTxPower(int8_t power) {
+   uint8_t               i;
+   uint8_t               reg_val;
+
+   // loop to find at-least :power: dBm in the look-up table
+   // if the max output power of a chip is higher than :power:, we configure the maximum
+   reg_val = at86rf231_output_power[0].register_val;
+   for(i = sizeof(at86rf231_output_power) / sizeof(radio_output_power_config_t) - 1; i >= 0; --i) {
+     if(power <= at86rf231_output_power[i].power_dbm) {
+       reg_val = at86rf231_output_power[i].register_val;
+       break;
+     }
+   }
+
+   // configure the radio
+   radio_spiWriteReg(RG_PHY_TX_PWR, (0x3<<6) | reg_val);
 }
 
 void radio_rfOn(void) {
@@ -110,11 +146,11 @@ void radio_rfOff(void) {
    radio_spiWriteReg(RG_TRX_STATE, CMD_FORCE_TRX_OFF);
    //radio_spiWriteReg(RG_TRX_STATE, CMD_TRX_OFF);
    while((radio_spiReadReg(RG_TRX_STATUS) & 0x1F) != TRX_OFF); // busy wait until done
-   
+
    // wiggle debug pin
    debugpins_radio_clr();
    leds_radio_off();
-   
+
    // change state
    radio_vars.state = RADIOSTATE_RFOFF;
 }
@@ -124,10 +160,10 @@ void radio_rfOff(void) {
 void radio_loadPacket(uint8_t* packet, uint16_t len) {
    // change state
    radio_vars.state = RADIOSTATE_LOADING_PACKET;
-   
+
    // load packet in TXFIFO
    radio_spiWriteTxFifo(packet,len);
-   
+
    // change state
    radio_vars.state = RADIOSTATE_PACKET_LOADED;
 }
@@ -135,15 +171,15 @@ void radio_loadPacket(uint8_t* packet, uint16_t len) {
 void radio_txEnable(void) {
    // change state
    radio_vars.state = RADIOSTATE_ENABLING_TX;
-   
+
    // wiggle debug pin
    debugpins_radio_set();
    leds_radio_on();
-   
+
    // turn on radio's PLL
    radio_spiWriteReg(RG_TRX_STATE, CMD_PLL_ON);
    while((radio_spiReadReg(RG_TRX_STATUS) & 0x1F) != PLL_ON); // busy wait until done
-   
+
    // change state
    radio_vars.state = RADIOSTATE_TX_ENABLED;
 }
@@ -152,11 +188,11 @@ void radio_txNow(void) {
    PORT_TIMER_WIDTH val;
    // change state
    radio_vars.state = RADIOSTATE_TRANSMITTING;
-   
+
    // send packet by pulsing the SLP_TR_CNTL pin
    PORT_PIN_RADIO_SLP_TR_CNTL_HIGH();
    PORT_PIN_RADIO_SLP_TR_CNTL_LOW();
-   
+
    // The AT86RF231 does not generate an interrupt when the radio transmits the
    // SFD, which messes up the MAC state machine. The danger is that, if we leave
    // this funtion like this, any radio watchdog timer will expire.
@@ -176,17 +212,17 @@ void radio_txNow(void) {
 void radio_rxEnable(void) {
    // change state
    radio_vars.state = RADIOSTATE_ENABLING_RX;
-   
+
    // put radio in reception mode
    radio_spiWriteReg(RG_TRX_STATE, CMD_RX_ON);
-   
+
    // wiggle debug pin
    debugpins_radio_set();
    leds_radio_on();
-   
+
    // busy wait until radio really listening
    while((radio_spiReadReg(RG_TRX_STATUS) & 0x1F) != RX_ON);
-   
+
    // change state
    radio_vars.state = RADIOSTATE_LISTENING;
 }
@@ -202,17 +238,17 @@ void radio_getReceivedFrame(uint8_t* pBufRead,
                             uint8_t* pLqi,
                                bool* pCrc) {
    uint8_t temp_reg_value;
-   
+
    //===== crc
    temp_reg_value  = radio_spiReadReg(RG_PHY_RSSI);
    *pCrc           = (temp_reg_value & 0x80)>>7;  // msb is whether packet passed CRC
-   
+
    //===== rssi
    // as per section 8.4.3 of the AT86RF231, the RSSI is calculate as:
    // -91 + ED [dBm]
    temp_reg_value  = radio_spiReadReg(RG_PHY_ED_LEVEL);
    *pRssi          = -91 + temp_reg_value;
-   
+
    //===== packet
    radio_spiReadRxFifo(pBufRead,
                        pLenRead,
@@ -249,10 +285,10 @@ uint8_t radio_spiReadRadioInfo(void) {
 void radio_spiWriteReg(uint8_t reg_addr, uint8_t reg_setting) {
    uint8_t spi_tx_buffer[2];
    uint8_t spi_rx_buffer[2];
-   
+
    spi_tx_buffer[0] = (0xC0 | reg_addr);        // turn addess in a 'reg write' address
    spi_tx_buffer[1] = reg_setting;
-   
+
    spi_txrx(spi_tx_buffer,
             sizeof(spi_tx_buffer),
             SPI_BUFFER,
@@ -265,10 +301,10 @@ void radio_spiWriteReg(uint8_t reg_addr, uint8_t reg_setting) {
 uint8_t radio_spiReadReg(uint8_t reg_addr) {
    uint8_t spi_tx_buffer[2];
    uint8_t spi_rx_buffer[2];
-   
+
    spi_tx_buffer[0] = (0x80 | reg_addr);        // turn addess in a 'reg read' address
    spi_tx_buffer[1] = 0x00;                     // send a no_operation command just to get the reg value
-   
+
    spi_txrx(spi_tx_buffer,
             sizeof(spi_tx_buffer),
             SPI_BUFFER,
@@ -276,7 +312,7 @@ uint8_t radio_spiReadReg(uint8_t reg_addr) {
             sizeof(spi_rx_buffer),
             SPI_FIRST,
             SPI_LAST);
-   
+
 
   return spi_rx_buffer[1];
 }
@@ -286,10 +322,10 @@ uint8_t radio_spiReadReg(uint8_t reg_addr) {
 void radio_spiWriteTxFifo(uint8_t* bufToWrite, uint8_t  lenToWrite) {
    uint8_t spi_tx_buffer[2];
    uint8_t spi_rx_buffer[1+1+127];               // 1B SPI address, 1B length, max. 127B data
-   
+
    spi_tx_buffer[0] = 0x60;                      // SPI destination address for TXFIFO
    spi_tx_buffer[1] = lenToWrite;                // length byte
-   
+
    spi_txrx(spi_tx_buffer,
             sizeof(spi_tx_buffer),
             SPI_BUFFER,
@@ -297,7 +333,7 @@ void radio_spiWriteTxFifo(uint8_t* bufToWrite, uint8_t  lenToWrite) {
             sizeof(spi_rx_buffer),
             SPI_FIRST,
             SPI_NOTLAST);
-   
+
    spi_txrx(bufToWrite,
             lenToWrite,
             SPI_BUFFER,
@@ -321,9 +357,9 @@ void radio_spiReadRxFifo(uint8_t* pBufRead,
    // - *[1B]     LQI
    uint8_t spi_tx_buffer[125];
    uint8_t spi_rx_buffer[3];
-   
+
    spi_tx_buffer[0] = 0x20;
-   
+
    // 2 first bytes
    spi_txrx(spi_tx_buffer,
             2,
@@ -332,12 +368,12 @@ void radio_spiReadRxFifo(uint8_t* pBufRead,
             sizeof(spi_rx_buffer),
             SPI_FIRST,
             SPI_NOTLAST);
-   
+
    *pLenRead  = spi_rx_buffer[1];
-   
+
    if (*pLenRead>2 && *pLenRead<=127) {
       // valid length
-      
+
       //read packet
       spi_txrx(spi_tx_buffer,
                *pLenRead,
@@ -346,7 +382,7 @@ void radio_spiReadRxFifo(uint8_t* pBufRead,
                125,
                SPI_NOTFIRST,
                SPI_NOTLAST);
-      
+
       // CRC (2B) and LQI (1B)
       spi_txrx(spi_tx_buffer,
                2+1,
@@ -355,12 +391,12 @@ void radio_spiReadRxFifo(uint8_t* pBufRead,
                3,
                SPI_NOTFIRST,
                SPI_LAST);
-      
+
       *pLqi   = spi_rx_buffer[2];
-      
+
    } else {
       // invalid length
-      
+
       // read a just byte to close spi
       spi_txrx(spi_tx_buffer,
                1,
@@ -385,7 +421,7 @@ kick_scheduler_t radio_isr(void) {
 
    // reading IRQ_STATUS causes radio's IRQ pin to go low
    irq_status = radio_spiReadReg(RG_IRQ_STATUS);
-    
+
    // start of frame event
    if (irq_status & AT_IRQ_RX_START) {
       // change state
@@ -412,6 +448,6 @@ kick_scheduler_t radio_isr(void) {
          while(1);
       }
    }
-   
+
    return DO_NOT_KICK_SCHEDULER;
 }
