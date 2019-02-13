@@ -850,6 +850,14 @@ void openserial_handleCommands(void){
             if (commandLen != 16) { break; }
             idmanager_setJoinKey(&openserial_vars.inputBuf[ptr]);
             break;
+        case COMMAND_SET_TX_POWER:
+            if (commandLen != 1) {break; }
+            // TODO handling
+            break;
+        case COMMAND_SEND_PACKET:
+            if (commandLen != 16) {break; }
+            // TODO handling
+            break;
         default:
             // wrong command ID
             break;
