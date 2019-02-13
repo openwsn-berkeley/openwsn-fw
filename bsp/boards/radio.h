@@ -22,7 +22,7 @@
 \brief Current state of the radio.
 
 \note This radio driver is very minimal in that it does not follow a state machine.
-      It is up to the MAC layer to ensure that the different radio operations 
+      It is up to the MAC layer to ensure that the different radio operations
       are called in the righr order. The radio keeps a state for debugging purposes only.
 */
 typedef enum {
@@ -42,6 +42,17 @@ typedef enum {
    RADIOSTATE_TURNING_OFF         = 0x0d,   ///< Turning the RF chain off.
 } radio_state_t;
 
+/**
+\brief Helper structure for power configuration to be defined by platforms with specific values.
+
+\note Not all values are supported by all platforms. In case the value is not supported, the closest higher
+value SHOULD be configured by the implementation in radio_setTxPower() function.
+*/
+typedef struct {
+   int8_t  power_dbm;
+   uint8_t register_val;
+} radio_output_power_config_t;
+
 //=========================== typedef =========================================
 
 typedef void  (*radio_capture_cbt)(PORT_TIMER_WIDTH timestamp);
@@ -58,6 +69,7 @@ void                radio_setEndFrameCb(radio_capture_cbt cb);
 void                radio_reset(void);
 // RF admin
 void                radio_setFrequency(uint8_t frequency);
+void                radio_setTxPower(int8_t power);  // Transmit power configuration in dBm
 void                radio_rfOn(void);
 void                radio_rfOff(void);
 // TX
