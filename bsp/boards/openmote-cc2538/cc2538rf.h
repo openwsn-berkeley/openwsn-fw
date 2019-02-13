@@ -16,7 +16,7 @@
  *---------------------------------------------------------------------------*/
 /* Constants */
 #define CC2538_RF_CCA_THRES_USER_GUIDE 0xF8
-#define CC2538_RF_TX_POWER_RECOMMENDED 0xD5 /* TODO: Check value */
+#define CC2538_RF_TX_POWER_RECOMMENDED 0xD5 /* 3 dBm */
 #define CC2538_RF_CHANNEL_MIN            11 //poipoi -- in fact is sending on 0x17 check that.
 #define CC2538_RF_CHANNEL_MAX            26
 #define CC2538_RF_CHANNEL_SPACING         5
