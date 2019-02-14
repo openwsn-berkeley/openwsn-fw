@@ -28,6 +28,7 @@
 #include "icmpv6echo.h"
 #include "msf.h"
 #include "debugpins.h"
+#include "radio.h"
 
 //=========================== variables =======================================
 
@@ -852,7 +853,8 @@ void openserial_handleCommands(void){
             break;
         case COMMAND_SET_TX_POWER:
             if (commandLen != 1) {break; }
-            // TODO handling
+            comandParam_8 = openserial_vars.inputBuf[ptr];
+            radio_setTxPower((int8_t) comandParam_8);
             break;
         case COMMAND_SEND_PACKET:
             if (commandLen != 16) {break; }
