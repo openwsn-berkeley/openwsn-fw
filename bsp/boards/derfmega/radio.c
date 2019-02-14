@@ -49,14 +49,14 @@ void radio_init(void) {
 
    // clear variables
    memset(&radio_vars,0,sizeof(radio_vars_t));
-   
+
    // change state
    radio_vars.state          = RADIOSTATE_STOPPED;
 
    // configure the radio
    radio_internalWriteReg(TRX_STATE, CMD_FORCE_TRX_OFF);    // turn radio off
 
-   
+
    radio_internalWriteReg(IRQ_MASK, 0b01001100); // enable TX_END,RX_START, RX_END interrupts
    radio_internalWriteReg(IRQ_STATUS,0xFF);                       // clear all interrupts
    radio_internalWriteReg(ANT_DIV, RADIO_CHIP_ANTENNA);     // use chip antenna
@@ -64,7 +64,7 @@ void radio_init(void) {
    radio_internalWriteReg(TRX_CTRL_1, 0x20);                // have the radio calculate CRC
    //busy wait until radio status is TRX_OFF
    while((radio_internalReadReg(TRX_STATUS) & 0x1F) != TRX_OFF);
-   
+
    // change state
    radio_vars.state          = RADIOSTATE_RFOFF;
 }
@@ -115,12 +115,16 @@ PORT_TIMER_WIDTH radio_getTimerPeriod(void) {
 void radio_setFrequency(uint8_t frequency) {
    // change state
    radio_vars.state = RADIOSTATE_SETTING_FREQUENCY;
-   
+
    // configure the radio to the right frequecy
    radio_internalWriteReg(PHY_CC_CCA,0x20+frequency);
-   
+
    // change state
    radio_vars.state = RADIOSTATE_FREQUENCY_SET;
+}
+
+void radio_setTxPower(int8_t power) {
+    // TODO
 }
 
 void radio_rfOn(void) {
@@ -134,11 +138,11 @@ void radio_rfOff(void) {
    radio_internalWriteReg(TRX_STATE, CMD_FORCE_TRX_OFF);
    //radio_spiWriteReg(RG_TRX_STATE, CMD_TRX_OFF);
    while((radio_internalReadReg(TRX_STATUS) & 0x1F) != TRX_OFF); // busy wait until done
-   
+
    // wiggle debug pin
    //debugpins_radio_clr();
    leds_radio_off();
-   
+
    // change state
    radio_vars.state = RADIOSTATE_RFOFF;
 }
@@ -148,10 +152,10 @@ void radio_rfOff(void) {
 void radio_loadPacket(uint8_t* packet, uint16_t len) {
    // change state
    radio_vars.state = RADIOSTATE_LOADING_PACKET;
-   
+
    // load packet in TXFIFO
    radio_internalWriteTxFifo(packet,len);
-   
+
    // change state
    radio_vars.state = RADIOSTATE_PACKET_LOADED;
 }
@@ -159,15 +163,15 @@ void radio_loadPacket(uint8_t* packet, uint16_t len) {
 void radio_txEnable(void) {
    // change state
    radio_vars.state = RADIOSTATE_ENABLING_TX;
-   
+
    // wiggle debug pin
    //debugpins_radio_set();
    leds_radio_on();
-   
+
    // turn on radio's PLL
    radio_internalWriteReg(TRX_STATE, CMD_PLL_ON);
    while((radio_internalReadReg(TRX_STATUS) & 0x1F) != PLL_ON); // busy wait until done
-   
+
    // change state
    radio_vars.state = RADIOSTATE_TX_ENABLED;
 }
@@ -175,7 +179,7 @@ void radio_txEnable(void) {
 void radio_txNow(void) {
    // change state
    radio_vars.state = RADIOSTATE_TRANSMITTING;
-   
+
    // send packet by forcing state to TX_START
    radio_internalWriteReg(TRX_STATE, CMD_TX_START);
    // The AT86RF231 does not generate an interrupt when the radio transmits the
@@ -196,16 +200,16 @@ void radio_txNow(void) {
 void radio_rxEnable(void) {
    // change state
    radio_vars.state = RADIOSTATE_ENABLING_RX;
-   
+
    // put radio in reception mode
    radio_internalWriteReg(TRX_STATE, CMD_RX_ON);
    // wiggle debug pin
    //debugpins_radio_set();
    leds_radio_on();
-   
+
    // busy wait until radio really listening
    while((radio_internalReadReg(TRX_STATUS) & 0x1F) != RX_ON);
-   
+
    // change state
    radio_vars.state = RADIOSTATE_LISTENING;
 }
@@ -221,17 +225,17 @@ void radio_getReceivedFrame(uint8_t* pBufRead,
                             uint8_t* pLqi,
                                bool* pCrc) {
    uint8_t temp_reg_value;
-   
+
    //===== crc
    temp_reg_value  = radio_internalReadReg(PHY_RSSI);
    *pCrc           = (temp_reg_value & 0x80)>>7;  // msb is whether packet passed CRC
-   
+
    //===== rssi
    // as per section 8.4.3 of the AT86RF231, the RSSI is calculate as:
    // -91 + ED [dBm]
    temp_reg_value  = radio_internalReadReg(PHY_ED_LEVEL);
    *pRssi          = -91 + temp_reg_value;
-   
+
    //===== packet
    radio_internalReadRxFifo(pBufRead,
                        pLenRead,
@@ -254,9 +258,9 @@ void radio_internalReadRxFifo(uint8_t* pBufRead,
                          uint8_t* pLenRead,
                          uint8_t  maxBufLen,
                          uint8_t* pLqi) {
-							 
+
 	*pLenRead = TST_RX_LENGTH;
-	memcpy(pBufRead,&TRXFBST,*pLenRead); 
+	memcpy(pBufRead,&TRXFBST,*pLenRead);
 	//poipoi, see if LQI is included in the length
 	*pLqi = *(TRXFBST + pLenRead);
 }
@@ -273,7 +277,7 @@ uint8_t radio_isr(void) {
 uint8_t radio_rx_start_isr(void) {
    PORT_TIMER_WIDTH capturedTime;
    // capture the time
-   capturedTime = radiotimer_getCapturedTime();	
+   capturedTime = radiotimer_getCapturedTime();
 	radio_vars.state = RADIOSTATE_RECEIVING;
 	if (radio_vars.startFrame_cb!=NULL) {
 		// call the callback
@@ -287,7 +291,7 @@ uint8_t radio_rx_start_isr(void) {
 uint8_t radio_trx_end_isr(void) {
    PORT_TIMER_WIDTH capturedTime;
    // capture the time
-   capturedTime = radiotimer_getCapturedTime();	
+   capturedTime = radiotimer_getCapturedTime();
     radio_vars.state = RADIOSTATE_TXRX_DONE;
     if (radio_vars.endFrame_cb!=NULL) {
 	    // call the callback

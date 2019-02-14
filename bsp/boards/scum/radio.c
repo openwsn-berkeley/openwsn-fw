@@ -28,7 +28,7 @@ typedef struct {
     radio_capture_cbt         endFrame_cb;
     uint8_t                   radio_tx_buffer[MAXLENGTH_TRX_BUFFER] __attribute__ ((aligned (4)));
     uint8_t                   radio_rx_buffer[MAXLENGTH_TRX_BUFFER] __attribute__ ((aligned (4)));
-    radio_state_t             state; 
+    radio_state_t             state;
 } radio_vars_t;
 
 radio_vars_t radio_vars;
@@ -43,7 +43,7 @@ void radio_init(void) {
 
     // clear variables
     memset(&radio_vars,0,sizeof(radio_vars_t));
-    
+
     // change state
     radio_vars.state                = RADIOSTATE_STOPPED;
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
@@ -71,7 +71,7 @@ void radio_init(void) {
                                       RX_OVERFLOW_ERROR_EN          |   \
                                       RX_CRC_ERROR_EN               |   \
                                       RX_CUTOFF_ERROR_EN;
-    
+
     // change state
     radio_vars.state                = RADIOSTATE_RFOFF;
 }
@@ -96,12 +96,16 @@ void radio_reset(void) {
 void radio_setFrequency(uint8_t frequency) {
     // change state
     radio_vars.state = RADIOSTATE_SETTING_FREQUENCY;
-    
+
     // not support by SCuM yet
-    
-    
+
+
     // change state
     radio_vars.state = RADIOSTATE_FREQUENCY_SET;
+}
+
+void radio_setTxPower(int8_t power) {
+    // TODO
 }
 
 void radio_rfOn(void) {
@@ -115,7 +119,7 @@ void radio_rfOff(void) {
 
     // turn SCuM radio off
     RFCONTROLLER_REG__CONTROL   = RX_STOP;
-    
+
     // wiggle debug pin
     debugpins_radio_clr();
     leds_radio_off();
@@ -128,14 +132,14 @@ void radio_rfOff(void) {
 
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
 void radio_loadPacket_prepare(uint8_t* packet, uint16_t len){
-    
+
     radio_vars.state = RADIOSTATE_LOADING_PACKET;
-    
+
     memcpy(&radio_vars.radio_tx_buffer[0],packet,len);
-    
+
     RFCONTROLLER_REG__TX_DATA_ADDR  = &(radio_vars.radio_tx_buffer[0]);
     RFCONTROLLER_REG__TX_PACK_LEN   = len;
-    
+
     // will be loaded when load timer fired, change the state in advance
     radio_vars.state = RADIOSTATE_PACKET_LOADED;
 }
@@ -145,7 +149,7 @@ void radio_loadPacket(uint8_t* packet, uint16_t len) {
     uint8_t i;
     // change state
     radio_vars.state = RADIOSTATE_LOADING_PACKET;
-    
+
     memcpy(&radio_vars.radio_tx_buffer[0],packet,len);
 
     // load packet in TXFIFO
@@ -156,7 +160,7 @@ void radio_loadPacket(uint8_t* packet, uint16_t len) {
 
     // add some delay for loading
     for (i=0;i<0xff;i++);
-    
+
     radio_vars.state = RADIOSTATE_PACKET_LOADED;
 
 }
@@ -166,7 +170,7 @@ void radio_txEnable(void) {
     radio_vars.state = RADIOSTATE_ENABLING_TX;
 
     // not support by SCuM
-    
+
     // wiggle debug pin
     debugpins_radio_set();
     leds_radio_on();
@@ -188,7 +192,7 @@ void radio_rxPacket_prepare(void){
 }
 
 void radio_rxEnable(void) {
-    
+
     // change state
     radio_vars.state            = RADIOSTATE_ENABLING_RX;
     DMA_REG__RF_RX_ADDR         = &(radio_vars.radio_rx_buffer[0]);
@@ -197,7 +201,7 @@ void radio_rxEnable(void) {
     // wiggle debug pin
     debugpins_radio_set();
     leds_radio_on();
-    
+
     // change state
     radio_vars.state            = RADIOSTATE_LISTENING;
 
@@ -206,11 +210,11 @@ void radio_rxEnable(void) {
 void radio_rxEnable_scum(void){
     // change state
     radio_vars.state            = RADIOSTATE_ENABLING_RX;
-    
+
     // wiggle debug pin
     debugpins_radio_set();
     leds_radio_on();
-    
+
     // change state
     radio_vars.state            = RADIOSTATE_LISTENING;
 }
@@ -225,17 +229,17 @@ void radio_getReceivedFrame(uint8_t* pBufRead,
                              int8_t* pRssi,
                             uint8_t* pLqi,
                                bool* pCrc) {
-    
+
     //===== crc
     *pCrc           = DEFAULT_CRC_CHECK;
-   
+
     //===== rssi
     *pRssi          = DEFAULT_RSSI;
-    
+
     //===== length
     *pLenRead       = radio_vars.radio_rx_buffer[0];
-    
-    //===== packet 
+
+    //===== packet
     memcpy(pBufRead,&(radio_vars.radio_rx_buffer[1]),*pLenRead);
 }
 
@@ -246,20 +250,20 @@ void radio_getReceivedFrame(uint8_t* pBufRead,
 //=========================== interrupt handlers ==============================
 
 kick_scheduler_t radio_isr(void) {
-    
+
     PORT_TIMER_WIDTH capturedTime;
-    
+
     PORT_TIMER_WIDTH irq_status = RFCONTROLLER_REG__INT;
     PORT_TIMER_WIDTH irq_error  = RFCONTROLLER_REG__ERROR;
-    
+
     debugpins_isr_set();
-    
+
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
 #else
     capturedTime                = sctimer_readCounter();
 #endif
     if (irq_status & TX_SFD_DONE_INT || irq_status & RX_SFD_DONE_INT){
-        // SFD is just sent or received, check the specific interruption and 
+        // SFD is just sent or received, check the specific interruption and
         // change the radio state accordingly
         if (irq_status & TX_SFD_DONE_INT) {
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
@@ -287,7 +291,7 @@ kick_scheduler_t radio_isr(void) {
             return KICK_SCHEDULER;
         }
     }
-    
+
     if (irq_status & TX_SEND_DONE_INT || irq_status & RX_DONE_INT){
         if (irq_status & TX_SEND_DONE_INT) {
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
@@ -316,13 +320,13 @@ kick_scheduler_t radio_isr(void) {
             while(1);
         }
     }
-    
+
     if (irq_status & TX_LOAD_DONE_INT){
         RFCONTROLLER_REG__INT_CLEAR = TX_LOAD_DONE_INT;
     }
-    
+
     if (irq_error == 0) {
-        // error happens during the operation of radio. Print out the error here. 
+        // error happens during the operation of radio. Print out the error here.
         // To Be Done. add error description deifinition for this type of errors.
         RFCONTROLLER_REG__ERROR_CLEAR = irq_error;
     }
