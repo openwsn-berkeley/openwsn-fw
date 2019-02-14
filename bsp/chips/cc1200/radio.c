@@ -32,16 +32,16 @@ void radio_init(void) {
 
     // clear variables
     memset(&radio_vars,0,sizeof(radio_vars_t));
-   
+
     // change state
     radio_vars.state          = RADIOSTATE_STOPPED;
-   
+
     // reset radio
     radio_reset();
-   
+
     // change state
     radio_vars.state          = RADIOSTATE_RFOFF;
-   
+
     P1SEL &= (~BIT3); // Set P1.3 SEL as GPIO
     P1DIR &= (~BIT3); // Set P1.3 SEL as Input
     P1IES |= (BIT3); // Falling Edge
@@ -78,8 +78,8 @@ void radio_setEndFrameCb(radiotimer_capture_cbt cb) {
 //===== reset
 
 void radio_reset(void) {
-  
-    cc1200_spiStrobe( CC1200_SRES, &radio_vars.radioStatusByte); 
+
+    cc1200_spiStrobe( CC1200_SRES, &radio_vars.radioStatusByte);
 }
 
 //===== timer
@@ -103,9 +103,13 @@ uint16_t radio_getTimerPeriod(void) {
 //===== RF admin
 
 void radio_setFrequency(uint8_t frequency) {
-    
+
     // change state
     radio_vars.state = RADIOSTATE_FREQUENCY_SET;
+}
+
+void radio_setTxPower(int8_t power) {
+    // TODO
 }
 
 void radio_rfOn(void) {
@@ -120,18 +124,18 @@ void radio_rfOn(void) {
 }
 
 void radio_rfOff(void) {
-   
+
     // change state
     radio_vars.state = RADIOSTATE_TURNING_OFF;
-   
+
     cc1200_spiStrobe(CC1200_SPWD, &radio_vars.radioStatusByte);
     // poipoipoi wait until off
     cc1200_spiStrobe(CC1200_SXOFF, &radio_vars.radioStatusByte);
-   
+
     // wiggle debug pin
     debugpins_radio_clr();
     leds_radio_off();
-   
+
     // change state
     radio_vars.state = RADIOSTATE_RFOFF;
 }
@@ -141,7 +145,7 @@ void radio_rfOff(void) {
 void radio_loadPacket(uint8_t* packet, uint16_t len) {
     //test 802.15.4g PHR. This has to be done by the MAC layer
     uint8_t PHR[2];
-    uint8_t aux;    
+    uint8_t aux;
 
     if (len<2048){
         PHR[0]      = len/256;
@@ -160,7 +164,7 @@ void radio_loadPacket(uint8_t* packet, uint16_t len) {
     }else{
     //error
     }
-    
+
 
 }
 
@@ -171,7 +175,7 @@ void radio_txEnable(void) {
     // wiggle debug pin
     debugpins_radio_set();
     leds_radio_on();
-      
+
     // change state
     radio_vars.state = RADIOSTATE_TX_ENABLED;
 }
@@ -179,7 +183,7 @@ void radio_txEnable(void) {
 void radio_txNow(void) {
     // change state
     radio_vars.state = RADIOSTATE_TRANSMITTING;
-   
+
     cc1200_spiStrobe( CC1200_STX, &radio_vars.radioStatusByte);
     cc1200_spiStrobe( CC1200_SNOP, &radio_vars.radioStatusByte);
     while(radio_vars.state != RADIOSTATE_TXRX_DONE);
@@ -191,10 +195,10 @@ void radio_rxEnable(void) {
     uint8_t aux;
     // change state
     radio_vars.state = RADIOSTATE_ENABLING_RX;
-   
+
     //calibrate ROCos
     cc1200_spiReadReg(CC1200_WOR_CFG0, &radio_vars.radioStatusByte, &aux);
-    aux = (aux & 0xF9) | (0x02 << 1); 
+    aux = (aux & 0xF9) | (0x02 << 1);
     // Write new register value
     cc1200_spiWriteReg(CC1200_WOR_CFG0, &radio_vars.radioStatusByte, aux);
     // Strobe IDLE to calibrate the RCOSC
@@ -202,14 +206,14 @@ void radio_rxEnable(void) {
     // Disable RC calibration
     aux = (aux & 0xF9) | (0x00 << 1);
     cc1200_spiWriteReg(CC1200_WOR_CFG0, &radio_vars.radioStatusByte, aux);
-   
+
     //put radio in reception mode
     cc1200_spiStrobe(CC1200_SWOR, &radio_vars.radioStatusByte); //sniffer mode
-   
+
     // wiggle debug pin
     debugpins_radio_set();
     leds_radio_on();
-     
+
     // change state
     radio_vars.state = RADIOSTATE_LISTENING;
 }
@@ -228,12 +232,12 @@ void radio_getReceivedFrame(
     ) {
     uint8_t marcStatus1;
     cc1200_spiReadReg( CC1200_MARC_STATUS1, &radio_vars.radioStatusByte, &marcStatus1);
-     
-    //read FIFO length 
+
+    //read FIFO length
     cc1200_spiReadReg(CC1200_NUM_RXBYTES, &radio_vars.radioStatusByte, lenRead);
     // read the received packet from the RXFIFO
     cc1200_spiReadRxFifo(&radio_vars.radioStatusByte, bufRead, lenRead, maxBufLen);
-    
+
     //TODO
     // On reception, the CC1200 replaces the
     // received CRC by:
@@ -242,7 +246,7 @@ void radio_getReceivedFrame(
     //*rssi  =  *(bufRead+*lenRead-1);
     //*crc   = ((*(bufRead+*lenRead))&0x80)>>7;
     //*lqi   =  (*(bufRead+*lenRead))&0x7f;
-    //clean RX FIFO  
+    //clean RX FIFO
     cc1200_spiStrobe( CC1200_SFRX, &radio_vars.radioStatusByte);
     //put radio in reception mode
     cc1200_spiStrobe(CC1200_SWOR, &radio_vars.radioStatusByte);
@@ -302,6 +306,6 @@ kick_scheduler_t radio_isr(void) {
             }
             break;
     }
-       
+
    return DO_NOT_KICK_SCHEDULER;
 }
