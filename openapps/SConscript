@@ -21,6 +21,7 @@ if localEnv['board']=='python':
         'rrt',
         'cexample',
         'cstorm',
+        'cbenchmark',
     ]
 
 # source files that should be included in the build other than
