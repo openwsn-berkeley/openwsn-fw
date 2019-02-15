@@ -85,11 +85,13 @@ enum {
     COMMAND_MAX                   = 22,
 };
 
+
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
 
 typedef void (*openserial_cbt)(void);
+typedef void (*callbackSendPacket_cbt)(open_addr_t*, bool, uint8_t, uint8_t*, uint8_t, uint8_t);
 
 typedef struct _openserial_rsvpt {
     uint8_t                       cmdId; ///< serial command (e.g. 'B')
@@ -105,6 +107,7 @@ typedef struct {
     openserial_rsvpt*   registeredCmd;
     uint8_t             reset_timerId;
     uint8_t             debugPrint_timerId;
+    callbackSendPacket_cbt callbackSendPacket;
     // input
     uint8_t             inputBuf[SERIAL_INPUT_BUFFER_SIZE];
     uint8_t             inputBufFillLevel;
@@ -123,6 +126,7 @@ typedef struct {
 // admin
 void openserial_init(void);
 void openserial_register(openserial_rsvpt* rsvp);
+void openserial_registerSendPacketCb(callbackSendPacket_cbt cb);
 
 // transmitting
 owerror_t openserial_printStatus(

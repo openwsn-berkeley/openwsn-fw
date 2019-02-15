@@ -29,6 +29,7 @@
 #include "msf.h"
 #include "debugpins.h"
 #include "radio.h"
+#include "packetfunctions.h"
 
 //=========================== variables =======================================
 
@@ -121,6 +122,11 @@ void openserial_init(void) {
 void openserial_register(openserial_rsvpt* rsvp) {
     // FIXME: register multiple commands (linked list)
     openserial_vars.registeredCmd = rsvp;
+}
+
+// register a callback for sendPacket command
+void openserial_registerSendPacketCb(callbackSendPacket_cbt cb) {
+    openserial_vars.callbackSendPacket = cb;
 }
 
 //===== transmitting
@@ -725,10 +731,13 @@ void openserial_handleCommands(void){
 
     uint8_t  code,cellOptions,numCell,listOffset,maxListLen;
     uint8_t  ptr;
+    uint8_t  con, numPackets, packetPayloadLen;
+    uint8_t*  token;
+
     cellInfo_ht celllist_add[CELLLIST_MAX_LEN];
     cellInfo_ht celllist_delete[CELLLIST_MAX_LEN];
 
-    open_addr_t neighbor;
+    open_addr_t address;
     bool        foundNeighbor;
 
     ptr = 0;
@@ -794,7 +803,7 @@ void openserial_handleCommands(void){
         case COMMAND_SET_6P_LIST:
         case COMMAND_SET_6P_CLEAR:
             // get preferred parent
-            foundNeighbor =icmpv6rpl_getPreferredParentEui64(&neighbor);
+            foundNeighbor =icmpv6rpl_getPreferredParentEui64(&address);
             if (foundNeighbor==FALSE) {
                 break;
             }
@@ -802,7 +811,7 @@ void openserial_handleCommands(void){
             openserial_get6pInfo(commandId,&code,&cellOptions,&numCell,celllist_add,celllist_delete,&listOffset,&maxListLen,ptr,commandLen);
             sixtop_request(
                 code,              // code
-                &neighbor,         // neighbor
+                &address,          // neighbor
                 numCell,           // number cells
                 cellOptions,       // cellOptions
                 celllist_add,      // celllist to add
@@ -852,13 +861,32 @@ void openserial_handleCommands(void){
             idmanager_setJoinKey(&openserial_vars.inputBuf[ptr]);
             break;
         case COMMAND_SET_TX_POWER:
-            if (commandLen != 1) {break; }
+            if (commandLen != 1) { break; }
             comandParam_8 = openserial_vars.inputBuf[ptr];
             radio_setTxPower((int8_t) comandParam_8);
             break;
         case COMMAND_SEND_PACKET:
-            if (commandLen != 16) {break; }
-            // TODO handling
+            if (commandLen != 16) { break; }
+            if (openserial_vars.callbackSendPacket) {
+                // parse the command payload first, then invoke handler
+                // EUI64 (8B) || CON (1B) || NUMPACKETS (1B) || TOKEN (5B) || PAYLOADLEN (1B)
+                packetfunctions_readAddress(&openserial_vars.inputBuf[ptr], ADDR_64B, &address, FALSE);
+                ptr += 8;  // skip 8 bytes for EUI-64
+
+                con = openserial_vars.inputBuf[ptr];
+                ptr++; // skip 1 byte for CON
+
+                numPackets = openserial_vars.inputBuf[ptr];
+                ptr++; // skip 1 byte for number of packets in the burst
+
+                token = &openserial_vars.inputBuf[ptr];
+                ptr += 5; // skip 5 bytes for token
+
+                packetPayloadLen = openserial_vars.inputBuf[ptr];
+                ptr++;
+
+                openserial_vars.callbackSendPacket(&address, (bool) con, numPackets, token, 5, packetPayloadLen);
+            }
             break;
         default:
             // wrong command ID
