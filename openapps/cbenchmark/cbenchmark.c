@@ -47,6 +47,8 @@ void cbenchmark_init() {
    cbenchmark_vars.desc.callbackRx                      = &cbenchmark_receive;
    cbenchmark_vars.desc.callbackSendDone                = &cbenchmark_sendDone;
 
+   cbenchmark_vars.noResponse                           = 26; // RFC7967 flag to suppress all responses
+
    opencoap_register(&cbenchmark_vars.desc);
 
    // Register sendPacket handler callback
@@ -63,7 +65,11 @@ owerror_t cbenchmark_receive(OpenQueueEntry_t* msg,
         coap_option_iht*  coap_outgoingOptions,
         uint8_t*          coap_outgoingOptionsLen) {
 
-    // TODO if confirmable send a request, otherwise don't send anything in response, just log
+    // TODO Parse the OpenBenchmark token in the payload
+    // TODO log packet received event
+
+    // in case the request contains a No Response option, it will be handled by the
+    // underlying CoAP lib
     return E_SUCCESS;
 }
 
@@ -76,7 +82,9 @@ void cbenchmark_sendPacket(open_addr_t *dest, bool con, uint8_t numPackets, uint
     OpenQueueEntry_t*            pkt;
     coap_option_iht              options[1];
     owerror_t                    outcome;
-    coap_type_t                  confirmable;
+    uint8_t                      numOptions;
+
+    numOptions = 0;
 
     // create a CoAP packet
     pkt = openqueue_getFreePacketBuffer(COMPONENT_CBENCHMARK);
@@ -95,9 +103,10 @@ void cbenchmark_sendPacket(open_addr_t *dest, bool con, uint8_t numPackets, uint
     pkt->owner                     = COMPONENT_CBENCHMARK;
 
     // location-path option
-    options[0].type = COAP_OPTION_NUM_URIPATH;
-    options[0].length = sizeof(cbenchmark_path0)-1;
-    options[0].pValue = (uint8_t *)cbenchmark_path0;
+    options[numOptions].type = COAP_OPTION_NUM_URIPATH;
+    options[numOptions].length = sizeof(cbenchmark_path0)-1;
+    options[numOptions].pValue = (uint8_t *)cbenchmark_path0;
+    numOptions++;
 
     // metadata
     pkt->l4_destination_port       = WKP_UDP_COAP;
@@ -112,16 +121,25 @@ void cbenchmark_sendPacket(open_addr_t *dest, bool con, uint8_t numPackets, uint
     packetfunctions_reserveHeaderSize(pkt, payloadLen);
     memset(pkt->payload, 0x00, payloadLen);
 
-    confirmable = con ? COAP_TYPE_CON : COAP_TYPE_NON;
+    // confirmable semantics of openbenchmark denotes whether there is an application-layer
+    // acknowledgment going back. we implement this behavior by sending or not the CoAP response
+    if (!con) {
+        // to avoid the server generating a response, we use the No Response option specified
+        // in RFC7967
+        options[numOptions].type = COAP_OPTION_NUM_NORESPONSE;
+        options[numOptions].length = 1;
+        options[numOptions].pValue = &cbenchmark_vars.noResponse;
+        numOptions++;
+    }
 
     // send
     outcome = opencoap_send(
         pkt,
-        confirmable,
+        COAP_TYPE_NON,
         COAP_CODE_REQ_POST,
-        0, // token len
+        1, // token len
         options,
-        1, // options len
+        numOptions,
         &cbenchmark_vars.desc
     );
 
@@ -131,5 +149,6 @@ void cbenchmark_sendPacket(open_addr_t *dest, bool con, uint8_t numPackets, uint
         // TODO log error
     }
 
+    // TODO log packet sent event
 }
 
