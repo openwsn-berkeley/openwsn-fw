@@ -63,6 +63,7 @@ owerror_t cbenchmark_receive(OpenQueueEntry_t* msg,
         coap_option_iht*  coap_outgoingOptions,
         uint8_t*          coap_outgoingOptionsLen) {
 
+    // TODO if confirmable send a request, otherwise don't send anything in response, just log
     return E_SUCCESS;
 }
 
@@ -71,6 +72,64 @@ void cbenchmark_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 }
 
 void cbenchmark_sendPacket(open_addr_t *dest, bool con, uint8_t numPackets, uint8_t* token, uint8_t tokenLen, uint8_t payloadLen) {
+
+    OpenQueueEntry_t*            pkt;
+    coap_option_iht              options[1];
+    owerror_t                    outcome;
+    coap_type_t                  confirmable;
+
+    // create a CoAP packet
+    pkt = openqueue_getFreePacketBuffer(COMPONENT_CBENCHMARK);
+    if (pkt==NULL) {
+        openserial_printError(
+            COMPONENT_CBENCHMARK,
+            ERR_NO_FREE_PACKET_BUFFER,
+            (errorparameter_t)0,
+            (errorparameter_t)0
+        );
+        // TODO log error
+    }
+
+    // take ownership over that packet
+    pkt->creator                   = COMPONENT_CBENCHMARK;
+    pkt->owner                     = COMPONENT_CBENCHMARK;
+
+    // location-path option
+    options[0].type = COAP_OPTION_NUM_URIPATH;
+    options[0].length = sizeof(cbenchmark_path0)-1;
+    options[0].pValue = (uint8_t *)cbenchmark_path0;
+
+    // metadata
+    pkt->l4_destination_port       = WKP_UDP_COAP;
+    // construct destination address
+    packetfunctions_mac64bToIp128b(idmanager_getMyID(ADDR_PREFIX), dest, &(pkt->l3_destinationAdd));
+
+    // copy the token
+    packetfunctions_reserveHeaderSize(pkt, tokenLen);
+    memcpy(pkt->payload, token, tokenLen);
+
+    // zero-out the payload after the token
+    packetfunctions_reserveHeaderSize(pkt, payloadLen);
+    memset(pkt->payload, 0x00, payloadLen);
+
+    confirmable = con ? COAP_TYPE_CON : COAP_TYPE_NON;
+
+    // send
+    outcome = opencoap_send(
+        pkt,
+        confirmable,
+        COAP_CODE_REQ_POST,
+        0, // token len
+        options,
+        1, // options len
+        &cbenchmark_vars.desc
+    );
+
+    // avoid overflowing the queue if fails
+    if (outcome==E_FAIL) {
+        openqueue_freePacketBuffer(pkt);
+        // TODO log error
+    }
 
 }
 
