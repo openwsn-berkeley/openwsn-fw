@@ -498,8 +498,8 @@ owerror_t forwarding_send_internal_RoutingTable(
         openserial_printError(
             COMPONENT_FORWARDING,
             ERR_NO_NEXTHOP,
-            (errorparameter_t)msg->l3_destinationAdd.addr_128b[6],
-            (errorparameter_t)msg->l3_destinationAdd.addr_128b[7]
+            (errorparameter_t)msg->l3_destinationAdd.addr_128b[14],
+            (errorparameter_t)msg->l3_destinationAdd.addr_128b[15]
         );
         return E_FAIL;
     }
