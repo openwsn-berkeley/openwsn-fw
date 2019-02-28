@@ -31,7 +31,8 @@ owerror_t cbenchmark_receive(OpenQueueEntry_t* msg,
         coap_option_iht*  coap_outgoingOptions,
         uint8_t*          coap_outgoingOptionsLen);
 void cbenchmark_sendDone(OpenQueueEntry_t* msg, owerror_t error);
-void cbenchmark_sendPacket(open_addr_t *, bool, uint8_t, uint8_t*, uint8_t, uint8_t);
+void cbenchmark_sendPacket(uint8_t *, uint8_t);
+owerror_t cbenchmark_parse_sendPacket(uint8_t *buf, uint8_t bufLen, cbenchmark_sendPacket_t *request);
 
 //=========================== public ==========================================
 
@@ -77,10 +78,11 @@ void cbenchmark_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
     openqueue_freePacketBuffer(msg);
 }
 
-void cbenchmark_sendPacket(open_addr_t *dest, bool con, uint8_t numPackets, uint8_t* token, uint8_t tokenLen, uint8_t payloadLen) {
+void cbenchmark_sendPacket(uint8_t *buf, uint8_t bufLen) {
 
     OpenQueueEntry_t*            pkt;
     coap_option_iht              options[1];
+    cbenchmark_sendPacket_t      request;
     owerror_t                    outcome;
     uint8_t                      numOptions;
     uint8_t                      i;
@@ -88,7 +90,12 @@ void cbenchmark_sendPacket(open_addr_t *dest, bool con, uint8_t numPackets, uint
     numOptions = 0;
     i = 0;
 
-    for (i = 0; i < numPackets; i++) {
+    if (cbenchmark_parse_sendPacket(buf, bufLen, &request) != E_SUCCESS) {
+        return;
+    };
+
+
+    for (i = 0; i < request.numPackets; i++) {
         // create a CoAP packet
         pkt = openqueue_getFreePacketBuffer(COMPONENT_CBENCHMARK);
         if (pkt==NULL) {
@@ -113,7 +120,7 @@ void cbenchmark_sendPacket(open_addr_t *dest, bool con, uint8_t numPackets, uint
 
         // confirmable semantics of openbenchmark denotes whether there is an application-layer
         // acknowledgment going back. we implement this behavior by sending or not the CoAP response
-        if (!con) {
+        if (!request.con) {
             // to avoid the server generating a response, we use the No Response option specified
             // in RFC7967
             options[numOptions].type = COAP_OPTION_NUM_NORESPONSE;
@@ -125,19 +132,18 @@ void cbenchmark_sendPacket(open_addr_t *dest, bool con, uint8_t numPackets, uint
         // metadata
         pkt->l4_destination_port       = WKP_UDP_COAP;
         // construct destination address
-        packetfunctions_mac64bToIp128b(idmanager_getMyID(ADDR_PREFIX), dest, &(pkt->l3_destinationAdd));
+        packetfunctions_mac64bToIp128b(idmanager_getMyID(ADDR_PREFIX), &request.dest, &(pkt->l3_destinationAdd));
 
-        // packet counter
-        packetfunctions_reserveHeaderSize(pkt, 1);
+        // zero-out the payload
+        packetfunctions_reserveHeaderSize(pkt, request.payloadLen);
+        memset(pkt->payload, 0x00, request.payloadLen);
+
+        // copy the token as given by OpenBenchmark
+        packetfunctions_reserveHeaderSize(pkt, CBENCHMARK_PACKETTOKEN_LEN);
+        memcpy(pkt->payload, &request.token, CBENCHMARK_PACKETTOKEN_LEN);
+
+        // set the first byte of the token to packet counter
         pkt->payload[0] = i;
-
-        // copy the token
-        packetfunctions_reserveHeaderSize(pkt, tokenLen);
-        memcpy(pkt->payload, token, tokenLen);
-
-        // zero-out the payload after the token
-        packetfunctions_reserveHeaderSize(pkt, payloadLen);
-        memset(pkt->payload, 0x00, payloadLen);
 
         // send
         outcome = opencoap_send(
@@ -157,5 +163,35 @@ void cbenchmark_sendPacket(open_addr_t *dest, bool con, uint8_t numPackets, uint
         }
         // TODO log packet sent event
     }
+}
+
+owerror_t cbenchmark_parse_sendPacket(uint8_t *buf, uint8_t bufLen, cbenchmark_sendPacket_t *request) {
+
+    uint8_t *tmp;
+
+    if (bufLen != 16) {
+        return E_FAIL;
+    }
+
+    tmp = buf;
+
+    // parse the command payload
+    // EUI64 (8B) || CON (1B) || NUMPACKETS (1B) || TOKEN (4B) || PAYLOADLEN (1B)
+    packetfunctions_readAddress(buf, ADDR_64B, &request->dest, FALSE);
+    tmp += 8;  // skip 8 bytes for EUI-64
+
+    request->con = (bool) *tmp;
+    tmp++; // skip 1 byte for CON
+
+    request->numPackets = *tmp;
+    tmp++; // skip 1 byte for number of packets in the burst
+
+    memcpy(request->token, tmp, CBENCHMARK_PACKETTOKEN_LEN);
+    tmp += CBENCHMARK_PACKETTOKEN_LEN; // skip token len bytes for token
+
+    request->payloadLen = *tmp;
+    tmp++;
+
+    return E_SUCCESS;
 }
 
