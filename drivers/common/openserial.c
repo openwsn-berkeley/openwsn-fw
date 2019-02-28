@@ -731,8 +731,6 @@ void openserial_handleCommands(void){
 
     uint8_t  code,cellOptions,numCell,listOffset,maxListLen;
     uint8_t  ptr;
-    uint8_t  con, numPackets, packetPayloadLen;
-    uint8_t*  token;
 
     cellInfo_ht celllist_add[CELLLIST_MAX_LEN];
     cellInfo_ht celllist_delete[CELLLIST_MAX_LEN];
@@ -866,26 +864,18 @@ void openserial_handleCommands(void){
             radio_setTxPower((int8_t) comandParam_8);
             break;
         case COMMAND_SEND_PACKET:
-            if (commandLen != 16) { break; }
+            if (commandLen != 16) {
+                openserial_printError(
+                    COMPONENT_OPENSERIAL,
+                    ERR_INVALIDSERIALFRAME,
+                    (errorparameter_t)0,
+                    (errorparameter_t)0
+                );
+                break;
+            }
+
             if (openserial_vars.callbackSendPacket) {
-                // parse the command payload first, then invoke handler
-                // EUI64 (8B) || CON (1B) || NUMPACKETS (1B) || TOKEN (5B) || PAYLOADLEN (1B)
-                packetfunctions_readAddress(&openserial_vars.inputBuf[ptr], ADDR_64B, &address, FALSE);
-                ptr += 8;  // skip 8 bytes for EUI-64
-
-                con = openserial_vars.inputBuf[ptr];
-                ptr++; // skip 1 byte for CON
-
-                numPackets = openserial_vars.inputBuf[ptr];
-                ptr++; // skip 1 byte for number of packets in the burst
-
-                token = &openserial_vars.inputBuf[ptr];
-                ptr += 5; // skip 5 bytes for token
-
-                packetPayloadLen = openserial_vars.inputBuf[ptr];
-                ptr++;
-
-                openserial_vars.callbackSendPacket(&address, (bool) con, numPackets, token, 5, packetPayloadLen);
+                openserial_vars.callbackSendPacket(&openserial_vars.inputBuf[ptr], 16);
             }
             break;
         default:

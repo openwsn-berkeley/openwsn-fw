@@ -91,7 +91,7 @@ enum {
 //=========================== prototypes ======================================
 
 typedef void (*openserial_cbt)(void);
-typedef void (*callbackSendPacket_cbt)(open_addr_t*, bool, uint8_t, uint8_t*, uint8_t, uint8_t);
+typedef void (*callbackSendPacket_cbt)(uint8_t *buf, uint8_t bufLen);
 
 typedef struct _openserial_rsvpt {
     uint8_t                       cmdId; ///< serial command (e.g. 'B')
