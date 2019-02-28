@@ -81,8 +81,8 @@ void cbenchmark_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 void cbenchmark_sendPacket(uint8_t *buf, uint8_t bufLen) {
 
     OpenQueueEntry_t*            pkt;
-    coap_option_iht              options[1];
     cbenchmark_sendPacket_t      request;
+    coap_option_iht              options[2];
     owerror_t                    outcome;
     uint8_t                      numOptions;
     uint8_t                      i;
@@ -105,7 +105,7 @@ void cbenchmark_sendPacket(uint8_t *buf, uint8_t bufLen) {
                 (errorparameter_t)0,
                 (errorparameter_t)0
             );
-            // TODO log error
+            return;
         }
 
         // take ownership over that packet
@@ -150,7 +150,7 @@ void cbenchmark_sendPacket(uint8_t *buf, uint8_t bufLen) {
             pkt,
             COAP_TYPE_NON,
             COAP_CODE_REQ_POST,
-            1, // token len
+            1, // CoAP token len
             options,
             numOptions,
             &cbenchmark_vars.desc
@@ -159,8 +159,14 @@ void cbenchmark_sendPacket(uint8_t *buf, uint8_t bufLen) {
         // avoid overflowing the queue if fails
         if (outcome==E_FAIL) {
             openqueue_freePacketBuffer(pkt);
-            // TODO log error
+            openserial_printError(
+                COMPONENT_CBENCHMARK,
+                ERR_NO_FREE_PACKET_BUFFER,
+                (errorparameter_t)0,
+                (errorparameter_t)0
+            );
         }
+
         // TODO log packet sent event
     }
 }
