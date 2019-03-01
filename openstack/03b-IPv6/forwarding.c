@@ -303,6 +303,7 @@ void forwarding_receive(
     // populate packets metadata with L3 information
     memcpy(&(msg->l3_destinationAdd),&ipv6_inner_header->dest, sizeof(open_addr_t));
     memcpy(&(msg->l3_sourceAdd),     &ipv6_inner_header->src,  sizeof(open_addr_t));
+    msg->l3_hopLimit = ipv6_inner_header->hop_limit;
 
     if (
         (

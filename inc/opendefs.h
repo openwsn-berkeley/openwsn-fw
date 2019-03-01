@@ -322,6 +322,7 @@ typedef struct {
    open_addr_t   l3_destinationAdd;                             // 128b IPv6 destination (down stack)
    open_addr_t   l3_sourceAdd;                                  // 128b IPv6 source address
    bool          l3_useSourceRouting;                           // TRUE when the packet goes downstream
+   uint8_t       l3_hopLimit;                                   // Value of the hop limit field
    //l2
    owerror_t     l2_sendDoneError;                              // outcome of trying to send this packet
    open_addr_t   l2_nextORpreviousHop;                          // 64b IEEE802.15.4 next (down stack) or previous (up) hop address
