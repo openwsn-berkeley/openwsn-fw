@@ -130,7 +130,7 @@ void cbenchmark_sendPacket(uint8_t *buf, uint8_t bufLen) {
         }
 
         // metadata
-        pkt->l4_destination_port       = WKP_UDP_COAP;
+        pkt->l4_destination_port       = CBENCHMARK_OPENBENCHMARK_COAP_PORT;
         // construct destination address
         packetfunctions_mac64bToIp128b(idmanager_getMyID(ADDR_PREFIX), &request.dest, &(pkt->l3_destinationAdd));
 
