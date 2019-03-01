@@ -501,6 +501,7 @@ void schedule_removeAllAutonomousTxRxCellUnicast(void){
            );
         }
     }
+    msf_setHashCollisionFlag(FALSE);
 }
 
 uint8_t schedule_getNumberOfFreeEntries(){
@@ -655,6 +656,28 @@ bool schedule_hasManagedTxCellToNeighbor(open_addr_t* neighbor){
             schedule_vars.scheduleBuf[i].neighbor.type == ADDR_64B &&
             packetfunctions_sameAddress(neighbor,&schedule_vars.scheduleBuf[i].neighbor)
         ){
+            ENABLE_INTERRUPTS();
+            return TRUE;
+        }
+    }
+
+    ENABLE_INTERRUPTS();
+    return FALSE;
+}
+
+bool          schedule_getAutonomousTxRxCellAnycast(uint16_t* slotoffset){
+    uint8_t i;
+
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+
+    for(i=0;i<MAXACTIVESLOTS;i++) {
+        if(
+            schedule_vars.scheduleBuf[i].type          == CELLTYPE_TXRX &&
+            schedule_vars.scheduleBuf[i].shared        == FALSE         &&
+            schedule_vars.scheduleBuf[i].neighbor.type == ADDR_ANYCAST
+        ){
+            *slotoffset = schedule_vars.scheduleBuf[i].slotOffset;
             ENABLE_INTERRUPTS();
             return TRUE;
         }

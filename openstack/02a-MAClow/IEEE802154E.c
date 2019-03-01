@@ -981,7 +981,13 @@ port_INLINE void activity_ti1ORri1(void) {
                         }
                     } else {
                         // this is autonomous TXRX cell (anycast)
-                        ieee154e_vars.dataToSend = openqueue_macGetDownStreamPacket(&neighbor);
+                        if (msf_getHashCollisionFlag()==TRUE){
+                            // check whether there is 6p or join request packet to send first
+                            ieee154e_vars.dataToSend = openqueue_macGet6PandJoinPacket(&neighbor);
+                        }
+                        if (ieee154e_vars.dataToSend == NULL) {
+                            ieee154e_vars.dataToSend = openqueue_macGetDownStreamPacket(&neighbor);
+                        }
                     }
                 }
             }

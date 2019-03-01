@@ -355,8 +355,10 @@ OpenQueueEntry_t*  openqueue_macGet6PandJoinPacket(open_addr_t* toNeighbor){
        if (
            openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
            (
-               toNeighbor->type==ADDR_64B &&
-               packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)
+               (
+                    toNeighbor->type==ADDR_64B &&
+                    packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)
+                ) || toNeighbor->type==ADDR_ANYCAST // in case autonomous unicast cells is located at the same slotoffset of autonomous anycast cell, send 6p and cjoin packets on anycast cell as well
            ) &&
            (
                openqueue_vars.queue[i].creator == COMPONENT_SIXTOP_RES ||
