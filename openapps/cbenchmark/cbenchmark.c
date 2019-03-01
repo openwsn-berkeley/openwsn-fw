@@ -14,6 +14,7 @@
 #include "eui64.h"
 #include "neighbors.h"
 #include "cbenchmark.h"
+#include "IEEE802154E.h"
 
 //=========================== defines =========================================
 
@@ -66,7 +67,26 @@ owerror_t cbenchmark_receive(OpenQueueEntry_t* msg,
         coap_option_iht*  coap_outgoingOptions,
         uint8_t*          coap_outgoingOptionsLen) {
 
-    // TODO Parse the OpenBenchmark token in the payload
+    uint8_t   token[5];
+    uint8_t   timestamp[5];
+
+    // get the current ASN as soon as possible
+    ieee154e_getAsn(timestamp);
+
+    // sanity check
+    if (msg->length < 5) {
+        // log formatting error
+            openserial_printError(
+                COMPONENT_CBENCHMARK,
+                ERR_MSG_UNKNOWN_TYPE,
+                (errorparameter_t)0,
+                (errorparameter_t)0
+            );
+    }
+
+    // get the token from the first 5 bytes of payload
+    memcpy(token, msg->payload, 5);
+
     // TODO log packet received event
 
     // in case the request contains a No Response option, it will be handled by the
