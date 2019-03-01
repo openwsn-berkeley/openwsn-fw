@@ -712,7 +712,7 @@ void  neighbors_removeOld(void) {
     for (i=0;i<MAXNUMNEIGHBORS;i++) {
         if (neighbors_vars.neighbors[i].used==1) {
             timeSinceHeard = ieee154e_asnDiff(&neighbors_vars.neighbors[i].asn);
-            if (timeSinceHeard>DESYNCTIMEOUT) {
+            if (timeSinceHeard>(2*DESYNCTIMEOUT)) {
                 if (
                     neighbors_vars.neighbors[i].f6PNORES    == FALSE &&
                     neighbors_vars.neighbors[i].inBlacklist == FALSE

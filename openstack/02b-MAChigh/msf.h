@@ -16,9 +16,9 @@
 #define CELLOPTIONS_MSF         CELLOPTIONS_TX
 #define NUMCELLS_MSF            1
 
-#define MAX_NUMCELLS                   16
-#define LIM_NUMCELLSUSED_HIGH          12
-#define LIM_NUMCELLSUSED_LOW            4
+#define MAX_NUMCELLS                   64
+#define LIM_NUMCELLSUSED_HIGH          48
+#define LIM_NUMCELLSUSED_LOW           16
 
 #define HOUSEKEEPING_PERIOD          30000 // miliseconds
 #define QUARANTINE_DURATION            300 // seconds

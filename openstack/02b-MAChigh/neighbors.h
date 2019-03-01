@@ -16,7 +16,7 @@
 #define BADNEIGHBORMAXRSSI        -70 //dBm
 #define GOODNEIGHBORMINRSSI       -80 //dBm
 #define SWITCHSTABILITYTHRESHOLD  3
-#define DEFAULTLINKCOST           8   // this value has too be no greater than 6, when MAXEB is 4 and MAXRETRIES is 4
+#define DEFAULTLINKCOST           4
 #define MINIMAL_NUM_TX            16
 
 #define MAXDAGRANK                0xffff
