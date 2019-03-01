@@ -14,6 +14,10 @@
 #include "schedule.h"
 #include "msf.h"
 
+//=========================== definition ======================================
+
+#define DIO_PORTION 10
+
 //=========================== variables =======================================
 
 icmpv6rpl_vars_t             icmpv6rpl_vars;
@@ -630,9 +634,8 @@ void icmpv6rpl_timer_DIO_cb(opentimers_id_t id) {
 \note This function is executed in task context, called by the scheduler.
 */
 void icmpv6rpl_timer_DIO_task(void) {
-    // send DIOs on a portion of the minimal cells not exceeding 1/(3(N+1))
-    // https://tools.ietf.org/html/draft-chang-6tisch-msf-01#section-2
-    if(openrandom_get16b()<0xffff/(3*(neighbors_getNumNeighbors()+1))){
+
+    if(openrandom_get16b()<(0xffff/DIO_PORTION)){
         sendDIO();
     }
 }
