@@ -142,10 +142,14 @@ owerror_t cjoin_receive(OpenQueueEntry_t* msg,
 
     if (configuration.keyset.num_keys == 1 &&
         configuration.keyset.key[0].key_usage == COJP_KEY_USAGE_6TiSCH_K1K2_ENC_MIC32) {
+            // only if I am not joined before, remove the previous installed autonomous cell
+            if (cjoin_vars.isJoined==FALSE){
+                neighbor_removeAutonomousTxRxCellUnicast(&(msg->l2_nextORpreviousHop));
+            }
+
             // set the L2 keys as per the parsed value
             IEEE802154_security_setBeaconKey(configuration.keyset.key[0].key_index, configuration.keyset.key[0].key_value);
             IEEE802154_security_setDataKey(configuration.keyset.key[0].key_index, configuration.keyset.key[0].key_value);
-            neighbor_removeAutonomousTxRxCellUnicast(&(msg->l2_nextORpreviousHop));
             cjoin_setIsJoined(TRUE); // declare join is over
             opentimers_cancel(cjoin_vars.timerId); // cancel the retransmission timer
             return E_SUCCESS;
