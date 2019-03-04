@@ -365,6 +365,11 @@ void msf_housekeeping(void){
     cellInfo_ht    celllist_add[CELLLIST_MAX_LEN];
     cellInfo_ht    celllist_delete[CELLLIST_MAX_LEN];
 
+    uint16_t       moteId;
+    uint16_t       slotoffset;
+    uint16_t       temp_slotoffset;
+    uint8_t        channeloffset;
+
     if (ieee154e_isSynch()==FALSE) {
         return;
     }
@@ -372,6 +377,30 @@ void msf_housekeeping(void){
     foundNeighbor = icmpv6rpl_getPreferredParentEui64(&parentNeighbor);
     if (foundNeighbor==FALSE) {
         return;
+    }
+
+    if (schedule_hasAutonomousTxRxCellUnicast(&parentNeighbor)==FALSE){
+
+        moteId          = 256*parentNeighbor.addr_64b[6]+parentNeighbor.addr_64b[7];
+        slotoffset      = msf_hashFunction_getSlotoffset(moteId);
+        channeloffset   = msf_hashFunction_getChanneloffset(moteId);
+
+        // the neighbor is selected as parent
+        if (
+            schedule_getAutonomousTxRxCellAnycast(&temp_slotoffset) &&
+            temp_slotoffset == slotoffset
+        ){
+            msf_setHashCollisionFlag(TRUE);
+        } else {
+            // reserve the autonomous cell to this neighbor
+            schedule_addActiveSlot(
+                slotoffset,                                 // slot offset
+                CELLTYPE_TXRX,                              // type of slot
+                TRUE,                                       // shared?
+                channeloffset,                              // channel offset
+                &(parentNeighbor)                           // neighbor
+            );
+        }
     }
 
     if (schedule_getNumberOfManagedTxCells(&parentNeighbor)==0){
