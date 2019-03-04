@@ -859,7 +859,9 @@ void openserial_handleCommands(void){
 //===== misc
 
 void openserial_debugPrint_timer_cb(opentimers_id_t id){
-    scheduler_push_task(task_openserial_debugPrint,TASKPRIO_OPENSERIAL);
+    // calling the task directly as the timer_cb function is executed in
+    // task mode by opentimer already
+    task_openserial_debugPrint();
 }
 
 void openserial_board_reset_cb(opentimers_id_t id) {

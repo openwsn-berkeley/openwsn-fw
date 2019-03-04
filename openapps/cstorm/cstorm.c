@@ -147,12 +147,10 @@ owerror_t cstorm_receive(
    return outcome;
 }
 
-/**
-\note timer fired, but we don't want to execute task in ISR mode instead, push
-   task to scheduler with CoAP priority, and let scheduler take care of it.
-*/
 void cstorm_timer_cb(void) {
-   scheduler_push_task(cstorm_task_cb,TASKPRIO_COAP);
+    // calling the task directly as the timer_cb function is executed in
+    // task mode by opentimer already
+    cstorm_task_cb();
 }
 
 void cstorm_task_cb(void) {

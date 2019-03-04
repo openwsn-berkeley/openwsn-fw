@@ -621,11 +621,11 @@ void icmpv6rpl_killPreferredParent(void) {
 /**
 \brief DIO timer callback function.
 
-\note This function is executed in interrupt context, and should only push a
-   task.
+\note This timer callback function is executed in task mode by opentimer
+    already. No need to push a task again.
 */
 void icmpv6rpl_timer_DIO_cb(opentimers_id_t id) {
-    scheduler_push_task(icmpv6rpl_timer_DIO_task,TASKPRIO_RPL);
+    icmpv6rpl_timer_DIO_task();
 }
 
 /**
@@ -787,11 +787,12 @@ void sendDIO(void) {
 /**
 \brief DAO timer callback function.
 
-\note This function is executed in interrupt context, and should only push a
-   task.
+\note This timer callback function is executed in task mode by opentimer
+    already. No need to push a task again.
 */
 void icmpv6rpl_timer_DAO_cb(opentimers_id_t id) {
-    scheduler_push_task(icmpv6rpl_timer_DAO_task,TASKPRIO_RPL);
+
+    icmpv6rpl_timer_DAO_task();
 }
 
 /**
