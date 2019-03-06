@@ -809,39 +809,39 @@ void icmpv6rpl_timer_DAO_task(void) {
 \brief Prepare and a send a RPL DAO.
 */
 void sendDAO(void) {
-   OpenQueueEntry_t*    msg;                // pointer to DAO messages
-   uint8_t              nbrIdx;             // running neighbor index
-   uint8_t              numTransitParents,numTargetParents;  // the number of parents indicated in transit option
-   open_addr_t         address;
-   open_addr_t*        prefix;
+    OpenQueueEntry_t*    msg;                // pointer to DAO messages
+    uint8_t              nbrIdx;             // running neighbor index
+    uint8_t              numTransitParents,numTargetParents;  // the number of parents indicated in transit option
+    open_addr_t          address;
+    open_addr_t*         prefix;
 
-   memset(&address,0,sizeof(open_addr_t));
+    memset(&address,0,sizeof(open_addr_t));
 
-   if (ieee154e_isSynch()==FALSE) {
-      // I'm not sync'ed
+    if (ieee154e_isSynch()==FALSE) {
+        // I'm not sync'ed
 
-      // delete packets genereted by this module (DIO and DAO) from openqueue
-      openqueue_removeAllCreatedBy(COMPONENT_ICMPv6RPL);
+        // delete packets genereted by this module (DIO and DAO) from openqueue
+        openqueue_removeAllCreatedBy(COMPONENT_ICMPv6RPL);
 
-      // I'm not busy sending a DIO/DAO
-      icmpv6rpl_vars.busySendingDAO = FALSE;
-      icmpv6rpl_vars.busySendingDIO = FALSE;
+        // I'm not busy sending a DIO/DAO
+        icmpv6rpl_vars.busySendingDAO = FALSE;
+        icmpv6rpl_vars.busySendingDIO = FALSE;
 
-      // stop here
-      return;
-   }
+        // stop here
+        return;
+    }
 
-   // dont' send a DAO if you're the DAG root
-   if (idmanager_getIsDAGroot()==TRUE) {
-      return;
-   }
+    // dont' send a DAO if you're the DAG root
+    if (idmanager_getIsDAGroot()==TRUE) {
+        return;
+    }
 
-   // dont' send a DAO if you did not acquire a DAGrank
-   if (icmpv6rpl_getMyDAGrank()==DEFAULTDAGRANK) {
-       return;
-   }
+    // dont' send a DAO if you did not acquire a DAGrank
+    if (icmpv6rpl_getMyDAGrank()==DEFAULTDAGRANK) {
+        return;
+    }
 
-   if (
+    if (
         icmpv6rpl_getPreferredParentEui64(&address) == FALSE ||
         (
             icmpv6rpl_getPreferredParentEui64(&address) &&
@@ -858,138 +858,138 @@ void sendDAO(void) {
         return;
     }
 
-   memset(&address,0,sizeof(open_addr_t));
+    memset(&address,0,sizeof(open_addr_t));
 
-   // dont' send a DAO if you're still busy sending the previous one
-   if (icmpv6rpl_vars.busySendingDAO==TRUE) {
-      return;
-   }
+    // dont' send a DAO if you're still busy sending the previous one
+    if (icmpv6rpl_vars.busySendingDAO==TRUE) {
+        return;
+    }
 
-   // if you get here, you start construct DAO
+    // if you get here, you start construct DAO
 
-   // reserve a free packet buffer for DAO
-   msg = openqueue_getFreePacketBuffer(COMPONENT_ICMPv6RPL);
-   if (msg==NULL) {
-      openserial_printError(COMPONENT_ICMPv6RPL,ERR_NO_FREE_PACKET_BUFFER,
+    // reserve a free packet buffer for DAO
+    msg = openqueue_getFreePacketBuffer(COMPONENT_ICMPv6RPL);
+    if (msg==NULL) {
+        openserial_printError(COMPONENT_ICMPv6RPL,ERR_NO_FREE_PACKET_BUFFER,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
-      return;
-   }
+        return;
+    }
 
-   // take ownership
-   msg->creator                             = COMPONENT_ICMPv6RPL;
-   msg->owner                               = COMPONENT_ICMPv6RPL;
+    // take ownership
+    msg->creator                             = COMPONENT_ICMPv6RPL;
+    msg->owner                               = COMPONENT_ICMPv6RPL;
 
-   // set transport information
-   msg->l4_protocol                         = IANA_ICMPv6;
-   msg->l4_sourcePortORicmpv6Type           = IANA_ICMPv6_RPL;
+    // set transport information
+    msg->l4_protocol                         = IANA_ICMPv6;
+    msg->l4_sourcePortORicmpv6Type           = IANA_ICMPv6_RPL;
 
-   // set DAO destination
-   msg->l3_destinationAdd.type=ADDR_128B;
-   memcpy(msg->l3_destinationAdd.addr_128b,icmpv6rpl_vars.dio.DODAGID,sizeof(icmpv6rpl_vars.dio.DODAGID));
+    // set DAO destination
+    msg->l3_destinationAdd.type=ADDR_128B;
+    memcpy(msg->l3_destinationAdd.addr_128b,icmpv6rpl_vars.dio.DODAGID,sizeof(icmpv6rpl_vars.dio.DODAGID));
 
-   //===== fill in packet
+    //===== fill in packet
 
-   //NOTE: limit to preferrred parent only the number of DAO transit addresses to send
+    //NOTE: limit to preferrred parent only the number of DAO transit addresses to send
 
-   //=== transit option -- from RFC 6550, page 55 - 1 transit information header per parent is required.
-   //getting only preferred parent as transit
-   numTransitParents=0;
-   icmpv6rpl_getPreferredParentEui64(&address);
-   packetfunctions_writeAddress(msg,&address,OW_BIG_ENDIAN);
-   prefix=idmanager_getMyID(ADDR_PREFIX);
-   packetfunctions_writeAddress(msg,prefix,OW_BIG_ENDIAN);
-   // update transit info fields
-   // from rfc6550 p.55 -- Variable, depending on whether or not the DODAG ParentAddress subfield is present.
-   // poipoi xv: it is not very clear if this includes all fields in the header. or as target info 2 bytes are removed.
-   // using the same pattern as in target information.
-   icmpv6rpl_vars.dao_transit.optionLength  = LENGTH_ADDR128b + sizeof(icmpv6rpl_dao_transit_ht)-2;
-   icmpv6rpl_vars.dao_transit.PathControl=0; //todo. this is to set the preference of this parent.
-   icmpv6rpl_vars.dao_transit.type=OPTION_TRANSIT_INFORMATION_TYPE;
+    //=== transit option -- from RFC 6550, page 55 - 1 transit information header per parent is required.
+    //getting only preferred parent as transit
+    numTransitParents=0;
+    icmpv6rpl_getPreferredParentEui64(&address);
+    packetfunctions_writeAddress(msg,&address,OW_BIG_ENDIAN);
+    prefix=idmanager_getMyID(ADDR_PREFIX);
+    packetfunctions_writeAddress(msg,prefix,OW_BIG_ENDIAN);
+    // update transit info fields
+    // from rfc6550 p.55 -- Variable, depending on whether or not the DODAG ParentAddress subfield is present.
+    // poipoi xv: it is not very clear if this includes all fields in the header. or as target info 2 bytes are removed.
+    // using the same pattern as in target information.
+    icmpv6rpl_vars.dao_transit.optionLength  = LENGTH_ADDR128b + sizeof(icmpv6rpl_dao_transit_ht)-2;
+    icmpv6rpl_vars.dao_transit.PathControl=0; //todo. this is to set the preference of this parent.
+    icmpv6rpl_vars.dao_transit.type=OPTION_TRANSIT_INFORMATION_TYPE;
 
-   // write transit info in packet
-   packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_dao_transit_ht));
-   memcpy(
+    // write transit info in packet
+    packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_dao_transit_ht));
+    memcpy(
           ((icmpv6rpl_dao_transit_ht*)(msg->payload)),
           &(icmpv6rpl_vars.dao_transit),
           sizeof(icmpv6rpl_dao_transit_ht)
-   );
-   numTransitParents++;
+    );
+    numTransitParents++;
 
-   //target information is required. RFC 6550 page 55.
-   /*
-   One or more Transit Information options MUST be preceded by one or
-   more RPL Target options.
-   */
+    //target information is required. RFC 6550 page 55.
+    /*
+    One or more Transit Information options MUST be preceded by one or
+    more RPL Target options.
+    */
     numTargetParents                        = 0;
     for (nbrIdx=0;nbrIdx<MAXNUMNEIGHBORS;nbrIdx++) {
-      if ((neighbors_isNeighborWithHigherDAGrank(nbrIdx))==TRUE) {
-         // this neighbor is of higher DAGrank as I am. so it is my child
+        if ((neighbors_isNeighborWithHigherDAGrank(nbrIdx))==TRUE) {
+            // this neighbor is of higher DAGrank as I am. so it is my child
 
-         // write it's address in DAO RFC6550 page 80 check point 1.
-         neighbors_getNeighborEui64(&address,ADDR_64B,nbrIdx);
-         packetfunctions_writeAddress(msg,&address,OW_BIG_ENDIAN);
-         prefix=idmanager_getMyID(ADDR_PREFIX);
-         packetfunctions_writeAddress(msg,prefix,OW_BIG_ENDIAN);
+             // write it's address in DAO RFC6550 page 80 check point 1.
+             neighbors_getNeighborEui64(&address,ADDR_64B,nbrIdx);
+             packetfunctions_writeAddress(msg,&address,OW_BIG_ENDIAN);
+             prefix=idmanager_getMyID(ADDR_PREFIX);
+             packetfunctions_writeAddress(msg,prefix,OW_BIG_ENDIAN);
 
-         // update target info fields
-         // from rfc6550 p.55 -- Variable, length of the option in octets excluding the Type and Length fields.
-         // poipoi xv: assuming that type and length fields refer to the 2 first bytes of the header
-         icmpv6rpl_vars.dao_target.optionLength  = LENGTH_ADDR128b +sizeof(icmpv6rpl_dao_target_ht) - 2; //no header type and length
-         icmpv6rpl_vars.dao_target.type  = OPTION_TARGET_INFORMATION_TYPE;
-         icmpv6rpl_vars.dao_target.flags  = 0;       //must be 0
-         icmpv6rpl_vars.dao_target.prefixLength = 128; //128 leading bits  -- full address.
+            // update target info fields
+            // from rfc6550 p.55 -- Variable, length of the option in octets excluding the Type and Length fields.
+            // poipoi xv: assuming that type and length fields refer to the 2 first bytes of the header
+            icmpv6rpl_vars.dao_target.optionLength  = LENGTH_ADDR128b +sizeof(icmpv6rpl_dao_target_ht) - 2; //no header type and length
+            icmpv6rpl_vars.dao_target.type  = OPTION_TARGET_INFORMATION_TYPE;
+            icmpv6rpl_vars.dao_target.flags  = 0;       //must be 0
+            icmpv6rpl_vars.dao_target.prefixLength = 128; //128 leading bits  -- full address.
 
-         // write transit info in packet
-         packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_dao_target_ht));
-         memcpy(
-               ((icmpv6rpl_dao_target_ht*)(msg->payload)),
-               &(icmpv6rpl_vars.dao_target),
-               sizeof(icmpv6rpl_dao_target_ht)
-         );
+            // write transit info in packet
+            packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_dao_target_ht));
+            memcpy(
+                ((icmpv6rpl_dao_target_ht*)(msg->payload)),
+                &(icmpv6rpl_vars.dao_target),
+                sizeof(icmpv6rpl_dao_target_ht)
+            );
 
-         // remember I found it
-         numTargetParents++;
-      }
-      //limit to MAX_TARGET_PARENTS the number of DAO target addresses to send
-      //section 8.2.1 pag 67 RFC6550 -- using a subset
-      // poipoi TODO base selection on ETX rather than first X.
-      if (numTargetParents>=MAX_TARGET_PARENTS) break;
-   }
-
-
-   // stop here if no parents found
-   if (numTransitParents==0) {
-      openqueue_freePacketBuffer(msg);
-      return;
-   }
-
-   icmpv6rpl_vars.dao_transit.PathSequence++; //increment path sequence.
-   // if you get here, you will send a DAO
+            // remember I found it
+            numTargetParents++;
+        }
+        //limit to MAX_TARGET_PARENTS the number of DAO target addresses to send
+        //section 8.2.1 pag 67 RFC6550 -- using a subset
+        // poipoi TODO base selection on ETX rather than first X.
+        if (numTargetParents>=MAX_TARGET_PARENTS) break;
+    }
 
 
-   //=== DAO header
-   packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_dao_ht));
-   icmpv6rpl_vars.dao.DAOSequence++;
-   memcpy(
-      ((icmpv6rpl_dao_ht*)(msg->payload)),
-      &(icmpv6rpl_vars.dao),
-      sizeof(icmpv6rpl_dao_ht)
-   );
+    // stop here if no parents found
+    if (numTransitParents==0) {
+        openqueue_freePacketBuffer(msg);
+        return;
+    }
 
-   //=== ICMPv6 header
-   packetfunctions_reserveHeaderSize(msg,sizeof(ICMPv6_ht));
-   ((ICMPv6_ht*)(msg->payload))->type       = msg->l4_sourcePortORicmpv6Type;
-   ((ICMPv6_ht*)(msg->payload))->code       = IANA_ICMPv6_RPL_DAO;
-   packetfunctions_calculateChecksum(msg,(uint8_t*)&(((ICMPv6_ht*)(msg->payload))->checksum)); //call last
+    icmpv6rpl_vars.dao_transit.PathSequence++; //increment path sequence.
+    // if you get here, you will send a DAO
 
-   //===== send
-   if (icmpv6_send(msg)==E_SUCCESS) {
-      icmpv6rpl_vars.busySendingDAO = TRUE;
-      icmpv6rpl_vars.daoSent = TRUE;
-   } else {
-      openqueue_freePacketBuffer(msg);
-   }
+
+    //=== DAO header
+    packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_dao_ht));
+    icmpv6rpl_vars.dao.DAOSequence++;
+    memcpy(
+        ((icmpv6rpl_dao_ht*)(msg->payload)),
+        &(icmpv6rpl_vars.dao),
+        sizeof(icmpv6rpl_dao_ht)
+    );
+
+    //=== ICMPv6 header
+    packetfunctions_reserveHeaderSize(msg,sizeof(ICMPv6_ht));
+    ((ICMPv6_ht*)(msg->payload))->type       = msg->l4_sourcePortORicmpv6Type;
+    ((ICMPv6_ht*)(msg->payload))->code       = IANA_ICMPv6_RPL_DAO;
+    packetfunctions_calculateChecksum(msg,(uint8_t*)&(((ICMPv6_ht*)(msg->payload))->checksum)); //call last
+
+    //===== send
+    if (icmpv6_send(msg)==E_SUCCESS) {
+        icmpv6rpl_vars.busySendingDAO = TRUE;
+        icmpv6rpl_vars.daoSent = TRUE;
+    } else {
+        openqueue_freePacketBuffer(msg);
+    }
 }
 
 void icmpv6rpl_setDIOPeriod(uint16_t dioPeriod){
