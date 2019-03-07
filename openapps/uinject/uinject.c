@@ -5,6 +5,8 @@
 #include "packetfunctions.h"
 #include "scheduler.h"
 #include "IEEE802154E.h"
+#include "schedule.h"
+#include "icmpv6rpl.h"
 #include "idmanager.h"
 
 //=========================== variables =======================================
@@ -48,87 +50,110 @@ void uinject_init(void) {
 }
 
 void uinject_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
-   openqueue_freePacketBuffer(msg);
+
+    // free the packet buffer entry
+    openqueue_freePacketBuffer(msg);
+
+    // allow send next uinject packet
+    uinject_vars.busySendingUinject = FALSE;
 }
 
 void uinject_receive(OpenQueueEntry_t* pkt) {
 
-   openqueue_freePacketBuffer(pkt);
+    openqueue_freePacketBuffer(pkt);
 
-   openserial_printError(
-      COMPONENT_UINJECT,
-      ERR_RCVD_ECHO_REPLY,
-      (errorparameter_t)0,
-      (errorparameter_t)0
-   );
+    openserial_printError(
+        COMPONENT_UINJECT,
+        ERR_RCVD_ECHO_REPLY,
+        (errorparameter_t)0,
+        (errorparameter_t)0
+    );
 }
 
 //=========================== private =========================================
 
-/**
-\note timer fired, but we don't want to execute task in ISR mode instead, push
-   task to scheduler with CoAP priority, and let scheduler take care of it.
-*/
 void uinject_timer_cb(opentimers_id_t id){
-
-   scheduler_push_task(uinject_task_cb,TASKPRIO_COAP);
+    // calling the task directly as the timer_cb function is executed in
+    // task mode by opentimer already
+    uinject_task_cb();
 }
 
 void uinject_task_cb(void) {
-   OpenQueueEntry_t*    pkt;
-   uint8_t              asnArray[5];
+    OpenQueueEntry_t*    pkt;
+    uint8_t              asnArray[5];
+    open_addr_t          parentNeighbor;
+    bool                 foundNeighbor;
 
-   // don't run if not synch
-   if (ieee154e_isSynch() == FALSE) return;
+    // don't run if not synch
+    if (ieee154e_isSynch() == FALSE) {
+        return;
+    }
 
-   // don't run on dagroot
-   if (idmanager_getIsDAGroot()) {
-      opentimers_destroy(uinject_vars.timerId);
-      return;
-   }
+    // don't run on dagroot
+    if (idmanager_getIsDAGroot()) {
+        opentimers_destroy(uinject_vars.timerId);
+        return;
+    }
 
-   // if you get here, send a packet
+    foundNeighbor = icmpv6rpl_getPreferredParentEui64(&parentNeighbor);
+    if (foundNeighbor==FALSE) {
+        return;
+    }
 
-   // get a free packet buffer
-   pkt = openqueue_getFreePacketBuffer(COMPONENT_UINJECT);
-   if (pkt==NULL) {
-      openserial_printError(
-         COMPONENT_UINJECT,
-         ERR_NO_FREE_PACKET_BUFFER,
-         (errorparameter_t)0,
-         (errorparameter_t)0
-      );
-      return;
-   }
+    if (schedule_hasManagedTxCellToNeighbor(&parentNeighbor) == FALSE) {
+        return;
+    }
 
-   pkt->owner                         = COMPONENT_UINJECT;
-   pkt->creator                       = COMPONENT_UINJECT;
-   pkt->l4_protocol                   = IANA_UDP;
-   pkt->l4_destination_port           = WKP_UDP_INJECT;
-   pkt->l4_sourcePortORicmpv6Type     = WKP_UDP_INJECT;
-   pkt->l3_destinationAdd.type        = ADDR_128B;
-   memcpy(&pkt->l3_destinationAdd.addr_128b[0],uinject_dst_addr,16);
+    if (uinject_vars.busySendingUinject==TRUE) {
+        // don't continue if I'm still sending a previous uinject packet
+        return;
+    }
 
-   // add payload
-   packetfunctions_reserveHeaderSize(pkt,sizeof(uinject_payload)-1);
-   memcpy(&pkt->payload[0],uinject_payload,sizeof(uinject_payload)-1);
+    // if you get here, send a packet
 
-   packetfunctions_reserveHeaderSize(pkt,sizeof(uint16_t));
-   pkt->payload[1] = (uint8_t)((uinject_vars.counter & 0xff00)>>8);
-   pkt->payload[0] = (uint8_t)(uinject_vars.counter & 0x00ff);
-   uinject_vars.counter++;
+    // get a free packet buffer
+    pkt = openqueue_getFreePacketBuffer(COMPONENT_UINJECT);
+    if (pkt==NULL) {
+        openserial_printError(
+            COMPONENT_UINJECT,
+            ERR_NO_FREE_PACKET_BUFFER,
+            (errorparameter_t)0,
+            (errorparameter_t)0
+        );
+        return;
+    }
 
-   packetfunctions_reserveHeaderSize(pkt,sizeof(asn_t));
-   ieee154e_getAsn(asnArray);
-   pkt->payload[0] = asnArray[0];
-   pkt->payload[1] = asnArray[1];
-   pkt->payload[2] = asnArray[2];
-   pkt->payload[3] = asnArray[3];
-   pkt->payload[4] = asnArray[4];
+    pkt->owner                         = COMPONENT_UINJECT;
+    pkt->creator                       = COMPONENT_UINJECT;
+    pkt->l4_protocol                   = IANA_UDP;
+    pkt->l4_destination_port           = WKP_UDP_INJECT;
+    pkt->l4_sourcePortORicmpv6Type     = WKP_UDP_INJECT;
+    pkt->l3_destinationAdd.type        = ADDR_128B;
+    memcpy(&pkt->l3_destinationAdd.addr_128b[0],uinject_dst_addr,16);
 
-   if ((openudp_send(pkt))==E_FAIL) {
-      openqueue_freePacketBuffer(pkt);
-   }
+    // add payload
+    packetfunctions_reserveHeaderSize(pkt,sizeof(uinject_payload)-1);
+    memcpy(&pkt->payload[0],uinject_payload,sizeof(uinject_payload)-1);
+
+    packetfunctions_reserveHeaderSize(pkt,sizeof(uint16_t));
+    pkt->payload[1] = (uint8_t)((uinject_vars.counter & 0xff00)>>8);
+    pkt->payload[0] = (uint8_t)(uinject_vars.counter & 0x00ff);
+    uinject_vars.counter++;
+
+    packetfunctions_reserveHeaderSize(pkt,sizeof(asn_t));
+    ieee154e_getAsn(asnArray);
+    pkt->payload[0] = asnArray[0];
+    pkt->payload[1] = asnArray[1];
+    pkt->payload[2] = asnArray[2];
+    pkt->payload[3] = asnArray[3];
+    pkt->payload[4] = asnArray[4];
+
+    if ((openudp_send(pkt))==E_FAIL) {
+        openqueue_freePacketBuffer(pkt);
+    } else {
+        // set busySending to TRUE
+        uinject_vars.busySendingUinject = TRUE;
+    }
 }
 
 

@@ -160,14 +160,16 @@ owerror_t cjoin_receive(OpenQueueEntry_t* msg,
     return E_FAIL;
 }
 
-//timer fired, but we don't want to execute task in ISR mode
-//instead, push task to scheduler with COAP priority, and let scheduler take care of it
 void cjoin_timer_cb(opentimers_id_t id){
-   scheduler_push_task(cjoin_task_cb,TASKPRIO_COAP);
+    // calling the task directly as the timer_cb function is executed in
+    // task mode by opentimer already
+    cjoin_task_cb();
 }
 
 void cjoin_retransmission_cb(opentimers_id_t id) {
-    scheduler_push_task(cjoin_retransmission_task_cb, TASKPRIO_COAP);
+    // calling the task directly as the timer_cb function is executed in
+    // task mode by opentimer already
+    cjoin_retransmission_task_cb();
 }
 
 void cjoin_retransmission_task_cb(void) {

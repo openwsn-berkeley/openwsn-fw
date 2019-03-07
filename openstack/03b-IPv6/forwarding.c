@@ -486,7 +486,7 @@ owerror_t forwarding_send_internal_RoutingTable(
         msg->is_cjoin_response ||
         msg->creator==COMPONENT_CJOIN
     ){
-        if (neighbors_isStableNeighbor(&(msg->l3_destinationAdd))) {
+        if (neighbors_isStableNeighbor(&(msg->l3_destinationAdd)) || msg->is_cjoin_response) {
             // IP destination is 1-hop neighbor, send directly
             packetfunctions_ip128bToMac64b(&(msg->l3_destinationAdd),&temp_prefix64btoWrite,&(msg->l2_nextORpreviousHop));
         }

@@ -180,10 +180,13 @@ void msf_timer_waitretry_cb(opentimers_id_t id){
 void msf_timer_housekeeping_cb(opentimers_id_t id){
     PORT_TIMER_WIDTH newDuration;
 
-    scheduler_push_task(msf_timer_housekeeping_task,TASKPRIO_MSF);
-
+    // update the timer period
     newDuration = openrandom_getRandomizePeriod(msf_vars.housekeepingPeriod, msf_vars.housekeepingPeriod),
     opentimers_updateDuration(msf_vars.housekeepingTimerId, newDuration);
+
+    // calling the task directly as the timer_cb function is executed in
+    // task mode by opentimer already
+    msf_timer_housekeeping_task();
 }
 
 //=========================== tasks ============================================

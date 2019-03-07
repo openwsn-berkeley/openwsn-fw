@@ -81,7 +81,9 @@ void uexpiration_receive(OpenQueueEntry_t* request) {
 }
 
 void uexpiration_timer_cb(opentimers_id_t id){
-   scheduler_push_task(uexpiration_task_cb,TASKPRIO_COAP);
+    // calling the task directly as the timer_cb function is executed in
+    // task mode by opentimer already
+    uexpiration_task_cb();
 }
 
 void uexpiration_task_cb(void) {

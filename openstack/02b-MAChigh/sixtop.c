@@ -630,17 +630,35 @@ owerror_t sixtop_send_internal(
     return E_SUCCESS;
 }
 
-// timer interrupt callbacks
+/**
+\brief sixtop sendingEb timer callback function.
+
+\note This timer callback function is executed in task mode by opentimer
+    already. No need to push a task again.
+*/
 void sixtop_sendingEb_timer_cb(opentimers_id_t id){
-    scheduler_push_task(timer_sixtop_sendEb_fired,TASKPRIO_SIXTOP);
+
+    timer_sixtop_sendEb_fired();
 }
 
+/**
+\brief sixtop maintenance timer callback function.
+
+\note This timer callback function is executed in task mode by opentimer
+    already. No need to push a task again.
+*/
 void sixtop_maintenance_timer_cb(opentimers_id_t id) {
-    scheduler_push_task(timer_sixtop_management_fired,TASKPRIO_SIXTOP);
+    timer_sixtop_management_fired();
 }
 
+/**
+\brief sixtop timeout timer callback function.
+
+\note This timer callback function is executed in task mode by opentimer
+    already. No need to push a task again.
+*/
 void sixtop_timeout_timer_cb(opentimers_id_t id) {
-    scheduler_push_task(timer_sixtop_six2six_timeout_fired,TASKPRIO_SIXTOP_TIMEOUT);
+    timer_sixtop_six2six_timeout_fired();
 }
 
 //======= EB/KA task

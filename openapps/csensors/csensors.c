@@ -276,30 +276,33 @@ owerror_t csensors_receive(
 }
 
 /**
-   \brief   Called back from opentimers when a CoAP message is received for this resource.
-      Timer fired, but we don't want to execute task in ISR mode.
-      Instead, push task to scheduler with COAP priority, and let scheduler take care of it.
+   \brief   Called back from opentimers when a CoAP message is received for
+      this resource. This timer callback function scheduled as task already
+      by OpenTimer component. No need to push another task.
+
    \param[in] id The opentimer identifier used to resolve the csensor resource associated
       parsed.
 */
 void csensors_timer_cb(opentimers_id_t id){
-   uint8_t i;
+    uint8_t i;
 
-   for(i=0;i<csensors_vars.numCsensors;i++) {
-      if (csensors_vars.csensors_resource[i].timerId == i) {
-         csensors_vars.cb_list[csensors_vars.cb_put] = i;
-         csensors_vars.cb_put = (csensors_vars.cb_put+1)%CSENSORSTASKLIST;
-         opentimers_scheduleIn(
-             csensors_vars.csensors_resource[i].timerId,
-             csensors_vars.csensors_resource[i].period,
-             TIME_MS,
-             TIMER_ONESHOT,
-             csensors_timer_cb
-         );
-         break;
-      }
-   }
-   scheduler_push_task(csensors_task_cb,TASKPRIO_COAP);
+    for(i=0;i<csensors_vars.numCsensors;i++) {
+        if (csensors_vars.csensors_resource[i].timerId == i) {
+            csensors_vars.cb_list[csensors_vars.cb_put] = i;
+            csensors_vars.cb_put = (csensors_vars.cb_put+1)%CSENSORSTASKLIST;
+            opentimers_scheduleIn(
+                csensors_vars.csensors_resource[i].timerId,
+                csensors_vars.csensors_resource[i].period,
+                TIME_MS,
+                TIMER_ONESHOT,
+                csensors_timer_cb
+            );
+            break;
+        }
+    }
+    // calling the task directly as the timer_cb function is executed in
+    // task mode by opentimer already
+    csensors_task_cb();
 }
 
 /**
