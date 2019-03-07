@@ -2922,8 +2922,6 @@ void endSlot(void) {
         // would have been set to NULL in ri9.
         // indicate  "received packet" to upper layer since we don't want to loose packets
         notif_receive(ieee154e_vars.dataReceived);
-        // free dataReceived  so corresponding RAM memory can be recycled
-        openqueue_freePacketBuffer(ieee154e_vars.dataReceived);
 
         // reset local variable
         ieee154e_vars.dataReceived = NULL;
