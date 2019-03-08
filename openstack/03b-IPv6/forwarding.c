@@ -358,7 +358,7 @@ void forwarding_receive(
             // by free the buffer.
             openserial_printError(
                      COMPONENT_FORWARDING,
-                     ERR_FORWARDING_DROPPED,
+                     ERR_FORWARDING_PACKET_DROPPED,
                      (errorparameter_t)msg->l2_nextORpreviousHop.addr_64b[6],
                      (errorparameter_t)msg->l2_nextORpreviousHop.addr_64b[7]
             );
