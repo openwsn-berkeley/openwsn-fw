@@ -15,6 +15,7 @@
 #include "neighbors.h"
 #include "cbenchmark.h"
 #include "IEEE802154E.h"
+#include "iphc.h"
 
 //=========================== defines =========================================
 
@@ -34,6 +35,7 @@ owerror_t cbenchmark_receive(OpenQueueEntry_t* msg,
 void cbenchmark_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 void cbenchmark_sendPacket(uint8_t *, uint8_t);
 owerror_t cbenchmark_parse_sendPacket(uint8_t *buf, uint8_t bufLen, cbenchmark_sendPacket_t *request);
+void cbenchmark_printSerial_packetSentReceived(uint8_t eventType, uint8_t *timestamp, uint8_t (*packetToken)[CBENCHMARK_PACKETTOKEN_LEN], open_addr_t *dest, uint8_t hopLimit);
 
 //=========================== public ==========================================
 
@@ -69,28 +71,45 @@ owerror_t cbenchmark_receive(OpenQueueEntry_t* msg,
 
     uint8_t   token[5];
     uint8_t   timestamp[5];
+    open_addr_t source;
+    open_addr_t prefix; // dummy
 
     // get the current ASN as soon as possible
     ieee154e_getAsn(timestamp);
 
-    // sanity check
-    if (msg->length < 5) {
-        // log formatting error
-            openserial_printError(
-                COMPONENT_CBENCHMARK,
-                ERR_MSG_UNKNOWN_TYPE,
-                (errorparameter_t)0,
-                (errorparameter_t)0
-            );
+    // get the source of the packet
+    packetfunctions_ip128bToMac64b(&msg->l3_sourceAdd, &prefix, &source);
+
+    // check if this is a request
+    if (
+         coap_header->Code==COAP_CODE_REQ_POST) {
+        // sanity check
+        if (msg->length < 5) {
+            // log formatting error
+                openserial_printError(
+                    COMPONENT_CBENCHMARK,
+                    ERR_MSG_UNKNOWN_TYPE,
+                    (errorparameter_t)msg->length,
+                    (errorparameter_t)msg->length
+                );
+                return E_FAIL;
+        }
+
+        // get the token from the first 5 bytes of payload
+        memcpy(token, msg->payload, 5);
+
+        // in case the request contains a No Response option, it will be handled by the
+        // underlying CoAP lib
+        cbenchmark_printSerial_packetSentReceived(STATUS_BENCHMARK_PACKETRECEIVED, timestamp, token, &source, msg->l3_hopLimit);
+        // reset packet payload
+        msg->payload                     = &(msg->packet[127]);
+        msg->length                      = 0;
+        // set the response CoAP header
+        coap_header->Code                = COAP_CODE_RESP_CHANGED;
     }
-
-    // get the token from the first 5 bytes of payload
-    memcpy(token, msg->payload, 5);
-
-    // TODO log packet received event
-
-    // in case the request contains a No Response option, it will be handled by the
-    // underlying CoAP lib
+    else { // else this is a response
+        // FIXME should this packet be logged?
+    }
     return E_SUCCESS;
 }
 
@@ -106,6 +125,7 @@ void cbenchmark_sendPacket(uint8_t *buf, uint8_t bufLen) {
     owerror_t                    outcome;
     uint8_t                      numOptions;
     uint8_t                      i;
+    uint8_t                      timestamp[5];
 
     numOptions = 0;
     i = 0;
@@ -165,6 +185,9 @@ void cbenchmark_sendPacket(uint8_t *buf, uint8_t bufLen) {
         // set the first byte of the token to packet counter
         pkt->payload[0] = i;
 
+        // get the current ASN
+        ieee154e_getAsn(timestamp);
+
         // send
         outcome = opencoap_send(
             pkt,
@@ -186,8 +209,9 @@ void cbenchmark_sendPacket(uint8_t *buf, uint8_t bufLen) {
                 (errorparameter_t)0
             );
         }
-
-        // TODO log packet sent event
+        else {
+            cbenchmark_printSerial_packetSentReceived(STATUS_BENCHMARK_PACKETSENT, timestamp, &request.token, &request.dest, IPHC_DEFAULT_HOP_LIMIT);
+        }
     }
 }
 
@@ -219,5 +243,26 @@ owerror_t cbenchmark_parse_sendPacket(uint8_t *buf, uint8_t bufLen, cbenchmark_s
     tmp++;
 
     return E_SUCCESS;
+}
+
+void cbenchmark_printSerial_packetSentReceived(uint8_t eventType, uint8_t *timestamp, uint8_t (*packetToken)[CBENCHMARK_PACKETTOKEN_LEN], open_addr_t *dest, uint8_t hopLimit) {
+    uint8_t output[5 + CBENCHMARK_PACKETTOKEN_LEN + LENGTH_ADDR64b + 1];
+    uint8_t *tmp;
+
+    tmp = output;
+
+    memcpy(tmp, timestamp, 5);
+    tmp += 5;
+
+    memcpy(tmp, packetToken, CBENCHMARK_PACKETTOKEN_LEN);
+    tmp += CBENCHMARK_PACKETTOKEN_LEN;
+
+    memcpy(tmp, dest->addr_64b, LENGTH_ADDR64b);
+    tmp += LENGTH_ADDR64b;
+
+    *tmp = hopLimit;
+    tmp++;
+
+    openserial_printStatus(eventType, output, tmp - output);
 }
 
