@@ -353,11 +353,17 @@ void forwarding_receive(
 #endif
 
         if(openqueue_isHighPriorityEntryEnough()==FALSE){
-          // after change the creator to COMPONENT_FORWARDING,
-          // there is no space for high priority packet, drop this message
-          // by free the buffer.
-          openqueue_freePacketBuffer(msg);
-          return;
+            // after change the creator to COMPONENT_FORWARDING,
+            // there is no space for high priority packet, drop this message
+            // by free the buffer.
+            openserial_printError(
+                     COMPONENT_FORWARDING,
+                     ERR_FORWARDING_DROPPED,
+                     (errorparameter_t)msg->l2_nextORpreviousHop.addr_64b[6],
+                     (errorparameter_t)msg->l2_nextORpreviousHop.addr_64b[7]
+            );
+            openqueue_freePacketBuffer(msg);
+            return;
         }
 
         if (ipv6_outer_header->next_header!=IANA_IPv6ROUTE) {

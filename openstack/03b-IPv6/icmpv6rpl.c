@@ -386,6 +386,8 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection(void) {
     dagrank_t neighborRank;
     uint32_t  tentativeDAGrank;
 
+    open_addr_t newParent;
+
     // if I'm a DAGroot, my DAGrank is always MINHOPRANKINCREASE
     if ((idmanager_getIsDAGroot())==TRUE) {
         // the dagrank is not set through setting command, set rank to MINHOPRANKINCREASE here
@@ -469,6 +471,12 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection(void) {
             neighbors_setPreferredParent(prevParentIndex, FALSE);
             // set neighbors as preferred parent
             neighbors_setPreferredParent(icmpv6rpl_vars.ParentIndex, TRUE);
+
+            // update the upstream traffic nexthop address to new parent
+            neighbors_getNeighborEui64(&newParent,ADDR_64B,icmpv6rpl_vars.ParentIndex);
+            icmpv6rpl_updateNexthopAddress(&newParent);
+
+
         } else {
             if (icmpv6rpl_vars.ParentIndex==prevParentIndex) {
                 // report on the rank change if any, not on the deletion/creation of parent
@@ -481,6 +489,10 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection(void) {
                 neighbors_setPreferredParent(prevParentIndex, FALSE);
                 // set neighbors as preferred parent
                 neighbors_setPreferredParent(icmpv6rpl_vars.ParentIndex, TRUE);
+
+                // update the upstream traffic nexthop address to new parent
+                neighbors_getNeighborEui64(&newParent,ADDR_64B,icmpv6rpl_vars.ParentIndex);
+                icmpv6rpl_updateNexthopAddress(&newParent);
             }
         }
     } else {
@@ -491,6 +503,16 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection(void) {
         icmpv6rpl_vars.rankIncrease= prevRankIncrease;
         // no change to report on
     }
+}
+
+/**
+\brief In case of parent changed, update the nexthop of the IPv6 packet in the queue
+
+\param newParent. the new parent address
+*/
+void icmpv6rpl_updateNexthopAddress(open_addr_t* newParent){
+
+    openqueue_updateNextHopPayload(newParent);
 }
 
 /**
