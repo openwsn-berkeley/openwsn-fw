@@ -10,7 +10,7 @@
 #include "opendefs.h"
 //=========================== define ==========================================
 #define CBENCHMARK_PACKETTOKEN_LEN 5
-#define CBENCHMARK_OPENBENCHMARK_COAP_PORT 5684
+#define CBENCHMARK_OPENBENCHMARK_COAP_PORT 5683
 //=========================== typedef =========================================
 
 typedef struct {
