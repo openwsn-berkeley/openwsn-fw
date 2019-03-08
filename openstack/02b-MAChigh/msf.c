@@ -335,35 +335,36 @@ bool msf_candidateRemoveCellList(
       open_addr_t* neighbor,
       uint8_t      requiredCells
    ){
-   uint8_t              i;
-   uint8_t              numCandCells;
-   slotinfo_element_t   info;
+    uint8_t              i;
+    uint8_t              numCandCells;
+    slotinfo_element_t   info;
 
-   memset(cellList,0,CELLLIST_MAX_LEN*sizeof(cellInfo_ht));
-   numCandCells    = 0;
-   for(i=0;i<schedule_getFrameLength();i++){
-      schedule_getSlotInfo(i,neighbor,&info);
-      if(info.link_type == CELLTYPE_TX){
-         cellList[numCandCells].slotoffset       = i;
-         cellList[numCandCells].channeloffset    = info.channelOffset;
-         cellList[numCandCells].isUsed           = TRUE;
-         numCandCells++;
-         if (numCandCells==CELLLIST_MAX_LEN){
-            break;
-         }
-      }
-   }
+    memset(cellList,0,CELLLIST_MAX_LEN*sizeof(cellInfo_ht));
+    numCandCells    = 0;
+    for(i=0;i<schedule_getFrameLength();i++){
+        schedule_getSlotInfo(i,&info);
+        if(info.link_type == CELLTYPE_TX){
+            cellList[numCandCells].slotoffset       = i;
+            cellList[numCandCells].channeloffset    = info.channelOffset;
+            cellList[numCandCells].isUsed           = TRUE;
+            numCandCells++;
+            if (numCandCells==CELLLIST_MAX_LEN){
+                break;
+            }
+        }
+    }
 
-   if(numCandCells<requiredCells){
-      return FALSE;
-   }else{
-      return TRUE;
-   }
+    if(numCandCells<requiredCells){
+        return FALSE;
+    }else{
+        return TRUE;
+    }
 }
 
 void msf_housekeeping(void){
 
     open_addr_t    parentNeighbor;
+    open_addr_t    nonParentNeighbor;
     bool           foundNeighbor;
     cellInfo_ht    celllist_add[CELLLIST_MAX_LEN];
     cellInfo_ht    celllist_delete[CELLLIST_MAX_LEN];
@@ -373,6 +374,8 @@ void msf_housekeeping(void){
     uint16_t       temp_slotoffset;
     uint8_t        channeloffset;
 
+    slotinfo_element_t  info;
+
     if (ieee154e_isSynch()==FALSE) {
         return;
     }
@@ -380,6 +383,30 @@ void msf_housekeeping(void){
     foundNeighbor = icmpv6rpl_getPreferredParentEui64(&parentNeighbor);
     if (foundNeighbor==FALSE) {
         return;
+    }
+
+    if (schedule_hasNonParentAutonomousTxRxCellUnicast(&parentNeighbor, &nonParentNeighbor)==TRUE){
+
+        if (schedule_hasManagedTxCellToNeighbor(&nonParentNeighbor)){
+            // send a clear request to previous
+
+            sixtop_request(
+                IANA_6TOP_CMD_CLEAR,                // code
+                &nonParentNeighbor,                  // neighbor
+                NUMCELLS_MSF,                       // number cells
+                CELLOPTIONS_MSF,                    // cellOptions
+                NULL,                               // celllist to add (not used)
+                NULL,                               // celllist to delete (not used)
+                IANA_6TISCH_SFID_MSF,               // sfid
+                0,                                  // list command offset (not used)
+                0                                   // list command maximum celllist (not used)
+            );
+            return;
+        } else {
+            // remove the non-parent autonomous TxRxUnicast cell
+
+            neighbor_removeAutonomousTxRxCellUnicast(&nonParentNeighbor);
+        }
     }
 
     if (schedule_hasAutonomousTxRxCellUnicast(&parentNeighbor)==FALSE){
@@ -395,14 +422,45 @@ void msf_housekeeping(void){
         ){
             msf_setHashCollisionFlag(TRUE);
         } else {
-            // reserve the autonomous cell to this neighbor
-            schedule_addActiveSlot(
-                slotoffset,                                 // slot offset
-                CELLTYPE_TXRX,                              // type of slot
-                TRUE,                                       // shared?
-                channeloffset,                              // channel offset
-                &(parentNeighbor)                           // neighbor
-            );
+            if (schedule_isSlotOffsetAvailable(slotoffset)){
+                // reserve the autonomous cell to this neighbor
+                schedule_addActiveSlot(
+                    slotoffset,                                 // slot offset
+                    CELLTYPE_TXRX,                              // type of slot
+                    TRUE,                                       // shared?
+                    channeloffset,                              // channel offset
+                    &(parentNeighbor)                           // neighbor
+                );
+            } else {
+                // the autonomous cell has been occupied by other slot
+                // trigger a 6P relocate packet to relocate that slot
+
+                // prepare the celllist to delete
+                schedule_getSlotInfo(slotoffset, &info);
+                memset(celllist_delete, 0, CELLLIST_MAX_LEN*sizeof(cellInfo_ht));
+                celllist_delete[0].isUsed               = TRUE;
+                celllist_delete[0].slotoffset           = slotoffset;
+                celllist_delete[0].channeloffset        = info.channelOffset;
+
+                // prepare the celllist to add
+                if (msf_candidateAddCellList(celllist_add,NUMCELLS_MSF)==FALSE){
+                    // failed to get cell list to add
+                    return;
+                }
+
+                sixtop_request(
+                    IANA_6TOP_CMD_RELOCATE,   // code
+                    &(info.address),          // neighbor
+                    NUMCELLS_MSF,             // number cells
+                    info.link_type,           // cellOptions
+                    celllist_add,             // celllist to add
+                    celllist_delete,          // celllist to delete
+                    IANA_6TISCH_SFID_MSF,     // sfid
+                    0,                        // list command offset (not used)
+                    0                         // list command maximum celllist (not used)
+                );
+                return;
+            }
         }
     }
 

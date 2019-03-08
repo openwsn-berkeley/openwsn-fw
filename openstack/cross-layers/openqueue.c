@@ -183,7 +183,7 @@ OpenQueueEntry_t* openqueue_sixtopGetReceivedPacket(void) {
 
 //======= called by IEEE80215E
 
-OpenQueueEntry_t* openqueue_macGetDownStreamPacket(open_addr_t* toNeighbor) {
+OpenQueueEntry_t* openqueue_macGet6PResponseAndDownStreamPacket(open_addr_t* toNeighbor) {
     uint8_t i;
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
@@ -206,32 +206,46 @@ OpenQueueEntry_t* openqueue_macGetDownStreamPacket(open_addr_t* toNeighbor) {
        }
     }
 
-    if (toNeighbor->type==ADDR_64B) {
-        // a neighbor is specified, look for a packet unicast to that neigbhbor
-        for (i=0;i<QUEUELENGTH;i++) {
-            if (openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
-                packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)
-            ) {
-                ENABLE_INTERRUPTS();
-                return &openqueue_vars.queue[i];
-            }
-        }
-    } else if (toNeighbor->type==ADDR_ANYCAST) {
-        // anycast case: look for a packet which is either from openbridge or forwarding component by source routing
-        for (i=0;i<QUEUELENGTH;i++) {
-            if (
-                openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
-                (
-                    openqueue_vars.queue[i].creator==COMPONENT_OPENBRIDGE ||
-                    openqueue_vars.queue[i].l3_useSourceRouting == TRUE   ||
-                    openqueue_vars.queue[i].is_cjoin_response
-                )
-            ) {
-                ENABLE_INTERRUPTS();
-                return &openqueue_vars.queue[i];
-            }
+    // look for a packet which is either from openbridge or forwarding component by source routing
+    for (i=0;i<QUEUELENGTH;i++) {
+        if (
+            openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
+            (
+                openqueue_vars.queue[i].creator==COMPONENT_OPENBRIDGE ||
+                openqueue_vars.queue[i].l3_useSourceRouting == TRUE   ||
+                openqueue_vars.queue[i].is_cjoin_response
+            )
+        ) {
+            ENABLE_INTERRUPTS();
+            return &openqueue_vars.queue[i];
         }
     }
+    ENABLE_INTERRUPTS();
+    return NULL;
+}
+
+OpenQueueEntry_t* openqueue_macGet6PRequestOnAnycast(open_addr_t* autonomousUnicastNeighbor){
+    uint8_t i;
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+
+    for (i=0;i<QUEUELENGTH;i++) {
+       if (
+           openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
+           openqueue_vars.queue[i].creator==COMPONENT_SIXTOP_RES &&
+           (
+               (
+                   autonomousUnicastNeighbor->type==ADDR_64B &&
+                   packetfunctions_sameAddress(autonomousUnicastNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop) == FALSE
+               )
+           ) &&
+           openqueue_vars.queue[i].l2_sixtop_messageType == SIXTOP_CELL_REQUEST
+       ){
+          ENABLE_INTERRUPTS();
+          return &openqueue_vars.queue[i];
+       }
+    }
+
     ENABLE_INTERRUPTS();
     return NULL;
 }
