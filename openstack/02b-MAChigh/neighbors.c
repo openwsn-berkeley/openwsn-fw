@@ -564,54 +564,7 @@ void neighbors_setNeighborNoResource(open_addr_t* address){
 
 void neighbors_setPreferredParent(uint8_t index, bool isPreferred){
 
-    uint16_t moteId;
-    uint16_t slotoffset;
-    uint16_t temp_slotoffset;
-    uint8_t  channeloffset;
-
     neighbors_vars.neighbors[index].parentPreference = isPreferred;
-
-    moteId = 256*neighbors_vars.neighbors[index].addr_64b.addr_64b[6]+\
-             neighbors_vars.neighbors[index].addr_64b.addr_64b[7];
-    slotoffset          = msf_hashFunction_getSlotoffset(moteId);
-    channeloffset       = msf_hashFunction_getChanneloffset(moteId);
-
-    if (isPreferred){
-        // the neighbor is selected as parent
-        if (
-            schedule_getAutonomousTxRxCellAnycast(&temp_slotoffset) &&
-            temp_slotoffset == slotoffset
-        ){
-            msf_setHashCollisionFlag(TRUE);
-        } else {
-            // reserve the autonomous cell to this neighbor
-            schedule_addActiveSlot(
-                slotoffset,                                 // slot offset
-                CELLTYPE_TXRX,                              // type of slot
-                TRUE,                                       // shared?
-                channeloffset,                              // channel offset
-                &(neighbors_vars.neighbors[index].addr_64b) // neighbor
-            );
-        }
-    } else {
-        // the neighbor is de-selected as parent
-        if (
-            schedule_getAutonomousTxRxCellAnycast(&temp_slotoffset) &&
-            temp_slotoffset == slotoffset
-        ){
-            msf_setHashCollisionFlag(FALSE);
-        } else {
-            // remove the autonomous cell to this neighbor
-            if (
-                schedule_hasAutonomousTxRxCellUnicast(&(neighbors_vars.neighbors[index].addr_64b))
-            ){
-                schedule_removeActiveSlot(
-                    slotoffset,                                 // slot offset
-                    &(neighbors_vars.neighbors[index].addr_64b) // neighbor
-                );
-            }
-        }
-    }
 }
 
 void neighbor_removeAutonomousTxRxCellUnicast(open_addr_t* address){

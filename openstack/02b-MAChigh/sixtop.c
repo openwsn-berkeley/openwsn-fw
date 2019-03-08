@@ -1749,9 +1749,9 @@ bool sixtop_areAvailableCellsToBeRemoved(
             if (cellList[i].isUsed){
                 memset(&info,0,sizeof(slotinfo_element_t));
                 if (type==CELLTYPE_TXRX){
-                    schedule_getSlotInfo(cellList[i].slotoffset,&anycastAddr,&info);
+                    schedule_getSlotInfo(cellList[i].slotoffset,&info);
                 } else {
-                    schedule_getSlotInfo(cellList[i].slotoffset,neighbor,&info);
+                    schedule_getSlotInfo(cellList[i].slotoffset,&info);
                 }
                 if(info.link_type != type){
                     available = FALSE;

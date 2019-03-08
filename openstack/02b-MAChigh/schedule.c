@@ -209,34 +209,35 @@ void schedule_setFrameNumber(uint8_t frameNumber) {
 \brief Get the information of a specific slot.
 
 \param slotOffset
-\param neighbor
 \param info
 */
 void  schedule_getSlotInfo(
-   slotOffset_t         slotOffset,
-   open_addr_t*         neighbor,
-   slotinfo_element_t*  info
+    slotOffset_t         slotOffset,
+    slotinfo_element_t*  info
 ){
 
-   scheduleEntry_t* slotContainer;
+    scheduleEntry_t* slotContainer;
 
-   // find an empty schedule entry container
-   slotContainer = &schedule_vars.scheduleBuf[0];
-   while (slotContainer<=&schedule_vars.scheduleBuf[schedule_vars.maxActiveSlots-1]) {
+    // find an empty schedule entry container
+    slotContainer = &schedule_vars.scheduleBuf[0];
+    while (slotContainer<=&schedule_vars.scheduleBuf[schedule_vars.maxActiveSlots-1]) {
        //check that this entry for that neighbour and timeslot is not already scheduled.
-       if (packetfunctions_sameAddress(neighbor,&(slotContainer->neighbor)) && (slotContainer->slotOffset==slotOffset)){
+       if (slotContainer->slotOffset==slotOffset){
                //it exists so this is an update.
                info->link_type                 = slotContainer->type;
                info->shared                    = slotContainer->shared;
+               info->slotOffset                = slotOffset;
                info->channelOffset             = slotContainer->channelOffset;
+               memcpy(&(info->address), &(slotContainer->neighbor), sizeof(open_addr_t));
                return; //as this is an update. No need to re-insert as it is in the same position on the list.
         }
         slotContainer++;
-   }
-   // return cell type off
-   info->link_type                 = CELLTYPE_OFF;
-   info->shared                    = FALSE;
-   info->channelOffset             = 0;//set to zero if not set.
+    }
+    // return cell type off
+    info->link_type                 = CELLTYPE_OFF;
+    info->shared                    = FALSE;
+    info->channelOffset             = 0;        //set to zero if not set.
+    memset(&(info->address), 0, sizeof(open_addr_t));
 }
 
 /**
@@ -643,6 +644,29 @@ bool schedule_hasAutonomousTxRxCellUnicast(open_addr_t* neighbor){
     return FALSE;
 }
 
+bool schedule_getAutonomousTxRxCellUnicastNeighbor(open_addr_t* neighbor){
+    uint8_t i;
+
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+
+    for(i=0;i<MAXACTIVESLOTS;i++) {
+        if(
+            schedule_vars.scheduleBuf[i].type          == CELLTYPE_TXRX &&
+            schedule_vars.scheduleBuf[i].shared                         &&
+            schedule_vars.scheduleBuf[i].neighbor.type == ADDR_64B      &&
+            packetfunctions_sameAddress(neighbor,&schedule_vars.scheduleBuf[i].neighbor)
+        ){
+            memcpy(neighbor, &schedule_vars.scheduleBuf[i].neighbor, sizeof(open_addr_t));
+            ENABLE_INTERRUPTS();
+            return TRUE;
+        }
+    }
+
+    ENABLE_INTERRUPTS();
+    return FALSE;
+}
+
 bool schedule_hasManagedTxCellToNeighbor(open_addr_t* neighbor){
     uint8_t i;
 
@@ -665,7 +689,30 @@ bool schedule_hasManagedTxCellToNeighbor(open_addr_t* neighbor){
     return FALSE;
 }
 
-bool          schedule_getAutonomousTxRxCellAnycast(uint16_t* slotoffset){
+bool schedule_hasNonParentAutonomousTxRxCellUnicast(open_addr_t* parentNeighbor, open_addr_t* nonParentNeighbor){
+    uint8_t i;
+
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+
+    for(i=0;i<MAXACTIVESLOTS;i++) {
+        if(
+            schedule_vars.scheduleBuf[i].type          == CELLTYPE_TXRX &&
+            schedule_vars.scheduleBuf[i].shared                         &&
+            schedule_vars.scheduleBuf[i].neighbor.type == ADDR_64B      &&
+            packetfunctions_sameAddress(parentNeighbor,&schedule_vars.scheduleBuf[i].neighbor) == FALSE
+        ){
+            memcpy(nonParentNeighbor,&schedule_vars.scheduleBuf[i].neighbor,sizeof(open_addr_t));
+            ENABLE_INTERRUPTS();
+            return TRUE;
+        }
+    }
+
+    ENABLE_INTERRUPTS();
+    return FALSE;
+}
+
+bool schedule_getAutonomousTxRxCellAnycast(uint16_t* slotoffset){
     uint8_t i;
 
     INTERRUPT_DECLARATION();

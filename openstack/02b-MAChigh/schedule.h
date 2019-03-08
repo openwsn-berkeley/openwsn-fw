@@ -122,7 +122,7 @@ typedef struct {
 END_PACK
 
 typedef struct {
-  uint8_t          address[LENGTH_ADDR64b];
+  open_addr_t      address;
   cellType_t       link_type;
   bool             shared;
   slotOffset_t     slotOffset;
@@ -165,7 +165,6 @@ owerror_t          schedule_addActiveSlot(
 
 void               schedule_getSlotInfo(
    slotOffset_t         slotOffset,
-   open_addr_t*         neighbor,
    slotinfo_element_t*  info
 );
 owerror_t          schedule_removeActiveSlot(
@@ -183,8 +182,11 @@ uint8_t           schedule_getNumberOfManagedTxCells(open_addr_t* neighbor);
 bool              schedule_isNumTxWrapped(open_addr_t* neighbor);
 bool              schedule_getCellsToBeRelocated(open_addr_t* neighbor, cellInfo_ht* celllist);
 bool              schedule_hasAutonomousTxRxCellUnicast(open_addr_t* neighbor);
+bool              schedule_getAutonomousTxRxCellUnicastNeighbor(open_addr_t* neighbor);
 bool              schedule_hasManagedTxCellToNeighbor(open_addr_t* neighbor);
 bool              schedule_getAutonomousTxRxCellAnycast(uint16_t* slotoffset);
+bool              schedule_hasNonParentManagedTxCell(open_addr_t* neighbor);
+bool              schedule_hasNonParentAutonomousTxRxCellUnicast(open_addr_t* neighbor, open_addr_t* nonParentNeighbor);
 
 // from IEEE802154E
 void               schedule_syncSlotOffset(slotOffset_t targetSlotOffset);

@@ -854,6 +854,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
 port_INLINE void activity_ti1ORri1(void) {
     cellType_t  cellType;
     open_addr_t neighbor;
+    open_addr_t autonomousUnicastNeighbor;
     uint8_t     i;
     uint8_t     asn[5];
     uint8_t     join_priority;
@@ -996,8 +997,15 @@ port_INLINE void activity_ti1ORri1(void) {
                             // check whether there is 6p or join request packet to send first
                             ieee154e_vars.dataToSend = openqueue_macGet6PandJoinPacket(&neighbor);
                         }
+
                         if (ieee154e_vars.dataToSend == NULL) {
-                            ieee154e_vars.dataToSend = openqueue_macGetDownStreamPacket(&neighbor);
+                            if (schedule_getAutonomousTxRxCellUnicastNeighbor(&autonomousUnicastNeighbor)==TRUE){
+                                ieee154e_vars.dataToSend = openqueue_macGet6PRequestOnAnycast(&autonomousUnicastNeighbor);
+                            }
+                        }
+
+                        if (ieee154e_vars.dataToSend == NULL) {
+                            ieee154e_vars.dataToSend = openqueue_macGet6PResponseAndDownStreamPacket(&neighbor);
                         }
                     }
                 }
