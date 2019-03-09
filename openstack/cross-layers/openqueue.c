@@ -181,6 +181,29 @@ OpenQueueEntry_t* openqueue_sixtopGetReceivedPacket(void) {
    return NULL;
 }
 
+uint8_t openqueue_getNum6PRespWithRC(uint8_t returnCode){
+
+    uint8_t i;
+    uint8_t num6Presponse;
+
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+
+    num6Presponse = 0;
+    for (i=0;i<QUEUELENGTH;i++) {
+        if (
+            openqueue_vars.queue[i].owner == COMPONENT_IEEE802154E_TO_SIXTOP  &&
+            openqueue_vars.queue[i].creator == COMPONENT_SIXTOP_RES           &&
+            openqueue_vars.queue[i].l2_sixtop_command == SIXTOP_CELL_RESPONSE &&
+            openqueue_vars.queue[i].l2_sixtop_returnCode == IANA_6TOP_RC_RESET
+        ) {
+            num6Presponse += 1;
+        }
+    }
+    ENABLE_INTERRUPTS();
+    return num6Presponse;
+}
+
 //======= called by IEEE80215E
 
 OpenQueueEntry_t* openqueue_macGet6PResponseAndDownStreamPacket(open_addr_t* toNeighbor) {
@@ -253,8 +276,8 @@ OpenQueueEntry_t* openqueue_macGet6PRequestOnAnycast(open_addr_t* autonomousUnic
 bool openqueue_isHighPriorityEntryEnough(void) {
     uint8_t i;
     uint8_t numberOfEntry;
-   INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
 
     numberOfEntry = 0;
     for (i=0;i<QUEUELENGTH;i++) {
@@ -320,6 +343,38 @@ OpenQueueEntry_t*  openqueue_macGetDIOPacket(){
     }
     ENABLE_INTERRUPTS();
     return NULL;
+}
+/**
+\Brief replace the upstream packet nexthop payload by given newNextHop address
+\param newNextHop.
+*/
+void openqueue_updateNextHopPayload(open_addr_t* newNextHop){
+
+    uint8_t i,j;
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+
+    for (i=0;i<QUEUELENGTH;i++) {
+        if (
+            openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
+            (
+                newNextHop->type==ADDR_64B &&
+                packetfunctions_sameAddress(newNextHop,&openqueue_vars.queue[i].l2_nextORpreviousHop) == FALSE
+            )
+        ){
+            if (
+                openqueue_vars.queue[i].creator >= COMPONENT_FORWARDING &&
+                openqueue_vars.queue[i].l3_useSourceRouting == FALSE
+            ) {
+                memcpy(&openqueue_vars.queue[i].l2_nextORpreviousHop, newNextHop, sizeof(open_addr_t));
+                for (j=0;j<8;j++) {
+                    *((uint8_t*)openqueue_vars.queue[i].l2_nextHop_payload+j) = newNextHop->addr_64b[j];
+                }
+            }
+        }
+    }
+
+    ENABLE_INTERRUPTS();
 }
 
 OpenQueueEntry_t*  openqueue_macGetNonJoinIPv6Packet(open_addr_t* toNeighbor){

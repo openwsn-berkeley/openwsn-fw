@@ -756,8 +756,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
             if (!isValidJoin(ieee154e_vars.dataReceived, &ieee802514_header)) {
                break;
             }
-         }
-         else { // discard other frames as we cannot decrypt without being synced
+         } else { // discard other frames as we cannot decrypt without being synced
             break;
          }
       }
