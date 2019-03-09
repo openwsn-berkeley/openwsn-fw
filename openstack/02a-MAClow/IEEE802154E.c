@@ -977,6 +977,7 @@ port_INLINE void activity_ti1ORri1(void) {
 
                         // update numcellpassed and numcellused on managed Tx cell
                         if (ieee154e_vars.dataToSend!=NULL) {
+                            ieee154e_vars.dataToSend->l2_sendOnTxCell = TRUE;
                             msf_updateCellsUsed(&neighbor);
                         }
                         msf_updateCellsPassed(&neighbor);
