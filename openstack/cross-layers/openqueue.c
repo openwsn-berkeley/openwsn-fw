@@ -181,6 +181,29 @@ OpenQueueEntry_t* openqueue_sixtopGetReceivedPacket(void) {
    return NULL;
 }
 
+uint8_t openqueue_getNum6PRespWithRC(uint8_t returnCode){
+
+    uint8_t i;
+    uint8_t num6Presponse;
+
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+
+    num6Presponse = 0;
+    for (i=0;i<QUEUELENGTH;i++) {
+        if (
+            openqueue_vars.queue[i].owner == COMPONENT_IEEE802154E_TO_SIXTOP  &&
+            openqueue_vars.queue[i].creator == COMPONENT_SIXTOP_RES           &&
+            openqueue_vars.queue[i].l2_sixtop_command == SIXTOP_CELL_RESPONSE &&
+            openqueue_vars.queue[i].l2_sixtop_returnCode == IANA_6TOP_RC_RESET
+        ) {
+            num6Presponse += 1;
+        }
+    }
+    ENABLE_INTERRUPTS();
+    return num6Presponse;
+}
+
 //======= called by IEEE80215E
 
 OpenQueueEntry_t* openqueue_macGet6PResponseAndDownStreamPacket(open_addr_t* toNeighbor) {

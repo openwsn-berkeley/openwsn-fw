@@ -43,6 +43,7 @@ void               openqueue_updateNextHopPayload(open_addr_t* newNextHop);
 // called by res
 OpenQueueEntry_t*  openqueue_sixtopGetSentPacket(void);
 OpenQueueEntry_t*  openqueue_sixtopGetReceivedPacket(void);
+uint8_t            openqueue_getNum6PRespWithRC(uint8_t returnCode);
 // called by IEEE80215E
 OpenQueueEntry_t*  openqueue_macGet6PResponseAndDownStreamPacket(open_addr_t* toNeighbor);
 OpenQueueEntry_t*  openqueue_macGet6PRequestOnAnycast(open_addr_t* autonomousUnicastNeighbor);

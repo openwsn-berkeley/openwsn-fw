@@ -21,6 +21,12 @@
 
 // in seconds: sixtop maintaince is called every 30 seconds
 #define MAINTENANCE_PERIOD        30
+/**
+ Drop the 6P request if number of 6P response with RC RESET in queue is larger
+    than MAX6PRESPONSE. Value 0 means that alway drop 6P response when the node
+    is in a 6P transcation.
+*/
+#define MAX6PRESPONSE             0
 
 //=========================== variables =======================================
 
@@ -1161,8 +1167,16 @@ void sixtop_six2six_notifyReceive(
             }
             // previous 6p transcation check
             if (sixtop_vars.six2six_state != SIX_STATE_IDLE){
-                returnCode = IANA_6TOP_RC_RESET;
-                break;
+                if (openqueue_getNum6PRespWithRC(IANA_6TOP_RC_RESET)>=MAX6PRESPONSE) {
+                    // too many 6P resp with RESET return code
+
+                    // drop the packet to avoid queue buffer overflow
+                    openqueue_freePacketBuffer(response_pkt);
+                    return;
+                } else {
+                    returnCode = IANA_6TOP_RC_RESET;
+                    break;
+                }
             }
             // metadata meaning check
             if (sixtop_vars.cb_sf_translateMetadata()!=METADATA_TYPE_FRAMEID){
