@@ -203,7 +203,7 @@ enum {
    ERR_HOP_LIMIT_REACHED               = 0x11, // packet discarded hop limit reached
    ERR_LOOP_DETECTED                   = 0x12, // loop detected due to previous rank {0} lower than current node rank {1}
    ERR_WRONG_DIRECTION                 = 0x13, // upstream packet set to be downstream, possible loop.
-   ERR_FORWARDING_PACKET_DROPPED       = 0x14, // the forwarding packet received from mote {0:x}{1:x} is dropped because of queue buffer is full
+   ERR_FORWARDING_PACKET_DROPPED       = 0x14, // packet received from mote {0:x}{1:x} is dropped
    // l2b
    ERR_NEIGHBORS_FULL                  = 0x15, // neighbors table is full (max number of neighbor is {0})
    ERR_NO_SENT_PACKET                  = 0x16, // there is no sent packet in queue

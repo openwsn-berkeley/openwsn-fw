@@ -17,6 +17,7 @@
 //=========================== definition ======================================
 
 #define DIO_PORTION 10
+#define DAO_PORTION 30
 
 //=========================== variables =======================================
 
@@ -177,7 +178,7 @@ void icmpv6rpl_init(void) {
     icmpv6rpl_vars.timerIdDAO                = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_RPL);
     opentimers_scheduleIn(
         icmpv6rpl_vars.timerIdDAO,
-        icmpv6rpl_vars.daoPeriod,
+        SLOTFRAME_LENGTH*SLOTDURATION,
         TIME_MS,
         TIMER_PERIODIC,
         icmpv6rpl_timer_DAO_cb
@@ -824,7 +825,9 @@ void icmpv6rpl_timer_DAO_cb(opentimers_id_t id) {
 */
 void icmpv6rpl_timer_DAO_task(void) {
 
-    sendDAO();
+    if(openrandom_get16b()<(0xffff/DAO_PORTION)){
+        sendDAO();
+    }
 }
 
 /**
