@@ -181,7 +181,7 @@ OpenQueueEntry_t* openqueue_sixtopGetReceivedPacket(void) {
    return NULL;
 }
 
-uint8_t openqueue_getNum6PRespWithRC(uint8_t returnCode){
+uint8_t openqueue_getNum6PResp(void){
 
     uint8_t i;
     uint8_t num6Presponse;
@@ -194,8 +194,7 @@ uint8_t openqueue_getNum6PRespWithRC(uint8_t returnCode){
         if (
             openqueue_vars.queue[i].owner == COMPONENT_IEEE802154E_TO_SIXTOP  &&
             openqueue_vars.queue[i].creator == COMPONENT_SIXTOP_RES           &&
-            openqueue_vars.queue[i].l2_sixtop_command == SIXTOP_CELL_RESPONSE &&
-            openqueue_vars.queue[i].l2_sixtop_returnCode == IANA_6TOP_RC_RESET
+            openqueue_vars.queue[i].l2_sixtop_command == SIXTOP_CELL_RESPONSE
         ) {
             num6Presponse += 1;
         }
@@ -467,6 +466,7 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry) {
    entry->l2_IEListPresent             = 0;
    entry->l2_isNegativeACK             = 0;
    entry->l2_payloadIEpresent          = 0;
+   entry->l2_sendOnTxCell              = FALSE;
    //l2-security
    entry->l2_securityLevel             = 0;
 }

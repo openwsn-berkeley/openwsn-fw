@@ -410,6 +410,7 @@ The fields which are updated are:
 void neighbors_indicateTx(
     open_addr_t* l2_dest,
     uint8_t      numTxAttempts,
+    bool         sentOnTxCell,
     bool         was_finally_acked,
     asn_t*       asnTs
 ) {
@@ -422,23 +423,30 @@ void neighbors_indicateTx(
     // loop through neighbor table
     for (i=0;i<MAXNUMNEIGHBORS;i++) {
         if (isThisRowMatching(l2_dest,i)) {
-            // handle roll-over case
+            // found the target neighbor
 
-            if (neighbors_vars.neighbors[i].numTx>(0xff-numTxAttempts)) {
-                neighbors_vars.neighbors[i].numWraps++; //counting the number of times that tx wraps.
-                neighbors_vars.neighbors[i].numTx/=2;
-                neighbors_vars.neighbors[i].numTxACK/=2;
-            }
-            // update statistics
-            neighbors_vars.neighbors[i].numTx += numTxAttempts;
-
+            // update asn if ack'ed
             if (was_finally_acked==TRUE) {
-                neighbors_vars.neighbors[i].numTxACK++;
                 memcpy(&neighbors_vars.neighbors[i].asn,asnTs,sizeof(asn_t));
             }
 
-            // numTx and numTxAck changed,, update my rank
-            icmpv6rpl_updateMyDAGrankAndParentSelection();
+            // only update numTx/numTxAck on Tx cell
+            if (sentOnTxCell) {
+                if (neighbors_vars.neighbors[i].numTx>(0xff-numTxAttempts)) {
+                    neighbors_vars.neighbors[i].numWraps++; //counting the number of times that tx wraps.
+                    neighbors_vars.neighbors[i].numTx/=2;
+                    neighbors_vars.neighbors[i].numTxACK/=2;
+                }
+                // update statistics
+                neighbors_vars.neighbors[i].numTx += numTxAttempts;
+
+                if (was_finally_acked==TRUE) {
+                    neighbors_vars.neighbors[i].numTxACK++;
+                }
+
+                // numTx and numTxAck changed,, update my rank
+                icmpv6rpl_updateMyDAGrankAndParentSelection();
+            }
             break;
         }
     }

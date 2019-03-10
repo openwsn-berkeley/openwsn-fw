@@ -92,6 +92,7 @@ void          neighbors_indicateRx(
 void          neighbors_indicateTx(
    open_addr_t*         dest,
    uint8_t              numTxAttempts,
+   bool                 sentOnTxCell,
    bool                 was_finally_acked,
    asn_t*               asnTimestamp
 );

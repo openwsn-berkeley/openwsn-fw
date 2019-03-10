@@ -26,7 +26,7 @@
     than MAX6PRESPONSE. Value 0 means that alway drop 6P response when the node
     is in a 6P transcation.
 */
-#define MAX6PRESPONSE             0
+#define MAX6PRESPONSE             1
 
 //=========================== variables =======================================
 
@@ -426,6 +426,7 @@ void task_sixtopNotifSendDone(void) {
         neighbors_indicateTx(
             &(msg->l2_nextORpreviousHop),
             msg->l2_numTxAttempts,
+            msg->l2_sendOnTxCell,
             TRUE,
             &msg->l2_asn
         );
@@ -433,6 +434,7 @@ void task_sixtopNotifSendDone(void) {
         neighbors_indicateTx(
              &(msg->l2_nextORpreviousHop),
              msg->l2_numTxAttempts,
+             msg->l2_sendOnTxCell,
              FALSE,
              &msg->l2_asn
         );
@@ -1127,6 +1129,11 @@ void sixtop_six2six_notifyReceive(
     if (type == SIXTOP_CELL_REQUEST){
         // if this is a 6p request message
 
+        // drop the packet if there are too many 6P response in the queue
+        if (openqueue_getNum6PResp()>=MAX6PRESPONSE) {
+            return;
+        }
+
         // get a free packet buffer
         response_pkt = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP_RES);
         if (response_pkt==NULL) {
@@ -1167,16 +1174,8 @@ void sixtop_six2six_notifyReceive(
             }
             // previous 6p transcation check
             if (sixtop_vars.six2six_state != SIX_STATE_IDLE){
-                if (openqueue_getNum6PRespWithRC(IANA_6TOP_RC_RESET)>=MAX6PRESPONSE) {
-                    // too many 6P resp with RESET return code
-
-                    // drop the packet to avoid queue buffer overflow
-                    openqueue_freePacketBuffer(response_pkt);
-                    return;
-                } else {
-                    returnCode = IANA_6TOP_RC_RESET;
-                    break;
-                }
+                returnCode = IANA_6TOP_RC_RESET;
+                break;
             }
             // metadata meaning check
             if (sixtop_vars.cb_sf_translateMetadata()!=METADATA_TYPE_FRAMEID){
