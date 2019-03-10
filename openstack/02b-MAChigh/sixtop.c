@@ -369,7 +369,10 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
                 icmpv6rpl_getPreferredParentEui64(&addressToWrite) == FALSE      ||
                 (
                     icmpv6rpl_getPreferredParentEui64(&addressToWrite)           &&
-                    schedule_hasAutonomousTxRxCellUnicast(&addressToWrite)== FALSE
+                    (
+                        msf_getHashCollisionFlag() == FALSE                      &&
+                        schedule_hasAutonomousTxRxCellUnicast(&addressToWrite)== FALSE
+                    )
                 )
             )
         )
@@ -673,7 +676,7 @@ void sixtop_timeout_timer_cb(opentimers_id_t id) {
 
 void timer_sixtop_sendEb_fired(void) {
 
-    if(openrandom_get16b()<(0xffff/EB_PORTION)){
+    if(openrandom_get16b()<(0xffff)){
         sixtop_sendEB();
     }
 }
@@ -717,6 +720,7 @@ port_INLINE void sixtop_sendEB(void) {
     open_addr_t addressToWrite;
 
     memset(&addressToWrite,0,sizeof(open_addr_t));
+
     if (
         (ieee154e_isSynch()==FALSE)                     ||
         (IEEE802154_security_isConfigured()==FALSE)     ||
