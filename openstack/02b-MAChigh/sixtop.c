@@ -676,7 +676,7 @@ void sixtop_timeout_timer_cb(opentimers_id_t id) {
 
 void timer_sixtop_sendEb_fired(void) {
 
-    if(openrandom_get16b()<(0xffff)){
+    if(openrandom_get16b()<(0xffff/EB_PORTION)){
         sixtop_sendEB();
     }
 }
