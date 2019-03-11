@@ -194,7 +194,7 @@ uint8_t openqueue_getNum6PResp(void){
         if (
             openqueue_vars.queue[i].owner == COMPONENT_IEEE802154E_TO_SIXTOP  &&
             openqueue_vars.queue[i].creator == COMPONENT_SIXTOP_RES           &&
-            openqueue_vars.queue[i].l2_sixtop_command == SIXTOP_CELL_RESPONSE
+            openqueue_vars.queue[i].l2_sixtop_messageType == SIXTOP_CELL_RESPONSE
         ) {
             num6Presponse += 1;
         }
