@@ -654,8 +654,7 @@ uint16_t neighbors_getLinkMetric(uint8_t index) {
 //===== maintenance
 
 void  neighbors_removeOld(void) {
-    uint8_t    i, j;
-    bool       haveParent;
+    uint8_t    i;
     PORT_TIMER_WIDTH timeSinceHeard;
     open_addr_t addressToWrite;
 
@@ -674,16 +673,20 @@ void  neighbors_removeOld(void) {
         if (neighbors_vars.neighbors[i].used==1) {
             timeSinceHeard = ieee154e_asnDiff(&neighbors_vars.neighbors[i].asn);
             if (timeSinceHeard>(2*DESYNCTIMEOUT)) {
+
+                /**
+                    don't remove neighbor marked as:
+                    - 6P no resource
+                    - in blacklist
+                    - pareferred parent
+                */
+
                 if (
-                    neighbors_vars.neighbors[i].f6PNORES    == FALSE &&
-                    neighbors_vars.neighbors[i].inBlacklist == FALSE
+                    neighbors_vars.neighbors[i].f6PNORES         == FALSE &&
+                    neighbors_vars.neighbors[i].inBlacklist      == FALSE &&
+                    neighbors_vars.neighbors[i].parentPreference == 0
                 ){
                     removeNeighbor(i);
-                }
-                haveParent = icmpv6rpl_getPreferredParentIndex(&j);
-                if (haveParent && (i==j)) { // this is our preferred parent, carefully!
-                    icmpv6rpl_killPreferredParent();
-                    icmpv6rpl_updateMyDAGrankAndParentSelection();
                 }
             }
         }
@@ -782,10 +785,6 @@ bool isNeighbor(open_addr_t* neighbor) {
 
 void removeNeighbor(uint8_t neighborIndex) {
 
-    uint16_t moteId;
-    uint16_t slotoffset;
-    uint16_t temp_slotoffset;
-
     neighbors_vars.neighbors[neighborIndex].used                      = FALSE;
     neighbors_vars.neighbors[neighborIndex].parentPreference          = 0;
     neighbors_vars.neighbors[neighborIndex].stableNeighbor            = FALSE;
@@ -802,26 +801,6 @@ void removeNeighbor(uint8_t neighborIndex) {
     neighbors_vars.neighbors[neighborIndex].sequenceNumber            = 0;
     neighbors_vars.neighbors[neighborIndex].backoffExponenton         = MINBE-1;;
     neighbors_vars.neighbors[neighborIndex].backoff                   = 0;
-
-    if (
-        schedule_hasAutonomousTxRxCellUnicast(&(neighbors_vars.neighbors[neighborIndex].addr_64b))
-    ){
-        moteId = 256*neighbors_vars.neighbors[neighborIndex].addr_64b.addr_64b[6]+\
-                     neighbors_vars.neighbors[neighborIndex].addr_64b.addr_64b[7];
-        slotoffset = msf_hashFunction_getSlotoffset(moteId);
-        if (
-            schedule_getAutonomousTxRxCellAnycast(&temp_slotoffset) &&
-            slotoffset == temp_slotoffset
-        ) {
-            msf_setHashCollisionFlag(FALSE);
-        } else {
-            schedule_removeActiveSlot(
-                slotoffset,                                         // slot offset
-                &(neighbors_vars.neighbors[neighborIndex].addr_64b) // neighbor
-            );
-        }
-    }
-
     neighbors_vars.neighbors[neighborIndex].addr_64b.type             = ADDR_NONE;
 }
 
