@@ -1491,7 +1491,6 @@ void sixtop_six2six_notifyReceive(
 
     if (type == SIXTOP_CELL_RESPONSE) {
         // this is a 6p response message
-        neighbors_updateSequenceNumber(&(pkt->l2_nextORpreviousHop));
 
         // if the code is SUCCESS
         if (code == IANA_6TOP_RC_SUCCESS || code == IANA_6TOP_RC_EOL){
@@ -1515,6 +1514,7 @@ void sixtop_six2six_notifyReceive(
                     &(pkt->l2_nextORpreviousHop), // neighbor that cells to be added to
                     sixtop_vars.cellOptions       // cell options
                 );
+                neighbors_updateSequenceNumber(&(pkt->l2_nextORpreviousHop));
                 break;
             case SIX_STATE_WAIT_DELETERESPONSE:
                 sixtop_removeCells(
@@ -1523,6 +1523,7 @@ void sixtop_six2six_notifyReceive(
                     &(pkt->l2_nextORpreviousHop),
                     sixtop_vars.cellOptions
                 );
+                neighbors_updateSequenceNumber(&(pkt->l2_nextORpreviousHop));
                 break;
             case SIX_STATE_WAIT_RELOCATERESPONSE:
                 i = 0;
@@ -1549,6 +1550,7 @@ void sixtop_six2six_notifyReceive(
                     &(pkt->l2_nextORpreviousHop), // neighbor that cells to be added to
                     sixtop_vars.cellOptions       // cell options
                 );
+                neighbors_updateSequenceNumber(&(pkt->l2_nextORpreviousHop));
                 break;
             case SIX_STATE_WAIT_COUNTRESPONSE:
                 numCells  = *((uint8_t*)(pkt->payload)+ptr);
@@ -1560,6 +1562,7 @@ void sixtop_six2six_notifyReceive(
                     (errorparameter_t)numCells,
                     (errorparameter_t)sixtop_vars.six2six_state
                 );
+                neighbors_updateSequenceNumber(&(pkt->l2_nextORpreviousHop));
                 break;
             case SIX_STATE_WAIT_LISTRESPONSE:
                 i = 0;
@@ -1581,6 +1584,7 @@ void sixtop_six2six_notifyReceive(
                     (errorparameter_t)celllist_list[0].slotoffset,
                     (errorparameter_t)celllist_list[1].slotoffset
                 );
+                neighbors_updateSequenceNumber(&(pkt->l2_nextORpreviousHop));
                 break;
             case SIX_STATE_WAIT_CLEARRESPONSE:
                 schedule_removeAllManagedUnicastCellsToNeighbor(
@@ -1590,7 +1594,13 @@ void sixtop_six2six_notifyReceive(
                 neighbors_resetSequenceNumber(&(pkt->l2_nextORpreviousHop));
                 break;
             default:
-                // should neven happen
+                // The sixtop response arrived after 6P TIMEOUT.
+
+
+                // it's a duplicated response.
+
+                openqueue_remove6PrequestToNeighbor(&(pkt->l2_nextORpreviousHop));
+
                 break;
             }
         } else {
