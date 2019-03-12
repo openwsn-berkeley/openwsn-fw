@@ -425,6 +425,10 @@ void neighbors_indicateTx(
         if (isThisRowMatching(l2_dest,i)) {
             // found the target neighbor
 
+            // reset backoff variable
+            neighbors_vars.neighbors[i].backoffExponenton     = MINBE-1;
+            neighbors_vars.neighbors[i].backoff               = 0;
+
             // update asn if ack'ed
             if (was_finally_acked==TRUE) {
                 memcpy(&neighbors_vars.neighbors[i].asn,asnTs,sizeof(asn_t));
