@@ -9,6 +9,8 @@
 #include "icmpv6rpl.h"
 #include "idmanager.h"
 
+#include "msf.h"
+
 //=========================== variables =======================================
 
 uinject_vars_t uinject_vars;
@@ -81,6 +83,7 @@ void uinject_timer_cb(opentimers_id_t id){
 void uinject_task_cb(void) {
     OpenQueueEntry_t*    pkt;
     uint8_t              asnArray[5];
+    uint8_t              numCellsUsed;
     open_addr_t          parentNeighbor;
     bool                 foundNeighbor;
 
@@ -147,6 +150,10 @@ void uinject_task_cb(void) {
     pkt->payload[2] = asnArray[2];
     pkt->payload[3] = asnArray[3];
     pkt->payload[4] = asnArray[4];
+    
+    packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
+    numCellsUsed = msf_getPreviousNumCellsUsed();
+    pkt->payload[0] = numCellsUsed;
 
     if ((openudp_send(pkt))==E_FAIL) {
         openqueue_freePacketBuffer(pkt);

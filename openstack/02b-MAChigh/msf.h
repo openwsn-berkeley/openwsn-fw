@@ -37,6 +37,8 @@ typedef struct {
     uint16_t             housekeepingPeriod;
     opentimers_id_t      waitretryTimerId;
     bool                 waitretry;
+
+    uint8_t              previousNumCellsUsed;
 } msf_vars_t;
 
 //=========================== module variables ================================
@@ -67,6 +69,8 @@ uint8_t msf_hashFunction_getChanneloffset(uint16_t moteId);
 
 void    msf_setHashCollisionFlag(bool isCollision);
 bool    msf_getHashCollisionFlag(void);
+
+uint8_t msf_getPreviousNumCellsUsed(void);
 /**
 \}
 \}

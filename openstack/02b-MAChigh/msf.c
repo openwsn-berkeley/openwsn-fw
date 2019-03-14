@@ -81,6 +81,9 @@ void    msf_updateCellsPassed(open_addr_t* neighbor){
 
     msf_vars.numCellsPassed++;
     if (msf_vars.numCellsPassed == MAX_NUMCELLS){
+
+        msf_vars.previousNumCellsUsed = msf_vars.numCellsUsed;
+
         if (msf_vars.numCellsUsed > LIM_NUMCELLSUSED_HIGH){
             scheduler_push_task(msf_trigger6pAdd,TASKPRIO_MSF);
         }
@@ -513,4 +516,8 @@ void    msf_setHashCollisionFlag(bool isCollision){
 }
 bool    msf_getHashCollisionFlag(void){
     return msf_vars.f_hashCollision;
+}
+
+uint8_t msf_getPreviousNumCellsUsed(void){
+    return msf_vars.previousNumCellsUsed;
 }
