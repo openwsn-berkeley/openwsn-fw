@@ -82,10 +82,10 @@ void    msf_updateCellsPassed(open_addr_t* neighbor){
     msf_vars.numCellsPassed++;
     if (msf_vars.numCellsPassed == MAX_NUMCELLS){
         if (msf_vars.numCellsUsed > LIM_NUMCELLSUSED_HIGH){
-            msf_trigger6pAdd();
+            scheduler_push_task(msf_trigger6pAdd,TASKPRIO_MSF);
         }
         if (msf_vars.numCellsUsed < LIM_NUMCELLSUSED_LOW){
-            msf_trigger6pDelete();
+            scheduler_push_task(msf_trigger6pDelete,TASKPRIO_MSF);
         }
         msf_vars.numCellsPassed = 0;
         msf_vars.numCellsUsed   = 0;
