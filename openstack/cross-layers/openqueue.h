@@ -44,6 +44,7 @@ void               openqueue_updateNextHopPayload(open_addr_t* newNextHop);
 OpenQueueEntry_t*  openqueue_sixtopGetSentPacket(void);
 OpenQueueEntry_t*  openqueue_sixtopGetReceivedPacket(void);
 uint8_t            openqueue_getNum6PResp(void);
+uint8_t            openqueue_getNum6PReq(open_addr_t* neighbor);
 void               openqueue_remove6PrequestToNeighbor(open_addr_t* neighbor);
 // called by IEEE80215E
 OpenQueueEntry_t*  openqueue_macGet6PResponseAndDownStreamPacket(open_addr_t* toNeighbor);

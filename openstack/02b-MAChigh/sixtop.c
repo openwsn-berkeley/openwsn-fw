@@ -191,6 +191,11 @@ owerror_t sixtop_request(
         return E_FAIL;
     }
 
+    if (openqueue_getNum6PReq(neighbor)>0){
+        // remove previous request as it's not sent out
+        openqueue_remove6PrequestToNeighbor(neighbor);
+    }
+
     // get a free packet buffer
     pkt = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP_RES);
     if (pkt==NULL) {

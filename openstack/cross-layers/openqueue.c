@@ -181,6 +181,29 @@ OpenQueueEntry_t* openqueue_sixtopGetReceivedPacket(void) {
    return NULL;
 }
 
+uint8_t openqueue_getNum6PReq(open_addr_t* neighbor){
+
+    uint8_t i;
+    uint8_t num6Prequest;
+
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+
+    num6Prequest = 0;
+    for (i=0;i<QUEUELENGTH;i++) {
+        if (
+            openqueue_vars.queue[i].owner   == COMPONENT_IEEE802154E_TO_SIXTOP  &&
+            openqueue_vars.queue[i].creator == COMPONENT_SIXTOP_RES             &&
+            openqueue_vars.queue[i].l2_sixtop_messageType == SIXTOP_CELL_REQUEST&&
+            packetfunctions_sameAddress(neighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)
+        ) {
+            num6Prequest += 1;
+        }
+    }
+    ENABLE_INTERRUPTS();
+    return num6Prequest;
+}
+
 uint8_t openqueue_getNum6PResp(void){
 
     uint8_t i;
