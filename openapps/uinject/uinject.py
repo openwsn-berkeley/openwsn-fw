@@ -14,7 +14,7 @@ NUM_CELLS_USAGE_LOW     = 16
 
 SLOTDURATION            = 0.02 # second
 
-EXP_DURATION      = 3 # in hour
+EXP_DURATION            = 3 # in hour
 mote_counter_asn_cellusage = {}
 
 # get data from file?
@@ -32,6 +32,9 @@ else:
     raw_input("Press Enter at the same time when network starts...")
     network_start_time = time.time()
     print "Network starts at {0}\n".format(time.ctime(network_start_time))
+    
+    with open('network_start_time.txt','a') as f:
+        f.write(str(network_start_time))
 
     # open socket
     socket_handler = socket.socket(socket.AF_INET6,socket.SOCK_DGRAM)
@@ -130,7 +133,7 @@ for mote,data in mote_counter_asn_cellusage.items():
 # pdr
 fig, ax = plt.subplots()
 ax.bar(num_node_list,node_e2e_reliability)
-ax.set_xlabel('nodes')
+# ax.set_xlabel('nodes')
 ax.set_xticks(num_node_list)
 ax.set_xticklabels(node_list_label, rotation=90)
 ax.set_ylabel('end-to-end reliability')
@@ -140,7 +143,7 @@ plt.clf()
 # latency
 fig, ax = plt.subplots()
 ax.bar(num_node_list,node_e2e_avg_latency)
-ax.set_xlabel('nodes')
+# ax.set_xlabel('nodes')
 ax.set_xticks(num_node_list)
 ax.set_xticklabels(node_list_label, rotation=90)
 ax.set_ylabel('end-to-end latency')
@@ -155,7 +158,7 @@ plt.text(len(num_node_list)/2, 0.77, 'LIM_NUMCELLSUSED_HIGH', color='red')
 ax.plot(num_node_list,node_avg_cell_usage_LOW,'r-')
 plt.text(len(num_node_list)/2, 0.20, 'LIM_NUMCELLSUSED_LOW', color='red')
 ax.plot(num_node_list,node_avg_cell_usage,'b-^')
-ax.set_xlabel('nodes')
+# ax.set_xlabel('nodes')
 ax.set_xticks(num_node_list)
 ax.set_xticklabels(node_list_label, rotation=90)
 ax.set_ylabel('node cell usage')
