@@ -353,6 +353,8 @@ void cjoin_setIsJoined(bool newValue) {
         openserial_printInfo(COMPONENT_CJOIN, ERR_JOINED,
                              (errorparameter_t)0,
                              (errorparameter_t)0);
+
+        debugPrint_joined();
     }
 }
 

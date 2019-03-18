@@ -382,10 +382,6 @@ void task_openserial_debugPrint(void) {
             if (debugPrint_kaPeriod()==TRUE) {
                 break;
             }
-        case STATUS_JOINED:
-            if (debugPrint_joined()==TRUE) {
-                break;
-            }
         default:
             debugPrintCounter=0;
     }
