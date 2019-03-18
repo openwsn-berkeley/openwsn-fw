@@ -63,10 +63,14 @@ else:
         if mote not in mote_counter_asn_cellusage.keys():
             mote_counter_asn_cellusage[mote] = {}
             mote_counter_asn_cellusage[mote]['counter']      = []
+            mote_counter_asn_cellusage[mote]['arriveTime']   = []
+            mote_counter_asn_cellusage[mote]['asnBytes']     = []
             mote_counter_asn_cellusage[mote]['latency']      = []
             mote_counter_asn_cellusage[mote]['numCellsUsed'] = []
         
         mote_counter_asn_cellusage[mote]['counter'].append(counter)
+        mote_counter_asn_cellusage[mote]['arriveTime'].append(time.time())
+        mote_counter_asn_cellusage[mote]['asnBytes'].append(asnBytes)
         mote_counter_asn_cellusage[mote]['latency'].append(time.time()-asn*SLOTDURATION-network_start_time)
         mote_counter_asn_cellusage[mote]['numCellsUsed'].append(numCellsUsed)
         
