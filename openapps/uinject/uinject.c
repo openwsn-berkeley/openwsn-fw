@@ -150,10 +150,14 @@ void uinject_task_cb(void) {
     pkt->payload[2] = asnArray[2];
     pkt->payload[3] = asnArray[3];
     pkt->payload[4] = asnArray[4];
-    
+
     packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
     numCellsUsed = msf_getPreviousNumCellsUsed();
     pkt->payload[0] = numCellsUsed;
+
+    packetfunctions_reserveHeaderSize(pkt,sizeof(uint16_t));
+    pkt->payload[1] = (uint8_t)(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
+    pkt->payload[0] = (uint8_t)(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
 
     if ((openudp_send(pkt))==E_FAIL) {
         openqueue_freePacketBuffer(pkt);
