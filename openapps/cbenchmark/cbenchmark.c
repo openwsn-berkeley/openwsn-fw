@@ -35,7 +35,7 @@ owerror_t cbenchmark_receive(OpenQueueEntry_t* msg,
 void cbenchmark_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 void cbenchmark_sendPacket(uint8_t *, uint8_t);
 owerror_t cbenchmark_parse_sendPacket(uint8_t *buf, uint8_t bufLen, cbenchmark_sendPacket_t *request);
-void cbenchmark_printSerial_packetSentReceived(uint8_t eventType, uint8_t *timestamp, uint8_t (*packetToken)[CBENCHMARK_PACKETTOKEN_LEN], open_addr_t *dest, uint8_t hopLimit);
+void cbenchmark_printSerial_packetSentReceived(uint8_t eventType, uint8_t *timestamp, uint8_t *packetToken, open_addr_t *dest, uint8_t hopLimit);
 
 //=========================== public ==========================================
 
@@ -210,7 +210,7 @@ void cbenchmark_sendPacket(uint8_t *buf, uint8_t bufLen) {
             );
         }
         else {
-            cbenchmark_printSerial_packetSentReceived(STATUS_BENCHMARK_PACKETSENT, timestamp, &request.token, &request.dest, IPHC_DEFAULT_HOP_LIMIT);
+            cbenchmark_printSerial_packetSentReceived(STATUS_BENCHMARK_PACKETSENT, timestamp, request.token, &request.dest, IPHC_DEFAULT_HOP_LIMIT);
         }
     }
 }
@@ -245,7 +245,7 @@ owerror_t cbenchmark_parse_sendPacket(uint8_t *buf, uint8_t bufLen, cbenchmark_s
     return E_SUCCESS;
 }
 
-void cbenchmark_printSerial_packetSentReceived(uint8_t eventType, uint8_t *timestamp, uint8_t (*packetToken)[CBENCHMARK_PACKETTOKEN_LEN], open_addr_t *dest, uint8_t hopLimit) {
+void cbenchmark_printSerial_packetSentReceived(uint8_t eventType, uint8_t *timestamp, uint8_t *packetToken, open_addr_t *dest, uint8_t hopLimit) {
     uint8_t output[5 + CBENCHMARK_PACKETTOKEN_LEN + LENGTH_ADDR64b + 1];
     uint8_t *tmp;
 
