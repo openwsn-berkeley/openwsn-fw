@@ -30,6 +30,7 @@
 #include "debugpins.h"
 #include "radio.h"
 #include "packetfunctions.h"
+#include "eui64.h"
 
 //=========================== variables =======================================
 
@@ -276,15 +277,19 @@ owerror_t openserial_printBenchmark(
 ) {
     uint8_t i;
     uint8_t asn[5];
+    uint8_t source[8];
 
     // retrieve ASN
     ieee154e_getAsn(asn);
+    eui64_get(source);
 
     outputHdlcOpen();
 
     outputHdlcWrite(SERFRAME_MOTE2PC_BENCHMARK);
-    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
-    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+
+    for (i=0;i<8;i++){
+        outputHdlcWrite(source[i]);
+    }
 
     // event
     outputHdlcWrite(statusElement);
