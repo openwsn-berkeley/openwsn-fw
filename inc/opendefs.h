@@ -113,9 +113,9 @@ enum {
 
 // benchmarking events
 enum {
-   BENCHMARK_EVENT_JOINED              =   0,
-   BENCHMARK_EVENT_PACKETSENT          =   1,
-   BENCHMARK_EVENT_PACKETRECEIVED      =   2,
+   BENCHMARK_EVENT_PACKETSENT          =   0,
+   BENCHMARK_EVENT_PACKETRECEIVED      =   1,
+   BENCHMARK_EVENT_JOINED              =   2,
    BENCHMARK_EVENT_BANDWIDTHASSIGNED   =   3,
    BENCHMARK_EVENT_MAX                 =   4,
 };
