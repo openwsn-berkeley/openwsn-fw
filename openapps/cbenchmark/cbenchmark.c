@@ -35,7 +35,7 @@ owerror_t cbenchmark_receive(OpenQueueEntry_t* msg,
 void cbenchmark_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 void cbenchmark_sendPacket(uint8_t *, uint8_t);
 owerror_t cbenchmark_parse_sendPacket(uint8_t *buf, uint8_t bufLen, cbenchmark_sendPacket_t *request);
-void cbenchmark_printSerial_packetSentReceived(uint8_t eventType, uint8_t *timestamp, uint8_t *packetToken, open_addr_t *dest, uint8_t hopLimit);
+void cbenchmark_printSerial_packetSentReceived(uint8_t eventType, uint8_t *packetToken, open_addr_t *dest, uint8_t hopLimit);
 
 //=========================== public ==========================================
 
@@ -100,7 +100,7 @@ owerror_t cbenchmark_receive(OpenQueueEntry_t* msg,
 
         // in case the request contains a No Response option, it will be handled by the
         // underlying CoAP lib
-        cbenchmark_printSerial_packetSentReceived(STATUS_BENCHMARK_PACKETRECEIVED, timestamp, token, &source, msg->l3_hopLimit);
+        cbenchmark_printSerial_packetSentReceived(STATUS_ASYNC_BENCHMARK_PACKETRECEIVED, token, &source, msg->l3_hopLimit);
         // reset packet payload
         msg->payload                     = &(msg->packet[127]);
         msg->length                      = 0;
@@ -210,7 +210,7 @@ void cbenchmark_sendPacket(uint8_t *buf, uint8_t bufLen) {
             );
         }
         else {
-            cbenchmark_printSerial_packetSentReceived(STATUS_BENCHMARK_PACKETSENT, timestamp, request.token, &request.dest, IPHC_DEFAULT_HOP_LIMIT);
+            cbenchmark_printSerial_packetSentReceived(STATUS_ASYNC_BENCHMARK_PACKETSENT, request.token, &request.dest, IPHC_DEFAULT_HOP_LIMIT);
         }
     }
 }
@@ -245,14 +245,11 @@ owerror_t cbenchmark_parse_sendPacket(uint8_t *buf, uint8_t bufLen, cbenchmark_s
     return E_SUCCESS;
 }
 
-void cbenchmark_printSerial_packetSentReceived(uint8_t eventType, uint8_t *timestamp, uint8_t *packetToken, open_addr_t *dest, uint8_t hopLimit) {
+void cbenchmark_printSerial_packetSentReceived(uint8_t eventType, uint8_t *packetToken, open_addr_t *dest, uint8_t hopLimit) {
     uint8_t output[5 + CBENCHMARK_PACKETTOKEN_LEN + LENGTH_ADDR64b + 1];
     uint8_t *tmp;
 
     tmp = output;
-
-    memcpy(tmp, timestamp, 5);
-    tmp += 5;
 
     memcpy(tmp, packetToken, CBENCHMARK_PACKETTOKEN_LEN);
     tmp += CBENCHMARK_PACKETTOKEN_LEN;
@@ -263,6 +260,6 @@ void cbenchmark_printSerial_packetSentReceived(uint8_t eventType, uint8_t *times
     *tmp = hopLimit;
     tmp++;
 
-    openserial_printStatus(eventType, output, tmp - output);
+    openserial_printBenchmark(eventType, output, tmp - output);
 }
 
