@@ -331,8 +331,6 @@ bool cjoin_getIsJoined(void) {
 }
 
 void cjoin_setIsJoined(bool newValue) {
-    uint8_t array[5];
-    asn_t joinAsn;
 
     if (cjoin_vars.isJoined == newValue) {
         return;
@@ -340,21 +338,13 @@ void cjoin_setIsJoined(bool newValue) {
 
     cjoin_vars.isJoined = newValue;
 
-    // Update Join ASN value
-    ieee154e_getAsn(array);
-    joinAsn.bytes0and1           = ((uint16_t) array[1] << 8) | ((uint16_t) array[0]);
-    joinAsn.bytes2and3           = ((uint16_t) array[3] << 8) | ((uint16_t) array[2]);
-    joinAsn.byte4                = array[4];
-
-    idmanager_setJoinAsn(&joinAsn);
-
     if (newValue == TRUE) {
         // log the info
         openserial_printInfo(COMPONENT_CJOIN, ERR_JOINED,
                              (errorparameter_t)0,
                              (errorparameter_t)0);
 
-        debugPrint_joined();
+        openserial_printBenchmark(BENCHMARK_EVENT_JOINED, NULL, 0);
     }
 }
 

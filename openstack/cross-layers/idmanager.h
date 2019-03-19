@@ -44,7 +44,6 @@ typedef struct {
    open_addr_t   myPrefix;
    bool          slotSkip;
    uint8_t       joinKey[16];
-   asn_t         joinAsn;
 } idmanager_vars_t;
 
 //=========================== prototypes ======================================
@@ -58,11 +57,9 @@ owerror_t    idmanager_setMyID(open_addr_t* newID);
 bool         idmanager_isMyAddress(open_addr_t* addr);
 void         idmanager_triggerAboutRoot(void);
 void         idmanager_setJoinKey(uint8_t *key);
-void         idmanager_setJoinAsn(asn_t *asn);
 void         idmanager_getJoinKey(uint8_t **pKey);
 
 bool         debugPrint_id(void);
-bool         debugPrint_joined(void);
 /**
 \}
 \}

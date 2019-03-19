@@ -273,10 +273,6 @@ void idmanager_getJoinKey(uint8_t **pKey) {
     return;
 }
 
-void idmanager_setJoinAsn(asn_t* asn) {
-    memcpy(&idmanager_vars.joinAsn, asn, sizeof(asn_t));
-}
-
 /**
 \brief Trigger this module to print status information, over serial.
 
@@ -295,15 +291,6 @@ bool debugPrint_id(void) {
    memcpy(output.myPrefix,idmanager_vars.myPrefix.prefix,8);
 
    openserial_printStatus(STATUS_ID,(uint8_t*)&output,sizeof(debugIDManagerEntry_t));
-   return TRUE;
-}
-
-bool debugPrint_joined(void) {
-   asn_t output;
-   output.byte4         =  idmanager_vars.joinAsn.byte4;
-   output.bytes2and3    =  idmanager_vars.joinAsn.bytes2and3;
-   output.bytes0and1    =  idmanager_vars.joinAsn.bytes0and1;
-   openserial_printStatus(STATUS_JOINED,(uint8_t*)&output,sizeof(output));
    return TRUE;
 }
 

@@ -107,9 +107,17 @@ enum {
    STATUS_BACKOFF                      =  7,
    STATUS_QUEUE                        =  8,
    STATUS_NEIGHBORS                    =  9,
-   STATUS_KAPERIOD                     = 10,
-   STATUS_JOINED                       = 11,
-   STATUS_MAX                          = 12,
+   STATUS_KAPERIOD                     =  10,
+   STATUS_MAX                          =  11,
+};
+
+// benchmarking events
+enum {
+   BENCHMARK_EVENT_JOINED              =   0,
+   BENCHMARK_EVENT_PACKETSENT          =   1,
+   BENCHMARK_EVENT_PACKETRECEIVED      =   2,
+   BENCHMARK_EVENT_BANDWIDTHASSIGNED   =   3,
+   BENCHMARK_EVENT_MAX                 =   4,
 };
 
 //component identifiers
