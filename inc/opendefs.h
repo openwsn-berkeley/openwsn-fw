@@ -115,9 +115,10 @@ enum {
 enum {
    BENCHMARK_EVENT_PACKETSENT          =   0,
    BENCHMARK_EVENT_PACKETRECEIVED      =   1,
-   BENCHMARK_EVENT_JOINED              =   2,
-   BENCHMARK_EVENT_BANDWIDTHASSIGNED   =   3,
-   BENCHMARK_EVENT_MAX                 =   4,
+   BENCHMARK_EVENT_SYNCHRONIZED        =   2,
+   BENCHMARK_EVENT_JOINED              =   3,
+   BENCHMARK_EVENT_BANDWIDTHASSIGNED   =   4,
+   BENCHMARK_EVENT_MAX                 =   5,
 };
 
 //component identifiers
