@@ -269,6 +269,44 @@ owerror_t openserial_printSniffedPacket(uint8_t* buffer, uint8_t length, uint8_t
     return E_SUCCESS;
 }
 
+owerror_t openserial_printBenchmark(
+    uint8_t             statusElement,
+    uint8_t*            buffer,
+    uint8_t             length
+) {
+    uint8_t i;
+    uint8_t asn[5];
+
+    // retrieve ASN
+    ieee154e_getAsn(asn);
+
+    outputHdlcOpen();
+
+    outputHdlcWrite(SERFRAME_MOTE2PC_BENCHMARK);
+    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
+    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+
+    // event
+    outputHdlcWrite(statusElement);
+
+    // timestamp
+    outputHdlcWrite(asn[0]);
+    outputHdlcWrite(asn[1]);
+    outputHdlcWrite(asn[2]);
+    outputHdlcWrite(asn[3]);
+    outputHdlcWrite(asn[4]);
+
+    for (i=0;i<length;i++){
+        outputHdlcWrite(buffer[i]);
+    }
+    outputHdlcClose();
+
+    // start TX'ing
+    openserial_flush();
+
+    return E_SUCCESS;
+}
+
 owerror_t openserial_print_uint32_t(uint32_t value) {
 #ifdef OPENSERIAL_PRINTF
     uint8_t  i;

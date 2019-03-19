@@ -48,6 +48,7 @@
 #define SERFRAME_MOTE2PC_CRITICAL                ((uint8_t)'C')
 #define SERFRAME_MOTE2PC_SNIFFED_PACKET          ((uint8_t)'P')
 #define SERFRAME_MOTE2PC_PRINTF                  ((uint8_t)'F')
+#define SERFRAME_MOTE2PC_BENCHMARK               ((uint8_t)'B')
 
 // frames sent PC->mote
 #define SERFRAME_PC2MOTE_SETROOT                 ((uint8_t)'R')
@@ -160,6 +161,11 @@ owerror_t openserial_printSniffedPacket(
     uint8_t*            buffer,
     uint8_t             length,
     uint8_t             channel
+);
+owerror_t openserial_printBenchmark(
+    uint8_t             statusElement,
+    uint8_t*            buffer,
+    uint8_t             length
 );
 
 void      task_openserial_debugPrint(void);
