@@ -118,7 +118,8 @@ enum {
    BENCHMARK_EVENT_SYNCHRONIZED        =   2,
    BENCHMARK_EVENT_JOINED              =   3,
    BENCHMARK_EVENT_BANDWIDTHASSIGNED   =   4,
-   BENCHMARK_EVENT_MAX                 =   5,
+   BENCHMARK_EVENT_PACKETSENTDAGROOT   =   5, // special event to log the asn when dag root sent the packet
+   BENCHMARK_EVENT_MAX                 =   6,
 };
 
 //component identifiers
