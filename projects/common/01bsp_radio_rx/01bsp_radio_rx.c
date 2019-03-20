@@ -216,15 +216,16 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
 
     // check the frame is sent by radio_tx project
     expectedFrame = TRUE;
-    for(i=1;i<10;i++){
-        if(app_vars.rxpk_buf[i]!=i){
-            expectedFrame = FALSE;
-            break;
-        }
-    }
 
-    if (app_vars.rxpk_crc==0){
+    if (app_vars.rxpk_len>LENGTH_PACKET){
         expectedFrame = FALSE;
+    } else {
+        for(i=1;i<10;i++){
+            if(app_vars.rxpk_buf[i]!=i){
+                expectedFrame = FALSE;
+                break;
+            }
+        }
     }
 
     // read the packet number

@@ -113,19 +113,18 @@ while True:
         with open('log.txt','a') as f:
             f.write(output+'\n')
         
-        if rxpk_crc ==1 and previousFrame>rxpk_num:
-            output = "frameCounter={0:<3}, PDR={1}%".format(frameCounter, frameCounter*100/MAX_NUM_PACKET)
-            print output
-            frameCounter  = 0
-            with open('log.txt','a') as f:
-                f.write(output+'\n')
-
-        if rxpk_crc ==1:
-            frameCounter += 1
-            previousFrame = rxpk_num
-        
         if rxpk_len>127:
             print "ERROR: frame too long.\a"
+        else:
+            if previousFrame>rxpk_num:
+                output = "frameCounter={0:<3}, PDR={1}%".format(frameCounter, frameCounter*100/MAX_NUM_PACKET)
+                print output
+                frameCounter  = 0
+                with open('log.txt','a') as f:
+                    f.write(output+'\n')
+
+            frameCounter += 1
+            previousFrame = rxpk_num
         
         rawFrame         = []
         rawFrame_decoded = []
