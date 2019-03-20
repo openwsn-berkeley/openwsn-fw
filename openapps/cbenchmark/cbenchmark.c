@@ -95,7 +95,10 @@ owerror_t cbenchmark_receive(OpenQueueEntry_t* msg,
                 return E_FAIL;
         }
 
-        // get the token from the first 5 bytes of payload
+        // toss everything but the last 5 bytes
+        packetfunctions_tossHeader(msg, msg->length - 5);
+
+        // get the token from the remaining 5 bytes of payload
         memcpy(token, msg->payload, 5);
 
         // in case the request contains a No Response option, it will be handled by the
@@ -174,16 +177,16 @@ void cbenchmark_sendPacket(uint8_t *buf, uint8_t bufLen) {
         // construct destination address
         packetfunctions_mac64bToIp128b(idmanager_getMyID(ADDR_PREFIX), &request.dest, &(pkt->l3_destinationAdd));
 
-        // zero-out the payload
-        packetfunctions_reserveHeaderSize(pkt, request.payloadLen);
-        memset(pkt->payload, 0x00, request.payloadLen);
-
         // copy the token as given by OpenBenchmark
         packetfunctions_reserveHeaderSize(pkt, CBENCHMARK_PACKETTOKEN_LEN);
         memcpy(pkt->payload, &request.token, CBENCHMARK_PACKETTOKEN_LEN);
 
         // set the first byte of the token to packet counter
         pkt->payload[0] = i;
+
+        // zero-out the payload
+        packetfunctions_reserveHeaderSize(pkt, request.payloadLen);
+        memset(pkt->payload, 0x00, request.payloadLen);
 
         // get the current ASN
         ieee154e_getAsn(timestamp);
