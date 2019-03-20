@@ -223,16 +223,21 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
         }
     }
 
+    if (app_vars.rxpk_crc==0){
+        expectedFrame = FALSE;
+    }
+
     // read the packet number
     app_vars.rxpk_num = app_vars.rxpk_buf[0];
 
     // toggle led if the frame is expected
     if (expectedFrame){
-        // indicate I just received a packet from bsp_radio_tx mote
-        app_vars.rxpk_done = 1;
 
         leds_debug_toggle();
     }
+
+    // indicate I just received a packet from bsp_radio_tx mote
+    app_vars.rxpk_done = 1;
 
     // keep listening (needed for at86rf215 radio)
     radio_rxEnable();

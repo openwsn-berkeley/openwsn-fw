@@ -147,7 +147,7 @@ void at86rf215_spiWriteFifo(uint8_t* bufToWrite, uint16_t len, uint8_t type) {
 
 }
 
-void at86rf215_spiReadRxFifo( uint8_t* pBufRead, uint16_t* lenRead, uint8_t type) {
+void at86rf215_spiReadRxFifo( uint8_t* pBufRead, uint16_t* lenRead, uint8_t type, uint16_t maxBuffLength) {
 
     uint8_t spi_tx_buffer[4];
     uint8_t spi_rx_buffer[4];
@@ -187,28 +187,30 @@ void at86rf215_spiReadRxFifo( uint8_t* pBufRead, uint16_t* lenRead, uint8_t type
     length = (uint16_t)spi_rx_buffer[2]             // RXFLL
                     | ((uint16_t)(spi_rx_buffer[3] & 0x07) << 8);  // RXFLH
 
-    spi_tx_buffer[0]    = (FLAG_READ | (uint8_t)(register_bbc_fbrxs/256));
-    spi_tx_buffer[1]    = (uint8_t)(register_bbc_fbrxs%256);
-    //read FIFO
-    spi_txrx(
-        spi_tx_buffer,              // bufTx
-        2,                          // size of the address
-        SPI_BUFFER,                 // returnType
-        spi_rx_buffer,              // bufRx
-        2,                          // maxLenBufRx
-        SPI_FIRST,                  // isFirst
-        SPI_NOTLAST                 // isLast
-    );
-
+    if (length<=maxBuffLength){
+        spi_tx_buffer[0]    = (FLAG_READ | (uint8_t)(register_bbc_fbrxs/256));
+        spi_tx_buffer[1]    = (uint8_t)(register_bbc_fbrxs%256);
+        //read FIFO
         spi_txrx(
-        NULL,                        // bufTx
-        length,                     // lenbufTx
-        SPI_BUFFER,                 // returnType
-        pBufRead,                  // bufRx
-        length,                     // maxLenBufRx
-        SPI_NOTFIRST,               // isFirst
-        SPI_LAST                    // isLast
-    );
+            spi_tx_buffer,              // bufTx
+            2,                          // size of the address
+            SPI_BUFFER,                 // returnType
+            spi_rx_buffer,              // bufRx
+            2,                          // maxLenBufRx
+            SPI_FIRST,                  // isFirst
+            SPI_NOTLAST                 // isLast
+        );
+
+            spi_txrx(
+            NULL,                        // bufTx
+            length,                     // lenbufTx
+            SPI_BUFFER,                 // returnType
+            pBufRead,                  // bufRx
+            length,                     // maxLenBufRx
+            SPI_NOTFIRST,               // isFirst
+            SPI_LAST                    // isLast
+        );
+    }
     *(lenRead) = length;
 }
 
