@@ -196,6 +196,7 @@ typedef struct {
    uint16_t                  daoPeriod;               ///< dao period in seconds.
    // routing table
    dagrank_t                 myDAGrank;               ///< rank of this router within DAG.
+   dagrank_t                 lowestRankInHistory;     ///< lowest Rank that the node has advertised
    uint16_t                  rankIncrease;            ///< the cost of the link to the parent, in units of rank
    bool                      haveParent;              ///< this router has a route to DAG root
    uint8_t                   ParentIndex;             ///< index of Parent in neighbor table (iff haveParent==TRUE)
