@@ -650,6 +650,9 @@ uint16_t neighbors_getLinkMetric(uint8_t index) {
         ){
             // PDR too low, put the neighbor in blacklist
             neighbors_vars.neighbors[index].inBlacklist = TRUE;
+        } else {
+            // Remove the neighbor from blacklist
+            neighbors_vars.neighbors[index].inBlacklist = FALSE;
         }
     }
     return rankIncrease;
