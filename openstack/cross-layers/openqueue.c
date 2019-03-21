@@ -138,15 +138,18 @@ owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
 \param creator The identifier of the component, taken in COMPONENT_*.
 */
 void openqueue_removeAllCreatedBy(uint8_t creator) {
-   uint8_t i;
-   INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
-   for (i=0;i<QUEUELENGTH;i++){
-      if (openqueue_vars.queue[i].creator==creator) {
-         openqueue_reset_entry(&(openqueue_vars.queue[i]));
-      }
-   }
-   ENABLE_INTERRUPTS();
+    uint8_t i;
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+    for (i=0;i<QUEUELENGTH;i++){
+        if (
+            openqueue_vars.queue[i].creator == creator &&
+            openqueue_vars.queue[i].owner   != COMPONENT_IEEE802154E
+        ) {
+            openqueue_reset_entry(&(openqueue_vars.queue[i]));
+        }
+    }
+    ENABLE_INTERRUPTS();
 }
 
 //======= called by RES
