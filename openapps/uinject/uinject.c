@@ -8,8 +8,13 @@
 #include "schedule.h"
 #include "icmpv6rpl.h"
 #include "idmanager.h"
+#include "openrandom.h"
 
 #include "msf.h"
+
+//=========================== defines =========================================
+
+#define UINJECT_TRAFFIC_RATE 2 ///> the value X indicates 1 packet/X minutes
 
 //=========================== variables =======================================
 
@@ -77,7 +82,9 @@ void uinject_receive(OpenQueueEntry_t* pkt) {
 void uinject_timer_cb(opentimers_id_t id){
     // calling the task directly as the timer_cb function is executed in
     // task mode by opentimer already
-    uinject_task_cb();
+    if(openrandom_get16b()<(0xffff/UINJECT_TRAFFIC_RATE)){
+        uinject_task_cb();
+    }
 }
 
 void uinject_task_cb(void) {
