@@ -318,7 +318,7 @@ void radio_getReceivedFrame(
     }
 
     // read the received packet from the RXFIFO
-    at86rf215_spiReadRxFifo(bufRead, lenRead, ATMEL_FREQUENCY_TYPE);
+    at86rf215_spiReadRxFifo(bufRead, lenRead, ATMEL_FREQUENCY_TYPE, maxBufLen);
 
     *rssi   = at86rf215_spiReadReg(register_edv);
     *crc    = (at86rf215_spiReadReg(register_bbc_pc)>>5);

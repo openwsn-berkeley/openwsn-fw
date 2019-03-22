@@ -3981,7 +3981,7 @@ void at86rf215_spiWriteReg    (uint16_t reg, uint8_t regValueToWrite);
 uint8_t at86rf215_spiReadReg  (uint16_t regAddr16);
 
 void at86rf215_spiWriteFifo   (uint8_t* bufToWrite, uint16_t len, uint8_t frequency_type);
-void at86rf215_spiReadRxFifo  (uint8_t* pBufRead, uint16_t* lenRead, uint8_t frequency_type);
+void at86rf215_spiReadRxFifo  (uint8_t* pBufRead, uint16_t* lenRead, uint8_t frequency_type, uint16_t maxBuffLength);
 
 uint8_t at86rf215_status      (uint8_t frequency_type);
 
