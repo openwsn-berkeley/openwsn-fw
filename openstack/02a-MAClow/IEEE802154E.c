@@ -999,7 +999,7 @@ port_INLINE void activity_ti1ORri1(void) {
                         }
 
                         if (ieee154e_vars.dataToSend == NULL) {
-                            memset(&autonomousUnicastNeighborm, 0, sizeof(open_addr_t));
+                            memset(&autonomousUnicastNeighbor, 0, sizeof(open_addr_t));
                             schedule_getAutonomousTxRxCellUnicastNeighbor(&autonomousUnicastNeighbor);
 
                             // autonomousUnicastNeighbor may be not found
