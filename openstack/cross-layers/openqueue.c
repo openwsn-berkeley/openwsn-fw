@@ -303,7 +303,7 @@ OpenQueueEntry_t* openqueue_macGet6PRequestOnAnycast(open_addr_t* autonomousUnic
            openqueue_vars.queue[i].creator==COMPONENT_SIXTOP_RES &&
            (
                (
-                    autonomousUnicastNeighbor == NULL ||
+                    autonomousUnicastNeighbor->type==ADDR_NONE ||
                     (
                         autonomousUnicastNeighbor->type==ADDR_64B &&
                         packetfunctions_sameAddress(autonomousUnicastNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop) == FALSE
