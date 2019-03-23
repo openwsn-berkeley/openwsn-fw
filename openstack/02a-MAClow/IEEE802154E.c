@@ -999,9 +999,11 @@ port_INLINE void activity_ti1ORri1(void) {
                         }
 
                         if (ieee154e_vars.dataToSend == NULL) {
-                            if (schedule_getAutonomousTxRxCellUnicastNeighbor(&autonomousUnicastNeighbor)==TRUE){
-                                ieee154e_vars.dataToSend = openqueue_macGet6PRequestOnAnycast(&autonomousUnicastNeighbor);
-                            }
+                            schedule_getAutonomousTxRxCellUnicastNeighbor(&autonomousUnicastNeighbor);
+
+                            // autonomousUnicastNeighbor may be not found
+                            // in that case any 6P request is OK to send on anycast autonomous cell
+                            ieee154e_vars.dataToSend = openqueue_macGet6PRequestOnAnycast(&autonomousUnicastNeighbor);
                         }
 
                         if (ieee154e_vars.dataToSend == NULL) {
