@@ -165,10 +165,6 @@ bool neighbors_getNeighborNoResource(uint8_t index){
     return neighbors_vars.neighbors[index].f6PNORES;
 }
 
-bool neighbors_getNeighborIsInBlacklist(uint8_t index){
-    return neighbors_vars.neighbors[index].inBlacklist;
-}
-
 uint8_t neighbors_getSequenceNumber(open_addr_t* address){
     uint8_t i;
     for (i=0;i<MAXNUMNEIGHBORS;i++){
@@ -643,17 +639,6 @@ uint16_t neighbors_getLinkMetric(uint8_t index) {
         } else {
             rankIncrease = (uint16_t)(rankIncreaseIntermediary >> 10);
         }
-
-        if (
-            rankIncrease>(3*DEFAULTLINKCOST-2)*MINHOPRANKINCREASE &&
-            neighbors_vars.neighbors[index].numTx > MINIMAL_NUM_TX
-        ){
-            // PDR too low, put the neighbor in blacklist
-            neighbors_vars.neighbors[index].inBlacklist = TRUE;
-        } else {
-            // Remove the neighbor from blacklist
-            neighbors_vars.neighbors[index].inBlacklist = FALSE;
-        }
     }
     return rankIncrease;
 }
@@ -684,13 +669,11 @@ void  neighbors_removeOld(void) {
                 /**
                     don't remove neighbor marked as:
                     - 6P no resource
-                    - in blacklist
                     - pareferred parent
                 */
 
                 if (
                     neighbors_vars.neighbors[i].f6PNORES         == FALSE &&
-                    neighbors_vars.neighbors[i].inBlacklist      == FALSE &&
                     neighbors_vars.neighbors[i].parentPreference == 0
                 ){
                     removeNeighbor(i);
