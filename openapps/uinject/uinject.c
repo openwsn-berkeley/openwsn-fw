@@ -58,6 +58,15 @@ void uinject_init(void) {
 
 void uinject_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 
+    if (error==E_FAIL){
+        openserial_printError(
+            COMPONENT_UINJECT,
+            ERR_UINJECT_PACKET_DROPPED,
+            (errorparameter_t)uinject_vars.counter,
+            (errorparameter_t)0
+        );
+    }
+
     // free the packet buffer entry
     openqueue_freePacketBuffer(msg);
 
@@ -68,13 +77,6 @@ void uinject_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 void uinject_receive(OpenQueueEntry_t* pkt) {
 
     openqueue_freePacketBuffer(pkt);
-
-    openserial_printError(
-        COMPONENT_UINJECT,
-        ERR_RCVD_ECHO_REPLY,
-        (errorparameter_t)0,
-        (errorparameter_t)0
-    );
 }
 
 //=========================== private =========================================
