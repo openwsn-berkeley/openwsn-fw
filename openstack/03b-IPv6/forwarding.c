@@ -228,33 +228,41 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
 */
 void forwarding_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 
-   // take ownership
-   msg->owner = COMPONENT_FORWARDING;
+    // take ownership
+    msg->owner = COMPONENT_FORWARDING;
 
-   if (msg->creator==COMPONENT_RADIO || msg->creator==COMPONENT_FORWARDING) {
-      // this is a relayed packet
+    if (msg->creator==COMPONENT_RADIO || msg->creator==COMPONENT_FORWARDING) {
+        // this is a relayed packet
 
-      // free packet
-      openqueue_freePacketBuffer(msg);
-   } else {
-      // this is a packet created by this mote
+        if (error==E_FAIL) {
+             openserial_printError(
+                 COMPONENT_FORWARDING,
+                 ERR_FORWARDING_PACKET_DROPPED,
+                 (errorparameter_t)1,
+                 (errorparameter_t)0
+            );
+        }
 
-      // indicate sendDone to upper layer
-      switch(msg->l4_protocol) {
-         case IANA_UDP:
+        // free packet
+        openqueue_freePacketBuffer(msg);
+    } else {
+        // this is a packet created by this mote
+
+        // indicate sendDone to upper layer
+        switch(msg->l4_protocol) {
+        case IANA_UDP:
             openudp_sendDone(msg,error);
             break;
-         case IANA_ICMPv6:
+        case IANA_ICMPv6:
             icmpv6_sendDone(msg,error);
             break;
-         default:
-
+        default:
             // log error
             openserial_printCritical(
-               COMPONENT_FORWARDING,
-               ERR_WRONG_TRAN_PROTOCOL,
-               (errorparameter_t)msg->l4_protocol,
-               (errorparameter_t)0
+                COMPONENT_FORWARDING,
+                ERR_WRONG_TRAN_PROTOCOL,
+                (errorparameter_t)msg->l4_protocol,
+                (errorparameter_t)0
             );
 
             // free packet
@@ -357,10 +365,10 @@ void forwarding_receive(
             // there is no space for high priority packet, drop this message
             // by free the buffer.
             openserial_printError(
-                     COMPONENT_FORWARDING,
-                     ERR_FORWARDING_PACKET_DROPPED,
-                     (errorparameter_t)msg->l2_nextORpreviousHop.addr_64b[6],
-                     (errorparameter_t)msg->l2_nextORpreviousHop.addr_64b[7]
+                 COMPONENT_FORWARDING,
+                 ERR_FORWARDING_PACKET_DROPPED,
+                 (errorparameter_t)0,
+                 (errorparameter_t)0
             );
             openqueue_freePacketBuffer(msg);
             return;
