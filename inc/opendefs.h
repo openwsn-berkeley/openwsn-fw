@@ -384,7 +384,6 @@ typedef struct {
    asn_t            asn;
    uint8_t          joinPrio;
    bool             f6PNORES;
-   bool             inBlacklist;
    uint8_t          sequenceNumber;
    uint8_t          backoffExponenton;
    uint8_t          backoff;

@@ -319,8 +319,7 @@ bool icmpv6rpl_getPreferredParentIndex(uint8_t* indexptr) {
 bool icmpv6rpl_getPreferredParentEui64(open_addr_t* addressToWrite) {
     if (
         icmpv6rpl_vars.haveParent &&
-        neighbors_getNeighborNoResource(icmpv6rpl_vars.ParentIndex)    == FALSE &&
-        neighbors_getNeighborIsInBlacklist(icmpv6rpl_vars.ParentIndex) == FALSE
+        neighbors_getNeighborNoResource(icmpv6rpl_vars.ParentIndex)    == FALSE
     ){
         return neighbors_getNeighborEui64(addressToWrite,ADDR_64B,icmpv6rpl_vars.ParentIndex);
     } else {
@@ -407,8 +406,7 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection(void) {
     if (icmpv6rpl_vars.haveParent==TRUE){
 
         if (
-            neighbors_getNeighborNoResource(icmpv6rpl_vars.ParentIndex)    == TRUE ||
-            neighbors_getNeighborIsInBlacklist(icmpv6rpl_vars.ParentIndex) == TRUE
+            neighbors_getNeighborNoResource(icmpv6rpl_vars.ParentIndex)    == TRUE
         ){
             icmpv6rpl_vars.myDAGrank = 65535;
         } else {
@@ -435,8 +433,7 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection(void) {
         if (neighbors_isStableNeighborByIndex(i)) { // in use and link is stable
             // neighbor marked as NORES can't be parent
             if (
-                neighbors_getNeighborNoResource(i)   == TRUE ||
-                neighbors_getNeighborIsInBlacklist(i)== TRUE
+                neighbors_getNeighborNoResource(i)   == TRUE
             ) {
                 continue;
             }

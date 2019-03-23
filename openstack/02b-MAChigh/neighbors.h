@@ -64,7 +64,6 @@ uint16_t      neighbors_getLinkMetric(uint8_t index);
 open_addr_t*  neighbors_getKANeighbor(uint16_t kaPeriod);
 open_addr_t*  neighbors_getJoinProxy(void);
 bool          neighbors_getNeighborNoResource(uint8_t index);
-bool          neighbors_getNeighborIsInBlacklist(uint8_t index);
 int8_t        neighbors_getRssi(uint8_t index);
 uint8_t       neighbors_getNumTx(uint8_t index);
 uint8_t       neighbors_getSequenceNumber(open_addr_t* address);
