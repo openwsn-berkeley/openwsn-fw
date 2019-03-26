@@ -70,7 +70,7 @@ See MINBE for an explanation of backoff.
 /**
 \brief a threshold used for triggering the maintaining process.uint: percent
 */
-#define RELOCATE_PDRTHRES  50 // 50 means 50%
+#define RELOCATE_PDRTHRES  30 // 50 means 50%
 
 typedef enum{
     CELLOPTIONS_TX              = 1<<0,
