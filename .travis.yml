@@ -14,13 +14,13 @@ before_script:
 script:
 - mkdir -p ./build/doc/
 - scons docs
-- scons board=telosb                                  toolchain=mspgcc verbose=1 oos_macpong
-- scons board=telosb              kernel=freertos     toolchain=mspgcc verbose=1 oos_macpong
+# - scons board=telosb                                  toolchain=mspgcc verbose=1 oos_macpong
+# - scons board=telosb              kernel=freertos     toolchain=mspgcc verbose=1 oos_macpong
 - scons board=openmote-cc2538                         toolchain=armgcc verbose=1 oos_macpong
-- scons board=wsn430v14                               toolchain=mspgcc verbose=1 oos_macpong
-- scons board=wsn430v13b                              toolchain=mspgcc verbose=1 oos_macpong
-- scons board=gina                                    toolchain=mspgcc verbose=1 oos_macpong
-- scons board=z1                                      toolchain=mspgcc verbose=1 oos_macpong
+# - scons board=wsn430v14                               toolchain=mspgcc verbose=1 oos_macpong
+# - scons board=wsn430v13b                              toolchain=mspgcc verbose=1 oos_macpong
+# - scons board=gina                                    toolchain=mspgcc verbose=1 oos_macpong
+# - scons board=z1                                      toolchain=mspgcc verbose=1 oos_macpong
 - scons board=iot-lab_M3                              toolchain=armgcc verbose=1 oos_macpong
 - scons board=iot-lab_A8-M3                           toolchain=armgcc verbose=1 oos_macpong
 # - scons board=telosb                                  toolchain=mspgcc verbose=1 oos_openwsn
