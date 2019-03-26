@@ -515,6 +515,11 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection(void) {
         icmpv6rpl_vars.rankIncrease= prevRankIncrease;
         // no change to report on
     }
+
+    // if my rank is reached to MAXDAGRANK
+    if (icmpv6rpl_vars.myDAGrank==MAXDAGRANK) {
+        icmpv6rpl_vars.lowestRankInHistory = MAXDAGRANK;
+    }
 }
 
 /**
