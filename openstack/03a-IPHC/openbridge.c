@@ -65,6 +65,11 @@ void openbridge_triggerData(void) {
       if ((iphc_sendFromBridge(pkt))==E_FAIL) {
          openqueue_freePacketBuffer(pkt);
       }
+      else {
+         // log the instant this packet has been sent by the dag root
+         // this is hack, we dump last 5 bytes to match possible benchmark packet that passes here
+         openserial_printBenchmark(BENCHMARK_EVENT_PACKETSENTDAGROOT, &pkt->payload[pkt->length-5], 5);
+      }
    }
 }
 
@@ -75,10 +80,6 @@ void openbridge_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
                             (errorparameter_t)0,
                             (errorparameter_t)0);
    }
-    // log the instant this packet has been sent by the dag root
-    // this is hack, we dump last 5 bytes to match possible benchmark packet that passes here
-    openserial_printBenchmark(BENCHMARK_EVENT_PACKETSENTDAGROOT, &msg->payload[msg->length-5], 5);
-
     openqueue_freePacketBuffer(msg);
 }
 
