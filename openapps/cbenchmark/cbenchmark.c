@@ -70,19 +70,16 @@ owerror_t cbenchmark_receive(OpenQueueEntry_t* msg,
         uint8_t*          coap_outgoingOptionsLen) {
 
     uint8_t   token[5];
-    uint8_t   timestamp[5];
     open_addr_t source;
     open_addr_t prefix; // dummy
-
-    // get the current ASN as soon as possible
-    ieee154e_getAsn(timestamp);
+    bool noResponse;
+    uint8_t i;
 
     // get the source of the packet
     packetfunctions_ip128bToMac64b(&msg->l3_sourceAdd, &prefix, &source);
 
     // check if this is a request
-    if (
-         coap_header->Code==COAP_CODE_REQ_POST) {
+    if (coap_header->Code==COAP_CODE_REQ_POST) {
         // sanity check
         if (msg->length < 5) {
             // log formatting error
@@ -90,7 +87,7 @@ owerror_t cbenchmark_receive(OpenQueueEntry_t* msg,
                     COMPONENT_CBENCHMARK,
                     ERR_MSG_UNKNOWN_TYPE,
                     (errorparameter_t)msg->length,
-                    (errorparameter_t)msg->length
+                    (errorparameter_t)0
                 );
                 return E_FAIL;
         }
@@ -101,17 +98,49 @@ owerror_t cbenchmark_receive(OpenQueueEntry_t* msg,
         // get the token from the remaining 5 bytes of payload
         memcpy(token, msg->payload, 5);
 
-        // in case the request contains a No Response option, it will be handled by the
-        // underlying CoAP lib
+        // generate packetReceived event for this request
         cbenchmark_printSerial_packetSentReceived(BENCHMARK_EVENT_PACKETRECEIVED, token, &source, msg->l3_hopLimit);
-        // reset packet payload
+
+        // now, construct the ACK response (if any)
         msg->payload                     = &(msg->packet[127]);
         msg->length                      = 0;
-        // set the response CoAP header
         coap_header->Code                = COAP_CODE_RESP_CHANGED;
+
+        // now check whether an ACK is needed in order to generate the packetSent event corresponding to it
+        noResponse = FALSE;
+        i = 0;
+        while(coap_incomingOptions[i].type != COAP_OPTION_NONE) {
+            if (coap_incomingOptions[i].type == COAP_OPTION_NUM_NORESPONSE) {
+                noResponse = TRUE;
+                break;
+            }
+            i++;
+        }
+
+        if (!noResponse) {
+            // the token in the ACK is the one from the request with the last byte incremented by one
+            token[CBENCHMARK_PACKETTOKEN_LEN-1]++;
+            packetfunctions_reserveHeaderSize(msg, CBENCHMARK_PACKETTOKEN_LEN);
+            memcpy(msg->payload, token, CBENCHMARK_PACKETTOKEN_LEN);
+
+           // generate the packetSent event for the response
+           cbenchmark_printSerial_packetSentReceived(BENCHMARK_EVENT_PACKETSENT, token, &source, IPHC_DEFAULT_HOP_LIMIT);
+        }
     }
-    else { // else this is a response
-        // FIXME should this packet be logged?
+    else { // this is a response
+        // assert that the response is exactly the length of the packet token, otherwise something is wrong
+        if (msg->length != CBENCHMARK_PACKETTOKEN_LEN) {
+            // log formatting error
+                openserial_printError(
+                    COMPONENT_CBENCHMARK,
+                    ERR_MSG_UNKNOWN_TYPE,
+                    (errorparameter_t)msg->length,
+                    (errorparameter_t)0
+                );
+                return E_FAIL;
+        }
+        // generate the packetReceived event for the response
+        cbenchmark_printSerial_packetSentReceived(BENCHMARK_EVENT_PACKETRECEIVED, msg->payload, &source, msg->l3_hopLimit);
     }
     return E_SUCCESS;
 }
