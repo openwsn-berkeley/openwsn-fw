@@ -100,7 +100,7 @@ owerror_t cbenchmark_receive(OpenQueueEntry_t* msg,
 
         // in case the request contains a No Response option, it will be handled by the
         // underlying CoAP lib
-        cbenchmark_printSerial_packetSentReceived(STATUS_ASYNC_BENCHMARK_PACKETRECEIVED, token, &source, msg->l3_hopLimit);
+        cbenchmark_printSerial_packetSentReceived(BENCHMARK_EVENT_PACKETRECEIVED, token, &source, msg->l3_hopLimit);
         // reset packet payload
         msg->payload                     = &(msg->packet[127]);
         msg->length                      = 0;
@@ -210,7 +210,7 @@ void cbenchmark_sendPacket(uint8_t *buf, uint8_t bufLen) {
             );
         }
         else {
-            cbenchmark_printSerial_packetSentReceived(STATUS_ASYNC_BENCHMARK_PACKETSENT, request.token, &request.dest, IPHC_DEFAULT_HOP_LIMIT);
+            cbenchmark_printSerial_packetSentReceived(BENCHMARK_EVENT_PACKETSENT, request.token, &request.dest, IPHC_DEFAULT_HOP_LIMIT);
         }
     }
 }
