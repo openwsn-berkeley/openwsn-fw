@@ -69,6 +69,7 @@ void openbridge_triggerData(void) {
 }
 
 void openbridge_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
+  (void)error;
    msg->owner = COMPONENT_OPENBRIDGE;
    if (msg->creator!=COMPONENT_OPENBRIDGE) {
       openserial_printError(COMPONENT_OPENBRIDGE,ERR_UNEXPECTED_SENDDONE,
