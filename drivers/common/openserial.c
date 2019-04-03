@@ -278,6 +278,8 @@ owerror_t openserial_print_uint32_t(uint32_t value) {
 
     // start TX'ing
     openserial_flush();
+#else
+    (void)value;
 #endif
     return E_SUCCESS;
 }
@@ -305,6 +307,9 @@ owerror_t openserial_print_str(char* buffer, uint8_t length) {
 
     // start TX'ing
     openserial_flush();
+#else
+    (void)buffer;
+    (void)length;
 #endif
    return E_SUCCESS;
 }
@@ -335,50 +340,62 @@ void task_openserial_debugPrint(void) {
             if (debugPrint_isSync()==TRUE) {
                 break;
             }
+            /* fall through */
         case STATUS_ID:
             if (debugPrint_id()==TRUE) {
                break;
             }
+            /* fall through */
         case STATUS_DAGRANK:
             if (debugPrint_myDAGrank()==TRUE) {
                 break;
             }
+            /* fall through */
         case STATUS_OUTBUFFERINDEXES:
             if (debugPrint_outBufferIndexes()==TRUE) {
                 break;
             }
+            /* fall through */
         case STATUS_ASN:
             if (debugPrint_asn()==TRUE) {
                 break;
             }
+            /* fall through */
         case STATUS_MACSTATS:
             if (debugPrint_macStats()==TRUE) {
                 break;
             }
+            /* fall through */
         case STATUS_SCHEDULE:
             if(debugPrint_schedule()==TRUE) {
                 break;
             }
+            /* fall through */
         case STATUS_BACKOFF:
             if(debugPrint_backoff()==TRUE) {
                 break;
             }
+            /* fall through */
         case STATUS_QUEUE:
             if(debugPrint_queue()==TRUE) {
                 break;
             }
+            /* fall through */
         case STATUS_NEIGHBORS:
             if (debugPrint_neighbors()==TRUE) {
                 break;
             }
+            /* fall through */
         case STATUS_KAPERIOD:
             if (debugPrint_kaPeriod()==TRUE) {
                 break;
             }
+            /* fall through */
         case STATUS_JOINED:
             if (debugPrint_joined()==TRUE) {
                 break;
             }
+            /* fall through */
         default:
             debugPrintCounter=0;
     }
@@ -392,7 +409,7 @@ void task_openserial_debugPrint(void) {
 
 //===== receiving
 
-uint8_t openserial_getInputBufferFillLevel() {
+uint8_t openserial_getInputBufferFillLevel(void) {
     uint8_t inputBufFillLevel;
     INTERRUPT_DECLARATION();
 
@@ -576,7 +593,7 @@ owerror_t openserial_printInfoErrorCritical(
 //===== command handlers
 
 // executed in ISR
-void openserial_handleRxFrame() {
+void openserial_handleRxFrame(void) {
     uint8_t cmdByte;
 
     cmdByte = openserial_vars.inputBuf[0];
@@ -859,6 +876,7 @@ void openserial_handleCommands(void){
 //===== misc
 
 void openserial_debugPrint_timer_cb(opentimers_id_t id){
+    (void)id;
     // calling the task directly as the timer_cb function is executed in
     // task mode by opentimer already
     task_openserial_debugPrint();
