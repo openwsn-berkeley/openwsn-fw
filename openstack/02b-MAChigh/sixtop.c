@@ -653,7 +653,7 @@ owerror_t sixtop_send_internal(
     already. No need to push a task again.
 */
 void sixtop_sendingEb_timer_cb(opentimers_id_t id){
-
+    (void)id;
     timer_sixtop_sendEb_fired();
 }
 
@@ -664,6 +664,7 @@ void sixtop_sendingEb_timer_cb(opentimers_id_t id){
     already. No need to push a task again.
 */
 void sixtop_maintenance_timer_cb(opentimers_id_t id) {
+    (void)id;
     timer_sixtop_management_fired();
 }
 
@@ -674,6 +675,7 @@ void sixtop_maintenance_timer_cb(opentimers_id_t id) {
     already. No need to push a task again.
 */
 void sixtop_timeout_timer_cb(opentimers_id_t id) {
+    (void)id;
     timer_sixtop_six2six_timeout_fired();
 }
 
@@ -1631,6 +1633,7 @@ bool sixtop_addCells(
     open_addr_t* previousHop,
     uint8_t      cellOptions
 ){
+    (void)slotframeID;
     uint8_t     i;
     bool        isShared;
     open_addr_t temp_neighbor;
@@ -1677,6 +1680,8 @@ bool sixtop_removeCells(
       open_addr_t* previousHop,
     uint8_t      cellOptions
    ){
+    (void)slotframeID;
+    (void)cellOptions;
     uint8_t     i;
     open_addr_t temp_neighbor;
     bool        hasCellsRemoved;
@@ -1703,6 +1708,7 @@ bool sixtop_areAvailableCellsToBeScheduled(
       uint8_t      numOfCells,
       cellInfo_ht* cellList
 ){
+    (void)frameID;
     uint8_t i;
     uint8_t numbOfavailableCells;
     bool    available;
@@ -1749,6 +1755,8 @@ bool sixtop_areAvailableCellsToBeRemoved(
     open_addr_t* neighbor,
     uint8_t      cellOptions
 ){
+    (void)frameID;
+    (void)neighbor;
     uint8_t              i;
     uint8_t              numOfavailableCells;
     bool                 available;
