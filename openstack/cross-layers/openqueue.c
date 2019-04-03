@@ -377,7 +377,7 @@ OpenQueueEntry_t* openqueue_macGetKaPacket(open_addr_t* toNeighbor) {
     return NULL;
 }
 
-OpenQueueEntry_t*  openqueue_macGetDIOPacket(){
+OpenQueueEntry_t*  openqueue_macGetDIOPacket(void){
     uint8_t i;
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
