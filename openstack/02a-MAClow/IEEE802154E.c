@@ -276,6 +276,7 @@ void ieee154e_orderToASNStructure(uint8_t* in,asn_t* val_asn) {
 This function executes in ISR mode, when the new slot timer fires.
 */
 void isr_ieee154e_newSlot(opentimers_id_t id) {
+    (void)id;
 
     ieee154e_vars.startOfSlotReference = opentimers_getCurrentCompareValue();
     opentimers_scheduleAbsolute(
@@ -311,6 +312,7 @@ void isr_ieee154e_newSlot(opentimers_id_t id) {
 This function executes in ISR mode, when the FSM timer fires.
 */
 void isr_ieee154e_timer(opentimers_id_t id) {
+    (void)id;
     switch (ieee154e_vars.state) {
         case S_TXDATAOFFSET:
             activity_ti2();
@@ -397,6 +399,7 @@ This needs to happen
 This function executes in ISR mode.
 */
 void isr_ieee154e_inhibitStart(opentimers_id_t id) {
+    (void)id;
     // inhibit serial activity
     openserial_inhibitStart(); // activity_inhibitSerial
 }
@@ -660,6 +663,8 @@ port_INLINE void activity_synchronize_startOfFrame(PORT_TIMER_WIDTH capturedTime
 }
 
 port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) {
+   (void)capturedTime;
+
    ieee802154_header_iht ieee802514_header;
    uint16_t              lenIE;
 
@@ -1080,6 +1085,7 @@ port_INLINE void activity_ti1ORri1(void) {
 #endif
                 break;
             }
+            /* fall through */
         case CELLTYPE_RX:
             // change state
             changeState(S_RXDATAOFFSET);
