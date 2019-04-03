@@ -79,6 +79,9 @@ owerror_t iphc_sendFromForwarding(
     uint8_t           rh3_length,
     uint8_t           fw_SendOrfw_Rcv
     ) {
+    (void)flow_label;
+    (void)fw_SendOrfw_Rcv;
+
     open_addr_t  temp_dest_prefix;
     open_addr_t  temp_dest_mac64b; 
     open_addr_t  temp_src_prefix;
@@ -1096,6 +1099,8 @@ void iphc_prependIPv6HopByHopHeader(
       uint8_t           nextheader,
       rpl_option_ht*    rpl_option
    ){
+   (void)nextheader;
+
    uint8_t temp_8b;
    
    if ((rpl_option->flags & K_FLAG) == 0){
