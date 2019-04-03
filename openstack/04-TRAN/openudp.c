@@ -240,6 +240,7 @@ bool openudp_debugPrint(void) {
 //=========================== private =========================================
 
 static void openudp_sendDone_default_handler(OpenQueueEntry_t* msg, owerror_t error) {
+   (void)error;
    openqueue_freePacketBuffer(msg);
 }
 
