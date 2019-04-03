@@ -467,6 +467,7 @@ void schedule_removeAllManagedUnicastCellsToNeighbor(
     uint8_t        slotframeID,
     open_addr_t*   neighbor
     ){
+    (void)slotframeID;
     uint8_t i;
 
     // remove all entries in schedule with previousHop address
@@ -505,7 +506,7 @@ void schedule_removeAllAutonomousTxRxCellUnicast(void){
     msf_setHashCollisionFlag(FALSE);
 }
 
-uint8_t schedule_getNumberOfFreeEntries(){
+uint8_t schedule_getNumberOfFreeEntries(void){
     uint8_t i;
     uint8_t counter;
 
@@ -998,6 +999,9 @@ void schedule_indicateTx(asn_t* asnTimestamp, bool succesfullTx) {
 }
 
 bool schedule_getOneCellAfterOffset(uint8_t metadata,uint8_t offset,open_addr_t* neighbor, uint8_t cellOptions, uint16_t* slotoffset, uint16_t* channeloffset){
+    (void)metadata;
+    (void)neighbor;
+
     bool returnVal;
     scheduleEntry_t* scheduleWalker;
     cellType_t type;
