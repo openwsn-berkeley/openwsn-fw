@@ -97,6 +97,7 @@ bool topology_isAcceptablePacket(ieee802154_header_iht* ieee802514_header) {
    }
    return returnVal;
 #else
+   (void)ieee802514_header;
    return TRUE;
 #endif
 }
