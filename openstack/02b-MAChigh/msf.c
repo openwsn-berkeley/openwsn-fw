@@ -90,6 +90,8 @@ void    msf_updateCellsPassed(open_addr_t* neighbor){
         msf_vars.numCellsPassed = 0;
         msf_vars.numCellsUsed   = 0;
     }
+#else
+    (void)neighbor;
 #endif
 }
 
@@ -174,10 +176,12 @@ void msf_handleRCError(uint8_t code, open_addr_t* address){
 }
 
 void msf_timer_waitretry_cb(opentimers_id_t id){
+    (void)id;
     msf_vars.waitretry = FALSE;
 }
 
 void msf_timer_housekeeping_cb(opentimers_id_t id){
+    (void)id;
     PORT_TIMER_WIDTH newDuration;
 
     // update the timer period
@@ -335,6 +339,7 @@ bool msf_candidateRemoveCellList(
       open_addr_t* neighbor,
       uint8_t      requiredCells
    ){
+    (void)neighbor;
     uint8_t              i;
     uint8_t              numCandCells;
     slotinfo_element_t   info;
