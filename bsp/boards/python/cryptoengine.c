@@ -1,5 +1,5 @@
 /**
-\brief Wrapper of software implementation of CCM.
+\brief Wrapper of software implementation of cryptoengine.
 
 \author Malisa Vucinic <malishav@gmail.com>, March 2015.
 */
@@ -44,3 +44,7 @@ owerror_t cryptoengine_init(OpenMote *self) {
     return E_SUCCESS;
 }
 
+owerror_t cryptoengine_ecdsa_verify(OpenMote* self, ecdsa_verify_state_t* ecdsa_state )
+{
+    return E_FAIL;
+}
