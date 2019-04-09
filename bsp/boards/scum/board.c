@@ -54,24 +54,13 @@ unsigned short do_debug_print = 0;
 unsigned reverse(unsigned x);
 unsigned int crc32c(unsigned char *message, unsigned int length);
 
-void init_ldo_control(void);
+void board_optical_calibration(void);
 
-void set_asc_bit(unsigned int position);
-void clear_asc_bit(unsigned int position);
-void GPO_control(unsigned char row1, unsigned char row2, unsigned char row3, unsigned char row4);
-void GPI_control(unsigned char row1, unsigned char row2, unsigned char row3, unsigned char row4);
-void GPO_enables(unsigned int mask);
-void GPI_enables(unsigned int mask);
+//=========================== interrupt ========================================
 
-void set_asc_bit_FPGA(unsigned int position);
-void clear_asc_bit_FPGA(unsigned int position);
-void GPO_control_FPGA(unsigned char row1, unsigned char row2, unsigned char row3, unsigned char row4);
-void GPI_control_FPGA(unsigned char row1, unsigned char row2, unsigned char row3, unsigned char row4);
+void optical_sfd_isr(void);
 
-void analog_scan_chain_write_3B_fromFPGA(unsigned int* scan_bits);
-void analog_scan_chain_load_3B_fromFPGA(void);
-
-//=========================== main ============================================
+//=========================== main =============================================
 
 extern int mote_main(void);
 
@@ -84,9 +73,42 @@ int main(void) {
 void board_init(void) {
     uint8_t eui[8];
     uint8_t calc_crc;
-    uint8_t i;
+    bool    optical_cal_finished;
     
-    // crc checking
+    board_optical_calibration();
+    
+    // set priority of interrupts
+    
+    IPR0 = 0xFF;    // uart has lowest priority
+    IPR6 = 0x0F;    // priority for radio
+    IPR7 = 0x00;    // priority for rf_timer
+    
+    // initialize bsp modules
+    debugpins_init();
+    leds_init();
+    uart_init();
+//    sctimer_init();
+//    radio_init();
+//    eui64_get(eui);
+}
+
+void board_sleep(void) {
+    // not sure how to enter a sleep mode
+}
+
+void board_reset(void) {
+    // not sure how the reset is triggered
+}
+
+//=========================== private =========================================
+
+// ==== optical calibration
+
+void board_optical_calibration(void){
+    
+    uint8_t i;
+
+    // crc checking, need to check why crc failed
     
 //    calc_crc = crc32c(0x0000,code_length);
 
@@ -116,6 +138,90 @@ void board_init(void) {
     GPI_enables(0x0002);
     GPO_enables(0xFFFD);
     
+    // Disable LF_CLOCK
+    set_asc_bit(553); //LF_CLOCK
+    //set_asc_bit(830); //HF_CLOCK
+   
+    // Set initial coarse/fine on HF_CLOCK
+    //coarse 0:4 = 860 861 875b 876b 877b
+    //fine 0:4 870 871 872 873 874b
+    set_sys_clk_secondary_freq(HF_CLOCK_coarse, HF_CLOCK_fine);   //Close to 20MHz at room temp
+
+    // Need to set crossbar so HF_CLOCK comes out divider_out_integ (gpio5, bank10)
+    // This is connected to JA9 on FPGA which is HF_CLOCK
+    set_asc_bit(1163);
+
+    // Set passthrough on divide_out_integ divider
+    set_asc_bit(40);
+
+
+// Uncomment these two lines to use an on-chip RC oscillator as the HCLK, otherwise it will be an FPGA clock
+//-------
+   // Set HCLK source as HF_CLOCK
+   //set_asc_bit(1147);   
+   
+   // Set RFTimer source as HF_CLOCK
+   //set_asc_bit(1151);
+//-------
+
+    // HF_CLOCK will be trimmed to 20MHz, so set RFTimer div value to 40 to get 500kHz (inverted, so 1101 0111)
+    set_asc_bit(49);
+    set_asc_bit(48);
+    clear_asc_bit(47);
+    set_asc_bit(46);
+    clear_asc_bit(45);
+    set_asc_bit(44);
+    set_asc_bit(43);
+    set_asc_bit(42);
+   
+    // Set 2M RC as source for chip CLK
+    set_asc_bit(1156);
+
+    // Route IF ADC_CLK out of BLE_PDA_clk for intitial optical calibration 
+    // (Can't use ADC_CLK and optical signals at the same time since they are all in the first group of four)
+    // This pin is shared with Q_LC[2], so that pin was connected to counter 4 in FPGA
+    // Comment these two lines out in IC version
+    set_asc_bit(1180);
+    set_asc_bit(1181);
+   
+    // Then set the divider for BLE_PDA_clk to passthrough
+    // Comment this line out in IC version
+    set_asc_bit(524);
+
+    // Enable 32k for cal
+    set_asc_bit(623);
+
+    // Enable passthrough on chip CLK divider
+    set_asc_bit(41);
+   
+    // Init counter setup - set all to analog_cfg control
+    // ASC[0] is leftmost
+    // ASC[0] |= 0xFF800000; 
+    for(i=2; i<22; i++) {
+        set_asc_bit(i);
+    }
+    
+    // Init RX
+    radio_init_rx_MF();
+    
+    // Init TX
+    radio_init_tx();
+      
+    // Set initial IF ADC clock frequency
+    set_IF_clock_frequency(IF_coarse, IF_fine, 0);
+
+    // Set initial TX clock frequency
+    set_2M_RC_frequency(31, 31, 21, 17, RC2M_superfine);
+   
+    // Turn on RC 2M for cal
+    set_asc_bit(1114);
+      
+    // Set initial LO frequency
+    LC_monotonic_ASC(LC_code);
+
+    // Init divider settings
+    radio_init_divider(2000);
+    
     // Program analog scan chain on SCM3B
     analog_scan_chain_write_3B_fromFPGA(&ASC[0]);
     analog_scan_chain_load_3B_fromFPGA();
@@ -131,37 +237,23 @@ void board_init(void) {
     // There are no direction controls on FPGA; hard-wired
     
     // the following gpio control will be set on the FPGA
-    // all the 16 pins are controlled as GPO: check the SCuM3B final sheet
+    // all the 16 pins are controlled as GPO: refer to the SCuM3B final sheet
     GPO_control_FPGA(6,6,6,6);
     
     // Program analog scan chain on FPGA
     analog_scan_chain_write(&ASC_FPGA[0]);
     analog_scan_chain_load();
     
-    // set priority of interrupts
+    radio_enable_LO();
     
-    IPR0 = 0xFF;    // uart has lowest priority
-    IPR6 = 0x0F;    // priority for radio
-    IPR7 = 0x00;    // priority for rf_timer
+    // Enable optical SFD interrupt for optical calibration
+    ISER = 0x0800;
     
-    // initialize bsp modules
-    debugpins_init();
-    leds_init();
-    uart_init();
-//    sctimer_init();
-//    radio_init();
-//    eui64_get(eui);
+    while(optical_cal_finished == 0) {
+        leds_all_toggle();
+    }
+    optical_cal_finished = 0;
 }
-
-void board_sleep(void) {
-    // not sure how to enter a sleep mode
-}
-
-void board_reset(void) {
-    // not sure how the reset is triggered
-}
-
-//=========================== private =========================================
 
 // Reverses (reflects) bits in a 32-bit word.
 unsigned reverse(unsigned x) {
@@ -196,292 +288,111 @@ unsigned int crc32c(unsigned char *message, unsigned int length) {
     return reverse(~crc);
 }
 
-void init_ldo_control(void){
-    
-    // Analog scan chain setup for radio LDOs
-    clear_asc_bit(501); // = scan_pon_if
-    clear_asc_bit(502); // = scan_pon_lo
-    clear_asc_bit(503); // = scan_pon_pa
-    set_asc_bit(504); // = gpio_pon_en_if
-    clear_asc_bit(505); // = fsm_pon_en_if
-    set_asc_bit(506); // = gpio_pon_en_lo
-    clear_asc_bit(507); // = fsm_pon_en_lo 
-    clear_asc_bit(508); // = gpio_pon_en_pa
-    clear_asc_bit(509); // = fsm_pon_en_pa
-    set_asc_bit(510); // = master_ldo_en_if
-    set_asc_bit(511); // = master_ldo_en_lo
-    set_asc_bit(512); // = master_ldo_en_pa
-    clear_asc_bit(513); // = scan_pon_div
-    set_asc_bit(514); // = gpio_pon_en_div
-    clear_asc_bit(515); // = fsm_pon_en_div
-    set_asc_bit(516); // = master_ldo_en_div
-}
+// ========================== interrupt ========================================
 
-void set_asc_bit(unsigned int position){
 
-    unsigned int index;
+// This interrupt goes off when the optical register holds the value {221, 176, 231, 47}
+// This interrupt is used to synchronize to the start of a data transfer
+// Need to make sure a new bit has been clocked in prior to returning from this ISR, or else it will immediately execute again
+void optical_sfd_isr(void){
     
-    index = position >> 5;
-    
-    ASC[index] |= 0x80000000 >> (position - (index << 5));
-}
+    //printf("Optical SFD interrupt triggered\n");
+    // Enable the 32bit optical interrupt
+    //ISER = 0x4;
 
-void clear_asc_bit(unsigned int position){
+    unsigned int rdata_lsb, rdata_msb; 
+    unsigned int count_LC, count_32k, count_2M, count_HFclock, count_IF;
+    
+    // Disable all counters
+    ANALOG_CFG_REG__0 = 0x007F;
 
-    unsigned int index;
-    
-    index = position >> 5;
-    
-    ASC[index] &= ~(0x80000000 >> (position - (index << 5)));
-}
+    optical_cal_iteration++;
 
-void GPO_control(unsigned char row1, unsigned char row2, unsigned char row3, unsigned char row4) {
-    
-    int j;
-    
-    for (j = 0; j <= 3; j++) { 
-    
-        if((row1 >> j) & 0x1)
-            set_asc_bit(245+j);
-        else    
-            clear_asc_bit(245+j);
+    // Read 2M counter
+    rdata_lsb = *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x180000);
+    rdata_msb = *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x1C0000);
+    count_2M = rdata_lsb + (rdata_msb << 16);
+      
+    // Read LC_div counter (via counter4)
+    rdata_lsb = *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x280000);
+    rdata_msb = *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x2C0000);
+    count_LC = rdata_lsb + (rdata_msb << 16);
+      
+    // Read 32k counter
+    rdata_lsb = *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x000000);
+    rdata_msb = *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x040000);
+    count_32k = rdata_lsb + (rdata_msb << 16);
+
+    // Read HF_CLOCK counter
+    rdata_lsb = *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x100000);
+    rdata_msb = *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x140000);
+    count_HFclock = rdata_lsb + (rdata_msb << 16);
+
+    // Read IF ADC_CLK counter
+    // This is a convoluted way to get access for initial optical cal
+    // Normally this clock would be read from counter 6, but can't get access to ADC_CLK and optical signals at same time
+    // So workaround is to plug it into counter 4 for initial calibration
+    rdata_lsb = *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x200000);
+    rdata_msb = *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x240000);
+    count_IF = rdata_lsb + (rdata_msb << 16);
+    // For the IC version, comment the above 3 lines and uncomment the 3 below
+    //rdata_lsb = *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x300000);
+    //rdata_msb = *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x340000);
+    //count_IF = rdata_lsb + (rdata_msb << 16);
+
+    // Reset all counters
+    ANALOG_CFG_REG__0 = 0x0000;      
+   
+    // Enable all counters
+    ANALOG_CFG_REG__0 = 0x3FFF;   
+
+    // Update HF CLOCK if needed
+    if(count_HFclock < 199600) {
+        HF_CLOCK_fine--;
+    }
+    if(count_HFclock > 20040000) {
+        HF_CLOCK_fine++;
+    }
+    set_sys_clk_secondary_freq(HF_CLOCK_coarse, HF_CLOCK_fine);
+   
+    // Start finer steps
+    if(count_LC > LC_target + 60){
+        LC_code -= 1;
+        LC_monotonic_ASC(LC_code);
+    } else {
+        if(count_LC < LC_target - 60){
+            LC_code += 1;
+            LC_monotonic_ASC(LC_code);
+        } 
     }
     
-    for (j = 0; j <= 3; j++) { 
-    
-        if((row2 >> j) & 0x1)
-            set_asc_bit(249+j);
-        else    
-            clear_asc_bit(249+j);
+    // Do correction on 2M RC
+    if(count_2M > (200100)) {
+        RC2M_superfine += 1;
     }
-    
-    for (j = 0; j <= 3; j++) { 
-    
-        if((row3 >> j) & 0x1)
-            set_asc_bit(253+j);
-        else    
-            clear_asc_bit(253+j);
+    if(count_2M < (199900)) {
+        RC2M_superfine -= 1;
     }
+    set_2M_RC_frequency(31, 31, 21, 17, RC2M_superfine);
     
-    for (j = 0; j <= 3; j++) { 
-    
-        if((row4 >> j) & 0x1)
-            set_asc_bit(257+j);
-        else    
-            clear_asc_bit(257+j);
+    // Do correction on IF RC clock
+    if(count_IF > (1600000+300)) {
+        IF_fine += 1;
     }
-}
-
-void GPI_control(unsigned char row1, unsigned char row2, unsigned char row3, unsigned char row4) {
-    
-    int j;
-    
-    for (j = 0; j <= 1; j++) { 
-        if((row1 >> j) & 0x1)
-            set_asc_bit(261+j);
-        else    
-            clear_asc_bit(261+j);
+    if(count_IF < (1600000-300)) {
+       IF_fine -= 1;
     }
+    set_IF_clock_frequency(IF_coarse, IF_fine, 0);
+
+    analog_scan_chain_write_3B_fromFPGA(&ASC[0]);
+    analog_scan_chain_load_3B_fromFPGA();
     
-    for (j = 0; j <= 1; j++) { 
-        if((row2 >> j) & 0x1)
-            set_asc_bit(263+j);
-        else    
-            clear_asc_bit(263+j);
+    if(optical_cal_iteration == 25){
+        ICER = 0x0800;
+        optical_cal_iteration = 0;
+        optical_cal_finished = 1;
+
+        // Halt all counters
+        ANALOG_CFG_REG__0 = 0x0000;   
     }
-    
-    for (j = 0; j <= 1; j++) { 
-        if((row3 >> j) & 0x1)
-            set_asc_bit(265+j);
-        else    
-            clear_asc_bit(265+j);
-    }
-    
-    for (j = 0; j <= 1; j++) { 
-        if((row4 >> j) & 0x1)
-            set_asc_bit(267+j);
-        else    
-            clear_asc_bit(267+j);
-    }
-}
-
-
-// Enable output drivers for GPIO based on 'mask'
-// '1' = output enabled, so GPO_enables(0xFFFF) enables all output drivers
-// GPO enables are active low on-chip
-void GPO_enables(unsigned int mask){
-
-    //out_en<0:15> = ASC<1131>,ASC<1133>,ASC<1135>,ASC<1137>,ASC<1140>,ASC<1142>,ASC<1144>,ASC<1146>,...
-    //ASC<1115>,ASC<1117>,ASC<1119>,ASC<1121>,ASC<1124>,ASC<1126>,ASC<1128>,ASC<1130>    
-    unsigned short asc_locations[16] = {1131,1133,1135,1137,1140,1142,1144,1146,1115,1117,1119,1121,1124,1126,1128,1130};
-    unsigned int j;
-    
-    for (j = 0; j <= 15; j++) { 
-    
-        if((mask >> j) & 0x1)
-            clear_asc_bit(asc_locations[j]);
-        else    
-            set_asc_bit(asc_locations[j]);
-    }
-}
-
-// Enable input path for GPIO based on 'mask'
-// '1' = input enabled, so GPI_enables(0xFFFF) enables all inputs
-// GPI enables are active high on-chip
-void GPI_enables(unsigned int mask){
-
-    //in_en<0:15> = ASC<1132>,ASC<1134>,ASC<1136>,ASC<1138>,ASC<1139>,ASC<1141>,ASC<1143>,ASC<1145>,...
-    //ASC<1116>,ASC<1118>,ASC<1120>,ASC<1122>,ASC<1123>,ASC<1125>,ASC<1127>,ASC<1129>    
-    unsigned short asc_locations[16] = {1132,1134,1136,1138,1139,1141,1143,1145,1116,1118,1120,1122,1123,1125,1127,1129};
-    unsigned int j;
-    
-    for (j = 0; j <= 15; j++) { 
-    
-        if((mask >> j) & 0x1)
-            set_asc_bit(asc_locations[j]);
-        else    
-            clear_asc_bit(asc_locations[j]);
-    }
-}
-
-// FPGA
-
-void set_asc_bit_FPGA(unsigned int position){
-
-    unsigned int index;
-    
-    index = position >> 5;
-    
-    ASC_FPGA[index] |= 0x80000000 >> (position - (index << 5));
-}
-
-void clear_asc_bit_FPGA(unsigned int position){
-
-    unsigned int index;
-    
-    index = position >> 5;
-    
-    ASC_FPGA[index] &= ~(0x80000000 >> (position - (index << 5)));
-}
-
-void GPO_control_FPGA(unsigned char row1, unsigned char row2, unsigned char row3, unsigned char row4) {
-    
-    int j;
-    
-    for (j = 0; j <= 3; j++) { 
-    
-        if((row1 >> j) & 0x1)
-            set_asc_bit_FPGA(245+j);
-        else    
-            clear_asc_bit_FPGA(245+j);
-    }
-    
-    for (j = 0; j <= 3; j++) { 
-    
-        if((row2 >> j) & 0x1)
-            set_asc_bit_FPGA(249+j);
-        else    
-            clear_asc_bit_FPGA(249+j);
-    }
-    
-    for (j = 0; j <= 3; j++) { 
-    
-        if((row3 >> j) & 0x1)
-            set_asc_bit_FPGA(253+j);
-        else    
-            clear_asc_bit_FPGA(253+j);
-    }
-    
-    for (j = 0; j <= 3; j++) { 
-    
-        if((row4 >> j) & 0x1)
-            set_asc_bit_FPGA(257+j);
-        else    
-            clear_asc_bit_FPGA(257+j);
-    }
-}
-
-void GPI_control_FPGA(unsigned char row1, unsigned char row2, unsigned char row3, unsigned char row4) {
-    
-    int j;
-    
-    for (j = 0; j <= 1; j++) { 
-    
-        if((row1 >> j) & 0x1)
-            set_asc_bit_FPGA(261+j);
-        else    
-            clear_asc_bit_FPGA(261+j);
-    }
-    
-    for (j = 0; j <= 1; j++) { 
-    
-        if((row2 >> j) & 0x1)
-            set_asc_bit_FPGA(263+j);
-        else    
-            clear_asc_bit_FPGA(263+j);
-    }
-    
-    for (j = 0; j <= 1; j++) { 
-    
-        if((row3 >> j) & 0x1)
-            set_asc_bit_FPGA(265+j);
-        else    
-            clear_asc_bit_FPGA(265+j);
-    }
-    
-    for (j = 0; j <= 1; j++) { 
-    
-        if((row4 >> j) & 0x1)
-            set_asc_bit_FPGA(267+j);
-        else    
-            clear_asc_bit_FPGA(267+j);
-    }
-}
-
-void analog_scan_chain_write_3B_fromFPGA(unsigned int* scan_bits) {
-    
-    int i = 0;
-    int j = 0;
-    unsigned int asc_reg;
-    
-    for (i=37; i>=0; i--) {
-        
-        //printf("\n%d,%lX\n",i,scan_bits[i]);
-        
-        for (j=0; j<32; j++) {
-
-        // Set scan_in (should be inverted)
-        if((scan_bits[i] & (0x00000001 << j)) == 0)
-            asc_reg = 0x1;    
-        else
-            asc_reg = 0x0;
-
-        // Write asc_reg to analog_cfg
-        ANALOG_CFG_REG__5 = asc_reg;
-
-        // Lower phi1
-        asc_reg &= ~(0x2);
-        ANALOG_CFG_REG__5 = asc_reg;
-
-        // Toggle phi2
-        asc_reg |= 0x4;
-        ANALOG_CFG_REG__5 = asc_reg;
-        asc_reg &= ~(0x4);
-        ANALOG_CFG_REG__5 = asc_reg;
-
-        // Raise phi1
-        asc_reg |= 0x2;
-        ANALOG_CFG_REG__5 = asc_reg;
-        
-        }    
-    }
-}
-
-void analog_scan_chain_load_3B_fromFPGA(void) {
-    
-    // Assert load signal (and cfg<357>)
-    ANALOG_CFG_REG__5 = 0x0028;
-
-    // Lower load signal
-    ANALOG_CFG_REG__5 = 0x0020;
 }

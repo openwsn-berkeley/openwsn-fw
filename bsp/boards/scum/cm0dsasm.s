@@ -47,7 +47,7 @@ __Vectors           DCD         __initial_sp
                     DCD         0
                     DCD         0
                     DCD         0
-                    DCD         0
+                    DCD         optical_sfd_interrupt
                     DCD         0
                     DCD         0
                     DCD         0
@@ -125,6 +125,27 @@ RFTIMER_Handler PROC
         
                 ENDP
                     
+optical_sfd_interrupt   PROC   
+        EXPORT    optical_sfd_interrupt
+        IMPORT   optical_sfd_isr
+        
+        PUSH   {R0,LR}
+        
+        MOVS    R0, #1 ;       ;MASK all interrupts
+        MSR    PRIMASK, R0 ; 
+        ;STR      R0,[R1]   
+        
+        BL    optical_sfd_isr
+        
+        MOVS   R0, #0      ;ENABLE all interrupts
+        MSR   PRIMASK, R0
+        
+        POP   {R0,PC}
+        
+                ENDP
+
+        ALIGN 4
+    
 ; User Initial Stack & Heap
                 IF      :DEF:__MICROLIB
                 EXPORT  __initial_sp

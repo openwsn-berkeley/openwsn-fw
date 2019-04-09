@@ -17,7 +17,7 @@
 //=========================== public ==========================================
 
 void leds_init(void) {
-//    GPIO_REG__OUTPUT    &= ~0xF00;    // GPIO_REG__OUTPUT = 0bxxxx00000000, all LEDs off
+    GPIO_REG__OUTPUT    &= ~0xFC00;    // GPIO_REG__OUTPUT = 0bxxxx00000000, all LEDs off
 }
 
 // 0 <H17>
