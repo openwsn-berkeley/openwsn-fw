@@ -18,88 +18,78 @@ To be implemented after issue: SCUM-25
 //=========================== public ==========================================
 
 void debugpins_init(void) {
-    // GPIO pin 13 to 16 are used as debugpins, 
-    GPIO_REG__OUTPUT    &= ~0xF000; // all PINS low at initial
+    // GPIO pin 0 to 7 are used as debugpins, 
+    GPIO_REG__OUTPUT    &= ~0x00FF; // all PINS low at initial
 }
 
 void debugpins_frame_toggle(void) {
-    // GPIO_REG__OUTPUT    ^=  0x1000;
+    GPIO_REG__OUTPUT    ^=  0x0001;
 }
 
 void debugpins_frame_clr(void) {
-     // GPIO_REG__OUTPUT    &= ~0x1000;
+    GPIO_REG__OUTPUT    &= ~0x0001;
 }
 
 void debugpins_frame_set(void) {
-    //GPIO_REG__OUTPUT    |=  0x1000;
+    GPIO_REG__OUTPUT    |=  0x0001;
 }
 
 void debugpins_slot_toggle(void) {
-    GPIO_REG__OUTPUT    ^=  0x2000;
+    GPIO_REG__OUTPUT    ^=  0x0002;
 }
 
 void debugpins_slot_clr(void) {
-    GPIO_REG__OUTPUT    &= ~0x2000;
+    GPIO_REG__OUTPUT    &= ~0x0002;
 }
 
 void debugpins_slot_set(void) {
-    GPIO_REG__OUTPUT    |=  0x2000;
+    GPIO_REG__OUTPUT    |=  0x0002;
 }
 
 void debugpins_fsm_toggle(void) {
-//    GPIO_REG__OUTPUT    ^=  0x4000;
-    GPIO_REG__OUTPUT    ^=  0x100;
+    GPIO_REG__OUTPUT    ^=  0x0004;
 }
 
 void debugpins_fsm_clr(void) {
-//    GPIO_REG__OUTPUT    &= ~0x4000;
-    GPIO_REG__OUTPUT    &=  ~0x100;
+    GPIO_REG__OUTPUT    &= ~0x0004;
 }
 
 void debugpins_fsm_set(void) {
-//    GPIO_REG__OUTPUT    |=  0x4000;
-    GPIO_REG__OUTPUT    |=  0x100;
+    GPIO_REG__OUTPUT    |=  0x0004;
 }
 
-// no enough pin for debugpins task
-
 void debugpins_task_toggle(void) {
-    // GPIO_REG__OUTPUT    ^=  0x8000;
+    GPIO_REG__OUTPUT    ^=  0x0008;
 }
 
 void debugpins_task_clr(void) {
-    // GPIO_REG__OUTPUT    &= ~0x8000;
+    GPIO_REG__OUTPUT    &= ~0x0008;
 }
 
 void debugpins_task_set(void) {
-    // GPIO_REG__OUTPUT    |=  0x8000;
+    GPIO_REG__OUTPUT    |=  0x0008;
 }
 
 void debugpins_isr_toggle(void) {
-//    GPIO_REG__OUTPUT    ^=  0x1000;
-    GPIO_REG__OUTPUT    ^=  0x200;
+    GPIO_REG__OUTPUT    ^=  0x0010;
 }
 
 void debugpins_isr_clr(void) {
-//    GPIO_REG__OUTPUT    &= ~0x1000;
-    GPIO_REG__OUTPUT    &=  ~0x200;
+    GPIO_REG__OUTPUT    &= ~0x0010;
 }
 
 void debugpins_isr_set(void) {
-//    GPIO_REG__OUTPUT    |=  0x1000;
-    GPIO_REG__OUTPUT    |=  0x200;
+    GPIO_REG__OUTPUT    |=  0x0010;
 }
 
-// no enough pin for debugpins radio
-
 void debugpins_radio_toggle(void) {
-    // GPIO_REG__OUTPUT    ^=  0x2000;
+    GPIO_REG__OUTPUT    ^=  0x0020;
 }
 
 void debugpins_radio_clr(void) {
-    // GPIO_REG__OUTPUT    &= ~0x2000;
+    GPIO_REG__OUTPUT    &= ~0x0020;
 }
 
 void debugpins_radio_set(void) {
-    // GPIO_REG__OUTPUT    |=  0x2000;
+    GPIO_REG__OUTPUT    |=  0x0020;
 }

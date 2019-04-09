@@ -173,16 +173,42 @@
 #define ANALOG_CFG_REG__2               *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x080000)
 #define ANALOG_CFG_REG__3               *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x0C0000)
 #define ANALOG_CFG_REG__4               *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x100000)
+#define ANALOG_CFG_REG__5               *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x140000)
+#define ANALOG_CFG_REG__6               *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x180000)
+#define ANALOG_CFG_REG__7               *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x1C0000)
+#define ANALOG_CFG_REG__8               *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x200000)
 #define ANALOG_CFG_REG__9               *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x240000)
 #define ANALOG_CFG_REG__10              *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x280000)
 #define ANALOG_CFG_REG__11              *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x2C0000)
+#define ANALOG_CFG_REG__12              *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x300000)
+#define ANALOG_CFG_REG__13              *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x340000)
+#define ANALOG_CFG_REG__14              *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x380000)
+#define ANALOG_CFG_REG__15              *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x3C0000)
+#define ANALOG_CFG_REG__16              *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x400000)
+#define ANALOG_CFG_REG__17              *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x440000)
+#define ANALOG_CFG_REG__18              *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x480000)
+#define ANALOG_CFG_REG__19              *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x4C0000)
+#define ANALOG_CFG_REG__20              *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x500000)
+#define ANALOG_CFG_REG__21              *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x540000)
 #define ANALOG_CFG_REG__22              *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x580000)
-    
+#define ANALOG_CFG_REG__23              *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x5C0000)
+#define ANALOG_CFG_REG__24              *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x600000)
+#define ANALOG_CFG_REG__25              *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x640000)
+#define ANALOG_CFG_REG__26              *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x680000)
+#define ANALOG_CFG_REG__27              *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x6C0000)
+#define ANALOG_CFG_REG__28              *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x700000)
+#define ANALOG_CFG_REG__29              *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x740000)
+#define ANALOG_CFG_REG__30              *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x780000)
+
 #define ACFG_LO__ADDR                   *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x001C0000)
 #define ACFG_LO__ADDR_2                 *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x00200000)
 
+// Interrupt clear/set enable register
 #define ISER                            *(unsigned int*)(0xE000E100)
 #define ICER                            *(unsigned int*)(0xE000E180)
+// Interrupt clear/set pending register
+#define ICPR                            *(unsigned int*)(0xE000E280)
+#define ISPR                            *(unsigned int*)(0xE000E200)
     
 // =========================== Priority Registers =============================
 
