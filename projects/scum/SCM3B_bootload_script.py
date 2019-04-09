@@ -14,6 +14,9 @@ com_port = 'COM11';
 
 binFilePath = "{0}\Objects\{0}.bin".format('01bsp_leds')
 
+
+print "bin file path: {0}".format(binFilePath)
+
 # 1 = use optical program mode
 # 0 = use wired 3-wire bus mode
 boot_mode = 1;
@@ -25,7 +28,7 @@ skip_reset = 0;
 # 1 = insert CRC for payload integrity checking
 # 0 = do not insert CRC
 # SCM C code must also be set up for CRC check for this to work
-insert_CRC = 1;
+insert_CRC = 0;
 
 # 1 = pad unused payload space with random data and check it with CRC
 # 0 = pad with zeros, do not check integrity of padding
