@@ -34,13 +34,6 @@ to return the board's description.
 
 // ==== SCuM RF timer specific 
 
-// with the setup of FPGA board +teensy, the rftimer clock is 
-// 20MHz divided by 255 (around 78431Hz), the following code is converting 
-// between 32768Hz and 78431Hz, the ratio between them is around 2 and 5
-// NOTICE: 
-// 1) 255 is the maxium value can be divided. 
-// 2) on FPGA, 20MHz clock can't be slow down.
-
 // NOTE: 
 // This convert has a problem that when multiple the value, it may exceeds 
 // 0xffffffff, resulting a wrong converting. Resolve this problem when the 
@@ -48,10 +41,10 @@ to return the board's description.
 
 // this is called when require to WRITE the RFTIMER counter/compare registers,
 // where the value is going to be multiplied.
-#define TIMER_COUNTER_CONVERT_32K_TO_RFTIMER_CLK(value)    value*5/2
+#define TIMER_COUNTER_CONVERT_32K_TO_RFTIMER_CLK(value)    value*61/4
 // this is called when require to READ  the RFTIMER counter/compare registers,
 // where the value is going to be divided.
-#define TIMER_COUNTER_CONVERT_RFTIMER_CLK_TO_32K(value)    value*2/5
+#define TIMER_COUNTER_CONVERT_RFTIMER_CLK_TO_32K(value)    value*4/61
 
 //===== radio
 
