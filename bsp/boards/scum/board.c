@@ -87,7 +87,7 @@ void board_init(void) {
     debugpins_init();
     leds_init();
     uart_init();
-//    sctimer_init();
+    sctimer_init();
 //    radio_init();
 //    eui64_get(eui);
 }
@@ -249,9 +249,7 @@ void board_optical_calibration(void){
     // Enable optical SFD interrupt for optical calibration
     ISER = 0x0800;
     
-    while(optical_cal_finished == 0) {
-        leds_all_toggle();
-    }
+    while(optical_cal_finished == 0);
     optical_cal_finished = 0;
 }
 
