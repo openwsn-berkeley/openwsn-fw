@@ -384,7 +384,7 @@
             <File>
               <FileName>01bsp_radio.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\common\01bsp_radio\01bsp_radio.c</FilePath>
+              <FilePath>.\01bsp_radio.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -495,6 +495,21 @@
               <FileName>scm3_hardware_interface.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\..\bsp\boards\scum\scm3_hardware_interface.h</FilePath>
+            </File>
+            <File>
+              <FileName>bucket_o_functions.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\bsp\boards\scum\bucket_o_functions.c</FilePath>
+            </File>
+            <File>
+              <FileName>bucket_o_functions.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\bsp\boards\scum\bucket_o_functions.h</FilePath>
+            </File>
+            <File>
+              <FileName>retarget.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\bsp\boards\scum\retarget.c</FilePath>
             </File>
           </Files>
         </Group>
