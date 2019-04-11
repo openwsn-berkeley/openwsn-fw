@@ -21,6 +21,7 @@
 
 #define DEFAULT_CRC_CHECK       0x01    // this is an arbitrary value for now
 #define DEFAULT_RSSI            -50     // this is an arbitrary value for now
+#define DEFAULT_FREQ             11     // since the LC calibration has some problem, just use the channel 11 for now
 
 // ==== for calibration
 
@@ -185,19 +186,20 @@ void radio_setFrequency(uint8_t frequency, uint8_t tx_or_rx) {
     // change state
     radio_vars.state = RADIOSTATE_SETTING_FREQUENCY;
     
+//    radio_vars.current_frequency = frequency;
+    radio_vars.current_frequency = DEFAULT_FREQ;
+    
     switch(tx_or_rx){
     case 0x01:
-        setFrequencyTX(frequency);
+        setFrequencyTX(radio_vars.current_frequency);
         break;
     case 0x02:
-        setFrequencyRX(frequency);
+        setFrequencyRX(radio_vars.current_frequency);
         break;
     default:
         // shouldn't happen
         break;
     }
-    
-    radio_vars.current_frequency = frequency;
     
     // change state
     radio_vars.state = RADIOSTATE_FREQUENCY_SET;
@@ -461,6 +463,10 @@ void radio_calibration(void) {
         }
     }
     
+    // Write and load analog scan chain
+    analog_scan_chain_write_3B_fromFPGA(&ASC[0]);
+    analog_scan_chain_load_3B_fromFPGA();
+    
 //    printf("IF=%d, LQI=%d, CDR=%d, len=%d, LC=%d\r\n",IF_estimate,LQI_chip_errors,cdr_tau_value,packet_len,LC_code);
 }
 
@@ -474,12 +480,7 @@ kick_scheduler_t radio_isr(void) {
     
     PORT_TIMER_WIDTH irq_status = RFCONTROLLER_REG__INT;
     PORT_TIMER_WIDTH irq_error  = RFCONTROLLER_REG__ERROR;
-    
-    UART_REG__TX_DATA = irq_status + '0';
-    UART_REG__TX_DATA = '-';
-    UART_REG__TX_DATA = irq_error + '0';
-    UART_REG__TX_DATA = '\r';
-    UART_REG__TX_DATA = '\n';
+
     
     debugpins_isr_set();
     
@@ -544,8 +545,6 @@ kick_scheduler_t radio_isr(void) {
             
             radio_calibration();
             
-            // set the frequency to update the scan chain
-            radio_setFrequency(11, 0x02);
             radio_rxEnable();
         }
         // the packet transmission or reception is done,
