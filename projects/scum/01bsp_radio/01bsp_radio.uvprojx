@@ -337,7 +337,7 @@
               <MiscControls></MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\bsp\boards;..\..\..\bsp\boards\scum</IncludePath>
+              <IncludePath>..\..\..\bsp\boards\scum;..\..\..\bsp\boards</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -420,11 +420,6 @@
               <FileName>leds.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\..\bsp\boards\leds.h</FilePath>
-            </File>
-            <File>
-              <FileName>radio.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\bsp\boards\radio.h</FilePath>
             </File>
             <File>
               <FileName>uart.h</FileName>
@@ -510,6 +505,11 @@
               <FileName>retarget.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\bsp\boards\scum\retarget.c</FilePath>
+            </File>
+            <File>
+              <FileName>radio.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\bsp\boards\scum\radio.h</FilePath>
             </File>
           </Files>
         </Group>

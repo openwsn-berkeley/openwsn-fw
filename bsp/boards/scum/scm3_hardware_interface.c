@@ -11,6 +11,9 @@ unsigned int current_lfsr = 0x12345678;
 // coarse1, coarse2, coarse3, fine, superfine dac settings
 unsigned int dac_2M_settings[5] = {31, 31, 29, 2, 2};
 
+unsigned int RX_channel_codes[16] = {0};
+unsigned int TX_channel_codes[16] = {0};
+
 
 // Reverse endianness of lower 16 bits
 unsigned int flip_lsb8(unsigned int in){
@@ -1016,8 +1019,173 @@ void set_IF_clock_frequency(int coarse, int fine, int high_range){
     }
 }
 
-void radio_enable_LO(){
+void radio_enable_LO(void){
     
     // Turn on only LO via memory mapped register
     ANALOG_CFG_REG__10 = 0x0008;
 }
+
+void radio_disable_all(void){
+    
+    // Turn off LDOs
+    ANALOG_CFG_REG__10 = 0x0000;
+}
+
+
+unsigned int build_RX_channel_table(unsigned int channel_11_LC_code){
+    
+    unsigned int rdata_lsb,rdata_msb;
+    int t,ii=0;
+    unsigned int count_LC[16] = {0};
+    unsigned int count_targets[17] = {0};
+    
+    RX_channel_codes[0] = channel_11_LC_code;
+    
+    //for(ii=0; ii<16; ii++){
+    while(ii<16) {
+    
+        LC_monotonic_ASC(RX_channel_codes[ii]);
+        analog_scan_chain_write_3B_fromFPGA(&ASC[0]);
+        analog_scan_chain_load_3B_fromFPGA();
+                    
+        // Reset all counters
+        ANALOG_CFG_REG__0 = 0x0000;
+        
+        // Enable all counters
+        ANALOG_CFG_REG__0 = 0x3FFF;    
+        
+        // Count for some arbitrary amount of time
+        for(t=1; t<16000; t++);
+        
+        // Disable all counters
+        ANALOG_CFG_REG__0 = 0x007F;
+
+        // Read count result
+        rdata_lsb = *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x280000);
+        rdata_msb = *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x2C0000);
+        count_LC[ii] = rdata_lsb + (rdata_msb << 16);
+    
+        count_targets[ii+1] = ((961+(ii+1)*2) * count_LC[0]) / 961;
+        
+        // Adjust LC_code to match new target
+        if(ii>0){
+            
+            if(count_LC[ii] < (count_targets[ii] - 20)){
+                RX_channel_codes[ii]++;
+            }
+            else{
+                RX_channel_codes[ii+1] = RX_channel_codes[ii] + 40;
+                ii++;
+            }                    
+        }
+        
+        if(ii==0){
+                RX_channel_codes[ii+1] = RX_channel_codes[ii] + 40;
+                ii++;
+        }
+    }
+    
+    for(ii=0; ii<16; ii++){
+        printf("RX ch=%d,  count_LC=%d,  count_targets=%d,  RX_channel_codes=%d\r\n",ii+11,count_LC[ii],count_targets[ii],RX_channel_codes[ii]);
+    }
+    
+    return count_LC[0];
+}
+
+
+void build_TX_channel_table(unsigned int channel_11_LC_code, unsigned int count_LC_RX_ch11){
+    
+    unsigned int rdata_lsb,rdata_msb;
+    int t,ii=0;
+    unsigned int count_LC[16] = {0};
+    unsigned int count_targets[17] = {0};
+    
+    unsigned short nums[16] = {802,904,929,269,949,434,369,578,455,970,139,297,587,109,373,159};
+    unsigned short dens[16] = {801,901,924,267,940,429,364,569,447,951,136,290,572,106,362,154};    
+        
+    
+    // Need to adjust here for shift from PA
+    TX_channel_codes[0] = channel_11_LC_code+30;
+    
+    
+    //for(ii=0; ii<16; ii++){
+    while(ii<16) {
+    
+        LC_monotonic_ASC(TX_channel_codes[ii]);
+        analog_scan_chain_write_3B_fromFPGA(&ASC[0]);
+        analog_scan_chain_load_3B_fromFPGA();
+                    
+        // Reset all counters
+        ANALOG_CFG_REG__0 = 0x0000;
+        
+        // Enable all counters
+        ANALOG_CFG_REG__0 = 0x3FFF;    
+        
+        // Count for some arbitrary amount of time
+        for(t=1; t<16000; t++);
+        
+        // Disable all counters
+        ANALOG_CFG_REG__0 = 0x007F;
+
+        // Read count result
+        rdata_lsb = *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x280000);
+        rdata_msb = *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x2C0000);
+        count_LC[ii] = rdata_lsb + (rdata_msb << 16);
+        
+        // Until figure out why modulation spacing is only 800kHz, only set 400khz above RF channel
+        count_targets[ii] = (nums[ii] * count_LC_RX_ch11) / dens[ii];
+        //count_targets[ii] = ((24054 + ii*50) * count_LC_RX_ch11) / 24025;
+        //count_targets[ii] = ((24055 + ii*50) * count_LC_RX_ch11) / 24025;
+        
+        if(count_LC[ii] < (count_targets[ii] - 5)){
+            TX_channel_codes[ii]++;
+        }
+        else{
+            TX_channel_codes[ii+1] = TX_channel_codes[ii] + 40;
+            ii++;
+        }                    
+    }
+    
+    for(ii=0; ii<16; ii++){
+        printf("\r\nTX ch=%d,  count_LC=%d,  count_targets=%d,  TX_channel_codes=%d\r\n",ii+11,count_LC[ii],count_targets[ii],TX_channel_codes[ii]);
+    }
+}
+
+void build_channel_table(unsigned int channel_11_LC_code){
+    
+    unsigned int count_LC_RX_ch11;
+
+    // Make sure in RX mode first
+
+    count_LC_RX_ch11 = build_RX_channel_table(channel_11_LC_code);
+
+    //printf("--\n");
+
+    // Switch over to TX mode
+
+    // Turn polyphase off for TX
+    clear_asc_bit(971);
+
+    // Hi-Z mixer wells for TX
+    set_asc_bit(298);
+    set_asc_bit(307);
+
+    // Analog scan chain setup for radio LDOs for RX
+    clear_asc_bit(504); // = gpio_pon_en_if
+    set_asc_bit(506); // = gpio_pon_en_lo
+    set_asc_bit(508); // = gpio_pon_en_pa
+
+    build_TX_channel_table(channel_11_LC_code,count_LC_RX_ch11);
+    
+    radio_disable_all();
+}
+
+unsigned int read_IF_estimate(void){
+    // Check valid flag
+    if(ANALOG_CFG_REG__16 & 0x400) {
+        return ANALOG_CFG_REG__16 & 0x3FF;
+    } else {
+        return 0;
+    }
+}
+

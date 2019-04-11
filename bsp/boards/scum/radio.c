@@ -11,6 +11,7 @@
 #include "debugpins.h"
 #include "leds.h"
 #include "memory_map.h"
+#include "scm3_hardware_interface.h"
 
 //=========================== defines =========================================
 
@@ -21,7 +22,17 @@
 #define DEFAULT_CRC_CHECK       0x01    // this is an arbitrary value for now
 #define DEFAULT_RSSI            -50     // this is an arbitrary value for now
 
+// ==== for calibration
+
+#define  FREQ_UPDATE_TIMEOUT  15
+
 //=========================== variables =======================================
+
+extern unsigned int ASC[38];
+extern unsigned int RX_channel_codes[16];
+extern unsigned int TX_channel_codes[16];
+
+extern unsigned int LC_code;
 
 typedef struct {
     radio_capture_cbt         startFrame_cb;
@@ -29,11 +40,27 @@ typedef struct {
     uint8_t                   radio_tx_buffer[MAXLENGTH_TRX_BUFFER] __attribute__ ((aligned (4)));
     uint8_t                   radio_rx_buffer[MAXLENGTH_TRX_BUFFER] __attribute__ ((aligned (4)));
     radio_state_t             state; 
+    uint8_t                   current_frequency;
 } radio_vars_t;
 
 radio_vars_t radio_vars;
 
+unsigned char   FIR_coeff[11] = {4,16,37,64,87,96,87,64,37,16,4};
+unsigned int    IF_estimate_history[11] = {500,500,500,500,500,500,500,500,500,500};
+signed short    cdr_tau_history[11] = {0};
+unsigned short  frequency_update_cooldown_timer = 0;
+signed short    cdr_tau_value;
+unsigned int    LQI_chip_errors;
+unsigned int    IF_estimate;
+
+// MF IF clock settings
+extern unsigned int    IF_clk_target;
+extern unsigned int    IF_coarse;
+extern unsigned int    IF_fine;
+
 //=========================== prototypes ======================================
+
+void radio_calibration(void);
 
 //=========================== public ==========================================
 
@@ -46,6 +73,10 @@ void radio_init(void) {
     
     // change state
     radio_vars.state                = RADIOSTATE_STOPPED;
+
+    // Enable radio interrupts in NVIC
+    ISER = 0x40;
+    
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
     // enable sfd done and send done interruptions of tranmission
     // enable sfd done and receiving done interruptions of reception
@@ -93,12 +124,80 @@ void radio_reset(void) {
 
 //===== RF admin
 
-void radio_setFrequency(uint8_t frequency) {
+
+// Call this to setup RX, followed quickly by a TX ack
+// Note that due to the two ASC program cycles, this function takes about 27ms to execute (@5MHz HCLK)
+void setFrequencyRX(unsigned int channel){
+    
+    // Set LO code for RX channel
+    LC_monotonic_ASC(RX_channel_codes[channel-11]);
+    
+    //printf("chan code = %d\n", RX_channel_codes[channel-11]);
+    
+    // On FPGA, have to use the chip's GPIO outputs for radio signals
+    // Note that can't reprogram while the RX is active
+    GPO_control(2,10,1,1);
+
+    // Turn polyphase on for RX
+    set_asc_bit(971);
+
+    // Enable mixer for RX
+    clear_asc_bit(298);
+    clear_asc_bit(307);
+
+    // Analog scan chain setup for radio LDOs for RX
+    set_asc_bit(504); // = gpio_pon_en_if
+    set_asc_bit(506); // = gpio_pon_en_lo
+    clear_asc_bit(508); // = gpio_pon_en_pa
+    clear_asc_bit(514); // = gpio_pon_en_div
+
+    // Write and load analog scan chain
+    analog_scan_chain_write_3B_fromFPGA(&ASC[0]);
+    analog_scan_chain_load_3B_fromFPGA();
+}
+
+
+// Call this to setup TX, followed quickly by a RX ack
+void setFrequencyTX(unsigned int channel){
+
+    // Set LO code for TX channel
+    LC_monotonic_ASC(TX_channel_codes[channel-11]);
+
+    // Turn polyphase off for TX
+    clear_asc_bit(971);
+
+    // Hi-Z mixer wells for TX
+    set_asc_bit(298);
+    set_asc_bit(307);
+
+    // Analog scan chain setup for radio LDOs for TX
+    clear_asc_bit(504); // = gpio_pon_en_if
+    set_asc_bit(506); // = gpio_pon_en_lo
+    set_asc_bit(508); // = gpio_pon_en_pa
+    clear_asc_bit(514); // = gpio_pon_en_div
+
+    // Write and load analog scan chain
+    analog_scan_chain_write_3B_fromFPGA(&ASC[0]);
+    analog_scan_chain_load_3B_fromFPGA();
+}
+
+void radio_setFrequency(uint8_t frequency, uint8_t tx_or_rx) {
     // change state
     radio_vars.state = RADIOSTATE_SETTING_FREQUENCY;
     
-    // not support by SCuM yet
+    switch(tx_or_rx){
+    case 0x01:
+        setFrequencyTX(frequency);
+        break;
+    case 0x02:
+        setFrequencyRX(frequency);
+        break;
+    default:
+        // shouldn't happen
+        break;
+    }
     
+    radio_vars.current_frequency = frequency;
     
     // change state
     radio_vars.state = RADIOSTATE_FREQUENCY_SET;
@@ -114,7 +213,13 @@ void radio_rfOff(void) {
     radio_vars.state            = RADIOSTATE_TURNING_OFF;
 
     // turn SCuM radio off
-    RFCONTROLLER_REG__CONTROL   = RX_STOP;
+    RFCONTROLLER_REG__CONTROL   = RX_RESET;
+    
+    // Hold digital baseband in reset
+    ANALOG_CFG_REG__4 = 0x2000;
+
+    // Turn off LDOs
+    ANALOG_CFG_REG__10 = 0x0000;
     
     // wiggle debug pin
     debugpins_radio_clr();
@@ -165,7 +270,8 @@ void radio_txEnable(void) {
     // change state
     radio_vars.state = RADIOSTATE_ENABLING_TX;
 
-    // not support by SCuM
+    // turn on LO, PA, and AUX LDOs
+    ANALOG_CFG_REG__10 = 0x00A8;
     
     // wiggle debug pin
     debugpins_radio_set();
@@ -191,16 +297,27 @@ void radio_rxEnable(void) {
     
     // change state
     radio_vars.state            = RADIOSTATE_ENABLING_RX;
+    // Turn on LO, IF, and AUX LDOs via memory mapped register
+    ANALOG_CFG_REG__10 = 0x0098;
+    
+    // reset
+    RFCONTROLLER_REG__CONTROL   = RX_RESET;
+    
+    // set receiving buffer address
     DMA_REG__RF_RX_ADDR         = &(radio_vars.radio_rx_buffer[0]);
+    
+    // Reset digital baseband
+    ANALOG_CFG_REG__4 = 0x2000;
+    ANALOG_CFG_REG__4 = 0x2800;
     // start to listen
     RFCONTROLLER_REG__CONTROL   = RX_START;
+    
     // wiggle debug pin
     debugpins_radio_set();
     leds_radio_on();
     
     // change state
     radio_vars.state            = RADIOSTATE_LISTENING;
-
 }
 
 void radio_rxEnable_scum(void){
@@ -241,6 +358,112 @@ void radio_getReceivedFrame(uint8_t* pBufRead,
 
 //=========================== private =========================================
 
+void radio_calibration(void) {
+
+    signed int sum = 0;
+    int jj;
+    unsigned int IF_est_filtered;
+    signed int chip_rate_error_ppm, chip_rate_error_ppm_filtered;
+    unsigned short packet_len;
+    signed int timing_correction;
+    
+    packet_len = radio_vars.radio_rx_buffer[0];
+    
+    // When updating LO and IF clock frequncies, must wait long enough for the changes to propagate before changing again
+    // Need to receive as many packets as there are taps in the FIR filter
+    frequency_update_cooldown_timer++;
+    
+    // FIR filter for cdr tau slope
+    sum = 0;
+    
+    // A tau value of 0 indicates there is no rate mistmatch between the TX and RX chip clocks
+    // The cdr_tau_value corresponds to the number of samples that were added or dropped by the CDR
+    // Each sample point is 1/16MHz = 62.5ns
+    // Need to estimate ppm error for each packet, then FIR those values to make tuning decisions
+    // error_in_ppm = 1e6 * (#adjustments * 62.5ns) / (packet length (bytes) * 64 chips/byte * 500ns/chip)
+    // Which can be simplified to (#adjustments * 15625) / (packet length * 8)
+                
+    chip_rate_error_ppm = (cdr_tau_value * 15625) / (packet_len * 8);
+    
+    // Shift old samples
+    for (jj=9; jj>=0; jj--){
+        cdr_tau_history[jj+1] = cdr_tau_history[jj];        
+    }
+    
+    // New sample
+    cdr_tau_history[0] = chip_rate_error_ppm;
+    
+    // Do FIR convolution
+    for (jj=0; jj<=10; jj++){
+        sum = sum + cdr_tau_history[jj] * FIR_coeff[jj];        
+    }
+    
+    // Divide by 512 (sum of the coefficients) to scale output
+    chip_rate_error_ppm_filtered = sum / 512;
+    
+    // The IF clock frequency steps are about 2000ppm, so make an adjustment only if the error is larger than 1000ppm
+    // Must wait long enough between changes for FIR to settle (at least 10 packets)
+    // Need to add some handling here in case the IF_fine code will rollover with this change (0 <= IF_fine <= 31)
+    if(frequency_update_cooldown_timer == FREQ_UPDATE_TIMEOUT){
+        if(chip_rate_error_ppm_filtered > 1000) {
+            set_IF_clock_frequency(IF_coarse, IF_fine++, 0);
+        }
+        if(chip_rate_error_ppm_filtered < -1000) {
+            set_IF_clock_frequency(IF_coarse, IF_fine--, 0);
+        }
+    }
+    
+    // FIR filter for IF estimate
+    sum = 0;
+    
+    // The IF estimate reports how many zero crossings (both pos and neg) there were in a 100us period
+    // The IF should on average be 2.5 MHz, which means the IF estimate will return ~500 when there is no IF error
+    // Each tick is roughly 5 kHz of error
+    
+    // Only make adjustments when the chip error rate is <10% (this value was picked as an arbitrary choice)
+    // While packets can be received at higher chip error rates, the average IF estimate tends to be less accurate
+    // Estimated chip_error_rate = LQI_chip_errors/256 (assuming the packet length was at least 8 Bytes)
+    if(LQI_chip_errors < 25){
+    
+        // Shift old samples
+        for (jj=9; jj>=0; jj--){
+            IF_estimate_history[jj+1] = IF_estimate_history[jj];        
+        }
+        
+        // New sample
+        IF_estimate_history[0] = IF_estimate;
+
+        // Do FIR convolution
+        for (jj=0; jj<=10; jj++){
+            sum = sum + IF_estimate_history[jj] * FIR_coeff[jj];        
+        }
+        
+        // Divide by 512 (sum of the coefficients) to scale output
+        IF_est_filtered = sum / 512;
+        
+        //printf("%d - %d, %d\n",IF_estimate,IF_est_filtered,LQI_chip_errors);
+        
+        // The LO frequency steps are about ~80-100 kHz, so make an adjustment only if the error is larger than that
+        // These hysteresis bounds (+/- X) have not been optimized
+        // Must wait long enough between changes for FIR to settle (at least as many packets as there are taps in the FIR)
+        // For now, assume that TX/RX should both be updated, even though the IF information is only from the RX code
+        if(frequency_update_cooldown_timer == FREQ_UPDATE_TIMEOUT){
+            if(IF_est_filtered > 520){
+                RX_channel_codes[radio_vars.current_frequency - 11]++; 
+                TX_channel_codes[radio_vars.current_frequency - 11]++; 
+            }
+            if(IF_est_filtered < 480){
+                RX_channel_codes[radio_vars.current_frequency - 11]--; 
+                TX_channel_codes[radio_vars.current_frequency - 11]--; 
+            }
+
+            frequency_update_cooldown_timer = 0;
+        }
+    }
+    
+//    printf("IF=%d, LQI=%d, CDR=%d, len=%d, LC=%d\r\n",IF_estimate,LQI_chip_errors,cdr_tau_value,packet_len,LC_code);
+}
+
 //=========================== callbacks =======================================
 
 //=========================== interrupt handlers ==============================
@@ -251,6 +474,12 @@ kick_scheduler_t radio_isr(void) {
     
     PORT_TIMER_WIDTH irq_status = RFCONTROLLER_REG__INT;
     PORT_TIMER_WIDTH irq_error  = RFCONTROLLER_REG__ERROR;
+    
+    UART_REG__TX_DATA = irq_status + '0';
+    UART_REG__TX_DATA = '-';
+    UART_REG__TX_DATA = irq_error + '0';
+    UART_REG__TX_DATA = '\r';
+    UART_REG__TX_DATA = '\n';
     
     debugpins_isr_set();
     
@@ -279,6 +508,7 @@ kick_scheduler_t radio_isr(void) {
             // a SFD is just received, update radio state
             radio_vars.state    = RADIOSTATE_RECEIVING;
         }
+        
         if (radio_vars.startFrame_cb!=NULL) {
             // call the callback
             radio_vars.startFrame_cb(capturedTime);
@@ -302,6 +532,21 @@ kick_scheduler_t radio_isr(void) {
             capturedTime = TIMER_COUNTER_CONVERT_RFTIMER_CLK_TO_32K(RFTIMER_REG__CAPTURE3);
 #endif
             RFCONTROLLER_REG__INT_CLEAR = RX_DONE_INT;
+
+            // Only record IF estimate, LQI, and CDR tau for valid packets
+            IF_estimate = read_IF_estimate();
+            LQI_chip_errors    = ANALOG_CFG_REG__21 & 0xFF; //read_LQI();    
+        
+            // Read the value of tau debug at end of packet
+            // Do this later in the ISR to make sure this register has settled before trying to read it
+            // (the register is on the adc clock domain)
+            cdr_tau_value = ANALOG_CFG_REG__25;
+            
+            radio_calibration();
+            
+            // set the frequency to update the scan chain
+            radio_setFrequency(11, 0x02);
+            radio_rxEnable();
         }
         // the packet transmission or reception is done,
         // update the radio state
@@ -321,10 +566,12 @@ kick_scheduler_t radio_isr(void) {
         RFCONTROLLER_REG__INT_CLEAR = TX_LOAD_DONE_INT;
     }
     
-    if (irq_error == 0) {
+    if (irq_error != 0) {
         // error happens during the operation of radio. Print out the error here. 
         // To Be Done. add error description deifinition for this type of errors.
         RFCONTROLLER_REG__ERROR_CLEAR = irq_error;
+        
+        radio_rxEnable();
     }
     debugpins_isr_clr();
     return DO_NOT_KICK_SCHEDULER;

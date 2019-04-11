@@ -22,6 +22,9 @@ extern char send_packet[127];
 extern unsigned int ASC[38];
 extern unsigned int ASC_FPGA[38];
 
+extern unsigned int RX_channel_codes[16];
+extern unsigned int TX_channel_codes[16];
+
 // Bootloader will insert length and pre-calculated CRC at these memory addresses    
 #define crc_value         (*((unsigned int *) 0x0000FFFC))
 #define code_length       (*((unsigned int *) 0x0000FFF8))
@@ -55,6 +58,7 @@ unsigned reverse(unsigned x);
 unsigned int crc32c(unsigned char *message, unsigned int length);
 
 void board_optical_calibration(void);
+void build_channel_table(unsigned int channel_11_LC_code);
 
 //=========================== interrupt ========================================
 
@@ -77,6 +81,10 @@ void board_init(void) {
     
     board_optical_calibration();
     
+    // measured in SwarmLab with room temperature
+    RX_channel_codes[0] = 360;
+    TX_channel_codes[0] = 410;
+    
     // set priority of interrupts
     
     IPR0 = 0xFF;    // uart has lowest priority
@@ -88,8 +96,8 @@ void board_init(void) {
     leds_init();
     uart_init();
     sctimer_init();
-//    radio_init();
-//    eui64_get(eui);
+    radio_init();
+    eui64_get(eui);
 }
 
 void board_sleep(void) {
@@ -386,9 +394,16 @@ void optical_sfd_isr(void){
     analog_scan_chain_load_3B_fromFPGA();
     
     if(optical_cal_iteration == 25){
+        // disable optical interrupts
         ICER = 0x0800;
+        
+        // mark as finished
         optical_cal_iteration = 0;
         optical_cal_finished = 1;
+        
+        build_channel_table(LC_code);
+        
+        radio_disable_all();
 
         // Halt all counters
         ANALOG_CFG_REG__0 = 0x0000;   

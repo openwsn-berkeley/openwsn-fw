@@ -37,8 +37,15 @@ void LC_FREQCHANGE_ASC(int coarse, int mid, int fine);
 void LC_monotonic_ASC(int LC_code);
 void radio_init_divider(unsigned int div_value);
 void radio_enable_LO(void);
+void radio_disable_all(void);
 
 void set_IF_stg3gm_ASC(unsigned int Igm, unsigned int Qgm);
 void set_IF_gain_ASC(unsigned int Igain, unsigned int Qgain);
 void set_IF_comparator_trim_I(unsigned int ptrim, unsigned int ntrim);
 void set_IF_comparator_trim_Q(unsigned int ptrim, unsigned int ntrim);
+
+void build_channel_table(unsigned int channel_11_LC_code);
+unsigned int build_RX_channel_table(unsigned int channel_11_LC_code);
+void build_TX_channel_table(unsigned int channel_11_LC_code, unsigned int count_LC_RX_ch11);
+
+unsigned int read_IF_estimate(void);
