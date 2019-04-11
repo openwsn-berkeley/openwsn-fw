@@ -83,7 +83,7 @@ void board_init(void) {
     
     // measured in SwarmLab with room temperature
     RX_channel_codes[0] = 360;
-    TX_channel_codes[0] = 410;
+    TX_channel_codes[0] = 412;
     
     // set priority of interrupts
     

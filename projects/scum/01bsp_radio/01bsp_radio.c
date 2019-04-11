@@ -192,25 +192,23 @@ int mote_main(void) {
          if (app_vars.flags & APP_FLAG_TIMER) {
             // timer fired
             
-            if (app_vars.state==APP_STATE_RX) {
-               // stop listening
-               radio_rfOff();
-               
-               // prepare packet
-               app_vars.packet_len = sizeof(app_vars.packet);
-               for (i=0;i<app_vars.packet_len;i++) {
-                  app_vars.packet[i] = ID;
-               }
-               
-               radio_setFrequency(CHANNEL, APP_STATE_TX);
-               
-               // start transmitting packet
-               radio_loadPacket(app_vars.packet,app_vars.packet_len);
-               radio_txEnable();
-               radio_txNow();
-               
-               app_vars.state = APP_STATE_TX;
-            }
+           // stop listening
+           radio_rfOff();
+           
+           // prepare packet
+           app_vars.packet_len = sizeof(app_vars.packet);
+           for (i=0;i<app_vars.packet_len;i++) {
+              app_vars.packet[i] = ID;
+           }
+           
+           radio_setFrequency(CHANNEL, APP_STATE_TX);
+           
+           // start transmitting packet
+           radio_loadPacket(app_vars.packet,app_vars.packet_len);
+           radio_txEnable();
+           radio_txNow();
+           
+           app_vars.state = APP_STATE_TX;
             
             // clear flag
             app_vars.flags &= ~APP_FLAG_TIMER;
