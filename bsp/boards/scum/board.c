@@ -82,8 +82,8 @@ void board_init(void) {
     board_optical_calibration();
     
     // measured in SwarmLab with room temperature
-    RX_channel_codes[0] = 360;
-    TX_channel_codes[0] = 412;
+    RX_channel_codes[0] = 363;
+    TX_channel_codes[0] = 417;
     
     // set priority of interrupts
     
@@ -101,6 +101,9 @@ void board_init(void) {
 }
 
 void board_sleep(void) {
+    uint16_t i;
+    
+    for (i=0;i<0xf;i++);
     // not sure how to enter a sleep mode
 }
 
@@ -172,14 +175,14 @@ void board_optical_calibration(void){
    //set_asc_bit(1151);
 //-------
 
-    // HF_CLOCK will be trimmed to 20MHz, so set RFTimer div value to 40 to get 500kHz (inverted, so 1101 0111)
+    // HF_CLOCK will be trimmed to 20MHz, so set RFTimer div value to 122 to get 163934Hz (inverted, so 1000 0101)
     set_asc_bit(49);
-    set_asc_bit(48);
+    clear_asc_bit(48);
     clear_asc_bit(47);
-    set_asc_bit(46);
+    clear_asc_bit(46);
     clear_asc_bit(45);
     set_asc_bit(44);
-    set_asc_bit(43);
+    clear_asc_bit(43);
     set_asc_bit(42);
    
     // Set 2M RC as source for chip CLK
@@ -223,7 +226,7 @@ void board_optical_calibration(void){
    
     // Turn on RC 2M for cal
     set_asc_bit(1114);
-      
+    
     // Set initial LO frequency
     LC_monotonic_ASC(LC_code);
 

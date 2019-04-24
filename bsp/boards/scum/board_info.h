@@ -41,10 +41,10 @@ to return the board's description.
 
 // this is called when require to WRITE the RFTIMER counter/compare registers,
 // where the value is going to be multiplied.
-#define TIMER_COUNTER_CONVERT_32K_TO_RFTIMER_CLK(value)    value*61/4
+#define TIMER_COUNTER_CONVERT_32K_TO_RFTIMER_CLK(value)    value*5
 // this is called when require to READ  the RFTIMER counter/compare registers,
 // where the value is going to be divided.
-#define TIMER_COUNTER_CONVERT_RFTIMER_CLK_TO_32K(value)    value*4/61
+#define TIMER_COUNTER_CONVERT_RFTIMER_CLK_TO_32K(value)    value/5
 
 //===== radio
 
@@ -55,13 +55,13 @@ to return the board's description.
 #define SLOTDURATION 20 // in miliseconds
 
 //// time-slot related
-#define PORT_TsSlotDuration                 655   // 491 ticks = 15ms   @32768Hz
-#define PORT_maxTxDataPrepare               100   // 66  ticks = 2013us @32768Hz
+#define PORT_TsSlotDuration                 2130  // 491 ticks = 15ms   @32768Hz
+#define PORT_maxTxDataPrepare               690   // 66  ticks = 2013us @32768Hz
 #define PORT_maxRxAckPrepare                20    // 20  ticks = 610us  @32768Hz
-#define PORT_maxRxDataPrepare               33    // 33  ticks = 1006us @32768Hz
-#define PORT_maxTxAckPrepare                45    // 30  ticks = 915us  @32768Hz
+#define PORT_maxRxDataPrepare               528   // 33  ticks = 1006us @32768Hz
+#define PORT_maxTxAckPrepare                48    // 30  ticks = 915us  @32768Hz
 // radio speed related
-#define PORT_delayTx                        20     //  5  ticks = 152us  @32768hz
+#define PORT_delayTx                        13     //  5  ticks = 152us  @32768hz
 #define PORT_delayRx                        0      //  0us (can not measure)
 
 //===== adaptive_sync accuracy
