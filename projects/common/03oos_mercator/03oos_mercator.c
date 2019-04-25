@@ -443,12 +443,14 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
          is_expected = FALSE;
       }
 
-      if (is_expected == TRUE){
+      if (is_expected == TRUE && mercator_vars.rxpk_crc == TRUE){
         resp = (IND_RX_ht*)mercator_vars.uartbuftx;
 
         resp->type     =  TYPE_IND_RX;
         resp->length   =  mercator_vars.rxpk_len;
         resp->rssi     =  mercator_vars.rxpk_rssi;
+        // resp->flags should have always the same value, 0xc0, but
+        // keep this attribute for backward compatibility
         resp->flags    =  mercator_vars.rxpk_crc << 7 | is_expected << 6;
         resp->pkctr    =  rx_temp->pkctr;
 
