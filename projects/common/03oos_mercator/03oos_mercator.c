@@ -127,6 +127,9 @@ void serial_tx_RESP_ST(void) {
 }
 
 void serial_rx_REQ_IDLE(void) {
+   // schedule a response
+   scheduler_push_task(serial_tx_RESP_IDLE,TASK_PRIO_SERIAL);
+
    if (mercator_vars.uartbufrxindex!=sizeof(REQ_IDLE_ht)){
       // update stats
       mercator_vars.serialNumRxWrongLength++;
@@ -141,16 +144,31 @@ void serial_rx_REQ_IDLE(void) {
    mercator_vars.status = ST_IDLE;
 }
 
+void serial_tx_RESP_IDLE(void) {
+  RESP_IDLE_ht* resp;
+
+  resp = (RESP_IDLE_ht*)mercator_vars.uartbuftx;
+
+  resp->type                     = TYPE_RESP_IDLE;
+  mercator_vars.uartbuftxfill    = sizeof(RESP_IDLE_ht);
+
+  serial_flushtx();
+}
+
 void serial_rx_REQ_TX(void) {
    uint16_t transctr;
    uint16_t pkctr;
    REQ_TX_ht* req;
+
+   // schedule a response
+   scheduler_push_task(serial_tx_RESP_TX,TASK_PRIO_SERIAL);
 
    if (mercator_vars.uartbufrxindex!=sizeof(REQ_TX_ht)){
       // update stats
       mercator_vars.serialNumRxWrongLength++;
       return;
    }
+
    mercator_vars.status = ST_TX;
    mercator_vars.numnotifications = 0;
 
@@ -193,8 +211,23 @@ void serial_rx_REQ_TX(void) {
    return;
 }
 
+void serial_tx_RESP_TX(void) {
+  RESP_TX_ht* resp;
+
+  resp = (RESP_TX_ht*)mercator_vars.uartbuftx;
+
+  resp->type                     = TYPE_RESP_TX;
+  mercator_vars.uartbuftxfill    = sizeof(RESP_TX_ht);
+
+  serial_flushtx();
+}
+
 void serial_rx_REQ_RX(void) {
    REQ_RX_ht* req;
+
+   // schedule a response
+   scheduler_push_task(serial_tx_RESP_RX,TASK_PRIO_SERIAL);
+
    if (mercator_vars.uartbufrxindex!=sizeof(REQ_RX_ht)){
       // update stats
       mercator_vars.serialNumRxWrongLength++;
@@ -224,6 +257,17 @@ void serial_rx_REQ_RX(void) {
    mercator_vars.status = ST_RX;
 
    return;
+}
+
+void serial_tx_RESP_RX(void) {
+  RESP_RX_ht* resp;
+
+  resp = (RESP_RX_ht*)mercator_vars.uartbuftx;
+
+  resp->type                     = TYPE_RESP_RX;
+  mercator_vars.uartbuftxfill    = sizeof(RESP_RX_ht);
+
+  serial_flushtx();
 }
 
 void serial_tx_IND_UP(void) {

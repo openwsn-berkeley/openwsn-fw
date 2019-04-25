@@ -24,6 +24,9 @@
 #define TYPE_REQ_RX          6
 #define TYPE_IND_RX          7
 #define TYPE_IND_UP          8
+#define TYPE_RESP_IDLE       10
+#define TYPE_RESP_TX         11
+#define TYPE_RESP_RX         12
 
 #define ST_IDLE              1
 #define ST_TX                2
@@ -68,6 +71,12 @@ END_PACK
 
 BEGIN_PACK
 typedef struct {
+  uint8_t         type;
+} RESP_TX_ht;
+END_PACK
+
+BEGIN_PACK
+typedef struct {
    uint8_t         type;
 } IND_TXDONE_ht;
 END_PACK
@@ -83,6 +92,8 @@ typedef struct {
 } REQ_RX_ht;
 END_PACK
 
+typedef RESP_TX_ht RESP_RX_ht;
+typedef RESP_TX_ht RESP_IDLE_ht;
 BEGIN_PACK
 typedef struct {
    uint8_t         type;
@@ -174,8 +185,11 @@ void serial_rx_all(void);
 void serial_rx_REQ_ST(void);
 void serial_tx_RESP_ST(void);
 void serial_rx_REQ_IDLE(void);
+void serial_tx_RESP_IDLE(void);
 void serial_rx_REQ_TX(void);
+void serial_tx_RESP_TX(void);
 void serial_rx_REQ_RX(void);
+void serial_tx_RESP_RX(void);
 void serial_tx_IND_UP(void);
 
 void isr_openserial_tx_mod(void);
