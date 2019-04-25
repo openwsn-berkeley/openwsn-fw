@@ -461,6 +461,7 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
         mercator_vars.numnotifications++;
       }
 
+      // get ready for a following frame
       radio_rfOn();
       radio_rxEnable();
    }
