@@ -457,9 +457,9 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
         mercator_vars.uartbuftxfill = sizeof(IND_RX_ht);
 
         serial_flushtx();
-      }
 
-      mercator_vars.numnotifications++;
+        mercator_vars.numnotifications++;
+      }
 
       radio_rfOn();
       radio_rxEnable();
