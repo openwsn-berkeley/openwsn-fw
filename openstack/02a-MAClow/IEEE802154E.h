@@ -42,9 +42,9 @@ static const uint8_t ebIEsBytestream[] = {
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to successfully synchronize
 #define US_PER_TICK                 30 // number of us per 32kHz clock tick
-#define EB_PORTION                  10 // set EB on minimal cell for 1/EB_PORTION portion
-#define MAXKAPERIOD               1000 // in slots: 1500@20ms per slot -> ~30 seconds. Max value used by adaptive synchronization.
-#define DESYNCTIMEOUT             1750 // in slots: 1750@20ms per slot -> ~35 seconds. A larger DESYNCTIMEOUT is needed if using a larger KATIMEOUT.
+#define EB_PORTION                   2 // set EB on minimal cell for 1/EB_PORTION portion
+#define MAXKAPERIOD                428 // in slots: 1500@20ms per slot -> ~30 seconds. Max value used by adaptive synchronization.
+#define DESYNCTIMEOUT              500 // in slots: 1750@20ms per slot -> ~35 seconds. A larger DESYNCTIMEOUT is needed if using a larger KATIMEOUT.
 #define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"
 #define LENGTH_IEEE154_MAX         128 // max length of a valid radio packet
 #define DUTY_CYCLE_WINDOW_LIMIT    (0xFFFFFFFF>>1) // limit of the dutycycle window
@@ -165,11 +165,11 @@ enum ieee154e_atomicdurations_enum {
    TsTxAckDelay              =   33,                  //  1000us
    TsShortGT                 =   13,                  //   500us, The standardlized value for this is 400/2=200us(7ticks). Currectly 7 doesn't work for short packet, change it back to 7 when found the problem.
 #endif
-#if SLOTDURATION==20
-   TsTxOffset                =  171,                  //  5215us
-   TsLongGT                  =   43,                  //  1300us
-   TsTxAckDelay              =  181,                  //  5521us
-   TsShortGT                 =   16,                  //   500us
+#if SLOTDURATION==70
+   TsTxOffset                =  800,                  //  5215us
+   TsLongGT                  =   44,                  //  1300us
+   TsTxAckDelay              = 1100,                  //  5521us
+   TsShortGT                 =   30,                  //   500us
 #endif
    TsSlotDuration            =  PORT_TsSlotDuration,  // 10000us
    // execution speed related
@@ -181,7 +181,7 @@ enum ieee154e_atomicdurations_enum {
    delayTx                   =  PORT_delayTx,         // between GO signal and SFD
    delayRx                   =  PORT_delayRx,         // between GO signal and start listening
    // radio watchdog
-   wdRadioTx                 =   45,                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
+   wdRadioTx                 =   44,                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
    wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
    wdAckDuration             =   98,                  //  3000us (measured 1000us)
 };
@@ -214,7 +214,7 @@ enum ieee154e_linkOption_enum {
 #define DURATION_rt7 ieee154e_vars.lastCapturedTime+TsTxAckDelay-delayTx+wdRadioTx
 #define DURATION_rt8 ieee154e_vars.lastCapturedTime+wdAckDuration
 // serialInhibit
-#define DURATION_si  ieee154e_vars.slotDuration-SERIALINHIBITGUARD
+#define DURATION_si  ieee154e_vars.slotDuration-3*SERIALINHIBITGUARD
 
 //=========================== typedef =========================================
 
@@ -266,6 +266,7 @@ typedef struct {
    opentimers_id_t           timerId;                 // id of timer used for implementing TSCH slot FSM
    uint32_t                  startOfSlotReference;    // the time refer to the beginning of slot
    opentimers_id_t           serialInhibitTimerId;    // id of serial inhibit timer used for scheduling serial output
+   uint16_t                  compensatingCounter;
 } ieee154e_vars_t;
 
 BEGIN_PACK
