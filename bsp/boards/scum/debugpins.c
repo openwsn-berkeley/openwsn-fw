@@ -93,3 +93,27 @@ void debugpins_radio_clr(void) {
 void debugpins_radio_set(void) {
     GPIO_REG__OUTPUT    |=  0x0020;
 }
+
+void debugpins_debug_toggle(void) {
+    GPIO_REG__OUTPUT    ^=  0x0040;
+}
+
+void debugpins_debug_clr(void) {
+    GPIO_REG__OUTPUT    &= ~0x0040;
+}
+
+void debugpins_debug_set(void) {
+    GPIO_REG__OUTPUT    |=  0x0040;
+}
+
+void debugpins_debug_y_toggle(void){
+    GPIO_REG__OUTPUT    ^=  0x0080;
+}
+
+void debugpins_debug_y_clr(void){
+    GPIO_REG__OUTPUT    &= ~0x0080;
+}
+
+void debugpins_debug_y_set(void){
+    GPIO_REG__OUTPUT    |=  0x0080;
+}
