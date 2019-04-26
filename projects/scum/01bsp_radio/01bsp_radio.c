@@ -26,8 +26,8 @@ end of frame event), it will turn on its error LED.
 
 #define LENGTH_PACKET   125+LENGTH_CRC ///< maximum length is 127 bytes
 #define CHANNEL         11             ///< 11=2.405GHz
-#define TIMER_PERIOD    0xffff         ///< 0xffff = 2s@32kHz
-#define ID              0x99           ///< byte sent in the packets
+#define TIMER_PERIOD    0xfff         ///< 0xffff = 2s@32kHz
+#define ID              0x12           ///< byte sent in the packets
 
 //=========================== variables =======================================
 
@@ -58,6 +58,7 @@ typedef struct {
     int8_t              rxpk_rssi;
    uint8_t              rxpk_lqi;
    bool                 rxpk_crc;
+    bool                txFlag;
 } app_vars_t;
 
 app_vars_t app_vars;
@@ -75,6 +76,7 @@ void     cb_timer(void);
 */
 int mote_main(void) {
    uint8_t i;
+    uint32_t j;
    
    // clear local variables
    memset(&app_vars,0,sizeof(app_vars_t));
@@ -168,6 +170,9 @@ int mote_main(void) {
                   
                   // led
                   leds_error_off();
+//                  if (app_vars.packet_len==22) {
+//                        app_vars.flags |= APP_FLAG_TIMER;
+//                  }
                   break;
                case APP_STATE_TX:
                   // done sending a packet
@@ -204,10 +209,10 @@ int mote_main(void) {
            radio_setFrequency(CHANNEL, APP_STATE_TX);
            
            // start transmitting packet
-           radio_loadPacket(app_vars.packet,app_vars.packet_len);
+           radio_loadPacket(app_vars.packet,125);
            radio_txEnable();
-           radio_txNow();
-           
+           app_vars.txFlag = TRUE;
+           sctimer_setCompare(sctimer_readCounter()+10);
            app_vars.state = APP_STATE_TX;
             
             // clear flag
@@ -237,10 +242,16 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
 
 void cb_timer(void) {
    // set flag
-   app_vars.flags |= APP_FLAG_TIMER;
+    if (app_vars.txFlag==FALSE) {
+        app_vars.flags |= APP_FLAG_TIMER;
+        sctimer_setCompare(sctimer_readCounter()+TIMER_PERIOD);
+    } else {
+        app_vars.txFlag = FALSE;
+        radio_txNow();
+        sctimer_setCompare(sctimer_readCounter()+TIMER_PERIOD);
+    }
    
    // update debug stats
    app_dbg.num_timer++;
    
-   sctimer_setCompare(sctimer_readCounter()+TIMER_PERIOD);
 }
