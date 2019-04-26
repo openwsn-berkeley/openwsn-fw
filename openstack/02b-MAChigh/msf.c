@@ -4,7 +4,6 @@
 #include "sixtop.h"
 #include "scheduler.h"
 #include "schedule.h"
-#include "openapps.h"
 #include "openrandom.h"
 #include "idmanager.h"
 #include "icmpv6rpl.h"
