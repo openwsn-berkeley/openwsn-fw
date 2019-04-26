@@ -158,7 +158,7 @@ void LC_FREQCHANGE_ASC(int coarse, int mid, int fine){
 }
 
 
-void LC_monotonic_ASC(int LC_code){
+void LC_monotonic_ASC(int LC_code, unsigned int type){
 
    //int coarse_divs = 440;
    //int mid_divs = 31; // For full fine code sweeps
@@ -184,9 +184,14 @@ void LC_monotonic_ASC(int LC_code){
    fine = (((LC_code % mid_divs + fine_fix) & 0x000000FF));
    if (fine > 15){fine++;};
    
+   if (type==1) {
+      mid = mid-1;
+      fine = 5;
+   }
+   
    LC_FREQCHANGE_ASC(coarse,mid,fine);
    
-   //printf("coarse=%d,mid=%d,fine=%d\n",coarse,mid,fine);
+//   printf("coarse=%d,mid=%d,fine=%d\r\n",coarse,mid,fine);
    
 }
 
@@ -1044,7 +1049,7 @@ unsigned int build_RX_channel_table(unsigned int channel_11_LC_code){
     //for(ii=0; ii<16; ii++){
     while(ii<16) {
     
-        LC_monotonic_ASC(RX_channel_codes[ii]);
+        LC_monotonic_ASC(RX_channel_codes[ii],0);
         analog_scan_chain_write_3B_fromFPGA(&ASC[0]);
         analog_scan_chain_load_3B_fromFPGA();
                     
@@ -1085,9 +1090,9 @@ unsigned int build_RX_channel_table(unsigned int channel_11_LC_code){
         }
     }
     
-    for(ii=0; ii<16; ii++){
-        printf("RX ch=%d,  count_LC=%d,  count_targets=%d,  RX_channel_codes=%d\r\n",ii+11,count_LC[ii],count_targets[ii],RX_channel_codes[ii]);
-    }
+//    for(ii=0; ii<16; ii++){
+//        printf("RX ch=%d,  count_LC=%d,  count_targets=%d,  RX_channel_codes=%d\r\n",ii+11,count_LC[ii],count_targets[ii],RX_channel_codes[ii]);
+//    }
     
     return count_LC[0];
 }
@@ -1111,7 +1116,7 @@ void build_TX_channel_table(unsigned int channel_11_LC_code, unsigned int count_
     //for(ii=0; ii<16; ii++){
     while(ii<16) {
     
-        LC_monotonic_ASC(TX_channel_codes[ii]);
+        LC_monotonic_ASC(TX_channel_codes[ii],1);
         analog_scan_chain_write_3B_fromFPGA(&ASC[0]);
         analog_scan_chain_load_3B_fromFPGA();
                     
@@ -1146,9 +1151,9 @@ void build_TX_channel_table(unsigned int channel_11_LC_code, unsigned int count_
         }                    
     }
     
-    for(ii=0; ii<16; ii++){
-        printf("\r\nTX ch=%d,  count_LC=%d,  count_targets=%d,  TX_channel_codes=%d\r\n",ii+11,count_LC[ii],count_targets[ii],TX_channel_codes[ii]);
-    }
+//    for(ii=0; ii<16; ii++){
+//        printf("\r\nTX ch=%d,  count_LC=%d,  count_targets=%d,  TX_channel_codes=%d\r\n",ii+11,count_LC[ii],count_targets[ii],TX_channel_codes[ii]);
+//    }
 }
 
 void build_channel_table(unsigned int channel_11_LC_code){

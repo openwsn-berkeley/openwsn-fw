@@ -34,7 +34,7 @@ void radio_init_rx_MF(void);
 void radio_init_tx(void);
 void set_IF_clock_frequency(int coarse, int fine, int high_range);
 void LC_FREQCHANGE_ASC(int coarse, int mid, int fine);
-void LC_monotonic_ASC(int LC_code);
+void LC_monotonic_ASC(int LC_code, unsigned int type);
 void radio_init_divider(unsigned int div_value);
 void radio_enable_LO(void);
 void radio_disable_all(void);
