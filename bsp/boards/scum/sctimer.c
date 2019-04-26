@@ -14,7 +14,7 @@
 
 #define RFTIMER_MAX_COUNT            0x3ffffff       // use a value less than 0xffffffff/61 and also equal to 2^n-1
 #define TIMERLOOP_THRESHOLD            0xfffff       // 0xffff is 2 seconds @ 32768Hz clock
-#define MINIMUM_COMPAREVALE_ADVANCE  10
+#define MINIMUM_COMPAREVALE_ADVANCE  5
 
 // ========================== variable ========================================
 
@@ -95,10 +95,12 @@ void sctimer_enable(void){
     // enable compare interrupt (this also cancels any pending interrupts)
     RFTIMER_REG__COMPARE0_CONTROL   = RFTIMER_COMPARE_ENABLE |   \
                                       RFTIMER_COMPARE_INTERRUPT_ENABLE;
+    ISER = 0x80;
 }
 
 void sctimer_disable(void){
     RFTIMER_REG__COMPARE0_CONTROL = 0x0;
+    ICER = 0x80;
 }
 
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
