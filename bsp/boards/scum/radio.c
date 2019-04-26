@@ -30,6 +30,13 @@
 #define  FILTER_WINDOWS_LEN      11
 #define  FIR_COEFF_SCALE         512 // determined by FIR_coeff
 
+// ==== for recognizing panid
+
+#define  LEN_PKT_INDEX           0x00
+#define  PANID_LBYTE_PKT_INDEX   0x04
+#define  PANID_HBYTE_PKT_INDEX   0x05
+#define  DEFAULT_PANID           0xcafe
+
 //=========================== variables =======================================
 
 extern unsigned int ASC[38];
@@ -135,7 +142,7 @@ void radio_reset(void) {
 void setFrequencyRX(unsigned int channel){
     
     // Set LO code for RX channel
-    LC_monotonic_ASC(RX_channel_codes[channel-11]);
+    LC_monotonic_ASC(RX_channel_codes[channel-11],0);
     
     //printf("chan code = %d\n", RX_channel_codes[channel-11]);
     
@@ -164,9 +171,9 @@ void setFrequencyRX(unsigned int channel){
 
 // Call this to setup TX, followed quickly by a RX ack
 void setFrequencyTX(unsigned int channel){
-
+    
     // Set LO code for TX channel
-    LC_monotonic_ASC(TX_channel_codes[channel-11]);
+    LC_monotonic_ASC(TX_channel_codes[channel-11],1);
 
     // Turn polyphase off for TX
     clear_asc_bit(971);
@@ -370,21 +377,24 @@ void radio_calibration(void) {
 
     int8_t   i;
     uint8_t  packet_len;
+    uint16_t panid;
     uint32_t IF_est_filtered;
     int32_t  chip_rate_error_ppm;
     int32_t  chip_rate_error_ppm_filtered;
     int32_t  sum;
     
-    packet_len = radio_vars.radio_rx_buffer[0];
+    packet_len = radio_vars.radio_rx_buffer[LEN_PKT_INDEX];
+    panid      = (uint16_t)(radio_vars.radio_rx_buffer[PANID_LBYTE_PKT_INDEX]);
+    panid     |= ((uint16_t)(radio_vars.radio_rx_buffer[PANID_HBYTE_PKT_INDEX]))<<8;
     
-    if( packet_len==0x0a){
+    if( panid == DEFAULT_PANID){
     
         // When updating LO and IF clock frequncies, must wait long enough for the changes to propagate before changing again
         // Need to receive as many packets as there are taps in the FIR filter
         IF_freq_freshness_timeout++;
         LO_freq_freshness_timeout++;
         
-        printf("IF_estimate=%d, cdr_tau_value=%d  LQI_chip_errors=%d\r\n",IF_estimate,cdr_tau_value,LQI_chip_errors);
+//        printf("IF_estimate=%d, cdr_tau_value=%d  LQI_chip_errors=%d\r\n",IF_estimate,cdr_tau_value,LQI_chip_errors);
         
         // ==== FIR filter for cdr tau slope ====
         
@@ -429,7 +439,7 @@ void radio_calibration(void) {
             }
             IF_freq_freshness_timeout = 0;
             
-            printf("chip_rate_error_ppm = %d, chip_rate_error_ppm_filtered = %d \r\n", chip_rate_error_ppm,   chip_rate_error_ppm_filtered);
+//            printf("chip_rate_error_ppm = %d, chip_rate_error_ppm_filtered = %d \r\n", chip_rate_error_ppm,   chip_rate_error_ppm_filtered);
         }
             
         // ==== FIR filter for IF estimate ====
@@ -443,43 +453,43 @@ void radio_calibration(void) {
         // Only make adjustments when the chip error rate is <10% (this value was picked as an arbitrary choice)
         // While packets can be received at higher chip error rates, the average IF estimate tends to be less accurate
         // Estimated chip_error_rate = LQI_chip_errors/256 (assuming the packet length was at least 8 symbols)
-//        if(LQI_chip_errors < 25){
         
-            // Shift old samples
-            for (i=FILTER_WINDOWS_LEN-2; i>=0; i--){
-                IF_estimate_history[i+1] = IF_estimate_history[i];        
+        // Shift old samples
+        for (i=FILTER_WINDOWS_LEN-2; i>=0; i--){
+            IF_estimate_history[i+1] = IF_estimate_history[i];        
+        }
+        
+        // New sample
+        IF_estimate_history[0] = IF_estimate;
+
+        // Do FIR convolution
+        for (i=0; i<FILTER_WINDOWS_LEN; i++){
+            sum = sum + IF_estimate_history[i] * FIR_coeff[i];        
+        }
+        IF_est_filtered = sum / FIR_COEFF_SCALE;
+        
+//        printf("IF_estimate = %d, IF_est_filtered = %d \r\n", IF_estimate, IF_est_filtered);
+
+        // The LO frequency steps are about ~80-100 kHz, so make an adjustment only if the error is larger than that
+        // These hysteresis bounds (+/- X) have not been optimized
+        // Must wait long enough between changes for FIR to settle (at least as many packets as there are taps in the FIR)
+        // For now, assume that TX/RX should both be updated, even though the IF information is only from the RX code
+        if(LO_freq_freshness_timeout >= LO_FREQ_UPDATE_TIMEOUT){
+            if(IF_est_filtered > 520){
+                RX_channel_codes[radio_vars.current_frequency - 11]++; 
+//                TX_channel_codes[radio_vars.current_frequency - 11]++; 
             }
+            if(IF_est_filtered < 480){
+                RX_channel_codes[radio_vars.current_frequency - 11]--; 
+//                TX_channel_codes[radio_vars.current_frequency - 11]--; 
+            }
+
+            LO_freq_freshness_timeout = 0;
             
-            // New sample
-            IF_estimate_history[0] = IF_estimate;
-
-            // Do FIR convolution
-            for (i=0; i<FILTER_WINDOWS_LEN; i++){
-                sum = sum + IF_estimate_history[i] * FIR_coeff[i];        
-            }
-            IF_est_filtered = sum / FIR_COEFF_SCALE;
-            
-            printf("IF_estimate = %d, IF_est_filtered = %d \r\n", IF_estimate, IF_est_filtered);
-
-            // The LO frequency steps are about ~80-100 kHz, so make an adjustment only if the error is larger than that
-            // These hysteresis bounds (+/- X) have not been optimized
-            // Must wait long enough between changes for FIR to settle (at least as many packets as there are taps in the FIR)
-            // For now, assume that TX/RX should both be updated, even though the IF information is only from the RX code
-            if(LO_freq_freshness_timeout >= LO_FREQ_UPDATE_TIMEOUT){
-                if(IF_est_filtered > 520){
-                    RX_channel_codes[radio_vars.current_frequency - 11]++; 
-                    TX_channel_codes[radio_vars.current_frequency - 11]++; 
-                }
-                if(IF_est_filtered < 480){
-                    RX_channel_codes[radio_vars.current_frequency - 11]--; 
-                    TX_channel_codes[radio_vars.current_frequency - 11]--; 
-                }
-
-                LO_freq_freshness_timeout = 0;
-                
-                printf("IF_estimate         = %d, IF_est_filtered              = %d \r\n", IF_estimate,           IF_est_filtered);
-            }
-//        }
+//            printf("IF_estimate         = %d, IF_est_filtered              = %d \r\n", IF_estimate,           IF_est_filtered);
+        }
+        
+//        printf("RX_channel_codes[0]=%d, TX_channel_codes[0]=%d \r\n",RX_channel_codes[0], TX_channel_codes[0]);
         
         // Write and load analog scan chain
         

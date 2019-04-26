@@ -82,8 +82,8 @@ void board_init(void) {
     board_optical_calibration();
     
     // measured in SwarmLab with room temperature
-    RX_channel_codes[0] = 363;
-    TX_channel_codes[0] = 417;
+    RX_channel_codes[0] = 363;  // 361-363 at Inria
+    TX_channel_codes[0] = 417;  // 415-418 at Inria
     
     // set priority of interrupts
     
@@ -228,7 +228,7 @@ void board_optical_calibration(void){
     set_asc_bit(1114);
     
     // Set initial LO frequency
-    LC_monotonic_ASC(LC_code);
+    LC_monotonic_ASC(LC_code,0);
 
     // Init divider settings
     radio_init_divider(2000);
@@ -250,6 +250,7 @@ void board_optical_calibration(void){
     // the following gpio control will be set on the FPGA
     // all the 16 pins are controlled as GPO: refer to the SCuM3B final sheet
     GPO_control_FPGA(6,6,6,6);
+//    GPO_control_FPGA(6,5,10,10);
     
     // Program analog scan chain on FPGA
     analog_scan_chain_write(&ASC_FPGA[0]);
@@ -261,7 +262,7 @@ void board_optical_calibration(void){
     ISER = 0x0800;
     
     while(optical_cal_finished == 0);
-    optical_cal_finished = 0;
+    printf("optical_cal_finished\r\n");
 }
 
 // Reverses (reflects) bits in a 32-bit word.
@@ -367,11 +368,11 @@ void optical_sfd_isr(void){
     // Start finer steps
     if(count_LC > LC_target + 60){
         LC_code -= 1;
-        LC_monotonic_ASC(LC_code);
+        LC_monotonic_ASC(LC_code,0);
     } else {
         if(count_LC < LC_target - 60){
             LC_code += 1;
-            LC_monotonic_ASC(LC_code);
+            LC_monotonic_ASC(LC_code,0);
         } 
     }
     
