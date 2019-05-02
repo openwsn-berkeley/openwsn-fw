@@ -52,6 +52,7 @@ typedef struct {
     uint8_t                   radio_rx_buffer[MAXLENGTH_TRX_BUFFER] __attribute__ ((aligned (4)));
     radio_state_t             state; 
     uint8_t                   current_frequency;
+    bool                      crc_ok;
 } radio_vars_t;
 
 radio_vars_t radio_vars;
@@ -357,7 +358,7 @@ void radio_getReceivedFrame(uint8_t* pBufRead,
                                bool* pCrc) {
     
     //===== crc
-    *pCrc           = DEFAULT_CRC_CHECK;
+    *pCrc           = radio_vars.crc_ok;
    
     //===== rssi
     *pRssi          = DEFAULT_RSSI;
@@ -387,7 +388,7 @@ void radio_calibration(void) {
     panid      = (uint16_t)(radio_vars.radio_rx_buffer[PANID_LBYTE_PKT_INDEX]);
     panid     |= ((uint16_t)(radio_vars.radio_rx_buffer[PANID_HBYTE_PKT_INDEX]))<<8;
     
-    if( panid == DEFAULT_PANID){
+    if( radio_vars.crc_ok){
     
         // When updating LO and IF clock frequncies, must wait long enough for the changes to propagate before changing again
         // Need to receive as many packets as there are taps in the FIR filter
@@ -561,7 +562,9 @@ kick_scheduler_t radio_isr(void) {
             capturedTime = TIMER_COUNTER_CONVERT_RFTIMER_CLK_TO_32K(RFTIMER_REG__CAPTURE3);
 #endif
             RFCONTROLLER_REG__INT_CLEAR = RX_DONE_INT;
-
+            
+            // record calibration related value
+            
             // Only record IF estimate, LQI, and CDR tau for valid packets
             IF_estimate = read_IF_estimate();
             LQI_chip_errors    = ANALOG_CFG_REG__21 & 0xFF; //read_LQI();
@@ -570,6 +573,14 @@ kick_scheduler_t radio_isr(void) {
             // Do this later in the ISR to make sure this register has settled before trying to read it
             // (the register is on the adc clock domain)
             cdr_tau_value = ANALOG_CFG_REG__25;
+            
+            // check crc
+            
+            if (irq_error & RX_CRC_ERROR) {
+                radio_vars.crc_ok = FALSE;
+            } else {
+                radio_vars.crc_ok = TRUE;
+            }
         }
         // the packet transmission or reception is done,
         // update the radio state
