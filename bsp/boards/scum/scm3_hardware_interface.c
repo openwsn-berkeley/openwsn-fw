@@ -185,10 +185,15 @@ void LC_monotonic_ASC(int LC_code, unsigned int type){
    if (fine > 15){fine++;};
    
    if (type==1) {
+      // need to be tuned each time for now (fine ranges from (0-11))
       mid = mid-1;
-      fine = 5;
+      fine = 0;
+   } else {
+      printf("coarse=%d,mid=%d,fine=%d\r\n",coarse,mid,fine);
+//      mid = mid-1;
+      fine = 0;
    }
-   
+       
    LC_FREQCHANGE_ASC(coarse,mid,fine);
    
 //   printf("coarse=%d,mid=%d,fine=%d\r\n",coarse,mid,fine);
