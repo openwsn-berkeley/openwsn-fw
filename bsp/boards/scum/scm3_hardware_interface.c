@@ -189,7 +189,7 @@ void LC_monotonic_ASC(int LC_code, unsigned int type){
       mid = mid-1;
       fine = 0;
    } else {
-      printf("coarse=%d,mid=%d,fine=%d\r\n",coarse,mid,fine);
+//      printf("coarse=%d,mid=%d,fine=%d\r\n",coarse,mid,fine);
 //      mid = mid-1;
       fine = 0;
    }
