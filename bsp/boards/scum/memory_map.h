@@ -70,6 +70,14 @@
 #define RX_SFD_DONE_INT                 0x08
 #define RX_DONE_INT                     0x10
 
+// ==== RFCONTROLLER error flag
+
+#define TX_OVERFLOW_ERROR               0x01
+#define TX_CUTOFF_ERROR                 0x02
+#define RX_OVERFLOW_ERROR               0x04
+#define RX_CRC_ERROR                    0x08
+#define RX_CUTOFF_ERROR                 0x10
+
 // ========================== RFTIMER Registers ===============================
 
 #define RFTIMER_REG__CONTROL            *(unsigned int*)(AHB_RFTIMER_BASE + 0x00)
