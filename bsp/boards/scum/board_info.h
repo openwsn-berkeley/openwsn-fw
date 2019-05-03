@@ -52,10 +52,10 @@ to return the board's description.
 
 //===== IEEE802154E timing
 
-#define SLOTDURATION 70 // in miliseconds
+#define SLOTDURATION 80 // in miliseconds
 
 //// time-slot related
-#define PORT_TsSlotDuration                 2296  // 491 ticks = 15ms   @32768Hz
+#define PORT_TsSlotDuration                 2623  // 491 ticks = 15ms   @32768Hz
 #define PORT_maxTxDataPrepare               690   // 66  ticks = 2013us @32768Hz
 #define PORT_maxRxAckPrepare                512   // 20  ticks = 610us  @32768Hz
 #define PORT_maxRxDataPrepare               528   // 33  ticks = 1006us @32768Hz

@@ -287,7 +287,7 @@ void isr_ieee154e_newSlot(opentimers_id_t id) {
             TIME_TICS,                              // timetype
             isr_ieee154e_newSlot                    // callback
         );
-        ieee154e_vars.compensatingCounter = 7;
+        ieee154e_vars.compensatingCounter = 2;
         ieee154e_vars.slotDuration          = TsSlotDuration+1;
     } else {
         opentimers_scheduleAbsolute(
@@ -699,7 +699,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
 
    // change state
    changeState(S_SYNCPROC);
-    debugpins_debug_set();
+
    // get a buffer to put the (received) frame in
    ieee154e_vars.dataReceived = openqueue_getFreePacketBuffer(COMPONENT_IEEE802154E);
    if (ieee154e_vars.dataReceived==NULL) {
@@ -714,8 +714,6 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
    // declare ownership over that packet
    ieee154e_vars.dataReceived->creator = COMPONENT_IEEE802154E;
    ieee154e_vars.dataReceived->owner   = COMPONENT_IEEE802154E;
-   
-   debugpins_debug_clr();
 
    /*
    The do-while loop that follows is a little parsing trick.
@@ -728,7 +726,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
      does not get executed. This indicates the received packet is correct.
    */
    do { // this "loop" is only executed once
-        debugpins_debug_set();
+
       // retrieve the received data frame from the radio's Rx buffer
       ieee154e_vars.dataReceived->payload = &(ieee154e_vars.dataReceived->packet[FIRST_FRAME_BYTE]);
       radio_getReceivedFrame(       ieee154e_vars.dataReceived->payload,
@@ -737,7 +735,6 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
                                    &ieee154e_vars.dataReceived->l1_rssi,
                                    &ieee154e_vars.dataReceived->l1_lqi,
                                    &ieee154e_vars.dataReceived->l1_crc);
-         debugpins_debug_clr();
 
       // break if packet too short
       if (ieee154e_vars.dataReceived->length<LENGTH_CRC || ieee154e_vars.dataReceived->length>LENGTH_IEEE154_MAX) {
@@ -757,8 +754,6 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
          break;
       }
       
-      debugpins_debug_set();
-
       // parse the IEEE802.15.4 header (synchronize, end of frame)
       ieee802154_retrieveHeader(ieee154e_vars.dataReceived,&ieee802514_header);
 
@@ -772,8 +767,6 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
       ieee154e_vars.dataReceived->l2_frameType = ieee802514_header.frameType;
       ieee154e_vars.dataReceived->l2_dsn       = ieee802514_header.dsn;
       memcpy(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop),&(ieee802514_header.src),sizeof(open_addr_t));
-      
-      debugpins_debug_clr();
       
       // verify that incoming security level is acceptable
       if (IEEE802154_security_acceptableLevel(ieee154e_vars.dataReceived, &ieee802514_header) == FALSE) {
@@ -792,8 +785,6 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
          }
       }
       
-      debugpins_debug_set();
-
       // toss the IEEE802.15.4 header -- this does not include IEs as they are processed
       // next.
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_header.headerLength);
@@ -811,10 +802,6 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
          // break from the do-while loop and execute the clean-up code below
          break;
       }
-            
-      debugpins_debug_clr();
-      
-      debugpins_debug_set();
 
       // turn off the radio
       radio_rfOff();
@@ -828,8 +815,6 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
       // synchronize (for the first time) to the sender's EB
       synchronizePacket(ieee154e_vars.syncCapturedTime);
       
-      debugpins_debug_clr();
-
       // declare synchronized
       changeIsSync(TRUE);
       // log the info
@@ -1822,8 +1807,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
         does not get executed. This indicates the received packet is correct.
     */
     do { // this "loop" is only executed once
-
-        debugpins_debug_toggle();
+        
         // retrieve the received data frame from the radio's Rx buffer
         ieee154e_vars.dataReceived->payload = &(ieee154e_vars.dataReceived->packet[FIRST_FRAME_BYTE]);
         radio_getReceivedFrame(
@@ -1862,8 +1846,6 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
             break;
         }
         
-        debugpins_debug_toggle();
-
         // store header details in packet buffer
         ieee154e_vars.dataReceived->l2_frameType      = ieee802514_header.frameType;
         ieee154e_vars.dataReceived->l2_dsn            = ieee802514_header.dsn;
@@ -1916,8 +1898,6 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
             break;
         }
         
-        debugpins_debug_toggle();
-
         // record the timeCorrection and print out at end of slot
         ieee154e_vars.dataReceived->l2_timeCorrection = (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)TsTxOffset-(PORT_SIGNED_INT_WIDTH)ieee154e_vars.syncCapturedTime);
 
@@ -2006,8 +1986,6 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
             // synchronize to the received packet if I'm not a DAGroot and this is my preferred parent
             // or in case I'm in the middle of the join process when parent is not yet selected
             // or in case I don't have an autonomous Tx cell cell to my parent yet
-            
-            debugpins_debug_toggle();
             
             if (
                 idmanager_getIsDAGroot()                                    == FALSE &&
