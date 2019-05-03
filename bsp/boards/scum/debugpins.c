@@ -94,15 +94,15 @@ void debugpins_radio_set(void) {
     GPIO_REG__OUTPUT    |=  0x0020;
 }
 
-void debugpins_debug_toggle(void) {
+void debugpins_debug_x_toggle(void) {
     GPIO_REG__OUTPUT    ^=  0x0040;
 }
 
-void debugpins_debug_clr(void) {
+void debugpins_debug_x_clr(void) {
     GPIO_REG__OUTPUT    &= ~0x0040;
 }
 
-void debugpins_debug_set(void) {
+void debugpins_debug_x_set(void) {
     GPIO_REG__OUTPUT    |=  0x0040;
 }
 

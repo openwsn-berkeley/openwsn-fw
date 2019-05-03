@@ -279,6 +279,9 @@ void isr_ieee154e_newSlot(opentimers_id_t id) {
 
     ieee154e_vars.startOfSlotReference = opentimers_getCurrentCompareValue();
     
+#ifdef SCUM3C_FPGA_PCB_VERSION
+    // the RFTimer clock is sourced from 500KHz clock which can't be well translated to 32768Hz
+    // so, use the adaptive synchronization to compensate this 
     if (ieee154e_vars.compensatingCounter == 0 && idmanager_getIsDAGroot()==FALSE){
         opentimers_scheduleAbsolute(
             ieee154e_vars.timerId,                  // timerId
@@ -299,17 +302,18 @@ void isr_ieee154e_newSlot(opentimers_id_t id) {
         );
         ieee154e_vars.slotDuration          = TsSlotDuration;
     }
-    
     ieee154e_vars.compensatingCounter -= 1;
+#else
+    opentimers_scheduleAbsolute(
+        ieee154e_vars.timerId,                  // timerId
+        TsSlotDuration,                         // duration
+        ieee154e_vars.startOfSlotReference,     // reference
+        TIME_TICS,                              // timetype
+        isr_ieee154e_newSlot                    // callback
+    );
+    ieee154e_vars.slotDuration          = TsSlotDuration;
+#endif
     
-//    opentimers_scheduleAbsolute(
-//        ieee154e_vars.timerId,                  // timerId
-//        TsSlotDuration,                         // duration
-//        ieee154e_vars.startOfSlotReference,     // reference
-//        TIME_TICS,                              // timetype
-//        isr_ieee154e_newSlot                    // callback
-//    );
-//    ieee154e_vars.slotDuration          = TsSlotDuration;
     // radiotimer_setPeriod(ieee154e_vars.slotDuration);
     if (ieee154e_vars.isSync==FALSE) {
         if (idmanager_getIsDAGroot()==TRUE) {
@@ -325,8 +329,8 @@ void isr_ieee154e_newSlot(opentimers_id_t id) {
         adaptive_sync_countCompensationTimeout();
 #endif
         activity_ti1ORri1();
-   }
-   ieee154e_dbg.num_newSlot++;
+    }
+    ieee154e_dbg.num_newSlot++;
 }
 
 /**
@@ -586,8 +590,12 @@ port_INLINE void activity_synchronize_newSlot(void) {
         // update record of current channel
         ieee154e_vars.freq = (openrandom_get16b()&0x0F) + 11;
 
+#ifdef SCUM3C_FPGA_PCB_VERSION
         // configure the radio to listen to the frequency
-        radio_setFrequency(ieee154e_vars.freq, 0x02);
+        radio_setFrequency(ieee154e_vars.freq, FREQ_RX);
+#else
+        radio_setFrequency(ieee154e_vars.freq);
+#endif
 
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
         sctimer_setCapture(ACTION_RX_SFD_DONE);
@@ -614,8 +622,13 @@ port_INLINE void activity_synchronize_newSlot(void) {
             // update record of current channel
             ieee154e_vars.freq = (openrandom_get16b()&0x0F) + 11;
 
+#ifdef SCUM3C_FPGA_PCB_VERSION
             // configure the radio to listen to the frequency
-            radio_setFrequency(ieee154e_vars.freq, 0x02);
+            radio_setFrequency(ieee154e_vars.freq, FREQ_RX);
+#else
+            // configure the radio to listen to the frequency
+            radio_setFrequency(ieee154e_vars.freq);
+#endif
         }
 
         // switch on the radio in Rx mode.
@@ -632,9 +645,12 @@ port_INLINE void activity_synchronize_newSlot(void) {
 
         // update record of current channel
         ieee154e_vars.freq = calculateFrequency(ieee154e_vars.singleChannel);
-
+#ifdef SCUM3C_FPGA_PCB_VERSION
         // configure the radio to listen to the default synchronizing channel
-        radio_setFrequency(ieee154e_vars.freq, 0x02);
+        radio_setFrequency(ieee154e_vars.freq, FREQ_RX);
+#else
+        radio_setFrequency(ieee154e_vars.freq);
+#endif
 
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
         sctimer_setCapture(ACTION_RX_SFD_DONE);
@@ -1058,7 +1074,6 @@ port_INLINE void activity_ti1ORri1(void) {
                 changeState(S_TXDATAOFFSET);
                 
                 
-                debugpins_debug_y_toggle();
                 // change owner
                 ieee154e_vars.dataToSend->owner = COMPONENT_IEEE802154E;
                 if (couldSendEB==TRUE) {        // I will be sending an EB
@@ -1069,7 +1084,6 @@ port_INLINE void activity_ti1ORri1(void) {
                     memcpy(ieee154e_vars.dataToSend->l2_ASNpayload,&asn[0],sizeof(asn_t));
                     memcpy(ieee154e_vars.dataToSend->l2_ASNpayload+sizeof(asn_t),&join_priority,sizeof(uint8_t));
                 }
-                debugpins_debug_y_toggle();
                 // record that I attempt to transmit this packet
                 ieee154e_vars.dataToSend->l2_numTxAttempts++;
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
@@ -1090,9 +1104,13 @@ port_INLINE void activity_ti1ORri1(void) {
                 }
                 // add 2 CRC bytes only to the local copy as we end up here for each retransmission
                 packetfunctions_reserveFooterSize(&ieee154e_vars.localCopyForTransmission, 2);
-
-            // configure the radio for that frequency
-            radio_setFrequency(ieee154e_vars.freq);
+#ifdef SCUM3C_FPGA_PCB_VERSION
+                // configure the radio to listen to the default synchronizing channel
+                radio_setFrequency(ieee154e_vars.freq, FREQ_TX);
+#else
+                // configure the radio for that frequency
+                radio_setFrequency(ieee154e_vars.freq);
+#endif
 
                 // set the tx buffer address and length register.(packet is NOT loaded at this moment)
                 radio_loadPacket_prepare(ieee154e_vars.localCopyForTransmission.payload,
@@ -1105,7 +1123,6 @@ port_INLINE void activity_ti1ORri1(void) {
             sctimer_setCapture(ACTION_TX_SFD_DONE);
             sctimer_setCapture(ACTION_TX_SEND_DONE);
 #else
-                debugpins_debug_y_toggle();
                 // arm tt1
                 opentimers_scheduleAbsolute(
                     ieee154e_vars.timerId,                            // timerId
@@ -1114,7 +1131,6 @@ port_INLINE void activity_ti1ORri1(void) {
                     TIME_TICS,                                        // timetype
                     isr_ieee154e_timer                                // callback
                 );
-                debugpins_debug_y_toggle();
                 // radiotimer_schedule(DURATION_tt1);
 #endif
                 break;
@@ -1131,9 +1147,14 @@ port_INLINE void activity_ti1ORri1(void) {
             // 3.  set capture interrupt for Rx SFD done and receiving packet done
          sctimer_setCapture(ACTION_RX_SFD_DONE);
          sctimer_setCapture(ACTION_RX_DONE);
-
+        
+#ifdef SCUM3C_FPGA_PCB_VERSION
+        // configure the radio to listen to the default synchronizing channel
+        radio_setFrequency(ieee154e_vars.freq, FREQ_RX);
+#else
          // configure the radio for that frequency
          radio_setFrequency(ieee154e_vars.freq);
+#endif
 #else
             // arm rt1
             opentimers_scheduleAbsolute(
@@ -1191,8 +1212,13 @@ port_INLINE void activity_ti2(void) {
     // add 2 CRC bytes only to the local copy as we end up here for each retransmission
     packetfunctions_reserveFooterSize(&ieee154e_vars.localCopyForTransmission, 2);
 
+#ifdef SCUM3C_FPGA_PCB_VERSION
+    // configure the radio to listen to the default synchronizing channel
+    radio_setFrequency(ieee154e_vars.freq, FREQ_TX);
+#else
     // configure the radio for that frequency
-    radio_setFrequency(ieee154e_vars.freq, 0x01);
+    radio_setFrequency(ieee154e_vars.freq);
+#endif
 
     // load the packet in the radio's Tx buffer
     radio_loadPacket(ieee154e_vars.localCopyForTransmission.payload,
@@ -1339,8 +1365,13 @@ port_INLINE void activity_ti5(PORT_TIMER_WIDTH capturedTime) {
         sctimer_setCapture(ACTION_RX_SFD_DONE);
         sctimer_setCapture(ACTION_RX_DONE);
 
+#ifdef SCUM3C_FPGA_PCB_VERSION
+        // configure the radio to listen to the default synchronizing channel
+        radio_setFrequency(ieee154e_vars.freq, FREQ_RX);
+#else
         // configure the radio for that frequency
         radio_setFrequency(ieee154e_vars.freq);
+#endif
 #else
         // arm tt5
         opentimers_scheduleAbsolute(
@@ -1382,8 +1413,13 @@ port_INLINE void activity_ti6(void) {
     );
     // radiotimer_schedule(DURATION_tt6);
 
+#ifdef SCUM3C_FPGA_PCB_VERSION
+    // configure the radio to listen to the default synchronizing channel
+    radio_setFrequency(ieee154e_vars.freq, FREQ_RX);
+#else
     // configure the radio for that frequency
-    radio_setFrequency(ieee154e_vars.freq, 0x02);
+    radio_setFrequency(ieee154e_vars.freq);
+#endif
 
     radio_rxEnable();
 #endif
@@ -1658,8 +1694,13 @@ port_INLINE void activity_ri2(void) {
     );
     // radiotimer_schedule(DURATION_rt2);
 
+#ifdef SCUM3C_FPGA_PCB_VERSION
+    // configure the radio to listen to the default synchronizing channel
+    radio_setFrequency(ieee154e_vars.freq, FREQ_RX);
+#else
     // configure the radio for that frequency
-    radio_setFrequency(ieee154e_vars.freq, 0x02);
+    radio_setFrequency(ieee154e_vars.freq);
+#endif
 
     radio_rxEnable();
 #endif
@@ -1969,8 +2010,13 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
             sctimer_setCapture(ACTION_TX_SFD_DONE);
             sctimer_setCapture(ACTION_TX_SEND_DONE);
 
+#ifdef SCUM3C_FPGA_PCB_VERSION
+            // configure the radio to listen to the default synchronizing channel
+            radio_setFrequency(ieee154e_vars.freq, FREQ_TX);
+#else
             // configure the radio for that frequency
             radio_setFrequency(ieee154e_vars.freq);
+#endif
 #else
             // arm rt5
             opentimers_scheduleAbsolute(
@@ -2095,8 +2141,14 @@ port_INLINE void activity_ri6(void) {
     packetfunctions_reserveFooterSize(ieee154e_vars.ackToSend,2);
     
     radio_rfOff();
+    
+#ifdef SCUM3C_FPGA_PCB_VERSION
+    // configure the radio to listen to the default synchronizing channel
+    radio_setFrequency(ieee154e_vars.freq, FREQ_TX);
+#else
     // configure the radio for that frequency
-    radio_setFrequency(ieee154e_vars.freq, 0x01);
+    radio_setFrequency(ieee154e_vars.freq);
+#endif
 
     // load the packet in the radio's Tx buffer
     radio_loadPacket(ieee154e_vars.ackToSend->payload,

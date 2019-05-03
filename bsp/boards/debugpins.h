@@ -58,9 +58,9 @@ void debugpins_intdisabled_toggle(void);
 void debugpins_intdisabled_clr(void);
 void debugpins_intdisabled_set(void);
 
-void debugpins_debug_toggle(void);
-void debugpins_debug_clr(void);
-void debugpins_debug_set(void);
+void debugpins_debug_x_toggle(void);
+void debugpins_debug_x_clr(void);
+void debugpins_debug_x_set(void);
 
 void debugpins_debug_y_toggle(void);
 void debugpins_debug_y_clr(void);

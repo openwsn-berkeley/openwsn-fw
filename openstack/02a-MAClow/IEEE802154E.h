@@ -165,11 +165,24 @@ enum ieee154e_atomicdurations_enum {
    TsTxAckDelay              =   33,                  //  1000us
    TsShortGT                 =   13,                  //   500us, The standardlized value for this is 400/2=200us(7ticks). Currectly 7 doesn't work for short packet, change it back to 7 when found the problem.
 #endif
+#ifdef SCUM3C_FPGA_PCB_VERSION
+    
 #if SLOTDURATION==80
    TsTxOffset                =  800,                  //  5215us
    TsLongGT                  =   44,                  //  1300us
    TsTxAckDelay              = 1100,                  //  5521us
    TsShortGT                 =   30,                  //   500us
+#endif
+
+#else
+    
+#if SLOTDURATION==20
+   TsTxOffset                =  171,                  //  5215us
+   TsLongGT                  =   43,                  //  1300us
+   TsTxAckDelay              =  181,                  //  5521us
+   TsShortGT                 =   16,                  //   500us
+#endif
+
 #endif
    TsSlotDuration            =  PORT_TsSlotDuration,  // 10000us
    // execution speed related
