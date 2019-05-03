@@ -12,7 +12,8 @@ import time
 # ---------------------------------------------------------------------
 com_port = 'COM11';
 
-binFilePath = "{0}\Objects\{0}.bin".format('01bsp_leds')
+# binFilePath = "{0}\Objects\{0}.bin".format('01bsp_radio')
+binFilePath = "{0}\Objects\{0}.bin".format('03oos_openwsn')
 
 
 print "bin file path: {0}".format(binFilePath)
@@ -52,6 +53,8 @@ with open(binFilePath, 'rb') as f:
 # Need to know how long the binary payload is for computing CRC
 code_length = len(bindata) - 1
 pad_length = 65536 - code_length - 1
+
+print code_length, pad_length
 
 # Optional: pad out payload with random data if desired
 # Otherwise pad out with zeros - uC must receive full 64kB
