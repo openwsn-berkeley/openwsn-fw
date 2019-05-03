@@ -1049,16 +1049,6 @@ port_INLINE void activity_ti1ORri1(void) {
                         if (ieee154e_vars.dataToSend == NULL) {
                             ieee154e_vars.dataToSend = openqueue_macGet6PResponseAndDownStreamPacket(&neighbor);
                         }
-                        
-                        if (ieee154e_vars.dataToSend != NULL) {
-                            printf("creator=%d reqORresp=%d neighborType=%d neighbor_addr[6]=%x neighbor_addr[7]=%x\r\n", 
-                                ieee154e_vars.dataToSend->creator, 
-                                ieee154e_vars.dataToSend->l2_sixtop_command,
-                                autonomousUnicastNeighbor.type,
-                                autonomousUnicastNeighbor.addr_64b[6],
-                                autonomousUnicastNeighbor.addr_64b[7]
-                            );
-                        } 
                     }
                 }
             }
