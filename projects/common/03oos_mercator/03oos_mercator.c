@@ -235,9 +235,10 @@ void serial_rx_REQ_RX(void) {
    }
 
    req = (REQ_RX_ht*)mercator_vars.uartbufrx;
-   mercator_vars.rxpk_transctr = htons(req->transctr);
-   mercator_vars.rxpk_txfillbyte = req->txfillbyte;
-   memcpy(mercator_vars.rxpk_srcmac, req->srcmac, 8);
+   // save the expected values
+   mercator_vars.txpk_transctr = htons(req->transctr);
+   mercator_vars.txpk_txfillbyte = req->txfillbyte;
+   memcpy(mercator_vars.txpk_srcmac, req->srcmac, 8);
 
 
    // reset notifications counter
@@ -473,17 +474,17 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
       rx_temp = (RF_PACKET_ht *)mercator_vars.rxpk_buf;
 
       // check srcmac
-      if (memcmp(rx_temp->srcmac, mercator_vars.rxpk_srcmac, MAC_LEN) != 0){
+      if (memcmp(rx_temp->srcmac, mercator_vars.txpk_srcmac, MAC_LEN) != 0){
          is_expected = FALSE;
       }
 
       // check transctr
-      if (rx_temp->transctr != mercator_vars.rxpk_transctr){
+      if (rx_temp->transctr != mercator_vars.txpk_transctr){
          is_expected = FALSE;
       }
 
       // check txfillbyte
-      if (rx_temp->txfillbyte != mercator_vars.rxpk_txfillbyte){
+      if (rx_temp->txfillbyte != mercator_vars.txpk_txfillbyte){
          is_expected = FALSE;
       }
 

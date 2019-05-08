@@ -155,12 +155,15 @@ typedef struct {
    uint16_t        serialNumRxUnknownRequest;
 
    //=== RF
+   uint8_t         mac[MAC_LEN];
    // tx
    uint8_t         rfbuftx[RF_BUF_LEN];
    uint16_t        txpk_numpk;
    uint8_t         txpk_len;
    uint16_t        txpk_totalnumpk;
-   uint8_t         mac[MAC_LEN];
+   uint8_t         txpk_txfillbyte;
+   uint8_t         txpk_srcmac[MAC_LEN];
+   uint16_t        txpk_transctr;
    // rx
    uint8_t         rxpk_buf[RF_BUF_LEN];
    uint8_t         rxpk_len;
@@ -168,9 +171,6 @@ typedef struct {
     int8_t         rxpk_rssi;
    uint8_t         rxpk_lqi;
       bool         rxpk_crc;
-   uint8_t         rxpk_txfillbyte;
-   uint8_t         rxpk_srcmac[MAC_LEN];
-   uint16_t        rxpk_transctr;
 } mercator_vars_t;
 
 mercator_vars_t mercator_vars;
