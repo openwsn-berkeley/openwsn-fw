@@ -479,6 +479,11 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
          is_expected = FALSE;
       }
 
+      // check length
+      if (mercator_vars.rxpk_len != mercator_vars.txpk_len){
+         is_expected = FALSE;
+      }
+
       // check transctr
       if (rx_temp->transctr != mercator_vars.txpk_transctr){
          is_expected = FALSE;
