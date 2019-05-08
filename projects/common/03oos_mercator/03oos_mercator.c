@@ -236,6 +236,7 @@ void serial_rx_REQ_RX(void) {
 
    req = (REQ_RX_ht*)mercator_vars.uartbufrx;
    // save the expected values
+   mercator_vars.txpk_len = req->txlength;
    mercator_vars.txpk_transctr = htons(req->transctr);
    mercator_vars.txpk_txfillbyte = req->txfillbyte;
    memcpy(mercator_vars.txpk_srcmac, req->srcmac, 8);
