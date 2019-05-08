@@ -553,6 +553,10 @@ void cb_sendPacket(opentimers_id_t id){
 
       mercator_vars.numnotifications++;
 
+      // goto IDLE
+      radio_rfOff();
+      mercator_vars.status = ST_IDLE;
+
       return;
    }
 
