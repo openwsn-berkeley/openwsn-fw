@@ -490,8 +490,12 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
       }
 
       // check txfillbyte
-      if (rx_temp->txfillbyte != mercator_vars.txpk_txfillbyte){
-         is_expected = FALSE;
+      for (int i = offsetof(RF_PACKET_ht, txfillbyte);
+           i < mercator_vars.rxpk_len - LENGTH_CRC; i++){
+         if(mercator_vars.rxpk_buf[i] != mercator_vars.txpk_txfillbyte){
+            is_expected = FALSE;
+            break;
+         }
       }
 
       if (is_expected == TRUE && mercator_vars.rxpk_crc == TRUE){
