@@ -2043,7 +2043,6 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
             ieee154e_vars.dataReceived = NULL;
             // abort
             endSlot();
-            leds_debug_off();
         }
 
         // everything went well, return here not to execute the error code below
@@ -2059,7 +2058,6 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
 
     // abort
     endSlot();
-    leds_debug_off();
 }
 
 port_INLINE void activity_ri6(void) {
