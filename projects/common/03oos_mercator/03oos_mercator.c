@@ -127,14 +127,13 @@ void serial_tx_RESP_ST(void) {
 }
 
 void serial_rx_REQ_IDLE(void) {
-   // schedule a response
-   scheduler_push_task(serial_tx_RESP_IDLE,TASK_PRIO_SERIAL);
-
    if (mercator_vars.uartbufrxindex!=sizeof(REQ_IDLE_ht)){
       // update stats
       mercator_vars.serialNumRxWrongLength++;
       return;
    }
+   // schedule a response
+   scheduler_push_task(serial_tx_RESP_IDLE,TASK_PRIO_SERIAL);
    if (mercator_vars.status == ST_TX){
       opentimers_cancel(mercator_vars.sendTimerId);
    } else if (mercator_vars.status == ST_RX){
@@ -160,14 +159,14 @@ void serial_rx_REQ_TX(void) {
    uint16_t pkctr;
    REQ_TX_ht* req;
 
-   // schedule a response
-   scheduler_push_task(serial_tx_RESP_TX,TASK_PRIO_SERIAL);
-
    if (mercator_vars.uartbufrxindex!=sizeof(REQ_TX_ht)){
       // update stats
       mercator_vars.serialNumRxWrongLength++;
       return;
    }
+
+   // schedule a response
+   scheduler_push_task(serial_tx_RESP_TX,TASK_PRIO_SERIAL);
 
    if (mercator_vars.status == ST_TX){
       // we've already in ST_TX; just return a response
@@ -230,14 +229,14 @@ void serial_tx_RESP_TX(void) {
 void serial_rx_REQ_RX(void) {
    REQ_RX_ht* req;
 
-   // schedule a response
-   scheduler_push_task(serial_tx_RESP_RX,TASK_PRIO_SERIAL);
-
    if (mercator_vars.uartbufrxindex!=sizeof(REQ_RX_ht)){
       // update stats
       mercator_vars.serialNumRxWrongLength++;
       return;
    }
+
+   // schedule a response
+   scheduler_push_task(serial_tx_RESP_RX,TASK_PRIO_SERIAL);
 
    req = (REQ_RX_ht*)mercator_vars.uartbufrx;
    // save the expected values
