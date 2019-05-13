@@ -169,6 +169,11 @@ void serial_rx_REQ_TX(void) {
       return;
    }
 
+   if (mercator_vars.status == ST_TX){
+      // we've already in ST_TX; just return a response
+      return;
+   }
+
    mercator_vars.status = ST_TX;
    mercator_vars.numnotifications = 0;
 
