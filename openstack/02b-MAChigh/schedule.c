@@ -573,40 +573,19 @@ bool schedule_isNumTxWrapped(open_addr_t* neighbor){
 bool schedule_getCellsToBeRelocated(open_addr_t* neighbor, cellInfo_ht* celllist){
     uint8_t     i;
 
-    uint16_t    highestPDR;
     uint16_t    cellPDR;
 
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
 
-    highestPDR = 0;
     // found the cell with higest PDR
     for(i=0;i<MAXACTIVESLOTS;i++) {
         if(
             packetfunctions_sameAddress(&schedule_vars.scheduleBuf[i].neighbor, neighbor) == TRUE
         ){
-            if (schedule_vars.scheduleBuf[i].numTx>0){
+            if (schedule_vars.scheduleBuf[i].numTx>MINIMAL_NUM_TX){
                 cellPDR = 100*schedule_vars.scheduleBuf[i].numTxACK/schedule_vars.scheduleBuf[i].numTx;
-                if (cellPDR > highestPDR){
-                    highestPDR = cellPDR;
-                }
-            }
-        }
-    }
-
-    if (highestPDR==0){
-        // no cell to relocate
-        ENABLE_INTERRUPTS();
-        return FALSE;
-    }
-
-    for(i=0;i<MAXACTIVESLOTS;i++) {
-        if(
-            packetfunctions_sameAddress(&schedule_vars.scheduleBuf[i].neighbor, neighbor) == TRUE
-        ){
-            if (schedule_vars.scheduleBuf[i].numTx>0){
-                cellPDR = 100*schedule_vars.scheduleBuf[i].numTxACK/schedule_vars.scheduleBuf[i].numTx;
-                if (highestPDR-cellPDR > RELOCATE_PDRTHRES){
+                if (cellPDR < RELOCATE_PDRTHRES){
                     celllist->isUsed            = TRUE;
                     celllist->slotoffset        = schedule_vars.scheduleBuf[i].slotOffset;
                     celllist->channeloffset     = schedule_vars.scheduleBuf[i].channelOffset;

@@ -8,6 +8,13 @@
 #include "schedule.h"
 #include "icmpv6rpl.h"
 #include "idmanager.h"
+#include "openrandom.h"
+
+#include "msf.h"
+
+//=========================== defines =========================================
+
+#define UINJECT_TRAFFIC_RATE 2 ///> the value X indicates 1 packet/X minutes
 
 //=========================== variables =======================================
 
@@ -77,12 +84,15 @@ void uinject_receive(OpenQueueEntry_t* pkt) {
 void uinject_timer_cb(opentimers_id_t id){
     // calling the task directly as the timer_cb function is executed in
     // task mode by opentimer already
-    uinject_task_cb();
+    if(openrandom_get16b()<(0xffff/UINJECT_TRAFFIC_RATE)){
+        uinject_task_cb();
+    }
 }
 
 void uinject_task_cb(void) {
     OpenQueueEntry_t*    pkt;
     uint8_t              asnArray[5];
+    uint8_t              numCellsUsed;
     open_addr_t          parentNeighbor;
     bool                 foundNeighbor;
 
@@ -149,6 +159,14 @@ void uinject_task_cb(void) {
     pkt->payload[2] = asnArray[2];
     pkt->payload[3] = asnArray[3];
     pkt->payload[4] = asnArray[4];
+
+    packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
+    numCellsUsed = msf_getPreviousNumCellsUsed();
+    pkt->payload[0] = numCellsUsed;
+
+    packetfunctions_reserveHeaderSize(pkt,sizeof(uint16_t));
+    pkt->payload[1] = (uint8_t)(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
+    pkt->payload[0] = (uint8_t)(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
 
     if ((openudp_send(pkt))==E_FAIL) {
         openqueue_freePacketBuffer(pkt);
