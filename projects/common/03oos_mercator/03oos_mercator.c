@@ -258,6 +258,7 @@ void serial_rx_REQ_RX(void) {
 
    // switch in RX
    radio_rxEnable();
+   radio_rxNow();
 
    // change status to RX
    mercator_vars.status = ST_RX;
@@ -523,6 +524,7 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
       // get ready for a following frame
       radio_rfOn();
       radio_rxEnable();
+      radio_rxNow();
    }
 }
 
