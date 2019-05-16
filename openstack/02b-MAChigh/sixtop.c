@@ -151,10 +151,10 @@ void sixtop_setEBPeriod(uint8_t ebPeriod) {
 }
 
 void  sixtop_setSFcallback(
-    sixtop_sf_getsfid           cb0,
-    sixtop_sf_getmetadata       cb1,
-    sixtop_sf_translatemetadata cb2,
-    sixtop_sf_handle_callback   cb3
+    sixtop_sf_getsfid_cbt           cb0,
+    sixtop_sf_getmetadata_cbt       cb1,
+    sixtop_sf_translatemetadata_cbt cb2,
+    sixtop_sf_handle_callback_cbt   cb3
 ){
    sixtop_vars.cb_sf_getsfid            = cb0;
    sixtop_vars.cb_sf_getMetadata        = cb1;

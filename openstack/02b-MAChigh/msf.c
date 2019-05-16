@@ -44,10 +44,10 @@ void msf_init(void) {
     memset(&msf_vars,0,sizeof(msf_vars_t));
     msf_vars.numAppPacketsPerSlotFrame = 0;
     sixtop_setSFcallback(
-        (sixtop_sf_getsfid)msf_getsfid,
-        (sixtop_sf_getmetadata)msf_getMetadata,
-        (sixtop_sf_translatemetadata)msf_translateMetadata,
-        (sixtop_sf_handle_callback)msf_handleRCError
+        (sixtop_sf_getsfid_cbt)msf_getsfid,
+        (sixtop_sf_getmetadata_cbt)msf_getMetadata,
+        (sixtop_sf_translatemetadata_cbt)msf_translateMetadata,
+        (sixtop_sf_handle_callback_cbt)msf_handleRCError
     );
 
     memset(&temp_neighbor,0,sizeof(temp_neighbor));
