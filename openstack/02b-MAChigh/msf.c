@@ -174,6 +174,8 @@ void msf_handleRCError(uint8_t code, open_addr_t* address){
         // mark neighbor f6NORES
         neighbors_setNeighborNoResource(address);
     }
+
+    neighbors_updateSequenceNumber(address);
 }
 
 void msf_timer_waitretry_cb(opentimers_id_t id){
