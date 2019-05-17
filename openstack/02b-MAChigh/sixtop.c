@@ -1522,9 +1522,21 @@ void sixtop_six2six_notifyReceive(
                 neighbors_updateSequenceNumber(&(pkt->l2_nextORpreviousHop));
                 break;
             case SIX_STATE_WAIT_DELETERESPONSE:
+                i = 0;
+                memset(pkt->l2_sixtop_celllist_delete,0,sizeof(pkt->l2_sixtop_celllist_delete));
+                while(pktLen>0){
+                    pkt->l2_sixtop_celllist_delete[i].slotoffset     =  *((uint8_t*)(pkt->payload)+ptr);
+                    pkt->l2_sixtop_celllist_delete[i].slotoffset    |= (*((uint8_t*)(pkt->payload)+ptr+1))<<8;
+                    pkt->l2_sixtop_celllist_delete[i].channeloffset  =  *((uint8_t*)(pkt->payload)+ptr+2);
+                    pkt->l2_sixtop_celllist_delete[i].channeloffset |= (*((uint8_t*)(pkt->payload)+ptr+3))<<8;
+                    pkt->l2_sixtop_celllist_delete[i].isUsed         = TRUE;
+                    ptr    += 4;
+                    pktLen -= 4;
+                    i++;
+                }
                 sixtop_removeCells(
                     sixtop_vars.cb_sf_getMetadata(),
-                    sixtop_vars.celllist_toDelete,
+                    pkt->l2_sixtop_celllist_delete,
                     &(pkt->l2_nextORpreviousHop),
                     sixtop_vars.cellOptions
                 );
