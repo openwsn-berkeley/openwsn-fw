@@ -461,6 +461,7 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
    RF_PACKET_ht* rx_temp;
    bool         is_expected = TRUE;
    IND_RX_ht*   resp;
+   int i;
 
    radio_rfOff();
 
@@ -496,7 +497,7 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
       }
 
       // check txfillbyte
-      for (int i = offsetof(RF_PACKET_ht, txfillbyte);
+      for (i = offsetof(RF_PACKET_ht, txfillbyte);
            i < mercator_vars.rxpk_len - LENGTH_CRC; i++){
          if(mercator_vars.rxpk_buf[i] != mercator_vars.txpk_txfillbyte){
             is_expected = FALSE;
