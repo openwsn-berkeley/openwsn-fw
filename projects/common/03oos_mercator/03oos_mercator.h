@@ -24,6 +24,9 @@
 #define TYPE_REQ_RX          6
 #define TYPE_IND_RX          7
 #define TYPE_IND_UP          8
+#define TYPE_RESP_IDLE       10
+#define TYPE_RESP_TX         11
+#define TYPE_RESP_RX         12
 
 #define ST_IDLE              1
 #define ST_TX                2
@@ -68,6 +71,12 @@ END_PACK
 
 BEGIN_PACK
 typedef struct {
+  uint8_t         type;
+} RESP_TX_ht;
+END_PACK
+
+BEGIN_PACK
+typedef struct {
    uint8_t         type;
 } IND_TXDONE_ht;
 END_PACK
@@ -83,6 +92,8 @@ typedef struct {
 } REQ_RX_ht;
 END_PACK
 
+typedef RESP_TX_ht RESP_RX_ht;
+typedef RESP_TX_ht RESP_IDLE_ht;
 BEGIN_PACK
 typedef struct {
    uint8_t         type;
@@ -144,12 +155,15 @@ typedef struct {
    uint16_t        serialNumRxUnknownRequest;
 
    //=== RF
+   uint8_t         mac[MAC_LEN];
    // tx
    uint8_t         rfbuftx[RF_BUF_LEN];
    uint16_t        txpk_numpk;
    uint8_t         txpk_len;
    uint16_t        txpk_totalnumpk;
-   uint8_t         mac[MAC_LEN];
+   uint8_t         txpk_txfillbyte;
+   uint8_t         txpk_srcmac[MAC_LEN];
+   uint16_t        txpk_transctr;
    // rx
    uint8_t         rxpk_buf[RF_BUF_LEN];
    uint8_t         rxpk_len;
@@ -157,9 +171,6 @@ typedef struct {
     int8_t         rxpk_rssi;
    uint8_t         rxpk_lqi;
       bool         rxpk_crc;
-   uint8_t         rxpk_txfillbyte;
-   uint8_t         rxpk_srcmac[MAC_LEN];
-   uint16_t        rxpk_transctr;
 } mercator_vars_t;
 
 mercator_vars_t mercator_vars;
@@ -174,8 +185,11 @@ void serial_rx_all(void);
 void serial_rx_REQ_ST(void);
 void serial_tx_RESP_ST(void);
 void serial_rx_REQ_IDLE(void);
+void serial_tx_RESP_IDLE(void);
 void serial_rx_REQ_TX(void);
+void serial_tx_RESP_TX(void);
 void serial_rx_REQ_RX(void);
+void serial_tx_RESP_RX(void);
 void serial_tx_IND_UP(void);
 
 void isr_openserial_tx_mod(void);

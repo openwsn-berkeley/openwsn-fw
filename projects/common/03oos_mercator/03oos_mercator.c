@@ -132,6 +132,8 @@ void serial_rx_REQ_IDLE(void) {
       mercator_vars.serialNumRxWrongLength++;
       return;
    }
+   // schedule a response
+   scheduler_push_task(serial_tx_RESP_IDLE,TASK_PRIO_SERIAL);
    if (mercator_vars.status == ST_TX){
       opentimers_cancel(mercator_vars.sendTimerId);
    } else if (mercator_vars.status == ST_RX){
@@ -139,6 +141,17 @@ void serial_rx_REQ_IDLE(void) {
    }
    radio_rfOff();
    mercator_vars.status = ST_IDLE;
+}
+
+void serial_tx_RESP_IDLE(void) {
+  RESP_IDLE_ht* resp;
+
+  resp = (RESP_IDLE_ht*)mercator_vars.uartbuftx;
+
+  resp->type                     = TYPE_RESP_IDLE;
+  mercator_vars.uartbuftxfill    = sizeof(RESP_IDLE_ht);
+
+  serial_flushtx();
 }
 
 void serial_rx_REQ_TX(void) {
@@ -151,6 +164,15 @@ void serial_rx_REQ_TX(void) {
       mercator_vars.serialNumRxWrongLength++;
       return;
    }
+
+   // schedule a response
+   scheduler_push_task(serial_tx_RESP_TX,TASK_PRIO_SERIAL);
+
+   if (mercator_vars.status == ST_TX){
+      // we've already in ST_TX; just return a response
+      return;
+   }
+
    mercator_vars.status = ST_TX;
    mercator_vars.numnotifications = 0;
 
@@ -193,18 +215,35 @@ void serial_rx_REQ_TX(void) {
    return;
 }
 
+void serial_tx_RESP_TX(void) {
+  RESP_TX_ht* resp;
+
+  resp = (RESP_TX_ht*)mercator_vars.uartbuftx;
+
+  resp->type                     = TYPE_RESP_TX;
+  mercator_vars.uartbuftxfill    = sizeof(RESP_TX_ht);
+
+  serial_flushtx();
+}
+
 void serial_rx_REQ_RX(void) {
    REQ_RX_ht* req;
+
    if (mercator_vars.uartbufrxindex!=sizeof(REQ_RX_ht)){
       // update stats
       mercator_vars.serialNumRxWrongLength++;
       return;
    }
 
+   // schedule a response
+   scheduler_push_task(serial_tx_RESP_RX,TASK_PRIO_SERIAL);
+
    req = (REQ_RX_ht*)mercator_vars.uartbufrx;
-   mercator_vars.rxpk_transctr = htons(req->transctr);
-   mercator_vars.rxpk_txfillbyte = req->txfillbyte;
-   memcpy(mercator_vars.rxpk_srcmac, req->srcmac, 8);
+   // save the expected values
+   mercator_vars.txpk_len = req->txlength;
+   mercator_vars.txpk_transctr = htons(req->transctr);
+   mercator_vars.txpk_txfillbyte = req->txfillbyte;
+   memcpy(mercator_vars.txpk_srcmac, req->srcmac, 8);
 
 
    // reset notifications counter
@@ -219,11 +258,23 @@ void serial_rx_REQ_RX(void) {
 
    // switch in RX
    radio_rxEnable();
+   radio_rxNow();
 
    // change status to RX
    mercator_vars.status = ST_RX;
 
    return;
+}
+
+void serial_tx_RESP_RX(void) {
+  RESP_RX_ht* resp;
+
+  resp = (RESP_RX_ht*)mercator_vars.uartbuftx;
+
+  resp->type                     = TYPE_RESP_RX;
+  mercator_vars.uartbuftxfill    = sizeof(RESP_RX_ht);
+
+  serial_flushtx();
 }
 
 void serial_tx_IND_UP(void) {
@@ -429,38 +480,51 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
       rx_temp = (RF_PACKET_ht *)mercator_vars.rxpk_buf;
 
       // check srcmac
-      if (memcmp(rx_temp->srcmac, mercator_vars.rxpk_srcmac, MAC_LEN) != 0){
+      if (memcmp(rx_temp->srcmac, mercator_vars.txpk_srcmac, MAC_LEN) != 0){
+         is_expected = FALSE;
+      }
+
+      // check length
+      if (mercator_vars.rxpk_len != mercator_vars.txpk_len){
          is_expected = FALSE;
       }
 
       // check transctr
-      if (rx_temp->transctr != mercator_vars.rxpk_transctr){
+      if (rx_temp->transctr != mercator_vars.txpk_transctr){
          is_expected = FALSE;
       }
 
       // check txfillbyte
-      if (rx_temp->txfillbyte != mercator_vars.rxpk_txfillbyte){
-         is_expected = FALSE;
+      for (int i = offsetof(RF_PACKET_ht, txfillbyte);
+           i < mercator_vars.rxpk_len - LENGTH_CRC; i++){
+         if(mercator_vars.rxpk_buf[i] != mercator_vars.txpk_txfillbyte){
+            is_expected = FALSE;
+            break;
+         }
       }
 
-      if (is_expected == TRUE){
+      if (is_expected == TRUE && mercator_vars.rxpk_crc == TRUE){
         resp = (IND_RX_ht*)mercator_vars.uartbuftx;
 
         resp->type     =  TYPE_IND_RX;
         resp->length   =  mercator_vars.rxpk_len;
         resp->rssi     =  mercator_vars.rxpk_rssi;
+        // resp->flags should have always the same value, 0xc0, but
+        // keep this attribute for backward compatibility
         resp->flags    =  mercator_vars.rxpk_crc << 7 | is_expected << 6;
         resp->pkctr    =  rx_temp->pkctr;
 
         mercator_vars.uartbuftxfill = sizeof(IND_RX_ht);
 
         serial_flushtx();
+
+        mercator_vars.numnotifications++;
       }
 
-      mercator_vars.numnotifications++;
-
+      // get ready for a following frame
       radio_rfOn();
       radio_rxEnable();
+      radio_rxNow();
    }
 }
 
@@ -468,6 +532,30 @@ void cb_sendPacket(opentimers_id_t id){
    IND_TXDONE_ht* resp;
    uint16_t pkctr;
    uint8_t pkctr_offset = 10; // srcmac[8] + transctr[2]
+
+   if (mercator_vars.txpk_numpk == mercator_vars.txpk_totalnumpk) {
+     opentimers_cancel(mercator_vars.sendTimerId);
+
+     // finishing TX
+     radio_rfOff();
+     mercator_vars.status = ST_TXDONE;
+
+     // send IND_TXDONE
+     resp = (IND_TXDONE_ht*)mercator_vars.uartbuftx;
+     resp->type = TYPE_IND_TXDONE;
+
+     mercator_vars.uartbuftxfill = sizeof(IND_TXDONE_ht);
+
+     serial_flushtx();
+
+     mercator_vars.numnotifications++;
+
+     // goto IDLE
+     radio_rfOff();
+     mercator_vars.status = ST_IDLE;
+
+     return;
+   }
 
    // send packet
    leds_error_on();
@@ -477,26 +565,6 @@ void cb_sendPacket(opentimers_id_t id){
    radio_txNow();
 
    leds_error_off();
-
-   if (mercator_vars.txpk_numpk == mercator_vars.txpk_totalnumpk) {
-      opentimers_cancel(mercator_vars.sendTimerId);
-
-      // finishing TX
-      radio_rfOff();
-      mercator_vars.status = ST_TXDONE;
-
-      // send IND_TXDONE
-      resp = (IND_TXDONE_ht*)mercator_vars.uartbuftx;
-      resp->type = TYPE_IND_TXDONE;
-
-      mercator_vars.uartbuftxfill = sizeof(IND_TXDONE_ht);
-
-      serial_flushtx();
-
-      mercator_vars.numnotifications++;
-
-      return;
-   }
 
    // update pkctr
    mercator_vars.txpk_numpk++;
