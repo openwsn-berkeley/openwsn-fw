@@ -467,6 +467,7 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
    if (mercator_vars.status == ST_RX){
 
       // get packet from radio
+      memset(mercator_vars.rxpk_buf, 0, sizeof(mercator_vars.rxpk_buf));
       radio_getReceivedFrame(
          mercator_vars.rxpk_buf,
          &mercator_vars.rxpk_len,
