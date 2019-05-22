@@ -550,10 +550,10 @@ void cb_sendPacket(opentimers_id_t id){
 
      mercator_vars.numnotifications++;
 
-     // goto IDLE
+     // turn off the radio just in case
      radio_rfOff();
-     mercator_vars.status = ST_IDLE;
-
+     // we keep the current status, ST_TX, which will be changed to
+     // ST_IDLE by the user
      return;
    }
 
