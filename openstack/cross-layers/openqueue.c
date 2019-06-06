@@ -195,7 +195,7 @@ uint8_t openqueue_getNum6PReq(open_addr_t* neighbor){
     num6Prequest = 0;
     for (i=0;i<QUEUELENGTH;i++) {
         if (
-            openqueue_vars.queue[i].owner   == COMPONENT_IEEE802154E_TO_SIXTOP  &&
+            openqueue_vars.queue[i].owner   == COMPONENT_SIXTOP_TO_IEEE802154E  &&
             openqueue_vars.queue[i].creator == COMPONENT_SIXTOP_RES             &&
             openqueue_vars.queue[i].l2_sixtop_messageType == SIXTOP_CELL_REQUEST&&
             packetfunctions_sameAddress(neighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)
@@ -218,7 +218,7 @@ uint8_t openqueue_getNum6PResp(void){
     num6Presponse = 0;
     for (i=0;i<QUEUELENGTH;i++) {
         if (
-            openqueue_vars.queue[i].owner   == COMPONENT_IEEE802154E_TO_SIXTOP  &&
+            openqueue_vars.queue[i].owner   == COMPONENT_SIXTOP_TO_IEEE802154E  &&
             openqueue_vars.queue[i].creator == COMPONENT_SIXTOP_RES             &&
             openqueue_vars.queue[i].l2_sixtop_messageType == SIXTOP_CELL_RESPONSE
         ) {
@@ -238,7 +238,7 @@ void openqueue_remove6PrequestToNeighbor(open_addr_t* neighbor){
 
     for (i=0;i<QUEUELENGTH;i++) {
         if (
-            openqueue_vars.queue[i].owner   == COMPONENT_IEEE802154E_TO_SIXTOP   &&
+            openqueue_vars.queue[i].owner   == COMPONENT_SIXTOP_TO_IEEE802154E   &&
             openqueue_vars.queue[i].creator == COMPONENT_SIXTOP_RES              &&
             openqueue_vars.queue[i].l2_sixtop_messageType == SIXTOP_CELL_REQUEST &&
             packetfunctions_sameAddress(neighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)
@@ -509,6 +509,7 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry) {
    entry->l3_sourceAdd.type            = ADDR_NONE;
    entry->l3_useSourceRouting          = FALSE;
    //l2
+   entry->l2_sixtop_command            = IANA_6TOP_CMD_NONE;
    entry->l2_nextORpreviousHop.type    = ADDR_NONE;
    entry->l2_frameType                 = IEEE154_TYPE_UNDEFINED;
    entry->l2_retriesLeft               = 0;

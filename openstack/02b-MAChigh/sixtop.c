@@ -187,7 +187,7 @@ owerror_t sixtop_request(
         sixtop_vars.six2six_state != SIX_STATE_IDLE   ||
         neighbor                  == NULL
     ){
-        // neighbor can't be none or previous transcation doesn't finishe yet
+        // neighbor can't be none or previous transcation doesn't finish yet
         return E_FAIL;
     }
 
@@ -1611,10 +1611,8 @@ void sixtop_six2six_notifyReceive(
                 neighbors_resetSequenceNumber(&(pkt->l2_nextORpreviousHop));
                 break;
             default:
-                // The sixtop response arrived after 6P TIMEOUT.
-
-
-                // it's a duplicated response.
+                // The sixtop response arrived after 6P TIMEOUT, or
+                // it's a duplicated response. Remove 6P request if I have.
 
                 openqueue_remove6PrequestToNeighbor(&(pkt->l2_nextORpreviousHop));
 
