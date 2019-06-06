@@ -71,7 +71,6 @@ void cjoin_init(void) {
    cjoin_vars.desc.callbackSendDone                = &cjoin_sendDone;
 
    cjoin_vars.isJoined                             = FALSE;
-   cjoin_vars.isBusySending                        = FALSE;
 
    opencoap_register(&cjoin_vars.desc);
 
@@ -240,7 +239,6 @@ void cjoin_task_cb(void) {
 
 void cjoin_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 
-    cjoin_vars.isBusySending = FALSE;
     openqueue_freePacketBuffer(msg);
 }
 
@@ -254,9 +252,8 @@ owerror_t cjoin_sendJoinRequest(open_addr_t* joinProxy) {
 
     payload_len = 0;
 
-    if (cjoin_vars.isBusySending){
-        return E_FAIL;
-    }
+    // if previous cjoin is not sent out, remove them
+    openqueue_removeAllCreatedBy(COMPONENT_CJOIN);
 
     // create a CoAP RD packet
     pkt = openqueue_getFreePacketBuffer(COMPONENT_CJOIN);
@@ -322,8 +319,6 @@ owerror_t cjoin_sendJoinRequest(open_addr_t* joinProxy) {
     if (outcome==E_FAIL) {
         openqueue_freePacketBuffer(pkt);
         return E_FAIL;
-    } else {
-        cjoin_vars.isBusySending = TRUE;
     }
 
     return E_SUCCESS;

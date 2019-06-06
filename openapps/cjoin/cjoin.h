@@ -20,7 +20,6 @@ typedef struct {
     bool                        isJoined;
     oscoap_security_context_t   context;
     uint8_t                     medType;
-    bool                        isBusySending;
 } cjoin_vars_t;
 
 //=========================== variables =======================================
