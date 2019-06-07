@@ -61,7 +61,7 @@ void uinject_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
     if (error==E_FAIL){
         openserial_printError(
             COMPONENT_UINJECT,
-            ERR_UINJECT_PACKET_DROPPED,
+            ERR_MAXRETRIES_REACHED,
             (errorparameter_t)uinject_vars.counter,
             (errorparameter_t)0
         );
