@@ -237,7 +237,7 @@ void forwarding_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
         if (error==E_FAIL) {
              openserial_printError(
                  COMPONENT_FORWARDING,
-                 ERR_FORWARDING_PACKET_DROPPED,
+                 ERR_MAXRETRIES_REACHED,
                  (errorparameter_t)1,
                  (errorparameter_t)0
             );
