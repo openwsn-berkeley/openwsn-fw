@@ -307,6 +307,7 @@ void               ieee154e_setSlotDuration(uint16_t duration);
 uint16_t           ieee154e_getSlotDuration(void);
 
 uint16_t           ieee154e_getTimeCorrection(void);
+void               ieee154e_getTicsInfo(uint32_t* numTicsOn, uint32_t* numTicsTotal);
 // events
 void               ieee154e_startOfFrame(PORT_TIMER_WIDTH capturedTime);
 void               ieee154e_endOfFrame(PORT_TIMER_WIDTH capturedTime);

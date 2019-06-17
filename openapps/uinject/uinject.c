@@ -96,6 +96,9 @@ void uinject_task_cb(void) {
     open_addr_t          parentNeighbor;
     bool                 foundNeighbor;
 
+    uint32_t             ticksOn;
+    uint32_t             ticksInTotal;
+
     // don't run if not synch
     if (ieee154e_isSynch() == FALSE) {
         return;
@@ -167,6 +170,19 @@ void uinject_task_cb(void) {
     packetfunctions_reserveHeaderSize(pkt,sizeof(uint16_t));
     pkt->payload[1] = (uint8_t)(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
     pkt->payload[0] = (uint8_t)(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+
+    ieee154e_getTicsInfo(&ticksOn, &ticksInTotal);
+    packetfunctions_reserveHeaderSize(pkt,sizeof(uint32_t));
+    pkt->payload[3] = (uint8_t)((ticksOn & 0xff000000) >> 24);
+    pkt->payload[2] = (uint8_t)((ticksOn & 0x00ff0000) >> 16);
+    pkt->payload[1] = (uint8_t)((ticksOn & 0x0000ff00) >> 8);
+    pkt->payload[0] = (uint8_t)( ticksOn & 0x000000ff);
+
+    packetfunctions_reserveHeaderSize(pkt,sizeof(uint32_t));
+    pkt->payload[3] = (uint8_t)((ticksInTotal & 0xff000000) >> 24);
+    pkt->payload[2] = (uint8_t)((ticksInTotal & 0x00ff0000) >> 16);
+    pkt->payload[1] = (uint8_t)((ticksInTotal & 0x0000ff00) >> 8);
+    pkt->payload[0] = (uint8_t)( ticksInTotal & 0x000000ff);
 
     if ((openudp_send(pkt))==E_FAIL) {
         openqueue_freePacketBuffer(pkt);

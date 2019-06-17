@@ -2307,6 +2307,12 @@ port_INLINE uint16_t ieee154e_getTimeCorrection(void) {
     return returnVal;
 }
 
+void ieee154e_getTicsInfo(uint32_t* numTicsOn, uint32_t* numTicsTotal){
+
+    *numTicsOn    = (uint32_t)(ieee154e_stats.numTicsOn);
+    *numTicsTotal = (uint32_t)(ieee154e_stats.numTicsTotal);
+}
+
 port_INLINE void joinPriorityStoreFromEB(uint8_t jp){
     ieee154e_vars.dataReceived->l2_joinPriority = jp;
     ieee154e_vars.dataReceived->l2_joinPriorityPresent = TRUE;
