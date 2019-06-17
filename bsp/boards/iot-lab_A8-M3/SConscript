@@ -23,6 +23,12 @@ source   = \
     Glob('configure/*.s') + \
     Glob('library/src/*.c')
 
+localEnv.Append(
+        CPPPATH =  [
+            os.path.join('#','bsp','chips','at86rf231'),
+        ],
+)
+
 board  = localEnv.Object(source=source) + rf231
 
 Return('board')

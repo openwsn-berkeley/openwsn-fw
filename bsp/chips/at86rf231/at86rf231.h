@@ -648,6 +648,9 @@ enum radio_irqstatus_enum {
 # define RG_RX_CTRL                      (0x0a)
 //controls the sensitivity of the antenna diversity mode
 
+# define RG_AES_STATE_KEY                (0x84)
+# define RG_AES_CTRL                     (0x83)
+# define RG_AES_STATUS                   (0x82)
 //=========================== typedef =========================================
 
 //=========================== variables =======================================
