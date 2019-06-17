@@ -6,7 +6,7 @@ before_script:
 - sudo apt-get update
 - sudo apt-get install scons
 - scons --version
-- sudo apt-get install gcc-arm-none-eabi
+- sudo apt-get install gcc-arm-embedded
 - arm-none-eabi-gcc --version
 - sudo apt-get install gcc-msp430
 - msp430-gcc --version
