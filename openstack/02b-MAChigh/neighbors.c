@@ -117,11 +117,6 @@ open_addr_t* neighbors_getJoinProxy(void) {
     uint8_t joinPrioMinimum;
     open_addr_t* joinProxy;
 
-    uint16_t moteId;
-    uint16_t slotoffset;
-    uint8_t  channeloffset;
-    uint16_t temp_slotoffset;
-
     joinPrioMinimum = 0xff;
     joinProxy = NULL;
     for (i=0;i<MAXNUMNEIGHBORS;i++) {
@@ -132,29 +127,6 @@ open_addr_t* neighbors_getJoinProxy(void) {
         ) {
             joinProxy = &(neighbors_vars.neighbors[i].addr_64b);
             joinPrioMinimum = neighbors_vars.neighbors[i].joinPrio;
-        }
-    }
-
-    if (joinProxy){
-        // remove all previous installed autonomous cell
-        neighbor_removeAllAutonomousTxRxCellUnicast();
-        moteId = 256*joinProxy->addr_64b[6]+joinProxy->addr_64b[7];
-        slotoffset          = msf_hashFunction_getSlotoffset(moteId);
-        channeloffset       = msf_hashFunction_getChanneloffset(moteId);
-        if (
-            schedule_getAutonomousTxRxCellAnycast(&temp_slotoffset) &&
-            temp_slotoffset == slotoffset
-        ){
-            msf_setHashCollisionFlag(TRUE);
-        } else {
-            // reserve the autonomous cell to joinproxy
-            schedule_addActiveSlot(
-                slotoffset,                                 // slot offset
-                CELLTYPE_TXRX,                              // type of slot
-                TRUE,                                       // shared?
-                channeloffset,                              // channel offset
-                joinProxy                                   // neighbor
-            );
         }
     }
 
@@ -573,33 +545,6 @@ void neighbors_setNeighborNoResource(open_addr_t* address){
 void neighbors_setPreferredParent(uint8_t index, bool isPreferred){
 
     neighbors_vars.neighbors[index].parentPreference = isPreferred;
-}
-
-void neighbor_removeAutonomousTxRxCellUnicast(open_addr_t* address){
-
-    uint16_t moteId;
-    uint16_t slotoffset;
-    uint16_t temp_slotoffset;
-
-    moteId = 256*address->addr_64b[6]+address->addr_64b[7];
-    slotoffset          = msf_hashFunction_getSlotoffset(moteId);
-
-    if (
-        schedule_getAutonomousTxRxCellAnycast(&temp_slotoffset) &&
-        temp_slotoffset == slotoffset
-    ){
-        msf_setHashCollisionFlag(FALSE);
-    } else {
-        schedule_removeActiveSlot(
-            slotoffset,             // slotoffset
-            address                 // neighbor
-        );
-    }
-}
-
-void neighbor_removeAllAutonomousTxRxCellUnicast(void){
-
-    schedule_removeAllAutonomousTxRxCellUnicast();
 }
 
 //===== managing routing info

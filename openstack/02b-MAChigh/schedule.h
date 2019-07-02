@@ -52,6 +52,17 @@ in your schedule, so not to waste RAM.
 #define MAXACTIVESLOTS       SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS+NUMSLOTSOFF
 
 /**
+\brief Maximum number of alternative slots (more than one cells with same slotOffset)
+
+
+Note that for each slot entry, it has a table of alternative slots. All
+those slots's next pointer is pointing to the same entries.
+
+*/
+
+#define MAXBACKUPSLOTS   2
+
+/**
 \brief Minimum backoff exponent.
 
 Backoff is used only in slots that are marked as shared in the schedule. When
@@ -87,23 +98,38 @@ typedef uint16_t   slotOffset_t;
 typedef uint16_t   frameLength_t;
 
 typedef enum {
-   CELLTYPE_OFF              = 0,
-   CELLTYPE_TX               = 1,
-   CELLTYPE_RX               = 2,
-   CELLTYPE_TXRX             = 3
+    CELLTYPE_OFF              = 0,
+    CELLTYPE_TX               = 1,
+    CELLTYPE_RX               = 2,
+    CELLTYPE_TXRX             = 3
 } cellType_t;
 
 typedef struct {
-   slotOffset_t    slotOffset;
-   cellType_t      type;
-   bool            shared;
-   uint8_t         channelOffset;
-   open_addr_t     neighbor;
-   uint8_t         numRx;
-   uint8_t         numTx;
-   uint8_t         numTxACK;
-   asn_t           lastUsedAsn;
-   void*           next;
+    cellType_t      type;
+    bool            shared;
+    bool            isAutoCell;
+    uint8_t         channelOffset;
+    open_addr_t     neighbor;
+    uint8_t         numRx;
+    uint8_t         numTx;
+    uint8_t         numTxACK;
+    asn_t           lastUsedAsn;
+    void*           next;
+} backupEntry_t;
+
+typedef struct {
+    slotOffset_t    slotOffset;
+    cellType_t      type;
+    bool            shared;
+    bool            isAutoCell;
+    uint8_t         channelOffset;
+    open_addr_t     neighbor;
+    uint8_t         numRx;
+    uint8_t         numTx;
+    uint8_t         numTxACK;
+    asn_t           lastUsedAsn;
+    backupEntry_t   backupEntries[MAXBACKUPSLOTS];
+    void*           next;
 } scheduleEntry_t;
 
 BEGIN_PACK
@@ -156,37 +182,47 @@ void               schedule_setFrameLength(frameLength_t newFrameLength);
 void               schedule_setFrameHandle(uint8_t frameHandle);
 void               schedule_setFrameNumber(uint8_t frameNumber);
 owerror_t          schedule_addActiveSlot(
-   slotOffset_t         slotOffset,
-   cellType_t           type,
-   bool                 shared,
-   uint8_t              channelOffset,
-   open_addr_t*         neighbor
+    slotOffset_t         slotOffset,
+    cellType_t           type,
+    bool                 shared,
+    bool                 isAutoCell,
+    uint8_t              channelOffset,
+    open_addr_t*         neighbor
 );
 
 void               schedule_getSlotInfo(
-   slotOffset_t         slotOffset,
-   slotinfo_element_t*  info
+    slotOffset_t         slotOffset,
+    slotinfo_element_t*  info
 );
 owerror_t          schedule_removeActiveSlot(
-   slotOffset_t         slotOffset,
-   open_addr_t*         neighbor
+    slotOffset_t         slotOffset,
+    cellType_t           type,
+    bool                 isShared,
+    open_addr_t*         neighbor
 );
 void              schedule_removeAllAutonomousTxRxCellUnicast(void);
 bool              schedule_isSlotOffsetAvailable(uint16_t slotOffset);
 void              schedule_removeAllManagedUnicastCellsToNeighbor(
-   uint8_t        slotframeID,
-   open_addr_t*   neighbor
+    uint8_t             slotframeID,
+    open_addr_t*        neighbor
 );
 uint8_t           schedule_getNumberOfFreeEntries(void);
-uint8_t           schedule_getNumberOfManagedTxCells(open_addr_t* neighbor);
+uint8_t           schedule_getNumberOfNegotiatedTxCells(open_addr_t* neighbor);
 bool              schedule_isNumTxWrapped(open_addr_t* neighbor);
 bool              schedule_getCellsToBeRelocated(open_addr_t* neighbor, cellInfo_ht* celllist);
 bool              schedule_hasAutonomousTxRxCellUnicast(open_addr_t* neighbor);
 bool              schedule_getAutonomousTxRxCellUnicastNeighbor(open_addr_t* neighbor);
-bool              schedule_hasManagedTxCellToNeighbor(open_addr_t* neighbor);
+bool              schedule_hasAutoTxCellToNeighbor(open_addr_t* neighbor);
+bool              schedule_hasNegotiatedTxCellToNeighbor(open_addr_t* neighbor);
 bool              schedule_getAutonomousTxRxCellAnycast(uint16_t* slotoffset);
 bool              schedule_hasNonParentManagedTxCell(open_addr_t* neighbor);
-bool              schedule_hasNonParentAutonomousTxRxCellUnicast(open_addr_t* neighbor, open_addr_t* nonParentNeighbor);
+bool              schedule_getNonParentsNegotiatedTxCell(open_addr_t* neighbor, open_addr_t* nonParentNeighbor);
+
+void              schedule_hasNegotiatedTxCell(open_addr_t* address);
+bool              schedule_hasNegotiatedTxCellToNonParent(
+    open_addr_t* parentNeighbor,
+    open_addr_t* nonParentNeighbor
+);
 
 // from IEEE802154E
 void               schedule_syncSlotOffset(slotOffset_t targetSlotOffset);
@@ -195,7 +231,9 @@ slotOffset_t       schedule_getNextActiveSlotOffset(void);
 frameLength_t      schedule_getFrameLength(void);
 cellType_t         schedule_getType(void);
 bool               schedule_getShared(void);
+bool               schedule_getIsAutoCell(void);
 void               schedule_getNeighbor(open_addr_t* addrToWrite);
+slotOffset_t       schedule_getSlottOffset(void);
 channelOffset_t    schedule_getChannelOffset(void);
 bool               schedule_getOkToSend(void);
 void               schedule_resetBackoff(void);

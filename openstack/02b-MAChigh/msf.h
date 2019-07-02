@@ -64,8 +64,8 @@ void    msf_updateCellsUsed(open_addr_t* neighbor);
 // called by icmpv6rpl, where parent changed
 void    msf_trigger6pClear(open_addr_t* neighbor);
 
-uint16_t msf_hashFunction_getSlotoffset(uint16_t moteId);
-uint8_t msf_hashFunction_getChanneloffset(uint16_t moteId);
+uint16_t msf_hashFunction_getSlotoffset(open_addr_t* address);
+uint8_t msf_hashFunction_getChanneloffset(open_addr_t* address);
 
 void    msf_setHashCollisionFlag(bool isCollision);
 bool    msf_getHashCollisionFlag(void);

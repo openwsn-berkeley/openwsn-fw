@@ -714,7 +714,7 @@ void sendDIO(void) {
             icmpv6rpl_getPreferredParentEui64(&addressToWrite) == FALSE ||
             (
                 icmpv6rpl_getPreferredParentEui64(&addressToWrite) &&
-                schedule_hasManagedTxCellToNeighbor(&addressToWrite) == FALSE
+                schedule_hasNegotiatedTxCellToNeighbor(&addressToWrite) == FALSE
             )
         )
     ){
@@ -886,7 +886,7 @@ void sendDAO(void) {
         icmpv6rpl_getPreferredParentEui64(&address) == FALSE ||
         (
             icmpv6rpl_getPreferredParentEui64(&address) &&
-            schedule_hasManagedTxCellToNeighbor(&address) == FALSE
+            schedule_hasNegotiatedTxCellToNeighbor(&address) == FALSE
         )
     ){
         // delete packets genereted by this module (EB and KA) from openqueue

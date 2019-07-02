@@ -853,7 +853,6 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
 port_INLINE void activity_ti1ORri1(void) {
     cellType_t  cellType;
     open_addr_t neighbor;
-    open_addr_t autonomousUnicastNeighbor;
     uint8_t     i;
     uint8_t     asn[5];
     uint8_t     join_priority;
@@ -940,7 +939,6 @@ port_INLINE void activity_ti1ORri1(void) {
                 incrementAsnOffset();
             }
         }
-        ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
     } else {
         // this is NOT the next active slot, abort
 
@@ -957,24 +955,21 @@ port_INLINE void activity_ti1ORri1(void) {
         case CELLTYPE_TX:
             // assuming that there is nothing to send
             ieee154e_vars.dataToSend = NULL;
-            // get the neighbor to check this is dedicated cell or not later
+            // get the neighbor
             schedule_getNeighbor(&neighbor);
 
             // check whether we can send
             if (schedule_getOkToSend()) {
                 if (packetfunctions_isBroadcastMulticast(&neighbor)==FALSE){
 
-                    if (schedule_getShared()){
-                        // this is an autonomous TxRx cell (unicast)
-                        ieee154e_vars.dataToSend = openqueue_macGet6PandJoinPacket(&neighbor);
-                    } else {
-                        // this is a managed Tx cell
-                        ieee154e_vars.dataToSend = openqueue_macGetNonJoinIPv6Packet(&neighbor);
+                    // look for a unicast packet to send
+                    ieee154e_vars.dataToSend = openqueue_macGetUnicastPakcet(&neighbor);
 
-                        if (ieee154e_vars.dataToSend == NULL){
-                            ieee154e_vars.dataToSend = openqueue_macGetKaPacket(&neighbor);
-                        }
+                    if (ieee154e_vars.dataToSend == NULL){
+                        ieee154e_vars.dataToSend = openqueue_macGetKaPacket(&neighbor);
+                    }
 
+                    if (schedule_getShared()==FALSE){
                         // update numcellpassed and numcellused on managed Tx cell
                         if (ieee154e_vars.dataToSend!=NULL) {
                             ieee154e_vars.dataToSend->l2_sendOnTxCell = TRUE;
@@ -983,33 +978,12 @@ port_INLINE void activity_ti1ORri1(void) {
                         msf_updateCellsPassed(&neighbor);
                     }
                 } else {
-                    if (schedule_getShared()) {
-                        // this is minimal cell
-                        ieee154e_vars.dataToSend = openqueue_macGetDIOPacket();
-                        if (ieee154e_vars.dataToSend==NULL){
-                            couldSendEB=TRUE;
-                            // look for an EB packet in the queue
-                            ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
-                        }
-                    } else {
-                        // this is autonomous TXRX cell (anycast)
-                        if (msf_getHashCollisionFlag()==TRUE){
-                            // check whether there is 6p or join request packet to send first
-                            ieee154e_vars.dataToSend = openqueue_macGet6PandJoinPacket(&neighbor);
-                        }
-
-                        if (ieee154e_vars.dataToSend == NULL) {
-                            memset(&autonomousUnicastNeighbor, 0, sizeof(open_addr_t));
-                            schedule_getAutonomousTxRxCellUnicastNeighbor(&autonomousUnicastNeighbor);
-
-                            // autonomousUnicastNeighbor may be not found
-                            // in that case any 6P request is OK to send on anycast autonomous cell
-                            ieee154e_vars.dataToSend = openqueue_macGet6PRequestOnAnycast(&autonomousUnicastNeighbor);
-                        }
-
-                        if (ieee154e_vars.dataToSend == NULL) {
-                            ieee154e_vars.dataToSend = openqueue_macGet6PResponseAndDownStreamPacket(&neighbor);
-                        }
+                    // this is minimal cell
+                    ieee154e_vars.dataToSend = openqueue_macGetDIOPacket();
+                    if (ieee154e_vars.dataToSend==NULL){
+                        couldSendEB=TRUE;
+                        // look for an EB packet in the queue
+                        ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
                     }
                 }
             }
@@ -1954,7 +1928,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
                     icmpv6rpl_getPreferredParentEui64(&addressToWrite)      == FALSE ||
                     (
                         icmpv6rpl_getPreferredParentEui64(&addressToWrite)           &&
-                        schedule_hasManagedTxCellToNeighbor(&addressToWrite)== FALSE
+                        schedule_hasNegotiatedTxCellToNeighbor(&addressToWrite)== FALSE
                     )
                 )
             ) {
@@ -2486,6 +2460,7 @@ bool isValidEbFormat(OpenQueueEntry_t* pkt, uint16_t* lenIE){
                             slotoffset,    // slot offset
                             CELLTYPE_TXRX, // type of slot
                             TRUE,          // shared?
+                            FALSE,         // auto cell
                             channeloffset, // channel offset
                             &temp_neighbor // neighbor
                         );
@@ -2873,6 +2848,9 @@ function should already have been done. If this is not the case, this function
 will do that for you, but assume that something went wrong.
 */
 void endSlot(void) {
+
+    open_addr_t slotNeighbor;
+
     // turn off the radio
     radio_rfOff();
 
@@ -2958,6 +2936,26 @@ void endSlot(void) {
         openqueue_freePacketBuffer(ieee154e_vars.ackReceived);
         // reset local variable
         ieee154e_vars.ackReceived = NULL;
+    }
+
+    // check if this is auto tx cell
+    if (
+        schedule_getSlottOffset() == ieee154e_vars.slotOffset &&
+        schedule_getIsAutoCell()                              &&
+        schedule_getType()        == CELLTYPE_TX
+    ){
+        // check if there are unicast packets to the neighbor of this slot
+        // if no, remove the cell
+
+        schedule_getNeighbor(&slotNeighbor);
+        if (openqueue_macGetUnicastPakcet(&slotNeighbor)==NULL) {
+            schedule_removeActiveSlot(
+                ieee154e_vars.slotOffset,
+                CELLTYPE_TX,
+                TRUE,
+                &slotNeighbor
+            );
+        }
     }
 
     // change state

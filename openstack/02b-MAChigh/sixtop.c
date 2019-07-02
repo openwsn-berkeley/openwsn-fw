@@ -363,29 +363,24 @@ owerror_t sixtop_request(
 
 owerror_t sixtop_send(OpenQueueEntry_t *msg) {
 
-    open_addr_t addressToWrite;
-
     if (
-        idmanager_getIsDAGroot() == FALSE               &&
-        (
-            msg->creator != COMPONENT_SIXTOP_RES        &&
-            msg->creator != COMPONENT_CJOIN             &&
-            (
-                icmpv6rpl_getPreferredParentEui64(&addressToWrite) == FALSE      ||
-                (
-                    icmpv6rpl_getPreferredParentEui64(&addressToWrite)           &&
-                    (
-                        msf_getHashCollisionFlag() == FALSE                      &&
-                        schedule_hasAutonomousTxRxCellUnicast(&addressToWrite)== FALSE
-                    )
-                )
-            )
-        )
+        packetfunctions_isBroadcastMulticast(&(msg->l2_nextORpreviousHop))   == FALSE &&
+        schedule_hasNegotiatedTxCellToNeighbor(&(msg->l2_nextORpreviousHop)) == FALSE &&
+        schedule_hasAutoTxCellToNeighbor(&(msg->l2_nextORpreviousHop))       == FALSE
     ){
-        return E_FAIL;
+        // the frame source address is not broadcast/multicast
+        // no negotiated tx cell to that neighbor
+        // no auto tx cell to that neighbor
+
+        schedule_addActiveSlot(
+            msf_hashFunction_getSlotoffset(&(msg->l2_nextORpreviousHop)),    // slot offset
+            CELLTYPE_TX,                                                     // type of slot
+            TRUE,                                                            // shared?
+            TRUE,                                                            // auto cell?
+            msf_hashFunction_getChanneloffset(&(msg->l2_nextORpreviousHop)), // channel offset
+            &(msg->l2_nextORpreviousHop)                                     // neighbor
+        );
     }
-
-
 
     // set metadata
     msg->owner        = COMPONENT_SIXTOP;
@@ -861,7 +856,7 @@ port_INLINE void sixtop_sendKA(void) {
         return;
     }
 
-    if (schedule_hasManagedTxCellToNeighbor(kaNeighAddr) == FALSE){
+    if (schedule_hasNegotiatedTxCellToNeighbor(kaNeighAddr) == FALSE){
         // delete packets genereted by this module (EB and KA) from openqueue
         openqueue_removeAllCreatedBy(COMPONENT_SIXTOP);
 
@@ -1672,6 +1667,7 @@ bool sixtop_addCells(
                 cellList[i].slotoffset,
                 type,
                 isShared,
+                FALSE,
                 cellList[i].channeloffset,
                 &temp_neighbor
             );
@@ -1682,14 +1678,30 @@ bool sixtop_addCells(
 }
 
 bool sixtop_removeCells(
-      uint8_t      slotframeID,
-      cellInfo_ht* cellList,
-      open_addr_t* previousHop,
+    uint8_t      slotframeID,
+    cellInfo_ht* cellList,
+    open_addr_t* previousHop,
     uint8_t      cellOptions
-   ){
+){
     uint8_t     i;
+    bool        isShared;
     open_addr_t temp_neighbor;
+    cellType_t  type;
     bool        hasCellsRemoved;
+
+    // translate cellOptions to cell type
+    if (cellOptions == CELLOPTIONS_TX){
+        type     = CELLTYPE_TX;
+        isShared = FALSE;
+    }
+    if (cellOptions == CELLOPTIONS_RX){
+        type     = CELLTYPE_RX;
+        isShared = FALSE;
+    }
+    if (cellOptions == (CELLOPTIONS_TX | CELLOPTIONS_RX | CELLOPTIONS_SHARED)){
+        type     = CELLTYPE_TXRX;
+        isShared = TRUE;
+    }
 
     memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
 
@@ -1700,6 +1712,8 @@ bool sixtop_removeCells(
             hasCellsRemoved = TRUE;
             schedule_removeActiveSlot(
                 cellList[i].slotoffset,
+                type,
+                isShared,
                 &temp_neighbor
             );
         }
