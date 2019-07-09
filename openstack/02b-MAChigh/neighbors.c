@@ -621,7 +621,16 @@ void  neighbors_removeOld(void) {
                     neighbors_vars.neighbors[i].f6PNORES         == FALSE &&
                     neighbors_vars.neighbors[i].parentPreference == 0
                 ){
-                    removeNeighbor(i);
+
+                    // remove neighbor only when there is no packet in queue
+                    if (
+                        openqueue_macGetUnicastPakcet(
+                            &(neighbors_vars.neighbors[i].addr_64b)
+                        )==NULL
+                    ) {
+
+                        removeNeighbor(i);
+                    }
                 }
             }
         }
