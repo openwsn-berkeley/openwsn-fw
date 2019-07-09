@@ -39,6 +39,8 @@ void msf_housekeeping(void);
 
 void msf_init(void) {
 
+    open_addr_t     temp_neighbor;
+
     memset(&msf_vars,0,sizeof(msf_vars_t));
     msf_vars.numAppPacketsPerSlotFrame = 0;
     sixtop_setSFcallback(
@@ -48,13 +50,15 @@ void msf_init(void) {
         (sixtop_sf_handle_callback_cbt)msf_handleRCError
     );
 
+    memset(&temp_neighbor,0,sizeof(temp_neighbor));
+    temp_neighbor.type             = ADDR_ANYCAST;
     schedule_addActiveSlot(
         msf_hashFunction_getSlotoffset(idmanager_getMyID(ADDR_64B)),     // slot offset
         CELLTYPE_RX,                                                     // type of slot
         FALSE,                                                           // shared?
         TRUE,                                                            // auto cell?
         msf_hashFunction_getChanneloffset(idmanager_getMyID(ADDR_64B)),  // channel offset
-        idmanager_getMyID(ADDR_64B)                                      // neighbor
+        &temp_neighbor                                                   // neighbor
     );
 
     msf_vars.housekeepingTimerId = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_MSF);
@@ -70,51 +74,92 @@ void msf_init(void) {
 }
 
 // called by schedule
-void    msf_updateCellsPassed(open_addr_t* neighbor){
+void    msf_updateCellsElapsed(open_addr_t* neighbor, cellType_t type){
 #ifdef MSF_ADAPTING_TO_TRAFFIC
     if (icmpv6rpl_isPreferredParent(neighbor)==FALSE){
         return;
     }
 
-    msf_vars.numCellsPassed++;
-    if (msf_vars.numCellsPassed == MAX_NUMCELLS){
+    switch(type) {
+    case CELLTYPE_TX:
+        msf_vars.numCellsElapsed_tx++;
+    case CELLTYPE_RX:
+        msf_vars.numCellsElapsed_rx++;
+    default:
+        // not appliable
+        return;
+    }
 
-        msf_vars.previousNumCellsUsed = msf_vars.numCellsUsed;
+    if (msf_vars.numCellsElapsed_tx == MAX_NUMCELLS){
 
-        if (msf_vars.numCellsUsed > LIM_NUMCELLSUSED_HIGH){
+        msf_vars.needAddTx       = FALSE;
+        msf_vars.needDeleteTx    = FALSE;
+
+        msf_vars.previousNumCellsUsed_tx = msf_vars.numCellsUsed_tx;
+
+        if (msf_vars.numCellsUsed_tx > LIM_NUMCELLSUSED_HIGH){
+            msf_vars.needAddTx    = TRUE;
             scheduler_push_task(msf_trigger6pAdd,TASKPRIO_MSF);
         }
-        if (msf_vars.numCellsUsed < LIM_NUMCELLSUSED_LOW){
+        if (msf_vars.numCellsUsed_tx < LIM_NUMCELLSUSED_LOW){
+            msf_vars.needDeleteTx = TRUE;
             scheduler_push_task(msf_trigger6pDelete,TASKPRIO_MSF);
         }
-        msf_vars.numCellsPassed = 0;
-        msf_vars.numCellsUsed   = 0;
+        msf_vars.numCellsElapsed_tx = 0;
+        msf_vars.numCellsUsed_tx    = 0;
+    }
+
+    if (msf_vars.numCellsElapsed_rx == MAX_NUMCELLS){
+
+        msf_vars.needAddRx       = FALSE;
+        msf_vars.needDeleteRx    = FALSE;
+
+        msf_vars.previousNumCellsUsed_rx = msf_vars.numCellsUsed_rx;
+
+        if (msf_vars.numCellsUsed_rx > LIM_NUMCELLSUSED_HIGH){
+            msf_vars.needAddRx    = TRUE;
+            scheduler_push_task(msf_trigger6pAdd,TASKPRIO_MSF);
+        }
+        if (msf_vars.numCellsUsed_rx < LIM_NUMCELLSUSED_LOW){
+            msf_vars.needDeleteRx = TRUE;
+            scheduler_push_task(msf_trigger6pDelete,TASKPRIO_MSF);
+        }
+        msf_vars.numCellsElapsed_rx = 0;
+        msf_vars.numCellsUsed_rx    = 0;
     }
 #endif
 }
 
-void    msf_updateCellsUsed(open_addr_t* neighbor){
+void    msf_updateCellsUsed(open_addr_t* neighbor, cellType_t type){
 
     if (icmpv6rpl_isPreferredParent(neighbor)==FALSE){
         return;
     }
 
-    msf_vars.numCellsUsed++;
+    switch(type) {
+    case CELLTYPE_TX:
+        msf_vars.numCellsUsed_tx++;
+    case CELLTYPE_RX:
+        msf_vars.numCellsUsed_rx++;
+    default:
+        // not appliable
+        return;
+    }
 }
 
 void    msf_trigger6pClear(open_addr_t* neighbor){
 
     if (schedule_hasNegotiatedTxCellToNeighbor(neighbor)){
         sixtop_request(
-            IANA_6TOP_CMD_CLEAR,                // code
-            neighbor,                           // neighbor
-            NUMCELLS_MSF,                       // number cells
-            CELLOPTIONS_MSF,                    // cellOptions
-            NULL,                               // celllist to add (not used)
-            NULL,                               // celllist to delete (not used)
-            IANA_6TISCH_SFID_MSF,               // sfid
-            0,                                  // list command offset (not used)
-            0                                   // list command maximum celllist (not used)
+            IANA_6TOP_CMD_CLEAR,   // code
+            neighbor,              // neighbor
+            NUMCELLS_MSF,          // number cells
+            CELLOPTIONS_MSF,       // cellOptions (not used)
+            NULL,                  // celllist to add (not used)
+            NULL,                  // celllist to delete (not used)
+            IANA_6TISCH_SFID_MSF,  // sfid
+            0,                     // list command offset (not used)
+            0                      // list command maximum celllist (not used)
         );
     }
 }
@@ -209,15 +254,15 @@ void msf_timer_clear_task(void){
     }
 
     sixtop_request(
-        IANA_6TOP_CMD_CLEAR,                // code
-        &neighbor,                          // neighbor
-        NUMCELLS_MSF,                       // number cells
-        CELLOPTIONS_MSF,                    // cellOptions
-        NULL,                               // celllist to add (not used)
-        NULL,                               // celllist to delete (not used)
-        IANA_6TISCH_SFID_MSF,               // sfid
-        0,                                  // list command offset (not used)
-        0                                   // list command maximum celllist (not used)
+        IANA_6TOP_CMD_CLEAR,        // code
+        &neighbor,                  // neighbor
+        NUMCELLS_MSF,               // number cells
+        CELLOPTIONS_MSF,            // cellOptions (not used)
+        NULL,                       // celllist to add (not used)
+        NULL,                       // celllist to delete (not used)
+        IANA_6TISCH_SFID_MSF,       // sfid
+        0,                          // list command offset (not used)
+        0                           // list command maximum celllist (not used)
     );
 }
 
@@ -227,6 +272,8 @@ void msf_trigger6pAdd(void){
     open_addr_t    neighbor;
     bool           foundNeighbor;
     cellInfo_ht    celllist_add[CELLLIST_MAX_LEN];
+
+    uint8_t        cellOptions;
 
     if (ieee154e_isSynch()==FALSE) {
         return;
@@ -247,16 +294,29 @@ void msf_trigger6pAdd(void){
         return;
     }
 
+    // check what type of cell need to add
+
+    if (msf_vars.needAddTx){
+        cellOptions = CELLOPTIONS_TX;
+    } else {
+        if (msf_vars.needAddRx) {
+            cellOptions = CELLOPTIONS_RX;
+        } else {
+            // no need to add cell
+            return;
+        }
+    }
+
     sixtop_request(
-        IANA_6TOP_CMD_ADD,                  // code
-        &neighbor,                          // neighbor
-        NUMCELLS_MSF,                       // number cells
-        CELLOPTIONS_MSF,                    // cellOptions
-        celllist_add,                       // celllist to add
-        NULL,                               // celllist to delete (not used)
-        IANA_6TISCH_SFID_MSF,               // sfid
-        0,                                  // list command offset (not used)
-        0                                   // list command maximum celllist (not used)
+        IANA_6TOP_CMD_ADD,           // code
+        &neighbor,                   // neighbor
+        NUMCELLS_MSF,                // number cells
+        cellOptions,                 // cellOptions
+        celllist_add,                // celllist to add
+        NULL,                        // celllist to delete (not used)
+        IANA_6TISCH_SFID_MSF,        // sfid
+        0,                           // list command offset (not used)
+        0                            // list command maximum celllist (not used)
     );
 }
 
@@ -264,6 +324,8 @@ void msf_trigger6pDelete(void){
     open_addr_t    neighbor;
     bool           foundNeighbor;
     cellInfo_ht    celllist_delete[CELLLIST_MAX_LEN];
+
+    uint8_t        cellOptions;
 
     if (ieee154e_isSynch()==FALSE) {
         return;
@@ -288,11 +350,25 @@ void msf_trigger6pDelete(void){
         // failed to get cell list to delete
         return;
     }
+
+    // check what type of cell need to delete
+
+    if (msf_vars.needDeleteTx){
+        cellOptions = CELLOPTIONS_TX;
+    } else {
+        if (msf_vars.needDeleteRx) {
+            cellOptions = CELLOPTIONS_RX;
+        } else {
+            // no need to delete cell
+            return;
+        }
+    }
+
     sixtop_request(
         IANA_6TOP_CMD_DELETE,   // code
         &neighbor,              // neighbor
         NUMCELLS_MSF,           // number cells
-        CELLOPTIONS_MSF,        // cellOptions
+        cellOptions,            // cellOptions
         NULL,                   // celllist to add (not used)
         celllist_delete,        // celllist to delete
         IANA_6TISCH_SFID_MSF,   // sfid
@@ -385,20 +461,21 @@ void msf_housekeeping(void){
         // send a clear request to the non-parent neighbor
 
         sixtop_request(
-            IANA_6TOP_CMD_CLEAR,                // code
-            &nonParentNeighbor,                  // neighbor
-            NUMCELLS_MSF,                       // number cells
-            CELLOPTIONS_MSF,                    // cellOptions
-            NULL,                               // celllist to add (not used)
-            NULL,                               // celllist to delete (not used)
-            IANA_6TISCH_SFID_MSF,               // sfid
-            0,                                  // list command offset (not used)
-            0                                   // list command maximum celllist (not used)
+            IANA_6TOP_CMD_CLEAR,     // code
+            &nonParentNeighbor,      // neighbor
+            NUMCELLS_MSF,            // number cells
+            CELLOPTIONS_MSF,         // cellOptions
+            NULL,                    // celllist to add (not used)
+            NULL,                    // celllist to delete (not used)
+            IANA_6TISCH_SFID_MSF,    // sfid
+            0,                       // list command offset (not used)
+            0                        // list command maximum celllist (not used)
         );
         return;
     }
 
     if (schedule_getNumberOfNegotiatedTxCells(&parentNeighbor)==0){
+        msf_vars.needAddTx = TRUE;
         msf_trigger6pAdd();
         return;
     }
@@ -418,15 +495,15 @@ void msf_housekeeping(void){
             return;
         }
         sixtop_request(
-            IANA_6TOP_CMD_RELOCATE,   // code
-            &parentNeighbor,          // neighbor
-            NUMCELLS_MSF,             // number cells
-            CELLOPTIONS_MSF,          // cellOptions
-            celllist_add,             // celllist to add
-            celllist_delete,          // celllist to delete
-            IANA_6TISCH_SFID_MSF,     // sfid
-            0,                        // list command offset (not used)
-            0                         // list command maximum celllist (not used)
+            IANA_6TOP_CMD_RELOCATE,  // code
+            &parentNeighbor,         // neighbor
+            NUMCELLS_MSF,            // number cells
+            CELLOPTIONS_MSF,         // cellOptions
+            celllist_add,            // celllist to add
+            celllist_delete,         // celllist to delete
+            IANA_6TISCH_SFID_MSF,    // sfid
+            0,                       // list command offset (not used)
+            0                        // list command maximum celllist (not used)
         );
     }
 }
@@ -457,6 +534,15 @@ bool    msf_getHashCollisionFlag(void){
     return msf_vars.f_hashCollision;
 }
 
-uint8_t msf_getPreviousNumCellsUsed(void){
-    return msf_vars.previousNumCellsUsed;
+uint8_t msf_getPreviousNumCellsUsed(cellType_t cellType){
+    switch(cellType){
+    case CELLTYPE_TX:
+        return msf_vars.previousNumCellsUsed_tx;
+    case CELLTYPE_RX:
+        return msf_vars.previousNumCellsUsed_rx;
+        break;
+    default:
+        // not appliable
+        return 0;
+    }
 }

@@ -10,6 +10,7 @@
 
 #include "opendefs.h"
 #include "opentimers.h"
+#include "schedule.h"
 //=========================== define ==========================================
 
 #define IANA_6TISCH_SFID_MSF    0
@@ -31,14 +32,21 @@ typedef struct {
     bool                 f_hashCollision;
     uint8_t              numAppPacketsPerSlotFrame;
     uint8_t              backoff;
-    uint8_t              numCellsPassed;
-    uint8_t              numCellsUsed;
+    uint8_t              numCellsElapsed_tx;
+    uint8_t              numCellsUsed_tx;
+    uint8_t              numCellsElapsed_rx;
+    uint8_t              numCellsUsed_rx;
     opentimers_id_t      housekeepingTimerId;
     uint16_t             housekeepingPeriod;
     opentimers_id_t      waitretryTimerId;
     bool                 waitretry;
-
-    uint8_t              previousNumCellsUsed;
+    bool                 needAddTx;
+    bool                 needAddRx;
+    bool                 needDeleteTx;
+    bool                 needDeleteRx;
+    // for msf status report
+    uint8_t              previousNumCellsUsed_tx;
+    uint8_t              previousNumCellsUsed_rx;
 } msf_vars_t;
 
 //=========================== module variables ================================
@@ -59,8 +67,8 @@ bool    msf_candidateRemoveCellList(
     uint8_t requiredCells
 );
 // called by schedule
-void    msf_updateCellsPassed(open_addr_t* neighbor);
-void    msf_updateCellsUsed(open_addr_t* neighbor);
+void    msf_updateCellsElapsed(open_addr_t* neighbor, cellType_t cellType);
+void    msf_updateCellsUsed(open_addr_t* neighbor, cellType_t cellType);
 // called by icmpv6rpl, where parent changed
 void    msf_trigger6pClear(open_addr_t* neighbor);
 
@@ -70,7 +78,7 @@ uint8_t msf_hashFunction_getChanneloffset(open_addr_t* address);
 void    msf_setHashCollisionFlag(bool isCollision);
 bool    msf_getHashCollisionFlag(void);
 
-uint8_t msf_getPreviousNumCellsUsed(void);
+uint8_t msf_getPreviousNumCellsUsed(cellType_t cellType);
 /**
 \}
 \}
