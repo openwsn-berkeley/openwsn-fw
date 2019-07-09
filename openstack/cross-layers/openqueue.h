@@ -47,13 +47,10 @@ uint8_t            openqueue_getNum6PResp(void);
 uint8_t            openqueue_getNum6PReq(open_addr_t* neighbor);
 void               openqueue_remove6PrequestToNeighbor(open_addr_t* neighbor);
 // called by IEEE80215E
-OpenQueueEntry_t*  openqueue_macGet6PResponseAndDownStreamPacket(open_addr_t* toNeighbor);
-OpenQueueEntry_t*  openqueue_macGet6PRequestOnAnycast(open_addr_t* autonomousUnicastNeighbor);
 OpenQueueEntry_t*  openqueue_macGetEBPacket(void);
 OpenQueueEntry_t*  openqueue_macGetKaPacket(open_addr_t* toNeighbor);
 OpenQueueEntry_t*  openqueue_macGetDIOPacket(void);
-OpenQueueEntry_t*  openqueue_macGetNonJoinIPv6Packet(open_addr_t* toNeighbor);
-OpenQueueEntry_t*  openqueue_macGet6PandJoinPacket(open_addr_t* toNeighbor);
+OpenQueueEntry_t*  openqueue_macGetUnicastPakcet(open_addr_t* toNeighbor);
 /**
 \}
 \}

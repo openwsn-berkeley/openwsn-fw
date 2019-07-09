@@ -51,7 +51,6 @@ int mote_main(void) {
 
 void macpong_initSend(opentimers_id_t id) {
     bool timeToSend = FALSE;
-    open_addr_t  temp;
 
     macpong_vars.macpongCounter = (macpong_vars.macpongCounter+1)%5;
     switch (macpong_vars.macpongCounter) {
@@ -65,15 +64,13 @@ void macpong_initSend(opentimers_id_t id) {
     if (idmanager_getIsDAGroot()==TRUE) {
         return;
     }
+
     if (ieee154e_isSynch()==TRUE && neighbors_getNumNeighbors()==1) {
-        neighbors_getNeighborEui64(&temp,ADDR_64B,0);
-        if (schedule_hasManagedTxCellToNeighbor(&temp)){
-            if (timeToSend){
-                // send packet
-                macpong_send(0);
-                // cancel timer
-                opentimers_cancel(macpong_vars.timerId);
-            }
+        if (timeToSend){
+            // send packet
+            macpong_send(0);
+            // cancel timer
+            opentimers_cancel(macpong_vars.timerId);
         }
     }
 }

@@ -39,8 +39,6 @@ void msf_housekeeping(void);
 
 void msf_init(void) {
 
-    open_addr_t     temp_neighbor;
-
     memset(&msf_vars,0,sizeof(msf_vars_t));
     msf_vars.numAppPacketsPerSlotFrame = 0;
     sixtop_setSFcallback(
@@ -50,14 +48,13 @@ void msf_init(void) {
         (sixtop_sf_handle_callback_cbt)msf_handleRCError
     );
 
-    memset(&temp_neighbor,0,sizeof(temp_neighbor));
-    temp_neighbor.type             = ADDR_ANYCAST;
     schedule_addActiveSlot(
-        msf_hashFunction_getSlotoffset(256*idmanager_getMyID(ADDR_64B)->addr_64b[6]+idmanager_getMyID(ADDR_64B)->addr_64b[7]),     // slot offset
-        CELLTYPE_TXRX,                        // type of slot
-        FALSE,                                // shared?
-        msf_hashFunction_getChanneloffset(256*idmanager_getMyID(ADDR_64B)->addr_64b[6]+idmanager_getMyID(ADDR_64B)->addr_64b[7]),  // channel offset
-        &temp_neighbor                        // neighbor
+        msf_hashFunction_getSlotoffset(idmanager_getMyID(ADDR_64B)),     // slot offset
+        CELLTYPE_RX,                                                     // type of slot
+        FALSE,                                                           // shared?
+        TRUE,                                                            // auto cell?
+        msf_hashFunction_getChanneloffset(idmanager_getMyID(ADDR_64B)),  // channel offset
+        idmanager_getMyID(ADDR_64B)                                      // neighbor
     );
 
     msf_vars.housekeepingTimerId = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_MSF);
@@ -107,7 +104,7 @@ void    msf_updateCellsUsed(open_addr_t* neighbor){
 
 void    msf_trigger6pClear(open_addr_t* neighbor){
 
-    if (schedule_hasManagedTxCellToNeighbor(neighbor)){
+    if (schedule_hasNegotiatedTxCellToNeighbor(neighbor)){
         sixtop_request(
             IANA_6TOP_CMD_CLEAR,                // code
             neighbor,                           // neighbor
@@ -282,7 +279,7 @@ void msf_trigger6pDelete(void){
         return;
     }
 
-    if (schedule_getNumberOfManagedTxCells(&neighbor)<=1){
+    if (schedule_getNumberOfNegotiatedTxCells(&neighbor)<=1){
         // at least one managed Tx cell presents
         return;
     }
@@ -374,13 +371,6 @@ void msf_housekeeping(void){
     cellInfo_ht    celllist_add[CELLLIST_MAX_LEN];
     cellInfo_ht    celllist_delete[CELLLIST_MAX_LEN];
 
-    uint16_t       moteId;
-    uint16_t       slotoffset;
-    uint16_t       temp_slotoffset;
-    uint8_t        channeloffset;
-
-    slotinfo_element_t  info;
-
     if (ieee154e_isSynch()==FALSE) {
         return;
     }
@@ -390,86 +380,25 @@ void msf_housekeeping(void){
         return;
     }
 
-    if (schedule_hasNonParentAutonomousTxRxCellUnicast(&parentNeighbor, &nonParentNeighbor)==TRUE){
+    if (schedule_hasNegotiatedTxCellToNonParent(&parentNeighbor, &nonParentNeighbor)==TRUE){
 
-        if (schedule_hasManagedTxCellToNeighbor(&nonParentNeighbor)){
-            // send a clear request to previous
+        // send a clear request to the non-parent neighbor
 
-            sixtop_request(
-                IANA_6TOP_CMD_CLEAR,                // code
-                &nonParentNeighbor,                  // neighbor
-                NUMCELLS_MSF,                       // number cells
-                CELLOPTIONS_MSF,                    // cellOptions
-                NULL,                               // celllist to add (not used)
-                NULL,                               // celllist to delete (not used)
-                IANA_6TISCH_SFID_MSF,               // sfid
-                0,                                  // list command offset (not used)
-                0                                   // list command maximum celllist (not used)
-            );
-            return;
-        } else {
-            // remove the non-parent autonomous TxRxUnicast cell
-
-            neighbor_removeAutonomousTxRxCellUnicast(&nonParentNeighbor);
-        }
+        sixtop_request(
+            IANA_6TOP_CMD_CLEAR,                // code
+            &nonParentNeighbor,                  // neighbor
+            NUMCELLS_MSF,                       // number cells
+            CELLOPTIONS_MSF,                    // cellOptions
+            NULL,                               // celllist to add (not used)
+            NULL,                               // celllist to delete (not used)
+            IANA_6TISCH_SFID_MSF,               // sfid
+            0,                                  // list command offset (not used)
+            0                                   // list command maximum celllist (not used)
+        );
+        return;
     }
 
-    if (schedule_hasAutonomousTxRxCellUnicast(&parentNeighbor)==FALSE){
-
-        moteId          = 256*parentNeighbor.addr_64b[6]+parentNeighbor.addr_64b[7];
-        slotoffset      = msf_hashFunction_getSlotoffset(moteId);
-        channeloffset   = msf_hashFunction_getChanneloffset(moteId);
-
-        // the neighbor is selected as parent
-        if (
-            schedule_getAutonomousTxRxCellAnycast(&temp_slotoffset) &&
-            temp_slotoffset == slotoffset
-        ){
-            msf_setHashCollisionFlag(TRUE);
-        } else {
-            if (schedule_isSlotOffsetAvailable(slotoffset)){
-                // reserve the autonomous cell to this neighbor
-                schedule_addActiveSlot(
-                    slotoffset,                                 // slot offset
-                    CELLTYPE_TXRX,                              // type of slot
-                    TRUE,                                       // shared?
-                    channeloffset,                              // channel offset
-                    &(parentNeighbor)                           // neighbor
-                );
-            } else {
-                // the autonomous cell has been occupied by other slot
-                // trigger a 6P relocate packet to relocate that slot
-
-                // prepare the celllist to delete
-                schedule_getSlotInfo(slotoffset, &info);
-                memset(celllist_delete, 0, CELLLIST_MAX_LEN*sizeof(cellInfo_ht));
-                celllist_delete[0].isUsed               = TRUE;
-                celllist_delete[0].slotoffset           = slotoffset;
-                celllist_delete[0].channeloffset        = info.channelOffset;
-
-                // prepare the celllist to add
-                if (msf_candidateAddCellList(celllist_add,NUMCELLS_MSF)==FALSE){
-                    // failed to get cell list to add
-                    return;
-                }
-
-                sixtop_request(
-                    IANA_6TOP_CMD_RELOCATE,   // code
-                    &(info.address),          // neighbor
-                    NUMCELLS_MSF,             // number cells
-                    info.link_type,           // cellOptions
-                    celllist_add,             // celllist to add
-                    celllist_delete,          // celllist to delete
-                    IANA_6TISCH_SFID_MSF,     // sfid
-                    0,                        // list command offset (not used)
-                    0                         // list command maximum celllist (not used)
-                );
-                return;
-            }
-        }
-    }
-
-    if (schedule_getNumberOfManagedTxCells(&parentNeighbor)==0){
+    if (schedule_getNumberOfNegotiatedTxCells(&parentNeighbor)==0){
         msf_trigger6pAdd();
         return;
     }
@@ -502,13 +431,21 @@ void msf_housekeeping(void){
     }
 }
 
-uint16_t msf_hashFunction_getSlotoffset(uint16_t moteId){
+uint16_t msf_hashFunction_getSlotoffset(open_addr_t* address){
+
+    uint16_t moteId;
+
+    moteId = (((uint16_t)(address->addr_64b[6]))<<8) + (uint16_t)(address->addr_64b[7]);
 
     return SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS + \
             (moteId%(SLOTFRAME_LENGTH-SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS));
 }
 
-uint8_t msf_hashFunction_getChanneloffset(uint16_t moteId){
+uint8_t msf_hashFunction_getChanneloffset(open_addr_t* address){
+
+    uint16_t moteId;
+
+    moteId = (((uint16_t)(address->addr_64b[6]))<<8) + (uint16_t)(address->addr_64b[7]);
 
     return moteId%NUM_CHANNELS;
 }

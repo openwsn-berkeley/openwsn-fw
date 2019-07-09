@@ -116,7 +116,7 @@ void cexample_task_cb(void) {
         return;
     }
 
-    if (schedule_hasManagedTxCellToNeighbor(&parentNeighbor) == FALSE) {
+    if (schedule_hasNegotiatedTxCellToNeighbor(&parentNeighbor) == FALSE) {
         return;
     }
 
