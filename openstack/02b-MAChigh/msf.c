@@ -86,8 +86,10 @@ void    msf_updateCellsElapsed(open_addr_t* neighbor, cellType_t type){
     switch(type) {
     case CELLTYPE_TX:
         msf_vars.numCellsElapsed_tx++;
+        break;
     case CELLTYPE_RX:
         msf_vars.numCellsElapsed_rx++;
+        break;
     default:
         // not appliable
         return;
@@ -152,8 +154,10 @@ void    msf_updateCellsUsed(open_addr_t* neighbor, cellType_t type){
     switch(type) {
     case CELLTYPE_TX:
         msf_vars.numCellsUsed_tx++;
+        break;
     case CELLTYPE_RX:
         msf_vars.numCellsUsed_rx++;
+        break;
     default:
         // not appliable
         return;
@@ -440,7 +444,7 @@ bool msf_candidateRemoveCellList(
       cellInfo_ht* cellList,
       open_addr_t* neighbor,
       uint8_t      requiredCells
-   ){
+){
     uint8_t              i;
     uint8_t              numCandCells;
     slotinfo_element_t   info;
@@ -573,6 +577,7 @@ uint8_t msf_getPreviousNumCellsUsed(cellType_t cellType){
     switch(cellType){
     case CELLTYPE_TX:
         return msf_vars.previousNumCellsUsed_tx;
+        break;
     case CELLTYPE_RX:
         return msf_vars.previousNumCellsUsed_rx;
         break;
