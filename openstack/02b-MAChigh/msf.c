@@ -150,6 +150,14 @@ void    msf_updateCellsUsed(open_addr_t* neighbor, cellType_t type){
 void    msf_trigger6pClear(open_addr_t* neighbor){
 
     if (schedule_hasNegotiatedTxCellToNeighbor(neighbor)){
+
+        // remove the cells at local first
+
+        schedule_removeAllNegotiatedCellsToNeighbor(
+            SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,
+            neighbor
+        );
+
         sixtop_request(
             IANA_6TOP_CMD_CLEAR,   // code
             neighbor,              // neighbor
@@ -252,6 +260,13 @@ void msf_timer_clear_task(void){
     if (foundNeighbor==FALSE) {
         return;
     }
+
+    // remove the cells at local first
+
+    schedule_removeAllNegotiatedCellsToNeighbor(
+        SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,
+        &neighbor
+    );
 
     sixtop_request(
         IANA_6TOP_CMD_CLEAR,        // code
@@ -457,6 +472,13 @@ void msf_housekeeping(void){
     }
 
     if (schedule_hasNegotiatedTxCellToNonParent(&parentNeighbor, &nonParentNeighbor)==TRUE){
+
+        // remove the cells at local first
+
+        schedule_removeAllNegotiatedCellsToNeighbor(
+            SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,
+            &nonParentNeighbor
+        );
 
         // send a clear request to the non-parent neighbor
 

@@ -912,7 +912,7 @@ void timer_sixtop_six2six_timeout_fired(void) {
 
     if (sixtop_vars.six2six_state == SIX_STATE_WAIT_CLEARRESPONSE){
         // no response for the 6p clear, just clear locally
-        schedule_removeAllManagedUnicastCellsToNeighbor(
+        schedule_removeAllNegotiatedCellsToNeighbor(
             sixtop_vars.cb_sf_getMetadata(),
             &sixtop_vars.neighborToClearCells
         );
@@ -1009,7 +1009,7 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
                 }
 
                 if ( msg->l2_sixtop_command == IANA_6TOP_CMD_CLEAR){
-                    schedule_removeAllManagedUnicastCellsToNeighbor(
+                    schedule_removeAllNegotiatedCellsToNeighbor(
                         msg->l2_sixtop_frameID,
                         &(msg->l2_nextORpreviousHop)
                     );
@@ -1024,7 +1024,7 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
 
             // if the response is for CLEAR command, remove all the cells and reset seqnum regardless NO ack received.
             if ( msg->l2_sixtop_command == IANA_6TOP_CMD_CLEAR){
-                schedule_removeAllManagedUnicastCellsToNeighbor(
+                schedule_removeAllNegotiatedCellsToNeighbor(
                     msg->l2_sixtop_frameID,
                     &(msg->l2_nextORpreviousHop)
                 );
@@ -1599,7 +1599,7 @@ void sixtop_six2six_notifyReceive(
                 neighbors_updateSequenceNumber(&(pkt->l2_nextORpreviousHop));
                 break;
             case SIX_STATE_WAIT_CLEARRESPONSE:
-                schedule_removeAllManagedUnicastCellsToNeighbor(
+                schedule_removeAllNegotiatedCellsToNeighbor(
                     sixtop_vars.cb_sf_getMetadata(),
                     &(pkt->l2_nextORpreviousHop)
                 );

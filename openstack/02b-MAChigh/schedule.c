@@ -678,7 +678,7 @@ bool schedule_isSlotOffsetAvailable(uint16_t slotOffset){
 void schedule_removeAllManagedUnicastCellsToNeighbor(
     uint8_t        slotframeID,
     open_addr_t*   neighbor
-    ){
+){
     uint8_t i;
 
     // remove all entries in schedule with previousHop address
