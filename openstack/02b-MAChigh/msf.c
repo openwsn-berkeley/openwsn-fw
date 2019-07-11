@@ -75,10 +75,13 @@ void msf_init(void) {
 
 // called by schedule
 void    msf_updateCellsElapsed(open_addr_t* neighbor, cellType_t type){
+
 #ifdef MSF_ADAPTING_TO_TRAFFIC
     if (icmpv6rpl_isPreferredParent(neighbor)==FALSE){
         return;
     }
+
+    // update numcellselapsed
 
     switch(type) {
     case CELLTYPE_TX:
@@ -89,6 +92,8 @@ void    msf_updateCellsElapsed(open_addr_t* neighbor, cellType_t type){
         // not appliable
         return;
     }
+
+    // addapt to upward traffic
 
     if (msf_vars.numCellsElapsed_tx == MAX_NUMCELLS){
 
@@ -108,6 +113,14 @@ void    msf_updateCellsElapsed(open_addr_t* neighbor, cellType_t type){
         msf_vars.numCellsElapsed_tx = 0;
         msf_vars.numCellsUsed_tx    = 0;
     }
+
+    // adapt to downward traffic when there are negotiated Tx cells in schedule
+
+    if (schedule_getNumberOfNegotiatedTxCells(neighbor)==0){
+        return;
+    }
+
+    // addapt to downward traffic
 
     if (msf_vars.numCellsElapsed_rx == MAX_NUMCELLS){
 
