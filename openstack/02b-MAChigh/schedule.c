@@ -1163,7 +1163,7 @@ bool schedule_getOkToSend(void) {
                 returnVal = FALSE;
             }
         } else {
-            // this is a dedicated cell
+            // this is a dedicated cell (auto Tx cell)
             neighbors_decreaseBackoff(&schedule_vars.currentScheduleEntry->neighbor);
 
             returnVal = neighbors_backoffHitZero(&schedule_vars.currentScheduleEntry->neighbor);
