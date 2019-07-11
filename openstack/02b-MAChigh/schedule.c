@@ -675,7 +675,7 @@ bool schedule_isSlotOffsetAvailable(uint16_t slotOffset){
    return TRUE;
 }
 
-void schedule_removeAllManagedUnicastCellsToNeighbor(
+void schedule_removeAllNegotiatedCellsToNeighbor(
     uint8_t        slotframeID,
     open_addr_t*   neighbor
 ){
