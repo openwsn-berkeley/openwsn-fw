@@ -234,6 +234,7 @@ void  schedule_getSlotInfo(
                info->shared                    = slotContainer->shared;
                info->slotOffset                = slotOffset;
                info->channelOffset             = slotContainer->channelOffset;
+               info->isAutoCell                = slotContainer->isAutoCell;
                memcpy(&(info->address), &(slotContainer->neighbor), sizeof(open_addr_t));
                return; //as this is an update. No need to re-insert as it is in the same position on the list.
         }
@@ -243,6 +244,7 @@ void  schedule_getSlotInfo(
     info->link_type                 = CELLTYPE_OFF;
     info->shared                    = FALSE;
     info->channelOffset             = 0;        //set to zero if not set.
+    info->isAutoCell                = FALSE;
     memset(&(info->address), 0, sizeof(open_addr_t));
 }
 

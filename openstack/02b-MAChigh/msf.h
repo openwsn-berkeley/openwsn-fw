@@ -64,7 +64,8 @@ bool    msf_candidateAddCellList(
 bool    msf_candidateRemoveCellList(
     cellInfo_ht* cellList,
     open_addr_t* neighbor,
-    uint8_t requiredCells
+    uint8_t requiredCells,
+    uint8_t cellOptions
 );
 // called by schedule
 void    msf_updateCellsElapsed(open_addr_t* neighbor, cellType_t cellType);

@@ -153,6 +153,7 @@ typedef struct {
   bool             shared;
   slotOffset_t     slotOffset;
   channelOffset_t  channelOffset;
+  bool             isAutoCell;
 }slotinfo_element_t;
 
 //=========================== variables =======================================

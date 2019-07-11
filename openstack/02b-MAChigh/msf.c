@@ -316,13 +316,9 @@ void msf_trigger6pAdd(void){
     }
 
     // get preferred parent
+
     foundNeighbor = icmpv6rpl_getPreferredParentEui64(&neighbor);
     if (foundNeighbor==FALSE) {
-        return;
-    }
-
-    if (msf_candidateAddCellList(celllist_add,NUMCELLS_MSF)==FALSE){
-        // failed to get cell list to add
         return;
     }
 
@@ -337,6 +333,11 @@ void msf_trigger6pAdd(void){
             // no need to add cell
             return;
         }
+    }
+
+    if (msf_candidateAddCellList(celllist_add,NUMCELLS_MSF)==FALSE){
+        // failed to get cell list to add
+        return;
     }
 
     sixtop_request(
@@ -373,14 +374,11 @@ void msf_trigger6pDelete(void){
         return;
     }
 
-    if (schedule_getNumberOfNegotiatedTxCells(&neighbor)<=1){
-        // at least one managed Tx cell presents
-        return;
-    }
-
-    if (msf_candidateRemoveCellList(celllist_delete,&neighbor,NUMCELLS_MSF)==FALSE){
-        // failed to get cell list to delete
-        return;
+    if (msf_vars.needDeleteTx) {
+        if (schedule_getNumberOfNegotiatedTxCells(&neighbor)<=1){
+            // at least one negotiated Tx cell presents
+            msf_vars.needDeleteTx = FALSE;
+        }
     }
 
     // check what type of cell need to delete
@@ -394,6 +392,11 @@ void msf_trigger6pDelete(void){
             // no need to delete cell
             return;
         }
+    }
+
+    if (msf_candidateRemoveCellList(celllist_delete,&neighbor,NUMCELLS_MSF, cellOptions)==FALSE){
+        // failed to get cell list to delete
+        return;
     }
 
     sixtop_request(
@@ -443,7 +446,8 @@ bool msf_candidateAddCellList(
 bool msf_candidateRemoveCellList(
       cellInfo_ht* cellList,
       open_addr_t* neighbor,
-      uint8_t      requiredCells
+      uint8_t      requiredCells,
+      uint8_t      cellOptions
 ){
     uint8_t              i;
     uint8_t              numCandCells;
@@ -453,7 +457,7 @@ bool msf_candidateRemoveCellList(
     numCandCells    = 0;
     for(i=0;i<schedule_getFrameLength();i++){
         schedule_getSlotInfo(i,&info);
-        if(info.link_type == CELLTYPE_TX){
+        if(info.link_type == cellOptions && info.isAutoCell == FALSE){
             cellList[numCandCells].slotoffset       = i;
             cellList[numCandCells].channeloffset    = info.channelOffset;
             cellList[numCandCells].isUsed           = TRUE;
