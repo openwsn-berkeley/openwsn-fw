@@ -10,6 +10,7 @@
 #include "icmpv6rpl.h"
 #include "IEEE802154E.h"
 #include "openqueue.h"
+#include "packetfunctions.h"
 
 //=========================== definition =====================================
 
@@ -457,7 +458,11 @@ bool msf_candidateRemoveCellList(
     numCandCells    = 0;
     for(i=0;i<schedule_getFrameLength();i++){
         schedule_getSlotInfo(i,&info);
-        if(info.link_type == cellOptions && info.isAutoCell == FALSE){
+        if(
+            packetfunctions_sameAddress(neighbor, &(info.address)) &&
+            info.link_type  == cellOptions &&
+            info.isAutoCell == FALSE
+        ){
             cellList[numCandCells].slotoffset       = i;
             cellList[numCandCells].channeloffset    = info.channelOffset;
             cellList[numCandCells].isUsed           = TRUE;
