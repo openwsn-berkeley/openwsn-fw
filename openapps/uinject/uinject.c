@@ -164,7 +164,7 @@ void uinject_task_cb(void) {
     pkt->payload[4] = asnArray[4];
 
     packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
-    numCellsUsed = msf_getPreviousNumCellsUsed();
+    numCellsUsed = msf_getPreviousNumCellsUsed(CELLTYPE_TX);
     pkt->payload[0] = numCellsUsed;
 
     packetfunctions_reserveHeaderSize(pkt,sizeof(uint16_t));

@@ -221,7 +221,7 @@ bool neighbors_isInsecureNeighbor(open_addr_t* address) {
       default:
          openserial_printCritical(COMPONENT_NEIGHBORS,ERR_WRONG_ADDR_TYPE,
                                (errorparameter_t)address->type,
-                               (errorparameter_t)0);
+                               (errorparameter_t)1);
          return returnVal;
    }
 
@@ -465,7 +465,7 @@ bool  neighbors_getNeighborEui64(open_addr_t* address, uint8_t addr_type, uint8_
       default:
          openserial_printCritical(COMPONENT_NEIGHBORS,ERR_WRONG_ADDR_TYPE,
                                (errorparameter_t)addr_type,
-                               (errorparameter_t)1);
+                               (errorparameter_t)2);
          break;
    }
    return ReturnVal;
@@ -506,6 +506,15 @@ bool neighbors_backoffHitZero(open_addr_t* address){
             returnVal = (neighbors_vars.neighbors[i].backoff==0);
             break;
         }
+    }
+    if (i==MAXNUMNEIGHBORS) {
+        // The neighbor looking for is not in the table.
+        // This is usually the case a packet is from downward traffic, which
+        // doesn't need to be in the neighbor table.
+
+        // currently, just allow the packet to be send without backoff checking.
+        // performence to be tested...
+        returnVal = TRUE;
     }
     return returnVal;
 }
@@ -670,7 +679,7 @@ void registerNewNeighbor(open_addr_t* address,
     if (address->type!=ADDR_64B) {
         openserial_printCritical(COMPONENT_NEIGHBORS,ERR_WRONG_ADDR_TYPE,
                             (errorparameter_t)address->type,
-                            (errorparameter_t)2);
+                            (errorparameter_t)3);
         return;
     }
     // add this neighbor
@@ -758,7 +767,7 @@ bool isThisRowMatching(open_addr_t* address, uint8_t rowNumber) {
       default:
          openserial_printCritical(COMPONENT_NEIGHBORS,ERR_WRONG_ADDR_TYPE,
                                (errorparameter_t)address->type,
-                               (errorparameter_t)3);
+                               (errorparameter_t)4);
          return FALSE;
    }
 }

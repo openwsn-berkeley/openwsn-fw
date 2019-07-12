@@ -970,12 +970,12 @@ port_INLINE void activity_ti1ORri1(void) {
                     }
 
                     if (schedule_getShared()==FALSE){
-                        // update numcellpassed and numcellused on managed Tx cell
+                        // update numcellelapsed and numcellused on managed Tx cell
                         if (ieee154e_vars.dataToSend!=NULL) {
                             ieee154e_vars.dataToSend->l2_sendOnTxCell = TRUE;
-                            msf_updateCellsUsed(&neighbor);
+                            msf_updateCellsUsed(&neighbor, CELLTYPE_TX);
                         }
-                        msf_updateCellsPassed(&neighbor);
+                        msf_updateCellsElapsed(&neighbor, CELLTYPE_TX);
                     }
                 } else {
                     // this is minimal cell
@@ -1011,7 +1011,7 @@ port_INLINE void activity_ti1ORri1(void) {
                 ieee154e_vars.dataToSend->l2_numTxAttempts++;
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
                 // 1. schedule timer for loading packet
-            sctimer_scheduleActionIn(ACTION_LOAD_PACKET, ieee154e_vars.startOfSlotReference+DURATION_tt1);
+                sctimer_scheduleActionIn(ACTION_LOAD_PACKET, ieee154e_vars.startOfSlotReference+DURATION_tt1);
                 // prepare the packet for load packet action at DURATION_tt1
                 // make a local copy of the frame
                 packetfunctions_duplicatePacket(&ieee154e_vars.localCopyForTransmission, ieee154e_vars.dataToSend);
@@ -1028,19 +1028,19 @@ port_INLINE void activity_ti1ORri1(void) {
                 // add 2 CRC bytes only to the local copy as we end up here for each retransmission
                 packetfunctions_reserveFooterSize(&ieee154e_vars.localCopyForTransmission, 2);
 
-            // configure the radio for that frequency
-            radio_setFrequency(ieee154e_vars.freq);
+                // configure the radio for that frequency
+                radio_setFrequency(ieee154e_vars.freq);
 
                 // set the tx buffer address and length register.(packet is NOT loaded at this moment)
                 radio_loadPacket_prepare(ieee154e_vars.localCopyForTransmission.payload,
                                      ieee154e_vars.localCopyForTransmission.length);
                 // 2. schedule timer for sending packet
-            sctimer_scheduleActionIn(ACTION_SEND_PACKET,  ieee154e_vars.startOfSlotReference+DURATION_tt2);
+                sctimer_scheduleActionIn(ACTION_SEND_PACKET,  ieee154e_vars.startOfSlotReference+DURATION_tt2);
                 // 3. schedule timer radio tx watchdog
-            sctimer_scheduleActionIn(ACTION_SET_TIMEOUT, ieee154e_vars.startOfSlotReference+DURATION_tt3);
+                sctimer_scheduleActionIn(ACTION_SET_TIMEOUT, ieee154e_vars.startOfSlotReference+DURATION_tt3);
                 // 4. set capture interrupt for Tx SFD senddone and packet senddone
-            sctimer_setCapture(ACTION_TX_SFD_DONE);
-            sctimer_setCapture(ACTION_TX_SEND_DONE);
+                sctimer_setCapture(ACTION_TX_SFD_DONE);
+                sctimer_setCapture(ACTION_TX_SEND_DONE);
 #else
                 // arm tt1
                 opentimers_scheduleAbsolute(
@@ -1059,16 +1059,16 @@ port_INLINE void activity_ti1ORri1(void) {
             changeState(S_RXDATAOFFSET);
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
             // arm rt1
-         sctimer_scheduleActionIn(ACTION_RADIORX_ENABLE,ieee154e_vars.startOfSlotReference+DURATION_rt1);
+            sctimer_scheduleActionIn(ACTION_RADIORX_ENABLE,ieee154e_vars.startOfSlotReference+DURATION_rt1);
             radio_rxPacket_prepare();
             // 2. schedule timer for starting
-         sctimer_scheduleActionIn(ACTION_SET_TIMEOUT,  ieee154e_vars.startOfSlotReference+DURATION_rt2);
+            sctimer_scheduleActionIn(ACTION_SET_TIMEOUT,  ieee154e_vars.startOfSlotReference+DURATION_rt2);
             // 3.  set capture interrupt for Rx SFD done and receiving packet done
-         sctimer_setCapture(ACTION_RX_SFD_DONE);
-         sctimer_setCapture(ACTION_RX_DONE);
+            sctimer_setCapture(ACTION_RX_SFD_DONE);
+            sctimer_setCapture(ACTION_RX_DONE);
 
-         // configure the radio for that frequency
-         radio_setFrequency(ieee154e_vars.freq);
+            // configure the radio for that frequency
+            radio_setFrequency(ieee154e_vars.freq);
 #else
             // arm rt1
             opentimers_scheduleAbsolute(
@@ -1080,6 +1080,7 @@ port_INLINE void activity_ti1ORri1(void) {
             );
             // radiotimer_schedule(DURATION_rt1);
 #endif
+
             break;
         default:
 
@@ -2849,7 +2850,9 @@ will do that for you, but assume that something went wrong.
 */
 void endSlot(void) {
 
+    cellType_t  cellType;
     open_addr_t slotNeighbor;
+    open_addr_t parentAddress;
 
     // turn off the radio
     radio_rfOff();
@@ -2909,6 +2912,32 @@ void endSlot(void) {
 
         // reset local variable
         ieee154e_vars.dataToSend = NULL;
+    }
+
+    cellType = schedule_getType();
+    if (cellType==CELLTYPE_RX){
+        // update numcellelapsed and numcellused on Rx cell
+
+        // update numcellused if received something
+        if (ieee154e_vars.dataReceived!=NULL) {
+            msf_updateCellsUsed(
+                &(ieee154e_vars.dataReceived->l2_nextORpreviousHop),
+                CELLTYPE_RX
+            );
+        }
+
+        // update numcellelapsed if this is auto rx or rx cell to parent
+        if (schedule_getIsAutoCell()){
+            if (icmpv6rpl_getPreferredParentEui64(&parentAddress)){
+                // adapt traffic on auto rx for downstream traffic
+                msf_updateCellsElapsed(&parentAddress, CELLTYPE_RX);
+            }
+        } else {
+            // update numelapsed on rx cell (msf will check whether it
+            // is to parent or not)
+            schedule_getNeighbor(&slotNeighbor);
+            msf_updateCellsElapsed(&slotNeighbor, CELLTYPE_RX);
+        }
     }
 
     // clean up dataReceived

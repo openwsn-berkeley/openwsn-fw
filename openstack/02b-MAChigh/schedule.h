@@ -153,6 +153,7 @@ typedef struct {
   bool             shared;
   slotOffset_t     slotOffset;
   channelOffset_t  channelOffset;
+  bool             isAutoCell;
 }slotinfo_element_t;
 
 //=========================== variables =======================================
@@ -202,7 +203,7 @@ owerror_t          schedule_removeActiveSlot(
 );
 void              schedule_removeAllAutonomousTxRxCellUnicast(void);
 bool              schedule_isSlotOffsetAvailable(uint16_t slotOffset);
-void              schedule_removeAllManagedUnicastCellsToNeighbor(
+void              schedule_removeAllNegotiatedCellsToNeighbor(
     uint8_t             slotframeID,
     open_addr_t*        neighbor
 );
