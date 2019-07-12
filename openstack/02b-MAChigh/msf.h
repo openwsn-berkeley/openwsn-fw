@@ -70,8 +70,6 @@ bool    msf_candidateRemoveCellList(
 // called by schedule
 void    msf_updateCellsElapsed(open_addr_t* neighbor, cellType_t cellType);
 void    msf_updateCellsUsed(open_addr_t* neighbor, cellType_t cellType);
-// called by icmpv6rpl, where parent changed
-void    msf_trigger6pClear(open_addr_t* neighbor);
 
 uint16_t msf_hashFunction_getSlotoffset(open_addr_t* address);
 uint8_t msf_hashFunction_getChanneloffset(open_addr_t* address);

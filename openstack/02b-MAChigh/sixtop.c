@@ -931,18 +931,18 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
     // if this is a request send done
     if (msg->l2_sixtop_messageType == SIXTOP_CELL_REQUEST){
         if(error == E_FAIL) {
-           // max retries, without ack
-           switch (sixtop_vars.six2six_state) {
-              
-           case SIX_STATE_WAIT_CLEARREQUEST_SENDDONE:
-              sixtop_vars.six2six_state = SIX_STATE_WAIT_CLEARRESPONSE;
-              timer_sixtop_six2six_timeout_fired();
-              break;
-           default:
-              // reset handler and state if the request is failed to send out
-              sixtop_vars.six2six_state = SIX_STATE_IDLE;
-              break;
-           }
+            // max retries, without ack
+            switch (sixtop_vars.six2six_state) {
+
+            case SIX_STATE_WAIT_CLEARREQUEST_SENDDONE:
+                sixtop_vars.six2six_state = SIX_STATE_WAIT_CLEARRESPONSE;
+                timer_sixtop_six2six_timeout_fired();
+                break;
+            default:
+                // reset handler and state if the request is failed to send out
+                sixtop_vars.six2six_state = SIX_STATE_IDLE;
+                break;
+            }
         } else {
             // the packet has been sent out successfully
             switch (sixtop_vars.six2six_state) {
