@@ -363,25 +363,6 @@ owerror_t sixtop_request(
 
 owerror_t sixtop_send(OpenQueueEntry_t *msg) {
 
-    if (
-        packetfunctions_isBroadcastMulticast(&(msg->l2_nextORpreviousHop))   == FALSE &&
-        schedule_hasNegotiatedTxCellToNeighbor(&(msg->l2_nextORpreviousHop)) == FALSE &&
-        schedule_hasAutoTxCellToNeighbor(&(msg->l2_nextORpreviousHop))       == FALSE
-    ){
-        // the frame source address is not broadcast/multicast
-        // no negotiated tx cell to that neighbor
-        // no auto tx cell to that neighbor
-
-        schedule_addActiveSlot(
-            msf_hashFunction_getSlotoffset(&(msg->l2_nextORpreviousHop)),    // slot offset
-            CELLTYPE_TX,                                                     // type of slot
-            TRUE,                                                            // shared?
-            TRUE,                                                            // auto cell?
-            msf_hashFunction_getChanneloffset(&(msg->l2_nextORpreviousHop)), // channel offset
-            &(msg->l2_nextORpreviousHop)                                     // neighbor
-        );
-    }
-
     // set metadata
     msg->owner        = COMPONENT_SIXTOP;
     msg->l2_frameType = IEEE154_TYPE_DATA;
@@ -638,6 +619,25 @@ owerror_t sixtop_send_internal(
     );
     // change owner to IEEE802154E fetches it from queue
     msg->owner  = COMPONENT_SIXTOP_TO_IEEE802154E;
+
+    if (
+        packetfunctions_isBroadcastMulticast(&(msg->l2_nextORpreviousHop))   == FALSE &&
+        schedule_hasNegotiatedTxCellToNeighbor(&(msg->l2_nextORpreviousHop)) == FALSE &&
+        schedule_hasAutoTxCellToNeighbor(&(msg->l2_nextORpreviousHop))       == FALSE
+    ){
+        // the frame source address is not broadcast/multicast
+        // no negotiated tx cell to that neighbor
+        // no auto tx cell to that neighbor
+
+        schedule_addActiveSlot(
+            msf_hashFunction_getSlotoffset(&(msg->l2_nextORpreviousHop)),    // slot offset
+            CELLTYPE_TX,                                                     // type of slot
+            TRUE,                                                            // shared?
+            TRUE,                                                            // auto cell?
+            msf_hashFunction_getChanneloffset(&(msg->l2_nextORpreviousHop)), // channel offset
+            &(msg->l2_nextORpreviousHop)                                     // neighbor
+        );
+    }
     return E_SUCCESS;
 }
 
