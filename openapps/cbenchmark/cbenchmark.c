@@ -36,6 +36,7 @@ void cbenchmark_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 void cbenchmark_sendPacket(uint8_t *, uint8_t);
 owerror_t cbenchmark_parse_sendPacket(uint8_t *buf, uint8_t bufLen, cbenchmark_sendPacket_t *request);
 void cbenchmark_printSerial_packetSentReceived(uint8_t eventType, uint8_t *packetToken, open_addr_t *dest, uint8_t hopLimit);
+void cbenchmark_sendPacket_task_cb(void);
 
 //=========================== public ==========================================
 
@@ -150,6 +151,13 @@ void cbenchmark_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 }
 
 void cbenchmark_sendPacket(uint8_t *buf, uint8_t bufLen) {
+	memcpy(cbenchmark_vars.cmdBuf, buf, bufLen);
+	cbenchmark_vars.cmdBufLen = bufLen;
+	// push task
+	scheduler_push_task(cbenchmark_sendPacket_task_cb,TASKPRIO_COAP);
+}
+
+void cbenchmark_sendPacket_task_cb(void) {
 
     OpenQueueEntry_t*            pkt;
     cbenchmark_sendPacket_t      request;
@@ -162,9 +170,13 @@ void cbenchmark_sendPacket(uint8_t *buf, uint8_t bufLen) {
     numOptions = 0;
     i = 0;
 
-    if (cbenchmark_parse_sendPacket(buf, bufLen, &request) != E_SUCCESS) {
+    if (cbenchmark_parse_sendPacket(cbenchmark_vars.cmdBuf, cbenchmark_vars.cmdBufLen, &request) != E_SUCCESS) {
         return;
-    };
+    }
+    else {
+	// success, invalidate the common buffer
+    	cbenchmark_vars.cmdBufLen = 0;
+    }
 
 
     for (i = 0; i < request.numPackets; i++) {

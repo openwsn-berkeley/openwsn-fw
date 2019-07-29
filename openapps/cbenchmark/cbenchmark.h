@@ -17,6 +17,8 @@ typedef struct {
     coap_resource_desc_t     desc;
     opentimers_id_t          timerId;
     uint8_t                  noResponse;
+    uint8_t                  cmdBuf[16];
+    uint8_t                  cmdBufLen;
 } cbenchmark_vars_t;
 
 typedef struct {
