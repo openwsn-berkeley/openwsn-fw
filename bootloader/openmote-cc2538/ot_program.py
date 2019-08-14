@@ -38,7 +38,7 @@ class program_over_testbed(object):
                 # refer to: https://en.wikipedia.org/wiki/Intel_HEX#Record_types
                 
                 # looking for upper 16bit address 0027
-                if line[:-1] == ':020000040027D3':
+                if line[:15] == ':020000040027D3':
                     extended_linear_address_found = True
             
                 # check the lower 16bit address FFD4
