@@ -720,7 +720,7 @@ uint8_t schedule_getNumberOfFreeEntries(){
     return counter;
 }
 
-uint8_t schedule_getNumberOfNegotiatedTxCells(open_addr_t* neighbor){
+uint8_t schedule_getNumberOfNegotiatedCells(open_addr_t* neighbor, cellType_t cell_type){
     uint8_t i;
     uint8_t j;
     uint8_t counter;
@@ -732,7 +732,7 @@ uint8_t schedule_getNumberOfNegotiatedTxCells(open_addr_t* neighbor){
     for(i=0;i<MAXACTIVESLOTS;i++) {
         if(
             schedule_vars.scheduleBuf[i].shared == FALSE       &&
-            schedule_vars.scheduleBuf[i].type   == CELLTYPE_TX &&
+            schedule_vars.scheduleBuf[i].type   == cell_type &&
             packetfunctions_sameAddress(&schedule_vars.scheduleBuf[i].neighbor, neighbor) == TRUE
         ){
             counter++;
@@ -880,7 +880,7 @@ bool schedule_hasAutoTxCellToNeighbor(open_addr_t* neighbor){
     return FALSE;
 }
 
-bool schedule_hasNegotiatedTxCellToNeighbor(open_addr_t* neighbor){
+bool schedule_hasNegotiatedCellToNeighbor(open_addr_t* neighbor, cellType_t cell_type){
     uint8_t i;
 
     INTERRUPT_DECLARATION();
@@ -889,7 +889,7 @@ bool schedule_hasNegotiatedTxCellToNeighbor(open_addr_t* neighbor){
     for(i=0;i<MAXACTIVESLOTS;i++) {
         if(
             schedule_vars.scheduleBuf[i].shared == FALSE &&
-            schedule_vars.scheduleBuf[i].type   == CELLTYPE_TX &&
+            schedule_vars.scheduleBuf[i].type   == cell_type &&
             schedule_vars.scheduleBuf[i].neighbor.type == ADDR_64B &&
             packetfunctions_sameAddress(neighbor,&schedule_vars.scheduleBuf[i].neighbor)
         ){

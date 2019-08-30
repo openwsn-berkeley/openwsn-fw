@@ -1695,6 +1695,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
     ieee802154_header_iht ieee802514_header;
     uint16_t lenIE=0;
     open_addr_t                 addressToWrite;
+    open_addr_t                 parentAddress;
 
     // change state
     changeState(S_TXACKOFFSET);
@@ -1833,6 +1834,12 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
             break;
         }
 
+        if (icmpv6rpl_getPreferredParentEui64(&parentAddress)){
+            if (packetfunctions_sameAddress(&ieee802514_header.src, &parentAddress)){
+                ieee154e_vars.receivedFrameFromParent = TRUE;
+            }
+        }
+
         // record the timeCorrection and print out at end of slot
         ieee154e_vars.dataReceived->l2_timeCorrection = (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)TsTxOffset-(PORT_SIGNED_INT_WIDTH)ieee154e_vars.syncCapturedTime);
 
@@ -1929,7 +1936,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
                     icmpv6rpl_getPreferredParentEui64(&addressToWrite)      == FALSE ||
                     (
                         icmpv6rpl_getPreferredParentEui64(&addressToWrite)           &&
-                        schedule_hasNegotiatedTxCellToNeighbor(&addressToWrite)== FALSE
+                        schedule_hasNegotiatedCellToNeighbor(&addressToWrite, CELLTYPE_TX)== FALSE
                     )
                 )
             ) {
@@ -2850,9 +2857,9 @@ will do that for you, but assume that something went wrong.
 */
 void endSlot(void) {
 
-    cellType_t  cellType;
     open_addr_t slotNeighbor;
     open_addr_t parentAddress;
+    slotinfo_element_t  info;
 
     // turn off the radio
     radio_rfOff();
@@ -2914,23 +2921,27 @@ void endSlot(void) {
         ieee154e_vars.dataToSend = NULL;
     }
 
-    cellType = schedule_getType();
-    if (cellType==CELLTYPE_RX){
+    schedule_getSlotInfo(ieee154e_vars.slotOffset, &info);
+    if (info.link_type==CELLTYPE_RX){
         // update numcellelapsed and numcellused on Rx cell
 
         // update numcellused if received something
-        if (ieee154e_vars.dataReceived!=NULL) {
-            msf_updateCellsUsed(
-                &(ieee154e_vars.dataReceived->l2_nextORpreviousHop),
-                CELLTYPE_RX
-            );
+        if (ieee154e_vars.receivedFrameFromParent) {
+            if (icmpv6rpl_getPreferredParentEui64(&parentAddress)){
+                msf_updateCellsUsed(
+                    &parentAddress,
+                    CELLTYPE_RX
+                );
+            }
         }
 
         // update numcellelapsed if this is auto rx or rx cell to parent
         if (schedule_getIsAutoCell()){
             if (icmpv6rpl_getPreferredParentEui64(&parentAddress)){
-                // adapt traffic on auto rx for downstream traffic
-                msf_updateCellsElapsed(&parentAddress, CELLTYPE_RX);
+                if (schedule_hasNegotiatedCellToNeighbor(&parentAddress, CELLTYPE_RX) == FALSE) {
+                    // adapt traffic on auto rx for downstream traffic
+                    msf_updateCellsElapsed(&parentAddress, CELLTYPE_RX);
+                }
             }
         } else {
             // update numelapsed on rx cell (msf will check whether it
@@ -2939,6 +2950,7 @@ void endSlot(void) {
             msf_updateCellsElapsed(&slotNeighbor, CELLTYPE_RX);
         }
     }
+    ieee154e_vars.receivedFrameFromParent = FALSE;
 
     // clean up dataReceived
     if (ieee154e_vars.dataReceived!=NULL) {

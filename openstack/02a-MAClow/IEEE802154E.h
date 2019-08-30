@@ -226,46 +226,49 @@ typedef struct {
 //=========================== module variables ================================
 
 typedef struct {
-   // misc
-   asn_t                     asn;                     // current absolute slot number
-   slotOffset_t              slotOffset;              // current slot offset
-   slotOffset_t              nextActiveSlotOffset;    // next active slot offset
-   PORT_TIMER_WIDTH          deSyncTimeout;           // how many slots left before looses sync
-   bool                      isSync;                  // TRUE iff mote is synchronized to network
-   OpenQueueEntry_t          localCopyForTransmission;// copy of the frame used for current TX
-   PORT_TIMER_WIDTH          numOfSleepSlots;         // number of slots to sleep between active slots
-   // as shown on the chronogram
-   ieee154e_state_t          state;                   // state of the FSM
-   OpenQueueEntry_t*         dataToSend;              // pointer to the data to send
-   OpenQueueEntry_t*         dataReceived;            // pointer to the data received
-   OpenQueueEntry_t*         ackToSend;               // pointer to the ack to send
-   OpenQueueEntry_t*         ackReceived;             // pointer to the ack received
-   PORT_TIMER_WIDTH          lastCapturedTime;        // last captured time
-   PORT_TIMER_WIDTH          syncCapturedTime;        // captured time used to sync
-   // channel hopping
-   uint8_t                   freq;                    // frequency of the current slot
-   uint8_t                   asnOffset;               // offset inside the frame
-   uint8_t                   singleChannel;           // the single channel used for transmission
-   bool                      singleChannelChanged;    // detect id singleChannelChanged
-   uint8_t                   chTemplate[NUM_CHANNELS];// storing the template of hopping sequence
-   // template ID
-   uint8_t                   tsTemplateId;            // timeslot template id
-   uint8_t                   chTemplateId;            // channel hopping tempalte id
+    // misc
+    asn_t                     asn;                     // current absolute slot number
+    slotOffset_t              slotOffset;              // current slot offset
+    slotOffset_t              nextActiveSlotOffset;    // next active slot offset
+    PORT_TIMER_WIDTH          deSyncTimeout;           // how many slots left before looses sync
+    bool                      isSync;                  // TRUE iff mote is synchronized to network
+    OpenQueueEntry_t          localCopyForTransmission;// copy of the frame used for current TX
+    PORT_TIMER_WIDTH          numOfSleepSlots;         // number of slots to sleep between active slots
+    // as shown on the chronogram
+    ieee154e_state_t          state;                   // state of the FSM
+    OpenQueueEntry_t*         dataToSend;              // pointer to the data to send
+    OpenQueueEntry_t*         dataReceived;            // pointer to the data received
+    OpenQueueEntry_t*         ackToSend;               // pointer to the ack to send
+    OpenQueueEntry_t*         ackReceived;             // pointer to the ack received
+    PORT_TIMER_WIDTH          lastCapturedTime;        // last captured time
+    PORT_TIMER_WIDTH          syncCapturedTime;        // captured time used to sync
+    // channel hopping
+    uint8_t                   freq;                    // frequency of the current slot
+    uint8_t                   asnOffset;               // offset inside the frame
+    uint8_t                   singleChannel;           // the single channel used for transmission
+    bool                      singleChannelChanged;    // detect id singleChannelChanged
+    uint8_t                   chTemplate[NUM_CHANNELS];// storing the template of hopping sequence
+    // template ID
+    uint8_t                   tsTemplateId;            // timeslot template id
+    uint8_t                   chTemplateId;            // channel hopping tempalte id
 
-   PORT_TIMER_WIDTH          radioOnInit;             // when within the slot the radio turns on
-   PORT_TIMER_WIDTH          radioOnTics;             // how many tics within the slot the radio is on
-   bool                      radioOnThisSlot;         // to control if the radio has been turned on in a slot.
+    PORT_TIMER_WIDTH          radioOnInit;             // when within the slot the radio turns on
+    PORT_TIMER_WIDTH          radioOnTics;             // how many tics within the slot the radio is on
+    bool                      radioOnThisSlot;         // to control if the radio has been turned on in a slot.
 
-   //control
-   bool                      isAckEnabled;            // whether reply for ack, used for synchronization test
-   bool                      isSecurityEnabled;       // whether security is applied
-   // time correction
-   int16_t                   timeCorrection;          // store the timeCorrection, prepend and retrieve it inside of frame header
+    // control
+    bool                      isAckEnabled;            // whether reply for ack, used for synchronization test
+    bool                      isSecurityEnabled;       // whether security is applied
+    // time correction
+    int16_t                   timeCorrection;          // store the timeCorrection, prepend and retrieve it inside of frame header
 
-   uint16_t                  slotDuration;            // duration of slot
-   opentimers_id_t           timerId;                 // id of timer used for implementing TSCH slot FSM
-   uint32_t                  startOfSlotReference;    // the time refer to the beginning of slot
-   opentimers_id_t           serialInhibitTimerId;    // id of serial inhibit timer used for scheduling serial output
+    uint16_t                  slotDuration;            // duration of slot
+    opentimers_id_t           timerId;                 // id of timer used for implementing TSCH slot FSM
+    uint32_t                  startOfSlotReference;    // the time refer to the beginning of slot
+    opentimers_id_t           serialInhibitTimerId;    // id of serial inhibit timer used for scheduling serial output
+
+    // for msf downstream traffic adaptation
+    uint32_t                  receivedFrameFromParent; // True when received a frame from parent
 } ieee154e_vars_t;
 
 BEGIN_PACK
