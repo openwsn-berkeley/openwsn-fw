@@ -119,7 +119,7 @@ void    msf_updateCellsElapsed(open_addr_t* neighbor, cellType_t type){
 
     // adapt to downward traffic when there are negotiated Tx cells in schedule
 
-    if (schedule_getNumberOfNegotiatedTxCells(neighbor)==0){
+    if (schedule_getNumberOfNegotiatedCells(neighbor, CELLTYPE_TX)==0){
         return;
     }
 
@@ -345,7 +345,7 @@ void msf_trigger6pDelete(void){
     }
 
     if (msf_vars.needDeleteTx) {
-        if (schedule_getNumberOfNegotiatedTxCells(&neighbor)<=1){
+        if (schedule_getNumberOfNegotiatedCells(&neighbor, CELLTYPE_TX)<=1){
             // at least one negotiated Tx cell presents
             msf_vars.needDeleteTx = FALSE;
         }
@@ -484,7 +484,7 @@ void msf_housekeeping(void){
         return;
     }
 
-    if (schedule_getNumberOfNegotiatedTxCells(&parentNeighbor)==0){
+    if (schedule_getNumberOfNegotiatedCells(&parentNeighbor, CELLTYPE_TX)==0){
         msf_vars.needAddTx = TRUE;
         msf_trigger6pAdd();
         return;

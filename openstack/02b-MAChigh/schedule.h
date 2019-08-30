@@ -208,16 +208,15 @@ void              schedule_removeAllNegotiatedCellsToNeighbor(
     open_addr_t*        neighbor
 );
 uint8_t           schedule_getNumberOfFreeEntries(void);
-uint8_t           schedule_getNumberOfNegotiatedTxCells(open_addr_t* neighbor);
+uint8_t           schedule_getNumberOfNegotiatedCells(open_addr_t* neighbor, cellType_t cell_type);
 bool              schedule_isNumTxWrapped(open_addr_t* neighbor);
 bool              schedule_getCellsToBeRelocated(open_addr_t* neighbor, cellInfo_ht* celllist);
 bool              schedule_hasAutonomousTxRxCellUnicast(open_addr_t* neighbor);
 bool              schedule_getAutonomousTxRxCellUnicastNeighbor(open_addr_t* neighbor);
 bool              schedule_hasAutoTxCellToNeighbor(open_addr_t* neighbor);
-bool              schedule_hasNegotiatedTxCellToNeighbor(open_addr_t* neighbor);
+bool              schedule_hasNegotiatedCellToNeighbor(open_addr_t* neighbor, cellType_t cell_type);
 bool              schedule_getAutonomousTxRxCellAnycast(uint16_t* slotoffset);
 bool              schedule_hasNonParentManagedTxCell(open_addr_t* neighbor);
-bool              schedule_getNonParentsNegotiatedTxCell(open_addr_t* neighbor, open_addr_t* nonParentNeighbor);
 
 void              schedule_hasNegotiatedTxCell(open_addr_t* address);
 bool              schedule_hasNegotiatedTxCellToNonParent(

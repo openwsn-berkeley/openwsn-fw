@@ -622,7 +622,7 @@ owerror_t sixtop_send_internal(
 
     if (
         packetfunctions_isBroadcastMulticast(&(msg->l2_nextORpreviousHop))   == FALSE &&
-        schedule_hasNegotiatedTxCellToNeighbor(&(msg->l2_nextORpreviousHop)) == FALSE &&
+        schedule_hasNegotiatedCellToNeighbor(&(msg->l2_nextORpreviousHop), CELLTYPE_TX) == FALSE &&
         schedule_hasAutoTxCellToNeighbor(&(msg->l2_nextORpreviousHop))       == FALSE
     ){
         // the frame source address is not broadcast/multicast
@@ -856,7 +856,7 @@ port_INLINE void sixtop_sendKA(void) {
         return;
     }
 
-    if (schedule_hasNegotiatedTxCellToNeighbor(kaNeighAddr) == FALSE){
+    if (schedule_hasNegotiatedCellToNeighbor(kaNeighAddr, CELLTYPE_TX) == FALSE){
         // delete packets genereted by this module (EB and KA) from openqueue
         openqueue_removeAllCreatedBy(COMPONENT_SIXTOP);
 
