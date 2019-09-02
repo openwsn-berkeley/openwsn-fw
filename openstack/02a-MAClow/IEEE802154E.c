@@ -2936,7 +2936,7 @@ void endSlot(void) {
         }
 
         // update numcellelapsed if this is auto rx or rx cell to parent
-        if (schedule_getIsAutoCell()){
+        if (info.isAutoCell){
             if (icmpv6rpl_getPreferredParentEui64(&parentAddress)){
                 if (schedule_hasNegotiatedCellToNeighbor(&parentAddress, CELLTYPE_RX) == FALSE) {
                     // adapt traffic on auto rx for downstream traffic
