@@ -839,7 +839,8 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
                 break;
             }
         }
-        ieee154e_vars.asnOffset = i - schedule_getChannelOffset();
+        // here we assume all EBs are sent on cells with channeloffset=0
+        ieee154e_vars.asnOffset = i - SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET;
         return TRUE;
     } else {
         // wrong eb format
@@ -906,6 +907,8 @@ port_INLINE void activity_ti1ORri1(void) {
     // Reset sleep slots
     ieee154e_vars.numOfSleepSlots = 1;
 
+    // find the next one
+    ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
     if (ieee154e_vars.slotOffset==ieee154e_vars.nextActiveSlotOffset) {
         // this is the next active slot
 
@@ -978,9 +981,18 @@ port_INLINE void activity_ti1ORri1(void) {
                         msf_updateCellsElapsed(&neighbor, CELLTYPE_TX);
                     }
                 } else {
-                    // this is minimal cell
-                    ieee154e_vars.dataToSend = openqueue_macGetDIOPacket();
-                    if (ieee154e_vars.dataToSend==NULL){
+                    if (ieee154e_vars.slotOffset==SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET) {
+                        // this is minimal cell
+
+                        ieee154e_vars.dataToSend = openqueue_macGetDIOPacket();
+                        if (ieee154e_vars.dataToSend==NULL){
+                            couldSendEB=TRUE;
+                            // look for an EB packet in the queue
+                            ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
+                        }
+                    } else {
+                        // this is temperal cell added for sending EB
+
                         couldSendEB=TRUE;
                         // look for an EB packet in the queue
                         ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
@@ -2568,6 +2580,10 @@ uint16_t ieee154e_getSlotDuration(void) {
     return ieee154e_vars.slotDuration;
 }
 
+uint16_t ieee154e_getCurrentSlotoffset(void){
+    return ieee154e_vars.slotOffset;
+}
+
 // timeslot template handling
 port_INLINE void timeslotTemplateIDStoreFromEB(uint8_t id){
     ieee154e_vars.tsTemplateId = id;
@@ -2858,6 +2874,7 @@ will do that for you, but assume that something went wrong.
 void endSlot(void) {
 
     open_addr_t slotNeighbor;
+    open_addr_t temp_neighbor;
     open_addr_t parentAddress;
     slotinfo_element_t  info;
 
@@ -2997,6 +3014,24 @@ void endSlot(void) {
                 &slotNeighbor
             );
         }
+    }
+
+    // check if this is txrx cell for EB but not the minimal cell
+    if (
+        ieee154e_vars.slotOffset  != 0                        &&
+        schedule_getSlottOffset() == ieee154e_vars.slotOffset &&
+        schedule_getType()        == CELLTYPE_TXRX
+    ){
+        // remove the cell
+
+        memset(&temp_neighbor,0,sizeof(temp_neighbor));
+        temp_neighbor.type             = ADDR_ANYCAST;
+        schedule_removeActiveSlot(
+            ieee154e_vars.slotOffset,
+            CELLTYPE_TXRX,
+            TRUE,
+            &temp_neighbor
+        );
     }
 
     // change state

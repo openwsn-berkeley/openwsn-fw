@@ -961,14 +961,22 @@ bool schedule_getAutonomousTxRxCellAnycast(uint16_t* slotoffset){
 
 void schedule_syncSlotOffset(slotOffset_t targetSlotOffset) {
 
-   INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
+    uint8_t slot_start_at;
 
-   while (schedule_vars.currentScheduleEntry->slotOffset!=targetSlotOffset) {
-      schedule_advanceSlot();
-   }
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
 
-   ENABLE_INTERRUPTS();
+    slot_start_at = schedule_vars.currentScheduleEntry->slotOffset;
+
+    while (schedule_vars.currentScheduleEntry->slotOffset!=targetSlotOffset) {
+        schedule_advanceSlot();
+        if (slot_start_at == schedule_vars.currentScheduleEntry->slotOffset){
+            // can't find it, probably because EB is not received on minimal cell
+            break;
+        }
+    }
+
+    ENABLE_INTERRUPTS();
 }
 
 /**

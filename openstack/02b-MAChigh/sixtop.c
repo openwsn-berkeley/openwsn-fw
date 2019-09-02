@@ -718,6 +718,8 @@ port_INLINE void sixtop_sendEB(void) {
     uint8_t     eb_len;
     uint16_t    temp16b;
     open_addr_t addressToWrite;
+    open_addr_t temp_neighbor;
+    uint16_t    slotToAdd;
 
     memset(&addressToWrite,0,sizeof(open_addr_t));
 
@@ -812,6 +814,29 @@ port_INLINE void sixtop_sendEB(void) {
     eb->l2_securityLevel   = IEEE802154_SECURITY_LEVEL_BEACON;
     eb->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE;
     eb->l2_keyIndex        = IEEE802154_security_getBeaconKeyIndex();
+
+    // reserve a minimal cell for sending the current EB as soon as possible
+
+    // starting from the second slot after current slotoffset
+    slotToAdd = ieee154e_getCurrentSlotoffset()+2;
+    for (i=0;i<SLOTFRAME_LENGTH;i++) {
+        slotToAdd = (slotToAdd+i)%SLOTFRAME_LENGTH;
+        if (schedule_isSlotOffsetAvailable(slotToAdd)){
+            // shared TXRX anycast slot(s)
+            memset(&temp_neighbor,0,sizeof(temp_neighbor));
+            temp_neighbor.type             = ADDR_ANYCAST;
+
+            schedule_addActiveSlot(
+                slotToAdd,                              // slot offset
+                CELLTYPE_TXRX,                          // type of slot
+                TRUE,                                   // shared?
+                FALSE,                                  // auto cell?
+                SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET,  // channel offset
+                &temp_neighbor                          // neighbor
+            );
+            break;
+        }
+    }
 
     // put in queue for MAC to handle
     sixtop_send_internal(eb,eb->l2_payloadIEpresent);
