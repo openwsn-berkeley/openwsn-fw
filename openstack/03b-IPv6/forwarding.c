@@ -784,7 +784,7 @@ owerror_t forwarding_send_internal_SourceRouting(
     } else {
         // log error
         openserial_printError(
-            COMPONENT_IPHC,
+            COMPONENT_FORWARDING,
             ERR_6LOWPAN_UNSUPPORTED,
             (errorparameter_t)16,
             (errorparameter_t)(temp_addr64.addr_64b[7])

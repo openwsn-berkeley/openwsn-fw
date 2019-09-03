@@ -347,7 +347,7 @@ bool icmpv6rpl_isPreferredParent(open_addr_t* address) {
          neighbors_getNeighborEui64(&temp,ADDR_64B,icmpv6rpl_vars.ParentIndex);
          return packetfunctions_sameAddress(address,&temp);
       default:
-         openserial_printCritical(COMPONENT_NEIGHBORS,ERR_WRONG_ADDR_TYPE,
+         openserial_printCritical(COMPONENT_ICMPv6RPL,ERR_WRONG_ADDR_TYPE,
                                (errorparameter_t)address->type,
                                (errorparameter_t)3);
          return FALSE;
@@ -553,7 +553,7 @@ void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t* msg) {
    uint8_t*         current;
    uint8_t          optionsLen;
    // take ownership over the packet
-   msg->owner = COMPONENT_NEIGHBORS;
+   msg->owner = COMPONENT_ICMPv6RPL;
 
    // update some fields of our DIO
    memcpy(
@@ -630,7 +630,7 @@ void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t* msg) {
             ) {
                // the new DAGrank looks suspiciously high, only increment a bit
                neighbors_setNeighborRank(i,neighborRank + ((3*DEFAULTLINKCOST-2)*2*MINHOPRANKINCREASE));
-               openserial_printError(COMPONENT_NEIGHBORS,ERR_LARGE_DAGRANK,
+               openserial_printError(COMPONENT_ICMPv6RPL,ERR_LARGE_DAGRANK,
                                (errorparameter_t)icmpv6rpl_vars.incomingDio->rank,
                                (errorparameter_t)neighborRank);
             } else {
