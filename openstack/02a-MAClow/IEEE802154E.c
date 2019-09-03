@@ -906,6 +906,8 @@ port_INLINE void activity_ti1ORri1(void) {
     // Reset sleep slots
     ieee154e_vars.numOfSleepSlots = 1;
 
+    // update nextActiveSlotOffset before using
+    ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
     if (ieee154e_vars.slotOffset==ieee154e_vars.nextActiveSlotOffset) {
         // this is the next active slot
 
@@ -2946,8 +2948,7 @@ void endSlot(void) {
         } else {
             // update numelapsed on rx cell (msf will check whether it
             // is to parent or not)
-            schedule_getNeighbor(&slotNeighbor);
-            msf_updateCellsElapsed(&slotNeighbor, CELLTYPE_RX);
+            msf_updateCellsElapsed(&info.address, CELLTYPE_RX);
         }
     }
     ieee154e_vars.receivedFrameFromParent = FALSE;
