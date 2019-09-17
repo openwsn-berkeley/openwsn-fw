@@ -66,6 +66,10 @@ void IEEE802154_security_setDataKey(uint8_t index, uint8_t* value) {
 }
 
 bool IEEE802154_security_isConfigured(void) {
+    if (idmanager_getIsDAGroot()==TRUE) {
+        return TRUE;
+    }
+   
     if (ieee802154_security_vars.dynamicKeying == FALSE) {
         return TRUE;
     }
