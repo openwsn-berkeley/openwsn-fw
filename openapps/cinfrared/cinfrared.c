@@ -11,6 +11,7 @@
 #include "neighbors.h"
 #include "pwm.h"
 #include "opentimers.h"
+#include "scheduler.h"
 
 //=========================== defines =========================================
 
@@ -53,7 +54,7 @@ void cinfrared_init(void) {
 
     opencoap_register(&cinfrared_vars.desc);
 
-    cinfrared_vars.timerId          = opentimers_create(TIMER_GENERAL_PURPOSE);
+    cinfrared_vars.timerId          = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_COAP);
 }
 
 //=========================== private =========================================

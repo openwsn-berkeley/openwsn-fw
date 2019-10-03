@@ -1954,6 +1954,9 @@
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\board.c</name>
         </file>
+		<file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\cryptoengine.c</name>
+        </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\debugpins.c</name>
         </file>

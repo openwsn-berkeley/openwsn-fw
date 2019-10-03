@@ -346,9 +346,14 @@
           <state>$PROJ_DIR$\..\..\..\openapps\cinfo\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\cleds\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\cwellknown\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\techo\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\tohlone\</state>
+		  <state>$PROJ_DIR$\..\..\..\openapps\cjoin\</state>
+		  <state>$PROJ_DIR$\..\..\..\openapps\opencoap\</state>
+		  <state>$PROJ_DIR$\..\..\..\openapps\rrt\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\uecho\</state>
+		  <state>$PROJ_DIR$\..\..\..\openapps\uexpiration\</state>
+		  <state>$PROJ_DIR$\..\..\..\openapps\uexpiration_monitor\</state>
+		  <state>$PROJ_DIR$\..\..\..\openapps\uinject\</state>
+		  <state>$PROJ_DIR$\..\..\..\openapps\userialbridge\</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -2059,9 +2064,6 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\board_info.h</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\bsp_timer.c</name>
-        </file>
-        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\debugpins.c</name>
         </file>
         <file>
@@ -2092,9 +2094,6 @@
           <name>$PROJ_DIR$\..\..\..\drivers\gina\magnetometer.h</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\radiotimer.c</name>
-        </file>
-        <file>
           <name>$PROJ_DIR$\..\..\..\drivers\gina\sensitive_accel_temperature.c</name>
         </file>
         <file>
@@ -2111,9 +2110,6 @@
         <name>$PROJ_DIR$\..\..\..\bsp\boards\board.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\debugpins.h</name>
       </file>
       <file>
@@ -2124,9 +2120,6 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\uart.h</name>
@@ -2237,28 +2230,55 @@
         <name>$PROJ_DIR$\..\..\..\openapps\cwellknown\cwellknown.h</name>
       </file>
     </group>
-    <group>
-      <name>techo</name>
+	<group>
+      <name>opencoap</name>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\techo\techo.c</name>
+        <name>$PROJ_DIR$\..\..\..\openapps\opencoap\opencoap.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\techo\techo.h</name>
+        <name>$PROJ_DIR$\..\..\..\openapps\opencoap\opencoap.h</name>
+      </file>
+    </group>
+	<group>
+      <name>cjoin</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cjoin.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cjoin.h</name>
+      </file>
+	  <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cojp_cbor.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cojp_cbor.h</name>
       </file>
     </group>
     <group>
-      <name>tohlone</name>
+      <name>rrt</name>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\tohlone\tohlone.c</name>
+        <name>$PROJ_DIR$\..\..\..\openapps\rrt\rrt.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\tohlone\tohlone.h</name>
+        <name>$PROJ_DIR$\..\..\..\openapps\rrt\rrt.h</name>
+      </file>
+    </group>
+	<group>
+      <name>uexpiration</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\uexpiration\uexpiration.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\tohlone\tohlone_webpages.c</name>
+        <name>$PROJ_DIR$\..\..\..\openapps\uexpiration\uexpiration.h</name>
+      </file>
+    </group>
+	<group>
+      <name>uexpiration_monitor</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\uexpiration_monitor\uexpiration_monitor.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\tohlone\tohlone_webpages.h</name>
+        <name>$PROJ_DIR$\..\..\..\openapps\uexpiration_monitor\uexpiration_monitor.h</name>
       </file>
     </group>
     <group>
@@ -2268,6 +2288,24 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openapps\uecho\uecho.h</name>
+      </file>
+    </group>
+    <group>
+      <name>uinject</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\uinject\uinject.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\uinject\uinject.h</name>
+      </file>
+    </group>
+    <group>
+      <name>userialbridge</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\userialbridge\userialbridge.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\userialbridge\userialbridge.h</name>
       </file>
     </group>
     <file>
@@ -2296,6 +2334,12 @@
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154E.h</name>
       </file>
+	  <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154_security.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154_security.h</name>
+      </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\topology.c</name>
       </file>
@@ -2312,16 +2356,10 @@
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\neighbors.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\otf.c</name>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\msf.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\otf.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\processIE.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\processIE.h</name>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\msf.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\schedule.c</name>
@@ -2380,18 +2418,6 @@
     </group>
     <group>
       <name>04-TRAN</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\opencoap.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\opencoap.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\opentcp.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\opentcp.h</name>
-      </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\openudp.c</name>
       </file>
