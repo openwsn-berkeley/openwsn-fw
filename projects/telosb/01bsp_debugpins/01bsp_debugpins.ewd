@@ -158,7 +158,7 @@
         </option>
         <option>
           <name>Erase</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>EMUVerifyDownloadP7</name>
@@ -236,7 +236,7 @@
         </option>
         <option>
           <name>SoftwareBreakpointEnable</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>RadioSoftwareBreakpointType</name>
@@ -540,7 +540,7 @@
         </option>
         <option>
           <name>Erase</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>EMUVerifyDownloadP7</name>
