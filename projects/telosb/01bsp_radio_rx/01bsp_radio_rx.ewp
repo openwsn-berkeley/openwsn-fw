@@ -58,11 +58,11 @@
         </option>
         <option>
           <name>RTConfigPath</name>
-          <state>$TOOLKIT_DIR$\LIB\DLIB\dl430fn.h</state>
+          <state>$TOOLKIT_DIR$\LIB\DLIB\dl430xsfn.h</state>
         </option>
         <option>
           <name>RTLibraryPath</name>
-          <state>$TOOLKIT_DIR$\LIB\DLIB\dl430fn.r43</state>
+          <state>$TOOLKIT_DIR$\LIB\DLIB\dl430xsfn.r43</state>
         </option>
         <option>
           <name>Input variant</name>
@@ -97,7 +97,7 @@
         </option>
         <option>
           <name>OGChipSelectMenu</name>
-          <state>MSP430F1611	MSP430F1611</state>
+          <state>MSP430F2618	MSP430F2618</state>
         </option>
         <option>
           <name>GStackHeapOverride</name>
@@ -277,7 +277,7 @@
         </option>
         <option>
           <name>CCCompilerRuntimeInfo</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>IDoubleSize</name>
@@ -288,16 +288,16 @@
           <state>$FILE_BNAME$.r43</state>
         </option>
         <option>
-          <name>CCLibConfigHeader</name>
-          <state>1</state>
-        </option>
-        <option>
           <name>OCCR4Utilize</name>
           <state>0</state>
         </option>
         <option>
           <name>OCCR5Utilize</name>
           <state>0</state>
+        </option>
+        <option>
+          <name>CCLibConfigHeader</name>
+          <state>1</state>
         </option>
         <option>
           <name>IExtraOptionsCheck</name>
@@ -325,11 +325,10 @@
         </option>
         <option>
           <name>newCCIncludePaths</name>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\telosb\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\common\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\boards\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\telosb\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\chips\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\chips\sht11\</state>
           <state>$PROJ_DIR$\..\..\..\inc\</state>
         </option>
         <option>
@@ -409,11 +408,11 @@
         </option>
         <option>
           <name>CCData16</name>
-          <state>DATA16</state>
+          <state>DATA</state>
         </option>
         <option>
           <name>CCData20</name>
-          <state>DATA20</state>
+          <state>DATA</state>
         </option>
         <option>
           <name>CCIntvec</name>
@@ -469,7 +468,7 @@
         </option>
         <option>
           <name>OCGuardCallsSlave</name>
-          <state>1</state>
+          <state>0</state>
         </option>
       </data>
     </settings>
@@ -707,7 +706,7 @@
         </option>
         <option>
           <name>XList</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>SegmentMap</name>
@@ -715,7 +714,7 @@
         </option>
         <option>
           <name>ListSymbols</name>
-          <state>2</state>
+          <state>0</state>
         </option>
         <option>
           <name>PageLengthCheck</name>
@@ -739,7 +738,7 @@
         </option>
         <option>
           <name>XclFile</name>
-          <state>$TOOLKIT_DIR$\CONFIG\lnk430F1611.xcl</state>
+          <state>$TOOLKIT_DIR$\CONFIG\lnk430F2618.xcl</state>
         </option>
         <option>
           <name>XclFileSlave</name>
@@ -815,7 +814,7 @@
         </option>
         <option>
           <name>ModuleSummary</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>XlinkStackSize</name>
@@ -867,7 +866,7 @@
         </option>
         <option>
           <name>ExtraOutputFile</name>
-          <state>01bsp_radio_rx.a43</state>
+          <state>01bsp_radio.a43</state>
         </option>
         <option>
           <name>ExtraOutputFormat</name>
@@ -889,7 +888,7 @@
         </option>
         <option>
           <name>ListOutputFormat</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>BufferedTermOutput</name>
@@ -946,7 +945,7 @@
         </option>
         <option>
           <name>LinkMathLib</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>IlinkThreadsSlave</name>
@@ -997,7 +996,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state>$PROJ_FNAME$.ulp</state>
+          <state></state>
         </option>
         <option>
           <name>ULPStatus</name>
@@ -1181,7 +1180,7 @@
         <debug>0</debug>
         <option>
           <name>CCDefines</name>
-          <state>NDEBUG</state>
+          <state></state>
         </option>
         <option>
           <name>CCPreprocFile</name>
@@ -1286,7 +1285,7 @@
         </option>
         <option>
           <name>CCCompilerRuntimeInfo</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>IDoubleSize</name>
@@ -1294,11 +1293,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state></state>
-        </option>
-        <option>
-          <name>CCLibConfigHeader</name>
-          <state>1</state>
+          <state>$FILE_BNAME$.r43</state>
         </option>
         <option>
           <name>OCCR4Utilize</name>
@@ -1307,6 +1302,10 @@
         <option>
           <name>OCCR5Utilize</name>
           <state>0</state>
+        </option>
+        <option>
+          <name>CCLibConfigHeader</name>
+          <state>1</state>
         </option>
         <option>
           <name>IExtraOptionsCheck</name>
@@ -1367,11 +1366,11 @@
         <option>
           <name>CCOptStrategy</name>
           <version>0</version>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>CCOptLevelSlave</name>
-          <state>1</state>
+          <state>3</state>
         </option>
         <option>
           <name>CInput</name>
@@ -1413,11 +1412,11 @@
         </option>
         <option>
           <name>CCData16</name>
-          <state>DATA16</state>
+          <state>DATA</state>
         </option>
         <option>
           <name>CCData20</name>
-          <state>DATA20</state>
+          <state>DATA</state>
         </option>
         <option>
           <name>CCIntvec</name>
@@ -1473,7 +1472,7 @@
         </option>
         <option>
           <name>OCGuardCallsSlave</name>
-          <state>1</state>
+          <state>0</state>
         </option>
       </data>
     </settings>
@@ -1950,7 +1949,7 @@
         </option>
         <option>
           <name>LinkMathLib</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>IlinkThreadsSlave</name>
@@ -2016,25 +2015,22 @@
     </settings>
   </configuration>
   <group>
+    <name>application</name>
+    <file>
+      <name>$PROJ_DIR$\..\..\common\01bsp_radio_rx\01bsp_radio_rx.c</name>
+    </file>
+  </group>
+  <group>
     <name>bsp</name>
     <group>
       <name>boards</name>
       <group>
         <name>telosb</name>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\adc_sensor.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\adc_sensor.h</name>
-        </file>
-        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\board.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\board_info.h</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\cryptoengine.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\debugpins.c</name>
@@ -2049,9 +2045,6 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\sctimer.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\sensors.c</name>
-        </file>
-        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\spi.c</name>
         </file>
         <file>
@@ -2062,19 +2055,10 @@
         <name>$PROJ_DIR$\..\..\..\bsp\boards\board.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\crypto_engine.h</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\debugpins.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\eui64.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\i2c.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</name>
@@ -2083,19 +2067,7 @@
         <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\sctimer.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\sensors.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\spi.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\toolchain_defs.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\uart.h</name>
@@ -2106,24 +2078,21 @@
       <group>
         <name>cc2420</name>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\cc2420.c</name>
-        </file>
-        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\cc2420.h</name>
+        </file>
+		<file>
+          <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\cc2420.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\radio.c</name>
         </file>
       </group>
-      <group>
-        <name>sht11</name>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\chips\sht11\sht11.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\chips\sht11\sht11.h</name>
-        </file>
-      </group>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\chips\i2c.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\chips\spi.h</name>
+      </file>
     </group>
   </group>
   <group>
@@ -2131,18 +2100,6 @@
     <file>
       <name>$PROJ_DIR$\..\..\..\inc\opendefs.h</name>
     </file>
-  </group>
-  <group>
-    <name>projects</name>
-    <group>
-      <name>common</name>
-      <group>
-        <name>01bsp_radio_rx</name>
-        <file>
-          <name>$PROJ_DIR$\..\..\common\01bsp_radio_rx\01bsp_radio_rx.c</name>
-        </file>
-      </group>
-    </group>
   </group>
 </project>
 
