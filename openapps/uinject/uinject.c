@@ -167,6 +167,10 @@ void uinject_task_cb(void) {
     numCellsUsed = msf_getPreviousNumCellsUsed(CELLTYPE_TX);
     pkt->payload[0] = numCellsUsed;
 
+    packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
+    numCellsUsed = msf_getPreviousNumCellsUsed(CELLTYPE_RX);
+    pkt->payload[0] = numCellsUsed;
+
     packetfunctions_reserveHeaderSize(pkt,sizeof(uint16_t));
     pkt->payload[1] = (uint8_t)(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
     pkt->payload[0] = (uint8_t)(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
