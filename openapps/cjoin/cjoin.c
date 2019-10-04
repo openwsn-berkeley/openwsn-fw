@@ -110,7 +110,7 @@ void cjoin_schedule(void) {
     uint16_t delay;
 
     if (cjoin_getIsJoined() == FALSE) {
-        delay = 0x0fff + openrandom_get16b();
+        delay = 0xff;
 
         opentimers_scheduleIn(cjoin_vars.timerId,
                 (uint32_t) delay, // random wait from 0 to 65535ms
