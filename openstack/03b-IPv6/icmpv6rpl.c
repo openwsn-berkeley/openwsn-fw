@@ -841,8 +841,13 @@ void icmpv6rpl_timer_DAO_cb(opentimers_id_t id) {
 */
 void icmpv6rpl_timer_DAO_task(void) {
 
-    if(openrandom_get16b()<(0xffff/DAO_PORTION)){
+    if (icmpv6rpl_vars.daoSent == FALSE) {
+        // send DAO out as quick as possible for the first shot
         sendDAO();
+    } else {
+        if(openrandom_get16b()<(0xffff/DAO_PORTION)){
+            sendDAO();
+        }
     }
 }
 
