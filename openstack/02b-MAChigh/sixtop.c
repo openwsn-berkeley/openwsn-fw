@@ -571,6 +571,26 @@ bool debugPrint_kaPeriod(void) {
     return TRUE;
 }
 
+/**
+\brief Trigger this module to print status information, over serial.
+
+debugPrint_* functions are used by the openserial module to continuously print
+status information about several modules in the OpenWSN stack.
+
+\returns TRUE if this function printed something, FALSE otherwise.
+*/
+bool      debugPrint_sixtopStatus(void){
+    uint8_t output;
+
+    output = sixtop_vars.six2six_state;
+    openserial_printStatus(
+        STATUS_SIX2SIX,
+        (uint8_t*)&output,
+        sizeof(output)
+    );
+    return TRUE;
+}
+
 void sixtop_setIsResponseEnabled(bool isEnabled){
     sixtop_vars.isResponseEnabled = isEnabled;
 }

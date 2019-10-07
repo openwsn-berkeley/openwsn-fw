@@ -379,6 +379,10 @@ void task_openserial_debugPrint(void) {
             if (debugPrint_joined()==TRUE) {
                 break;
             }
+        case STATUS_SIX2SIX:
+            if (debugPrint_sixtopStatus()==TRUE) {
+                break;
+            }
         default:
             debugPrintCounter=0;
     }

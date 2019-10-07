@@ -147,6 +147,7 @@ void      task_sixtopNotifReceive(void);
 // debugging
 bool      debugPrint_myDAGrank(void);
 bool      debugPrint_kaPeriod(void);
+bool      debugPrint_sixtopStatus(void);
 // control
 void      sixtop_setIsResponseEnabled(bool isEnabled);
 
