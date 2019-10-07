@@ -683,10 +683,12 @@ void schedule_removeAllNegotiatedCellsToNeighbor(
 ){
     uint8_t i;
 
-    // remove all entries in schedule with previousHop address
+    // remove all entries to the specified neighbor in schedul
+    // except the autoCells
     for(i=0;i<MAXACTIVESLOTS;i++){
         if (
             packetfunctions_sameAddress(&(schedule_vars.scheduleBuf[i].neighbor),neighbor) &&
+            schedule_vars.scheduleBuf[i].isAutoCell == FALSE &&
             (
                 schedule_vars.scheduleBuf[i].type == CELLTYPE_TX ||
                 schedule_vars.scheduleBuf[i].type == CELLTYPE_RX
