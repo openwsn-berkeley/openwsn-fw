@@ -221,6 +221,15 @@ void radio_rfOff(void) {
    radio_vars.state = RADIOSTATE_RFOFF;
 }
 
+int8_t radio_getFrequencyOffset(void){
+
+    int8_t freq_offset;
+
+    freq_offset = HWREG(RFCORE_XREG_FREQEST);
+
+    return freq_offset;
+}
+
 //===== TX
 
 void radio_loadPacket(uint8_t* packet, uint16_t len) {

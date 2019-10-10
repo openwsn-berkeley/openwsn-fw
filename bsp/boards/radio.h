@@ -22,7 +22,7 @@
 \brief Current state of the radio.
 
 \note This radio driver is very minimal in that it does not follow a state machine.
-      It is up to the MAC layer to ensure that the different radio operations 
+      It is up to the MAC layer to ensure that the different radio operations
       are called in the righr order. The radio keeps a state for debugging purposes only.
 */
 typedef enum {
@@ -60,6 +60,7 @@ void                radio_reset(void);
 void                radio_setFrequency(uint8_t frequency);
 void                radio_rfOn(void);
 void                radio_rfOff(void);
+int8_t              radio_getFrequencyOffset(void);
 // TX
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
 void                radio_loadPacket_prepare(uint8_t* packet, uint16_t len);

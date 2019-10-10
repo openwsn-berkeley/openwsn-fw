@@ -85,7 +85,7 @@ while True:
         byte  = mote.read(1)
         rawFrame += [ord(byte)]
     
-    if rawFrame[-3:]==[0xff]*3 and len(rawFrame)>=8:
+    if rawFrame[-3:]==[0xff]*3 and len(rawFrame)>=9:
         
         for byte in rawFrame:
             if byte==XONXOFF_ESCAPE:
@@ -96,16 +96,18 @@ while True:
                     xonxoffEscaping=False
                 elif byte!=XON and byte!=XOFF:
                     rawFrame_decoded += [byte]
-        (rxpk_len,rxpk_num,rxpk_rssi,rxpk_lqi,rxpk_crc) = \
-            struct.unpack('>BBbBB', ''.join([chr(b) for b in rawFrame_decoded[-8:-3]]))
+        
+        (rxpk_len,rxpk_num,rxpk_rssi,rxpk_lqi,rxpk_crc, rxpk_freq_offset) = \
+            struct.unpack('>BBbBBb', ''.join([chr(b) for b in rawFrame_decoded[-9:-3]]))
             
         # debug info
-        output = 'len={0:<3} num={1:<3} rssi={2:<4} lqi={3:<3} crc={4}'.format(
+        output = 'len={0:<3} num={1:<3} rssi={2:<4} lqi={3:<3} crc={4} freq_offset={5:<4}'.format(
             rxpk_len,
             rxpk_num,
             rxpk_rssi,
             rxpk_lqi,
-            rxpk_crc
+            rxpk_crc,
+            rxpk_freq_offset
         )
         
         print output
