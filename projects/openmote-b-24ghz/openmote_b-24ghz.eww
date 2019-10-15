@@ -4,6 +4,9 @@
         <path>$WS_DIR$\01bsp_leds\01bsp_leds.ewp</path>
     </project>
     <project>
+        <path>$WS_DIR$\01bsp_radio\01bsp_radio.ewp</path>
+    </project>
+    <project>
         <path>$WS_DIR$\01bsp_radio_rx\01bsp_radio_rx.ewp</path>
     </project>
     <project>
@@ -11,6 +14,9 @@
     </project>
     <project>
         <path>$WS_DIR$\01bsp_sctimer\01bsp_sctimer.ewp</path>
+    </project>
+    <project>
+        <path>$WS_DIR$\01bsp_uart\01bsp_uart.ewp</path>
     </project>
     <project>
         <path>$WS_DIR$\02drv_openserial\02drv_openserial.ewp</path>
