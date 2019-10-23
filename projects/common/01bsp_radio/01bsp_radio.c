@@ -31,7 +31,7 @@ end of frame event), it will turn on its error LED.
 #define TIMER_PERIOD    (0xffff>>4)    ///< 0xffff = 2s@32kHz
 #define ID              0x99           ///< byte sent in the packets
 
-uint8_t stringToSend[]  = "+002 Ptest\r\n";
+uint8_t stringToSend[]  = "+002 Ptest.24.00.12\n";
 
 //=========================== variables =======================================
 
@@ -86,7 +86,6 @@ uint8_t  cb_uart_rx(void);
 */
 int mote_main(void) {
     uint8_t i;
-    uint8_t j;
 
     uint8_t freq_offset;
     uint8_t sign;
@@ -207,14 +206,10 @@ int mote_main(void) {
                         stringToSend[i++] = ' ';
 
                         stringToSend[i++] = 'P';
-                        j = 0;
-                        stringToSend[i++] = app_vars.packet[j++];
-                        stringToSend[i++] = app_vars.packet[j++];
-                        stringToSend[i++] = app_vars.packet[j++];
-                        stringToSend[i++] = app_vars.packet[j++];
+                        memcpy(&stringToSend[i],&app_vars.packet[0],sizeof(stringToSend)-i-1);
 
-                        stringToSend[i++] = '\r';
-                        stringToSend[i++] = '\n';
+                        stringToSend[sizeof(stringToSend)-2] = '\r';
+                        stringToSend[sizeof(stringToSend)-1] = '\n';
 
                         // send string over UART
                         if (app_vars.uartDone == 1) {
