@@ -25,13 +25,13 @@ end of frame event), it will turn on its error LED.
 
 //=========================== defines =========================================
 
-#define LENGTH_PACKET   30+LENGTH_CRC ///< maximum length is 127 bytes
+#define LENGTH_PACKET   30+LENGTH_CRC  ///< maximum length is 127 bytes
 #define LEN_PKT_TO_SEND 20+LENGTH_CRC
 #define CHANNEL         11             ///< 11=2.405GHz
 #define TIMER_PERIOD    (0xffff>>4)    ///< 0xffff = 2s@32kHz
 #define ID              0x99           ///< byte sent in the packets
 
-uint8_t stringToSend[]  = "+002 Ptest.24.00.12\n";
+uint8_t stringToSend[]  = "+002 Ptest.24.00.12.-010\n";
 
 //=========================== variables =======================================
 
@@ -206,7 +206,24 @@ int mote_main(void) {
                         stringToSend[i++] = ' ';
 
                         stringToSend[i++] = 'P';
-                        memcpy(&stringToSend[i],&app_vars.packet[0],sizeof(stringToSend)-i-1);
+                        memcpy(&stringToSend[i],&app_vars.packet[0],14);
+                        i += 14;
+
+                        sign = (app_vars.rxpk_rssi & 0x80) >> 7;
+                        if (sign){
+                            read = 0xff - (uint8_t)(app_vars.rxpk_rssi) + 1;
+                        } else {
+                            read = app_vars.rxpk_rssi;
+                        }
+
+                        if (sign) {
+                            stringToSend[i++] = '-';
+                        } else {
+                            stringToSend[i++] = '+';
+                        }
+                        stringToSend[i++] = '0'+read/100;
+                        stringToSend[i++] = '0'+read/10;
+                        stringToSend[i++] = '0'+read%10;
 
                         stringToSend[sizeof(stringToSend)-2] = '\r';
                         stringToSend[sizeof(stringToSend)-1] = '\n';
@@ -247,8 +264,13 @@ int mote_main(void) {
 
                     // prepare packet
                     app_vars.packet_len = sizeof(app_vars.packet);
-                    for (i=0;i<app_vars.packet_len;i++) {
-                        app_vars.packet[i] = ID;
+                    i = 0;
+                    app_vars.packet[i++] = 't';
+                    app_vars.packet[i++] = 'e';
+                    app_vars.packet[i++] = 's';
+                    app_vars.packet[i++] = 't';
+                    while (i<app_vars.packet_len) {
+                        app_vars.packet[i++] = ID;
                     }
 
                     // start transmitting packet
