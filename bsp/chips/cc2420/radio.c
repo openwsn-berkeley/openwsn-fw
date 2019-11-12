@@ -23,6 +23,18 @@ typedef struct {
 
 radio_vars_t radio_vars;
 
+/* TX Power dBm lookup table. Values from CC2420 datasheet */
+static const radio_output_power_config_t cc2420_output_power[] = {
+   {   0, 31 },
+   {  -1, 27 },
+   {  -3, 23 },
+   {  -5, 19 },
+   {  -7, 15 },
+   { -10, 11 },
+   { -15, 7  },
+   { -25, 3  },
+};
+
 //=========================== public ==========================================
 
 //===== admin
@@ -30,16 +42,16 @@ radio_vars_t radio_vars;
 void radio_init(void) {
    // clear variables
    memset(&radio_vars,0,sizeof(radio_vars_t));
-   
+
    // change state
    radio_vars.state          = RADIOSTATE_STOPPED;
-   
+
    // reset radio
    radio_reset();
-   
+
    // change state
    radio_vars.state          = RADIOSTATE_RFOFF;
-   
+
 }
 
 void radio_setStartFrameCb(radio_capture_cbt cb) {
@@ -57,19 +69,19 @@ void radio_reset(void) {
    cc2420_MDMCTRL0_reg_t cc2420_MDMCTRL0_reg;
    cc2420_TXCTRL_reg_t   cc2420_TXCTRL_reg;
    cc2420_RXCTRL1_reg_t  cc2420_RXCTRL1_reg;
-   
+
    // set radio VREG pin high
    PORT_PIN_RADIO_VREG_HIGH();
    for (delay=0xffff;delay>0;delay--);           // max. VREG start-up time is 0.6ms
-   
+
    // set radio RESET pin low
    PORT_PIN_RADIO_RESET_LOW();
    for (delay=0xffff;delay>0;delay--);
-   
+
    // set radio RESET pin high
    PORT_PIN_RADIO_RESET_HIGH();
    for (delay=0xffff;delay>0;delay--);
-   
+
    // disable address recognition
    cc2420_MDMCTRL0_reg.PREAMBLE_LENGTH      = 2; // 3 leading zero's (IEEE802.15.4 compliant)
    cc2420_MDMCTRL0_reg.AUTOACK              = 0;
@@ -85,7 +97,7 @@ void radio_reset(void) {
       &radio_vars.radioStatusByte,
       *(uint16_t*)&cc2420_MDMCTRL0_reg
    );
-   
+
    // speed up time to TX
    cc2420_TXCTRL_reg.PA_LEVEL               = 31;// max. TX power (~0dBm)
    cc2420_TXCTRL_reg.reserved_w1            = 1;
@@ -99,7 +111,7 @@ void radio_reset(void) {
       &radio_vars.radioStatusByte,
       *(uint16_t*)&cc2420_TXCTRL_reg
    );
-   
+
    // apply correction recommended in datasheet
    cc2420_RXCTRL1_reg.RXMIX_CURRENT         = 2;
    cc2420_RXCTRL1_reg.RXMIX_VCM             = 1;
@@ -123,10 +135,10 @@ void radio_reset(void) {
 
 void radio_setFrequency(uint8_t frequency) {
    cc2420_FSCTRL_reg_t cc2420_FSCTRL_reg;
-   
+
    // change state
    radio_vars.state = RADIOSTATE_SETTING_FREQUENCY;
-   
+
    cc2420_FSCTRL_reg.FREQ         = frequency-11;
    cc2420_FSCTRL_reg.FREQ        *= 5;
    cc2420_FSCTRL_reg.FREQ        += 357;
@@ -135,18 +147,49 @@ void radio_setFrequency(uint8_t frequency) {
    cc2420_FSCTRL_reg.CAL_RUNNING  = 0;
    cc2420_FSCTRL_reg.CAL_DONE     = 0;
    cc2420_FSCTRL_reg.LOCK_THR     = 1;
-   
+
    cc2420_spiWriteReg(
       CC2420_FSCTRL_ADDR,
       &radio_vars.radioStatusByte,
       *(uint16_t*)&cc2420_FSCTRL_reg
    );
-   
+
    // change state
    radio_vars.state = RADIOSTATE_FREQUENCY_SET;
 }
 
-void radio_rfOn(void) {   
+// configure the radio to output at least @power dBm, or the maximum available power
+void radio_setTxPower(int8_t power) {
+   cc2420_TXCTRL_reg_t   cc2420_TXCTRL_reg;
+   uint8_t               i;
+   uint8_t               reg_val;
+
+   // loop to find at-least :power: dBm in the look-up table
+   // if the max output power of a chip is higher than :power:, we configure the maximum
+   reg_val = cc2420_output_power[0].register_val;
+   for(i = sizeof(cc2420_output_power) / sizeof(radio_output_power_config_t) - 1; i >= 0; --i) {
+     if(power <= cc2420_output_power[i].power_dbm) {
+       reg_val = cc2420_output_power[i].register_val;
+       break;
+     }
+   }
+
+   // speed up time to TX
+   cc2420_TXCTRL_reg.PA_LEVEL               = reg_val;
+   cc2420_TXCTRL_reg.reserved_w1            = 1;
+   cc2420_TXCTRL_reg.PA_CURRENT             = 3;
+   cc2420_TXCTRL_reg.TXMIX_CURRENT          = 0;
+   cc2420_TXCTRL_reg.TXMIX_CAP_ARRAY        = 0;
+   cc2420_TXCTRL_reg.TX_TURNAROUND          = 0; // faster STXON->SFD timing (128us)
+   cc2420_TXCTRL_reg.TXMIXBUF_CUR           = 2;
+   cc2420_spiWriteReg(
+      CC2420_TXCTRL_ADDR,
+      &radio_vars.radioStatusByte,
+      *(uint16_t*)&cc2420_TXCTRL_reg
+   );
+}
+
+void radio_rfOn(void) {
    cc2420_spiStrobe(CC2420_SXOSCON, &radio_vars.radioStatusByte);
    while (radio_vars.radioStatusByte.xosc16m_stable==0) {
       cc2420_spiStrobe(CC2420_SNOP, &radio_vars.radioStatusByte);
@@ -154,17 +197,17 @@ void radio_rfOn(void) {
 }
 
 void radio_rfOff(void) {
-   
+
    // change state
    radio_vars.state = RADIOSTATE_TURNING_OFF;
-   
+
    cc2420_spiStrobe(CC2420_SRFOFF, &radio_vars.radioStatusByte);
    // poipoipoi wait until off
-   
+
    // wiggle debug pin
    debugpins_radio_clr();
    leds_radio_off();
-   
+
    // change state
    radio_vars.state = RADIOSTATE_RFOFF;
 }
@@ -180,10 +223,10 @@ int8_t radio_getFrequencyOffset(void){
 void radio_loadPacket(uint8_t* packet, uint16_t len) {
    // change state
    radio_vars.state = RADIOSTATE_LOADING_PACKET;
-   
+
    cc2420_spiStrobe(CC2420_SFLUSHTX, &radio_vars.radioStatusByte);
    cc2420_spiWriteFifo(&radio_vars.radioStatusByte, packet, len, CC2420_TXFIFO_ADDR);
-   
+
    // change state
    radio_vars.state = RADIOSTATE_PACKET_LOADED;
 }
@@ -191,13 +234,13 @@ void radio_loadPacket(uint8_t* packet, uint16_t len) {
 void radio_txEnable(void) {
    // change state
    radio_vars.state = RADIOSTATE_ENABLING_TX;
-   
+
    // wiggle debug pin
    debugpins_radio_set();
    leds_radio_on();
-   
+
    // I don't fully understand how the CC2420_STXCA the can be used here.
-   
+
    // change state
    radio_vars.state = RADIOSTATE_TX_ENABLED;
 }
@@ -205,7 +248,7 @@ void radio_txEnable(void) {
 void radio_txNow(void) {
    // change state
    radio_vars.state = RADIOSTATE_TRANSMITTING;
-   
+
    cc2420_spiStrobe(CC2420_STXON, &radio_vars.radioStatusByte);
 }
 
@@ -242,10 +285,10 @@ void radio_getReceivedFrame(
       uint8_t* lqi,
       bool*    crc
    ) {
-   
+
    // read the received packet from the RXFIFO
    cc2420_spiReadRxFifo(&radio_vars.radioStatusByte, bufRead, lenRead, maxBufLen);
-   
+
    // On reception, when MODEMCTRL0.AUTOCRC is set, the CC2420 replaces the
    // received CRC by:
    // - [1B] the rssi, a signed value. The actual value in dBm is that - 45.

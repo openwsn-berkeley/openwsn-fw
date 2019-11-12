@@ -19,8 +19,8 @@ static const uint8_t ipAddr_ipsoRD[]    = {0x26, 0x07, 0xf7, 0x40, 0x00, 0x00, 0
 static const uint8_t ipAddr_motesEecs[] = {0x20, 0x01, 0x04, 0x70, 0x00, 0x66, 0x00, 0x19, \
                                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02};
 static const uint8_t ipAddr_local[]     = {0x26, 0x07, 0xf1, 0x40, 0x04, 0x00, 0x10, 0x36, \
-                                           0x4d, 0xcd, 0xab, 0x54, 0x81, 0x99, 0xc1, 0xf7}; 
-                                           
+                                           0x4d, 0xcd, 0xab, 0x54, 0x81, 0x99, 0xc1, 0xf7};
+
 static const uint8_t ipAddr_motedata[]  = {0x20, 0x01, 0x04, 0x70, 0x00, 0x66, 0x00, 0x17, \
                                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02};
 
@@ -115,6 +115,7 @@ typedef enum {
    COAP_OPTION_NUM_PROXYSCHEME         = 39,
    COAP_OPTION_NUM_OBJECTSECURITY      = 21,
    COAP_OPTION_NUM_STATELESSPROXY      = 40,
+   COAP_OPTION_NUM_NORESPONSE          = 258, // RFC7967
 } coap_option_t;
 
 typedef enum {
@@ -160,18 +161,18 @@ typedef struct {
 typedef struct {
     // common context
    uint8_t               aeadAlgorithm;
-    // sender context 
+    // sender context
    uint8_t               senderID[OSCOAP_MAX_ID_LEN];
    uint8_t               senderIDLen;
    uint8_t               senderKey[AES_CCM_16_64_128_KEY_LEN];
    uint8_t               senderIV[AES_CCM_16_64_128_IV_LEN];
    uint16_t              sequenceNumber;
-   // recipient context 
+   // recipient context
    uint8_t               recipientID[OSCOAP_MAX_ID_LEN];
    uint8_t               recipientIDLen;
    uint8_t               recipientKey[AES_CCM_16_64_128_KEY_LEN];
    uint8_t               recipientIV[AES_CCM_16_64_128_IV_LEN];
-   replay_window_t       window; 
+   replay_window_t       window;
 } oscoap_security_context_t;
 
 typedef owerror_t (*callbackRx_cbt)(OpenQueueEntry_t* msg,
@@ -190,7 +191,7 @@ struct coap_resource_desc_t {
    uint8_t                      path1len;
    uint8_t*                     path1val;
    uint8_t                      componentID;
-   oscoap_security_context_t*   securityContext;     
+   oscoap_security_context_t*   securityContext;
    bool                         discoverable;
    callbackRx_cbt               callbackRx;
    callbackSendDone_cbt         callbackSendDone;
@@ -198,7 +199,7 @@ struct coap_resource_desc_t {
    coap_resource_desc_t*        next;
 };
 
-typedef struct { 
+typedef struct {
    uint8_t               key[16];
    uint8_t               buffer[STATELESS_PROXY_STATE_LEN + STATELESS_PROXY_TAG_LEN];
    uint8_t               sequenceNumber;
@@ -238,14 +239,14 @@ owerror_t     opencoap_send(
 // option handling
 coap_option_class_t opencoap_get_option_class(coap_option_t type);
 uint8_t opencoap_options_encode(OpenQueueEntry_t* msg,
-    coap_option_iht* options, 
-    uint8_t optionsLen, 
+    coap_option_iht* options,
+    uint8_t optionsLen,
     coap_option_class_t class);
 uint8_t opencoap_options_parse(uint8_t* buffer,
     uint8_t bufferLen,
     coap_option_iht* options,
     uint8_t* optionsLen);
-uint8_t opencoap_find_option(coap_option_iht* array, uint8_t arrayLen, coap_option_t option, uint8_t* startIndex); 
+uint8_t opencoap_find_option(coap_option_iht* array, uint8_t arrayLen, coap_option_t option, uint8_t* startIndex);
 
 /**
 \}

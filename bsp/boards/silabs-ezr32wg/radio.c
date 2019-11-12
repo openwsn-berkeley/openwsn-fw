@@ -117,6 +117,10 @@ void radio_setFrequency(uint8_t frequency) {
 	radio_vars.state = RADIOSTATE_FREQUENCY_SET;
 }
 
+void radio_setTxPower(int8_t power) {
+    // TODO
+}
+
 void radio_rfOn(void) {
 
 }

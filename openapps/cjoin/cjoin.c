@@ -21,7 +21,8 @@
 //=========================== defines =========================================
 
 /// inter-packet period (in ms)
-#define TIMEOUT                 60000
+#define RETRANSMISSION_TIMEOUT                 60000
+#define POLLING_PERIOD			       1000
 
 const uint8_t cjoin_path0[] = "j";
 
@@ -107,13 +108,11 @@ void cjoin_init_security_context(void) {
 }
 
 void cjoin_schedule(void) {
-    uint16_t delay;
 
     if (cjoin_getIsJoined() == FALSE) {
-        delay = openrandom_get16b();
 
         opentimers_scheduleIn(cjoin_vars.timerId,
-                (uint32_t) delay, // random wait from 0 to 65535ms
+                (uint32_t) POLLING_PERIOD,
                 TIME_MS,
                 TIMER_PERIODIC,
                 cjoin_timer_cb
@@ -166,7 +165,7 @@ void cjoin_retransmission_cb(opentimers_id_t id) {
     // task mode by opentimer already
     opentimers_scheduleIn(
         cjoin_vars.timerId,
-        (uint32_t) TIMEOUT,
+        (uint32_t) RETRANSMISSION_TIMEOUT,
         TIME_MS,
         TIMER_ONESHOT,
         cjoin_retransmission_cb
@@ -219,7 +218,7 @@ void cjoin_task_cb(void) {
     // arm the retransmission timer
     opentimers_scheduleIn(
         cjoin_vars.timerId,
-        (uint32_t) TIMEOUT,
+        (uint32_t) RETRANSMISSION_TIMEOUT,
         TIME_MS,
         TIMER_ONESHOT,
         cjoin_retransmission_cb
@@ -331,8 +330,6 @@ bool cjoin_getIsJoined(void) {
 }
 
 void cjoin_setIsJoined(bool newValue) {
-    uint8_t array[5];
-    asn_t joinAsn;
 
     if (cjoin_vars.isJoined == newValue) {
         return;
@@ -340,19 +337,13 @@ void cjoin_setIsJoined(bool newValue) {
 
     cjoin_vars.isJoined = newValue;
 
-    // Update Join ASN value
-    ieee154e_getAsn(array);
-    joinAsn.bytes0and1           = ((uint16_t) array[1] << 8) | ((uint16_t) array[0]);
-    joinAsn.bytes2and3           = ((uint16_t) array[3] << 8) | ((uint16_t) array[2]);
-    joinAsn.byte4                = array[4];
-
-    idmanager_setJoinAsn(&joinAsn);
-
     if (newValue == TRUE) {
         // log the info
         openserial_printInfo(COMPONENT_CJOIN, ERR_JOINED,
                              (errorparameter_t)0,
                              (errorparameter_t)0);
+
+        openserial_printBenchmark(BENCHMARK_EVENT_JOINED, NULL, 0);
     }
 }
 

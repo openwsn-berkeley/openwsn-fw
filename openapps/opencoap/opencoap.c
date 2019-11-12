@@ -114,6 +114,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    coap_option_iht*          objectSecurity;
    coap_option_iht*          proxyScheme;
    coap_option_iht*          statelessProxy;
+   bool                      noResponse; // RFC7967 flag supressing all responses
    uint16_t                  rcvdSequenceNumber;
    uint8_t*                  rcvdKid;
    uint8_t                   rcvdKidLen;
@@ -181,6 +182,14 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
        opencoap_handle_stateless_proxy(msg, &coap_header, coap_incomingOptions, coap_incomingOptionsLen);
        openqueue_freePacketBuffer(msg);
        return;
+   }
+
+   //== No Response option
+   option_count = opencoap_find_option(coap_incomingOptions, coap_incomingOptionsLen, COAP_OPTION_NUM_NORESPONSE, &option_index);
+   if(option_count >= 1) {
+     noResponse = TRUE;
+   } else {
+     noResponse = FALSE;
    }
 
    //== Proxy Scheme option
@@ -425,6 +434,15 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
 
       // call the resource's callback
       outcome = temp_desc->callbackRx(msg,&coap_header,&coap_incomingOptions[0], coap_outgoingOptions, &coap_outgoingOptionsLen);
+
+      if (noResponse) {
+          // free the received packet
+          openqueue_freePacketBuffer(msg);
+          // stop here: we will not respond to a request with No Response option set
+          // TODO implement noResponse granularity as per RFC7967
+          return;
+      }
+
       if (outcome == E_FAIL) {
             securityReturnCode = COAP_CODE_RESP_METHODNOTALLOWED;
       }
@@ -771,6 +789,7 @@ coap_option_class_t opencoap_get_option_class(coap_option_t type) {
         case COAP_OPTION_NUM_URIQUERY:
         case COAP_OPTION_NUM_ACCEPT:
         case COAP_OPTION_NUM_LOCATIONQUERY:
+        case COAP_OPTION_NUM_NORESPONSE:
             return COAP_OPTION_CLASS_E;
         // class I options none supported
 

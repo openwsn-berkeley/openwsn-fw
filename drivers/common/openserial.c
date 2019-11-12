@@ -28,6 +28,9 @@
 #include "icmpv6echo.h"
 #include "msf.h"
 #include "debugpins.h"
+#include "radio.h"
+#include "packetfunctions.h"
+#include "eui64.h"
 
 //=========================== variables =======================================
 
@@ -120,6 +123,11 @@ void openserial_init(void) {
 void openserial_register(openserial_rsvpt* rsvp) {
     // FIXME: register multiple commands (linked list)
     openserial_vars.registeredCmd = rsvp;
+}
+
+// register a callback for sendPacket command
+void openserial_registerSendPacketCb(callbackSendPacket_cbt cb) {
+    openserial_vars.callbackSendPacket = cb;
 }
 
 //===== transmitting
@@ -262,6 +270,48 @@ owerror_t openserial_printSniffedPacket(uint8_t* buffer, uint8_t length, uint8_t
     return E_SUCCESS;
 }
 
+owerror_t openserial_printBenchmark(
+    uint8_t             statusElement,
+    uint8_t*            buffer,
+    uint8_t             length
+) {
+    uint8_t i;
+    uint8_t asn[5];
+    uint8_t source[8];
+
+    // retrieve ASN
+    ieee154e_getAsn(asn);
+    eui64_get(source);
+
+    outputHdlcOpen();
+
+    outputHdlcWrite(SERFRAME_MOTE2PC_BENCHMARK);
+
+    for (i=0;i<8;i++){
+        outputHdlcWrite(source[i]);
+    }
+
+    // event
+    outputHdlcWrite(statusElement);
+
+    // timestamp
+    outputHdlcWrite(asn[0]);
+    outputHdlcWrite(asn[1]);
+    outputHdlcWrite(asn[2]);
+    outputHdlcWrite(asn[3]);
+    outputHdlcWrite(asn[4]);
+
+    for (i=0;i<length;i++){
+        outputHdlcWrite(buffer[i]);
+    }
+    outputHdlcClose();
+
+    // start TX'ing
+    openserial_flush();
+
+    return E_SUCCESS;
+}
+
 owerror_t openserial_print_uint32_t(uint32_t value) {
 #ifdef OPENSERIAL_PRINTF
     uint8_t  i;
@@ -373,10 +423,6 @@ void task_openserial_debugPrint(void) {
             }
         case STATUS_KAPERIOD:
             if (debugPrint_kaPeriod()==TRUE) {
-                break;
-            }
-        case STATUS_JOINED:
-            if (debugPrint_joined()==TRUE) {
                 break;
             }
         default:
@@ -724,10 +770,11 @@ void openserial_handleCommands(void){
 
     uint8_t  code,cellOptions,numCell,listOffset,maxListLen;
     uint8_t  ptr;
+
     cellInfo_ht celllist_add[CELLLIST_MAX_LEN];
     cellInfo_ht celllist_delete[CELLLIST_MAX_LEN];
 
-    open_addr_t neighbor;
+    open_addr_t address;
     bool        foundNeighbor;
 
     ptr = 0;
@@ -793,7 +840,7 @@ void openserial_handleCommands(void){
         case COMMAND_SET_6P_LIST:
         case COMMAND_SET_6P_CLEAR:
             // get preferred parent
-            foundNeighbor =icmpv6rpl_getPreferredParentEui64(&neighbor);
+            foundNeighbor =icmpv6rpl_getPreferredParentEui64(&address);
             if (foundNeighbor==FALSE) {
                 break;
             }
@@ -801,7 +848,7 @@ void openserial_handleCommands(void){
             openserial_get6pInfo(commandId,&code,&cellOptions,&numCell,celllist_add,celllist_delete,&listOffset,&maxListLen,ptr,commandLen);
             sixtop_request(
                 code,              // code
-                &neighbor,         // neighbor
+                &address,          // neighbor
                 numCell,           // number cells
                 cellOptions,       // cellOptions
                 celllist_add,      // celllist to add
@@ -849,6 +896,26 @@ void openserial_handleCommands(void){
         case COMMAND_SET_JOIN_KEY:
             if (commandLen != 16) { break; }
             idmanager_setJoinKey(&openserial_vars.inputBuf[ptr]);
+            break;
+        case COMMAND_SET_TX_POWER:
+            if (commandLen != 1) { break; }
+            comandParam_8 = openserial_vars.inputBuf[ptr];
+            radio_setTxPower((int8_t) comandParam_8);
+            break;
+        case COMMAND_SEND_PACKET:
+            if (commandLen != 16) {
+                openserial_printError(
+                    COMPONENT_OPENSERIAL,
+                    ERR_INVALIDSERIALFRAME,
+                    (errorparameter_t)0,
+                    (errorparameter_t)0
+                );
+                break;
+            }
+
+            if (openserial_vars.callbackSendPacket) {
+                openserial_vars.callbackSendPacket(&openserial_vars.inputBuf[ptr], 16);
+            }
             break;
         default:
             // wrong command ID

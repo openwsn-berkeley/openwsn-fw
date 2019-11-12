@@ -883,6 +883,8 @@ port_INLINE void activity_ti1ORri1(void) {
                                   (errorparameter_t)ieee154e_vars.slotOffset,
                                   (errorparameter_t)0);
 
+	    openserial_printBenchmark(BENCHMARK_EVENT_DESYNCHRONIZED, NULL, 0);
+
             // update the statistics
             ieee154e_stats.numDeSync++;
 
@@ -2708,6 +2710,7 @@ void changeIsSync(bool newIsSync) {
     if (ieee154e_vars.isSync==TRUE) {
         leds_sync_on();
         resetStats();
+        openserial_printBenchmark(BENCHMARK_EVENT_SYNCHRONIZED, NULL, 0);
     } else {
         leds_sync_off();
         schedule_resetBackoff();

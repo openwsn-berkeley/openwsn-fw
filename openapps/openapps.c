@@ -12,6 +12,7 @@
 #include "cinfo.h"
 #include "cleds.h"
 #include "cjoin.h"
+#include "cbenchmark.h"
 #include "cwellknown.h"
 #include "rrt.h"
 // UDP
@@ -39,6 +40,7 @@ void openapps_init(void) {
    cleds__init();
    cjoin_init();
    cwellknown_init();
+   cbenchmark_init();
    //rrt_init();
 
    // UDP

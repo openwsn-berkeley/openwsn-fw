@@ -34,6 +34,7 @@
 #include "c6t_obj.h"
 #include "cexample_obj.h"
 #include "cjoin_obj.h"
+#include "cbenchmark_obj.h"
 #include "cinfo_obj.h"
 #include "cleds_obj.h"
 #include "cstorm_obj.h"
@@ -235,6 +236,7 @@ struct OpenMote {
    rrt_vars_t           rrt_vars;
    //tohlone_vars_t       tohlone_vars;
    cjoin_vars_t         cjoin_vars;
+   cbenchmark_vars_t    cbenchmark_vars;
    uecho_vars_t         uecho_vars;
    uinject_vars_t       uinject_vars;
    userialbridge_vars_t userialbridge_vars;

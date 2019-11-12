@@ -48,6 +48,7 @@
 #define SERFRAME_MOTE2PC_CRITICAL                ((uint8_t)'C')
 #define SERFRAME_MOTE2PC_SNIFFED_PACKET          ((uint8_t)'P')
 #define SERFRAME_MOTE2PC_PRINTF                  ((uint8_t)'F')
+#define SERFRAME_MOTE2PC_BENCHMARK               ((uint8_t)'B')
 
 // frames sent PC->mote
 #define SERFRAME_PC2MOTE_SETROOT                 ((uint8_t)'R')
@@ -80,14 +81,18 @@ enum {
     COMMAND_SET_UINJECTPERIOD     = 17,
     COMMAND_SET_ECHO_REPLY_STATUS = 18,
     COMMAND_SET_JOIN_KEY          = 19,
-    COMMAND_MAX                   = 20,
+    COMMAND_SET_TX_POWER          = 20,
+    COMMAND_SEND_PACKET           = 21,
+    COMMAND_MAX                   = 22,
 };
+
 
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
 
 typedef void (*openserial_cbt)(void);
+typedef void (*callbackSendPacket_cbt)(uint8_t *buf, uint8_t bufLen);
 
 typedef struct _openserial_rsvpt {
     uint8_t                       cmdId; ///< serial command (e.g. 'B')
@@ -103,6 +108,7 @@ typedef struct {
     openserial_rsvpt*   registeredCmd;
     uint8_t             reset_timerId;
     uint8_t             debugPrint_timerId;
+    callbackSendPacket_cbt callbackSendPacket;
     // input
     uint8_t             inputBuf[SERIAL_INPUT_BUFFER_SIZE];
     uint8_t             inputBufFillLevel;
@@ -121,6 +127,7 @@ typedef struct {
 // admin
 void openserial_init(void);
 void openserial_register(openserial_rsvpt* rsvp);
+void openserial_registerSendPacketCb(callbackSendPacket_cbt cb);
 
 // transmitting
 owerror_t openserial_printStatus(
@@ -154,6 +161,11 @@ owerror_t openserial_printSniffedPacket(
     uint8_t*            buffer,
     uint8_t             length,
     uint8_t             channel
+);
+owerror_t openserial_printBenchmark(
+    uint8_t             statusElement,
+    uint8_t*            buffer,
+    uint8_t             length
 );
 
 void      task_openserial_debugPrint(void);

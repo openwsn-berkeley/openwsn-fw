@@ -62,7 +62,7 @@ to return the board's description.
 #define PORT_maxTxAckPrepare                50    //  1525us (not measured)
 
 // radio speed related
-#define PORT_delayTx                        18    //   549us (not measured)
+#define PORT_delayTx                        8    //   549us (not measured)
 #define PORT_delayRx                        0     //     0us (can not measure)
 // radio watchdog
 

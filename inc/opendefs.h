@@ -107,9 +107,20 @@ enum {
    STATUS_BACKOFF                      =  7,
    STATUS_QUEUE                        =  8,
    STATUS_NEIGHBORS                    =  9,
-   STATUS_KAPERIOD                     = 10,
-   STATUS_JOINED                       = 11,
-   STATUS_MAX                          = 12,
+   STATUS_KAPERIOD                     =  10,
+   STATUS_MAX                          =  11,
+};
+
+// benchmarking events
+enum {
+   BENCHMARK_EVENT_PACKETSENT          =   0,
+   BENCHMARK_EVENT_PACKETRECEIVED      =   1,
+   BENCHMARK_EVENT_SYNCHRONIZED        =   2,
+   BENCHMARK_EVENT_JOINED              =   3,
+   BENCHMARK_EVENT_BANDWIDTHASSIGNED   =   4,
+   BENCHMARK_EVENT_PACKETSENTDAGROOT   =   5, // special event to log the asn when dag root sent the packet
+   BENCHMARK_EVENT_DESYNCHRONIZED      =   6,
+   BENCHMARK_EVENT_MAX                 =   7,
 };
 
 //component identifiers
@@ -172,6 +183,7 @@ enum {
    COMPONENT_UEXPIRATION               = 0x27,
    COMPONENT_UMONITOR                  = 0x28,
    COMPONENT_CINFRARED                 = 0x29,
+   COMPONENT_CBENCHMARK                = 0x2a,
 };
 
 /**
@@ -322,6 +334,7 @@ typedef struct {
    open_addr_t   l3_destinationAdd;                             // 128b IPv6 destination (down stack)
    open_addr_t   l3_sourceAdd;                                  // 128b IPv6 source address
    bool          l3_useSourceRouting;                           // TRUE when the packet goes downstream
+   uint8_t       l3_hopLimit;                                   // Value of the hop limit field
    //l2
    owerror_t     l2_sendDoneError;                              // outcome of trying to send this packet
    open_addr_t   l2_nextORpreviousHop;                          // 64b IEEE802.15.4 next (down stack) or previous (up) hop address
