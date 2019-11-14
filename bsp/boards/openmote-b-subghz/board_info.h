@@ -57,7 +57,7 @@
 #define PORT_PIN_RADIO_RESET_HIGH()    // nothing
 #define PORT_PIN_RADIO_RESET_LOW()     // nothing
 
-#define SLOTDURATION 20                // in miliseconds: default is 20 ms. Use 120 ms for SubGHz band with FSK.
+#define SLOTDURATION 120                // in miliseconds: default is 20 ms. Use 120 ms for SubGHz band with FSK.
 
 //===== IEEE802154E timing
 
