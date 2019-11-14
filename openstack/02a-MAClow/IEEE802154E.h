@@ -36,19 +36,24 @@ static const uint8_t ebIEsBytestream[] = {
 #define EB_SLOTFRAME_NUMLINK_OFFSET 22
 
 #define EB_IE_LEN                   28
-
 #define NUM_CHANNELS                16 // number of channels to channel hop on
 #define TXRETRIES                   15 // number of MAC retries before declaring failed
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to successfully synchronize
 #define US_PER_TICK                 30 // number of us per 32kHz clock tick
-#define EB_PORTION                  10 // set EB on minimal cell for 1/EB_PORTION portion
 #define MAXKAPERIOD               1000 // in slots: 1500@20ms per slot -> ~30 seconds. Max value used by adaptive synchronization.
 #define DESYNCTIMEOUT             1750 // in slots: 1750@20ms per slot -> ~35 seconds. A larger DESYNCTIMEOUT is needed if using a larger KATIMEOUT.
 #define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"
 #define LENGTH_IEEE154_MAX         128 // max length of a valid radio packet
 #define DUTY_CYCLE_WINDOW_LIMIT    (0xFFFFFFFF>>1) // limit of the dutycycle window
 #define SERIALINHIBITGUARD          32 // 32@32kHz ~ 1ms
+
+// set EB on minimal cell for 1/EB_PORTION portion
+#if SLOTDURATION==120                 
+#define EB_PORTION                   4 // experimental: use higher porability for large slot size to expedite synchronization
+#else
+#define EB_PORTION                  10 // default value is 10 for small slot duration such as 20ms
+#endif
 
 //15.4e information elements related
 #define IEEE802154E_PAYLOAD_DESC_LEN_SHIFT                 0x04
@@ -164,13 +169,33 @@ enum ieee154e_atomicdurations_enum {
    TsLongGT                  =   36,                  //  1100us
    TsTxAckDelay              =   33,                  //  1000us
    TsShortGT                 =   13,                  //   500us, The standardlized value for this is 400/2=200us(7ticks). Currectly 7 doesn't work for short packet, change it back to 7 when found the problem.
+      // radio watchdog
+   wdRadioTx                 =   45,                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
+   wdDataDuration            =  164,                  //   5000us (measured 4280us with max payload) >> Mina original is 164
+   wdAckDuration             =   98,                  //  3000us (measured 1000us)>> Mina original 98 
 #endif
 #if SLOTDURATION==20
    TsTxOffset                =  171,                  //  5215us
    TsLongGT                  =   43,                  //  1300us
    TsTxAckDelay              =  181,                  //  5521us
    TsShortGT                 =   16,                  //   500us
+      // radio watchdog
+   wdRadioTx                 =   45,                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
+   wdDataDuration            =  164,                  //   5000us (measured 4280us with max payload) >> Mina original is 164
+   wdAckDuration             =   98,                  //  3000us (measured 1000us)>> Mina original 98 
 #endif
+    // experimental: relaxed estimations for fsk1 with fec 25kbps
+#if SLOTDURATION==120
+   TsTxOffset                =  342,                  //  5215us
+   TsLongGT                  =   86,                  //  1300us
+   TsTxAckDelay              =  362,                  //  5521us
+   TsShortGT                 =   32,                  //   500us
+      // radio watchdog
+   wdRadioTx                 =   230,                  //  4500us delayTx+Tx time for 10 bytes( (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
+   wdDataDuration            =  2662,                  //  40320 us (measured with max payload) >> Mina original is 164
+   wdAckDuration             =   600,                  //  8962us (measured)
+#endif
+
    TsSlotDuration            =  PORT_TsSlotDuration,  // 10000us
    // execution speed related
    maxTxDataPrepare          =  PORT_maxTxDataPrepare,
@@ -180,10 +205,6 @@ enum ieee154e_atomicdurations_enum {
    // radio speed related
    delayTx                   =  PORT_delayTx,         // between GO signal and SFD
    delayRx                   =  PORT_delayRx,         // between GO signal and start listening
-   // radio watchdog
-   wdRadioTx                 =   45,                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
-   wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
-   wdAckDuration             =   98,                  //  3000us (measured 1000us)
 };
 
 //shift of bytes in the linkOption bitmap: draft-ietf-6tisch-minimal-10.txt: page 6

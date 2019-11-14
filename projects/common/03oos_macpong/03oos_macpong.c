@@ -42,7 +42,7 @@ int mote_main(void) {
     board_init();
     scheduler_init();
     openstack_init();
-    if (idmanager_getMyID(ADDR_64B)->addr_64b[7]==0x16) {
+    if (idmanager_getMyID(ADDR_64B)->addr_64b[7]==0x6b) {
         idmanager_setIsDAGroot(TRUE);
     }
     scheduler_start();

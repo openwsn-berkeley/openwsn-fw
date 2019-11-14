@@ -116,7 +116,7 @@ void ieee154e_init(void) {
     memset(&ieee154e_dbg,0,sizeof(ieee154e_dbg_t));
 
     // set singleChannel to 0 to enable channel hopping.
-    ieee154e_vars.singleChannel     = 0;
+    ieee154e_vars.singleChannel     = 11;
     ieee154e_vars.isAckEnabled      = TRUE;
     ieee154e_vars.isSecurityEnabled = FALSE;
     ieee154e_vars.slotDuration      = TsSlotDuration;
