@@ -35,6 +35,13 @@ static const uint8_t ebIEsBytestream[] = {
 #define EB_SLOTFRAME_LEN_OFFSET     20
 #define EB_SLOTFRAME_NUMLINK_OFFSET 22
 
+/**
+Set EB on minimal cell for 1/EB_PORTION portion. 
+Must be set to lower values for slower modulations. Otherwise, impossible to synchronize. 
+Default setting is 10 for 20 ms slot duration and 4 for 120 ms slot duration
+*/
+#define EB_PORTION                  10 
+
 #define EB_IE_LEN                   28
 #define NUM_CHANNELS                16 // number of channels to channel hop on
 #define TXRETRIES                   15 // number of MAC retries before declaring failed
@@ -47,13 +54,6 @@ static const uint8_t ebIEsBytestream[] = {
 #define LENGTH_IEEE154_MAX         128 // max length of a valid radio packet
 #define DUTY_CYCLE_WINDOW_LIMIT    (0xFFFFFFFF>>1) // limit of the dutycycle window
 #define SERIALINHIBITGUARD          32 // 32@32kHz ~ 1ms
-
-// set EB on minimal cell for 1/EB_PORTION portion
-#if SLOTDURATION==120                 
-#define EB_PORTION                   4 // experimental: use higher porability for large slot size to expedite synchronization
-#else
-#define EB_PORTION                  10 // default value is 10 for small slot duration such as 20ms
-#endif
 
 //15.4e information elements related
 #define IEEE802154E_PAYLOAD_DESC_LEN_SHIFT                 0x04
