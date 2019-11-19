@@ -40,7 +40,7 @@ Set EB on minimal cell for 1/EB_PORTION portion.
 Must be set to lower values for slower modulations. Otherwise, impossible to synchronize. 
 Default setting is 10 for 20 ms slot duration and 4 for 120 ms slot duration
 */
-#define EB_PORTION                  10 
+#define EB_PORTION                  4 
 
 #define EB_IE_LEN                   28
 #define NUM_CHANNELS                16 // number of channels to channel hop on
@@ -185,11 +185,11 @@ enum ieee154e_atomicdurations_enum {
    wdAckDuration             =   98,                  //  3000us (measured 1000us)>> Mina original 98 
 #endif
     // experimental: relaxed estimations for fsk1 with fec 25kbps
-#if SLOTDURATION==120
-   TsTxOffset                =  342,                  //  5215us
-   TsLongGT                  =   86,                  //  1300us
+#if SLOTDURATION==160
+   TsTxOffset                =  360,                  //  5215us
+   TsLongGT                  =  240,                  //  1300us
    TsTxAckDelay              =  362,                  //  5521us
-   TsShortGT                 =   32,                  //   500us
+   TsShortGT                 =   60,                  //   500us
       // radio watchdog
    wdRadioTx                 =   230,                  //  4500us delayTx+Tx time for 10 bytes( (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
    wdDataDuration            =  2662,                  //  40320 us (measured with max payload) >> Mina original is 164

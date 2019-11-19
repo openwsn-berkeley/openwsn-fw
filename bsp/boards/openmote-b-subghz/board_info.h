@@ -57,7 +57,7 @@
 #define PORT_PIN_RADIO_RESET_HIGH()    // nothing
 #define PORT_PIN_RADIO_RESET_LOW()     // nothing
 
-#define SLOTDURATION 120                // in miliseconds: default is 20 ms. Use 120 ms for SubGHz band with FSK.
+#define SLOTDURATION 160                // in miliseconds: default is 20 ms. Use 120 ms for SubGHz band with FSK.
 
 //===== IEEE802154E timing
 
@@ -94,14 +94,14 @@
 #endif
 
     // experimental: relaxed estimations for fsk1 with fec 25kbps
-#if SLOTDURATION==120
-    #define PORT_TsSlotDuration                 4000   //    120ms
+#if SLOTDURATION==160
+    #define PORT_TsSlotDuration                 5300   //    161ms
 
     // execution speed related
     #define PORT_maxTxDataPrepare               220   
-    #define PORT_maxRxAckPrepare                40    
-    #define PORT_maxRxDataPrepare               33    
-    #define PORT_maxTxAckPrepare                50    
+    #define PORT_maxRxAckPrepare                250    
+    #define PORT_maxRxDataPrepare               66    
+    #define PORT_maxTxAckPrepare                150    
     // radio speed related
     #define PORT_delayTx                        30    
     #define PORT_delayRx                        0     
