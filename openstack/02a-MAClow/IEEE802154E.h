@@ -40,7 +40,7 @@ Set EB on minimal cell for 1/EB_PORTION portion.
 Must be set to lower values for slower modulations. Otherwise, impossible to synchronize. 
 Default setting is 10 for 20 ms slot duration and 4 for 120 ms slot duration
 */
-#define EB_PORTION                  4 
+#define EB_PORTION                  10 
 
 #define EB_IE_LEN                   28
 #define NUM_CHANNELS                16 // number of channels to channel hop on
