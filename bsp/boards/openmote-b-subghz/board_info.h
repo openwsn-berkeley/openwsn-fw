@@ -101,9 +101,9 @@
     #define PORT_maxTxDataPrepare               220   
     #define PORT_maxRxAckPrepare                250    
     #define PORT_maxRxDataPrepare               66    
-    #define PORT_maxTxAckPrepare                150    
+    #define PORT_maxTxAckPrepare                250    
     // radio speed related
-    #define PORT_delayTx                        30    
+    #define PORT_delayTx                        100    
     #define PORT_delayRx                        0     
 #endif
 

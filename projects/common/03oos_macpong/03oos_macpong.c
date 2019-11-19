@@ -20,7 +20,7 @@
 #include "idmanager.h"
 #include "neighbors.h"
 
-#define LEN_PAYLOAD 50
+#define LEN_PAYLOAD 100
 
 //=========================== variables =======================================
 
@@ -109,7 +109,7 @@ void iphc_init(void) {
     macpong_vars.timerId = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_IPHC);
     opentimers_scheduleIn(
         macpong_vars.timerId,   // timerId
-        12000,                   // duration
+        1000,                   // duration: longer duration is preferable for slower connections to avoid buffer overflow. 4000 was used for FSK at 25kbps wnad it was fine
         TIME_MS,                // timetype
         TIMER_PERIODIC,         // timertype
         macpong_initSend        // callback
