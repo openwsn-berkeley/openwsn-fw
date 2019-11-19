@@ -42,7 +42,7 @@ int mote_main(void) {
     board_init();
     scheduler_init();
     openstack_init();
-    if (idmanager_getMyID(ADDR_64B)->addr_64b[7]==0x6b) {
+    if (idmanager_getMyID(ADDR_64B)->addr_64b[7]==0x16) {
         idmanager_setIsDAGroot(TRUE);
     }
     scheduler_start();
@@ -109,7 +109,7 @@ void iphc_init(void) {
     macpong_vars.timerId = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_IPHC);
     opentimers_scheduleIn(
         macpong_vars.timerId,   // timerId
-        1000,                   // duration: longer duration is preferable for slower connections to avoid buffer overflow. 4000 was used for FSK at 25kbps wnad it was fine
+        1000,                   // duration
         TIME_MS,                // timetype
         TIMER_PERIODIC,         // timertype
         macpong_initSend        // callback
