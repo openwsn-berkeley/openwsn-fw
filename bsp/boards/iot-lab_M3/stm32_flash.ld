@@ -15,7 +15,7 @@
 **
 **  Environment : Atollic TrueSTUDIO(R)
 **
-**  Distribution: The file is distributed “as is,” without any warranty
+**  Distribution: The file is distributed ï¿½as is,ï¿½ without any warranty
 **                of any kind.
 **
 **  (c)Copyright Atollic AB.
@@ -145,8 +145,8 @@ SECTIONS
 	{
 		PROVIDE(__heap1_start = .);
 		. = . + __heap1_size;
-		PROVIDE(__heap1_max = .);	
-	} > RAM	
+		PROVIDE(__heap1_max = .);
+	} > RAM
 
   /*
   PROVIDE ( end = _ebss );
