@@ -33,12 +33,17 @@ can use this project with any platform.
 #define SLOT_DURATION           (0xffff>>1)     ///< 0xffff     = 2s@32kHz
 #define SUB_SLOT_DURATION       20              ///< 32         = 1ms@32kHz
 
-#define DEBUGGING
-
 // 16 mote eui64
 
+#define DEBUGGING
+
+#ifdef DEBUGGING
+#define OTBOX08_MOTE_1          0xb5b3  // COM91
+#else
 #define OTBOX08_MOTE_1          0xb5f3
-#define OTBOX08_MOTE_2          0xb5d0
+#endif
+
+#define OTBOX08_MOTE_2          0xb5d0  // COM89
 #define OTBOX08_MOTE_3          0xb595
 #define OTBOX08_MOTE_4          0xb5d1
 
@@ -98,7 +103,7 @@ typedef struct{
     ch_motes_t  ch_motes[NUM_CHANNELS];
     uint8_t     myChannel;
 
-    bool        isTimeRerence;
+    bool        isTimeMaster;
     bool        isSync;
     uint8_t     currentSlotOffset;
     uint16_t    seqNum;
@@ -111,8 +116,8 @@ typedef struct{
 // debugging
 
 typedef enum{
-    D_ERROR     = 0,
-    D_INFO      = 1,
+    D_ERROR     = 'E',
+    D_INFO      = 'I',
 }debug_type_t;
 
 typedef struct{
@@ -138,6 +143,7 @@ void     synchronize(uint32_t capturedTime, uint8_t pkt_channel, uint16_t pkt_se
 
 // debugging
 void     debug_output(debug_type_t type, uint8_t* buffer, uint8_t length);
+uint8_t  int_to_char(uint8_t temp);
 
 //=========================== main ============================================
 
@@ -195,15 +201,11 @@ int mote_main(void) {
     eui64_get(myId);
     app_vars.myChannel = get_mychannel(myId);
 
-#ifdef DEBUGGING
-    app_vars.myChannel = SYNC_CHANNEL;
-    app_vars.currentSlotOffset = SLOTFRAME_LEN - 1 ;
-#endif
-
     // the mote assigned with SYNC_CHANNEL is the time reference
     if (app_vars.myChannel==SYNC_CHANNEL) {
         app_vars.isSync = TRUE;
-        app_vars.isTimeRerence = TRUE;
+        app_vars.isTimeMaster = TRUE;
+        app_vars.currentSlotOffset = SLOTFRAME_LEN-1;
     }
 
     // setup UART
@@ -306,21 +308,48 @@ void synchronize(uint32_t capturedTime, uint8_t pkt_channel, uint16_t pkt_seqNum
     slot_boudary = capturedTime - pkt_seqNum*SUB_SLOT_DURATION - TXOFFSET;
     sctimer_set_callback(cb_slot_timer);
     sctimer_setCompare(slot_boudary+SLOT_DURATION);
+
+    app_vars.isSync = TRUE;
+
+    leds_sync_on();
+}
+
+uint8_t int_to_char(uint8_t temp){
+
+    uint8_t returnVal;
+
+    if (temp>0x09){
+        returnVal = (temp-0x0a)+'a';
+    } else {
+        returnVal = (temp)+'0';
+    }
+
+    return returnVal;
 }
 
 void debug_output(debug_type_t type, uint8_t* buffer, uint8_t length){
 
-    // copy content
-    debug_vars.uart_to_send[0] = type;
-    memcpy(&debug_vars.uart_to_send[1], buffer, length);
+    uint8_t temp;
+    uint8_t i;
+    uint8_t len;
+
+    len = 0;
+    debug_vars.uart_to_send[len++]        = type;
+
+    for (i=0;i<length;i++){
+        temp = (buffer[i] & 0xf0)>>4;
+        debug_vars.uart_to_send[len++] = int_to_char(temp);
+        temp = buffer[i] & 0x0f;
+        debug_vars.uart_to_send[len++] = int_to_char(temp);
+    }
 
     // add ending chars
-    debug_vars.uart_to_send[1+length]   = '\r';
-    debug_vars.uart_to_send[1+length+1] = '\n';
+    debug_vars.uart_to_send[len++]   = '\r';
+    debug_vars.uart_to_send[len++] = '\n';
 
     // write to uart
     debug_vars.index = 0;
-    uart_writeByte(debug_vars.uart_to_send[0]);
+    uart_writeByte(debug_vars.uart_to_send[debug_vars.index]);
 }
 
 //=========================== callbacks =======================================
@@ -349,6 +378,7 @@ void cb_startFrame(PORT_TIMER_WIDTH timestamp) {
         switch(app_vars.state){
         case S_LISTENING:
             app_vars.state = S_RECEIVING;
+
             break;
         default:
             // wrong state
@@ -381,7 +411,7 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
 
             // nothing need to do
 
-            break;
+        break;
         case S_ACK_SENDING:
             app_vars.state = S_ACK_SENDDONE;
 
@@ -394,20 +424,22 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
 
             app_vars.state = S_LISTENING;
 
-            break;
+        break;
         default:
-            // wrong status, todo
+            // wrong status
+
+            debug_output(D_ERROR, (uint8_t*)(&app_vars.state), 1);
             return;
         }
 
-        break;
+    break;
     case T_RX:
 
         // received frames
         switch(app_vars.state){
         case S_RECEIVING:
             app_vars.state = S_RXPROC;
-            break;
+        break;
         default:
             // wrong state
 
@@ -432,7 +464,12 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
 
         isValidFrame = FALSE;
 
+        debug_output(D_INFO, app_vars.packet, 2);
+
         if (app_vars.rxpk_crc && app_vars.packet_len == TARGET_PKT_LEN){
+
+            leds_debug_toggle();
+
             pkt_channel = (app_vars.packet[0] & 0xf0)>>4;
             pkt_seqNum  = ((uint16_t)(app_vars.packet[0] & 0x0f))<<8 |
                            (uint16_t)(app_vars.packet[1]);
@@ -446,6 +483,7 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
         }
 
         if (isValidFrame){
+
             if (app_vars.isSync){
                 if (app_vars.currentSlotOffset==0){
                     // received from time reference, re-synchronize
@@ -474,16 +512,25 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
             }
 
         } else {
+
             // continous to listen on myChannel
 
             radio_rfOn();
-            radio_setFrequency(app_vars.myChannel);
+            if (app_vars.isSync){
+                radio_setFrequency(app_vars.myChannel);
+            } else {
+                radio_setFrequency(SYNC_CHANNEL);
+            }
             radio_rxEnable();
             radio_rxNow();
 
             app_vars.state = S_LISTENING;
         }
-        break;
+    break;
+    default:
+        // wrong type
+
+        leds_error_blink();
     }
 }
 
@@ -506,6 +553,8 @@ void cb_slot_timer(void) {
     radio_rfOn();
 
     if (app_vars.isSync){
+
+        leds_sync_on();
 
         if ((app_vars.myChannel - SYNC_CHANNEL)==app_vars.currentSlotOffset){
 
@@ -545,6 +594,8 @@ void cb_slot_timer(void) {
 
     } else {
 
+        leds_sync_off();
+
         // slot to rx
         app_vars.type = T_RX;
 
@@ -555,20 +606,23 @@ void cb_slot_timer(void) {
             // start to listen
             radio_rxEnable();
             radio_rxNow();
+
             app_vars.state = S_LISTENING;
 
-            break;
+        break;
         case S_LISTENING:
-            break;
+
+        break;
         case S_RECEIVING:
-            break;
+
+        break;
         case S_RXPROC:
-            break;
+
+        break;
         default:
             // wrong state
 
             debug_output(D_ERROR, (uint8_t*)(&app_vars.state), 1);
-            break;
         }
 
     }
