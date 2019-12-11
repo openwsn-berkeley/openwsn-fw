@@ -29,7 +29,7 @@ can use this project with any platform.
 #define SYNC_CHANNEL            11
 
 // timing
-#define TXOFFSET                100             ///< measured, todo
+#define TXOFFSET                13              ///< measured, 382ms
 #define SLOT_DURATION           (0xffff>>1)     ///< 0xffff     = 2s@32kHz
 #define SUB_SLOT_DURATION       20              ///< 32         = 1ms@32kHz
 
@@ -314,6 +314,8 @@ void synchronize(uint32_t capturedTime, uint8_t pkt_channel, uint16_t pkt_seqNum
     leds_sync_on();
 }
 
+// debugging
+
 uint8_t int_to_char(uint8_t temp){
 
     uint8_t returnVal;
@@ -463,8 +465,6 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
         // check the frame is valid or not
 
         isValidFrame = FALSE;
-
-        debug_output(D_INFO, app_vars.packet, 2);
 
         if (app_vars.rxpk_crc && app_vars.packet_len == TARGET_PKT_LEN){
 
@@ -635,7 +635,9 @@ void cb_sub_slot_timer(void) {
     debugpins_fsm_toggle();
 
     // schedule next sub-slot
-    sctimer_setCompare(app_vars.slotRerference+app_vars.seqNum*SUB_SLOT_DURATION);
+    sctimer_setCompare(
+        app_vars.slotRerference + (app_vars.seqNum+1) * SUB_SLOT_DURATION
+    );
 
     // load pkt and transmit
 
