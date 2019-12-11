@@ -17,17 +17,21 @@ can use this project with any platform.
 
 //=========================== defines =========================================
 
-#define LENGTH_PACKET           2+LENGTH_CRC    ///< maximum length is 127 bytes
-#define SLOT_DURATION           (0xffff>>1)     ///< 0xffff     = 2s@32kHz
-#define SUB_SLOT_DURATION       20              ///< 32         = 1ms@32kHz
+#define MAX_PKT_BUFFER          125+LENGTH_CRC  ///< maximum packet buffer size is 127 bytes
+#define TARGET_PKT_LEN          2+LENGTH_CRC    ///< frame length sent by mote
 #define ID                      0x99            ///< byte sent in the packets
 
-#define NUM_PKT_SLOT            (2*32*32)       ///< slot duration = SUB_SLOT_DURATION *
-                                                            // num_pkt_slot
+#define NUM_PKT_PER_SLOT        (2*32*32)       ///< slot duration = SUB_SLOT_DURATION *
+                                                            // NUM_PKT_PER_SLOT
 #define CAL_STEPS               2
 #define NUM_CHANNELS            16
 #define SLOTFRAME_LEN           16
 #define SYNC_CHANNEL            11
+
+// timing
+#define TXOFFSET                100             ///< measured, todo
+#define SLOT_DURATION           (0xffff>>1)     ///< 0xffff     = 2s@32kHz
+#define SUB_SLOT_DURATION       20              ///< 32         = 1ms@32kHz
 
 #define DEBUGGING
 
@@ -53,6 +57,10 @@ can use this project with any platform.
 #define OTBOX19_MOTE_3          0xb565
 #define OTBOX19_MOTE_4          0xb648
 
+// debugging
+
+#define UART_BUFFER_LEN         100
+
 //=========================== variables =======================================
 
 typedef struct{
@@ -60,19 +68,60 @@ typedef struct{
     uint16_t short_address;
 }ch_motes_t;
 
+typedef enum{
+    T_IDLE              = 0,
+    T_TX                = 1,
+    T_RX                = 2,
+}type_t;
+
+typedef enum{
+    S_IDLE              = 0,
+    S_LISTENING         = 1,
+    S_RECEIVING         = 2,
+    S_RXPROC            = 3,
+    S_DATA_SENDING      = 4,
+    S_ACK_SENDING       = 5,
+    S_DATA_SENDDONE     = 6,
+    S_ACK_SENDDONE      = 7,
+    S_DATA_SEND         = 8,
+    S_ACK_SEND          = 9,
+}state_t;
+
 typedef struct{
+    uint8_t     packet[MAX_PKT_BUFFER];
+    uint8_t     packet_len;
+     int8_t     rxpk_rssi;
+    uint8_t     rxpk_lqi;
+       bool     rxpk_crc;
+
     uint8_t     myId[8];
     ch_motes_t  ch_motes[NUM_CHANNELS];
-    uint8_t     packet[LENGTH_PACKET];
-    uint8_t     packet_len;
-    uint8_t     channel;
+    uint8_t     myChannel;
+
+    bool        isTimeRerence;
     bool        isSync;
     uint8_t     currentSlotOffset;
     uint16_t    seqNum;
     uint32_t    slotRerference;
+    type_t      type;
+    state_t     state;
+    uint32_t    lastCaptureTime;
 }app_vars_t;
 
-app_vars_t app_vars;
+// debugging
+
+typedef enum{
+    D_ERROR     = 0,
+    D_INFO      = 1,
+}debug_type_t;
+
+typedef struct{
+    uint8_t     uart_to_send[UART_BUFFER_LEN];
+    uint8_t     index;
+}debug_vars_t;
+
+app_vars_t      app_vars;
+debug_vars_t    debug_vars;
 
 //=========================== prototypes ======================================
 
@@ -85,6 +134,10 @@ void     cb_uart_tx_done(void);
 uint8_t  cb_uart_rx(void);
 
 uint8_t  get_mychannel(uint8_t* myId);
+void     synchronize(uint32_t capturedTime, uint8_t pkt_channel, uint16_t pkt_seqNum);
+
+// debugging
+void     debug_output(debug_type_t type, uint8_t* buffer, uint8_t length);
 
 //=========================== main ============================================
 
@@ -140,16 +193,17 @@ int mote_main(void) {
 
     // get eui64 and calculate channel assignment
     eui64_get(myId);
-    app_vars.channel = get_mychannel(myId);
+    app_vars.myChannel = get_mychannel(myId);
 
 #ifdef DEBUGGING
-    app_vars.channel = SYNC_CHANNEL;
+    app_vars.myChannel = SYNC_CHANNEL;
     app_vars.currentSlotOffset = SLOTFRAME_LEN - 1 ;
 #endif
 
     // the mote assigned with SYNC_CHANNEL is the time reference
-    if (app_vars.channel==SYNC_CHANNEL) {
+    if (app_vars.myChannel==SYNC_CHANNEL) {
         app_vars.isSync = TRUE;
+        app_vars.isTimeRerence = TRUE;
     }
 
     // setup UART
@@ -161,7 +215,7 @@ int mote_main(void) {
     radio_setEndFrameCb(cb_endFrame);
 
     // prepare packet
-    temp = (app_vars.channel << 4) | ((app_vars.seqNum & 0x0f00)>>8);
+    temp = (app_vars.myChannel << 4) | ((app_vars.seqNum & 0x0f00)>>8);
     app_vars.packet[0] = temp;
 
     temp = app_vars.seqNum & 0x00ff;
@@ -172,11 +226,6 @@ int mote_main(void) {
     sctimer_set_callback(cb_slot_timer);
     sctimer_setCompare(sctimer_readCounter()+SLOT_DURATION);
     sctimer_enable();
-
-    // prepare radio
-    radio_rfOn();
-    radio_setFrequency(app_vars.channel);
-    radio_rfOff();
 
     while (1) {
         board_sleep();
@@ -245,19 +294,204 @@ uint8_t get_mychannel(uint8_t* address){
     return channel;
 }
 
+void synchronize(uint32_t capturedTime, uint8_t pkt_channel, uint16_t pkt_seqNum){
+
+    uint32_t slot_boudary;
+
+    // synchronize currentslotoffset
+    app_vars.currentSlotOffset = pkt_channel-SYNC_CHANNEL;
+
+    // synchronize to slot boudary
+    sctimer_disable();
+    slot_boudary = capturedTime - pkt_seqNum*SUB_SLOT_DURATION - TXOFFSET;
+    sctimer_set_callback(cb_slot_timer);
+    sctimer_setCompare(slot_boudary+SLOT_DURATION);
+}
+
+void debug_output(debug_type_t type, uint8_t* buffer, uint8_t length){
+
+    // copy content
+    debug_vars.uart_to_send[0] = type;
+    memcpy(&debug_vars.uart_to_send[1], buffer, length);
+
+    // add ending chars
+    debug_vars.uart_to_send[1+length]   = '\r';
+    debug_vars.uart_to_send[1+length+1] = '\n';
+
+    // write to uart
+    debug_vars.index = 0;
+    uart_writeByte(debug_vars.uart_to_send[0]);
+}
+
 //=========================== callbacks =======================================
 
 void cb_startFrame(PORT_TIMER_WIDTH timestamp) {
 
+    app_vars.lastCaptureTime = timestamp;
+
+    switch(app_vars.type){
+    case T_TX:
+        switch(app_vars.state) {
+        case S_DATA_SEND:
+            app_vars.state = S_DATA_SENDING;
+            break;
+        case S_ACK_SEND:
+            app_vars.state = S_ACK_SENDING;
+            break;
+        default:
+            // wrong state
+
+            debug_output(D_ERROR, (uint8_t*)(&app_vars.state), 1);
+            return;
+        }
+        break;
+    case T_RX:
+        switch(app_vars.state){
+        case S_LISTENING:
+            app_vars.state = S_RECEIVING;
+            break;
+        default:
+            // wrong state
+
+            debug_output(D_ERROR, (uint8_t*)(&app_vars.state), 1);
+            return;
+        }
+        break;
+    }
 }
 
 void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
 
+    bool        isValidFrame;
+    uint8_t     pkt_channel;
+    uint16_t    pkt_seqNum;
+
+    // todo
+    //uint8_t     freq_offset;
+
+    // turn radio off first
+    radio_rfOff();
+
+    switch(app_vars.type){
+    case T_TX:
+
+        switch(app_vars.state){
+        case S_DATA_SENDING:
+            app_vars.state = S_DATA_SENDDONE;
+
+            // nothing need to do
+
+            break;
+        case S_ACK_SENDING:
+            app_vars.state = S_ACK_SENDDONE;
+
+            // set radio back to listen on myChannel
+
+            radio_rfOn();
+            radio_setFrequency(app_vars.myChannel);
+            radio_rxEnable();
+            radio_rxNow();
+
+            app_vars.state = S_LISTENING;
+
+            break;
+        default:
+            // wrong status, todo
+            return;
+        }
+
+        break;
+    case T_RX:
+
+        // received frames
+        switch(app_vars.state){
+        case S_RECEIVING:
+            app_vars.state = S_RXPROC;
+            break;
+        default:
+            // wrong state
+
+            debug_output(D_ERROR, (uint8_t*)(&app_vars.state), 1);
+            return;
+        }
+
+        memset(app_vars.packet,0,MAX_PKT_BUFFER);
+        app_vars.rxpk_crc = 0;
+
+        // get packet from radio
+        radio_getReceivedFrame(
+            app_vars.packet,
+            &app_vars.packet_len,
+            sizeof(app_vars.packet),
+            &app_vars.rxpk_rssi,
+            &app_vars.rxpk_lqi,
+            &app_vars.rxpk_crc
+        );
+
+        // check the frame is valid or not
+
+        isValidFrame = FALSE;
+
+        if (app_vars.rxpk_crc && app_vars.packet_len == TARGET_PKT_LEN){
+            pkt_channel = (app_vars.packet[0] & 0xf0)>>4;
+            pkt_seqNum  = ((uint16_t)(app_vars.packet[0] & 0x0f))<<8 |
+                           (uint16_t)(app_vars.packet[1]);
+            if (
+                pkt_channel>=11 &&
+                pkt_channel<=26 &&
+                pkt_seqNum<NUM_PKT_PER_SLOT
+            ){
+                isValidFrame = TRUE;
+            }
+        }
+
+        if (isValidFrame){
+            if (app_vars.isSync){
+                if (app_vars.currentSlotOffset==0){
+                    // received from time reference, re-synchronize
+
+                    synchronize(app_vars.lastCaptureTime, pkt_channel, pkt_seqNum);
+                } else {
+                    // received from SCuM, prepare Ack to send back
+
+                    // read the freq_offset
+                    // freq_offset = radio_getFrequencyOffset();
+
+                    radio_rfOn();
+                    radio_setFrequency(app_vars.myChannel);
+
+                    // the ack is the same with frame? todo
+                    radio_loadPacket(app_vars.packet, TARGET_PKT_LEN);
+                    radio_txEnable();
+                    radio_txNow();
+
+                    app_vars.state = S_ACK_SEND;
+                }
+            } else {
+                // received from timer reference, synchronize
+
+                synchronize(app_vars.lastCaptureTime, pkt_channel, pkt_seqNum);
+            }
+
+        } else {
+            // continous to listen on myChannel
+
+            radio_rfOn();
+            radio_setFrequency(app_vars.myChannel);
+            radio_rxEnable();
+            radio_rxNow();
+
+            app_vars.state = S_LISTENING;
+        }
+        break;
+    }
 }
 
 void cb_slot_timer(void) {
 
     debugpins_slot_toggle();
+
+    // schedule next slot timer
 
     app_vars.slotRerference = sctimer_readCounter();
 
@@ -265,31 +499,78 @@ void cb_slot_timer(void) {
     app_vars.currentSlotOffset = \
         (app_vars.currentSlotOffset + 1) % SLOTFRAME_LEN;
 
-    // check the slot offset to decide to tx or rx:
-    //  - if channel == current slotoffset: tx
-    //  - else: rx
+    // initial seqNum
+    app_vars.seqNum = 0;
 
-    if ((app_vars.channel - SYNC_CHANNEL)==app_vars.currentSlotOffset){
+    // prepare radio
+    radio_rfOn();
 
-        // slot to tx
+    if (app_vars.isSync){
 
-        // initial seqNum
-        app_vars.seqNum = 0;
+        if ((app_vars.myChannel - SYNC_CHANNEL)==app_vars.currentSlotOffset){
 
-        radio_txEnable();
+            // this is my slot
 
-        // change sctimer callback to sub_slot cb
+            // slot to tx
+            app_vars.type = T_TX;
 
-        sctimer_disable();
-        sctimer_set_callback(cb_sub_slot_timer);
+            radio_setFrequency(app_vars.myChannel);
 
-        // call the callback first time directly
-        cb_sub_slot_timer();
+            // change sctimer callback to sub_slot cb
+            sctimer_disable();
+            sctimer_set_callback(cb_sub_slot_timer);
+
+            // call the callback first time directly
+            cb_sub_slot_timer();
+        } else {
+
+            // this is NOT my slot
+
+            // slot to rx
+            app_vars.type = T_RX;
+
+            if (app_vars.currentSlotOffset==0){
+
+                radio_setFrequency(SYNC_CHANNEL);
+            } else {
+
+                radio_setFrequency(app_vars.myChannel);
+            }
+
+            // start to listen
+            radio_rxEnable();
+            radio_rxNow();
+            app_vars.state = S_LISTENING;
+        }
 
     } else {
-        // slot to rx
 
-        radio_rxEnable();
+        // slot to rx
+        app_vars.type = T_RX;
+
+        switch(app_vars.state){
+        case S_IDLE:
+            radio_setFrequency(SYNC_CHANNEL);
+
+            // start to listen
+            radio_rxEnable();
+            radio_rxNow();
+            app_vars.state = S_LISTENING;
+
+            break;
+        case S_LISTENING:
+            break;
+        case S_RECEIVING:
+            break;
+        case S_RXPROC:
+            break;
+        default:
+            // wrong state
+
+            debug_output(D_ERROR, (uint8_t*)(&app_vars.state), 1);
+            break;
+        }
+
     }
 }
 
@@ -300,20 +581,24 @@ void cb_sub_slot_timer(void) {
     debugpins_fsm_toggle();
 
     // schedule next sub-slot
-    sctimer_setCompare(sctimer_readCounter()+SUB_SLOT_DURATION);
+    sctimer_setCompare(app_vars.slotRerference+app_vars.seqNum*SUB_SLOT_DURATION);
 
     // load pkt and transmit
 
-    app_vars.packet_len = sizeof(app_vars.packet);
+    radio_rfOn();
+    radio_txEnable();
+    app_vars.packet_len = TARGET_PKT_LEN;
     radio_loadPacket(app_vars.packet,app_vars.packet_len);
     radio_txNow();
 
+    app_vars.state = S_DATA_SEND;
+
     // update the seqNum in payload
 
-    if (app_vars.seqNum<NUM_PKT_SLOT/CAL_STEPS) {
+    if (app_vars.seqNum<NUM_PKT_PER_SLOT/CAL_STEPS) {
         app_vars.seqNum += 1;
          // prepare packet
-        temp = (app_vars.channel << 4) | ((app_vars.seqNum & 0x0f00)>>8);
+        temp = (app_vars.myChannel << 4) | ((app_vars.seqNum & 0x0f00)>>8);
         app_vars.packet[0] = temp;
 
         temp = app_vars.seqNum & 0x00ff;
@@ -322,11 +607,17 @@ void cb_sub_slot_timer(void) {
         sctimer_disable();
         sctimer_set_callback(cb_slot_timer);
         sctimer_setCompare(app_vars.slotRerference+SLOT_DURATION);
+        radio_rfOff();
     }
 }
 
 void cb_uart_tx_done(void) {
-
+    debug_vars.index++;
+    if (debug_vars.uart_to_send[debug_vars.index-1]!='\n'){
+        uart_writeByte(debug_vars.uart_to_send[debug_vars.index]);
+    } else {
+        debug_vars.index = 0;
+    }
 }
 
 uint8_t cb_uart_rx(void) {
