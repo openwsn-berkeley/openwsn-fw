@@ -29,7 +29,7 @@ can use this project with any platform.
 #define SYNC_CHANNEL            11
 
 // timing
-#define TXOFFSET                13              ///< measured, 382ms
+#define TXOFFSET                13              ///< measured, 382us
 #define SLOT_DURATION           (0xffff>>1)     ///< 0xffff     = 2s@32kHz
 #define SUB_SLOT_DURATION       20              ///< 32         = 1ms@32kHz
 
@@ -651,7 +651,8 @@ void cb_sub_slot_timer(void) {
 
     // update the seqNum in payload
 
-    if (app_vars.seqNum<NUM_PKT_PER_SLOT/CAL_STEPS) {
+    // if (app_vars.seqNum<NUM_PKT_PER_SLOT/CAL_STEPS) {
+	if (app_vars.seqNum<(SLOT_DURATION/SUB_SLOT_DURATION-2)) {
         app_vars.seqNum += 1;
          // prepare packet
         temp = (app_vars.myChannel << 4) | ((app_vars.seqNum & 0x0f00)>>8);
