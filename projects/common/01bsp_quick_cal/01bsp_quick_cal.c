@@ -217,7 +217,7 @@ int mote_main(void) {
     radio_setEndFrameCb(cb_endFrame);
 
     // prepare packet
-    temp = (app_vars.myChannel << 4) | ((app_vars.seqNum & 0x0f00)>>8);
+    temp = ((app_vars.myChannel-SYNC_CHANNEL) << 4) | ((app_vars.seqNum & 0x0f00)>>8);
     app_vars.packet[0] = temp;
 
     temp = app_vars.seqNum & 0x00ff;
@@ -464,22 +464,33 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
 
         // check the frame is valid or not
 
-        isValidFrame = FALSE;
+        isValidFrame = TRUE;
 
         if (app_vars.rxpk_crc && app_vars.packet_len == TARGET_PKT_LEN){
 
             leds_debug_toggle();
 
-            pkt_channel = (app_vars.packet[0] & 0xf0)>>4;
+            pkt_channel = SYNC_CHANNEL+((app_vars.packet[0] & 0xf0)>>4);
             pkt_seqNum  = ((uint16_t)(app_vars.packet[0] & 0x0f))<<8 |
                            (uint16_t)(app_vars.packet[1]);
-            if (
-                pkt_channel>=11 &&
-                pkt_channel<=26 &&
-                pkt_seqNum<NUM_PKT_PER_SLOT
-            ){
-                isValidFrame = TRUE;
+            
+            if (pkt_seqNum>=NUM_PKT_PER_SLOT){
+                isValidFrame = FALSE;
             }
+            
+            if (app_vars.isSync){
+                if ((pkt_channel - SYNC_CHANNEL)!= app_vars.currentSlotOffset){
+                    // maybe received from other channel: abnormal behavior of cc2538
+                    
+                    isValidFrame = FALSE;
+                }
+            } else {
+                if (pkt_channel != SYNC_CHANNEL){
+                    isValidFrame = FALSE;
+                }
+            }
+        } else {
+            isValidFrame = FALSE;
         }
 
         if (isValidFrame){
@@ -655,7 +666,7 @@ void cb_sub_slot_timer(void) {
 	if (app_vars.seqNum<(SLOT_DURATION/SUB_SLOT_DURATION-2)) {
         app_vars.seqNum += 1;
          // prepare packet
-        temp = (app_vars.myChannel << 4) | ((app_vars.seqNum & 0x0f00)>>8);
+        temp = ((app_vars.myChannel-SYNC_CHANNEL) << 4) | ((app_vars.seqNum & 0x0f00)>>8);
         app_vars.packet[0] = temp;
 
         temp = app_vars.seqNum & 0x00ff;
