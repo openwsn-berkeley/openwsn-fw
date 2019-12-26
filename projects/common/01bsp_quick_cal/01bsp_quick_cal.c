@@ -128,6 +128,8 @@ typedef struct{
 app_vars_t      app_vars;
 debug_vars_t    debug_vars;
 
+const uint8_t debuginfo[] = "ack sent";
+
 //=========================== prototypes ======================================
 
 void     cb_startFrame(PORT_TIMER_WIDTH timestamp);
@@ -346,7 +348,7 @@ void debug_output(debug_type_t type, uint8_t* buffer, uint8_t length){
     }
 
     // add ending chars
-    debug_vars.uart_to_send[len++]   = '\r';
+    debug_vars.uart_to_send[len++] = '\r';
     debug_vars.uart_to_send[len++] = '\n';
 
     // write to uart
@@ -380,7 +382,6 @@ void cb_startFrame(PORT_TIMER_WIDTH timestamp) {
         switch(app_vars.state){
         case S_LISTENING:
             app_vars.state = S_RECEIVING;
-
             break;
         default:
             // wrong state
@@ -423,6 +424,8 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
             radio_setFrequency(app_vars.myChannel);
             radio_rxEnable();
             radio_rxNow();
+
+            app_vars.type = T_RX;
 
             app_vars.state = S_LISTENING;
 
@@ -468,20 +471,18 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
 
         if (app_vars.rxpk_crc && app_vars.packet_len == TARGET_PKT_LEN){
 
-            leds_debug_toggle();
-
             pkt_channel = SYNC_CHANNEL+((app_vars.packet[0] & 0xf0)>>4);
             pkt_seqNum  = ((uint16_t)(app_vars.packet[0] & 0x0f))<<8 |
                            (uint16_t)(app_vars.packet[1]);
-            
+
             if (pkt_seqNum>=NUM_PKT_PER_SLOT){
                 isValidFrame = FALSE;
             }
-            
+
             if (app_vars.isSync){
                 if ((pkt_channel - SYNC_CHANNEL)!= app_vars.currentSlotOffset){
                     // maybe received from other channel: abnormal behavior of cc2538
-                    
+
                     isValidFrame = FALSE;
                 }
             } else {
@@ -514,6 +515,7 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
                     radio_txEnable();
                     radio_txNow();
 
+                    app_vars.type  = T_TX;
                     app_vars.state = S_ACK_SEND;
                 }
             } else {
