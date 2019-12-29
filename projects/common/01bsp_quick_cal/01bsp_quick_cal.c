@@ -30,7 +30,7 @@ can use this project with any platform.
 
 // timing
 #define TXOFFSET                13              ///< measured, 382us
-#define SLOT_DURATION           (0xffff>>1)     ///< 0xffff     = 2s@32kHz
+#define SLOT_DURATION           (0x17fff)       ///< 0xffff     = 2s@32kHz
 #define SUB_SLOT_DURATION       20              ///< 32         = 1ms@32kHz
 
 // 16 mote eui64
