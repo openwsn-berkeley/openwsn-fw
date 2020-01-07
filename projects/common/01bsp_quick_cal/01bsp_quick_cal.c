@@ -399,8 +399,7 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
     uint8_t     pkt_channel;
     uint16_t    pkt_seqNum;
 
-    // todo
-    //uint8_t     freq_offset;
+    int8_t      freq_offset;
 
     // turn radio off first
     radio_rfOff();
@@ -505,12 +504,13 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
                     // received from SCuM, prepare Ack to send back
 
                     // read the freq_offset
-                    // freq_offset = radio_getFrequencyOffset();
+                    freq_offset = radio_getFrequencyOffset();
 
                     radio_rfOn();
                     radio_setFrequency(app_vars.myChannel);
 
-                    // the ack is the same with frame? todo
+                    // the ack use freq_offset as second byte
+                    app_vars.packet[1] = (uint8_t)freq_offset;
                     radio_loadPacket(app_vars.packet, TARGET_PKT_LEN);
                     radio_txEnable();
                     radio_txNow();
