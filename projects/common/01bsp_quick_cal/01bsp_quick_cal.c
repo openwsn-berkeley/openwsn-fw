@@ -19,7 +19,7 @@ can use this project with any platform.
 
 #define MAX_PKT_BUFFER          125+LENGTH_CRC  ///< maximum packet buffer size is 127 bytes
 #define TARGET_PKT_LEN          2+LENGTH_CRC    ///< frame length sent by mote
-#define ID                      0x99            ///< byte sent in the packets
+#define MAGIC_BYTE              0x0FFF            ///< byte sent in the packets
 
 #define NUM_PKT_PER_SLOT        (2*32*32)       ///< slot duration = SUB_SLOT_DURATION *
                                                             // NUM_PKT_PER_SLOT
@@ -35,17 +35,10 @@ can use this project with any platform.
 
 // 16 mote eui64
 
-#define DEBUGGING
-
-#ifdef DEBUGGING
 #define OTBOX08_MOTE_1          0xb5b3  // COM91
-#else
-#define OTBOX08_MOTE_1          0xb5f3
-#endif
-
 #define OTBOX08_MOTE_2          0xb5d0  // COM89
 #define OTBOX08_MOTE_3          0xb595
-#define OTBOX08_MOTE_4          0xb5d1
+#define OTBOX08_MOTE_4          0xb5f3
 
 #define OTBOX09_MOTE_1          0xb5e7
 #define OTBOX09_MOTE_2          0xb5d8
@@ -474,7 +467,10 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
             pkt_seqNum  = ((uint16_t)(app_vars.packet[0] & 0x0f))<<8 |
                            (uint16_t)(app_vars.packet[1]);
 
-            if (pkt_seqNum>=NUM_PKT_PER_SLOT){
+            if (
+                pkt_seqNum >= NUM_PKT_PER_SLOT && 
+                pkt_seqNum != MAGIC_BYTE
+            ){
                 isValidFrame = FALSE;
             }
 
@@ -497,26 +493,46 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
 
             if (app_vars.isSync){
                 if (app_vars.currentSlotOffset==0){
+                    
                     // received from time reference, re-synchronize
-
-                    synchronize(app_vars.lastCaptureTime, pkt_channel, pkt_seqNum);
+                    
+                    if (
+                        app_vars.isTimeMaster == FALSE && 
+                        pkt_seqNum            != MAGIC_BYTE
+                    ) {
+                        synchronize(app_vars.lastCaptureTime, pkt_channel, pkt_seqNum);
+                    }
                 } else {
-                    // received from SCuM, prepare Ack to send back
+                    
+                    if (pkt_seqNum  == MAGIC_BYTE){
+                        
+                        // received from SCuM, prepare ack to send back
 
-                    // read the freq_offset
-                    freq_offset = radio_getFrequencyOffset();
+                        // read the freq_offset
+                        freq_offset = radio_getFrequencyOffset();
 
-                    radio_rfOn();
-                    radio_setFrequency(app_vars.myChannel);
+                        radio_rfOn();
+                        radio_setFrequency(app_vars.myChannel);
 
-                    // the ack use freq_offset as second byte
-                    app_vars.packet[1] = (uint8_t)freq_offset;
-                    radio_loadPacket(app_vars.packet, TARGET_PKT_LEN);
-                    radio_txEnable();
-                    radio_txNow();
+                        // the ack use freq_offset as second byte
+                        app_vars.packet[1] = (uint8_t)freq_offset;
+                        radio_loadPacket(app_vars.packet, TARGET_PKT_LEN);
+                        radio_txEnable();
+                        radio_txNow();
 
-                    app_vars.type  = T_TX;
-                    app_vars.state = S_ACK_SEND;
+                        app_vars.type  = T_TX;
+                        app_vars.state = S_ACK_SEND;
+                    } else {
+                        
+                        // not sent by SCuM, keep listening
+                        
+                        radio_rfOn();
+                        radio_setFrequency(app_vars.myChannel);
+                        radio_rxEnable();
+                        radio_rxNow();
+
+                        app_vars.state = S_LISTENING;
+                    }
                 }
             } else {
                 // received from timer reference, synchronize
@@ -581,6 +597,9 @@ void cb_slot_timer(void) {
             // change sctimer callback to sub_slot cb
             sctimer_disable();
             sctimer_set_callback(cb_sub_slot_timer);
+            
+            app_vars.packet[0] = ((app_vars.myChannel-SYNC_CHANNEL) << 4) & 0xf0;
+            app_vars.packet[1] = 0;
 
             // call the callback first time directly
             cb_sub_slot_timer();
@@ -665,7 +684,7 @@ void cb_sub_slot_timer(void) {
     // update the seqNum in payload
 
     // if (app_vars.seqNum<NUM_PKT_PER_SLOT/CAL_STEPS) {
-	if (app_vars.seqNum<(SLOT_DURATION/SUB_SLOT_DURATION-2)) {
+    if (app_vars.seqNum<(SLOT_DURATION/SUB_SLOT_DURATION-2)) {
         app_vars.seqNum += 1;
          // prepare packet
         temp = ((app_vars.myChannel-SYNC_CHANNEL) << 4) | ((app_vars.seqNum & 0x0f00)>>8);
