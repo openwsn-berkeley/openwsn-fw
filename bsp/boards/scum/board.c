@@ -50,8 +50,6 @@ unsigned int cal_iteration = 0;
 unsigned int run_test_flag = 0;
 unsigned int num_packets_to_test = 1;
 
-unsigned short optical_cal_iteration = 0, optical_cal_finished = 0;
-
 unsigned short doing_initial_packet_search;
 unsigned short current_RF_channel;
 unsigned short do_debug_print = 0;
@@ -81,7 +79,6 @@ int main(void) {
 void board_init(void) {
     uint8_t eui[8];
     uint8_t calc_crc;
-    bool    optical_cal_finished;
     
     printf("Initializing...");
         

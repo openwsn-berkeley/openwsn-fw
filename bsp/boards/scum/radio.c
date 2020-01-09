@@ -384,7 +384,7 @@ void radio_getReceivedFrame(uint8_t* pBufRead,
     *pCrc           = radio_vars.crc_ok;
    
     //===== rssi
-    *pRssi          = read_RSSI()+RSSI_REFERENCE;
+    *pRssi          = (int8_t)(read_RSSI()+RSSI_REFERENCE);
                                 
     //===== lqi
     *pLqi           = read_LQI();
@@ -411,7 +411,6 @@ void radio_calibration(
     unsigned int IF_est_filtered;
     signed int chip_rate_error_ppm, chip_rate_error_ppm_filtered;
     unsigned short packet_len;
-    signed int timing_correction;
     
     uint32_t IF_coarse;
     uint32_t IF_fine;

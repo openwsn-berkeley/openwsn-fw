@@ -77,7 +77,6 @@ void optical_32_isr(){
 // Need to make sure a new bit has been clocked in prior to returning from this ISR, or else it will immediately execute again
 void optical_sfd_isr(){
     
-    int32_t t;
     uint32_t rdata_lsb, rdata_msb; 
     uint32_t count_LC, count_32k, count_2M, count_HFclock, count_IF;
     
