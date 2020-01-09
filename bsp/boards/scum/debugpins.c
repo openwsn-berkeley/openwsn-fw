@@ -18,102 +18,123 @@ To be implemented after issue: SCUM-25
 //=========================== public ==========================================
 
 void debugpins_init(void) {
-    // GPIO pin 0 to 7 are used as debugpins, 
-    GPIO_REG__OUTPUT    &= ~0x00FF; // all PINS low at initial
+    GPIO_REG__OUTPUT    &= ~0x0FFF; // all PINS low at initial
 }
 
+// frame
 void debugpins_frame_toggle(void) {
-    GPIO_REG__OUTPUT    ^=  0x0001;
-}
-
-void debugpins_frame_clr(void) {
-    GPIO_REG__OUTPUT    &= ~0x0001;
-}
-
-void debugpins_frame_set(void) {
-    GPIO_REG__OUTPUT    |=  0x0001;
-}
-
-void debugpins_slot_toggle(void) {
-    GPIO_REG__OUTPUT    ^=  0x0002;
-}
-
-void debugpins_slot_clr(void) {
-    GPIO_REG__OUTPUT    &= ~0x0002;
-}
-
-void debugpins_slot_set(void) {
     GPIO_REG__OUTPUT    |=  0x0002;
 }
 
-void debugpins_fsm_toggle(void) {
-    GPIO_REG__OUTPUT    ^=  0x0004;
+void debugpins_frame_clr(void) {
+    GPIO_REG__OUTPUT    &= ~0x0002;
 }
 
-void debugpins_fsm_clr(void) {
-    GPIO_REG__OUTPUT    &= ~0x0004;
+void debugpins_frame_set(void) {
+    GPIO_REG__OUTPUT    ^=  0x0002;
 }
 
-void debugpins_fsm_set(void) {
-    GPIO_REG__OUTPUT    |=  0x0004;
-}
-
-void debugpins_task_toggle(void) {
+// slot
+void debugpins_slot_toggle(void) {
     GPIO_REG__OUTPUT    ^=  0x0008;
 }
 
-void debugpins_task_clr(void) {
+void debugpins_slot_clr(void) {
     GPIO_REG__OUTPUT    &= ~0x0008;
 }
 
-void debugpins_task_set(void) {
+void debugpins_slot_set(void) {
     GPIO_REG__OUTPUT    |=  0x0008;
 }
 
-void debugpins_isr_toggle(void) {
+// fsm
+void debugpins_fsm_toggle(void) {
     GPIO_REG__OUTPUT    ^=  0x0010;
 }
 
-void debugpins_isr_clr(void) {
+void debugpins_fsm_clr(void) {
     GPIO_REG__OUTPUT    &= ~0x0010;
 }
 
-void debugpins_isr_set(void) {
+void debugpins_fsm_set(void) {
     GPIO_REG__OUTPUT    |=  0x0010;
 }
 
-void debugpins_radio_toggle(void) {
+// task
+void debugpins_task_toggle(void) {
     GPIO_REG__OUTPUT    ^=  0x0020;
 }
 
-void debugpins_radio_clr(void) {
+void debugpins_task_clr(void) {
     GPIO_REG__OUTPUT    &= ~0x0020;
 }
 
-void debugpins_radio_set(void) {
+void debugpins_task_set(void) {
     GPIO_REG__OUTPUT    |=  0x0020;
 }
 
-void debugpins_debug_x_toggle(void) {
+// isr
+void debugpins_isr_toggle(void) {
+    GPIO_REG__OUTPUT    ^=  0x0004;
+}
+
+void debugpins_isr_clr(void) {
+    GPIO_REG__OUTPUT    &= ~0x0004;
+}
+
+void debugpins_isr_set(void) {
+    GPIO_REG__OUTPUT    |=  0x0004;
+}
+
+// radio
+void debugpins_radio_toggle(void) {
     GPIO_REG__OUTPUT    ^=  0x0040;
 }
 
-void debugpins_debug_x_clr(void) {
+void debugpins_radio_clr(void) {
     GPIO_REG__OUTPUT    &= ~0x0040;
 }
 
-void debugpins_debug_x_set(void) {
+void debugpins_radio_set(void) {
     GPIO_REG__OUTPUT    |=  0x0040;
 }
 
-void debugpins_debug_y_toggle(void){
+// debug x
+void debugpins_debug_x_toggle(void) {
     GPIO_REG__OUTPUT    ^=  0x0080;
 }
 
-void debugpins_debug_y_clr(void){
+void debugpins_debug_x_clr(void) {
     GPIO_REG__OUTPUT    &= ~0x0080;
 }
 
-void debugpins_debug_y_set(void){
+void debugpins_debug_x_set(void) {
     GPIO_REG__OUTPUT    |=  0x0080;
+}
+
+// debug y
+void debugpins_debug_y_toggle(void){
+    GPIO_REG__OUTPUT    ^=  0x0100;
+}
+
+void debugpins_debug_y_clr(void){
+    GPIO_REG__OUTPUT    &= ~0x0100;
+}
+
+void debugpins_debug_y_set(void){
+    GPIO_REG__OUTPUT    |=  0x0100;
+}
+
+// ISRs for external interrupts
+void ext_gpio3_activehigh_debounced_isr(){
+    printf("External Interrupt GPIO3 triggered\r\n");
+}
+void ext_gpio8_activehigh_isr(){
+    printf("External Interrupt GPIO8 triggered\r\n");
+}
+void ext_gpio9_activelow_isr(){
+    printf("External Interrupt GPIO9 triggered\r\n");
+}
+void ext_gpio10_activelow_isr(){
+    printf("External Interrupt GPIO10 triggered\r\n");
 }

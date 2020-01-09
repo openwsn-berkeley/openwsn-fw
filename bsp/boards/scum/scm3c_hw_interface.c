@@ -5,7 +5,7 @@
 #include "scm3c_hw_interface.h"
 #include "radio.h"
 #include "optical.h"
-#include "rftimer.h"
+#include "sctimer.h"
 #include "scum_defs.h"
 
 //=========================== definition ======================================
@@ -1137,7 +1137,7 @@ void initialize_mote(){
     scm3c_hw_interface_init();
     optical_init();
     radio_init();
-    rftimer_init();
+    sctimer_init();
     
     //--------------------------------------------------------
     // SCM3C Analog Scan Chain Initialization

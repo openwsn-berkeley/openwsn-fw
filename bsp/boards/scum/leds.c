@@ -17,63 +17,63 @@
 //=========================== public ==========================================
 
 void leds_init(void) {
-    GPIO_REG__OUTPUT    &= ~0xFC00;    // GPIO_REG__OUTPUT = 0bxxxx00000000, all LEDs off
+    GPIO_REG__OUTPUT    &= ~0xF000;    // GPIO_REG__OUTPUT = 0bxxxx00000000, all LEDs off
 }
 
 // 0 <H17>
 void    leds_error_on(void) {
-    GPIO_REG__OUTPUT    |=  0x8000;
+    GPIO_REG__OUTPUT    |=  0x1000;
 }
 void    leds_error_off(void) {
-    GPIO_REG__OUTPUT    &= ~0x8000;
+    GPIO_REG__OUTPUT    &= ~0x1000;
 }
 void    leds_error_toggle(void) {
-    GPIO_REG__OUTPUT    ^=  0x8000;
+    GPIO_REG__OUTPUT    ^=  0x1000;
 }
 uint8_t leds_error_isOn(void) {
-    return (uint8_t)(GPIO_REG__OUTPUT & 0x8000);
+    return (uint8_t)(GPIO_REG__OUTPUT & 0x1000)>>12;
 }
 
 // 1 <K15>
 void    leds_radio_on(void) {
-    GPIO_REG__OUTPUT    |=  0x4000;
+    GPIO_REG__OUTPUT    |=  0x2000;
 }
 void    leds_radio_off(void) {
-    GPIO_REG__OUTPUT    &= ~0x4000;
+    GPIO_REG__OUTPUT    &= ~0x2000;
 }
 void    leds_radio_toggle(void) {
-    GPIO_REG__OUTPUT    ^=  0x4000;
+    GPIO_REG__OUTPUT    ^=  0x2000;
 }
 uint8_t leds_radio_isOn(void) {
-    return (uint8_t)(GPIO_REG__OUTPUT & 0x4000)>>1;
+    return (uint8_t)(GPIO_REG__OUTPUT & 0x2000)>>13;
 }
 
 // 2 <J13>
 void    leds_sync_on(void) {
-    GPIO_REG__OUTPUT    |=  0x2000;
+    GPIO_REG__OUTPUT    |=  0x4000;
 }
 void    leds_sync_off(void) {
-    GPIO_REG__OUTPUT    &= ~0x2000;
+    GPIO_REG__OUTPUT    &= ~0x4000;
 }
 void    leds_sync_toggle(void) {
-    GPIO_REG__OUTPUT    ^=  0x2000;
+    GPIO_REG__OUTPUT    ^=  0x4000;
 }
 uint8_t leds_sync_isOn(void) {
-    return (uint8_t)(GPIO_REG__OUTPUT & 0x2000)>>2;
+    return (uint8_t)(GPIO_REG__OUTPUT & 0x4000)>>14;
 }
 
 // 3 <N14>
 void    leds_debug_on(void) {
-    GPIO_REG__OUTPUT    |=  0x1000;
+    GPIO_REG__OUTPUT    |=  0x8000;
 }
 void    leds_debug_off(void) {
-    GPIO_REG__OUTPUT    &= ~0x1000;
+    GPIO_REG__OUTPUT    &= ~0x8000;
 }
 void    leds_debug_toggle(void) {
-    GPIO_REG__OUTPUT    ^=  0x1000;
+    GPIO_REG__OUTPUT    ^=  0x8000;
 }
 uint8_t leds_debug_isOn(void) {
-    return (uint8_t)(GPIO_REG__OUTPUT & 0x1000)>>3;
+    return (uint8_t)(GPIO_REG__OUTPUT & 0x8000)>>15;
 }
 
 void leds_all_on(void) {
