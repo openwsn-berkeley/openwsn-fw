@@ -17,7 +17,9 @@
 openqueue_vars_t openqueue_vars;
 
 //=========================== prototypes ======================================
+
 void openqueue_reset_entry(OpenQueueEntry_t* entry);
+void openqueue_reset_big_entry(OpenQueueBigEntry_t *entry);
 
 //=========================== public ==========================================
 
@@ -30,6 +32,10 @@ void openqueue_init(void) {
    uint8_t i;
    for (i=0;i<QUEUELENGTH;i++){
       openqueue_reset_entry(&(openqueue_vars.queue[i]));
+   }
+
+   for (i = 0; i < BIGQUEUELENGTH; i++) {
+      openqueue_reset_big_entry(&(openqueue_vars.big_queue[i]));
    }
 }
 
@@ -98,6 +104,32 @@ OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
    return NULL;
 }
 
+OpenQueueEntry_t* openqueue_getFreeBigPacketBuffer(uint8_t creator) {
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+
+   // refuse to allocate if we're not in sync
+   if (ieee154e_isSynch()==FALSE){
+     ENABLE_INTERRUPTS();
+     return NULL;
+   }
+
+   for (int i = 0; i < BIGQUEUELENGTH; i++) {
+      if (openqueue_vars.big_queue[i].standard_entry.owner == COMPONENT_NULL) {
+
+         openqueue_vars.big_queue[i].standard_entry.creator = creator;
+         openqueue_vars.big_queue[i].standard_entry.owner = COMPONENT_OPENQUEUE;
+         openqueue_vars.big_queue[i].standard_entry.is_big_packet = TRUE;
+
+         ENABLE_INTERRUPTS();
+         return &openqueue_vars.big_queue[i].standard_entry;
+
+      }
+   }
+
+   ENABLE_INTERRUPTS();
+   return NULL;
+}
 
 /**
 \brief Free a previously-allocated packet buffer.
@@ -109,21 +141,44 @@ OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
 */
 owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
    uint8_t i;
-   INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
-   for (i=0;i<QUEUELENGTH;i++) {
-      if (&openqueue_vars.queue[i]==pkt) {
-         if (openqueue_vars.queue[i].owner==COMPONENT_NULL) {
-            // log the error
-            openserial_printCritical(COMPONENT_OPENQUEUE,ERR_FREEING_UNUSED,
-                                  (errorparameter_t)0,
-                                  (errorparameter_t)0);
-         }
-         openqueue_reset_entry(&(openqueue_vars.queue[i]));
-         ENABLE_INTERRUPTS();
-         return E_SUCCESS;
+
+   if (pkt->is_big_packet){
+      INTERRUPT_DECLARATION();
+      DISABLE_INTERRUPTS();
+      for (i = 0; i < BIGQUEUELENGTH; i++) {
+          if ((OpenQueueBigEntry_t *) pkt == &openqueue_vars.big_queue[i]) {
+              if (openqueue_vars.big_queue[i].standard_entry.owner == COMPONENT_NULL) {
+                 // log the error
+                 openserial_printCritical(COMPONENT_OPENQUEUE,ERR_FREEING_UNUSED,
+                                     (errorparameter_t)0,
+                                     (errorparameter_t)0);
+              }
+
+              openqueue_reset_big_entry((OpenQueueBigEntry_t *) pkt);
+              ENABLE_INTERRUPTS();
+              return E_SUCCESS;
+          }
       }
+   
+   } else {
+      INTERRUPT_DECLARATION();
+      DISABLE_INTERRUPTS();
+      for (i=0;i<QUEUELENGTH;i++) {
+         if (&openqueue_vars.queue[i]==pkt) {
+            if (openqueue_vars.queue[i].owner==COMPONENT_NULL) {
+               // log the error
+               openserial_printCritical(COMPONENT_OPENQUEUE,ERR_FREEING_UNUSED,
+                                     (errorparameter_t)0,
+                                     (errorparameter_t)0);
+            }
+            openqueue_reset_entry(&(openqueue_vars.queue[i]));
+            ENABLE_INTERRUPTS();
+            return E_SUCCESS;
+         }
+      }
+   
    }
+
    // log the error
    openserial_printCritical(COMPONENT_OPENQUEUE,ERR_FREEING_ERROR,
                          (errorparameter_t)0,
@@ -149,6 +204,13 @@ void openqueue_removeAllCreatedBy(uint8_t creator) {
             openqueue_reset_entry(&(openqueue_vars.queue[i]));
         }
     }
+
+    for (i = 0; i < BIGQUEUELENGTH; i++) {
+        if (openqueue_vars.big_queue[i].standard_entry.creator == creator) {
+             openqueue_reset_big_entry(&(openqueue_vars.big_queue[i]));
+        }
+    }
+
     ENABLE_INTERRUPTS();
 }
 
@@ -404,6 +466,7 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry) {
    entry->payload                      = &(entry->packet[127 - IEEE802154_SECURITY_TAG_LEN]); // Footer is longer if security is used
    entry->length                       = 0;
    entry->is_cjoin_response            = FALSE;
+   entry->is_big_packet                = FALSE;
    //l4
    entry->l4_protocol                  = IANA_UNDEFINED;
    entry->l4_protocol_compressed       = FALSE;
@@ -411,6 +474,7 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry) {
    entry->l3_destinationAdd.type       = ADDR_NONE;
    entry->l3_sourceAdd.type            = ADDR_NONE;
    entry->l3_useSourceRouting          = FALSE;
+   entry->l3_isFragment                = FALSE;
    //l2
    entry->l2_sixtop_command            = IANA_6TOP_CMD_NONE;
    entry->l2_nextORpreviousHop.type    = ADDR_NONE;
@@ -422,4 +486,11 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry) {
    entry->l2_sendOnTxCell              = FALSE;
    //l2-security
    entry->l2_securityLevel             = 0;
+}
+
+
+void openqueue_reset_big_entry(OpenQueueBigEntry_t *entry) {
+   openqueue_reset_entry(&(entry->standard_entry));
+
+   entry->standard_entry.payload = &(entry->standard_entry.packet[IEEE802154_FRAME_SIZE + BIG_PACKET_SIZE]); // make pointer point to the end op the extended buffer
 }

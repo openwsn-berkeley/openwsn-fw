@@ -14,6 +14,7 @@
 //=========================== define ==========================================
 
 #define QUEUELENGTH  20
+#define BIGQUEUELENGTH  4
 
 //=========================== typedef =========================================
 
@@ -26,6 +27,7 @@ typedef struct {
 
 typedef struct {
    OpenQueueEntry_t queue[QUEUELENGTH];
+   OpenQueueBigEntry_t big_queue[BIGQUEUELENGTH];
 } openqueue_vars_t;
 
 //=========================== prototypes ======================================
@@ -35,6 +37,7 @@ void               openqueue_init(void);
 bool               debugPrint_queue(void);
 // called by any component
 OpenQueueEntry_t*  openqueue_getFreePacketBuffer(uint8_t creator);
+OpenQueueEntry_t*  openqueue_getFreeBigPacketBuffer(uint8_t creator);
 owerror_t          openqueue_freePacketBuffer(OpenQueueEntry_t* pkt);
 void               openqueue_removeAllCreatedBy(uint8_t creator);
 bool               openqueue_isHighPriorityEntryEnough(void);

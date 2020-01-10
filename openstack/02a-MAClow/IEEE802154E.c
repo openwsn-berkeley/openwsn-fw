@@ -706,7 +706,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
       // retrieve the received data frame from the radio's Rx buffer
       ieee154e_vars.dataReceived->payload = &(ieee154e_vars.dataReceived->packet[FIRST_FRAME_BYTE]);
       radio_getReceivedFrame(       ieee154e_vars.dataReceived->payload,
-                                   &ieee154e_vars.dataReceived->length,
+                                   (uint8_t*)&ieee154e_vars.dataReceived->length,
                              sizeof(ieee154e_vars.dataReceived->packet),
                                    &ieee154e_vars.dataReceived->l1_rssi,
                                    &ieee154e_vars.dataReceived->l1_lqi,
@@ -1488,7 +1488,7 @@ port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
         ieee154e_vars.ackReceived->payload = &(ieee154e_vars.ackReceived->packet[FIRST_FRAME_BYTE]);
         radio_getReceivedFrame(
             ieee154e_vars.ackReceived->payload,
-            &ieee154e_vars.ackReceived->length,
+            (uint8_t*)&ieee154e_vars.ackReceived->length,
             sizeof(ieee154e_vars.ackReceived->packet),
             &ieee154e_vars.ackReceived->l1_rssi,
             &ieee154e_vars.ackReceived->l1_lqi,
@@ -1750,7 +1750,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
         ieee154e_vars.dataReceived->payload = &(ieee154e_vars.dataReceived->packet[FIRST_FRAME_BYTE]);
         radio_getReceivedFrame(
             ieee154e_vars.dataReceived->payload,
-            &ieee154e_vars.dataReceived->length,
+            (uint8_t*)&ieee154e_vars.dataReceived->length,
             sizeof(ieee154e_vars.dataReceived->packet),
             &ieee154e_vars.dataReceived->l1_rssi,
             &ieee154e_vars.dataReceived->l1_lqi,

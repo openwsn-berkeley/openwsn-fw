@@ -27,7 +27,12 @@ void uecho_receive(OpenQueueEntry_t* request) {
    uint16_t          temp_l4_destination_port;
    OpenQueueEntry_t* reply;
    
-   reply = openqueue_getFreePacketBuffer(COMPONENT_UECHO);
+   if (request->length > 60){
+      reply = openqueue_getFreeBigPacketBuffer(COMPONENT_UECHO);
+   } else {
+      reply = openqueue_getFreePacketBuffer(COMPONENT_UECHO);
+   }
+
    if (reply==NULL) {
       openserial_printError(
          COMPONENT_UECHO,

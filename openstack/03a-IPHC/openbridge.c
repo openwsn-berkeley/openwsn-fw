@@ -55,12 +55,6 @@ void openbridge_triggerData(void) {
       packetfunctions_reserveHeaderSize(pkt,numDataBytes-8);
       memcpy(pkt->payload,&(input_buffer[8]),numDataBytes-8);
       
-      //this is to catch the too short packet. remove it after fw-103 is solved.
-      if (numDataBytes<16){
-              openserial_printError(COMPONENT_OPENBRIDGE,ERR_INVALIDSERIALFRAME,
-                            (errorparameter_t)0,
-                            (errorparameter_t)0);
-      }        
       //send
       if ((iphc_sendFromBridge(pkt))==E_FAIL) {
          openqueue_freePacketBuffer(pkt);

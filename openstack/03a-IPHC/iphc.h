@@ -298,6 +298,14 @@ void iphc_retrieveIPv6DeadlineHeader(
 void iphc_getDeadlineInfo(
    monitor_expiration_vars_t*	stats
 );
+
+void iphc_retrieveIPv6Header(
+   OpenQueueEntry_t* msg, 
+   ipv6_header_iht* ipv6_outer_header,
+   ipv6_header_iht* ipv6_inner_header,
+   uint8_t*         page_length
+);
+
 #endif
 /**
 \}

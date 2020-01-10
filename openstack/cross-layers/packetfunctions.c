@@ -289,44 +289,59 @@ void packetfunctions_writeAddress(OpenQueueEntry_t* msg, open_addr_t* address, b
 
 //======= reserving/tossing headers
 
-void packetfunctions_reserveHeaderSize(OpenQueueEntry_t* pkt, uint8_t header_length) {
+void packetfunctions_reserveHeaderSize(OpenQueueEntry_t* pkt, uint16_t header_length) {
    pkt->payload -= header_length;
    pkt->length  += header_length;
    if ( (uint8_t*)(pkt->payload) < (uint8_t*)(pkt->packet) ) {
-      openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_HEADER_TOO_LONG,
+      openserial_printCritical(COMPONENT_PACKETFUNCTIONS, ERR_HEADER_TOO_LONG,
                             (errorparameter_t)0,
                             (errorparameter_t)pkt->length);
    }
 }
 
-void packetfunctions_tossHeader(OpenQueueEntry_t* pkt, uint8_t header_length) {
-
+void packetfunctions_tossHeader(OpenQueueEntry_t* pkt, uint16_t header_length) {
+   uint16_t size;
+   if (pkt->is_big_packet) {
+       size = BIG_PACKET_SIZE + 127;
+   } else {
+       size = 127;
+   }
    pkt->payload += header_length;
    pkt->length  -= header_length;
-   if ( (uint8_t*)(pkt->payload) > (uint8_t*)(pkt->packet+127) ) {
+
+   if ( (uint8_t*)(pkt->payload) > (uint8_t*)(pkt->packet + size) ) {
       openserial_printError(COMPONENT_PACKETFUNCTIONS,ERR_HEADER_TOO_LONG,
                             (errorparameter_t)1,
                             (errorparameter_t)pkt->length);
    }
 }
 
-void packetfunctions_reserveFooterSize(OpenQueueEntry_t* pkt, uint8_t header_length) {
+void packetfunctions_reserveFooterSize(OpenQueueEntry_t* pkt, uint16_t header_length) {
+   uint16_t size;
+   if (pkt->is_big_packet) {
+       size = BIG_PACKET_SIZE + 127;
+   } else {
+       size = 127;
+   }
+
    pkt->length  += header_length;
-   if (pkt->length>127) {
+
+   if (pkt->length > size) {
       openserial_printError(COMPONENT_PACKETFUNCTIONS,ERR_HEADER_TOO_LONG,
                             (errorparameter_t)2,
                             (errorparameter_t)pkt->length);
    }
 }
 
-void packetfunctions_tossFooter(OpenQueueEntry_t* pkt, uint8_t header_length) {
+void packetfunctions_tossFooter(OpenQueueEntry_t* pkt, uint16_t header_length) {
    pkt->length  -= header_length;
-   if (pkt->length>128) {//wraps around, so a negative value will be >128
+   if (pkt->length> BIG_PACKET_SIZE + 128) {//wraps around, so a negative value will be >128
       openserial_printError(COMPONENT_PACKETFUNCTIONS,ERR_HEADER_TOO_LONG,
                             (errorparameter_t)3,
                             (errorparameter_t)pkt->length);
    }
 }
+
 
 //======= packet duplication
 // function duplicates a frame from one OpenQueueEntry structure to the other,
@@ -437,8 +452,8 @@ void packetfunctions_calculateChecksum(OpenQueueEntry_t* msg, uint8_t* checksum_
     }
    
     // length
-    little_helper[0] = 0;
-    little_helper[1] = msg->length;
+    little_helper[0] = (msg->length & 0xFF00) >> 8;
+    little_helper[1] = (msg->length & 0x00FF);
     onesComplementSum(temp_checksum,little_helper,2);
    
     // next header

@@ -4,7 +4,7 @@
 #include "idmanager.h"
 #include "openserial.h"
 #include "IEEE802154E.h"
-#include "sixtop.h"
+#include "frag.h"
 #include "forwarding.h"
 #include "neighbors.h"
 #include "openbridge.h"
@@ -221,7 +221,7 @@ owerror_t iphc_sendFromForwarding(
         *((uint8_t*)(msg->payload)) = PAGE_DISPATCH_NO_1;
     }
     
-    return sixtop_send(msg);
+    return frag_fragment6LoPacket(msg);
 }
 
 //send from bridge: 6LoWPAN header already added by OpenLBR, send as is
@@ -234,6 +234,8 @@ owerror_t iphc_sendFromBridge(OpenQueueEntry_t *msg) {
                             (errorparameter_t)0);
       return E_FAIL;
    }
+
+   // send directly to sixtop layer (6lowpan headers still attached)
    return sixtop_send(msg);
 }
 
