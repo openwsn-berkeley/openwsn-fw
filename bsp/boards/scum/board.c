@@ -64,8 +64,6 @@ void build_channel_table(unsigned int channel_11_LC_code);
 
 //=========================== interrupt ========================================
 
-void optical_sfd_isr(void);
-
 //=========================== main =============================================
 
 extern int mote_main(void);
@@ -78,7 +76,7 @@ int main(void) {
 
 void board_init(void) {
     uint8_t eui[8];
-    uint8_t calc_crc;
+    uint32_t calc_crc;
     
     printf("Initializing...");
         

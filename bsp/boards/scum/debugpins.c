@@ -23,7 +23,7 @@ void debugpins_init(void) {
 
 // frame
 void debugpins_frame_toggle(void) {
-    GPIO_REG__OUTPUT    |=  0x0002;
+    GPIO_REG__OUTPUT    ^=  0x0002;
 }
 
 void debugpins_frame_clr(void) {
@@ -31,7 +31,7 @@ void debugpins_frame_clr(void) {
 }
 
 void debugpins_frame_set(void) {
-    GPIO_REG__OUTPUT    ^=  0x0002;
+    GPIO_REG__OUTPUT    |=  0x0002;
 }
 
 // slot
