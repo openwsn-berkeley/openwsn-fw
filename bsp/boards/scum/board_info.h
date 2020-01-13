@@ -28,9 +28,11 @@ to return the board's description.
 #define PORT_RADIOTIMER_WIDTH               uint32_t
 
 #define PORT_SIGNED_INT_WIDTH               int32_t
-#define PORT_TICS_PER_MS                    32
+#define PORT_TICS_PER_MS                    500
+#define US_PER_TICK                         2 // number of us per tick
+
 #define SCHEDULER_WAKEUP()                  
-#define SCHEDULER_ENABLE_INTERRUPT()        
+#define SCHEDULER_ENABLE_INTERRUPT()
 
 // ==== SCuM RF timer specific 
 
@@ -52,21 +54,21 @@ to return the board's description.
 
 //===== IEEE802154E timing
 
-#define SLOTDURATION 80 // in miliseconds
+#define SLOTDURATION 20 // in miliseconds
 
 //// time-slot related
-#define PORT_TsSlotDuration                 2623  // 491 ticks = 15ms   @32768Hz
-#define PORT_maxTxDataPrepare               690   // 66  ticks = 2013us @32768Hz
-#define PORT_maxRxAckPrepare                512   // 20  ticks = 610us  @32768Hz
-#define PORT_maxRxDataPrepare               528   // 33  ticks = 1006us @32768Hz
-#define PORT_maxTxAckPrepare                504   // 30  ticks = 915us  @32768Hz
+#define PORT_TsSlotDuration                 10000  // 10000 ticks = 15ms   @500000hz
+#define PORT_maxTxDataPrepare               1650   // 1650  ticks = 2013us @500000hz
+#define PORT_maxRxAckPrepare                305    // 305  ticks = 610us  @500000hz
+#define PORT_maxRxDataPrepare               504    // 504  ticks = 1006us @500000hz
+#define PORT_maxTxAckPrepare                763    // 763  ticks = 915us  @500000hz
 // radio speed related
-#define PORT_delayTx                        13     //  5  ticks = 152us  @32768hz
+#define PORT_delayTx                        39     //  39  ticks = 78us  @500000hz
 #define PORT_delayRx                        0      //  0us (can not measure)
 
 //===== adaptive_sync accuracy
 
-#define SYNC_ACCURACY                       2     // by ticks
+#define SYNC_ACCURACY                       1     // by ticks
 
 //===== SCuM speicification
 
@@ -80,8 +82,6 @@ to return the board's description.
 //  timing for when to send the frame which currently is a common value for all board.
 // Those are the two reasons to define the marco below to insolated the SCuM related code.
 // This marco shouldn't be used with the new tapeout which should be ready around July 2019.
-
-#define SCUM3C_FPGA_PCB_VERSION
 
 //#define DAGROOT
 

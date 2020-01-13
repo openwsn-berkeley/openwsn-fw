@@ -41,14 +41,13 @@ static const uint8_t ebIEsBytestream[] = {
 #define TXRETRIES                   15 // number of MAC retries before declaring failed
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to successfully synchronize
-#define US_PER_TICK                 30 // number of us per 32kHz clock tick
 #define EB_PORTION                   2 // set EB on minimal cell for 1/EB_PORTION portion
 #define MAXKAPERIOD                428 // in slots: 1500@20ms per slot -> ~30 seconds. Max value used by adaptive synchronization.
 #define DESYNCTIMEOUT              500 // in slots: 1750@20ms per slot -> ~35 seconds. A larger DESYNCTIMEOUT is needed if using a larger KATIMEOUT.
 #define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"
 #define LENGTH_IEEE154_MAX         128 // max length of a valid radio packet
 #define DUTY_CYCLE_WINDOW_LIMIT    (0xFFFFFFFF>>1) // limit of the dutycycle window
-#define SERIALINHIBITGUARD          32 // 32@32kHz ~ 1ms
+#define SERIALINHIBITGUARD          1000/US_PER_TICK // 32@32kHz ~ 1ms
 
 //15.4e information elements related
 #define IEEE802154E_PAYLOAD_DESC_LEN_SHIFT                 0x04
@@ -160,30 +159,19 @@ typedef enum {
 enum ieee154e_atomicdurations_enum {
    // time-slot related
 #if SLOTDURATION==10
-   TsTxOffset                =   70,                  //  2120us
-   TsLongGT                  =   36,                  //  1100us
-   TsTxAckDelay              =   33,                  //  1000us
-   TsShortGT                 =   13,                  //   500us, The standardlized value for this is 400/2=200us(7ticks). Currectly 7 doesn't work for short packet, change it back to 7 when found the problem.
+   TsTxOffset                =   2120/US_PER_TICK,                  //  2120us
+   TsLongGT                  =   1100/US_PER_TICK,                  //  1100us
+   TsTxAckDelay              =   1000/US_PER_TICK,                  //  1000us
+   TsShortGT                 =    500/US_PER_TICK,                  //   500us, The standardlized value for this is 400/2=200us(7ticks). Currectly 7 doesn't work for short packet, change it back to 7 when found the problem.
 #endif
-#ifdef SCUM3C_FPGA_PCB_VERSION
-    
-#if SLOTDURATION==80
-   TsTxOffset                =  800,                  //  5215us
-   TsLongGT                  =   44,                  //  1300us
-   TsTxAckDelay              = 1100,                  //  5521us
-   TsShortGT                 =   30,                  //   500us
-#endif
-
-#else
     
 #if SLOTDURATION==20
-   TsTxOffset                =  171,                  //  5215us
-   TsLongGT                  =   43,                  //  1300us
-   TsTxAckDelay              =  181,                  //  5521us
-   TsShortGT                 =   16,                  //   500us
+   TsTxOffset                =  (5215/US_PER_TICK),                  //  5215us
+   TsLongGT                  =  (1311/US_PER_TICK),                  //  1311us
+   TsTxAckDelay              =  (5521/US_PER_TICK),                  //  5521us
+   TsShortGT                 =   (500/US_PER_TICK),                  //   500us
 #endif
 
-#endif
    TsSlotDuration            =  PORT_TsSlotDuration,  // 10000us
    // execution speed related
    maxTxDataPrepare          =  PORT_maxTxDataPrepare,
@@ -194,9 +182,9 @@ enum ieee154e_atomicdurations_enum {
    delayTx                   =  PORT_delayTx,         // between GO signal and SFD
    delayRx                   =  PORT_delayRx,         // between GO signal and start listening
    // radio watchdog
-   wdRadioTx                 =   44,                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
-   wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
-   wdAckDuration             =   98,                  //  3000us (measured 1000us)
+   wdRadioTx                 =  1342/US_PER_TICK,                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
+   wdDataDuration            =  5000/US_PER_TICK,                  //  5000us (measured 4280us with max payload)
+   wdAckDuration             =  3000/US_PER_TICK,                  //  3000us (measured 1000us)
 };
 
 //shift of bytes in the linkOption bitmap: draft-ietf-6tisch-minimal-10.txt: page 6

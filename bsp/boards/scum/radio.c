@@ -334,6 +334,11 @@ void radio_txNow(void) {
 
     // change state
     RFCONTROLLER_REG__CONTROL = TX_SEND;
+    
+    if (radio_vars.startFrame_cb!=NULL) {
+        // call the callback
+        radio_vars.startFrame_cb(sctimer_readCounter());
+    }
 }
 
 //===== RX
