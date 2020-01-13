@@ -121,7 +121,7 @@ void radio_reset(void) {
 
 //===== RF admin
 
-void radio_setFrequency(uint8_t frequency) {
+void radio_setFrequency(uint8_t frequency, radio_freq_t tx_or_rx) {
    cc2420_FSCTRL_reg_t cc2420_FSCTRL_reg;
    
    // change state

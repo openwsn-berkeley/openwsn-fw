@@ -177,7 +177,7 @@ void radio_setEndFrameCb(radio_capture_cbt cb) {
 //channel spacing in KHz
 //frequency_0 in kHz
 //frequency_nb integer
-void radio_setFrequency(uint16_t channel) {
+void radio_setFrequency(uint16_t channel, radio_freq_t tx_or_rx) {
 
     uint16_t frequency_0;
 

@@ -156,7 +156,7 @@ void radio_reset(void) {
 
 //==== RF admin
 
-void radio_setFrequency(uint8_t frequency) {
+void radio_setFrequency(uint8_t frequency, radio_freq_t tx_or_rx) {
   cc1101_FREQ0_reg_t cc1101_FREQ0_reg;
   cc1101_FREQ1_reg_t cc1101_FREQ1_reg;
   cc1101_FREQ2_reg_t cc1101_FREQ2_reg;
