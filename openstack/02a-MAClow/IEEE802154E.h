@@ -269,7 +269,7 @@ typedef struct {
    PORT_TIMER_WIDTH          radioOnTics;             // how many tics within the slot the radio is on
    bool                      radioOnThisSlot;         // to control if the radio has been turned on in a slot.
 
-   //control
+    // control
    bool                      isAckEnabled;            // whether reply for ack, used for synchronization test
    bool                      isSecurityEnabled;       // whether security is applied
    // time correction
@@ -279,6 +279,10 @@ typedef struct {
    opentimers_id_t           timerId;                 // id of timer used for implementing TSCH slot FSM
    uint32_t                  startOfSlotReference;    // the time refer to the beginning of slot
    opentimers_id_t           serialInhibitTimerId;    // id of serial inhibit timer used for scheduling serial output
+
+    // for msf downstream traffic adaptation
+    uint32_t                  receivedFrameFromParent; // True when received a frame from parent
+
    uint16_t                  compensatingCounter;
 } ieee154e_vars_t;
 
@@ -321,6 +325,7 @@ void               ieee154e_setSlotDuration(uint16_t duration);
 uint16_t           ieee154e_getSlotDuration(void);
 
 uint16_t           ieee154e_getTimeCorrection(void);
+void               ieee154e_getTicsInfo(uint32_t* numTicsOn, uint32_t* numTicsTotal);
 // events
 void               ieee154e_startOfFrame(PORT_TIMER_WIDTH capturedTime);
 void               ieee154e_endOfFrame(PORT_TIMER_WIDTH capturedTime);

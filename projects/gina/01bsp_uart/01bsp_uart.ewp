@@ -329,7 +329,7 @@
           <state>$PROJ_DIR$\..\..\..\bsp\boards\gina\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\chips\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\chips\at86rf231\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\inc\</state>
+          <state>$PROJ_DIR$\..\..\..\inc\</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -2033,9 +2033,6 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\board_info.h</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\bsp_timer.c</name>
-        </file>
-        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\debugpins.c</name>
         </file>
         <file>
@@ -2048,13 +2045,7 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\leds.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\radiotimer.c</name>
-        </file>
-        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\sctimer.c</name>
-          <excluded>
-            <configuration>Debug</configuration>
-          </excluded>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\spi.c</name>
@@ -2067,9 +2058,6 @@
         <name>$PROJ_DIR$\..\..\..\bsp\boards\board.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\debugpins.h</name>
       </file>
       <file>
@@ -2080,9 +2068,6 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\sctimer.h</name>

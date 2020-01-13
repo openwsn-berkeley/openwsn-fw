@@ -25,6 +25,32 @@ class program_over_testbed(object):
         # initialize parameters
         self.mote       = mote
         self.image      = None
+        
+        # check bootload backdoor is configured correctly
+        
+        bootloader_backdoor_enabled   = False
+        extended_linear_address_found = False
+        
+        with open(image_path,'r') as f:
+            for line in f:
+            
+                # looking for data at address 0027FFD4
+                # refer to: https://en.wikipedia.org/wiki/Intel_HEX#Record_types
+                
+                # looking for upper 16bit address 0027
+                if line[:15] == ':020000040027D3':
+                    extended_linear_address_found = True
+            
+                # check the lower 16bit address FFD4
+                
+                # | 1:3 byte count | 3:7 address | 9:17 32-bit field of the lock bit page (the last byte is backdoor configuration) |
+                # 'F6' = 111        1                               0           110
+                #        reserved   backdoor and bootloader enable  active low  PA pin used for backdoor enabling (PA6)
+                if extended_linear_address_found and line[3:7] == 'FFD4' and int(line[1:3], 16)>4  and line[9:17] == 'FFFFFFF6':
+                    bootloader_backdoor_enabled = True
+        
+        assert bootloader_backdoor_enabled
+        
         self.image_name = ''
         with open(image_path,'rb') as f:
             self.image = base64.b64encode(f.read())

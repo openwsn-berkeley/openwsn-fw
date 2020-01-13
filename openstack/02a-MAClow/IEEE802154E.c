@@ -757,7 +757,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
          // break from the do-while loop and execute abort code below
          break;
       }
-      
+
       // parse the IEEE802.15.4 header (synchronize, end of frame)
       ieee802154_retrieveHeader(ieee154e_vars.dataReceived,&ieee802514_header);
 
@@ -771,7 +771,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
       ieee154e_vars.dataReceived->l2_frameType = ieee802514_header.frameType;
       ieee154e_vars.dataReceived->l2_dsn       = ieee802514_header.dsn;
       memcpy(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop),&(ieee802514_header.src),sizeof(open_addr_t));
-      
+
       // verify that incoming security level is acceptable
       if (IEEE802154_security_acceptableLevel(ieee154e_vars.dataReceived, &ieee802514_header) == FALSE) {
             break;
@@ -788,7 +788,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
             break;
          }
       }
-      
+
       // toss the IEEE802.15.4 header -- this does not include IEs as they are processed
       // next.
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_header.headerLength);
@@ -818,7 +818,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
 
       // synchronize (for the first time) to the sender's EB
       synchronizePacket(ieee154e_vars.syncCapturedTime);
-      
+
       // declare synchronized
       changeIsSync(TRUE);
       // log the info
@@ -881,7 +881,6 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
 port_INLINE void activity_ti1ORri1(void) {
     cellType_t  cellType;
     open_addr_t neighbor;
-    open_addr_t autonomousUnicastNeighbor;
     uint8_t     i;
     uint8_t     asn[5];
     uint8_t     join_priority;
@@ -935,6 +934,8 @@ port_INLINE void activity_ti1ORri1(void) {
     // Reset sleep slots
     ieee154e_vars.numOfSleepSlots = 1;
 
+    // update nextActiveSlotOffset before using
+    ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
     if (ieee154e_vars.slotOffset==ieee154e_vars.nextActiveSlotOffset) {
         // this is the next active slot
 
@@ -968,7 +969,6 @@ port_INLINE void activity_ti1ORri1(void) {
                 incrementAsnOffset();
             }
         }
-        ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
     } else {
         // this is NOT the next active slot, abort
 
@@ -984,33 +984,29 @@ port_INLINE void activity_ti1ORri1(void) {
         case CELLTYPE_TX:
             // assuming that there is nothing to send
             ieee154e_vars.dataToSend = NULL;
-            // get the neighbor to check this is dedicated cell or not later
+            // get the neighbor
             schedule_getNeighbor(&neighbor);
 
             // check whether we can send
             if (schedule_getOkToSend()) {
                 if (packetfunctions_isBroadcastMulticast(&neighbor)==FALSE){
 
-                    if (schedule_getShared()){
-                        // this is an autonomous TxRx cell (unicast)
-                        ieee154e_vars.dataToSend = openqueue_macGet6PandJoinPacket(&neighbor);
-                    } else {
-                        // this is a managed Tx cell
-                        ieee154e_vars.dataToSend = openqueue_macGetNonJoinIPv6Packet(&neighbor);
+                    // look for a unicast packet to send
+                    ieee154e_vars.dataToSend = openqueue_macGetUnicastPakcet(&neighbor);
 
                         if (ieee154e_vars.dataToSend == NULL){
                             ieee154e_vars.dataToSend = openqueue_macGetKaPacket(&neighbor);
                         }
 
-                        // update numcellpassed and numcellused on managed Tx cell
+                    if (schedule_getShared()==FALSE){
+                        // update numcellelapsed and numcellused on managed Tx cell
                         if (ieee154e_vars.dataToSend!=NULL) {
                             ieee154e_vars.dataToSend->l2_sendOnTxCell = TRUE;
-                            msf_updateCellsUsed(&neighbor);
+                            msf_updateCellsUsed(&neighbor, CELLTYPE_TX);
                         }
-                        msf_updateCellsPassed(&neighbor);
+                        msf_updateCellsElapsed(&neighbor, CELLTYPE_TX);
                     }
                 } else {
-                    if (schedule_getShared()) {
                         // this is minimal cell
                         ieee154e_vars.dataToSend = openqueue_macGetDIOPacket();
                         if (ieee154e_vars.dataToSend==NULL){
@@ -1018,28 +1014,8 @@ port_INLINE void activity_ti1ORri1(void) {
                             // look for an EB packet in the queue
                             ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
                         }
-                    } else {
-                        // this is autonomous TXRX cell (anycast)
-                        if (msf_getHashCollisionFlag()==TRUE){
-                            // check whether there is 6p or join request packet to send first
-                            ieee154e_vars.dataToSend = openqueue_macGet6PandJoinPacket(&neighbor);
                         }
-
-                        if (ieee154e_vars.dataToSend == NULL) {
-                            memset(&autonomousUnicastNeighbor, 0, sizeof(open_addr_t));
-                            schedule_getAutonomousTxRxCellUnicastNeighbor(&autonomousUnicastNeighbor);
-
-                            // autonomousUnicastNeighbor may be not found
-                            // in that case any 6P request is OK to send on anycast autonomous cell
-                            ieee154e_vars.dataToSend = openqueue_macGet6PRequestOnAnycast(&autonomousUnicastNeighbor);
                         }
-
-                        if (ieee154e_vars.dataToSend == NULL) {
-                            ieee154e_vars.dataToSend = openqueue_macGet6PResponseAndDownStreamPacket(&neighbor);
-                        }
-                    }
-                }
-            }
 
             if (ieee154e_vars.dataToSend==NULL) {
                 if (cellType==CELLTYPE_TX) {
@@ -1050,8 +1026,6 @@ port_INLINE void activity_ti1ORri1(void) {
             } else {
                 // change state
                 changeState(S_TXDATAOFFSET);
-                
-                
                 // change owner
                 ieee154e_vars.dataToSend->owner = COMPONENT_IEEE802154E;
                 if (couldSendEB==TRUE) {        // I will be sending an EB
@@ -1135,6 +1109,7 @@ port_INLINE void activity_ti1ORri1(void) {
             );
             // radiotimer_schedule(DURATION_rt1);
 #endif
+
             break;
         default:
 
@@ -1750,6 +1725,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
     ieee802154_header_iht ieee802514_header;
     uint16_t lenIE=0;
     open_addr_t                 addressToWrite;
+    open_addr_t                 parentAddress;
 
     // change state
     changeState(S_TXACKOFFSET);
@@ -1888,6 +1864,12 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
             break;
         }
         
+        if (icmpv6rpl_getPreferredParentEui64(&parentAddress)){
+            if (packetfunctions_sameAddress(&ieee802514_header.src, &parentAddress)){
+                ieee154e_vars.receivedFrameFromParent = TRUE;
+            }
+        }
+
         // record the timeCorrection and print out at end of slot
         ieee154e_vars.dataReceived->l2_timeCorrection = (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)TsTxOffset-(PORT_SIGNED_INT_WIDTH)ieee154e_vars.syncCapturedTime);
 
@@ -1986,7 +1968,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
                     icmpv6rpl_getPreferredParentEui64(&addressToWrite)      == FALSE ||
                     (
                         icmpv6rpl_getPreferredParentEui64(&addressToWrite)           &&
-                        schedule_hasManagedTxCellToNeighbor(&addressToWrite)== FALSE
+                        schedule_hasNegotiatedCellToNeighbor(&addressToWrite, CELLTYPE_TX)== FALSE
                     )
                 )
             ) {
@@ -2082,9 +2064,6 @@ port_INLINE void activity_ri6(void) {
     }
     // space for 2-byte CRC
     packetfunctions_reserveFooterSize(ieee154e_vars.ackToSend,2);
-    
-    radio_rfOff();
-    
     // configure the radio to listen to the default synchronizing channel
     radio_setFrequency(ieee154e_vars.freq, FREQ_TX);
     
@@ -2342,6 +2321,12 @@ port_INLINE uint16_t ieee154e_getTimeCorrection(void) {
     return returnVal;
 }
 
+void ieee154e_getTicsInfo(uint32_t* numTicsOn, uint32_t* numTicsTotal){
+
+    *numTicsOn    = (uint32_t)(ieee154e_stats.numTicsOn);
+    *numTicsTotal = (uint32_t)(ieee154e_stats.numTicsTotal);
+}
+
 port_INLINE void joinPriorityStoreFromEB(uint8_t jp){
     ieee154e_vars.dataReceived->l2_joinPriority = jp;
     ieee154e_vars.dataReceived->l2_joinPriorityPresent = TRUE;
@@ -2515,6 +2500,7 @@ bool isValidEbFormat(OpenQueueEntry_t* pkt, uint16_t* lenIE){
                             slotoffset,    // slot offset
                             CELLTYPE_TXRX, // type of slot
                             TRUE,          // shared?
+                            FALSE,         // auto cell
                             channeloffset, // channel offset
                             &temp_neighbor // neighbor
                         );
@@ -2902,6 +2888,11 @@ function should already have been done. If this is not the case, this function
 will do that for you, but assume that something went wrong.
 */
 void endSlot(void) {
+
+    open_addr_t slotNeighbor;
+    open_addr_t parentAddress;
+    slotinfo_element_t  info;
+
     // turn off the radio
     radio_rfOff();
 
@@ -2962,6 +2953,36 @@ void endSlot(void) {
         ieee154e_vars.dataToSend = NULL;
     }
 
+    schedule_getSlotInfo(ieee154e_vars.slotOffset, &info);
+    if (info.link_type==CELLTYPE_RX){
+        // update numcellelapsed and numcellused on Rx cell
+
+        // update numcellused if received something
+        if (ieee154e_vars.receivedFrameFromParent) {
+            if (icmpv6rpl_getPreferredParentEui64(&parentAddress)){
+                msf_updateCellsUsed(
+                    &parentAddress,
+                    CELLTYPE_RX
+                );
+            }
+        }
+
+        // update numcellelapsed if this is auto rx or rx cell to parent
+        if (info.isAutoCell){
+            if (icmpv6rpl_getPreferredParentEui64(&parentAddress)){
+                if (schedule_hasNegotiatedCellToNeighbor(&parentAddress, CELLTYPE_RX) == FALSE) {
+                    // adapt traffic on auto rx for downstream traffic
+                    msf_updateCellsElapsed(&parentAddress, CELLTYPE_RX);
+                }
+            }
+        } else {
+            // update numelapsed on rx cell (msf will check whether it
+            // is to parent or not)
+            msf_updateCellsElapsed(&info.address, CELLTYPE_RX);
+        }
+    }
+    ieee154e_vars.receivedFrameFromParent = FALSE;
+
     // clean up dataReceived
     if (ieee154e_vars.dataReceived!=NULL) {
         // assume something went wrong. If everything went well, dataReceived
@@ -2987,6 +3008,26 @@ void endSlot(void) {
         openqueue_freePacketBuffer(ieee154e_vars.ackReceived);
         // reset local variable
         ieee154e_vars.ackReceived = NULL;
+    }
+
+    // check if this is auto tx cell
+    if (
+        schedule_getSlottOffset() == ieee154e_vars.slotOffset &&
+        schedule_getIsAutoCell()                              &&
+        schedule_getType()        == CELLTYPE_TX
+    ){
+        // check if there are unicast packets to the neighbor of this slot
+        // if no, remove the cell
+
+        schedule_getNeighbor(&slotNeighbor);
+        if (openqueue_macGetUnicastPakcet(&slotNeighbor)==NULL) {
+            schedule_removeActiveSlot(
+                ieee154e_vars.slotOffset,
+                CELLTYPE_TX,
+                TRUE,
+                &slotNeighbor
+            );
+        }
     }
 
     // change state

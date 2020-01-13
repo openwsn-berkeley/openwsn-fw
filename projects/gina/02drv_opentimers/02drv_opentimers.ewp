@@ -331,6 +331,7 @@
           <state>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\</state>
           <state>$PROJ_DIR$\..\..\..\drivers\common\</state>
           <state>$PROJ_DIR$\..\..\..\inc\</state>
+		  <state>$PROJ_DIR$\..\..\..\kernel\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\</state>
         </option>
         <option>
@@ -2035,9 +2036,6 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\board_info.h</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\bsp_timer.c</name>
-        </file>
-        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\debugpins.c</name>
         </file>
         <file>
@@ -2050,13 +2048,7 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\leds.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\radiotimer.c</name>
-        </file>
-        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\sctimer.c</name>
-          <excluded>
-            <configuration>Debug</configuration>
-          </excluded>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\spi.c</name>
@@ -2069,9 +2061,6 @@
         <name>$PROJ_DIR$\..\..\..\bsp\boards\board.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\debugpins.h</name>
       </file>
       <file>
@@ -2082,9 +2071,6 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\uart.h</name>
@@ -2122,6 +2108,15 @@
     <name>inc</name>
     <file>
       <name>$PROJ_DIR$\..\..\..\inc\opendefs.h</name>
+    </file>
+  </group>
+  <group>
+    <name>kernel</name>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\kernel\scheduler.h</name>
+    </file>
+	<file>
+      <name>$PROJ_DIR$\..\..\..\kernel\openos\scheduler.c</name>
     </file>
   </group>
 </project>

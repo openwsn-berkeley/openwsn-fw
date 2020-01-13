@@ -15,6 +15,7 @@ can use this project with any platform.
 #include "uart.h"
 // driver modules required
 #include "opentimers.h"
+#include "scheduler.h"
 #include "sensitive_accel_temperature.h"
 
 //=========================== defines =========================================
@@ -42,15 +43,16 @@ typedef struct {
    uint8_t  lastSentByte;
    uint8_t  lastMeasurement[MEASUREMENENT_LENGTH];
    uint8_t  serialPk[SERIALPKT_LENGTH];
+   uint8_t  timer_id;
 } app_vars_t;
 
 app_vars_t app_vars;
 
 //=========================== prototypes ======================================
 
-void cb_timer();
+void cb_timer(opentimers_id_t id);
 void cb_uart_tx();
-void cb_uart_rx();
+uint8_t cb_uart_rx();
 
 //=========================== main ============================================
 
@@ -76,10 +78,15 @@ int mote_main(void) {
    uart_clearRxInterrupts();          // clear possible pending interrupts
    uart_enableInterrupts();           // Enable USCI_A1 TX & RX interrupt
    
-   // start the timer
-   opentimers_start(APP_DLY_TIMER_ms,
-                    TIMER_PERIODIC,TIME_MS,
-                    cb_timer);
+   // start the timer   
+    app_vars.timer_id = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_NONE);
+    opentimers_scheduleIn(
+        app_vars.timer_id,
+        APP_DLY_TIMER_ms,
+        TIME_MS,
+        TIMER_PERIODIC,
+        cb_timer
+    );
       
    while(1) {
       // sleep while waiting for at least one of the flags to be set
@@ -123,7 +130,7 @@ int mote_main(void) {
 
 //=========================== callbacks =======================================
 
-void cb_timer(void) {
+void cb_timer(opentimers_id_t id) {
    // set flag
    app_vars.flags |= APP_FLAG_TIMER;
    // update debug stats
@@ -146,9 +153,11 @@ void cb_uart_tx(void) {
    app_dbg.num_txByte++;
 }
 
-void cb_uart_rx(void) {
+uint8_t cb_uart_rx(void) {
    // this should never happen
    
    // simply toggle the error LED
    leds_error_toggle();
+   
+   return 0;
 }

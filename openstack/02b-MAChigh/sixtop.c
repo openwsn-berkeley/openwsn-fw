@@ -151,10 +151,10 @@ void sixtop_setEBPeriod(uint8_t ebPeriod) {
 }
 
 void  sixtop_setSFcallback(
-    sixtop_sf_getsfid           cb0,
-    sixtop_sf_getmetadata       cb1,
-    sixtop_sf_translatemetadata cb2,
-    sixtop_sf_handle_callback   cb3
+    sixtop_sf_getsfid_cbt           cb0,
+    sixtop_sf_getmetadata_cbt       cb1,
+    sixtop_sf_translatemetadata_cbt cb2,
+    sixtop_sf_handle_callback_cbt   cb3
 ){
    sixtop_vars.cb_sf_getsfid            = cb0;
    sixtop_vars.cb_sf_getMetadata        = cb1;
@@ -187,7 +187,7 @@ owerror_t sixtop_request(
         sixtop_vars.six2six_state != SIX_STATE_IDLE   ||
         neighbor                  == NULL
     ){
-        // neighbor can't be none or previous transcation doesn't finishe yet
+        // neighbor can't be none or previous transcation doesn't finish yet
         return E_FAIL;
     }
 
@@ -362,30 +362,6 @@ owerror_t sixtop_request(
 //======= from upper layer
 
 owerror_t sixtop_send(OpenQueueEntry_t *msg) {
-
-    open_addr_t addressToWrite;
-
-    if (
-        idmanager_getIsDAGroot() == FALSE               &&
-        (
-            msg->creator != COMPONENT_SIXTOP_RES        &&
-            msg->creator != COMPONENT_CJOIN             &&
-            (
-                icmpv6rpl_getPreferredParentEui64(&addressToWrite) == FALSE      ||
-                (
-                    icmpv6rpl_getPreferredParentEui64(&addressToWrite)           &&
-                    (
-                        msf_getHashCollisionFlag() == FALSE                      &&
-                        schedule_hasAutonomousTxRxCellUnicast(&addressToWrite)== FALSE
-                    )
-                )
-            )
-        )
-    ){
-        return E_FAIL;
-    }
-
-
 
     // set metadata
     msg->owner        = COMPONENT_SIXTOP;
@@ -643,6 +619,25 @@ owerror_t sixtop_send_internal(
     );
     // change owner to IEEE802154E fetches it from queue
     msg->owner  = COMPONENT_SIXTOP_TO_IEEE802154E;
+
+    if (
+        packetfunctions_isBroadcastMulticast(&(msg->l2_nextORpreviousHop))   == FALSE &&
+        schedule_hasNegotiatedCellToNeighbor(&(msg->l2_nextORpreviousHop), CELLTYPE_TX) == FALSE &&
+        schedule_hasAutoTxCellToNeighbor(&(msg->l2_nextORpreviousHop))       == FALSE
+    ){
+        // the frame source address is not broadcast/multicast
+        // no negotiated tx cell to that neighbor
+        // no auto tx cell to that neighbor
+
+        schedule_addActiveSlot(
+            msf_hashFunction_getSlotoffset(&(msg->l2_nextORpreviousHop)),    // slot offset
+            CELLTYPE_TX,                                                     // type of slot
+            TRUE,                                                            // shared?
+            TRUE,                                                            // auto cell?
+            msf_hashFunction_getChanneloffset(&(msg->l2_nextORpreviousHop)), // channel offset
+            &(msg->l2_nextORpreviousHop)                                     // neighbor
+        );
+    }
     return E_SUCCESS;
 }
 
@@ -861,7 +856,7 @@ port_INLINE void sixtop_sendKA(void) {
         return;
     }
 
-    if (schedule_hasManagedTxCellToNeighbor(kaNeighAddr) == FALSE){
+    if (schedule_hasNegotiatedCellToNeighbor(kaNeighAddr, CELLTYPE_TX) == FALSE){
         // delete packets genereted by this module (EB and KA) from openqueue
         openqueue_removeAllCreatedBy(COMPONENT_SIXTOP);
 
@@ -917,7 +912,7 @@ void timer_sixtop_six2six_timeout_fired(void) {
 
     if (sixtop_vars.six2six_state == SIX_STATE_WAIT_CLEARRESPONSE){
         // no response for the 6p clear, just clear locally
-        schedule_removeAllManagedUnicastCellsToNeighbor(
+        schedule_removeAllNegotiatedCellsToNeighbor(
             sixtop_vars.cb_sf_getMetadata(),
             &sixtop_vars.neighborToClearCells
         );
@@ -936,8 +931,18 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
     // if this is a request send done
     if (msg->l2_sixtop_messageType == SIXTOP_CELL_REQUEST){
         if(error == E_FAIL) {
-            // reset handler and state if the request is failed to send out
-            sixtop_vars.six2six_state = SIX_STATE_IDLE;
+            // max retries, without ack
+            switch (sixtop_vars.six2six_state) {
+
+            case SIX_STATE_WAIT_CLEARREQUEST_SENDDONE:
+                sixtop_vars.six2six_state = SIX_STATE_WAIT_CLEARRESPONSE;
+                timer_sixtop_six2six_timeout_fired();
+                break;
+            default:
+                // reset handler and state if the request is failed to send out
+                sixtop_vars.six2six_state = SIX_STATE_IDLE;
+                break;
+            }
         } else {
             // the packet has been sent out successfully
             switch (sixtop_vars.six2six_state) {
@@ -1014,7 +1019,7 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
                 }
 
                 if ( msg->l2_sixtop_command == IANA_6TOP_CMD_CLEAR){
-                    schedule_removeAllManagedUnicastCellsToNeighbor(
+                    schedule_removeAllNegotiatedCellsToNeighbor(
                         msg->l2_sixtop_frameID,
                         &(msg->l2_nextORpreviousHop)
                     );
@@ -1029,7 +1034,7 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
 
             // if the response is for CLEAR command, remove all the cells and reset seqnum regardless NO ack received.
             if ( msg->l2_sixtop_command == IANA_6TOP_CMD_CLEAR){
-                schedule_removeAllManagedUnicastCellsToNeighbor(
+                schedule_removeAllNegotiatedCellsToNeighbor(
                     msg->l2_sixtop_frameID,
                     &(msg->l2_nextORpreviousHop)
                 );
@@ -1522,9 +1527,21 @@ void sixtop_six2six_notifyReceive(
                 neighbors_updateSequenceNumber(&(pkt->l2_nextORpreviousHop));
                 break;
             case SIX_STATE_WAIT_DELETERESPONSE:
+                i = 0;
+                memset(pkt->l2_sixtop_celllist_delete,0,sizeof(pkt->l2_sixtop_celllist_delete));
+                while(pktLen>0){
+                    pkt->l2_sixtop_celllist_delete[i].slotoffset     =  *((uint8_t*)(pkt->payload)+ptr);
+                    pkt->l2_sixtop_celllist_delete[i].slotoffset    |= (*((uint8_t*)(pkt->payload)+ptr+1))<<8;
+                    pkt->l2_sixtop_celllist_delete[i].channeloffset  =  *((uint8_t*)(pkt->payload)+ptr+2);
+                    pkt->l2_sixtop_celllist_delete[i].channeloffset |= (*((uint8_t*)(pkt->payload)+ptr+3))<<8;
+                    pkt->l2_sixtop_celllist_delete[i].isUsed         = TRUE;
+                    ptr    += 4;
+                    pktLen -= 4;
+                    i++;
+                }
                 sixtop_removeCells(
                     sixtop_vars.cb_sf_getMetadata(),
-                    sixtop_vars.celllist_toDelete,
+                    pkt->l2_sixtop_celllist_delete,
                     &(pkt->l2_nextORpreviousHop),
                     sixtop_vars.cellOptions
                 );
@@ -1592,17 +1609,15 @@ void sixtop_six2six_notifyReceive(
                 neighbors_updateSequenceNumber(&(pkt->l2_nextORpreviousHop));
                 break;
             case SIX_STATE_WAIT_CLEARRESPONSE:
-                schedule_removeAllManagedUnicastCellsToNeighbor(
+                schedule_removeAllNegotiatedCellsToNeighbor(
                     sixtop_vars.cb_sf_getMetadata(),
                     &(pkt->l2_nextORpreviousHop)
                 );
                 neighbors_resetSequenceNumber(&(pkt->l2_nextORpreviousHop));
                 break;
             default:
-                // The sixtop response arrived after 6P TIMEOUT.
-
-
-                // it's a duplicated response.
+                // The sixtop response arrived after 6P TIMEOUT, or
+                // it's a duplicated response. Remove 6P request if I have.
 
                 openqueue_remove6PrequestToNeighbor(&(pkt->l2_nextORpreviousHop));
 
@@ -1662,6 +1677,7 @@ bool sixtop_addCells(
                 cellList[i].slotoffset,
                 type,
                 isShared,
+                FALSE,
                 cellList[i].channeloffset,
                 &temp_neighbor
             );
@@ -1672,14 +1688,30 @@ bool sixtop_addCells(
 }
 
 bool sixtop_removeCells(
-      uint8_t      slotframeID,
-      cellInfo_ht* cellList,
-      open_addr_t* previousHop,
+    uint8_t      slotframeID,
+    cellInfo_ht* cellList,
+    open_addr_t* previousHop,
     uint8_t      cellOptions
-   ){
+){
     uint8_t     i;
+    bool        isShared;
     open_addr_t temp_neighbor;
+    cellType_t  type;
     bool        hasCellsRemoved;
+
+    // translate cellOptions to cell type
+    if (cellOptions == CELLOPTIONS_TX){
+        type     = CELLTYPE_TX;
+        isShared = FALSE;
+    }
+    if (cellOptions == CELLOPTIONS_RX){
+        type     = CELLTYPE_RX;
+        isShared = FALSE;
+    }
+    if (cellOptions == (CELLOPTIONS_TX | CELLOPTIONS_RX | CELLOPTIONS_SHARED)){
+        type     = CELLTYPE_TXRX;
+        isShared = TRUE;
+    }
 
     memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
 
@@ -1690,6 +1722,8 @@ bool sixtop_removeCells(
             hasCellsRemoved = TRUE;
             schedule_removeActiveSlot(
                 cellList[i].slotoffset,
+                type,
+                isShared,
                 &temp_neighbor
             );
         }

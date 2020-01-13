@@ -2076,9 +2076,6 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\board_info.h</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\bsp_timer.c</name>
-        </file>
-        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\debugpins.c</name>
         </file>
         <file>
@@ -2109,7 +2106,7 @@
           <name>$PROJ_DIR$\..\..\..\drivers\gina\magnetometer.h</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\radiotimer.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\sctimer.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\drivers\gina\sensitive_accel_temperature.c</name>
@@ -2128,9 +2125,6 @@
         <name>$PROJ_DIR$\..\..\..\bsp\boards\board.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\debugpins.h</name>
       </file>
       <file>
@@ -2141,9 +2135,6 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\uart.h</name>
@@ -2232,6 +2223,12 @@
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154.h</name>
       </file>
+	  <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154_security.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154_security.h</name>
+      </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154E.c</name>
       </file>
@@ -2254,16 +2251,10 @@
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\neighbors.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\otf.c</name>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\msf.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\otf.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\processIE.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\processIE.h</name>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\msf.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\schedule.c</name>

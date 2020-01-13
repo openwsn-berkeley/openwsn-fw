@@ -169,6 +169,12 @@ void radio_rfOff(void) {
    radio_vars.state = RADIOSTATE_RFOFF;
 }
 
+int8_t radio_getFrequencyOffset(void){
+
+    // not available
+    return 0;
+}
+
 //===== TX
 
 void radio_loadPacket(uint8_t* packet, uint16_t len) {

@@ -59,7 +59,9 @@
 
 //===== IEEE802154E timing
 
-#define SLOTDURATION 10 // in miliseconds
+#define SLOTDURATION 20                // in miliseconds
+
+//===== IEEE802154E timing
 
 #if SLOTDURATION==10
     // time-slot related
@@ -68,30 +70,29 @@
     #define PORT_maxTxDataPrepare               10    //  305us (measured  82us)
     #define PORT_maxRxAckPrepare                10    //  305us (measured  83us)
     #define PORT_maxRxDataPrepare                4    //  122us (measured  22us)
-    #define PORT_maxTxAckPrepare                15    //  122us (measured  94us)
+    #define PORT_maxTxAckPrepare                10    //  122us (measured  94us)
     // radio speed related
     #ifdef L2_SECURITY_ACTIVE
     #define PORT_delayTx                        14    //  366us (measured xxxus)
     #else
-    #define PORT_delayTx                         8    //  366us (measured xxxus)
+    #define PORT_delayTx                        12    //  366us (measured xxxus)
     #endif
     #define PORT_delayRx                         0    //    0us (can not measure)
     // radio watchdog
 #endif
 
 #if SLOTDURATION==20
-    // time-slot related
-    #define PORT_TsSlotDuration                 492   // counter counts one extra count, see datasheet
+    #define PORT_TsSlotDuration                 655   //    20ms
+
     // execution speed related
-    #define PORT_maxTxDataPrepare               110   //  3355us (not measured)
-    #define PORT_maxRxAckPrepare                20    //   610us (not measured)
-    #define PORT_maxRxDataPrepare               33    //  1000us (not measured)
-    #define PORT_maxTxAckPrepare                50    //  1525us (not measured)
+    #define PORT_maxTxDataPrepare                15   //   458us (measured  213us)
+    #define PORT_maxRxAckPrepare                 10   //   305us (measured   86us)
+    #define PORT_maxRxDataPrepare                10   //   305us (measured   88us)
+    #define PORT_maxTxAckPrepare                 15   //   458us (measured  211us)
 
     // radio speed related
-    #define PORT_delayTx                        18    //   549us (not measured)
+    #define PORT_delayTx                        13    //   397us (measured  388us)
     #define PORT_delayRx                        0     //     0us (can not measure)
-    // radio watchdog
 #endif
 
 //===== adaptive_sync accuracy

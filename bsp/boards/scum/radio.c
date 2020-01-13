@@ -238,7 +238,7 @@ void radio_setFrequency(uint8_t frequency, radio_freq_t tx_or_rx) {
 
 void radio_rfOn(void) {
     // clear reset pin
-    RFCONTROLLER_REG__CONTROL   &= ~RX_RESET;
+    RFCONTROLLER_REG__CONTROL   &= ~RF_RESET;
 }
 
 void radio_rfOff(void) {
@@ -249,7 +249,7 @@ void radio_rfOff(void) {
     radio_reset();
 
     // turn SCuM radio off
-    RFCONTROLLER_REG__CONTROL   = RX_RESET;
+    RFCONTROLLER_REG__CONTROL   = RF_RESET;
     
     // Hold digital baseband in reset
     ANALOG_CFG_REG__4 = 0x2000;
@@ -326,6 +326,8 @@ void radio_txEnable(void) {
 
     // change state
     radio_vars.state = RADIOSTATE_TX_ENABLED;
+    
+    RFCONTROLLER_REG__CONTROL   = RF_RESET;
 }
 
 void radio_txNow(void) {
@@ -364,7 +366,7 @@ void radio_rxEnable(void) {
     ANALOG_CFG_REG__16 = 0x1;
     
     // reset
-    RFCONTROLLER_REG__CONTROL   = RX_RESET;
+    RFCONTROLLER_REG__CONTROL   = RF_RESET;
     
     // set receiving buffer address
     DMA_REG__RF_RX_ADDR         = &(radio_vars.radio_rx_buffer[0]);

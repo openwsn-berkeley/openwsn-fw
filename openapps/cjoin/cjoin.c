@@ -142,11 +142,6 @@ owerror_t cjoin_receive(OpenQueueEntry_t* msg,
 
     if (configuration.keyset.num_keys == 1 &&
         configuration.keyset.key[0].key_usage == COJP_KEY_USAGE_6TiSCH_K1K2_ENC_MIC32) {
-            // only if I am not joined before, remove the previous installed autonomous cell
-            if (cjoin_vars.isJoined==FALSE){
-                neighbor_removeAutonomousTxRxCellUnicast(&(msg->l2_nextORpreviousHop));
-            }
-
             // set the L2 keys as per the parsed value
             IEEE802154_security_setBeaconKey(configuration.keyset.key[0].key_index, configuration.keyset.key[0].key_value);
             IEEE802154_security_setDataKey(configuration.keyset.key[0].key_index, configuration.keyset.key[0].key_value);
@@ -169,6 +164,13 @@ void cjoin_timer_cb(opentimers_id_t id){
 void cjoin_retransmission_cb(opentimers_id_t id) {
     // calling the task directly as the timer_cb function is executed in
     // task mode by opentimer already
+    opentimers_scheduleIn(
+        cjoin_vars.timerId,
+        (uint32_t) TIMEOUT,
+        TIME_MS,
+        TIMER_ONESHOT,
+        cjoin_retransmission_cb
+    );
     cjoin_retransmission_task_cb();
 }
 
@@ -177,24 +179,12 @@ void cjoin_retransmission_task_cb(void) {
 
     if (ieee154e_isSynch() == FALSE){
         // keep the retransmission timer, in case it synchronized at next time
-        opentimers_scheduleIn(cjoin_vars.timerId,
-                (uint32_t) TIMEOUT,
-                TIME_MS,
-                TIMER_ONESHOT,
-                cjoin_retransmission_cb
-        );
         return;
     }
 
     joinProxy = neighbors_getJoinProxy();
     if(joinProxy == NULL) {
         // keep the retransmission timer, in case it synchronized at next time
-        opentimers_scheduleIn(cjoin_vars.timerId,
-                (uint32_t) TIMEOUT,
-                TIME_MS,
-                TIMER_ONESHOT,
-                cjoin_retransmission_cb
-        );
         openserial_printError(
             COMPONENT_CJOIN,
             ERR_ABORT_JOIN_PROCESS,
@@ -226,19 +216,24 @@ void cjoin_task_cb(void) {
         return;
     }
 
-    // cancel the startup timer but do not destroy it as we reuse it for retransmissions
-    opentimers_cancel(cjoin_vars.timerId);
+    // arm the retransmission timer
+    opentimers_scheduleIn(
+        cjoin_vars.timerId,
+        (uint32_t) TIMEOUT,
+        TIME_MS,
+        TIMER_ONESHOT,
+        cjoin_retransmission_cb
+    );
 
     // init the security context only here in order to use the latest joinKey
     // that may be set over the serial
     cjoin_init_security_context();
 
     cjoin_sendJoinRequest(joinProxy);
-
-    return;
 }
 
 void cjoin_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
+
     openqueue_freePacketBuffer(msg);
 }
 
@@ -252,13 +247,8 @@ owerror_t cjoin_sendJoinRequest(open_addr_t* joinProxy) {
 
     payload_len = 0;
 
-    // immediately arm the retransmission timer
-    opentimers_scheduleIn(cjoin_vars.timerId,
-            (uint32_t) TIMEOUT,
-            TIME_MS,
-            TIMER_ONESHOT,
-            cjoin_retransmission_cb
-    );
+    // if previous cjoin is not sent out, remove them
+    openqueue_removeAllCreatedBy(COMPONENT_CJOIN);
 
     // create a CoAP RD packet
     pkt = openqueue_getFreePacketBuffer(COMPONENT_CJOIN);

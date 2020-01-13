@@ -48,7 +48,7 @@ to return the board's description.
 
 //===== radio
 
-#define PORT_PIN_RADIO_RESET_LOW()          RFCONTROLLER_REG__CONTROL = 0x10;
+#define PORT_PIN_RADIO_RESET_LOW()          RFCONTROLLER_REG__CONTROL = RF_RESET;
 
 //===== IEEE802154E timing
 

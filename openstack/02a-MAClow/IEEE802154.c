@@ -324,7 +324,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
          ieee802514_header->headerLength += 8;
          if (ieee802514_header->headerLength>msg->length) {  return; } // no more to read!
          break;
-      // no need for a default, since case would have been caught above
+         // no need for a default, since case would have been caught above
    }
 
    if (ieee802514_header->ieListPresent==TRUE && ieee802514_header->frameVersion!=IEEE154_FRAMEVERSION_2012){

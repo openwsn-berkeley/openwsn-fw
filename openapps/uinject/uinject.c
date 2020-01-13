@@ -8,6 +8,13 @@
 #include "schedule.h"
 #include "icmpv6rpl.h"
 #include "idmanager.h"
+#include "openrandom.h"
+
+#include "msf.h"
+
+//=========================== defines =========================================
+
+#define UINJECT_TRAFFIC_RATE 2 ///> the value X indicates 1 packet/X minutes
 
 //=========================== variables =======================================
 
@@ -54,7 +61,7 @@ void uinject_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
     if (error==E_FAIL){
         openserial_printError(
             COMPONENT_UINJECT,
-            ERR_UINJECT_PACKET_DROPPED,
+            ERR_MAXRETRIES_REACHED,
             (errorparameter_t)uinject_vars.counter,
             (errorparameter_t)0
         );
@@ -77,14 +84,20 @@ void uinject_receive(OpenQueueEntry_t* pkt) {
 void uinject_timer_cb(opentimers_id_t id){
     // calling the task directly as the timer_cb function is executed in
     // task mode by opentimer already
-    uinject_task_cb();
+    if(openrandom_get16b()<(0xffff/UINJECT_TRAFFIC_RATE)){
+        uinject_task_cb();
+    }
 }
 
 void uinject_task_cb(void) {
     OpenQueueEntry_t*    pkt;
     uint8_t              asnArray[5];
+    uint8_t              numCellsUsed;
     open_addr_t          parentNeighbor;
     bool                 foundNeighbor;
+
+    uint32_t             ticksOn;
+    uint32_t             ticksInTotal;
 
     // don't run if not synch
     if (ieee154e_isSynch() == FALSE) {
@@ -102,7 +115,7 @@ void uinject_task_cb(void) {
         return;
     }
 
-    if (schedule_hasManagedTxCellToNeighbor(&parentNeighbor) == FALSE) {
+    if (schedule_hasNegotiatedCellToNeighbor(&parentNeighbor, CELLTYPE_TX) == FALSE) {
         return;
     }
 
@@ -149,6 +162,31 @@ void uinject_task_cb(void) {
     pkt->payload[2] = asnArray[2];
     pkt->payload[3] = asnArray[3];
     pkt->payload[4] = asnArray[4];
+
+    packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
+    numCellsUsed = msf_getPreviousNumCellsUsed(CELLTYPE_TX);
+    pkt->payload[0] = numCellsUsed;
+
+    packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
+    numCellsUsed = msf_getPreviousNumCellsUsed(CELLTYPE_RX);
+    pkt->payload[0] = numCellsUsed;
+
+    packetfunctions_reserveHeaderSize(pkt,sizeof(uint16_t));
+    pkt->payload[1] = (uint8_t)(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
+    pkt->payload[0] = (uint8_t)(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+
+    ieee154e_getTicsInfo(&ticksOn, &ticksInTotal);
+    packetfunctions_reserveHeaderSize(pkt,sizeof(uint32_t));
+    pkt->payload[3] = (uint8_t)((ticksOn & 0xff000000) >> 24);
+    pkt->payload[2] = (uint8_t)((ticksOn & 0x00ff0000) >> 16);
+    pkt->payload[1] = (uint8_t)((ticksOn & 0x0000ff00) >> 8);
+    pkt->payload[0] = (uint8_t)( ticksOn & 0x000000ff);
+
+    packetfunctions_reserveHeaderSize(pkt,sizeof(uint32_t));
+    pkt->payload[3] = (uint8_t)((ticksInTotal & 0xff000000) >> 24);
+    pkt->payload[2] = (uint8_t)((ticksInTotal & 0x00ff0000) >> 16);
+    pkt->payload[1] = (uint8_t)((ticksInTotal & 0x0000ff00) >> 8);
+    pkt->payload[0] = (uint8_t)( ticksInTotal & 0x000000ff);
 
     if ((openudp_send(pkt))==E_FAIL) {
         openqueue_freePacketBuffer(pkt);

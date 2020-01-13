@@ -60,7 +60,7 @@
 #define TX_SEND                         0x02
 #define RX_START                        0x04
 #define RX_STOP                         0x08
-#define RX_RESET                        0x10
+#define RF_RESET                        0x10
 
 // ==== RFCONTROLLER interruption flag
 
