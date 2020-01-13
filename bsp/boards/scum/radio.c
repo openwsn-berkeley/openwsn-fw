@@ -55,6 +55,14 @@
 
 //=========================== variables =======================================
 
+// freq_settings
+typedef struct {
+   uint16_t fine:5;
+   uint16_t mid:5;
+   uint16_t coarse:5;
+   uint16_t not_used:1;
+} freq_setting_t;
+
 typedef struct {
     radio_capture_cbt         startFrame_cb;
     radio_capture_cbt         endFrame_cb;
@@ -87,6 +95,10 @@ unsigned int acfg3_val;
 unsigned char FIR_coeff[11] = {4,16,37,64,87,96,87,64,37,16,4};
 unsigned int IF_estimate_history[11] = {500,500,500,500,500,500,500,500,500,500};
 signed short cdr_tau_history[11] = {0};
+
+
+uint16_t freq_setting_rx[16] = {24878, 25070, 25265, 25852, 26094, 26286, 26504, 27091, 27306, 27449, 28109, 28252, 28466, 29078, 29291, 29456};
+uint16_t freq_setting_tx[16] = {24473, 25133, 25749, 25918, 26183, 26377, 26968, 27203, 27840, 28005, 28153, 28364, 28975, 29117, 29376, 29965};
 
 //=========================== prototypes ======================================
 
@@ -174,17 +186,31 @@ void radio_reset(void) {
 // Call this to setup RX, followed quickly by a TX ack
 // Note that due to the two ASC program cycles, this function takes about 27ms to execute (@5MHz HCLK)
 void setFrequencyRX(uint8_t channel){
+    uint8_t coarse;
+    uint8_t mid;
+    uint8_t fine;
     
-    // Set LO code for RX channel
-    LC_monotonic(radio_vars.rx_channel_codes[channel-11]);
+    coarse = (freq_setting_rx[channel-11]>>10) & 0x001f;
+    mid    = (freq_setting_rx[channel-11]>>5)  & 0x001f;
+    fine   =  freq_setting_rx[channel-11]      & 0x001f;
+
+    LC_FREQCHANGE(coarse,mid,fine);
+    
 }
 
 
 // Call this to setup TX, followed quickly by a RX ack
 void setFrequencyTX(uint8_t channel){
     
-    // Set LO code for TX channel
-    LC_monotonic(radio_vars.tx_channel_codes[channel-11]);
+    uint8_t coarse;
+    uint8_t mid;
+    uint8_t fine;
+    
+    coarse = (freq_setting_tx[channel-11]>>10) & 0x001f;
+    mid    = (freq_setting_tx[channel-11]>>5)  & 0x001f;
+    fine   =  freq_setting_tx[channel-11]      & 0x001f;
+
+    LC_FREQCHANGE(coarse,mid,fine);
 }
 
 void radio_setFrequency(uint8_t frequency, radio_freq_t tx_or_rx) {
