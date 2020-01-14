@@ -169,7 +169,7 @@ enum ieee154e_atomicdurations_enum {
    TsTxOffset                =  (5215/US_PER_TICK),                  //  5215us
    TsLongGT                  =  (1311/US_PER_TICK),                  //  1311us
    TsTxAckDelay              =  (5521/US_PER_TICK),                  //  5521us
-   TsShortGT                 =   (500/US_PER_TICK),                  //   500us
+   TsShortGT                 =   (700/US_PER_TICK),                  //   500us
 #endif
 
    TsSlotDuration            =  PORT_TsSlotDuration,  // 10000us
