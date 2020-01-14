@@ -97,8 +97,8 @@ unsigned int IF_estimate_history[11] = {500,500,500,500,500,500,500,500,500,500}
 signed short cdr_tau_history[11] = {0};
 
 
-uint16_t freq_setting_rx[16] = {24878, 25070, 25265, 25852, 26094, 26286, 26504, 27091, 27306, 27449, 28109, 28252, 28466, 29078, 29291, 29456};
-uint16_t freq_setting_tx[16] = {24473, 25133, 25749, 25918, 26183, 26377, 26968, 27203, 27840, 28005, 28153, 28364, 28975, 29117, 29376, 29965};
+uint16_t freq_setting_rx[16] = {24901, 25070, 25265, 25852, 26094, 26286, 26504, 27091, 27306, 27449, 28109, 28252, 28466, 29078, 29291, 29456};
+uint16_t freq_setting_tx[16] = {24495, 25133, 25749, 25918, 26183, 26377, 26968, 27203, 27840, 28005, 28153, 28364, 28975, 29117, 29376, 29965};
 
 //=========================== prototypes ======================================
 
@@ -326,8 +326,6 @@ void radio_txEnable(void) {
 
     // change state
     radio_vars.state = RADIOSTATE_TX_ENABLED;
-    
-    RFCONTROLLER_REG__CONTROL   = RF_RESET;
 }
 
 void radio_txNow(void) {
@@ -335,10 +333,6 @@ void radio_txNow(void) {
     // change state
     RFCONTROLLER_REG__CONTROL = TX_SEND;
     
-    if (radio_vars.startFrame_cb!=NULL) {
-        // call the callback
-        radio_vars.startFrame_cb(sctimer_readCounter());
-    }
 }
 
 //===== RX
@@ -804,10 +798,10 @@ kick_scheduler_t radio_isr(void) {
             // call the callback
             radio_vars.endFrame_cb(capturedTime);
             
-            if (irq_status & RX_DONE_INT) {
-                radio_calibration(IF_estimate, LQI_chip_errors, cdr_tau_value);
-                radio_rxEnable();
-            }
+//            if (irq_status & RX_DONE_INT) {
+//                radio_calibration(IF_estimate, LQI_chip_errors, cdr_tau_value);
+//                radio_rxEnable();
+//            }
             
             debugpins_isr_clr();
             // kick the OS
@@ -826,7 +820,7 @@ kick_scheduler_t radio_isr(void) {
         // To Be Done. add error description deifinition for this type of errors.
         RFCONTROLLER_REG__ERROR_CLEAR = irq_error;
         
-        radio_rxEnable();
+        radio_reset();
     }
     debugpins_isr_clr();
     return DO_NOT_KICK_SCHEDULER;
