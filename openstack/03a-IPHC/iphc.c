@@ -651,10 +651,6 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t *msg, ipv6_header_iht *ipv6_outer_
                                 extention_header_length += 2 + 16 * size;
                                 break;
                         }
-                        temp_8b = *(uint8_t * )((msg->payload) + \
-                        *page_length + \
-                        extention_header_length + \
-                        ipv6_outer_header->header_length);
                     } else {
                         if (lorh_type == 5) {
                             if (ipv6_outer_header->routing_header[0] == NULL) {
@@ -675,10 +671,6 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t *msg, ipv6_header_iht *ipv6_outer_
                                     extention_header_length += 2 + 1;
                                     break;
                             }
-                            temp_8b = *(uint8_t * )((msg->payload) + \
-                            *page_length + \
-                            extention_header_length + \
-                            ipv6_outer_header->header_length);
                         } else {
                             //log wrong inf
                             openserial_printError(
@@ -763,12 +755,13 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t *msg, ipv6_header_iht *ipv6_outer_
                         extention_header_length += 2 + lorh_length;
                         ipv6_outer_header->rhe_length += 2 + lorh_length;
                     }
-                    temp_8b = *(uint8_t * )((msg->payload) + \
+                    break;
+            }
+            temp_8b = *(uint8_t * )((msg->payload) + \
                         *page_length + \
                         extention_header_length + \
                         ipv6_outer_header->header_length);
-                    break;
-            }
+            rh3_index++;
         }
     }
 
