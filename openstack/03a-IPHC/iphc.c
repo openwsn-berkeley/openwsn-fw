@@ -1,5 +1,6 @@
 #include "opendefs.h"
 #include "iphc.h"
+#include "sixtop.h"
 #include "packetfunctions.h"
 #include "idmanager.h"
 #include "openserial.h"
