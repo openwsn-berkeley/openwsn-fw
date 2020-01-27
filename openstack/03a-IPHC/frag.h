@@ -3,21 +3,23 @@
 
 #include "opendefs.h"
 #include "openqueue.h"
+#include "opentimers.h"
 
 //=========================== define ==========================================
 
 
-#define FRAGMENT_BUFFER_SIZE    15
-#define MAX_FRAGMENT_SIZE       96
-#define NUM_OF_VRBS             3
-#define MAX_PACKET_SIZE         (FRAGMENT_BUFFER_SIZE * MAX_FRAGMENT_SIZE)
+#define FRAGMENT_BUFFER_SIZE        15
+#define MAX_FRAGMENT_SIZE           96
+#define NUM_OF_VRBS                 3
+#define MAX_PACKET_SIZE             (FRAGMENT_BUFFER_SIZE * MAX_FRAGMENT_SIZE)
 
-#define FRAG1_HEADER_SIZE       4
-#define FRAGN_HEADER_SIZE       5
+#define FRAG1_HEADER_SIZE           4
+#define FRAGN_HEADER_SIZE           5
 
-#define DISPATCH_FRAG_FIRST     24
-#define DISPATCH_FRAG_SUBSEQ    28
+#define DISPATCH_FRAG_FIRST         24
+#define DISPATCH_FRAG_SUBSEQ        28
 
+#define FRAG_REASSEMBLY_TIMEOUT     60000
 
 // 6lowpan fragment1 header
 typedef struct {
@@ -44,6 +46,7 @@ struct fragment_t {
     bool lock;
     uint8_t datagram_offset;
     uint16_t datagram_tag;
+    opentimers_id_t reassembly_timer;
     OpenQueueEntry_t *pFragment;
     OpenQueueEntry_t *pOriginalMsg;
 };
