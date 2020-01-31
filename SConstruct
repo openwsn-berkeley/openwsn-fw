@@ -84,6 +84,8 @@ project:
     printf        Sends the string messages to openvisualizer  
                   0 (off ), 1 (on, default)
     ide           qtcreator
+    fix_channel   Set single channel hopping for debugging
+                  0 (off, default), i (on, channel=i [11:26])
 
     Common variables:
     verbose        Print each complete compile/link command.
@@ -147,6 +149,7 @@ command_line_options = {
     'atmel_24ghz':              ['0','1'],
     'noadaptivesync':           ['0','1'],
     'l2_security':              ['0','1'],
+    'fix_channel':              ['0'] + map(str, range(11, 27)),
     'msf_adapting_to_traffic':  ['0','1'],
     'printf':                   ['1','0'],          # 1=on (default),  0=off
     'deadline_option':          ['0','1'],
@@ -300,6 +303,13 @@ command_line_vars.AddVariables(
         'l2_security',                                     # key
         '',                                                # help
         command_line_options['l2_security'][0],            # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
+        'fix_channel',                                     # key
+        '',                                                # help
+        command_line_options['fix_channel'][0],            # default
         validate_option,                                   # validator
         int,                                               # converter
     ),
