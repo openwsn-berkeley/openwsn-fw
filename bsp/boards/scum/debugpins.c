@@ -125,6 +125,19 @@ void debugpins_debug_y_set(void){
     GPIO_REG__OUTPUT    |=  0x0100;
 }
 
+// debug z
+void debugpins_debug_z_toggle(void){
+    GPIO_REG__OUTPUT    ^=  0x0200;
+}
+
+void debugpins_debug_z_clr(void){
+    GPIO_REG__OUTPUT    &= ~0x0200;
+}
+
+void debugpins_debug_z_set(void){
+    GPIO_REG__OUTPUT    |=  0x0200;
+}
+
 // ISRs for external interrupts
 void ext_gpio3_activehigh_debounced_isr(){
     printf("External Interrupt GPIO3 triggered\r\n");

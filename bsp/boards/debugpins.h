@@ -66,6 +66,10 @@ void debugpins_debug_y_toggle(void);
 void debugpins_debug_y_clr(void);
 void debugpins_debug_y_set(void);
 
+void debugpins_debug_z_toggle(void);
+void debugpins_debug_z_clr(void);
+void debugpins_debug_z_set(void);
+
 #ifdef OPENSIM
 void debugpins_ka_clr(void);
 void debugpins_ka_set(void);
