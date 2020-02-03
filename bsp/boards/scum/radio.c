@@ -228,8 +228,8 @@ void radio_setFrequency(uint8_t frequency, radio_freq_t tx_or_rx) {
     // change state
     radio_vars.state = RADIOSTATE_SETTING_FREQUENCY;
     
-//    radio_vars.current_frequency = frequency;
-    radio_vars.current_frequency = DEFAULT_FREQ;
+    radio_vars.current_frequency = frequency;
+    // radio_vars.current_frequency = DEFAULT_FREQ;
     
     switch(tx_or_rx){
     case FREQ_TX:
