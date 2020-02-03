@@ -47,7 +47,7 @@ static const uint8_t ebIEsBytestream[] = {
 #define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"
 #define LENGTH_IEEE154_MAX         128 // max length of a valid radio packet
 #define DUTY_CYCLE_WINDOW_LIMIT    (0xFFFFFFFF>>1) // limit of the dutycycle window
-#define SERIALINHIBITGUARD          1000/US_PER_TICK // 32@32kHz ~ 1ms
+#define SERIALINHIBITGUARD          1000/PORT_US_PER_TICK // 32@32kHz ~ 1ms
 
 //15.4e information elements related
 #define IEEE802154E_PAYLOAD_DESC_LEN_SHIFT                 0x04
@@ -166,10 +166,10 @@ enum ieee154e_atomicdurations_enum {
 #endif
     
 #if SLOTDURATION==20
-   TsTxOffset                =  (5215/US_PER_TICK),                  //  5215us
-   TsLongGT                  =  (1311/US_PER_TICK),                  //  1311us
-   TsTxAckDelay              =  (5521/US_PER_TICK),                  //  5521us
-   TsShortGT                 =   (700/US_PER_TICK),                  //   500us
+   TsTxOffset                =  (5215/PORT_US_PER_TICK),                  //  5215us
+   TsLongGT                  =  (1311/PORT_US_PER_TICK),                  //  1311us
+   TsTxAckDelay              =  (5521/PORT_US_PER_TICK),                  //  5521us
+   TsShortGT                 =   (700/PORT_US_PER_TICK),                  //   500us
 #endif
 
    TsSlotDuration            =  PORT_TsSlotDuration,  // 10000us
@@ -182,9 +182,9 @@ enum ieee154e_atomicdurations_enum {
    delayTx                   =  PORT_delayTx,         // between GO signal and SFD
    delayRx                   =  PORT_delayRx,         // between GO signal and start listening
    // radio watchdog
-   wdRadioTx                 =  1342/US_PER_TICK,                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
-   wdDataDuration            =  5000/US_PER_TICK,                  //  5000us (measured 4280us with max payload)
-   wdAckDuration             =  3000/US_PER_TICK,                  //  3000us (measured 1000us)
+   wdRadioTx                 =  1342/PORT_US_PER_TICK,                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
+   wdDataDuration            =  5000/PORT_US_PER_TICK,                  //  5000us (measured 4280us with max payload)
+   wdAckDuration             =  3000/PORT_US_PER_TICK,                  //  3000us (measured 1000us)
 };
 
 //shift of bytes in the linkOption bitmap: draft-ietf-6tisch-minimal-10.txt: page 6

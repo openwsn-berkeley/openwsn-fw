@@ -29,7 +29,7 @@ to return the board's description.
 
 #define PORT_SIGNED_INT_WIDTH               int32_t
 #define PORT_TICS_PER_MS                    500
-#define US_PER_TICK                         2 // number of us per tick
+#define PORT_US_PER_TICK                    2 // number of us per 500kHz clock tick
 
 #define SCHEDULER_WAKEUP()                  
 #define SCHEDULER_ENABLE_INTERRUPT()

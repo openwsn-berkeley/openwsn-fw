@@ -83,7 +83,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
        timeCorrection = (int16_t)(ieee154e_getTimeCorrection());
        // add the payload to the ACK (i.e. the timeCorrection)
        packetfunctions_reserveHeaderSize(msg,sizeof(uint16_t));
-       timeCorrection *= US_PER_TICK;
+       timeCorrection *= PORT_US_PER_TICK;
        timeSyncInfo  = ((uint16_t)timeCorrection) & 0x0fff;
        if (msg->l2_isNegativeACK){
           timeSyncInfo |= 0x8000;
@@ -381,7 +381,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
                        } else {
                            timeCorrection = timeSyncInfo & 0x0fff;
                        }
-                       timeCorrection  = ((int16_t)timeCorrection / (PORT_SIGNED_INT_WIDTH)US_PER_TICK);
+                       timeCorrection  = ((int16_t)timeCorrection / (PORT_SIGNED_INT_WIDTH)PORT_US_PER_TICK);
 
                        ieee802514_header->timeCorrection = timeCorrection;
                        ieee802514_header->headerLength  += len;
