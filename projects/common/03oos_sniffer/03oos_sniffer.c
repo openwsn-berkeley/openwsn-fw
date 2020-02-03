@@ -95,7 +95,7 @@ int mote_main(void) {
 
    // prepare radio
    radio_rfOn();
-   radio_setFrequency(CHANNEL);
+   radio_setFrequency(CHANNEL, FREQ_RX);
    app_vars.channel = CHANNEL;
 
    // switch in RX by default
@@ -113,7 +113,7 @@ void sniffer_setListeningChannel(uint8_t channel){
     while(app_vars.flag != APP_FLAG_IDLE);
     radio_rfOff();
     radio_rfOn();
-    radio_setFrequency(channel);
+    radio_setFrequency(channel, FREQ_RX);
     app_vars.channel = channel;
     radio_rxEnable();
     radio_rxNow();
