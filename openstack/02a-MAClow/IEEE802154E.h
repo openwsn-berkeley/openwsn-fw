@@ -159,10 +159,10 @@ typedef enum {
 enum ieee154e_atomicdurations_enum {
    // time-slot related
 #if SLOTDURATION==10
-   TsTxOffset                =   2120/US_PER_TICK,                  //  2120us
-   TsLongGT                  =   1100/US_PER_TICK,                  //  1100us
-   TsTxAckDelay              =   1000/US_PER_TICK,                  //  1000us
-   TsShortGT                 =    500/US_PER_TICK,                  //   500us, The standardlized value for this is 400/2=200us(7ticks). Currectly 7 doesn't work for short packet, change it back to 7 when found the problem.
+   TsTxOffset                =   2120/PORT_US_PER_TICK,                  //  2120us
+   TsLongGT                  =   1100/PORT_US_PER_TICK,                  //  1100us
+   TsTxAckDelay              =   1000/PORT_US_PER_TICK,                  //  1000us
+   TsShortGT                 =    500/PORT_US_PER_TICK,                  //   500us, The standardlized value for this is 400/2=200us(7ticks). Currectly 7 doesn't work for short packet, change it back to 7 when found the problem.
 #endif
     
 #if SLOTDURATION==20
