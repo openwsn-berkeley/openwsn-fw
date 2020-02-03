@@ -97,7 +97,18 @@ unsigned int IF_estimate_history[11] = {500,500,500,500,500,500,500,500,500,500}
 signed short cdr_tau_history[11] = {0};
 
 
-uint16_t freq_setting_rx[16] = {24901, 25070, 25265, 25852, 26094, 26286, 26504, 27091, 27306, 27449, 28109, 28252, 28466, 29078, 29291, 29456};
+// 10:02am rx 24850 tx 24473
+// 11:24am rx 24435 tx 24929 (freq_sweep)
+//  3:30pm rx 24458 tx 24521
+//  5:49pm rx 24434 tx 24498
+
+//3:50pm   rx 24410 tx 24442  (freq_sweep)
+// rx=24408, tx=24497
+
+// rx = 24458  tx= 24495
+
+
+uint16_t freq_setting_rx[16] = {24458, 25070, 25265, 25852, 26094, 26286, 26504, 27091, 27306, 27449, 28109, 28252, 28466, 29078, 29291, 29456};
 uint16_t freq_setting_tx[16] = {24495, 25133, 25749, 25918, 26183, 26377, 26968, 27203, 27840, 28005, 28153, 28364, 28975, 29117, 29376, 29965};
 
 //=========================== prototypes ======================================
@@ -190,9 +201,9 @@ void setFrequencyRX(uint8_t channel){
     uint8_t mid;
     uint8_t fine;
     
-    coarse = (freq_setting_rx[channel-11]>>10) & 0x001f;
-    mid    = (freq_setting_rx[channel-11]>>5)  & 0x001f;
-    fine   =  freq_setting_rx[channel-11]      & 0x001f;
+    coarse = (uint8_t)((freq_setting_rx[channel-11]>>10) & 0x001f);
+    mid    = (uint8_t)((freq_setting_rx[channel-11]>>5)  & 0x001f);
+    fine   = (uint8_t)( freq_setting_rx[channel-11]      & 0x001f);
 
     LC_FREQCHANGE(coarse,mid,fine);
     
@@ -206,9 +217,9 @@ void setFrequencyTX(uint8_t channel){
     uint8_t mid;
     uint8_t fine;
     
-    coarse = (freq_setting_tx[channel-11]>>10) & 0x001f;
-    mid    = (freq_setting_tx[channel-11]>>5)  & 0x001f;
-    fine   =  freq_setting_tx[channel-11]      & 0x001f;
+    coarse = (uint8_t)((freq_setting_tx[channel-11]>>10) & 0x001f);
+    mid    = (uint8_t)((freq_setting_tx[channel-11]>>5)  & 0x001f);
+    fine   = (uint8_t)( freq_setting_tx[channel-11]      & 0x001f);
 
     LC_FREQCHANGE(coarse,mid,fine);
 }
@@ -247,9 +258,6 @@ void radio_rfOff(void) {
     
     // reset state machine first
     radio_reset();
-
-    // turn SCuM radio off
-    RFCONTROLLER_REG__CONTROL   = RF_RESET;
     
     // Hold digital baseband in reset
     ANALOG_CFG_REG__4 = 0x2000;
@@ -364,17 +372,11 @@ void radio_rxEnable(void) {
     // Enable polyphase and mixers via memory-mapped I/O
     ANALOG_CFG_REG__16 = 0x1;
     
-    // reset
-    RFCONTROLLER_REG__CONTROL   = RF_RESET;
-    
     // set receiving buffer address
     DMA_REG__RF_RX_ADDR         = &(radio_vars.radio_rx_buffer[0]);
     
-    // Reset digital baseband
-    ANALOG_CFG_REG__4 = 0x2000;
-    ANALOG_CFG_REG__4 = 0x2800;
-    // start to listen
-    RFCONTROLLER_REG__CONTROL   = RX_START;
+    // reset
+    RFCONTROLLER_REG__CONTROL   = RF_RESET;
     
     // wiggle debug pin
     debugpins_radio_set();
@@ -397,7 +399,13 @@ void radio_rxEnable_scum(void){
 }
 
 void radio_rxNow(void) {
-    // nothing to do
+    
+    // Reset digital baseband
+    ANALOG_CFG_REG__4 = 0x2000;
+    ANALOG_CFG_REG__4 = 0x2800;
+    
+    // start to listen
+    RFCONTROLLER_REG__CONTROL   = RX_START;
 }
 
 void radio_getReceivedFrame(uint8_t* pBufRead,
@@ -820,7 +828,7 @@ kick_scheduler_t radio_isr(void) {
         // To Be Done. add error description deifinition for this type of errors.
         RFCONTROLLER_REG__ERROR_CLEAR = irq_error;
         
-        radio_reset();
+//        radio_reset();
     }
     debugpins_isr_clr();
     return DO_NOT_KICK_SCHEDULER;
@@ -852,7 +860,7 @@ void rawchips_32_isr() {
     acfg3_val &= ~(0x20);
     ANALOG_CFG_REG__3 = acfg3_val;
 
-    if(chip_index == 10){    
+    if(chip_index == 10){
         for(jj=1;jj<10;jj++){
             printf("%X\r\n",chips[jj]);
         }
