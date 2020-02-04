@@ -220,7 +220,7 @@ enum {
    ERR_FRAG_FAST_FORWARD               = 0x1c, // fast-forwarded all fragments with tag {0} (total size: {1})
    ERR_FRAG_STORED                     = 0x1d, // stored a fragment with offset {0} (currently in buffer: {1})
    ERR_FRAG_TX_FAIL                    = 0x1e, // failed to send fragment with tag {0} (offset: {1})
-   ERR_FRAG_REASSEMBLY_TIMEOUT         = 0x1f, // reassembly timer expired for fragments with tag {0}
+   ERR_FRAG_REASSEMBLY_OR_VRB_TIMEOUT  = 0x1f, // reassembly or vrb timer expired for fragments with tag {0}
    // l2b
    ERR_NEIGHBORS_FULL                  = 0x20, // neighbors table is full (max number of neighbor is {0})
    ERR_NO_SENT_PACKET                  = 0x21, // there is no sent packet in queue
@@ -256,24 +256,26 @@ enum {
    ERR_BUSY_SENDING                    = 0x3c, // busy sending
    ERR_UNEXPECTED_SENDDONE             = 0x3d, // sendDone for packet I didn't send
    ERR_NO_FREE_PACKET_BUFFER           = 0x3e, // no free packet buffer (code location {0})
-   ERR_FREEING_UNUSED                  = 0x3f, // freeing unused memory
-   ERR_FREEING_ERROR                   = 0x40, // freeing memory unsupported memory
-   ERR_UNSUPPORTED_COMMAND             = 0x41, // unsupported command {0}
-   ERR_MSG_UNKNOWN_TYPE                = 0x42, // unknown message type {0}
-   ERR_WRONG_ADDR_TYPE                 = 0x43, // wrong address type {0} (code location {1})
-   ERR_BRIDGE_MISMATCH                 = 0x44, // bridge mismatch (code location {0})
-   ERR_HEADER_TOO_LONG                 = 0x45, // header too long, length {1} (code location {0})
-   ERR_INPUTBUFFER_LENGTH              = 0x46, // input length problem, length={0}
-   ERR_BOOTED                          = 0x47, // booted
-   ERR_INVALIDSERIALFRAME              = 0x48, // invalid serial frame
-   ERR_INVALIDPACKETFROMRADIO          = 0x49, // invalid packet from radio, length {1} (code location {0})
-   ERR_BUSY_RECEIVING                  = 0x4a, // busy receiving when stop of serial activity, buffer input length {1} (code location {0})
-   ERR_WRONG_CRC_INPUT                 = 0x4b, // wrong CRC in input Buffer
-   ERR_PACKET_SYNC                     = 0x4c, // synchronized when received a packet
-   ERR_SCHEDULE_ADDDUPLICATESLOT       = 0x4d, // the slot {0} to be added is already in schedule
-   ERR_UNSUPPORTED_FORMAT              = 0x4e, // the received packet format is not supported (code location {0})
-   ERR_UNSUPPORTED_METADATA            = 0x4f, // the metadata type is not suppored
-   ERR_MAXRETRIES_REACHED              = 0x50, // maxretries reached (counter: {0})
+   ERR_NO_FREE_TIMER_OR_QUEUE_ENTRY    = 0x3f, // no free timer or queue entry (code location {0})
+   ERR_FREEING_UNUSED                  = 0x40, // freeing unused memory
+   ERR_FREEING_ERROR                   = 0x41, // freeing memory unsupported memory
+   ERR_UNSUPPORTED_COMMAND             = 0x42, // unsupported command {0}
+   ERR_MSG_UNKNOWN_TYPE                = 0x43, // unknown message type {0}
+   ERR_WRONG_ADDR_TYPE                 = 0x44, // wrong address type {0} (code location {1})
+   ERR_BRIDGE_MISMATCH                 = 0x45, // bridge mismatch (code location {0})
+   ERR_HEADER_TOO_LONG                 = 0x46, // header too long, length {1} (code location {0})
+   ERR_INPUTBUFFER_LENGTH              = 0x47, // input length problem, length={0}
+   ERR_BOOTED                          = 0x48, // booted
+   ERR_INVALIDSERIALFRAME              = 0x49, // invalid serial frame
+   ERR_INVALIDPACKETFROMRADIO          = 0x4a, // invalid packet from radio, length {1} (code location {0})
+   ERR_BUSY_RECEIVING                  = 0x4b, // busy receiving when stop of serial activity, buffer input length {1} (code location {0})
+   ERR_WRONG_CRC_INPUT                 = 0x4c, // wrong CRC in input Buffer
+   ERR_PACKET_SYNC                     = 0x4d, // synchronized when received a packet
+   ERR_SCHEDULE_ADDDUPLICATESLOT       = 0x4e, // the slot {0} to be added is already in schedule
+   ERR_UNSUPPORTED_FORMAT              = 0x4f, // the received packet format is not supported (code location {0})
+   ERR_UNSUPPORTED_METADATA            = 0x50, // the metadata type is not suppored
+   ERR_MAXRETRIES_REACHED              = 0x51, // maxretries reached (counter: {0})
+   ERR_EMPTY_QUEUE_OR_UNKNOWN_TIMER    = 0x52, // empty queue or trying to remove unknown timer id (code location {0})
 };
 
 //=========================== typedef =========================================

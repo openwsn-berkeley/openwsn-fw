@@ -269,8 +269,7 @@ This function should be called in the callback of the timer interrupt.
 \param[in] id the timer id
 \param[in] duration the timer duration
  */
-void             opentimers_updateDuration(opentimers_id_t id,
-                                           PORT_TIMER_WIDTH duration){
+void opentimers_updateDuration(opentimers_id_t id, PORT_TIMER_WIDTH duration){
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
 
@@ -391,7 +390,7 @@ void opentimers_timer_callback(void){
                         opentimers_vars.insideISR = FALSE;
                     } else {
                         if (opentimers_vars.timersBuf[i].wraps_remaining==0){
-                            opentimers_vars.timersBuf[i].isrunning  = FALSE;
+                            opentimers_vars.timersBuf[i].isrunning = FALSE;
                             scheduler_push_task((task_cbt)(opentimers_vars.timersBuf[i].callback),(task_prio_t)opentimers_vars.timersBuf[i].timer_task_prio);
                             if (opentimers_vars.timersBuf[i].timerType==TIMER_PERIODIC){
                                 opentimers_vars.insideISR = TRUE;

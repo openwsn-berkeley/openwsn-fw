@@ -1,3 +1,13 @@
+/**
+\brief Definition of the "6LoWPAN fragmentation" module.
+
+This module implements 6LoWPAN fragmentation according to RFC 4944,
+ RFC 6282 and https://hal.inria.fr/hal-02061838/document.
+
+\author Timothy Claeys <timothy.claeys@inria.fr>, January 2020.
+*/
+
+
 #include "opendefs.h"
 #include "frag.h"
 #include "iphc.h"
@@ -64,27 +74,31 @@ static void fast_forward_frags(uint16_t tag, uint16_t size, uint8_t vrb_pos);
 
 void frag_timeout_cb(opentimers_id_t id);
 
+owerror_t frag_timerq_enqueue(opentimers_id_t id);
+
+owerror_t frag_timerq_remove(opentimers_id_t id);
+
+opentimers_id_t frag_timerq_dequeue(void);
 //============================= public ========================================
 
 void frag_init() {
     memset(&frag_vars, 0, sizeof(frag_vars_t));
 
     // unspecified start value, wraps around at 65535     
-    frag_vars.tag = openrandom_get16b() & 0x7FF;
+    frag_vars.global_tag = openrandom_get16b() & 0x7FF;
 }
 
 owerror_t frag_fragment6LoPacket(OpenQueueEntry_t *msg) {
     OpenQueueEntry_t *lowpan_fragment;
     uint16_t remaining_bytes;
-    uint8_t fragment_length;
-    uint8_t fragment_offset;
+    uint8_t fragment_length, fragment_offset;
     int8_t bpos;
 
     // check if fragmentation is necessary
     if (msg->is_big_packet && msg->length > (MAX_FRAGMENT_SIZE + FRAGN_HEADER_SIZE)) {
 
         // update the global 6LoWPAN datagram tag
-        frag_vars.tag++;
+        frag_vars.global_tag++;
         remaining_bytes = msg->length;
         fragment_offset = 0;
         bpos = -1;
@@ -125,14 +139,14 @@ owerror_t frag_fragment6LoPacket(OpenQueueEntry_t *msg) {
             if (bpos == -1) {
                 openqueue_freePacketBuffer(lowpan_fragment);
 
-                cleanup_fragments(frag_vars.tag);
+                cleanup_fragments(frag_vars.global_tag);
 
                 openserial_printError(COMPONENT_FRAG, ERR_FRAG_BUFFER_OV, (errorparameter_t) 0, (errorparameter_t) 0);
                 return E_FAIL;
             }
 
             // populate a fragment buffer 
-            frag_vars.fragmentBuf[bpos].datagram_tag = frag_vars.tag;
+            frag_vars.fragmentBuf[bpos].datagram_tag = frag_vars.global_tag;
             frag_vars.fragmentBuf[bpos].datagram_offset = fragment_offset;
             frag_vars.fragmentBuf[bpos].pFragment = lowpan_fragment;
             frag_vars.fragmentBuf[bpos].pOriginalMsg = msg;
@@ -149,9 +163,9 @@ owerror_t frag_fragment6LoPacket(OpenQueueEntry_t *msg) {
             remaining_bytes -= fragment_length;
 
             if (fragment_offset == 0) {
-                prepend_frag1_header(lowpan_fragment, msg->length, frag_vars.tag);
+                prepend_frag1_header(lowpan_fragment, msg->length, frag_vars.global_tag);
             } else {
-                prepend_fragn_header(lowpan_fragment, msg->length, frag_vars.tag, fragment_offset);
+                prepend_fragn_header(lowpan_fragment, msg->length, frag_vars.global_tag, fragment_offset);
             }
 
             // update the fragment offset
@@ -160,13 +174,13 @@ owerror_t frag_fragment6LoPacket(OpenQueueEntry_t *msg) {
 
         // send all the fragments with the current datagram tag
         for (int i = 0; i < FRAGMENT_BUFFER_SIZE; i++) {
-            if (frag_vars.fragmentBuf[i].datagram_tag == frag_vars.tag) {
+            if (frag_vars.fragmentBuf[i].datagram_tag == frag_vars.global_tag) {
                 // try to send the fragment. If this fails, abort the transmission of the other fragments.
                 if (sixtop_send(frag_vars.fragmentBuf[i].pFragment) == E_FAIL) {
                     openserial_printError(COMPONENT_FRAG, ERR_FRAG_TX_FAIL,
-                                          (errorparameter_t) frag_vars.tag,
+                                          (errorparameter_t) frag_vars.global_tag,
                                           (errorparameter_t) frag_vars.fragmentBuf[i].datagram_offset);
-                    cleanup_fragments(frag_vars.tag);
+                    cleanup_fragments(frag_vars.global_tag);
                     return E_FAIL;
                 } else {
                     // fragment succesfully scheduled, lock it
@@ -247,8 +261,8 @@ void frag_sendDone(OpenQueueEntry_t *msg, owerror_t sendError) {
             openqueue_freePacketBuffer(msg);
         }
     } else if (msg->l3_isFragment && msg->l3_useSourceRouting) {
-        uint8_t k;
 
+        uint8_t k;
         for (k = 0; k < FRAGMENT_BUFFER_SIZE; k++) {
             if (frag_vars.fragmentBuf[k].pFragment == msg) {
                 datagram_tag = frag_vars.fragmentBuf[k].datagram_tag;
@@ -260,7 +274,7 @@ void frag_sendDone(OpenQueueEntry_t *msg, owerror_t sendError) {
         }
 
         if (k >= FRAGMENT_BUFFER_SIZE) {
-            // fragment not found in buffer
+            // fragment not found in fragment buffer (it was never stored locally, immediately fast-forwarded)
             openqueue_freePacketBuffer(msg);
         }
 
@@ -272,13 +286,9 @@ void frag_sendDone(OpenQueueEntry_t *msg, owerror_t sendError) {
 
 
 void frag_receive(OpenQueueEntry_t *msg) {
-    uint8_t dispatch;
-    uint16_t size;
-    uint16_t tag;
-    uint8_t offset;
-    uint8_t page_length;
-    ipv6_header_iht ipv6_outer_header;
-    ipv6_header_iht ipv6_inner_header;
+    uint8_t dispatch, offset, page_length;
+    uint16_t size, tag;
+    ipv6_header_iht ipv6_outer_header, ipv6_inner_header;
 
     memset(&ipv6_outer_header, 0, sizeof(ipv6_header_iht));
     memset(&ipv6_inner_header, 0, sizeof(ipv6_header_iht));
@@ -340,30 +350,41 @@ void frag_receive(OpenQueueEntry_t *msg) {
             }
 
             if (i < NUM_OF_VRBS) {
-                // we have found a corresponding VRB for this subsequent fragment, update the fragment next hop
+                // we have found a corresponding VRB for this subsequent fragment, update the fragment's next hop
                 msg->l3_useSourceRouting = TRUE;
                 msg->creator = COMPONENT_FRAG;
 
                 memcpy(&msg->l2_nextORpreviousHop, &frag_vars.vrbs[i].nexthop, sizeof(open_addr_t));
-                // update the VRB
+
+                // update the VRB (how many bytes do we still need to forward)
                 frag_vars.vrbs[i].left -= msg->length;
 
                 if (frag_vars.vrbs[i].left == 0) {
-                    // clear VRB entry
+                    // all bytes forwarded, remove VRB entry
                     openserial_printInfo(COMPONENT_FRAG, ERR_FRAG_FAST_FORWARD, (errorparameter_t) tag,
                                          (errorparameter_t) size);
+                    opentimers_cancel(frag_vars.vrbs[i].forward_timer);
+                    opentimers_destroy(frag_vars.vrbs[i].forward_timer);
+                    if (frag_timerq_remove(frag_vars.vrbs[i].forward_timer) == E_FAIL) {
+                        openserial_printCritical(COMPONENT_FRAG, ERR_EMPTY_QUEUE_OR_UNKNOWN_TIMER,
+                                                 (errorparameter_t) 1,
+                                                 (errorparameter_t) 0);
+                    }
                     memset(&frag_vars.vrbs[i], 0, sizeof(vrb_t));
+
                 }
 
                 // restore fragn header
                 prepend_fragn_header(msg, size, tag, offset);
                 sixtop_send(msg);
             } else {
-                // If VRB buffer does not exist, there are two scenarios
-                // (1) I am the destination, thus store the fragment and attempt reassembly
-                // (2) Subsequent fragment arrived out-of-order, also store and forward later
-
-                // TODO: temporarily store and send later
+                /*
+                 * If VRB buffer does not exist, there are two scenarios:
+                 * (1) I am the destination, but I have not yet received the first fragment containing the address
+                 *     information. Store the fragment and attempt reassembly later.
+                 * (2) A subsequent fragment arrived out-of-order. Store temporarily and wait for first fragment to
+                 *     create a VRB and fast-forward to the next hop.
+                */
                 store_fragment(msg, size, tag, offset);
             }
         }
@@ -412,6 +433,17 @@ static void store_fragment(OpenQueueEntry_t *msg, uint16_t size, uint16_t tag, u
 
             if (!has_timer) {
                 frag_vars.fragmentBuf[i].reassembly_timer = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_FRAG);
+
+                // get a timer for the fragment reassembly and add it to the timer queue
+                if ((frag_vars.fragmentBuf[i].reassembly_timer == ERROR_NO_AVAILABLE_ENTRIES) ||
+                    (frag_timerq_enqueue(frag_vars.fragmentBuf[i].reassembly_timer) == E_FAIL)) {
+
+                    openserial_printError(COMPONENT_FRAG, ERR_NO_FREE_TIMER_OR_QUEUE_ENTRY,
+                                          (errorparameter_t) 0, (errorparameter_t) 0);
+                    RESET_FRAG_BUFFER_ENTRY(i);
+                    return;
+                }
+
                 opentimers_scheduleAbsolute(
                         frag_vars.fragmentBuf[i].reassembly_timer,
                         FRAG_REASSEMBLY_TIMEOUT,
@@ -502,6 +534,11 @@ static void reassemble_fragments(uint16_t tag, uint16_t size, OpenQueueEntry_t *
             if (frag_vars.fragmentBuf[i].reassembly_timer != 0) {
                 opentimers_cancel(frag_vars.fragmentBuf[i].reassembly_timer);
                 opentimers_destroy(frag_vars.fragmentBuf[i].reassembly_timer);
+                if (frag_timerq_remove(frag_vars.fragmentBuf[i].reassembly_timer) == E_FAIL) {
+                    openserial_printCritical(COMPONENT_FRAG, ERR_EMPTY_QUEUE_OR_UNKNOWN_TIMER,
+                                             (errorparameter_t) 2,
+                                             (errorparameter_t) 0);
+                }
             }
 
             RESET_FRAG_BUFFER_ENTRY(i);
@@ -521,6 +558,27 @@ static owerror_t allocate_vrb(OpenQueueEntry_t *frag1, uint16_t size, uint16_t t
             frag_vars.vrbs[i].size = size;
             frag_vars.vrbs[i].left = (size - MAX_FRAGMENT_SIZE);
             frag_vars.vrbs[i].frag1 = frag1;
+
+            frag_vars.vrbs[i].forward_timer = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_FRAG);
+
+            // get a timer for the fragment forwarding and add it to the timer queue
+            if ((frag_vars.vrbs[i].forward_timer == ERROR_NO_AVAILABLE_ENTRIES) ||
+                (frag_timerq_enqueue(frag_vars.vrbs[i].forward_timer) == E_FAIL)) {
+
+                openserial_printError(COMPONENT_FRAG, ERR_NO_FREE_TIMER_OR_QUEUE_ENTRY,
+                                      (errorparameter_t) 0, (errorparameter_t) 0);
+                memset(&frag_vars.vrbs[i], 0, sizeof(vrb_t));
+                return E_FAIL;
+            }
+
+            opentimers_scheduleAbsolute(
+                    frag_vars.vrbs[i].forward_timer,
+                    FRAG_REASSEMBLY_TIMEOUT,
+                    opentimers_getValue(),
+                    TIME_MS,
+                    frag_timeout_cb
+            );
+
             break;
         }
     }
@@ -554,12 +612,24 @@ static void fast_forward_frags(uint16_t tag, uint16_t size, uint8_t vrb_pos) {
                 // clear VRB entry if all data is forwarded
                 openserial_printInfo(COMPONENT_FRAG, ERR_FRAG_FAST_FORWARD, (errorparameter_t) tag,
                                      (errorparameter_t) size);
+                opentimers_cancel(frag_vars.vrbs[vrb_pos].forward_timer);
+                opentimers_destroy(frag_vars.vrbs[vrb_pos].forward_timer);
+                if (frag_timerq_remove(frag_vars.vrbs[vrb_pos].forward_timer) == E_FAIL) {
+                    openserial_printCritical(COMPONENT_FRAG, ERR_EMPTY_QUEUE_OR_UNKNOWN_TIMER,
+                                             (errorparameter_t) 3,
+                                             (errorparameter_t) 0);
+                }
                 memset(&frag_vars.vrbs[vrb_pos], 0, sizeof(vrb_t));
             }
 
             if (frag_vars.fragmentBuf[i].reassembly_timer != 0) {
                 opentimers_cancel(frag_vars.fragmentBuf[i].reassembly_timer);
                 opentimers_destroy(frag_vars.fragmentBuf[i].reassembly_timer);
+                if (frag_timerq_remove(frag_vars.fragmentBuf[i].reassembly_timer) == E_FAIL) {
+                    openserial_printCritical(COMPONENT_FRAG, ERR_EMPTY_QUEUE_OR_UNKNOWN_TIMER,
+                                             (errorparameter_t) 4,
+                                             (errorparameter_t) 0);
+                }
             }
 
             prepend_fragn_header(
@@ -597,22 +667,74 @@ static void prepend_fragn_header(OpenQueueEntry_t *fragn, uint16_t size, uint16_
     ((fragn_t *) fragn->payload)->datagram_offset = offset;
 }
 
-void frag_timeout_cb(opentimers_id_t id) {
-    uint16_t expired_tag;
-    uint8_t j;
-
-
-    // find the tag of the expired fragments
-    for (j = 0; j < FRAGMENT_BUFFER_SIZE; j++) {
-        if (frag_vars.fragmentBuf[j].reassembly_timer == id) {
-            expired_tag = frag_vars.fragmentBuf[j].datagram_tag;
+owerror_t frag_timerq_enqueue(opentimers_id_t id) {
+    uint8_t i;
+    for (i = 0; i < NUM_OF_CONCURRENT_TIMERS; i++) {
+        if (frag_vars.frag_timerq[i] == 0) {
+            frag_vars.frag_timerq[i] = id;
+            return E_SUCCESS;
         }
     }
 
+    return E_FAIL;
+}
 
-    if (j < FRAGMENT_BUFFER_SIZE) {
-        openserial_printError(COMPONENT_FRAG, ERR_FRAG_REASSEMBLY_TIMEOUT, (errorparameter_t) expired_tag,
-                              (errorparameter_t) 0);
-        cleanup_fragments(expired_tag);
+opentimers_id_t frag_timerq_dequeue(void) {
+    opentimers_id_t expired;
+    expired = frag_vars.frag_timerq[0];
+
+    memcpy((uint8_t *) frag_vars.frag_timerq, (uint8_t * ) & (frag_vars.frag_timerq[1]), NUM_OF_CONCURRENT_TIMERS - 1);
+    frag_vars.frag_timerq[NUM_OF_CONCURRENT_TIMERS] = 0;
+
+    return expired;
+}
+
+owerror_t frag_timerq_remove(opentimers_id_t id) {
+    for (uint8_t i = 0; i < NUM_OF_CONCURRENT_TIMERS - 1; i++) {
+        if (frag_vars.frag_timerq[i] == id) {
+            memcpy(&frag_vars.frag_timerq[i], &frag_vars.frag_timerq[i + 1], NUM_OF_CONCURRENT_TIMERS - 1 - i);
+            frag_vars.frag_timerq[NUM_OF_CONCURRENT_TIMERS - 1] = 0;
+            return E_SUCCESS;
+        }
+    }
+
+    if (frag_vars.frag_timerq[NUM_OF_CONCURRENT_TIMERS - 1] == id) {
+        frag_vars.frag_timerq[NUM_OF_CONCURRENT_TIMERS - 1] = 0;
+        return E_SUCCESS;
+    }
+
+    return E_FAIL;
+}
+
+void frag_timeout_cb(opentimers_id_t id) {
+    opentimers_id_t expired_timer;
+
+    if ((expired_timer = frag_timerq_dequeue()) == 0) {
+        // timer id can never be 0, if we get zero we have "dequeued" and empty queue!
+        openserial_printCritical(COMPONENT_FRAG, ERR_EMPTY_QUEUE_OR_UNKNOWN_TIMER,
+                                 (errorparameter_t) 0,
+                                 (errorparameter_t) 0);
+    }
+
+    // find the tag of the expired fragments
+    for (uint8_t j = 0; j < FRAGMENT_BUFFER_SIZE; j++) {
+        if (frag_vars.fragmentBuf[j].pFragment != NULL && frag_vars.fragmentBuf[j].reassembly_timer == expired_timer) {
+            openserial_printError(COMPONENT_FRAG, ERR_FRAG_REASSEMBLY_OR_VRB_TIMEOUT,
+                                  (errorparameter_t) frag_vars.fragmentBuf[j].datagram_tag,
+                                  (errorparameter_t) 0);
+            opentimers_destroy(frag_vars.fragmentBuf[j].reassembly_timer);
+            cleanup_fragments(frag_vars.fragmentBuf[j].datagram_tag);
+            break;
+        }
+    }
+
+    for (uint8_t j = 0; j < NUM_OF_VRBS; j++) {
+        if (frag_vars.vrbs[j].tag != 0 && frag_vars.vrbs[j].forward_timer == expired_timer) {
+            openserial_printError(COMPONENT_FRAG, ERR_FRAG_REASSEMBLY_OR_VRB_TIMEOUT,
+                                  (errorparameter_t) frag_vars.vrbs[j].tag,
+                                  (errorparameter_t) 0);
+            opentimers_destroy(frag_vars.vrbs[j].forward_timer);
+            memset(&frag_vars.vrbs[j], 0, sizeof(vrb_t));
+        }
     }
 }

@@ -1,5 +1,20 @@
+/**
+\brief Definition of the "6LoWPAN fragmentation" module.
+
+
+\author Timothy Claeys <timothy.claeys@inria.fr>, January 2020.
+*/
+
 #ifndef __FRAG_H
 #define __FRAG_H
+
+/**
+\addtogroup LoWPAN
+\{
+\addtogroup FRAG
+\{
+*/
+
 
 #include "opendefs.h"
 #include "openqueue.h"
@@ -11,6 +26,9 @@
 #define FRAGMENT_BUFFER_SIZE        15
 #define MAX_FRAGMENT_SIZE           96
 #define NUM_OF_VRBS                 3
+#define NUM_OF_CONCURRENT_TIMERS    5
+
+// maximum size of packet we can fragment
 #define MAX_PACKET_SIZE             (FRAGMENT_BUFFER_SIZE * MAX_FRAGMENT_SIZE)
 
 #define FRAG1_HEADER_SIZE           4
@@ -19,15 +37,16 @@
 #define DISPATCH_FRAG_FIRST         24
 #define DISPATCH_FRAG_SUBSEQ        28
 
+// specifies how long we store fragments or keep vrb allocated
 #define FRAG_REASSEMBLY_TIMEOUT     60000
 
-// 6lowpan fragment1 header
+// 6LoWPAN fragment1 header
 typedef struct {
     uint16_t dispatch_size_field;
     uint16_t datagram_tag;
 } frag1_t;
 
-// 6lowpan fragmentN header
+// 6LoWPAN fragmentN header
 typedef struct {
     uint16_t dispatch_size_field;
     uint16_t datagram_tag;
@@ -35,11 +54,13 @@ typedef struct {
 } fragn_t;
 
 /*
-* Describes an entry in the fragment buffer, contains:
-* - if lock is TRUE, fragment is scheduled for Tx (do not delete until cb sendDone!!)
-* - the tag value used for this fragment
-* - a pointer to the fragment
-* - a pointer to the original 6lowpan packet
+ * Describes an entry in the fragment buffer, contains:
+ * - If lock is TRUE, fragment is scheduled for Tx (do not delete until cb sendDone!!).
+ * - The fragment offset value (multiple of 8)
+ * - The tag value used for this fragment.
+ * - The reassembly timer (60s after the arrival of the first fragment, reassembly must be completed).
+ * - A pointer to the fragment's location in the OpenQueue.
+ * - A pointer to the original unfragmented 6LoWPAN packet in the OpenQueue.
 */
 BEGIN_PACK
 struct fragment_t {
@@ -59,15 +80,17 @@ typedef struct {
     uint16_t tag;
     uint16_t left;
     uint16_t size;
+    opentimers_id_t forward_timer;
     OpenQueueEntry_t *frag1;
     open_addr_t nexthop;
 } vrb_t;
 
 // state information for fragmentation
 typedef struct {
-    uint16_t tag;
+    uint16_t global_tag;
     vrb_t vrbs[NUM_OF_VRBS];
     fragment fragmentBuf[FRAGMENT_BUFFER_SIZE];
+    opentimers_id_t frag_timerq[NUM_OF_CONCURRENT_TIMERS];
 } frag_vars_t;
 
 
