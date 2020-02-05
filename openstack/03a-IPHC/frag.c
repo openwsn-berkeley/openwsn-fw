@@ -40,13 +40,13 @@ This module implements 6LoWPAN fragmentation according to RFC 4944,
 
 #define CHECK_OVERSIZED(size) \
     do { \
-        if ((size) > (MAX_PACKET_SIZE)) { \
+        if ((size) > (IPV6_PACKET_SIZE)) { \
             openqueue_freePacketBuffer(msg); \
             openserial_printError( \
                 COMPONENT_FRAG, \
                 ERR_FRAG_INVALID_SIZE, \
                 (errorparameter_t) (size), \
-                (errorparameter_t) MAX_PACKET_SIZE \
+                (errorparameter_t) IPV6_PACKET_SIZE \
             ); \
             return; \
         } \
@@ -95,7 +95,7 @@ owerror_t frag_fragment6LoPacket(OpenQueueEntry_t *msg) {
     int8_t bpos;
 
     // check if fragmentation is necessary
-    if (msg->is_big_packet && msg->length > (MAX_FRAGMENT_SIZE + FRAGN_HEADER_SIZE)) {
+    if (!msg->l3_isFragment && msg->length > (MAX_FRAGMENT_SIZE + FRAGN_HEADER_SIZE)) {
 
         // update the global 6LoWPAN datagram tag
         frag_vars.global_tag++;

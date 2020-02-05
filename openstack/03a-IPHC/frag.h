@@ -19,17 +19,19 @@
 #include "opendefs.h"
 #include "openqueue.h"
 #include "opentimers.h"
+#include "IEEE802154_security.h"
 
 //=========================== define ==========================================
 
+/* Pick a conservative maximum payload size for the fragments in case L2 security is active
+ * If L2 security is not active MAX_FRAGMENT_SIZE can be set to 96 bytes, but the corresponding variable in
+ * openvisualizer must then also be updated to the same value.
+ */
+#define MAX_FRAGMENT_SIZE           80
 
-#define FRAGMENT_BUFFER_SIZE        15
-#define MAX_FRAGMENT_SIZE           96
-#define NUM_OF_VRBS                 3
-#define NUM_OF_CONCURRENT_TIMERS    5
-
-// maximum size of packet we can fragment
-#define MAX_PACKET_SIZE             (FRAGMENT_BUFFER_SIZE * MAX_FRAGMENT_SIZE)
+#define FRAGMENT_BUFFER_SIZE        (((IPV6_PACKET_SIZE / MAX_FRAGMENT_SIZE) + 1) * BIGQUEUELENGTH)
+#define NUM_OF_VRBS                 2
+#define NUM_OF_CONCURRENT_TIMERS    (NUM_OF_VRBS + BIGQUEUELENGTH)
 
 #define FRAG1_HEADER_SIZE           4
 #define FRAGN_HEADER_SIZE           5

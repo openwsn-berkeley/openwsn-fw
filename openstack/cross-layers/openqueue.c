@@ -463,7 +463,7 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry) {
    //admin
    entry->creator                      = COMPONENT_NULL;
    entry->owner                        = COMPONENT_NULL;
-   entry->payload                      = &(entry->packet[127 - IEEE802154_SECURITY_TAG_LEN]); // Footer is longer if security is used
+   entry->payload                      = &(entry->packet[IEEE802154_FRAME_SIZE - IEEE802154_SECURITY_TAG_LEN]); // Footer is longer if security is used
    entry->length                       = 0;
    entry->is_cjoin_response            = FALSE;
    entry->is_big_packet                = FALSE;
@@ -492,5 +492,5 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry) {
 void openqueue_reset_big_entry(OpenQueueBigEntry_t *entry) {
    openqueue_reset_entry(&(entry->standard_entry));
 
-   entry->standard_entry.payload = &(entry->standard_entry.packet[IEEE802154_FRAME_SIZE + BIG_PACKET_SIZE]); // make pointer point to the end op the extended buffer
+   entry->standard_entry.payload = &(entry->standard_entry.packet[IPV6_PACKET_SIZE]); // make pointer point to the end op the extended buffer
 }

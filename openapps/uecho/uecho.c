@@ -26,11 +26,7 @@ void uecho_init(void) {
 void uecho_receive(OpenQueueEntry_t *request) {
     OpenQueueEntry_t *reply;
 
-    if (request->length > 60) {
-        reply = openqueue_getFreeBigPacketBuffer(COMPONENT_UECHO);
-    } else {
-        reply = openqueue_getFreePacketBuffer(COMPONENT_UECHO);
-    }
+    reply = openqueue_getFreeBigPacketBuffer(COMPONENT_UECHO);
 
     if (reply == NULL) {
         openserial_printError(

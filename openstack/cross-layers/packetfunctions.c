@@ -303,11 +303,9 @@ void packetfunctions_reserveHeaderSize(OpenQueueEntry_t *pkt, uint16_t header_le
 
 void packetfunctions_tossHeader(OpenQueueEntry_t *pkt, uint16_t header_length) {
     uint16_t size;
-    if (pkt->is_big_packet) {
-        size = BIG_PACKET_SIZE + 127;
-    } else {
-        size = 127;
-    }
+
+    size = pkt->is_big_packet == TRUE ? IPV6_PACKET_SIZE : IEEE802154_FRAME_SIZE;
+
     pkt->payload += header_length;
     pkt->length -= header_length;
 
@@ -320,11 +318,7 @@ void packetfunctions_tossHeader(OpenQueueEntry_t *pkt, uint16_t header_length) {
 
 void packetfunctions_reserveFooterSize(OpenQueueEntry_t *pkt, uint16_t header_length) {
     uint16_t size;
-    if (pkt->is_big_packet) {
-        size = BIG_PACKET_SIZE + 127;
-    } else {
-        size = 127;
-    }
+    size = pkt->is_big_packet == TRUE ? IPV6_PACKET_SIZE : IEEE802154_FRAME_SIZE;
 
     pkt->length += header_length;
 
@@ -337,7 +331,7 @@ void packetfunctions_reserveFooterSize(OpenQueueEntry_t *pkt, uint16_t header_le
 
 void packetfunctions_tossFooter(OpenQueueEntry_t *pkt, uint16_t header_length) {
     pkt->length -= header_length;
-    if (pkt->length > BIG_PACKET_SIZE + 128) {//wraps around, so a negative value will be >128
+    if (pkt->length > IPV6_PACKET_SIZE) {//wraps around, so a negative value will be >128
         openserial_printError(COMPONENT_PACKETFUNCTIONS, ERR_HEADER_TOO_LONG,
                               (errorparameter_t) 3,
                               (errorparameter_t) pkt->length);

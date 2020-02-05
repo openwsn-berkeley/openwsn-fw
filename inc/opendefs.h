@@ -43,7 +43,7 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 
 // frame sizes
 #define IEEE802154_FRAME_SIZE   127
-#define BIG_PACKET_SIZE         (10*127)
+#define IPV6_PACKET_SIZE        1320
 
 enum {
    E_SUCCESS                           = 0,
@@ -384,7 +384,7 @@ typedef struct {
 
 typedef struct {
     OpenQueueEntry_t standard_entry;
-    uint8_t packet_remainder[BIG_PACKET_SIZE];
+    uint8_t packet_remainder[IPV6_PACKET_SIZE - 130];           // 130 byts alread allocated in the normal OpenQueueEntry
 } OpenQueueBigEntry_t;
 
 

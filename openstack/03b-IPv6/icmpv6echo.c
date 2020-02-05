@@ -101,12 +101,9 @@ void icmpv6echo_receive(OpenQueueEntry_t *msg) {
                                  (errorparameter_t) 0,
                                  (errorparameter_t) 0);
             if (icmpv6echo_vars.isReplyEnabled) {
-                // get a new openqueuEntry_t for the echo reply
-                if (msg->length > 65)
-                    reply = openqueue_getFreeBigPacketBuffer(COMPONENT_ICMPv6ECHO);
-                else
-                    reply = openqueue_getFreePacketBuffer(COMPONENT_ICMPv6ECHO);
-               
+                // get a new OpenQueuEntry_t for the echo reply
+                reply = openqueue_getFreeBigPacketBuffer(COMPONENT_ICMPv6ECHO);
+
                 if (reply == NULL) {
                     openserial_printError(COMPONENT_ICMPv6ECHO, ERR_NO_FREE_PACKET_BUFFER,
                                           (errorparameter_t) 1,
