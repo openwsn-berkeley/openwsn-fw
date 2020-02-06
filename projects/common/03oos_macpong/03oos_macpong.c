@@ -190,31 +190,14 @@ bool icmpv6rpl_daoSent(void) {
     return TRUE;
 }
 void icmpv6rpl_setMyDAGrank(dagrank_t rank)                          { return; }
-void icmpv6rpl_killPreferredParent(void)                             { return; }
 void icmpv6rpl_updateMyDAGrankAndParentSelection(void)               { return; }
-void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t* msg)                  { return; }
 void icmpv6echo_setIsReplyEnabled(bool isEnabled)                    { return; }
 
 
-
-void opentcp_init(void)                                 { return; }
 void openudp_init(void)                                 { return; }
 void opencoap_init(void)                                { return; }
 
 //===== L7
 
 void openapps_init(void)                                { return; }
-void ohlone_init(void)                                  { return; }
-void tcpecho_init(void)                                 { return; }
-void tcpinject_init(void)                               { return; }
-void tcpinject_trigger(void)                            { return; }
-void tcpprint_init(void)                                { return; }
-void c6t_init(void)                                     { return; }
-void cinfo_init(void)                                   { return; }
-void cleds__init(void)                                  { return; }
-void cwellknown_init(void)                              { return; }
-   // TCP
-void techo_init(void)                                   { return; }
-   // UDP
-void uecho_init(void)                                   { return; }
 
