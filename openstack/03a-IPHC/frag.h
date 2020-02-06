@@ -39,6 +39,8 @@
 #define DISPATCH_FRAG_FIRST         24
 #define DISPATCH_FRAG_SUBSEQ        28
 
+#define OFFSET_MULTIPLE             8
+
 // specifies how long we store fragments or keep vrb allocated
 #define FRAG_REASSEMBLY_TIMEOUT     60000
 
@@ -78,6 +80,7 @@ END_PACK
 typedef struct fragment_t fragment;
 
 // virtual reassembly buffer struct
+BEGIN_PACK
 typedef struct {
     uint16_t tag;
     uint16_t left;
@@ -86,6 +89,7 @@ typedef struct {
     OpenQueueEntry_t *frag1;
     open_addr_t nexthop;
 } vrb_t;
+END_PACK
 
 // state information for fragmentation
 typedef struct {

@@ -224,16 +224,16 @@ END_PACK
 BEGIN_PACK
 typedef struct {
    uint8_t    optionType;
-   uint8_t    o_flag:1;         //
-   uint8_t    d_flag:1;         //
-   uint8_t    exp_etl:3; 				//
-   uint8_t    org_otl:3; 				//
-   uint8_t    time_unit:2; 				//exp_er,org_or
-   uint8_t		exponent:3;				//
-   uint8_t		rsv:3;						//
-     uint8_t		et_val[8];				//
-     uint8_t		ot_val[8];				//
-     int16_t		time_left;
+   uint8_t    o_flag:1;
+   uint8_t    d_flag:1;
+   uint8_t    exp_etl:3;
+   uint8_t    org_otl:3;
+   uint8_t    time_unit:2; 		//exp_er,org_or
+   uint8_t	  exponent:3;
+   uint8_t    rsv:3;
+   uint8_t	  et_val[8];
+   uint8_t	  ot_val[8];
+   int16_t	  time_left;
 } deadline_option_ht;
 END_PACK
 #endif
@@ -294,6 +294,13 @@ uint8_t iphc_retrieveIPv6HopByHopHeader(
         rpl_option_ht *rpl_option
 );
 
+void iphc_retrieveIPv6Header(
+   OpenQueueEntry_t* msg,
+   ipv6_header_iht* ipv6_outer_header,
+   ipv6_header_iht* ipv6_inner_header,
+   uint8_t*         page_length
+);
+
 #ifdef DEADLINE_OPTION_ENABLED
 void iphc_retrieveIPv6DeadlineHeader(
    OpenQueueEntry_t*    msg,
@@ -303,13 +310,6 @@ void iphc_retrieveIPv6DeadlineHeader(
 
 void iphc_getDeadlineInfo(
    monitor_expiration_vars_t*	stats
-);
-
-void iphc_retrieveIPv6Header(
-   OpenQueueEntry_t* msg, 
-   ipv6_header_iht* ipv6_outer_header,
-   ipv6_header_iht* ipv6_inner_header,
-   uint8_t*         page_length
 );
 
 #endif
