@@ -103,6 +103,10 @@ owerror_t frag_fragment6LoPacket(OpenQueueEntry_t *msg) {
     // check if fragmentation is necessary
     if (!msg->l3_isFragment && msg->length > (MAX_FRAGMENT_SIZE + FRAGN_HEADER_SIZE)) {
 
+        openserial_printInfo(COMPONENT_FRAG, ERR_FRAG_FRAGMENTING,
+                              (errorparameter_t) msg->length,
+                              (errorparameter_t) (msg->length / MAX_FRAGMENT_SIZE) + 1);
+
         // update the global 6LoWPAN datagram tag
         frag_vars.global_tag++;
         remaining_bytes = msg->length;
