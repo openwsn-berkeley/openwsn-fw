@@ -119,12 +119,10 @@ owerror_t frag_fragment6LoPacket(OpenQueueEntry_t *msg) {
             lowpan_fragment = openqueue_getFreePacketBuffer(COMPONENT_FRAG);
             if (lowpan_fragment == NULL) {
                 // 6LoWPAN packet couldn't be entirely fragmented, thus clean up previously created fragments and exit.
-                openserial_printError(
-                        COMPONENT_FRAG,
-                        ERR_NO_FREE_PACKET_BUFFER,
+                openserial_printError(COMPONENT_FRAG, ERR_NO_FREE_PACKET_BUFFER,
                         (errorparameter_t) 0,
-                        (errorparameter_t) 0
-                );
+                        (errorparameter_t) 0);
+                cleanup_fragments(frag_vars.global_tag);
                 return E_FAIL;
             }
 
