@@ -142,9 +142,10 @@ OpenQueueEntry_t* openqueue_getFreeBigPacketBuffer(uint8_t creator) {
 owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
    uint8_t i;
 
-   if (pkt->is_big_packet){
-      INTERRUPT_DECLARATION();
-      DISABLE_INTERRUPTS();
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+
+    if (pkt->is_big_packet){
       for (i = 0; i < BIGQUEUELENGTH; i++) {
           if ((OpenQueueBigEntry_t *) pkt == &openqueue_vars.big_queue[i]) {
               if (openqueue_vars.big_queue[i].standard_entry.owner == COMPONENT_NULL) {
@@ -159,10 +160,8 @@ owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
               return E_SUCCESS;
           }
       }
-   
+
    } else {
-      INTERRUPT_DECLARATION();
-      DISABLE_INTERRUPTS();
       for (i=0;i<QUEUELENGTH;i++) {
          if (&openqueue_vars.queue[i]==pkt) {
             if (openqueue_vars.queue[i].owner==COMPONENT_NULL) {
@@ -176,7 +175,7 @@ owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
             return E_SUCCESS;
          }
       }
-   
+
    }
 
    // log the error
