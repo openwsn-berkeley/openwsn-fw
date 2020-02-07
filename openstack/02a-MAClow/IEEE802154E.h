@@ -276,7 +276,9 @@ typedef struct {
     PORT_TIMER_WIDTH          radioOnInit;             // when within the slot the radio turns on
     PORT_TIMER_WIDTH          radioOnTics;             // how many tics within the slot the radio is on
     bool                      radioOnThisSlot;         // to control if the radio has been turned on in a slot.
-
+    bool                      UseDefaultRFConfig;      // tells if we are in a state to use the default RF config (e.g. shared state) or use a custom RF config (e.g. an active negotiated slot).
+    uint8_t                   DefaultRFConfig;          // defines the RF config to use by default (such as on shared slots, and perhaps for retransmissions later?). This currenly represents only level of Tx power. Later it should be a struct representing heterogeneous configuration.
+    uint8_t                   CurrentRFConfig;          // defines the RF config to use at given slot. This currenly represents only level of Tx power. Later it should be a struct representing heterogeneous configuration.
     // control
     bool                      isAckEnabled;            // whether reply for ack, used for synchronization test
     bool                      isSecurityEnabled;       // whether security is applied

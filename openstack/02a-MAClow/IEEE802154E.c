@@ -121,6 +121,9 @@ void ieee154e_init(void) {
     ieee154e_vars.isSecurityEnabled = FALSE;
     ieee154e_vars.slotDuration      = TsSlotDuration;
     ieee154e_vars.numOfSleepSlots   = 1;
+    ieee154e_vars.DefaultRFConfig   = 2;
+    ieee154e_vars.CurrentRFConfig   = 2;
+    ieee154e_vars.UseDefaultRFConfig   = 1;
 
     // default hopping template
     memcpy(
@@ -853,6 +856,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
 port_INLINE void activity_ti1ORri1(void) {
     cellType_t  cellType;
     open_addr_t neighbor;
+    uint8_t     rfConfig=0;
     uint8_t     i;
     uint8_t     asn[5];
     uint8_t     join_priority;
@@ -965,6 +969,13 @@ port_INLINE void activity_ti1ORri1(void) {
                 if (packetfunctions_isBroadcastMulticast(&neighbor)==FALSE){
 
                     // look for a unicast packet to send
+                    ieee154e_vars.dataToSend = openqueue_macGetUnicastPakcet(&neighbor); //**Packet not Pakcet
+                    //use custom RF config of the target neighbor
+                    ieee154e_vars.UseDefaultRFConfig=FALSE;
+                    // get the RF config associated with that slot/neighbor. Currently this is determined from link rssi. Later it will come from sixtop.
+                    rfConfig=neighbors_getRFConfig(&neighbor);
+                    ieee154e_vars.CurrentRFConfig = rfConfig;
+                    if (ieee154e_vars.dataToSend == NULL){
                     ieee154e_vars.dataToSend = openqueue_macGetUnicastPakcet(&neighbor);
 
                      if (ieee154e_vars.dataToSend == NULL){
@@ -980,6 +991,8 @@ port_INLINE void activity_ti1ORri1(void) {
                         msf_updateCellsElapsed(&neighbor, CELLTYPE_TX);
                     }
                 } else {
+                    //use default RF config of the target neighbor
+                    ieee154e_vars.UseDefaultRFConfig=TRUE;
                     // this is minimal cell
                     ieee154e_vars.dataToSend = openqueue_macGetDIOPacket();
                     if (ieee154e_vars.dataToSend==NULL){
@@ -1131,7 +1144,13 @@ port_INLINE void activity_ti2(void) {
 
     // configure the radio for that frequency
     radio_setFrequency(ieee154e_vars.freq);
-
+    //check if the radio needs to use the default RF or a custom RF config and configure accordingly. 
+    if (ieee154e_vars.UseDefaultRFConfig)
+    {
+        radio_setConfig (ieee154e_vars.DefaultRFConfig);
+    } else {
+        radio_setConfig (ieee154e_vars.CurrentRFConfig);
+    }
     // load the packet in the radio's Tx buffer
     radio_loadPacket(ieee154e_vars.localCopyForTransmission.payload,
                     ieee154e_vars.localCopyForTransmission.length);
@@ -1276,7 +1295,8 @@ port_INLINE void activity_ti5(PORT_TIMER_WIDTH capturedTime) {
         // 3. set capture for receiving SFD and packet receiving done
         sctimer_setCapture(ACTION_RX_SFD_DONE);
         sctimer_setCapture(ACTION_RX_DONE);
-
+        radio_setFrequency(ieee154e_vars.freq);
+        radio_setConfig (ieee154e_vars.CurrentRFConfig);
         // configure the radio for that frequency
         radio_setFrequency(ieee154e_vars.freq);
 #else
@@ -1915,6 +1935,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
 
             // configure the radio for that frequency
             radio_setFrequency(ieee154e_vars.freq);
+            radio_setConfig (ieee154e_vars.CurrentRFConfig);
 #else
             // arm rt5
             opentimers_scheduleAbsolute(
@@ -2886,7 +2907,8 @@ void endSlot(void) {
     // reset capturedTimes
     ieee154e_vars.lastCapturedTime = 0;
     ieee154e_vars.syncCapturedTime = 0;
-
+    // reset radio config
+    ieee154e_vars.UseDefaultRFConfig=TRUE;
     // compute duty cycle.
     ieee154e_stats.numTicsOn+=ieee154e_vars.radioOnTics;//accumulate and tics the radio is on for that window
     ieee154e_stats.numTicsTotal+=ieee154e_vars.slotDuration;//increment total tics by timer period.
