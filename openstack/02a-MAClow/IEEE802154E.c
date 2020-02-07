@@ -967,7 +967,7 @@ port_INLINE void activity_ti1ORri1(void) {
                     // look for a unicast packet to send
                     ieee154e_vars.dataToSend = openqueue_macGetUnicastPakcet(&neighbor);
 
-                    if (ieee154e_vars.dataToSend == NULL){
+                     if (ieee154e_vars.dataToSend == NULL){
                         ieee154e_vars.dataToSend = openqueue_macGetKaPacket(&neighbor);
                     }
 
@@ -1028,7 +1028,7 @@ port_INLINE void activity_ti1ORri1(void) {
                     }
                 }
                 // add 2 CRC bytes only to the local copy as we end up here for each retransmission
-                packetfunctions_reserveFooterSize(&ieee154e_vars.localCopyForTransmission, 2);
+                packetfunctions_reserveFooterSize(&ieee154e_vars.localCopyForTransmission, LENGTH_CRC); 
 
                 // configure the radio for that frequency
                 radio_setFrequency(ieee154e_vars.freq);
@@ -1127,7 +1127,7 @@ port_INLINE void activity_ti2(void) {
     }
 
     // add 2 CRC bytes only to the local copy as we end up here for each retransmission
-    packetfunctions_reserveFooterSize(&ieee154e_vars.localCopyForTransmission, 2);
+    packetfunctions_reserveFooterSize(&ieee154e_vars.localCopyForTransmission, LENGTH_CRC);
 
     // configure the radio for that frequency
     radio_setFrequency(ieee154e_vars.freq);

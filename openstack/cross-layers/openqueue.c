@@ -20,7 +20,7 @@ openqueue_vars_t openqueue_vars;
 void openqueue_reset_entry(OpenQueueEntry_t* entry);
 
 //=========================== public ==========================================
-
+uint8_t buffer_counter =0;		//for debugging purposes: used to track packet queue size using JTAG live watch.
 //======= admin
 
 /**
@@ -68,9 +68,10 @@ get a new packet buffer to start creating a new packet.
 */
 OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
    uint8_t i;
+   buffer_counter = 0;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
-
+  
    // refuse to allocate if we're not in sync
    if (ieee154e_isSynch()==FALSE && creator > COMPONENT_IEEE802154E){
      ENABLE_INTERRUPTS();
@@ -87,6 +88,7 @@ OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
 
    // walk through queue and find free entry
    for (i=0;i<QUEUELENGTH;i++) {
+     buffer_counter++;
       if (openqueue_vars.queue[i].owner==COMPONENT_NULL) {
          openqueue_vars.queue[i].creator=creator;
          openqueue_vars.queue[i].owner=COMPONENT_OPENQUEUE;
