@@ -16,14 +16,18 @@
  *---------------------------------------------------------------------------*/
 /* Constants */
 #define CC2538_RF_CCA_THRES_USER_GUIDE 0xF8
-#define CC2538_RF_TX_POWER_RECOMMENDED 0xD5 /* TODO: Check value */
-#define CC2538_RF_CHANNEL_MIN            11 //poipoi -- in fact is sending on 0x17 check that.
-#define CC2538_RF_CHANNEL_MAX            26
-#define CC2538_RF_CHANNEL_SPACING         5
-#define CC2538_RF_MAX_PACKET_LEN        127
-#define CC2538_RF_MIN_PACKET_LEN          4
-#define CC2538_RF_CCA_CLEAR               1
-#define CC2538_RF_CCA_BUSY                0
+//This will have to be conditional, will come back to it later
+#define CC2538_RF_TX_POWER_MIN              0x00
+#define CC2538_RF_TX_POWER_RECOMMENDED      0xC5 /* TODO: Check value */
+#define CC2538_RF_TX_POWER_MAX              0xFF 
+
+#define CC2538_RF_CHANNEL_MIN               11 //poipoi -- in fact is sending on 0x17 check that.
+#define CC2538_RF_CHANNEL_MAX               26
+#define CC2538_RF_CHANNEL_SPACING           5
+#define CC2538_RF_MAX_PACKET_LEN            127
+#define CC2538_RF_MIN_PACKET_LEN            4
+#define CC2538_RF_CCA_CLEAR                 1
+#define CC2538_RF_CCA_BUSY                  0
 /*---------------------------------------------------------------------------*/
 #ifdef CC2538_RF_CONF_TX_POWER
 #define CC2538_RF_TX_POWER CC2538_RF_CONF_TX_POWER

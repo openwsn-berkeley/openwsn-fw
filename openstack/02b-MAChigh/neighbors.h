@@ -15,6 +15,14 @@
 #define MAXPREFERENCE             2
 #define BADNEIGHBORMAXRSSI        -70 //dBm
 #define GOODNEIGHBORMINRSSI       -80 //dBm
+
+#define BADLINKMAXRSSI            -40 //dBm
+#define GOODLINKMINRSSI           -30 //dBm
+
+#define CLOSE_NEIGHBOR            1
+#define NEARBY_NEIGHBOR           2
+#define FAR_NEIGHBOR              3
+
 #define SWITCHSTABILITYTHRESHOLD  3
 #define DEFAULTLINKCOST           4
 #define MINIMAL_NUM_TX            16
@@ -67,6 +75,7 @@ bool          neighbors_getNeighborNoResource(uint8_t index);
 int8_t        neighbors_getRssi(uint8_t index);
 uint8_t       neighbors_getNumTx(uint8_t index);
 uint8_t       neighbors_getSequenceNumber(open_addr_t* address);
+uint8_t       neighbors_getRFConfig(open_addr_t* address);
 // setters
 void          neighbors_setNeighborRank(uint8_t index, dagrank_t rank);
 void          neighbors_setNeighborNoResource(open_addr_t* address);

@@ -36,6 +36,7 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 #define LENGTH_ADDR64b   8
 #define LENGTH_ADDR128b  16
 
+
 #define MAXNUMNEIGHBORS  30
 
 // maximum celllist length
@@ -385,6 +386,7 @@ typedef struct {
    uint8_t          sequenceNumber;
    uint8_t          backoffExponenton;
    uint8_t          backoff;
+   uint8_t          rfConfig;
 } neighborRow_t;
 END_PACK
 

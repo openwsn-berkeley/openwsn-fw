@@ -35,14 +35,19 @@ static const uint8_t ebIEsBytestream[] = {
 #define EB_SLOTFRAME_LEN_OFFSET     20
 #define EB_SLOTFRAME_NUMLINK_OFFSET 22
 
-#define EB_IE_LEN                   28
+/**
+Set EB on minimal cell for 1/EB_PORTION portion. 
+Must be set to lower values for slower modulations. Otherwise, impossible to synchronize. 
+Default setting is 10 for 20 ms slot duration and 4 for 120 ms slot duration
+*/
+#define EB_PORTION                  4 
 
+#define EB_IE_LEN                   28
 #define NUM_CHANNELS                16 // number of channels to channel hop on
 #define TXRETRIES                   15 // number of MAC retries before declaring failed
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to successfully synchronize
 #define US_PER_TICK                 30 // number of us per 32kHz clock tick
-#define EB_PORTION                  10 // set EB on minimal cell for 1/EB_PORTION portion
 #define MAXKAPERIOD               1000 // in slots: 1500@20ms per slot -> ~30 seconds. Max value used by adaptive synchronization.
 #define DESYNCTIMEOUT             1750 // in slots: 1750@20ms per slot -> ~35 seconds. A larger DESYNCTIMEOUT is needed if using a larger KATIMEOUT.
 #define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"
@@ -164,13 +169,33 @@ enum ieee154e_atomicdurations_enum {
    TsLongGT                  =   36,                  //  1100us
    TsTxAckDelay              =   33,                  //  1000us
    TsShortGT                 =   13,                  //   500us, The standardlized value for this is 400/2=200us(7ticks). Currectly 7 doesn't work for short packet, change it back to 7 when found the problem.
+      // radio watchdog
+   wdRadioTx                 =   45,                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
+   wdDataDuration            =  164,                  //   5000us (measured 4280us with max payload) >> Mina original is 164
+   wdAckDuration             =   98,                  //  3000us (measured 1000us)>> Mina original 98 
 #endif
 #if SLOTDURATION==20
    TsTxOffset                =  171,                  //  5215us
    TsLongGT                  =   43,                  //  1300us
    TsTxAckDelay              =  181,                  //  5521us
    TsShortGT                 =   16,                  //   500us
+      // radio watchdog
+   wdRadioTx                 =   45,                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
+   wdDataDuration            =  164,                  //   5000us (measured 4280us with max payload) >> Mina original is 164
+   wdAckDuration             =   98,                  //  3000us (measured 1000us)>> Mina original 98 
 #endif
+    // experimental: relaxed estimations for fsk1 with fec 25kbps
+#if SLOTDURATION==160
+   TsTxOffset                =  360,                  //  5215us
+   TsLongGT                  =  240,                  //  1300us
+   TsTxAckDelay              =  362,                  //  5521us
+   TsShortGT                 =   60,                  //   500us
+      // radio watchdog
+   wdRadioTx                 =   230,                  //  4500us delayTx+Tx time for 10 bytes( (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
+   wdDataDuration            =  2662,                  //  40320 us (measured with max payload) >> Mina original is 164
+   wdAckDuration             =   600,                  //  8962us (measured)
+#endif
+
    TsSlotDuration            =  PORT_TsSlotDuration,  // 10000us
    // execution speed related
    maxTxDataPrepare          =  PORT_maxTxDataPrepare,
@@ -180,10 +205,6 @@ enum ieee154e_atomicdurations_enum {
    // radio speed related
    delayTx                   =  PORT_delayTx,         // between GO signal and SFD
    delayRx                   =  PORT_delayRx,         // between GO signal and start listening
-   // radio watchdog
-   wdRadioTx                 =   45,                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
-   wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
-   wdAckDuration             =   98,                  //  3000us (measured 1000us)
 };
 
 //shift of bytes in the linkOption bitmap: draft-ietf-6tisch-minimal-10.txt: page 6
@@ -255,7 +276,9 @@ typedef struct {
     PORT_TIMER_WIDTH          radioOnInit;             // when within the slot the radio turns on
     PORT_TIMER_WIDTH          radioOnTics;             // how many tics within the slot the radio is on
     bool                      radioOnThisSlot;         // to control if the radio has been turned on in a slot.
-
+    bool                      UseDefaultRFConfig;      // tells if we are in a state to use the default RF config (e.g. shared state) or use a custom RF config (e.g. an active negotiated slot).
+    uint8_t                   DefaultRFConfig;          // defines the RF config to use by default (such as on shared slots, and perhaps for retransmissions later?). This currenly represents only level of Tx power. Later it should be a struct representing heterogeneous configuration.
+    uint8_t                   CurrentRFConfig;          // defines the RF config to use at given slot. This currenly represents only level of Tx power. Later it should be a struct representing heterogeneous configuration.
     // control
     bool                      isAckEnabled;            // whether reply for ack, used for synchronization test
     bool                      isSecurityEnabled;       // whether security is applied

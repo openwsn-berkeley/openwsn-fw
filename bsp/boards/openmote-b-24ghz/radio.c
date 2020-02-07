@@ -133,7 +133,6 @@ void radio_init(void) {
    /* MAX FIFOP threshold */
    HWREG(RFCORE_XREG_FIFOPCTRL)   = CC2538_RF_MAX_PACKET_LEN;
    
-   HWREG(RFCORE_XREG_TXPOWER)     = CC2538_RF_TX_POWER;
    HWREG(RFCORE_XREG_FREQCTRL)    = CC2538_RF_CHANNEL_MIN;
    
    /* Enable RF interrupts  see page 751  */
@@ -201,6 +200,21 @@ void radio_setFrequency(uint8_t frequency) {
    // change state
    radio_vars.state = RADIOSTATE_FREQUENCY_SET;
 }
+
+void radio_setConfig(uint8_t rfConfig) {
+    //Configuring TX Power
+    if (rfConfig== 1){
+        HWREG(RFCORE_XREG_TXPOWER)     = CC2538_RF_TX_POWER_MIN;
+    }
+    else {
+        if (rfConfig== 2){
+            HWREG(RFCORE_XREG_TXPOWER)     = CC2538_RF_TX_POWER_RECOMMENDED;
+        }else {
+            HWREG(RFCORE_XREG_TXPOWER)     = CC2538_RF_TX_POWER_MAX;
+        }
+    }
+}
+
 
 void radio_rfOn(void) {
    //radio_on();

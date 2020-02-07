@@ -148,6 +148,17 @@ uint8_t neighbors_getSequenceNumber(open_addr_t* address){
 
 }
 
+uint8_t neighbors_getRFConfig(open_addr_t* address){
+    uint8_t i;
+    for (i=0;i<MAXNUMNEIGHBORS;i++){
+        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b)){
+            break;
+        }
+    }
+    return neighbors_vars.neighbors[i].rfConfig;
+
+}
+
 //===== interrogators
 
 /**
@@ -345,7 +356,17 @@ void neighbors_indicateRx(open_addr_t* l2_src,
                neighbors_vars.neighbors[i].switchStabilityCounter=0;
             }
          }
-
+         // update closeNeighbor, switchQualityCounter
+        if (neighbors_vars.neighbors[i].rssi>GOODLINKMINRSSI){
+            neighbors_vars.neighbors[i].rfConfig=1;
+            } else {
+                if (neighbors_vars.neighbors[i].rssi>BADLINKMAXRSSI){
+                    neighbors_vars.neighbors[i].rfConfig=2;
+                }else {
+                        neighbors_vars.neighbors[i].rfConfig=3;
+                }
+            }
+        }
          // stop looping
          break;
       }
@@ -707,6 +728,17 @@ void registerNewNeighbor(open_addr_t* address,
                 memcpy(&neighbors_vars.neighbors[i].asn,asnTimestamp,sizeof(asn_t));
                 neighbors_vars.neighbors[i].backoffExponenton      = MINBE-1;;
                 neighbors_vars.neighbors[i].backoff                = 0;
+                //configure neighbor closeness depending on its rssi
+                if (rssi>GOODLINKMINRSSI){
+                    neighbors_vars.neighbors[i].rfConfig=1;
+                } else {
+                    if (rssi>BADLINKMAXRSSI){
+                        neighbors_vars.neighbors[i].rfConfig=2;
+                    } else {
+                            neighbors_vars.neighbors[i].rfConfig=3;
+                        }
+                    }
+                
                 //update jp
                 if (joinPrioPresent==TRUE){
                     neighbors_vars.neighbors[i].joinPrio=joinPrio;
