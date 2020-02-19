@@ -111,7 +111,7 @@ void sctimer_scheduleActionIn(uint8_t type,PORT_RADIOTIMER_WIDTH offset){
     switch(type){
         case ACTION_LOAD_PACKET:
             // offset when to fire
-            RFTIMER_REG__COMPARE3           = TIMER_COUNTER_CONVERT_32K_TO_RFTIMER_CLK(offset);
+            RFTIMER_REG__COMPARE3           = offset;
             
             // enable compare and tx load interrupt (this also cancels any pending interrupts)
             RFTIMER_REG__COMPARE3_CONTROL   = RFTIMER_COMPARE_ENABLE           |\
@@ -120,7 +120,7 @@ void sctimer_scheduleActionIn(uint8_t type,PORT_RADIOTIMER_WIDTH offset){
             break;
         case ACTION_SEND_PACKET:
             // offset when to fire
-            RFTIMER_REG__COMPARE4           = TIMER_COUNTER_CONVERT_32K_TO_RFTIMER_CLK(offset);
+            RFTIMER_REG__COMPARE4           = offset;
             
             // enable compare and tx send interrupt (this also cancels any pending interrupts)
             RFTIMER_REG__COMPARE4_CONTROL   = RFTIMER_COMPARE_ENABLE           |\
@@ -129,7 +129,7 @@ void sctimer_scheduleActionIn(uint8_t type,PORT_RADIOTIMER_WIDTH offset){
             break;
         case ACTION_RADIORX_ENABLE:
             // offset when to fire
-            RFTIMER_REG__COMPARE5           = TIMER_COUNTER_CONVERT_32K_TO_RFTIMER_CLK(offset);
+            RFTIMER_REG__COMPARE5           = offset;
             
             // enable compare and rx start interrupt (this also cancels any pending interrupts)
             RFTIMER_REG__COMPARE5_CONTROL   = RFTIMER_COMPARE_ENABLE           |\
@@ -138,7 +138,7 @@ void sctimer_scheduleActionIn(uint8_t type,PORT_RADIOTIMER_WIDTH offset){
             break;
         case ACTION_SET_TIMEOUT:
             // offset when to fire
-            RFTIMER_REG__COMPARE2           = TIMER_COUNTER_CONVERT_32K_TO_RFTIMER_CLK(offset);
+            RFTIMER_REG__COMPARE2           = offset;
             
             // enable compare interrupt (this also cancels any pending interrupts)
             RFTIMER_REG__COMPARE2_CONTROL   = RFTIMER_COMPARE_ENABLE           |\

@@ -34,20 +34,6 @@ to return the board's description.
 #define SCHEDULER_WAKEUP()                  
 #define SCHEDULER_ENABLE_INTERRUPT()
 
-// ==== SCuM RF timer specific 
-
-// NOTE: 
-// This convert has a problem that when multiple the value, it may exceeds 
-// 0xffffffff, resulting a wrong converting. Resolve this problem when the 
-// frequency of rftimer is determined finally.
-
-// this is called when require to WRITE the RFTIMER counter/compare registers,
-// where the value is going to be multiplied.
-#define TIMER_COUNTER_CONVERT_32K_TO_RFTIMER_CLK(value)    value*5
-// this is called when require to READ  the RFTIMER counter/compare registers,
-// where the value is going to be divided.
-#define TIMER_COUNTER_CONVERT_RFTIMER_CLK_TO_32K(value)    value/5
-
 //===== radio
 
 #define PORT_PIN_RADIO_RESET_LOW()          RFCONTROLLER_REG__CONTROL = RF_RESET;
