@@ -229,6 +229,15 @@ OpenQueueEntry_t* openqueue_sixtopGetSentPacket(void) {
             return &openqueue_vars.queue[i];
         }
     }
+
+    for (i = 0; i < BIGQUEUELENGTH; i++) {
+        if (((OpenQueueEntry_t*)&openqueue_vars.big_queue[i])->owner == COMPONENT_IEEE802154E_TO_SIXTOP &&
+            ((OpenQueueEntry_t*)&openqueue_vars.big_queue[i])->creator != COMPONENT_IEEE802154E) {
+            ENABLE_INTERRUPTS();
+            return (OpenQueueEntry_t*)&openqueue_vars.big_queue[i];
+        }
+    }
+
     ENABLE_INTERRUPTS();
     return NULL;
 }
@@ -452,6 +461,19 @@ OpenQueueEntry_t*  openqueue_macGetUnicastPakcet(open_addr_t* toNeighbor){
                 ) {
             ENABLE_INTERRUPTS();
             return &openqueue_vars.queue[i];
+        }
+    }
+
+    for (i = 0; i < BIGQUEUELENGTH; i++) {
+        if (
+                ((OpenQueueEntry_t*)&openqueue_vars.big_queue[i])->owner == COMPONENT_SIXTOP_TO_IEEE802154E &&
+                (
+                        toNeighbor->type == ADDR_64B &&
+                        packetfunctions_sameAddress(toNeighbor, &((OpenQueueEntry_t*)&openqueue_vars.big_queue[i])->l2_nextORpreviousHop)
+                )
+                ) {
+            ENABLE_INTERRUPTS();
+            return (OpenQueueEntry_t*)&openqueue_vars.big_queue[i];
         }
     }
     ENABLE_INTERRUPTS();

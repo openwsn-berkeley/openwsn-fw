@@ -318,12 +318,15 @@ void packetfunctions_tossHeader(OpenQueueEntry_t *pkt, uint16_t header_length) {
 
 void packetfunctions_reserveFooterSize(OpenQueueEntry_t *pkt, uint16_t header_length) {
     uint16_t size;
-    size = pkt->is_big_packet == TRUE ? IPV6_PACKET_SIZE : IEEE802154_FRAME_SIZE;
+
+    // this function is only called from the MAC layer,
+    // there the packets should never be bigger than IEEE802154_FRAME_SIZE
+    size = IEEE802154_FRAME_SIZE;
 
     pkt->length += header_length;
 
     if (pkt->length > size) {
-        openserial_printError(COMPONENT_PACKETFUNCTIONS, ERR_HEADER_TOO_LONG,
+        openserial_printCritical(COMPONENT_PACKETFUNCTIONS, ERR_HEADER_TOO_LONG,
                               (errorparameter_t) 2,
                               (errorparameter_t) pkt->length);
     }
@@ -345,10 +348,21 @@ void packetfunctions_tossFooter(OpenQueueEntry_t *pkt, uint16_t header_length) {
 // the frame before transmission (where it can possibly be encrypted). 
 void packetfunctions_duplicatePacket(OpenQueueEntry_t *dst, OpenQueueEntry_t *src) {
     // make a copy of the frame
-    memcpy(dst, src, sizeof(OpenQueueEntry_t));
 
-    // Calculate where payload starts in the buffer
-    dst->payload = &dst->packet[src->payload - src->packet]; // update pointers
+    if (src->is_big_packet){
+        memcpy(dst, src, sizeof(OpenQueueEntry_t));
+
+        // local copy is never a big packet
+        dst->is_big_packet = FALSE;
+        dst->payload -= src->length;
+        memcpy(dst->payload, src->payload, src->length);
+
+    } else {
+        memcpy(dst, src, sizeof(OpenQueueEntry_t));
+
+        // Calculate where payload starts in the buffer
+        dst->payload = &dst->packet[src->payload - src->packet]; // update pointers
+    }
 
     // update l2_FrameCounter pointer
     dst->l2_FrameCounter = dst->payload + (src->l2_FrameCounter - src->payload);
