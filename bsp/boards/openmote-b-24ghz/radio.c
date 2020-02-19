@@ -194,7 +194,7 @@ void radio_setFrequency(uint8_t frequency, radio_freq_t tx_or_rx) {
    
    /* Changes to FREQCTRL take effect after the next recalibration */
    HWREG(RFCORE_XREG_FREQCTRL) = (CC2538_RF_CHANNEL_MIN
-      + (frequency - CC2538_RF_CHANNEL_MIN) * CC2538_RF_CHANNEL_SPACING);
+      + (11 - CC2538_RF_CHANNEL_MIN) * CC2538_RF_CHANNEL_SPACING);
    
    //radio_on();
    

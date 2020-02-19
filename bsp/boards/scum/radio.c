@@ -107,9 +107,8 @@ signed short cdr_tau_history[11] = {0};
 
 // rx = 24458  tx= 24495
 
-
-uint16_t freq_setting_rx[16] = {24458, 25070, 25265, 25852, 26094, 26286, 26504, 27091, 27306, 27449, 28109, 28252, 28466, 29078, 29291, 29456};
-uint16_t freq_setting_tx[16] = {24495, 25133, 25749, 25918, 26183, 26377, 26968, 27203, 27840, 28005, 28153, 28364, 28975, 29117, 29376, 29965};
+uint16_t freq_setting_rx[16] = {24877, 25070, 25265, 25852, 26094, 26286, 26504, 27091, 27306, 27449, 28109, 28252, 28466, 29078, 29291, 29456};
+uint16_t freq_setting_tx[16] = {24455, 25133, 25749, 25918, 26183, 26377, 26968, 27203, 27840, 28005, 28153, 28364, 28975, 29117, 29376, 29965};
 
 //=========================== prototypes ======================================
 
@@ -228,8 +227,8 @@ void radio_setFrequency(uint8_t frequency, radio_freq_t tx_or_rx) {
     // change state
     radio_vars.state = RADIOSTATE_SETTING_FREQUENCY;
     
-    radio_vars.current_frequency = frequency;
-    // radio_vars.current_frequency = DEFAULT_FREQ;
+//    radio_vars.current_frequency = frequency;
+    radio_vars.current_frequency = DEFAULT_FREQ;
     
     switch(tx_or_rx){
     case FREQ_TX:

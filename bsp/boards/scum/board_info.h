@@ -75,22 +75,14 @@ to return the board's description.
 #define SLOT_FSM_IMPLEMENTATION_SINGLE_COMPARE_TIMER_INTERRUPT
 // #define SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
 
-// The scum setting frequency for tx and rx are seperated, 
-//  the radio interface needs to be changed to adapt this feature
-//  Another reason is the setting frequency takes long since we need write the 
-//  frequency variables from FPGA to the PCB board. SCuM needs a seperating 
-//  timing for when to send the frame which currently is a common value for all board.
-// Those are the two reasons to define the marco below to insolated the SCuM related code.
-// This marco shouldn't be used with the new tapeout which should be ready around July 2019.
-
-//#define DAGROOT
+#define RAM_SIZE_64KB
 
 //=========================== typedef  ========================================
 
 //=========================== variables =======================================
 
 static const uint8_t rreg_uriquery[]        = "h=ucb";
-static const uint8_t infoBoardname[]        = "SCuM";
+static const uint8_t infoBoardname[]        = "SCuM3C";
 static const uint8_t infouCName[]           = "CortexM0";
 static const uint8_t infoRadioName[]        = "SCuM";
 

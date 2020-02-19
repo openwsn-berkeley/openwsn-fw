@@ -279,31 +279,6 @@ void isr_ieee154e_newSlot(opentimers_id_t id) {
 
     ieee154e_vars.startOfSlotReference = opentimers_getCurrentCompareValue();
     
-#ifdef SCUM3C_FPGA_PCB_VERSION
-    // the RFTimer clock is sourced from 500KHz clock which can't be well translated to 32768Hz
-    // so, use the adaptive synchronization to compensate this 
-    if (ieee154e_vars.compensatingCounter == 0 && idmanager_getIsDAGroot()==FALSE){
-        opentimers_scheduleAbsolute(
-            ieee154e_vars.timerId,                  // timerId
-            TsSlotDuration+1,                       // duration
-            ieee154e_vars.startOfSlotReference,     // reference
-            TIME_TICS,                              // timetype
-            isr_ieee154e_newSlot                    // callback
-        );
-        ieee154e_vars.compensatingCounter = 2;
-        ieee154e_vars.slotDuration          = TsSlotDuration+1;
-    } else {
-        opentimers_scheduleAbsolute(
-            ieee154e_vars.timerId,                  // timerId
-            TsSlotDuration,                         // duration
-            ieee154e_vars.startOfSlotReference,     // reference
-            TIME_TICS,                              // timetype
-            isr_ieee154e_newSlot                    // callback
-        );
-        ieee154e_vars.slotDuration          = TsSlotDuration;
-    }
-    ieee154e_vars.compensatingCounter -= 1;
-#else
     opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                  // timerId
         TsSlotDuration,                         // duration
@@ -312,7 +287,6 @@ void isr_ieee154e_newSlot(opentimers_id_t id) {
         isr_ieee154e_newSlot                    // callback
     );
     ieee154e_vars.slotDuration          = TsSlotDuration;
-#endif
     
     // radiotimer_setPeriod(ieee154e_vars.slotDuration);
     if (ieee154e_vars.isSync==FALSE) {

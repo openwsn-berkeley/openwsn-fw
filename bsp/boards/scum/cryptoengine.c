@@ -31,10 +31,12 @@ owerror_t cryptoengine_aes_ccms_dec(uint8_t* a,
 }
 
 owerror_t cryptoengine_aes_ecb_enc(uint8_t* buffer, uint8_t* key) {
-   return E_FAIL;
+    // To be implemented
+    return E_FAIL;
 }
 
 owerror_t cryptoengine_init(void) {
-   return E_SUCCESS;
+    // To be implemented
+    return E_SUCCESS;
 }
 

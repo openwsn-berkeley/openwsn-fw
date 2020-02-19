@@ -723,7 +723,7 @@ port_INLINE void sixtop_sendEB(void) {
 
     if (
         (ieee154e_isSynch()==FALSE)                     ||
-//        (IEEE802154_security_isConfigured()==FALSE)     ||
+        (IEEE802154_security_isConfigured()==FALSE)     ||
         (icmpv6rpl_getMyDAGrank()==DEFAULTDAGRANK)      ||
         icmpv6rpl_daoSent()==FALSE
     ) {

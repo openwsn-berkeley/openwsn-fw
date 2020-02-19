@@ -33,6 +33,13 @@
 //-- 04-TRAN
 #include "openudp.h"
 
+#ifndef RAM_SIZE_64KB
+
+//===== applications
+#include "openapps.h"
+
+#endif
+
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
@@ -71,6 +78,11 @@ void openstack_init(void) {
    icmpv6rpl_init();
    //-- 04-TRAN
    openudp_init();
+   
+#ifndef RAM_SIZE_64KB
+   //===== applications
+   openapps_init();
+#endif
 
    openserial_printInfo(
       COMPONENT_OPENWSN,ERR_BOOTED,
