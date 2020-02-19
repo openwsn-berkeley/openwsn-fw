@@ -105,6 +105,7 @@ OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
 }
 
 OpenQueueEntry_t* openqueue_getFreeBigPacketBuffer(uint8_t creator) {
+    uint8_t i;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
 
@@ -114,7 +115,7 @@ OpenQueueEntry_t* openqueue_getFreeBigPacketBuffer(uint8_t creator) {
      return NULL;
    }
 
-   for (int i = 0; i < BIGQUEUELENGTH; i++) {
+    for (i = 0; i < BIGQUEUELENGTH; i++) {
       if (openqueue_vars.big_queue[i].standard_entry.owner == COMPONENT_NULL) {
 
          openqueue_vars.big_queue[i].standard_entry.creator = creator;

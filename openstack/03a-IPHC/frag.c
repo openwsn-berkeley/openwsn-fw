@@ -95,17 +95,19 @@ void frag_init() {
 }
 
 owerror_t frag_fragment6LoPacket(OpenQueueEntry_t *msg) {
+    uint32_t i;
     OpenQueueEntry_t *lowpan_fragment;
     uint16_t remaining_bytes;
-    uint8_t fragment_length; uint8_t fragment_offset;
+    uint8_t fragment_length;
+    uint8_t fragment_offset;
     int8_t bpos;
 
     // check if fragmentation is necessary
     if (!msg->l3_isFragment && msg->length > (MAX_FRAGMENT_SIZE + FRAGN_HEADER_SIZE)) {
 
         openserial_printInfo(COMPONENT_FRAG, ERR_FRAG_FRAGMENTING,
-                              (errorparameter_t) msg->length,
-                              (errorparameter_t) (msg->length / MAX_FRAGMENT_SIZE) + 1);
+                             (errorparameter_t) msg->length,
+                             (errorparameter_t)(msg->length / MAX_FRAGMENT_SIZE) + 1);
 
         // update the global 6LoWPAN datagram tag
         frag_vars.global_tag++;
@@ -120,8 +122,8 @@ owerror_t frag_fragment6LoPacket(OpenQueueEntry_t *msg) {
             if (lowpan_fragment == NULL) {
                 // 6LoWPAN packet couldn't be entirely fragmented, thus clean up previously created fragments and exit.
                 openserial_printError(COMPONENT_FRAG, ERR_NO_FREE_PACKET_BUFFER,
-                        (errorparameter_t) 0,
-                        (errorparameter_t) 0);
+                                      (errorparameter_t) 0,
+                                      (errorparameter_t) 0);
                 cleanup_fragments(frag_vars.global_tag);
                 return E_FAIL;
             }
@@ -136,7 +138,7 @@ owerror_t frag_fragment6LoPacket(OpenQueueEntry_t *msg) {
                 fragment_length = remaining_bytes;
 
             // find a new spot in the fragmentation buffer  
-            for (int i = 0; i < FRAGMENT_BUFFER_SIZE; i++) {
+            for (i = 0; i < FRAGMENT_BUFFER_SIZE; i++) {
                 if (frag_vars.fragmentBuf[i].pFragment == NULL) {
                     bpos = i;
                     break;
@@ -181,7 +183,7 @@ owerror_t frag_fragment6LoPacket(OpenQueueEntry_t *msg) {
         }
 
         // send all the fragments with the current datagram tag
-        for (int i = 0; i < FRAGMENT_BUFFER_SIZE; i++) {
+        for (i = 0; i < FRAGMENT_BUFFER_SIZE; i++) {
             if (frag_vars.fragmentBuf[i].datagram_tag == frag_vars.global_tag) {
                 // try to send the fragment. If this fails, abort the transmission of the other fragments.
                 if (sixtop_send(frag_vars.fragmentBuf[i].pFragment) == E_FAIL) {
@@ -204,7 +206,7 @@ owerror_t frag_fragment6LoPacket(OpenQueueEntry_t *msg) {
         // this is a fragment (type frag1) that's being source routed
         // set nexthop in vrb and restore original frag1 header
 
-        for (uint8_t i = 0; i < NUM_OF_VRBS; i++) {
+        for (i = 0; i < NUM_OF_VRBS; i++) {
             if (frag_vars.vrbs[i].frag1 == msg) {
                 memcpy(&frag_vars.vrbs[i].nexthop, &msg->l2_nextORpreviousHop, sizeof(open_addr_t));
                 prepend_frag1_header(msg, frag_vars.vrbs[i].size, frag_vars.vrbs[i].tag);
@@ -223,6 +225,7 @@ owerror_t frag_fragment6LoPacket(OpenQueueEntry_t *msg) {
 
 
 void frag_sendDone(OpenQueueEntry_t *msg, owerror_t sendError) {
+    uint32_t i, k;
     bool frags_queued;
     bool upward_relay;
     uint16_t datagram_tag;
@@ -234,7 +237,6 @@ void frag_sendDone(OpenQueueEntry_t *msg, owerror_t sendError) {
         upward_relay = FALSE;
 
         // delete sent fragment from fragment buffer
-        int i;
         for (i = 0; i < FRAGMENT_BUFFER_SIZE; i++) {
             if (frag_vars.fragmentBuf[i].pFragment == msg) {
                 datagram_tag = frag_vars.fragmentBuf[i].datagram_tag;
@@ -251,7 +253,7 @@ void frag_sendDone(OpenQueueEntry_t *msg, owerror_t sendError) {
 
         if (sendError == E_SUCCESS && upward_relay == FALSE) {
             // check if we have send all other fragments of the original packet
-            for (int i = 0; i < FRAGMENT_BUFFER_SIZE; i++) {
+            for (i = 0; i < FRAGMENT_BUFFER_SIZE; i++) {
                 if (frag_vars.fragmentBuf[i].datagram_tag == datagram_tag) {
                     frags_queued = TRUE;
                     break;
@@ -271,7 +273,6 @@ void frag_sendDone(OpenQueueEntry_t *msg, owerror_t sendError) {
         }
     } else if (msg->l3_isFragment && msg->l3_useSourceRouting) {
 
-        int k;
         for (k = 0; k < FRAGMENT_BUFFER_SIZE; k++) {
             if (frag_vars.fragmentBuf[k].pFragment == msg) {
                 datagram_tag = frag_vars.fragmentBuf[k].datagram_tag;
@@ -295,6 +296,7 @@ void frag_sendDone(OpenQueueEntry_t *msg, owerror_t sendError) {
 
 
 void frag_receive(OpenQueueEntry_t *msg) {
+    uint32_t i;
     uint8_t dispatch;
     uint8_t offset;
     uint8_t page_length;
@@ -353,8 +355,6 @@ void frag_receive(OpenQueueEntry_t *msg) {
         } else {
             packetfunctions_tossHeader(msg, FRAGN_HEADER_SIZE);
 
-
-            uint8_t i;
             for (i = 0; i < NUM_OF_VRBS; i++) {
                 if (frag_vars.vrbs[i].tag == tag &&
                     frag_vars.vrbs[i].size == size &&
@@ -411,24 +411,29 @@ void frag_receive(OpenQueueEntry_t *msg) {
 
 
 static void cleanup_fragments(uint16_t datagram_tag) {
-    for (int i = 0; i < FRAGMENT_BUFFER_SIZE; i++) {
+    uint32_t i;
+    for (i = 0; i < FRAGMENT_BUFFER_SIZE; i++) {
         if (frag_vars.fragmentBuf[i].datagram_tag == datagram_tag)
             RESET_FRAG_BUFFER_ENTRY(i);
     }
 }
 
 static void store_fragment(OpenQueueEntry_t *msg, uint16_t size, uint16_t tag, uint8_t offset) {
+    uint32_t i, j;
     uint8_t dropped_srh_len;
     uint8_t count;
     uint16_t total_wanted_bytes;
     uint16_t received_bytes;
 
-    bool do_reassemble = FALSE;
-    bool has_timer = FALSE;
+    bool do_reassemble;
+    bool has_timer;
+
+    do_reassemble = FALSE;
+    has_timer = FALSE;
 
     // we detect a duplicate fragment (if datagram_tag and offset are the same)
     // check if we have running reassembly timer
-    for (int i = 0; i < FRAGMENT_BUFFER_SIZE; i++) {
+    for (i = 0; i < FRAGMENT_BUFFER_SIZE; i++) {
         if (frag_vars.fragmentBuf[i].datagram_tag == tag && frag_vars.fragmentBuf[i].datagram_offset == offset) {
             openqueue_freePacketBuffer(msg);
             return;
@@ -440,7 +445,6 @@ static void store_fragment(OpenQueueEntry_t *msg, uint16_t size, uint16_t tag, u
     }
 
     // we find buffer space for a new fragment (new datagram_tag)
-    int i;
     for (i = 0; i < FRAGMENT_BUFFER_SIZE; i++) {
         if (frag_vars.fragmentBuf[i].pFragment == NULL) {
             frag_vars.fragmentBuf[i].datagram_tag = tag;
@@ -484,7 +488,7 @@ static void store_fragment(OpenQueueEntry_t *msg, uint16_t size, uint16_t tag, u
     total_wanted_bytes = size;
     received_bytes = dropped_srh_len = count = 0;
 
-    for (int j = 0; j < FRAGMENT_BUFFER_SIZE; j++) {
+    for (j = 0; j < FRAGMENT_BUFFER_SIZE; j++) {
         if (tag == frag_vars.fragmentBuf[j].datagram_tag) {
             if (frag_vars.fragmentBuf[j].datagram_offset == 0) {
                 dropped_srh_len = MAX_FRAGMENT_SIZE - frag_vars.fragmentBuf[j].pFragment->length;
@@ -523,6 +527,7 @@ static void store_fragment(OpenQueueEntry_t *msg, uint16_t size, uint16_t tag, u
 }
 
 static void reassemble_fragments(uint16_t tag, uint16_t size, OpenQueueEntry_t *reassembled_msg) {
+    uint32_t i;
     uint8_t *ptr;
     uint8_t offset = 0;
 
@@ -535,7 +540,7 @@ static void reassemble_fragments(uint16_t tag, uint16_t size, OpenQueueEntry_t *
     reassembled_msg->is_big_packet = TRUE;
     reassembled_msg->length = size;
 
-    for (int i = 0; i < FRAGMENT_BUFFER_SIZE; i++) {
+    for (i = 0; i < FRAGMENT_BUFFER_SIZE; i++) {
         if (frag_vars.fragmentBuf[i].pFragment != NULL && frag_vars.fragmentBuf[i].datagram_tag == tag) {
             if (frag_vars.fragmentBuf[i].datagram_offset == 0 &&
                 frag_vars.fragmentBuf[i].pFragment->length < MAX_FRAGMENT_SIZE) {
@@ -567,7 +572,7 @@ static void reassemble_fragments(uint16_t tag, uint16_t size, OpenQueueEntry_t *
 
 static owerror_t allocate_vrb(OpenQueueEntry_t *frag1, uint16_t size, uint16_t tag) {
     // find an a vrb spot
-    uint8_t i;
+    uint32_t i;
     for (i = 0; i < NUM_OF_VRBS; i++) {
         if (frag_vars.vrbs[i].tag == 0 && frag_vars.vrbs[i].size == 0) {
             frag_vars.vrbs[i].tag = tag;
@@ -606,7 +611,8 @@ static owerror_t allocate_vrb(OpenQueueEntry_t *frag1, uint16_t size, uint16_t t
 }
 
 static void fast_forward_frags(uint16_t tag, uint16_t size, uint8_t vrb_pos) {
-    for (int i = 0; i < FRAGMENT_BUFFER_SIZE; i++) {
+    uint32_t i;
+    for (i = 0; i < FRAGMENT_BUFFER_SIZE; i++) {
         // check if we have subsequent fragments stored.
         if (frag_vars.fragmentBuf[i].pFragment != NULL &&
             frag_vars.fragmentBuf[i].datagram_tag == tag &&
@@ -684,7 +690,7 @@ static void prepend_fragn_header(OpenQueueEntry_t *fragn, uint16_t size, uint16_
 }
 
 owerror_t frag_timerq_enqueue(opentimers_id_t id) {
-    uint8_t i;
+    uint32_t i;
     for (i = 0; i < NUM_OF_CONCURRENT_TIMERS; i++) {
         if (frag_vars.frag_timerq[i] == 0) {
             frag_vars.frag_timerq[i] = id;
@@ -706,7 +712,8 @@ opentimers_id_t frag_timerq_dequeue(void) {
 }
 
 owerror_t frag_timerq_remove(opentimers_id_t id) {
-    for (int i = 0; i < NUM_OF_CONCURRENT_TIMERS - 1; i++) {
+    uint32_t i;
+    for (i = 0; i < NUM_OF_CONCURRENT_TIMERS - 1; i++) {
         if (frag_vars.frag_timerq[i] == id) {
             memcpy(&frag_vars.frag_timerq[i], &frag_vars.frag_timerq[i + 1], NUM_OF_CONCURRENT_TIMERS - 1 - i);
             frag_vars.frag_timerq[NUM_OF_CONCURRENT_TIMERS - 1] = 0;
@@ -723,6 +730,7 @@ owerror_t frag_timerq_remove(opentimers_id_t id) {
 }
 
 void frag_timeout_cb(opentimers_id_t id) {
+    uint32_t j;
     opentimers_id_t expired_timer;
 
     if ((expired_timer = frag_timerq_dequeue()) == 0) {
@@ -733,7 +741,7 @@ void frag_timeout_cb(opentimers_id_t id) {
     }
 
     // find the tag of the expired fragments
-    for (int j = 0; j < FRAGMENT_BUFFER_SIZE; j++) {
+    for (j = 0; j < FRAGMENT_BUFFER_SIZE; j++) {
         if (frag_vars.fragmentBuf[j].pFragment != NULL && frag_vars.fragmentBuf[j].reassembly_timer == expired_timer) {
             openserial_printError(COMPONENT_FRAG, ERR_FRAG_REASSEMBLY_OR_VRB_TIMEOUT,
                                   (errorparameter_t) frag_vars.fragmentBuf[j].datagram_tag,
@@ -744,7 +752,7 @@ void frag_timeout_cb(opentimers_id_t id) {
         }
     }
 
-    for (uint8_t j = 0; j < NUM_OF_VRBS; j++) {
+    for (j = 0; j < NUM_OF_VRBS; j++) {
         if (frag_vars.vrbs[j].tag != 0 && frag_vars.vrbs[j].forward_timer == expired_timer) {
             openserial_printError(COMPONENT_FRAG, ERR_FRAG_REASSEMBLY_OR_VRB_TIMEOUT,
                                   (errorparameter_t) frag_vars.vrbs[j].tag,
