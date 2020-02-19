@@ -845,7 +845,8 @@ bool schedule_getAutonomousTxRxCellUnicastNeighbor(open_addr_t* neighbor){
         if(
             schedule_vars.scheduleBuf[i].type          == CELLTYPE_TXRX &&
             schedule_vars.scheduleBuf[i].shared                         &&
-            schedule_vars.scheduleBuf[i].neighbor.type == ADDR_64B
+            schedule_vars.scheduleBuf[i].neighbor.type == ADDR_64B      &&
+            packetfunctions_sameAddress(neighbor,&schedule_vars.scheduleBuf[i].neighbor)
         ){
             memcpy(neighbor, &schedule_vars.scheduleBuf[i].neighbor, sizeof(open_addr_t));
             ENABLE_INTERRUPTS();
