@@ -49,6 +49,11 @@ typedef enum {
    RADIOSTATE_TURNING_OFF         = 0x0d,   ///< Turning the RF chain off.
 } radio_state_t;
 
+typedef enum {
+   FREQ_TX                        = 0x01,
+   FREQ_RX                        = 0x02,
+} radio_freq_t;
+
 typedef void (*radio_capture_cbt)(PORT_TIMER_WIDTH timestamp);
 
 //=========================== variables =======================================
@@ -63,7 +68,7 @@ void     radio_setEndFrameCb(radio_capture_cbt cb);
 // reset
 void     radio_reset(void);
 // RF admin
-void     radio_setFrequency(uint16_t channel);
+void     radio_setFrequency(uint16_t channel, radio_freq_t tx_or_rx);
 void     radio_rfOn(void);
 void     radio_rfOff(void);
 void     radio_change_modulation(registerSetting_t * mod);

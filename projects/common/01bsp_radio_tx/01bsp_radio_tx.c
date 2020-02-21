@@ -71,7 +71,8 @@ int mote_main(void) {
 
     // prepare radio
     radio_rfOn();
-    radio_setFrequency(CHANNEL);
+    // freq type only effects on scum port
+    radio_setFrequency(CHANNEL, FREQ_TX);
     radio_rfOff();
 
     // start periodic overflow
@@ -84,7 +85,8 @@ int mote_main(void) {
         while (app_vars.txpk_txNow==0) {
             board_sleep();
         }
-        radio_setFrequency(CHANNEL);
+        // freq type only effects on scum port
+        radio_setFrequency(CHANNEL, FREQ_TX);
         // led
         leds_error_toggle();
 

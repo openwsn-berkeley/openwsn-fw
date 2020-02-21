@@ -199,7 +199,8 @@ void serial_rx_REQ_TX(void) {
 
    // prepare radio
    radio_rfOn();
-   radio_setFrequency(req->frequency);
+   // freq type only effects on scum port
+   radio_setFrequency(req->frequency, FREQ_TX);
 
    // TODO set TX Power
 
@@ -254,7 +255,8 @@ void serial_rx_REQ_RX(void) {
 
    // prepare radio
    radio_rfOn();
-   radio_setFrequency(req->frequency);
+   // freq type only effects on scum port
+   radio_setFrequency(req->frequency, FREQ_RX);
 
    // switch in RX
    radio_rxEnable();
