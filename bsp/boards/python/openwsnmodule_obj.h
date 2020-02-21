@@ -30,6 +30,7 @@
 #include "idmanager_obj.h"
 #include "openqueue_obj.h"
 #include "openrandom_obj.h"
+#include "frag_obj.h"
 // applications
 #include "c6t_obj.h"
 #include "cexample_obj.h"
@@ -201,6 +202,7 @@ struct OpenMote {
    openudp_vars_t       openudp_vars;
    // l3
    monitor_expiration_vars_t        monitor_expiration_vars;
+   frag_vars_t          frag_vars;
    // l2b
    sixtop_vars_t        sixtop_vars;
    neighbors_vars_t     neighbors_vars;

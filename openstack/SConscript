@@ -19,6 +19,7 @@ sources_c = [
     os.path.join('02b-MAChigh','schedule.c'),
     os.path.join('02b-MAChigh','sixtop.c'),
     #=== 03a-IPHC
+    os.path.join('03a-IPHC','frag.c'),
     os.path.join('03a-IPHC','iphc.c'),
     os.path.join('03a-IPHC','openbridge.c'),
     #=== 03b-IPv6
@@ -48,6 +49,7 @@ sources_h = [
     os.path.join('02b-MAChigh','schedule.h'),
     os.path.join('02b-MAChigh','sixtop.h'),
     #=== 03a-IPHC
+    os.path.join('03a-IPHC','frag.h'),
     os.path.join('03a-IPHC','iphc.h'),
     os.path.join('03a-IPHC','openbridge.h'),
     #=== 03b-IPv6
