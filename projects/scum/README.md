@@ -33,6 +33,12 @@ in schedule.h file, such as:
         radio_vars.current_frequency = DEFAULT_FREQ;
     
     Do the same thing on OpenMote side as well to communicate with OpenMote
+    
+5. Xon/Xoff adaptation
+
+    SCuM may need more time to support the xon/xoff feature with following changes (in IEEE802154e.h)
+    
+    #define DURATION_si  ieee154e_vars.slotDuration-3*SERIALINHIBITGUARD
 
 
 Test

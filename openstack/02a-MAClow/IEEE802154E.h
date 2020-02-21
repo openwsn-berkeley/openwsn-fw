@@ -159,10 +159,10 @@ typedef enum {
 enum ieee154e_atomicdurations_enum {
    // time-slot related
 #if SLOTDURATION==10
-   TsTxOffset                =   2120/PORT_US_PER_TICK,                  //  2120us
-   TsLongGT                  =   1100/PORT_US_PER_TICK,                  //  1100us
-   TsTxAckDelay              =   1000/PORT_US_PER_TICK,                  //  1000us
-   TsShortGT                 =    500/PORT_US_PER_TICK,                  //   500us, The standardlized value for this is 400/2=200us(7ticks). Currectly 7 doesn't work for short packet, change it back to 7 when found the problem.
+   TsTxOffset                =   (2120/PORT_US_PER_TICK),                 //  2120us
+   TsLongGT                  =   (1100/PORT_US_PER_TICK),                 //  1100us
+   TsTxAckDelay              =   (1000/PORT_US_PER_TICK),                 //  1000us
+   TsShortGT                 =    (500/PORT_US_PER_TICK),                 //   500us, The standardlized value for this is 400/2=200us(7ticks). Currectly 7 doesn't work for short packet, change it back to 7 when found the problem.
 #endif
     
 #if SLOTDURATION==20
@@ -182,9 +182,9 @@ enum ieee154e_atomicdurations_enum {
    delayTx                   =  PORT_delayTx,         // between GO signal and SFD
    delayRx                   =  PORT_delayRx,         // between GO signal and start listening
    // radio watchdog
-   wdRadioTx                 =  1342/PORT_US_PER_TICK,                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
-   wdDataDuration            =  5000/PORT_US_PER_TICK,                  //  5000us (measured 4280us with max payload)
-   wdAckDuration             =  3000/PORT_US_PER_TICK,                  //  3000us (measured 1000us)
+   wdRadioTx                 =  (1342/PORT_US_PER_TICK),                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
+   wdDataDuration            =  (5000/PORT_US_PER_TICK),                  //  5000us (measured 4280us with max payload)
+   wdAckDuration             =  (3000/PORT_US_PER_TICK),                  //  3000us (measured 1000us)
 };
 
 //shift of bytes in the linkOption bitmap: draft-ietf-6tisch-minimal-10.txt: page 6
@@ -215,7 +215,7 @@ enum ieee154e_linkOption_enum {
 #define DURATION_rt7 ieee154e_vars.lastCapturedTime+TsTxAckDelay-delayTx+wdRadioTx
 #define DURATION_rt8 ieee154e_vars.lastCapturedTime+wdAckDuration
 // serialInhibit
-#define DURATION_si  ieee154e_vars.slotDuration-3*SERIALINHIBITGUARD
+#define DURATION_si  ieee154e_vars.slotDuration-SERIALINHIBITGUARD
 
 //=========================== typedef =========================================
 
