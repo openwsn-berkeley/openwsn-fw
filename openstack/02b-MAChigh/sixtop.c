@@ -4,7 +4,7 @@
 #include "openqueue.h"
 #include "neighbors.h"
 #include "IEEE802154E.h"
-#include "iphc.h"
+#include "frag.h"
 #include "packetfunctions.h"
 #include "openrandom.h"
 #include "scheduler.h"
@@ -446,7 +446,7 @@ void task_sixtopNotifSendDone(void) {
             break;
         default:
             // send the rest up the stack
-            iphc_sendDone(msg,msg->l2_sendDoneError);
+            frag_sendDone(msg,msg->l2_sendDoneError);
             break;
     }
 }
@@ -511,7 +511,7 @@ void task_sixtopNotifReceive(void) {
                 break;
             }
             // send to upper layer
-            iphc_receive(msg);
+            frag_receive(msg);
         } else {
             // free up the RAM
             openqueue_freePacketBuffer(msg);

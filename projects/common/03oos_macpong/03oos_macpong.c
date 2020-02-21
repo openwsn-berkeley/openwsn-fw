@@ -103,6 +103,12 @@ void macpong_send(uint8_t payloadCtr) {
 
 //=========================== stubbing ========================================
 
+//===== FRAG
+
+void frag_init(void)                                            {return; }
+void frag_sendDone(OpenQueueEntry_t *msg, owerror_t sendError)  {return; }
+void frag_receive(OpenQueueEntry_t *msg)                        {return; }
+
 //===== IPHC
 
 void iphc_init(void) {

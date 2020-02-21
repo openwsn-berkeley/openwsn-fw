@@ -116,7 +116,11 @@ void ieee154e_init(void) {
     memset(&ieee154e_dbg,0,sizeof(ieee154e_dbg_t));
 
     // set singleChannel to 0 to enable channel hopping.
-    ieee154e_vars.singleChannel     = 0;
+#if IEEE802154E_SINGLE_CHANNEL
+    ieee154e_vars.singleChannel     = IEEE802154E_SINGLE_CHANNEL;
+#else
+    ieee154e_vars.singleChannel     = 0; // 0 means channel hopping
+#endif
     ieee154e_vars.isAckEnabled      = TRUE;
     ieee154e_vars.isSecurityEnabled = FALSE;
     ieee154e_vars.slotDuration      = TsSlotDuration;
@@ -562,8 +566,12 @@ port_INLINE void activity_synchronize_newSlot(void) {
         radio_rfOff();
 
         // update record of current channel
+#if IEEE802154E_SINGLE_CHANNEL
+        ieee154e_vars.freq = IEEE802154E_SINGLE_CHANNEL;
+#else
         ieee154e_vars.freq = (openrandom_get16b()&0x0F) + 11;
-        
+#endif
+
         // configure the radio to listen to the frequency
         radio_setFrequency(ieee154e_vars.freq, FREQ_RX);
 
@@ -590,7 +598,11 @@ port_INLINE void activity_synchronize_newSlot(void) {
             radio_rfOff();
 
             // update record of current channel
+#if IEEE802154E_SINGLE_CHANNEL
+            ieee154e_vars.freq = IEEE802154E_SINGLE_CHANNEL;
+#else
             ieee154e_vars.freq = (openrandom_get16b()&0x0F) + 11;
+#endif
 
             // configure the radio to listen to the frequency
             radio_setFrequency(ieee154e_vars.freq, FREQ_RX);
@@ -708,7 +720,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
       // retrieve the received data frame from the radio's Rx buffer
       ieee154e_vars.dataReceived->payload = &(ieee154e_vars.dataReceived->packet[FIRST_FRAME_BYTE]);
       radio_getReceivedFrame(       ieee154e_vars.dataReceived->payload,
-                                   &ieee154e_vars.dataReceived->length,
+                                   (uint8_t*)&ieee154e_vars.dataReceived->length,
                              sizeof(ieee154e_vars.dataReceived->packet),
                                    &ieee154e_vars.dataReceived->l1_rssi,
                                    &ieee154e_vars.dataReceived->l1_lqi,
@@ -1490,7 +1502,7 @@ port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
         ieee154e_vars.ackReceived->payload = &(ieee154e_vars.ackReceived->packet[FIRST_FRAME_BYTE]);
         radio_getReceivedFrame(
             ieee154e_vars.ackReceived->payload,
-            &ieee154e_vars.ackReceived->length,
+            (uint8_t*)&ieee154e_vars.ackReceived->length,
             sizeof(ieee154e_vars.ackReceived->packet),
             &ieee154e_vars.ackReceived->l1_rssi,
             &ieee154e_vars.ackReceived->l1_lqi,
@@ -1752,7 +1764,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
         ieee154e_vars.dataReceived->payload = &(ieee154e_vars.dataReceived->packet[FIRST_FRAME_BYTE]);
         radio_getReceivedFrame(
             ieee154e_vars.dataReceived->payload,
-            &ieee154e_vars.dataReceived->length,
+            (uint8_t*)&ieee154e_vars.dataReceived->length,
             sizeof(ieee154e_vars.dataReceived->packet),
             &ieee154e_vars.dataReceived->l1_rssi,
             &ieee154e_vars.dataReceived->l1_lqi,
