@@ -651,6 +651,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\openstack\03a-IPHC\openbridge.c</FilePath>
             </File>
+            <File>
+              <FileName>frag.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\openstack\03a-IPHC\frag.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
