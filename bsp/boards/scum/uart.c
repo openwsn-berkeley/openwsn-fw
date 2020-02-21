@@ -17,6 +17,8 @@
 typedef struct {
    uart_tx_cbt txCb;
    uart_rx_cbt rxCb;
+   bool        fXonXoffEscaping;
+   uint8_t     xonXoffEscapedByte;
 } uart_vars_t;
 
 uart_vars_t uart_vars;
@@ -36,7 +38,14 @@ void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb) {
 }
 
 void    uart_writeByte(uint8_t byteToWrite){
-    UART_REG__TX_DATA = byteToWrite;
+    
+    if (byteToWrite==XON || byteToWrite==XOFF || byteToWrite==XONXOFF_ESCAPE) {
+        uart_vars.fXonXoffEscaping     = 0x01;
+        uart_vars.xonXoffEscapedByte   = byteToWrite;
+        UART_REG__TX_DATA = XONXOFF_ESCAPE;
+    } else {
+        UART_REG__TX_DATA = byteToWrite;
+    }
     // there is no txdone interruption, call the handler directly
     uart_tx_isr();
 }
@@ -65,11 +74,24 @@ uint8_t uart_readByte(void) {
     return UART_REG__RX_DATA;
 }
 
+void uart_setCTS(bool state){
+    if (state==0x01) {
+        UART_REG__TX_DATA = XON;
+    } else {
+        UART_REG__TX_DATA = XOFF;
+    }
+}
+
 //=========================== interrupt handlers ==============================
 
 kick_scheduler_t uart_tx_isr(void) {
-    if (uart_vars.txCb != NULL){
-        uart_vars.txCb();
+    if (uart_vars.fXonXoffEscaping==0x01) {
+        uart_vars.fXonXoffEscaping = 0x00;
+        UART_REG__TX_DATA = uart_vars.xonXoffEscapedByte^XONXOFF_MASK;
+    } else {
+        if (uart_vars.txCb != NULL){
+            uart_vars.txCb();
+        }
     }
     return DO_NOT_KICK_SCHEDULER;
 }

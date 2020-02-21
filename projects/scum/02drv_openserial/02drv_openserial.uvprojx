@@ -337,7 +337,7 @@
               <MiscControls>--gnu</MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\bsp\boards;..\..\..\bsp\boards\scum;..\..\..\drivers\common;..\..\..\inc;..\..\..\openstack\02a-MAClow;..\..\..\openstack\02b-MAChigh;..\..\..\openstack\03a-IPHC;..\..\..\openstack\03b-IPv6;..\..\..\openstack\04-TRAN;..\..\..\openstack\cross-layers</IncludePath>
+              <IncludePath>..\..\..\bsp\boards;..\..\..\bsp\boards\scum;..\..\..\drivers\common;..\..\..\inc;..\..\..\drivers\common;..\..\..\kernel;..\..\..\openstack\02a-MAClow;..\..\..\openstack\02b-MAChigh;..\..\..\openstack\03a-IPHC;..\..\..\openstack\03b-IPv6;..\..\..\openstack\04-TRAN;..\..\..\openstack\cross-layers</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -482,14 +482,24 @@
               <FilePath>..\..\..\bsp\boards\scum\eui64.c</FilePath>
             </File>
             <File>
-              <FileName>scm3_hardware_interface.c</FileName>
+              <FileName>adc.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\bsp\boards\scum\scm3_hardware_interface.c</FilePath>
+              <FilePath>..\..\..\bsp\boards\scum\adc.c</FilePath>
             </File>
             <File>
-              <FileName>scm3_hardware_interface.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\bsp\boards\scum\scm3_hardware_interface.h</FilePath>
+              <FileName>optical.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\bsp\boards\scum\optical.c</FilePath>
+            </File>
+            <File>
+              <FileName>retarget.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\bsp\boards\scum\retarget.c</FilePath>
+            </File>
+            <File>
+              <FileName>scm3c_hw_interface.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\bsp\boards\scum\scm3c_hw_interface.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -87,7 +87,7 @@ void radio_reset(OpenMote* self) {
 
 //===== RF admin
 
-void radio_setFrequency(OpenMote* self, uint8_t frequency) {
+void radio_setFrequency(OpenMote* self, uint8_t frequency, radio_freq_t tx_or_rx) {
    PyObject*   result;
    PyObject*   arglist;
    

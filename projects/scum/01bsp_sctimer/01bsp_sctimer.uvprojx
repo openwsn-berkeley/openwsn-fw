@@ -487,14 +487,24 @@
               <FilePath>..\..\..\bsp\boards\scum\memory_map.h</FilePath>
             </File>
             <File>
-              <FileName>scm3_hardware_interface.c</FileName>
+              <FileName>retarget.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\bsp\boards\scum\scm3_hardware_interface.c</FilePath>
+              <FilePath>..\..\..\bsp\boards\scum\retarget.c</FilePath>
             </File>
             <File>
-              <FileName>scm3_hardware_interface.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\bsp\boards\scum\scm3_hardware_interface.h</FilePath>
+              <FileName>scm3c_hw_interface.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\bsp\boards\scum\scm3c_hw_interface.c</FilePath>
+            </File>
+            <File>
+              <FileName>optical.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\bsp\boards\scum\optical.c</FilePath>
+            </File>
+            <File>
+              <FileName>adc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\bsp\boards\scum\adc.c</FilePath>
             </File>
           </Files>
         </Group>

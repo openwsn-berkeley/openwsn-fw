@@ -25,6 +25,7 @@ to return the board's description.
 #define PORT_RADIOTIMER_WIDTH               uint32_t
 
 #define PORT_TICS_PER_MS                    33
+#define PORT_US_PER_TICK                    30 // number of us per 32kHz clock tick
 /*
 #define SCHEDULER_WAKEUP()                  radiotimer_isr()
 #define SCHEDULER_ENABLE_INTERRUPT()        TIMSK2 |= (1<<OCIE2A)

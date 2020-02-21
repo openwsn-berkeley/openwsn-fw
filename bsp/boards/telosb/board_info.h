@@ -40,7 +40,7 @@ to this board.
 
 #define PORT_SIGNED_INT_WIDTH               int16_t
 #define PORT_TICS_PER_MS                    33
-
+#define PORT_US_PER_TICK                    30 // number of us per 32kHz clock tick
 // on TelosB, we use the comparatorA interrupt for the OS
 #define SCHEDULER_WAKEUP()                  CACTL1 |= CAIFG
 #define SCHEDULER_ENABLE_INTERRUPT()        CACTL1  = CAIE
