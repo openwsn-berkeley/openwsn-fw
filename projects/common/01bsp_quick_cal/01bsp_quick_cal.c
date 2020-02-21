@@ -35,25 +35,25 @@ can use this project with any platform.
 
 // 16 mote eui64
 
-#define OTBOX08_MOTE_1          0xb5b3  // COM91
-#define OTBOX08_MOTE_2          0xb5d0  // COM89
-#define OTBOX08_MOTE_3          0xb595
-#define OTBOX08_MOTE_4          0xb5f3
+#define OTBOX08_MOTE_1          0xb5b3  // COM91: b5-b3
+#define OTBOX08_MOTE_2          0xb5d0  // COM89: b5-d0
+#define OTBOX08_MOTE_3          0xb595  // 00-12-4b-00-14-b5-b5-95
+#define OTBOX08_MOTE_4          0xb5f3  // 00-12-4b-00-14-b5-b5-f3
 
-#define OTBOX09_MOTE_1          0xb5e7
-#define OTBOX09_MOTE_2          0xb5d8
-#define OTBOX09_MOTE_3          0xb55b
-#define OTBOX09_MOTE_4          0xb558
+#define OTBOX09_MOTE_1          0xb5e7  // 00-12-4b-00-14-b5-b5-e7
+#define OTBOX09_MOTE_2          0xb5d8  // 00-12-4b-00-14-b5-b5-d8
+#define OTBOX09_MOTE_3          0xb55b  // 00-12-4b-00-14-b5-b5-5b
+#define OTBOX09_MOTE_4          0xb558  // 00-12-4b-00-14-b5-b5-58
 
-#define OTBOX14_MOTE_1          0xb638
-#define OTBOX14_MOTE_2          0xb5bf
-#define OTBOX14_MOTE_3          0xb588
-#define OTBOX14_MOTE_4          0xb5a3
+#define OTBOX14_MOTE_1          0xb638  // 00-12-4b-00-14-b5-b6-38
+#define OTBOX14_MOTE_2          0xb5bf  // 00-12-4b-00-14-b5-b5-bf
+#define OTBOX14_MOTE_3          0xb588  // 00-12-4b-00-14-b5-b5-88
+#define OTBOX14_MOTE_4          0xb5a3  // 00-12-4b-00-14-b5-b5-a3
 
-#define OTBOX19_MOTE_1          0xb61a
-#define OTBOX19_MOTE_2          0xb60b
-#define OTBOX19_MOTE_3          0xb565
-#define OTBOX19_MOTE_4          0xb648
+#define OTBOX19_MOTE_1          0xb61a  // 00-12-4b-00-14-b5-b6-1a
+#define OTBOX19_MOTE_2          0xb60b  // 00-12-4b-00-14-b5-b6-0b
+#define OTBOX19_MOTE_3          0xb565  // 00-12-4b-00-14-b5-b5-65
+#define OTBOX19_MOTE_4          0xb648  // 00-12-4b-00-14-b5-b6-48
 
 // debugging
 
@@ -501,6 +501,37 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
                         pkt_seqNum            != MAGIC_BYTE
                     ) {
                         synchronize(app_vars.lastCaptureTime, pkt_channel, pkt_seqNum);
+                        
+                        // switch to listen on my channel
+                        radio_rfOn();
+                        radio_setFrequency(app_vars.myChannel);
+                        radio_rxEnable();
+                        radio_rxNow();
+                        
+                        app_vars.state = S_LISTENING;
+                        
+                    } else {
+                        if (
+                            app_vars.isTimeMaster == FALSE && 
+                            pkt_seqNum            == MAGIC_BYTE
+                        ){
+                            // received from SCuM, prepare Ack to send back
+
+                            // read the freq_offset
+                            freq_offset = radio_getFrequencyOffset();
+
+                            radio_rfOn();
+                            radio_setFrequency(app_vars.myChannel);
+
+                            // the ack use freq_offset as second byte
+                            app_vars.packet[1] = (uint8_t)freq_offset;
+                            radio_loadPacket(app_vars.packet, TARGET_PKT_LEN);
+                            radio_txEnable();
+                            radio_txNow();
+
+                            app_vars.type  = T_TX;
+                            app_vars.state = S_ACK_SEND;
+                        }
                     }
                 } else {
                     
@@ -542,7 +573,7 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
 
         } else {
 
-            // continous to listen on myChannel
+            // continuous to listen on myChannel
 
             radio_rfOn();
             if (app_vars.isSync){
