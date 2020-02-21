@@ -47,7 +47,7 @@ static const uint8_t ebIEsBytestream[] = {
 #define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"
 #define LENGTH_IEEE154_MAX         128 // max length of a valid radio packet
 #define DUTY_CYCLE_WINDOW_LIMIT    (0xFFFFFFFF>>1) // limit of the dutycycle window
-#define SERIALINHIBITGUARD          1000/PORT_US_PER_TICK // 32@32kHz ~ 1ms
+#define SERIALINHIBITGUARD         (1000/PORT_US_PER_TICK) // 32@32kHz ~ 1ms
 
 //15.4e information elements related
 #define IEEE802154E_PAYLOAD_DESC_LEN_SHIFT                 0x04
