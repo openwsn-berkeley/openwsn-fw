@@ -356,8 +356,6 @@
                     <state>$PROJ_DIR$\..\..\..\openapps\cinfo\</state>
                     <state>$PROJ_DIR$\..\..\..\openapps\cleds\</state>
                     <state>$PROJ_DIR$\..\..\..\openapps\cwellknown\</state>
-                    <state>$PROJ_DIR$\..\..\..\openapps\techo\</state>
-                    <state>$PROJ_DIR$\..\..\..\openapps\tohlone\</state>
                     <state>$PROJ_DIR$\..\..\..\openapps\uecho\</state>
                     <state>$PROJ_DIR$\..\..\..\openapps\cstorm\</state>
                     <state>$PROJ_DIR$\..\..\..\openapps\rrt\</state>

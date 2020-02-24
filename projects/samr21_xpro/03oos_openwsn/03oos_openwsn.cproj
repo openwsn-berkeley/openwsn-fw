@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <SchemaVersion>2.0</SchemaVersion>
@@ -95,8 +95,6 @@
       <Value>../../../../openapps/cleds</Value>
       <Value>../../../../openapps/cstorm</Value>
       <Value>../../../../openapps/cwellknown</Value>
-      <Value>../../../../openapps/techo</Value>
-      <Value>../../../../openapps/tohlone</Value>
       <Value>../../../../openapps/uecho</Value>
       <Value>../../../../openapps/rrt</Value>
       <Value>../../../../openstack/cross-layers</Value>
@@ -178,8 +176,6 @@
       <Value>../../../../openapps/cleds</Value>
       <Value>../../../../openapps/cstorm</Value>
       <Value>../../../../openapps/cwellknown</Value>
-      <Value>../../../../openapps/techo</Value>
-      <Value>../../../../openapps/tohlone</Value>
       <Value>../../../../openapps/uecho</Value>
       <Value>../../../../openapps/rrt</Value>
       <Value>../../../../openstack/cross-layers</Value>
@@ -497,14 +493,6 @@
       <SubType>compile</SubType>
       <Link>openapps\cwellknown\cwellknown.c</Link>
     </Compile>
-    <Compile Include="..\..\..\openapps\techo\techo.c">
-      <SubType>compile</SubType>
-      <Link>openapps\techo\techo.c</Link>
-    </Compile>
-    <Compile Include="..\..\..\openapps\tohlone\tohlone.c">
-      <SubType>compile</SubType>
-      <Link>openapps\tohlone\tohlone.c</Link>
-    </Compile>
     <Compile Include="..\..\..\openapps\uecho\uecho.c">
       <SubType>compile</SubType>
       <Link>openapps\uecho\uecho.c</Link>
@@ -559,8 +547,6 @@
     <Folder Include="openapps\cleds" />
     <Folder Include="openapps\cstorm" />
     <Folder Include="openapps\cwellknown" />
-    <Folder Include="openapps\techo" />
-    <Folder Include="openapps\tohlone" />
     <Folder Include="openapps\uecho" />
     <Folder Include="openapps\rrt" />
     <Folder Include="openstack\cross-layers" />

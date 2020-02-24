@@ -11,7 +11,7 @@ sources_c = [
     os.path.join('02a-MAClow','topology.c'),
     os.path.join('02a-MAClow','IEEE802154.c'),
     os.path.join('02a-MAClow','IEEE802154E.c'),
-#    os.path.join('02a-MAClow','adaptive_sync.c'),
+    # os.path.join('02a-MAClow','adaptive_sync.c'),
     os.path.join('02a-MAClow','IEEE802154_security.c'),
     #=== 02b-MAChigh
     os.path.join('02b-MAChigh','neighbors.c'),
@@ -111,8 +111,6 @@ else:
             os.path.join('#','openapps','cstorm'),
             os.path.join('#','openapps','cwellknown'),
             os.path.join('#','openapps','rrt'),
-            #os.path.join('#','openapps','techo'),
-            os.path.join('#','openapps','tohlone'),
             os.path.join('#','openapps','uecho'),
             os.path.join('#','openapps','uinject'),
             os.path.join('#','openapps','userialbridge'),
