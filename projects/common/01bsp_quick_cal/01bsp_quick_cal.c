@@ -383,6 +383,9 @@ void cb_startFrame(PORT_TIMER_WIDTH timestamp) {
             return;
         }
         break;
+    default:
+        // should never happen
+        break;
     }
 }
 
@@ -413,7 +416,7 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
             // set radio back to listen on myChannel
 
             radio_rfOn();
-            radio_setFrequency(app_vars.myChannel);
+            radio_setFrequency(app_vars.myChannel, FREQ_RX);
             radio_rxEnable();
             radio_rxNow();
 
@@ -504,7 +507,7 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
                         
                         // switch to listen on my channel
                         radio_rfOn();
-                        radio_setFrequency(app_vars.myChannel);
+                        radio_setFrequency(app_vars.myChannel, FREQ_RX);
                         radio_rxEnable();
                         radio_rxNow();
                         
@@ -521,7 +524,7 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
                             freq_offset = radio_getFrequencyOffset();
 
                             radio_rfOn();
-                            radio_setFrequency(app_vars.myChannel);
+                            radio_setFrequency(app_vars.myChannel, FREQ_TX);
 
                             // the ack use freq_offset as second byte
                             app_vars.packet[1] = (uint8_t)freq_offset;
@@ -543,7 +546,7 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
                         freq_offset = radio_getFrequencyOffset();
 
                         radio_rfOn();
-                        radio_setFrequency(app_vars.myChannel);
+                        radio_setFrequency(app_vars.myChannel, FREQ_TX);
 
                         // the ack use freq_offset as second byte
                         app_vars.packet[1] = (uint8_t)freq_offset;
@@ -558,7 +561,7 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
                         // not sent by SCuM, keep listening
                         
                         radio_rfOn();
-                        radio_setFrequency(app_vars.myChannel);
+                        radio_setFrequency(app_vars.myChannel, FREQ_RX);
                         radio_rxEnable();
                         radio_rxNow();
 
@@ -577,9 +580,9 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
 
             radio_rfOn();
             if (app_vars.isSync){
-                radio_setFrequency(app_vars.myChannel);
+                radio_setFrequency(app_vars.myChannel, FREQ_RX);
             } else {
-                radio_setFrequency(SYNC_CHANNEL);
+                radio_setFrequency(SYNC_CHANNEL, FREQ_RX);
             }
             radio_rxEnable();
             radio_rxNow();
@@ -623,7 +626,7 @@ void cb_slot_timer(void) {
             // slot to tx
             app_vars.type = T_TX;
 
-            radio_setFrequency(app_vars.myChannel);
+            radio_setFrequency(app_vars.myChannel, FREQ_TX);
 
             // change sctimer callback to sub_slot cb
             sctimer_disable();
@@ -643,10 +646,10 @@ void cb_slot_timer(void) {
 
             if (app_vars.currentSlotOffset==0){
 
-                radio_setFrequency(SYNC_CHANNEL);
+                radio_setFrequency(SYNC_CHANNEL, FREQ_RX);
             } else {
 
-                radio_setFrequency(app_vars.myChannel);
+                radio_setFrequency(app_vars.myChannel, FREQ_RX);
             }
 
             // start to listen
@@ -664,7 +667,7 @@ void cb_slot_timer(void) {
 
         switch(app_vars.state){
         case S_IDLE:
-            radio_setFrequency(SYNC_CHANNEL);
+            radio_setFrequency(SYNC_CHANNEL, FREQ_RX);
 
             // start to listen
             radio_rxEnable();
