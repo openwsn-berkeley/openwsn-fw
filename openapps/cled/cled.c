@@ -3,6 +3,10 @@
    error LED.
 */
 
+#include "config.h"
+
+#if defined(OPENWSN_CLED_C)
+
 #include "opendefs.h"
 #include "cled.h"
 #include "coap.h"
@@ -123,3 +127,5 @@ owerror_t cled_receive(OpenQueueEntry_t *msg,
 void cled_sendDone(OpenQueueEntry_t *msg, owerror_t error) {
     openqueue_freePacketBuffer(msg);
 }
+
+#endif /* OPENWSN_CLED_C */

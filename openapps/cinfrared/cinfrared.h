@@ -14,6 +14,7 @@
 \{
 */
 
+#include "config.h"
 #include "opendefs.h"
 #include "coap.h"
 #include "schedule.h"

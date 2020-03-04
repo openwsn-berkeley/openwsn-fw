@@ -15,6 +15,7 @@
 \{
 */
 
+#include "config.h"
 #include "opendefs.h"
 #include "coap.h"
 //=========================== define ==========================================

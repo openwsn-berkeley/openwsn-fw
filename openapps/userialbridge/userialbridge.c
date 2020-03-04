@@ -1,3 +1,7 @@
+#include "config.h"
+
+#if defined(OPENWSN_USERIALBRIDGE_C)
+
 #include "opendefs.h"
 #include "userialbridge.h"
 #include "openqueue.h"
@@ -94,3 +98,5 @@ void userialbridge_task_cb(void) {
         openqueue_freePacketBuffer(pkt);
     }
 }
+
+#endif /* OPENWSN_USERIALBRIDGE_C */

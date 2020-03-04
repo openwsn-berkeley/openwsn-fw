@@ -1,3 +1,7 @@
+#include "config.h"
+
+#if defined(OPENWSN_CWELLKNOWN_C)
+
 #include "opendefs.h"
 #include "cwellknown.h"
 #include "coap.h"
@@ -89,3 +93,5 @@ owerror_t cwellknown_receive(OpenQueueEntry_t* msg,
 void cwellknown_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }
+
+#endif /* OPENWSN_CWELLKNOWN_C */

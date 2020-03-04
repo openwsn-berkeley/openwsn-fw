@@ -44,7 +44,7 @@
 #include "uexpiration.h"
 #endif
 
-#if defined(OPENWSN_UEXPIRATION_MONITOR_C)
+#if defined(OPENWSN_UEXP_MONITOR_C)
 #include "uexpiration_monitor.h"
 #endif
 
@@ -74,27 +74,27 @@ void openapps_init(void) {
     cwellknown_init();
 #endif
 
-#if defined(OPENWSN_CWELLKNOWN_C)
+#if defined(OPENWSN_RRT_C)
     rrt_init();
 #endif
 
-#if defined(OPENWSN_CWELLKNOWN_C)
+#if defined(OPENWSN_UECHO_C)
     uecho_init();
 #endif
 
-#if defined(OPENWSN_CWELLKNOWN_C)
+#if defined(OPENWSN_UINJECT_C)
     uinject_init();
 #endif
 
-#if defined(OPENWSN_CWELLKNOWN_C)
+#if defined(OPENWSN_USERIALBRIDGE_C)
     userialbridge_init();
 #endif
 
-#if defined(OPENWSN_CWELLKNOWN_C)
+#if defined(OPENWSN_UEXPIRATION_C)
     uexpiration_init();
 #endif
 
-#if defined(OPENWSN_CWELLKNOWN_C)
+#if defined(OPENWSN_UEXP_MONITOR_C)
     umonitor_init();
 #endif
 

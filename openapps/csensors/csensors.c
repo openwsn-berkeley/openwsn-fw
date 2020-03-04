@@ -4,6 +4,10 @@
     \author Nicola Accettura <nicola.accettura@eecs.berkeley.edu>, March 2015.
 */
 
+#include "config.h"
+
+#if defined(OPENWSN_CSENSORS_C)
+
 #include "opendefs.h"
 #include "csensors.h"
 #include "coap.h"
@@ -461,7 +465,4 @@ void csensors_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }
 
-
-
-
-
+#endif /* OPENWSN_CSENSORS_C */

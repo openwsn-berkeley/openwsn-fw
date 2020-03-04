@@ -1,3 +1,7 @@
+#include "config.h"
+
+#if defined(OPENWSN_UINJECT_C)
+
 #include "opendefs.h"
 #include "uinject.h"
 #include "openqueue.h"
@@ -196,5 +200,4 @@ void uinject_task_cb(void) {
     }
 }
 
-
-
+#endif /* OPENWSN_UINJECT_C */

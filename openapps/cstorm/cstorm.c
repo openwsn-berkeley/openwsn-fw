@@ -1,3 +1,7 @@
+#include "config.h"
+
+#if defined(OPENWSN_CSTORM_C)
+
 #include "opendefs.h"
 #include "cstorm.h"
 #include "coap.h"
@@ -6,7 +10,6 @@
 #include "openserial.h"
 #include "openrandom.h"
 #include "scheduler.h"
-//#include "ADC_Channel.h"
 #include "IEEE802154E.h"
 #include "schedule.h"
 #include "icmpv6rpl.h"
@@ -258,8 +261,4 @@ void cstorm_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
     cstorm_vars.busySendingCstorm=FALSE;
 }
 
-
-
-
-
-
+#endif /* OPENWSN_CSTORM_C */

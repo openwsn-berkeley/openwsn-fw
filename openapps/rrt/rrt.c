@@ -2,6 +2,9 @@
 \brief A CoAP resource which indicates the board its running on.
 */
 
+#include "config.h"
+
+#if defined(OPENWSN_RRT_C)
 
 #include "opendefs.h"
 #include "rrt.h"
@@ -260,3 +263,5 @@ void rrt_sendCoAPMsg(char actionMsg, uint8_t *ipv6mote) {
 void rrt_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }
+
+#endif /* OPENWSN_RRT_C */

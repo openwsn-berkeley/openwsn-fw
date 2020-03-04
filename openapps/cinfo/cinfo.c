@@ -2,6 +2,10 @@
 \brief A CoAP resource which indicates the board its running on.
 */
 
+#include "config.h"
+
+#if defined(OPENWSN_CINFO_C)
+
 #include "opendefs.h"
 #include "cinfo.h"
 #include "coap.h"
@@ -138,3 +142,5 @@ owerror_t cinfo_receive(
 void cinfo_sendDone(OpenQueueEntry_t *msg, owerror_t error) {
     openqueue_freePacketBuffer(msg);
 }
+
+#endif /* OPENWSN_CINFO_C */

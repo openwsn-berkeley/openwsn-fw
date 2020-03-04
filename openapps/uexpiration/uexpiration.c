@@ -1,3 +1,7 @@
+#include "config.h"
+
+#if defined(OPENWSN_UEXPIRATION_C)
+
 #include "stdlib.h"
 #include "opendefs.h"
 #include "uexpiration.h"
@@ -148,3 +152,5 @@ void uexpiration_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 
 
 //=========================== private =========================================
+
+#endif /* OPENWSN_UEXPIRATION_C */

@@ -1,3 +1,7 @@
+#include "config.h"
+
+#if defined(OPENWSN_UEXP_MONITOR_C)
+
 #include "opendefs.h"
 #include "uexpiration_monitor.h"
 #include "openqueue.h"
@@ -78,3 +82,5 @@ bool umonitor_debugPrint(void) {
 }
 
 //=========================== private =========================================
+
+#endif /* OPEWSN_UEXP_MONITOR_C */

@@ -5,6 +5,10 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, July 2014
 */
 
+#include "config.h"
+
+#if defined(OPENWSN_C6T_C)
+
 #include "opendefs.h"
 #include "coap.h"
 #include "schedule.h"
@@ -170,3 +174,5 @@ owerror_t c6t_receive(OpenQueueEntry_t* msg,
 void c6t_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }
+
+#endif /* OPENWSN_6CT_C */

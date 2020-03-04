@@ -13,6 +13,7 @@
 \{
 */
 
+#include "config.h"
 #include "coap.h"
 #include "opensensors.h"
 #include "sensors.h"

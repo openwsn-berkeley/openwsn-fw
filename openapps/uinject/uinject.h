@@ -8,6 +8,7 @@
 \{
 */
 
+#include "config.h"
 #include "opentimers.h"
 #include "openudp.h"
 

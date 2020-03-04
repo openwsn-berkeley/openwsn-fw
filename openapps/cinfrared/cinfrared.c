@@ -4,6 +4,10 @@
 \author Tengfei Chang <tengfei.chang@inria.fr>, December, 2017
 */
 
+#include "config.h"
+
+#if defined(OPENWSN_CINFRARED_C)
+
 #include "opendefs.h"
 #include "cinfrared.h"
 #include "idmanager.h"
@@ -218,3 +222,5 @@ void cinrared_turnOnOrOff(uint8_t turnOnOrOff){
         cinfrared_vars.state++;
     }
 }
+
+#endif /* OPENWSN_CINFRARED_C */

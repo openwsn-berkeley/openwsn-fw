@@ -1,3 +1,7 @@
+#include "config.h"
+
+#if defined(OPENWSN_UECHO_C)
+
 #include "opendefs.h"
 #include "uecho.h"
 #include "openqueue.h"
@@ -70,3 +74,5 @@ bool uecho_debugPrint(void) {
 }
 
 //=========================== private =========================================
+
+#endif /* OPENWSN_UECHO_C */

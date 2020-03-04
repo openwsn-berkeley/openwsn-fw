@@ -1,4 +1,177 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
+// ========================== Applications ==========================
+
+/**
+ * \def OPENWSN_C6T_C
+ *
+ * Application that allows direct manipulation of the 6top scheduling.
+ *
+ * Requires: OPENWSN_COAP_C
+ *
+ */
+
+// #define OPENWSN_C6T_C
+
+/**
+ * \def OPENWSN_CEXAMPLE_C
+ *
+ * A CoAP example application. It periodically sends a random string of numbers.
+ *
+ * Requires: OPENWSN_COAP_C
+ *
+ */
+
+// #define OPENWSN_CEXAMPLE_C
+
+/**
+ * \def OPENWSN_CINFO_C
+ *
+ * CoAP application which responds with information about the OpenWSN version running on the board.
+ *
+ * Requires: OPENWSN_COAP_C
+ *
+ */
+
+// #define OPENWSN_CINFO_C
+
+/**
+ * \def OPENWSN_CINFRARED_C
+ *
+ * A CoAP infrared application.
+ *
+ * Requires: OPENWSN_COAP_C
+ *
+ */
+
+// #define OPENWSN_CINFRARED_C
+
+/**
+ * \def OPENWSN_CLED_C
+ *
+ * CoAP application that exposes the leds of the board as a CoAP resource.
+ *
+ * Requires: OPENWSN_COAP_C
+ *
+ */
+
+// #define OPENWSN_CLED_C
+
+/**
+ * \def OPENWSN_CSENSORS_C
+ *
+ * A CoAP resource which allows an application to GET/SET the state of sensors.
+ *
+ * Requires: OPENWSN_COAP_C
+ *
+ */
+
+// #define OPENWSN_CSENSORS_C
+
+/**
+ * \def OPENWSN_CSTORM_C
+ *
+ *
+ *
+ * Requires: OPENWSN_COAP_C
+ *
+ */
+
+// #define OPENWSN_CSTORM_C
+
+/**
+ * \def OPENWSN_CWELLKNOWN_C
+ *
+ * Implements the CoAP .wellknown endpoint on a mote.
+ *
+ * Requires: OPENWSN_COAP_C
+ *
+ */
+
+// #define OPENWSN_CWELLKNOWN_C
+
+/**
+ * \def OPENWSN_RRT_C
+ *
+ * A CoAP application.
+ *
+ * Requires: OPENWSN_COAP_C
+ *
+ */
+
+// #define OPENWSN_RRT_C
+
+/**
+ * \def OPENWSN_UECHO_C
+ *
+ * An echo application (server side) that sits directly on top of UDP.
+ *
+ * Requires: OPENWSN_UDP_C
+ *
+ */
+
+// #define OPENWSN_UECHO_C
+
+/**
+ * \def OPENWSN_UEXPIRATION_C
+ *
+ *
+ *
+ * Requires: OPENWSN_UDP_C
+ *
+ */
+
+// #define OPENWSN_UEXPIRATION_C
+
+/**
+ * \def OPENWSN_UEXP_MONITOR_C
+ *
+ *
+ *
+ * Requires: OPENWSN_UDP_C
+ *
+ */
+
+// #define OPENWSN_UEXP_MONITOR_C
+
+/**
+ * \def OPENWSN_UINJECT_C
+ *
+ * Application that creates UDP traffic and injects it in the network.
+ *
+ * Requires: OPENWSN_UDP_C
+ *
+ */
+
+// #define OPENWSN_UINJECT_C
+
+/**
+ * \def OPENWSN_USERIALBRIDGE_C
+ *
+ *
+ *
+ * Requires: OPENWSN_UDP_C
+ *
+ */
+
+// #define OPENWSN_USERIALBRIDGE_C
+
+// ========================== Application Layer ==========================
+
+// #define OPENWSN_COAP_C
+
+/**
+ * \def OPENWSN_CJOIN_C
+ *
+ * The CJOIN protocol performs a secure joining and install link-layer keys
+ *
+ */
+
+// #define OPENWSN_CJOIN_C
+
+
+
+#include "check_config.h"
+
 #endif /* __CONFIG_H */

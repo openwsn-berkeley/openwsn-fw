@@ -2,6 +2,10 @@
 \brief An example CoAP application.
 */
 
+#include "config.h"
+
+#if defined(OPENWSN_EXAMPLE_C)
+
 #include "opendefs.h"
 #include "cexample.h"
 #include "coap.h"
@@ -199,5 +203,4 @@ void cexample_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
     cexample_vars.busySendingCexample = FALSE;
 }
 
-
-
+#endif /* OPENWSN_CEXAMPLE_C */
