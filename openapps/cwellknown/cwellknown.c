@@ -1,6 +1,6 @@
 #include "opendefs.h"
 #include "cwellknown.h"
-#include "opencoap.h"
+#include "coap.h"
 #include "openqueue.h"
 #include "packetfunctions.h"
 #include "openserial.h"
@@ -43,7 +43,7 @@ void cwellknown_init(void) {
    cwellknown_vars.desc.callbackRx          = &cwellknown_receive;
    cwellknown_vars.desc.callbackSendDone    = &cwellknown_sendDone;
    
-   opencoap_register(&cwellknown_vars.desc);
+   coap_register(&cwellknown_vars.desc);
 }
 
 //=========================== private =========================================
@@ -63,7 +63,7 @@ owerror_t cwellknown_receive(OpenQueueEntry_t* msg,
          msg->length         = 0;
          
          // have CoAP module write links to all resources
-         opencoap_writeLinks(msg,COMPONENT_CWELLKNOWN);
+         coap_writeLinks(msg,COMPONENT_CWELLKNOWN);
          
          // add return option
          cwellknown_vars.medType = COAP_MEDTYPE_APPLINKFORMAT;

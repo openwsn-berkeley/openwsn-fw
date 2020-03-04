@@ -4,13 +4,12 @@
 
 #include "opendefs.h"
 #include "cexample.h"
-#include "opencoap.h"
+#include "coap.h"
 #include "openqueue.h"
 #include "packetfunctions.h"
 #include "openserial.h"
 #include "openrandom.h"
 #include "scheduler.h"
-//#include "ADC_Channel.h"
 #include "idmanager.h"
 #include "IEEE802154E.h"
 #include "schedule.h"
@@ -57,7 +56,7 @@ void cexample_init(void) {
     cexample_vars.desc.callbackSendDone     = &cexample_sendDone;
 
 
-    opencoap_register(&cexample_vars.desc);
+    coap_register(&cexample_vars.desc);
     cexample_vars.timerId    = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_COAP);
     opentimers_scheduleIn(
         cexample_vars.timerId,
@@ -171,7 +170,7 @@ void cexample_task_cb(void) {
     memcpy(&pkt->l3_destinationAdd.addr_128b[0],&ipAddr_motesEecs,16);
 
     // send
-    outcome = opencoap_send(
+    outcome = coap_send(
         pkt,
         COAP_TYPE_NON,
         COAP_CODE_REQ_PUT,

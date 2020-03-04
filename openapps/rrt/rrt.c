@@ -65,7 +65,7 @@ void rrt_init(void) {
    rrt_vars.discovered                = 0; //if this mote has been discovered by ringmaster
    
    // register with the CoAP module
-   opencoap_register(&rrt_vars.desc);
+   coap_register(&rrt_vars.desc);
 }
 
 //=========================== private =========================================
@@ -235,7 +235,7 @@ void rrt_sendCoAPMsg(char actionMsg, uint8_t *ipv6mote) {
       }
 
       //send
-      outcome = opencoap_send(
+      outcome = coap_send(
               pkt,
               COAP_TYPE_NON,
               COAP_CODE_REQ_PUT,

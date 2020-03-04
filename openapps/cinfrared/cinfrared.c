@@ -52,7 +52,7 @@ void cinfrared_init(void) {
     cinfrared_vars.desc.callbackRx          = &cinfrared_receive;
     cinfrared_vars.desc.callbackSendDone    = &cinfrared_sendDone;
 
-    opencoap_register(&cinfrared_vars.desc);
+    coap_register(&cinfrared_vars.desc);
 
     cinfrared_vars.timerId          = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_COAP);
 }

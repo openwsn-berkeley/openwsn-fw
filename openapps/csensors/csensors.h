@@ -13,7 +13,7 @@
 \{
 */
 
-#include "opencoap.h"
+#include "coap.h"
 #include "opensensors.h"
 #include "sensors.h"
 #include "opentimers.h"

@@ -6,7 +6,7 @@
 
 #include "opendefs.h"
 #include "csensors.h"
-#include "opencoap.h"
+#include "coap.h"
 #include "packetfunctions.h"
 #include "openqueue.h"
 #include "idmanager.h"
@@ -91,7 +91,7 @@ void csensors_init(void) {
    csensors_vars.desc.callbackRx             = &csensors_receive;
    csensors_vars.desc.callbackSendDone       = &csensors_sendDone;
    // register with the CoAP module
-   opencoap_register(&csensors_vars.desc);
+   coap_register(&csensors_vars.desc);
 
    numSensors = opensensors_getNumSensors();
    csensors_vars.cb_put                      = 0;
@@ -110,7 +110,7 @@ void csensors_init(void) {
 //=========================== private =========================================
 
 /**
-   \brief Register a csensor resource into opencoap.
+   \brief Register a csensor resource into coap.
    \param[in] csensors_resource The resource to be registered.
 */
 void csensors_register(
@@ -159,7 +159,7 @@ void csensors_register(
    csensors_resource->desc.callbackSendDone = &csensors_sendDone;
 
    // register with the CoAP module
-   opencoap_register(&csensors_resource->desc);
+   coap_register(&csensors_resource->desc);
 }
 
 /**
@@ -194,7 +194,7 @@ owerror_t csensors_receive(
          if (coap_incomingOptions[1].type != COAP_OPTION_NUM_URIPATH) {
 
             // have CoAP module write links to csensors resources
-            opencoap_writeLinks(msg,COMPONENT_CSENSORS);
+            coap_writeLinks(msg,COMPONENT_CSENSORS);
 
             // add return option
             csensors_vars.medType = COAP_MEDTYPE_APPLINKFORMAT;
@@ -357,7 +357,7 @@ void csensors_task_cb(void) {
    memcpy(&pkt->l3_destinationAdd.addr_128b[0],&ipAddr_ringmaster,16);
 
    // send
-   outcome = opencoap_send(
+   outcome = coap_send(
       pkt,
       COAP_TYPE_NON,
       COAP_CODE_REQ_PUT,

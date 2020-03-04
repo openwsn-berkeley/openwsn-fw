@@ -75,8 +75,7 @@ if localEnv['board']=='python':
             target = localEnv.ObjectifiedFilename(s),
             source = s,
         )
-        #localEnv.AlwaysBuild(temp)
-    
+
     libopenstack = localEnv.Library(
         target = target,
         source = [localEnv.ObjectifiedFilename(s) for s in sources_c],
@@ -101,22 +100,6 @@ else:
             os.path.join('#','openstack','03b-IPv6'),
             os.path.join('#','openstack','04-TRAN'),
             os.path.join('#','openstack','cross-layers'),
-            # openapps
-            # TODO: remove once cleaned-up?
-            os.path.join('#','openapps','opencoap'),
-            os.path.join('#','openapps','c6t'),
-            os.path.join('#','openapps','cexample'),
-            os.path.join('#','openapps','cinfo'),
-            os.path.join('#','openapps','cleds'),
-            os.path.join('#','openapps','cstorm'),
-            os.path.join('#','openapps','cwellknown'),
-            os.path.join('#','openapps','rrt'),
-            os.path.join('#','openapps','uecho'),
-            os.path.join('#','openapps','uinject'),
-            os.path.join('#','openapps','userialbridge'),
-            os.path.join('#','openapps','cjoin'),
-            os.path.join('#','openapps','uexpiration'),
-            os.path.join('#','openapps','uexpiration_monitor'),
         ],
     )
     

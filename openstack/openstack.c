@@ -34,12 +34,12 @@
 //-- 04-TRAN
 #include "openudp.h"
 
-#ifndef RAM_SIZE_64KB
+//===== coap-layer
+#include "applayer.h"
 
 //===== applications
 #include "openapps.h"
 
-#endif
 
 //=========================== variables =======================================
 
@@ -51,45 +51,46 @@
 
 void openstack_init(void) {
 
-   //===== drivers
-   opentimers_init();
-   openserial_init();
+    //===== drivers
+    opentimers_init();
+    openserial_init();
 
-   //===== stack
-   //-- cross-layer
-   idmanager_init();    // call first since initializes EUI64 and isDAGroot
-   openqueue_init();
-   openrandom_init();
+    //===== stack
+    //-- cross-layer
+    idmanager_init();    // call first since initializes EUI64 and isDAGroot
+    openqueue_init();
+    openrandom_init();
 
-   //-- 02a-TSCH
+    //-- 02a-TSCH
 //   adaptive_sync_init();
-   ieee154e_init();
-   //-- 02b-RES
-   schedule_init();
-   sixtop_init();
-   neighbors_init();
-   msf_init();
-   //-- 03a-IPHC
-   openbridge_init();
-   iphc_init();
-   frag_init();
-   //-- 03b-IPv6
-   forwarding_init();
-   icmpv6_init();
-   icmpv6echo_init();
-   icmpv6rpl_init();
-   //-- 04-TRAN
-   openudp_init();
-   
-#ifndef RAM_SIZE_64KB
-   //===== applications
-   openapps_init();
-#endif
+    ieee154e_init();
+    //-- 02b-RES
+    schedule_init();
+    sixtop_init();
+    neighbors_init();
+    msf_init();
+    //-- 03a-IPHC
+    openbridge_init();
+    iphc_init();
+    frag_init();
+    //-- 03b-IPv6
+    forwarding_init();
+    icmpv6_init();
+    icmpv6echo_init();
+    icmpv6rpl_init();
+    //-- 04-TRAN
+    openudp_init();
 
-   openserial_printInfo(
-      COMPONENT_OPENWSN,ERR_BOOTED,
-      (errorparameter_t)0,
-      (errorparameter_t)0
-   );
+    //===== coap-layer
+    applayer_init();
+
+    //===== applications
+    openapps_init();
+
+    openserial_printInfo(
+            COMPONENT_OPENWSN, ERR_BOOTED,
+            (errorparameter_t) 0,
+            (errorparameter_t) 0
+    );
 }
 

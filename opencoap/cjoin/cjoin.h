@@ -7,8 +7,9 @@
 \addtogroup cjoin
 \{
 */
+
 #include "opendefs.h"
-#include "opencoap.h"
+#include "coap.h"
 #include "openoscoap.h"
 //=========================== define ==========================================
 

@@ -1,6 +1,6 @@
 #include "opendefs.h"
 #include "cstorm.h"
-#include "opencoap.h"
+#include "coap.h"
 #include "openqueue.h"
 #include "packetfunctions.h"
 #include "openserial.h"
@@ -52,7 +52,7 @@ void cstorm_init(void) {
     cstorm_vars.desc.discoverable          = TRUE;
     cstorm_vars.desc.callbackRx            = &cstorm_receive;
     cstorm_vars.desc.callbackSendDone      = &cstorm_sendDone;
-    opencoap_register(&cstorm_vars.desc);
+    coap_register(&cstorm_vars.desc);
 
     //start a periodic timer
     //comment : not running by default
@@ -232,7 +232,7 @@ void cstorm_task_cb(void) {
     memcpy(&pkt->l3_destinationAdd.addr_128b[0],&dst_addr,16);
 
     // send
-    outcome = opencoap_send(
+    outcome = coap_send(
         pkt,
         COAP_TYPE_NON,
         COAP_CODE_REQ_PUT,

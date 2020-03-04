@@ -2,165 +2,77 @@ import os
 
 Import('env')
 
-localEnv      = env.Clone()
+localEnv = env.Clone()
 
 #===== retrieve the list of apps to build
 
-defaultApps   = ['cjoin']
-if localEnv['board']=='python':
-    defaultApps  += [
-        'c6t',
-        'cinfo',
-        'cleds',
-        'cwellknown',
-        'uecho',
-        'uinject',
-        'userialbridge',
-        'uexpiration',
-        'uexpiration_monitor',
-        'rrt',
-        'cexample',
-        'cstorm',
-    ]
-
-# source files that should be included in the build other than
-# those with default application name (application.c)
-additionalSourceFiles = [
-    os.path.join('opencoap','openoscoap.c'),
-    os.path.join('opencoap','usha.c'),
-    os.path.join('opencoap','hkdf.c'),
-    os.path.join('opencoap','hmac.c'),
-    os.path.join('opencoap','sha224-256.c'),
-    os.path.join('opencoap','cborencoder.c'),
-    os.path.join('cjoin','cojp_cbor.c'),
+apps = [
+    'c6t',
+    'cinfo',
+    'cled',
+    'cwellknown',
+    'uecho',
+    'uinject',
+    'userialbridge',
+    'uexpiration',
+    'uexpiration_monitor',
+    'rrt',
+    'cexample',
+    'cstorm'
 ]
-
-# header files that should be included in the build other than
-# those with default application name (application.h)
-additionalHeaderFiles = [
-    os.path.join('opencoap','openoscoap.h'),
-    os.path.join('opencoap','sha.h'),
-    os.path.join('opencoap','cborencoder.h'),
-    os.path.join('cjoin','cojp_cbor.h'),
-]
-
-# additional apps the user wants to build
-if localEnv['apps']:
-    userApps  = localEnv['apps'].split(',')
-else:
-    userApps  = []
-
-# union of default and additional apps (without duplicates)
-apps      = ['opencoap']
-apps     += sorted(list(set(defaultApps+userApps)))
-
-appsInit  = ['opencoap'] # make sure opencoap is initialized first
-appsInit += ['cjoin']    # enable cjoin by defualt
-if userApps:
-    appsInit += sorted(list(set(userApps)))
-
-#===== rule to create a (temporary) openapps_dyn.c file
-
-def dynify(env,target,source):
-    
-    assert len(target)==1
-    assert len(source)==1
-    
-    target = target[0].abspath
-    source = source[0].abspath
-    
-    #=== create file
-    
-    dynfile  = '#include "opendefs.h"\n\n'
-    dynfile += '{HEADERS_FILES}'.format(HEADERS_FILES  = '\n'.join(['#include "{0}.h"'.format(a) for a in apps]))
-    dynfile += '\n\nvoid openapps_init(void) {\n'
-    dynfile += '{INIT_FUNCTIONS}'''.format(INIT_FUNCTIONS = '\n'.join(['   {0}_init();'.format(a) for a in appsInit]))
-    dynfile += '\n}'
-    
-    # this is a workaround for the fact that leds_init() is called leds__init()
-    # which itself it due to possible confusion in the objecticication process
-    # between leds_init() and rleds_init()
-    dynfile = dynfile.replace('leds_init','leds__init')
-    
-    #=== write
-    
-    with open(target,'w') as f:
-        f.write(dynfile)
-
-dynifyBuilder = Builder(
-    action = Action(dynify,'Dynifying $TARGET')
-)
-
-localEnv.Append(BUILDERS = {'Dynify' : dynifyBuilder})
-
-dynapps = localEnv.Dynify(
-    target = 'openapps_dyn.c',
-    source = 'openapps.c'
-)
-localEnv.AlwaysBuild(dynapps)
-localEnv.Alias('dynapps', dynapps)
 
 #===== pick the correct source files
 
 target = 'libopenapps'
 
-sources_c          = []
-sources_h          = []
-
-if localEnv['board']=='python':
-    sources_c     += ['openapps.c']
-else:
-    sources_c     += ['openapps_dyn.c']
-sources_h         += ['openapps.h']
+sources_c = ['openapps.c']
+sources_h = ['openapps.h']
 
 for a in apps:
     sources_c     += [os.path.join(a,a+'.c')]
     sources_h     += [os.path.join(a,a+'.h')]
 
-sources_c += additionalSourceFiles
-sources_h += additionalHeaderFiles
-
 #===== build the openapps library
 
 if localEnv['board']=='python':
-    
-    if userApps:
-        raise SystemError("Dynamic app creation not yet supported in simulation mode")
     
     for s in sources_c+sources_h:
         temp = localEnv.Objectify(
             target = localEnv.ObjectifiedFilename(s),
             source = s,
         )
-        #localEnv.AlwaysBuild(temp)
-    
+
     libopenapps = localEnv.Library(
         target = target,
         source = [localEnv.ObjectifiedFilename(s) for s in sources_c],
     )
-    localEnv.Depends(libopenapps,[localEnv.ObjectifiedFilename(s) for s in sources_h])
+    localEnv.Depends(libopenapps, [localEnv.ObjectifiedFilename(s) for s in sources_h])
     
 else:
     
     localEnv.Append(
-        CPPPATH =  [
+        CPPPATH = [
             # inc
             os.path.join('#','inc'),
             # openstack
-            os.path.join('#','openstack','04-TRAN'),
-            os.path.join('#','openstack','cross-layers'),
             os.path.join('#','openstack','02a-MAClow'),
             os.path.join('#','openstack','02b-MAChigh'),
             os.path.join('#','openstack','03a-IPHC'),
             os.path.join('#','openstack','03b-IPv6'),
+            os.path.join('#','openstack','04-TRAN'),
+            os.path.join('#','openstack','cross-layers'),
+            # openapps
+            os.path.join('#','opencoap','opencoap'),
+            os.path.join('#','opencoap','cjoin'),
             # openapps
             os.path.join('#','openapps'),
         ]+[os.path.join('#','openapps',a) for a in apps],
     )
-    
+
     libopenapps = localEnv.Library(
         target = target,
         source = sources_c,
     )
+
 
 Alias('libopenapps', libopenapps)

@@ -6,6 +6,8 @@
 */
 
 #include "opendefs.h"
+#include "coap.h"
+#include "schedule.h"
 #include "c6t.h"
 #include "sixtop.h"
 #include "idmanager.h"
@@ -50,7 +52,7 @@ void c6t_init(void) {
    c6t_vars.desc.callbackRx          = &c6t_receive;
    c6t_vars.desc.callbackSendDone    = &c6t_sendDone;
 
-   opencoap_register(&c6t_vars.desc);
+   coap_register(&c6t_vars.desc);
 }
 
 //=========================== private =========================================

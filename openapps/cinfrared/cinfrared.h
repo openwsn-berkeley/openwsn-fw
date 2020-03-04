@@ -15,7 +15,7 @@
 */
 
 #include "opendefs.h"
-#include "opencoap.h"
+#include "coap.h"
 #include "schedule.h"
 
 //=========================== define ==========================================

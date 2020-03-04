@@ -31,6 +31,7 @@ if env['board']!='python':
             os.path.join('#','bsp','chips'),
             os.path.join('#','drivers','common'),
             os.path.join('#','kernel'),
+            os.path.join('#','opencoap'),
             os.path.join('#','openapps'),
             os.path.join('#','openstack'),
         ]
@@ -518,7 +519,7 @@ elif env['toolchain']=='armgcc':
     
     # print sizes
     printSizeFunc = Builder(
-        action = 'arm-none-eabi-size --format=berkeley -x --totals $SOURCE',
+        action = 'arm-none-eabi-size --format=berkeley -d --totals $SOURCE',
         suffix = '.phonysize',
     )
     env.Append(BUILDERS = {'PrintSize' : printSizeFunc})
@@ -626,12 +627,13 @@ if env['jtag']:
 
 #============================ bootload ========================================
 
-##
-# Pass a list, a range or all ports to do the bootloading
-# list  -> /dev/ttyUSB0,ttyUSB1,/dev/ttyUSB2
-# range -> /dev/ttyUSB[0-2] = /dev/ttyUSB0,ttyUSB1,/dev/ttyUSB2
-# all   -> /dev/ttyUSBX = /dev/ttyUSB0,ttyUSB1,/dev/ttyUSB2
-##
+"""
+Pass a list, a range or all ports to do the bootloading
+  list  -> /dev/ttyUSB0,ttyUSB1,/dev/ttyUSB2
+  range -> /dev/ttyUSB[0-2] = /dev/ttyUSB0,ttyUSB1,/dev/ttyUSB2
+  all   -> /dev/ttyUSBX = /dev/ttyUSB0,ttyUSB1,/dev/ttyUSB2
+"""
+
 def expandBootloadPortList(ports):
     # Process only when there is a single port
     if (len(ports) == 1):
@@ -1008,10 +1010,10 @@ env.AddMethod(extras, 'PostBuildExtras')
 
 def buildLibs(projectDir):
     libs_dict = {
-        '00std': [                                                              ],
-        '01bsp': [                                                      'libbsp'],
-        '02drv': [                             'libkernel','libdrivers','libbsp'],
-        '03oos': ['libopenstack','libopenapps','libopenstack','libkernel','libdrivers','libbsp'], # this order needed for mspgcc
+        '00std': [],
+        '01bsp': ['libbsp'],
+        '02drv': ['libkernel','libdrivers','libbsp'],
+        '03oos': ['libopenstack','libopenapps','libopencoap','libopenstack','libkernel','libdrivers','libbsp'], # this order needed for mspgcc
     }
     
     returnVal = None
@@ -1020,7 +1022,7 @@ def buildLibs(projectDir):
            returnVal = v
     
     assert returnVal!=None
-    
+
     return returnVal
 
 def buildIncludePath(projectDir,localEnv):
@@ -1063,8 +1065,8 @@ def project_finder(localEnv):
     # parse dirs and build targets
     for projectDir in subdirs:
         
-        src_dir         = os.path.join(PATH_TO_BOARD_PROJECTS,projectDir)
-        variant_dir     = os.path.join(env['VARDIR'],'projects',projectDir)
+        src_dir         = os.path.join(PATH_TO_BOARD_PROJECTS, projectDir)
+        variant_dir     = os.path.join(env['VARDIR'],'projects', projectDir)
         
         added           = False
         targetName      = projectDir[2:]
@@ -1263,6 +1265,17 @@ buildEnv.SConscript(
 )
 buildEnv.Clean('libopenstack', Dir(openstackVarDir).abspath)
 buildEnv.Append(LIBPATH = [openstackVarDir])
+
+# opencoap
+opencoapDir        = os.path.join('#','opencoap')
+opencoapVarDir     = os.path.join(buildEnv['VARDIR'],'opencoap')
+buildEnv.SConscript(
+    os.path.join(opencoapDir,'SConscript'),
+    exports        = {'env': buildEnv},
+    variant_dir    = opencoapVarDir,
+)
+buildEnv.Clean('libopencoap', Dir(opencoapVarDir).abspath)
+buildEnv.Append(LIBPATH = [opencoapVarDir])
 
 # openapps
 openappsDir        = os.path.join('#','openapps')

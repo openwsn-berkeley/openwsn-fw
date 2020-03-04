@@ -4,7 +4,7 @@
 
 #include "opendefs.h"
 #include "cjoin.h"
-#include "opencoap.h"
+#include "coap.h"
 #include "opentimers.h"
 #include "openqueue.h"
 #include "packetfunctions.h"
@@ -72,7 +72,7 @@ void cjoin_init(void) {
 
    cjoin_vars.isJoined                             = FALSE;
 
-   opencoap_register(&cjoin_vars.desc);
+   coap_register(&cjoin_vars.desc);
 
    cjoin_vars.timerId = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_COAP);
 
@@ -300,7 +300,7 @@ owerror_t cjoin_sendJoinRequest(open_addr_t* joinProxy) {
     packetfunctions_reserveHeaderSize(pkt, payload_len);
     memcpy(pkt->payload, tmp, payload_len);
     // send
-    outcome = opencoap_send(
+    outcome = coap_send(
         pkt,
         COAP_TYPE_NON,
         COAP_CODE_REQ_POST,
