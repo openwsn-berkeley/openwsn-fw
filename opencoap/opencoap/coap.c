@@ -1,3 +1,7 @@
+#include "config.h"
+
+#if defined(OPENWSN_COAP_C)
+
 #include "opendefs.h"
 #include "coap.h"
 #include "openoscoap.h"
@@ -1245,3 +1249,5 @@ void coap_forward_message(OpenQueueEntry_t *msg,
       openqueue_freePacketBuffer(outgoingPacket);
     }
 }
+
+#endif /* OPENWSN_COAP_C */
