@@ -54,13 +54,6 @@ typedef enum {
    FREQ_RX                        = 0x02,
 } radio_freq_t;
 
-enum radios
-{
-    FSK_OPTION1_FEC,
-    OFDM_OPTION_1_MCS0,
-    OFDM_OPTION_1_MCS1
-};
-
 typedef void (*radio_capture_cbt)(PORT_TIMER_WIDTH timestamp);
 
 //=========================== variables =======================================
@@ -68,27 +61,26 @@ typedef void (*radio_capture_cbt)(PORT_TIMER_WIDTH timestamp);
 //=========================== prototypes ======================================
 
 // admin
-void     radio_bootstrap(void);
-void     radio_powerOn(void);
-void     radio_init(void);
-void     radio_setStartFrameCb(radio_capture_cbt cb);
-void     radio_setEndFrameCb(radio_capture_cbt cb);
+void     radio_powerOn_at86rf215(void);
+void     radio_init_at86rf215(void);
+void     radio_setStartFrameCb_at86rf215(radio_capture_cbt cb);
+void     radio_setEndFrameCb_at86rf215(radio_capture_cbt cb);
 // reset
-void     radio_reset(void);
+void     radio_reset_at86rf215(void);
 // RF admin
-void     radio_setFrequency(uint16_t channel, radio_freq_t tx_or_rx);
-void     radio_rfOn(void);
-void     radio_rfOff(void);
-void     radio_change_modulation(registerSetting_t * mod);
-void     radio_change_size(uint16_t* size);
+void     radio_setFrequency_at86rf215(uint16_t channel, radio_freq_t tx_or_rx);
+void     radio_rfOn_at86rf215(void);
+void     radio_rfOff_at86rf215(void);
+void     radio_change_modulation_at86rf215(registerSetting_t * mod);
+void     radio_change_size_at86rf215(uint16_t* size);
 // TX
-void     radio_loadPacket(uint8_t* packet, uint16_t len);
-void     radio_txEnable(void);
-void     radio_txNow(void);
+void     radio_loadPacket_at86rf215(uint8_t* packet, uint16_t len);
+void     radio_txEnable_at86rf215(void);
+void     radio_txNow_at86rf215(void);
 // RX
-void     radio_rxEnable(void);
-void     radio_rxNow(void);
-void     radio_getReceivedFrame(uint8_t* bufRead,
+void     radio_rxEnable_at86rf215(void);
+void     radio_rxNow_at86rf215(void);
+void     radio_getReceivedFrame_at86rf215(uint8_t* bufRead,
                                 uint16_t* lenRead,
                                 uint16_t  maxBufLen,
                                  int8_t* rssi,
