@@ -58,7 +58,7 @@ if env['l2_security']==1:
     env.Append(CPPDEFINES    = 'L2_SECURITY_ACTIVE')
 if env['fix_channel']>=11 and env['fix_channel']<=26:
     env.Append(CPPDEFINES    = {'IEEE802154E_SINGLE_CHANNEL' : env['fix_channel']})
-if env['msf_adapting_to_traffic']==1:
+if env['msf_adaptive']==1:
     env.Append(CPPDEFINES    = 'MSF_ADAPTING_TO_TRAFFIC')
 if env['printf']==1:
     env.Append(CPPDEFINES    = 'OPENSERIAL_PRINTF')

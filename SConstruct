@@ -79,7 +79,7 @@ project:
     noadaptivesync Do not use adaptive synchronization.
     l2_security   Use hop-by-hop encryption and authentication.
                   0 (off), 1 (on)
-    msf_adapting_to_traffic enable/disable MSF for adding/deleting cell to adapt to traffic
+    msf_adaptive  Enable/disable MSF for adding/deleting cell to adapt to traffic
                   0 (disable), 1 (enable)
     printf        Sends the string messages to openvisualizer  
                   0 (off ), 1 (on, default)
@@ -141,7 +141,7 @@ command_line_options = {
     ],
     'fet_version':              ['2','3'],
     'verbose':                  ['0','1'],
-    'fastsim':                  ['1','0'],
+    'fastsim':                  ['0','1'],
     'simhost':                  ['amd64-linux','x86-linux','amd64-windows','x86-windows'],
     'simhostpy':                [''],                               # No reasonable default
     'panid':                    [''],
@@ -152,8 +152,8 @@ command_line_options = {
     'noadaptivesync':           ['0','1'],
     'l2_security':              ['0','1'],
     'fix_channel':              ['0'] + map(str, range(11, 27)),
-    'msf_adapting_to_traffic':  ['0','1'],
-    'printf':                   ['1','0'],          # 1=on (default),  0=off
+    'msf_adaptive':             ['0','1'],
+    'printf':                   ['0','1'],
     'deadline_option':          ['0','1'],
     'ide':                      ['none','qtcreator'],
     'revision':                 ['']
@@ -164,22 +164,6 @@ def validate_option(key, value, env):
         raise ValueError("Unknown switch {0}.".format(key))
     if value not in command_line_options[key]:
         raise ValueError("Unknown {0} \"{1}\". Options are {2}.\n\n".format(key,value,','.join(command_line_options[key])))
-
-def validate_apps(key, value, env):
-    assert key=='apps'
-    if not value.strip():
-        return
-    requestedApps = value.split(',')
-    availableApps = [f for f in os.listdir('openapps') if not os.path.isfile(os.path.join('openapps',f))]
-    unknownApps   = list(set(requestedApps) - set(availableApps))
-    
-    if unknownApps:
-        raise ValueError(
-            "Unknown app(s) {0}. Available apps are {1}.\n\n".format(
-                ','.join(unknownApps),
-                ','.join(availableApps),
-            )
-        )
 
 # Define default value for simhost option
 if os.name=='nt':
@@ -241,7 +225,7 @@ command_line_vars.AddVariables(
     (
         'fastsim',                                         # key
         '',                                                # help
-        command_line_options['fastsim'][0],                # default
+        command_line_options['fastsim'][1],                # default
         validate_option,                                   # validator
         int,                                               # converter
     ),
@@ -316,9 +300,9 @@ command_line_vars.AddVariables(
         int,                                               # converter
     ),
     (
-        'msf_adapting_to_traffic',                         # key
+        'msf_adaptive',                                    # key
         '',                                                # help
-        command_line_options['msf_adapting_to_traffic'][1],# default
+        command_line_options['msf_adaptive'][1],           # default
         validate_option,                                   # validator
         int,                                               # converter
     ),
@@ -435,18 +419,11 @@ command_line_vars.AddVariables(
         int,                                               # converter
     ),
     (
-        'deadline_option',                                     # key
+        'deadline_option',                                 # key
         '',                                                # help
-        command_line_options['deadline_option'][1],            # default
+        command_line_options['deadline_option'][0],        # default
         validate_option,                                   # validator
         int,                                               # converter
-    ),
-    (
-        'apps',                                            # key
-        'comma-separated list of user applications',       # help
-        '',                                                # default
-        validate_apps,                                     # validator
-        None,                                              # converter
     ),
     (
         'ide',                                             # key
