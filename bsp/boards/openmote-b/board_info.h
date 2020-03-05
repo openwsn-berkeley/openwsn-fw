@@ -57,7 +57,12 @@
 #define PORT_PIN_RADIO_RESET_HIGH()    // nothing
 #define PORT_PIN_RADIO_RESET_LOW()     // nothing
 
-#define SLOTDURATION 10                // in miliseconds
+#define SLOTDURATION 160                // in miliseconds
+
+//===== Radios
+
+// Number of available radios
+#define MAX_RADIOS  3
 
 //===== IEEE802154E timing
 
@@ -79,20 +84,33 @@
     // radio watchdog
 #endif
 
-#if SLOTDURATION==15
-    // time-slot related
-    #define PORT_TsSlotDuration                 492   // counter counts one extra count, see datasheet
+#if SLOTDURATION==20
+    #define PORT_TsSlotDuration                 655   //    20ms
+
     // execution speed related
-    #define PORT_maxTxDataPrepare               66    // 2014us (measured 746us)
-    #define PORT_maxRxAckPrepare                10    //  305us (measured  83us)
-    #define PORT_maxRxDataPrepare               33    // 1007us (measured  84us)
-    #define PORT_maxTxAckPrepare                22    //  305us (measured 219us)
+    #define PORT_maxTxDataPrepare               110   //  3355us (not measured)
+    #define PORT_maxRxAckPrepare                20    //   610us (not measured)
+    #define PORT_maxRxDataPrepare               33    //  1000us (not measured)
+    #define PORT_maxTxAckPrepare                50    //  1525us (not measured)
+
     // radio speed related
-    #define PORT_delayTx                        12    //  214us (measured 219us)
-    #define PORT_delayRx                        0     //    0us (can not measure)
-    // radio watchdog
+    #define PORT_delayTx                        18    //   549us (not measured)
+    #define PORT_delayRx                        0     //     0us (can not measure)
 #endif
 
+    // experimental: relaxed estimations for fsk1 with fec 25kbps
+#if SLOTDURATION==160
+    #define PORT_TsSlotDuration                 5300   //    161ms
+
+    // execution speed related
+    #define PORT_maxTxDataPrepare               220   
+    #define PORT_maxRxAckPrepare                250    
+    #define PORT_maxRxDataPrepare               66    
+    #define PORT_maxTxAckPrepare                250    
+    // radio speed related
+    #define PORT_delayTx                        100    
+    #define PORT_delayRx                        0     
+#endif
 //===== adaptive_sync accuracy
 
 #define SYNC_ACCURACY                       1     // ticks
@@ -105,21 +123,21 @@
 #define BSP_ANTENNA_BASE            GPIO_D_BASE
 #define BSP_ANTENNA_CC2538_24GHZ    GPIO_PIN_4      //!< PD4 -- 2.4ghz
 #define BSP_ANTENNA_AT215_24GHZ     GPIO_PIN_3      //!< PD3 -- subghz
- 
+//#define DAGROOT
 
 //=========================== typedef  ========================================
 
 //=========================== variables =======================================
 
 static const uint8_t rreg_uriquery[]        = "h=ucb";
-static const uint8_t infoBoardname[]        = "CC2538";
+static const uint8_t infoBoardname[]        = "openmote-b";
 static const uint8_t infouCName[]           = "CC2538";
 static const uint8_t infoRadioName[]        = "CC2538 SoC";
 
 //=========================== prototypes ======================================
 
 //=========================== public ==========================================
-
+void eraseFlash(void);
 //=========================== private =========================================
 
 #endif

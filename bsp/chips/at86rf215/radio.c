@@ -2,6 +2,7 @@
 \brief at86rf215-specific definition of the "radio" bsp module.
 
 \author Jonathan Munoz <jonathan.munoz@inria.fr>, July 2016.
+
 */
 
 #include "board.h"
@@ -44,6 +45,58 @@
 #endif
 
 //=========================== variables =======================================
+// radio functions callback types declaration
+typedef void                (*radio_powerOn_cb_t)(void);
+typedef void                (*radio_reset_cb_t)(void);
+typedef void                (*radio_init_cb_t)(void);
+typedef void                (*radio_change_size_cb_t)(uint16_t* size);
+typedef void                (*radio_change_modulation_cb_t)(registerSetting_t * mod);
+typedef void                (*radio_setStartFrameCb_cb_t)(radio_capture_cbt cb);
+typedef void                (*radio_setEndFrameCb_cb_t)(radio_capture_cbt cb);
+typedef void                (*radio_setFrequency_cb_t)(uint16_t channel, radio_freq_t tx_or_rx);
+typedef void                (*radio_rfOn_cb_t)(void);
+typedef void                (*radio_rfOff_cb_t)(void);
+typedef void                (*radio_getFrequencyOffset_cb_t)(void);
+typedef void                (*radio_loadPacket_cb_t)(uint8_t* packet, uint16_t len);
+typedef radio_state_t                (*radio_getState_cb_t)(void);
+typedef void                (*radio_txEnable_cb_t)(void);
+typedef void                (*radio_txNow_cb_t)(void);
+typedef void                (*radio_rxEnable_cb_t)(void);
+typedef void                (*radio_rxNow_cb_t)(void);
+typedef void                (*radio_getReceivedFrame_cb_t)(
+                                                    uint8_t* bufRead,
+                                                    uint16_t* lenRead,
+                                                    uint16_t  maxBufLen,
+                                                    int8_t*  rssi,
+                                                    uint8_t* lqi,
+                                                    bool*    crc
+                                                    );
+
+// ... more types to be added in accordance with the API
+
+// the template for radio function callbacks
+// inspired from release FW_807 bsp/common/openradio.h
+typedef struct {
+    radio_powerOn_cb_t                  radio_powerOn;
+    radio_reset_cb_t                    radio_reset;
+    radio_init_cb_t                     radio_init;
+    radio_change_size_cb_t              radio_change_size;
+    radio_change_modulation_cb_t        radio_change_modulation;
+    radio_setStartFrameCb_cb_t          radio_setStartFrameCb;
+    radio_setEndFrameCb_cb_t            radio_setEndFrameCb;
+    radio_setFrequency_cb_t             radio_setFrequency;
+    radio_rfOn_cb_t                     radio_rfOn;
+    radio_rfOff_cb_t                    radio_rfOff;
+    radio_getFrequencyOffset_cb_t       radio_getFrequencyOffset;
+    radio_loadPacket_cb_t               radio_loadPacket;
+    radio_getState_cb_t                 radio_getState;
+    radio_txEnable_cb_t                 radio_txEnable;
+    radio_txNow_cb_t                    radio_txNow;
+    radio_rxEnable_cb_t                 radio_rxEnable;
+    radio_rxNow_cb_t                    radio_rxNow;
+    radio_getReceivedFrame_cb_t         radio_getReceivedFrame;
+} radio_functions_t;
+
 
 typedef struct {
     radio_capture_cbt           startFrame_cb;
@@ -57,6 +110,83 @@ typedef struct {
 
 radio_vars_t radio_vars;
 
+enum radios
+{
+    FSK_OPTION1_FEC,
+    OFDM_OPTION_1_MCS0,
+    OFDM_OPTION_1_MCS1
+};
+
+//function call back matrix
+radio_functions_t dyn_funcs [MAX_RADIOS];
+
+// ================ Bootstrapping ==========
+
+// initializing the lookup table for radio function callbacks
+void openradio_bootstrap ()
+{   
+    // FSK_OPTION1_FEC
+    dyn_funcs [FSK_OPTION1_FEC].radio_powerOn               =   radio_powerOn_at86rf215; 
+    dyn_funcs [FSK_OPTION1_FEC].radio_reset                 =   radio_reset_at86rf215; 
+    dyn_funcs [FSK_OPTION1_FEC].radio_init                  =   radio_init_at86rf215; 
+    dyn_funcs [FSK_OPTION1_FEC].radio_change_size           =   radio_change_size_at86rf215; 
+    dyn_funcs [FSK_OPTION1_FEC].radio_change_modulation     =   radio_change_modulation_at86rf215; 
+    dyn_funcs [FSK_OPTION1_FEC].radio_setStartFrameCb       =   radio_setStartFrameCb_at86rf215; 
+    dyn_funcs [FSK_OPTION1_FEC].radio_setEndFrameCb         =   radio_setEndFrameCb_at86rf215; 
+    dyn_funcs [FSK_OPTION1_FEC].radio_setFrequency          =   radio_setFrequency_at86rf215; 
+    dyn_funcs [FSK_OPTION1_FEC].radio_rfOn                  =   radio_rfOn_at86rf215; 
+    dyn_funcs [FSK_OPTION1_FEC].radio_rfOff                 =   radio_rfOff_at86rf215; 
+    dyn_funcs [FSK_OPTION1_FEC].radio_getFrequencyOffset    =   radio_getFrequencyOffset_at86rf215; 
+    dyn_funcs [FSK_OPTION1_FEC].radio_loadPacket            =   radio_loadPacket_at86rf215; 
+    dyn_funcs [FSK_OPTION1_FEC].radio_getState              =   radio_getState_at86rf215; 
+    dyn_funcs [FSK_OPTION1_FEC].radio_txEnable              =   radio_txEnable_at86rf215; 
+    dyn_funcs [FSK_OPTION1_FEC].radio_txNow                 =   radio_txNow_at86rf215; 
+    dyn_funcs [FSK_OPTION1_FEC].radio_rxEnable              =   radio_rxEnable_at86rf215; 
+    dyn_funcs [FSK_OPTION1_FEC].radio_rxNow                 =   radio_rxNow_at86rf215; 
+    dyn_funcs [FSK_OPTION1_FEC].radio_getReceivedFrame      =   radio_getReceivedFrame_at86rf215; 
+
+    //OFDM_OPTION_1_MCS0
+    dyn_funcs [OFDM_OPTION_1_MCS0].radio_powerOn               =   radio_powerOn_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS0].radio_reset                 =   radio_reset_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS0].radio_init                  =   radio_init_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS0].radio_change_size           =   radio_change_size_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS0].radio_change_modulation     =   radio_change_modulation_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS0].radio_setStartFrameCb       =   radio_setStartFrameCb_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS0].radio_setEndFrameCb         =   radio_setEndFrameCb_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS0].radio_setFrequency          =   radio_setFrequency_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS0].radio_rfOn                  =   radio_rfOn_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS0].radio_rfOff                 =   radio_rfOff_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS0].radio_getFrequencyOffset    =   radio_getFrequencyOffset_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS0].radio_loadPacket            =   radio_loadPacket_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS0].radio_getState              =   radio_getState_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS0].radio_txEnable              =   radio_txEnable_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS0].radio_txNow                 =   radio_txNow_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS0].radio_rxEnable              =   radio_rxEnable_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS0].radio_rxNow                 =   radio_rxNow_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS0].radio_getReceivedFrame      =   radio_getReceivedFrame_at86rf215; 
+    
+    //OFDM_OPTION_1_MCS1
+    dyn_funcs [OFDM_OPTION_1_MCS1].radio_powerOn               =   radio_powerOn_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS1].radio_reset                 =   radio_reset_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS1].radio_init                  =   radio_init_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS1].radio_change_size           =   radio_change_size_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS1].radio_change_modulation     =   radio_change_modulation_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS1].radio_setStartFrameCb       =   radio_setStartFrameCb_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS1].radio_setEndFrameCb         =   radio_setEndFrameCb_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS1].radio_setFrequency          =   radio_setFrequency_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS1].radio_rfOn                  =   radio_rfOn_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS1].radio_rfOff                 =   radio_rfOff_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS1].radio_getFrequencyOffset    =   radio_getFrequencyOffset_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS1].radio_loadPacket            =   radio_loadPacket_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS1].radio_getState              =   radio_getState_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS1].radio_txEnable              =   radio_txEnable_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS1].radio_txNow                 =   radio_txNow_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS1].radio_rxEnable              =   radio_rxEnable_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS1].radio_rxNow                 =   radio_rxNow_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS1].radio_getReceivedFrame      =   radio_getReceivedFrame_at86rf215;
+}
+
+
 //=========================== public ==========================================
 
 static void radio_read_isr(void);
@@ -64,7 +194,7 @@ static void radio_clear_isr(void);
 
 //===== admin
 
-void radio_powerOn(void) {
+void radio_powerOn_at86rf215(void) {
     volatile uint32_t delay;
 
     GPIOPinTypeGPIOOutput(GPIO_C_BASE, GPIO_PIN_0);
@@ -84,11 +214,11 @@ void radio_powerOn(void) {
 
 }
 
-void radio_reset(void) {
+void radio_reset_at86rf215(void) {
     at86rf215_spiWriteReg( RG_RF_RST, CMD_RF_RESET);
 }
 
-void radio_init(void) {
+void radio_init_at86rf215(void) {
 
     uint16_t i;
     //power it on and configure pins
@@ -145,13 +275,13 @@ void radio_init(void) {
     radio_read_isr();
 }
 
-void radio_change_size(uint16_t* size){
+void radio_change_size_at86rf215(uint16_t* size){
     static int i = 0;
     *size = sizes[i%4];
     i++;
 }
 
-void radio_change_modulation(registerSetting_t * mod){
+void radio_change_modulation_at86rf215(registerSetting_t * mod){
     static int mod_list = 1;
     uint16_t i;
 
@@ -165,11 +295,11 @@ void radio_change_modulation(registerSetting_t * mod){
     mod_list++;
 }
 
-void radio_setStartFrameCb(radio_capture_cbt cb) {
+void radio_setStartFrameCb_at86rf215(radio_capture_cbt cb) {
     radio_vars.startFrame_cb  = cb;
 }
 
-void radio_setEndFrameCb(radio_capture_cbt cb) {
+void radio_setEndFrameCb_at86rf215(radio_capture_cbt cb) {
     radio_vars.endFrame_cb    = cb;
 }
 
@@ -177,7 +307,7 @@ void radio_setEndFrameCb(radio_capture_cbt cb) {
 //channel spacing in KHz
 //frequency_0 in kHz
 //frequency_nb integer
-void radio_setFrequency(uint16_t channel, radio_freq_t tx_or_rx) {
+void radio_setFrequency_at86rf215(uint16_t channel, radio_freq_t tx_or_rx) {
 
     uint16_t frequency_0;
 
@@ -206,13 +336,13 @@ void radio_setFrequency(uint16_t channel, radio_freq_t tx_or_rx) {
     radio_vars.state = RADIOSTATE_FREQUENCY_SET;
 }
 
-void radio_rfOn(void) {
+void radio_rfOn_at86rf215(void) {
     //put the radio in the TRXPREP state
     at86rf215_spiStrobe(CMD_RF_TRXOFF, ATMEL_FREQUENCY_TYPE);
     while(at86rf215_status(ATMEL_FREQUENCY_TYPE) != RF_STATE_TRXOFF);
 }
 
-void radio_rfOff(void) {
+void radio_rfOff_at86rf215(void) {
 
     // change state
     radio_vars.state = RADIOSTATE_TURNING_OFF;
@@ -227,7 +357,7 @@ void radio_rfOff(void) {
     radio_vars.state = RADIOSTATE_RFOFF;
 }
 
-int8_t radio_getFrequencyOffset(void){
+int8_t radio_getFrequencyOffset_at86rf215(void){
 
     // not available
     return 0;
@@ -235,7 +365,7 @@ int8_t radio_getFrequencyOffset(void){
 
 //===== TX
 
-void radio_loadPacket(uint8_t* packet, uint16_t len) {
+void radio_loadPacket_at86rf215(uint8_t* packet, uint16_t len) {
 
     radio_vars.state = RADIOSTATE_LOADING_PACKET;
     at86rf215_spiWriteFifo(packet, len, ATMEL_FREQUENCY_TYPE);
@@ -244,11 +374,11 @@ void radio_loadPacket(uint8_t* packet, uint16_t len) {
     //at86rf215_readBurst(0x0306, packet, len);
 }
 
-radio_state_t radio_getState(void){
+radio_state_t radio_getState_at86rf215(void){
     return radio_vars.state;
 }
 
-void radio_txEnable(void) {
+void radio_txEnable_at86rf215(void) {
 
     // change state
     radio_vars.state = RADIOSTATE_ENABLING_TX;
@@ -263,7 +393,7 @@ void radio_txEnable(void) {
     radio_vars.state = RADIOSTATE_TX_ENABLED;
 }
 
-void radio_txNow(void) {
+void radio_txNow_at86rf215(void) {
 
     PORT_TIMER_WIDTH capturedTime;
 
@@ -282,7 +412,7 @@ void radio_txNow(void) {
 
 //===== RX
 
-void radio_rxEnable(void) {
+void radio_rxEnable_at86rf215(void) {
     // change state
     radio_vars.state = RADIOSTATE_ENABLING_RX;
     // wiggle debug pin
@@ -294,7 +424,7 @@ void radio_rxEnable(void) {
     radio_vars.state = RADIOSTATE_LISTENING;
 }
 
-void radio_rxNow(void) {
+void radio_rxNow_at86rf215(void) {
     //nothing to do
     if(at86rf215_status(ATMEL_FREQUENCY_TYPE) != RF_STATE_RX){
         leds_error_toggle();
@@ -302,7 +432,7 @@ void radio_rxNow(void) {
     }
 }
 
-void radio_getReceivedFrame(
+void radio_getReceivedFrame_at86rf215(
     uint8_t* bufRead,
     uint16_t* lenRead,
     uint16_t  maxBufLen,

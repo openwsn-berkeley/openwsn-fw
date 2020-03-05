@@ -48,6 +48,8 @@ void sctimer_set_callback(sctimer_cbt cb){
 */
 void sctimer_setCompare(uint32_t val){
     IntEnable(INT_SMTIM);
+    // the current time is later than the required value, but close enough
+    // to think we have been too slow to schedule it.
     if (SleepModeTimerCountGet() - val < TIMERLOOP_THRESHOLD){
         // the timer is already late, schedule the ISR right now manually 
         IntPendSet(INT_SMTIM);
