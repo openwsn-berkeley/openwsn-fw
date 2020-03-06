@@ -4,6 +4,7 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, October 2014.
 */
 
+#include "config.h"
 #include "opendefs.h"
 //===== drivers
 #include "openserial.h"
@@ -32,7 +33,10 @@
 #include "icmpv6echo.h"
 #include "icmpv6rpl.h"
 //-- 04-TRAN
+
+#if defined(OPENWSN_OPENUDP_C)
 #include "openudp.h"
+#endif
 
 //===== coap-layer
 #include "applayer.h"
@@ -62,7 +66,7 @@ void openstack_init(void) {
     openrandom_init();
 
     //-- 02a-TSCH
-//   adaptive_sync_init();
+    // adaptive_sync_init();
     ieee154e_init();
     //-- 02b-RES
     schedule_init();
@@ -79,7 +83,10 @@ void openstack_init(void) {
     icmpv6echo_init();
     icmpv6rpl_init();
     //-- 04-TRAN
+
+#if defined(OPEWSN_OPENUDP_C)
     openudp_init();
+#endif
 
     //===== coap-layer
     applayer_init();

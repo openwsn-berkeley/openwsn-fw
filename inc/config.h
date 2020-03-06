@@ -151,13 +151,20 @@
  *
  *
  *
- * Requires: OPENWSN_UDP_C
+ * Requires: OPENWSN_OPENUDP_C
  *
  */
 
 // #define OPENWSN_USERIALBRIDGE_C
 
 // ========================== Application Layer ==========================
+
+/**
+ * \def OPENWSN_COAP_C
+ *
+ * Implementation of the CoAP protocol.
+ *
+ */
 
 // #define OPENWSN_COAP_C
 
@@ -171,6 +178,16 @@
 // #define OPENWSN_CJOIN_C
 
 
+// ======================== Stack configuration ========================
+
+/**
+ * \def OPENWSN_OPENUDP_C
+ *
+ * Implementation of the UDP protocol.
+ *
+ */
+
+// #define OPENWSN_OPENUDP_C
 
 #include "check_config.h"
 
