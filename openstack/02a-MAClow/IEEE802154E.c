@@ -141,9 +141,7 @@ void ieee154e_init(void) {
 
     resetStats();
     ieee154e_stats.numDeSync                 = 0;
-    // bootstrap open radio
-    radio_bootstrap();
-    
+
     // switch radio on
     radio_rfOn();
 

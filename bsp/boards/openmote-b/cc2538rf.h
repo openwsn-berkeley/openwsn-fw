@@ -16,25 +16,8 @@
  *---------------------------------------------------------------------------*/
 /* Constants */
 #define CC2538_RF_CCA_THRES_USER_GUIDE 0xF8
-/** Tx Power register
- dbm - value
-{  7, 0xFF },
-{  5, 0xED },
-{  3, 0xD5 },
-{  1, 0xC5 },
-{  0, 0xB6 },
-{ -1, 0xB0 },
-{ -3, 0xA1 },
-{ -5, 0x91 },
-{ -7, 0x88 },
-{ -9, 0x72 },
-{-11, 0x62 },
-{-13, 0x58 },
-{-15, 0x42 },
-{-24, 0x00 },
-*/
-#define CC2538_RF_TX_POWER_RECOMMENDED 0xFF // use 7dbm maxmium txpower
-#define CC2538_RF_CHANNEL_MIN            11 // poipoi -- in fact is sending on 0x17 check that.
+#define CC2538_RF_TX_POWER_RECOMMENDED 0xD5 /* TODO: Check value */
+#define CC2538_RF_CHANNEL_MIN            11 //poipoi -- in fact is sending on 0x17 check that.
 #define CC2538_RF_CHANNEL_MAX            26
 #define CC2538_RF_CHANNEL_SPACING         5
 #define CC2538_RF_MAX_PACKET_LEN        127
