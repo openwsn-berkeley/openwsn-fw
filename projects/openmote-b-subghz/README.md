@@ -10,4 +10,4 @@ Configuration | Location
 ------------ | -------------
 fix_channel | add scons compile option fix_channel = 11 (for example)
 EB_PORTION 4 | openstack\02a-MAClow\IEEE802154E.h
-SLOTFRAME_LENGTH11 | openstack\02b-MAChigh\schedule.h
+SLOTFRAME_LENGTH 11 | openstack\02b-MAChigh\schedule.h
