@@ -163,6 +163,9 @@ enum ieee154e_atomicdurations_enum {
    TsLongGT                  =   (1100/PORT_US_PER_TICK),                 //  1100us
    TsTxAckDelay              =   (1000/PORT_US_PER_TICK),                 //  1000us
    TsShortGT                 =    (500/PORT_US_PER_TICK),                 //   500us, The standardlized value for this is 400/2=200us(7ticks). Currectly 7 doesn't work for short packet, change it back to 7 when found the problem.
+   wdRadioTx                 =  (1342/PORT_US_PER_TICK),                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
+   wdDataDuration            =  (5000/PORT_US_PER_TICK),                  //  5000us (measured 4280us with max payload)
+   wdAckDuration             =  (3000/PORT_US_PER_TICK),                  //  3000us (measured 1000us)
 #endif
     
 #if SLOTDURATION==20
@@ -170,9 +173,22 @@ enum ieee154e_atomicdurations_enum {
    TsLongGT                  =  (1311/PORT_US_PER_TICK),                  //  1311us
    TsTxAckDelay              =  (5521/PORT_US_PER_TICK),                  //  5521us
    TsShortGT                 =   (700/PORT_US_PER_TICK),                  //   700us
+   wdRadioTx                 =  (1342/PORT_US_PER_TICK),                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
+   wdDataDuration            =  (5000/PORT_US_PER_TICK),                  //  5000us (measured 4280us with max payload)
+   wdAckDuration             =  (3000/PORT_US_PER_TICK),                  //  3000us (measured 1000us)
 #endif
 
-   TsSlotDuration            =  PORT_TsSlotDuration,  // 10000us
+#if SLOTDURATION==160
+   TsTxOffset                =  (10986/PORT_US_PER_TICK),                 //    360 ticks, 10986us
+   TsLongGT                  =  (7324/PORT_US_PER_TICK),                  //    240 ticks, 7324us
+   TsTxAckDelay              =  (11047/PORT_US_PER_TICK),                 //    362 ticks, 11047us
+   TsShortGT                 =  (1831/PORT_US_PER_TICK),                  //    60 ticksz 1831us
+   // radio watchdog
+   wdRadioTx                 =  (7019/PORT_US_PER_TICK),                  //    230 ticks  7019us delayTx+Tx time for 10 bytes( (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
+   wdDataDuration            =  (81238/PORT_US_PER_TICK),                 //    2662 ticks  81238us (measured with max payload) 
+   wdAckDuration             =  (18310/PORT_US_PER_TICK),                 //    600 ticks 18310us (measured)
+#endif
+   TsSlotDuration            =  PORT_TsSlotDuration,  
    // execution speed related
    maxTxDataPrepare          =  PORT_maxTxDataPrepare,
    maxRxAckPrepare           =  PORT_maxRxAckPrepare,
@@ -182,9 +198,7 @@ enum ieee154e_atomicdurations_enum {
    delayTx                   =  PORT_delayTx,         // between GO signal and SFD
    delayRx                   =  PORT_delayRx,         // between GO signal and start listening
    // radio watchdog
-   wdRadioTx                 =  (1342/PORT_US_PER_TICK),                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
-   wdDataDuration            =  (5000/PORT_US_PER_TICK),                  //  5000us (measured 4280us with max payload)
-   wdAckDuration             =  (3000/PORT_US_PER_TICK),                  //  3000us (measured 1000us)
+
 };
 
 //shift of bytes in the linkOption bitmap: draft-ietf-6tisch-minimal-10.txt: page 6
