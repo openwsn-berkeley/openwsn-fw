@@ -103,7 +103,7 @@
     #define PORT_maxRxDataPrepare               66    
     #define PORT_maxTxAckPrepare                250    
     // radio speed related
-    #define PORT_delayTx                        100    
+    #define PORT_delayTx                        68    
     #define PORT_delayRx                        0     
 #endif
 //===== adaptive_sync accuracy

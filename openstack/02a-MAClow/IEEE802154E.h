@@ -179,16 +179,16 @@ enum ieee154e_atomicdurations_enum {
 #endif
 
 #if SLOTDURATION==160
-   TsTxOffset                =  360,                  //  5215us
-   TsLongGT                  =  240,                  //  1300us
-   TsTxAckDelay              =  362,                  //  5521us
-   TsShortGT                 =   60,                  //   500us
-      // radio watchdog
-   wdRadioTx                 =   230,                  //  4500us delayTx+Tx time for 10 bytes( (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
-   wdDataDuration            =  2662,                  //  40320 us (measured with max payload) >> Mina original is 164
-   wdAckDuration             =   600,                  //  8962us (measured)
+   TsTxOffset                =  (10986/PORT_US_PER_TICK),                 //    360 ticks, 10986us
+   TsLongGT                  =  (7324/PORT_US_PER_TICK),                  //    240 ticks, 7324us
+   TsTxAckDelay              =  (11047/PORT_US_PER_TICK),                 //    362 ticks, 11047us
+   TsShortGT                 =  (1831/PORT_US_PER_TICK),                  //    60 ticksz 1831us
+   // radio watchdog
+   wdRadioTx                 =  (7019/PORT_US_PER_TICK),                  //    230 ticks  7019us delayTx+Tx time for 10 bytes( (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
+   wdDataDuration            =  (81238/PORT_US_PER_TICK),                 //    2662 ticks  81238us (measured with max payload) 
+   wdAckDuration             =  (18310/PORT_US_PER_TICK),                 //    600 ticks 18310us (measured)
 #endif
-   TsSlotDuration            =  PORT_TsSlotDuration,  // 10000us
+   TsSlotDuration            =  PORT_TsSlotDuration,  
    // execution speed related
    maxTxDataPrepare          =  PORT_maxTxDataPrepare,
    maxRxAckPrepare           =  PORT_maxRxAckPrepare,
