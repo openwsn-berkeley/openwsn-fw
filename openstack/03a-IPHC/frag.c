@@ -7,6 +7,9 @@ This module implements 6LoWPAN fragmentation according to RFC 4944,
 \author Timothy Claeys <timothy.claeys@inria.fr>, January 2020.
 */
 
+#include "config.h"
+
+#if defined(OPENWSN_6LO_FRAGMENTATION_C)
 
 #include "opendefs.h"
 #include "frag.h"
@@ -762,3 +765,5 @@ void frag_timeout_cb(opentimers_id_t id) {
         }
     }
 }
+
+#endif /* OPENWSN_6LO_FRAGMENTATION_C */

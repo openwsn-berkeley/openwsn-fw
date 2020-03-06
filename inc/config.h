@@ -189,6 +189,22 @@
 
 // #define OPENWSN_OPENUDP_C
 
+/**
+ * \def OPENWSN_6LO_FRAGMENTATION_C
+ *
+ * Implements 6LoWPAN fragmentation.
+ *
+ * Configuration options:
+ *  - OPENWSN_MAX_PKTSIZE_SUPPORTED: defines the maximum IPV6 packet size (header + payload) the mote supports. Default
+ *  value is 1320. This corresponds to a 40-byte IPv6 header + the minimal IPv6 MTU of 1280 bytes.
+ *  - OPENWSN_MAX_NUM_BIGPKTS: defines how many static buffer space will be allocated for processing large packets.
+ *
+ */
+
+#define OPENWSN_6LO_FRAGMENTATION_C
+#define OPENWSN_MAX_PKTSIZE_SUPPORTED   1320
+#define OPENWSN_MAX_NUM_BIGPKTS         2
+
 #include "check_config.h"
 
 #endif /* __CONFIG_H */

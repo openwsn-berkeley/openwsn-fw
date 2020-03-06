@@ -1,3 +1,4 @@
+#include "config.h"
 #include "opendefs.h"
 #include "openqueue.h"
 #include "openserial.h"
@@ -20,7 +21,9 @@ openqueue_vars_t openqueue_vars;
 
 void openqueue_reset_entry(OpenQueueEntry_t *entry);
 
+#if defined(OPENWSN_6LO_FRAGMENTATION_C)
 void openqueue_reset_big_entry(OpenQueueBigEntry_t *entry);
+#endif
 
 //=========================== public ==========================================
 
@@ -29,15 +32,17 @@ void openqueue_reset_big_entry(OpenQueueBigEntry_t *entry);
 /**
 \brief Initialize this module.
 */
-void openqueue_init(void) {
+void openqueue_init() {
     uint8_t i;
     for (i = 0; i < QUEUELENGTH; i++) {
         openqueue_reset_entry(&(openqueue_vars.queue[i]));
     }
 
+#if defined(OPENWSN_6LO_FRAGMENTATION_C)
     for (i = 0; i < BIGQUEUELENGTH; i++) {
         openqueue_reset_big_entry(&(openqueue_vars.big_queue[i]));
     }
+#endif
 }
 
 /**
@@ -48,7 +53,7 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_queue(void) {
+bool debugPrint_queue() {
     debugOpenQueueEntry_t output[QUEUELENGTH];
     uint8_t i;
     for (i = 0; i < QUEUELENGTH; i++) {
@@ -105,6 +110,7 @@ OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
     return NULL;
 }
 
+#if defined(OPENWSN_6LO_FRAGMENTATION_C)
 OpenQueueEntry_t* openqueue_getFreeBigPacketBuffer(uint8_t creator) {
     uint8_t i;
 
@@ -133,6 +139,7 @@ OpenQueueEntry_t* openqueue_getFreeBigPacketBuffer(uint8_t creator) {
     ENABLE_INTERRUPTS();
     return NULL;
 }
+#endif
 
 /**
 \brief Free a previously-allocated packet buffer.
@@ -148,6 +155,7 @@ owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t *pkt) {
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
 
+#if defined(OPENWSN_6LO_FRAGMENTATION_C)
     if (pkt->is_big_packet) {
         for (i = 0; i < BIGQUEUELENGTH; i++) {
             if ((OpenQueueBigEntry_t *) pkt == &openqueue_vars.big_queue[i]) {
@@ -163,8 +171,8 @@ owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t *pkt) {
                 return E_SUCCESS;
             }
         }
-
     } else {
+#endif
         for (i = 0; i < QUEUELENGTH; i++) {
             if (&openqueue_vars.queue[i] == pkt) {
                 if (openqueue_vars.queue[i].owner == COMPONENT_NULL) {
@@ -178,8 +186,9 @@ owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t *pkt) {
                 return E_SUCCESS;
             }
         }
-
+#if defined(OPENWSN_6LO_FRAGMENTATION_C)
     }
+#endif
 
     // log the error
     openserial_printCritical(COMPONENT_OPENQUEUE, ERR_FREEING_ERROR,
@@ -207,18 +216,20 @@ void openqueue_removeAllCreatedBy(uint8_t creator) {
         }
     }
 
+#if defined(OPENWSN_6LO_FRAGMENTATION_C)
     for (i = 0; i < BIGQUEUELENGTH; i++) {
         if (openqueue_vars.big_queue[i].standard_entry.creator == creator) {
             openqueue_reset_big_entry(&(openqueue_vars.big_queue[i]));
         }
     }
+#endif
 
     ENABLE_INTERRUPTS();
 }
 
 //======= called by RES
 
-OpenQueueEntry_t* openqueue_sixtopGetSentPacket(void) {
+OpenQueueEntry_t* openqueue_sixtopGetSentPacket() {
     uint8_t i;
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
@@ -230,6 +241,7 @@ OpenQueueEntry_t* openqueue_sixtopGetSentPacket(void) {
         }
     }
 
+#if defined(OPENWSN_6LO_FRAGMENTATION_C)
     for (i = 0; i < BIGQUEUELENGTH; i++) {
         if (((OpenQueueEntry_t*)&openqueue_vars.big_queue[i])->owner == COMPONENT_IEEE802154E_TO_SIXTOP &&
             ((OpenQueueEntry_t*)&openqueue_vars.big_queue[i])->creator != COMPONENT_IEEE802154E) {
@@ -237,12 +249,13 @@ OpenQueueEntry_t* openqueue_sixtopGetSentPacket(void) {
             return (OpenQueueEntry_t*)&openqueue_vars.big_queue[i];
         }
     }
+#endif
 
     ENABLE_INTERRUPTS();
     return NULL;
 }
 
-OpenQueueEntry_t* openqueue_sixtopGetReceivedPacket(void) {
+OpenQueueEntry_t* openqueue_sixtopGetReceivedPacket() {
     uint8_t i;
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
@@ -280,7 +293,7 @@ uint8_t openqueue_getNum6PReq(open_addr_t *neighbor) {
     return num6Prequest;
 }
 
-uint8_t openqueue_getNum6PResp(void) {
+uint8_t openqueue_getNum6PResp() {
 
     uint8_t i;
     uint8_t num6Presponse;
@@ -324,7 +337,7 @@ void openqueue_remove6PrequestToNeighbor(open_addr_t *neighbor) {
 
 //======= called by IEEE80215E
 
-bool openqueue_isHighPriorityEntryEnough(void) {
+bool openqueue_isHighPriorityEntryEnough() {
     uint8_t i;
     uint8_t numberOfEntry;
     INTERRUPT_DECLARATION();
@@ -346,7 +359,7 @@ bool openqueue_isHighPriorityEntryEnough(void) {
     }
 }
 
-OpenQueueEntry_t* openqueue_macGetEBPacket(void) {
+OpenQueueEntry_t* openqueue_macGetEBPacket() {
    uint8_t i;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
@@ -464,6 +477,7 @@ OpenQueueEntry_t*  openqueue_macGetUnicastPakcet(open_addr_t* toNeighbor){
         }
     }
 
+#if defined(OPENWSN_6LO_FRAGMENTATION_C)
     for (i = 0; i < BIGQUEUELENGTH; i++) {
         if (
                 ((OpenQueueEntry_t*)&openqueue_vars.big_queue[i])->owner == COMPONENT_SIXTOP_TO_IEEE802154E &&
@@ -476,9 +490,9 @@ OpenQueueEntry_t*  openqueue_macGetUnicastPakcet(open_addr_t* toNeighbor){
             return (OpenQueueEntry_t*)&openqueue_vars.big_queue[i];
         }
     }
+#endif
     ENABLE_INTERRUPTS();
     return NULL;
-
 }
 
 
@@ -493,7 +507,9 @@ void openqueue_reset_entry(OpenQueueEntry_t *entry) {
     entry->payload = &(entry->packet[IEEE802154_FRAME_SIZE - IEEE802154_SECURITY_TAG_LEN]);
     entry->length = 0;
     entry->is_cjoin_response = FALSE;
+#if defined(OPENWSN_6LO_FRAGMENTATION_C)
     entry->is_big_packet = FALSE;
+#endif
     //l4
     entry->l4_protocol = IANA_UNDEFINED;
     entry->l4_protocol_compressed = FALSE;
@@ -501,7 +517,9 @@ void openqueue_reset_entry(OpenQueueEntry_t *entry) {
     entry->l3_destinationAdd.type = ADDR_NONE;
     entry->l3_sourceAdd.type = ADDR_NONE;
     entry->l3_useSourceRouting = FALSE;
+#if defined(OPENWSN_6LO_FRAGMENTATION_C)
     entry->l3_isFragment = FALSE;
+#endif
     //l2
     entry->l2_sixtop_command = IANA_6TOP_CMD_NONE;
     entry->l2_nextORpreviousHop.type = ADDR_NONE;
@@ -515,10 +533,11 @@ void openqueue_reset_entry(OpenQueueEntry_t *entry) {
     entry->l2_securityLevel = 0;
 }
 
-
+#if defined(OPENWSN_6LO_FRAGMENTATION_C)
 void openqueue_reset_big_entry(OpenQueueBigEntry_t *entry) {
     openqueue_reset_entry(&(entry->standard_entry));
 
     // make pointer point to the end op the extended buffer
     entry->standard_entry.payload = &(entry->standard_entry.packet[IPV6_PACKET_SIZE]);
 }
+#endif

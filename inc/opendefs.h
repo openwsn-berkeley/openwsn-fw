@@ -44,7 +44,12 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 
 // frame sizes
 #define IEEE802154_FRAME_SIZE   127
-#define IPV6_PACKET_SIZE        1320
+
+#if defined(OPENWSN_6LO_FRAGMENTATION_C)
+#define IPV6_PACKET_SIZE        OPENWSN_MAX_PKTSIZE_SUPPORTED
+#else
+#define IPV6_PACKET_SIZE        0
+#endif
 
 enum {
    E_SUCCESS                           = 0,
@@ -328,7 +333,9 @@ typedef struct {
    bool          orgination_time_flag;
    bool          drop_flag;
    bool          is_cjoin_response;
+#if defined(OPENWSN_6LO_FRAGMENTATION_C)
    bool          is_big_packet;
+#endif
    //l4
    uint8_t       l4_protocol;                                   // l4 protocol to be used
    bool          l4_protocol_compressed;                        // is the l4 protocol header compressed?
@@ -340,7 +347,9 @@ typedef struct {
    open_addr_t   l3_destinationAdd;                             // 128b IPv6 destination (down stack)
    open_addr_t   l3_sourceAdd;                                  // 128b IPv6 source address
    bool          l3_useSourceRouting;                           // TRUE when the packet goes downstream
+#if defined(OPENWSN_6LO_FRAGMENTATION_C)
    bool          l3_isFragment;                                 // TRUE when this is a 6LowPAN fragment
+#endif
    //l2
    owerror_t     l2_sendDoneError;                              // outcome of trying to send this packet
    open_addr_t   l2_nextORpreviousHop;                          // 64b IEEE802.15.4 next (down stack) or previous (up) hop address
@@ -384,10 +393,12 @@ typedef struct {
 } OpenQueueEntry_t;
 
 
+#if defined(OPENWSN_6LO_FRAGMENTATION_C)
 typedef struct {
     OpenQueueEntry_t standard_entry;
     uint8_t packet_remainder[IPV6_PACKET_SIZE - 130];           // 130 byts alread allocated in the normal OpenQueueEntry
 } OpenQueueBigEntry_t;
+#endif
 
 
 BEGIN_PACK

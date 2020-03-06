@@ -213,7 +213,11 @@ owerror_t iphc_sendFromForwarding(
         *((uint8_t * )(msg->payload)) = PAGE_DISPATCH_NO_1;
     }
 
+#if defined(OPENWSN_6LO_FRAGMENTATION_C)
     return frag_fragment6LoPacket(msg);
+#else
+    return sixtop_send(msg);
+#endif
 }
 
 //send from bridge: 6LoWPAN header already added by OpenLBR, send as is

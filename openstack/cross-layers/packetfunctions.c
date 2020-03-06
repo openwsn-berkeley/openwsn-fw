@@ -1,3 +1,4 @@
+#include "config.h"
 #include "packetfunctions.h"
 #include "openserial.h"
 #include "idmanager.h"
@@ -304,7 +305,11 @@ void packetfunctions_reserveHeaderSize(OpenQueueEntry_t *pkt, uint16_t header_le
 void packetfunctions_tossHeader(OpenQueueEntry_t *pkt, uint16_t header_length) {
     uint16_t size;
 
+#if defined(OPENWSN_6LO_FRAGMENTATION_C)
     size = pkt->is_big_packet == TRUE ? IPV6_PACKET_SIZE : IEEE802154_FRAME_SIZE;
+#else
+    size = IEEE802154_FRAME_SIZE;
+#endif
 
     pkt->payload += header_length;
     pkt->length -= header_length;
@@ -327,14 +332,22 @@ void packetfunctions_reserveFooterSize(OpenQueueEntry_t *pkt, uint16_t header_le
 
     if (pkt->length > size) {
         openserial_printCritical(COMPONENT_PACKETFUNCTIONS, ERR_HEADER_TOO_LONG,
-                              (errorparameter_t) 2,
-                              (errorparameter_t) pkt->length);
+                                 (errorparameter_t) 2,
+                                 (errorparameter_t) pkt->length);
     }
 }
 
 void packetfunctions_tossFooter(OpenQueueEntry_t *pkt, uint16_t header_length) {
     pkt->length -= header_length;
-    if (pkt->length > IPV6_PACKET_SIZE) {//wraps around, so a negative value will be >128
+    uint16_t max_length;
+
+#if defined(OPENWSN_6LO_FRAGMENTATION_C)
+    max_length = IPV6_PACKET_SIZE;
+#else
+    max_length = IEEE802154_FRAME_SIZE;
+#endif
+
+    if (pkt->length > max_length) {//wraps around, so a negative value will be >128
         openserial_printError(COMPONENT_PACKETFUNCTIONS, ERR_HEADER_TOO_LONG,
                               (errorparameter_t) 3,
                               (errorparameter_t) pkt->length);
@@ -349,6 +362,7 @@ void packetfunctions_tossFooter(OpenQueueEntry_t *pkt, uint16_t header_length) {
 void packetfunctions_duplicatePacket(OpenQueueEntry_t *dst, OpenQueueEntry_t *src) {
     // make a copy of the frame
 
+#if defined(OPENWSN_6LO_FRAGMENTATION_C)
     if (src->is_big_packet){
         memcpy(dst, src, sizeof(OpenQueueEntry_t));
 
@@ -356,13 +370,15 @@ void packetfunctions_duplicatePacket(OpenQueueEntry_t *dst, OpenQueueEntry_t *sr
         dst->is_big_packet = FALSE;
         dst->payload -= src->length;
         memcpy(dst->payload, src->payload, src->length);
-
     } else {
-        memcpy(dst, src, sizeof(OpenQueueEntry_t));
+#endif
+    memcpy(dst, src, sizeof(OpenQueueEntry_t));
 
-        // Calculate where payload starts in the buffer
-        dst->payload = &dst->packet[src->payload - src->packet]; // update pointers
+    // Calculate where payload starts in the buffer
+    dst->payload = &dst->packet[src->payload - src->packet]; // update pointers
+#if defined(OPENWSN_6LO_FRAGMENTATION_C)
     }
+#endif
 
     // update l2_FrameCounter pointer
     dst->l2_FrameCounter = dst->payload + (src->l2_FrameCounter - src->payload);

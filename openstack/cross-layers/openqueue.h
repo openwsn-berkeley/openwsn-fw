@@ -8,13 +8,19 @@
 \{
 */
 
+#include "config.h"
 #include "opendefs.h"
 #include "IEEE802154.h"
 
 //=========================== define ==========================================
 
 #define QUEUELENGTH  20
-#define BIGQUEUELENGTH  2
+
+#if defined(OPENWSN_6LO_FRAGMENTATION_C)
+#define BIGQUEUELENGTH  OPENWSN_MAX_NUM_BIGPKTS
+#else
+#define BIGQUEUELENGTH  0
+#endif
 
 //=========================== typedef =========================================
 
@@ -27,7 +33,9 @@ typedef struct {
 
 typedef struct {
    OpenQueueEntry_t queue[QUEUELENGTH];
+#if defined(OPENWSN_6LO_FRAGMENTATION_C)
    OpenQueueBigEntry_t big_queue[BIGQUEUELENGTH];
+#endif
 } openqueue_vars_t;
 
 //=========================== prototypes ======================================
@@ -37,7 +45,11 @@ void               openqueue_init(void);
 bool               debugPrint_queue(void);
 // called by any component
 OpenQueueEntry_t*  openqueue_getFreePacketBuffer(uint8_t creator);
+
+#if defined(OPENWSN_6LO_FRAGMENTATION_C)
 OpenQueueEntry_t*  openqueue_getFreeBigPacketBuffer(uint8_t creator);
+#endif
+
 owerror_t          openqueue_freePacketBuffer(OpenQueueEntry_t* pkt);
 void               openqueue_removeAllCreatedBy(uint8_t creator);
 bool               openqueue_isHighPriorityEntryEnough(void);

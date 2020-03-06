@@ -33,10 +33,7 @@
 #include "icmpv6echo.h"
 #include "icmpv6rpl.h"
 //-- 04-TRAN
-
-#if defined(OPENWSN_OPENUDP_C)
 #include "openudp.h"
-#endif
 
 //===== coap-layer
 #include "applayer.h"
@@ -76,7 +73,11 @@ void openstack_init(void) {
     //-- 03a-IPHC
     openbridge_init();
     iphc_init();
+
+#if defined(OPENWSN_6LO_FRAGMENTATION_C)
     frag_init();
+#endif
+
     //-- 03b-IPv6
     forwarding_init();
     icmpv6_init();

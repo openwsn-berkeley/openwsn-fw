@@ -1,3 +1,4 @@
+#include "config.h"
 #include "opendefs.h"
 #include "sixtop.h"
 #include "openserial.h"
@@ -5,12 +6,12 @@
 #include "neighbors.h"
 #include "IEEE802154E.h"
 #include "frag.h"
+#include "iphc.h"
 #include "packetfunctions.h"
 #include "openrandom.h"
 #include "scheduler.h"
 #include "opentimers.h"
 #include "debugpins.h"
-#include "leds.h"
 #include "IEEE802154.h"
 #include "IEEE802154_security.h"
 #include "idmanager.h"
@@ -446,7 +447,11 @@ void task_sixtopNotifSendDone(void) {
             break;
         default:
             // send the rest up the stack
-            frag_sendDone(msg,msg->l2_sendDoneError);
+#if defined(OPENWSN_6LO_FRAGMENTATION_C)
+            frag_sendDone(msg, msg->l2_sendDoneError);
+#else
+            iphc_sendDone(msg, msg->l2_sendDoneError);
+#endif
             break;
     }
 }
@@ -511,7 +516,11 @@ void task_sixtopNotifReceive(void) {
                 break;
             }
             // send to upper layer
+#if defined(OPENWSN_6LO_FRAGMENTATION_C)
             frag_receive(msg);
+#else
+            iphc_receive(msg);
+#endif
         } else {
             // free up the RAM
             openqueue_freePacketBuffer(msg);
