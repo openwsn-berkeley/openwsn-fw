@@ -602,7 +602,7 @@ class telosb_bootloadThread(threading.Thread):
     def run(self):
         print 'starting bootloading on {0}'.format(self.comPort)
         subprocess.call(
-            'python '+os.path.join('bootloader','telosb','bsl')+' --telosb -c {0} -r -e -I -p "{1}"'.format(self.comPort,self.hexFile),
+            'python2 '+os.path.join('bootloader','telosb','bsl')+' --telosb -c {0} -r -e -I -p "{1}"'.format(self.comPort,self.hexFile),
             shell=True
         )
         print 'done bootloading on {0}'.format(self.comPort)
@@ -644,7 +644,7 @@ class OpenMoteCC2538_bootloadThread(threading.Thread):
     def run(self):
         print 'starting bootloading on {0}'.format(self.comPort)
         subprocess.call(
-            'python '+os.path.join('bootloader','openmote-cc2538','cc2538-bsl.py')+' -e --bootloader-invert-lines -w -b 400000 -p {0} {1}'.format(self.comPort,self.hexFile),
+            'python2 '+os.path.join('bootloader','openmote-cc2538','cc2538-bsl.py')+' -e --bootloader-invert-lines -w -b 400000 -p {0} {1}'.format(self.comPort,self.hexFile),
             shell=True
         )
         print 'done bootloading on {0}'.format(self.comPort)
@@ -699,7 +699,7 @@ class opentestbed_bootloadThread(threading.Thread):
         else:
             target  = self.mote
         subprocess.call(
-            'python '+os.path.join('bootloader','openmote-cc2538','ot_program.py')+' -a {0} {1}'.format(target,self.hexFile),
+            'python2 '+os.path.join('bootloader','openmote-cc2538','ot_program.py')+' -a {0} {1}'.format(target,self.hexFile),
             shell=True
         )
         print 'done bootloading on {0}'.format(self.mote)
@@ -746,7 +746,7 @@ class openmotestm_bootloadThread(threading.Thread):
     def run(self):
         print 'starting bootloading on {0}'.format(self.comPort)
         subprocess.call(
-            'python '+ os.path.join('bootloader','openmotestm','bin.py' + ' -p {0} {1}'.format(self.comPort, self.binaryFile)),
+            'python2 '+ os.path.join('bootloader','openmotestm','bin.py' + ' -p {0} {1}'.format(self.comPort, self.binaryFile)),
             shell=True
         )
         print 'done bootloading on {0}'.format(self.comPort)
@@ -788,7 +788,7 @@ class IotLabM3_bootloadThread(threading.Thread):
     def run(self):
         print 'starting bootloading on {0}'.format(self.comPort)
         subprocess.call(
-            'python '+ os.path.join('bootloader','iot-lab_M3','iotlab-m3-bsl.py' + ' -i {0} -p {1}'.format(self.binaryFile, self.comPort)),
+            'python2 '+ os.path.join('bootloader','iot-lab_M3','iotlab-m3-bsl.py' + ' -i {0} -p {1}'.format(self.binaryFile, self.comPort)),
             shell=True
         )
         print 'done bootloading on {0}'.format(self.comPort)
@@ -834,7 +834,7 @@ class scum_bootloadThread(threading.Thread):
     def run(self):
         print 'starting bootloading on {0}'.format(self.comPort)
         subprocess.call(
-            'python '+ os.path.join('bootloader','scum','scum_bootloader.py' + ' -p {0} {1}'.format(self.comPort, self.binaryFile)),
+            'python2 '+ os.path.join('bootloader','scum','scum_bootloader.py' + ' -p {0} {1}'.format(self.comPort, self.binaryFile)),
             shell=True
         )
         print 'done bootloading on {0}'.format(self.comPort)
