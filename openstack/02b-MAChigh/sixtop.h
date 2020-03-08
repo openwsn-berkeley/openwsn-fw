@@ -82,10 +82,10 @@ typedef enum {
 // on the receiver side of sixtop, it may has mutiple sixtop request in the queue to response (most of them will return with RC BUSY)
 // increase the timeout longer than calculated value
 #define SIX2SIX_TIMEOUT_MS      65535
-typedef uint8_t                 (*sixtop_sf_getsfid)(void);
-typedef uint16_t                (*sixtop_sf_getmetadata)(void);
-typedef metadata_t              (*sixtop_sf_translatemetadata)(void);
-typedef void (*sixtop_sf_handle_callback)(uint8_t arg, open_addr_t* address);
+typedef uint8_t                 (*sixtop_sf_getsfid_cbt)(void);
+typedef uint16_t                (*sixtop_sf_getmetadata_cbt)(void);
+typedef metadata_t              (*sixtop_sf_translatemetadata_cbt)(void);
+typedef void (*sixtop_sf_handle_callback_cbt)(uint8_t arg, open_addr_t* address);
 
 #define SIXTOP_MINIMAL_EBPERIOD     5 // minist period of sending EB
 
@@ -108,10 +108,10 @@ typedef struct {
    bool                 isResponseEnabled;
    uint8_t                      cellOptions;
    cellInfo_ht                  celllist_toDelete[CELLLIST_MAX_LEN];
-   sixtop_sf_getsfid            cb_sf_getsfid;
-   sixtop_sf_getmetadata        cb_sf_getMetadata;
-   sixtop_sf_translatemetadata  cb_sf_translateMetadata;
-   sixtop_sf_handle_callback    cb_sf_handleRCError;
+   sixtop_sf_getsfid_cbt            cb_sf_getsfid;
+   sixtop_sf_getmetadata_cbt        cb_sf_getMetadata;
+   sixtop_sf_translatemetadata_cbt  cb_sf_translateMetadata;
+   sixtop_sf_handle_callback_cbt    cb_sf_handleRCError;
    open_addr_t          neighborToClearCells;
 } sixtop_vars_t;
 
@@ -122,10 +122,10 @@ void      sixtop_init(void);
 void      sixtop_setKaPeriod(uint16_t kaPeriod);
 void      sixtop_setEBPeriod(uint8_t ebPeriod);
 void      sixtop_setSFcallback(
-    sixtop_sf_getsfid     cb0,
-    sixtop_sf_getmetadata cb1,
-    sixtop_sf_translatemetadata cb2,
-    sixtop_sf_handle_callback cb3
+    sixtop_sf_getsfid_cbt     cb0,
+    sixtop_sf_getmetadata_cbt cb1,
+    sixtop_sf_translatemetadata_cbt cb2,
+    sixtop_sf_handle_callback_cbt cb3
 );
 // scheduling
 owerror_t sixtop_request(

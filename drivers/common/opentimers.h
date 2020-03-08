@@ -58,6 +58,7 @@ typedef struct {
    timer_type_t         timerType;          // the timer type
    bool                 hasExpired;         // in case there are more than one interrupt occur at same time
    opentimers_cbt       callback;           // function to call when elapses
+   uint8_t              timer_task_prio;    // when opentimer push a task, use timer_task_prio to mark the priority
 } opentimers_t;
 
 //=========================== module variables ================================
@@ -73,7 +74,7 @@ typedef struct {
 //=========================== prototypes ======================================
 
 void             opentimers_init(void);
-opentimers_id_t  opentimers_create(uint8_t priority);
+opentimers_id_t  opentimers_create(uint8_t timer_id, uint8_t task_priority);
 void             opentimers_scheduleIn(opentimers_id_t      id,
                                        uint32_t            duration,
                                        time_type_t         uint_type,

@@ -117,10 +117,6 @@ open_addr_t* neighbors_getJoinProxy(void) {
     uint8_t joinPrioMinimum;
     open_addr_t* joinProxy;
 
-    uint16_t moteId;
-    uint16_t slotoffset;
-    uint8_t  channeloffset;
-
     joinPrioMinimum = 0xff;
     joinProxy = NULL;
     for (i=0;i<MAXNUMNEIGHBORS;i++) {
@@ -134,31 +130,11 @@ open_addr_t* neighbors_getJoinProxy(void) {
         }
     }
 
-    if (joinProxy){
-        // remove all previous installed autonomous cell
-        neighbor_removeAllAutonomousTxRxCellUnicast();
-        moteId = 256*joinProxy->addr_64b[6]+joinProxy->addr_64b[7];
-        slotoffset          = msf_hashFunction_getSlotoffset(moteId);
-        channeloffset       = msf_hashFunction_getChanneloffset(moteId);
-        // reserve the autonomous cell to joinproxy
-        schedule_addActiveSlot(
-            slotoffset,                                 // slot offset
-            CELLTYPE_TXRX,                              // type of slot
-            TRUE,                                       // shared?
-            channeloffset,                              // channel offset
-            joinProxy                                   // neighbor
-        );
-    }
-
     return joinProxy;
 }
 
 bool neighbors_getNeighborNoResource(uint8_t index){
     return neighbors_vars.neighbors[index].f6PNORES;
-}
-
-bool neighbors_getNeighborIsInBlacklist(uint8_t index){
-    return neighbors_vars.neighbors[index].inBlacklist;
 }
 
 uint8_t neighbors_getSequenceNumber(open_addr_t* address){
@@ -245,7 +221,7 @@ bool neighbors_isInsecureNeighbor(open_addr_t* address) {
       default:
          openserial_printCritical(COMPONENT_NEIGHBORS,ERR_WRONG_ADDR_TYPE,
                                (errorparameter_t)address->type,
-                               (errorparameter_t)0);
+                               (errorparameter_t)1);
          return returnVal;
    }
 
@@ -402,6 +378,7 @@ The fields which are updated are:
 void neighbors_indicateTx(
     open_addr_t* l2_dest,
     uint8_t      numTxAttempts,
+    bool         sentOnTxCell,
     bool         was_finally_acked,
     asn_t*       asnTs
 ) {
@@ -414,23 +391,34 @@ void neighbors_indicateTx(
     // loop through neighbor table
     for (i=0;i<MAXNUMNEIGHBORS;i++) {
         if (isThisRowMatching(l2_dest,i)) {
-            // handle roll-over case
+            // found the target neighbor
 
-            if (neighbors_vars.neighbors[i].numTx>(0xff-numTxAttempts)) {
-                neighbors_vars.neighbors[i].numWraps++; //counting the number of times that tx wraps.
-                neighbors_vars.neighbors[i].numTx/=2;
-                neighbors_vars.neighbors[i].numTxACK/=2;
-            }
-            // update statistics
-            neighbors_vars.neighbors[i].numTx += numTxAttempts;
+            // reset backoff variable
+            neighbors_vars.neighbors[i].backoffExponenton     = MINBE-1;
+            neighbors_vars.neighbors[i].backoff               = 0;
 
+            // update asn if ack'ed
             if (was_finally_acked==TRUE) {
-                neighbors_vars.neighbors[i].numTxACK++;
                 memcpy(&neighbors_vars.neighbors[i].asn,asnTs,sizeof(asn_t));
             }
 
-            // numTx and numTxAck changed,, update my rank
-            icmpv6rpl_updateMyDAGrankAndParentSelection();
+            // only update numTx/numTxAck on Tx cell
+            if (sentOnTxCell) {
+                if (neighbors_vars.neighbors[i].numTx>(0xff-numTxAttempts)) {
+                    neighbors_vars.neighbors[i].numWraps++; //counting the number of times that tx wraps.
+                    neighbors_vars.neighbors[i].numTx/=2;
+                    neighbors_vars.neighbors[i].numTxACK/=2;
+                }
+                // update statistics
+                neighbors_vars.neighbors[i].numTx += numTxAttempts;
+
+                if (was_finally_acked==TRUE) {
+                    neighbors_vars.neighbors[i].numTxACK++;
+                }
+
+                // numTx and numTxAck changed,, update my rank
+                icmpv6rpl_updateMyDAGrankAndParentSelection();
+            }
             break;
         }
     }
@@ -477,7 +465,7 @@ bool  neighbors_getNeighborEui64(open_addr_t* address, uint8_t addr_type, uint8_
       default:
          openserial_printCritical(COMPONENT_NEIGHBORS,ERR_WRONG_ADDR_TYPE,
                                (errorparameter_t)addr_type,
-                               (errorparameter_t)1);
+                               (errorparameter_t)2);
          break;
    }
    return ReturnVal;
@@ -519,6 +507,15 @@ bool neighbors_backoffHitZero(open_addr_t* address){
             break;
         }
     }
+    if (i==MAXNUMNEIGHBORS) {
+        // The neighbor looking for is not in the table.
+        // This is usually the case a packet is from downward traffic, which
+        // doesn't need to be in the neighbor table.
+
+        // currently, just allow the packet to be send without backoff checking.
+        // performence to be tested...
+        returnVal = TRUE;
+    }
     return returnVal;
 }
 
@@ -556,56 +553,7 @@ void neighbors_setNeighborNoResource(open_addr_t* address){
 
 void neighbors_setPreferredParent(uint8_t index, bool isPreferred){
 
-    uint16_t moteId;
-    uint16_t slotoffset;
-    uint8_t  channeloffset;
-
     neighbors_vars.neighbors[index].parentPreference = isPreferred;
-
-    moteId = 256*neighbors_vars.neighbors[index].addr_64b.addr_64b[6]+\
-             neighbors_vars.neighbors[index].addr_64b.addr_64b[7];
-    slotoffset          = msf_hashFunction_getSlotoffset(moteId);
-    channeloffset       = msf_hashFunction_getChanneloffset(moteId);
-
-    if (isPreferred){
-        // the neighbor is selected as parent
-        // reserve the autonomous cell to this neighbor
-        schedule_addActiveSlot(
-            slotoffset,                                 // slot offset
-            CELLTYPE_TXRX,                              // type of slot
-            TRUE,                                       // shared?
-            channeloffset,                              // channel offset
-            &(neighbors_vars.neighbors[index].addr_64b) // neighbor
-        );
-    } else {
-        // the neighbor is de-selected as parent
-        // remove the autonomous cell to this neighbor
-        if (schedule_hasAutonomousTxRxCellUnicast(&(neighbors_vars.neighbors[index].addr_64b))){
-            schedule_removeActiveSlot(
-                slotoffset,                                 // slot offset
-                &(neighbors_vars.neighbors[index].addr_64b) // neighbor
-            );
-        }
-    }
-}
-
-void neighbor_removeAutonomousTxRxCellUnicast(open_addr_t* address){
-
-    uint16_t moteId;
-    uint16_t slotoffset;
-
-    moteId = 256*address->addr_64b[6]+address->addr_64b[7];
-    slotoffset          = msf_hashFunction_getSlotoffset(moteId);
-
-    schedule_removeActiveSlot(
-        slotoffset,             // slot offset
-        address                 // neighbor
-    );
-}
-
-void neighbor_removeAllAutonomousTxRxCellUnicast(void){
-
-    schedule_removeAllAutonomousTxRxCellUnicast();
 }
 
 //===== managing routing info
@@ -645,14 +593,6 @@ uint16_t neighbors_getLinkMetric(uint8_t index) {
         } else {
             rankIncrease = (uint16_t)(rankIncreaseIntermediary >> 10);
         }
-
-        if (
-            rankIncrease>(3*DEFAULTLINKCOST-2)*MINHOPRANKINCREASE &&
-            neighbors_vars.neighbors[index].numTx > MINIMAL_NUM_TX
-        ){
-            // PDR too low, put the neighbor in blacklist
-            neighbors_vars.neighbors[index].inBlacklist = TRUE;
-        }
     }
     return rankIncrease;
 }
@@ -660,8 +600,7 @@ uint16_t neighbors_getLinkMetric(uint8_t index) {
 //===== maintenance
 
 void  neighbors_removeOld(void) {
-    uint8_t    i, j;
-    bool       haveParent;
+    uint8_t    i;
     PORT_TIMER_WIDTH timeSinceHeard;
     open_addr_t addressToWrite;
 
@@ -679,17 +618,28 @@ void  neighbors_removeOld(void) {
     for (i=0;i<MAXNUMNEIGHBORS;i++) {
         if (neighbors_vars.neighbors[i].used==1) {
             timeSinceHeard = ieee154e_asnDiff(&neighbors_vars.neighbors[i].asn);
-            if (timeSinceHeard>DESYNCTIMEOUT) {
+            if (timeSinceHeard>(2*DESYNCTIMEOUT)) {
+
+                /**
+                    don't remove neighbor marked as:
+                    - 6P no resource
+                    - pareferred parent
+                */
+
                 if (
-                    neighbors_vars.neighbors[i].f6PNORES    == FALSE &&
-                    neighbors_vars.neighbors[i].inBlacklist == FALSE
+                    neighbors_vars.neighbors[i].f6PNORES         == FALSE &&
+                    neighbors_vars.neighbors[i].parentPreference == 0
                 ){
-                    removeNeighbor(i);
-                }
-                haveParent = icmpv6rpl_getPreferredParentIndex(&j);
-                if (haveParent && (i==j)) { // this is our preferred parent, carefully!
-                    icmpv6rpl_killPreferredParent();
-                    icmpv6rpl_updateMyDAGrankAndParentSelection();
+
+                    // remove neighbor only when there is no packet in queue
+                    if (
+                        openqueue_macGetUnicastPakcet(
+                            &(neighbors_vars.neighbors[i].addr_64b)
+                        )==NULL
+                    ) {
+
+                        removeNeighbor(i);
+                    }
                 }
             }
         }
@@ -729,7 +679,7 @@ void registerNewNeighbor(open_addr_t* address,
     if (address->type!=ADDR_64B) {
         openserial_printCritical(COMPONENT_NEIGHBORS,ERR_WRONG_ADDR_TYPE,
                             (errorparameter_t)address->type,
-                            (errorparameter_t)2);
+                            (errorparameter_t)3);
         return;
     }
     // add this neighbor
@@ -760,6 +710,8 @@ void registerNewNeighbor(open_addr_t* address,
                 //update jp
                 if (joinPrioPresent==TRUE){
                     neighbors_vars.neighbors[i].joinPrio=joinPrio;
+                } else {
+                    neighbors_vars.neighbors[i].joinPrio=DEFAULTJOINPRIORITY;
                 }
                 break;
             }
@@ -786,8 +738,6 @@ bool isNeighbor(open_addr_t* neighbor) {
 
 void removeNeighbor(uint8_t neighborIndex) {
 
-    uint16_t moteId, slotoffset;
-
     neighbors_vars.neighbors[neighborIndex].used                      = FALSE;
     neighbors_vars.neighbors[neighborIndex].parentPreference          = 0;
     neighbors_vars.neighbors[neighborIndex].stableNeighbor            = FALSE;
@@ -804,17 +754,6 @@ void removeNeighbor(uint8_t neighborIndex) {
     neighbors_vars.neighbors[neighborIndex].sequenceNumber            = 0;
     neighbors_vars.neighbors[neighborIndex].backoffExponenton         = MINBE-1;;
     neighbors_vars.neighbors[neighborIndex].backoff                   = 0;
-
-    if (schedule_hasAutonomousTxRxCellUnicast(&(neighbors_vars.neighbors[neighborIndex].addr_64b))){
-        moteId = 256*neighbors_vars.neighbors[neighborIndex].addr_64b.addr_64b[6]+\
-                     neighbors_vars.neighbors[neighborIndex].addr_64b.addr_64b[7];
-        slotoffset = msf_hashFunction_getSlotoffset(moteId);
-        schedule_removeActiveSlot(
-            slotoffset,                                         // slot offset
-            &(neighbors_vars.neighbors[neighborIndex].addr_64b) // neighbor
-        );
-    }
-
     neighbors_vars.neighbors[neighborIndex].addr_64b.type             = ADDR_NONE;
 }
 
@@ -828,7 +767,7 @@ bool isThisRowMatching(open_addr_t* address, uint8_t rowNumber) {
       default:
          openserial_printCritical(COMPONENT_NEIGHBORS,ERR_WRONG_ADDR_TYPE,
                                (errorparameter_t)address->type,
-                               (errorparameter_t)3);
+                               (errorparameter_t)4);
          return FALSE;
    }
 }

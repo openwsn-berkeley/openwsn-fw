@@ -39,27 +39,27 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    uint16_t     length_elementid_type;
    bool         headerIEPresent = FALSE;
    uint8_t      destAddrMode = -1;
-   
+
    securityEnabled = msg->l2_securityLevel == IEEE154_ASH_SLF_TYPE_NOSEC ? 0 : 1;
 
-   msg->l2_payload = msg->payload; // save the position where to start encrypting if security is enabled 
- 
+   msg->l2_payload = msg->payload; // save the position where to start encrypting if security is enabled
+
    // General IEs here (those that are carried in all packets)
-   // add termination IE accordingly 
+   // add termination IE accordingly
    if (payloadIEPresent == TRUE) {
-       ielistpresent = IEEE154_IELIST_YES; 
+       ielistpresent = IEEE154_IELIST_YES;
        //add header termination IE (id=0x7e)
        packetfunctions_reserveHeaderSize(msg,TERMINATIONIE_LEN);
        msg->payload[0] = HEADER_TERMINATION_1_IE         & 0xFF;
        msg->payload[1] = (HEADER_TERMINATION_1_IE  >> 8) & 0xFF;
-       
-       
+
+
    } else {
        // check whether I have payload, if yes, add header termination IE (0x7F)
        // or ternimation IE will be omitted. For example, Keep alive doesn't have
        // any payload, so there is no ternimation IE for it.
        if (msg->length != 0) {
-           //add header termination IE (id=0x7f)if I have header IE list, OR 
+           //add header termination IE (id=0x7f)if I have header IE list, OR
            // no need for termination IE.
            if (headerIEPresent == TRUE){
                ielistpresent = IEEE154_IELIST_YES;
@@ -71,7 +71,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
            }
        } else {
            // no payload, termination IE is omitted. check whether timeCorrection IE
-           // presents. 
+           // presents.
            if (frameType != IEEE154_TYPE_ACK) {
            } else {
                ielistpresent = IEEE154_IELIST_YES; // I will have a timeCorrection IE later
@@ -83,7 +83,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
        timeCorrection = (int16_t)(ieee154e_getTimeCorrection());
        // add the payload to the ACK (i.e. the timeCorrection)
        packetfunctions_reserveHeaderSize(msg,sizeof(uint16_t));
-       timeCorrection *= US_PER_TICK;
+       timeCorrection *= PORT_US_PER_TICK;
        timeSyncInfo  = ((uint16_t)timeCorrection) & 0x0fff;
        if (msg->l2_isNegativeACK){
           timeSyncInfo |= 0x8000;
@@ -96,11 +96,11 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
        //create the header for ack IE
        length_elementid_type=sizeof(uint16_t)|
                              (IEEE802154E_ACK_NACK_TIMECORRECTION_ELEMENTID << IEEE802154E_DESC_ELEMENTID_HEADER_IE_SHIFT)|
-                             (IEEE802154E_DESC_TYPE_SHORT << IEEE802154E_DESC_TYPE_IE_SHIFT); 
+                             (IEEE802154E_DESC_TYPE_SHORT << IEEE802154E_DESC_TYPE_IE_SHIFT);
        msg->payload[0] = (length_elementid_type)        & 0xFF;
        msg->payload[1] = ((length_elementid_type) >> 8) & 0xFF;
    }
-   
+
    //if security is enabled, the Auxiliary Security Header need to be added to the IEEE802.15.4 MAC header
    if(securityEnabled){
       IEEE802154_security_prependAuxiliarySecurityHeader(msg);
@@ -126,11 +126,14 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
                                   (errorparameter_t)nextHop->type,
                                   (errorparameter_t)1);
       }
-      
+
    }
+
+   msg->l2_nextHop_payload = msg->payload;
+
    // destpan -- se page 41 of 15.4-2011 std. DEST PANID only sent as it is equal to SRC PANID
    packetfunctions_writeAddress(msg,idmanager_getMyID(ADDR_PANID),OW_LITTLE_ENDIAN);
-   
+
    //dsn
    packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
    *((uint8_t*)(msg->payload)) = sequenceNumber;
@@ -159,7 +162,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    temp_8b             |= ielistpresent                   << IEEE154_FCF_IELIST_PRESENT;
    temp_8b             |= IEEE154_FRAMEVERSION_2012       << IEEE154_FCF_FRAME_VERSION;
    temp_8b             |= IEEE154_DSN_SUPPRESSION_NO      << IEEE154_FCF_DSN_SUPPRESSION;
-     
+
    *((uint8_t*)(msg->payload)) = temp_8b;
    //fcf (1st byte)
    packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
@@ -178,7 +181,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
        if (destAddrMode == IEEE154_ADDR_EXT) {
            temp_8b     |= IEEE154_PANID_UNCOMPRESSED      << IEEE154_FCF_INTRAPAN;
        } else {
-           // never happens 
+           // never happens
        }
    }
    *((uint8_t*)(msg->payload)) = temp_8b;
@@ -205,7 +208,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
    // by default, let's assume the header is not valid, in case we leave this
    // function because the packet ends up being shorter than the header.
    ieee802514_header->valid=FALSE;
-   
+
    ieee802514_header->headerLength = 0;
    // fcf, byte 1
    if (ieee802514_header->headerLength>msg->length) { return; } // no more to read!
@@ -227,7 +230,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
    if (ieee802514_header->ieListPresent==TRUE && ieee802514_header->frameVersion!=IEEE154_FRAMEVERSION_2012){
        return; //invalid packet accordint to p.64 IEEE15.4e
    }
-   
+
    switch ( (temp_8b >> IEEE154_FCF_DEST_ADDR_MODE ) & 0x03 ) {
       case IEEE154_ADDR_NONE:
          ieee802514_header->dest.type = ADDR_NONE;
@@ -261,14 +264,14 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
          return; // this is an invalid packet, return
    }
    ieee802514_header->headerLength += 1;
-   
+
    if (ieee802514_header->dsn_suppressed==FALSE) {
        // sequenceNumber
        if (ieee802514_header->headerLength>msg->length) { return; } // no more to read!
        ieee802514_header->dsn  = *((uint8_t*)(msg->payload)+ieee802514_header->headerLength);
        ieee802514_header->headerLength += 1;
    }
-   
+
    // panID
    if (ieee802514_header->headerLength>msg->length) { return; } // no more to read!
    packetfunctions_readAddress(((uint8_t*)(msg->payload)+ieee802514_header->headerLength),
@@ -321,9 +324,9 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
          ieee802514_header->headerLength += 8;
          if (ieee802514_header->headerLength>msg->length) {  return; } // no more to read!
          break;
-      // no need for a default, since case would have been caught above
+         // no need for a default, since case would have been caught above
    }
-   
+
    if (ieee802514_header->ieListPresent==TRUE && ieee802514_header->frameVersion!=IEEE154_FRAMEVERSION_2012){
        return; //invalid packet accordint to p.64 IEEE15.4e
    }
@@ -336,7 +339,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
       return; // security not supported
    }
 
-   // remove termination IE accordingly 
+   // remove termination IE accordingly
    if (ieee802514_header->ieListPresent == TRUE) {
        while(1) {
            // I have IE in frame. phase the IE in header first
@@ -378,8 +381,8 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
                        } else {
                            timeCorrection = timeSyncInfo & 0x0fff;
                        }
-                       timeCorrection  = ((int16_t)timeCorrection / (PORT_SIGNED_INT_WIDTH)US_PER_TICK);
-                       
+                       timeCorrection  = ((int16_t)timeCorrection / (PORT_SIGNED_INT_WIDTH)PORT_US_PER_TICK);
+
                        ieee802514_header->timeCorrection = timeCorrection;
                        ieee802514_header->headerLength  += len;
 

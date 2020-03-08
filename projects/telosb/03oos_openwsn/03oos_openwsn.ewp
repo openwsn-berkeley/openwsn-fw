@@ -58,11 +58,11 @@
         </option>
         <option>
           <name>RTConfigPath</name>
-          <state>$TOOLKIT_DIR$\LIB\DLIB\dl430fn.h</state>
+          <state>$TOOLKIT_DIR$\LIB\DLIB\dl430xsfn.h</state>
         </option>
         <option>
           <name>RTLibraryPath</name>
-          <state>$TOOLKIT_DIR$\LIB\DLIB\dl430fn.r43</state>
+          <state>$TOOLKIT_DIR$\LIB\DLIB\dl430xsfn.r43</state>
         </option>
         <option>
           <name>Input variant</name>
@@ -277,7 +277,7 @@
         </option>
         <option>
           <name>CCCompilerRuntimeInfo</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>IDoubleSize</name>
@@ -288,16 +288,16 @@
           <state>$FILE_BNAME$.r43</state>
         </option>
         <option>
-          <name>CCLibConfigHeader</name>
-          <state>1</state>
-        </option>
-        <option>
           <name>OCCR4Utilize</name>
           <state>0</state>
         </option>
         <option>
           <name>OCCR5Utilize</name>
           <state>0</state>
+        </option>
+        <option>
+          <name>CCLibConfigHeader</name>
+          <state>1</state>
         </option>
         <option>
           <name>IExtraOptionsCheck</name>
@@ -325,32 +325,14 @@
         </option>
         <option>
           <name>newCCIncludePaths</name>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\telosb\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\common\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\</state>
+          <state>$PROJ_DIR$</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\chips\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\chips\sht11\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\telosb\</state>
           <state>$PROJ_DIR$\..\..\..\drivers\common\</state>
-          <state>$PROJ_DIR$\..\..\..\inc\</state>
           <state>$PROJ_DIR$\..\..\..\kernel\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\c6t\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\cexample\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\cjoin\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\cinfo\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\cleds\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\csensors\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\cstorm\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\cwellknown\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\opencoap\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\rrt\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\techo\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\tohlone\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\uecho\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\uinject\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\userialbridge\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\uexpiration\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\uexpiration_monitor\</state>
+          <state>$PROJ_DIR$\..\..\..\inc\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\</state>
@@ -358,6 +340,19 @@
           <state>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\04-TRAN\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\cross-layers\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\c6t\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\cinfo\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\cleds\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\cwellknown\</state>
+		  <state>$PROJ_DIR$\..\..\..\openapps\cjoin\</state>
+		  <state>$PROJ_DIR$\..\..\..\openapps\opencoap\</state>
+		  <state>$PROJ_DIR$\..\..\..\openapps\rrt\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\uecho\</state>
+		  <state>$PROJ_DIR$\..\..\..\openapps\uexpiration\</state>
+		  <state>$PROJ_DIR$\..\..\..\openapps\uexpiration_monitor\</state>
+		  <state>$PROJ_DIR$\..\..\..\openapps\uinject\</state>
+		  <state>$PROJ_DIR$\..\..\..\openapps\userialbridge\</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -436,11 +431,11 @@
         </option>
         <option>
           <name>CCData16</name>
-          <state>DATA16</state>
+          <state>DATA</state>
         </option>
         <option>
           <name>CCData20</name>
-          <state>DATA20</state>
+          <state>DATA</state>
         </option>
         <option>
           <name>CCIntvec</name>
@@ -496,7 +491,7 @@
         </option>
         <option>
           <name>OCGuardCallsSlave</name>
-          <state>1</state>
+          <state>0</state>
         </option>
       </data>
     </settings>
@@ -742,7 +737,7 @@
         </option>
         <option>
           <name>ListSymbols</name>
-          <state>2</state>
+          <state>0</state>
         </option>
         <option>
           <name>PageLengthCheck</name>
@@ -894,12 +889,12 @@
         </option>
         <option>
           <name>ExtraOutputFile</name>
-          <state>03oos_openwsn.s19</state>
+          <state>03oos_openwsn.a43</state>
         </option>
         <option>
           <name>ExtraOutputFormat</name>
           <version>11</version>
-          <state>37</state>
+          <state>23</state>
         </option>
         <option>
           <name>ExtraFormatVariant</name>
@@ -973,7 +968,7 @@
         </option>
         <option>
           <name>LinkMathLib</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>IlinkThreadsSlave</name>
@@ -1212,7 +1207,7 @@
         <debug>0</debug>
         <option>
           <name>CCDefines</name>
-          <state>NDEBUG</state>
+          <state></state>
         </option>
         <option>
           <name>CCPreprocFile</name>
@@ -1317,7 +1312,7 @@
         </option>
         <option>
           <name>CCCompilerRuntimeInfo</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>IDoubleSize</name>
@@ -1325,11 +1320,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state></state>
-        </option>
-        <option>
-          <name>CCLibConfigHeader</name>
-          <state>1</state>
+          <state>$FILE_BNAME$.r43</state>
         </option>
         <option>
           <name>OCCR4Utilize</name>
@@ -1338,6 +1329,10 @@
         <option>
           <name>OCCR5Utilize</name>
           <state>0</state>
+        </option>
+        <option>
+          <name>CCLibConfigHeader</name>
+          <state>1</state>
         </option>
         <option>
           <name>IExtraOptionsCheck</name>
@@ -1398,11 +1393,11 @@
         <option>
           <name>CCOptStrategy</name>
           <version>0</version>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>CCOptLevelSlave</name>
-          <state>1</state>
+          <state>3</state>
         </option>
         <option>
           <name>CInput</name>
@@ -1444,11 +1439,11 @@
         </option>
         <option>
           <name>CCData16</name>
-          <state>DATA16</state>
+          <state>DATA</state>
         </option>
         <option>
           <name>CCData20</name>
-          <state>DATA20</state>
+          <state>DATA</state>
         </option>
         <option>
           <name>CCIntvec</name>
@@ -1504,7 +1499,7 @@
         </option>
         <option>
           <name>OCGuardCallsSlave</name>
-          <state>1</state>
+          <state>0</state>
         </option>
       </data>
     </settings>
@@ -1981,7 +1976,7 @@
         </option>
         <option>
           <name>LinkMathLib</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>IlinkThreadsSlave</name>
@@ -2047,25 +2042,25 @@
     </settings>
   </configuration>
   <group>
+    <name>application</name>
+    <file>
+      <name>$PROJ_DIR$\..\..\common\03oos_openwsn\03oos_openwsn.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\common\03oos_openwsn\03oos_openwsn.h</name>
+    </file>
+  </group>
+  <group>
     <name>bsp</name>
     <group>
       <name>boards</name>
       <group>
         <name>telosb</name>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\adc_sensor.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\adc_sensor.h</name>
-        </file>
-        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\board.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\board_info.h</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\cryptoengine.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\debugpins.c</name>
@@ -2075,12 +2070,6 @@
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\leds.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\sctimer.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\sensors.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\spi.c</name>
@@ -2093,34 +2082,16 @@
         <name>$PROJ_DIR$\..\..\..\bsp\boards\board.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\cryptoengine.h</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\debugpins.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\eui64.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\i2c.h</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\sctimer.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\sensors.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\spi.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\toolchain_defs.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\uart.h</name>
@@ -2131,24 +2102,21 @@
       <group>
         <name>cc2420</name>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\cc2420.c</name>
-        </file>
-        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\cc2420.h</name>
+        </file>
+		<file>
+          <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\cc2420.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\radio.c</name>
         </file>
       </group>
-      <group>
-        <name>sht11</name>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\chips\sht11\sht11.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\chips\sht11\sht11.h</name>
-        </file>
-      </group>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\chips\i2c.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\chips\spi.h</name>
+      </file>
     </group>
   </group>
   <group>
@@ -2160,12 +2128,6 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\drivers\common\openhdlc.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\drivers\common\opensensors.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\drivers\common\opensensors.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\drivers\common\openserial.c</name>
@@ -2189,12 +2151,9 @@
   </group>
   <group>
     <name>kernel</name>
-    <group>
-      <name>openos</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\kernel\openos\scheduler.c</name>
-      </file>
-    </group>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\kernel\openos\scheduler.c</name>
+    </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\kernel\scheduler.h</name>
     </file>
@@ -2211,36 +2170,12 @@
       </file>
     </group>
     <group>
-      <name>cexample</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\cexample\cexample.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\cexample\cexample.h</name>
-      </file>
-    </group>
-    <group>
       <name>cinfo</name>
       <file>
         <name>$PROJ_DIR$\..\..\..\openapps\cinfo\cinfo.c</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openapps\cinfo\cinfo.h</name>
-      </file>
-    </group>
-    <group>
-      <name>cjoin</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cjoin.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cjoin.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cojp_cbor.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cojp_cbor.h</name>
       </file>
     </group>
     <group>
@@ -2253,24 +2188,6 @@
       </file>
     </group>
     <group>
-      <name>csensors</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\csensors\csensors.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\csensors\csensors.h</name>
-      </file>
-    </group>
-    <group>
-      <name>cstorm</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\cstorm\cstorm.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\cstorm\cstorm.h</name>
-      </file>
-    </group>
-    <group>
       <name>cwellknown</name>
       <file>
         <name>$PROJ_DIR$\..\..\..\openapps\cwellknown\cwellknown.c</name>
@@ -2279,43 +2196,28 @@
         <name>$PROJ_DIR$\..\..\..\openapps\cwellknown\cwellknown.h</name>
       </file>
     </group>
-    <group>
+	<group>
       <name>opencoap</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\opencoap\cborencoder.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\opencoap\cborencoder.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\opencoap\hkdf.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\opencoap\hmac.c</name>
-      </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openapps\opencoap\opencoap.c</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openapps\opencoap\opencoap.h</name>
       </file>
+    </group>
+	<group>
+      <name>cjoin</name>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\opencoap\openoscoap.c</name>
+        <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cjoin.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\opencoap\openoscoap.h</name>
+        <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cjoin.h</name>
+      </file>
+	  <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cojp_cbor.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\opencoap\sha-private.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\opencoap\sha.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\opencoap\sha224-256.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\opencoap\usha.c</name>
+        <name>$PROJ_DIR$\..\..\..\openapps\cjoin\cojp_cbor.h</name>
       </file>
     </group>
     <group>
@@ -2327,16 +2229,7 @@
         <name>$PROJ_DIR$\..\..\..\openapps\rrt\rrt.h</name>
       </file>
     </group>
-    <group>
-      <name>uecho</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\uecho\uecho.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\uecho\uecho.h</name>
-      </file>
-    </group>
-    <group>
+	<group>
       <name>uexpiration</name>
       <file>
         <name>$PROJ_DIR$\..\..\..\openapps\uexpiration\uexpiration.c</name>
@@ -2345,13 +2238,22 @@
         <name>$PROJ_DIR$\..\..\..\openapps\uexpiration\uexpiration.h</name>
       </file>
     </group>
-    <group>
+	<group>
       <name>uexpiration_monitor</name>
       <file>
         <name>$PROJ_DIR$\..\..\..\openapps\uexpiration_monitor\uexpiration_monitor.c</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openapps\uexpiration_monitor\uexpiration_monitor.h</name>
+      </file>
+    </group>
+    <group>
+      <name>uecho</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\uecho\uecho.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\uecho\uecho.h</name>
       </file>
     </group>
     <group>
@@ -2375,9 +2277,6 @@
     <file>
       <name>$PROJ_DIR$\..\..\..\openapps\openapps.c</name>
     </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\openapps\openapps.h</name>
-    </file>
   </group>
   <group>
     <name>openstack</name>
@@ -2385,15 +2284,9 @@
       <name>02a-MAClow</name>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\adaptive_sync.c</name>
-        <excluded>
-          <configuration>Debug</configuration>
-        </excluded>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\adaptive_sync.h</name>
-        <excluded>
-          <configuration>Debug</configuration>
-        </excluded>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154.c</name>
@@ -2402,19 +2295,16 @@
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154_security.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154_security.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\ieee802154_security_driver.h</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154E.c</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154E.h</name>
+      </file>
+	  <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154_security.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154_security.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\topology.c</name>
@@ -2426,16 +2316,16 @@
     <group>
       <name>02b-MAChigh</name>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\msf.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\msf.h</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\neighbors.c</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\neighbors.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\msf.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\msf.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\schedule.c</name>
@@ -2495,7 +2385,6 @@
     <group>
       <name>04-TRAN</name>
       <file>
-
         <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\openudp.c</name>
       </file>
       <file>
@@ -2535,21 +2424,6 @@
     <file>
       <name>$PROJ_DIR$\..\..\..\openstack\openstack.h</name>
     </file>
-  </group>
-  <group>
-    <name>projects</name>
-    <group>
-      <name>common</name>
-      <group>
-        <name>03oos_openwsn</name>
-        <file>
-          <name>$PROJ_DIR$\..\..\common\03oos_openwsn\03oos_openwsn.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\common\03oos_openwsn\03oos_openwsn.h</name>
-        </file>
-      </group>
-    </group>
   </group>
 </project>
 

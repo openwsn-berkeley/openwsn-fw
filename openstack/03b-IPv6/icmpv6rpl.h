@@ -196,6 +196,7 @@ typedef struct {
    uint16_t                  daoPeriod;               ///< dao period in seconds.
    // routing table
    dagrank_t                 myDAGrank;               ///< rank of this router within DAG.
+   dagrank_t                 lowestRankInHistory;     ///< lowest Rank that the node has advertised
    uint16_t                  rankIncrease;            ///< the cost of the link to the parent, in units of rank
    bool                      haveParent;              ///< this router has a route to DAG root
    uint8_t                   ParentIndex;             ///< index of Parent in neighbor table (iff haveParent==TRUE)
@@ -220,6 +221,7 @@ void     icmpv6rpl_setDIOPeriod(uint16_t dioPeriod);
 void     icmpv6rpl_setDAOPeriod(uint16_t daoPeriod);
 bool     icmpv6rpl_getPreferredParentIndex(uint8_t* indexptr);
 bool     icmpv6rpl_getPreferredParentEui64(open_addr_t* addressToWrite);
+void     icmpv6rpl_updateNexthopAddress(open_addr_t* addressToWrite);
 bool     icmpv6rpl_isPreferredParent(open_addr_t* address);
 dagrank_t icmpv6rpl_getMyDAGrank(void);
 void     icmpv6rpl_setMyDAGrank(dagrank_t rank);

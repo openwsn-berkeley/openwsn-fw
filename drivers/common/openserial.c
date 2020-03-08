@@ -99,8 +99,8 @@ void openserial_init(void) {
     openserial_vars.outputBufIdxW      = 0;
     openserial_vars.fBusyFlushing      = FALSE;
 
-    openserial_vars.reset_timerId      = opentimers_create(TIMER_GENERAL_PURPOSE);
-    openserial_vars.debugPrint_timerId = opentimers_create(TIMER_GENERAL_PURPOSE);
+    openserial_vars.reset_timerId      = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_OPENSERIAL);
+    openserial_vars.debugPrint_timerId = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_OPENSERIAL);
     opentimers_scheduleIn(
         openserial_vars.debugPrint_timerId,
         DEBUGPRINT_PERIOD,
@@ -859,7 +859,9 @@ void openserial_handleCommands(void){
 //===== misc
 
 void openserial_debugPrint_timer_cb(opentimers_id_t id){
-    scheduler_push_task(task_openserial_debugPrint,TASKPRIO_OPENSERIAL);
+    // calling the task directly as the timer_cb function is executed in
+    // task mode by opentimer already
+    task_openserial_debugPrint();
 }
 
 void openserial_board_reset_cb(opentimers_id_t id) {

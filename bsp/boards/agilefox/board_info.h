@@ -35,6 +35,7 @@ to return the board's description.
 
 #define PORT_SIGNED_INT_WIDTH               int16_t
 #define PORT_TICS_PER_MS                    32
+#define PORT_US_PER_TICK                    30 // number of us per 32kHz clock tick
 #define SCHEDULER_WAKEUP()                  EXTI->SWIER |= EXTI_Line1;
 #define SCHEDULER_ENABLE_INTERRUPT()        //enable in board use EXTI_Line1
 

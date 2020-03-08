@@ -44,11 +44,12 @@ void opentimers_init(void){
 /**
 \brief create a timer by assigning an entry from timer buffer.
 
-create a timer with given id or assigning one if it's general purpose timer
+create a timer with given id or assigning one if it's general purpose timer.
+task_prio gives a priority when opentimer push a task.
 
 \returns the id of the timer will be returned
  */
-opentimers_id_t opentimers_create(uint8_t timer_id){
+opentimers_id_t opentimers_create(uint8_t timer_id, uint8_t task_prio){
     uint8_t id;
 
     INTERRUPT_DECLARATION();
@@ -57,6 +58,8 @@ opentimers_id_t opentimers_create(uint8_t timer_id){
     if (timer_id==TIMER_TSCH || timer_id==TIMER_INHIBIT){
         if (opentimers_vars.timersBuf[timer_id].isUsed  == FALSE){
             opentimers_vars.timersBuf[timer_id].isUsed   = TRUE;
+            // the TSCH timer and inhibit timer won't push a task,
+            // hence task_prio is not used
             return timer_id;
         }
     }
@@ -65,6 +68,7 @@ opentimers_id_t opentimers_create(uint8_t timer_id){
         for (id=TIMER_NUMBER_NON_GENERAL;id<MAX_NUM_TIMERS;id++){
             if (opentimers_vars.timersBuf[id].isUsed  == FALSE){
                 opentimers_vars.timersBuf[id].isUsed   = TRUE;
+                opentimers_vars.timersBuf[id].timer_task_prio = task_prio;
                 return id;
             }
         }
@@ -265,8 +269,7 @@ This function should be called in the callback of the timer interrupt.
 \param[in] id the timer id
 \param[in] duration the timer duration
  */
-void             opentimers_updateDuration(opentimers_id_t id,
-                                           PORT_TIMER_WIDTH duration){
+void opentimers_updateDuration(opentimers_id_t id, PORT_TIMER_WIDTH duration){
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
 
@@ -387,8 +390,8 @@ void opentimers_timer_callback(void){
                         opentimers_vars.insideISR = FALSE;
                     } else {
                         if (opentimers_vars.timersBuf[i].wraps_remaining==0){
-                            opentimers_vars.timersBuf[i].isrunning  = FALSE;
-                            scheduler_push_task((task_cbt)(opentimers_vars.timersBuf[i].callback),TASKPRIO_OPENTIMERS);
+                            opentimers_vars.timersBuf[i].isrunning = FALSE;
+                            scheduler_push_task((task_cbt)(opentimers_vars.timersBuf[i].callback),(task_prio_t)opentimers_vars.timersBuf[i].timer_task_prio);
                             if (opentimers_vars.timersBuf[i].timerType==TIMER_PERIODIC){
                                 opentimers_vars.insideISR = TRUE;
                                 opentimers_scheduleIn(
@@ -407,7 +410,7 @@ void opentimers_timer_callback(void){
                                 if (opentimers_vars.timersBuf[i].currentCompareValue - opentimers_vars.currentCompareValue < PRE_CALL_TIMER_WINDOW){
                                     // pre-call the timer here if it will be fired within PRE_CALL_TIMER_WINDOW, when wraps_remaining decrease to 0
                                     opentimers_vars.timersBuf[i].isrunning  = FALSE;
-                                    scheduler_push_task((task_cbt)(opentimers_vars.timersBuf[i].callback),TASKPRIO_OPENTIMERS);
+                                    scheduler_push_task((task_cbt)(opentimers_vars.timersBuf[i].callback),(task_prio_t)opentimers_vars.timersBuf[i].timer_task_prio);
                                     if (opentimers_vars.timersBuf[i].timerType==TIMER_PERIODIC){
                                         opentimers_vars.insideISR = TRUE;
                                         opentimers_scheduleIn(

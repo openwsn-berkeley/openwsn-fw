@@ -2,7 +2,7 @@ import os
 import sys
 here = sys.path[0]
 print here
-sys.path.insert(0,os.path.join(here,'..','..','..','..','..','..','coap'))
+sys.path.insert(0,os.path.join(here,'..','..','..','coap'))
 
 from coap import coap
 

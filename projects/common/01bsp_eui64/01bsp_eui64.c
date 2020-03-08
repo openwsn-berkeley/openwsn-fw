@@ -37,7 +37,7 @@ app_vars_t app_vars;
 //=========================== prototypes ======================================
 
 void cb_uartTxDone(void);
-void cb_uartRxCb(void);
+uint8_t cb_uartRxCb(void);
 
 //=========================== main ============================================
 
@@ -95,5 +95,6 @@ void cb_uartTxDone(void) {
    }
 }
 
-void cb_uartRxCb(void) {
+uint8_t cb_uartRxCb(void) {
+	return 0;
 }

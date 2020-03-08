@@ -23,6 +23,7 @@
 
 #define PORT_SIGNED_INT_WIDTH               int32_t
 #define PORT_TICS_PER_MS                    33
+#define PORT_US_PER_TICK                    30 // number of us per 32kHz clock tick
 
 // on GINA, we use the comparatorA interrupt for the OS
 #define SCHEDULER_WAKEUP()

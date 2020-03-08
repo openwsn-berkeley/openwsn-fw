@@ -357,8 +357,6 @@
                     <state>$PROJ_DIR$\..\..\..\openapps\csensors\</state>
                     <state>$PROJ_DIR$\..\..\..\openapps\cwellknown\</state>
                     <state>$PROJ_DIR$\..\..\..\openapps\opencoap\</state>
-                    <state>$PROJ_DIR$\..\..\..\openapps\techo\</state>
-                    <state>$PROJ_DIR$\..\..\..\openapps\tohlone\</state>
                     <state>$PROJ_DIR$\..\..\..\openapps\uecho\</state>
                     <state>$PROJ_DIR$\..\..\..\openapps\cstorm\</state>
                     <state>$PROJ_DIR$\..\..\..\openapps\rrt\</state>
@@ -2628,9 +2626,6 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154_security.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\ieee802154_security_driver.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154E.c</name>

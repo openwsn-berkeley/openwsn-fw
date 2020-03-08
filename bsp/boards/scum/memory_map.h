@@ -60,7 +60,7 @@
 #define TX_SEND                         0x02
 #define RX_START                        0x04
 #define RX_STOP                         0x08
-#define RX_RESET                        0x10
+#define RF_RESET                        0x10
 
 // ==== RFCONTROLLER interruption flag
 
@@ -70,37 +70,45 @@
 #define RX_SFD_DONE_INT                 0x08
 #define RX_DONE_INT                     0x10
 
+// ==== RFCONTROLLER error flag
+
+#define TX_OVERFLOW_ERROR               0x01
+#define TX_CUTOFF_ERROR                 0x02
+#define RX_OVERFLOW_ERROR               0x04
+#define RX_CRC_ERROR                    0x08
+#define RX_CUTOFF_ERROR                 0x10
+
 // ========================== RFTIMER Registers ===============================
 
-#define RFTIMER_REG__CONTROL            *(unsigned int*)(AHB_RFTIMER_BASE + 0x00)
-#define RFTIMER_REG__COUNTER            *(unsigned int*)(AHB_RFTIMER_BASE + 0x04)
-#define RFTIMER_REG__MAX_COUNT          *(unsigned int*)(AHB_RFTIMER_BASE + 0x08)
-#define RFTIMER_REG__COMPARE0           *(unsigned int*)(AHB_RFTIMER_BASE + 0x10)
-#define RFTIMER_REG__COMPARE1           *(unsigned int*)(AHB_RFTIMER_BASE + 0x14)
-#define RFTIMER_REG__COMPARE2           *(unsigned int*)(AHB_RFTIMER_BASE + 0x18)
-#define RFTIMER_REG__COMPARE3           *(unsigned int*)(AHB_RFTIMER_BASE + 0x1C)
-#define RFTIMER_REG__COMPARE4           *(unsigned int*)(AHB_RFTIMER_BASE + 0x20)
-#define RFTIMER_REG__COMPARE5           *(unsigned int*)(AHB_RFTIMER_BASE + 0x24)
-#define RFTIMER_REG__COMPARE6           *(unsigned int*)(AHB_RFTIMER_BASE + 0x28)
-#define RFTIMER_REG__COMPARE7           *(unsigned int*)(AHB_RFTIMER_BASE + 0x2C)
-#define RFTIMER_REG__COMPARE0_CONTROL   *(unsigned int*)(AHB_RFTIMER_BASE + 0x30)
-#define RFTIMER_REG__COMPARE1_CONTROL   *(unsigned int*)(AHB_RFTIMER_BASE + 0x34)
-#define RFTIMER_REG__COMPARE2_CONTROL   *(unsigned int*)(AHB_RFTIMER_BASE + 0x38)
-#define RFTIMER_REG__COMPARE3_CONTROL   *(unsigned int*)(AHB_RFTIMER_BASE + 0x3C)
-#define RFTIMER_REG__COMPARE4_CONTROL   *(unsigned int*)(AHB_RFTIMER_BASE + 0x40)
-#define RFTIMER_REG__COMPARE5_CONTROL   *(unsigned int*)(AHB_RFTIMER_BASE + 0x44)
-#define RFTIMER_REG__COMPARE6_CONTROL   *(unsigned int*)(AHB_RFTIMER_BASE + 0x48)
-#define RFTIMER_REG__COMPARE7_CONTROL   *(unsigned int*)(AHB_RFTIMER_BASE + 0x4C)
-#define RFTIMER_REG__CAPTURE0           *(unsigned int*)(AHB_RFTIMER_BASE + 0x50)
-#define RFTIMER_REG__CAPTURE1           *(unsigned int*)(AHB_RFTIMER_BASE + 0x54)
-#define RFTIMER_REG__CAPTURE2           *(unsigned int*)(AHB_RFTIMER_BASE + 0x58)
-#define RFTIMER_REG__CAPTURE3           *(unsigned int*)(AHB_RFTIMER_BASE + 0x5C)
-#define RFTIMER_REG__CAPTURE0_CONTROL   *(unsigned int*)(AHB_RFTIMER_BASE + 0x60)
-#define RFTIMER_REG__CAPTURE1_CONTROL   *(unsigned int*)(AHB_RFTIMER_BASE + 0x64)
-#define RFTIMER_REG__CAPTURE2_CONTROL   *(unsigned int*)(AHB_RFTIMER_BASE + 0x68)
-#define RFTIMER_REG__CAPTURE3_CONTROL   *(unsigned int*)(AHB_RFTIMER_BASE + 0x6C)
-#define RFTIMER_REG__INT                *(unsigned int*)(AHB_RFTIMER_BASE + 0x70)
-#define RFTIMER_REG__INT_CLEAR          *(unsigned int*)(AHB_RFTIMER_BASE + 0x74)
+#define RFTIMER_REG__CONTROL           *(unsigned int*)(AHB_RFTIMER_BASE + 0x00)
+#define RFTIMER_REG__COUNTER           *(unsigned int*)(AHB_RFTIMER_BASE + 0x04)
+#define RFTIMER_REG__MAX_COUNT         *(unsigned int*)(AHB_RFTIMER_BASE + 0x08)
+#define RFTIMER_REG__COMPARE0          *(unsigned int*)(AHB_RFTIMER_BASE + 0x10)
+#define RFTIMER_REG__COMPARE1          *(unsigned int*)(AHB_RFTIMER_BASE + 0x14)
+#define RFTIMER_REG__COMPARE2          *(unsigned int*)(AHB_RFTIMER_BASE + 0x18)
+#define RFTIMER_REG__COMPARE3          *(unsigned int*)(AHB_RFTIMER_BASE + 0x1C)
+#define RFTIMER_REG__COMPARE4          *(unsigned int*)(AHB_RFTIMER_BASE + 0x20)
+#define RFTIMER_REG__COMPARE5          *(unsigned int*)(AHB_RFTIMER_BASE + 0x24)
+#define RFTIMER_REG__COMPARE6          *(unsigned int*)(AHB_RFTIMER_BASE + 0x28)
+#define RFTIMER_REG__COMPARE7          *(unsigned int*)(AHB_RFTIMER_BASE + 0x2C)
+#define RFTIMER_REG__COMPARE0_CONTROL  *(unsigned int*)(AHB_RFTIMER_BASE + 0x30)
+#define RFTIMER_REG__COMPARE1_CONTROL  *(unsigned int*)(AHB_RFTIMER_BASE + 0x34)
+#define RFTIMER_REG__COMPARE2_CONTROL  *(unsigned int*)(AHB_RFTIMER_BASE + 0x38)
+#define RFTIMER_REG__COMPARE3_CONTROL  *(unsigned int*)(AHB_RFTIMER_BASE + 0x3C)
+#define RFTIMER_REG__COMPARE4_CONTROL  *(unsigned int*)(AHB_RFTIMER_BASE + 0x40)
+#define RFTIMER_REG__COMPARE5_CONTROL  *(unsigned int*)(AHB_RFTIMER_BASE + 0x44)
+#define RFTIMER_REG__COMPARE6_CONTROL  *(unsigned int*)(AHB_RFTIMER_BASE + 0x48)
+#define RFTIMER_REG__COMPARE7_CONTROL  *(unsigned int*)(AHB_RFTIMER_BASE + 0x4C)
+#define RFTIMER_REG__CAPTURE0          *(unsigned int*)(AHB_RFTIMER_BASE + 0x50)
+#define RFTIMER_REG__CAPTURE1          *(unsigned int*)(AHB_RFTIMER_BASE + 0x54)
+#define RFTIMER_REG__CAPTURE2          *(unsigned int*)(AHB_RFTIMER_BASE + 0x58)
+#define RFTIMER_REG__CAPTURE3          *(unsigned int*)(AHB_RFTIMER_BASE + 0x5C)
+#define RFTIMER_REG__CAPTURE0_CONTROL  *(unsigned int*)(AHB_RFTIMER_BASE + 0x60)
+#define RFTIMER_REG__CAPTURE1_CONTROL  *(unsigned int*)(AHB_RFTIMER_BASE + 0x64)
+#define RFTIMER_REG__CAPTURE2_CONTROL  *(unsigned int*)(AHB_RFTIMER_BASE + 0x68)
+#define RFTIMER_REG__CAPTURE3_CONTROL  *(unsigned int*)(AHB_RFTIMER_BASE + 0x6C)
+#define RFTIMER_REG__INT               *(unsigned int*)(AHB_RFTIMER_BASE + 0x70)
+#define RFTIMER_REG__INT_CLEAR         *(unsigned int*)(AHB_RFTIMER_BASE + 0x74)
 
 // ==== RFTIMER compare control bit
 
@@ -149,43 +157,69 @@
 
 // ========================== DMA Registers ===================================
 
-#define DMA_REG__RF_RX_ADDR             *(char**)(AHB_DMA_BASE + 0x14)
+#define DMA_REG__RF_RX_ADDR     *(char**)(AHB_DMA_BASE + 0x14)
 
 // ========================== ADC Registers ===================================
 
-#define ADC_REG__START                  *(unsigned int*)(APB_ADC_BASE + 0x000000)
-#define ADC_REG__DATA                   *(unsigned int*)(APB_ADC_BASE + 0x040000)
+#define ADC_REG__START          *(unsigned int*)(APB_ADC_BASE + 0x000000)
+#define ADC_REG__DATA           *(unsigned int*)(APB_ADC_BASE + 0x040000)
 
 // ========================== UART Registers ==================================
 
-#define UART_REG__TX_DATA               *(unsigned int*)(APB_UART_BASE)
-#define UART_REG__RX_DATA               *(unsigned int*)(APB_UART_BASE)
+#define UART_REG__TX_DATA       *(unsigned int*)(APB_UART_BASE)
+#define UART_REG__RX_DATA       *(unsigned int*)(APB_UART_BASE)
     
 // ========================== GPIO Registers ==================================
 
-#define GPIO_REG__INPUT                 *(unsigned int*)(APB_GPIO_BASE + 0x000000)
-#define GPIO_REG__OUTPUT                *(unsigned int*)(APB_GPIO_BASE + 0x040000)
+#define GPIO_REG__INPUT         *(unsigned int*)(APB_GPIO_BASE + 0x000000)
+#define GPIO_REG__OUTPUT        *(unsigned int*)(APB_GPIO_BASE + 0x040000)
     
 // ========================== Analog Configure Registers ======================
 
-#define ANALOG_CFG_REG__0               *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x000000)
-#define ANALOG_CFG_REG__1               *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x040000)
-#define ANALOG_CFG_REG__2               *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x080000)
-#define ANALOG_CFG_REG__3               *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x0C0000)
-#define ANALOG_CFG_REG__4               *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x100000)
-#define ANALOG_CFG_REG__9               *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x240000)
-#define ANALOG_CFG_REG__10              *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x280000)
-#define ANALOG_CFG_REG__11              *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x2C0000)
-#define ANALOG_CFG_REG__22              *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x580000)
-    
-#define ACFG_LO__ADDR                   *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x001C0000)
-#define ACFG_LO__ADDR_2                 *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x00200000)
+#define ANALOG_CFG_REG__0       *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x000000)
+#define ANALOG_CFG_REG__1       *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x040000)
+#define ANALOG_CFG_REG__2       *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x080000)
+#define ANALOG_CFG_REG__3       *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x0C0000)
+#define ANALOG_CFG_REG__4       *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x100000)
+#define ANALOG_CFG_REG__5       *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x140000) // contains 2.4 GHz divider control, see bucket_o_functions/divProgram()
+#define ANALOG_CFG_REG__6       *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x180000) // contains 2.4 GHz divider control, see bucket_o_functions/divProgram()
+#define ANALOG_CFG_REG__7       *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x1C0000) // contains 2.4 GHz oscillator control, see bucket_o_functions/LC_freqchange
+#define ANALOG_CFG_REG__8       *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x200000) // contains 2.4 GHz oscillator control, see bucket_o_functions/LC_freqchange
+#define ANALOG_CFG_REG__9       *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x240000)
+#define ANALOG_CFG_REG__10      *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x280000)
+#define ANALOG_CFG_REG__11      *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x2C0000) // contains control bits for the arbitrary TX FIFO, apparently
+#define ANALOG_CFG_REG__12      *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x300000)
+#define ANALOG_CFG_REG__13      *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x340000)
+#define ANALOG_CFG_REG__14      *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x380000)
+#define ANALOG_CFG_REG__15      *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x3C0000)
+#define ANALOG_CFG_REG__16      *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x400000)
+#define ANALOG_CFG_REG__17      *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x440000)
+#define ANALOG_CFG_REG__18      *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x480000)
+#define ANALOG_CFG_REG__19      *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x4C0000)
+#define ANALOG_CFG_REG__20      *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x500000)
+#define ANALOG_CFG_REG__21      *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x540000)
+#define ANALOG_CFG_REG__22      *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x580000)
+#define ANALOG_CFG_REG__23      *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x5C0000)
+#define ANALOG_CFG_REG__24      *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x600000)
+#define ANALOG_CFG_REG__25      *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x640000)
+#define ANALOG_CFG_REG__26      *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x680000)
+#define ANALOG_CFG_REG__27      *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x6C0000)
+#define ANALOG_CFG_REG__28      *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x700000)
+#define ANALOG_CFG_REG__29      *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x740000)
+#define ANALOG_CFG_REG__30      *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x780000)
 
-#define ISER                            *(unsigned int*)(0xE000E100)
-#define ICER                            *(unsigned int*)(0xE000E180)
-    
+#define ACFG_LO__ADDR           *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x1C0000)
+#define ACFG_LO__ADDR_2         *(unsigned int*)(APB_ANALOG_CFG_BASE + 0x200000)
+
+// Interrupt clear/set enable register
+#define ISER                    *(unsigned int*)(0xE000E100)
+#define ICER                    *(unsigned int*)(0xE000E180)
+// Interrupt clear/set pending register
+#define ICPR                    *(unsigned int*)(0xE000E280)
+#define ISPR                    *(unsigned int*)(0xE000E200)
+
 // =========================== Priority Registers =============================
 
-#define IPR0 *(unsigned int*)( 0xE000E400 )
-#define IPR6 *(unsigned int*)( 0xE000E418 )
-#define IPR7 *(unsigned int*)( 0xE000E41C )
+#define IPR0                    *(unsigned int*)( 0xE000E400 )
+#define IPR6                    *(unsigned int*)( 0xE000E418 )
+#define IPR7                    *(unsigned int*)( 0xE000E41C )

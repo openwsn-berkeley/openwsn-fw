@@ -25,6 +25,7 @@
 //-- 03a-IPHC
 #include "openbridge.h"
 #include "iphc.h"
+#include "frag.h"
 //-- 03b-IPv6
 #include "forwarding.h"
 #include "icmpv6.h"
@@ -32,8 +33,13 @@
 #include "icmpv6rpl.h"
 //-- 04-TRAN
 #include "openudp.h"
+
+#ifndef RAM_SIZE_64KB
+
 //===== applications
 #include "openapps.h"
+
+#endif
 
 //=========================== variables =======================================
 
@@ -66,6 +72,7 @@ void openstack_init(void) {
    //-- 03a-IPHC
    openbridge_init();
    iphc_init();
+   frag_init();
    //-- 03b-IPv6
    forwarding_init();
    icmpv6_init();
@@ -73,9 +80,11 @@ void openstack_init(void) {
    icmpv6rpl_init();
    //-- 04-TRAN
    openudp_init();
-
+   
+#ifndef RAM_SIZE_64KB
    //===== applications
    openapps_init();
+#endif
 
    openserial_printInfo(
       COMPONENT_OPENWSN,ERR_BOOTED,

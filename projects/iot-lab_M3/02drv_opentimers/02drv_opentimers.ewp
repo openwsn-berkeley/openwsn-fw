@@ -1963,6 +1963,9 @@
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\board.c</name>
         </file>
+		<file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\cryptoengine.c</name>
+        </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\iot-lab_M3\debugpins.c</name>
         </file>
@@ -2021,6 +2024,15 @@
     <name>inc</name>
     <file>
       <name>$PROJ_DIR$\..\..\..\inc\opendefs.h</name>
+    </file>
+  </group>
+  <group>
+    <name>kernel</name>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\kernel\openos\scheduler.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\kernel\scheduler.h</name>
     </file>
   </group>
 </project>

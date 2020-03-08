@@ -85,7 +85,7 @@ while True:
         byte  = mote.read(1)
         rawFrame += [ord(byte)]
     
-    if rawFrame[-3:]==[0xff]*3 and len(rawFrame)>=8:
+    if rawFrame[-3:]==[0xff]*3 and len(rawFrame)>=9:
         
         for byte in rawFrame:
             if byte==XONXOFF_ESCAPE:
@@ -96,27 +96,37 @@ while True:
                     xonxoffEscaping=False
                 elif byte!=XON and byte!=XOFF:
                     rawFrame_decoded += [byte]
-        (rxpk_len,rxpk_num,rxpk_rssi,rxpk_lqi,rxpk_crc) = \
-            struct.unpack('>BBbBB', ''.join([chr(b) for b in rawFrame_decoded[-8:-3]]))
+        
+        (rxpk_len,rxpk_num,rxpk_rssi,rxpk_lqi,rxpk_crc, rxpk_freq_offset) = \
+            struct.unpack('>BBbBBb', ''.join([chr(b) for b in rawFrame_decoded[-9:-3]]))
             
         # debug info
-        # print 'len={0:<3} num={1:<3} rssi={2:<4} lqi={3:<3} crc={4}'.format(
-            # rxpk_len,
-            # rxpk_num,
-            # rxpk_rssi,
-            # rxpk_lqi,
-            # rxpk_crc
-        # )
+        output = 'len={0:<3} num={1:<3} rssi={2:<4} lqi={3:<3} crc={4} freq_offset={5:<4}'.format(
+            rxpk_len,
+            rxpk_num,
+            rxpk_rssi,
+            rxpk_lqi,
+            rxpk_crc,
+            rxpk_freq_offset
+        )
         
-        if previousFrame>rxpk_num:
-            print "frameCounter={0:<3}, PDR={1}%".format(frameCounter, frameCounter*100/MAX_NUM_PACKET)
-            frameCounter  = 0
-
-        frameCounter += 1
-        previousFrame = rxpk_num
+        print output
+        
+        with open('log.txt','a') as f:
+            f.write(output+'\n')
         
         if rxpk_len>127:
             print "ERROR: frame too long.\a"
+        else:
+            if previousFrame>rxpk_num:
+                output = "frameCounter={0:<3}, PDR={1}%".format(frameCounter, frameCounter*100/MAX_NUM_PACKET)
+                print output
+                frameCounter  = 0
+                with open('log.txt','a') as f:
+                    f.write(output+'\n')
+
+            frameCounter += 1
+            previousFrame = rxpk_num
         
         rawFrame         = []
         rawFrame_decoded = []

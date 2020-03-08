@@ -1207,8 +1207,7 @@ void opencoap_forward_message(OpenQueueEntry_t *msg,
                 (errorparameter_t)0,
                 (errorparameter_t)0
         );
-      openqueue_freePacketBuffer(outgoingPacket);
-      return;
+        return;
     }
 
     // take ownership over that packet and set destination IP and port

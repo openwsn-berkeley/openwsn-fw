@@ -51,7 +51,6 @@ int mote_main(void) {
 
 void macpong_initSend(opentimers_id_t id) {
     bool timeToSend = FALSE;
-    open_addr_t  temp;
 
     macpong_vars.macpongCounter = (macpong_vars.macpongCounter+1)%5;
     switch (macpong_vars.macpongCounter) {
@@ -65,15 +64,13 @@ void macpong_initSend(opentimers_id_t id) {
     if (idmanager_getIsDAGroot()==TRUE) {
         return;
     }
+
     if (ieee154e_isSynch()==TRUE && neighbors_getNumNeighbors()==1) {
-        neighbors_getNeighborEui64(&temp,ADDR_64B,0);
-        if (schedule_hasManagedTxCellToNeighbor(&temp)){
-            if (timeToSend){
-                // send packet
-                macpong_send(0);
-                // cancel timer
-                opentimers_cancel(macpong_vars.timerId);
-            }
+        if (timeToSend){
+            // send packet
+            macpong_send(0);
+            // cancel timer
+            opentimers_cancel(macpong_vars.timerId);
         }
     }
 }
@@ -106,10 +103,16 @@ void macpong_send(uint8_t payloadCtr) {
 
 //=========================== stubbing ========================================
 
+//===== FRAG
+
+void frag_init(void)                                            {return; }
+void frag_sendDone(OpenQueueEntry_t *msg, owerror_t sendError)  {return; }
+void frag_receive(OpenQueueEntry_t *msg)                        {return; }
+
 //===== IPHC
 
 void iphc_init(void) {
-    macpong_vars.timerId = opentimers_create(TIMER_GENERAL_PURPOSE);
+    macpong_vars.timerId = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_IPHC);
     opentimers_scheduleIn(
         macpong_vars.timerId,   // timerId
         1000,                   // duration
@@ -187,31 +190,14 @@ bool icmpv6rpl_daoSent(void) {
     return TRUE;
 }
 void icmpv6rpl_setMyDAGrank(dagrank_t rank)                          { return; }
-void icmpv6rpl_killPreferredParent(void)                             { return; }
 void icmpv6rpl_updateMyDAGrankAndParentSelection(void)               { return; }
-void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t* msg)                  { return; }
 void icmpv6echo_setIsReplyEnabled(bool isEnabled)                    { return; }
 
 
-
-void opentcp_init(void)                                 { return; }
 void openudp_init(void)                                 { return; }
 void opencoap_init(void)                                { return; }
 
 //===== L7
 
 void openapps_init(void)                                { return; }
-void ohlone_init(void)                                  { return; }
-void tcpecho_init(void)                                 { return; }
-void tcpinject_init(void)                               { return; }
-void tcpinject_trigger(void)                            { return; }
-void tcpprint_init(void)                                { return; }
-void c6t_init(void)                                     { return; }
-void cinfo_init(void)                                   { return; }
-void cleds__init(void)                                  { return; }
-void cwellknown_init(void)                              { return; }
-   // TCP
-void techo_init(void)                                   { return; }
-   // UDP
-void uecho_init(void)                                   { return; }
 

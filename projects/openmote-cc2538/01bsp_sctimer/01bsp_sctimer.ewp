@@ -2152,6 +2152,12 @@
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\uart.c</name>
         </file>
+		<file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\pwm.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-cc2538\pwm.h</name>
+        </file>
       </group>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\board.h</name>

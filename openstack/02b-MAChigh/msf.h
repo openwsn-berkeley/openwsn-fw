@@ -10,15 +10,16 @@
 
 #include "opendefs.h"
 #include "opentimers.h"
+#include "schedule.h"
 //=========================== define ==========================================
 
 #define IANA_6TISCH_SFID_MSF    0
 #define CELLOPTIONS_MSF         CELLOPTIONS_TX
 #define NUMCELLS_MSF            1
 
-#define MAX_NUMCELLS                   16
-#define LIM_NUMCELLSUSED_HIGH          12
-#define LIM_NUMCELLSUSED_LOW            4
+#define MAX_NUMCELLS                   32
+#define LIM_NUMCELLSUSED_HIGH          24
+#define LIM_NUMCELLSUSED_LOW           8
 
 #define HOUSEKEEPING_PERIOD          30000 // miliseconds
 #define QUARANTINE_DURATION            300 // seconds
@@ -28,14 +29,24 @@
 //=========================== typedef =========================================
 
 typedef struct {
-   uint8_t              numAppPacketsPerSlotFrame;
-   uint8_t              backoff;
-   uint8_t              numCellsPassed;
-   uint8_t              numCellsUsed;
-   opentimers_id_t      housekeepingTimerId;
-   uint16_t             housekeepingPeriod;
-   opentimers_id_t      waitretryTimerId;
-   bool                 waitretry;
+    bool                 f_hashCollision;
+    uint8_t              numAppPacketsPerSlotFrame;
+    uint8_t              backoff;
+    uint8_t              numCellsElapsed_tx;
+    uint8_t              numCellsUsed_tx;
+    uint8_t              numCellsElapsed_rx;
+    uint8_t              numCellsUsed_rx;
+    opentimers_id_t      housekeepingTimerId;
+    uint16_t             housekeepingPeriod;
+    opentimers_id_t      waitretryTimerId;
+    bool                 waitretry;
+    bool                 needAddTx;
+    bool                 needAddRx;
+    bool                 needDeleteTx;
+    bool                 needDeleteRx;
+    // for msf status report
+    uint8_t              previousNumCellsUsed_tx;
+    uint8_t              previousNumCellsUsed_rx;
 } msf_vars_t;
 
 //=========================== module variables ================================
@@ -53,16 +64,20 @@ bool    msf_candidateAddCellList(
 bool    msf_candidateRemoveCellList(
     cellInfo_ht* cellList,
     open_addr_t* neighbor,
-    uint8_t requiredCells
+    uint8_t requiredCells,
+    uint8_t cellOptions
 );
 // called by schedule
-void    msf_updateCellsPassed(open_addr_t* neighbor);
-void    msf_updateCellsUsed(open_addr_t* neighbor);
-// called by icmpv6rpl, where parent changed
-void    msf_trigger6pClear(open_addr_t* neighbor);
+void    msf_updateCellsElapsed(open_addr_t* neighbor, cellType_t cellType);
+void    msf_updateCellsUsed(open_addr_t* neighbor, cellType_t cellType);
 
-uint16_t msf_hashFunction_getSlotoffset(uint16_t moteId);
-uint8_t msf_hashFunction_getChanneloffset(uint16_t moteId);
+uint16_t msf_hashFunction_getSlotoffset(open_addr_t* address);
+uint8_t msf_hashFunction_getChanneloffset(open_addr_t* address);
+
+void    msf_setHashCollisionFlag(bool isCollision);
+bool    msf_getHashCollisionFlag(void);
+
+uint8_t msf_getPreviousNumCellsUsed(cellType_t cellType);
 /**
 \}
 \}

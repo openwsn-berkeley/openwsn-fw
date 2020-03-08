@@ -38,16 +38,16 @@ static const uint8_t ebIEsBytestream[] = {
 #define EB_IE_LEN                   28
 
 #define NUM_CHANNELS                16 // number of channels to channel hop on
-#define TXRETRIES                    3 // number of MAC retries before declaring failed
+#define TXRETRIES                   15 // number of MAC retries before declaring failed
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to successfully synchronize
-#define US_PER_TICK                 30 // number of us per 32kHz clock tick
-#define MAXKAPERIOD               1000 // in slots: 1500@20ms per slot -> ~30 seconds. Max value used by adaptive synchronization.
-#define DESYNCTIMEOUT             1750 // in slots: 1750@20ms per slot -> ~35 seconds. A larger DESYNCTIMEOUT is needed if using a larger KATIMEOUT.
+#define EB_PORTION                  10 // set EB on minimal cell for 1/EB_PORTION portion
+#define MAXKAPERIOD               1000  // in slots: 1500@20ms per slot -> ~30 seconds. Max value used by adaptive synchronization.
+#define DESYNCTIMEOUT             1750  // in slots: 1750@20ms per slot -> ~35 seconds. A larger DESYNCTIMEOUT is needed if using a larger KATIMEOUT.
 #define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"
 #define LENGTH_IEEE154_MAX         128 // max length of a valid radio packet
 #define DUTY_CYCLE_WINDOW_LIMIT    (0xFFFFFFFF>>1) // limit of the dutycycle window
-#define SERIALINHIBITGUARD          32 // 32@32kHz ~ 1ms
+#define SERIALINHIBITGUARD         (1000/PORT_US_PER_TICK) // 32@32kHz ~ 1ms
 
 //15.4e information elements related
 #define IEEE802154E_PAYLOAD_DESC_LEN_SHIFT                 0x04
@@ -157,26 +157,50 @@ typedef enum {
 //    - ticks = duration_in_seconds * 32768
 //    - duration_in_seconds = ticks / 32768
 enum ieee154e_atomicdurations_enum {
-   // time-slot related
+
+// time-slot related
 #if SLOTDURATION==10
-   TsTxOffset                =   70,                  //  2120us
-   TsLongGT                  =   36,                  //  1100us
-   TsTxAckDelay              =   33,                  //  1000us
-   TsShortGT                 =   13,                  //   500us, The standardized value for this is 400/2=200us(7ticks). Currectly 7 doesn't work for short packet, change it back to 7 when found the problem.
+   TsTxOffset                =  (2120/PORT_US_PER_TICK),                  //  2120us
+   TsLongGT                  =  (1100/PORT_US_PER_TICK),                  //  1100us
+   TsTxAckDelay              =  (1000/PORT_US_PER_TICK),                  //  1000us
+   TsShortGT                 =  (500/PORT_US_PER_TICK),                   //   500us, The standardlized value for this is 400/2=200us(7ticks). Currectly 7 doesn't work for short packet, change it back to 7 when found the problem.
+   wdRadioTx                 =  (1342/PORT_US_PER_TICK),                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
+   wdDataDuration            =  (5000/PORT_US_PER_TICK),                  //  5000us (measured 4280us with max payload)
+   wdAckDuration             =  (3000/PORT_US_PER_TICK),                  //  3000us (measured 1000us)
 #endif
+
 #if SLOTDURATION==15
-   TsTxOffset                =  131,                  //  4000us
-   TsLongGT                  =   43,                  //  1300us
-   TsTxAckDelay              =  151,                  //  4606us
-   TsShortGT                 =   16,                  //   500us
+   TsTxOffset                =  (4000/PORT_US_PER_TICK),                  //  4000us
+   TsLongGT                  =  (1300/PORT_US_PER_TICK),                  //  1300us
+   TsTxAckDelay              =  (4606/PORT_US_PER_TICK),                  //  4606us
+   TsShortGT                 =  (500/PORT_US_PER_TICK),                   //   500us
+   wdRadioTx                 =  (1342/PORT_US_PER_TICK),                  //  1342us (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
+   wdDataDuration            =  (5000/PORT_US_PER_TICK),                  //  5000us (measured 4280us with max payload)
+   wdAckDuration             =  (3000/PORT_US_PER_TICK),                  //  3000us (measured 1000us)
 #endif
+    
 #if SLOTDURATION==20
-   TsTxOffset                =  171,                  //  5215us
-   TsLongGT                  =   43,                  //  1300us
-   TsTxAckDelay              =  181,                  //  5521us
-   TsShortGT                 =   16,                  //   500us
+   TsTxOffset                =  (5215/PORT_US_PER_TICK),                  //  5215us
+   TsLongGT                  =  (1311/PORT_US_PER_TICK),                  //  1311us
+   TsTxAckDelay              =  (5521/PORT_US_PER_TICK),                  //  5521us
+   TsShortGT                 =  (700/PORT_US_PER_TICK),                  //   700us
+   wdRadioTx                 =  (1342/PORT_US_PER_TICK),                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
+   wdDataDuration            =  (5000/PORT_US_PER_TICK),                  //  5000us (measured 4280us with max payload)
+   wdAckDuration             =  (3000/PORT_US_PER_TICK),                  //  3000us (measured 1000us)
 #endif
-   TsSlotDuration            =  PORT_TsSlotDuration,  // 10000us
+
+#if SLOTDURATION==160
+   TsTxOffset                =  (10986/PORT_US_PER_TICK),                 //    360 ticks, 10986us
+   TsLongGT                  =  (7324/PORT_US_PER_TICK),                  //    240 ticks, 7324us
+   TsTxAckDelay              =  (11047/PORT_US_PER_TICK),                 //    362 ticks, 11047us
+   TsShortGT                 =  (1831/PORT_US_PER_TICK),                  //    60 ticksz 1831us
+   // radio watchdog
+   wdRadioTx                 =  (7019/PORT_US_PER_TICK),                  //    230 ticks  7019us delayTx+Tx time for 10 bytes( (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
+   wdDataDuration            =  (81238/PORT_US_PER_TICK),                 //    2662 ticks  81238us (measured with max payload) 
+   wdAckDuration             =  (18310/PORT_US_PER_TICK),                 //    600 ticks 18310us (measured)
+   
+#endif
+   TsSlotDuration            =  PORT_TsSlotDuration,  
    // execution speed related
    maxTxDataPrepare          =  PORT_maxTxDataPrepare,
    maxRxAckPrepare           =  PORT_maxRxAckPrepare,
@@ -186,9 +210,7 @@ enum ieee154e_atomicdurations_enum {
    delayTx                   =  PORT_delayTx,         // between GO signal and SFD
    delayRx                   =  PORT_delayRx,         // between GO signal and start listening
    // radio watchdog
-   wdRadioTx                 =   45,                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
-   wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
-   wdAckDuration             =   98,                  //  3000us (measured 1000us)
+
 };
 
 //shift of bytes in the linkOption bitmap: draft-ietf-6tisch-minimal-10.txt: page 6
@@ -261,7 +283,7 @@ typedef struct {
    PORT_TIMER_WIDTH          radioOnTics;             // how many tics within the slot the radio is on
    bool                      radioOnThisSlot;         // to control if the radio has been turned on in a slot.
 
-   //control
+    // control
    bool                      isAckEnabled;            // whether reply for ack, used for synchronization test
    bool                      isSecurityEnabled;       // whether security is applied
    // time correction
@@ -271,6 +293,11 @@ typedef struct {
    opentimers_id_t           timerId;                 // id of timer used for implementing TSCH slot FSM
    uint32_t                  startOfSlotReference;    // the time refer to the beginning of slot
    opentimers_id_t           serialInhibitTimerId;    // id of serial inhibit timer used for scheduling serial output
+
+    // for msf downstream traffic adaptation
+    uint32_t                  receivedFrameFromParent; // True when received a frame from parent
+
+   uint16_t                  compensatingCounter;
 } ieee154e_vars_t;
 
 BEGIN_PACK
@@ -312,6 +339,7 @@ void               ieee154e_setSlotDuration(uint16_t duration);
 uint16_t           ieee154e_getSlotDuration(void);
 
 uint16_t           ieee154e_getTimeCorrection(void);
+void               ieee154e_getTicsInfo(uint32_t* numTicsOn, uint32_t* numTicsTotal);
 // events
 void               ieee154e_startOfFrame(PORT_TIMER_WIDTH capturedTime);
 void               ieee154e_endOfFrame(PORT_TIMER_WIDTH capturedTime);

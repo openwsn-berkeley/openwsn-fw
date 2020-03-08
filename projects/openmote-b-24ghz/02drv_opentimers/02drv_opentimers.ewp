@@ -2440,6 +2440,18 @@
         </file>
     </group>
     <group>
+        <name>kernel</name>
+        <group>
+            <name>openos</name>
+            <file>
+                <name>$PROJ_DIR$\..\..\..\kernel\openos\scheduler.c</name>
+            </file>
+        </group>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\kernel\scheduler.h</name>
+        </file>
+    </group>
+    <group>
         <name>projects</name>
         <group>
             <name>common</name>
