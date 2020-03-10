@@ -1,6 +1,9 @@
 #ifndef __RADIO_H
 #define __RADIO_H
 
+#include "board.h"
+#include "at86rf215.h"
+#include "radio_at86rf215.h"
 /**
 \addtogroup BSP
 \{
@@ -14,11 +17,8 @@
 
 /*
 \modifications to implement the IEEE 802.15.4-SUN
-\done by Jonathan Munoz <jonathan.munoz@inria.fr>
+\done by Jonathan Munoz <jonathan.munoz@inria.fr> 
 */
-
-#include "at86rf215.h"
-
 //=========================== define ==========================================
 
 #define LENGTH_CRC 2
@@ -54,13 +54,14 @@ typedef enum {
    FREQ_RX                        = 0x02,
 } radio_freq_t;
 
-typedef void (*radio_capture_cbt)(PORT_TIMER_WIDTH timestamp);
+typedef void                (*radio_capture_cbt)(PORT_TIMER_WIDTH timestamp);
 
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
 
 // admin
+void     radio_bootstrap(void);
 void     radio_powerOn(void);
 void     radio_init(void);
 void     radio_setStartFrameCb(radio_capture_cbt cb);

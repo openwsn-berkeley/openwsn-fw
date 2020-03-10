@@ -27,6 +27,7 @@ static const uint8_t ebIEsBytestream[] = {
     0xC8,0x00,0x0A,0x1B,0x01,0x00,SLOTFRAME_LENGTH,0x00,SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS,0x00,0x00,0x00,0x00,0x0F
 };
 //=========================== define ==========================================
+#define IEEE802154E_SINGLE_CHANNEL   11
 
 #define EB_ASN0_OFFSET               4
 #define EB_JP_OFFSET                 9
@@ -41,7 +42,7 @@ static const uint8_t ebIEsBytestream[] = {
 #define TXRETRIES                   15 // number of MAC retries before declaring failed
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to successfully synchronize
-#define EB_PORTION                  10 // set EB on minimal cell for 1/EB_PORTION portion
+#define EB_PORTION                  4 // set EB on minimal cell for 1/EB_PORTION portion
 #define MAXKAPERIOD               1000  // in slots: 1500@20ms per slot -> ~30 seconds. Max value used by adaptive synchronization.
 #define DESYNCTIMEOUT             1750  // in slots: 1750@20ms per slot -> ~35 seconds. A larger DESYNCTIMEOUT is needed if using a larger KATIMEOUT.
 #define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"
