@@ -32,6 +32,7 @@ typedef void                (*radio_powerOn_cb_t)(void);
 typedef void                (*radio_reset_cb_t)(void);
 typedef void                (*radio_init_cb_t)(void);
 typedef void                (*radio_change_size_cb_t)(uint16_t* size);
+typedef void                (*radio_set_modulation_cb_t)(RADIO_TYPE selected_radio);
 typedef void                (*radio_change_modulation_cb_t)(registerSetting_t * mod);
 typedef void                (*radio_setStartFrameCb_cb_t)(radio_capture_cbt cb);
 typedef void                (*radio_setEndFrameCb_cb_t)(radio_capture_cbt cb);
@@ -67,6 +68,7 @@ typedef struct {
     radio_reset_cb_t                    radio_reset;
     radio_init_cb_t                     radio_init;
     radio_change_size_cb_t              radio_change_size;
+    radio_set_modulation_cb_t           radio_set_modulation;
     radio_change_modulation_cb_t        radio_change_modulation;
     radio_setStartFrameCb_cb_t          radio_setStartFrameCb;
     radio_setEndFrameCb_cb_t            radio_setEndFrameCb;
@@ -85,13 +87,6 @@ typedef struct {
     radio_isr_cb_t                      radio_isr;
     radio_clear_isr_cb_t                radio_clear_isr;
 } radio_functions_t;
-
-enum radios
-{
-    FSK_OPTION1_FEC,
-    OFDM_OPTION_1_MCS0,
-    OFDM_OPTION_1_MCS1
-};
 
 
 // global radio selection, will use the slowest by default at initialization. 
@@ -112,6 +107,7 @@ void radio_bootstrap (void)
     dyn_funcs [FSK_OPTION1_FEC].radio_reset                 =   radio_reset_at86rf215; 
     dyn_funcs [FSK_OPTION1_FEC].radio_init                  =   radio_init_at86rf215; 
     dyn_funcs [FSK_OPTION1_FEC].radio_change_size           =   radio_change_size_at86rf215; 
+    dyn_funcs [FSK_OPTION1_FEC].radio_set_modulation        =   radio_set_modulation_at86rf215; 
     dyn_funcs [FSK_OPTION1_FEC].radio_change_modulation     =   radio_change_modulation_at86rf215; 
     dyn_funcs [FSK_OPTION1_FEC].radio_setStartFrameCb       =   radio_setStartFrameCb_at86rf215; 
     dyn_funcs [FSK_OPTION1_FEC].radio_setEndFrameCb         =   radio_setEndFrameCb_at86rf215; 
@@ -134,6 +130,7 @@ void radio_bootstrap (void)
     dyn_funcs [OFDM_OPTION_1_MCS0].radio_init                  =   radio_init_at86rf215; 
     dyn_funcs [OFDM_OPTION_1_MCS0].radio_change_size           =   radio_change_size_at86rf215; 
     dyn_funcs [OFDM_OPTION_1_MCS0].radio_change_modulation     =   radio_change_modulation_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS0].radio_set_modulation     =   radio_set_modulation_at86rf215; 
     dyn_funcs [OFDM_OPTION_1_MCS0].radio_setStartFrameCb       =   radio_setStartFrameCb_at86rf215; 
     dyn_funcs [OFDM_OPTION_1_MCS0].radio_setEndFrameCb         =   radio_setEndFrameCb_at86rf215; 
     dyn_funcs [OFDM_OPTION_1_MCS0].radio_setFrequency          =   radio_setFrequency_at86rf215; 
@@ -154,6 +151,7 @@ void radio_bootstrap (void)
     dyn_funcs [OFDM_OPTION_1_MCS1].radio_init                  =   radio_init_at86rf215; 
     dyn_funcs [OFDM_OPTION_1_MCS1].radio_change_size           =   radio_change_size_at86rf215; 
     dyn_funcs [OFDM_OPTION_1_MCS1].radio_change_modulation     =   radio_change_modulation_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS1].radio_set_modulation     =   radio_set_modulation_at86rf215; 
     dyn_funcs [OFDM_OPTION_1_MCS1].radio_setStartFrameCb       =   radio_setStartFrameCb_at86rf215; 
     dyn_funcs [OFDM_OPTION_1_MCS1].radio_setEndFrameCb         =   radio_setEndFrameCb_at86rf215; 
     dyn_funcs [OFDM_OPTION_1_MCS1].radio_setFrequency          =   radio_setFrequency_at86rf215; 

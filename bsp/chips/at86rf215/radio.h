@@ -22,6 +22,7 @@
 //=========================== define ==========================================
 
 #define LENGTH_CRC 2
+//definitions for open radio
 
 //=========================== typedef =========================================
 
@@ -73,6 +74,7 @@ void     radio_setFrequency(uint16_t channel, radio_freq_t tx_or_rx);
 void     radio_rfOn(void);
 void     radio_rfOff(void);
 void     radio_change_modulation(registerSetting_t * mod);
+void     radio_set_modulation_at86rf215(RADIO_TYPE radio);
 void     radio_change_size(uint16_t* size);
 // TX
 void     radio_loadPacket(uint8_t* packet, uint16_t len);

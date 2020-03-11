@@ -27,7 +27,6 @@ static const uint8_t ebIEsBytestream[] = {
     0xC8,0x00,0x0A,0x1B,0x01,0x00,SLOTFRAME_LENGTH,0x00,SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS,0x00,0x00,0x00,0x00,0x0F
 };
 //=========================== define ==========================================
-#define IEEE802154E_SINGLE_CHANNEL   11
 
 #define EB_ASN0_OFFSET               4
 #define EB_JP_OFFSET                 9
