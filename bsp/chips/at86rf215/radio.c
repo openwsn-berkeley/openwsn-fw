@@ -24,7 +24,6 @@
 //=========================== defines =========================================
 
 
-
 // open radio functions callback types declaration
 // can be optimized by creating void_fun_void_t
 
@@ -130,7 +129,7 @@ void radio_bootstrap (void)
     dyn_funcs [OFDM_OPTION_1_MCS0].radio_init                  =   radio_init_at86rf215; 
     dyn_funcs [OFDM_OPTION_1_MCS0].radio_change_size           =   radio_change_size_at86rf215; 
     dyn_funcs [OFDM_OPTION_1_MCS0].radio_change_modulation     =   radio_change_modulation_at86rf215; 
-    dyn_funcs [OFDM_OPTION_1_MCS0].radio_set_modulation     =   radio_set_modulation_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS0].radio_set_modulation         =   radio_set_modulation_at86rf215; 
     dyn_funcs [OFDM_OPTION_1_MCS0].radio_setStartFrameCb       =   radio_setStartFrameCb_at86rf215; 
     dyn_funcs [OFDM_OPTION_1_MCS0].radio_setEndFrameCb         =   radio_setEndFrameCb_at86rf215; 
     dyn_funcs [OFDM_OPTION_1_MCS0].radio_setFrequency          =   radio_setFrequency_at86rf215; 
@@ -190,6 +189,9 @@ void radio_init (void) {
 
 void radio_change_size (uint16_t* size){
     dyn_funcs [SELECTED_RADIO].radio_change_size(size);
+}
+void radio_set_modulation (RADIO_TYPE selected_radio){
+    dyn_funcs [SELECTED_RADIO].radio_set_modulation(selected_radio);
 }
 
 void radio_change_modulation (registerSetting_t * mod){
