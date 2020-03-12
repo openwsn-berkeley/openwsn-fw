@@ -183,7 +183,7 @@ void radio_reset(void)
 }
 
 
-void radio_setFrequency(uint8_t frequency)
+void radio_setFrequency(uint8_t frequency, radio_freq_t tx_or_rx)
 {
   NRF_RADIO->FREQUENCY = FREQUENCY_STEP*(frequency-FREQUENCY_OFFSET);  ///< IEEE 802.15.4 frequency channel, see http://infocenter.nordicsemi.com/topic/com.nordic.infocenter.nrf52840.ps/radio.html?cp=2_0_0_5_19_11_1#ieee802154_freq
 }
