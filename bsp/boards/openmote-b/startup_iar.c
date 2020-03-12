@@ -191,7 +191,7 @@ lockPageCCA_t;
 
 __root const lockPageCCA_t __cca @ ".flashcca" =
 {
-  BOOTLOADER_BACKDOOR_DISABLE,    // Bootloader backdoor enabled
+  BOOTLOADER_BACKDOOR_ENABLE,    // Bootloader backdoor enabled
   0,                            // Image valid bytes
   FLASH_START_ADDR              // Vector table located at flash start address
 };

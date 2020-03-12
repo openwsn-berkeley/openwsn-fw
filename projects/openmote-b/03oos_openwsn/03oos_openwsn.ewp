@@ -2425,9 +2425,6 @@
                 <name>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
-            </file>
-            <file>
                 <name>$PROJ_DIR$\..\..\..\bsp\boards\sctimer.h</name>
             </file>
             <file>
@@ -2442,6 +2439,27 @@
         </group>
         <group>
             <name>chips</name>
+            <group>
+                <name>at86rf215</name>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\at86rf215.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\at86rf215.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\radio.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\radio.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\radio_at86rf215.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\radio_at86rf215.h</name>
+                </file>
+            </group>
             <group>
                 <name>si70x</name>
                 <file>
