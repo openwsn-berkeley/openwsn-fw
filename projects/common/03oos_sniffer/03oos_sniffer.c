@@ -81,7 +81,7 @@ int mote_main(void) {
    // add callback functions radio
    radio_setStartFrameCb(cb_startFrame);
    radio_setEndFrameCb(cb_endFrame);
-
+   radio_set_modulation (OFDM_OPTION_1_MCS0);
    // start timer
    app_vars.timerId = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_SNIFFER);
    reference        = opentimers_getValue();
@@ -113,6 +113,7 @@ void sniffer_setListeningChannel(uint8_t channel){
     while(app_vars.flag != APP_FLAG_IDLE);
     radio_rfOff();
     radio_rfOn();
+    radio_set_modulation (FSK_OPTION1_FEC);
     radio_setFrequency(channel, FREQ_RX);
     app_vars.channel = channel;
     radio_rxEnable();

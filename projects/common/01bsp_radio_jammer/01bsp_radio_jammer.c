@@ -15,7 +15,7 @@ The packet contains LENGTH_PACKET bytes. The send bytes are random.
 #include "board.h"
 #include "radio.h"
 #include "leds.h"
-#include "bsp_timer.h"
+//#include "bsp_timer.h"
 
 //=========================== defines =========================================
 
@@ -72,7 +72,8 @@ int mote_main(void) {
    
    // prepare radio
    radio_rfOn();
-   radio_setFrequency(CHANNEL); 
+   radio_setFrequency(CHANNEL,FREQ_RX); 
+   radio_set_modulation (FSK_OPTION1_FEC);
    radio_rfOff();
    //delay
    //for (j=0;j<0xffff;j++);;

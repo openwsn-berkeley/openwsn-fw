@@ -87,6 +87,8 @@ int mote_main(void) {
         }
         // freq type only effects on scum port
         radio_setFrequency(CHANNEL, FREQ_TX);
+        radio_set_modulation (FSK_OPTION1_FEC);
+        
         // led
         leds_error_toggle();
 

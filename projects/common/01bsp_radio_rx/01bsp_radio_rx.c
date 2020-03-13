@@ -141,7 +141,7 @@ int mote_main(void) {
     radio_rfOn();
     // freq type only effects on scum port
     radio_setFrequency(CHANNEL, FREQ_RX);
-
+    radio_set_modulation (FSK_OPTION1_FEC);
     // switch in RX
     radio_rxEnable();
     radio_rxNow();
