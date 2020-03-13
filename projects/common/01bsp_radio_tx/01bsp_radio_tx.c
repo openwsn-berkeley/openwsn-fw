@@ -68,13 +68,14 @@ int mote_main(void) {
     sctimer_set_callback(cb_scTimerCompare);
     radio_setStartFrameCb(cb_startFrame);
     radio_setEndFrameCb(cb_endFrame);
-
+    
     // prepare radio
     radio_rfOn();
     // freq type only effects on scum port
     radio_setFrequency(CHANNEL, FREQ_TX);
+    radio_set_modulation (FSK_OPTION1_FEC);
     radio_rfOff();
-
+    
     // start periodic overflow
     sctimer_setCompare(sctimer_readCounter()+ TIMER_PERIOD);
     sctimer_enable();
@@ -87,7 +88,6 @@ int mote_main(void) {
         }
         // freq type only effects on scum port
         radio_setFrequency(CHANNEL, FREQ_TX);
-        radio_set_modulation (FSK_OPTION1_FEC);
         
         // led
         leds_error_toggle();
