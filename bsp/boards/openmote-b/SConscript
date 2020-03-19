@@ -10,6 +10,11 @@ si70x = localEnv.SConscript(
     exports     = {'env': env},
 )
 
+cc2538rf = localEnv.SConscript(
+    os.path.join('#','bsp','chips','cc2538rf','SConscript'),
+    variant_dir = 'cc2538rf',
+    exports     = {'env': env},
+)
 rf215 = localEnv.SConscript(
     os.path.join('#','bsp','chips','at86rf215','SConscript'),
     variant_dir = 'rf215',
@@ -25,11 +30,12 @@ localEnv.Append(
         os.path.join('#','bsp','boards','openmote-b'),
         os.path.join('#','bsp','boards','openmote-b','headers'),
         os.path.join('#','bsp','boards','openmote-b','source'),
+        os.path.join('#','bsp','chips','cc2538rf'),
         os.path.join('#','bsp','chips','si70x'),
         os.path.join('#','bsp','chips','rf215'),
     ],
 )
 
-board  = localEnv.Object(source=source) + si70x + rf215
+board  = localEnv.Object(source=source) + si70x + rf215 + cc2538rf
 
 Return('board')

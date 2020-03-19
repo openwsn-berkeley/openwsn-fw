@@ -51,7 +51,8 @@ typedef enum
 {
     FSK_OPTION1_FEC,
     OFDM_OPTION_1_MCS0,
-    OFDM_OPTION_1_MCS1
+    OFDM_OPTION_1_MCS1,
+    CC2538RF_24GHZ
 } RADIO_TYPE;
 
 //=========================== typedef =========================================
@@ -62,14 +63,21 @@ typedef void  (*radio_capture_cbt)(PORT_TIMER_WIDTH timestamp);
 
 //=========================== prototypes ======================================
 
-// admin
+// admin    
+// This bootstraps the openradio interface. It is called from board initializationin board.c and it allows the MAC later to select which radio to use 
+void                radio_bootstrap(void);
+// This is called during MAC initialization. Perhaps it can be merged with set_modulation
+void                radio_select(RADIO_TYPE selected_radio);
+// currently this is called from board initialization, good idea? 
 void                radio_init(void);
+void                radio_powerOn(void);
 void                radio_setStartFrameCb(radio_capture_cbt cb);
 void                radio_setEndFrameCb(radio_capture_cbt cb);
 // reset
 void                radio_reset(void);
 // RF admin
 void                radio_setFrequency(uint16_t frequency, radio_freq_t tx_or_rx);
+
 void                radio_set_modulation(RADIO_TYPE radio);
 
 //void                radio_setFrequency(uint8_t frequency);
@@ -89,14 +97,14 @@ void                radio_rxEnable(void);
 void                radio_rxEnable_scum(void);
 void                radio_rxNow(void);
 void                radio_getReceivedFrame(uint8_t* bufRead,
-                                uint8_t* lenRead,
-                                uint8_t  maxBufLen,
+                                uint16_t* lenRead,
+                                uint16_t  maxBufLen,
                                  int8_t* rssi,
                                 uint8_t* lqi,
                                    bool* crc);
 
 // interrupt handlers
-kick_scheduler_t    radio_isr(void);
+void    radio_isr(void);
 
 /**
 \}

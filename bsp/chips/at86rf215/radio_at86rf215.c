@@ -49,7 +49,7 @@
 #endif
 
 //=========================== variables ==========================================
-radio_vars_t radio_vars;
+radio_vars_at86rf215_t radio_vars_at86rf215;
 
 // open radio register mapping: an array of pointers to registersettings arrays
 
@@ -93,10 +93,10 @@ void radio_init_at86rf215(void) {
     spi_init();
 
     // clear variables
-    memset(&radio_vars,0,sizeof(radio_vars_t));
+    memset(&radio_vars_at86rf215,0,sizeof(radio_vars_at86rf215_t));
 
     // change state
-    radio_vars.state          = RADIOSTATE_STOPPED;
+    radio_vars_at86rf215.state          = RADIOSTATE_STOPPED;
 
     // reset radio
     radio_reset_at86rf215();
@@ -105,7 +105,7 @@ void radio_init_at86rf215(void) {
     while(at86rf215_status(ATMEL_FREQUENCY_TYPE) != RF_STATE_TRXOFF);
 
     // change state
-    radio_vars.state          = RADIOSTATE_RFOFF;
+    radio_vars_at86rf215.state          = RADIOSTATE_RFOFF;
 
     //configure external radio interrupt in pin D0
     GPIOPinIntDisable(AT86RF215_IRQ_BASE, AT86RF215_IRQ_PIN);
@@ -171,11 +171,11 @@ void radio_change_modulation_at86rf215(registerSetting_t * mod){
 }
 
 void radio_setStartFrameCb_at86rf215(radio_capture_cbt cb) {
-    radio_vars.startFrame_cb  = cb;
+    radio_vars_at86rf215.startFrame_cb  = cb;
 }
 
 void radio_setEndFrameCb_at86rf215(radio_capture_cbt cb) {
-    radio_vars.endFrame_cb    = cb;
+    radio_vars_at86rf215.endFrame_cb    = cb;
 }
 
 //===== RF admin
@@ -208,7 +208,7 @@ void radio_setFrequency_at86rf215(uint16_t channel, radio_freq_t tx_or_rx) {
     }
 
     // change state
-    radio_vars.state = RADIOSTATE_FREQUENCY_SET;
+    radio_vars_at86rf215.state = RADIOSTATE_FREQUENCY_SET;
 }
 
 void radio_rfOn_at86rf215(void) {
@@ -220,7 +220,7 @@ void radio_rfOn_at86rf215(void) {
 void radio_rfOff_at86rf215(void) {
 
     // change state
-    radio_vars.state = RADIOSTATE_TURNING_OFF;
+    radio_vars_at86rf215.state = RADIOSTATE_TURNING_OFF;
 
     at86rf215_spiStrobe(CMD_RF_TRXOFF, ATMEL_FREQUENCY_TYPE);
     while(at86rf215_status(ATMEL_FREQUENCY_TYPE) != RF_STATE_TRXOFF);
@@ -229,10 +229,10 @@ void radio_rfOff_at86rf215(void) {
     leds_radio_off();
 
     // change state
-    radio_vars.state = RADIOSTATE_RFOFF;
+    radio_vars_at86rf215.state = RADIOSTATE_RFOFF;
 }
 
-uint8_t radio_getFrequencyOffset_at86rf215(void){
+int8_t radio_getFrequencyOffset_at86rf215(void){
 
     // not available
     return 0;
@@ -242,21 +242,21 @@ uint8_t radio_getFrequencyOffset_at86rf215(void){
 
 void radio_loadPacket_at86rf215(uint8_t* packet, uint16_t len) {
 
-    radio_vars.state = RADIOSTATE_LOADING_PACKET;
+    radio_vars_at86rf215.state = RADIOSTATE_LOADING_PACKET;
     at86rf215_spiWriteFifo(packet, len, ATMEL_FREQUENCY_TYPE);
     // change state
-    radio_vars.state = RADIOSTATE_PACKET_LOADED;
+    radio_vars_at86rf215.state = RADIOSTATE_PACKET_LOADED;
     //at86rf215_readBurst(0x0306, packet, len);
 }
 
 radio_state_t radio_getState_at86rf215(void){
-    return radio_vars.state;
+    return radio_vars_at86rf215.state;
 }
 
 void radio_txEnable_at86rf215(void) {
 
     // change state
-    radio_vars.state = RADIOSTATE_ENABLING_TX;
+    radio_vars_at86rf215.state = RADIOSTATE_ENABLING_TX;
 
     at86rf215_spiStrobe(CMD_RF_TXPREP, ATMEL_FREQUENCY_TYPE);
     while(at86rf215_status(ATMEL_FREQUENCY_TYPE) != RF_STATE_TXPREP);
@@ -265,7 +265,7 @@ void radio_txEnable_at86rf215(void) {
     debugpins_radio_set();
     leds_radio_on();
 
-    radio_vars.state = RADIOSTATE_TX_ENABLED;
+    radio_vars_at86rf215.state = RADIOSTATE_TX_ENABLED;
 }
 
 void radio_txNow_at86rf215(void) {
@@ -273,15 +273,15 @@ void radio_txNow_at86rf215(void) {
     PORT_TIMER_WIDTH capturedTime;
 
     // change state
-    radio_vars.state = RADIOSTATE_TRANSMITTING;
+    radio_vars_at86rf215.state = RADIOSTATE_TRANSMITTING;
 
     at86rf215_spiStrobe(CMD_RF_TX, ATMEL_FREQUENCY_TYPE);
 
-    if (radio_vars.startFrame_cb!=NULL) {
+    if (radio_vars_at86rf215.startFrame_cb!=NULL) {
         // capture the time
         capturedTime = sctimer_readCounter();
         // call the callback
-        radio_vars.startFrame_cb(capturedTime);
+        radio_vars_at86rf215.startFrame_cb(capturedTime);
     }
 }
 
@@ -289,14 +289,14 @@ void radio_txNow_at86rf215(void) {
 
 void radio_rxEnable_at86rf215(void) {
     // change state
-    radio_vars.state = RADIOSTATE_ENABLING_RX;
+    radio_vars_at86rf215.state = RADIOSTATE_ENABLING_RX;
     // wiggle debug pin
     debugpins_radio_set();
     leds_radio_on();
     at86rf215_spiStrobe(CMD_RF_RX, ATMEL_FREQUENCY_TYPE);
 
     // change state
-    radio_vars.state = RADIOSTATE_LISTENING;
+    radio_vars_at86rf215.state = RADIOSTATE_LISTENING;
 }
 
 void radio_rxNow_at86rf215(void) {
@@ -352,10 +352,10 @@ void radio_read_isr_at86rf215(void){
     uint8_t flags[4];
     at86rf215_read_isr(flags, ATMEL_FREQUENCY_TYPE);
 
-    radio_vars.rf09_isr = flags[0];
-    radio_vars.rf24_isr = flags[1];
-    radio_vars.bb0_isr = flags[2];
-    radio_vars.bb1_isr = flags[3];
+    radio_vars_at86rf215.rf09_isr = flags[0];
+    radio_vars_at86rf215.rf24_isr = flags[1];
+    radio_vars_at86rf215.bb0_isr = flags[2];
+    radio_vars_at86rf215.bb1_isr = flags[3];
 }
 
 
@@ -365,7 +365,7 @@ void radio_read_isr_at86rf215(void){
 void radio_isr_at86rf215(void) {
 
     PORT_TIMER_WIDTH capturedTime;
-    // kick_scheduler_t result = DO_NOT_KICK_SCHEDULER;
+    //kick_scheduler_t result = DO_NOT_KICK_SCHEDULER;
 
     debugpins_isr_set();
 
@@ -376,33 +376,33 @@ void radio_isr_at86rf215(void) {
     //get isr that happened from radio
     radio_read_isr_at86rf215();
 
-    if (radio_vars.bb0_isr & IRQS_RXFS_MASK){
-        radio_vars.state = RADIOSTATE_RECEIVING;
-        if (radio_vars.startFrame_cb!=NULL) {
+    if (radio_vars_at86rf215.bb0_isr & IRQS_RXFS_MASK){
+        radio_vars_at86rf215.state = RADIOSTATE_RECEIVING;
+        if (radio_vars_at86rf215.startFrame_cb!=NULL) {
             // call the callback
-            radio_vars.startFrame_cb(capturedTime);
+            radio_vars_at86rf215.startFrame_cb(capturedTime);
             // kick the OS
-            // result = KICK_SCHEDULER;
+            //result = KICK_SCHEDULER;
         } else {
             //while(1);
         }
     } else {
-        if ((radio_vars.bb0_isr & IRQS_TXFE_MASK)){
-            radio_vars.state = RADIOSTATE_TXRX_DONE;
-            if (radio_vars.endFrame_cb!=NULL) {
+        if ((radio_vars_at86rf215.bb0_isr & IRQS_TXFE_MASK)){
+            radio_vars_at86rf215.state = RADIOSTATE_TXRX_DONE;
+            if (radio_vars_at86rf215.endFrame_cb!=NULL) {
                 // call the callback
-                radio_vars.endFrame_cb(capturedTime);
+                radio_vars_at86rf215.endFrame_cb(capturedTime);
                 // kick the OS
-                // result = KICK_SCHEDULER;
+                //result = KICK_SCHEDULER;
             } else {
                 //while(1);
             }
         }  else {
-            if ((radio_vars.bb0_isr & IRQS_RXFE_MASK)){
-                radio_vars.state = RADIOSTATE_TXRX_DONE;
-                if (radio_vars.endFrame_cb!=NULL) {
+            if ((radio_vars_at86rf215.bb0_isr & IRQS_RXFE_MASK)){
+                radio_vars_at86rf215.state = RADIOSTATE_TXRX_DONE;
+                if (radio_vars_at86rf215.endFrame_cb!=NULL) {
                     // call the callback
-                    radio_vars.endFrame_cb(capturedTime);
+                    radio_vars_at86rf215.endFrame_cb(capturedTime);
                     // kick the OS
                     //result = KICK_SCHEDULER;
                 } else {
@@ -413,11 +413,12 @@ void radio_isr_at86rf215(void) {
     }
     radio_clear_isr_at86rf215();
     debugpins_isr_clr();
+    //return result;
 }
 
 port_INLINE void radio_clear_isr_at86rf215(){
-    radio_vars.rf09_isr = 0;
-    radio_vars.rf24_isr = 0;
-    radio_vars.bb0_isr = 0;
-    radio_vars.bb1_isr = 0;
+    radio_vars_at86rf215.rf09_isr = 0;
+    radio_vars_at86rf215.rf24_isr = 0;
+    radio_vars_at86rf215.bb0_isr = 0;
+    radio_vars_at86rf215.bb1_isr = 0;
 }
