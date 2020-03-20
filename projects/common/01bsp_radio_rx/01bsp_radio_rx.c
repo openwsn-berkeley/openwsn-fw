@@ -90,7 +90,7 @@ typedef struct {
     // rx packet
     volatile    uint8_t    rxpk_done;
                 uint8_t    rxpk_buf[LENGTH_PACKET];
-                uint8_t    rxpk_len;
+                uint16_t    rxpk_len;
                 uint8_t    rxpk_num;
                 int8_t     rxpk_rssi;
                 uint8_t    rxpk_lqi;
@@ -130,18 +130,19 @@ int mote_main(void) {
     // initialize board
     board_init();
 
-    // add callback functions radio
-    radio_setStartFrameCb(cb_startFrame);
-    radio_setEndFrameCb(cb_endFrame);
+
 
     // setup UART
     uart_setCallbacks(cb_uartTxDone,cb_uartRxCb);
 
     // prepare radio
+    radio_set_modulation (OFDM_OPTION_1_MCS0);
     radio_rfOn();
     // freq type only effects on scum port
     radio_setFrequency(CHANNEL, FREQ_RX);
-    radio_set_modulation (FSK_OPTION1_FEC);
+        // add callback functions radio
+    radio_setStartFrameCb(cb_startFrame);
+    radio_setEndFrameCb(cb_endFrame);
     // switch in RX
     radio_rxEnable();
     radio_rxNow();

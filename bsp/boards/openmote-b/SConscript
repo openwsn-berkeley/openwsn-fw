@@ -32,7 +32,7 @@ localEnv.Append(
         os.path.join('#','bsp','boards','openmote-b','source'),
         os.path.join('#','bsp','chips','cc2538rf'),
         os.path.join('#','bsp','chips','si70x'),
-        os.path.join('#','bsp','chips','rf215'),
+        os.path.join('#','bsp','chips','at86rf215'),
     ],
 )
 

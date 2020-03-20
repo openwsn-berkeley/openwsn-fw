@@ -352,6 +352,8 @@
                     <state>$PROJ_DIR$\..\..\..\bsp\chips\adxl346\</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\chips\max44009\</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\chips\sht21\</state>
+                    <state>$PROJ_DIR$\..\..\..\bsp\chips\cc2538rf\</state>
+                    <state>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\</state>
                     <state>$PROJ_DIR$\..\..\..\kernel\</state>
                     <state>$PROJ_DIR$\..\..\..\drivers\common\</state>
                     <state>$PROJ_DIR$\..\..\..\inc\</state>
@@ -630,7 +632,7 @@
                 </option>
                 <option>
                     <name>AOutputFile</name>
-                    <state></state>
+                    <state>$FILE_BNAME$.o</state>
                 </option>
                 <option>
                     <name>ALimitErrorsCheck</name>
@@ -680,7 +682,7 @@
                 </option>
                 <option>
                     <name>OOCOutputFile</name>
-                    <state></state>
+                    <state>03oos_macpong.srec</state>
                 </option>
                 <option>
                     <name>OOCCommandLineProducer</name>
@@ -2390,6 +2392,9 @@
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\leds.c</name>
                 </file>
                 <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\radio.c</name>
+                </file>
+                <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\sctimer.c</name>
                 </file>
                 <file>
@@ -2456,9 +2461,6 @@
                     <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\at86rf215.h</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\radio.c</name>
-                </file>
-                <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\radio.h</name>
                 </file>
                 <file>
@@ -2466,6 +2468,15 @@
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\radio_at86rf215.h</name>
+                </file>
+            </group>
+            <group>
+                <name>cc2538rf</name>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2538rf\radio_cc2538rf.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2538rf\radio_cc2538rf.h</name>
                 </file>
             </group>
             <group>

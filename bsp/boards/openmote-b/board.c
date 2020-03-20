@@ -76,7 +76,6 @@ void board_init(void) {
     uart_init();
     radio_bootstrap();
     radio_init();
-    radio_select(CC2538RF_24GHZ);
     i2c_init();
 
     // sensors_init();

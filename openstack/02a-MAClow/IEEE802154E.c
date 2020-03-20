@@ -141,7 +141,10 @@ void ieee154e_init(void) {
 
     resetStats();
     ieee154e_stats.numDeSync                 = 0;
-
+    
+    //set radio modulation
+    radio_set_modulation (CC2538RF_24GHZ);
+    
     // switch radio on
     radio_rfOn();
 

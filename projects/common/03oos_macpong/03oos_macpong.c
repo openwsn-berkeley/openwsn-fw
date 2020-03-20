@@ -7,6 +7,7 @@
 // stack initialization
 #include "opendefs.h"
 #include "board.h"
+#include "radio.h"
 #include "scheduler.h"
 #include "openstack.h"
 #include "opentimers.h"
@@ -42,6 +43,7 @@ int mote_main(void) {
     board_init();
     scheduler_init();
     openstack_init();
+    radio_set_modulation(FSK_OPTION1_FEC);
     if (idmanager_getMyID(ADDR_64B)->addr_64b[7]==0x66) {
         idmanager_setIsDAGroot(TRUE);
     }

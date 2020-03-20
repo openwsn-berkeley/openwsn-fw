@@ -350,6 +350,8 @@
                     <state>$PROJ_DIR$\..\..\..\bsp\boards\</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\boards\common\</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\chips\si70x\</state>
+                    <state>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\</state>
+                    <state>$PROJ_DIR$\..\..\..\bsp\chips\cc2538rf\</state>
                     <state>$PROJ_DIR$\..\..\..\kernel\</state>
                     <state>$PROJ_DIR$\..\..\..\drivers\common\</state>
                     <state>$PROJ_DIR$\..\..\..\inc\</state>
@@ -2394,10 +2396,19 @@
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\leds.c</name>
                 </file>
                 <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\radio.c</name>
+                </file>
+                <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\sctimer.c</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\sensors.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\spi.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\startup_gcc.c</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\startup_iar.c</name>
@@ -2425,6 +2436,9 @@
                 <name>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\..\..\bsp\boards\sctimer.h</name>
             </file>
             <file>
@@ -2448,9 +2462,6 @@
                     <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\at86rf215.h</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\radio.c</name>
-                </file>
-                <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\radio.h</name>
                 </file>
                 <file>
@@ -2458,6 +2469,15 @@
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\radio_at86rf215.h</name>
+                </file>
+            </group>
+            <group>
+                <name>cc2538rf</name>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2538rf\radio_cc2538rf.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2538rf\radio_cc2538rf.h</name>
                 </file>
             </group>
             <group>
