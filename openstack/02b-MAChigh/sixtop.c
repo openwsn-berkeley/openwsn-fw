@@ -608,6 +608,7 @@ owerror_t sixtop_send_internal(
     // this is a new packet which I never attempted to send
     msg->l2_numTxAttempts = 0;
     // transmit with the default TX power
+    
     msg->l1_txPower = TX_POWER;
     // add a IEEE802.15.4 header
     ieee802154_prependHeader(

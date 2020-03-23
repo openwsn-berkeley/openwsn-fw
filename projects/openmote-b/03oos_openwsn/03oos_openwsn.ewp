@@ -2408,9 +2408,6 @@
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\spi.c</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\startup_gcc.c</name>
-                </file>
-                <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\startup_iar.c</name>
                 </file>
                 <file>
@@ -2460,9 +2457,6 @@
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\at86rf215.h</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\radio.h</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\radio_at86rf215.c</name>
@@ -2789,6 +2783,12 @@
         </group>
         <group>
             <name>03a-IPHC</name>
+            <file>
+                <name>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\frag.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\frag.h</name>
+            </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\iphc.c</name>
             </file>

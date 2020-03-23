@@ -2404,12 +2404,6 @@
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\spi.c</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\startup_gcc.c</name>
-                    <excluded>
-                        <configuration>Debug</configuration>
-                    </excluded>
-                </file>
-                <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\startup_iar.c</name>
                 </file>
                 <file>

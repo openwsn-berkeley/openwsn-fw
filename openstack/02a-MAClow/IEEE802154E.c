@@ -114,9 +114,9 @@ void ieee154e_init(void) {
     // initialize variables
     memset(&ieee154e_vars,0,sizeof(ieee154e_vars_t));
     memset(&ieee154e_dbg,0,sizeof(ieee154e_dbg_t));
-
+#define IEEE802154E_SINGLE_CHANNEL    11
     // set singleChannel to 0 to enable channel hopping.
-#if IEEE802154E_SINGLE_CHANNEL
+#if IEEE802154E_SINGLE_CHANNEL  
     ieee154e_vars.singleChannel     = IEEE802154E_SINGLE_CHANNEL;
 #else
     ieee154e_vars.singleChannel     = 0; // 0 means channel hopping
@@ -723,7 +723,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
       // retrieve the received data frame from the radio's Rx buffer
       ieee154e_vars.dataReceived->payload = &(ieee154e_vars.dataReceived->packet[FIRST_FRAME_BYTE]);
       radio_getReceivedFrame(       ieee154e_vars.dataReceived->payload,
-                                   &ieee154e_vars.dataReceived->length,
+                                    &ieee154e_vars.dataReceived->length,
                              sizeof(ieee154e_vars.dataReceived->packet),
                                    &ieee154e_vars.dataReceived->l1_rssi,
                                    &ieee154e_vars.dataReceived->l1_lqi,
@@ -1505,7 +1505,7 @@ port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
         ieee154e_vars.ackReceived->payload = &(ieee154e_vars.ackReceived->packet[FIRST_FRAME_BYTE]);
         radio_getReceivedFrame(
             ieee154e_vars.ackReceived->payload,
-            &ieee154e_vars.ackReceived->length,
+             &ieee154e_vars.ackReceived->length,
             sizeof(ieee154e_vars.ackReceived->packet),
             &ieee154e_vars.ackReceived->l1_rssi,
             &ieee154e_vars.ackReceived->l1_lqi,

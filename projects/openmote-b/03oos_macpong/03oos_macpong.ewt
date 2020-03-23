@@ -2637,9 +2637,6 @@
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\spi.c</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\startup_gcc.c</name>
-                </file>
-                <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\startup_iar.c</name>
                 </file>
                 <file>
