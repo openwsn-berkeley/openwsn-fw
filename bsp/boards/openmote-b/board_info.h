@@ -62,7 +62,7 @@
 //===== Radios
 
 // Number of available radios
-#define MAX_RADIOS  4
+#define MAX_RADIOS  7
 
 //===== IEEE802154E timing
 

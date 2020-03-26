@@ -114,6 +114,25 @@ void radio_bootstrap (void)
     dyn_funcs [FSK_OPTION1_FEC].radio_getReceivedFrame      =   radio_getReceivedFrame_at86rf215; 
     dyn_funcs [FSK_OPTION1_FEC].radio_isr                   =   radio_isr_at86rf215; 
 
+  
+ //OQPSK_RATE3
+    dyn_funcs [OQPSK_RATE3].radio_reset                 =   radio_reset_at86rf215; 
+    dyn_funcs [OQPSK_RATE3].radio_init                  =   radio_init_at86rf215; 
+    dyn_funcs [OQPSK_RATE3].radio_set_modulation     =   radio_set_modulation_at86rf215; 
+    dyn_funcs [OQPSK_RATE3].radio_setStartFrameCb       =   radio_setStartFrameCb_at86rf215; 
+    dyn_funcs [OQPSK_RATE3].radio_setEndFrameCb         =   radio_setEndFrameCb_at86rf215; 
+    dyn_funcs [OQPSK_RATE3].radio_setFrequency          =   radio_setFrequency_at86rf215; 
+    dyn_funcs [OQPSK_RATE3].radio_rfOn                  =   radio_rfOn_at86rf215; 
+    dyn_funcs [OQPSK_RATE3].radio_rfOff                 =   radio_rfOff_at86rf215; 
+    dyn_funcs [OQPSK_RATE3].radio_getFrequencyOffset    =   radio_getFrequencyOffset_at86rf215; 
+    dyn_funcs [OQPSK_RATE3].radio_loadPacket            =   radio_loadPacket_at86rf215; 
+    dyn_funcs [OQPSK_RATE3].radio_txEnable              =   radio_txEnable_at86rf215; 
+    dyn_funcs [OQPSK_RATE3].radio_txNow                 =   radio_txNow_at86rf215; 
+    dyn_funcs [OQPSK_RATE3].radio_rxEnable              =   radio_rxEnable_at86rf215; 
+    dyn_funcs [OQPSK_RATE3].radio_rxNow                 =   radio_rxNow_at86rf215; 
+    dyn_funcs [OQPSK_RATE3].radio_getReceivedFrame      =   radio_getReceivedFrame_at86rf215;
+    dyn_funcs [OQPSK_RATE3].radio_isr                   =   radio_isr_at86rf215; 
+ 
     //OFDM_OPTION_1_MCS0
     dyn_funcs [OFDM_OPTION_1_MCS0].radio_reset                 =   radio_reset_at86rf215; 
     dyn_funcs [OFDM_OPTION_1_MCS0].radio_init                  =   radio_init_at86rf215; 
@@ -149,8 +168,45 @@ void radio_bootstrap (void)
     dyn_funcs [OFDM_OPTION_1_MCS1].radio_rxNow                 =   radio_rxNow_at86rf215; 
     dyn_funcs [OFDM_OPTION_1_MCS1].radio_getReceivedFrame      =   radio_getReceivedFrame_at86rf215;
     dyn_funcs [OFDM_OPTION_1_MCS1].radio_isr                   =   radio_isr_at86rf215; 
-    
- //OFDM_OPTION_1_MCS1
+  
+ //OFDM_OPTION_1_MCS2
+    dyn_funcs [OFDM_OPTION_1_MCS2].radio_reset                 =   radio_reset_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS2].radio_init                  =   radio_init_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS2].radio_set_modulation     =   radio_set_modulation_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS2].radio_setStartFrameCb       =   radio_setStartFrameCb_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS2].radio_setEndFrameCb         =   radio_setEndFrameCb_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS2].radio_setFrequency          =   radio_setFrequency_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS2].radio_rfOn                  =   radio_rfOn_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS2].radio_rfOff                 =   radio_rfOff_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS2].radio_getFrequencyOffset    =   radio_getFrequencyOffset_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS2].radio_loadPacket            =   radio_loadPacket_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS2].radio_txEnable              =   radio_txEnable_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS2].radio_txNow                 =   radio_txNow_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS2].radio_rxEnable              =   radio_rxEnable_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS2].radio_rxNow                 =   radio_rxNow_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS2].radio_getReceivedFrame      =   radio_getReceivedFrame_at86rf215;
+    dyn_funcs [OFDM_OPTION_1_MCS2].radio_isr                   =   radio_isr_at86rf215; 
+  
+ //OFDM_OPTION_1_MCS3
+    dyn_funcs [OFDM_OPTION_1_MCS3].radio_reset                 =   radio_reset_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS3].radio_init                  =   radio_init_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS3].radio_set_modulation     =   radio_set_modulation_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS3].radio_setStartFrameCb       =   radio_setStartFrameCb_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS3].radio_setEndFrameCb         =   radio_setEndFrameCb_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS3].radio_setFrequency          =   radio_setFrequency_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS3].radio_rfOn                  =   radio_rfOn_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS3].radio_rfOff                 =   radio_rfOff_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS3].radio_getFrequencyOffset    =   radio_getFrequencyOffset_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS3].radio_loadPacket            =   radio_loadPacket_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS3].radio_txEnable              =   radio_txEnable_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS3].radio_txNow                 =   radio_txNow_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS3].radio_rxEnable              =   radio_rxEnable_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS3].radio_rxNow                 =   radio_rxNow_at86rf215; 
+    dyn_funcs [OFDM_OPTION_1_MCS3].radio_getReceivedFrame      =   radio_getReceivedFrame_at86rf215;
+    dyn_funcs [OFDM_OPTION_1_MCS3].radio_isr                   =   radio_isr_at86rf215; 
+ 
+ 
+ //CC2538RF_24GHZ
     dyn_funcs [CC2538RF_24GHZ].radio_reset                 =   radio_reset_cc2538rf; 
     dyn_funcs [CC2538RF_24GHZ].radio_init                  =   radio_init_cc2538rf; 
     dyn_funcs [CC2538RF_24GHZ].radio_set_modulation     =   radio_set_modulation_cc2538rf; 

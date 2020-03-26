@@ -225,7 +225,7 @@ void radio_rfOff_at86rf215(void) {
     at86rf215_spiStrobe(CMD_RF_TRXOFF, ATMEL_FREQUENCY_TYPE);
     while(at86rf215_status(ATMEL_FREQUENCY_TYPE) != RF_STATE_TRXOFF);
     // wiggle debug pin
-    debugpins_radio_clr();
+    //debugpins_radio_clr();
     leds_radio_off();
 
     // change state
@@ -262,7 +262,7 @@ void radio_txEnable_at86rf215(void) {
     while(at86rf215_status(ATMEL_FREQUENCY_TYPE) != RF_STATE_TXPREP);
 
     // wiggle debug pin
-    debugpins_radio_set();
+    //debugpins_radio_set();
     leds_radio_on();
 
     radio_vars_at86rf215.state = RADIOSTATE_TX_ENABLED;
@@ -291,7 +291,7 @@ void radio_rxEnable_at86rf215(void) {
     // change state
     radio_vars_at86rf215.state = RADIOSTATE_ENABLING_RX;
     // wiggle debug pin
-    debugpins_radio_set();
+    //debugpins_radio_set();
     leds_radio_on();
     at86rf215_spiStrobe(CMD_RF_RX, ATMEL_FREQUENCY_TYPE);
 
@@ -341,12 +341,18 @@ void radio_getReceivedFrame_at86rf215(
 void radio_local_bootstrap_at86rf215(void){
     
     radio_api.radios [FSK_OPTION1_FEC]        = basic_settings_fsk_option1;
+    radio_api.radios [OQPSK_RATE3]            = basic_settings_oqpsk_rate3;
     radio_api.radios [OFDM_OPTION_1_MCS0]     = basic_settings_ofdm_1_mcs0;
     radio_api.radios [OFDM_OPTION_1_MCS1]     = basic_settings_ofdm_1_mcs1;
+    radio_api.radios [OFDM_OPTION_1_MCS2]     = basic_settings_ofdm_1_mcs2;
+    radio_api.radios [OFDM_OPTION_1_MCS3]     = basic_settings_ofdm_1_mcs3;
     
     radio_api.size [FSK_OPTION1_FEC]        = sizeof(basic_settings_fsk_option1)/sizeof(registerSetting_t);
+    radio_api.size [OQPSK_RATE3]            = sizeof(basic_settings_oqpsk_rate3)/sizeof(registerSetting_t);
     radio_api.size [OFDM_OPTION_1_MCS0]     = sizeof(basic_settings_ofdm_1_mcs0)/sizeof(registerSetting_t);
     radio_api.size [OFDM_OPTION_1_MCS1]     = sizeof(basic_settings_ofdm_1_mcs1)/sizeof(registerSetting_t);    
+    radio_api.size [OFDM_OPTION_1_MCS2]     = sizeof(basic_settings_ofdm_1_mcs2)/sizeof(registerSetting_t);    
+    radio_api.size [OFDM_OPTION_1_MCS3]     = sizeof(basic_settings_ofdm_1_mcs3)/sizeof(registerSetting_t);    
 }
 void radio_read_isr_at86rf215(void){
     uint8_t flags[4];
@@ -375,7 +381,7 @@ void radio_isr_at86rf215(void) {
     capturedTime = sctimer_readCounter();
     //get isr that happened from radio
     radio_read_isr_at86rf215();
-
+  uint8_t i = radio_vars_at86rf215.bb0_isr & IRQS_RXFS_MASK;
     if (radio_vars_at86rf215.bb0_isr & IRQS_RXFS_MASK){
         radio_vars_at86rf215.state = RADIOSTATE_RECEIVING;
         if (radio_vars_at86rf215.startFrame_cb!=NULL) {

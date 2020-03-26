@@ -50,8 +50,11 @@ typedef enum {
 typedef enum 
 {
     FSK_OPTION1_FEC,
+    OQPSK_RATE3,
     OFDM_OPTION_1_MCS0,
     OFDM_OPTION_1_MCS1,
+    OFDM_OPTION_1_MCS2,
+    OFDM_OPTION_1_MCS3,
     CC2538RF_24GHZ
 } RADIO_TYPE;
 

@@ -23,7 +23,7 @@
 //=========================== define ==========================================
 
 // Number of modulations available on this radio chip. This is different from MAC_RADIOS which is for all the board and defined in board_info.h
-#define MAX_MODULATIONS 3
+#define MAX_MODULATIONS 6
 
 //=========================== typedef =========================================
 
