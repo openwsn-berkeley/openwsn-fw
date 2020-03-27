@@ -6,7 +6,7 @@
 
 #include "config.h"
 
-#include "applayer.h"
+#include "openweb.h"
 
 #if defined(OPENWSN_COAP_C)
 #include "coap.h"
@@ -16,7 +16,7 @@
 #include "cjoin.h"
 #endif
 
-void applayer_init() {
+void openweb_init() {
 
 #if defined(OPENWSN_COAP_C)
     coap_init();

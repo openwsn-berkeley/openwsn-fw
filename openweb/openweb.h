@@ -9,6 +9,6 @@
 
 //=========================== prototypes ======================================
 
-void applayer_init(void);
+void openweb_init(void);
 
 #endif /* __OPENCOAP_H */

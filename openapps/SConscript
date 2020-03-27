@@ -62,8 +62,7 @@ else:
             os.path.join('#','openstack','04-TRAN'),
             os.path.join('#','openstack','cross-layers'),
             # openapps
-            os.path.join('#','opencoap','opencoap'),
-            os.path.join('#','opencoap','cjoin'),
+            os.path.join('#','openweb','opencoap'),
             # openapps
             os.path.join('#','openapps'),
         ]+[os.path.join('#','openapps',a) for a in apps],

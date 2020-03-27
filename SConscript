@@ -1013,7 +1013,7 @@ def buildLibs(projectDir):
         '00std': [],
         '01bsp': ['libbsp'],
         '02drv': ['libkernel','libdrivers','libbsp'],
-        '03oos': ['libopenstack','libopenapps','libopencoap','libopenstack','libkernel','libdrivers','libbsp'], # this order needed for mspgcc
+        '03oos': ['libopenstack','libopenapps','libopenweb','libopenstack','libkernel','libdrivers','libbsp'], # this order needed for mspgcc
     }
     
     returnVal = None
@@ -1266,16 +1266,16 @@ buildEnv.SConscript(
 buildEnv.Clean('libopenstack', Dir(openstackVarDir).abspath)
 buildEnv.Append(LIBPATH = [openstackVarDir])
 
-# opencoap
-opencoapDir        = os.path.join('#','opencoap')
-opencoapVarDir     = os.path.join(buildEnv['VARDIR'],'opencoap')
+# openweb
+openwebDir        = os.path.join('#','openweb')
+openwebVarDir     = os.path.join(buildEnv['VARDIR'],'openweb')
 buildEnv.SConscript(
-    os.path.join(opencoapDir,'SConscript'),
+    os.path.join(openwebDir,'SConscript'),
     exports        = {'env': buildEnv},
-    variant_dir    = opencoapVarDir,
+    variant_dir    = openwebVarDir,
 )
-buildEnv.Clean('libopencoap', Dir(opencoapVarDir).abspath)
-buildEnv.Append(LIBPATH = [opencoapVarDir])
+buildEnv.Clean('libopenweb', Dir(openwebVarDir).abspath)
+buildEnv.Append(LIBPATH = [openwebVarDir])
 
 # openapps
 openappsDir        = os.path.join('#','openapps')

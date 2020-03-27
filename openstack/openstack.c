@@ -36,7 +36,7 @@
 #include "openudp.h"
 
 //===== coap-layer
-#include "applayer.h"
+#include "openweb.h"
 
 //===== applications
 #include "openapps.h"
@@ -90,7 +90,7 @@ void openstack_init(void) {
 #endif
 
     //===== coap-layer
-    applayer_init();
+    openweb_init();
 
     //===== applications
     openapps_init();

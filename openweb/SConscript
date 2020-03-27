@@ -4,9 +4,9 @@ Import('env')
 
 localEnv = env.Clone()
 
-target = 'libopencoap'
+target = 'libopenweb'
 sources_c = [
-    "applayer.c",
+    "openweb.c",
     # ==== opencoap
     os.path.join("opencoap", "cborencoder.c"),
     os.path.join("opencoap", "hkdf.c"),
@@ -21,7 +21,7 @@ sources_c = [
 ]
 
 sources_h = [
-    "applayer.h",
+    "openweb.h",
     # ==== opencoap
     os.path.join("opencoap", "cborencoder.h"),
     os.path.join("opencoap", "coap.h"),
@@ -42,11 +42,11 @@ if localEnv['board']=='python':
         )
         #localEnv.AlwaysBuild(temp)
 
-    libopencoap = localEnv.Library(
+    libopenweb = localEnv.Library(
         target = target,
         source = [localEnv.ObjectifiedFilename(s) for s in sources_c],
     )
-    localEnv.Depends(libopencoap, [localEnv.ObjectifiedFilename(s) for s in sources_h])
+    localEnv.Depends(libopenweb, [localEnv.ObjectifiedFilename(s) for s in sources_h])
 
 else:
 
@@ -67,15 +67,15 @@ else:
             os.path.join('#','openstack','04-TRAN'),
             os.path.join('#','openstack','cross-layers'),
             # openapps
-            os.path.join('#','opencoap'),
-            os.path.join('#','opencoap','opencoap'),
-            os.path.join('#','opencoap','cjoin')
+            os.path.join('#','openweb'),
+            os.path.join('#','openweb','opencoap'),
+            os.path.join('#','openweb','cjoin')
         ],
     )
 
-    libopencoap = localEnv.Library(
+    libopenweb = localEnv.Library(
         target = target,
         source = sources_c,
     )
 
-Alias('libopencoap', libopencoap)
+Alias('libopenweb', libopenweb)

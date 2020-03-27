@@ -64,8 +64,6 @@ sources_h = [
     os.path.join('cross-layers','openqueue.h'),
     os.path.join('cross-layers','openrandom.h'),
     os.path.join('cross-layers','packetfunctions.h'),
-    #=== apps
-    os.path.join('#','openapps','userialbridge','userialbridge.h'),
 ]
 
 if localEnv['board']=='python':
@@ -100,6 +98,10 @@ else:
             os.path.join('#','openstack','03b-IPv6'),
             os.path.join('#','openstack','04-TRAN'),
             os.path.join('#','openstack','cross-layers'),
+            # openweb
+            os.path.join('#','openweb'),
+            # openapps
+            os.path.join('#','openapps')
         ],
     )
     
