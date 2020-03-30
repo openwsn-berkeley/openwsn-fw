@@ -19,7 +19,7 @@ The packet contains LENGTH_PACKET bytes. The send bytes are random.
 
 //=========================== defines =========================================
 
-#define LENGTH_PACKET   100+LENGTH_CRC // maximum length is 127 bytes
+#define LENGTH_PACKET   125+LENGTH_CRC // maximum length is 127 bytes
 #define CHANNEL         11             // 11 = 2.405GHz
 #define RANDOM_SEED     65521          // prime
 
@@ -72,8 +72,7 @@ int mote_main(void) {
    
    // prepare radio
    radio_rfOn();
-   radio_setFrequency(CHANNEL,FREQ_RX); 
-   radio_set_modulation (FSK_OPTION1_FEC);
+   radio_setFrequency(CHANNEL); 
    radio_rfOff();
    //delay
    //for (j=0;j<0xffff;j++);;
@@ -97,7 +96,6 @@ int mote_main(void) {
       
       // send packet
       radio_loadPacket(app_vars.txpk_buf,app_vars.txpk_len);
-      radio_set_modulation (FSK_OPTION1_FEC);
       radio_txEnable();
       //set a semaphore to wait until the tx finished
       app_vars.txpk_txNow = 0;

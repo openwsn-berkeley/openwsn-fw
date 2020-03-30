@@ -15,8 +15,7 @@
 //=========================== variables =======================================
 
 openqueue_vars_t openqueue_vars;
-//for debuging
-uint8_t queue_length;
+
 
 //=========================== prototypes ======================================
 
@@ -77,7 +76,6 @@ get a new packet buffer to start creating a new packet.
 */
 OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
     uint8_t i;
-    queue_length = 0;
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
 
@@ -97,7 +95,6 @@ OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
 
     // walk through queue and find free entry
     for (i = 0; i < QUEUELENGTH; i++) {
-        queue_length++;
         if (openqueue_vars.queue[i].owner == COMPONENT_NULL) {
             openqueue_vars.queue[i].creator = creator;
             openqueue_vars.queue[i].owner = COMPONENT_OPENQUEUE;
