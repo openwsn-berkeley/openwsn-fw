@@ -57,9 +57,11 @@
 #define PORT_PIN_RADIO_RESET_HIGH()    // nothing
 #define PORT_PIN_RADIO_RESET_LOW()     // nothing
 
-#define SLOTDURATION 20                // in miliseconds
+#define SLOTDURATION 160                // in miliseconds
 
 //===== Radios
+// This board's radio driver is Open Radio compliant. 
+#define OPENRADIO_COMPLIANT     1
 
 // Number of available radios
 #define MAX_RADIOS  7

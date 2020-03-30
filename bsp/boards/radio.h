@@ -47,6 +47,7 @@ typedef enum {
    FREQ_RX                        = 0x02,
 } radio_freq_t;
 
+// radio settings available for the MAC layer and supported by openmote-b
 typedef enum 
 {
     FSK_OPTION1_FEC,
@@ -56,7 +57,7 @@ typedef enum
     OFDM_OPTION_1_MCS2,
     OFDM_OPTION_1_MCS3,
     CC2538RF_24GHZ
-} RADIO_TYPE;
+} radioSetting_t;
 
 //=========================== typedef =========================================
 
@@ -67,11 +68,6 @@ typedef void  (*radio_capture_cbt)(PORT_TIMER_WIDTH timestamp);
 //=========================== prototypes ======================================
 
 // admin    
-// This bootstraps the openradio interface. It is called from board initializationin board.c and it allows the MAC later to select which radio to use 
-void                radio_bootstrap(void);
-// This is called during MAC initialization. Perhaps it can be merged with set_modulation
-void                radio_select(RADIO_TYPE selected_radio);
-// currently this is called from board initialization, good idea? 
 void                radio_init(void);
 void                radio_powerOn(void);
 void                radio_setStartFrameCb(radio_capture_cbt cb);
@@ -81,7 +77,7 @@ void                radio_reset(void);
 // RF admin
 void                radio_setFrequency(uint16_t frequency, radio_freq_t tx_or_rx);
 
-void                radio_set_modulation(RADIO_TYPE radio);
+void                radio_set_modulation(radioSetting_t radio);
 
 //void                radio_setFrequency(uint8_t frequency);
 void                radio_rfOn(void);

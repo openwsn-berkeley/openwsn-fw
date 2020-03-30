@@ -74,7 +74,6 @@ void board_init(void) {
     button_init();
     sctimer_init();
     uart_init();
-    radio_bootstrap();
     radio_init();
     i2c_init();
 

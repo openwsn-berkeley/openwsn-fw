@@ -197,7 +197,7 @@ void radio_setFrequency_cc2538rf(uint16_t frequency, radio_freq_t tx_or_rx) {
    radio_vars_cc2538rf.state = RADIOSTATE_FREQUENCY_SET;
 }
 
-void radio_set_modulation_cc2538rf(RADIO_TYPE selected_radio){
+void radio_set_modulation_cc2538rf(radioSetting_t selected_radio){
     // do nothing
 }
 

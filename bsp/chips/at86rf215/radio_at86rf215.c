@@ -143,7 +143,7 @@ void radio_change_size_at86rf215(uint16_t* size){
 }
 
 // This function accepts one of the existing radio presets and writes them to the radio chip.
-void radio_set_modulation_at86rf215(RADIO_TYPE selected_radio){
+void radio_set_modulation_at86rf215(radioSetting_t selected_radio){
     uint16_t _register;
 
     at86rf215_spiStrobe(CMD_RF_TRXOFF, ATMEL_FREQUENCY_TYPE);
@@ -225,7 +225,7 @@ void radio_rfOff_at86rf215(void) {
     at86rf215_spiStrobe(CMD_RF_TRXOFF, ATMEL_FREQUENCY_TYPE);
     while(at86rf215_status(ATMEL_FREQUENCY_TYPE) != RF_STATE_TRXOFF);
     // wiggle debug pin
-    //debugpins_radio_clr();
+    debugpins_radio_clr();
     leds_radio_off();
 
     // change state
@@ -262,7 +262,7 @@ void radio_txEnable_at86rf215(void) {
     while(at86rf215_status(ATMEL_FREQUENCY_TYPE) != RF_STATE_TXPREP);
 
     // wiggle debug pin
-    //debugpins_radio_set();
+    debugpins_radio_set();
     leds_radio_on();
 
     radio_vars_at86rf215.state = RADIOSTATE_TX_ENABLED;
@@ -291,7 +291,7 @@ void radio_rxEnable_at86rf215(void) {
     // change state
     radio_vars_at86rf215.state = RADIOSTATE_ENABLING_RX;
     // wiggle debug pin
-    //debugpins_radio_set();
+    debugpins_radio_set();
     leds_radio_on();
     at86rf215_spiStrobe(CMD_RF_RX, ATMEL_FREQUENCY_TYPE);
 

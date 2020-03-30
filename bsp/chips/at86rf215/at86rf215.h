@@ -4071,7 +4071,7 @@ static const registerSetting_t basic_settings_fsk_option3 []={  //DO NOT USE
   {RG_BBC0_FSKPHRTX,  0x00},// No data whitening SFD0 used.
 };
 //------------------------------------ OQPSK -----------------------------------//
-static const registerSetting_t basic_settings_oqpsk_rate1[] = {
+static const registerSetting_t basic_settings_oqpsk_rate0[] = {
     {RG_BBC0_PC,        0x1F},
     {RG_BBC0_OQPSKPHRTX, 0x00}, // MR-OQPSK, rate mode 0
     {RG_BBC0_OQPSKC0,   0x10},  // 100kchips/s, RC-0.8 shaping, direct-modulation enabled
@@ -4092,7 +4092,7 @@ static const registerSetting_t basic_settings_oqpsk_rate1[] = {
     {RG_RF09_PAC,       0x7F},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
 };
 
-static const registerSetting_t basic_settings_oqpsk_rate2[] = {
+static const registerSetting_t basic_settings_oqpsk_rate1[] = {
     {RG_BBC0_PC,        0x17},
     {RG_BBC0_OQPSKPHRTX, 0x02}, // MR-OQPSK, rate mode 0
     {RG_BBC0_OQPSKC0,   0x10},  // 100kchips/s, RC-0.8 shaping, direct-modulation enabled
@@ -4113,9 +4113,9 @@ static const registerSetting_t basic_settings_oqpsk_rate2[] = {
     {RG_RF09_PAC,       0x7F},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
 };
 
-static registerSetting_t basic_settings_oqpsk_rate3[] = {
+static const registerSetting_t basic_settings_oqpsk_rate2[] = {
     {RG_BBC0_PC,        0x1F},  // Mina: used to be 17 but change to 1F make 2B FCS
-    {RG_BBC0_OQPSKPHRTX, 0x04}, // MR-OQPSK, rate mode 0
+    {RG_BBC0_OQPSKPHRTX, 0x04}, // MR-OQPSK, rate mode 3
     {RG_BBC0_OQPSKC0,   0x10},  // 100kchips/s, RC-0.8 shaping, direct-modulation enabled
 //  {RG_BBC0_OQPSKC1,   0x3F},  // MINIMUM preamble-detection sensitivities, rx-override disabled
 //  {RG_BBC0_OQPSKC2,   0x00},  // listen for MR-OQPSK frames only
@@ -4134,9 +4134,9 @@ static registerSetting_t basic_settings_oqpsk_rate3[] = {
     {RG_RF09_PAC,       0x7F},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
 };
 
-static const registerSetting_t basic_settings_oqpsk_rate4[] = {
-    {RG_BBC0_PC,        0x17},
-    {RG_BBC0_OQPSKPHRTX, 0x06}, // MR-OQPSK, rate mode 0
+static  registerSetting_t basic_settings_oqpsk_rate3[] = {
+    {RG_BBC0_PC,        0x1F},
+    {RG_BBC0_OQPSKPHRTX, 0x06}, // MR-OQPSK, rate mode 0//ERORR
     {RG_BBC0_OQPSKC0,   0x10},  // 100kchips/s, RC-0.8 shaping, direct-modulation enabled
 //  {RG_BBC0_OQPSKC1,   0x3F},  // MINIMUM preamble-detection sensitivities, rx-override disabled
 //  {RG_BBC0_OQPSKC2,   0x00},  // listen for MR-OQPSK frames only

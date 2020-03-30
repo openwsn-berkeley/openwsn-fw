@@ -17,7 +17,7 @@
 #include "sctimer.h"
 #include "openrandom.h"
 #include "msf.h"
-
+#include "board_info.h"
 //=========================== definition ======================================
 
 //=========================== variables =======================================
@@ -141,9 +141,12 @@ void ieee154e_init(void) {
 
     resetStats();
     ieee154e_stats.numDeSync                 = 0;
-    
-    //set radio modulation
-    radio_set_modulation (CC2538RF_24GHZ);
+
+    // If this board is open radio comlpiant, set the required modulation    
+#ifdef OPENRADIO_COMPLIANT
+    //set radio modulation.
+    radio_set_modulation (FSK_OPTION1_FEC);
+#endif
     
     // switch radio on
     radio_rfOn();

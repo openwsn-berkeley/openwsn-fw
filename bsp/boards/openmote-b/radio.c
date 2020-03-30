@@ -1,4 +1,7 @@
-// Open Radio
+/**
+    \brief Definition of the Open Radio interface for openmote-b
+    \author Mina Rady <mina1.rady@orange.com>, March 2020.
+*/
 #include "board.h"
 
 #include "spi.h"
@@ -18,19 +21,21 @@
 #include <source/gpio.h>
 #include <source/sys_ctrl.h>
 
+// Drivers of radios attached to openmote-b
 #include "radio_at86rf215.h"
 #include "radio_cc2538rf.h"
+
+// The generic radio driver header file
 #include "radio.h"
 
 //=========================== defines =========================================
 
 
 // open radio functions callback types declaration
-// can be optimized by creating void_fun_void_t
 
 typedef void                (*radio_reset_cb_t)(void);
 typedef void                (*radio_init_cb_t)(void);
-typedef void                (*radio_set_modulation_cb_t)(RADIO_TYPE selected_radio);
+typedef void                (*radio_set_modulation_cb_t)(radioSetting_t selected_radio);
 
 typedef void                (*radio_setStartFrameCb_cb_t)(radio_capture_cbt cb);
 typedef void                (*radio_setEndFrameCb_cb_t)(radio_capture_cbt cb);
@@ -52,15 +57,12 @@ typedef void                (*radio_getReceivedFrame_cb_t)(
                                                     uint8_t* lqi,
                                                     bool*    crc
                                                     );
-typedef void                (*radio_read_isr_cb_t)(void);
 typedef void                (*radio_isr_cb_t)(void);
-typedef void                (*radio_clear_isr_cb_t)(void);
 
 
 
 
 // the template for radio function callbacks
-// inspired from release FW_807 bsp/common/openradio.h
 typedef struct {
     radio_reset_cb_t                    radio_reset;
     radio_init_cb_t                     radio_init;
@@ -77,9 +79,7 @@ typedef struct {
     radio_rxEnable_cb_t                 radio_rxEnable;
     radio_rxNow_cb_t                    radio_rxNow;
     radio_getReceivedFrame_cb_t         radio_getReceivedFrame;
-    radio_read_isr_cb_t                 radio_read_isr;
     radio_isr_cb_t                      radio_isr;
-    radio_clear_isr_cb_t                radio_clear_isr;
 } radio_functions_t;
 
 
@@ -223,8 +223,6 @@ void radio_bootstrap (void)
     dyn_funcs [CC2538RF_24GHZ].radio_rxNow                 =   radio_rxNow_cc2538rf; 
     dyn_funcs [CC2538RF_24GHZ].radio_getReceivedFrame      =   radio_getReceivedFrame_cc2538rf;
     dyn_funcs [CC2538RF_24GHZ].radio_isr                   =   radio_isr_cc2538rf; 
-    
-    
 }
 
 
@@ -232,6 +230,9 @@ void radio_bootstrap (void)
 
 //===== admin
 void radio_init (void) {
+    //bootstrapping the radio look-up matrix
+    radio_bootstrap();
+    
     // Initializing the atmel radio
     dyn_funcs [FSK_OPTION1_FEC].radio_init();
     
@@ -239,7 +240,7 @@ void radio_init (void) {
     dyn_funcs [CC2538RF_24GHZ].radio_init();
 }
 
-void radio_select (RADIO_TYPE radio){
+void radio_select (radioSetting_t radio){
     SELECTED_RADIO = radio;
 }
 
@@ -248,7 +249,7 @@ void radio_reset(void) {
 }
 
 
-void radio_set_modulation (RADIO_TYPE selected_radio){
+void radio_set_modulation (radioSetting_t selected_radio){
     SELECTED_RADIO = selected_radio;
     dyn_funcs [SELECTED_RADIO].radio_set_modulation(selected_radio);
 }

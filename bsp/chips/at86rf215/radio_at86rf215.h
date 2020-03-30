@@ -65,7 +65,7 @@ void     radio_setFrequency_at86rf215(uint16_t channel, radio_freq_t tx_or_rx);
 int8_t  radio_getFrequencyOffset_at86rf215(void);
 void     radio_rfOn_at86rf215(void);
 void     radio_rfOff_at86rf215(void);
-void     radio_set_modulation_at86rf215 (RADIO_TYPE selected_radio);
+void     radio_set_modulation_at86rf215 (radioSetting_t selected_radio);
 void     radio_change_modulation_at86rf215(registerSetting_t * mod);
 void     radio_change_size_at86rf215(uint16_t* size);
 // TX
