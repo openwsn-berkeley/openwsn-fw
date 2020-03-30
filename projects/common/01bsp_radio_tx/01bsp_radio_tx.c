@@ -1,16 +1,13 @@
 /**
 \brief This program shows the use of the "radio" bsp module.
-
 Since the bsp modules for different platforms have the same declaration, you
 can use this project with any platform.
-
 The board running this program will send a packet on channel CHANNEL every
 TIMER_PERIOD ticks. The packet contains LENGTH_PACKET bytes. The first byte
 is the packet number, which increments for each transmitted packet. The
 remainder of the packet contains an incrementing bytes.
-
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2014.
-*/
+*/ 
 
 #include "stdint.h"
 #include "string.h"
@@ -57,9 +54,7 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp);
 */
 int mote_main(void) {
     uint8_t  i;
-    // bool to switch betweeb radios 
-    
-    uint8_t radio_switch = 1;
+
     // clear local variables
     memset(&app_vars,0,sizeof(app_vars_t));
 
@@ -68,22 +63,15 @@ int mote_main(void) {
 
     // add radio callback functions
     sctimer_set_callback(cb_scTimerCompare);
-
-    radio_set_modulation (FSK_OPTION1_FEC);
     radio_setStartFrameCb(cb_startFrame);
     radio_setEndFrameCb(cb_endFrame);
 
-    radio_set_modulation (CC2538RF_24GHZ);
-    radio_setStartFrameCb(cb_startFrame);
-    radio_setEndFrameCb(cb_startFrame);
-    
     // prepare radio
-    //radio_rfOn();
+    radio_rfOn();
     // freq type only effects on scum port
-    //radio_setFrequency(CHANNEL, FREQ_TX);
-    //radio_set_modulation (FSK_OPTION1_FEC);
-    //radio_rfOff();
-    
+    radio_setFrequency(CHANNEL, FREQ_TX);
+    radio_rfOff();
+
     // start periodic overflow
     sctimer_setCompare(sctimer_readCounter()+ TIMER_PERIOD);
     sctimer_enable();
@@ -94,25 +82,8 @@ int mote_main(void) {
         while (app_vars.txpk_txNow==0) {
             board_sleep();
         }
-
-        switch (radio_switch%3){
-        case 0:
-            // freq type only effects on scum port
-            radio_setFrequency(CHANNEL, FREQ_TX);
-            radio_set_modulation (CC2538RF_24GHZ);
-            break;
-        case 1:
-            radio_setFrequency(CHANNEL, FREQ_TX);
-            radio_set_modulation (FSK_OPTION1_FEC);
-            break;
-        case 2:
-            radio_setFrequency(CHANNEL, FREQ_TX);
-            radio_set_modulation (OFDM_OPTION_1_MCS0);
-            break;
-        }
-
-        //Toggle the switch
-        radio_switch ++;
+        // freq type only effects on scum port
+        radio_setFrequency(CHANNEL, FREQ_TX);
         // led
         leds_error_toggle();
 
