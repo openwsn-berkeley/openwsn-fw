@@ -1,119 +1,63 @@
 /**
-\brief This program shows the use of the "radio" bsp module.
+\brief This program shows the use of the "sniffer" module.
 
-Since the bsp modules for different platforms have the same declaration, you
-can use this project with any platform.
-
-This application places the mote in receive mode, and prints, over the serial
-port, all information about the received packet. The frame printed over the
-serial port for each received packet is formatted as follows:
-- [1B] the length of the packet, an unsigned integer
-- [1B] the first byte of the packet, an unsigned integer
-- [1B] the receive signal strength of tehe packet, an signed integer
-- [1B] the link quality indicator, an unsigned integer
-- [1B] whether the receive packet passed CRC (1) or not (0)
-- [3B] closing flags, each of value 0xff
-
-You can run the 01bsp_radio_rx.py script to listen to your mote and parse those
-serial frames. The application can connect directly to the mote's serial port,
-or to its TCP port when running on the IoT-LAB platform.
-
-Example when running locally:
-----------------------------
-
- ___                 _ _ _  ___  _ _
-| . | ___  ___ ._ _ | | | |/ __>| \ |
-| | || . \/ ._>| ' || | | |\__ \|   |
-`___'|  _/\___.|_|_||__/_/ <___/|_\_|
-     |_|                  openwsn.org
-
-running IoT-lAB? (Y|N): N
-name of serial port (e.g. COM10): COM25
-len=127 num=176 rssi=-43  lqi=107 crc=1
-len=127 num=177 rssi=-43  lqi=107 crc=1
-len=127 num=178 rssi=-43  lqi=106 crc=1
-len=127 num=179 rssi=-43  lqi=107 crc=1
-len=127 num=180 rssi=-43  lqi=108 crc=1
-len=127 num=181 rssi=-43  lqi=107 crc=1
-len=127 num=182 rssi=-43  lqi=107 crc=1
-len=127 num=183 rssi=-43  lqi=107 crc=1
-
-
-Example when running on the IoT-LAB platform:
---------------------------------------------
-
- ___                 _ _ _  ___  _ _
-| . | ___  ___ ._ _ | | | |/ __>| \ |
-| | || . \/ ._>| ' || | | |\__ \|   |
-`___'|  _/\___.|_|_||__/_/ <___/|_\_|
-     |_|                  openwsn.org
-
-running IoT-lAB? (Y|N): Y
-motename? (e.g. wsn430-35): wsn430-35
-len=17  num=84  rssi=-80  lqi=107 crc=1
-len=17  num=84  rssi=-81  lqi=107 crc=1
-len=17  num=84  rssi=-80  lqi=107 crc=1
-len=17  num=84  rssi=-81  lqi=105 crc=1
-len=17  num=84  rssi=-80  lqi=108 crc=1
-len=17  num=84  rssi=-81  lqi=108 crc=1
-
-
-\author Xavi Vilajosana xvilajosana@eecs.berkeley.edu>, June 2012.
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2014.
+\author Tengfei Chang <tengfei.chang@eecs.berkeley.edu>, June 2015.
 */
 
-#include "stdint.h"
-#include "string.h"
 #include "board.h"
 #include "radio.h"
 #include "leds.h"
-#include "uart.h"
-//#include "sctimer.h"
+#include "opentimers.h"
+#include "scheduler.h"
+#include "03oos_sniffer.h"
+#include "openserial.h"
+#include "idmanager.h"
+#include "sixtop.h"
+#include "neighbors.h"
+#include "msf.h"
+#include "openrandom.h"
 
 //=========================== defines =========================================
 
-#define LENGTH_PACKET        125+LENGTH_CRC // maximum length is 127 bytes
-#define CHANNEL              11             // 24ghz: 11 = 2.405GHz, subghz: 11 = 865.325 in  FSK operating mode #1
-#define LENGTH_SERIAL_FRAME  9              // length of the serial frame
+#define LENGTH_PACKET   125+LENGTH_CRC ///< maximum length is 127 bytes
+#define CHANNEL         20             ///< 20=2.450GHz
+#define ID              0x99           ///< byte sent in the packets
+#define TIMER_PERIOD    0x1ff
 
 //=========================== variables =======================================
 
-typedef struct {
-    uint8_t    num_radioTimerCompare;
-    uint8_t    num_startFrame;
-    uint8_t    num_endFrame;
-} app_dbg_t;
+enum {
+   APP_FLAG_START_FRAME = 0x01,
+   APP_FLAG_END_FRAME   = 0x02,
+   APP_FLAG_IDLE        = 0x00,
+};
 
-app_dbg_t app_dbg;
+typedef enum {
+   APP_STATE_TX         = 0x01,
+   APP_STATE_RX         = 0x02,
+} app_state_t;
 
 typedef struct {
-    // rx packet
-    volatile    uint8_t    rxpk_done;
-                uint8_t    rxpk_buf[LENGTH_PACKET];
-                uint16_t    rxpk_len;
-                uint8_t    rxpk_num;
-                int8_t     rxpk_rssi;
-                uint8_t    rxpk_lqi;
-                bool       rxpk_crc;
-                uint8_t    rxpk_freq_offset;
-    // uart
-                uint8_t    uart_txFrame[LENGTH_SERIAL_FRAME];
-                uint8_t    uart_lastTxByte;
-    volatile    uint8_t    uart_done;
+   app_state_t          app_state;
+   uint8_t              flag;
+   uint8_t              packet[LENGTH_PACKET];
+   uint8_t              packet_len;
+    int8_t              rxpk_rssi;
+   uint8_t              rxpk_lqi;
+   bool                 rxpk_crc;
+   uint8_t              channel;
+   uint8_t              outputOrInput;
+   opentimers_id_t      timerId;
 } app_vars_t;
 
 app_vars_t app_vars;
 
 //=========================== prototypes ======================================
 
-// radiotimer
-void cb_radioTimerOverflows(void);
-// radio
-void cb_startFrame(PORT_TIMER_WIDTH timestamp);
-void cb_endFrame(PORT_TIMER_WIDTH timestamp);
-// uart
-void cb_uartTxDone(void);
-uint8_t cb_uartRxCb(void);
+void     cb_startFrame(PORT_TIMER_WIDTH timestamp);
+void     cb_endFrame(PORT_TIMER_WIDTH timestamp);
+void     cb_timer(opentimers_id_t id);
+void     task_uploadPacket(void);
 
 //=========================== main ============================================
 
@@ -122,159 +66,162 @@ uint8_t cb_uartRxCb(void);
 */
 int mote_main(void) {
 
-    uint8_t i;
+   PORT_TIMER_WIDTH       reference;
+   // clear local variables
+   memset(&app_vars,0,sizeof(app_vars_t));
 
-    // clear local variables
-    memset(&app_vars,0,sizeof(app_vars_t));
+   // initialize board
+   board_init();
+   scheduler_init();
+   openserial_init();
+   idmanager_init();
+   openrandom_init();
+   opentimers_init();
 
-    // initialize board
-    board_init();
+   // add callback functions radio
+   radio_setStartFrameCb(cb_startFrame);
+   radio_setEndFrameCb(cb_endFrame);
 
+   // start timer
+   app_vars.timerId = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_SNIFFER);
+   reference        = opentimers_getValue();
+   opentimers_scheduleAbsolute(
+        app_vars.timerId,      // timerId
+        TIMER_PERIOD,          // duration
+        reference,             // reference
+        TIME_TICS,            // timetype
+        cb_timer               // callback
+   );
 
+   // prepare radio
+   radio_rfOn();
+   radio_setFrequency(CHANNEL, FREQ_RX);
+   app_vars.channel = CHANNEL;
 
-    // setup UART
-    uart_setCallbacks(cb_uartTxDone,cb_uartRxCb);
+   // switch in RX by default
+   radio_rxEnable();
+   radio_rxNow();
 
-    // prepare radio
-    radio_set_modulation (OFDM_OPTION_1_MCS0);
+   scheduler_start();
+
+   return 0;
+}
+
+//=========================== interface =======================================
+void sniffer_setListeningChannel(uint8_t channel){
+
+    while(app_vars.flag != APP_FLAG_IDLE);
+    radio_rfOff();
     radio_rfOn();
-    // freq type only effects on scum port
-    radio_setFrequency(CHANNEL, FREQ_RX);
-        // add callback functions radio
-    radio_setStartFrameCb(cb_startFrame);
-    radio_setEndFrameCb(cb_endFrame);
-    // switch in RX
+    radio_setFrequency(channel, FREQ_RX);
+    app_vars.channel = channel;
     radio_rxEnable();
     radio_rxNow();
-
-    while (1) {
-
-        // sleep while waiting for at least one of the rxpk_done to be set
-
-        app_vars.rxpk_done = 0;
-        while (app_vars.rxpk_done==0) {
-            board_sleep();
-        }
-
-        // if I get here, I just received a packet
-
-        //===== send notification over serial port
-
-        // led
-        leds_error_on();
-
-        // format frame to send over serial port
-        i = 0;
-        app_vars.uart_txFrame[i++] = app_vars.rxpk_len;  // packet length
-        app_vars.uart_txFrame[i++] = app_vars.rxpk_num;  // packet number
-        app_vars.uart_txFrame[i++] = app_vars.rxpk_rssi; // RSSI
-        app_vars.uart_txFrame[i++] = app_vars.rxpk_lqi;  // LQI
-        app_vars.uart_txFrame[i++] = app_vars.rxpk_crc;  // CRC
-        app_vars.uart_txFrame[i++] = app_vars.rxpk_freq_offset; // freq_offset
-        app_vars.uart_txFrame[i++] = 0xff;               // closing flag
-        app_vars.uart_txFrame[i++] = 0xff;               // closing flag
-        app_vars.uart_txFrame[i++] = 0xff;               // closing flag
-
-        app_vars.uart_done          = 0;
-        app_vars.uart_lastTxByte    = 0;
-
-        // send app_vars.uart_txFrame over UART
-        uart_clearTxInterrupts();
-        uart_clearRxInterrupts();
-        uart_enableInterrupts();
-        uart_writeByte(app_vars.uart_txFrame[app_vars.uart_lastTxByte]);
-        while (app_vars.uart_done==0); // busy wait to finish
-        uart_disableInterrupts();
-
-        // led
-        leds_error_off();
-    }
 }
 
 //=========================== callbacks =======================================
 
-//===== radio
-
 void cb_startFrame(PORT_TIMER_WIDTH timestamp) {
 
-    leds_sync_on();
-    // update debug stats
-    app_dbg.num_startFrame++;
+   app_vars.flag |= APP_FLAG_START_FRAME;
+   // led
+   leds_error_on();
 }
 
 void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
-    uint8_t  i;
-    bool     expectedFrame;
 
-    // update debug stats
-    app_dbg.num_endFrame++;
+   app_vars.flag |= APP_FLAG_END_FRAME;
+   // done receiving a packet
+   app_vars.packet_len = sizeof(app_vars.packet);
 
-    memset(&app_vars.rxpk_buf[0],0,LENGTH_PACKET);
+   // get packet from radio
+   radio_getReceivedFrame(
+      app_vars.packet,
+      &app_vars.packet_len,
+      sizeof(app_vars.packet),
+      &app_vars.rxpk_rssi,
+      &app_vars.rxpk_lqi,
+      &app_vars.rxpk_crc
+   );
 
-    app_vars.rxpk_freq_offset = radio_getFrequencyOffset();
+   scheduler_push_task(task_uploadPacket,TASKPRIO_SNIFFER);
+   app_vars.flag &= ~APP_FLAG_START_FRAME;
+   app_vars.flag &= ~APP_FLAG_END_FRAME;
+   // led
+   leds_error_off();
+}
 
-    // get packet from radio
-    radio_getReceivedFrame(
-        app_vars.rxpk_buf,
-        &app_vars.rxpk_len,
-        sizeof(app_vars.rxpk_buf),
-        &app_vars.rxpk_rssi,
-        &app_vars.rxpk_lqi,
-        &app_vars.rxpk_crc
+void cb_timer(opentimers_id_t id) {
+
+   // schedule again
+   opentimers_scheduleIn(
+        app_vars.timerId,     // timerId
+        TIMER_PERIOD,         // duration
+        TIME_TICS,            // timetype
+        TIMER_ONESHOT,        // timertype
+        cb_timer              // callback
+   );
+   app_vars.outputOrInput = (app_vars.outputOrInput+1)%2;
+   scheduler_push_task(task_openserial_debugPrint,TASKPRIO_OPENSERIAL);
+}
+
+// ================================ task =======================================
+void task_uploadPacket(void) {
+    openserial_printSniffedPacket(
+        &(app_vars.packet[0]),
+        app_vars.packet_len,
+        app_vars.channel
     );
-
-    // check the frame is sent by radio_tx project
-    expectedFrame = TRUE;
-
-    if (app_vars.rxpk_len>LENGTH_PACKET){
-        expectedFrame = FALSE;
-    } else {
-        for(i=1;i<10;i++){
-            if(app_vars.rxpk_buf[i]!=i){
-                expectedFrame = FALSE;
-                break;
-            }
-        }
-    }
-
-    // read the packet number
-    app_vars.rxpk_num = app_vars.rxpk_buf[0];
-
-    // toggle led if the frame is expected
-    if (expectedFrame){
-        // indicate I just received a packet from bsp_radio_tx mote
-        app_vars.rxpk_done = 1;
-
-        leds_debug_toggle();
-    }
-
-    // keep listening (needed for at86rf215 radio)
-    radio_rxEnable();
-    radio_rxNow();
-
-    // led
-    leds_sync_off();
 }
+// ================================= stubbing ==================================
 
-//===== uart
-
-void cb_uartTxDone(void) {
-
-    uart_clearTxInterrupts();
-
-    // prepare to send the next byte
-    app_vars.uart_lastTxByte++;
-
-    if (app_vars.uart_lastTxByte<sizeof(app_vars.uart_txFrame)) {
-        uart_writeByte(app_vars.uart_txFrame[app_vars.uart_lastTxByte]);
-    } else {
-        app_vars.uart_done=1;
-    }
+void ieee154e_setSingleChannel(uint8_t channel) {
+    sniffer_setListeningChannel(channel);
 }
+void ieee154e_setIsSecurityEnabled(bool isEnabled)      {return;}
+void ieee154e_setSlotDuration(uint16_t duration)        {return;}
+void ieee154e_setIsAckEnabled(bool isEnabled)           {return;}
+void ieee154e_getAsn(uint8_t* array)                    {return;}
 
-uint8_t cb_uartRxCb(void) {
+void schedule_startDAGroot(void)                        {return;}
+void schedule_setFrameLength(uint16_t frameLength)      {return;}
 
-    //  uint8_t byte;
-    uart_clearRxInterrupts();
-    return 1;
-}
+void sixtop_setEBPeriod(uint8_t ebPeriod)                                 {return;}
+owerror_t sixtop_request(
+    uint8_t      code,
+    open_addr_t* neighbor,
+    uint8_t      numCells,
+    uint8_t      cellOptions,
+    cellInfo_ht* celllist_toBeAdded,
+    cellInfo_ht* celllist_toBeRemoved,
+    uint8_t      sfid,
+    uint16_t     listingOffset,
+    uint16_t     listingMaxNumCells
+)                                                                         {return E_FAIL;}
+void sixtop_setIsResponseEnabled(bool isEnabled)                          {return;}
+void sixtop_setKaPeriod(uint16_t kaPeriod)                                  {return;}
+void msf_appPktPeriod(uint8_t numAppPacketsPerSlotFrame)                  {return;}
+uint8_t  msf_getsfid(void)                                                {return 0;}
+
+void openbridge_triggerData(void)                                           {return;}
+
+void icmpv6rpl_setDIOPeriod(uint16_t dioPeriod)                           {return;}
+void icmpv6rpl_setDAOPeriod(uint16_t daoPeriod)                           {return;}
+void icmpv6rpl_setMyDAGrank(uint16_t rank)                                {return;}
+void icmpv6rpl_writeDODAGid(uint8_t* dodagid)                             {return;}
+void icmpv6rpl_updateMyDAGrankAndParentSelection(void)                    {return;}
+bool icmpv6rpl_getPreferredParentEui64(open_addr_t* neighbor)             {return TRUE;}
+void icmpv6echo_setIsReplyEnabled(bool isEnabled)                           {return;}
+
+bool debugPrint_asn(void)       {return TRUE;}
+bool debugPrint_isSync(void)    {return TRUE;}
+bool debugPrint_macStats(void)  {return TRUE;}
+bool debugPrint_schedule(void)  {return TRUE;}
+bool debugPrint_backoff(void)   {return TRUE;}
+bool debugPrint_queue(void)     {return TRUE;}
+bool debugPrint_neighbors(void) {return TRUE;}
+bool debugPrint_myDAGrank(void) {return TRUE;}
+bool debugPrint_kaPeriod(void)  {return TRUE;}
+
+void IEEE802154_security_setBeaconKey(uint8_t index, uint8_t* value)      {return;}
+void IEEE802154_security_setDataKey(uint8_t index, uint8_t* value)        {return;}
