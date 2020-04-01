@@ -40,6 +40,8 @@ typedef struct
 {
    uart_tx_cbt txCb;
    uart_rx_cbt rxCb;
+   bool        fXonXoffEscaping;
+   uint8_t     xonXoffEscapedByte;
 } uart_vars_t;
 
 uart_vars_t uart_vars;
@@ -147,7 +149,13 @@ void uart_setCTS(bool state)
 
 void uart_writeByte(uint8_t byteToWrite)
 {
-  app_uart_put(byteToWrite);
+   if (byteToWrite==XON || byteToWrite==XOFF || byteToWrite==XONXOFF_ESCAPE) {
+        uart_vars.fXonXoffEscaping     = 0x01;
+        uart_vars.xonXoffEscapedByte   = byteToWrite;
+        app_uart_put(XONXOFF_ESCAPE);
+    } else {
+        app_uart_put(byteToWrite);;
+    }
 }
 
 uint8_t uart_readByte(void)
