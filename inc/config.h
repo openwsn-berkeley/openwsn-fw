@@ -207,6 +207,8 @@
 
 #define OPENWSN_AES_HW
 
+#define OPENWSN_OPENSERIAL_PRINTF
+
 #include "check_config.h"
 
 #endif /* OPENWSN_CONFIG_H */

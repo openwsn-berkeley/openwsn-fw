@@ -81,8 +81,6 @@ project:
                   0 (off), 1 (on)
     msf_adaptive  Enable/disable MSF for adding/deleting cell to adapt to traffic
                   0 (disable), 1 (enable)
-    printf        Sends the string messages to openvisualizer  
-                  0 (off ), 1 (on, default)
     ide           qtcreator
     fix_channel   Set single channel hopping for debugging
                   0 (off, default), i (on, channel=i [11:26])
@@ -153,7 +151,6 @@ command_line_options = {
     'l2_security':              ['0','1'],
     'fix_channel':              ['0'] + map(str, range(11, 27)),
     'msf_adaptive':             ['0','1'],
-    'printf':                   ['0','1'],
     'deadline_option':          ['0','1'],
     'ide':                      ['none','qtcreator'],
     'revision':                 ['']
@@ -303,118 +300,6 @@ command_line_vars.AddVariables(
         'msf_adaptive',                                    # key
         '',                                                # help
         command_line_options['msf_adaptive'][1],           # default
-        validate_option,                                   # validator
-        int,                                               # converter
-    ),
-    (
-        'toolchain',                                       # key
-        '',                                                # help
-        command_line_options['toolchain'][0],              # default
-        validate_option,                                   # validator
-        None,                                              # converter
-    ),
-    (
-        'kernel',                                          # key
-        '',                                                # help
-        command_line_options['kernel'][0],                 # default
-        validate_option,                                   # validator
-        None,                                              # converter
-    ),
-    (
-        'jtag',                                            # key
-        '',                                                # help
-        '',                                                # default
-        None,                                              # validator
-        None,                                              # converter
-    ),
-    (
-        'fet_version',                                     # key
-        '',                                                # help
-        command_line_options['fet_version'][0],            # default
-        validate_option,                                   # validator
-        int,                                               # converter
-    ),
-    (
-        'bootload',                                        # key
-        '',                                                # help
-        '',                                                # default
-        None,                                              # validator
-        None,                                              # converter
-    ),
-    (
-        'verbose',                                         # key
-        '',                                                # help
-        command_line_options['verbose'][0],                # default
-        validate_option,                                   # validator
-        int,                                               # converter
-    ),
-    (
-        'fastsim',                                         # key
-        '',                                                # help
-        command_line_options['fastsim'][0],                # default
-        validate_option,                                   # validator
-        int,                                               # converter
-    ),
-    (
-        'simhost',                                         # key
-        '',                                                # help
-        command_line_options['simhost'][defaultHost],      # default
-        validate_option,                                   # validator
-        None,                                              # converter
-    ),
-    (
-        'simhostpy',                                       # key
-        '',                                                # help
-        command_line_options['simhostpy'][0],              # default
-        None,                                              # validator
-        None,                                              # converter
-    ),
-    (
-        'panid',                                           # key
-        '0xFFFF',                                          # help
-        command_line_options['panid'][0],                  # default
-        None,                                              # validator
-        None,                                              # converter
-    ),
-    (
-        'dagroot',                                         # key
-        '',                                                # help
-        command_line_options['dagroot'][0],                # default
-        validate_option,                                   # validator
-        int,                                               # converter
-    ),
-    (
-        'forcetopology',                                   # key
-        '',                                                # help
-        command_line_options['forcetopology'][0],          # default
-        validate_option,                                   # validator
-        int,                                               # converter
-    ),
-    (
-        'debug',                                           # key
-        '',                                                # help
-        command_line_options['debug'][0],                  # default
-        validate_option,                                   # validator
-        int,                                               # converter
-    ),
-    (
-        'noadaptivesync',                                  # key
-        '',                                                # help
-        command_line_options['noadaptivesync'][0],         # default
-        validate_option,                                   # validator
-        int,                                               # converter
-    ),
-    (
-        'l2_security',                                     # key
-        '',                                                # help
-        command_line_options['l2_security'][0],            # default
-        validate_option,                                   # validator
-        int,                                               # converter
-    ),
-    (
-        'printf',                                          # key
-        '',                                                # help
-        command_line_options['printf'][0],                 # default
         validate_option,                                   # validator
         int,                                               # converter
     ),

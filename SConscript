@@ -60,8 +60,6 @@ if env['fix_channel']>=11 and env['fix_channel']<=26:
     env.Append(CPPDEFINES    = {'IEEE802154E_SINGLE_CHANNEL' : env['fix_channel']})
 if env['msf_adaptive']==1:
     env.Append(CPPDEFINES    = 'MSF_ADAPTING_TO_TRAFFIC')
-if env['printf']==1:
-    env.Append(CPPDEFINES    = 'OPENSERIAL_PRINTF')
 if env['deadline_option']==1:
     env.Append(CPPDEFINES    = 'DEADLINE_OPTION_ENABLED')
 
@@ -242,12 +240,14 @@ elif env['toolchain']=='armgcc':
             env.Append(ASFLAGS   = '-DREVA1=1')
      
         # linker
-        env.Append(LINKFLAGS     = '-Tbsp/boards/'+env['board']+'/' + linker_file)
-        env.Append(LINKFLAGS     = '-nostartfiles')
-        env.Append(LINKFLAGS     = '-Wl,-Map,${TARGET.base}.map')
-        env.Append(LINKFLAGS     = '-mcpu=cortex-m3')
-        env.Append(LINKFLAGS     = '-mthumb')
-        env.Append(LINKFLAGS     = '-g3')
+        env.Append(LINKFLAGS='-Tbsp/boards/' + env['board'] + '/' + linker_file)
+        env.Append(LINKFLAGS='-nostartfiles')
+        env.Append(LINKFLAGS='-specs=nosys.specs')
+        env.Append(LINKFLAGS='-specs=nano.specs')
+        env.Append(LINKFLAGS='-Wl,-Map,${TARGET.base}.map')
+        env.Append(LINKFLAGS='-mcpu=cortex-m3')
+        env.Append(LINKFLAGS='-mthumb')
+        env.Append(LINKFLAGS='-g3')
         if env['revision'] == "A1":
             env.Append(LINKFLAGS   = '-DREVA1=1')
 		
