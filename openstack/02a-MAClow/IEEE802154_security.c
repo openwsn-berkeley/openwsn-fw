@@ -15,6 +15,7 @@
 #include "openserial.h"
 #include "neighbors.h"
 #include "IEEE802154_security.h"
+#include "ccms.h"
 
 //=============================define==========================================
 //=========================== variables =======================================
@@ -218,14 +219,14 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t *msg) {
 
     //Encryption and/or authentication
     // cryptoengine overwrites m[] with ciphertext and appends the MIC
-    outStatus = openccms_enc(a,
-                             len_a,
-                             m,
-                             &len_m,
-                             nonce,
-                             2, // L=2 in 15.4 std
-                             key,
-                             msg->l2_authenticationLength);
+    outStatus = aes128_ccms_enc(a,
+                                len_a,
+                                m,
+                                &len_m,
+                                nonce,
+                                2, // L=2 in 15.4 std
+                                key,
+                                msg->l2_authenticationLength);
 
     //verify that no errors occurred
     if (outStatus != E_SUCCESS) {
@@ -392,14 +393,14 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t *msg) {
     }
 
     //decrypt and/or verify authenticity of the frame
-    outStatus = openccms_dec(a,
-                             len_a,
-                             c,
-                             &len_c,
-                             nonce,
-                             2,
-                             key,
-                             msg->l2_authenticationLength);
+    outStatus = aes128_ccms_dec(a,
+                                len_a,
+                                c,
+                                &len_c,
+                                nonce,
+                                2,
+                                key,
+                                msg->l2_authenticationLength);
 
     //verify if any error occurs
     if (outStatus != E_SUCCESS) {

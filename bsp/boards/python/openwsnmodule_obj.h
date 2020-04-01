@@ -13,8 +13,8 @@
 // OpenWSN
 #include "openserial_obj.h"
 #include "opentimers_obj.h"
-#include "openccms_obj.h"
-#include "openaes_obj.h"
+#include "ccms_obj.h"
+#include "aes128_obj.h"
 #include "scheduler_obj.h"
 #include "IEEE802154E_obj.h"
 #include "IEEE802154_security_obj.h"

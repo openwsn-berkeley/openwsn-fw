@@ -11,16 +11,16 @@ sources_c = [
     os.path.join('common','opensensors.c'),
     os.path.join('common','openserial.c'),
     os.path.join('common','opentimers.c'),
-    os.path.join('common','crypto','openccms.c'),
-    os.path.join('common','crypto','openaes.c')
+    os.path.join('common','crypto','ccms.c'),
+    os.path.join('common','crypto','aes128.c')
 ]
 sources_h = [
     os.path.join('common','openhdlc.h'),
     os.path.join('common','opensensors.h'),
     os.path.join('common','openserial.h'),
     os.path.join('common','opentimers.h'),
-    os.path.join('common','crypto','openccms.h'),
-    os.path.join('common','crypto','openaes.h')
+    os.path.join('common','crypto','ccms.h'),
+    os.path.join('common','crypto','aes128.h')
 ]
 
 if localEnv['board']=='python':

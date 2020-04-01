@@ -4,6 +4,7 @@
 #include "openoscoap.h"
 #include "cborencoder.h"
 #include "sha.h"
+#include "ccms.h"
 
 
 //=========================== defines =========================================
@@ -260,14 +261,14 @@ owerror_t openoscoap_protect_message(
         requestKidLen = 0;
     }
 
-    encStatus = openccms_enc(aad,
-                             aadLen,
-                             payload,
-                             &payloadLen,
-                             nonce,
-                             2, // L=2 in 15.4 std
-                             context->senderKey,
-                             AES_CCM_16_64_128_TAG_LEN);
+    encStatus = aes128_ccms_enc(aad,
+                                aadLen,
+                                payload,
+                                &payloadLen,
+                                nonce,
+                                2, // L=2 in 15.4 std
+                                context->senderKey,
+                                AES_CCM_16_64_128_TAG_LEN);
 
     if (encStatus != E_SUCCESS) {
         return E_FAIL;
@@ -391,14 +392,14 @@ owerror_t openoscoap_unprotect_message(
         xor_arrays(nonce, partialIV, nonce, AES_CCM_16_64_128_IV_LEN);
     }
 
-    decStatus = openccms_dec(aad,
-                             aadLen,
-                             ciphertext,
-                             &ciphertextLen,
-                             nonce,
-                             2,
-                             context->recipientKey,
-                             AES_CCM_16_64_128_TAG_LEN);
+    decStatus = aes128_ccms_dec(aad,
+                                aadLen,
+                                ciphertext,
+                                &ciphertextLen,
+                                nonce,
+                                2,
+                                context->recipientKey,
+                                AES_CCM_16_64_128_TAG_LEN);
 
     if (decStatus != E_SUCCESS) {
         openserial_printError(
