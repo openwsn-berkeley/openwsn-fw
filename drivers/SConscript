@@ -12,7 +12,11 @@ sources_c = [
     os.path.join('common','openserial.c'),
     os.path.join('common','opentimers.c'),
     os.path.join('common','crypto','ccms.c'),
-    os.path.join('common','crypto','aes128.c')
+    os.path.join('common','crypto','hkdf.c'),
+    os.path.join('common','crypto','hmac.c'),
+    os.path.join('common','crypto','sha224-256.c'),
+    os.path.join('common','crypto','aes128.c'),
+    os.path.join('common','crypto','usha.c')
 ]
 sources_h = [
     os.path.join('common','openhdlc.h'),
@@ -20,7 +24,9 @@ sources_h = [
     os.path.join('common','openserial.h'),
     os.path.join('common','opentimers.h'),
     os.path.join('common','crypto','ccms.h'),
-    os.path.join('common','crypto','aes128.h')
+    os.path.join('common','crypto','aes128.h'),
+    os.path.join('common','crypto','sha.h'),
+    os.path.join('common','crypto','sha-private.h')
 ]
 
 if localEnv['board']=='python':
