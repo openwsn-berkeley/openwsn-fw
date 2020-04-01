@@ -1,10 +1,10 @@
 #include "opendefs.h"
 #include "openserial.h"
 #include "packetfunctions.h"
-#include "openoscoap.h"
+#include "oscore.h"
 #include "cborencoder.h"
-#include "sha.h"
 #include "ccms.h"
+#include "sha.h"
 
 
 //=========================== defines =========================================
@@ -13,8 +13,6 @@
 #define AAD_MAX_LEN            12 + EAAD_MAX_LEN
 
 //=========================== variables =======================================
-
-openoscoap_vars_t openoscoap_vars;
 
 //=========================== prototype =======================================
 owerror_t hkdf_derive_parameter(uint8_t *buffer,
@@ -25,70 +23,52 @@ owerror_t hkdf_derive_parameter(uint8_t *buffer,
                                 uint8_t *identifier,
                                 uint8_t identifierLen,
                                 uint8_t algorithm,
-                                oscoap_derivation_t type,
+                                oscore_derivation_t type,
                                 uint8_t length
 );
 
 bool is_request(uint8_t code);
 
-uint8_t openoscoap_construct_aad(uint8_t *buffer,
-                                 uint8_t version,
-                                 uint8_t code,
-                                 uint8_t *optionsSerialized,
-                                 uint8_t optionsSerializedLen,
-                                 uint8_t aeadAlgorithm,
-                                 uint8_t *requestKid,
-                                 uint8_t requestKidLen,
-                                 uint8_t *requestSeq,
-                                 uint8_t requestSeqLen
+uint8_t oscore_construct_aad(uint8_t *buffer,
+                             uint8_t version,
+                             uint8_t code,
+                             uint8_t *optionsSerialized,
+                             uint8_t optionsSerializedLen,
+                             uint8_t aeadAlgorithm,
+                             uint8_t *requestKid,
+                             uint8_t requestKidLen,
+                             uint8_t *requestSeq,
+                             uint8_t requestSeqLen
 );
 
-void openoscoap_encode_compressed_COSE(OpenQueueEntry_t *msg,
-                                       uint8_t *requestSeq, uint8_t requestSeqLen,
-                                       uint8_t *requestKid,
-                                       uint8_t requestKidLen);
+void oscore_encode_compressed_COSE(OpenQueueEntry_t *msg,
+                                   uint8_t *requestSeq, uint8_t requestSeqLen,
+                                   uint8_t *requestKid,
+                                   uint8_t requestKidLen);
 
 void xor_arrays(uint8_t *s1, uint8_t *s2, uint8_t *dst, uint8_t len);
 
 void flip_first_bit(uint8_t *source, uint8_t *dst, uint8_t len);
 
-bool replay_window_check(oscoap_security_context_t *context, uint16_t sequenceNumber);
+bool replay_window_check(oscore_security_context_t *context, uint16_t sequenceNumber);
 
-void replay_window_update(oscoap_security_context_t *context, uint16_t sequenceNumber);
+void replay_window_update(oscore_security_context_t *context, uint16_t sequenceNumber);
 
-uint8_t openoscoap_convert_sequence_number(uint16_t sequenceNumber, uint8_t **buffer);
+uint8_t oscore_convert_sequence_number(uint16_t sequenceNumber, uint8_t **buffer);
 //=========================== public ==========================================
 
 
-/**
-\brief Initialize OSCOAP security context.
+void oscore_init_security_context(oscore_security_context_t *ctx,
+                                  uint8_t *senderID,
+                                  uint8_t senderIDLen,
+                                  uint8_t *recipientID,
+                                  uint8_t recipientIDLen,
+                                  uint8_t *masterSecret,
+                                  uint8_t masterSecretLen,
+                                  uint8_t *masterSalt,
+                                  uint8_t masterSaltLen) {
 
-This function will derive the parameters needed to initialize OSCOAP
-security context.
-
-\param[out] ctx OSCOAP security context structure.
-\param[in] senderID Pointer to the Byte array containing Sender ID.
-\param[in] senderIDLen Length of the Sender ID byte array in bytes.
-\param[in] recipientID Pointer to the Byte array contaning Recipient ID.
-\param[in] recipientIDLen Length of the Recipient ID byte array in bytes.
-\param[in] Pointer to the byte array contaning the Master Secret.
-\param[in] Length of the Master Secret byte array in bytes.
-\param[in] Pointer to the byte array contaning Master Salt.
-\param[in] Length of the Master Salt byte array in bytes.
-*/
-
-void openoscoap_init_security_context(oscoap_security_context_t *ctx,
-                                      uint8_t *senderID,
-                                      uint8_t senderIDLen,
-                                      uint8_t *recipientID,
-                                      uint8_t recipientIDLen,
-                                      uint8_t *masterSecret,
-                                      uint8_t masterSecretLen,
-                                      uint8_t *masterSalt,
-                                      uint8_t masterSaltLen) {
-
-    if (senderIDLen > OSCOAP_MAX_ID_LEN ||
-        recipientIDLen > OSCOAP_MAX_ID_LEN) {
+    if (senderIDLen > OSCOAP_MAX_ID_LEN || recipientIDLen > OSCOAP_MAX_ID_LEN) {
         return;
     }
 
@@ -155,8 +135,8 @@ void openoscoap_init_security_context(oscoap_security_context_t *ctx,
 
 }
 
-owerror_t openoscoap_protect_message(
-        oscoap_security_context_t *context,
+owerror_t oscore_protect_message(
+        oscore_security_context_t *context,
         uint8_t version,
         uint8_t code,
         coap_option_iht *incomingOptions,
@@ -195,7 +175,7 @@ owerror_t openoscoap_protect_message(
     // convert sequence number to array and strip leading zeros
     memset(partialIV, 0x00, AES_CCM_16_64_128_IV_LEN);
     requestSeq = &partialIV[AES_CCM_16_64_128_IV_LEN - 2];
-    requestSeqLen = openoscoap_convert_sequence_number(sequenceNumber, &requestSeq);
+    requestSeqLen = oscore_convert_sequence_number(sequenceNumber, &requestSeq);
 
     if (is_request(code)) {
         requestKid = context->senderID;
@@ -227,21 +207,21 @@ owerror_t openoscoap_protect_message(
     // update payload pointer but leave length intact
     payload = &msg->payload[0];
 
-    aadLen = openoscoap_construct_aad(aad,
-                                      version,
-                                      code,
-                                      NULL,
-                                      0, // do not support Class I options at the moment
-                                      AES_CCM_16_64_128,
-                                      requestKid,
-                                      requestKidLen,
-                                      requestSeq,
-                                      requestSeqLen);
+    aadLen = oscore_construct_aad(aad,
+                                  version,
+                                  code,
+                                  NULL,
+                                  0, // do not support Class I options at the moment
+                                  AES_CCM_16_64_128,
+                                  requestKid,
+                                  requestKidLen,
+                                  requestSeq,
+                                  requestSeqLen);
 
     if (aadLen > AAD_MAX_LEN) {
         // corruption
         openserial_printError(
-                COMPONENT_OPENOSCOAP, ERR_BUFFER_OVERFLOW,
+                COMPONENT_OSCORE, ERR_BUFFER_OVERFLOW,
                 (errorparameter_t) 0,
                 (errorparameter_t) 0
         );
@@ -275,7 +255,7 @@ owerror_t openoscoap_protect_message(
     }
 
     // encode compressed COSE
-    openoscoap_encode_compressed_COSE(msg, requestSeq, requestSeqLen, requestKid, requestKidLen);
+    oscore_encode_compressed_COSE(msg, requestSeq, requestSeqLen, requestKid, requestKidLen);
 
 
     if (payloadPresent) {
@@ -294,8 +274,8 @@ owerror_t openoscoap_protect_message(
     return E_SUCCESS;
 }
 
-owerror_t openoscoap_unprotect_message(
-        oscoap_security_context_t *context,
+owerror_t oscore_unprotect_message(
+        oscore_security_context_t *context,
         uint8_t version,
         uint8_t code,
         coap_option_iht *incomingOptions,
@@ -345,7 +325,7 @@ owerror_t openoscoap_unprotect_message(
     if (is_request(code)) {
         if (replay_window_check(context, sequenceNumber) == FALSE) {
             openserial_printError(
-                    COMPONENT_OPENOSCOAP, ERR_REPLAY_FAILED,
+                    COMPONENT_OSCORE, ERR_REPLAY_FAILED,
                     (errorparameter_t) 0,
                     (errorparameter_t) 0
             );
@@ -361,23 +341,23 @@ owerror_t openoscoap_unprotect_message(
     // convert sequence number to array and strip leading zeros
     memset(partialIV, 0x00, AES_CCM_16_64_128_IV_LEN);
     requestSeq = &partialIV[AES_CCM_16_64_128_IV_LEN - 2];
-    requestSeqLen = openoscoap_convert_sequence_number(sequenceNumber, &requestSeq);
+    requestSeqLen = oscore_convert_sequence_number(sequenceNumber, &requestSeq);
 
-    aadLen = openoscoap_construct_aad(aad,
-                                      version,
-                                      code,
-                                      NULL,
-                                      0, // do not support Class I options at the moment
-                                      AES_CCM_16_64_128,
-                                      requestKid,
-                                      requestKidLen,
-                                      requestSeq,
-                                      requestSeqLen);
+    aadLen = oscore_construct_aad(aad,
+                                  version,
+                                  code,
+                                  NULL,
+                                  0, // do not support Class I options at the moment
+                                  AES_CCM_16_64_128,
+                                  requestKid,
+                                  requestKidLen,
+                                  requestSeq,
+                                  requestSeqLen);
 
     if (aadLen > AAD_MAX_LEN) {
         // corruption
         openserial_printError(
-                COMPONENT_OPENOSCOAP, ERR_BUFFER_OVERFLOW,
+                COMPONENT_OSCORE, ERR_BUFFER_OVERFLOW,
                 (errorparameter_t) 0,
                 (errorparameter_t) 0
         );
@@ -403,7 +383,7 @@ owerror_t openoscoap_unprotect_message(
 
     if (decStatus != E_SUCCESS) {
         openserial_printError(
-                COMPONENT_OPENOSCOAP, ERR_DECRYPTION_FAILED,
+                COMPONENT_OSCORE, ERR_DECRYPTION_FAILED,
                 (errorparameter_t) 0,
                 (errorparameter_t) 0
         );
@@ -425,10 +405,10 @@ owerror_t openoscoap_unprotect_message(
     return E_SUCCESS;
 }
 
-uint16_t openoscoap_get_sequence_number(oscoap_security_context_t *context) {
+uint16_t oscore_get_sequence_number(oscore_security_context_t *context) {
     if (context->sequenceNumber == 0xffff) {
         openserial_printError(
-                COMPONENT_OPENOSCOAP, ERR_SEQUENCE_NUMBER_OVERFLOW,
+                COMPONENT_OSCORE, ERR_SEQUENCE_NUMBER_OVERFLOW,
                 (errorparameter_t) 0,
                 (errorparameter_t) 0
         );
@@ -438,11 +418,11 @@ uint16_t openoscoap_get_sequence_number(oscoap_security_context_t *context) {
     return context->sequenceNumber;
 }
 
-uint8_t openoscoap_parse_compressed_COSE(uint8_t *buffer,
-                                         uint8_t bufferLen,
-                                         uint16_t *sequenceNumber,
-                                         uint8_t **kid,
-                                         uint8_t *kidLen
+uint8_t oscore_parse_compressed_COSE(uint8_t *buffer,
+                                     uint8_t bufferLen,
+                                     uint16_t *sequenceNumber,
+                                     uint8_t **kid,
+                                     uint8_t *kidLen
 ) {
     uint8_t index;
     uint8_t pivsz;
@@ -495,7 +475,7 @@ owerror_t hkdf_derive_parameter(uint8_t *buffer,
                                 uint8_t *identifier,
                                 uint8_t identifierLen,
                                 uint8_t algorithm,
-                                oscoap_derivation_t type,
+                                oscore_derivation_t type,
                                 uint8_t length
 ) {
 
@@ -539,16 +519,16 @@ bool is_request(uint8_t code) {
     }
 }
 
-uint8_t openoscoap_construct_aad(uint8_t *buffer,
-                                 uint8_t version,
-                                 uint8_t code,
-                                 uint8_t *optionsSerialized,
-                                 uint8_t optionsSerializedLen,
-                                 uint8_t aeadAlgorithm,
-                                 uint8_t *requestKid,
-                                 uint8_t requestKidLen,
-                                 uint8_t *requestSeq,
-                                 uint8_t requestSeqLen
+uint8_t oscore_construct_aad(uint8_t *buffer,
+                             uint8_t version,
+                             uint8_t code,
+                             uint8_t *optionsSerialized,
+                             uint8_t optionsSerializedLen,
+                             uint8_t aeadAlgorithm,
+                             uint8_t *requestKid,
+                             uint8_t requestKidLen,
+                             uint8_t *requestSeq,
+                             uint8_t requestSeqLen
 ) {
     uint8_t externalAAD[EAAD_MAX_LEN];
     uint8_t externalAADLen;
@@ -569,7 +549,7 @@ uint8_t openoscoap_construct_aad(uint8_t *buffer,
     if (externalAADLen > EAAD_MAX_LEN) {
         // corruption
         openserial_printError(
-                COMPONENT_OPENOSCOAP, ERR_BUFFER_OVERFLOW,
+                COMPONENT_OSCORE, ERR_BUFFER_OVERFLOW,
                 (errorparameter_t) 0,
                 (errorparameter_t) 0
         );
@@ -587,10 +567,10 @@ uint8_t openoscoap_construct_aad(uint8_t *buffer,
     return ret;
 }
 
-void openoscoap_encode_compressed_COSE(OpenQueueEntry_t *msg,
-                                       uint8_t *partialIV, uint8_t partialIVLen,
-                                       uint8_t *kid,
-                                       uint8_t kidLen) {
+void oscore_encode_compressed_COSE(OpenQueueEntry_t *msg,
+                                   uint8_t *partialIV, uint8_t partialIVLen,
+                                   uint8_t *kid,
+                                   uint8_t kidLen) {
     // ciphertext is already encoded and of length msg->length
     uint8_t kidFlag;
 
@@ -628,7 +608,7 @@ void flip_first_bit(uint8_t *source, uint8_t *dst, uint8_t len) {
     dst[0] = dst[0] ^ 0x80;
 }
 
-bool replay_window_check(oscoap_security_context_t *context, uint16_t sequenceNumber) {
+bool replay_window_check(oscore_security_context_t *context, uint16_t sequenceNumber) {
     uint16_t delta;
 
     // packets lower than the left edge are rejected
@@ -650,7 +630,7 @@ bool replay_window_check(oscoap_security_context_t *context, uint16_t sequenceNu
     return TRUE;
 }
 
-void replay_window_update(oscoap_security_context_t *context, uint16_t sequenceNumber) {
+void replay_window_update(oscore_security_context_t *context, uint16_t sequenceNumber) {
     uint16_t delta;
 
     if (replay_window_check(context, sequenceNumber) == FALSE) {
@@ -674,7 +654,7 @@ void replay_window_update(oscoap_security_context_t *context, uint16_t sequenceN
     }
 }
 
-uint8_t openoscoap_convert_sequence_number(uint16_t sequenceNumber, uint8_t **buffer) {
+uint8_t oscore_convert_sequence_number(uint16_t sequenceNumber, uint8_t **buffer) {
     packetfunctions_htons(sequenceNumber, *buffer);
     if (**buffer == 0x00) {
         (*buffer)++;

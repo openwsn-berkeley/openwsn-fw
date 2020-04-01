@@ -1,5 +1,5 @@
-#ifndef __CONFIG_H
-#define __CONFIG_H
+#ifndef OPENWSN_CONFIG_H
+#define OPENWSN_CONFIG_H
 
 // ========================== Applications ==========================
 
@@ -205,6 +205,8 @@
 #define OPENWSN_MAX_PKTSIZE_SUPPORTED   1320
 #define OPENWSN_MAX_NUM_BIGPKTS         2
 
+#define OPENWSN_AES_HW
+
 #include "check_config.h"
 
-#endif /* __CONFIG_H */
+#endif /* OPENWSN_CONFIG_H */

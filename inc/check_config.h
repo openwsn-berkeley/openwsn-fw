@@ -1,5 +1,5 @@
-#ifndef __CHECK_CONFIG_H
-#define __CHECK_CONFIG_H
+#ifndef OPENWSN_CHECK_CONFIG_H
+#define OPENWSN_CHECK_CONFIG_H
 
 
 #if !defined(OPENWSN_COAP_C) && (\
@@ -34,4 +34,15 @@
 #error "6LoWPAN fragmentation options specified, but 6LoWPAN fragmentation is not included in the build."
 #endif
 
-#endif /* __CHECK_CONFIG_H */
+#if defined(OPENWSN_CJOIN_C) && !defined(OPENWSN_COAP_C)
+
+#errori "CJOIN requires the CoAP protocol."
+#endif
+
+#if defined(OPENWSN_COAP_C) && (\
+    !defined(OPENWSN_OPENUDP_C) && !defined(OPEWSN_TCP_C))
+
+#error "CoAP requires a transport layer, i.e. UDP or TCP."
+#endif
+
+#endif /* OPENWSN_CHECK_CONFIG_H */

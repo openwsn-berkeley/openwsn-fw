@@ -27,7 +27,7 @@
 #include "icmpv6echo_obj.h"
 #include "icmpv6rpl_obj.h"
 #include "coap_obj.h"
-#include "openoscoap_obj.h"
+#include "oscore_obj.h"
 #include "openudp_obj.h"
 #include "idmanager_obj.h"
 #include "openqueue_obj.h"
@@ -234,7 +234,6 @@ struct OpenMote {
     //===== openapps
     //
     coap_vars_t coap_vars;
-    openoscoap_vars_t openoscoap_vars;
     c6t_vars_t c6t_vars;
     cexample_vars_t cexample_vars;
     cinfo_vars_t cinfo_vars;

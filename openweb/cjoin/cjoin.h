@@ -10,17 +10,17 @@
 
 #include "opendefs.h"
 #include "coap.h"
-#include "openoscoap.h"
+#include "oscore.h"
 //=========================== define ==========================================
 
 //=========================== typedef =========================================
 
 typedef struct {
-    coap_resource_desc_t        desc;
-    opentimers_id_t             timerId;
-    bool                        isJoined;
-    oscoap_security_context_t   context;
-    uint8_t                     medType;
+    coap_resource_desc_t desc;
+    opentimers_id_t timerId;
+    bool isJoined;
+    oscore_security_context_t context;
+    uint8_t medType;
 } cjoin_vars_t;
 
 //=========================== variables =======================================
@@ -28,9 +28,13 @@ typedef struct {
 //=========================== prototypes ======================================
 
 void cjoin_init(void);
+
 void cjoin_schedule(void);
+
 bool cjoin_getIsJoined(void);
+
 void cjoin_setIsJoined(bool newValue);
+
 void cjoin_setJoinKey(uint8_t *key, uint8_t len);
 
 /**

@@ -144,7 +144,7 @@ typedef struct {
     coap_code_t Code;
     uint16_t messageID;
     uint8_t token[COAP_MAX_TKL];
-    uint16_t oscoapSeqNum;
+    uint16_t oscoreSeqNum;
 } coap_header_iht;
 
 typedef struct {
@@ -173,7 +173,7 @@ typedef struct {
     uint8_t recipientKey[AES_CCM_16_64_128_KEY_LEN];
     uint8_t recipientIV[AES_CCM_16_64_128_IV_LEN];
     replay_window_t window;
-} oscoap_security_context_t;
+} oscore_security_context_t;
 
 typedef owerror_t (*callbackRx_cbt)(OpenQueueEntry_t *msg,
                                     coap_header_iht *coap_header,
@@ -192,7 +192,7 @@ struct coap_resource_desc_t {
     uint8_t path1len;
     uint8_t *path1val;
     uint8_t componentID;
-    oscoap_security_context_t *securityContext;
+    oscore_security_context_t *securityContext;
     bool discoverable;
     callbackRx_cbt callbackRx;
     callbackSendDone_cbt callbackSendDone;

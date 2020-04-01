@@ -6,6 +6,7 @@
 */
 #include <string.h>
 #include <stdint.h>
+#include "config.h"
 #include "opendefs.h"
 #include "ccms.h"
 #include "aes128.h"
@@ -15,6 +16,8 @@
 
 
 //=========================== prototypes ======================================
+
+#ifndef OPENWSN_AES_HW
 
 static owerror_t aes_cbc_mac(uint8_t *a,
                              uint8_t len_a,
@@ -40,6 +43,8 @@ owerror_t aes_ctr_enc_raw(uint8_t *buffer, uint8_t len, uint8_t key[16], uint8_t
 
 static void inc_counter(uint8_t *counter);
 
+#endif
+
 //=========================== public ==========================================
 
 owerror_t aes128_ccms_enc(uint8_t *a,
@@ -51,6 +56,9 @@ owerror_t aes128_ccms_enc(uint8_t *a,
                           uint8_t key[16],
                           uint8_t len_mac) {
 
+#ifdef OPENWSN_AES_HW
+    return cryptoengine_aes_ccms_enc(a, len_a, m, len_m, nonce, l, key, len_mac);
+#else
     uint8_t mac[CBC_MAX_MAC_SIZE];
 
     if ((len_mac > CBC_MAX_MAC_SIZE) || (l != 2)) {
@@ -67,6 +75,7 @@ owerror_t aes128_ccms_enc(uint8_t *a,
     }
 
     return E_FAIL;
+#endif
 }
 
 owerror_t aes128_ccms_dec(uint8_t *a,
@@ -78,6 +87,9 @@ owerror_t aes128_ccms_dec(uint8_t *a,
                           uint8_t key[16],
                           uint8_t len_mac) {
 
+#ifdef OPENWSN_AES_HW
+    return cryptoengine_aes_ccms_dec(a, len_a, m, len_m, nonce, l, key, len_mac);
+#else
     uint8_t mac[CBC_MAX_MAC_SIZE];
     uint8_t orig_mac[CBC_MAX_MAC_SIZE];
 
@@ -97,9 +109,11 @@ owerror_t aes128_ccms_dec(uint8_t *a,
     }
 
     return E_FAIL;
+#endif
 }
 
 //=========================== private =========================================
+#ifndef OPENWSN_AES_HW
 
 /**
 \brief CBC-MAC generation specific to CCM*.
@@ -336,4 +350,4 @@ static void inc_counter(uint8_t *counter) {
     } while (n);
 }
 
-
+#endif

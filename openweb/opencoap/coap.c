@@ -4,7 +4,7 @@
 
 #include "opendefs.h"
 #include "coap.h"
-#include "openoscoap.h"
+#include "oscore.h"
 #include "openqueue.h"
 #include "openserial.h"
 #include "openrandom.h"
@@ -120,7 +120,7 @@ void coap_receive(OpenQueueEntry_t* msg) {
    uint16_t                  rcvdSequenceNumber;
    uint8_t*                  rcvdKid;
    uint8_t                   rcvdKidLen;
-   oscoap_security_context_t* blindContext;
+   oscore_security_context_t* blindContext;
    coap_code_t               securityReturnCode;
    coap_option_class_t       class;
 
@@ -215,7 +215,7 @@ void coap_receive(OpenQueueEntry_t* msg) {
        }
 
        if (objectSecurity->length == 0) {
-           index = openoscoap_parse_compressed_COSE(&msg->payload[0],
+           index = oscore_parse_compressed_COSE(&msg->payload[0],
                    msg->length,
                    &rcvdSequenceNumber,
                    &rcvdKid,
@@ -226,7 +226,7 @@ void coap_receive(OpenQueueEntry_t* msg) {
            packetfunctions_tossHeader(msg, index);
        }
        else {
-           index = openoscoap_parse_compressed_COSE(objectSecurity->pValue,
+           index = oscore_parse_compressed_COSE(objectSecurity->pValue,
                    objectSecurity->length,
                    &rcvdSequenceNumber,
                    &rcvdKid,
@@ -270,7 +270,7 @@ void coap_receive(OpenQueueEntry_t* msg) {
 
             if (blindContext) {
                     coap_incomingOptionsLen = MAX_COAP_OPTIONS;
-                    decStatus = openoscoap_unprotect_message(blindContext,
+                    decStatus = oscore_unprotect_message(blindContext,
                             coap_header.Ver,
                             coap_header.Code,
                             coap_incomingOptions,
@@ -388,13 +388,13 @@ void coap_receive(OpenQueueEntry_t* msg) {
             if (found==TRUE && temp_desc->callbackRx!=NULL) {
                 if (temp_desc->securityContext != NULL && coap_header.Code < COAP_CODE_RESP_BADREQ) {
                     coap_incomingOptionsLen = MAX_COAP_OPTIONS;
-                    decStatus = openoscoap_unprotect_message(temp_desc->securityContext,
+                    decStatus = oscore_unprotect_message(temp_desc->securityContext,
                             coap_header.Ver,
                             coap_header.Code,
                             coap_incomingOptions,
                             &coap_incomingOptionsLen,
                             msg,
-                            temp_desc->last_request.oscoapSeqNum
+                            temp_desc->last_request.oscoreSeqNum
                     );
 
                     if (decStatus != E_SUCCESS) {
@@ -437,7 +437,7 @@ void coap_receive(OpenQueueEntry_t* msg) {
             securityReturnCode = COAP_CODE_RESP_SERVERERROR; // no space for object security option
         }
         // protect the message in the openqueue buffer
-        openoscoap_protect_message(
+        oscore_protect_message(
                   temp_desc->securityContext,
                   COAP_VERSION,
                   coap_header.Code,
@@ -717,16 +717,16 @@ owerror_t coap_send(
 
    if (descSender->securityContext != NULL) { // security activated for the resource
       // get new sequence number and save it
-      request->oscoapSeqNum = openoscoap_get_sequence_number(descSender->securityContext);
+      request->oscoreSeqNum = oscore_get_sequence_number(descSender->securityContext);
       // protect the message in the openqueue buffer
-      ret = openoscoap_protect_message(
+      ret = oscore_protect_message(
               descSender->securityContext,
               COAP_VERSION,
               code,
               options,
               optionsLen,
               msg,
-              request->oscoapSeqNum);
+              request->oscoreSeqNum);
 
       if (ret != E_SUCCESS) {
          return E_FAIL;

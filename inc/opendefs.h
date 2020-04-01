@@ -166,7 +166,7 @@ enum {
    COMPONENT_OPENCOAP                  = 0x19,
    // secure join
    COMPONENT_CJOIN                     = 0x1a,
-   COMPONENT_OPENOSCOAP                = 0x1b,
+   COMPONENT_OSCORE                    = 0x1b,
    // applications
    COMPONENT_C6T                       = 0x1c,
    COMPONENT_CEXAMPLE                  = 0x1d,
@@ -195,94 +195,95 @@ enum {
 enum {
    // l7
    ERR_JOINED                          = 0x01, // node joined
-   ERR_SEQUENCE_NUMBER_OVERFLOW        = 0x02, // OSCOAP sequence number reached maximum value
-   ERR_BUFFER_OVERFLOW                 = 0x03, // OSCOAP buffer overflow detected (code location {0})
-   ERR_REPLAY_FAILED                   = 0x04, // OSCOAP replay protection failed
-   ERR_DECRYPTION_FAILED               = 0x05, // OSCOAP decryption and tag verification failed
-   ERR_ABORT_JOIN_PROCESS              = 0x06, // Aborted join process (code location {0})
+   ERR_JOIN_REQUEST                    = 0x02, // sending CJOIN request
+   ERR_SEQUENCE_NUMBER_OVERFLOW        = 0x03, // OSCORE sequence number reached maximum value
+   ERR_BUFFER_OVERFLOW                 = 0x04, // OSCORE buffer overflow detected (code location {0})
+   ERR_REPLAY_FAILED                   = 0x05, // OSCORE replay protection failed
+   ERR_DECRYPTION_FAILED               = 0x06, // OSCORE decryption and tag verification failed
+   ERR_ABORT_JOIN_PROCESS              = 0x07, // Aborted join process (code location {0})
    // l4
-   ERR_WRONG_TRAN_PROTOCOL             = 0x07, // unknown transport protocol {0} (code location {1})
-   ERR_UNSUPPORTED_PORT_NUMBER         = 0x08, // unsupported port number {0} (code location {1})
-   ERR_INVALID_CHECKSUM                = 0x09, // invalid checksum, expected 0x{:04x}, found 0x{:04x}
+   ERR_WRONG_TRAN_PROTOCOL             = 0x08, // unknown transport protocol {0} (code location {1})
+   ERR_UNSUPPORTED_PORT_NUMBER         = 0x09, // unsupported port number {0} (code location {1})
+   ERR_INVALID_CHECKSUM                = 0x0a, // invalid checksum, expected 0x{:04x}, found 0x{:04x}
    // l3
-   ERR_RCVD_ECHO_REQUEST               = 0x0a, // received an echo request
-   ERR_RCVD_ECHO_REPLY                 = 0x0b, // received an echo reply
-   ERR_6LORH_DEADLINE_EXPIRED          = 0x0c, // the received packet has expired
-   ERR_6LORH_DEADLINE_DROPPED          = 0x0d, // packet expiry time reached, dropped
-   ERR_UNEXPECTED_DAO                  = 0x0e, // unexpected DAO (code location {0}). A change maybe happened on dagroot node.
-   ERR_UNSUPPORTED_ICMPV6_TYPE         = 0x0f, // unsupported ICMPv6 type {0} (code location {1})
-   ERR_6LOWPAN_UNSUPPORTED             = 0x10, // unsupported 6LoWPAN parameter {1} at location {0}
-   ERR_NO_NEXTHOP                      = 0x11, // no next hop for layer 3 destination {0:x}{1:x}
-   ERR_INVALID_PARAM                   = 0x12, // invalid parameter
-   ERR_INVALID_FWDMODE                 = 0x13, // invalid forward mode
-   ERR_LARGE_DAGRANK                   = 0x14, // large DAGrank {0}, set to {1}
-   ERR_HOP_LIMIT_REACHED               = 0x15, // packet discarded hop limit reached
-   ERR_LOOP_DETECTED                   = 0x16, // loop detected due to previous rank {0} lower than current node rank {1}
-   ERR_WRONG_DIRECTION                 = 0x17, // upstream packet set to be downstream, possible loop.
-   ERR_FORWARDING_PACKET_DROPPED       = 0x18, // packet to forward is dropped (code location {0})
-   ERR_FRAG_BUFFER_OV                  = 0x19, // fragmentation buffer overflowed ({0} fragments queued)
-   ERR_FRAG_INVALID_SIZE               = 0x1a, // invalid original packet size ({0} > {1})
-   ERR_FRAG_REASSEMBLED                = 0x1b, // reassembled fragments into big packet (size: {0}, tag: {1})
-   ERR_FRAG_FAST_FORWARD               = 0x1c, // fast-forwarded all fragments with tag {0} (total size: {1})
-   ERR_FRAG_STORED                     = 0x1d, // stored a fragment with offset {0} (currently in buffer: {1})
-   ERR_FRAG_TX_FAIL                    = 0x1e, // failed to send fragment with tag {0} (offset: {1})
-   ERR_FRAG_REASSEMBLY_OR_VRB_TIMEOUT  = 0x1f, // reassembly or vrb timer expired for fragments with tag {0}
-   ERR_FRAG_FRAGMENTING                = 0x20, // fragmenting a big packet, original size {0}, number of fragments {1}
+   ERR_RCVD_ECHO_REQUEST               = 0x0b, // received an echo request
+   ERR_RCVD_ECHO_REPLY                 = 0x0c, // received an echo reply
+   ERR_6LORH_DEADLINE_EXPIRED          = 0x0d, // the received packet has expired
+   ERR_6LORH_DEADLINE_DROPPED          = 0x0e, // packet expiry time reached, dropped
+   ERR_UNEXPECTED_DAO                  = 0x0f, // unexpected DAO (code location {0}). A change maybe happened on dagroot node.
+   ERR_UNSUPPORTED_ICMPV6_TYPE         = 0x10, // unsupported ICMPv6 type {0} (code location {1})
+   ERR_6LOWPAN_UNSUPPORTED             = 0x11, // unsupported 6LoWPAN parameter {1} at location {0}
+   ERR_NO_NEXTHOP                      = 0x12, // no next hop for layer 3 destination {0:x}{1:x}
+   ERR_INVALID_PARAM                   = 0x13, // invalid parameter
+   ERR_INVALID_FWDMODE                 = 0x14, // invalid forward mode
+   ERR_LARGE_DAGRANK                   = 0x15, // large DAGrank {0}, set to {1}
+   ERR_HOP_LIMIT_REACHED               = 0x16, // packet discarded hop limit reached
+   ERR_LOOP_DETECTED                   = 0x17, // loop detected due to previous rank {0} lower than current node rank {1}
+   ERR_WRONG_DIRECTION                 = 0x18, // upstream packet set to be downstream, possible loop.
+   ERR_FORWARDING_PACKET_DROPPED       = 0x19, // packet to forward is dropped (code location {0})
+   ERR_FRAG_BUFFER_OV                  = 0x1a, // fragmentation buffer overflowed ({0} fragments queued)
+   ERR_FRAG_INVALID_SIZE               = 0x1b, // invalid original packet size ({0} > {1})
+   ERR_FRAG_REASSEMBLED                = 0x1c, // reassembled fragments into big packet (size: {0}, tag: {1})
+   ERR_FRAG_FAST_FORWARD               = 0x1d, // fast-forwarded all fragments with tag {0} (total size: {1})
+   ERR_FRAG_STORED                     = 0x1e, // stored a fragment with offset {0} (currently in buffer: {1})
+   ERR_FRAG_TX_FAIL                    = 0x1f, // failed to send fragment with tag {0} (offset: {1})
+   ERR_FRAG_REASSEMBLY_OR_VRB_TIMEOUT  = 0x20, // reassembly or vrb timer expired for fragments with tag {0}
+   ERR_FRAG_FRAGMENTING                = 0x21, // fragmenting a big packet, original size {0}, number of fragments {1}
    // l2b
-   ERR_NEIGHBORS_FULL                  = 0x21, // neighbors table is full (max number of neighbor is {0})
-   ERR_NO_SENT_PACKET                  = 0x22, // there is no sent packet in queue
-   ERR_NO_RECEIVED_PACKET              = 0x23, // there is no received packet in queue
-   ERR_SCHEDULE_OVERFLOWN              = 0x24, // schedule overflown
-   ERR_SIXTOP_RETURNCODE               = 0x25, // sixtop return code {0} at sixtop state {1}
-   ERR_SIXTOP_COUNT                    = 0x26, // there are {0} cells to request mote
-   ERR_SIXTOP_LIST                     = 0x27, // the cells reserved to request mote contains slot {0} and slot {1}
+   ERR_NEIGHBORS_FULL                  = 0x22, // neighbors table is full (max number of neighbor is {0})
+   ERR_NO_SENT_PACKET                  = 0x23, // there is no sent packet in queue
+   ERR_NO_RECEIVED_PACKET              = 0x24, // there is no received packet in queue
+   ERR_SCHEDULE_OVERFLOWN              = 0x25, // schedule overflown
+   ERR_SIXTOP_RETURNCODE               = 0x26, // sixtop return code {0} at sixtop state {1}
+   ERR_SIXTOP_COUNT                    = 0x27, // there are {0} cells to request mote
+   ERR_SIXTOP_LIST                     = 0x28, // the cells reserved to request mote contains slot {0} and slot {1}
    // l3a
-   ERR_WRONG_CELLTYPE                  = 0x28, // wrong celltype {0} at slotOffset {1}
-   ERR_IEEE154_UNSUPPORTED             = 0x29, // unsupported IEEE802.15.4 parameter {1} at location {0}
-   ERR_DESYNCHRONIZED                  = 0x2a, // got desynchronized at slotOffset {0}
-   ERR_SYNCHRONIZED                    = 0x2b, // synchronized at slotOffset {0}
-   ERR_LARGE_TIMECORRECTION            = 0x2c, // large timeCorr.: {0} ticks (code loc. {1})
-   ERR_WRONG_STATE_IN_ENDFRAME_SYNC    = 0x2d, // wrong state {0} in end of frame+sync
-   ERR_WRONG_STATE_IN_STARTSLOT        = 0x2e, // wrong state {0} in startSlot, at slotOffset {1}
-   ERR_WRONG_STATE_IN_TIMERFIRES       = 0x2f, // wrong state {0} in timer fires, at slotOffset {1}
-   ERR_WRONG_STATE_IN_NEWSLOT          = 0x30, // wrong state {0} in start of frame, at slotOffset {1}
-   ERR_WRONG_STATE_IN_ENDOFFRAME       = 0x31, // wrong state {0} in end of frame, at slotOffset {1}
-   ERR_MAXTXDATAPREPARE_OVERFLOW       = 0x32, // maxTxDataPrepare overflows while at state {0} in slotOffset {1}
-   ERR_MAXRXACKPREPARE_OVERFLOWS       = 0x33, // maxRxAckPrepapare overflows while at state {0} in slotOffset {1}
-   ERR_MAXRXDATAPREPARE_OVERFLOWS      = 0x34, // maxRxDataPrepapre overflows while at state {0} in slotOffset {1}
-   ERR_MAXTXACKPREPARE_OVERFLOWS       = 0x35, // maxTxAckPrepapre overflows while at state {0} in slotOffset {1}
-   ERR_WDDATADURATION_OVERFLOWS        = 0x36, // wdDataDuration overflows while at state {0} in slotOffset {1}
-   ERR_WDRADIO_OVERFLOWS               = 0x37, // wdRadio overflows while at state {0} in slotOffset {1}
-   ERR_WDRADIOTX_OVERFLOWS             = 0x38, // wdRadioTx overflows while at state {0} in slotOffset {1}
-   ERR_WDACKDURATION_OVERFLOWS         = 0x39, // wdAckDuration overflows while at state {0} in slotOffset {1}
-   ERR_SECURITY                        = 0x3a, // security error on frameType {0}, code location {1}
+   ERR_WRONG_CELLTYPE                  = 0x29, // wrong celltype {0} at slotOffset {1}
+   ERR_IEEE154_UNSUPPORTED             = 0x2a, // unsupported IEEE802.15.4 parameter {1} at location {0}
+   ERR_DESYNCHRONIZED                  = 0x2b, // got desynchronized at slotOffset {0}
+   ERR_SYNCHRONIZED                    = 0x2c, // synchronized at slotOffset {0}
+   ERR_LARGE_TIMECORRECTION            = 0x2d, // large timeCorr.: {0} ticks (code loc. {1})
+   ERR_WRONG_STATE_IN_ENDFRAME_SYNC    = 0x2e, // wrong state {0} in end of frame+sync
+   ERR_WRONG_STATE_IN_STARTSLOT        = 0x2f, // wrong state {0} in startSlot, at slotOffset {1}
+   ERR_WRONG_STATE_IN_TIMERFIRES       = 0x30, // wrong state {0} in timer fires, at slotOffset {1}
+   ERR_WRONG_STATE_IN_NEWSLOT          = 0x31, // wrong state {0} in start of frame, at slotOffset {1}
+   ERR_WRONG_STATE_IN_ENDOFFRAME       = 0x32, // wrong state {0} in end of frame, at slotOffset {1}
+   ERR_MAXTXDATAPREPARE_OVERFLOW       = 0x33, // maxTxDataPrepare overflows while at state {0} in slotOffset {1}
+   ERR_MAXRXACKPREPARE_OVERFLOWS       = 0x34, // maxRxAckPrepapare overflows while at state {0} in slotOffset {1}
+   ERR_MAXRXDATAPREPARE_OVERFLOWS      = 0x35, // maxRxDataPrepapre overflows while at state {0} in slotOffset {1}
+   ERR_MAXTXACKPREPARE_OVERFLOWS       = 0x36, // maxTxAckPrepapre overflows while at state {0} in slotOffset {1}
+   ERR_WDDATADURATION_OVERFLOWS        = 0x37, // wdDataDuration overflows while at state {0} in slotOffset {1}
+   ERR_WDRADIO_OVERFLOWS               = 0x38, // wdRadio overflows while at state {0} in slotOffset {1}
+   ERR_WDRADIOTX_OVERFLOWS             = 0x39, // wdRadioTx overflows while at state {0} in slotOffset {1}
+   ERR_WDACKDURATION_OVERFLOWS         = 0x3a, // wdAckDuration overflows while at state {0} in slotOffset {1}
+   ERR_SECURITY                        = 0x3b, // security error on frameType {0}, code location {1}
    // cross layer
-   ERR_GETDATA_ASKS_TOO_FEW_BYTES      = 0x3b, // getData asks for too few bytes, maxNumBytes={0}, fill level={1}
-   ERR_INPUT_BUFFER_OVERFLOW           = 0x3c, // the input buffer has overflown
+   ERR_GETDATA_ASKS_TOO_FEW_BYTES      = 0x3c, // getData asks for too few bytes, maxNumBytes={0}, fill level={1}
+   ERR_INPUT_BUFFER_OVERFLOW           = 0x3d, // the input buffer has overflown
    // general
-   ERR_BUSY_SENDING                    = 0x3d, // busy sending
-   ERR_UNEXPECTED_SENDDONE             = 0x3e, // sendDone for packet I didn't send
-   ERR_NO_FREE_PACKET_BUFFER           = 0x3f, // no free packet buffer (code location {0})
-   ERR_NO_FREE_TIMER_OR_QUEUE_ENTRY    = 0x40, // no free timer or queue entry (code location {0})
-   ERR_FREEING_UNUSED                  = 0x41, // freeing unused memory
-   ERR_FREEING_ERROR                   = 0x42, // freeing memory unsupported memory
-   ERR_UNSUPPORTED_COMMAND             = 0x43, // unsupported command {0}
-   ERR_MSG_UNKNOWN_TYPE                = 0x44, // unknown message type {0}
-   ERR_WRONG_ADDR_TYPE                 = 0x45, // wrong address type {0} (code location {1})
-   ERR_BRIDGE_MISMATCH                 = 0x46, // bridge mismatch (code location {0})
-   ERR_HEADER_TOO_LONG                 = 0x47, // header too long, length {1} (code location {0})
-   ERR_INPUTBUFFER_LENGTH              = 0x48, // input length problem, length={0}
-   ERR_BOOTED                          = 0x49, // booted
-   ERR_INVALIDSERIALFRAME              = 0x4a, // invalid serial frame
-   ERR_INVALIDPACKETFROMRADIO          = 0x4b, // invalid packet from radio, length {1} (code location {0})
-   ERR_BUSY_RECEIVING                  = 0x4c, // busy receiving when stop of serial activity, buffer input length {1} (code location {0})
-   ERR_WRONG_CRC_INPUT                 = 0x4d, // wrong CRC in input Buffer
-   ERR_PACKET_SYNC                     = 0x4e, // synchronized when received a packet
-   ERR_SCHEDULE_ADDDUPLICATESLOT       = 0x4f, // the slot {0} to be added is already in schedule
-   ERR_UNSUPPORTED_FORMAT              = 0x50, // the received packet format is not supported (code location {0})
-   ERR_UNSUPPORTED_METADATA            = 0x51, // the metadata type is not suppored
-   ERR_MAXRETRIES_REACHED              = 0x52, // maxretries reached (counter: {0})
-   ERR_EMPTY_QUEUE_OR_UNKNOWN_TIMER    = 0x53, // empty queue or trying to remove unknown timer id (code location {0})
+   ERR_BUSY_SENDING                    = 0x3e, // busy sending
+   ERR_UNEXPECTED_SENDDONE             = 0x3f, // sendDone for packet I didn't send
+   ERR_NO_FREE_PACKET_BUFFER           = 0x40, // no free packet buffer (code location {0})
+   ERR_NO_FREE_TIMER_OR_QUEUE_ENTRY    = 0x41, // no free timer or queue entry (code location {0})
+   ERR_FREEING_UNUSED                  = 0x42, // freeing unused memory
+   ERR_FREEING_ERROR                   = 0x43, // freeing memory unsupported memory
+   ERR_UNSUPPORTED_COMMAND             = 0x44, // unsupported command {0}
+   ERR_MSG_UNKNOWN_TYPE                = 0x45, // unknown message type {0}
+   ERR_WRONG_ADDR_TYPE                 = 0x46, // wrong address type {0} (code location {1})
+   ERR_BRIDGE_MISMATCH                 = 0x47, // bridge mismatch (code location {0})
+   ERR_HEADER_TOO_LONG                 = 0x48, // header too long, length {1} (code location {0})
+   ERR_INPUTBUFFER_LENGTH              = 0x49, // input length problem, length={0}
+   ERR_BOOTED                          = 0x4a, // booted
+   ERR_INVALIDSERIALFRAME              = 0x4b, // invalid serial frame
+   ERR_INVALIDPACKETFROMRADIO          = 0x4c, // invalid packet from radio, length {1} (code location {0})
+   ERR_BUSY_RECEIVING                  = 0x4d, // busy receiving when stop of serial activity, buffer input length {1} (code location {0})
+   ERR_WRONG_CRC_INPUT                 = 0x4e, // wrong CRC in input Buffer
+   ERR_PACKET_SYNC                     = 0x4f, // synchronized when received a packet
+   ERR_SCHEDULE_ADDDUPLICATESLOT       = 0x50, // the slot {0} to be added is already in schedule
+   ERR_UNSUPPORTED_FORMAT              = 0x51, // the received packet format is not supported (code location {0})
+   ERR_UNSUPPORTED_METADATA            = 0x52, // the metadata type is not suppored
+   ERR_MAXRETRIES_REACHED              = 0x53, // maxretries reached (counter: {0})
+   ERR_EMPTY_QUEUE_OR_UNKNOWN_TIMER    = 0x54, // empty queue or trying to remove unknown timer id (code location {0})
 };
 
 //=========================== typedef =========================================
