@@ -105,13 +105,13 @@ void macpong_send(uint8_t payloadCtr) {
 
 //===== FRAG
 
-void frag_init(void)                                            {return; }
-void frag_sendDone(OpenQueueEntry_t *msg, owerror_t sendError)  {return; }
-void frag_receive(OpenQueueEntry_t *msg)                        {return; }
+void iphc_init(void)                                            {return; }
+void iphc_sendDone(OpenQueueEntry_t *msg, owerror_t sendError)  {return; }
+void iphc_receive(OpenQueueEntry_t *msg)                        {return; }
 
 //===== IPHC
 
-void iphc_init(void) {
+void frag_init(void) {
     macpong_vars.timerId = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_IPHC);
     opentimers_scheduleIn(
         macpong_vars.timerId,   // timerId
@@ -122,12 +122,12 @@ void iphc_init(void) {
     );
 }
 
-void iphc_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
+void frag_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    msg->owner = COMPONENT_IPHC;
    openqueue_freePacketBuffer(msg);
 }
 
-void iphc_receive(OpenQueueEntry_t* msg) {
+void frag_receive(OpenQueueEntry_t* msg) {
    msg->owner = COMPONENT_IPHC;
    macpong_send(++msg->payload[0]);
    openqueue_freePacketBuffer(msg);
