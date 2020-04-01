@@ -12,7 +12,6 @@
 #include "idmanager.h"
 #include "opentimers.h"
 #include "scheduler.h"
-#include "cryptoengine.h"
 #include "icmpv6rpl.h"
 
 //=========================== defines =========================================

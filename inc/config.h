@@ -166,7 +166,7 @@
  *
  */
 
-// #define OPENWSN_COAP_C
+#define OPENWSN_COAP_C
 
 /**
  * \def OPENWSN_CJOIN_C
@@ -175,7 +175,7 @@
  *
  */
 
-// #define OPENWSN_CJOIN_C
+#define OPENWSN_CJOIN_C
 
 
 // ======================== Stack configuration ========================
@@ -187,7 +187,7 @@
  *
  */
 
-// #define OPENWSN_OPENUDP_C
+#define OPENWSN_OPENUDP_C
 
 /**
  * \def OPENWSN_6LO_FRAGMENTATION_C

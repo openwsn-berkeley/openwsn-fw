@@ -58,6 +58,7 @@ else:
             os.path.join('#','kernel'),
             # drivers
             os.path.join('#','drivers','common'),
+            os.path.join('#','drivers','common','crypto'),
             # openstack
             os.path.join('#','openstack'),
             os.path.join('#','openstack','02a-MAClow'),

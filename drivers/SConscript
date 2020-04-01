@@ -11,12 +11,16 @@ sources_c = [
     os.path.join('common','opensensors.c'),
     os.path.join('common','openserial.c'),
     os.path.join('common','opentimers.c'),
+    os.path.join('common','crypto','openccms.c'),
+    os.path.join('common','crypto','openaes.c')
 ]
 sources_h = [
     os.path.join('common','openhdlc.h'),
     os.path.join('common','opensensors.h'),
     os.path.join('common','openserial.h'),
     os.path.join('common','opentimers.h'),
+    os.path.join('common','crypto','openccms.h'),
+    os.path.join('common','crypto','openaes.h')
 ]
 
 if localEnv['board']=='python':
@@ -46,11 +50,7 @@ else:
             os.path.join('#','openstack','03a-IPHC'),
             os.path.join('#','openstack','03b-IPv6'),
             os.path.join('#','openstack','04-TRAN'),
-            os.path.join('#','openstack','07-App','tcpinject'),
-            os.path.join('#','openstack','07-App','udpinject'),
             os.path.join('#','openstack','cross-layers'),
-            # openapps
-            os.path.join('#','openapps','userialbridge'),
         ],
     )
     
