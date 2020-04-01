@@ -1,9 +1,6 @@
 <!DOCTYPE CrossStudio_Project_File>
-<solution
-  Name="nordicopenwsn_03oos_openwsn_pca10056"
-  target="8"
-  version="2">
-  <project Name="01bsp_uart">
+<solution Name="02drb_openserial" target="8" version="2">
+  <project Name="02drb_openserial">
     <configuration
       Name="Common"
       arm_architecture="v7EM"
@@ -37,7 +34,7 @@
       project_type="Executable" />
     <folder Name="Application">
       <file file_name="../../../bsp/boards/nrf52840/app_config.h" />
-      <file file_name="../../../projects/common/03oos_openwsn/03oos_openwsn.c" />
+      <file file_name="../../common/02drv_openserial/02drv_openserial.c" />
     </folder>
     <folder Name="Segger ES Specific">
       <file file_name="../../../bsp/boards/nrf52840/sdk/modules/nrfx/mdk/ses_nRF_Startup.s" />
@@ -47,7 +44,110 @@
         <file file_name="$(StudioDir)/source/thumb_crt0.s" />
       </folder>
     </folder>
-    <folder Name="OpenWSN" />
+    <folder Name="OpenWSN">
+      <folder Name="bsp">
+        <file file_name="../../../bsp/boards/nrf52840/board.c" />
+        <file file_name="../../../bsp/boards/nrf52840/board_info.h" />
+        <file file_name="../../../bsp/boards/nrf52840/debugpins.c" />
+        <file file_name="../../../bsp/boards/nrf52840/eui64.c" />
+        <file file_name="../../../bsp/boards/nrf52840/leds.c" />
+        <file file_name="../../../bsp/boards/nrf52840/radio.c" />
+        <file file_name="../../../bsp/boards/nrf52840/sctimer.c" />
+        <file file_name="../../../bsp/boards/nrf52840/spi.c" />
+        <file file_name="../../../bsp/boards/nrf52840/uart.c" />
+        <file file_name="../../../bsp/boards/board.h" />
+        <file file_name="../../../bsp/boards/cryptoengine.h" />
+        <file file_name="../../../bsp/boards/debugpins.h" />
+        <file file_name="../../../bsp/boards/eui64.h" />
+        <file file_name="../../../bsp/boards/i2c.h" />
+        <file file_name="../../../bsp/boards/leds.h" />
+        <file file_name="../../../bsp/boards/radio.h" />
+        <file file_name="../../../bsp/boards/sctimer.h" />
+        <file file_name="../../../bsp/boards/sensors.h" />
+        <file file_name="../../../bsp/boards/spi.h" />
+        <file file_name="../../../bsp/boards/toolchain_defs.h" />
+        <file file_name="../../../bsp/boards/uart.h" />
+        <file file_name="../../../bsp/boards/nrf52840/i2c.c" />
+        <file file_name="../../../bsp/boards/nrf52840/sensors.c" />
+        <file file_name="../../../bsp/boards/nrf52840/adc_sensor.c" />
+      </folder>
+      <folder Name="kernel">
+        <file file_name="../../../kernel/openos/scheduler.c" />
+      </folder>
+      <folder Name="openstack">
+        <file file_name="../../../openstack/openstack.c" />
+        <file file_name="../../../openstack/cross-layers/idmanager.c" />
+        <file file_name="../../../openstack/03b-IPv6/icmpv6rpl.c" />
+        <file file_name="../../../openstack/03a-IPHC/openbridge.c" />
+        <file file_name="../../../openstack/04-TRAN/openudp.c" />
+        <file file_name="../../../openstack/cross-layers/openqueue.c" />
+        <file file_name="../../../openstack/02b-MAChigh/msf.c" />
+        <file file_name="../../../openstack/02b-MAChigh/neighbors.c" />
+        <file file_name="../../../openstack/02b-MAChigh/schedule.c" />
+        <file file_name="../../../openstack/02b-MAChigh/sixtop.c" />
+        <file file_name="../../../openstack/02a-MAClow/adaptive_sync.c" />
+        <file file_name="../../../openstack/02a-MAClow/IEEE802154.c" />
+        <file file_name="../../../openstack/02a-MAClow/IEEE802154_security.c" />
+        <file file_name="../../../openstack/02a-MAClow/IEEE802154E.c" />
+        <file file_name="../../../openstack/02a-MAClow/topology.c" />
+        <file file_name="../../../openstack/03a-IPHC/iphc.c" />
+        <file file_name="../../../openstack/03b-IPv6/forwarding.c" />
+        <file file_name="../../../openstack/03b-IPv6/icmpv6.c" />
+        <file file_name="../../../openstack/03b-IPv6/icmpv6echo.c" />
+        <file file_name="../../../openstack/cross-layers/openrandom.c" />
+        <file file_name="../../../openstack/cross-layers/packetfunctions.c" />
+      </folder>
+      <folder Name="drivers">
+        <file file_name="../../../drivers/common/openserial.c" />
+        <file file_name="../../../drivers/common/opentimers.c" />
+        <file file_name="../../../drivers/common/openhdlc.c" />
+      </folder>
+      <folder Name="openapps">
+        <file file_name="../../../openapps/openapps.c" />
+        <file file_name="../../../openapps/c6t/c6t.c">
+          <configuration Name="Debug" build_exclude_from_build="Yes" />
+        </file>
+        <file file_name="../../../openapps/cinfo/cinfo.c">
+          <configuration Name="Debug" build_exclude_from_build="Yes" />
+        </file>
+        <file file_name="../../../openapps/cjoin/cjoin.c">
+          <configuration Name="Debug" build_exclude_from_build="Yes" />
+        </file>
+        <file file_name="../../../openapps/cleds/cleds.c">
+          <configuration Name="Debug" build_exclude_from_build="Yes" />
+        </file>
+        <file file_name="../../../openapps/cwellknown/cwellknown.c">
+          <configuration Name="Debug" build_exclude_from_build="Yes" />
+        </file>
+        <file file_name="../../../openapps/opencoap/opencoap.c">
+          <configuration Name="Debug" build_exclude_from_build="Yes" />
+        </file>
+        <file file_name="../../../openapps/rrt/rrt.c">
+          <configuration Name="Debug" build_exclude_from_build="Yes" />
+        </file>
+        <file file_name="../../../openapps/uecho/uecho.c">
+          <configuration Name="Debug" build_exclude_from_build="Yes" />
+        </file>
+        <file file_name="../../../openapps/uexpiration/uexpiration.c">
+          <configuration Name="Debug" build_exclude_from_build="Yes" />
+        </file>
+        <file file_name="../../../openapps/uexpiration_monitor/uexpiration_monitor.c">
+          <configuration Name="Debug" build_exclude_from_build="Yes" />
+        </file>
+        <file file_name="../../../openapps/uinject/uinject.c">
+          <configuration Name="Debug" build_exclude_from_build="Yes" />
+        </file>
+        <file file_name="../../../openapps/userialbridge/userialbridge.c">
+          <configuration Name="Debug" build_exclude_from_build="Yes" />
+        </file>
+        <file file_name="../../../openapps/opencoap/openoscoap.c">
+          <configuration Name="Debug" build_exclude_from_build="Yes" />
+        </file>
+        <file file_name="../../../openapps/opencoap/cborencoder.c">
+          <configuration Name="Debug" build_exclude_from_build="Yes" />
+        </file>
+      </folder>
+    </folder>
     <folder Name="Nordic SDK15 Specific">
       <folder Name="nRF_Drivers">
         <file file_name="../../../bsp/boards/nrf52840/sdk/integration/nrfx/legacy/nrf_drv_spi.c" />
@@ -67,8 +167,8 @@
         <file file_name="../../../bsp/boards/nrf52840/sdk/components/libraries/util/app_error_weak.c" />
         <file file_name="../../../bsp/boards/nrf52840/sdk/components/libraries/strerror/nrf_strerror.c" />
         <file file_name="../../../bsp/boards/nrf52840/nrfx_rtc_hack.c" />
-        <file file_name="../../../bsp/boards/nrf52840/sdk/modules/nrfx/drivers/src/nrfx_twi.c" />
         <file file_name="../../../bsp/boards/nrf52840/sdk/modules/nrfx/drivers/src/nrfx_systick.c" />
+        <file file_name="../../../bsp/boards/nrf52840/sdk/modules/nrfx/drivers/src/nrfx_twi.c" />
         <file file_name="../../../bsp/boards/nrf52840/sdk/modules/nrfx/drivers/src/nrfx_saadc.c" />
       </folder>
       <folder Name="nRF_Libraries" />
@@ -82,33 +182,6 @@
     </folder>
     <configuration Name="Debug" gcc_optimization_level="None" />
     <configuration Name="Release" gcc_optimization_level="Level 3" />
-    <folder Name="bsp">
-      <file file_name="../../../bsp/boards/nrf52840/board.c" />
-      <file file_name="../../../bsp/boards/nrf52840/board_info.h" />
-      <file file_name="../../../bsp/boards/nrf52840/debugpins.c" />
-      <file file_name="../../../bsp/boards/nrf52840/eui64.c" />
-      <file file_name="../../../bsp/boards/nrf52840/leds.c" />
-      <file file_name="../../../bsp/boards/nrf52840/radio.c" />
-      <file file_name="../../../bsp/boards/nrf52840/sctimer.c" />
-      <file file_name="../../../bsp/boards/nrf52840/spi.c" />
-      <file file_name="../../../bsp/boards/nrf52840/uart.c" />
-      <file file_name="../../../bsp/boards/board.h" />
-      <file file_name="../../../bsp/boards/cryptoengine.h" />
-      <file file_name="../../../bsp/boards/debugpins.h" />
-      <file file_name="../../../bsp/boards/eui64.h" />
-      <file file_name="../../../bsp/boards/i2c.h" />
-      <file file_name="../../../bsp/boards/leds.h" />
-      <file file_name="../../../bsp/boards/radio.h" />
-      <file file_name="../../../bsp/boards/sctimer.h" />
-      <file file_name="../../../bsp/boards/sensors.h" />
-      <file file_name="../../../bsp/boards/spi.h" />
-      <file file_name="../../../bsp/boards/toolchain_defs.h" />
-      <file file_name="../../../bsp/boards/uart.h" />
-      <file file_name="../../../bsp/boards/nrf52840/cryptoengine.c" />
-      <file file_name="../../../bsp/boards/nrf52840/adc_sensor.c" />
-      <file file_name="../../../bsp/boards/nrf52840/i2c.c" />
-      <file file_name="../../../bsp/boards/nrf52840/sensors.c" />
-    </folder>
   </project>
   <configuration
     Name="Release"

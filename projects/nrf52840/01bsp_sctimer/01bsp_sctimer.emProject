@@ -1,9 +1,6 @@
 <!DOCTYPE CrossStudio_Project_File>
-<solution
-  Name="nordicopenwsn_03oos_openwsn_pca10056"
-  target="8"
-  version="2">
-  <project Name="nordicopenwsn_03oos_openwsn_pca10056">
+<solution Name="01bsp_sctimer" target="8" version="2">
+  <project Name="01bsp_sctimer">
     <configuration
       Name="Common"
       arm_architecture="v7EM"
@@ -37,7 +34,7 @@
       project_type="Executable" />
     <folder Name="Application">
       <file file_name="../../../bsp/boards/nrf52840/app_config.h" />
-      <file file_name="../../../projects/common/03oos_openwsn/03oos_openwsn.c" />
+      <file file_name="../../common/01bsp_sctimer/01bsp_sctimer.c" />
     </folder>
     <folder Name="Segger ES Specific">
       <file file_name="../../../bsp/boards/nrf52840/sdk/modules/nrfx/mdk/ses_nRF_Startup.s" />
