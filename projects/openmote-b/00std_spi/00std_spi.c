@@ -47,6 +47,11 @@ typedef struct {
 
 spi_vars_t spi_vars;
 
+//*********Variables to use as parameters of spi_txrx function****************//
+
+/*static char stringToPrint[]="MessageToTest\r\n";
+size_t len = strlen(stringToPrint);*/
+	
 //=========================== prototypes ======================================
 static void disableInterrupts(void);
 static void enableInterrupts(void);
@@ -56,36 +61,55 @@ void spi_init() {
     // clear variables
     memset(&spi_vars,0,sizeof(spi_vars_t));
 
-    // set the clk miso and cs pins as output
+    // set the clk miso and cs pins as Software-controlled outputs (configures GPIO_AFSEL and GPIO_DIR )
+    // Only FSS can be used as SOFTWARE controlled OUTPUT
     GPIOPinTypeGPIOOutput(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_CLK);
     GPIOPinTypeGPIOOutput(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_TX);
     GPIOPinTypeGPIOOutput(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_FSS);
+    // set the Miso pin as input
+    GPIOPinTypeGPIOInput(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_RX);
 
-    //set cs to high
+    //set cs to high (writes into GPIO_DATA)
     GPIOPinWrite(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_FSS, SPI_PIN_SSI_FSS);
+
     //set pins to low
     GPIOPinWrite(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_TX, 0);
     GPIOPinWrite(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_CLK, 0);
 
+    //Configuration of SSI1 peripheral
     SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_SSI1);
     SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_SSI1);
     SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_SSI1);
 
+    //Disabling SSI (writes into SSI_CR1)
     SSIDisable(SSI1_BASE);
+
+    //Set clock source
     SSIClockSourceSet(SSI1_BASE, SSI_CLOCK_PIOSC);
 
+    /*Configure output signal to IOC_Pxx_SEL register
+    Each signal is identified with its address table 9.1 in T.I datasheet*/
     IOCPinConfigPeriphOutput(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_CLK, IOC_MUX_OUT_SEL_SSI1_CLKOUT);
     IOCPinConfigPeriphOutput(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_TX, IOC_MUX_OUT_SEL_SSI1_TXD);
+    IOCPinConfigPeriphOutput(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_FSS, IOC_MUX_OUT_SEL_SSI1_FSSOUT);
+    //Configures hardware peripheral input selection (i.e. IOC_SSIRXD_SSI1)
     IOCPinConfigPeriphInput(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_RX, IOC_SSIRXD_SSI1);
 
+    //Set the pins as Hardware-controlled(AFSEL register)
     GPIOPinTypeSSI(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_CLK );
     GPIOPinTypeSSI(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_RX );
     GPIOPinTypeSSI(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_TX );
+    //FSS would be better to be controlled as software
+    GPIOPinTypeSSI(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_FSS );
 
-    SSIConfigSetExpClk(SSI1_BASE, SysCtrlIOClockGet(), SSI_FRF_MOTO_MODE_0, SSI_MODE_MASTER, /*SysCtrlIOClockGet()/2*/16000000, 8 /*bits*/);
+    //Sets SSI_CR0, SSI_CR1, SSI_CPSR
+    SSIConfigSetExpClk(SSI1_BASE, SysCtrlIOClockGet(), SSI_FRF_MOTO_MODE_0, SSI_MODE_MASTER, SysCtrlIOClockGet()/2/*16000000*/, 8);
 
-    // Enable the SSI1 module.
+    // Enable the SSI1 module(writes into CR1)
     SSIEnable(SSI1_BASE);
+    
+    //Call the spi_txrx function
+	//spi_txrx(&stringToPrint,len,)
 }
 
 #ifdef SPI_IN_INTERRUPT_MODE
@@ -117,7 +141,7 @@ void    spi_txrx(uint8_t*     bufTx,
     // SPI is now busy
     spi_vars.busy             =  1;
 
-    // lower CS signal to have slave listening
+    // lower CS signal to have slave listening (FSS is managed through software, not hardware)
     if (spi_vars.isFirst==SPI_FIRST) {
        GPIOPinWrite(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_FSS, 0);
     }
