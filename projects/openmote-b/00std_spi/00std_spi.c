@@ -61,31 +61,32 @@ void spi_init() {
     // clear variables
     memset(&spi_vars,0,sizeof(spi_vars_t));
 
-    // set the clk miso and cs pins as Software-controlled outputs (configures GPIO_AFSEL and GPIO_DIR )
-    // Only FSS can be used as SOFTWARE controlled OUTPUT
-    GPIOPinTypeGPIOOutput(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_CLK);
-    GPIOPinTypeGPIOOutput(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_TX);
-    GPIOPinTypeGPIOOutput(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_FSS);
-    // set the Miso pin as input
-    GPIOPinTypeGPIOInput(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_RX);
+    //Set the CLK , MOSI(TX) and MISO(RX) pins as Hardware-controlled (AFSEL register)
+    GPIOPinTypeSSI(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_CLK );
+    GPIOPinTypeSSI(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_RX );
+    GPIOPinTypeSSI(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_TX );
 
-    //set cs to high (writes into GPIO_DATA)
+    //Set the SS pin as Software-controlled outputs (configures GPIO_AFSEL-->0 (software) and GPIO_DIR-->1 (Output) )
+    //Only FSS can be used as SOFTWARE controlled OUTPUT
+    GPIOPinTypeGPIOOutput(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_FSS);
+
+    //Set SS to High (writes into GPIO_DATA register)
     GPIOPinWrite(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_FSS, SPI_PIN_SSI_FSS);
 
-    //set pins to low
+    /*//Set pins to low
     GPIOPinWrite(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_TX, 0);
-    GPIOPinWrite(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_CLK, 0);
+    GPIOPinWrite(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_CLK, 0);*/
 
     //Configuration of SSI1 peripheral
     SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_SSI1);
     SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_SSI1);
     SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_SSI1);
 
-    //Disabling SSI (writes into SSI_CR1)
+    //Disabling SSI (writes into SSI_CR1 --> 0)
     SSIDisable(SSI1_BASE);
 
-    //Set clock source
-    SSIClockSourceSet(SSI1_BASE, SSI_CLOCK_PIOSC);
+    //Set clock source (The baud clock source for the SSI to select.)
+    SSIClockSourceSet(SSI1_BASE, SSI_CLOCK_PIOSC); //The precision internal oscillator
 
     /*Configure output signal to IOC_Pxx_SEL register
     Each signal is identified with its address table 9.1 in T.I datasheet*/
@@ -95,14 +96,8 @@ void spi_init() {
     //Configures hardware peripheral input selection (i.e. IOC_SSIRXD_SSI1)
     IOCPinConfigPeriphInput(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_RX, IOC_SSIRXD_SSI1);
 
-    //Set the pins as Hardware-controlled(AFSEL register)
-    GPIOPinTypeSSI(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_CLK );
-    GPIOPinTypeSSI(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_RX );
-    GPIOPinTypeSSI(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_TX );
-    //FSS would be better to be controlled as software
-    GPIOPinTypeSSI(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_FSS );
 
-    //Sets SSI_CR0, SSI_CR1, SSI_CPSR
+    //Sets SSI_CR0 (SPI MODE), SSI_CR1(Protocol), SSI_CPSR(Clock prescaler divisor)
     SSIConfigSetExpClk(SSI1_BASE, SysCtrlIOClockGet(), SSI_FRF_MOTO_MODE_0, SSI_MODE_MASTER, SysCtrlIOClockGet()/2/*16000000*/, 8);
 
     // Enable the SSI1 module(writes into CR1)
