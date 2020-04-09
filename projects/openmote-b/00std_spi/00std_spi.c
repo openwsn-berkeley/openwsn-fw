@@ -98,6 +98,7 @@ void spi_init() {
 
 
     //Sets SSI_CR0 (SPI MODE), SSI_CR1(Protocol), SSI_CPSR(Clock prescaler divisor)
+    //According to the LoRaSX1276 datasheet, the corresponding mode is CPOL=0 , CPHA=0 which is FRF mode 0
     SSIConfigSetExpClk(SSI1_BASE, SysCtrlIOClockGet(), SSI_FRF_MOTO_MODE_0, SSI_MODE_MASTER, SysCtrlIOClockGet()/2/*16000000*/, 8);
 
     // Enable the SSI1 module(writes into CR1)
