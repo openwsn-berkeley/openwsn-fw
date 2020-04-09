@@ -32,6 +32,18 @@
 
 //=========================== defines =========================================
 
+#define RADIO_POWER_POWER_POS       0
+
+#define STATE_DISABLED              0
+#define STATE_RXRU                  1
+#define STATE_RXIDLE                2
+#define STATE_RX                    3
+#define STATE_RXDISABLE             4
+#define STATE_TXTU                  9
+#define STATE_TXIDLE                10
+#define STATE_TX                    11
+#define STATE_TXDIABLE              12
+
 /* For calculating frequency */
 #define FREQUENCY_OFFSET  10
 #define FREQUENCY_STEP    5
@@ -46,24 +58,16 @@
 
 //=========================== variables =======================================
 
-enum transciever_state_t {
-   TS_OFF, 
-   TS_TX, 
-   TS_RX 
-}
-
 typedef struct {
     radio_capture_cbt   startFrame_cb;
     radio_capture_cbt   endFrame_cb;
     radio_state_t       state; 
     uint8_t             payload[1+MAX_PACKET_SIZE] __attribute__ ((aligned));
-    transciever_state   transciever_state;
     bool                hfc_started;
 //  volatile bool event_ready;
 } radio_vars_t;
 
 static radio_vars_t radio_vars;
-
 
 //=========================== prototypes ======================================
 
@@ -74,21 +78,12 @@ static uint32_t bytewise_bitswap(uint32_t inp);
 
 
 void radio_init(void) {
-#if 0
-    // start 16 MHz crystal oscillator
-    NRF_CLOCK->EVENTS_HFCLKSTARTED = 0;
-    NRF_CLOCK->TASKS_HFCLKSTART    = 1;
-    while (NRF_CLOCK->EVENTS_HFCLKSTARTED == 0) { }
-#endif
 
     // clear internal variables
     memset(&radio_vars, 0, sizeof(radio_vars));
 
     // set radio configuration parameters
     NRF_RADIO->TXPOWER   = (RADIO_TXPOWER_TXPOWER_Pos4dBm << RADIO_TXPOWER_TXPOWER_Pos);
-
-    uint8_t const frequency= 13;                                          ///< let's start on channel 13
-    NRF_RADIO->FREQUENCY = FREQUENCY_STEP*(frequency-FREQUENCY_OFFSET);   ///< IEEE 802.15.4 frequency channel, see http://infocenter.nordicsemi.com/topic/com.nordic.infocenter.nrf52840.ps/radio.html?cp=2_0_0_5_19_11_1#ieee802154_freq
 
     // set radio mode to IEEE 802.15.4
     NRF_RADIO->MODE      = (RADIO_MODE_MODE_Ieee802154_250Kbit << RADIO_MODE_MODE_Pos);
@@ -115,17 +110,11 @@ void radio_init(void) {
 
     // set config field length to 8
     NRF_RADIO->PCNF0 &= (~RADIO_PCNF0_LFLEN_Msk);
-    NRF_RADIO->PCNF0 |= (8UL << RADIO_PCNF0_LFLEN_Pos);
+    NRF_RADIO->PCNF0 |= (((uint32_t)8) << RADIO_PCNF0_LFLEN_Pos);
 
     // set 32-bit zero preamble
     NRF_RADIO->PCNF0 &= (~RADIO_PCNF0_PLEN_Msk);
     NRF_RADIO->PCNF0 |= ((uint32_t) RADIO_PCNF0_PLEN_32bitZero << RADIO_PCNF0_PLEN_Pos);
-
-#if 0
-    // [MADE THE RADIO UNUSABLE IN FIRST TESTS] set fast radio ramp-up mode - shortens ramp-up to 40 about us from about 140 us while increasing required current, see http://infocenter.nordicsemi.com/topic/com.nordic.infocenter.nrf52840.ps/radio.html?cp=2_0_0_5_19_14_7#unique_1302685657
-    NRF_RADIO->PCNF0 &= (~RADIO_MODECNF0_RU_Msk);
-    NRF_RADIO->PCNF0 |= ((uint32_t) RADIO_MODECNF0_RU_Fast << RADIO_MODECNF0_RU_Pos);
-#endif  
 
     // set max packet size
     NRF_RADIO->PCNF1 &= (~RADIO_PCNF1_MAXLEN_Msk);
@@ -151,7 +140,7 @@ void radio_init(void) {
     NRF_RADIO->CRCINIT = 0x0UL;
 
     // set payload pointer
-    NRF_RADIO->PACKETPTR = (uint32_t) &radio_vars.payload[0];
+    NRF_RADIO->PACKETPTR = (uint32_t)(radio_vars.payload);
 
     // set up interrupts
     // disable radio interrupt
@@ -161,128 +150,75 @@ void radio_init(void) {
                         RADIO_INTENSET_END_Enabled << RADIO_INTENSET_END_Pos; 
     NVIC_SetPriority(RADIO_IRQn, NRFX_RADIO_CONFIG_IRQ_PRIORITY);
 
-#if 0
-    nrf_drv_clock_hfclk_release();
-    radio_vars.hfc_started= false;
-#endif
+    NVIC_ClearPendingIRQ(RADIO_IRQn);
+    NVIC_EnableIRQ(RADIO_IRQn);
 }
 
 
 void radio_setStartFrameCb(radio_capture_cbt cb) {
+
     radio_vars.startFrame_cb  = cb;
 }
 
 
 void radio_setEndFrameCb(radio_capture_cbt cb) {
+
     radio_vars.endFrame_cb = cb;
 }
 
 
 void radio_reset(void) {
-    radio_rfOff();
-    radio_init();
+
+    // reset is implemented by power off and power radio
+    NRF_RADIO->POWER = ((uint32_t)(0)) << RADIO_POWER_POWER_POS;
+    NRF_RADIO->POWER = ((uint32_t)(1)) << RADIO_POWER_POWER_POS;
+
+    radio_vars.state  = RADIOSTATE_STOPPED;
 }
 
 
 void radio_setFrequency(uint8_t frequency, radio_freq_t tx_or_rx) {
-    NRF_RADIO->FREQUENCY = FREQUENCY_STEP*(frequency-FREQUENCY_OFFSET);  ///< IEEE 802.15.4 frequency channel, see http://infocenter.nordicsemi.com/topic/com.nordic.infocenter.nrf52840.ps/radio.html?cp=2_0_0_5_19_11_1#ieee802154_freq
+
+    NRF_RADIO->FREQUENCY = FREQUENCY_STEP*(frequency-FREQUENCY_OFFSET);
+
+    radio_vars.state  = RADIOSTATE_FREQUENCY_SET;
 }
 
-int8_t radio_getFrequencyOffset(void){ return 0; }
+int8_t radio_getFrequencyOffset(void){
+  
+    return 0; 
+}
 
 
 void radio_rfOn(void) {
-    /**
-    *  \var hfclk_request_timeout_us
-    *
-    *  Tests have been made to measure the time the hfclk (HFXO) needs to start up at different temperatures.
-    *  It has been shown that there is little variation related to temperature; between +24 and -28 degrees
-    *  Celsius the difference was only 10 us in max. and 5 us in median (calculated from 100000 samples), so
-    *  that starting the HFXO in cold surrounding will take max. 10 us longer, which is already included in
-    *  the number (380 us) below.
-    */  
-    #define hfclk_request_timeout_us 380
+    // power on radio
+    NRF_RADIO->POWER = ((uint32_t)(1)) << 0;
 
-    nrfx_systick_state_t systick_time;
-
-
-    NRFX_CRITICAL_SECTION_ENTER();
-
-    // as a prerequisite for the radio, we start the high frequency clock now, if not yet running, this can take about 350 us on the Dongle
-    if (!radio_vars.hfc_started) {
-
-        nrfx_systick_get(&systick_time);
-        nrf_drv_clock_hfclk_request(NULL);
-
-        while (
-          (!nrf_drv_clock_hfclk_is_running()) && 
-          (!nrfx_systick_test(&systick_time, hfclk_request_timeout_us))
-        ) {
-           // nrfx_systick_get(&systick_time2);
-            // lastDelay= ((systick_time.time-systick_time2.time) & 0x00FFFFFF)/(SystemCoreClock/1000000);
-        }
-
-        if (!nrf_drv_clock_hfclk_is_running()) {
-            // this seems to happen a few times an hour, though the HFCLK *IS* running
-            // leds_error_blink();
-        }
-
-        radio_vars.hfc_started= true;
-    }
-
-    NRFX_CRITICAL_SECTION_EXIT();
-
-
-    NVIC_ClearPendingIRQ(RADIO_IRQn);
-    NVIC_EnableIRQ(RADIO_IRQn);
-
-    // RF can only be turned on in TX or RX mode, so the actual
-    // code has been moved to txEnable and rxEnable, respectively
+    radio_vars.state = RADIOSTATE_STOPPED;
 }
 
 
 void radio_rfOff(void) {
 
-    if (radio_vars.transciever_state == TS_OFF) { 
-        return; 
-    }
+    radio_vars.state  = RADIOSTATE_TURNING_OFF;
 
-    NRFX_CRITICAL_SECTION_ENTER();
+    NRF_RADIO->EVENTS_DISABLED = 0;
 
-    // disable radio shortcut
-    NRF_RADIO->SHORTS= 0;
+    // stop radio
+    NRF_RADIO->TASKS_DISABLE = (uint32_t)(1);
 
-    // disable radio interrupt
-    NVIC_DisableIRQ(RADIO_IRQn);
-
-    // release the high frequency clock
-    if (radio_vars.hfc_started {
-        nrf_drv_clock_hfclk_release();
-        radio_vars.hfc_started= false;
-    }
-
-    radio_vars.transciever_state = TS_OFF;
-
-    NRFX_CRITICAL_SECTION_EXIT();
-
-
-#if (WAIT_FOR_RADIO_DISABLE == 1)
-    NRF_RADIO->EVENTS_DISABLED = 0U;
-#endif // WAIT_FOR_RADIO_DISABLE == 1
-
-   // disable radio - should take max. 6 µs, see http://infocenter.nordicsemi.com/topic/com.nordic.infocenter.nrf52840.ps/radio.html?cp=2_0_0_5_19_14_7#unique_1302685657
-    NRF_RADIO->TASKS_DISABLE = 1U;
-
-#if (WAIT_FOR_RADIO_DISABLE == 1)
-    while (NRF_RADIO->EVENTS_DISABLED == 0U) { }  
-#endif // WAIT_FOR_RADIO_DISABLE == 1
+    while(NRF_RADIO->EVENTS_DISABLED==0);
 
     leds_radio_off();
     debugpins_radio_clr();
+
+    radio_vars.state  = RADIOSTATE_RFOFF;
 }
 
 
 void radio_loadPacket(uint8_t* packet, uint16_t len) {
+
+    radio_vars.state  = RADIOSTATE_LOADING_PACKET;
 
     ///< note: 1st byte should be the payload size (for Nordic), and
     ///   the two last bytes are used by the MAC layer for CRC
@@ -292,72 +228,64 @@ void radio_loadPacket(uint8_t* packet, uint16_t len) {
     }
 
     // (re)set payload pointer
-    NRF_RADIO->PACKETPTR = (uint32_t) &radio_vars.payload[0];
+    NRF_RADIO->PACKETPTR = (uint32_t)(radio_vars.payload);
+
+    radio_vars.state  = RADIOSTATE_PACKET_LOADED;
 }
 
 
 void radio_txEnable(void) {
-    // M1-START
-    if (radio_vars.transciever_state == TS_TX) { 
-        return; 
-    }
 
-    radio_rfOn();
+    radio_vars.state  = RADIOSTATE_ENABLING_TX;
 
-    radio_vars.transciever_state = TS_TX;
-    // M1-END
+    NRF_RADIO->EVENTS_READY = (uint32_t)0;
+
+    NRF_RADIO->TASKS_TXEN = (uint32_t)1;
+    while(NRF_RADIO->EVENTS_READY==0);
+
+
+    // wiggle debug pin
+    debugpins_radio_set();
+    leds_radio_on();
+
+    radio_vars.state  = RADIOSTATE_TX_ENABLED;
 }
 
 
 void radio_txNow(void) {
-    // M2-START
-    if (radio_vars.transciever_state != TS_TX) { 
-        return; 
-    }
 
-    leds_radio_on();
+    NRF_RADIO->TASKS_START = (uint32_t)1;
 
-    // shortcut: start transmitting when ready
-    NRF_RADIO->SHORTS |= RADIO_SHORTS_READY_START_Enabled << RADIO_SHORTS_READY_START_Pos;
-
-    NRF_RADIO->EVENTS_END = 0U;
-    NRF_RADIO->TASKS_TXEN = 1U;
-
-    debugpins_radio_set();
+    radio_vars.state = RADIOSTATE_TRANSMITTING;
 }
 
 
 void radio_rxEnable(void) {
 
-    if (radio_vars.transciever_state == TS_RX) {
-        return;
+    radio_vars.state = RADIOSTATE_ENABLING_RX;
+
+    if (NRF_RADIO->STATE != STATE_RX) {
+
+        // turn off radio first
+        radio_rfOff();
+
+        NRF_RADIO->EVENTS_READY = (uint32_t)0;
+
+        NRF_RADIO->TASKS_RXEN  = (uint32_t)1;
+
+        while(NRF_RADIO->EVENTS_READY==0);
     }
-
-    radio_rfOn();
-
-    radio_vars.transciever_state = TS_RX;
 }
 
 
 void radio_rxNow(void) {
 
-    if (radio_vars.transciever_state != TS_RX) { 
-        return; 
-    }
-
-    leds_radio_on();
-
-    // enable shortcut (as soon as a packet was received, the radio prepares itself for the next one)
-    // NRF_RADIO->SHORTS |= RADIO_SHORTS_PHYEND_START_Enabled << RADIO_SHORTS_PHYEND_START_Pos;
-    NRF_RADIO->SHORTS |= RADIO_SHORTS_END_START_Enabled << RADIO_SHORTS_END_START_Pos;
-
-    // shortcut: start listening when ready
-    NRF_RADIO->SHORTS |= RADIO_SHORTS_READY_START_Enabled << RADIO_SHORTS_READY_START_Pos;
-
-    NRF_RADIO->EVENTS_END = 0U;
-    NRF_RADIO->TASKS_RXEN = 1U;
+    NRF_RADIO->TASKS_START = (uint32_t)1;
 
     debugpins_radio_set();
+    leds_radio_on();
+
+    radio_vars.state  = RADIOSTATE_LISTENING;
 }
 
 
@@ -369,25 +297,28 @@ void radio_getReceivedFrame(uint8_t* pBufRead,
                                bool* pCrc)
 {
     // check for length parameter; if too long, payload won't fit into memory
-    uint8_t len= radio_vars.payload[0];
-    if (len == 0) { 
+    uint8_t len;
+
+    len = radio_vars.payload[0];
+
+    if (len == 0) {
         return; 
     }
 
     if (len > MAX_PACKET_SIZE) { 
-        len= MAX_PACKET_SIZE; 
+        len = MAX_PACKET_SIZE; 
     }
 
     if (len > maxBufLen) { 
-        len= maxBufLen; 
+        len = maxBufLen; 
     }
 
     // copy payload
     memcpy(pBufRead, &radio_vars.payload[1], len);
 
     // store other parameters
-    *pLenRead= len;
-    *pLqi= radio_vars.payload[radio_vars.payload[0]-1];
+    *pLenRead = len;
+    *pLqi = radio_vars.payload[radio_vars.payload[0]-1];
 
     // For the RSSI calculation, see 
     //
@@ -395,9 +326,9 @@ void radio_getReceivedFrame(uint8_t* pBufRead,
     // - https://www.metageek.com/training/resources/understanding-rssi.html
     //
     // Our RSSI will be in the range -91 dB (worst) to 0 dB (best)
-    *pRssi= (*pLqi > 91)?(0):(((int8_t) *pLqi) - 91);
+    *pRssi = (*pLqi > 91)?(0):(((int8_t) *pLqi) - 91);
 
-    *pCrc= (NRF_RADIO->CRCSTATUS == 1U);
+    *pCrc = (NRF_RADIO->CRCSTATUS == 1U);
 }
 
 
@@ -436,8 +367,6 @@ void RADIO_IRQHandler(void) {
     if (NRF_RADIO->EVENTS_ADDRESS) {
 
         NRF_RADIO->EVENTS_ADDRESS = 0;
-
-        // M2-END
 
         if (radio_vars.startFrame_cb) {
             radio_vars.startFrame_cb(sctimer_readCounter());

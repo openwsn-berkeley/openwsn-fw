@@ -43,61 +43,59 @@ static void button_init(void);
 
 extern int mote_main(void);
 
-int main(void)
-{
-  return mote_main();
+int main(void) {
+    return mote_main();
 }
 
 
 //=========================== public ==========================================
 
-void board_init(void)
-{
-  // start low-frequency clock (LFCLK)
-  nrf_drv_clock_init();
-  NRF_CLOCK->EVENTS_LFCLKSTARTED= 0;  ///< part of workaround for 3.1 [20] RTC: Register values are invalid from http://infocenter.nordicsemi.com/pdf/nRF52840_Rev_1_Errata_v1.1.pdf
-  nrf_drv_clock_lfclk_request(NULL);
-  while (!nrf_drv_clock_lfclk_is_running()) { }
-  NRF_RTC0->TASKS_STOP= 0;            ///< part of workaround for 3.1 [20] RTC: Register values are invalid from http://infocenter.nordicsemi.com/pdf/nRF52840_Rev_1_Errata_v1.1.pdf
+void board_init(void) {
 
-  nrfx_systick_init();
+    // start low-frequency clock (LFCLK)
+    nrf_drv_clock_init();
+    NRF_CLOCK->EVENTS_LFCLKSTARTED= 0;  ///< part of workaround for 3.1 [20] RTC: Register values are invalid from http://infocenter.nordicsemi.com/pdf/nRF52840_Rev_1_Errata_v1.1.pdf
+    nrf_drv_clock_lfclk_request(NULL);
+    while (!nrf_drv_clock_lfclk_is_running());
+    NRF_RTC0->TASKS_STOP= 0;            ///< part of workaround for 3.1 [20] RTC: Register values are invalid from http://infocenter.nordicsemi.com/pdf/nRF52840_Rev_1_Errata_v1.1.pdf
 
-  leds_init();
+    nrfx_systick_init();
 
-  // enable on-board DC-DC converter to reduce overall consumption (this also disables the LDO [low-dropout] regulator)
-  // This only works if the required coil and condenser are properly connected to the pins DCC and DEC4, which is the
-  // case with the development kit, but not with some other nRF52840-based boards. (If enabled without the proper 
-  // circuitry, the CPU will hang.)
-  nrf_power_dcdcen_set(true);
-  nrf_power_dcdcen_vddh_set(true);
+    leds_init();
 
-  // initialize power management library
-  nrf_pwr_mgmt_init();
+    // enable on-board DC-DC converter to reduce overall consumption (this also disables the LDO [low-dropout] regulator)
+    // This only works if the required coil and condenser are properly connected to the pins DCC and DEC4, which is the
+    // case with the development kit, but not with some other nRF52840-based boards. (If enabled without the proper 
+    // circuitry, the CPU will hang.)
+    nrf_power_dcdcen_set(true);
+    nrf_power_dcdcen_vddh_set(true);
 
-  // initialize board with LEDs and buttons
-  bsp_board_init(BSP_INIT_LEDS | BSP_INIT_BUTTONS);
-  button_init();
+    // initialize power management library
+    nrf_pwr_mgmt_init();
 
-  uart_init();
+    // initialize board with LEDs and buttons
+    bsp_board_init(BSP_INIT_LEDS | BSP_INIT_BUTTONS);
+    button_init();
 
-  debugpins_init();
+    uart_init();
 
-  sctimer_init();  ///<  bsp_timer_init() and radiotimer_init() were OBSOLETE, we use sctimer instead
+    debugpins_init();
 
-  radio_init();
+    sctimer_init();  ///<  bsp_timer_init() and radiotimer_init() were OBSOLETE, we use sctimer instead
 
-  spi_init();
+    radio_init();
 
-  i2c_init();
+    spi_init();
 
-  sensors_init();
+    i2c_init();
+
+    sensors_init();
 }
 
 /**
  * Puts the board to sleep
  */
-void board_sleep(void)
-{
+void board_sleep(void) {
   nrf_pwr_mgmt_run();
 
 /*
@@ -118,8 +116,7 @@ void board_sleep(void)
 /**
  * Resets the board
  */
-void board_reset(void)
-{
+void board_reset(void) {
   NVIC_SystemReset();
 }
 
