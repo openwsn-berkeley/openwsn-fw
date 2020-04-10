@@ -101,8 +101,6 @@ open_addr_t* idmanager_getMyID(uint8_t type) {
    return &app_vars.addr;
 }
 
-void scheduler_push_task(task_cbt task_cb, task_prio_t prio){}
-
 void ieee154e_getAsn(uint8_t* array) {
    array[0]   = 0x00;
    array[1]   = 0x01;
