@@ -82,8 +82,14 @@ static void uart_reinit(void) {
     memset(rx_buf, 0, sizeof(rx_buf));
     memset(tx_buf, 0, sizeof(tx_buf));
 
-  // if UART cannot be initialized, blink error LED for 10s, and then reset
-    if (NRF_SUCCESS != app_uart_init(&app_config, &app_uart_buffers, uart_event_handler, (app_irq_priority_t) NRFX_UART_DEFAULT_CONFIG_IRQ_PRIORITY)) {
+    // if UART cannot be initialized, blink error LED for 10s, and then reset
+    if (
+        NRF_SUCCESS != app_uart_init(
+                            &app_config, 
+                            &app_uart_buffers, 
+                            uart_event_handler, 
+                            (app_irq_priority_t) NRFX_UART_DEFAULT_CONFIG_IRQ_PRIORITY)
+    ) {
         leds_error_blink();
         board_reset();
     }
@@ -107,36 +113,37 @@ void uart_init(void) {
 }
 
 void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb) {
-  uart_vars.txCb = txCb;
-  uart_vars.rxCb = rxCb;
+    uart_vars.txCb = txCb;
+    uart_vars.rxCb = rxCb;
 }
 
 void uart_enableInterrupts(void) {
-    nrf_uart_int_enable(NRF_UART0, NRF_UART_INT_MASK_TXDRDY | NRF_UART_INT_MASK_RXDRDY | NRF_UART_INT_MASK_RXTO | NRF_UART_INT_MASK_ERROR);
+    nrf_uart_int_enable(NRF_UART0, NRF_UART_INT_MASK_TXDRDY | NRF_UART_INT_MASK_RXDRDY);
 }
 
 void uart_disableInterrupts(void) {
-    nrf_uart_int_disable(NRF_UART0, NRF_UART_INT_MASK_TXDRDY | NRF_UART_INT_MASK_RXDRDY | NRF_UART_INT_MASK_RXTO | NRF_UART_INT_MASK_ERROR);
+    nrf_uart_int_disable(NRF_UART0, NRF_UART_INT_MASK_TXDRDY | NRF_UART_INT_MASK_RXDRDY);
 }
 
 void uart_clearRxInterrupts(void) {
-  // is handled within app_uart
+  
+    NRF_UART0->EVENTS_RXDRDY = (uint32_t)0;
 }
 
 void uart_clearTxInterrupts(void) {
-  // is handled within app_uart
+  
+    NRF_UART0->EVENTS_TXDRDY = (uint32_t)0;
 }
 
 void uart_setCTS(bool state) {
     if (state==0x01) {
-     app_uart_put(XON);
+        app_uart_put(XON);
     } else {
-      app_uart_put(XOFF);
+        app_uart_put(XOFF);
     }
 }
 
 void uart_writeByte(uint8_t byteToWrite) {
-    app_uart_put(byteToWrite);
 
     if (byteToWrite==XON || byteToWrite==XOFF || byteToWrite==XONXOFF_ESCAPE) {
         uart_vars.fXonXoffEscaping     = 0x01;
@@ -156,56 +163,54 @@ uint8_t uart_readByte(void) {
 //=========================== interrupt handlers ==============================
 
 void uart_event_handler(app_uart_evt_t * p_event) {
-// debugpins_isr_set();
 
-  if ((p_event->evt_type == APP_UART_COMMUNICATION_ERROR) || (p_event->evt_type == APP_UART_FIFO_ERROR))
-  {
+    debugpins_isr_set();
+
+    if (
+        (p_event->evt_type == APP_UART_DATA) || 
+        (p_event->evt_type == APP_UART_DATA_READY)
+    ) {
+        // RX data has been received
+        uart_rx_isr();
+    } else if (p_event->evt_type == APP_UART_TX_EMPTY) {
+        // TX data has been sent
+        uart_tx_isr();
+    }
+
+    debugpins_isr_clr();
+}
+
+
+kick_scheduler_t uart_tx_isr(void) {
+  
+    uart_clearTxInterrupts();
+
+    if (uart_vars.fXonXoffEscaping==0x01) {
+        uart_vars.fXonXoffEscaping = 0x00;
+        app_uart_put(uart_vars.xonXoffEscapedByte^XONXOFF_MASK);
+    } else {
+        if (uart_vars.txCb != NULL){
+            uart_vars.txCb();
+            return KICK_SCHEDULER;
+        }
+    }
+
+    return DO_NOT_KICK_SCHEDULER;
+}
+
+kick_scheduler_t uart_rx_isr(void) {
+    
+    uart_clearRxInterrupts();
+
+    if (uart_vars.rxCb != NULL) {
+        uart_vars.rxCb();
+        return KICK_SCHEDULER;
+    }
+
+    return DO_NOT_KICK_SCHEDULER;
+}
+
+void app_error_fault_handler(uint32_t id, uint32_t pc, uint32_t info) {
     // handle error ...
-    // leds_error_blink();
-    leds_error_toggle();
-    uart_reinit();  
-  }
-  else if ((p_event->evt_type == APP_UART_DATA) || (p_event->evt_type == APP_UART_DATA_READY))
-  {
-    // RX data has been received
-    uart_rx_isr();
-  }
-  else if (p_event->evt_type == APP_UART_TX_EMPTY)
-  {
-    // TX data has been sent
-    uart_tx_isr();
-  }
-
-//  debugpins_isr_clr();
-}
-
-
-kick_scheduler_t uart_tx_isr(void)
-{
-  uart_clearTxInterrupts();
-
-  if (uart_vars.txCb != NULL)
-  {
-    uart_vars.txCb();
-  }
-
-  return DO_NOT_KICK_SCHEDULER;
-}
-
-kick_scheduler_t uart_rx_isr(void)
-{
-  uart_clearRxInterrupts();
-
-  if (uart_vars.rxCb != NULL)
-  {
-    uart_vars.rxCb();
-  }
-
-  return DO_NOT_KICK_SCHEDULER;
-}
-
-void app_error_fault_handler(uint32_t id, uint32_t pc, uint32_t info)
-{
-  // handle error ...
 }
 #endif // UART_DISABLED  
