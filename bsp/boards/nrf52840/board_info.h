@@ -115,8 +115,8 @@
     #define PORT_maxTxAckPrepare                13    // ~397us (measured 364us)
 
     // radio speed related
-    #define PORT_delayTx                        10    //  305us (measured 282us; radio_txNow() to RADIO_IRQHandler() / NRF_RADIO->EVENTS_READY)
-    #define PORT_delayRx                         5    // ~153us (measured 147us; radio_rxNow() to RADIO_IRQHandler() / NRF_RADIO->EVENTS_READY)
+    #define PORT_delayTx                         1    //  305us (measured 282us; radio_txNow() to RADIO_IRQHandler() / NRF_RADIO->EVENTS_READY)
+    #define PORT_delayRx                         0    // ~153us (measured 147us; radio_rxNow() to RADIO_IRQHandler() / NRF_RADIO->EVENTS_READY)
 #endif
 #if BOARD_PCA10059
 // nrf52840-DONGLE

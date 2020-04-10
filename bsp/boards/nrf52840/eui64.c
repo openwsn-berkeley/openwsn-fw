@@ -25,20 +25,18 @@ static bool m_deviceIDRead= false;    ///< will become true once the device ID h
 
 //=========================== public ==========================================
 
-void eui64_get(uint8_t* addressToWrite)
-{
-  if (!m_deviceIDRead)
-  {
-    // get ID from Nordic chip
-    m_deviceID[0]= NRF_FICR->DEVICEID[0];
-    m_deviceID[1]= NRF_FICR->DEVICEID[1];
-    m_deviceIDRead= true;
-  }
+void eui64_get(uint8_t* addressToWrite) {
+    
+    if (!m_deviceIDRead)  {
+        // get ID from Nordic chip
+        m_deviceID[0]= NRF_FICR->DEVICEID[0];
+        m_deviceID[1]= NRF_FICR->DEVICEID[1];
+        m_deviceIDRead= true;
+    }
 
-  if (addressToWrite)
-  {
-    memcpy(addressToWrite, m_deviceID, 2*sizeof(uint32_t));
-  }
+    if (addressToWrite) {
+        memcpy(addressToWrite, m_deviceID, 2*sizeof(uint32_t));
+    }
 }
 
 //=========================== private =========================================
