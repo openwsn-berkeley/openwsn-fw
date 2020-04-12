@@ -76,28 +76,40 @@
         <file file_name="../../../kernel/openos/scheduler.c" />
       </folder>
       <folder Name="openstack">
+        <folder Name="02a-MAClow">
+          <file file_name="../../../openstack/02a-MAClow/adaptive_sync.c" />
+          <file file_name="../../../openstack/02a-MAClow/IEEE802154.c" />
+          <file file_name="../../../openstack/02a-MAClow/IEEE802154_security.c" />
+          <file file_name="../../../openstack/02a-MAClow/IEEE802154E.c" />
+          <file file_name="../../../openstack/02a-MAClow/topology.c" />
+        </folder>
+        <folder Name="02b-MAChigh">
+          <file file_name="../../../openstack/02b-MAChigh/msf.c" />
+          <file file_name="../../../openstack/02b-MAChigh/neighbors.c" />
+          <file file_name="../../../openstack/02b-MAChigh/sixtop.c" />
+          <file file_name="../../../openstack/02b-MAChigh/schedule.c" />
+        </folder>
+        <folder Name="03a-IPHC">
+          <file file_name="../../../openstack/03a-IPHC/frag.c" />
+          <file file_name="../../../openstack/03a-IPHC/iphc.c" />
+          <file file_name="../../../openstack/03a-IPHC/openbridge.c" />
+        </folder>
+        <folder Name="03b-IPv6">
+          <file file_name="../../../openstack/03b-IPv6/forwarding.c" />
+          <file file_name="../../../openstack/03b-IPv6/icmpv6.c" />
+          <file file_name="../../../openstack/03b-IPv6/icmpv6echo.c" />
+          <file file_name="../../../openstack/03b-IPv6/icmpv6rpl.c" />
+        </folder>
+        <folder Name="04-TRAN">
+          <file file_name="../../../openstack/04-TRAN/openudp.c" />
+        </folder>
+        <folder Name="cross-layers">
+          <file file_name="../../../openstack/cross-layers/idmanager.c" />
+          <file file_name="../../../openstack/cross-layers/openqueue.c" />
+          <file file_name="../../../openstack/cross-layers/openrandom.c" />
+          <file file_name="../../../openstack/cross-layers/packetfunctions.c" />
+        </folder>
         <file file_name="../../../openstack/openstack.c" />
-        <file file_name="../../../openstack/cross-layers/idmanager.c" />
-        <file file_name="../../../openstack/03b-IPv6/icmpv6rpl.c" />
-        <file file_name="../../../openstack/03a-IPHC/openbridge.c" />
-        <file file_name="../../../openstack/04-TRAN/openudp.c" />
-        <file file_name="../../../openstack/cross-layers/openqueue.c" />
-        <file file_name="../../../openstack/02b-MAChigh/msf.c" />
-        <file file_name="../../../openstack/02b-MAChigh/neighbors.c" />
-        <file file_name="../../../openstack/02b-MAChigh/schedule.c" />
-        <file file_name="../../../openstack/02b-MAChigh/sixtop.c" />
-        <file file_name="../../../openstack/02a-MAClow/adaptive_sync.c" />
-        <file file_name="../../../openstack/02a-MAClow/IEEE802154.c" />
-        <file file_name="../../../openstack/02a-MAClow/IEEE802154_security.c" />
-        <file file_name="../../../openstack/02a-MAClow/IEEE802154E.c" />
-        <file file_name="../../../openstack/02a-MAClow/topology.c" />
-        <file file_name="../../../openstack/03a-IPHC/iphc.c" />
-        <file file_name="../../../openstack/03b-IPv6/forwarding.c" />
-        <file file_name="../../../openstack/03b-IPv6/icmpv6.c" />
-        <file file_name="../../../openstack/03b-IPv6/icmpv6echo.c" />
-        <file file_name="../../../openstack/cross-layers/openrandom.c" />
-        <file file_name="../../../openstack/cross-layers/packetfunctions.c" />
-        <file file_name="../../../openstack/03a-IPHC/frag.c" />
       </folder>
       <folder Name="drivers">
         <file file_name="../../../drivers/common/openserial.c" />
