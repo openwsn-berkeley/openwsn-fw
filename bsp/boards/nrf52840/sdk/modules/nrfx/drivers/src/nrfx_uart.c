@@ -639,11 +639,11 @@ static void uart_irq_handler(NRF_UART_Type *        p_uart,
     }
 }
 
-#if NRFX_CHECK(NRFX_UART0_ENABLED)
-void nrfx_uart_0_irq_handler(void)
-{
-    uart_irq_handler(NRF_UART0, &m_cb[NRFX_UART0_INST_IDX]);
-}
-#endif
+//#if NRFX_CHECK(NRFX_UART0_ENABLED)
+//void nrfx_uart_0_irq_handler(void)
+//{
+//    uart_irq_handler(NRF_UART0, &m_cb[NRFX_UART0_INST_IDX]);
+//}
+//#endif
 
 #endif // NRFX_CHECK(NRFX_UART_ENABLED)
