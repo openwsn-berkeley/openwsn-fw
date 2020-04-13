@@ -47,7 +47,6 @@
     <folder Name="OpenWSN">
       <folder Name="bsp">
         <file file_name="../../../bsp/boards/nrf52840/board.c" />
-        <file file_name="../../../bsp/boards/nrf52840/board_info.h" />
         <file file_name="../../../bsp/boards/nrf52840/debugpins.c" />
         <file file_name="../../../bsp/boards/nrf52840/eui64.c" />
         <file file_name="../../../bsp/boards/nrf52840/leds.c" />
@@ -71,6 +70,7 @@
         <file file_name="../../../bsp/boards/nrf52840/adc_sensor.c" />
         <file file_name="../../../bsp/boards/nrf52840/i2c.c" />
         <file file_name="../../../bsp/boards/nrf52840/sensors.c" />
+        <file file_name="../../../bsp/boards/nrf52840/board_info.h" />
       </folder>
       <folder Name="kernel">
         <file file_name="../../../kernel/openos/scheduler.c" />
@@ -122,19 +122,16 @@
           <configuration Name="Debug" build_exclude_from_build="Yes" />
         </file>
         <file file_name="../../../openapps/cinfo/cinfo.c">
-          <configuration Name="Debug" build_exclude_from_build="Yes" />
+          <configuration Name="Debug" build_exclude_from_build="No" />
         </file>
         <file file_name="../../../openapps/cjoin/cjoin.c">
-          <configuration Name="Debug" build_exclude_from_build="Yes" />
+          <configuration Name="Debug" build_exclude_from_build="No" />
         </file>
         <file file_name="../../../openapps/cleds/cleds.c">
-          <configuration Name="Debug" build_exclude_from_build="Yes" />
+          <configuration Name="Debug" build_exclude_from_build="No" />
         </file>
         <file file_name="../../../openapps/cwellknown/cwellknown.c">
-          <configuration Name="Debug" build_exclude_from_build="Yes" />
-        </file>
-        <file file_name="../../../openapps/opencoap/opencoap.c">
-          <configuration Name="Debug" build_exclude_from_build="Yes" />
+          <configuration Name="Debug" build_exclude_from_build="No" />
         </file>
         <file file_name="../../../openapps/rrt/rrt.c">
           <configuration Name="Debug" build_exclude_from_build="Yes" />
@@ -154,12 +151,22 @@
         <file file_name="../../../openapps/userialbridge/userialbridge.c">
           <configuration Name="Debug" build_exclude_from_build="Yes" />
         </file>
-        <file file_name="../../../openapps/opencoap/openoscoap.c">
-          <configuration Name="Debug" build_exclude_from_build="Yes" />
-        </file>
-        <file file_name="../../../openapps/opencoap/cborencoder.c">
-          <configuration Name="Debug" build_exclude_from_build="Yes" />
-        </file>
+        <file file_name="../../../openapps/cjoin/cojp_cbor.c" />
+        <folder Name="opencoap">
+          <file file_name="../../../openapps/opencoap/cborencoder.c">
+            <configuration Name="Debug" build_exclude_from_build="No" />
+          </file>
+          <file file_name="../../../openapps/opencoap/openoscoap.c">
+            <configuration Name="Debug" build_exclude_from_build="No" />
+          </file>
+          <file file_name="../../../openapps/opencoap/opencoap.c">
+            <configuration Name="Debug" build_exclude_from_build="No" />
+          </file>
+          <file file_name="../../../openapps/opencoap/hkdf.c" />
+          <file file_name="../../../openapps/opencoap/hmac.c" />
+          <file file_name="../../../openapps/opencoap/sha224-256.c" />
+          <file file_name="../../../openapps/opencoap/usha.c" />
+        </folder>
       </folder>
     </folder>
     <folder Name="Nordic SDK15 Specific">
