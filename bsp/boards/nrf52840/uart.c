@@ -45,8 +45,6 @@
 #define UART_BAUDRATE_115200        0x01D7E000  // Baud 115200
 #define UART_BAUDRATE_1M            0x10000000  // Baud 1M
 
-#define UART_PRIORITY               2
-
 #define UART_INTEN_RXDRDY_POS       2
 #define UART_INTEN_TXDRDY_POS       7
 
@@ -121,12 +119,8 @@ void uart_init(void) {
         | (uint32_t)(1<<UART_INTEN_TXDRDY_POS);
 
     // set priority and enable interrupt in NVIC
-    NVIC->IP[((uint32_t)UARTE0_UART0_IRQn)] = 
-        (uint8_t)(
-            (
-                UART_PRIORITY << (8 - __NVIC_PRIO_BITS)
-            ) & (uint32_t)0xff
-        );
+    NVIC_SetPriority(UARTE0_UART0_IRQn, NRFX_UART_DEFAULT_CONFIG_IRQ_PRIORITY);
+
     NVIC->ISER[((uint32_t)UARTE0_UART0_IRQn)>>5] = 
        ((uint32_t)1) << ( ((uint32_t)UARTE0_UART0_IRQn) & 0x1f);
 
