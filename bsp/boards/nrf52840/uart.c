@@ -73,64 +73,21 @@ static void uart_event_handler(app_uart_evt_t * p_event);
 
 //=========================== public ==========================================
 
-static app_uart_comm_params_t const app_config =
-{
-    .rx_pin_no= RX_PIN_NUMBER,
-    .tx_pin_no= TX_PIN_NUMBER,
-    .rts_pin_no= RTS_PIN_NUMBER,                // defaults to UART_PIN_DISCONNECTED
-    .cts_pin_no= CTS_PIN_NUMBER,                // defaults to UART_PIN_DISCONNECTED
-    .baud_rate= UART_DEFAULT_CONFIG_BAUDRATE,
-    .use_parity= (UART_DEFAULT_CONFIG_PARITY != 0) ? (true) : (false),
-    .flow_control= UART_DEFAULT_CONFIG_HWFC     // defaults to false
-};
+void uart_init(void) {
+    // reset local variables
+    memset(&uart_vars,0,sizeof(uart_vars_t));
 
-static void uart_reinit(void) { 
-    // for the case that the UART has previously been initialized, uninitialize it first  
-    app_uart_close();
-
-    #define APP_UART_BUF_SIZE 128
-
-    static uint8_t rx_buf[APP_UART_BUF_SIZE];
-    static uint8_t tx_buf[APP_UART_BUF_SIZE];
-    static app_uart_buffers_t app_uart_buffers=
+    // UART baudrate accuracy depends on HFCLK
+   // see radio.c for details on enabling HFCLK
+    #define hfclk_request_timeout_us 380
     {
-        .rx_buf= rx_buf,
-        .tx_buf= tx_buf,
-        .rx_buf_size= sizeof(rx_buf),
-        .tx_buf_size= sizeof(tx_buf)
-    };
-
-    memset(rx_buf, 0, sizeof(rx_buf));
-    memset(tx_buf, 0, sizeof(tx_buf));
-
-    // if UART cannot be initialized, blink error LED for 10s, and then reset
-    if (
-        NRF_SUCCESS != app_uart_init(
-                            &app_config, 
-                            &app_uart_buffers, 
-                            uart_event_handler, 
-                            (app_irq_priority_t) NRFX_UART_DEFAULT_CONFIG_IRQ_PRIORITY)
-    ) {
-        leds_error_blink();
-        board_reset();
+      nrfx_systick_state_t systick_time;
+        nrfx_systick_get(&systick_time);
+        nrf_drv_clock_hfclk_request(NULL);
+        while ((!nrf_drv_clock_hfclk_is_running()) && (!nrfx_systick_test(&systick_time, hfclk_request_timeout_us))) {}
     }
-}
 
-void uart_init(void) { 
-  // reset local variables
-  memset(&uart_vars,0,sizeof(uart_vars_t));
-
-  // UART baudrate accuracy depends on HFCLK
-  // see radio.c for details on enabling HFCLK
-  #define hfclk_request_timeout_us 380
-  {
-    nrfx_systick_state_t systick_time;
-    nrfx_systick_get(&systick_time);
-    nrf_drv_clock_hfclk_request(NULL);
-    while ((!nrf_drv_clock_hfclk_is_running()) && (!nrfx_systick_test(&systick_time, hfclk_request_timeout_us))) {}
-  }
-
-// configure txd and rxd pin
+    // configure txd and rxd pin
     NRF_P0->OUTSET =  1 << UART_TX_PIN;
 
     // tx pin configured as output
