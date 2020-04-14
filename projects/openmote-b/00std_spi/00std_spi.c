@@ -61,7 +61,7 @@ void spi_init() {
     // clear variables
     memset(&spi_vars,0,sizeof(spi_vars_t));
 
-    //Set the CLK , MOSI(TX) and MISO(RX) pins as Hardware-controlled (AFSEL register)
+    //Set the CLK , MOSI(TX) and MISO(RX) pins as Hardware-controlled (Configures GPIO_AFSEL-->1)
     GPIOPinTypeSSI(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_CLK );
     GPIOPinTypeSSI(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_RX );
     GPIOPinTypeSSI(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_TX );
@@ -101,7 +101,7 @@ void spi_init() {
     //According to the LoRaSX1276 datasheet, the corresponding mode is CPOL=0 , CPHA=0 which is FRF mode 0
     SSIConfigSetExpClk(SSI1_BASE, SysCtrlIOClockGet(), SSI_FRF_MOTO_MODE_0, SSI_MODE_MASTER, SysCtrlIOClockGet()/2/*16000000*/, 8);
 
-    // Enable the SSI1 module(writes into CR1)
+    //Enable the SSI1 module(writes into CR1)
     SSIEnable(SSI1_BASE);
     
     //Call the spi_txrx function
