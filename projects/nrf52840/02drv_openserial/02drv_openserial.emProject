@@ -71,9 +71,6 @@
         <file file_name="../../../bsp/boards/nrf52840/sensors.c" />
         <file file_name="../../../bsp/boards/nrf52840/adc_sensor.c" />
       </folder>
-      <folder Name="kernel">
-        <file file_name="../../../kernel/openos/scheduler.c" />
-      </folder>
       <folder Name="drivers">
         <file file_name="../../../drivers/common/openserial.c" />
         <file file_name="../../../drivers/common/opentimers.c" />
