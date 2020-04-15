@@ -163,18 +163,8 @@ enum ieee154e_atomicdurations_enum {
    TsTxOffset                =  (2120/PORT_US_PER_TICK),                  //  2120us
    TsLongGT                  =  (1100/PORT_US_PER_TICK),                  //  1100us
    TsTxAckDelay              =  (1000/PORT_US_PER_TICK),                  //  1000us
-   TsShortGT                 =  (500/PORT_US_PER_TICK),                   //   500us, The standardlized value for this is 400/2=200us(7ticks). Currectly 7 doesn't work for short packet, change it back to 7 when found the problem.
+   TsShortGT                 =   (500/PORT_US_PER_TICK),                  //   500us, The standardlized value for this is 400/2=200us(7ticks). Currectly 7 doesn't work for short packet, change it back to 7 when found the problem.
    wdRadioTx                 =  (1342/PORT_US_PER_TICK),                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
-   wdDataDuration            =  (5000/PORT_US_PER_TICK),                  //  5000us (measured 4280us with max payload)
-   wdAckDuration             =  (3000/PORT_US_PER_TICK),                  //  3000us (measured 1000us)
-#endif
-
-#if SLOTDURATION==15
-   TsTxOffset                =  (4000/PORT_US_PER_TICK),                  //  4000us
-   TsLongGT                  =  (1300/PORT_US_PER_TICK),                  //  1300us
-   TsTxAckDelay              =  (4606/PORT_US_PER_TICK),                  //  4606us
-   TsShortGT                 =  (500/PORT_US_PER_TICK),                   //   500us
-   wdRadioTx                 =  (1342/PORT_US_PER_TICK),                  //  1342us (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
    wdDataDuration            =  (5000/PORT_US_PER_TICK),                  //  5000us (measured 4280us with max payload)
    wdAckDuration             =  (3000/PORT_US_PER_TICK),                  //  3000us (measured 1000us)
 #endif
@@ -183,7 +173,7 @@ enum ieee154e_atomicdurations_enum {
    TsTxOffset                =  (5215/PORT_US_PER_TICK),                  //  5215us
    TsLongGT                  =  (1311/PORT_US_PER_TICK),                  //  1311us
    TsTxAckDelay              =  (5521/PORT_US_PER_TICK),                  //  5521us
-   TsShortGT                 =  (700/PORT_US_PER_TICK),                  //   700us
+   TsShortGT                 =   (700/PORT_US_PER_TICK),                  //   700us
    wdRadioTx                 =  (1342/PORT_US_PER_TICK),                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
    wdDataDuration            =  (5000/PORT_US_PER_TICK),                  //  5000us (measured 4280us with max payload)
    wdAckDuration             =  (3000/PORT_US_PER_TICK),                  //  3000us (measured 1000us)
