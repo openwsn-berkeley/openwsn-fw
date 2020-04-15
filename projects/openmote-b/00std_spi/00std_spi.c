@@ -50,7 +50,7 @@ spi_vars_t spi_vars;
 //*********Variables to use as parameters of spi_txrx function****************//
 
 static char stringToPrint[]="MessageToTest\r\n";
-size_t len = sizeof(stringToPrint);
+size_t len=sizeof(stringToPrint);
 	
 //=========================== prototypes ======================================
 static void disableInterrupts(void);
