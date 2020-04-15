@@ -77,15 +77,16 @@ void     radio_txNow_at86rf215(void);
 void     radio_rxEnable_at86rf215(void);
 void     radio_rxNow_at86rf215(void);
 void     radio_getReceivedFrame_at86rf215(uint8_t* bufRead,
-                                uint16_t* lenRead,
-                                uint16_t  maxBufLen,
+                                uint8_t* lenRead,
+                                uint8_t  maxBufLen,
                                  int8_t* rssi,
                                 uint8_t* lqi,
                                    bool* crc);
 
 // interrupt handlers
-void     radio_isr_at86rf215(void);
+kick_scheduler_t     radio_isr_at86rf215(void);
 // private
+void     radio_isr_internal_at86rf215(void);
 void     radio_local_bootstrap_at86rf215(void);
 /**
 \}

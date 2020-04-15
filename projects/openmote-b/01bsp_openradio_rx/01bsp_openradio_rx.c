@@ -137,7 +137,7 @@ int mote_main(void) {
     uart_setCallbacks(cb_uartTxDone,cb_uartRxCb);
 
     // prepare radio
-    radio_set_modulation (FSK_OPTION1_FEC);
+    radio_set_modulation (OQPSK_RATE3);
     radio_rfOn();
     // freq type only effects on scum port
     radio_setFrequency(CHANNEL, FREQ_RX);
@@ -198,6 +198,7 @@ int mote_main(void) {
 
 void cb_startFrame(PORT_TIMER_WIDTH timestamp) {
     debugpins_radio_toggle();
+    debugpins_fsm_set();
     leds_sync_on();
     // update debug stats
     app_dbg.num_startFrame++;
@@ -205,6 +206,7 @@ void cb_startFrame(PORT_TIMER_WIDTH timestamp) {
 
 void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
     debugpins_radio_toggle();
+    debugpins_fsm_clr();
     uint8_t  i;
     bool     expectedFrame;
 

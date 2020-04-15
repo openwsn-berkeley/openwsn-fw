@@ -114,7 +114,7 @@ void ieee154e_init(void) {
     // initialize variables
     memset(&ieee154e_vars,0,sizeof(ieee154e_vars_t));
     memset(&ieee154e_dbg,0,sizeof(ieee154e_dbg_t));
-
+#define IEEE802154E_SINGLE_CHANNEL       11
     // set singleChannel to 0 to enable channel hopping.
 #if IEEE802154E_SINGLE_CHANNEL  
     ieee154e_vars.singleChannel     = IEEE802154E_SINGLE_CHANNEL;
@@ -143,9 +143,9 @@ void ieee154e_init(void) {
     ieee154e_stats.numDeSync                 = 0;
 
     // If this board is open radio comlpiant, set the required modulation    
-#ifdef OPENRADIO_COMPLIANT
+#ifdef OPENRADIO_COMPLIANT // ****Remove
     //set radio modulation.
-    radio_set_modulation (CC2538RF_24GHZ);
+    radio_set_modulation (FSK_OPTION1_FEC); //set default modulation to 24ghz
 #endif
     
     // switch radio on
@@ -725,8 +725,8 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
 
       // retrieve the received data frame from the radio's Rx buffer
       ieee154e_vars.dataReceived->payload = &(ieee154e_vars.dataReceived->packet[FIRST_FRAME_BYTE]);
-      radio_getReceivedFrame(       ieee154e_vars.dataReceived->payload,
-                                    &ieee154e_vars.dataReceived->length,
+      radio_getReceivedFrame(        ieee154e_vars.dataReceived->payload,
+                                     (uint8_t*)&ieee154e_vars.dataReceived->length,
                              sizeof(ieee154e_vars.dataReceived->packet),
                                    &ieee154e_vars.dataReceived->l1_rssi,
                                    &ieee154e_vars.dataReceived->l1_lqi,
@@ -1071,6 +1071,8 @@ port_INLINE void activity_ti1ORri1(void) {
                     TIME_TICS,                                        // timetype
                     isr_ieee154e_timer                                // callback
                 );
+                debugpins_fsm_toggle();
+                debugpins_fsm_toggle();
                 // radiotimer_schedule(DURATION_tt1);
 #endif
                 break;
@@ -1099,6 +1101,8 @@ port_INLINE void activity_ti1ORri1(void) {
                 TIME_TICS,                                        // timetype
                 isr_ieee154e_timer                                // callback
             );
+                debugpins_fsm_toggle();
+                debugpins_fsm_toggle();            
             // radiotimer_schedule(DURATION_rt1);
 #endif
 
@@ -1308,6 +1312,9 @@ port_INLINE void activity_ti5(PORT_TIMER_WIDTH capturedTime) {
             isr_ieee154e_timer                                // callback
         );
         // radiotimer_schedule(DURATION_tt5);
+        
+        debugpins_fsm_toggle();
+        debugpins_fsm_toggle();
 #endif
     } else {
         // indicate succesful Tx to schedule to keep statistics
@@ -1508,7 +1515,7 @@ port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
         ieee154e_vars.ackReceived->payload = &(ieee154e_vars.ackReceived->packet[FIRST_FRAME_BYTE]);
         radio_getReceivedFrame(
             ieee154e_vars.ackReceived->payload,
-             &ieee154e_vars.ackReceived->length,
+              (uint8_t*)&ieee154e_vars.ackReceived->length,
             sizeof(ieee154e_vars.ackReceived->packet),
             &ieee154e_vars.ackReceived->l1_rssi,
             &ieee154e_vars.ackReceived->l1_lqi,
@@ -1770,7 +1777,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
         ieee154e_vars.dataReceived->payload = &(ieee154e_vars.dataReceived->packet[FIRST_FRAME_BYTE]);
         radio_getReceivedFrame(
             ieee154e_vars.dataReceived->payload,
-            &ieee154e_vars.dataReceived->length,
+             (uint8_t*)&ieee154e_vars.dataReceived->length,
             sizeof(ieee154e_vars.dataReceived->packet),
             &ieee154e_vars.dataReceived->l1_rssi,
             &ieee154e_vars.dataReceived->l1_lqi,
@@ -1947,6 +1954,8 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
             );
             // radiotimer_schedule(DURATION_rt5);
 #endif
+        debugpins_fsm_toggle();
+        debugpins_fsm_toggle();
         } else {
             // synchronize to the received packet if I'm not a DAGroot and this is my preferred parent
             // or in case I'm in the middle of the join process when parent is not yet selected
@@ -2679,7 +2688,6 @@ void synchronizePacket(PORT_TIMER_WIDTH timeReceived) {
 void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
     PORT_TIMER_WIDTH newPeriod;
     PORT_TIMER_WIDTH currentPeriod;
-
     // calculate new period
     currentPeriod                  =  ieee154e_vars.slotDuration;
     newPeriod                      =  (PORT_TIMER_WIDTH)((PORT_SIGNED_INT_WIDTH)currentPeriod+timeCorrection);

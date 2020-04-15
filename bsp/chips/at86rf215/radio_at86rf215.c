@@ -2,6 +2,7 @@
 \brief at86rf215-specific definition of the "radio" bsp module.
 
 \author Jonathan Munoz <jonathan.munoz@inria.fr>, July 2016.
+Modified by Mina Rady <mina1.rady@orange.com>
 
 */
 #include "board.h"
@@ -117,7 +118,7 @@ void radio_init_at86rf215(void) {
 
     GPIOPinIntClear(AT86RF215_IRQ_BASE, AT86RF215_IRQ_PIN);
     /* Register the interrupt */
-    GPIOPortIntRegister(AT86RF215_IRQ_BASE, radio_isr_at86rf215);
+    GPIOPortIntRegister(AT86RF215_IRQ_BASE, radio_isr_internal_at86rf215);
 
     /* Clear and enable the interrupt */
     GPIOPinIntEnable(AT86RF215_IRQ_BASE, AT86RF215_IRQ_PIN);
@@ -309,8 +310,8 @@ void radio_rxNow_at86rf215(void) {
 
 void radio_getReceivedFrame_at86rf215(
     uint8_t* bufRead,
-    uint16_t* lenRead,
-    uint16_t  maxBufLen,
+    uint8_t* lenRead,
+    uint8_t  maxBufLen,
     int8_t*  rssi,
     uint8_t* lqi,
     bool*    crc
@@ -329,7 +330,7 @@ void radio_getReceivedFrame_at86rf215(
     }
 
     // read the received packet from the RXFIFO
-    at86rf215_spiReadRxFifo(bufRead, lenRead, ATMEL_FREQUENCY_TYPE, maxBufLen);
+    at86rf215_spiReadRxFifo(bufRead, (uint16_t*)lenRead, ATMEL_FREQUENCY_TYPE, maxBufLen);
 
     *rssi   = at86rf215_spiReadReg(register_edv);
     *crc    = (at86rf215_spiReadReg(register_bbc_pc)>>5);
@@ -368,10 +369,17 @@ void radio_read_isr_at86rf215(void){
 //=========================== callbacks =======================================
 
 //=========================== interrupt handlers ==============================
-void radio_isr_at86rf215(void) {
+
+// Wrapper function for radio_isr_at86rf215 to be called by the radio interrupt
+void radio_isr_internal_at86rf215(void) {
+    
+    kick_scheduler_t ks = radio_isr_at86rf215();
+    
+}
+kick_scheduler_t radio_isr_at86rf215(void) {
 
     PORT_TIMER_WIDTH capturedTime;
-    //kick_scheduler_t result = DO_NOT_KICK_SCHEDULER;
+    kick_scheduler_t result = DO_NOT_KICK_SCHEDULER;
 
     debugpins_isr_set();
 
@@ -388,7 +396,7 @@ void radio_isr_at86rf215(void) {
             // call the callback
             radio_vars_at86rf215.startFrame_cb(capturedTime);
             // kick the OS
-            //result = KICK_SCHEDULER;
+             result = KICK_SCHEDULER;
         } else {
             //while(1);
         }
@@ -399,7 +407,7 @@ void radio_isr_at86rf215(void) {
                 // call the callback
                 radio_vars_at86rf215.endFrame_cb(capturedTime);
                 // kick the OS
-                //result = KICK_SCHEDULER;
+                result = KICK_SCHEDULER;
             } else {
                 //while(1);
             }
@@ -409,8 +417,9 @@ void radio_isr_at86rf215(void) {
                 if (radio_vars_at86rf215.endFrame_cb!=NULL) {
                     // call the callback
                     radio_vars_at86rf215.endFrame_cb(capturedTime);
+                    
                     // kick the OS
-                    //result = KICK_SCHEDULER;
+                    result = KICK_SCHEDULER;
                 } else {
                     // while(1);
                 }
@@ -419,7 +428,7 @@ void radio_isr_at86rf215(void) {
     }
     radio_clear_isr_at86rf215();
     debugpins_isr_clr();
-    //return result;
+    return result;
 }
 
 port_INLINE void radio_clear_isr_at86rf215(){

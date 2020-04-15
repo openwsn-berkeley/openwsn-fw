@@ -56,7 +56,7 @@ typedef enum
     OFDM_OPTION_1_MCS1,
     OFDM_OPTION_1_MCS2,
     OFDM_OPTION_1_MCS3,
-    CC2538RF_24GHZ
+    CC2538RF_24GHZ // Default
 } radioSetting_t;
 
 //=========================== typedef =========================================
@@ -67,12 +67,16 @@ typedef void  (*radio_capture_cbt)(PORT_TIMER_WIDTH timestamp);
 
 //=========================== prototypes ======================================
 
-// admin    
+// admin
+// used in MAC init
 void                radio_init(void);
+// referred to only inside projects. Never inside MAC or even drivers 
 void                radio_powerOn(void);
+// referred to in init and change of settings
 void                radio_setStartFrameCb(radio_capture_cbt cb);
 void                radio_setEndFrameCb(radio_capture_cbt cb);
 // reset
+// I don't see it referenced anywhere in cource code. there are some references in pbi and pbd files 
 void                radio_reset(void);
 // RF admin
 void                radio_setFrequency(uint16_t frequency, radio_freq_t tx_or_rx);
@@ -80,30 +84,42 @@ void                radio_setFrequency(uint16_t frequency, radio_freq_t tx_or_rx
 void                radio_set_modulation(radioSetting_t radio);
 
 //void                radio_setFrequency(uint8_t frequency);
+//referred to in MAC init and in some projects
 void                radio_rfOn(void);
+//referenced at end of each rf activity in the MAC
 void                radio_rfOff(void);
+// not referenced in MAC but referenced in some projects
 int8_t              radio_getFrequencyOffset(void);
 // TX
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
+// why not put it under the scum implementation of loadpacket?
 void                radio_loadPacket_prepare(uint8_t* packet, uint16_t len);
 #endif
+
+
 void                radio_loadPacket(uint8_t* packet, uint16_t len);
 void                radio_txEnable(void);
 void                radio_txNow(void);
 // RX
+//referenced in the MAC in scum context only.
+// why not put it under the scum implementation of rxEnable?
 void                radio_rxPacket_prepare(void);
+
 void                radio_rxEnable(void);
+//referenced in the MAC in scum context only: why not have an implementation of rxEnable
 void                radio_rxEnable_scum(void);
 void                radio_rxNow(void);
+// some older implementations support only 8bit lenRead and maxBufLen. They need to be generalized to 16bit because of big packets and to keep a flexible radio interface for non-openwsn applications where lengh can be up to 16bit)
 void                radio_getReceivedFrame(uint8_t* bufRead,
-                                uint16_t* lenRead,
-                                uint16_t  maxBufLen,
+                                uint8_t* lenRead,
+                                uint8_t  maxBufLen,
                                  int8_t* rssi,
                                 uint8_t* lqi,
                                    bool* crc);
 
 // interrupt handlers
-void    radio_isr(void);
+// kick_scheduler_t: a generalized version of this will need to maintain void return.? 
+kick_scheduler_t    radio_isr(void);
 
 /**
 \}

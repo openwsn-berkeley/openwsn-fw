@@ -139,14 +139,14 @@ void     radio_txNow_cc2538rf(void);
 void     radio_rxEnable_cc2538rf(void);
 void     radio_rxNow_cc2538rf(void);
 void     radio_getReceivedFrame_cc2538rf(uint8_t* bufRead,
-                                uint16_t* lenRead,
-                                uint16_t  maxBufLen,
+                                uint8_t* lenRead,
+                                uint8_t  maxBufLen,
                                  int8_t* rssi,
                                 uint8_t* lqi,
                                    bool* crc);
 
 // interrupt handlers
-void     radio_isr_cc2538rf(void);
+kick_scheduler_t     radio_isr_cc2538rf(void);
 
 /**
 \}

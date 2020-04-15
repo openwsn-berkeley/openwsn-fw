@@ -23,7 +23,7 @@ remainder of the packet contains an incrementing bytes.
 
 //=========================== defines =========================================
 
-#define LENGTH_PACKET   20+LENGTH_CRC // maximum length is 127 bytes
+#define LENGTH_PACKET   125+LENGTH_CRC // maximum length is 127 bytes
 #define CHANNEL         11            // 24ghz: 11 = 2.405GHz, subghz: 11 = 865.325 in  FSK operating mode #1
 #define TIMER_PERIOD    (32768>>4)    // (32768>>1) = 500ms @ 32kHz
 
@@ -96,6 +96,9 @@ int mote_main(void) {
         while (app_vars.txpk_txNow==0) {
             board_sleep();
         }
+        radio_setFrequency(CHANNEL, FREQ_TX);
+        radio_set_modulation (OQPSK_RATE3);        
+        /*
         switch (radio_switch%7){
         case 0:
             // freq type only effects on scum port
@@ -128,7 +131,7 @@ int mote_main(void) {
             radio_set_modulation (CC2538RF_24GHZ);
             break;   
         }
-
+*/
         //Toggle the switch
         radio_switch ++;
         // led

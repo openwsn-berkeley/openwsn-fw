@@ -327,8 +327,8 @@ void radio_rxNow_cc2538rf(void) {
 }
 
 void radio_getReceivedFrame_cc2538rf(uint8_t* pBufRead,
-                            uint16_t* pLenRead,
-                            uint16_t  maxBufLen,
+                            uint8_t* pLenRead,
+                            uint8_t  maxBufLen,
                              int8_t* pRssi,
                             uint8_t* pLqi,
                                bool* pCrc) {
@@ -437,8 +437,8 @@ the scheduler will always be kicked in after servicing an interrupt. This
 behaviour can be changed by modifying the SLEEPEXIT field in the SYSCTRL
 regiser (see page 131 of the CC2538 manual).
 */
-void radio_isr_cc2538rf(void) {
-   //return DO_NOT_KICK_SCHEDULER;
+kick_scheduler_t radio_isr_cc2538rf(void) {
+   return DO_NOT_KICK_SCHEDULER;
 }
 
 void radio_isr_internal_cc2538rf(void) {

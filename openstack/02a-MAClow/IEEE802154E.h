@@ -41,7 +41,7 @@ static const uint8_t ebIEsBytestream[] = {
 #define TXRETRIES                   15 // number of MAC retries before declaring failed
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to successfully synchronize
-#define EB_PORTION                  10 // set EB on minimal cell for 1/EB_PORTION portion
+#define EB_PORTION                  4 // set EB on minimal cell for 1/EB_PORTION portion
 #define MAXKAPERIOD               1000  // in slots: 1500@20ms per slot -> ~30 seconds. Max value used by adaptive synchronization.
 #define DESYNCTIMEOUT             1750  // in slots: 1750@20ms per slot -> ~35 seconds. A larger DESYNCTIMEOUT is needed if using a larger KATIMEOUT.
 #define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"
@@ -177,11 +177,11 @@ enum ieee154e_atomicdurations_enum {
    wdDataDuration            =  (5000/PORT_US_PER_TICK),                  //  5000us (measured 4280us with max payload)
    wdAckDuration             =  (3000/PORT_US_PER_TICK),                  //  3000us (measured 1000us)
 #endif
-
+ 
 #if SLOTDURATION==160
-   TsTxOffset                =  (10986/PORT_US_PER_TICK),                 //    360 ticks, 10986us
-   TsLongGT                  =  (7324/PORT_US_PER_TICK),                  //    240 ticks, 7324us
-   TsTxAckDelay              =  (11047/PORT_US_PER_TICK),                 //    362 ticks, 11047us
+   TsTxOffset                = (3500/PORT_US_PER_TICK),//(10986/PORT_US_PER_TICK),                 //    360 ticks, 10986us
+   TsLongGT                  =  (2000/PORT_US_PER_TICK),//(7324/PORT_US_PER_TICK),                  //    240 ticks, 7324us
+   TsTxAckDelay              = (3700/PORT_US_PER_TICK),  //(11047/PORT_US_PER_TICK),                 //    362 ticks, 11047us
    TsShortGT                 =  (1831/PORT_US_PER_TICK),                  //    60 ticksz 1831us
    // radio watchdog
    wdRadioTx                 =  (7019/PORT_US_PER_TICK),                  //    230 ticks  7019us delayTx+Tx time for 10 bytes( (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)

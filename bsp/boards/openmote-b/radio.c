@@ -51,15 +51,13 @@ typedef void                (*radio_rxEnable_cb_t)(void);
 typedef void                (*radio_rxNow_cb_t)(void);
 typedef void                (*radio_getReceivedFrame_cb_t)(
                                                     uint8_t* bufRead,
-                                                    uint16_t* lenRead,
-                                                    uint16_t  maxBufLen,
+                                                    uint8_t* lenRead,
+                                                    uint8_t  maxBufLen,
                                                     int8_t*  rssi,
                                                     uint8_t* lqi,
                                                     bool*    crc
                                                     );
-typedef void                (*radio_isr_cb_t)(void);
-
-
+typedef kick_scheduler_t                (*radio_isr_cb_t)(void);
 
 
 // the template for radio function callbacks
@@ -240,9 +238,6 @@ void radio_init (void) {
     dyn_funcs [CC2538RF_24GHZ].radio_init();
 }
 
-void radio_select (radioSetting_t radio){
-    SELECTED_RADIO = radio;
-}
 
 void radio_reset(void) {
     dyn_funcs [SELECTED_RADIO].radio_reset();
@@ -308,8 +303,8 @@ void radio_rxNow (void) {
 
 void radio_getReceivedFrame (
     uint8_t* bufRead,
-    uint16_t* lenRead,
-    uint16_t  maxBufLen,
+    uint8_t* lenRead,
+    uint8_t  maxBufLen,
     int8_t*  rssi,
     uint8_t* lqi,
     bool*    crc
@@ -323,8 +318,8 @@ void radio_getReceivedFrame (
 //=========================== callbacks =======================================
 
 //=========================== interrupt handlers ==============================
-void radio_isr(void) {
-    dyn_funcs [SELECTED_RADIO].radio_isr();
+kick_scheduler_t radio_isr(void) {
+    return dyn_funcs [SELECTED_RADIO].radio_isr();
 }
 
 
