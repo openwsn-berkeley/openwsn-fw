@@ -88,26 +88,6 @@ void radio_init(void) {
     // set radio mode to IEEE 802.15.4
     NRF_RADIO->MODE      = (RADIO_MODE_MODE_Ieee802154_250Kbit << RADIO_MODE_MODE_Pos);
 
-    // - - - - - - The followings may be unneeded - - - - - ->
-    // radio address config
-    NRF_RADIO->PREFIX0 =
-         ((uint32_t)swap_bits(0xC3) << 24) // Prefix byte of address 3 converted to nRF24L series format
-        | ((uint32_t)swap_bits(0xC2) << 16) // Prefix byte of address 2 converted to nRF24L series format
-        | ((uint32_t)swap_bits(0xC1) << 8)  // Prefix byte of address 1 converted to nRF24L series format
-        | ((uint32_t)swap_bits(0xC0) << 0); // Prefix byte of address 0 converted to nRF24L series format
-
-    NRF_RADIO->PREFIX1 =
-         ((uint32_t)swap_bits(0xC7) << 24) // Prefix byte of address 7 converted to nRF24L series format
-        | ((uint32_t)swap_bits(0xC6) << 16) // Prefix byte of address 6 converted to nRF24L series format
-        | ((uint32_t)swap_bits(0xC4) << 0); // Prefix byte of address 4 converted to nRF24L series format
-
-    NRF_RADIO->BASE0 = bytewise_bitswap(0x01234567UL);  // Base address for prefix 0 converted to nRF24L series format
-    NRF_RADIO->BASE1 = bytewise_bitswap(0x89ABCDEFUL);  // Base address for prefix 1-7 converted to nRF24L series format
-
-    NRF_RADIO->TXADDRESS   = 0x00UL;  // Set device address 0 to use when transmitting
-    NRF_RADIO->RXADDRESSES = 0x01UL;  // Enable device address 0 to use to select which addresses to receive
-    // <- - - - - - - - - - until here - - - - - - - - - - - -
-
     // set config field length to 8
     NRF_RADIO->PCNF0 &= (~RADIO_PCNF0_LFLEN_Msk);
     NRF_RADIO->PCNF0 |= (((uint32_t)8) << RADIO_PCNF0_LFLEN_Pos);
