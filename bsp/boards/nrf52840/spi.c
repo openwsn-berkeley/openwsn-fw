@@ -51,20 +51,19 @@ void spi_event_handler(nrfx_spi_evt_t const * p_event,void * p_context);
 
 //=========================== public ==========================================
 
-void spi_init(void)
-{
-  nrfx_spi_config_t spi_config = NRFX_SPI_DEFAULT_CONFIG;
+void spi_init(void) {
+    nrfx_spi_config_t spi_config = NRFX_SPI_DEFAULT_CONFIG;
 
-  spi_config.ss_pin   = SPI_SS_PIN;
-  spi_config.miso_pin = SPI_MISO_PIN;
-  spi_config.mosi_pin = SPI_MOSI_PIN;
-  spi_config.sck_pin  = SPI_SCK_PIN;
+    spi_config.ss_pin   = SPI_SS_PIN;
+    spi_config.miso_pin = SPI_MISO_PIN;
+    spi_config.mosi_pin = SPI_MOSI_PIN;
+    spi_config.sck_pin  = SPI_SCK_PIN;
 
-  if(NRF_SUCCESS != nrfx_spi_init(&spi, &spi_config, spi_event_handler, NULL))
-  {
-    leds_error_blink();
-    board_reset();
-  }
+    if(NRF_SUCCESS != nrfx_spi_init(&spi, &spi_config, spi_event_handler, NULL))
+    {
+      leds_error_blink();
+      board_reset();
+    }
 }
 
  
@@ -76,34 +75,31 @@ void    spi_txrx(uint8_t*     bufTx,
                  spi_first_t  isFirst,
                  spi_last_t   isLast)
 {
-  // Fill in transfer descriptor
-  nrfx_spi_xfer_desc_t nrfx_spi_xfer_desc;
+    // Fill in transfer descriptor
+    nrfx_spi_xfer_desc_t nrfx_spi_xfer_desc;
 
-  nrfx_spi_xfer_desc.p_tx_buffer = bufTx;
-  nrfx_spi_xfer_desc.tx_length = lenbufTx;
-  nrfx_spi_xfer_desc.p_rx_buffer = bufRx;
-  nrfx_spi_xfer_desc.rx_length = maxLenBufRx;
+    nrfx_spi_xfer_desc.p_tx_buffer = bufTx;
+    nrfx_spi_xfer_desc.tx_length = lenbufTx;
+    nrfx_spi_xfer_desc.p_rx_buffer = bufRx;
+    nrfx_spi_xfer_desc.rx_length = maxLenBufRx;
 
-  memset(bufRx, 0, maxLenBufRx);
+    memset(bufRx, 0, maxLenBufRx);
 
-  spi_xfer_done = false;
+    spi_xfer_done = false;
 
-  if (NRFX_SUCCESS != nrfx_spi_xfer(&spi, &nrfx_spi_xfer_desc, 0))
-  {
-    leds_error_blink();
-  }
+    if (NRFX_SUCCESS != nrfx_spi_xfer(&spi, &nrfx_spi_xfer_desc, 0)) {
+        leds_error_blink();
+    }
 
-  while (!spi_xfer_done)
-  {
-    board_sleep();
-  }
+    while (!spi_xfer_done) {
+        board_sleep();
+    }
 }
 
 
 // interrupt handlers
-kick_scheduler_t spi_isr(void)
-{
-  return DO_NOT_KICK_SCHEDULER;
+kick_scheduler_t spi_isr(void) {
+    return DO_NOT_KICK_SCHEDULER;
 }
 
 
@@ -116,5 +112,5 @@ kick_scheduler_t spi_isr(void)
 void spi_event_handler(nrfx_spi_evt_t const * p_event,              
                        void *                p_context)
 {
-  spi_xfer_done = true;
+    spi_xfer_done = true;
 }

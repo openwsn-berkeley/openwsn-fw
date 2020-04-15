@@ -46,111 +46,91 @@
 
 //=========================== public ==========================================
 
-void debugpins_init(void)
-{
-  // set the corresponding GPIO pins to be used as output
-  const uint8_t m_board_gpio_debugpin_list[GPIO_NUM_DEBUGPINS] = GPIO_PINS_LIST;
+void debugpins_init(void) {
+    // set the corresponding GPIO pins to be used as output
+    const uint8_t m_board_gpio_debugpin_list[GPIO_NUM_DEBUGPINS] = GPIO_PINS_LIST;
 
-  for (uint8_t p=0; p < GPIO_NUM_DEBUGPINS; ++p)
-  {
-    nrf_gpio_cfg_output(m_board_gpio_debugpin_list[p]);
-  }
+    for (uint8_t p=0; p < GPIO_NUM_DEBUGPINS; ++p) {
+        nrf_gpio_cfg_output(m_board_gpio_debugpin_list[p]);
+    }
 }
 
 
-void debugpins_frame_set(void)
-{
-  nrf_gpio_pin_set(GPIO_DEBUGPIN_FRAME);
+void debugpins_frame_set(void) {
+   nrf_gpio_pin_set(GPIO_DEBUGPIN_FRAME);
 }
 
-void debugpins_frame_clr(void)
-{
-  nrf_gpio_pin_clear(GPIO_DEBUGPIN_FRAME);
+void debugpins_frame_clr(void) {
+    nrf_gpio_pin_clear(GPIO_DEBUGPIN_FRAME);
 }
 
-void debugpins_frame_toggle(void)
-{
-  nrf_gpio_pin_toggle(GPIO_DEBUGPIN_FRAME);
+void debugpins_frame_toggle(void) {
+    nrf_gpio_pin_toggle(GPIO_DEBUGPIN_FRAME);
 }
 
 
-void debugpins_slot_set(void)
-{
-  nrf_gpio_pin_set(GPIO_DEBUGPIN_SLOT);
+void debugpins_slot_set(void) {
+    nrf_gpio_pin_set(GPIO_DEBUGPIN_SLOT);
 }
 
-void debugpins_slot_clr(void)
-{
-  nrf_gpio_pin_clear(GPIO_DEBUGPIN_SLOT);
+void debugpins_slot_clr(void) {
+    nrf_gpio_pin_clear(GPIO_DEBUGPIN_SLOT);
 }
 
-void debugpins_slot_toggle(void)
-{
-  nrf_gpio_pin_toggle(GPIO_DEBUGPIN_SLOT);
+void debugpins_slot_toggle(void) {
+    nrf_gpio_pin_toggle(GPIO_DEBUGPIN_SLOT);
 }
 
 
-void debugpins_fsm_set(void)
-{
-  nrf_gpio_pin_set(GPIO_DEBUGPIN_FSM);
+void debugpins_fsm_set(void) {
+    nrf_gpio_pin_set(GPIO_DEBUGPIN_FSM);
 }
 
-void debugpins_fsm_clr(void)
-{
-  nrf_gpio_pin_clear(GPIO_DEBUGPIN_FSM);
+void debugpins_fsm_clr(void) {
+    nrf_gpio_pin_clear(GPIO_DEBUGPIN_FSM);
 }
 
-void debugpins_fsm_toggle(void)
-{
-  nrf_gpio_pin_toggle(GPIO_DEBUGPIN_FSM);
+void debugpins_fsm_toggle(void) {
+    nrf_gpio_pin_toggle(GPIO_DEBUGPIN_FSM);
 }
 
 
-void debugpins_task_set(void)
-{
-  nrf_gpio_pin_set(GPIO_DEBUGPIN_TASK);
+void debugpins_task_set(void) {
+    nrf_gpio_pin_set(GPIO_DEBUGPIN_TASK);
 }
 
-void debugpins_task_clr(void)
-{
-  nrf_gpio_pin_clear(GPIO_DEBUGPIN_TASK);
+void debugpins_task_clr(void) {
+    nrf_gpio_pin_clear(GPIO_DEBUGPIN_TASK);
 }
 
-void debugpins_task_toggle(void)
-{
-  nrf_gpio_pin_toggle(GPIO_DEBUGPIN_TASK);
+void debugpins_task_toggle(void) {
+    nrf_gpio_pin_toggle(GPIO_DEBUGPIN_TASK);
 }
 
 
-void debugpins_isr_set(void)
-{
-  nrf_gpio_pin_set(GPIO_DEBUGPIN_ISR);
+void debugpins_isr_set(void) {
+    nrf_gpio_pin_set(GPIO_DEBUGPIN_ISR);
 }
 
-void debugpins_isr_clr(void)
-{
-  nrf_gpio_pin_clear(GPIO_DEBUGPIN_ISR);
+void debugpins_isr_clr(void) {
+    nrf_gpio_pin_clear(GPIO_DEBUGPIN_ISR);
 }
 
-void debugpins_isr_toggle(void)
-{
-  nrf_gpio_pin_toggle(GPIO_DEBUGPIN_ISR);
+void debugpins_isr_toggle(void) {
+    nrf_gpio_pin_toggle(GPIO_DEBUGPIN_ISR);
 }
 
 
-void debugpins_radio_set(void)
-{
-  nrf_gpio_pin_set(GPIO_DEBUGPIN_RADIO);
+void debugpins_radio_set(void) {
+    nrf_gpio_pin_set(GPIO_DEBUGPIN_RADIO);
 }
 
-void debugpins_radio_clr(void)
-{
-  nrf_gpio_pin_clear(GPIO_DEBUGPIN_RADIO);
+void debugpins_radio_clr(void) {
+    nrf_gpio_pin_clear(GPIO_DEBUGPIN_RADIO);
 }
 
-void debugpins_radio_toggle(void)
-{
-  nrf_gpio_pin_toggle(GPIO_DEBUGPIN_RADIO);
+void debugpins_radio_toggle(void) {
+    nrf_gpio_pin_toggle(GPIO_DEBUGPIN_RADIO);
 }
 
 

@@ -22,14 +22,13 @@ sensors_vars_t sensors_vars;
 /**
    \brief Initialize sensors on the board
 */
-void sensors_init(void)
-{
-  memset(&sensors_vars,0,sizeof(sensors_vars_t));
+void sensors_init(void) {
+   memset(&sensors_vars,0,sizeof(sensors_vars_t));
 
-  if (adc_sens_init()) {
-    sensors_vars.sensorsTypes[SENSOR_ADCBATTERY] = 1;
-    sensors_vars.sensorsTypes[SENSOR_ADCTEMPERATURE] = 1;
-  }
+    if (adc_sens_init()) {
+        sensors_vars.sensorsTypes[SENSOR_ADCBATTERY] = 1;
+        sensors_vars.sensorsTypes[SENSOR_ADCTEMPERATURE] = 1;
+    }
 }
 
 /**
@@ -37,9 +36,8 @@ void sensors_init(void)
    \param[in] sensorType sensor type polled.
    \param[out] returnVal presence of the sensor.
 */
-bool sensors_is_present(uint8_t sensorType)
-{
-  return sensors_vars.sensorsTypes[sensorType];
+bool sensors_is_present(uint8_t sensorType) {
+    return sensors_vars.sensorsTypes[sensorType];
 }
 
 /**
@@ -47,24 +45,23 @@ bool sensors_is_present(uint8_t sensorType)
    \param[in] sensorType sensor type used to associate the callback.
    \param[out] callback for reading data.
 */
-callbackRead_cbt sensors_getCallbackRead(uint8_t sensorType)
-{
-  switch (sensorType) {
-    case SENSOR_ADCTEMPERATURE:
-      return &adc_sens_read_temperature;
-    case SENSOR_ADCBATTERY:
-      return &adc_sens_read_battery;
+callbackRead_cbt sensors_getCallbackRead(uint8_t sensorType) {
+    switch (sensorType) {
+        case SENSOR_ADCTEMPERATURE:
+            return &adc_sens_read_temperature;
+        case SENSOR_ADCBATTERY:
+            return &adc_sens_read_battery;
 
-    case SENSOR_TEMPERATURE:
-    case SENSOR_HUMIDITY:
-    case SENSOR_LIGHT:
-    case SENSOR_XACCELERATION:
-    case SENSOR_YACCELERATION:
-    case SENSOR_ZACCELERATION:
+        case SENSOR_TEMPERATURE:
+        case SENSOR_HUMIDITY:
+        case SENSOR_LIGHT:
+        case SENSOR_XACCELERATION:
+        case SENSOR_YACCELERATION:
+        case SENSOR_ZACCELERATION:
 
-    default:
-      return NULL;
-  }
+        default:
+            return NULL;
+    }
 }
 
 /**
@@ -72,24 +69,23 @@ callbackRead_cbt sensors_getCallbackRead(uint8_t sensorType)
    \param[in] sensorType sensor type used to associate the callback.
    \param[out] callback for converting data.
 */
-callbackConvert_cbt sensors_getCallbackConvert(uint8_t sensorType)
-{
-  switch (sensorType) {
-    case SENSOR_ADCTEMPERATURE:
-      return &adc_sens_convert_temperature;
-    case SENSOR_ADCBATTERY:
-      return &adc_sens_convert_battery;
+callbackConvert_cbt sensors_getCallbackConvert(uint8_t sensorType) {
+    switch (sensorType) {
+        case SENSOR_ADCTEMPERATURE:
+            return &adc_sens_convert_temperature;
+        case SENSOR_ADCBATTERY:
+            return &adc_sens_convert_battery;
 
-    case SENSOR_TEMPERATURE:
-    case SENSOR_HUMIDITY:
-    case SENSOR_LIGHT:
-    case SENSOR_XACCELERATION:
-    case SENSOR_YACCELERATION:
-    case SENSOR_ZACCELERATION:
+        case SENSOR_TEMPERATURE:
+        case SENSOR_HUMIDITY:
+        case SENSOR_LIGHT:
+        case SENSOR_XACCELERATION:
+        case SENSOR_YACCELERATION:
+        case SENSOR_ZACCELERATION:
 
-    default:
-      return NULL;
-  }
+        default:
+            return NULL;
+    }
 }
 
 //=========================== private =========================================
