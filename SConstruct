@@ -37,7 +37,7 @@ project:
     
     board          Board to build for. 'python' is for software simulation.
                    telosb, wsn430v14, wsn430v13b, gina, z1, python,
-                   iot-lab_M3, iot-lab_A8-M3
+                   iot-lab_M3, iot-lab_A8-M3, nrf52840
 
     version        Board version
         
@@ -123,6 +123,8 @@ command_line_options = {
         'samr21_xpro',
         # Cortex-M0
         'scum',
+        # Nordic nRF52840 (Cortex-M4), use revision=DK or revision=DONGLE
+        'nrf52840',
         # misc.
         'python',
     ],
@@ -320,7 +322,112 @@ command_line_vars.AddVariables(
         validate_option,                                   # validator
         int,                                               # converter
     ),
-   (
+    (
+        'toolchain',                                       # key
+        '',                                                # help
+        command_line_options['toolchain'][0],              # default
+        validate_option,                                   # validator
+        None,                                              # converter
+    ),
+    (
+        'kernel',                                          # key
+        '',                                                # help
+        command_line_options['kernel'][0],                 # default
+        validate_option,                                   # validator
+        None,                                              # converter
+    ),
+    (
+        'jtag',                                            # key
+        '',                                                # help
+        '',                                                # default
+        None,                                              # validator
+        None,                                              # converter
+    ),
+    (
+        'fet_version',                                     # key
+        '',                                                # help
+        command_line_options['fet_version'][0],            # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
+        'bootload',                                        # key
+        '',                                                # help
+        '',                                                # default
+        None,                                              # validator
+        None,                                              # converter
+    ),
+    (
+        'verbose',                                         # key
+        '',                                                # help
+        command_line_options['verbose'][0],                # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
+        'fastsim',                                         # key
+        '',                                                # help
+        command_line_options['fastsim'][0],                # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
+        'simhost',                                         # key
+        '',                                                # help
+        command_line_options['simhost'][defaultHost],      # default
+        validate_option,                                   # validator
+        None,                                              # converter
+    ),
+    (
+        'simhostpy',                                       # key
+        '',                                                # help
+        command_line_options['simhostpy'][0],              # default
+        None,                                              # validator
+        None,                                              # converter
+    ),
+    (
+        'panid',                                           # key
+        '0xFFFF',                                          # help
+        command_line_options['panid'][0],                  # default
+        None,                                              # validator
+        None,                                              # converter
+    ),
+    (
+        'dagroot',                                         # key
+        '',                                                # help
+        command_line_options['dagroot'][0],                # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
+        'forcetopology',                                   # key
+        '',                                                # help
+        command_line_options['forcetopology'][0],          # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
+        'debug',                                           # key
+        '',                                                # help
+        command_line_options['debug'][0],                  # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
+        'noadaptivesync',                                  # key
+        '',                                                # help
+        command_line_options['noadaptivesync'][0],         # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
+        'l2_security',                                     # key
+        '',                                                # help
+        command_line_options['l2_security'][0],            # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
         'printf',                                          # key
         '',                                                # help
         command_line_options['printf'][0],                 # default

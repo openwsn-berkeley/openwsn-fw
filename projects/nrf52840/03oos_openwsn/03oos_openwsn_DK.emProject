@@ -1,0 +1,215 @@
+<!DOCTYPE CrossStudio_Project_File>
+<solution Name="03oos_openwsn" target="8" version="2">
+  <project Name="03oos_openwsn">
+    <configuration
+      Name="Common"
+      arm_architecture="v7EM"
+      arm_core_type="Cortex-M4"
+      arm_endian="Little"
+      arm_fp_abi="Hard"
+      arm_fpu_type="FPv4-SP-D16"
+      arm_linker_heap_size="131072"
+      arm_linker_process_stack_size="0"
+      arm_linker_stack_size="65536"
+      arm_linker_treat_warnings_as_errors="No"
+      arm_simulator_memory_simulation_parameter="RWX 00000000,00100000,FFFFFFFF;RWX 20000000,00010000,CDCDCDCD"
+      arm_target_device_name="nRF52840_xxAA"
+      arm_target_interface_type="SWD"
+      c_preprocessor_definitions="BSP_DEFINES_ONLY;FLOAT_ABI_HARD;INITIALIZE_USER_SECTIONS;NO_VTOR_CONFIG;ARM_MATH_CM4;__FPU_PRESENT=1;USE_APP_CONFIG=1;NRF52840_XXAA=1;BOARD_PCA10056=1;CONFIG_GPIO_AS_PINRESET=1"
+      c_user_include_directories="../../../drivers/common;../../../inc;../../../kernel;../../../openapps;../../../openapps/c6t;../../../openapps/cinfo;../../../openapps/cjoin;../../../openapps/cleds;../../../openapps/cwellknown;../../../openapps/opencoap;../../../openapps/rrt;../../../openapps/uecho;../../../openapps/uexpiration;../../../openapps/uexpiration_monitor;../../../openapps/uinject;../../../openapps/userialbridge;../../../openstack;../../../openstack/02a-MAClow;../../../openstack/02b-MAChigh;../../../openstack/03a-IPHC;../../../openstack/03b-IPv6;../../../openstack/04-TRAN;../../../openstack/cross-layers;../../../bsp/boards/nrf52840;../../../bsp/boards/nrf52840/sdk/config/nrf52840/config;../../../bsp/boards/nrf52840/sdk/integration/nrfx;../../../bsp/boards/nrf52840/sdk/components/toolchain/cmsis/include;../../../bsp/boards/nrf52840/sdk/components/drivers_nrf/nrf_soc_nosd;../../../bsp/boards/nrf52840/sdk/components/libraries/atomic;../../../bsp/boards/nrf52840/sdk/components/libraries/balloc;../../../bsp/boards/nrf52840/sdk/components/libraries/delay;../../../bsp/boards/nrf52840/sdk/components/libraries/experimental_log;../../../bsp/boards/nrf52840/sdk/components/libraries/experimental_log/src;../../../bsp/boards/nrf52840/sdk/components/libraries/experimental_memobj;../../../bsp/boards/nrf52840/sdk/components/libraries/experimental_section_vars;../../../bsp/boards/nrf52840/sdk/components/libraries/mutex;../../../bsp/boards/nrf52840/sdk/components/libraries/strerror;../../../bsp/boards/nrf52840/sdk/components/libraries/uart;../../../bsp/boards/nrf52840/sdk/components/libraries/util;../../../bsp/boards/nrf52840/sdk/integration/nrfx/legacy;../../../bsp/boards/nrf52840/sdk/modules/nrfx;../../../bsp/boards/nrf52840/sdk/modules/nrfx/drivers;../../../bsp/boards/nrf52840/sdk/modules/nrfx/drivers/include;../../../bsp/boards/nrf52840/sdk/modules/nrfx/drivers/src;../../../bsp/boards/nrf52840/sdk/modules/nrfx/drivers/src/prs;../../../bsp/boards/nrf52840/sdk/modules/nrfx/hal;../../../bsp/boards/nrf52840/sdk/modules/nrfx/mdk;../../../bsp/boards/nrf52840/sdk/modules/nrfx/soc;../../../bsp/boards/nrf52840/sdk/modules/nrfx/templates;../../../bsp/boards/nrf52840/sdk/components/drivers_nrf/radio_config;../../../bsp/boards"
+      debug_register_definition_file="../../../bsp/boards/nrf52840/sdk/modules/nrfx/mdk/nrf52840.svd"
+      debug_start_from_entry_point_symbol="No"
+      debug_target_connection="J-Link"
+      gcc_debugging_level="Level 3"
+      gcc_entry_point="Reset_Handler"
+      linker_output_format="hex"
+      linker_printf_fmt_level="long"
+      linker_printf_fp_enabled="Float"
+      linker_printf_width_precision_supported="Yes"
+      linker_section_placement_file="flash_placement.xml"
+      linker_section_placement_macros="FLASH_PH_START=0x0;FLASH_PH_SIZE=0x100000;RAM_PH_START=0x20000000;RAM_PH_SIZE=0x40000;FLASH_START=0x0;FLASH_SIZE=0x100000;RAM_START=0x20000000;RAM_SIZE=0x40000"
+      linker_section_placements_segments="FLASH RX 0x0 0x100000;RAM RWX 0x20000000 0x40000"
+      macros="CMSIS_CONFIG_TOOL=../../../bsp/boards/nrf52840/sdk/external_tools/cmsisconfig/CMSIS_Configuration_Wizard.jar"
+      project_directory=""
+      project_type="Executable" />
+    <folder Name="Application">
+      <file file_name="../../../bsp/boards/nrf52840/app_config.h" />
+      <file file_name="../../../projects/common/03oos_openwsn/03oos_openwsn.c" />
+    </folder>
+    <folder Name="Segger ES Specific">
+      <file file_name="../../../bsp/boards/nrf52840/sdk/modules/nrfx/mdk/ses_nRF_Startup.s" />
+      <file file_name="../../../bsp/boards/nrf52840/sdk/modules/nrfx/mdk/ses_nrf52840_Vectors.s" />
+      <file file_name="../../../bsp/boards/nrf52840/sdk/modules/nrfx/mdk/system_nrf52840.c" />
+      <folder Name="Segger Startup Files">
+        <file file_name="$(StudioDir)/source/thumb_crt0.s" />
+      </folder>
+    </folder>
+    <folder Name="OpenWSN">
+      <folder Name="bsp">
+        <file file_name="../../../bsp/boards/nrf52840/board.c" />
+        <file file_name="../../../bsp/boards/nrf52840/debugpins.c" />
+        <file file_name="../../../bsp/boards/nrf52840/eui64.c" />
+        <file file_name="../../../bsp/boards/nrf52840/leds.c" />
+        <file file_name="../../../bsp/boards/nrf52840/radio.c" />
+        <file file_name="../../../bsp/boards/nrf52840/sctimer.c" />
+        <file file_name="../../../bsp/boards/nrf52840/spi.c" />
+        <file file_name="../../../bsp/boards/nrf52840/uart.c" />
+        <file file_name="../../../bsp/boards/board.h" />
+        <file file_name="../../../bsp/boards/cryptoengine.h" />
+        <file file_name="../../../bsp/boards/debugpins.h" />
+        <file file_name="../../../bsp/boards/eui64.h" />
+        <file file_name="../../../bsp/boards/i2c.h" />
+        <file file_name="../../../bsp/boards/leds.h" />
+        <file file_name="../../../bsp/boards/radio.h" />
+        <file file_name="../../../bsp/boards/sctimer.h" />
+        <file file_name="../../../bsp/boards/sensors.h" />
+        <file file_name="../../../bsp/boards/spi.h" />
+        <file file_name="../../../bsp/boards/toolchain_defs.h" />
+        <file file_name="../../../bsp/boards/uart.h" />
+        <file file_name="../../../bsp/boards/nrf52840/cryptoengine.c" />
+        <file file_name="../../../bsp/boards/nrf52840/adc_sensor.c" />
+        <file file_name="../../../bsp/boards/nrf52840/i2c.c" />
+        <file file_name="../../../bsp/boards/nrf52840/sensors.c" />
+        <file file_name="../../../bsp/boards/nrf52840/board_info.h" />
+      </folder>
+      <folder Name="kernel">
+        <file file_name="../../../kernel/openos/scheduler.c" />
+      </folder>
+      <folder Name="openstack">
+        <folder Name="02a-MAClow">
+          <file file_name="../../../openstack/02a-MAClow/adaptive_sync.c" />
+          <file file_name="../../../openstack/02a-MAClow/IEEE802154.c" />
+          <file file_name="../../../openstack/02a-MAClow/IEEE802154_security.c" />
+          <file file_name="../../../openstack/02a-MAClow/IEEE802154E.c" />
+          <file file_name="../../../openstack/02a-MAClow/topology.c" />
+        </folder>
+        <folder Name="02b-MAChigh">
+          <file file_name="../../../openstack/02b-MAChigh/msf.c" />
+          <file file_name="../../../openstack/02b-MAChigh/neighbors.c" />
+          <file file_name="../../../openstack/02b-MAChigh/sixtop.c" />
+          <file file_name="../../../openstack/02b-MAChigh/schedule.c" />
+        </folder>
+        <folder Name="03a-IPHC">
+          <file file_name="../../../openstack/03a-IPHC/frag.c" />
+          <file file_name="../../../openstack/03a-IPHC/iphc.c" />
+          <file file_name="../../../openstack/03a-IPHC/openbridge.c" />
+        </folder>
+        <folder Name="03b-IPv6">
+          <file file_name="../../../openstack/03b-IPv6/forwarding.c" />
+          <file file_name="../../../openstack/03b-IPv6/icmpv6.c" />
+          <file file_name="../../../openstack/03b-IPv6/icmpv6echo.c" />
+          <file file_name="../../../openstack/03b-IPv6/icmpv6rpl.c" />
+        </folder>
+        <folder Name="04-TRAN">
+          <file file_name="../../../openstack/04-TRAN/openudp.c" />
+        </folder>
+        <folder Name="cross-layers">
+          <file file_name="../../../openstack/cross-layers/idmanager.c" />
+          <file file_name="../../../openstack/cross-layers/openqueue.c" />
+          <file file_name="../../../openstack/cross-layers/openrandom.c" />
+          <file file_name="../../../openstack/cross-layers/packetfunctions.c" />
+        </folder>
+        <file file_name="../../../openstack/openstack.c" />
+      </folder>
+      <folder Name="drivers">
+        <file file_name="../../../drivers/common/openserial.c" />
+        <file file_name="../../../drivers/common/opentimers.c" />
+        <file file_name="../../../drivers/common/openhdlc.c" />
+      </folder>
+      <folder Name="openapps">
+        <file file_name="../../../openapps/openapps.c" />
+        <file file_name="../../../openapps/c6t/c6t.c">
+          <configuration Name="Debug" build_exclude_from_build="Yes" />
+        </file>
+        <file file_name="../../../openapps/cinfo/cinfo.c">
+          <configuration Name="Debug" build_exclude_from_build="No" />
+        </file>
+        <file file_name="../../../openapps/cjoin/cjoin.c">
+          <configuration Name="Debug" build_exclude_from_build="No" />
+        </file>
+        <file file_name="../../../openapps/cleds/cleds.c">
+          <configuration Name="Debug" build_exclude_from_build="No" />
+        </file>
+        <file file_name="../../../openapps/cwellknown/cwellknown.c">
+          <configuration Name="Debug" build_exclude_from_build="No" />
+        </file>
+        <file file_name="../../../openapps/rrt/rrt.c">
+          <configuration Name="Debug" build_exclude_from_build="Yes" />
+        </file>
+        <file file_name="../../../openapps/uecho/uecho.c">
+          <configuration Name="Debug" build_exclude_from_build="Yes" />
+        </file>
+        <file file_name="../../../openapps/uexpiration/uexpiration.c">
+          <configuration Name="Debug" build_exclude_from_build="Yes" />
+        </file>
+        <file file_name="../../../openapps/uexpiration_monitor/uexpiration_monitor.c">
+          <configuration Name="Debug" build_exclude_from_build="Yes" />
+        </file>
+        <file file_name="../../../openapps/uinject/uinject.c">
+          <configuration Name="Debug" build_exclude_from_build="Yes" />
+        </file>
+        <file file_name="../../../openapps/userialbridge/userialbridge.c">
+          <configuration Name="Debug" build_exclude_from_build="Yes" />
+        </file>
+        <file file_name="../../../openapps/cjoin/cojp_cbor.c" />
+        <folder Name="opencoap">
+          <file file_name="../../../openapps/opencoap/cborencoder.c">
+            <configuration Name="Debug" build_exclude_from_build="No" />
+          </file>
+          <file file_name="../../../openapps/opencoap/openoscoap.c">
+            <configuration Name="Debug" build_exclude_from_build="No" />
+          </file>
+          <file file_name="../../../openapps/opencoap/opencoap.c">
+            <configuration Name="Debug" build_exclude_from_build="No" />
+          </file>
+          <file file_name="../../../openapps/opencoap/hkdf.c" />
+          <file file_name="../../../openapps/opencoap/hmac.c" />
+          <file file_name="../../../openapps/opencoap/sha224-256.c" />
+          <file file_name="../../../openapps/opencoap/usha.c" />
+        </folder>
+      </folder>
+    </folder>
+    <folder Name="Nordic SDK15 Specific">
+      <folder Name="nRF_Drivers">
+        <file file_name="../../../bsp/boards/nrf52840/sdk/integration/nrfx/legacy/nrf_drv_spi.c" />
+        <file file_name="../../../bsp/boards/nrf52840/sdk/integration/nrfx/legacy/nrf_drv_uart.c" />
+        <file file_name="../../../bsp/boards/nrf52840/sdk/modules/nrfx/drivers/src/nrfx_spi.c" />
+        <file file_name="../../../bsp/boards/nrf52840/sdk/modules/nrfx/drivers/src/nrfx_uart.c" />
+        <file file_name="../../../bsp/boards/nrf52840/sdk/modules/nrfx/drivers/src/nrfx_clock.c" />
+        <file file_name="../../../bsp/boards/nrf52840/sdk/components/libraries/experimental_section_vars/nrf_section_iter.c" />
+        <file file_name="../../../bsp/boards/nrf52840/sdk/components/libraries/pwr_mgmt/nrf_pwr_mgmt.c" />
+        <file file_name="../../../bsp/boards/nrf52840/sdk/components/libraries/uart/app_uart.c" />
+        <file file_name="../../../bsp/boards/nrf52840/sdk/components/libraries/util/app_util_platform.c" />
+        <file file_name="../../../bsp/boards/nrf52840/sdk/integration/nrfx/legacy/nrf_drv_clock.c" />
+        <file file_name="../../../bsp/boards/nrf52840/sdk/modules/nrfx/drivers/src/nrfx_power.c" />
+        <file file_name="../../../bsp/boards/nrf52840/sdk/components/libraries/util/nrf_assert.c" />
+        <file file_name="../../../bsp/boards/nrf52840/sdk/components/libraries/util/app_error.c" />
+        <file file_name="../../../bsp/boards/nrf52840/sdk/components/libraries/util/app_error_handler_gcc.c" />
+        <file file_name="../../../bsp/boards/nrf52840/sdk/components/libraries/util/app_error_weak.c" />
+        <file file_name="../../../bsp/boards/nrf52840/sdk/components/libraries/strerror/nrf_strerror.c" />
+        <file file_name="../../../bsp/boards/nrf52840/nrfx_rtc_hack.c" />
+        <file file_name="../../../bsp/boards/nrf52840/sdk/modules/nrfx/drivers/src/nrfx_twi.c" />
+        <file file_name="../../../bsp/boards/nrf52840/sdk/modules/nrfx/drivers/src/nrfx_systick.c" />
+        <file file_name="../../../bsp/boards/nrf52840/sdk/modules/nrfx/drivers/src/nrfx_saadc.c" />
+      </folder>
+      <folder Name="nRF_Libraries" />
+      <folder Name="Board Definition">
+        <file file_name="../../../bsp/boards/nrf52840/sdk/components/boards/boards.c" />
+      </folder>
+      <folder Name="CMSIS DSP">
+        <file file_name="../../../bsp/boards/nrf52840/sdk/components/toolchain/cmsis/include/arm_math.h" />
+        <file file_name="../../../bsp/boards/nrf52840/sdk/components/toolchain/cmsis/include/core_cm4.h" />
+      </folder>
+    </folder>
+    <configuration Name="Debug" gcc_optimization_level="None" />
+    <configuration Name="Release" gcc_optimization_level="Level 3" />
+  </project>
+  <configuration
+    Name="Release"
+    c_preprocessor_definitions="NDEBUG"
+    gcc_optimization_level="Optimize For Size" />
+  <configuration
+    Name="Debug"
+    c_preprocessor_definitions="DEBUG; DEBUG_NRF"
+    gcc_optimization_level="None" />
+</solution>

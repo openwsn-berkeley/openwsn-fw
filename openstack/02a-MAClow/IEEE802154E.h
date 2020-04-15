@@ -157,12 +157,13 @@ typedef enum {
 //    - ticks = duration_in_seconds * 32768
 //    - duration_in_seconds = ticks / 32768
 enum ieee154e_atomicdurations_enum {
-   // time-slot related
+
+// time-slot related
 #if SLOTDURATION==10
-   TsTxOffset                =   (2120/PORT_US_PER_TICK),                 //  2120us
-   TsLongGT                  =   (1100/PORT_US_PER_TICK),                 //  1100us
-   TsTxAckDelay              =   (1000/PORT_US_PER_TICK),                 //  1000us
-   TsShortGT                 =    (500/PORT_US_PER_TICK),                 //   500us, The standardlized value for this is 400/2=200us(7ticks). Currectly 7 doesn't work for short packet, change it back to 7 when found the problem.
+   TsTxOffset                =  (2120/PORT_US_PER_TICK),                  //  2120us
+   TsLongGT                  =  (1100/PORT_US_PER_TICK),                  //  1100us
+   TsTxAckDelay              =  (1000/PORT_US_PER_TICK),                  //  1000us
+   TsShortGT                 =   (500/PORT_US_PER_TICK),                  //   500us, The standardlized value for this is 400/2=200us(7ticks). Currectly 7 doesn't work for short packet, change it back to 7 when found the problem.
    wdRadioTx                 =  (1342/PORT_US_PER_TICK),                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
    wdDataDuration            =  (5000/PORT_US_PER_TICK),                  //  5000us (measured 4280us with max payload)
    wdAckDuration             =  (3000/PORT_US_PER_TICK),                  //  3000us (measured 1000us)
@@ -187,6 +188,7 @@ enum ieee154e_atomicdurations_enum {
    wdRadioTx                 =  (7019/PORT_US_PER_TICK),                  //    230 ticks  7019us delayTx+Tx time for 10 bytes( (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
    wdDataDuration            =  (81238/PORT_US_PER_TICK),                 //    2662 ticks  81238us (measured with max payload) 
    wdAckDuration             =  (18310/PORT_US_PER_TICK),                 //    600 ticks 18310us (measured)
+   
 #endif
    TsSlotDuration            =  PORT_TsSlotDuration,  
    // execution speed related
