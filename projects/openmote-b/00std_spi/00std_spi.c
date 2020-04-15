@@ -50,7 +50,7 @@ spi_vars_t spi_vars;
 //*********Variables to use as parameters of spi_txrx function****************//
 
 static char stringToPrint[]="MessageToTest\r\n";
-size_t len = strlen(stringToPrint);*/
+size_t len = sizeof(stringToPrint);
 	
 //=========================== prototypes ======================================
 static void disableInterrupts(void);
@@ -105,7 +105,7 @@ void spi_init() {
     SSIEnable(SSI1_BASE);
     
     //Call the spi_txrx function
-	spi_txrx(&stringToPrint,len,SPI_FIRSTBYTE,16,16,SPI_FIRST,SPI_NOTLAST);
+	spi_txrx((uint8_t*)stringToPrint,len,SPI_FIRSTBYTE,(uint8_t*)16,16,SPI_FIRST,SPI_NOTLAST);
 }
 
 #ifdef SPI_IN_INTERRUPT_MODE
