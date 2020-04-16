@@ -52,7 +52,7 @@ typedef enum
 {
     
     // different "modulations" (AT86RF215-specific)
-    // Atmel settings start at index 0 because they are used directly in a sub-array in the atmel driver.
+    // At83rf215 settings start at index 0 because they are used directly in a sub-array in the atmel driver.
     RADIOSETTING_FSK_OPTION1_FEC,
     RADIOSETTING_OQPSK_RATE3,
     RADIOSETTING_OFDM_OPTION_1_MCS0,
@@ -60,11 +60,14 @@ typedef enum
     RADIOSETTING_OFDM_OPTION_1_MCS2,
     RADIOSETTING_OFDM_OPTION_1_MCS3,
 
-    // Default
-    RADIOSETTING_24GHZ ,
+    // default
+    RADIOSETTING_24GHZ,
+ 
+    // can be useful for switching receiver between OFDMx MCS modes.
+    RADIOSETTING_NONE,
+    
+    RADIOSETTING_MAX 
 
-    // Can be useful for switching receiver between OFDMx MCS modes.
-    RADIOSETTING_NONE
 } radioSetting_t;
 
 //=========================== typedef =========================================

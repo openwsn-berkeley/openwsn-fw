@@ -97,7 +97,7 @@
 
 #if SLOT_TEMPLATE==20
     #define SLOTDURATION                        20     // ms  
- #define PORT_TsSlotDuration                1310 //655   //    20ms
+    #define PORT_TsSlotDuration                1310 //655   //    20ms
 
     // execution speed related
     #define PORT_maxTxDataPrepare               110   //  3355us (not measured)
