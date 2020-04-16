@@ -6,6 +6,9 @@
 #ifndef __SENSORS_H__
 #define __SENSORS_H__
 
+#include "stdint.h"
+#include "board.h"
+
 //=========================== define ==========================================
 
 /// define NUMSENSORS if not defined in board_info.h
@@ -24,6 +27,7 @@ enum {
    SENSOR_ZACCELERATION,
    SENSOR_ADCTEMPERATURE,
    SENSOR_DEFAULT,
+   SENSOR_ADCBATTERY,
    SENSOR_LAST                  // new sensor types go before this one
 };
 
