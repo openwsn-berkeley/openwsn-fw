@@ -4072,7 +4072,7 @@ static const registerSetting_t basic_settings_fsk_option3 []={  //DO NOT USE
 };
 //------------------------------------ OQPSK -----------------------------------//
 static const registerSetting_t basic_settings_oqpsk_rate0[] = {
-    {RG_BBC0_PC,        0x1F},
+    {RG_BBC0_PC,        0x1F}, // 16bit FCS
     {RG_BBC0_OQPSKPHRTX, 0x00}, // MR-OQPSK, rate mode 0
     {RG_BBC0_OQPSKC0,   0x10},  // 100kchips/s, RC-0.8 shaping, direct-modulation enabled
 //  {RG_BBC0_OQPSKC1,   0x3F},  // MINIMUM preamble-detection sensitivities, rx-override disabled

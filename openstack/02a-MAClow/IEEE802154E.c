@@ -1070,8 +1070,7 @@ port_INLINE void activity_ti1ORri1(void) {
                     TIME_TICS,                                        // timetype
                     isr_ieee154e_timer                                // callback
                 );
-                debugpins_fsm_toggle();
-                debugpins_fsm_toggle();
+
                 // radiotimer_schedule(DURATION_tt1);
 #endif
                 break;
@@ -1100,8 +1099,7 @@ port_INLINE void activity_ti1ORri1(void) {
                 TIME_TICS,                                        // timetype
                 isr_ieee154e_timer                                // callback
             );
-                debugpins_fsm_toggle();
-                debugpins_fsm_toggle();            
+          
             // radiotimer_schedule(DURATION_rt1);
 #endif
 
@@ -1312,8 +1310,7 @@ port_INLINE void activity_ti5(PORT_TIMER_WIDTH capturedTime) {
         );
         // radiotimer_schedule(DURATION_tt5);
         
-        debugpins_fsm_toggle();
-        debugpins_fsm_toggle();
+
 #endif
     } else {
         // indicate succesful Tx to schedule to keep statistics
@@ -1953,8 +1950,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
             );
             // radiotimer_schedule(DURATION_rt5);
 #endif
-        debugpins_fsm_toggle();
-        debugpins_fsm_toggle();
+
         } else {
             // synchronize to the received packet if I'm not a DAGroot and this is my preferred parent
             // or in case I'm in the middle of the join process when parent is not yet selected
