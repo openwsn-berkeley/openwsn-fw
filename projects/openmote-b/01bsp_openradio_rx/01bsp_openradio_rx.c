@@ -137,7 +137,7 @@ int mote_main(void) {
     uart_setCallbacks(cb_uartTxDone,cb_uartRxCb);
 
     // prepare radio
-    radio_set_modulation (OQPSK_RATE3);
+    radio_setConfig (RADIOSETTING_OQPSK_RATE3);
     radio_rfOn();
     // freq type only effects on scum port
     radio_setFrequency(CHANNEL, FREQ_RX);

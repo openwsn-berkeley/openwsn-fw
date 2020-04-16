@@ -58,8 +58,16 @@
 #define PORT_PIN_RADIO_RESET_LOW()     // nothing
 
 //===== Slot Information
-
-#define SLOT_TEMPLATE 42                
+/*
+    Indexes for slot templates:
+    
+    10 : 10 ms tempalte
+    20 : 20 ms template for cc2538 24ghz radio --> Default
+    41 : 40 ms template for cc2538 24ghz radio
+    42 : 40 ms template for Atmel FSK FEC radio
+    43 : 40 ms template for Atmel OFSM1 radios MCS 0,1,2, and 3
+*/
+#define SLOT_TEMPLATE 20                
 
 //===== Radios
 
@@ -105,13 +113,13 @@
 //40ms slot for 24ghz cc2538
 #if SLOT_TEMPLATE==41
     #define SLOTDURATION                        40     // ms 
-    #define PORT_TsSlotDuration                1310 //655   //    20ms
+    #define PORT_TsSlotDuration                1310    // 40ms
 
     // execution speed related
-    #define PORT_maxTxDataPrepare               10    //  305us (measured  82us)
-    #define PORT_maxRxAckPrepare                10    //  305us (measured  83us)
-    #define PORT_maxRxDataPrepare                4    //  122us (measured  22us)
-    #define PORT_maxTxAckPrepare                10    //  122us (measured  94us)
+    #define PORT_maxTxDataPrepare               10    //  305us 
+    #define PORT_maxRxAckPrepare                10    //  305us 
+    #define PORT_maxRxDataPrepare                4    //  122us 
+    #define PORT_maxTxAckPrepare                10    //  305us 
     // radio speed related
     #ifdef L2_SECURITY_ACTIVE
     #define PORT_delayTx                        14    //  366us (measured xxxus)
@@ -125,32 +133,32 @@
 //40ms slot for FSK    
 #if SLOT_TEMPLATE==42 
     #define SLOTDURATION                        40     // ms  
-    #define PORT_TsSlotDuration                 1310//1966//5300   //    161ms
+    #define PORT_TsSlotDuration                 1310   // 40ms 
 
     // execution speed related
-    #define PORT_maxTxDataPrepare               50//220   1500µs
-    #define PORT_maxRxAckPrepare                10//250   305µs 
-    #define PORT_maxRxDataPrepare               10//66    305µs
-    #define PORT_maxTxAckPrepare                33//250   1000µs
+    #define PORT_maxTxDataPrepare               50      // 1525 us  (based on measurement)
+    #define PORT_maxRxAckPrepare                10      // 305µs (based on measurement)
+    #define PORT_maxRxDataPrepare               10      // 305µs  (based on measurement)
+    #define PORT_maxTxAckPrepare                33      // 1000µs  (based on measurement)
     // radio speed related
-    #define PORT_delayTx                        66//100  2000µs  
-    #define PORT_delayRx                        16//0    518µs    
+    #define PORT_delayTx                        66      // 2000µs  (based on measurement)
+    #define PORT_delayRx                        16      // 488µs. This parameter is usually set to 0, however for Atmel on openmote-b, it takes at least 1ms for the transmission to occure because of spi delay (or other implementation specific overhead), so reciver is expected to wait a little more before turning on the radio. 
 #endif
 
 
 //40ms slot for OFDM1 MCS0-3
 #if SLOT_TEMPLATE==43 
     #define SLOTDURATION                        40     // ms  
-    #define PORT_TsSlotDuration                 1310//1966//5300   //    161ms
+    #define PORT_TsSlotDuration                 1310   // 40ms
 
     // execution speed related
-    #define PORT_maxTxDataPrepare               50//220   1500µs
-    #define PORT_maxRxAckPrepare                10//250   305µs 
-    #define PORT_maxRxDataPrepare               10//66    305µs
-    #define PORT_maxTxAckPrepare                33//250   1000µs
+    #define PORT_maxTxDataPrepare               50          //1525us (based on measurement) 
+    #define PORT_maxRxAckPrepare                10          //305us (based on measurement) 
+    #define PORT_maxRxDataPrepare               10          //305us (based on measurement) 
+    #define PORT_maxTxAckPrepare                33          //1000us (based on measurement) 
     // radio speed related
-    #define PORT_delayTx                        41//100  00µs  
-    #define PORT_delayRx                        16//0    518µs    
+    #define PORT_delayTx                        41          //1251us (based on measurement)  
+    #define PORT_delayRx                        16          // 488µs. This parameter is usually set to 0, however for Atmel on openmote-b, it takes at least 1ms for the transmission to occure because of spi delay (or other implementation specific overhead), so reciver is expected to wait a little more before turning on the radio. 
 #endif
 
 

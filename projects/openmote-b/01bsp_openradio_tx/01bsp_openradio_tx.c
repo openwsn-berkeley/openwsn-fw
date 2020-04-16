@@ -79,12 +79,6 @@ int mote_main(void) {
     radio_setStartFrameCb(cb_startFrame);
     radio_setEndFrameCb(cb_startFrame);
     
-    // prepare radio
-    //radio_rfOn();
-    // freq type only effects on scum port
-    //radio_setFrequency(CHANNEL, FREQ_TX);
-    //radio_setConfig (FSK_OPTION1_FEC);
-    //radio_rfOff();
     
     // start periodic overflow
     sctimer_setCompare(sctimer_readCounter()+ TIMER_PERIOD);

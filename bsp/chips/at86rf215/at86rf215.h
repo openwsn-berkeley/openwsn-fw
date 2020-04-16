@@ -4006,7 +4006,7 @@ static  registerSetting_t basic_settings_fsk_option1 []={
   {RG_RF09_PAC,       0x7F},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
   {RG_BBC0_IRQM,      0x1F},// TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
   {RG_BBC1_IRQM,      0x00},
-  {RG_BBC0_PC,        0x1D},// No FCS filter, 32 bits FCS, FSK. >Mina: used to be 15. Set to 1D to use 16 bit FCS
+  {RG_BBC0_PC,        0x1D},// No FCS filter, 16 bits FCS, FSK. 
   {RG_BBC0_FSKDM,     0x01},//Direct modulation and preemphasis enabled.
   {RG_BBC0_FSKC0,     0xD6},
   {RG_BBC0_FSKC1,     0x00},
@@ -4135,7 +4135,7 @@ static const registerSetting_t basic_settings_oqpsk_rate2[] = {
 };
 
 static  registerSetting_t basic_settings_oqpsk_rate3[] = {
-    {RG_BBC0_PC,        0x1F},
+    {RG_BBC0_PC,        0x1F},  // 16 bit FCS
     {RG_BBC0_OQPSKPHRTX, 0x06}, // MR-OQPSK, rate mode 0//ERORR
     {RG_BBC0_OQPSKC0,   0x10},  // 100kchips/s, RC-0.8 shaping, direct-modulation enabled
 //  {RG_BBC0_OQPSKC1,   0x3F},  // MINIMUM preamble-detection sensitivities, rx-override disabled

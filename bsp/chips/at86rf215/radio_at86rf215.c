@@ -133,7 +133,7 @@ void radio_init_at86rf215(void) {
     radio_local_bootstrap_at86rf215();
     
     // select the radio configuration to use -- configuration 2-FSK-50kbps
-    radio_set_modulation_at86rf215 (FSK_OPTION1_FEC);
+    radio_setConfig_at86rf215 (RADIOSETTING_FSK_OPTION1_FEC);
     radio_read_isr_at86rf215();
 }
 
@@ -144,14 +144,14 @@ void radio_change_size_at86rf215(uint16_t* size){
 }
 
 // This function accepts one of the existing radio presets and writes them to the radio chip.
-void radio_set_modulation_at86rf215(radioSetting_t selected_radio){
+void radio_setConfig_at86rf215(radioSetting_t radioSetting){
     uint16_t _register;
 
     at86rf215_spiStrobe(CMD_RF_TRXOFF, ATMEL_FREQUENCY_TYPE);
     while(at86rf215_status(ATMEL_FREQUENCY_TYPE) != RF_STATE_TRXOFF);
 
-    for( _register = 0; _register < radio_api.size[selected_radio]; _register++) {
-        at86rf215_spiWriteReg(radio_api.radios[selected_radio][_register].addr, radio_api.radios[selected_radio][_register].data);
+    for( _register = 0; _register < radio_api.size[radioSetting]; _register++) {
+        at86rf215_spiWriteReg(radio_api.radios[radioSetting][_register].addr, radio_api.radios[radioSetting][_register].data);
     };
     radio_read_isr_at86rf215();
 }
@@ -341,19 +341,19 @@ void radio_getReceivedFrame_at86rf215(
 //This function creates a matrix of register configurations of each modulation supported by the readio chip. It is used for dynamic modulation change inside the chip.
 void radio_local_bootstrap_at86rf215(void){
     
-    radio_api.radios [FSK_OPTION1_FEC]        = basic_settings_fsk_option1;
-    radio_api.radios [OQPSK_RATE3]            = basic_settings_oqpsk_rate3;
-    radio_api.radios [OFDM_OPTION_1_MCS0]     = basic_settings_ofdm_1_mcs0;
-    radio_api.radios [OFDM_OPTION_1_MCS1]     = basic_settings_ofdm_1_mcs1;
-    radio_api.radios [OFDM_OPTION_1_MCS2]     = basic_settings_ofdm_1_mcs2;
-    radio_api.radios [OFDM_OPTION_1_MCS3]     = basic_settings_ofdm_1_mcs3;
+    radio_api.radios [RADIOSETTING_FSK_OPTION1_FEC]        = basic_settings_fsk_option1;
+    radio_api.radios [RADIOSETTING_OQPSK_RATE3]            = basic_settings_oqpsk_rate3;
+    radio_api.radios [RADIOSETTING_OFDM_OPTION_1_MCS0]     = basic_settings_ofdm_1_mcs0;
+    radio_api.radios [RADIOSETTING_OFDM_OPTION_1_MCS1]     = basic_settings_ofdm_1_mcs1;
+    radio_api.radios [RADIOSETTING_OFDM_OPTION_1_MCS2]     = basic_settings_ofdm_1_mcs2;
+    radio_api.radios [RADIOSETTING_OFDM_OPTION_1_MCS3]     = basic_settings_ofdm_1_mcs3;
     
-    radio_api.size [FSK_OPTION1_FEC]        = sizeof(basic_settings_fsk_option1)/sizeof(registerSetting_t);
-    radio_api.size [OQPSK_RATE3]            = sizeof(basic_settings_oqpsk_rate3)/sizeof(registerSetting_t);
-    radio_api.size [OFDM_OPTION_1_MCS0]     = sizeof(basic_settings_ofdm_1_mcs0)/sizeof(registerSetting_t);
-    radio_api.size [OFDM_OPTION_1_MCS1]     = sizeof(basic_settings_ofdm_1_mcs1)/sizeof(registerSetting_t);    
-    radio_api.size [OFDM_OPTION_1_MCS2]     = sizeof(basic_settings_ofdm_1_mcs2)/sizeof(registerSetting_t);    
-    radio_api.size [OFDM_OPTION_1_MCS3]     = sizeof(basic_settings_ofdm_1_mcs3)/sizeof(registerSetting_t);    
+    radio_api.size [RADIOSETTING_FSK_OPTION1_FEC]        = sizeof(basic_settings_fsk_option1)/sizeof(registerSetting_t);
+    radio_api.size [RADIOSETTING_OQPSK_RATE3]            = sizeof(basic_settings_oqpsk_rate3)/sizeof(registerSetting_t);
+    radio_api.size [RADIOSETTING_OFDM_OPTION_1_MCS0]     = sizeof(basic_settings_ofdm_1_mcs0)/sizeof(registerSetting_t);
+    radio_api.size [RADIOSETTING_OFDM_OPTION_1_MCS1]     = sizeof(basic_settings_ofdm_1_mcs1)/sizeof(registerSetting_t);    
+    radio_api.size [RADIOSETTING_OFDM_OPTION_1_MCS2]     = sizeof(basic_settings_ofdm_1_mcs2)/sizeof(registerSetting_t);    
+    radio_api.size [RADIOSETTING_OFDM_OPTION_1_MCS3]     = sizeof(basic_settings_ofdm_1_mcs3)/sizeof(registerSetting_t);    
 }
 void radio_read_isr_at86rf215(void){
     uint8_t flags[4];
@@ -389,7 +389,7 @@ kick_scheduler_t radio_isr_at86rf215(void) {
     capturedTime = sctimer_readCounter();
     //get isr that happened from radio
     radio_read_isr_at86rf215();
-  uint8_t i = radio_vars_at86rf215.bb0_isr & IRQS_RXFS_MASK;
+
     if (radio_vars_at86rf215.bb0_isr & IRQS_RXFS_MASK){
         radio_vars_at86rf215.state = RADIOSTATE_RECEIVING;
         if (radio_vars_at86rf215.startFrame_cb!=NULL) {

@@ -145,7 +145,7 @@ void ieee154e_init(void) {
     // If this board is open radio comlpiant, set the required modulation    
 
     //set radio modulation.
-    radio_setConfig (RADIO_SETTING_FSK_OPTION1_FEC); //set default modulation to 24ghz
+    radio_setConfig (RADIOSETTING_24GHZ); //set default modulation to 24ghz
     
     // switch radio on
     radio_rfOn();
@@ -2816,6 +2816,8 @@ different channel offsets in the same slot.
 
 \returns The calculated frequency channel, an integer between 11 and 26.
 */
+
+// Should be calculateChannel
 port_INLINE uint8_t calculateFrequency(uint8_t channelOffset) {
     if (ieee154e_vars.singleChannel >= 11 && ieee154e_vars.singleChannel <= 26 ) {
         return ieee154e_vars.singleChannel; // single channel

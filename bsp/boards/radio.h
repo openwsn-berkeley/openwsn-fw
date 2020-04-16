@@ -50,15 +50,21 @@ typedef enum {
 // radio settings available for the MAC layer and supported by openmote-b
 typedef enum 
 {
-    RADIO_SETTING_24GHZ, // Default
     
     // different "modulations" (AT86RF215-specific)
+    // Atmel settings start at index 0 because they are used directly in a sub-array in the atmel driver.
     RADIOSETTING_FSK_OPTION1_FEC,
     RADIOSETTING_OQPSK_RATE3,
     RADIOSETTING_OFDM_OPTION_1_MCS0,
     RADIOSETTING_OFDM_OPTION_1_MCS1,
     RADIOSETTING_OFDM_OPTION_1_MCS2,
-    RADIOSETTING_OFDM_OPTION_1_MCS3
+    RADIOSETTING_OFDM_OPTION_1_MCS3,
+
+    // Default
+    RADIOSETTING_24GHZ ,
+
+    // Can be useful for switching receiver between OFDMx MCS modes.
+    RADIOSETTING_NONE
 } radioSetting_t;
 
 //=========================== typedef =========================================
@@ -81,11 +87,12 @@ void                radio_setEndFrameCb(radio_capture_cbt cb);
 // I don't see it referenced anywhere in cource code. there are some references in pbi and pbd files 
 void                radio_reset(void);
 // RF admin
+// This function never sets frequency in fact. It sets a "channel". It shoud change accordingly. 
+// Should be claculateChannel and it can take an 8 bit channel index.  
 void                radio_setFrequency(uint16_t frequency, radio_freq_t tx_or_rx);
 
 void                radio_setConfig(radioSetting_t radioSetting);
 
-//void                radio_setFrequency(uint8_t frequency);
 //referred to in MAC init and in some projects
 void                radio_rfOn(void);
 //referenced at end of each rf activity in the MAC

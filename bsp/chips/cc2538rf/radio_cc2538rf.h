@@ -129,7 +129,7 @@ void     radio_setFrequency_cc2538rf(uint16_t channel, radio_freq_t tx_or_rx);
 int8_t  radio_getFrequencyOffset_cc2538rf(void);
 void     radio_rfOn_cc2538rf(void);
 void     radio_rfOff_cc2538rf(void);
-void     radio_set_modulation_cc2538rf (radioSetting_t selected_radio);
+void     radio_setConfig_cc2538rf (radioSetting_t radioSetting);
 
 // TX
 void     radio_loadPacket_cc2538rf(uint8_t* packet, uint16_t len);
