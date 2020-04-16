@@ -7,7 +7,6 @@
 // stack initialization
 #include "opendefs.h"
 #include "board.h"
-#include "radio.h"
 #include "scheduler.h"
 #include "openstack.h"
 #include "opentimers.h"
@@ -201,4 +200,3 @@ void opencoap_init(void)                                { return; }
 //===== L7
 
 void openapps_init(void)                                { return; }
-
