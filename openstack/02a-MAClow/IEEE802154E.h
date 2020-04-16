@@ -158,7 +158,7 @@ typedef enum {
 //    - duration_in_seconds = ticks / 32768
 enum ieee154e_atomicdurations_enum {
    // time-slot related
-#if SLOTDURATION==10
+#if SLOT_TEMPLATE==10
    TsTxOffset                =   (2120/PORT_US_PER_TICK),                 //  2120us
    TsLongGT                  =   (1100/PORT_US_PER_TICK),                 //  1100us
    TsTxAckDelay              =   (1000/PORT_US_PER_TICK),                 //  1000us
@@ -168,7 +168,7 @@ enum ieee154e_atomicdurations_enum {
    wdAckDuration             =  (3000/PORT_US_PER_TICK),                  //  3000us (measured 1000us)
 #endif
     
-#if SLOTDURATION==20
+#if SLOT_TEMPLATE==20
    TsTxOffset                =  (5215/PORT_US_PER_TICK),                  //  5215us
    TsLongGT                  =  (1311/PORT_US_PER_TICK),                  //  1311us
    TsTxAckDelay              =  (5521/PORT_US_PER_TICK),                  //  5521us
@@ -177,27 +177,42 @@ enum ieee154e_atomicdurations_enum {
    wdDataDuration            =  (5000/PORT_US_PER_TICK),                  //  5000us (measured 4280us with max payload)
    wdAckDuration             =  (3000/PORT_US_PER_TICK),                  //  3000us (measured 1000us)
 #endif
+
+//40 ms slot for 24GHZ cc2538
+#if SLOT_TEMPLATE==41
+    TsTxOffset                =  (5215/PORT_US_PER_TICK),                  //  5215us
+   TsLongGT                  =  (1311/PORT_US_PER_TICK),                  //  1311us
+   TsTxAckDelay              =  (5521/PORT_US_PER_TICK),                  //  5521us
+   TsShortGT                 =   (700/PORT_US_PER_TICK),                  //   700us
+   wdRadioTx                 =  (1342/PORT_US_PER_TICK),                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
+   wdDataDuration            =  (5000/PORT_US_PER_TICK),                  //  5000us (measured 4280us with max payload)
+   wdAckDuration             =  (3000/PORT_US_PER_TICK),                  //  3000us (measured 1000us)
+#endif
+
  //40 ms slot fot FSK
-#if SLOTDURATION==40
+#if SLOT_TEMPLATE==42
    TsTxOffset                = (4000/PORT_US_PER_TICK),//(10986/PORT_US_PER_TICK),                 //    360 ticks, 10986us
    TsLongGT                  =  (2000/PORT_US_PER_TICK),//(7324/PORT_US_PER_TICK),                  //    240 ticks, 7324us
    TsTxAckDelay              = (3700/PORT_US_PER_TICK),  //(11047/PORT_US_PER_TICK),                 //    362 ticks, 11047us
    TsShortGT                 =  (1831/PORT_US_PER_TICK),                  //    60 ticksz 1831us
    // radio watchdog
-   wdRadioTx                 =  (7019/PORT_US_PER_TICK),                  //    230 ticks  7019us delayTx+Tx time for 10 bytes( (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
-   wdDataDuration            =  (81238/PORT_US_PER_TICK),                 //    2662 ticks  81238us (measured with max payload) 
-   wdAckDuration             =  (18310/PORT_US_PER_TICK),                 //    600 ticks 18310us (measured)
+   wdRadioTx                 =  (7000/PORT_US_PER_TICK),                  //    230 ticks  7019us delayTx+Tx time for 10 bytes( (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
+   wdDataDuration            =  (30000/PORT_US_PER_TICK),                 //    2662 ticks  81238us (measured with max payload) 
+   wdAckDuration             =  (20000/PORT_US_PER_TICK),                 //    600 ticks 18310us (measured)
 #endif
+
+
+
 //40 ms slot for OFDM01 MCS3
-#if SLOTDURATION==41
+#if SLOT_TEMPLATE==43
    TsTxOffset                = (3500/PORT_US_PER_TICK),//(10986/PORT_US_PER_TICK),                 //    360 ticks, 10986us
    TsLongGT                  =  (2000/PORT_US_PER_TICK),//(7324/PORT_US_PER_TICK),                  //    240 ticks, 7324us
    TsTxAckDelay              = (3700/PORT_US_PER_TICK),  //(11047/PORT_US_PER_TICK),                 //    362 ticks, 11047us
    TsShortGT                 =  (1831/PORT_US_PER_TICK),                  //    60 ticksz 1831us
    // radio watchdog
-   wdRadioTx                 =  (7019/PORT_US_PER_TICK),                  //    230 ticks  7019us delayTx+Tx time for 10 bytes( (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
-   wdDataDuration            =  (81238/PORT_US_PER_TICK),                 //    2662 ticks  81238us (measured with max payload) 
-   wdAckDuration             =  (18310/PORT_US_PER_TICK),                 //    600 ticks 18310us (measured)
+   wdRadioTx                 =  (7000/PORT_US_PER_TICK),                  //    230 ticks  7019us delayTx+Tx time for 10 bytes( (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
+   wdDataDuration            =  (30000/PORT_US_PER_TICK),                 //    2662 ticks  81238us (measured with max payload) 
+   wdAckDuration             =  (20000/PORT_US_PER_TICK),                 //    600 ticks 18310us (measured)
 #endif
 
 

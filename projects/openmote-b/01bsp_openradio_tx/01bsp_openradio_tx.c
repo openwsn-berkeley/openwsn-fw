@@ -71,11 +71,11 @@ int mote_main(void) {
     // add radio callback functions
     sctimer_set_callback(cb_scTimerCompare);
 
-    radio_set_modulation (FSK_OPTION1_FEC);
+    radio_setConfig (RADIOSETTING_FSK_OPTION1_FEC);
     radio_setStartFrameCb(cb_startFrame);
     radio_setEndFrameCb(cb_endFrame);
 
-    radio_set_modulation (CC2538RF_24GHZ);
+    radio_setConfig (RADIOSETTING_24GHZ);
     radio_setStartFrameCb(cb_startFrame);
     radio_setEndFrameCb(cb_startFrame);
     
@@ -83,7 +83,7 @@ int mote_main(void) {
     //radio_rfOn();
     // freq type only effects on scum port
     //radio_setFrequency(CHANNEL, FREQ_TX);
-    //radio_set_modulation (FSK_OPTION1_FEC);
+    //radio_setConfig (FSK_OPTION1_FEC);
     //radio_rfOff();
     
     // start periodic overflow
@@ -95,43 +95,41 @@ int mote_main(void) {
         app_vars.txpk_txNow = 0;
         while (app_vars.txpk_txNow==0) {
             board_sleep();
-        }
-        radio_setFrequency(CHANNEL, FREQ_TX);
-        radio_set_modulation (OQPSK_RATE3);        
-        /*
+        }     
+        
         switch (radio_switch%7){
         case 0:
             // freq type only effects on scum port
           // looping on radio settings from slowest to fastest.
             radio_setFrequency(CHANNEL, FREQ_TX);
-            radio_set_modulation (FSK_OPTION1_FEC);
+            radio_setConfig (RADIOSETTING_FSK_OPTION1_FEC);
             break;
         case 1:
             radio_setFrequency(CHANNEL, FREQ_TX);
-            radio_set_modulation (OQPSK_RATE3);
+            radio_setConfig (RADIOSETTING_OQPSK_RATE3);
             break;
         case 2:
             radio_setFrequency(CHANNEL, FREQ_TX);
-            radio_set_modulation (OFDM_OPTION_1_MCS0);
+            radio_setConfig (RADIOSETTING_OFDM_OPTION_1_MCS0);
             break;
         case 3:
             radio_setFrequency(CHANNEL, FREQ_TX);
-            radio_set_modulation (OFDM_OPTION_1_MCS1);
+            radio_setConfig (RADIOSETTING_OFDM_OPTION_1_MCS1);
             break;
         case 4:
             radio_setFrequency(CHANNEL, FREQ_TX);
-            radio_set_modulation (OFDM_OPTION_1_MCS2);
+            radio_setConfig (RADIOSETTING_OFDM_OPTION_1_MCS2);
             break;
         case 5:
             radio_setFrequency(CHANNEL, FREQ_TX);
-            radio_set_modulation (OFDM_OPTION_1_MCS3);
+            radio_setConfig (RADIOSETTING_OFDM_OPTION_1_MCS3);
             break;
         case 6:
             radio_setFrequency(CHANNEL, FREQ_TX);
-            radio_set_modulation (CC2538RF_24GHZ);
+            radio_setConfig (RADIOSETTING_24GHZ);
             break;   
         }
-*/
+
         //Toggle the switch
         radio_switch ++;
         // led

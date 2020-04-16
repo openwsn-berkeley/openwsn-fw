@@ -143,10 +143,9 @@ void ieee154e_init(void) {
     ieee154e_stats.numDeSync                 = 0;
 
     // If this board is open radio comlpiant, set the required modulation    
-#ifdef OPENRADIO_COMPLIANT // ****Remove
+
     //set radio modulation.
-    radio_set_modulation (OFDM_OPTION_1_MCS3); //set default modulation to 24ghz
-#endif
+    radio_setConfig (RADIO_SETTING_FSK_OPTION1_FEC); //set default modulation to 24ghz
     
     // switch radio on
     radio_rfOn();

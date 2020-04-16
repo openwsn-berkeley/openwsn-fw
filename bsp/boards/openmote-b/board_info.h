@@ -57,19 +57,20 @@
 #define PORT_PIN_RADIO_RESET_HIGH()    // nothing
 #define PORT_PIN_RADIO_RESET_LOW()     // nothing
 
-#define SLOTDURATION 41                // in miliseconds
+//===== Slot Information
+
+#define SLOT_TEMPLATE 42                
 
 //===== Radios
-// This board's radio driver is Open Radio compliant. 
-#define OPENRADIO_COMPLIANT     1
 
 // Number of available radios
 #define MAX_RADIOS  7
 
 //===== IEEE802154E timing
 
-#if SLOTDURATION==10
+#if SLOT_TEMPLATE==10
     // time-slot related
+    #define SLOTDURATION                        10     // ms 
     #define PORT_TsSlotDuration                 328   // counter counts one extra count, see datasheet
     // execution speed related
     #define PORT_maxTxDataPrepare               10    //  305us (measured  82us)
@@ -86,8 +87,9 @@
     // radio watchdog
 #endif
 
-#if SLOTDURATION==20
-    #define PORT_TsSlotDuration                1310 //655   //    20ms
+#if SLOT_TEMPLATE==20
+    #define SLOTDURATION                        20     // ms  
+ #define PORT_TsSlotDuration                1310 //655   //    20ms
 
     // execution speed related
     #define PORT_maxTxDataPrepare               110   //  3355us (not measured)
@@ -100,8 +102,29 @@
     #define PORT_delayRx                        0     //     0us (can not measure)
 #endif
 
-    
-#if SLOTDURATION==40 //40ms slot for FSK
+//40ms slot for 24ghz cc2538
+#if SLOT_TEMPLATE==41
+    #define SLOTDURATION                        40     // ms 
+    #define PORT_TsSlotDuration                1310 //655   //    20ms
+
+    // execution speed related
+    #define PORT_maxTxDataPrepare               10    //  305us (measured  82us)
+    #define PORT_maxRxAckPrepare                10    //  305us (measured  83us)
+    #define PORT_maxRxDataPrepare                4    //  122us (measured  22us)
+    #define PORT_maxTxAckPrepare                10    //  122us (measured  94us)
+    // radio speed related
+    #ifdef L2_SECURITY_ACTIVE
+    #define PORT_delayTx                        14    //  366us (measured xxxus)
+    #else
+    #define PORT_delayTx                        12    //  366us (measured xxxus)
+    #endif
+    #define PORT_delayRx                         0    //    0us (can not measure)
+    // radio watchdog
+#endif
+
+//40ms slot for FSK    
+#if SLOT_TEMPLATE==42 
+    #define SLOTDURATION                        40     // ms  
     #define PORT_TsSlotDuration                 1310//1966//5300   //    161ms
 
     // execution speed related
@@ -114,7 +137,10 @@
     #define PORT_delayRx                        16//0    518µs    
 #endif
 
-#if SLOTDURATION==41 //40ms slot for OFDM1 MCS3
+
+//40ms slot for OFDM1 MCS0-3
+#if SLOT_TEMPLATE==43 
+    #define SLOTDURATION                        40     // ms  
     #define PORT_TsSlotDuration                 1310//1966//5300   //    161ms
 
     // execution speed related
@@ -126,6 +152,8 @@
     #define PORT_delayTx                        41//100  00µs  
     #define PORT_delayRx                        16//0    518µs    
 #endif
+
+
 //===== adaptive_sync accuracy
 
 #define SYNC_ACCURACY                       1     // ticks

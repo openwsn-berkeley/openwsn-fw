@@ -50,13 +50,15 @@ typedef enum {
 // radio settings available for the MAC layer and supported by openmote-b
 typedef enum 
 {
-    FSK_OPTION1_FEC,
-    OQPSK_RATE3,
-    OFDM_OPTION_1_MCS0,
-    OFDM_OPTION_1_MCS1,
-    OFDM_OPTION_1_MCS2,
-    OFDM_OPTION_1_MCS3,
-    CC2538RF_24GHZ // Default
+    RADIO_SETTING_24GHZ, // Default
+    
+    // different "modulations" (AT86RF215-specific)
+    RADIOSETTING_FSK_OPTION1_FEC,
+    RADIOSETTING_OQPSK_RATE3,
+    RADIOSETTING_OFDM_OPTION_1_MCS0,
+    RADIOSETTING_OFDM_OPTION_1_MCS1,
+    RADIOSETTING_OFDM_OPTION_1_MCS2,
+    RADIOSETTING_OFDM_OPTION_1_MCS3
 } radioSetting_t;
 
 //=========================== typedef =========================================
@@ -81,7 +83,7 @@ void                radio_reset(void);
 // RF admin
 void                radio_setFrequency(uint16_t frequency, radio_freq_t tx_or_rx);
 
-void                radio_set_modulation(radioSetting_t radio);
+void                radio_setConfig(radioSetting_t radioSetting);
 
 //void                radio_setFrequency(uint8_t frequency);
 //referred to in MAC init and in some projects
