@@ -177,8 +177,19 @@ enum ieee154e_atomicdurations_enum {
    wdDataDuration            =  (5000/PORT_US_PER_TICK),                  //  5000us (measured 4280us with max payload)
    wdAckDuration             =  (3000/PORT_US_PER_TICK),                  //  3000us (measured 1000us)
 #endif
- 
-#if SLOTDURATION==160
+ //40 ms slot fot FSK
+#if SLOTDURATION==40
+   TsTxOffset                = (4000/PORT_US_PER_TICK),//(10986/PORT_US_PER_TICK),                 //    360 ticks, 10986us
+   TsLongGT                  =  (2000/PORT_US_PER_TICK),//(7324/PORT_US_PER_TICK),                  //    240 ticks, 7324us
+   TsTxAckDelay              = (3700/PORT_US_PER_TICK),  //(11047/PORT_US_PER_TICK),                 //    362 ticks, 11047us
+   TsShortGT                 =  (1831/PORT_US_PER_TICK),                  //    60 ticksz 1831us
+   // radio watchdog
+   wdRadioTx                 =  (7019/PORT_US_PER_TICK),                  //    230 ticks  7019us delayTx+Tx time for 10 bytes( (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
+   wdDataDuration            =  (81238/PORT_US_PER_TICK),                 //    2662 ticks  81238us (measured with max payload) 
+   wdAckDuration             =  (18310/PORT_US_PER_TICK),                 //    600 ticks 18310us (measured)
+#endif
+//40 ms slot for OFDM01 MCS3
+#if SLOTDURATION==41
    TsTxOffset                = (3500/PORT_US_PER_TICK),//(10986/PORT_US_PER_TICK),                 //    360 ticks, 10986us
    TsLongGT                  =  (2000/PORT_US_PER_TICK),//(7324/PORT_US_PER_TICK),                  //    240 ticks, 7324us
    TsTxAckDelay              = (3700/PORT_US_PER_TICK),  //(11047/PORT_US_PER_TICK),                 //    362 ticks, 11047us
@@ -188,6 +199,8 @@ enum ieee154e_atomicdurations_enum {
    wdDataDuration            =  (81238/PORT_US_PER_TICK),                 //    2662 ticks  81238us (measured with max payload) 
    wdAckDuration             =  (18310/PORT_US_PER_TICK),                 //    600 ticks 18310us (measured)
 #endif
+
+
    TsSlotDuration            =  PORT_TsSlotDuration,  
    // execution speed related
    maxTxDataPrepare          =  PORT_maxTxDataPrepare,

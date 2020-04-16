@@ -57,7 +57,7 @@
 #define PORT_PIN_RADIO_RESET_HIGH()    // nothing
 #define PORT_PIN_RADIO_RESET_LOW()     // nothing
 
-#define SLOTDURATION 160                // in miliseconds
+#define SLOTDURATION 41                // in miliseconds
 
 //===== Radios
 // This board's radio driver is Open Radio compliant. 
@@ -100,8 +100,8 @@
     #define PORT_delayRx                        0     //     0us (can not measure)
 #endif
 
-    // experimental: relaxed estimations for fsk1 with fec 25kbps
-#if SLOTDURATION==160
+    
+#if SLOTDURATION==40 //40ms slot for FSK
     #define PORT_TsSlotDuration                 1310//1966//5300   //    161ms
 
     // execution speed related
@@ -110,7 +110,20 @@
     #define PORT_maxRxDataPrepare               10//66    305µs
     #define PORT_maxTxAckPrepare                33//250   1000µs
     // radio speed related
-    #define PORT_delayTx                        50//100  1500µs  
+    #define PORT_delayTx                        66//100  2000µs  
+    #define PORT_delayRx                        16//0    518µs    
+#endif
+
+#if SLOTDURATION==41 //40ms slot for OFDM1 MCS3
+    #define PORT_TsSlotDuration                 1310//1966//5300   //    161ms
+
+    // execution speed related
+    #define PORT_maxTxDataPrepare               50//220   1500µs
+    #define PORT_maxRxAckPrepare                10//250   305µs 
+    #define PORT_maxRxDataPrepare               10//66    305µs
+    #define PORT_maxTxAckPrepare                33//250   1000µs
+    // radio speed related
+    #define PORT_delayTx                        41//100  00µs  
     #define PORT_delayRx                        16//0    518µs    
 #endif
 //===== adaptive_sync accuracy
