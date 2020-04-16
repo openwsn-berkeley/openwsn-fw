@@ -244,6 +244,7 @@ int mote_main(void) {
 
                         // switch to RX mode
                         radio_rxEnable();
+                        radio_rxNow();
                         app_vars.state = APP_STATE_RX;
 
                         // led

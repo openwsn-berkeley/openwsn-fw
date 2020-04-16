@@ -210,7 +210,7 @@ elif env['toolchain']=='iar-proj':
     
 elif env['toolchain']=='armgcc':
     
-    if env['board'] not in ['silabs-ezr32wg','openmote-cc2538','openmote-b','openmote-b-24ghz','openmote-b-subghz','iot-lab_M3','iot-lab_A8-M3','openmotestm', 'samr21_xpro', 'scum']:
+    if env['board'] not in ['silabs-ezr32wg','openmote-cc2538','openmote-b','openmote-b-24ghz','openmote-b-subghz','iot-lab_M3','iot-lab_A8-M3','openmotestm','samr21_xpro','scum','nrf52840']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     if   env['board'] in ['openmote-cc2538','openmote-b','openmote-b-24ghz', 'openmote-b-subghz']:
@@ -404,6 +404,66 @@ elif env['toolchain']=='armgcc':
         env.Replace(NM           = 'arm-none-eabi-nm')
         env.Replace(SIZE         = 'arm-none-eabi-size')
         
+    elif env['board']=='nrf52840':
+
+        # compiler (C)
+        env.Replace(CC           = 'arm-none-eabi-gcc')
+        env.Append(CCFLAGS       = '-O0')
+        env.Append(CCFLAGS       = '-Wall')
+        env.Append(CCFLAGS       = '-Wa,-adhlns=${TARGET.base}.lst')
+        env.Append(CCFLAGS       = '-c')
+        env.Append(CCFLAGS       = '-fmessage-length=0')
+        env.Append(CCFLAGS       = '-mcpu=cortex-m4')
+        env.Append(CCFLAGS       = '-mthumb')
+        env.Append(CCFLAGS       = '-g')
+        env.Append(CCFLAGS       = '-std=gnu99')
+        env.Append(CCFLAGS       = '-Wstrict-prototypes')
+        env.Append(CCFLAGS       = '-ffunction-sections')
+        env.Append(CCFLAGS       = '-fdata-sections')
+        env.Append(CCFLAGS       = '-mfpu=fpv4-sp-d16')
+        env.Append(CCFLAGS       = '-mfloat-abi=hard')
+        env.Append(CCFLAGS       = '-D__FPU_PRESENT=1')
+        env.Append(CCFLAGS       = '-DUSE_APP_CONFIG=1')
+        env.Append(CCFLAGS       = '-DNRF52840_XXAA=1')             # set the CPU to nRF52840 (ARM Cortex M4f)
+        if env['revision'] == "DK":
+            env.Append(CCFLAGS   = '-DBOARD_PCA10056=1')            # set the board to be the nRF52840 Development Kit
+            print "*** nrf52840-DK ***\n"
+        elif env['revision'] == "DONGLE":
+            env.Append(CCFLAGS   = '-DBOARD_PCA10059=1')            # set the board to be the nRF52840 Dongle
+            env.Append(CCFLAGS   = '-DCONFIG_NFCT_PINS_AS_GPIOS=1') # configure NFCT pins as GPIOs
+            print "*** nrf52840-DONGLE ***\n"
+        else:
+            print "*** unknown ***\n"
+
+        env.Append(CCFLAGS       = '-DCONFIG_GPIO_AS_PINRESET=1')   # just to be able to reset the board via the on-board reset pin
+
+        # assembler
+        env.Replace(AS           = 'arm-none-eabi-as')
+        env.Append(ASFLAGS       = '-g -gdwarf-2 -mcpu=cortex-m4 -mthumb -c -x assembler-with-cpp ')
+        env.Append(ASFLAGS       = '-DNRF52840_XXAA=1')
+        
+        # linker
+        env.Append(LINKFLAGS     = '-Lbsp/boards/nrf52840/sdk/modules/nrfx/mdk')
+        env.Append(LINKFLAGS     = '-g -gdwarf-2 -mcpu=cortex-m4 -mthumb')
+
+        # @todo: Decide which linker script to use
+        if env['revision'] == "DK":
+            env.Append(LINKFLAGS     = '-Tbsp/boards/nrf52840/nrf52840_xxaa.ld')
+        elif env['revision'] == "DONGLE":
+            env.Append(LINKFLAGS     = '-Tbsp/boards/nrf52840/nrf52840_xxaa_dongle.ld')
+        # env.Append(LINKFLAGS     = '-Tbsp/boards/nrf52840/sdk/config/nrf52840/armgcc/generic_gcc_nrf52.ld')
+
+        # env.Append(LINKFLAGS     = '--strip-debug')
+
+        env.Append(LINKFLAGS     = '-Xlinker --gc-sections -Xlinker')
+        env.Append(LINKFLAGS     = '-Map=${TARGET.base}.map')
+        
+        env.Append(LINKFLAGS     = '-mfpu=fpv4-sp-d16 -mfloat-abi=hard --specs=nosys.specs')
+
+        #--specs=nano.specs
+        env.Append(LINKFLAGS     = '-Wl,--start-group -lgcc -lc -lg -lm -lnosys -Wl,--end-group')
+        env.Append(LINKFLAGS       = os.path.join('build',env['board']+'_armgcc','bsp','boards',env['board'],'sdk','modules','nrfx','mdk','gcc_startup_nrf52840.o'))
+        
     elif   env['board']=='scum':
         
         # compiler (C)
@@ -438,7 +498,7 @@ elif env['toolchain']=='armgcc':
         # misc
         env.Replace(NM           = 'arm-none-eabi-nm')
         env.Replace(SIZE         = 'arm-none-eabi-size')
-        
+
     else:
         raise SystemError('unexpected board={0}'.format(env['board']))
     
@@ -528,6 +588,15 @@ def jtagUploadFunc(location):
                 suffix      = '.phonyupload',
                 src_suffix  = '.ihex',
             )
+        if env['board']=='nrf52840':
+            if env['revision']=='DK':
+              return Builder(
+                  action      = os.path.join('bsp','boards',env['board'],'tools','flash.sh') + " $SOURCE",
+                  suffix      = '.phonyupload',
+                  src_suffix  = '.elf',
+              )
+            else:
+              raise SystemError('Only nRF52840 DK flashing is supported at the moment.')
     else:
         if env['fet_version']==2:
             # MSP-FET430uif is running v2 Firmware
@@ -923,9 +992,13 @@ def extras(env, source):
     returnVal  = []
     returnVal += [env.PrintSize(source=source)]
     returnVal += [env.Elf2iHex(source=source)]
-    returnVal += [env.Elf2iBin(source=source)]
+    if env['board'] != 'nrf52840':
+        returnVal += [env.Elf2iBin(source=source)]
     if   env['jtag']:
-        returnVal += [env.JtagUpload(env.Elf2iHex(source))]
+        if env['board'] == 'nrf52840' and env['revision'] == 'DK' and env['jtag'] == 'bflash':
+            returnVal += [env.JtagUpload(source)]
+        else:
+            returnVal += [env.JtagUpload(env.Elf2iHex(source))]
     elif env['bootload']:
         returnVal += [env.Bootload(env.Elf2iHex(source))]
     return returnVal
