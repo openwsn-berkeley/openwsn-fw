@@ -51,16 +51,16 @@ typedef enum{
 } slotType_t;
 
 //=========================== variables =======================================
-extern slot_board_vars_t slot_board_vars [MAX_SLOT_TYPES];
-extern slotType_t selected_slot_type;
 
 //=========================== prototypes ======================================
 
-void board_init(void);
-void board_sleep(void);
-void board_reset(void);
-void board_init_slot_vars(void);
-
+void              board_init(void);
+void              board_sleep(void);
+void              board_reset(void);
+void              board_init_slot_vars(void);
+uint16_t          board_getSlotDuration (void);
+void              board_setSlotType(slotType_t slot_type);
+slot_board_vars_t board_getSlotTemplate (void);
 /**
 \}
 \}

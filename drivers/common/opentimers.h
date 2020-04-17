@@ -33,7 +33,7 @@
 
 #define SPLITE_TIMER_DURATION     15 // in ticks
 
-#define PRE_CALL_TIMER_WINDOW     slot_board_vars [selected_slot_type].PORT_TsSlotDuration
+#define PRE_CALL_TIMER_WINDOW     board_getSlotDuration()
 
 typedef void (*opentimers_cbt)(opentimers_id_t id);
 

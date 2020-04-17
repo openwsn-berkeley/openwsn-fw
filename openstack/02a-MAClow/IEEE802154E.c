@@ -127,7 +127,7 @@ void ieee154e_init(void) {
 #endif
     ieee154e_vars.isAckEnabled      = TRUE;
     ieee154e_vars.isSecurityEnabled = FALSE;
-    ieee154e_vars.slotDuration      = slotTemplate.TsSlotDuration;
+    
     ieee154e_vars.numOfSleepSlots   = 1;
 
     // default hopping template
@@ -150,10 +150,11 @@ void ieee154e_init(void) {
     ieee154e_slot_template_init();
     
     // select the desired slot template to use, default  SLOT_20ms_24GHZ
-    ieee154e_select_slot_template (SLOT_20ms_24GHZ);
+    ieee154e_select_slot_template (SLOT_40ms_FSK_SUBGHZ);
+    ieee154e_vars.slotDuration      = slotTemplate.TsSlotDuration;
 
     //set the radio setting to use
-    radio_setConfig (RADIOSETTING_24GHZ); 
+    radio_setConfig (RADIOSETTING_FSK_OPTION1_FEC); 
     
     // switch radio on
     radio_rfOn();
@@ -240,8 +241,18 @@ Call this function once, preferrably at end of the ieee154e_init function
 */
 void ieee154e_select_slot_template(slotType_t slotType)
 {   
+    board_setSlotType (slotType);
+    slot_board_vars_t slot_board_vars= board_getSlotTemplate();
+      
+    // board-specific template details
+    slotTemplate.SLOTDURATION        =   slot_board_vars.PORT_SLOTDURATION;
+    slotTemplate.TsSlotDuration      =   slot_board_vars.PORT_TsSlotDuration;  
+    slotTemplate.maxTxDataPrepare    =   slot_board_vars.PORT_maxTxDataPrepare;
+    slotTemplate.maxRxAckPrepare     =   slot_board_vars.PORT_maxRxAckPrepare;
+    slotTemplate.maxRxDataPrepare    =   slot_board_vars.PORT_maxRxDataPrepare;
+    slotTemplate.maxTxAckPrepare     =   slot_board_vars.PORT_maxTxAckPrepare;     
+     
     //154e general slot template
-  
     slotTemplate.TsTxOffset          =   slot_154e_vars [slotType].TsTxOffset;         
     slotTemplate.TsLongGT            =   slot_154e_vars [slotType].TsLongGT;    
     slotTemplate.TsTxAckDelay        =   slot_154e_vars [slotType].TsTxAckDelay;
@@ -249,16 +260,7 @@ void ieee154e_select_slot_template(slotType_t slotType)
     slotTemplate.wdRadioTx           =   slot_154e_vars [slotType].wdRadioTx;
     slotTemplate.wdDataDuration      =   slot_154e_vars [slotType].wdDataDuration;
     slotTemplate.wdAckDuration       =   slot_154e_vars [slotType].wdAckDuration;
-    
-    // board-specific template details
-    slotTemplate.SLOTDURATION        =   slot_board_vars [slotType].PORT_SLOTDURATION;
-    slotTemplate.TsSlotDuration      =   slot_board_vars [slotType].PORT_TsSlotDuration;  
-    slotTemplate.maxTxDataPrepare    =   slot_board_vars [slotType].PORT_maxTxDataPrepare;
-    slotTemplate.maxRxAckPrepare     =   slot_board_vars [slotType].PORT_maxRxAckPrepare;
-    slotTemplate.maxRxDataPrepare    =   slot_board_vars [slotType].PORT_maxRxDataPrepare;
-    slotTemplate.maxTxAckPrepare     =   slot_board_vars [slotType].PORT_maxTxAckPrepare;
-    selected_slot_type = slotType;
-    ieee154e_vars.ieee_154e_slot_template = slotTemplate;
+  
 }
 
 
