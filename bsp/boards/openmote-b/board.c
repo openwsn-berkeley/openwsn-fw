@@ -56,7 +56,8 @@ static void SysCtrlRunSetting(void);
 static void SysCtrlWakeupSetting(void);
 
 //=========================== variables ============================================
-
+slot_board_vars_t slot_board_vars [MAX_SLOT_TYPES];
+slotType_t selected_slot_type;
 
 //=========================== main ============================================
 
@@ -206,7 +207,7 @@ void board_init_slot_vars(void){
     slot_board_vars [SLOT_40ms_24GHZ].PORT_delayRx                        =    0  ;  //    0us (can not measure)
 
     //40ms slot for FSK
-    slot_board_vars [SLOT_40ms_FSK_SUBGHZ].PORT_SLOTDURATION                   =   40   ;  // ms  
+    slot_board_vars [SLOT_40ms_FSK_SUBGHZ].PORT_SLOTDURATION              =   40   ;  // ms  
     slot_board_vars [SLOT_40ms_FSK_SUBGHZ].PORT_TsSlotDuration            =   1310 ;  // 40ms 
     slot_board_vars [SLOT_40ms_FSK_SUBGHZ].PORT_maxTxDataPrepare          =   50   ;   // 1525 us  (based on measurement)
     slot_board_vars [SLOT_40ms_FSK_SUBGHZ].PORT_maxRxAckPrepare           =   10   ;   // 305µs (based on measurement)
@@ -216,7 +217,7 @@ void board_init_slot_vars(void){
     slot_board_vars [SLOT_40ms_FSK_SUBGHZ].PORT_delayRx                   =   16   ;   // 488µs. This parameter is usually set to 0, however for Atmel on openmote-b, it takes at least 1ms for the transmission to occure because of spi delay (or other implementation specific overhead), so reciver is expected to wait a little more before turning on the radio. 
     
     //40ms slot for OFDM1 MCS0-3    
-    slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].PORT_SLOTDURATION           =  40   ;     // ms  
+    slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].PORT_SLOTDURATION      =  40   ;     // ms  
     slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].PORT_TsSlotDuration    =  1310 ;     // 40ms
     slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].PORT_maxTxDataPrepare  =  50   ;     //1525us (based on measurement) 
     slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].PORT_maxRxAckPrepare   =  10   ;     //305us (based on measurement) 
@@ -226,6 +227,24 @@ void board_init_slot_vars(void){
     slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].PORT_delayRx           =  16   ;     // 488µs. This parameter is usually set to 0, however for Atmel on openmote-b, it takes at least 1ms for the transmission to occure because of spi delay (or other implementation specific overhead), so reciver is expected to wait a little more before turning on the radio. 
 }
 
+// To get the current slotDuration at any time
+// used during initialization by sixtop to fire the first sixtop EB
+uint16_t board_getSlotDuration (void)
+{
+  return slot_board_vars [selected_slot_type].PORT_SLOTDURATION;
+}
+
+// Getter function for slot_board_vars
+slot_board_vars_t board_getSlotTemplate (void)
+{
+  return slot_board_vars [selected_slot_type];
+}
+
+// Getter function for selected_slot_type
+void board_setSlotType(slotType_t slot_type)
+{
+  selected_slot_type = slot_type;
+}
 /**
  * Resets the board
  */
