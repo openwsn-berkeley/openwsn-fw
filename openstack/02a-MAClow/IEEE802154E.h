@@ -151,6 +151,18 @@ typedef enum {
 
 #define  TIMESLOT_TEMPLATE_ID         0x00
 #define  CHANNELHOPPING_TEMPLATE_ID   0x00
+//===== Slot Template Configurations
+
+//general MAC slot template
+typedef struct {
+    uint8_t TsTxOffset;
+    uint8_t TsLongGT;
+    uint8_t TsTxAckDelay;
+    uint8_t TsShortGT;
+    uint8_t wdRadioTx;
+    uint8_t wdDataDuration;
+    uint8_t wdAckDuration;
+} slot_154e_vars_t; 
 
 // Atomic durations
 // expressed in 32kHz ticks:

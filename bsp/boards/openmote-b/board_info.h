@@ -75,92 +75,33 @@
 #define MAX_RADIOS  7
 
 //===== IEEE802154E timing
-
-#if SLOT_TEMPLATE==10
-    // time-slot related
-    #define SLOTDURATION                        10     // ms 
-    #define PORT_TsSlotDuration                 328   // counter counts one extra count, see datasheet
-    // execution speed related
-    #define PORT_maxTxDataPrepare               10    //  305us (measured  82us)
-    #define PORT_maxRxAckPrepare                10    //  305us (measured  83us)
-    #define PORT_maxRxDataPrepare                4    //  122us (measured  22us)
-    #define PORT_maxTxAckPrepare                10    //  122us (measured  94us)
-    // radio speed related
-    #ifdef L2_SECURITY_ACTIVE
-    #define PORT_delayTx                        14    //  366us (measured xxxus)
-    #else
-    #define PORT_delayTx                        12    //  366us (measured xxxus)
-    #endif
-    #define PORT_delayRx                         0    //    0us (can not measure)
-    // radio watchdog
-#endif
-
-#if SLOT_TEMPLATE==20
-    #define SLOTDURATION                        20     // ms  
-    #define PORT_TsSlotDuration                1310 //655   //    20ms
+    
+typedef struct {
+    uint8_t SLOTDURATION;
+    uint8_t PORT_TsSlotDuration;
 
     // execution speed related
-    #define PORT_maxTxDataPrepare               110   //  3355us (not measured)
-    #define PORT_maxRxAckPrepare                20    //   610us (not measured)
-    #define PORT_maxRxDataPrepare               33    //  1000us (not measured)
-    #define PORT_maxTxAckPrepare                50    //  1525us (not measured)
+    // also implementation related (e.g. SoC radio or spi-connected radio because of the time to load a packet to/from radio)
+    uint8_t PORT_maxTxDataPrepare;
+    uint8_t PORT_maxRxAckPrepare;
+    uint8_t PORT_maxRxDataPrepare;
+    uint8_t PORT_maxTxAckPrepare;
 
     // radio speed related
-    #define PORT_delayTx                        18    //   549us (not measured)
-    #define PORT_delayRx                        0     //     0us (can not measure)
-#endif
+    // also implementation related (because the time to execute the Tx/Rx command is highly dependent on the radio AND the configuration)
+    uint8_t PORT_delayTx;                       
+    uint8_t PORT_delayRx;
+} slot_board_vars_t; //board specific slot vars
 
-//40ms slot for 24ghz cc2538
-#if SLOT_TEMPLATE==41
-    #define SLOTDURATION                        40     // ms 
-    #define PORT_TsSlotDuration                1310    // 40ms
-
-    // execution speed related
-    #define PORT_maxTxDataPrepare               10    //  305us 
-    #define PORT_maxRxAckPrepare                10    //  305us 
-    #define PORT_maxRxDataPrepare                4    //  122us 
-    #define PORT_maxTxAckPrepare                10    //  305us 
-    // radio speed related
-    #ifdef L2_SECURITY_ACTIVE
-    #define PORT_delayTx                        14    //  366us (measured xxxus)
-    #else
-    #define PORT_delayTx                        12    //  366us (measured xxxus)
-    #endif
-    #define PORT_delayRx                         0    //    0us (can not measure)
-    // radio watchdog
-#endif
-
-//40ms slot for FSK    
-#if SLOT_TEMPLATE==42 
-    #define SLOTDURATION                        40     // ms  
-    #define PORT_TsSlotDuration                 1310   // 40ms 
-
-    // execution speed related
-    #define PORT_maxTxDataPrepare               50      // 1525 us  (based on measurement)
-    #define PORT_maxRxAckPrepare                10      // 305µs (based on measurement)
-    #define PORT_maxRxDataPrepare               10      // 305µs  (based on measurement)
-    #define PORT_maxTxAckPrepare                33      // 1000µs  (based on measurement)
-    // radio speed related
-    #define PORT_delayTx                        66      // 2000µs  (based on measurement)
-    #define PORT_delayRx                        16      // 488µs. This parameter is usually set to 0, however for Atmel on openmote-b, it takes at least 1ms for the transmission to occure because of spi delay (or other implementation specific overhead), so reciver is expected to wait a little more before turning on the radio. 
-#endif
-
-
-//40ms slot for OFDM1 MCS0-3
-#if SLOT_TEMPLATE==43 
-    #define SLOTDURATION                        40     // ms  
-    #define PORT_TsSlotDuration                 1310   // 40ms
-
-    // execution speed related
-    #define PORT_maxTxDataPrepare               50          //1525us (based on measurement) 
-    #define PORT_maxRxAckPrepare                10          //305us (based on measurement) 
-    #define PORT_maxRxDataPrepare               10          //305us (based on measurement) 
-    #define PORT_maxTxAckPrepare                33          //1000us (based on measurement) 
-    // radio speed related
-    #define PORT_delayTx                        41          //1251us (based on measurement)  
-    #define PORT_delayRx                        16          // 488µs. This parameter is usually set to 0, however for Atmel on openmote-b, it takes at least 1ms for the transmission to occure because of spi delay (or other implementation specific overhead), so reciver is expected to wait a little more before turning on the radio. 
-#endif
-
+// available slot templates
+typedef enum{
+    SLOT_10ms,
+    SLOT_20ms_24GHZ,
+    SLOT_40ms_24GHZ,
+    SLOT_40ms_FSK_SUBGHZ,
+    SLOT_40ms_OFDM1MCS0_3_SUBGHZ,
+    MAX_SLOT_TYPES,
+} slotType_t;
 
 //===== adaptive_sync accuracy
 
