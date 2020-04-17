@@ -17,6 +17,7 @@
 #include "sctimer.h"
 #include "openrandom.h"
 #include "msf.h"
+#include "board.h"
 #include "board_info.h"
 //=========================== definition ======================================
 
@@ -25,7 +26,10 @@
 ieee154e_vars_t     ieee154e_vars;
 ieee154e_stats_t    ieee154e_stats;
 ieee154e_dbg_t      ieee154e_dbg;
-slot_154e_vars_t    slot_154e_vars [MAX_SLOT_TYPES-1];
+
+slotTemplate_t      slotTemplate;
+slot_154e_vars_t    slot_154e_vars [MAX_SLOT_TYPES];
+
 //=========================== prototypes ======================================
 
 // SYNCHRONIZING
@@ -123,7 +127,7 @@ void ieee154e_init(void) {
 #endif
     ieee154e_vars.isAckEnabled      = TRUE;
     ieee154e_vars.isSecurityEnabled = FALSE;
-    ieee154e_vars.slotDuration      = TsSlotDuration;
+    ieee154e_vars.slotDuration      = slotTemplate.TsSlotDuration;
     ieee154e_vars.numOfSleepSlots   = 1;
 
     // default hopping template
@@ -142,10 +146,14 @@ void ieee154e_init(void) {
     resetStats();
     ieee154e_stats.numDeSync                 = 0;
 
-    // If this board is open radio comlpiant, set the required modulation    
+    // initialize slot template lookup table
+    ieee154e_slot_template_init();
+    
+    // select the desired slot template to use, default  SLOT_20ms_24GHZ
+    ieee154e_select_slot_template (SLOT_20ms_24GHZ);
 
-    //set radio modulation.
-    radio_setConfig (RADIOSETTING_24GHZ); //set default modulation to 24ghz
+    //set the radio setting to use
+    radio_setConfig (RADIOSETTING_24GHZ); 
     
     // switch radio on
     radio_rfOn();
@@ -224,6 +232,36 @@ void ieee154e_slot_template_init(void)
     slot_154e_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].wdDataDuration            =  (30000/PORT_US_PER_TICK);           //    983 ticks; estimated based on max payload
     slot_154e_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].wdAckDuration             =  (20000/PORT_US_PER_TICK);           //    655 ticks;  estimated
 }
+
+/**
+\brief This function initializes the lookup table for the slot templates.
+
+Call this function once, preferrably at end of the ieee154e_init function
+*/
+void ieee154e_select_slot_template(slotType_t slotType)
+{   
+    //154e general slot template
+  
+    slotTemplate.TsTxOffset          =   slot_154e_vars [slotType].TsTxOffset;         
+    slotTemplate.TsLongGT            =   slot_154e_vars [slotType].TsLongGT;    
+    slotTemplate.TsTxAckDelay        =   slot_154e_vars [slotType].TsTxAckDelay;
+    slotTemplate.TsShortGT           =   slot_154e_vars [slotType].TsShortGT;   
+    slotTemplate.wdRadioTx           =   slot_154e_vars [slotType].wdRadioTx;
+    slotTemplate.wdDataDuration      =   slot_154e_vars [slotType].wdDataDuration;
+    slotTemplate.wdAckDuration       =   slot_154e_vars [slotType].wdAckDuration;
+    
+    // board-specific template details
+    slotTemplate.SLOTDURATION        =   slot_board_vars [slotType].PORT_SLOTDURATION;
+    slotTemplate.TsSlotDuration      =   slot_board_vars [slotType].PORT_TsSlotDuration;  
+    slotTemplate.maxTxDataPrepare    =   slot_board_vars [slotType].PORT_maxTxDataPrepare;
+    slotTemplate.maxRxAckPrepare     =   slot_board_vars [slotType].PORT_maxRxAckPrepare;
+    slotTemplate.maxRxDataPrepare    =   slot_board_vars [slotType].PORT_maxRxDataPrepare;
+    slotTemplate.maxTxAckPrepare     =   slot_board_vars [slotType].PORT_maxTxAckPrepare;
+    selected_slot_type = slotType;
+    ieee154e_vars.ieee_154e_slot_template = slotTemplate;
+}
+
+
 //=========================== public ==========================================
 
 /**
@@ -342,12 +380,12 @@ void isr_ieee154e_newSlot(opentimers_id_t id) {
     
     opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                  // timerId
-        TsSlotDuration,                         // duration
+        slotTemplate.TsSlotDuration,                         // duration
         ieee154e_vars.startOfSlotReference,     // reference
         TIME_TICS,                              // timetype
         isr_ieee154e_newSlot                    // callback
     );
-    ieee154e_vars.slotDuration          = TsSlotDuration;
+    ieee154e_vars.slotDuration          = slotTemplate.TsSlotDuration;
     
     // radiotimer_setPeriod(ieee154e_vars.slotDuration);
     if (ieee154e_vars.isSync==FALSE) {
@@ -999,12 +1037,12 @@ port_INLINE void activity_ti1ORri1(void) {
 
             opentimers_scheduleAbsolute(
                 ieee154e_vars.timerId,                            // timerId
-                TsSlotDuration*(ieee154e_vars.numOfSleepSlots),   // duration
+                slotTemplate.TsSlotDuration*(ieee154e_vars.numOfSleepSlots),   // duration
                 ieee154e_vars.startOfSlotReference,               // reference
                 TIME_TICS,                                        // timetype
                 isr_ieee154e_newSlot                              // callback
             );
-            ieee154e_vars.slotDuration = TsSlotDuration*(ieee154e_vars.numOfSleepSlots);
+            ieee154e_vars.slotDuration = slotTemplate.TsSlotDuration*(ieee154e_vars.numOfSleepSlots);
             // radiotimer_setPeriod(TsSlotDuration*(ieee154e_vars.numOfSleepSlots));
 
             //increase ASN by numOfSleepSlots-1 slots as at this slot is already incremented by 1
@@ -1918,7 +1956,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
         }
 
         // record the timeCorrection and print out at end of slot
-        ieee154e_vars.dataReceived->l2_timeCorrection = (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)TsTxOffset-(PORT_SIGNED_INT_WIDTH)ieee154e_vars.syncCapturedTime);
+        ieee154e_vars.dataReceived->l2_timeCorrection = (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)slotTemplate.TsTxOffset-(PORT_SIGNED_INT_WIDTH)ieee154e_vars.syncCapturedTime);
 
         // check if ack requested
         if (ieee802514_header.ackRequested==1 && ieee154e_vars.isAckEnabled == TRUE) {
@@ -2083,7 +2121,7 @@ port_INLINE void activity_ri6(void) {
 
     // calculate the time timeCorrection (this is the time the sender is off w.r.t to this node. A negative number means
     // the sender is too late.
-    ieee154e_vars.timeCorrection = (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)TsTxOffset-(PORT_SIGNED_INT_WIDTH)ieee154e_vars.syncCapturedTime);
+    ieee154e_vars.timeCorrection = (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)slotTemplate.TsTxOffset-(PORT_SIGNED_INT_WIDTH)ieee154e_vars.syncCapturedTime);
 
     // prepend the IEEE802.15.4 header to the ACK
     ieee154e_vars.ackToSend->l2_frameType = IEEE154_TYPE_ACK;
@@ -2670,7 +2708,7 @@ void synchronizePacket(PORT_TIMER_WIDTH timeReceived) {
     currentPeriod                  =  ieee154e_vars.slotDuration;
 
     // calculate new period
-    timeCorrection                 =  (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)timeReceived-(PORT_SIGNED_INT_WIDTH)TsTxOffset);
+    timeCorrection                 =  (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)timeReceived-(PORT_SIGNED_INT_WIDTH)slotTemplate.TsTxOffset);
 
     // The interrupt beginning a new slot can either occur after the packet has been
     // or while it is being received, possibly because the mote is not yet synchronized.
@@ -2688,7 +2726,7 @@ void synchronizePacket(PORT_TIMER_WIDTH timeReceived) {
     // detect whether I'm too close to the edge of the slot, in that case,
     // skip a slot and increase the temporary slot length to be 2 slots long
     if ((PORT_SIGNED_INT_WIDTH)newPeriod - (PORT_SIGNED_INT_WIDTH)currentValue < (PORT_SIGNED_INT_WIDTH)RESYNCHRONIZATIONGUARD) {
-        newPeriod                  +=  TsSlotDuration;
+        newPeriod                  +=  slotTemplate.TsSlotDuration;
         incrementAsnOffset();
     }
 
@@ -3101,4 +3139,10 @@ void endSlot(void) {
 
 bool ieee154e_isSynch(void){
     return ieee154e_vars.isSync;
+}
+// To get the current slotTemplate at any time
+// used during initialization by sixtop to fire the first sixtop EB
+slotTemplate_t ieee154e_getSlotTemplate (void)
+{
+  return ieee154e_vars.ieee_154e_slot_template;
 }

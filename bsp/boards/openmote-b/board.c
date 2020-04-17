@@ -34,6 +34,8 @@
 #define BSP_BUTTON_BASE                 ( GPIO_D_BASE )
 #define BSP_BUTTON_USER                 ( GPIO_PIN_5 )
 
+//=========================== variables ======================================
+
 //=========================== prototypes ======================================
 
 void board_timer_init(void);
@@ -54,7 +56,7 @@ static void SysCtrlRunSetting(void);
 static void SysCtrlWakeupSetting(void);
 
 //=========================== variables ============================================
-slot_board_vars_t slot_board_vars [MAX_SLOT_TYPES-1];
+
 
 //=========================== main ============================================
 
@@ -180,7 +182,7 @@ void board_init_slot_vars(void){
     slot_board_vars [SLOT_10ms].PORT_delayRx                              =  0  ; //    0us (can not measure)
 
     // 20ms slot
-    slot_board_vars [SLOT_20ms_24GHZ].PORT_SLOTDURATION                        =  20   ; // ms  
+    slot_board_vars [SLOT_20ms_24GHZ].PORT_SLOTDURATION                   =  20   ; // ms  
     slot_board_vars [SLOT_20ms_24GHZ].PORT_TsSlotDuration                 =  1310 ; //    20ms
     slot_board_vars [SLOT_20ms_24GHZ].PORT_maxTxDataPrepare               =  110  ; //  3355us (not measured)
     slot_board_vars [SLOT_20ms_24GHZ].PORT_maxRxAckPrepare                =  20   ; //   610us (not measured)
@@ -190,17 +192,17 @@ void board_init_slot_vars(void){
     slot_board_vars [SLOT_20ms_24GHZ].PORT_delayRx                        =  0    ; //     0us (can not measure)
     
     //40ms slot for 24ghz cc2538
-    slot_board_vars [SLOT_40ms_24GHZ].PORT_SLOTDURATION                        =   40  ;   // ms 
+    slot_board_vars [SLOT_40ms_24GHZ].PORT_SLOTDURATION                   =   40  ;   // ms 
     slot_board_vars [SLOT_40ms_24GHZ].PORT_TsSlotDuration                 =  1310 ;   // 40ms
     slot_board_vars [SLOT_40ms_24GHZ].PORT_maxTxDataPrepare               =   10  ;  //  305us 
     slot_board_vars [SLOT_40ms_24GHZ].PORT_maxRxAckPrepare                =   10  ;  //  305us 
     slot_board_vars [SLOT_40ms_24GHZ].PORT_maxRxDataPrepare               =    4  ;  //  122us 
     slot_board_vars [SLOT_40ms_24GHZ].PORT_maxTxAckPrepare                =   10  ;  //  305us 
-    #ifdef L2_SECURITY_ACTIVE                                             =       ;
+    #ifdef L2_SECURITY_ACTIVE                                             
     slot_board_vars [SLOT_40ms_24GHZ].PORT_delayTx                        =   14  ;  //  366us (measured xxxus)
-    #else                                                                 =       ;
+    #else                                                                 
     slot_board_vars [SLOT_40ms_24GHZ].PORT_delayTx                        =   12  ;  //  366us (measured xxxus)
-    #endif                                                                =       ;
+    #endif                                                                
     slot_board_vars [SLOT_40ms_24GHZ].PORT_delayRx                        =    0  ;  //    0us (can not measure)
 
     //40ms slot for FSK

@@ -31,7 +31,7 @@
 //=========================== variables =======================================
 
 sixtop_vars_t sixtop_vars;
-
+extern slotTemplate_t      slotTemplate;
 //=========================== prototypes ======================================
 
 // send internal
@@ -117,7 +117,7 @@ void sixtop_init(void) {
     sixtop_vars.ebSendingTimerId   = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_SIXTOP);
     opentimers_scheduleIn(
         sixtop_vars.ebSendingTimerId,
-        SLOTFRAME_LENGTH*SLOTDURATION,
+        SLOTFRAME_LENGTH*(slotTemplate.SLOTDURATION),
         TIME_MS,
         TIMER_PERIODIC,
         sixtop_sendingEb_timer_cb

@@ -151,97 +151,60 @@ typedef enum {
 
 #define  TIMESLOT_TEMPLATE_ID         0x00
 #define  CHANNELHOPPING_TEMPLATE_ID   0x00
+
 //===== Slot Template Configurations
 
 //general MAC slot template
 typedef struct {
-    uint8_t TsTxOffset;
-    uint8_t TsLongGT;
-    uint8_t TsTxAckDelay;
-    uint8_t TsShortGT;
-    uint8_t wdRadioTx;
-    uint8_t wdDataDuration;
-    uint8_t wdAckDuration;
+    uint16_t TsTxOffset;
+    uint16_t TsLongGT;
+    uint16_t TsTxAckDelay;
+    uint16_t TsShortGT;
+    uint16_t wdRadioTx;
+    uint16_t wdDataDuration;
+    uint16_t wdAckDuration;
 } slot_154e_vars_t; 
 
-// Atomic durations
-// expressed in 32kHz ticks:
+
+//======== global 802154e atomic duration variables
+
 //    - ticks = duration_in_seconds * 32768
 //    - duration_in_seconds = ticks / 32768
-enum ieee154e_atomicdurations_enum {
 
-   // time-slot related
-#if SLOT_TEMPLATE==10
-   TsTxOffset                =   (2120/PORT_US_PER_TICK),                 //  2120us
-   TsLongGT                  =   (1100/PORT_US_PER_TICK),                 //  1100us
-   TsTxAckDelay              =   (1000/PORT_US_PER_TICK),                 //  1000us
-   TsShortGT                 =    (500/PORT_US_PER_TICK),                 //   500us, The standardlized value for this is 400/2=200us(7ticks). Currectly 7 doesn't work for short packet, change it back to 7 when found the problem.
+// This slotTemplate should be instantiated only once for the currently used slotTemplate
+typedef struct {
+  
+// 1. slot template variables
+//  data transmission template
+uint16_t TsTxOffset;         //tx
+uint16_t TsLongGT;           //rx
 
-   wdRadioTx                 =  (1342/PORT_US_PER_TICK),                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
-   wdDataDuration            =  (5000/PORT_US_PER_TICK),                  //  5000us (measured 4280us with max payload)
-   wdAckDuration             =  (3000/PORT_US_PER_TICK),                  //  3000us (measured 1000us)
-#endif
-//Default TS    
-#if SLOT_TEMPLATE==20
-   TsTxOffset                =  (5215/PORT_US_PER_TICK),                  //  5215us
-   TsLongGT                  =  (1311/PORT_US_PER_TICK),                  //  1311us
-   TsTxAckDelay              =  (5521/PORT_US_PER_TICK),                  //  5521us
-   TsShortGT                 =   (700/PORT_US_PER_TICK),                  //   700us
-   wdRadioTx                 =  (1342/PORT_US_PER_TICK),                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
-   wdDataDuration            =  (5000/PORT_US_PER_TICK),                  //  5000us (measured 4280us with max payload)
-   wdAckDuration             =  (3000/PORT_US_PER_TICK),                  //  3000us (measured 1000us)
-#endif
+// ack transmission template
+uint16_t TsTxAckDelay;       //tx
+uint16_t TsShortGT;          //rx
 
-//40 ms slot for 24GHZ cc2538
-#if SLOT_TEMPLATE==41
-    TsTxOffset                =  (5215/PORT_US_PER_TICK),                  //  5215us
-   TsLongGT                  =  (1311/PORT_US_PER_TICK),                  //  1311us
-   TsTxAckDelay              =  (5521/PORT_US_PER_TICK),                  //  5521us
-   TsShortGT                 =   (700/PORT_US_PER_TICK),                  //   700us
-   wdRadioTx                 =  (1342/PORT_US_PER_TICK),                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
-   wdDataDuration            =  (5000/PORT_US_PER_TICK),                  //  5000us (measured 4280us with max payload)
-   wdAckDuration             =  (3000/PORT_US_PER_TICK),                  //  3000us (measured 1000us)
-#endif
+// watchdog (safety check) template
+uint16_t wdRadioTx;      
+uint16_t wdDataDuration;
+uint16_t wdAckDuration;
 
- //40 ms slot fot FSK
-#if SLOT_TEMPLATE==42
-   TsTxOffset                = (4000/PORT_US_PER_TICK),          //    measured: 131 ticks
-   TsLongGT                  =  (2000/PORT_US_PER_TICK),         //    measured: 66 ticks
-   TsTxAckDelay              = (3700/PORT_US_PER_TICK),          //    measured: 121 ticks
-   TsShortGT                 =  (1831/PORT_US_PER_TICK),         //    measured: 60 ticks
-   // radio watchdog
-   wdRadioTx                 =  (7000/PORT_US_PER_TICK),         //    230 ticks  7019us delayTx+Tx time for 10 bytes( (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
-   wdDataDuration            =  (30000/PORT_US_PER_TICK),                 //    983 ticks , estimated based on max payload
-   wdAckDuration             =  (20000/PORT_US_PER_TICK),                 //    655 ticks, estimated 
-#endif
+// 2. board/implementation specific durations
+// note that these variables MUST respect (i.e. fit) the slot template section 1 in order for the scedule to maintain its integrity. 
+uint16_t SLOTDURATION;
+uint16_t TsSlotDuration;
+uint16_t maxTxDataPrepare;
+uint16_t maxRxAckPrepare;
+uint16_t maxRxDataPrepare;
+uint16_t maxTxAckPrepare;
 
+//3. radio setting specific durations
 
+// this parameter is specifically helpful in tuning the radio transmission timing to meet the TsTxOffset for accurate synchronization
+uint16_t delayTx;       // between GO signal and SFD
 
-//40 ms slot for OFDM01 MCS3
-#if SLOT_TEMPLATE==43
-   TsTxOffset                = (3500/PORT_US_PER_TICK),             //    measured: 115 ticks, 
-   TsLongGT                  =  (2000/PORT_US_PER_TICK),            //    measured: 66 ticks, 
-   TsTxAckDelay              = (3700/PORT_US_PER_TICK),             //    measured: 121 ticks
-   TsShortGT                 =  (1831/PORT_US_PER_TICK),            //    measured: 60 ticks 
-   // radio watchdog
-   wdRadioTx                 =  (7000/PORT_US_PER_TICK),            //    230 ticks  7019us delayTx+Tx time for 10 bytes( (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
-   wdDataDuration            =  (30000/PORT_US_PER_TICK),           //    983 ticks, estimated based on max payload
-   wdAckDuration             =  (20000/PORT_US_PER_TICK),           //    655 ticks,  estimated
-#endif
-
-
-   TsSlotDuration            =  PORT_TsSlotDuration,  
-   // execution speed related
-   maxTxDataPrepare          =  PORT_maxTxDataPrepare,
-   maxRxAckPrepare           =  PORT_maxRxAckPrepare,
-   maxRxDataPrepare          =  PORT_maxRxDataPrepare,
-   maxTxAckPrepare           =  PORT_maxTxAckPrepare,
-   // radio speed related
-   delayTx                   =  PORT_delayTx,         // between GO signal and SFD
-   delayRx                   =  PORT_delayRx,         // between GO signal and start listening
-   // radio watchdog
-
-};
+// this parameter is helpful to have the radio listen later or earlier to save energy in listening state.
+uint16_t delayRx;        // between GO signal and start listening
+} slotTemplate_t;
 
 //shift of bytes in the linkOption bitmap: draft-ietf-6tisch-minimal-10.txt: page 6
 enum ieee154e_linkOption_enum {
@@ -253,23 +216,23 @@ enum ieee154e_linkOption_enum {
 
 // FSM timer durations (combinations of atomic durations)
 // TX
-#define DURATION_tt1 ieee154e_vars.lastCapturedTime+TsTxOffset-delayTx-maxTxDataPrepare
-#define DURATION_tt2 ieee154e_vars.lastCapturedTime+TsTxOffset-delayTx
-#define DURATION_tt3 ieee154e_vars.lastCapturedTime+TsTxOffset-delayTx+wdRadioTx
-#define DURATION_tt4 ieee154e_vars.lastCapturedTime+wdDataDuration
-#define DURATION_tt5 ieee154e_vars.lastCapturedTime+TsTxAckDelay-TsShortGT-delayRx-maxRxAckPrepare
-#define DURATION_tt6 ieee154e_vars.lastCapturedTime+TsTxAckDelay-TsShortGT-delayRx
-#define DURATION_tt7 ieee154e_vars.lastCapturedTime+TsTxAckDelay+TsShortGT
-#define DURATION_tt8 ieee154e_vars.lastCapturedTime+wdAckDuration
+#define DURATION_tt1 ieee154e_vars.lastCapturedTime+slotTemplate.TsTxOffset-slotTemplate.delayTx-slotTemplate.maxTxDataPrepare
+#define DURATION_tt2 ieee154e_vars.lastCapturedTime+slotTemplate.TsTxOffset-slotTemplate.delayTx
+#define DURATION_tt3 ieee154e_vars.lastCapturedTime+slotTemplate.TsTxOffset-slotTemplate.delayTx+slotTemplate.wdRadioTx
+#define DURATION_tt4 ieee154e_vars.lastCapturedTime+slotTemplate.wdDataDuration
+#define DURATION_tt5 ieee154e_vars.lastCapturedTime+slotTemplate.TsTxAckDelay-slotTemplate.TsShortGT-slotTemplate.delayRx-slotTemplate.maxRxAckPrepare
+#define DURATION_tt6 ieee154e_vars.lastCapturedTime+slotTemplate.TsTxAckDelay-slotTemplate.TsShortGT-slotTemplate.delayRx
+#define DURATION_tt7 ieee154e_vars.lastCapturedTime+slotTemplate.TsTxAckDelay+slotTemplate.TsShortGT
+#define DURATION_tt8 ieee154e_vars.lastCapturedTime+slotTemplate.wdAckDuration
 // RX
-#define DURATION_rt1 ieee154e_vars.lastCapturedTime+TsTxOffset-TsLongGT-delayRx-maxRxDataPrepare
-#define DURATION_rt2 ieee154e_vars.lastCapturedTime+TsTxOffset-TsLongGT-delayRx
-#define DURATION_rt3 ieee154e_vars.lastCapturedTime+TsTxOffset+TsLongGT
-#define DURATION_rt4 ieee154e_vars.lastCapturedTime+wdDataDuration
-#define DURATION_rt5 ieee154e_vars.lastCapturedTime+TsTxAckDelay-delayTx-maxTxAckPrepare
-#define DURATION_rt6 ieee154e_vars.lastCapturedTime+TsTxAckDelay-delayTx
-#define DURATION_rt7 ieee154e_vars.lastCapturedTime+TsTxAckDelay-delayTx+wdRadioTx
-#define DURATION_rt8 ieee154e_vars.lastCapturedTime+wdAckDuration
+#define DURATION_rt1 ieee154e_vars.lastCapturedTime+slotTemplate.TsTxOffset-slotTemplate.TsLongGT-slotTemplate.delayRx-slotTemplate.maxRxDataPrepare
+#define DURATION_rt2 ieee154e_vars.lastCapturedTime+slotTemplate.TsTxOffset-slotTemplate.TsLongGT-slotTemplate.delayRx
+#define DURATION_rt3 ieee154e_vars.lastCapturedTime+slotTemplate.TsTxOffset+slotTemplate.TsLongGT
+#define DURATION_rt4 ieee154e_vars.lastCapturedTime+slotTemplate.wdDataDuration
+#define DURATION_rt5 ieee154e_vars.lastCapturedTime+slotTemplate.TsTxAckDelay-slotTemplate.delayTx-slotTemplate.maxTxAckPrepare
+#define DURATION_rt6 ieee154e_vars.lastCapturedTime+slotTemplate.TsTxAckDelay-slotTemplate.delayTx
+#define DURATION_rt7 ieee154e_vars.lastCapturedTime+slotTemplate.TsTxAckDelay-slotTemplate.delayTx+slotTemplate.wdRadioTx
+#define DURATION_rt8 ieee154e_vars.lastCapturedTime+slotTemplate.wdAckDuration
 // serialInhibit
 #define DURATION_si  ieee154e_vars.slotDuration-SERIALINHIBITGUARD
 
@@ -328,6 +291,8 @@ typedef struct {
     uint32_t                  receivedFrameFromParent; // True when received a frame from parent
 
    uint16_t                  compensatingCounter;
+   
+   slotTemplate_t            ieee_154e_slot_template;
 } ieee154e_vars_t;
 
 BEGIN_PACK
@@ -353,6 +318,9 @@ typedef struct {
 
 // admin
 void               ieee154e_init(void);
+void               ieee154e_slot_template_init(void);
+void               ieee154e_select_slot_template(slotType_t slotType);
+slotTemplate_t     ieee154e_getSlotTemplate (void);
 // public
 PORT_TIMER_WIDTH   ieee154e_asnDiff(asn_t* someASN);
 #ifdef DEADLINE_OPTION_ENABLED

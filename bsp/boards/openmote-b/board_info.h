@@ -57,51 +57,9 @@
 #define PORT_PIN_RADIO_RESET_HIGH()    // nothing
 #define PORT_PIN_RADIO_RESET_LOW()     // nothing
 
-//===== Slot Information
-/*
-    Indexes for slot templates:
-    
-    10 : 10 ms tempalte
-    20 : 20 ms template for cc2538 24ghz radio --> Default
-    41 : 40 ms template for cc2538 24ghz radio
-    42 : 40 ms template for Atmel FSK FEC radio
-    43 : 40 ms template for Atmel OFSM1 radios MCS 0,1,2, and 3
-*/
-#define SLOT_TEMPLATE 20                
-
-//===== Radios
 
 // Number of available radios
 #define MAX_RADIOS  7
-
-//===== IEEE802154E timing
-    
-typedef struct {
-    uint8_t SLOTDURATION;
-    uint8_t PORT_TsSlotDuration;
-
-    // execution speed related
-    // also implementation related (e.g. SoC radio or spi-connected radio because of the time to load a packet to/from radio)
-    uint8_t PORT_maxTxDataPrepare;
-    uint8_t PORT_maxRxAckPrepare;
-    uint8_t PORT_maxRxDataPrepare;
-    uint8_t PORT_maxTxAckPrepare;
-
-    // radio speed related
-    // also implementation related (because the time to execute the Tx/Rx command is highly dependent on the radio AND the configuration)
-    uint8_t PORT_delayTx;                       
-    uint8_t PORT_delayRx;
-} slot_board_vars_t; //board specific slot vars
-
-// available slot templates
-typedef enum{
-    SLOT_10ms,
-    SLOT_20ms_24GHZ,
-    SLOT_40ms_24GHZ,
-    SLOT_40ms_FSK_SUBGHZ,
-    SLOT_40ms_OFDM1MCS0_3_SUBGHZ,
-    MAX_SLOT_TYPES,
-} slotType_t;
 
 //===== adaptive_sync accuracy
 
