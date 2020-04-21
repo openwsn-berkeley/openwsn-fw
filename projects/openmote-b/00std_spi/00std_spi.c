@@ -57,7 +57,7 @@ static void disableInterrupts(void);
 static void enableInterrupts(void);
 //=========================== public ==========================================
 
-void spi_init() {
+void spi_init(){
     // clear variables
     memset(&spi_vars,0,sizeof(spi_vars_t));
 
@@ -105,7 +105,7 @@ void spi_init() {
     SSIEnable(SSI1_BASE);
     
     //Call the spi_txrx function
-	spi_txrx((uint8_t*)stringToPrint,len,SPI_FIRSTBYTE,(uint8_t*)16,16,SPI_FIRST,SPI_NOTLAST);
+    spi_txrx((uint8_t*)stringToPrint,len,SPI_FIRSTBYTE,(uint8_t*)16,16,SPI_FIRST,SPI_NOTLAST);
 }
 
 #ifdef SPI_IN_INTERRUPT_MODE
