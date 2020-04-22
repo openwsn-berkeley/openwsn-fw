@@ -131,7 +131,7 @@ void icmpv6rpl_init(void) {
 
     opentimers_scheduleIn(
         icmpv6rpl_vars.timerIdDIO,
-        SLOTFRAME_LENGTH*(board_getSlotDuration()),
+        SLOTFRAME_LENGTH*(board_getSlotDuration(TIME_MS)),
         TIME_MS,
         TIMER_PERIODIC,
         icmpv6rpl_timer_DIO_cb
@@ -180,7 +180,7 @@ void icmpv6rpl_init(void) {
     icmpv6rpl_vars.timerIdDAO                = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_RPL);
     opentimers_scheduleIn(
         icmpv6rpl_vars.timerIdDAO,
-        SLOTFRAME_LENGTH*(board_getSlotDuration()),
+        SLOTFRAME_LENGTH*(board_getSlotDuration(TIME_MS)),
         TIME_MS,
         TIMER_PERIODIC,
         icmpv6rpl_timer_DAO_cb

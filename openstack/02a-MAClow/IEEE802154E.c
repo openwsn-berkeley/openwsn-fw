@@ -1766,6 +1766,9 @@ port_INLINE void activity_ri4(PORT_TIMER_WIDTH capturedTime) {
 
     // change state
     changeState(S_RXDATA);
+    //indicate on LA that a frame reception has actually started
+    debugpins_radio_toggle();
+    debugpins_radio_toggle();
 
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
     // cancel rt3
@@ -1812,6 +1815,10 @@ port_INLINE void activity_rie3(void) {
 }
 
 port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
+    //indicate on LA that a frame reception has ended
+    debugpins_radio_toggle();
+    debugpins_radio_toggle();
+    
     ieee802154_header_iht ieee802514_header;
     uint16_t lenIE=0;
     open_addr_t                 addressToWrite;

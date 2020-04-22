@@ -2429,6 +2429,9 @@
                 <name>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\..\..\bsp\boards\sctimer.h</name>
             </file>
             <file>
@@ -2453,9 +2456,6 @@
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\at86rf215.h</name>
-                </file>
-                <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\radio.h</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\radio_at86rf215.c</name>

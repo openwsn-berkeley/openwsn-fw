@@ -22,6 +22,11 @@ typedef enum {
    KICK_SCHEDULER        = 1,
 } kick_scheduler_t;
 
+typedef enum {
+   TIME_MS,
+   TIME_TICS,
+} time_type_t;
+
 //=========================== typedef =========================================
 typedef struct {
     uint16_t PORT_SLOTDURATION;
@@ -58,7 +63,7 @@ void              board_init(void);
 void              board_sleep(void);
 void              board_reset(void);
 void              board_init_slot_vars(void);
-uint16_t          board_getSlotDuration (void);
+uint16_t          board_getSlotDuration (time_type_t time_type);
 void              board_setSlotType(slotType_t slot_type);
 slot_board_vars_t board_getSlotTemplate (void);
 /**
