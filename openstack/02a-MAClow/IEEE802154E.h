@@ -291,8 +291,7 @@ typedef struct {
     uint32_t                  receivedFrameFromParent; // True when received a frame from parent
 
    uint16_t                  compensatingCounter;
-   
-   slotTemplate_t            ieee_154e_slot_template;
+
 } ieee154e_vars_t;
 
 BEGIN_PACK

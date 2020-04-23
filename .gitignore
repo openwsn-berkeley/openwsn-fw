@@ -1,6 +1,9 @@
 Debug
 settings
 *.dep
+*.ewd
+*.ewt
+*.bak
 *.sfr
 *.o
 *.exe

@@ -801,7 +801,7 @@
                 </option>
                 <option>
                     <name>IlinkIcfFile</name>
-                    <state>C:\openwsn\iar-plugin\cx2538xf53.icf</state>
+                    <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\cx2538xf53.icf</state>
                 </option>
                 <option>
                     <name>IlinkIcfFileSlave</name>
