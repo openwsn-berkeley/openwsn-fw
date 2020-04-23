@@ -118,7 +118,7 @@ void ieee154e_init(void) {
     // initialize variables
     memset(&ieee154e_vars,0,sizeof(ieee154e_vars_t));
     memset(&ieee154e_dbg,0,sizeof(ieee154e_dbg_t));
-#define IEEE802154E_SINGLE_CHANNEL       11
+
     // set singleChannel to 0 to enable channel hopping.
 #if IEEE802154E_SINGLE_CHANNEL  
     ieee154e_vars.singleChannel     = IEEE802154E_SINGLE_CHANNEL;
@@ -149,7 +149,17 @@ void ieee154e_init(void) {
     // initialize slot template lookup table
     ieee154e_slot_template_init();
     
-    // select the desired slot template to use, default is SLOT_20ms_24GHZ
+    /* select the desired slot template to use, default is SLOT_20ms_24GHZ
+       currently, the following slot template/radio setting combinations are supported:
+
+        SLOT_20ms_24GHZ              , RADIOSETTING_24GHZ --> Default
+        SLOT_40ms_24GHZ              , RADIOSETTING_24GHZ
+        SLOT_40ms_FSK_SUBGHZ         , RADIOSETTING_FSK_OPTION1_FEC
+        SLOT_40ms_OFDM1MCS0_3_SUBGHZ , RADIOSETTING_OFDM_OPTION_1_MCS0
+        SLOT_40ms_OFDM1MCS0_3_SUBGHZ , RADIOSETTING_OFDM_OPTION_1_MCS1
+        SLOT_40ms_OFDM1MCS0_3_SUBGHZ , RADIOSETTING_OFDM_OPTION_1_MCS2
+        SLOT_40ms_OFDM1MCS0_3_SUBGHZ , RADIOSETTING_OFDM_OPTION_1_MCS3
+    */
     ieee154e_select_slot_template (SLOT_20ms_24GHZ);
     ieee154e_vars.slotDuration      = slotTemplate.TsSlotDuration;
 
