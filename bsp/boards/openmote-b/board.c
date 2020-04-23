@@ -170,58 +170,58 @@ bool board_timer_expired(uint32_t future) {
 //==== bootstrapping slot info lookup table
 void board_init_slot_vars(void){
     //10ms slot
-    slot_board_vars [SLOT_10ms].PORT_SLOTDURATION                         = 10  ;   // ms 
+    slot_board_vars [SLOT_10ms].PORT_SLOTDURATION                         = 10  ;  // ms 
     slot_board_vars [SLOT_10ms].PORT_TsSlotDuration                       = 328 ;  // counter counts one extra count, see datasheet
-    slot_board_vars [SLOT_10ms].PORT_maxTxDataPrepare                     = 10  ;  //  305us (measured  82us)
-    slot_board_vars [SLOT_10ms].PORT_maxRxAckPrepare                      = 10  ;  //  305us (measured  83us)
-    slot_board_vars [SLOT_10ms].PORT_maxRxDataPrepare                     =  4  ;  //  122us (measured  22us)
-    slot_board_vars [SLOT_10ms].PORT_maxTxAckPrepare                      = 10  ;  //  122us (measured  94us)
+    slot_board_vars [SLOT_10ms].PORT_maxTxDataPrepare                     = 10  ;  // 305us (measured  82us)
+    slot_board_vars [SLOT_10ms].PORT_maxRxAckPrepare                      = 10  ;  // 305us (measured  83us)
+    slot_board_vars [SLOT_10ms].PORT_maxRxDataPrepare                     =  4  ;  // 122us (measured  22us)
+    slot_board_vars [SLOT_10ms].PORT_maxTxAckPrepare                      = 10  ;  // 122us (measured  94us)
     #ifdef L2_SECURITY_ACTIVE                                             
-    slot_board_vars [SLOT_10ms].PORT_delayTx                              = 14  ;  //  366us (measured xxxus)
+    slot_board_vars [SLOT_10ms].PORT_delayTx                              = 14  ;  // 366us (measured xxxus)
     #else                                                                 
-    slot_board_vars [SLOT_10ms].PORT_delayTx                              = 12  ; //  366us (measured xxxus)
+    slot_board_vars [SLOT_10ms].PORT_delayTx                              = 12  ;  // 366us (measured xxxus)
     #endif                                                                
-    slot_board_vars [SLOT_10ms].PORT_delayRx                              =  0  ; //    0us (can not measure)
+    slot_board_vars [SLOT_10ms].PORT_delayRx                              =  0  ;  // 0us (can not measure)
 
     // 20ms slot
     slot_board_vars [SLOT_20ms_24GHZ].PORT_SLOTDURATION                   =  20   ; // ms  
-    slot_board_vars [SLOT_20ms_24GHZ].PORT_TsSlotDuration                 =  655 ; //    20ms
-    slot_board_vars [SLOT_20ms_24GHZ].PORT_maxTxDataPrepare               =  15  ; //  3355us (not measured)
-    slot_board_vars [SLOT_20ms_24GHZ].PORT_maxRxAckPrepare                =  10   ; //   610us (not measured)
-    slot_board_vars [SLOT_20ms_24GHZ].PORT_maxRxDataPrepare               =  10   ; //  1000us (not measured)
-    slot_board_vars [SLOT_20ms_24GHZ].PORT_maxTxAckPrepare                =  15   ; //  1525us (not measured)
-    slot_board_vars [SLOT_20ms_24GHZ].PORT_delayTx                        =  13   ; //   549us (not measured)
-    slot_board_vars [SLOT_20ms_24GHZ].PORT_delayRx                        =  0    ; //     0us (can not measure)
+    slot_board_vars [SLOT_20ms_24GHZ].PORT_TsSlotDuration                 =  655  ;  // 20ms
+    slot_board_vars [SLOT_20ms_24GHZ].PORT_maxTxDataPrepare               =  15   ;  // 457us (based on measurement)
+    slot_board_vars [SLOT_20ms_24GHZ].PORT_maxRxAckPrepare                =  10   ; // 305us (based on measurement)
+    slot_board_vars [SLOT_20ms_24GHZ].PORT_maxRxDataPrepare               =  10   ; // 305us (based on measurement)
+    slot_board_vars [SLOT_20ms_24GHZ].PORT_maxTxAckPrepare                =  15   ; // 457us (based on measurement)
+    slot_board_vars [SLOT_20ms_24GHZ].PORT_delayTx                        =  13   ; // 396us (based on measurement)
+    slot_board_vars [SLOT_20ms_24GHZ].PORT_delayRx                        =  0    ; // 0us (can not measure)
     
     //40ms slot for 24ghz cc2538
-    slot_board_vars [SLOT_40ms_24GHZ].PORT_SLOTDURATION                   =   40  ;   // ms 
-    slot_board_vars [SLOT_40ms_24GHZ].PORT_TsSlotDuration                 =  1310 ;   // 40ms
-    slot_board_vars [SLOT_40ms_24GHZ].PORT_maxTxDataPrepare               =   15  ;  //  305us 
-    slot_board_vars [SLOT_40ms_24GHZ].PORT_maxRxAckPrepare                =   10  ;  //  305us 
-    slot_board_vars [SLOT_40ms_24GHZ].PORT_maxRxDataPrepare               =   10  ;  //  122us 
-    slot_board_vars [SLOT_40ms_24GHZ].PORT_maxTxAckPrepare                =   15  ;  //  305us 
-    slot_board_vars [SLOT_40ms_24GHZ].PORT_delayTx                        =   13  ;  //  366us (measured xxxus)
-    slot_board_vars [SLOT_40ms_24GHZ].PORT_delayRx                        =    0  ;  //    0us (can not measure)
+    slot_board_vars [SLOT_40ms_24GHZ].PORT_SLOTDURATION                   =   40  ;  // ms 
+    slot_board_vars [SLOT_40ms_24GHZ].PORT_TsSlotDuration                 =  1310 ;  // 40ms
+    slot_board_vars [SLOT_40ms_24GHZ].PORT_maxTxDataPrepare               =   15  ;  // 457us (based on measurement) 
+    slot_board_vars [SLOT_40ms_24GHZ].PORT_maxRxAckPrepare                =   10  ;  // 305us (based on measurement)
+    slot_board_vars [SLOT_40ms_24GHZ].PORT_maxRxDataPrepare               =   10  ;  // 305us (based on measurement)
+    slot_board_vars [SLOT_40ms_24GHZ].PORT_maxTxAckPrepare                =   15  ;  // 457us (based on measurement)
+    slot_board_vars [SLOT_40ms_24GHZ].PORT_delayTx                        =   13  ;  // 396us (measured xxxus)
+    slot_board_vars [SLOT_40ms_24GHZ].PORT_delayRx                        =    0  ;  // 0us (can not measure)
 
     //40ms slot for FSK
     slot_board_vars [SLOT_40ms_FSK_SUBGHZ].PORT_SLOTDURATION              =   40   ;  // ms  
     slot_board_vars [SLOT_40ms_FSK_SUBGHZ].PORT_TsSlotDuration            =   1310 ;  // 40ms 
-    slot_board_vars [SLOT_40ms_FSK_SUBGHZ].PORT_maxTxDataPrepare          =   50   ;   // 1525 us  (based on measurement)
-    slot_board_vars [SLOT_40ms_FSK_SUBGHZ].PORT_maxRxAckPrepare           =   10   ;   // 305µs (based on measurement)
-    slot_board_vars [SLOT_40ms_FSK_SUBGHZ].PORT_maxRxDataPrepare          =   10   ;   // 305µs  (based on measurement)
-    slot_board_vars [SLOT_40ms_FSK_SUBGHZ].PORT_maxTxAckPrepare           =   33   ;   // 1000µs  (based on measurement)
-    slot_board_vars [SLOT_40ms_FSK_SUBGHZ].PORT_delayTx                   =   66   ;   // 2000µs  (based on measurement)
-    slot_board_vars [SLOT_40ms_FSK_SUBGHZ].PORT_delayRx                   =   16   ;   // 488µs. This parameter is usually set to 0, however for Atmel on openmote-b, it takes at least 1ms for the transmission to occure because of spi delay (or other implementation specific overhead), so reciver is expected to wait a little more before turning on the radio. 
+    slot_board_vars [SLOT_40ms_FSK_SUBGHZ].PORT_maxTxDataPrepare          =   50   ;  // 1525us  (based on measurement)
+    slot_board_vars [SLOT_40ms_FSK_SUBGHZ].PORT_maxRxAckPrepare           =   10   ;  // 305µs   (based on measurement)
+    slot_board_vars [SLOT_40ms_FSK_SUBGHZ].PORT_maxRxDataPrepare          =   10   ;  // 305µs   (based on measurement)
+    slot_board_vars [SLOT_40ms_FSK_SUBGHZ].PORT_maxTxAckPrepare           =   33   ;  // 1000µs  (based on measurement)
+    slot_board_vars [SLOT_40ms_FSK_SUBGHZ].PORT_delayTx                   =   66   ;  // 2000µs  (based on measurement)
+    slot_board_vars [SLOT_40ms_FSK_SUBGHZ].PORT_delayRx                   =   16   ;  // 488µs. This parameter is usually set to 0, however for Atmel on openmote-b, it takes at least 1ms for the transmission to occure because of spi delay (or other implementation specific overhead), so reciver is expected to wait a little more before turning on the radio. 
     
     //40ms slot for OFDM1 MCS0-3    
-    slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].PORT_SLOTDURATION      =  40   ;     // ms  
-    slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].PORT_TsSlotDuration    =  1310 ;     // 40ms
-    slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].PORT_maxTxDataPrepare  =  50   ;     //1525us (based on measurement) 
-    slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].PORT_maxRxAckPrepare   =  10   ;     //305us (based on measurement) 
-    slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].PORT_maxRxDataPrepare  =  10   ;     //305us (based on measurement) 
-    slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].PORT_maxTxAckPrepare   =  33   ;     //1000us (based on measurement) 
-    slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].PORT_delayTx           =  41   ;     //1251us (based on measurement)  
-    slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].PORT_delayRx           =  16   ;     // 488µs. This parameter is usually set to 0, however for Atmel on openmote-b, it takes at least 1ms for the transmission to occure because of spi delay (or other implementation specific overhead), so reciver is expected to wait a little more before turning on the radio. 
+    slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].PORT_SLOTDURATION      =  40    ;  // ms  
+    slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].PORT_TsSlotDuration    =  1310  ;  // 40ms
+    slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].PORT_maxTxDataPrepare  =  50    ;  // 1525us (based on measurement) 
+    slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].PORT_maxRxAckPrepare   =  10    ;  // 305us (based on measurement) 
+    slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].PORT_maxRxDataPrepare  =  10    ;  // 305us (based on measurement) 
+    slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].PORT_maxTxAckPrepare   =  33    ;  // 1000us (based on measurement) 
+    slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].PORT_delayTx           =  41    ;  // 1251us (based on measurement)  
+    slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].PORT_delayRx           =  16    ;  // 488µs. This parameter is usually set to 0, however for Atmel on openmote-b, it takes at least 1ms for the transmission to occure because of spi delay (or other implementation specific overhead), so reciver is expected to wait a little more before turning on the radio. 
 }
 
 // To get the current slotDuration at any time

@@ -149,12 +149,12 @@ void ieee154e_init(void) {
     // initialize slot template lookup table
     ieee154e_slot_template_init();
     
-    // select the desired slot template to use, default  SLOT_20ms_24GHZ
-    ieee154e_select_slot_template (SLOT_40ms_FSK_SUBGHZ);
+    // select the desired slot template to use, default is SLOT_20ms_24GHZ
+    ieee154e_select_slot_template (SLOT_20ms_24GHZ);
     ieee154e_vars.slotDuration      = slotTemplate.TsSlotDuration;
 
-    //set the radio setting to use
-    radio_setConfig (RADIOSETTING_FSK_OPTION1_FEC); 
+    //set the radio setting to use, default is RADIOSETTING_24GHZ
+    radio_setConfig (RADIOSETTING_24GHZ); 
     
     // switch radio on
     radio_rfOn();

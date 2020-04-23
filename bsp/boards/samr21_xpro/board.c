@@ -55,6 +55,9 @@
 #include "leds.h"
 #include "delay.h"
 
+//=========================== variables ============================================
+slot_board_vars_t slot_board_vars [MAX_SLOT_TYPES];
+slotType_t selected_slot_type;
 
 
 /* === MACROS ============================================================== */
@@ -132,6 +135,9 @@ void board_init(void)
  /* BSP Timer Init*/
  sctimer_init(); 
  
+ /* Initialize slot vars*/
+ board_init_slot_vars();
+ 
  /* Clear the Radio Interrupt */
  extint_enable_irq(TRX_EXT_INT_CH);
  /* Enable the IRQ */
@@ -195,6 +201,42 @@ void rf_interface_init(void)
 	//RST_LOW();
 	cpu_delay_us(RST_PULSE_WIDTH_US);
 	//RST_HIGH();
+}
+
+//==== bootstrapping slot info lookup table
+void board_init_slot_vars(void){
+
+    // 20ms slot
+    slot_board_vars [SLOT_20ms_24GHZ].PORT_SLOTDURATION                   =  20   ; // ms  
+    slot_board_vars [SLOT_20ms_24GHZ].PORT_TsSlotDuration                 =  655  ; // 20ms
+    slot_board_vars [SLOT_20ms_24GHZ].PORT_maxTxDataPrepare               =  110  ; // 3355us (not measured)
+    slot_board_vars [SLOT_20ms_24GHZ].PORT_maxRxAckPrepare                =  20   ; // 610us (not measured)
+    slot_board_vars [SLOT_20ms_24GHZ].PORT_maxRxDataPrepare               =  33   ; // 1007us (not measured)
+    slot_board_vars [SLOT_20ms_24GHZ].PORT_maxTxAckPrepare                =  50   ; // 1525us (not measured)
+    slot_board_vars [SLOT_20ms_24GHZ].PORT_delayTx                        =  18   ; // 549us (not measured)
+    slot_board_vars [SLOT_20ms_24GHZ].PORT_delayRx                        =  0    ; // 0us (can not measure)
+    
+}
+
+// To get the current slotDuration at any time
+// used during initialization by sixtop to fire the first sixtop EB
+uint16_t board_getSlotDuration (time_type_t time_type)
+{
+  if (time_type == TIME_MS)
+    return slot_board_vars [selected_slot_type].PORT_SLOTDURATION;
+ else 
+   return slot_board_vars [selected_slot_type].PORT_TsSlotDuration;
+}
+
+// Getter function for slot_board_vars
+slot_board_vars_t board_getSlotTemplate (void)
+{
+  return slot_board_vars [selected_slot_type];
+}
+// Getter function for selected_slot_type
+void board_setSlotType(slotType_t slot_type)
+{
+  selected_slot_type = slot_type;
 }
 
 /*

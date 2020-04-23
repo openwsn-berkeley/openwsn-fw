@@ -207,7 +207,7 @@ void radio_bootstrap (void)
  //RADIOSETTING_24GHZ
     dyn_funcs [RADIOSETTING_24GHZ].radio_reset                 =   radio_reset_cc2538rf; 
     dyn_funcs [RADIOSETTING_24GHZ].radio_init                  =   radio_init_cc2538rf; 
-    dyn_funcs [RADIOSETTING_24GHZ].radio_setConfig     =   radio_setConfig_cc2538rf; 
+    dyn_funcs [RADIOSETTING_24GHZ].radio_setConfig             =   radio_setConfig_cc2538rf; 
     dyn_funcs [RADIOSETTING_24GHZ].radio_setStartFrameCb       =   radio_setStartFrameCb_cc2538rf; 
     dyn_funcs [RADIOSETTING_24GHZ].radio_setEndFrameCb         =   radio_setEndFrameCb_cc2538rf; 
     dyn_funcs [RADIOSETTING_24GHZ].radio_setFrequency          =   radio_setFrequency_cc2538rf; 

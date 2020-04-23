@@ -34,6 +34,11 @@
 #define BSP_BUTTON_BASE                 ( GPIO_D_BASE )
 #define BSP_BUTTON_USER                 ( GPIO_PIN_5 )
 
+//=========================== variables ============================================
+slot_board_vars_t slot_board_vars [MAX_SLOT_TYPES];
+slotType_t selected_slot_type;
+
+
 //=========================== prototypes ======================================
 
 void board_timer_init(void);
@@ -73,9 +78,58 @@ void board_init(void) {
     uart_init();
     radio_init();
     i2c_init();
-
+    board_init_slot_vars();
     // sensors_init();
     cryptoengine_init();
+}
+
+//==== bootstrapping slot info lookup table
+void board_init_slot_vars(void){
+    //10ms slot
+    slot_board_vars [SLOT_10ms].PORT_SLOTDURATION                         = 10  ;  // ms 
+    slot_board_vars [SLOT_10ms].PORT_TsSlotDuration                       = 328 ;  // counter counts one extra count, see datasheet
+    slot_board_vars [SLOT_10ms].PORT_maxTxDataPrepare                     = 10  ;  // 305us (measured  82us)
+    slot_board_vars [SLOT_10ms].PORT_maxRxAckPrepare                      = 10  ;  // 305us (measured  83us)
+    slot_board_vars [SLOT_10ms].PORT_maxRxDataPrepare                     =  4  ;  // 122us (measured  22us)
+    slot_board_vars [SLOT_10ms].PORT_maxTxAckPrepare                      = 10  ;  // 122us (measured  94us)
+    #ifdef L2_SECURITY_ACTIVE                                             
+    slot_board_vars [SLOT_10ms].PORT_delayTx                              = 14  ;  // 366us (measured xxxus)
+    #else                                                                 
+    slot_board_vars [SLOT_10ms].PORT_delayTx                              = 12  ;  // 366us (measured xxxus)
+    #endif                                                                
+    slot_board_vars [SLOT_10ms].PORT_delayRx                              =  0  ;  // 0us (can not measure)
+
+    // 20ms slot
+    slot_board_vars [SLOT_20ms_24GHZ].PORT_SLOTDURATION                   =  20   ; // ms  
+    slot_board_vars [SLOT_20ms_24GHZ].PORT_TsSlotDuration                 =  655  ;  // 20ms
+    slot_board_vars [SLOT_20ms_24GHZ].PORT_maxTxDataPrepare               =  15   ;  // 457us (based on measurement)
+    slot_board_vars [SLOT_20ms_24GHZ].PORT_maxRxAckPrepare                =  10   ; // 305us (based on measurement)
+    slot_board_vars [SLOT_20ms_24GHZ].PORT_maxRxDataPrepare               =  10   ; // 305us (based on measurement)
+    slot_board_vars [SLOT_20ms_24GHZ].PORT_maxTxAckPrepare                =  15   ; // 457us (based on measurement)
+    slot_board_vars [SLOT_20ms_24GHZ].PORT_delayTx                        =  13   ; // 396us (based on measurement)
+    slot_board_vars [SLOT_20ms_24GHZ].PORT_delayRx                        =  0    ; // 0us (can not measure)  
+}
+
+// To get the current slotDuration at any time
+// used during initialization by sixtop to fire the first sixtop EB
+uint16_t board_getSlotDuration (time_type_t time_type)
+{
+  if (time_type == TIME_MS)
+    return slot_board_vars [selected_slot_type].PORT_SLOTDURATION;
+ else 
+   return slot_board_vars [selected_slot_type].PORT_TsSlotDuration;
+}
+
+// Getter function for slot_board_vars
+slot_board_vars_t board_getSlotTemplate (void)
+{
+  return slot_board_vars [selected_slot_type];
+}
+
+// Getter function for selected_slot_type
+void board_setSlotType(slotType_t slot_type)
+{
+  selected_slot_type = slot_type;
 }
 
 void antenna_init(void) {
