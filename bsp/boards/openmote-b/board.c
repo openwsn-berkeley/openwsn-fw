@@ -56,7 +56,7 @@ static void SysCtrlSleepSetting(void);
 static void SysCtrlRunSetting(void);
 static void SysCtrlWakeupSetting(void);
 
-//=========================== variables ============================================
+//=========================== variables =======================================
 slot_board_vars_t slot_board_vars [MAX_SLOT_TYPES];
 slotType_t selected_slot_type;
 
@@ -226,17 +226,13 @@ uint16_t board_getSlotDuration (void)
     return slot_board_vars [selected_slot_type].slotDuration;
 }
 
-// Getter function for slot_board_vars
-slot_board_vars_t board_getSlotTemplate (void)
+// Setter/Getter function for slot_board_vars
+slot_board_vars_t board_selectSlotTemplate (slotType_t slot_type)
 {
+  selected_slot_type = slot_type;
   return slot_board_vars [selected_slot_type];
 }
 
-// Getter function for selected_slot_type
-void board_setSlotType(slotType_t slot_type)
-{
-  selected_slot_type = slot_type;
-}
 /**
  * Resets the board
  */

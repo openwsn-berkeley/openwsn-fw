@@ -60,8 +60,7 @@ void              board_init(void);
 void              board_sleep(void);
 void              board_reset(void);
 uint16_t          board_getSlotDuration (void);
-void              board_setSlotType(slotType_t slot_type);
-slot_board_vars_t board_getSlotTemplate (void);
+slot_board_vars_t board_selectSlotTemplate(slotType_t slot_type);
 /**
 \}
 \}

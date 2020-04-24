@@ -251,8 +251,7 @@ Call this function once, preferrably at end of the ieee154e_init function
 */
 void ieee154e_select_slot_template(slotType_t slotType)
 {   
-    board_setSlotType (slotType);
-    slot_board_vars_t slot_board_vars= board_getSlotTemplate();
+    slot_board_vars_t slot_board_vars= board_selectSlotTemplate(slotType);
       
     // board-specific template details
     slotTemplate.slotDuration        =   slot_board_vars.slotDuration;  

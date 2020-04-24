@@ -20,6 +20,7 @@
 
 
 //=========================== defines =========================================
+
 #define SPI_PIN_SSI_CLK             GPIO_PIN_2      //    CLK
 #define SPI_PIN_SSI_FSS             GPIO_PIN_3      //    CSn
 #define SPI_PIN_SSI_RX              GPIO_PIN_4      //    MISO
