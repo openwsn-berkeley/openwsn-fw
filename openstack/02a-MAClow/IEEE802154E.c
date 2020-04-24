@@ -118,7 +118,7 @@ void ieee154e_init(void) {
     // initialize variables
     memset(&ieee154e_vars,0,sizeof(ieee154e_vars_t));
     memset(&ieee154e_dbg,0,sizeof(ieee154e_dbg_t));
-
+#define  IEEE802154E_SINGLE_CHANNEL     11
     // set singleChannel to 0 to enable channel hopping.
 #if IEEE802154E_SINGLE_CHANNEL  
     ieee154e_vars.singleChannel     = IEEE802154E_SINGLE_CHANNEL;
@@ -160,11 +160,11 @@ void ieee154e_init(void) {
         SLOT_40ms_OFDM1MCS0_3_SUBGHZ , RADIOSETTING_OFDM_OPTION_1_MCS2
         SLOT_40ms_OFDM1MCS0_3_SUBGHZ , RADIOSETTING_OFDM_OPTION_1_MCS3
     */
-    ieee154e_select_slot_template (SLOT_20ms_24GHZ);
-    ieee154e_vars.slotDuration      = slotTemplate.TsSlotDuration;
+    ieee154e_select_slot_template (SLOT_40ms_FSK_SUBGHZ);
+    ieee154e_vars.slotDuration      = slotTemplate.slotDuration;
 
     //set the radio setting to use, default is RADIOSETTING_24GHZ
-    radio_setConfig (RADIOSETTING_24GHZ); 
+    radio_setConfig (RADIOSETTING_FSK_OPTION1_FEC); 
     
     // switch radio on
     radio_rfOn();
@@ -255,14 +255,13 @@ void ieee154e_select_slot_template(slotType_t slotType)
     slot_board_vars_t slot_board_vars= board_getSlotTemplate();
       
     // board-specific template details
-    slotTemplate.SLOTDURATION        =   slot_board_vars.PORT_SLOTDURATION;
-    slotTemplate.TsSlotDuration      =   slot_board_vars.PORT_TsSlotDuration;  
-    slotTemplate.maxTxDataPrepare    =   slot_board_vars.PORT_maxTxDataPrepare;
-    slotTemplate.maxRxAckPrepare     =   slot_board_vars.PORT_maxRxAckPrepare;
-    slotTemplate.maxRxDataPrepare    =   slot_board_vars.PORT_maxRxDataPrepare;
-    slotTemplate.maxTxAckPrepare     =   slot_board_vars.PORT_maxTxAckPrepare;
-    slotTemplate.delayTx             =   slot_board_vars.PORT_delayTx;
-    slotTemplate.delayRx             =   slot_board_vars.PORT_delayRx;
+    slotTemplate.slotDuration        =   slot_board_vars.slotDuration;  
+    slotTemplate.maxTxDataPrepare    =   slot_board_vars.maxTxDataPrepare;
+    slotTemplate.maxRxAckPrepare     =   slot_board_vars.maxRxAckPrepare;
+    slotTemplate.maxRxDataPrepare    =   slot_board_vars.maxRxDataPrepare;
+    slotTemplate.maxTxAckPrepare     =   slot_board_vars.maxTxAckPrepare;
+    slotTemplate.delayTx             =   slot_board_vars.delayTx;
+    slotTemplate.delayRx             =   slot_board_vars.delayRx;
      
     //154e general slot template
     slotTemplate.TsTxOffset          =   slot_154e_vars [slotType].TsTxOffset;         
@@ -394,12 +393,12 @@ void isr_ieee154e_newSlot(opentimers_id_t id) {
     
     opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                  // timerId
-        slotTemplate.TsSlotDuration,                         // duration
+        slotTemplate.slotDuration,                         // duration
         ieee154e_vars.startOfSlotReference,     // reference
         TIME_TICS,                              // timetype
         isr_ieee154e_newSlot                    // callback
     );
-    ieee154e_vars.slotDuration          = slotTemplate.TsSlotDuration;
+    ieee154e_vars.slotDuration          = slotTemplate.slotDuration;
     
     // radiotimer_setPeriod(ieee154e_vars.slotDuration);
     if (ieee154e_vars.isSync==FALSE) {
@@ -1051,13 +1050,13 @@ port_INLINE void activity_ti1ORri1(void) {
 
             opentimers_scheduleAbsolute(
                 ieee154e_vars.timerId,                            // timerId
-                slotTemplate.TsSlotDuration*(ieee154e_vars.numOfSleepSlots),   // duration
+                slotTemplate.slotDuration*(ieee154e_vars.numOfSleepSlots),   // duration
                 ieee154e_vars.startOfSlotReference,               // reference
                 TIME_TICS,                                        // timetype
                 isr_ieee154e_newSlot                              // callback
             );
-            ieee154e_vars.slotDuration = slotTemplate.TsSlotDuration*(ieee154e_vars.numOfSleepSlots);
-            // radiotimer_setPeriod(TsSlotDuration*(ieee154e_vars.numOfSleepSlots));
+            ieee154e_vars.slotDuration = slotTemplate.slotDuration*(ieee154e_vars.numOfSleepSlots);
+            // radiotimer_setPeriod(slotDuration*(ieee154e_vars.numOfSleepSlots));
 
             //increase ASN by numOfSleepSlots-1 slots as at this slot is already incremented by 1
             for (i=0;i<ieee154e_vars.numOfSleepSlots-1;i++){
@@ -2747,7 +2746,7 @@ void synchronizePacket(PORT_TIMER_WIDTH timeReceived) {
     // detect whether I'm too close to the edge of the slot, in that case,
     // skip a slot and increase the temporary slot length to be 2 slots long
     if ((PORT_SIGNED_INT_WIDTH)newPeriod - (PORT_SIGNED_INT_WIDTH)currentValue < (PORT_SIGNED_INT_WIDTH)RESYNCHRONIZATIONGUARD) {
-        newPeriod                  +=  slotTemplate.TsSlotDuration;
+        newPeriod                  +=  slotTemplate.slotDuration;
         incrementAsnOffset();
     }
 

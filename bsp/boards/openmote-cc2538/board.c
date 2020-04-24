@@ -94,38 +94,33 @@ void board_init(void) {
 //==== bootstrapping slot info lookup table
 void board_init_slot_vars(void){
     //10ms slot
-    slot_board_vars [SLOT_10ms].PORT_SLOTDURATION                         = 10  ;  // ms 
-    slot_board_vars [SLOT_10ms].PORT_TsSlotDuration                       = 328 ;  // counter counts one extra count, see datasheet
-    slot_board_vars [SLOT_10ms].PORT_maxTxDataPrepare                     = 10  ;  // 305us (measured  82us)
-    slot_board_vars [SLOT_10ms].PORT_maxRxAckPrepare                      = 10  ;  // 305us (measured  83us)
-    slot_board_vars [SLOT_10ms].PORT_maxRxDataPrepare                     =  4  ;  // 122us (measured  22us)
-    slot_board_vars [SLOT_10ms].PORT_maxTxAckPrepare                      = 10  ;  // 122us (measured  94us)
+    slot_board_vars [SLOT_10ms].slotDuration                         = 328  ;  // ms 
+    slot_board_vars [SLOT_10ms].maxTxDataPrepare                     = 10  ;  // 305us (measured  82us)
+    slot_board_vars [SLOT_10ms].maxRxAckPrepare                      = 10  ;  // 305us (measured  83us)
+    slot_board_vars [SLOT_10ms].maxRxDataPrepare                     =  4  ;  // 122us (measured  22us)
+    slot_board_vars [SLOT_10ms].maxTxAckPrepare                      = 10  ;  // 122us (measured  94us)
     #ifdef L2_SECURITY_ACTIVE                                             
-    slot_board_vars [SLOT_10ms].PORT_delayTx                              = 14  ;  // 366us (measured xxxus)
+    slot_board_vars [SLOT_10ms].delayTx                              = 14  ;  // 366us (measured xxxus)
     #else                                                                 
-    slot_board_vars [SLOT_10ms].PORT_delayTx                              = 12  ;  // 366us (measured xxxus)
+    slot_board_vars [SLOT_10ms].delayTx                              = 12  ;  // 366us (measured xxxus)
     #endif                                                                
-    slot_board_vars [SLOT_10ms].PORT_delayRx                              =  0  ;  // 0us (can not measure)
+    slot_board_vars [SLOT_10ms].delayRx                              =  0  ;  // 0us (can not measure)
 
     // 20ms slot
-    slot_board_vars [SLOT_20ms_24GHZ].PORT_SLOTDURATION                   =  20   ; // ms  
-    slot_board_vars [SLOT_20ms_24GHZ].PORT_TsSlotDuration                 =  655  ;  // 20ms
-    slot_board_vars [SLOT_20ms_24GHZ].PORT_maxTxDataPrepare               =  15   ;  // 457us (based on measurement)
-    slot_board_vars [SLOT_20ms_24GHZ].PORT_maxRxAckPrepare                =  10   ; // 305us (based on measurement)
-    slot_board_vars [SLOT_20ms_24GHZ].PORT_maxRxDataPrepare               =  10   ; // 305us (based on measurement)
-    slot_board_vars [SLOT_20ms_24GHZ].PORT_maxTxAckPrepare                =  15   ; // 457us (based on measurement)
-    slot_board_vars [SLOT_20ms_24GHZ].PORT_delayTx                        =  13   ; // 396us (based on measurement)
-    slot_board_vars [SLOT_20ms_24GHZ].PORT_delayRx                        =  0    ; // 0us (can not measure)
+    slot_board_vars [SLOT_20ms_24GHZ].slotDuration                   =  655   ; // ms  
+    slot_board_vars [SLOT_20ms_24GHZ].maxTxDataPrepare               =  15   ;  // 457us (based on measurement)
+    slot_board_vars [SLOT_20ms_24GHZ].maxRxAckPrepare                =  10   ; // 305us (based on measurement)
+    slot_board_vars [SLOT_20ms_24GHZ].maxRxDataPrepare               =  10   ; // 305us (based on measurement)
+    slot_board_vars [SLOT_20ms_24GHZ].maxTxAckPrepare                =  15   ; // 457us (based on measurement)
+    slot_board_vars [SLOT_20ms_24GHZ].delayTx                        =  13   ; // 396us (based on measurement)
+    slot_board_vars [SLOT_20ms_24GHZ].delayRx                        =  0    ; // 0us (can not measure)
 }
 
 // To get the current slotDuration at any time
 // used during initialization by sixtop to fire the first sixtop EB
-uint16_t board_getSlotDuration (time_type_t time_type)
+uint16_t board_getSlotDuration (void)
 {
-  if (time_type == TIME_MS)
-    return slot_board_vars [selected_slot_type].PORT_SLOTDURATION;
- else 
-   return slot_board_vars [selected_slot_type].PORT_TsSlotDuration;
+    return slot_board_vars [selected_slot_type].slotDuration;
 }
 
 // Getter function for slot_board_vars
