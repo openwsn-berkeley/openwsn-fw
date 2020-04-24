@@ -156,24 +156,24 @@ void board_reset(void){
 void GPIO_Config_ALL_AIN(void){
     GPIO_InitTypeDef GPIO_InitStructure;
 
-    /* Enable GPIOD and GPIOE clock */
+    //Enable GPIOD and GPIOE clock 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB 
                          | RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOD 
                          | RCC_APB2Periph_AFIO, ENABLE);
 
-    /* PA  */
+    //PA  
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_All;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
-      /* PB  */
+      //PB  
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_All;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
     GPIO_Init(GPIOB, &GPIO_InitStructure);
-      /* PC  */
+      //PC  
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_All;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
     GPIO_Init(GPIOC, &GPIO_InitStructure);
-        /* PD  */
+        //PD  
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_All;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
     GPIO_Init(GPIOD, &GPIO_InitStructure);

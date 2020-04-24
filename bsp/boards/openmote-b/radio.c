@@ -35,8 +35,7 @@
 
 typedef void                (*radio_reset_cb_t)(void);
 typedef void                (*radio_init_cb_t)(void);
-typedef void                (*radio_setConfig_cb_t)(radioSetting_t selected_radio);
-
+typedef void                (*radio_setConfig_cb_t)(radioSetting_t radioSetting);
 typedef void                (*radio_setStartFrameCb_cb_t)(radio_capture_cbt cb);
 typedef void                (*radio_setEndFrameCb_cb_t)(radio_capture_cbt cb);
 typedef void                (*radio_setFrequency_cb_t)(uint16_t channel, radio_freq_t tx_or_rx);
@@ -50,21 +49,21 @@ typedef void                (*radio_txNow_cb_t)(void);
 typedef void                (*radio_rxEnable_cb_t)(void);
 typedef void                (*radio_rxNow_cb_t)(void);
 typedef void                (*radio_getReceivedFrame_cb_t)(
-                                                    uint8_t* bufRead,
-                                                    uint8_t* lenRead,
-                                                    uint8_t  maxBufLen,
-                                                    int8_t*  rssi,
-                                                    uint8_t* lqi,
-                                                    bool*    crc
-                                                    );
-typedef kick_scheduler_t                (*radio_isr_cb_t)(void);
+                                uint8_t* bufRead,
+                                uint8_t* lenRead,
+                                uint8_t  maxBufLen,
+                                int8_t*  rssi,
+                                uint8_t* lqi,
+                                bool*    crc
+                                );
+typedef kick_scheduler_t    (*radio_isr_cb_t)(void);
 
 
 // the template for radio function callbacks
 typedef struct {
     radio_reset_cb_t                    radio_reset;
     radio_init_cb_t                     radio_init;
-    radio_setConfig_cb_t           radio_setConfig;
+    radio_setConfig_cb_t                radio_setConfig;
     radio_setStartFrameCb_cb_t          radio_setStartFrameCb;
     radio_setEndFrameCb_cb_t            radio_setEndFrameCb;
     radio_setFrequency_cb_t             radio_setFrequency;
@@ -82,14 +81,14 @@ typedef struct {
 
 
 // global radio selection, will use the slowest by default at initialization. 
-uint8_t SELECTED_RADIO      =       RADIOSETTING_FSK_OPTION1_FEC;
+uint8_t selected_radioSetting      =       RADIOSETTING_FSK_OPTION1_FEC;
 
 //=========================== variables =======================================
 
 //function call back matrix
 radio_functions_t dyn_funcs [MAX_RADIOS];
 
-// ================ Bootstrapping ==========
+//=========================== Bootstrapping ===================================
 
 // initializing the lookup table for radio function callbacks
 void radio_bootstrap (void)
@@ -240,65 +239,65 @@ void radio_init (void) {
 
 
 void radio_reset(void) {
-    dyn_funcs [SELECTED_RADIO].radio_reset();
+    dyn_funcs [selected_radioSetting].radio_reset();
 }
 
 
-void radio_setConfig (radioSetting_t selected_radio){
-    SELECTED_RADIO = selected_radio;
-    dyn_funcs [SELECTED_RADIO].radio_setConfig(selected_radio);
+void radio_setConfig (radioSetting_t radioSetting){
+    selected_radioSetting = radioSetting;
+    dyn_funcs [selected_radioSetting].radio_setConfig(selected_radioSetting);
 }
 
 
 void radio_setStartFrameCb (radio_capture_cbt cb) {
-    dyn_funcs [SELECTED_RADIO].radio_setStartFrameCb(cb);
+    dyn_funcs [selected_radioSetting].radio_setStartFrameCb(cb);
 }
 
 void radio_setEndFrameCb (radio_capture_cbt cb) {
-    dyn_funcs [SELECTED_RADIO].radio_setEndFrameCb(cb);
+    dyn_funcs [selected_radioSetting].radio_setEndFrameCb(cb);
 }
 
 //===== RF admin
 
 void radio_setFrequency (uint16_t channel, radio_freq_t tx_or_rx) {
-    dyn_funcs [SELECTED_RADIO].radio_setFrequency(channel, tx_or_rx);
+    dyn_funcs [selected_radioSetting].radio_setFrequency(channel, tx_or_rx);
 }
 
 void radio_rfOn (void) {
-    dyn_funcs [SELECTED_RADIO].radio_rfOn();
+    dyn_funcs [selected_radioSetting].radio_rfOn();
 }
 
 void radio_rfOff (void) {
-    dyn_funcs [SELECTED_RADIO].radio_rfOff();
+    dyn_funcs [selected_radioSetting].radio_rfOff();
 }
 
 int8_t radio_getFrequencyOffset (void){
-    return dyn_funcs [SELECTED_RADIO].radio_getFrequencyOffset();
+    return dyn_funcs [selected_radioSetting].radio_getFrequencyOffset();
 }
 
 //===== TX
 
 void radio_loadPacket (uint8_t* packet, uint16_t len) {
-    dyn_funcs [SELECTED_RADIO].radio_loadPacket(packet, len);
+    dyn_funcs [selected_radioSetting].radio_loadPacket(packet, len);
 }
 
 
 void radio_txEnable (void) {
-    dyn_funcs [SELECTED_RADIO].radio_txEnable();
+    dyn_funcs [selected_radioSetting].radio_txEnable();
 }
 
 void radio_txNow (void) {
-    dyn_funcs [SELECTED_RADIO].radio_txNow();
+    dyn_funcs [selected_radioSetting].radio_txNow();
 }
 
 //===== RX
 
 void radio_rxEnable (void) {
-    dyn_funcs [SELECTED_RADIO].radio_rxEnable();
+    dyn_funcs [selected_radioSetting].radio_rxEnable();
 }
 
 void radio_rxNow (void) {
-    dyn_funcs [SELECTED_RADIO].radio_rxNow();
+    dyn_funcs [selected_radioSetting].radio_rxNow();
 }
 
 void radio_getReceivedFrame (
@@ -310,7 +309,7 @@ void radio_getReceivedFrame (
     bool*    crc
 ) {
 
-    dyn_funcs [SELECTED_RADIO].radio_getReceivedFrame (bufRead, lenRead, maxBufLen, rssi, lqi, crc );
+    dyn_funcs [selected_radioSetting].radio_getReceivedFrame (bufRead, lenRead, maxBufLen, rssi, lqi, crc );
 }
 
 //=========================== private =========================================
@@ -319,7 +318,7 @@ void radio_getReceivedFrame (
 
 //=========================== interrupt handlers ==============================
 kick_scheduler_t radio_isr(void) {
-    return dyn_funcs [SELECTED_RADIO].radio_isr();
+    return dyn_funcs [selected_radioSetting].radio_isr();
 }
 
 

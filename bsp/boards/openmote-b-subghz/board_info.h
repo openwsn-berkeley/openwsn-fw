@@ -115,7 +115,8 @@
 #define NUMSENSORS      7
 
 
-//====== Antenna options ====
+//=========================== Antenna options ================================
+
 #define BSP_ANTENNA_BASE            GPIO_D_BASE
 #define BSP_ANTENNA_CC2538_24GHZ    GPIO_PIN_4      //!< PD4 -- 2.4ghz
 #define BSP_ANTENNA_AT215_24GHZ     GPIO_PIN_3      //!< PD3 -- subghz   
@@ -129,6 +130,7 @@ static const uint8_t rreg_uriquery[]        = "h=ucb";
 static const uint8_t infoBoardname[]        = "openmote-b-subghz";
 static const uint8_t infouCName[]           = "CC2538";
 static const uint8_t infoRadioName[]        = "CC2538 SoC";
+
 //=========================== prototypes ======================================
 
 //=========================== public ==========================================

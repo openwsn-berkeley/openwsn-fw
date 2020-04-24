@@ -46,7 +46,7 @@ typedef struct {
 radio_vars_t radio_vars;
 
 // global radio selection, will use RADIOSETTING_24GHZ by default at initialization. 
-uint8_t SELECTED_RADIO      =       RADIOSETTING_24GHZ;
+uint8_t selected_radioSetting      =       RADIOSETTING_24GHZ;
 //=========================== prototypes ======================================
 
 void     enable_radio_interrupts(void);
@@ -183,8 +183,8 @@ void radio_reset(void) {
 
 //===== RF admin
 
-void radio_setConfig (radioSetting_t selected_radio){
-    SELECTED_RADIO = selected_radio;
+void radio_setConfig (radioSetting_t radioSetting){
+    selected_radioSetting = radioSetting;
     //do nothing
 }
 

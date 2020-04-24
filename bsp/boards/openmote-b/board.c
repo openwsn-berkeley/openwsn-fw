@@ -1,9 +1,9 @@
-/**
- * Author: Xavier Vilajosana (xvilajosana@eecs.berkeley.edu)
- *         Pere Tuset (peretuset@openmote.com)
- * Date:   July 2013
- * Description: CC2538-specific definition of the "board" bsp module.
- */
+
+ // Author: Xavier Vilajosana (xvilajosana@eecs.berkeley.edu)
+ //         Pere Tuset (peretuset@openmote.com)
+ // Date:   July 2013
+ // Description: CC2538-specific definition of the "board" bsp module.
+
 
 #include <headers/hw_ioc.h>
 #include <headers/hw_memmap.h>
@@ -18,7 +18,6 @@
 #include <source/gptimer.h>
 #include <source/sys_ctrl.h>
 
-#include "opentimers.h"
 #include "board.h"
 #include "board_info.h"
 #include "debugpins.h"
@@ -89,7 +88,7 @@ void board_init(void) {
 }
 
 void antenna_init(void) {
-    /* Configure GPIO as output */
+    // Configure GPIO as output 
     GPIOPinTypeGPIOOutput(BSP_ANTENNA_BASE, BSP_ANTENNA_CC2538_24GHZ);
     GPIOPinTypeGPIOOutput(BSP_ANTENNA_BASE, BSP_ANTENNA_AT215_24GHZ);
 
@@ -112,54 +111,54 @@ void antenna_at86rf215(void) {
   GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_CC2538_24GHZ, BSP_ANTENNA_CC2538_24GHZ);
 }
 
-/**
- * Puts the board to sleep
- */
+
+ // Puts the board to sleep
+ 
 void board_sleep(void) {
     SysCtrlPowerModeSet(SYS_CTRL_PM_NOACTION);
     SysCtrlSleep();
 }
 
-/**
- * Timer runs at 32 MHz and is 32-bit wide
- * The timer is divided by 32, whichs gives a 1 microsecond ticks
- */
+
+ // Timer runs at 32 MHz and is 32-bit wide
+ // The timer is divided by 32, whichs gives a 1 microsecond ticks
+
 void board_timer_init(void) {
-    /* Configure the timer */
+    //Configure the timer 
     TimerConfigure(GPTIMER2_BASE, GPTIMER_CFG_PERIODIC_UP);
 
-    /* Enable the timer */
+    // Enable the timer
     TimerEnable(GPTIMER2_BASE, GPTIMER_BOTH);
 }
 
-/**
- * Returns the current value of the timer
- * The timer is divided by 32, whichs gives a 1 microsecond ticks
- */
+
+ // Returns the current value of the timer
+ // The timer is divided by 32, whichs gives a 1 microsecond ticks
+
 uint32_t board_timer_get(void) {
     uint32_t current;
 
-    /* Get the current timer value */
+    //Get the current timer value
     current = TimerValueGet(GPTIMER2_BASE, GPTIMER_A) >> 5;
 
     return current;
 }
 
-/**
- * Returns true if the timer has expired
- * The timer is divided by 32, whichs gives a 1 microsecond ticks
- */
+
+ // Returns true if the timer has expired
+ // The timer is divided by 32, whichs gives a 1 microsecond ticks
+
 bool board_timer_expired(uint32_t future) {
     uint32_t current;
     int32_t remaining;
 
-    /* Get current time */
+    //Get current time
     current = TimerValueGet(GPTIMER2_BASE, GPTIMER_A) >> 5;
 
-    /* Calculate remaining time */
+    //Calculate remaining time
     remaining = (int32_t) (future - current);
 
-    /* Return if timer has expired */
+    //Return if timer has expired
     if (remaining > 0) {
         return false;
     } else {
@@ -183,22 +182,22 @@ void board_init_slot_vars(void){
     slot_board_vars [SLOT_10ms].delayRx                              =  0  ;  // 0us (can not measure)
 
     // 20ms slot
-    slot_board_vars [SLOT_20ms_24GHZ].slotDuration                   =  655   ; // ms  
+    slot_board_vars [SLOT_20ms_24GHZ].slotDuration                   =  655  ; // ms  
     slot_board_vars [SLOT_20ms_24GHZ].maxTxDataPrepare               =  15   ;  // 457us (based on measurement)
     slot_board_vars [SLOT_20ms_24GHZ].maxRxAckPrepare                =  10   ; // 305us (based on measurement)
     slot_board_vars [SLOT_20ms_24GHZ].maxRxDataPrepare               =  10   ; // 305us (based on measurement)
     slot_board_vars [SLOT_20ms_24GHZ].maxTxAckPrepare                =  15   ; // 457us (based on measurement)
-    slot_board_vars [SLOT_20ms_24GHZ].delayTx                        =  13   ; // 396us (based on measurement)
+    slot_board_vars [SLOT_20ms_24GHZ].delayTx                        =  6    ; // 183us (based on measurement)
     slot_board_vars [SLOT_20ms_24GHZ].delayRx                        =  0    ; // 0us (can not measure)
     
     //40ms slot for 24ghz cc2538
-    slot_board_vars [SLOT_40ms_24GHZ].slotDuration                   =    1310 ;  // ms 
+    slot_board_vars [SLOT_40ms_24GHZ].slotDuration                   =   1310 ;  // ms 
     slot_board_vars [SLOT_40ms_24GHZ].maxTxDataPrepare               =   15  ;  // 457us (based on measurement) 
     slot_board_vars [SLOT_40ms_24GHZ].maxRxAckPrepare                =   10  ;  // 305us (based on measurement)
     slot_board_vars [SLOT_40ms_24GHZ].maxRxDataPrepare               =   10  ;  // 305us (based on measurement)
     slot_board_vars [SLOT_40ms_24GHZ].maxTxAckPrepare                =   15  ;  // 457us (based on measurement)
-    slot_board_vars [SLOT_40ms_24GHZ].delayTx                        =   13  ;  // 396us (measured xxxus)
-    slot_board_vars [SLOT_40ms_24GHZ].delayRx                        =    0  ;  // 0us (can not measure)
+    slot_board_vars [SLOT_40ms_24GHZ].delayTx                        =   6   ;  // 183us (measured xxxus)
+    slot_board_vars [SLOT_40ms_24GHZ].delayRx                        =   0  ;  // 0us (can not measure)
 
     //40ms slot for FSK
     slot_board_vars [SLOT_40ms_FSK_SUBGHZ].slotDuration              =   1310   ;  // ms  
@@ -233,9 +232,9 @@ slot_board_vars_t board_selectSlotTemplate (slotType_t slot_type)
   return slot_board_vars [selected_slot_type];
 }
 
-/**
- * Resets the board
- */
+
+ // Resets the board
+
 void board_reset(void) {
     SysCtrlReset();
 }
@@ -243,7 +242,7 @@ void board_reset(void) {
 //=========================== private =========================================
 
 static void gpio_init(void) {
-    /* Configure all GPIO as input */
+    // Configure all GPIO as input
     GPIOPinTypeGPIOInput(GPIO_A_BASE, 0xFF);
     GPIOPinTypeGPIOInput(GPIO_B_BASE, 0xFF);
     GPIOPinTypeGPIOInput(GPIO_C_BASE, 0xFF);
@@ -251,120 +250,120 @@ static void gpio_init(void) {
 }
 
 static void clock_init(void) {
-    /* Disable global interrupts */
+    // Disable global interrupts
     bool bIntDisabled = IntMasterDisable();
 
-    /* Configure the 32 kHz pins, PD6 and PD7, for crystal operation */
-    /* By default they are configured as GPIOs */
+    // Configure the 32 kHz pins, PD6 and PD7, for crystal operation
+    // By default they are configured as GPIOs
     GPIODirModeSet(GPIO_D_BASE, 0x40, GPIO_DIR_MODE_IN);
     GPIODirModeSet(GPIO_D_BASE, 0x80, GPIO_DIR_MODE_IN);
     IOCPadConfigSet(GPIO_D_BASE, 0x40, IOC_OVERRIDE_ANA);
     IOCPadConfigSet(GPIO_D_BASE, 0x80, IOC_OVERRIDE_ANA);
 
-    /* Set the real-time clock to use the 32 kHz external crystal */
-    /* Set the system clock to use the external 32 MHz crystal */
-    /* Set the system clock to 32 MHz */
+    // Set the real-time clock to use the 32 kHz external crystal
+    // Set the system clock to use the external 32 MHz crystal
+    // Set the system clock to 32 MHz
     SysCtrlClockSet(true, false, SYS_CTRL_SYSDIV_32MHZ);
 
-    /* Set the IO clock to operate at 32 MHz */
-    /* This way peripherals can run while the system clock is gated */
+    // Set the IO clock to operate at 32 MHz
+    // This way peripherals can run while the system clock is gated
     SysCtrlIOClockSet(SYS_CTRL_SYSDIV_32MHZ);
 
-    /* Wait until the selected clock configuration is stable */
+    // Wait until the selected clock configuration is stable
     while (!((HWREG(SYS_CTRL_CLOCK_STA)) & (SYS_CTRL_CLOCK_STA_XOSC_STB)));
 
-    /* Define what peripherals run in each mode */
+    // Define what peripherals run in each mode
     SysCtrlRunSetting();
     SysCtrlSleepSetting();
     SysCtrlDeepSleepSetting();
     SysCtrlWakeupSetting();
 
-    /* Re-enable interrupt if initially enabled */
+    // Re-enable interrupt if initially enabled
     if (!bIntDisabled) {
         IntMasterEnable();
     }
 }
 
-/**
- * Configures the user button as input source
- */
+
+ // Configures the user button as input source
+
 static void button_init(void) {
-    /* The button is an input GPIO on falling edge */
+    // The button is an input GPIO on falling edge
     GPIOPinTypeGPIOInput(BSP_BUTTON_BASE, BSP_BUTTON_USER);
     GPIOIntTypeSet(BSP_BUTTON_BASE, BSP_BUTTON_USER, GPIO_FALLING_EDGE);
 
-    /* Enable wake-up capability */
+    // Enable wake-up capability
     GPIOIntWakeupEnable(GPIO_IWE_PORT_D);
 
-    /* Clear and enable the interrupt */
+    // Clear and enable the interrupt
     GPIOPinIntClear(BSP_BUTTON_BASE, BSP_BUTTON_USER);
     GPIOPinIntEnable(BSP_BUTTON_BASE, BSP_BUTTON_USER);
 }
 
 static void SysCtrlRunSetting(void) {
-  /* Disable General Purpose Timers 0, 1, 2, 3 when running */
+  // Disable General Purpose Timers 0, 1, 2, 3 when running
   SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_GPT0);
   SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_GPT1);
   SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_GPT3);
 
-  /* Disable SSI 0, 1 when running */
+  // Disable SSI 0, 1 when running
   SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_SSI0);
   SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_SSI1);
 
-  /* Disable UART1 when running */
+  // Disable UART1 when running
   SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_UART1);
 
-  /* Disable I2C, AES and PKA when running */
+  // Disable I2C, AES and PKA when running
   SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_I2C);
   SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_PKA);
   SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_AES);
 
-  /* Enable UART0 and RFC when running */
+  // Enable UART0 and RFC when running
   SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_GPT2);
   SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_UART0);
   SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_RFC);
 }
 
 static void SysCtrlSleepSetting(void) {
-  /* Disable General Purpose Timers 0, 1, 2, 3 during sleep */
+  // Disable General Purpose Timers 0, 1, 2, 3 during sleep
   SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_GPT0);
   SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_GPT1);
   SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_GPT3);
 
-  /* Disable SSI 0, 1 during sleep */
+  // Disable SSI 0, 1 during sleep
   SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_SSI0);
   SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_SSI1);
 
-  /* Disable UART 0, 1 during sleep */
+  // Disable UART 0, 1 during sleep
   SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_UART1);
 
-  /* Disable I2C, PKA, AES during sleep */
+  // Disable I2C, PKA, AES during sleep
   SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_I2C);
   SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_PKA);
   SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_AES);
 
-  /* Enable UART and RFC during sleep */
+  // Enable UART and RFC during sleep
   SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_GPT2);
   SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_UART0);
   SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_RFC);
 }
 
 static void SysCtrlDeepSleepSetting(void) {
-  /* Disable General Purpose Timers 0, 1, 2, 3 during deep sleep */
+  // Disable General Purpose Timers 0, 1, 2, 3 during deep sleep
   SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_GPT0);
   SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_GPT1);
   SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_GPT2);
   SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_GPT3);
 
-  /* Disable SSI 0, 1 during deep sleep */
+  // Disable SSI 0, 1 during deep sleep
   SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_SSI0);
   SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_SSI1);
 
-  /* Disable UART 0, 1 during deep sleep */
+  // Disable UART 0, 1 during deep sleep
   SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_UART0);
   SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_UART1);
 
-  /* Disable I2C, PKA, AES during deep sleep */
+  // Disable I2C, PKA, AES during deep sleep
   SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_I2C);
   SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_PKA);
   SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_AES);
@@ -372,7 +371,7 @@ static void SysCtrlDeepSleepSetting(void) {
 }
 
 static void SysCtrlWakeupSetting(void) {
-  /* Allow the SMTimer to wake up the processor */
+  // Allow the SMTimer to wake up the processor
   GPIOIntWakeupEnable(GPIO_IWE_SM_TIMER);
 }
 

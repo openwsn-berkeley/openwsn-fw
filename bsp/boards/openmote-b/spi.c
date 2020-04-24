@@ -50,8 +50,10 @@ typedef struct {
 spi_vars_t spi_vars;
 
 //=========================== prototypes ======================================
+
 static void disableInterrupts(void);
 static void enableInterrupts(void);
+
 //=========================== public ==========================================
 
 void spi_init() {

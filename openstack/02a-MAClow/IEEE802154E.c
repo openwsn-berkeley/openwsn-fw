@@ -118,7 +118,7 @@ void ieee154e_init(void) {
     // initialize variables
     memset(&ieee154e_vars,0,sizeof(ieee154e_vars_t));
     memset(&ieee154e_dbg,0,sizeof(ieee154e_dbg_t));
-#define  IEEE802154E_SINGLE_CHANNEL     11
+
     // set singleChannel to 0 to enable channel hopping.
 #if IEEE802154E_SINGLE_CHANNEL  
     ieee154e_vars.singleChannel     = IEEE802154E_SINGLE_CHANNEL;
@@ -160,11 +160,11 @@ void ieee154e_init(void) {
         SLOT_40ms_OFDM1MCS0_3_SUBGHZ , RADIOSETTING_OFDM_OPTION_1_MCS2
         SLOT_40ms_OFDM1MCS0_3_SUBGHZ , RADIOSETTING_OFDM_OPTION_1_MCS3
     */
-    ieee154e_select_slot_template (SLOT_40ms_FSK_SUBGHZ);
+    ieee154e_select_slot_template (SLOT_20ms_24GHZ);
     ieee154e_vars.slotDuration      = slotTemplate.slotDuration;
 
     //set the radio setting to use, default is RADIOSETTING_24GHZ
-    radio_setConfig (RADIOSETTING_FSK_OPTION1_FEC); 
+    radio_setConfig (RADIOSETTING_24GHZ); 
     
     // switch radio on
     radio_rfOn();

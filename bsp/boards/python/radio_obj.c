@@ -10,7 +10,7 @@
 
 //=========================== variables =======================================
 // global radio selection
-uint8_t SELECTED_RADIO      =       RADIOSETTING_24GHZ;
+uint8_t selected_radioSetting      =       RADIOSETTING_24GHZ;
 //=========================== prototypes ======================================
 
 
@@ -88,8 +88,8 @@ void radio_reset(OpenMote* self) {
 
 //===== RF admin
 
-void radio_setConfig ( radioSetting_t selected_radio){
-    SELECTED_RADIO = selected_radio;
+void radio_setConfig ( radioSetting_t radioSetting){
+    selected_radioSetting = radioSetting;
     //do nothing
 }
 
