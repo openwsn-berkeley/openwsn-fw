@@ -352,10 +352,9 @@
                     <state>$PROJ_DIR$</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\boards\</state>
-                    <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\</state>
+                    <state>$PROJ_DIR$\..\..\..\bsp\boards\common\</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\headers\</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\</state>
-                    <state>$PROJ_DIR$\..\..\..\bsp\boards\common\</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\chips\adxl346\</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\chips\max44009\</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\chips\sht21\</state>
@@ -364,6 +363,7 @@
                     <state>$PROJ_DIR$\..\..\..\kernel\openos\</state>
                     <state>$PROJ_DIR$\..\..\..\drivers\common\</state>
                     <state>$PROJ_DIR$\..\..\..\inc\</state>
+                    <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
@@ -667,7 +667,7 @@
                 </option>
                 <option>
                     <name>OOCOutputFile</name>
-                    <state></state>
+                    <state>00std_spi.srec</state>
                 </option>
                 <option>
                     <name>OOCCommandLineProducer</name>
@@ -2534,6 +2534,12 @@
         <name>projects</name>
         <group>
             <name>common</name>
+            <group>
+                <name>02drv_opentimers</name>
+                <file>
+                    <name>$PROJ_DIR$\..\..\common\02drv_opentimers\02drv_opentimers.c</name>
+                </file>
+            </group>
         </group>
     </group>
     <file>
