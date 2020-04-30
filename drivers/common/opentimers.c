@@ -8,6 +8,7 @@ at most MAX_NUM_TIMERS timers.
  */
 
 #include "opendefs.h"
+#include "board.h"   
 #include "opentimers.h"
 // some dsp modules are required
 #include "sctimer.h"

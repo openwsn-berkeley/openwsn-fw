@@ -31,7 +31,6 @@
 //=========================== variables =======================================
 
 sixtop_vars_t sixtop_vars;
-
 //=========================== prototypes ======================================
 
 // send internal
@@ -117,7 +116,7 @@ void sixtop_init(void) {
     sixtop_vars.ebSendingTimerId   = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_SIXTOP);
     opentimers_scheduleIn(
         sixtop_vars.ebSendingTimerId,
-        SLOTFRAME_LENGTH*SLOTDURATION,
+        SLOTFRAME_LENGTH*(SLOTDURATION_MS),
         TIME_MS,
         TIMER_PERIODIC,
         sixtop_sendingEb_timer_cb
@@ -608,6 +607,7 @@ owerror_t sixtop_send_internal(
     // this is a new packet which I never attempted to send
     msg->l2_numTxAttempts = 0;
     // transmit with the default TX power
+    
     msg->l1_txPower = TX_POWER;
     // add a IEEE802.15.4 header
     ieee802154_prependHeader(

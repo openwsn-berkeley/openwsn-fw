@@ -324,7 +324,6 @@ void frag_receive(OpenQueueEntry_t *msg) {
 
         if (idmanager_getIsDAGroot() == TRUE) {
             openbridge_receive(msg);
-            return;
         } else {
             // recover ip address from first fragment
             packetfunctions_tossHeader(msg, FRAG1_HEADER_SIZE);
@@ -337,7 +336,7 @@ void frag_receive(OpenQueueEntry_t *msg) {
                 // fast forwarding / source routing
                 msg->creator = COMPONENT_FRAG;
                 allocate_vrb(msg, size, tag);
-                return iphc_receive(msg);
+                iphc_receive(msg);
             }
         }
     } else if (dispatch == DISPATCH_FRAG_SUBSEQ) {
@@ -436,7 +435,6 @@ static void store_fragment(OpenQueueEntry_t *msg, uint16_t size, uint16_t tag, u
     for (i = 0; i < FRAGMENT_BUFFER_SIZE; i++) {
         if (frag_vars.fragmentBuf[i].datagram_tag == tag && frag_vars.fragmentBuf[i].datagram_offset == offset) {
             openqueue_freePacketBuffer(msg);
-            return;
         }
 
         if (frag_vars.fragmentBuf[i].datagram_tag == tag && frag_vars.fragmentBuf[i].reassembly_timer != 0) {

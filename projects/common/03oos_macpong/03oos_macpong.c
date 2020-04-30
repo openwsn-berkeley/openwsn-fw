@@ -200,4 +200,3 @@ void opencoap_init(void)                                { return; }
 //===== L7
 
 void openapps_init(void)                                { return; }
-

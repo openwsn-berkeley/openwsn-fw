@@ -11,7 +11,7 @@
             <name>General</name>
             <archiveVersion>3</archiveVersion>
             <data>
-                <version>28</version>
+                <version>31</version>
                 <wantNonLocal>1</wantNonLocal>
                 <debug>1</debug>
                 <option>
@@ -32,11 +32,11 @@
                 </option>
                 <option>
                     <name>Input description</name>
-                    <state>Automatic choice of formatter.</state>
+                    <state>Automatic choice of formatter, without multibyte support.</state>
                 </option>
                 <option>
                     <name>Output description</name>
-                    <state>Automatic choice of formatter.</state>
+                    <state>Automatic choice of formatter, without multibyte support.</state>
                 </option>
                 <option>
                     <name>GOutputBinary</name>
@@ -66,7 +66,7 @@
                 </option>
                 <option>
                     <name>OGLastSavedByProductVersion</name>
-                    <state>8.11.1.13270</state>
+                    <state>8.40.1.21529</state>
                 </option>
                 <option>
                     <name>GeneralEnableMisra</name>
@@ -112,11 +112,11 @@
                 </option>
                 <option>
                     <name>RTConfigPath2</name>
-                    <state>$TOOLKIT_DIR$\INC\c\DLib_Config_Normal.h</state>
+                    <state>$TOOLKIT_DIR$\inc\c\DLib_Config_Normal.h</state>
                 </option>
                 <option>
                     <name>GBECoreSlave</name>
-                    <version>25</version>
+                    <version>27</version>
                     <state>38</state>
                 </option>
                 <option>
@@ -133,7 +133,7 @@
                 </option>
                 <option>
                     <name>CoreVariant</name>
-                    <version>25</version>
+                    <version>27</version>
                     <state>38</state>
                 </option>
                 <option>
@@ -156,7 +156,7 @@
                 </option>
                 <option>
                     <name>GFPUCoreSlave2</name>
-                    <version>25</version>
+                    <version>27</version>
                     <state>38</state>
                 </option>
                 <option>
@@ -196,13 +196,26 @@
                     <name>GenLocaleDisplayOnly</name>
                     <state></state>
                 </option>
+                <option>
+                    <name>DSPExtension</name>
+                    <state>0</state>
+                </option>
+                <option>
+                    <name>TrustZone</name>
+                    <state>0</state>
+                </option>
+                <option>
+                    <name>TrustZoneModes</name>
+                    <version>0</version>
+                    <state>0</state>
+                </option>
             </data>
         </settings>
         <settings>
             <name>ICCARM</name>
             <archiveVersion>2</archiveVersion>
             <data>
-                <version>34</version>
+                <version>35</version>
                 <wantNonLocal>1</wantNonLocal>
                 <debug>1</debug>
                 <option>
@@ -339,6 +352,8 @@
                     <state>$PROJ_DIR$\..\..\..\bsp\chips\adxl346\</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\chips\max44009\</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\chips\sht21\</state>
+                    <state>$PROJ_DIR$\..\..\..\bsp\chips\cc2538rf\</state>
+                    <state>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\</state>
                     <state>$PROJ_DIR$\..\..\..\kernel\</state>
                     <state>$PROJ_DIR$\..\..\..\drivers\common\</state>
                     <state>$PROJ_DIR$\..\..\..\inc\</state>
@@ -363,6 +378,7 @@
                     <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\headers\</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\</state>
                     <state>$PROJ_DIR$\..\..\..\projects\common\03oos_openwsn</state>
+                    <state>$PROJ_DIR$\..\..\..\bsp\chips\si70x</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
@@ -479,6 +495,10 @@
                 <option>
                     <name>IccRTTI2</name>
                     <state>0</state>
+                </option>
+                <option>
+                    <name>OICompilerExtraOption</name>
+                    <state>1</state>
                 </option>
             </data>
         </settings>
@@ -612,7 +632,7 @@
                 </option>
                 <option>
                     <name>AOutputFile</name>
-                    <state></state>
+                    <state>$FILE_BNAME$.o</state>
                 </option>
                 <option>
                     <name>ALimitErrorsCheck</name>
@@ -662,7 +682,7 @@
                 </option>
                 <option>
                     <name>OOCOutputFile</name>
-                    <state></state>
+                    <state>03oos_macpong.srec</state>
                 </option>
                 <option>
                     <name>OOCCommandLineProducer</name>
@@ -700,7 +720,7 @@
             <name>ILINK</name>
             <archiveVersion>0</archiveVersion>
             <data>
-                <version>20</version>
+                <version>23</version>
                 <wantNonLocal>1</wantNonLocal>
                 <debug>1</debug>
                 <option>
@@ -777,11 +797,11 @@
                 </option>
                 <option>
                     <name>IlinkIcfOverride</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>IlinkIcfFile</name>
-                    <state>$TOOLKIT_DIR$\config\linker\TexasInstruments\cx2538xf53.icf</state>
+                    <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\cx2538xf53.icf</state>
                 </option>
                 <option>
                     <name>IlinkIcfFileSlave</name>
@@ -1012,6 +1032,30 @@
                     <name>IlinkLocaleSelect</name>
                     <state>1</state>
                 </option>
+                <option>
+                    <name>IlinkTrustzoneImportLibraryOut</name>
+                    <state>03oos_macpong_import_lib.o</state>
+                </option>
+                <option>
+                    <name>OILinkExtraOption</name>
+                    <state>1</state>
+                </option>
+                <option>
+                    <name>IlinkRawBinaryFile2</name>
+                    <state></state>
+                </option>
+                <option>
+                    <name>IlinkRawBinarySymbol2</name>
+                    <state></state>
+                </option>
+                <option>
+                    <name>IlinkRawBinarySegment2</name>
+                    <state></state>
+                </option>
+                <option>
+                    <name>IlinkRawBinaryAlign2</name>
+                    <state></state>
+                </option>
             </data>
         </settings>
         <settings>
@@ -1051,7 +1095,7 @@
             <name>General</name>
             <archiveVersion>3</archiveVersion>
             <data>
-                <version>28</version>
+                <version>31</version>
                 <wantNonLocal>1</wantNonLocal>
                 <debug>0</debug>
                 <option>
@@ -1156,7 +1200,7 @@
                 </option>
                 <option>
                     <name>GBECoreSlave</name>
-                    <version>25</version>
+                    <version>27</version>
                     <state>1</state>
                 </option>
                 <option>
@@ -1173,7 +1217,7 @@
                 </option>
                 <option>
                     <name>CoreVariant</name>
-                    <version>25</version>
+                    <version>27</version>
                     <state>0</state>
                 </option>
                 <option>
@@ -1196,7 +1240,7 @@
                 </option>
                 <option>
                     <name>GFPUCoreSlave2</name>
-                    <version>25</version>
+                    <version>27</version>
                     <state>0</state>
                 </option>
                 <option>
@@ -1236,13 +1280,26 @@
                     <name>GenLocaleDisplayOnly</name>
                     <state></state>
                 </option>
+                <option>
+                    <name>DSPExtension</name>
+                    <state>0</state>
+                </option>
+                <option>
+                    <name>TrustZone</name>
+                    <state>0</state>
+                </option>
+                <option>
+                    <name>TrustZoneModes</name>
+                    <version>0</version>
+                    <state>0</state>
+                </option>
             </data>
         </settings>
         <settings>
             <name>ICCARM</name>
             <archiveVersion>2</archiveVersion>
             <data>
-                <version>34</version>
+                <version>35</version>
                 <wantNonLocal>1</wantNonLocal>
                 <debug>0</debug>
                 <option>
@@ -1490,6 +1547,10 @@
                     <name>IccRTTI2</name>
                     <state>0</state>
                 </option>
+                <option>
+                    <name>OICompilerExtraOption</name>
+                    <state>1</state>
+                </option>
             </data>
         </settings>
         <settings>
@@ -1710,7 +1771,7 @@
             <name>ILINK</name>
             <archiveVersion>0</archiveVersion>
             <data>
-                <version>20</version>
+                <version>23</version>
                 <wantNonLocal>1</wantNonLocal>
                 <debug>0</debug>
                 <option>
@@ -2022,6 +2083,30 @@
                     <name>IlinkLocaleSelect</name>
                     <state>1</state>
                 </option>
+                <option>
+                    <name>IlinkTrustzoneImportLibraryOut</name>
+                    <state>###Unitialized###</state>
+                </option>
+                <option>
+                    <name>OILinkExtraOption</name>
+                    <state>1</state>
+                </option>
+                <option>
+                    <name>IlinkRawBinaryFile2</name>
+                    <state></state>
+                </option>
+                <option>
+                    <name>IlinkRawBinarySymbol2</name>
+                    <state></state>
+                </option>
+                <option>
+                    <name>IlinkRawBinarySegment2</name>
+                    <state></state>
+                </option>
+                <option>
+                    <name>IlinkRawBinaryAlign2</name>
+                    <state></state>
+                </option>
             </data>
         </settings>
         <settings>
@@ -2316,10 +2401,7 @@
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\sensors.c</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\startup_gcc.c</name>
-                    <excluded>
-                        <configuration>Debug</configuration>
-                    </excluded>
+                    <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\spi.c</name>
                 </file>
                 <file>
                     <name>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\startup_iar.c</name>
@@ -2332,7 +2414,7 @@
                 <name>$PROJ_DIR$\..\..\..\bsp\boards\board.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</name>
+                <name>$PROJ_DIR$\..\..\..\bsp\boards\cryptoengine.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\bsp\boards\debugpins.h</name>
@@ -2348,9 +2430,6 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\bsp\boards\sctimer.h</name>
@@ -2371,21 +2450,36 @@
         <group>
             <name>chips</name>
             <group>
-                <name>adxl346</name>
+                <name>at86rf215</name>
                 <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\chips\adxl346\adxl346.c</name>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\at86rf215.c</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\chips\adxl346\adxl346.h</name>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\at86rf215.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\radio_at86rf215.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf215\radio_at86rf215.h</name>
                 </file>
             </group>
             <group>
-                <name>max44009</name>
+                <name>cc2538rf</name>
                 <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\chips\max44009\max44009.c</name>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2538rf\radio_cc2538rf.c</name>
                 </file>
                 <file>
-                    <name>$PROJ_DIR$\..\..\..\bsp\chips\max44009\max44009.h</name>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2538rf\radio_cc2538rf.h</name>
+                </file>
+            </group>
+            <group>
+                <name>s70x</name>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\si70x\si70x.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\bsp\chips\si70x\si70x.h</name>
                 </file>
             </group>
             <group>
@@ -2482,6 +2576,12 @@
         <group>
             <name>02b-MAChigh</name>
             <file>
+                <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\msf.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\msf.h</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\neighbors.c</name>
             </file>
             <file>
@@ -2495,12 +2595,6 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\schedule.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\msf.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\msf.h</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sixtop.c</name>

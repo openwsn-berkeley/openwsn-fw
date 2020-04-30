@@ -32,7 +32,7 @@
 * 
 */
 
-/* === INCLUDES ============================================================ */
+//=== INCLUDES ============================================================
 #include "sam.h"
 #include "samr21_extint.h"
 #include "samr21_flash.h"
@@ -55,19 +55,22 @@
 #include "leds.h"
 #include "delay.h"
 
+//=========================== variables =======================================
+slot_board_vars_t slot_board_vars [MAX_SLOT_TYPES];
+slotType_t selected_slot_type;
 
 
-/* === MACROS ============================================================== */
+//=== MACROS ==============================================================
 
-/* TRX Parameter: t10 */
+//TRX Parameter: t10
 #define RST_PULSE_WIDTH_US                          (10)
 
-/* TRX Parameter: tTR1 typical value */
+//TRX Parameter: tTR1 typical value
 #define P_ON_TO_CLKM_AVAILABLE_TYP_US               (330)
 
 #define TRX_EXT_INT_CH	(0)
 
-/* === GLOBALS ============================================================= */
+//=== GLOBALS =============================================================
 
 extern int mote_main();
 
@@ -98,43 +101,46 @@ int main(void)
  */
 void board_init(void)
 {
- /* Disable the irq before initialization */
+ //Disable the irq before initialization
  cpu_irq_disable();
  
- /*  Initialize the Clock and event system and more */
+ // Initialize the Clock and event system and more
  sys_clock_init(); 
  
- /* Configure the Debug Pins */
+ //Configure the Debug Pins
  debugpins_init(); 
  
- /* Configure the Radio Interrupt */	
+ //Configure the Radio Interrupt	
  at86rfx_intc_init();
- /* Clear the Radio Interrupt */
+ //Clear the Radio Interrupt
  extint_flag_clear(TRX_EXT_INT_CH);
 
-/*  Initialize board hardware
-	SPI Init  Configure the Radio Pins and  Like RST, SLP_TR, EXTI(IRQ on Rising Edge)	 
- */
+// Initialize board hardware
+//	SPI Init  Configure the Radio Pins and  Like RST, SLP_TR, EXTI(IRQ on Rising Edge)	 
+
  rf_interface_init();
  
- /* Initialize the LED Output */
+ //Initialize the LED Output
  leds_init();
  
- /* Initialize the Button Input */
+ //Initialize the Button Input
  button_init();
  
- /* Radio Init */
+ //Radio Init
  radio_init();
   
- /* UART Init */
+ //UART Init
  uart_init();  
  
- /* BSP Timer Init*/
+ //BSP Timer Init
  sctimer_init(); 
  
- /* Clear the Radio Interrupt */
+ //Initialize slot vars
+ board_init_slot_vars();
+ 
+ //Clear the Radio Interrupt 
  extint_enable_irq(TRX_EXT_INT_CH);
- /* Enable the IRQ */
+ //Enable the IRQ 
  cpu_irq_enable();
 }
 
@@ -149,7 +155,7 @@ void board_init(void)
 void rf_interface_init(void)
 {
 	pinmux_t pinmux;
-		/* Configure the RF233 SPI Interface */
+		//Configure the RF233 SPI Interface 
 	pinmux.dir = PORT_PIN_DIR_OUTPUT;
 	pinmux.mux_loc = SYSTEM_PINMUX_GPIO;
 	pinmux.pull = PORT_PIN_PULLUP;
@@ -169,7 +175,7 @@ void rf_interface_init(void)
 	port_pin_set_level(AT86RFX_RST_PIN, SET_HIGH);
 	port_pin_set_level(AT86RFX_SLP_PIN, SET_HIGH);
 		
-	/* Enable the RF Block */
+	//Enable the RF Block 
 	PM->APBCMASK.reg |= (1<<PM_APBCMASK_RFCTRL_Pos);
 	REG_RFCTRL_FECFG = RFCTRL_CFG_ANT_DIV;	
 	
@@ -181,20 +187,48 @@ void rf_interface_init(void)
 
 	spi_init();
 		
-	/* Wait typical time of timer TR1. */
+	//Wait typical time of timer TR1. 
 	cpu_delay_us(P_ON_TO_CLKM_AVAILABLE_TYP_US);
 		
-	/* Initialize the transceiver */
+	//Initialize the transceiver 
 	//RST_HIGH();
 	PORT_PIN_RADIO_SLP_TR_CNTL_LOW();
 
-	/* Wait typical time of timer TR1. */
+	//Wait typical time of timer TR1. 
 	cpu_delay_us(P_ON_TO_CLKM_AVAILABLE_TYP_US);
 
-	/* Apply reset pulse */
+	//Apply reset pulse 
 	//RST_LOW();
 	cpu_delay_us(RST_PULSE_WIDTH_US);
 	//RST_HIGH();
+}
+
+//==== bootstrapping slot info lookup table
+void board_init_slot_vars(void){
+
+    // 20ms slot
+    slot_board_vars [SLOT_20ms_24GHZ].slotDuration                   =  655   ; // ms  
+    slot_board_vars [SLOT_20ms_24GHZ].maxTxDataPrepare               =  110  ; // 3355us (not measured)
+    slot_board_vars [SLOT_20ms_24GHZ].maxRxAckPrepare                =  20   ; // 610us (not measured)
+    slot_board_vars [SLOT_20ms_24GHZ].maxRxDataPrepare               =  33   ; // 1007us (not measured)
+    slot_board_vars [SLOT_20ms_24GHZ].maxTxAckPrepare                =  50   ; // 1525us (not measured)
+    slot_board_vars [SLOT_20ms_24GHZ].delayTx                        =  18   ; // 549us (not measured)
+    slot_board_vars [SLOT_20ms_24GHZ].delayRx                        =  0    ; // 0us (can not measure)
+    
+}
+
+// To get the current slotDuration at any time
+// used during initialization by sixtop to fire the first sixtop EB
+uint16_t board_getSlotDuration (void)
+{
+    return slot_board_vars [selected_slot_type].slotDuration;
+}
+
+// Setter/Getter function for slot_board_vars
+slot_board_vars_t board_selectSlotTemplate (slotType_t slot_type)
+{
+  selected_slot_type = slot_type;
+  return slot_board_vars [selected_slot_type];
 }
 
 /*
@@ -207,16 +241,16 @@ void rf_interface_init(void)
  */
 void board_sleep(void)
 {
- /* Enter into sleep mode and disable the MCU and other peripherals */
+ //Enter into sleep mode and disable the MCU and other peripherals 
  cpu_irq_enable(); 
- /* Set sleep mode to STANDBY */
- system_set_sleepmode(SYSTEM_SLEEPMODE_IDLE_2/*SYSTEM_SLEEPMODE_STANDBY*/);
+ //Set sleep mode to STANDBY 
+ system_set_sleepmode(SYSTEM_SLEEPMODE_IDLE_2);
 
- /* Stay in STANDBY sleep until low voltage is detected */
+ //Stay in STANDBY sleep until low voltage is detected 
  system_sleep();
 }
 
-/* 
+/*
  * @brief This will reset the MCU and board to default state
  *
  * @param None
@@ -224,10 +258,10 @@ void board_sleep(void)
  */
 void board_reset(void)
 {
- /* No Handlers added */
+ //No Handlers added 
 }
 
-/* 
+/*
  * @brief TRX END and other Transceiver Interrupt 
  *        Handler for AT86RFX
  */

@@ -9,7 +9,8 @@
 //=========================== defines =========================================
 
 //=========================== variables =======================================
-
+// global radio selection
+uint8_t selected_radioSetting      =       RADIOSETTING_24GHZ;
 //=========================== prototypes ======================================
 
 
@@ -87,7 +88,13 @@ void radio_reset(OpenMote* self) {
 
 //===== RF admin
 
-void radio_setFrequency(OpenMote* self, uint8_t frequency, radio_freq_t tx_or_rx) {
+void radio_setConfig ( radioSetting_t radioSetting){
+    selected_radioSetting = radioSetting;
+    //do nothing
+}
+
+
+void radio_setFrequency(OpenMote* self, uint16_t frequency, radio_freq_t tx_or_rx) {
    PyObject*   result;
    PyObject*   arglist;
    

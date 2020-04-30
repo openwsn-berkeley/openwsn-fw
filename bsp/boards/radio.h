@@ -47,6 +47,29 @@ typedef enum {
    FREQ_RX                        = 0x02,
 } radio_freq_t;
 
+// radio settings available for the MAC layer and supported by openmote-b
+typedef enum 
+{
+    
+    // different "modulations" (AT86RF215-specific)
+    // At83rf215 settings start at index 0 because they are used directly in a sub-array in the atmel driver.
+    RADIOSETTING_FSK_OPTION1_FEC,
+    RADIOSETTING_OQPSK_RATE3,
+    RADIOSETTING_OFDM_OPTION_1_MCS0,
+    RADIOSETTING_OFDM_OPTION_1_MCS1,
+    RADIOSETTING_OFDM_OPTION_1_MCS2,
+    RADIOSETTING_OFDM_OPTION_1_MCS3,
+
+    // default
+    RADIOSETTING_24GHZ,
+ 
+    // can be useful for switching receiver between OFDMx MCS modes.
+    RADIOSETTING_NONE,
+    
+    RADIOSETTING_MAX 
+
+} radioSetting_t;
+
 //=========================== typedef =========================================
 
 typedef void  (*radio_capture_cbt)(PORT_TIMER_WIDTH timestamp);
@@ -56,29 +79,49 @@ typedef void  (*radio_capture_cbt)(PORT_TIMER_WIDTH timestamp);
 //=========================== prototypes ======================================
 
 // admin
+// used in MAC init
 void                radio_init(void);
+// referred to only inside projects. Never inside MAC or even drivers 
+void                radio_powerOn(void);
+// referred to in init and change of settings
 void                radio_setStartFrameCb(radio_capture_cbt cb);
 void                radio_setEndFrameCb(radio_capture_cbt cb);
 // reset
+// I don't see it referenced anywhere in cource code. there are some references in pbi and pbd files 
 void                radio_reset(void);
 // RF admin
-void                radio_setFrequency(uint8_t frequency, radio_freq_t tx_or_rx);
-//void                radio_setFrequency(uint8_t frequency);
+// This function never sets frequency in fact. It sets a "channel". It shoud change accordingly. 
+// Should be claculateChannel and it can take an 8 bit channel index.  
+void                radio_setFrequency(uint16_t frequency, radio_freq_t tx_or_rx);
+
+void                radio_setConfig(radioSetting_t radioSetting);
+
+//referred to in MAC init and in some projects
 void                radio_rfOn(void);
+//referenced at end of each rf activity in the MAC
 void                radio_rfOff(void);
+// not referenced in MAC but referenced in some projects
 int8_t              radio_getFrequencyOffset(void);
 // TX
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
+// why not put it under the scum implementation of loadpacket?
 void                radio_loadPacket_prepare(uint8_t* packet, uint16_t len);
 #endif
+
+
 void                radio_loadPacket(uint8_t* packet, uint16_t len);
 void                radio_txEnable(void);
 void                radio_txNow(void);
 // RX
+//referenced in the MAC in scum context only.
+// why not put it under the scum implementation of rxEnable?
 void                radio_rxPacket_prepare(void);
+
 void                radio_rxEnable(void);
+//referenced in the MAC in scum context only: why not have an implementation of rxEnable
 void                radio_rxEnable_scum(void);
 void                radio_rxNow(void);
+// some older implementations support only 8bit lenRead and maxBufLen. They need to be generalized to 16bit because of big packets and to keep a flexible radio interface for non-openwsn applications where lengh can be up to 16bit)
 void                radio_getReceivedFrame(uint8_t* bufRead,
                                 uint8_t* lenRead,
                                 uint8_t  maxBufLen,
@@ -87,6 +130,7 @@ void                radio_getReceivedFrame(uint8_t* bufRead,
                                    bool* crc);
 
 // interrupt handlers
+// kick_scheduler_t: a generalized version of this will need to maintain void return.? 
 kick_scheduler_t    radio_isr(void);
 
 /**

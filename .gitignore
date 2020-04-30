@@ -1,6 +1,9 @@
 Debug
 settings
 *.dep
+*.ewd
+*.ewt
+*.bak
 *.sfr
 *.o
 *.exe
@@ -24,3 +27,5 @@ settings
 /projects/telosb/01bsp_uart/path.txt
 /projects/telosb/03oos_macpong/path.txt
 /projects/telosb/02drv_opentimers/path.txt
+/projects/openmote-b/01bsp_openradio_rx/log.txt
+/projects/openmote-b/01bsp_radio_tx/asm.s

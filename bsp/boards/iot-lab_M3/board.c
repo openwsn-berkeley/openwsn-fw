@@ -19,6 +19,11 @@
 #include "gpio.h"
 #include "cryptoengine.h"
 
+
+//=========================== variables =======================================
+slot_board_vars_t slot_board_vars [MAX_SLOT_TYPES];
+slotType_t selected_slot_type;
+
 //=========================== main ============================================
 
 extern int mote_main(void);
@@ -93,6 +98,35 @@ void board_init(void)
     //enable nvic for the radio
     NVIC_radio();
     cryptoengine_init();
+    board_init_slot_vars();
+}
+
+
+//==== bootstrapping slot info lookup table
+void board_init_slot_vars(void){
+    
+    // 20ms slot
+    slot_board_vars [SLOT_20ms_24GHZ].slotDuration                   =  655   ; // ms  
+    slot_board_vars [SLOT_20ms_24GHZ].maxTxDataPrepare               =  110  ; //  3355us (not measured)
+    slot_board_vars [SLOT_20ms_24GHZ].maxRxAckPrepare                =  20   ; //   610us (not measured)
+    slot_board_vars [SLOT_20ms_24GHZ].maxRxDataPrepare               =  33   ; //  1000us (not measured)
+    slot_board_vars [SLOT_20ms_24GHZ].maxTxAckPrepare                =  50   ; //  1525us (not measured)
+    slot_board_vars [SLOT_20ms_24GHZ].delayTx                        =  18   ; //   549us (not measured)
+    slot_board_vars [SLOT_20ms_24GHZ].delayRx                        =  0    ; //     0us (can not measure)
+}
+
+// To get the current slotDuration at any time
+// used during initialization by sixtop to fire the first sixtop EB
+uint16_t board_getSlotDuration (void)
+{
+    return slot_board_vars [selected_slot_type].slotDuration;
+}
+
+// Setter/Getter function for slot_board_vars
+slot_board_vars_t board_selectSlotTemplate (slotType_t slot_type)
+{
+  selected_slot_type = slot_type;
+  return slot_board_vars [selected_slot_type];
 }
 
 void board_sleep(void) {

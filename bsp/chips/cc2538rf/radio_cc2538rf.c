@@ -19,9 +19,9 @@
 #include <source/sys_ctrl.h>
 
 #include "board.h"
-#include "cc2538rf.h"
 #include "debugpins.h"
 #include "leds.h"
+#include "radio_cc2538rf.h"
 #include "radio.h"
 #include "sctimer.h"
 
@@ -37,16 +37,9 @@
 
 //=========================== variables =======================================
 
-typedef struct {
-   radio_capture_cbt         startFrame_cb;
-   radio_capture_cbt         endFrame_cb;
-   radio_state_t             state;
-} radio_vars_t;
 
-radio_vars_t radio_vars;
+radio_vars_cc2538rf_t radio_vars_cc2538rf;
 
-// global radio selection, will use RADIOSETTING_24GHZ by default at initialization. 
-uint8_t selected_radioSetting      =       RADIOSETTING_24GHZ;
 //=========================== prototypes ======================================
 
 void     enable_radio_interrupts(void);
@@ -55,20 +48,20 @@ void     disable_radio_interrupts(void);
 void     radio_on(void);
 void     radio_off(void);
 
-void     radio_error_isr(void);
-void     radio_isr_internal(void);
+void     radio_error_isr_cc2538rf(void);
+void     radio_isr_internal_cc2538rf(void);
 
 //=========================== public ==========================================
 
 //===== admin
 
-void radio_init(void) {
+void radio_init_cc2538rf(void) {
 
    // clear variables
-   memset(&radio_vars,0,sizeof(radio_vars_t));
+   memset(&radio_vars_cc2538rf,0,sizeof(radio_vars_cc2538rf_t));
 
    // change state
-   radio_vars.state          = RADIOSTATE_STOPPED;
+   radio_vars_cc2538rf.state          = RADIOSTATE_STOPPED;
    //flush fifos
    CC2538_RF_CSP_ISFLUSHRX();
    CC2538_RF_CSP_ISFLUSHTX();
@@ -142,8 +135,8 @@ void radio_init(void) {
    // enable_radio_interrupts();
 
    //register interrupt
-   IntRegister(INT_RFCORERTX, radio_isr_internal);
-   IntRegister(INT_RFCOREERR, radio_error_isr);
+   IntRegister(INT_RFCORERTX, radio_isr_internal_cc2538rf);
+   IntRegister(INT_RFCOREERR, radio_error_isr_cc2538rf);
 
    IntEnable(INT_RFCORERTX);
 
@@ -153,20 +146,20 @@ void radio_init(void) {
    //radio_on();
 
    // change state
-   radio_vars.state               = RADIOSTATE_RFOFF;
+   radio_vars_cc2538rf.state               = RADIOSTATE_RFOFF;
 }
 
-void radio_setStartFrameCb(radio_capture_cbt cb) {
-   radio_vars.startFrame_cb  = cb;
+void radio_setStartFrameCb_cc2538rf(radio_capture_cbt cb) {
+   radio_vars_cc2538rf.startFrame_cb  = cb;
 }
 
-void radio_setEndFrameCb(radio_capture_cbt cb) {
-   radio_vars.endFrame_cb    = cb;
+void radio_setEndFrameCb_cc2538rf(radio_capture_cbt cb) {
+   radio_vars_cc2538rf.endFrame_cb    = cb;
 }
 
 //===== reset
 
-void radio_reset(void) {
+void radio_reset_cc2538rf(void) {
    /* Wait for ongoing TX to complete (e.g. this could be an outgoing ACK) */
    while(HWREG(RFCORE_XREG_FSMSTAT1) & RFCORE_XREG_FSMSTAT1_TX_ACTIVE);
 
@@ -183,16 +176,10 @@ void radio_reset(void) {
 
 //===== RF admin
 
-void radio_setConfig (radioSetting_t radioSetting){
-    selected_radioSetting = radioSetting;
-    //do nothing
-}
-
-
-void radio_setFrequency(uint16_t frequency, radio_freq_t tx_or_rx) {
+void radio_setFrequency_cc2538rf(uint16_t frequency, radio_freq_t tx_or_rx) {
 
    // change state
-   radio_vars.state = RADIOSTATE_SETTING_FREQUENCY;
+   radio_vars_cc2538rf.state = RADIOSTATE_SETTING_FREQUENCY;
 
    radio_off();
    // configure the radio to the right frequecy
@@ -207,17 +194,21 @@ void radio_setFrequency(uint16_t frequency, radio_freq_t tx_or_rx) {
    //radio_on();
 
    // change state
-   radio_vars.state = RADIOSTATE_FREQUENCY_SET;
+   radio_vars_cc2538rf.state = RADIOSTATE_FREQUENCY_SET;
 }
 
-void radio_rfOn(void) {
+void radio_setConfig_cc2538rf(radioSetting_t radioSetting){
+    // do nothing
+}
+
+void radio_rfOn_cc2538rf(void) {
    //radio_on();
 }
 
-void radio_rfOff(void) {
+void radio_rfOff_cc2538rf(void) {
 
    // change state
-   radio_vars.state = RADIOSTATE_TURNING_OFF;
+   radio_vars_cc2538rf.state = RADIOSTATE_TURNING_OFF;
    radio_off();
    // wiggle debug pin
    debugpins_radio_clr();
@@ -226,10 +217,10 @@ void radio_rfOff(void) {
    disable_radio_interrupts();
 
    // change state
-   radio_vars.state = RADIOSTATE_RFOFF;
+   radio_vars_cc2538rf.state = RADIOSTATE_RFOFF;
 }
 
-int8_t radio_getFrequencyOffset(void){
+int8_t radio_getFrequencyOffset_cc2538rf(void){
 
     int8_t freq_offset;
 
@@ -240,11 +231,11 @@ int8_t radio_getFrequencyOffset(void){
 
 //===== TX
 
-void radio_loadPacket(uint8_t* packet, uint16_t len) {
+void radio_loadPacket_cc2538rf(uint8_t* packet, uint16_t len) {
    uint8_t i=0;
 
    // change state
-   radio_vars.state = RADIOSTATE_LOADING_PACKET;
+   radio_vars_cc2538rf.state = RADIOSTATE_LOADING_PACKET;
 
    // load packet in TXFIFO
    /*
@@ -263,13 +254,13 @@ void radio_loadPacket(uint8_t* packet, uint16_t len) {
    }
 
    // change state
-   radio_vars.state = RADIOSTATE_PACKET_LOADED;
+   radio_vars_cc2538rf.state = RADIOSTATE_PACKET_LOADED;
 }
 
-void radio_txEnable(void) {
+void radio_txEnable_cc2538rf(void) {
 
    // change state
-   radio_vars.state = RADIOSTATE_ENABLING_TX;
+   radio_vars_cc2538rf.state = RADIOSTATE_ENABLING_TX;
 
    // wiggle debug pin
    debugpins_radio_set();
@@ -279,14 +270,14 @@ void radio_txEnable(void) {
    //radio_rfOn();
 
    // change state
-   radio_vars.state = RADIOSTATE_TX_ENABLED;
+   radio_vars_cc2538rf.state = RADIOSTATE_TX_ENABLED;
 }
 
-void radio_txNow(void) {
+void radio_txNow_cc2538rf(void) {
    PORT_TIMER_WIDTH count;
 
    // change state
-   radio_vars.state = RADIOSTATE_TRANSMITTING;
+   radio_vars_cc2538rf.state = RADIOSTATE_TRANSMITTING;
 
    //enable radio interrupts
    enable_radio_interrupts();
@@ -306,10 +297,10 @@ void radio_txNow(void) {
 
 //===== RX
 
-void radio_rxEnable(void) {
+void radio_rxEnable_cc2538rf(void) {
 
    // change state
-   radio_vars.state = RADIOSTATE_ENABLING_RX;
+   radio_vars_cc2538rf.state = RADIOSTATE_ENABLING_RX;
 
    //enable radio interrupts
 
@@ -319,10 +310,10 @@ void radio_rxEnable(void) {
    leds_radio_on();
 
    // change state
-   radio_vars.state = RADIOSTATE_LISTENING;
+   radio_vars_cc2538rf.state = RADIOSTATE_LISTENING;
 }
 
-void radio_rxNow(void) {
+void radio_rxNow_cc2538rf(void) {
    //empty buffer before receiving
    //CC2538_RF_CSP_ISFLUSHRX();
 
@@ -335,7 +326,7 @@ void radio_rxNow(void) {
    while(!((HWREG(RFCORE_XREG_FSMSTAT1) & RFCORE_XREG_FSMSTAT1_RX_ACTIVE)));
 }
 
-void radio_getReceivedFrame(uint8_t* pBufRead,
+void radio_getReceivedFrame_cc2538rf(uint8_t* pBufRead,
                             uint8_t* pLenRead,
                             uint8_t  maxBufLen,
                              int8_t* pRssi,
@@ -446,11 +437,11 @@ the scheduler will always be kicked in after servicing an interrupt. This
 behaviour can be changed by modifying the SLEEPEXIT field in the SYSCTRL
 regiser (see page 131 of the CC2538 manual).
 */
-kick_scheduler_t radio_isr(void) {
+kick_scheduler_t radio_isr_cc2538rf(void) {
    return DO_NOT_KICK_SCHEDULER;
 }
 
-void radio_isr_internal(void) {
+void radio_isr_internal_cc2538rf(void) {
    volatile PORT_TIMER_WIDTH capturedTime;
    uint8_t  irq_status0,irq_status1;
 
@@ -473,10 +464,10 @@ void radio_isr_internal(void) {
    // start of frame event
    if ((irq_status0 & RFCORE_SFR_RFIRQF0_SFD) == RFCORE_SFR_RFIRQF0_SFD) {
       // change state
-      radio_vars.state = RADIOSTATE_RECEIVING;
-      if (radio_vars.startFrame_cb!=NULL) {
+      radio_vars_cc2538rf.state = RADIOSTATE_RECEIVING;
+      if (radio_vars_cc2538rf.startFrame_cb!=NULL) {
          // call the callback
-         radio_vars.startFrame_cb(capturedTime);
+         radio_vars_cc2538rf.startFrame_cb(capturedTime);
          debugpins_isr_clr();
          // kick the OS
          return;
@@ -488,10 +479,10 @@ void radio_isr_internal(void) {
    //or RXDONE is full -- we have a packet.
    if (((irq_status0 & RFCORE_SFR_RFIRQF0_RXPKTDONE) ==  RFCORE_SFR_RFIRQF0_RXPKTDONE)) {
       // change state
-      radio_vars.state = RADIOSTATE_TXRX_DONE;
-      if (radio_vars.endFrame_cb!=NULL) {
+      radio_vars_cc2538rf.state = RADIOSTATE_TXRX_DONE;
+      if (radio_vars_cc2538rf.endFrame_cb!=NULL) {
          // call the callback
-         radio_vars.endFrame_cb(capturedTime);
+         radio_vars_cc2538rf.endFrame_cb(capturedTime);
          debugpins_isr_clr();
          // kick the OS
          return;
@@ -503,10 +494,10 @@ void radio_isr_internal(void) {
    // or FIFOP is full -- we have a packet.
    if (((irq_status0 & RFCORE_SFR_RFIRQF0_FIFOP) ==  RFCORE_SFR_RFIRQF0_FIFOP)) {
       // change state
-      radio_vars.state = RADIOSTATE_TXRX_DONE;
-      if (radio_vars.endFrame_cb!=NULL) {
+      radio_vars_cc2538rf.state = RADIOSTATE_TXRX_DONE;
+      if (radio_vars_cc2538rf.endFrame_cb!=NULL) {
          // call the callback
-         radio_vars.endFrame_cb(capturedTime);
+         radio_vars_cc2538rf.endFrame_cb(capturedTime);
          debugpins_isr_clr();
          // kick the OS
          return;
@@ -519,10 +510,10 @@ void radio_isr_internal(void) {
    // end of frame event --either end of tx .
    if (((irq_status1 & RFCORE_SFR_RFIRQF1_TXDONE) == RFCORE_SFR_RFIRQF1_TXDONE)) {
       // change state
-      radio_vars.state = RADIOSTATE_TXRX_DONE;
-      if (radio_vars.endFrame_cb!=NULL) {
+      radio_vars_cc2538rf.state = RADIOSTATE_TXRX_DONE;
+      if (radio_vars_cc2538rf.endFrame_cb!=NULL) {
          // call the callback
-         radio_vars.endFrame_cb(capturedTime);
+         radio_vars_cc2538rf.endFrame_cb(capturedTime);
          debugpins_isr_clr();
          // kick the OS
          return;
@@ -535,7 +526,7 @@ void radio_isr_internal(void) {
    return;
 }
 
-void radio_error_isr(void){
+void radio_error_isr_cc2538rf(void){
    uint8_t rferrm;
 
    rferrm = (uint8_t)HWREG(RFCORE_XREG_RFERRM);

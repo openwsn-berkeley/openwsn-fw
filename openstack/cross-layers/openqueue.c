@@ -16,6 +16,7 @@
 
 openqueue_vars_t openqueue_vars;
 
+
 //=========================== prototypes ======================================
 
 void openqueue_reset_entry(OpenQueueEntry_t *entry);
