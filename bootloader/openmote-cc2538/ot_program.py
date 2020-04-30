@@ -18,7 +18,7 @@ class program_over_testbed(object):
     CMD                     = 'program'
     
     # in seconds, should be larger than the time starting from publishing message until receiving the response
-    MESSAGE_RESP_TIMEOUT    = 30
+    MESSAGE_RESP_TIMEOUT    = 40
     
     def __init__(self, mote, image_path):
         
