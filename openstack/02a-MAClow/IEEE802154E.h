@@ -24,7 +24,15 @@ static const uint8_t chTemplate_default[] = {
 // ASN and join Metric are replaced later when sending an EB
 static const uint8_t ebIEsBytestream[] = {
     0x1A,0x88,0x06,0x1A,0x00,0x00,            0x00,0x00,                                0x00,0x00,0x01,0x1C,0x00,0x01,
-    0xC8,0x00,0x0A,0x1B,0x01,0x00,SLOTFRAME_LENGTH,0x00,SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS,0x00,0x00,0x00,0x00,0x0F
+    0xC8,0x00,0x0A,0x1B,0x01,0x00,SLOTFRAME_LENGTH,0x00,SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS,SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET,0x00,0x00,0x00,0x0F
+};
+
+// Defining link options for each minimal active cell 
+
+static const uint8_t cellLinkOptions [SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS] = {
+  CELLOPTIONS_TX|CELLOPTIONS_RX|CELLOPTIONS_SHARED|CELLOPTIONS_TIMEKEPPING| CELLOPTIONS_24GHZ_OQPSK ,
+  CELLOPTIONS_TX|CELLOPTIONS_RX|CELLOPTIONS_SHARED|CELLOPTIONS_TIMEKEPPING| CELLOPTIONS_OFDM1_MCS3 ,
+  CELLOPTIONS_TX|CELLOPTIONS_RX|CELLOPTIONS_SHARED|CELLOPTIONS_TIMEKEPPING| CELLOPTIONS_FSK
 };
 //=========================== define ==========================================
 

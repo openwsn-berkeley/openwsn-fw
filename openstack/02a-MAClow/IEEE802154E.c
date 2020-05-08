@@ -118,7 +118,7 @@ void ieee154e_init(void) {
     // initialize variables
     memset(&ieee154e_vars,0,sizeof(ieee154e_vars_t));
     memset(&ieee154e_dbg,0,sizeof(ieee154e_dbg_t));
-
+#define IEEE802154E_SINGLE_CHANNEL 11
     // set singleChannel to 0 to enable channel hopping.
 #if IEEE802154E_SINGLE_CHANNEL  
     ieee154e_vars.singleChannel     = IEEE802154E_SINGLE_CHANNEL;
@@ -1035,6 +1035,7 @@ port_INLINE void activity_ti1ORri1(void) {
         // advance the schedule
         schedule_advanceSlot();
 
+        // Perhaps this is also where th radiosetting will be selected
         // calculate the frequency to transmit on
         ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset());
 
@@ -2502,6 +2503,7 @@ bool isValidEbFormat(OpenQueueEntry_t* pkt, uint16_t* lenIE){
     open_addr_t temp_neighbor;
     uint16_t slotoffset;
     uint16_t channeloffset;
+    uint16_t linkoptions;
 
     chTemplate_checkPass        = FALSE;
     tsTemplate_checkpass        = FALSE;
@@ -2595,12 +2597,15 @@ bool isValidEbFormat(OpenQueueEntry_t* pkt, uint16_t* lenIE){
                     temp_neighbor.type             = ADDR_ANYCAST;
 
                     for (i=0;i<numlinks;i++){
-                        slotoffset     = *((uint8_t*)(pkt->payload+ptr+5+5*i));   // slotframes length
+                        slotoffset     = *((uint8_t*)(pkt->payload+ptr+5+5*i));   // slot offset
                         slotoffset    |= *((uint8_t*)(pkt->payload+ptr+5+5*i+1))<<8;
 
-                        channeloffset  = *((uint8_t*)(pkt->payload+ptr+5+5*i+2));   // slotframes length
+                        channeloffset  = *((uint8_t*)(pkt->payload+ptr+5+5*i+2));   // channel offset
                         channeloffset |= *((uint8_t*)(pkt->payload+ptr+5+5*i+3))<<8;
 
+                        linkoptions  = *((uint8_t*)(pkt->payload+ptr+5+5*i+5));   // link options
+                        linkoptions |= *((uint8_t*)(pkt->payload+ptr+5+5*i+6))<<8;
+                        
                         schedule_addActiveSlot(
                             slotoffset,    // slot offset
                             CELLTYPE_TXRX, // type of slot

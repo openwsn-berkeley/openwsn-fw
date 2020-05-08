@@ -711,15 +711,26 @@ void timer_sixtop_management_fired(void) {
 This is one of the MAC management tasks. This function inlines in the
 timers_res_fired() function, but is declared as a separate function for better
 readability of the code.
+
+The general logic of this function is organized as follows:
+  - Ensure you are in the right conditions to send an EB internally
+  - Get a free packet buffer
+  - Compose eb payload (e.g. shared cell(s) offset, their respective channels and link options etc.) 
+  - Compose l2 attributes
+  - Send the EB internally (pass it to 802154e). 
+
 */
 port_INLINE void sixtop_sendEB(void) {
     OpenQueueEntry_t* eb;
+
     uint8_t     i;
     uint8_t     eb_len;
     uint16_t    temp16b;
     open_addr_t addressToWrite;
 
     memset(&addressToWrite,0,sizeof(open_addr_t));
+
+//=========================== ensure you are in the right conditions ==========
 
     if (
         (ieee154e_isSynch()==FALSE)                     ||
@@ -749,7 +760,8 @@ port_INLINE void sixtop_sendEB(void) {
 
     // if I get here, I will send an EB
 
-    // get a free packet buffer
+//=========================== get a free packet buffer ========================
+    
     eb = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP);
     if (eb==NULL) {
         openserial_printError(
@@ -764,6 +776,8 @@ port_INLINE void sixtop_sendEB(void) {
     // declare ownership over that packet
     eb->creator = COMPONENT_SIXTOP;
     eb->owner   = COMPONENT_SIXTOP;
+    
+//=========================== Compose eb payload ==============================
 
     // in case we none default number of shared cells defined in minimal configuration
     if (ebIEsBytestream[EB_SLOTFRAME_NUMLINK_OFFSET]>1){
@@ -773,7 +787,7 @@ port_INLINE void sixtop_sendEB(void) {
             eb->payload[1]   = 0x00;
             eb->payload[2]   = 0x00; // channel offset
             eb->payload[3]   = 0x00;
-            eb->payload[4]   = 0x0F; // link options
+            eb->payload[4]   = cellLinkOptions[i]; // link options
         }
     }
 
@@ -793,7 +807,9 @@ port_INLINE void sixtop_sendEB(void) {
 
     eb->payload[EB_SLOTFRAME_LEN_OFFSET]   = (uint8_t)(0x00FF & (schedule_getFrameLength()));
     eb->payload[EB_SLOTFRAME_LEN_OFFSET+1] = (uint8_t)(0x00FF & (schedule_getFrameLength()>>8));
-
+    
+//=========================== Compose l2 attributes ===========================
+    
     // Keep a pointer to where the ASN will be
     // Note: the actual value of the current ASN and JP will be written by the
     //    IEEE802.15.4e when transmitting
@@ -812,7 +828,9 @@ port_INLINE void sixtop_sendEB(void) {
     eb->l2_securityLevel   = IEEE802154_SECURITY_LEVEL_BEACON;
     eb->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE;
     eb->l2_keyIndex        = IEEE802154_security_getBeaconKeyIndex();
-
+    
+//=========================== Send ============================================
+    
     // put in queue for MAC to handle
     sixtop_send_internal(eb,eb->l2_payloadIEpresent);
 
