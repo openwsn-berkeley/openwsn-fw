@@ -51,7 +51,8 @@ spi_vars_t spi_vars;
 
 static char stringToPrint[]="MessageToTest\r\n";
 size_t len=sizeof(stringToPrint);
-	
+uint8_t  spi_tx_buffer[2];
+uint8_t  spi_rx_buffer[2];
 //=========================== prototypes ======================================
 static void disableInterrupts(void);
 static void enableInterrupts(void);
@@ -97,15 +98,19 @@ void spi_init(){
     IOCPinConfigPeriphInput(SPI_GPIO_SSI_BASE, SPI_PIN_SSI_RX, IOC_SSIRXD_SSI1);
 
 
-    //Sets SSI_CR0 (SPI MODE and Data Size), SSI_CR1(Protocol), SSI_CPSR(Clock prescaler divisor)
+    //Sets SSI_CR0 (SPI MODE and Data Size), SSI_CR1(Protocol -- Master/Slave), SSI_CPSR(Clock prescaler divisor)
     //According to the LoRaSX1276 datasheet, the corresponding mode is CPOL=0 , CPHA=0 which is FRF mode 0
-    SSIConfigSetExpClk(SSI1_BASE, SysCtrlIOClockGet(), SSI_FRF_MOTO_MODE_0, SSI_MODE_MASTER, SysCtrlIOClockGet()/2/*16000000*/, 8);
+    SSIConfigSetExpClk(SSI1_BASE, SysCtrlIOClockGet(), SSI_FRF_MOTO_MODE_0, SSI_MODE_MASTER, SysCtrlIOClockGet()/200 /*16000000*/, 8);
 
     //Enable the SSI1 module(writes into CR1)
     SSIEnable(SSI1_BASE);
     
+    spi_tx_buffer[0]     = 0x42;
+    spi_tx_buffer[1]     = 0xFF;
+    
     //Call the spi_txrx function
-    spi_txrx((uint8_t*)stringToPrint,len,SPI_FIRSTBYTE,(uint8_t*)16,16,SPI_FIRST,SPI_NOTLAST);
+    //spi_txrx((uint8_t*)stringToPrint,len,SPI_FIRSTBYTE,(uint8_t*)16,16,SPI_FIRST,SPI_NOTLAST);
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
 }
 
 #ifdef SPI_IN_INTERRUPT_MODE
