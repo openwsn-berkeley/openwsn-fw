@@ -1039,6 +1039,9 @@ port_INLINE void activity_ti1ORri1(void) {
         // calculate the frequency to transmit on
         ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset());
 
+        // retrieve the radio setting to be used in this cell
+        ieee154e_vars.radioSetting = cellRadioSettingMap[schedule_getCellRadioSetting()];
+        
         // find the next one
         ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
         if (idmanager_getIsSlotSkip() && idmanager_getIsDAGroot()==FALSE) {
@@ -1070,7 +1073,7 @@ port_INLINE void activity_ti1ORri1(void) {
         endSlot();
         return;
     }
-
+    
     // check the schedule to see what type of slot this is
     cellType = schedule_getType();
     switch (cellType) {
@@ -1252,6 +1255,9 @@ port_INLINE void activity_ti2(void) {
     // add 2 CRC bytes only to the local copy as we end up here for each retransmission
     packetfunctions_reserveFooterSize(&ieee154e_vars.localCopyForTransmission, 2);
 
+    // configure the radio setting
+    radio_setConfig (RADIOSETTING_24GHZ);
+    
     // configure the radio to listen to the default synchronizing channel
     radio_setFrequency(ieee154e_vars.freq, FREQ_TX);
 
@@ -2504,7 +2510,8 @@ bool isValidEbFormat(OpenQueueEntry_t* pkt, uint16_t* lenIE){
     uint16_t slotoffset;
     uint16_t channeloffset;
     uint16_t linkoptions;
-
+    uint8_t  cell_radiosetting;
+    
     chTemplate_checkPass        = FALSE;
     tsTemplate_checkpass        = FALSE;
     sync_ie_checkPass           = FALSE;
@@ -2606,13 +2613,16 @@ bool isValidEbFormat(OpenQueueEntry_t* pkt, uint16_t* lenIE){
                         linkoptions  = *((uint8_t*)(pkt->payload+ptr+5+5*i+5));   // link options
                         linkoptions |= *((uint8_t*)(pkt->payload+ptr+5+5*i+6))<<8;
                         
+                        //extract cell radiosetting with bitmask 0x60
+                        cell_radiosetting = (linkoptions  & 0x60)>>5;
                         schedule_addActiveSlot(
-                            slotoffset,    // slot offset
-                            CELLTYPE_TXRX, // type of slot
-                            TRUE,          // shared?
-                            FALSE,         // auto cell
-                            channeloffset, // channel offset
-                            &temp_neighbor // neighbor
+                            slotoffset,         // slot offset
+                            CELLTYPE_TXRX,      // type of slot
+                            TRUE,               // shared?
+                            FALSE,              // auto cell
+                            cell_radiosetting,  // cell radiosetting
+                            channeloffset,      // channel offset
+                            &temp_neighbor      // neighbor
                         );
                     }
                 }

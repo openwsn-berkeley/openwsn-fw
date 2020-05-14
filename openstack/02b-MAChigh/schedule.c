@@ -80,6 +80,8 @@ void schedule_startDAGroot(void) {
             CELLTYPE_TXRX,                          // type of slot
             TRUE,                                   // shared?
             FALSE,                                  // auto cell?
+            CELLRADIOSETTING_1                      // cell radio setting
+              + (running_slotOffset-start_slotOffset)
             SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET,  // channel offset
             &temp_neighbor                          // neighbor
         );
@@ -263,6 +265,7 @@ owerror_t schedule_addActiveSlot(
     cellType_t      type,
     bool            shared,
     bool            isAutoCell,
+    cellRadioSetting_t cell_radiosetting,
     channelOffset_t channelOffset,
     open_addr_t*    neighbor
 ) {
@@ -351,10 +354,11 @@ owerror_t schedule_addActiveSlot(
         if (needSwapEntries) {
 
             // backup current entries
-            backupEntry->type           = slotContainer->type;
-            backupEntry->shared         = slotContainer->shared;
-            backupEntry->channelOffset  = slotContainer->channelOffset;
-            backupEntry->isAutoCell     = slotContainer->isAutoCell;
+            backupEntry->type              = slotContainer->type;
+            backupEntry->shared            = slotContainer->shared;
+            backupEntry->channelOffset     = slotContainer->channelOffset;
+            backupEntry->cellRadioSetting  = slotContainer->cellRadioSetting;
+            backupEntry->isAutoCell        = slotContainer->isAutoCell;
 
             memcpy(&(backupEntry->neighbor), &(slotContainer->neighbor), sizeof(open_addr_t));
 
@@ -371,6 +375,7 @@ owerror_t schedule_addActiveSlot(
             slotContainer->shared               = shared;
             slotContainer->channelOffset        = channelOffset;
             slotContainer->isAutoCell           = isAutoCell;
+            slotContainer->cellRadioSetting     = cellRadioSetting;
             memcpy(&(slotContainer->neighbor),neighbor,sizeof(open_addr_t));
 
             // fill that schedule entry with current asn
@@ -385,6 +390,7 @@ owerror_t schedule_addActiveSlot(
             backupEntry->shared                     = shared;
             backupEntry->channelOffset              = channelOffset;
             backupEntry->isAutoCell                 = isAutoCell;
+            backupEntry->cellRadioSetting           = cellRadioSetting;
             memcpy(&backupEntry->neighbor,neighbor,sizeof(open_addr_t));
 
             // fill that schedule entry with current asn
@@ -406,6 +412,7 @@ owerror_t schedule_addActiveSlot(
     slotContainer->shared                    = shared;
     slotContainer->channelOffset             = channelOffset;
     slotContainer->isAutoCell                = isAutoCell;
+    slotContainer->cellRadioSetting          = cellRadioSetting;
     memcpy(&(slotContainer->neighbor),neighbor,sizeof(open_addr_t));
 
     // fill that schedule entry with current asn
@@ -460,6 +467,7 @@ owerror_t schedule_addActiveSlot(
                 slotContainer->type                      = CELLTYPE_OFF;
                 slotContainer->shared                    = FALSE;
                 slotContainer->channelOffset             = 0;
+                slotContainer->cellRadioSetting          = 0;
                 memset(&slotContainer->neighbor,0,sizeof(open_addr_t));
                 ENABLE_INTERRUPTS();
                 return E_FAIL;
@@ -1101,6 +1109,25 @@ slotOffset_t schedule_getSlottOffset(void) {
     DISABLE_INTERRUPTS();
 
     returnVal = schedule_vars.currentScheduleEntry->slotOffset;
+
+    ENABLE_INTERRUPTS();
+
+    return returnVal;
+}
+
+/**
+
+\brief Get the cellRadioSetting of the current schedule entry.
+
+\returns The cellRadioSetting of the current schedule entry.
+*/
+cellRadioSetting_t schedule_getCellRadioSetting(void) {
+    cellRadioSetting_t returnVal;
+
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+
+    returnVal = schedule_vars.currentScheduleEntry->cellRadioSetting;
 
     ENABLE_INTERRUPTS();
 

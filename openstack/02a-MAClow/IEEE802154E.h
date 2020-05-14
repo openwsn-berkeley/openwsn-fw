@@ -12,6 +12,7 @@
 #include "board.h"
 #include "opentimers.h"
 #include "schedule.h"
+#include "radio.h"
 
 //=========================== debug define ====================================
 
@@ -30,9 +31,9 @@ static const uint8_t ebIEsBytestream[] = {
 // Defining link options for each minimal active cell 
 
 static const uint8_t cellLinkOptions [SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS] = {
-  CELLOPTIONS_TX|CELLOPTIONS_RX|CELLOPTIONS_SHARED|CELLOPTIONS_TIMEKEPPING| CELLOPTIONS_24GHZ_OQPSK ,
-  CELLOPTIONS_TX|CELLOPTIONS_RX|CELLOPTIONS_SHARED|CELLOPTIONS_TIMEKEPPING| CELLOPTIONS_OFDM1_MCS3 ,
-  CELLOPTIONS_TX|CELLOPTIONS_RX|CELLOPTIONS_SHARED|CELLOPTIONS_TIMEKEPPING| CELLOPTIONS_FSK
+  CELLOPTIONS_TX|CELLOPTIONS_RX|CELLOPTIONS_SHARED|CELLOPTIONS_TIMEKEPPING| CELLRADIOSETTING_1<<5 ,
+  CELLOPTIONS_TX|CELLOPTIONS_RX|CELLOPTIONS_SHARED|CELLOPTIONS_TIMEKEPPING| CELLRADIOSETTING_2<<5 ,
+  CELLOPTIONS_TX|CELLOPTIONS_RX|CELLOPTIONS_SHARED|CELLOPTIONS_TIMEKEPPING| CELLRADIOSETTING_3<<5
 };
 //=========================== define ==========================================
 
@@ -257,6 +258,7 @@ typedef struct {
    // misc
    asn_t                     asn;                     // current absolute slot number
    slotOffset_t              slotOffset;              // current slot offset
+   radioSetting_t            radioSetting;            // current slot radio setting
    slotOffset_t              nextActiveSlotOffset;    // next active slot offset
    PORT_TIMER_WIDTH          deSyncTimeout;           // how many slots left before looses sync
    bool                      isSync;                  // TRUE iff mote is synchronized to network

@@ -38,6 +38,14 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 
 #define MAXNUMNEIGHBORS  30
 
+// dynamic mapping of MAC-level cellRadioSetting_t (in schedule.h) to Open Radio 
+// radioSetting_t (in radio.h)
+
+static const uint8_t cellRadioSettingMap [MAX_CELLRADIOSETTINGS];
+cellRadioSettingMap [CELLRADIOSETTING_1] = RADIOSETTING_FSK_OPTION1_FEC;
+cellRadioSettingMap [CELLRADIOSETTING_2] = RADIOSETTING_24GHZ;
+cellRadioSettingMap [CELLRADIOSETTING_3] = RADIOSETTING_OFDM_OPTION_1_MCS3;
+
 // maximum celllist length
 #define CELLLIST_MAX_LEN 5
 
