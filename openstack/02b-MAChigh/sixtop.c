@@ -634,6 +634,7 @@ owerror_t sixtop_send_internal(
             CELLTYPE_TX,                                                     // type of slot
             TRUE,                                                            // shared?
             TRUE,                                                            // auto cell?
+            CELLRADIOSETTING_FALLBACK,                                       // default radio setting for first time neogotiation
             msf_hashFunction_getChanneloffset(&(msg->l2_nextORpreviousHop)), // channel offset
             &(msg->l2_nextORpreviousHop)                                     // neighbor
         );
@@ -1696,6 +1697,12 @@ bool sixtop_addCells(
                 type,
                 isShared,
                 FALSE,
+                
+                // this is a temporay hack, this fallback setting needs to be 
+                // retrieved from cellList [i].cellRadioSetting from the 
+                // sixtop add cells requestion from the neighbor
+                
+                CELLRADIOSETTING_FALLBACK,
                 cellList[i].channeloffset,
                 &temp_neighbor
             );

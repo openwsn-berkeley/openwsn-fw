@@ -38,13 +38,28 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 
 #define MAXNUMNEIGHBORS  30
 
-// dynamic mapping of MAC-level cellRadioSetting_t (in schedule.h) to Open Radio 
-// radioSetting_t (in radio.h)
+// radio settings available for the MAC layer and supported by openmote-b
+typedef enum 
+{
+    
+    // different "modulations" (AT86RF215-specific)
+    // At83rf215 settings start at index 0 because they are used directly in a sub-array in the atmel driver.
+    RADIOSETTING_FSK_OPTION1_FEC,
+    RADIOSETTING_OQPSK_RATE3,
+    RADIOSETTING_OFDM_OPTION_1_MCS0,
+    RADIOSETTING_OFDM_OPTION_1_MCS1,
+    RADIOSETTING_OFDM_OPTION_1_MCS2,
+    RADIOSETTING_OFDM_OPTION_1_MCS3,
 
-static const uint8_t cellRadioSettingMap [MAX_CELLRADIOSETTINGS];
-cellRadioSettingMap [CELLRADIOSETTING_1] = RADIOSETTING_FSK_OPTION1_FEC;
-cellRadioSettingMap [CELLRADIOSETTING_2] = RADIOSETTING_24GHZ;
-cellRadioSettingMap [CELLRADIOSETTING_3] = RADIOSETTING_OFDM_OPTION_1_MCS3;
+    // default
+    RADIOSETTING_24GHZ,
+ 
+    // can be useful for switching receiver between OFDMx MCS modes.
+    RADIOSETTING_NONE,
+    
+    RADIOSETTING_MAX 
+
+} radioSetting_t;
 
 // maximum celllist length
 #define CELLLIST_MAX_LEN 5

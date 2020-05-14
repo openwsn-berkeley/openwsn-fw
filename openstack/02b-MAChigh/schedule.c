@@ -81,7 +81,7 @@ void schedule_startDAGroot(void) {
             TRUE,                                   // shared?
             FALSE,                                  // auto cell?
             CELLRADIOSETTING_1                      // cell radio setting
-              + (running_slotOffset-start_slotOffset)
+              + (running_slotOffset-start_slotOffset),
             SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET,  // channel offset
             &temp_neighbor                          // neighbor
         );
@@ -235,6 +235,7 @@ void  schedule_getSlotInfo(
                info->link_type                 = slotContainer->type;
                info->shared                    = slotContainer->shared;
                info->slotOffset                = slotOffset;
+               info->cellRadioSetting         = slotContainer->cellRadioSetting;
                info->channelOffset             = slotContainer->channelOffset;
                info->isAutoCell                = slotContainer->isAutoCell;
                memcpy(&(info->address), &(slotContainer->neighbor), sizeof(open_addr_t));
@@ -246,6 +247,7 @@ void  schedule_getSlotInfo(
     info->link_type                 = CELLTYPE_OFF;
     info->shared                    = FALSE;
     info->channelOffset             = 0;        //set to zero if not set.
+    info->cellRadioSetting         = 0;
     info->isAutoCell                = FALSE;
     memset(&(info->address), 0, sizeof(open_addr_t));
 }
@@ -265,7 +267,7 @@ owerror_t schedule_addActiveSlot(
     cellType_t      type,
     bool            shared,
     bool            isAutoCell,
-    cellRadioSetting_t cell_radiosetting,
+    cellRadioSetting_t cellRadioSetting,
     channelOffset_t channelOffset,
     open_addr_t*    neighbor
 ) {
@@ -557,7 +559,7 @@ owerror_t schedule_removeActiveSlot(
         backupEntry->type                   = CELLTYPE_OFF;
         backupEntry->shared                 = FALSE;
         backupEntry->channelOffset          = 0;
-
+        backupEntry->cellRadioSetting      = 0;
         backupEntry->neighbor.type          = ADDR_NONE;
         memset(&backupEntry->neighbor.addr_64b[0], 0x00, sizeof(backupEntry->neighbor.addr_64b));
 
@@ -587,6 +589,7 @@ owerror_t schedule_removeActiveSlot(
             // move the backup entry to the schedule
             slotContainer->type                      = slotContainer->backupEntries[candidate_index].type;
             slotContainer->shared                    = slotContainer->backupEntries[candidate_index].shared;
+            slotContainer->cellRadioSetting         = slotContainer->backupEntries[candidate_index].cellRadioSetting;
             slotContainer->channelOffset             = slotContainer->backupEntries[candidate_index].channelOffset;
             slotContainer->isAutoCell                = slotContainer->backupEntries[candidate_index].isAutoCell;
             memcpy(&slotContainer->neighbor,&(slotContainer->backupEntries[candidate_index].neighbor),sizeof(open_addr_t));

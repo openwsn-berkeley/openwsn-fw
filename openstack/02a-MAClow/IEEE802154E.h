@@ -174,7 +174,6 @@ typedef struct {
     uint16_t wdAckDuration;
 } slot_154e_vars_t; 
 
-
 //======== global 802154e atomic duration variables
 
 //    - ticks = duration_in_seconds * 32768

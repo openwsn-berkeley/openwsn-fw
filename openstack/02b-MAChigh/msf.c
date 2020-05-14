@@ -57,6 +57,7 @@ void msf_init(void) {
         CELLTYPE_RX,                                                     // type of slot
         FALSE,                                                           // shared?
         TRUE,                                                            // auto cell?
+        CELLRADIOSETTING_FALLBACK,                                       // default radio setting
         msf_hashFunction_getChanneloffset(idmanager_getMyID(ADDR_64B)),  // channel offset
         &temp_neighbor                                                   // neighbor
     );

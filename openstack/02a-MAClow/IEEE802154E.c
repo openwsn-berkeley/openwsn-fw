@@ -1042,6 +1042,37 @@ port_INLINE void activity_ti1ORri1(void) {
         // retrieve the radio setting to be used in this cell
         ieee154e_vars.radioSetting = cellRadioSettingMap[schedule_getCellRadioSetting()];
         
+            /* select the desired slot template to use, default is SLOT_20ms_24GHZ
+       currently, the following slot template/radio setting combinations are supported:
+
+        SLOT_20ms_24GHZ              , RADIOSETTING_24GHZ --> Default
+        SLOT_40ms_24GHZ              , RADIOSETTING_24GHZ
+        SLOT_40ms_FSK_SUBGHZ         , RADIOSETTING_FSK_OPTION1_FEC
+        SLOT_40ms_OFDM1MCS0_3_SUBGHZ , RADIOSETTING_OFDM_OPTION_1_MCS0
+        SLOT_40ms_OFDM1MCS0_3_SUBGHZ , RADIOSETTING_OFDM_OPTION_1_MCS1
+        SLOT_40ms_OFDM1MCS0_3_SUBGHZ , RADIOSETTING_OFDM_OPTION_1_MCS2
+        SLOT_40ms_OFDM1MCS0_3_SUBGHZ , RADIOSETTING_OFDM_OPTION_1_MCS3
+    */
+        switch (ieee154e_vars.radioSetting) {
+        case RADIOSETTING_24GHZ:
+           ieee154e_select_slot_template (SLOT_40ms_24GHZ);
+           break;
+        case RADIOSETTING_FSK_OPTION1_FEC:
+           ieee154e_select_slot_template (SLOT_40ms_FSK_SUBGHZ);
+           break;
+        case RADIOSETTING_OFDM_OPTION_1_MCS3:
+           ieee154e_select_slot_template (SLOT_40ms_OFDM1MCS0_3_SUBGHZ);
+           break;
+         default:
+          // log the error
+            // >> add error notification here
+          // abort
+          endSlot();
+          break;
+            
+        }
+
+        
         // find the next one
         ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
         if (idmanager_getIsSlotSkip() && idmanager_getIsDAGroot()==FALSE) {
@@ -1254,13 +1285,13 @@ port_INLINE void activity_ti2(void) {
 
     // add 2 CRC bytes only to the local copy as we end up here for each retransmission
     packetfunctions_reserveFooterSize(&ieee154e_vars.localCopyForTransmission, 2);
-
-    // configure the radio setting
-    radio_setConfig (RADIOSETTING_24GHZ);
     
     // configure the radio to listen to the default synchronizing channel
     radio_setFrequency(ieee154e_vars.freq, FREQ_TX);
-
+    
+    // configure the radio setting
+    radio_setConfig (ieee154e_vars.radioSetting);
+    
     // load the packet in the radio's Tx buffer
     radio_loadPacket(ieee154e_vars.localCopyForTransmission.payload,
                     ieee154e_vars.localCopyForTransmission.length);
@@ -1726,7 +1757,10 @@ port_INLINE void activity_ri2(void) {
         isr_ieee154e_timer                                // callback
     );
     // radiotimer_schedule(DURATION_rt2);
-
+    
+    // configure the radio setting
+    radio_setConfig (ieee154e_vars.radioSetting);
+    
     // configure the radio to listen to the default synchronizing channel
     radio_setFrequency(ieee154e_vars.freq, FREQ_RX);
 
@@ -2510,7 +2544,7 @@ bool isValidEbFormat(OpenQueueEntry_t* pkt, uint16_t* lenIE){
     uint16_t slotoffset;
     uint16_t channeloffset;
     uint16_t linkoptions;
-    uint8_t  cell_radiosetting;
+    uint8_t  cellRadioSetting;
     
     chTemplate_checkPass        = FALSE;
     tsTemplate_checkpass        = FALSE;
@@ -2614,13 +2648,13 @@ bool isValidEbFormat(OpenQueueEntry_t* pkt, uint16_t* lenIE){
                         linkoptions |= *((uint8_t*)(pkt->payload+ptr+5+5*i+6))<<8;
                         
                         //extract cell radiosetting with bitmask 0x60
-                        cell_radiosetting = (linkoptions  & 0x60)>>5;
+                        cellRadioSetting = (linkoptions  & 0x60)>>5;
                         schedule_addActiveSlot(
                             slotoffset,         // slot offset
                             CELLTYPE_TXRX,      // type of slot
                             TRUE,               // shared?
                             FALSE,              // auto cell
-                            cell_radiosetting,  // cell radiosetting
+                            cellRadioSetting,   // cell radiosetting
                             channeloffset,      // channel offset
                             &temp_neighbor      // neighbor
                         );
