@@ -83,8 +83,6 @@ project:
     noadaptivesync Do not use adaptive synchronization.
     l2_security   Use hop-by-hop encryption and authentication.
                   0 (off), 1 (on)
-    msf_adaptive  Enable/disable MSF for adding/deleting cell to adapt to traffic
-                  0 (disable), 1 (enable)
     ide           qtcreator
     fix_channel   Set single channel hopping for debugging
                   0 (off, default), i (on, channel=i [11:26])
@@ -154,7 +152,6 @@ command_line_options = {
     'noadaptivesync': ['0', '1'],
     'l2_security': ['0', '1'],
     'fix_channel': ['0'] + map(str, range(11, 27)),
-    'msf_adaptive': ['0', '1'],
     'deadline_option': ['0', '1'],
     'ide': ['none', 'qtcreator'],
     'revision': ['']
@@ -302,13 +299,6 @@ command_line_vars.AddVariables(
         'fix_channel',  # key
         '',  # help
         command_line_options['fix_channel'][0],  # default
-        validate_option,  # validator
-        int,  # converter
-    ),
-    (
-        'msf_adaptive',  # key
-        '',  # help
-        command_line_options['msf_adaptive'][1],  # default
         validate_option,  # validator
         int,  # converter
     ),

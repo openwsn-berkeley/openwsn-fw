@@ -222,6 +222,14 @@
  */
 // #define OPENWSN_OPENSERIAL_PRINTF
 
+/**
+ * \def OPENWSN_ADAPTIVE_MSF
+ *
+ * Allow the MSF algorithm to dynamically remove and allocate slots, based on the traffic load in the network.
+ *
+ */
+#define OPENWSN_ADAPTIVE_MSF
+
 #include "check_config.h"
 
 #endif /* OPENWSN_CONFIG_H */
