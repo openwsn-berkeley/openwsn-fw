@@ -1,6 +1,22 @@
 #ifndef OPENWSN_CHECK_CONFIG_H
 #define OPENWSN_CHECK_CONFIG_H
 
+#if !defined(PYTHON_BOARD) && \
+    !defined(TELOSB) && \
+    !defined(WSN430V13B) && \
+    !defined(WSN430V14) && \
+    !defined(GINA) && \
+    !defined(Z1) && \
+    !defined(OPENMOTE_CC2538) && \
+    !defined(OPENMOTE_B) && \
+    !defined(OPENMOTE_B_24GHZ) && \
+    !defined(OPENMOTE_B_SUBGHZ)
+#error 'Board name must be specified to check for configuration errors'
+#endif
+
+#if defined(PYTHON_BOARD) && defined(OPENWSN_AES_HW)
+#error 'Python board does not support hardware acceleration.'
+#endif
 
 #if !defined(OPENWSN_COAP_C) && (\
     defined(OPENWSN_C6T_C) || \

@@ -205,9 +205,22 @@
 #define OPENWSN_MAX_PKTSIZE_SUPPORTED   1320
 #define OPENWSN_MAX_NUM_BIGPKTS         2
 
-#define OPENWSN_AES_HW
+/**
+ * \def OPENWSN_AES_HW
+ *
+ * Enable AES hardware acceleration. This options is only available on boards that support hardware acceleration. It
+ * cannot be combined with the python board.
+ *
+ */
+// #define OPENWSN_AES_HW
 
-#define OPENWSN_OPENSERIAL_PRINTF
+/**
+ * \def OPENWSN_OPENSERIAL_PRINTF
+ *
+ * Enable usage of openserial_printf function to print strings over the serial port.
+ *
+ */
+// #define OPENWSN_OPENSERIAL_PRINTF
 
 #include "check_config.h"
 
