@@ -14,6 +14,19 @@
 #error 'Board name must be specified to check for configuration errors'
 #endif
 
+#if (defined(OPENMOTE_CC2538) || \
+    defined(OPENMOTE_B) || \
+    defined(OPENMOTE_B_24GHZ) || \
+    defined(OPENMOTE_B_SUBGHZ) || \
+    defined(TELOSB) || \
+    defined(WSN430V13B) || \
+    defined(WSN430V14) || \
+    defined(GINA) || \
+    defined(Z1)) && \
+    !defined(OPENWSN_AES_HW)
+#warning 'Software encryption might be too slow on certain hardware. It is recommend to use OPENWSN_AES_HW where possible.'
+#endif
+
 #if defined(PYTHON_BOARD) && defined(OPENWSN_AES_HW)
 #error 'Python board does not support hardware acceleration.'
 #endif
