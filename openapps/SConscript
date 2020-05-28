@@ -7,6 +7,7 @@ localEnv = env.Clone()
 #===== retrieve the list of apps to build
 
 apps = [
+    'cjoin',
     'c6t',
     'cinfo',
     'cled',
@@ -29,8 +30,11 @@ sources_c = ['openapps.c']
 sources_h = ['openapps.h']
 
 for a in apps:
-    sources_c     += [os.path.join(a,a+'.c')]
-    sources_h     += [os.path.join(a,a+'.h')]
+    sources_c     += [os.path.join(a, a + '.c')]
+    sources_h     += [os.path.join(a, a + '.h')]
+
+sources_c += [os.path.join("cjoin", "cojp_cbor.c")]
+sources_h += [os.path.join("cjoin", "cojp_cbor.h")]
 
 #===== build the openapps library
 
@@ -55,17 +59,17 @@ else:
             # inc
             os.path.join('#','inc'),
             # openstack
-            os.path.join('#','openstack','02a-MAClow'),
-            os.path.join('#','openstack','02b-MAChigh'),
-            os.path.join('#','openstack','03a-IPHC'),
-            os.path.join('#','openstack','03b-IPv6'),
-            os.path.join('#','openstack','04-TRAN'),
-            os.path.join('#','openstack','cross-layers'),
+            os.path.join('#', 'openstack', '02a-MAClow'),
+            os.path.join('#', 'openstack', '02b-MAChigh'),
+            os.path.join('#', 'openstack', '03a-IPHC'),
+            os.path.join('#', 'openstack', '03b-IPv6'),
+            os.path.join('#', 'openstack', '04-TRAN'),
+            os.path.join('#', 'openstack', 'cross-layers'),
             # openapps
-            os.path.join('#','openweb','opencoap'),
+            os.path.join('#', 'openweb', 'opencoap'),
             # openapps
-            os.path.join('#','openapps'),
-        ]+[os.path.join('#','openapps',a) for a in apps],
+            os.path.join('#', 'openapps'),
+        ] + [os.path.join('#', 'openapps', a) for a in apps]
     )
 
     libopenapps = localEnv.Library(

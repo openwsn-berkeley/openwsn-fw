@@ -8,6 +8,7 @@
 #include "opendefs.h"
 //===== drivers
 #include "openserial.h"
+
 //===== stack
 #include "openstack.h"
 //-- cross-layer
@@ -35,7 +36,7 @@
 //-- 04-TRAN
 #include "udp.h"
 
-//===== coap-layer
+//===== application-layer
 #include "openweb.h"
 
 //===== applications
@@ -96,16 +97,12 @@ void openstack_init(void) {
     openudp_init();
 #endif
 
-    //===== coap-layer
+    //===== application-layer
     openweb_init();
 
     //===== applications
     openapps_init();
 
-    openserial_printInfo(
-            COMPONENT_OPENWSN, ERR_BOOTED,
-            (errorparameter_t) 0,
-            (errorparameter_t) 0
-    );
+    openserial_printInfo(COMPONENT_OPENWSN, ERR_BOOTED, (errorparameter_t) 0, (errorparameter_t) 0);
 }
 

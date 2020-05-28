@@ -11,7 +11,9 @@
 
 //=========================== prototypes ======================================
 owerror_t cojp_cbor_decode_link_layer_keyset(uint8_t *, uint8_t *, cojp_link_layer_keyset_t *);
+
 owerror_t cojp_cbor_decode_link_layer_short_address(uint8_t *, uint8_t *, cojp_link_layer_short_address_t *);
+
 owerror_t cojp_cbor_decode_ipv6_address(uint8_t *, uint8_t *, open_addr_t *);
 
 uint8_t cbor_decode_uint(uint8_t *buf, uint8_t *value);
@@ -55,7 +57,7 @@ owerror_t cojp_cbor_decode_configuration_object(uint8_t *buf, uint8_t len, cojp_
     tmp++;
 
     for (i = 0; i < num_elems; i++) {
-        switch((cojp_parameters_labels_t) *tmp) {
+        switch ((cojp_parameters_labels_t) *tmp) {
             case COJP_PARAMETERS_LABELS_LLKEYSET:
                 tmp++;
                 if (cojp_cbor_decode_link_layer_keyset(tmp, &ret, &(configuration->keyset)) == E_FAIL) {
@@ -81,7 +83,7 @@ owerror_t cojp_cbor_decode_configuration_object(uint8_t *buf, uint8_t len, cojp_
         }
     }
 
-    if ( (uint8_t)(tmp - buf) != len) { // final check that everything has been processed
+    if ((uint8_t)(tmp - buf) != len) { // final check that everything has been processed
         error++;
     }
 
@@ -140,7 +142,7 @@ and parses it into a cojp_link_layer_keyset_t structure.
 \param[out] keyset The cojp_link_layer_keyset_t structure containing the parsed keys.
 \return E_SUCCESS if all elements are successfully processed, E_FAIL in all other cases.
 */
-owerror_t cojp_cbor_decode_link_layer_keyset(uint8_t *buf, uint8_t* len, cojp_link_layer_keyset_t *keyset) {
+owerror_t cojp_cbor_decode_link_layer_keyset(uint8_t *buf, uint8_t *len, cojp_link_layer_keyset_t *keyset) {
 
     cbor_majortype_t major_type;
     uint8_t add_info;
@@ -172,7 +174,7 @@ owerror_t cojp_cbor_decode_link_layer_keyset(uint8_t *buf, uint8_t* len, cojp_li
 
     tmp++;
 
-    while(i < add_info) { // while there are elements left in the array
+    while (i < add_info) { // while there are elements left in the array
 
         if (current_key_index >= KEYSET_MAX_NUM_KEYS) {
             return E_FAIL; // more keys than we can handle
@@ -204,13 +206,13 @@ owerror_t cojp_cbor_decode_link_layer_keyset(uint8_t *buf, uint8_t* len, cojp_li
             }
 
             if (major_type == CBOR_MAJORTYPE_BSTR) { // mandatory key_value parameter as a bstr
-                 if (l != AES128_KEY_LENGTH) {
-                     return E_FAIL; // unsupported
-                 }
-                 tmp++;
-                 memcpy(current_key->key_value, tmp, AES128_KEY_LENGTH);
-                 tmp += l;
-                 i++; // moving on to the next element, if any
+                if (l != AES128_KEY_LENGTH) {
+                    return E_FAIL; // unsupported
+                }
+                tmp++;
+                memcpy(current_key->key_value, tmp, AES128_KEY_LENGTH);
+                tmp += l;
+                i++; // moving on to the next element, if any
             } else { // last element in the group is not a bstr -> error
                 return E_FAIL;
             }
@@ -222,7 +224,7 @@ owerror_t cojp_cbor_decode_link_layer_keyset(uint8_t *buf, uint8_t* len, cojp_li
     }
 
     keyset->num_keys = current_key_index;
-    *len = (uint8_t) (tmp - buf);
+    *len = (uint8_t)(tmp - buf);
     return E_SUCCESS;
 }
 
@@ -238,7 +240,8 @@ and parses it into short_address_t structure.
 \param[out] short_address The cojp_link_layer_short_address_t structure containing the parsed short address.
 \return E_SUCCESS in case of success, E_FAIL otherwise.
 */
-owerror_t cojp_cbor_decode_link_layer_short_address(uint8_t *buf, uint8_t *len, cojp_link_layer_short_address_t *short_address) {
+owerror_t
+cojp_cbor_decode_link_layer_short_address(uint8_t *buf, uint8_t *len, cojp_link_layer_short_address_t *short_address) {
 
     cbor_majortype_t major_type;
     uint8_t additional_info;
@@ -278,7 +281,7 @@ owerror_t cojp_cbor_decode_link_layer_short_address(uint8_t *buf, uint8_t *len, 
         // TODO lease_time parsing unsupported for now, do nothing
     }
 
-    *len = (uint8_t) (tmp - buf);
+    *len = (uint8_t)(tmp - buf);
     return E_SUCCESS;
 }
 
@@ -314,7 +317,7 @@ owerror_t cojp_cbor_decode_ipv6_address(uint8_t *buf, uint8_t *len, open_addr_t 
     ipv6_address->type = ADDR_128B;
     memcpy(ipv6_address->addr_128b, tmp, LENGTH_ADDR128b);
 
-    *len = (uint8_t) (tmp - buf);;
+    *len = (uint8_t)(tmp - buf);;
     return E_SUCCESS;
 }
 

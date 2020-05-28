@@ -11,9 +11,6 @@ sources_c = [
     os.path.join("opencoap", "cborencoder.c"),
     os.path.join("opencoap", "coap.c"),
     os.path.join("opencoap", "oscore.c"),
-    # ==== cjoin
-    os.path.join("cjoin", "cjoin.c"),
-    os.path.join("cjoin", "cojp_cbor.c")
 ]
 
 sources_h = [
@@ -22,9 +19,6 @@ sources_h = [
     os.path.join("opencoap", "cborencoder.h"),
     os.path.join("opencoap", "coap.h"),
     os.path.join("opencoap", "oscore.h"),
-    # ==== cjoin
-    os.path.join("cjoin", "cjoin.h"),
-    os.path.join("cjoin", "cojp_cbor.h")
 ]
 
 if localEnv['board']=='python':
@@ -64,7 +58,6 @@ else:
             # openapps
             os.path.join('#','openweb'),
             os.path.join('#','openweb','opencoap'),
-            os.path.join('#','openweb','cjoin')
         ],
     )
 

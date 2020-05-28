@@ -68,7 +68,7 @@ if env['board'] != 'python':
             os.path.join('#', 'bsp', 'chips'),
             os.path.join('#', 'drivers', 'common'),
             os.path.join('#', 'kernel'),
-            os.path.join('#', 'opencoap'),
+            os.path.join('#', 'openweb'),
             os.path.join('#', 'openapps'),
             os.path.join('#', 'openstack'),
         ]

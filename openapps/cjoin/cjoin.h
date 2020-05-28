@@ -1,5 +1,5 @@
-#ifndef __CJOIN_H
-#define __CJOIN_H
+#ifndef OPENWSN_CJOIN_H
+#define OPENWSN_CJOIN_H
 
 /**
 \addtogroup AppUdp
@@ -42,4 +42,4 @@ void cjoin_setJoinKey(uint8_t *key, uint8_t len);
 \}
 */
 
-#endif
+#endif /* OPENWSN_CJOIN_H */

@@ -48,6 +48,10 @@
 #include "uexpiration_monitor.h"
 #endif
 
+#if defined(OPENWSN_CJOIN_C)
+#include "cjoin.h"
+#endif
+
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
@@ -57,6 +61,9 @@
 //=========================== private =========================================
 
 void openapps_init(void) {
+#if defined(OPENWSN_CJOIN_C)
+    cjoin_init();
+#endif
 
 #if defined(OPENWSN_C6T_C)
     c6t_init();
