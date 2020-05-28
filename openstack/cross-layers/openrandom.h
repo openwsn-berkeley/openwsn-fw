@@ -22,8 +22,10 @@ typedef struct {
 
 //=========================== prototypes ======================================
 
-void     openrandom_init(void);
+void openrandom_init(void);
+
 uint16_t openrandom_get16b(void);
+
 uint16_t openrandom_getRandomizePeriod(uint16_t period, uint16_t range);
 
 /**
