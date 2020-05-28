@@ -1,5 +1,5 @@
-#ifndef __ICMPv6RPL_H
-#define __ICMPv6RPL_H
+#ifndef OPENWSN_ICMPv6RPL_H
+#define OPENWSN_ICMPv6RPL_H
 
 /**
 \addtogroup IPv6
@@ -246,6 +246,6 @@ bool icmpv6rpl_daoSent(void);
 \}
 */
 
-#endif
+#endif /* OPENWSN_ICMPv6RPL_H */
 
 
