@@ -253,6 +253,16 @@
  */
 // #define OPENWSN_ADAPTIVE_SYNC_C
 
+
+/**
+ * \def OPENWSN_IEEE802154E_SINGLE_CHANNEL
+ *
+ * Sets channel to a fixed value (acceptable values are [11 - 26] and [0])
+ * When the channel is set to 0, frequency hopping is enabled, otherwise a single channel is used.
+ *
+ */
+#define IEEE802154E_SINGLE_CHANNEL      11
+
 // ======================== Board configuration ========================
 
 /**

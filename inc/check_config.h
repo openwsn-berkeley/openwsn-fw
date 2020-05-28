@@ -36,6 +36,13 @@
 #error 'Python board does not support hardware acceleration.'
 #endif
 
+#if defined(IEEE802154E_SINGLE_CHANNEL) && \
+    ((IEEE802154E_SINGLE_CHANNEL != 0) && \
+    ((IEEE802154E_SINGLE_CHANNEL < 11) || \
+    (IEEE802154E_SINGLE_CHANNEL > 26)))
+#error 'Illegal value for OPENWSN_IEEE802154E_SINGLE_CHANNEL'
+#endif
+
 #if !defined(OPENWSN_COAP_C) && (\
     defined(OPENWSN_C6T_C) || \
     defined(OPENWN_CEXAMPLE_C) || \
