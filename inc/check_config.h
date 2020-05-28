@@ -23,9 +23,13 @@
     defined(WSN430V14) || \
     defined(GINA) || \
     defined(Z1)) && \
-    defined(L2_SECURITY_ACTIVE) && \
+    defined(OPENWSN_IEEE802154E_SECURITY_C) && \
     !defined(BOARD_CRYPTOENGINE_ENABLED)
 #warning 'Software encryption might be too slow on certain hardware. It is recommend to use BOARD_CRYTPOENGINE_ENABLED where possible.'
+#endif
+
+#if defined(OPENWSN_IEEE802154E_SECURITY_C) && !defined(OPENWSN_CJOIN_C)
+#error 'Link-layer security requires CJOIN application'
 #endif
 
 #if defined(PYTHON_BOARD) && defined(BOARD_CRYPTOENGINE_ENABLED)
@@ -66,7 +70,7 @@
 
 #if defined(OPENWSN_CJOIN_C) && !defined(OPENWSN_COAP_C)
 
-#errori "CJOIN requires the CoAP protocol."
+#error "CJOIN requires the CoAP protocol."
 #endif
 
 #if defined(OPENWSN_COAP_C) && (\

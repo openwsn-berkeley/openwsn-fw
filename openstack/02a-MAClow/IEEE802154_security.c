@@ -8,6 +8,7 @@
 \author Malisa Vucinic <malishav@gmail.com>, June 2015.
 */
 
+#include "config.h"
 #include "packetfunctions.h"
 #include "IEEE802154.h"
 #include "IEEE802154E.h"
@@ -83,7 +84,7 @@ void IEEE802154_security_setDynamicKeying(void) {
 }
 
 //=========================== public ==========================================
-#ifdef L2_SECURITY_ACTIVE
+#ifdef OPENWSN_IEEE802154E_SECURITY_C
 /**
 \brief Adding of Auxiliary Security Header to the IEEE802.15.4 MAC header
 */
@@ -96,18 +97,17 @@ void IEEE802154_security_prependAuxiliarySecurityHeader(OpenQueueEntry_t *msg) {
 
     frameCounterSuppression = IEEE154_ASH_FRAMECOUNTER_SUPPRESSED; //the frame counter is carried in the frame
 
-    //max length of MAC frames
+    // max length of MAC frames
     // length of authentication Tag
     msg->l2_authenticationLength = IEEE802154_security_authLengthChecking(msg->l2_securityLevel);
 
-    //length of auxiliary security header
+    // length of auxiliary security header
     auxiliaryLength = IEEE802154_security_auxLengthChecking(msg->l2_keyIdMode,
-                                                            frameCounterSuppression, // frame counter suppressed
-                                                            0); //length of Key ID field
+                                                            frameCounterSuppression,    // frame counter suppressed
+                                                            0);                         //length of Key ID field
 
 
-    if ((msg->length + auxiliaryLength + msg->l2_authenticationLength + 2) >=
-        128) { //2 bytes of CRC, 127 MaxPHYPacketSize
+    if ((msg->length + auxiliaryLength + msg->l2_authenticationLength + 2) >= 128) { // 2 bytes of CRC, 127 MaxPHYPacketSize
         return;
     }
 
@@ -178,7 +178,7 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t *msg) {
     ieee154e_getAsn(&nonce[8]);
     packetfunctions_reverseArrayByteOrder(&nonce[8], 5);  // reverse ASN bytes to big endian
 
-    //identify data to be authenticated and data to be encrypted
+    // identify data to be authenticated and data to be encrypted
     switch (msg->l2_securityLevel) {
         case IEEE154_ASH_SLF_TYPE_MIC_32:  // authentication only cases
         case IEEE154_ASH_SLF_TYPE_MIC_64:
@@ -213,11 +213,11 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t *msg) {
     }
 
     if (msg->l2_authenticationLength != 0) {
-        //update the length of the packet
+        // update the length of the packet
         packetfunctions_reserveFooterSize(msg, msg->l2_authenticationLength);
     }
 
-    //Encryption and/or authentication
+    // Encryption and/or authentication
     // cryptoengine overwrites m[] with ciphertext and appends the MIC
     outStatus = aes128_ccms_enc(a,
                                 len_a,
@@ -228,7 +228,7 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t *msg) {
                                 key,
                                 msg->l2_authenticationLength);
 
-    //verify that no errors occurred
+    // verify that no errors occurred
     if (outStatus != E_SUCCESS) {
         openserial_printError(COMPONENT_SECURITY, ERR_SECURITY,
                               (errorparameter_t) msg->l2_frameType,
@@ -241,8 +241,7 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t *msg) {
 /**
 \brief Parsing of IEEE802.15.4 Auxiliary Security Header.
 */
-void IEEE802154_security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t *msg,
-                                                         ieee802154_header_iht *tempheader) {
+void IEEE802154_security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t *msg, ieee802154_header_iht *tempheader) {
 
     uint8_t frameCnt_Suppression;
     uint8_t frameCnt_Size;
@@ -251,22 +250,22 @@ void IEEE802154_security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t *msg,
     uint8_t receivedASN[5];
     macFrameCounter_t l2_frameCounter;
 
-    //Retrieve the Security Control field
-    //1byte, Security Control Field
+    // retrieve the Security Control field
+    // 1byte, Security Control Field
     temp8b = *((uint8_t * )(msg->payload) + tempheader->headerLength);
     msg->l2_securityLevel = (temp8b >> IEEE154_ASH_SCF_SECURITY_LEVEL) & 0x07;//3b
 
-    //identify the length of the MIC looking the security level
+    // identify the length of the MIC looking the security level
     msg->l2_authenticationLength = IEEE802154_security_authLengthChecking(msg->l2_securityLevel);
 
-    //retrieve the KeyIdMode field
+    // retrieve the KeyIdMode field
     msg->l2_keyIdMode = (temp8b >> IEEE154_ASH_SCF_KEY_IDENTIFIER_MODE) & 0x03;//2b
 
-    //retrieve information on the Frame Counter Mode
+    // retrieve information on the Frame Counter Mode
     frameCnt_Suppression = (temp8b >> IEEE154_ASH_SCF_FRAME_CNT_MODE) & 0x01;//1b
     frameCnt_Size = (temp8b >> IEEE154_ASH_SCF_FRAME_CNT_SIZE) & 0x01;//1b
 
-    //if the frame counter is zero, it is 4-bytes long, 5 otherwise
+    // if the frame counter is zero, it is 4-bytes long, 5 otherwise
     if (frameCnt_Size == IEEE154_ASH_FRAMECOUNTER_COUNTER) {
         frameCnt_Size = 4;
     } else {
@@ -275,7 +274,7 @@ void IEEE802154_security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t *msg,
 
     tempheader->headerLength++;
 
-    //Frame Counter field
+    // Frame Counter field
     if (frameCnt_Suppression == IEEE154_ASH_FRAMECOUNTER_PRESENT) {//the frame counter is here
         //the frame counter size can be 4 or 5 bytes
         for (i = 0; i < frameCnt_Size; i++) {
@@ -285,7 +284,7 @@ void IEEE802154_security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t *msg,
 
         l2_frameCounter.bytes0and1 = receivedASN[0] + 256 * receivedASN[1];
         l2_frameCounter.bytes2and3 = receivedASN[2] + 256 * receivedASN[3];
-        if (frameCnt_Size == 5) { //we have the ASN as the frame counter
+        if (frameCnt_Size == 5) { // we have the ASN as the frame counter
             l2_frameCounter.byte4 = receivedASN[4];
         }
 
@@ -360,23 +359,23 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t *msg) {
 
     //identify data to be authenticated and data to be decrypted
     switch (msg->l2_securityLevel) {
-        case IEEE154_ASH_SLF_TYPE_MIC_32:  // authentication only cases
+        case IEEE154_ASH_SLF_TYPE_MIC_32:                          // authentication only cases
         case IEEE154_ASH_SLF_TYPE_MIC_64:
         case IEEE154_ASH_SLF_TYPE_MIC_128:
-            a = msg->payload;                                           // first byte of the frame
-            len_a = msg->length - msg->l2_authenticationLength;           // whole frame
-            c = &msg->payload[len_a];                                   // MIC is at the end of the frame
-            len_c = msg->l2_authenticationLength;                       // length of the encrypted part
+            a = msg->payload;                                      // first byte of the frame
+            len_a = msg->length - msg->l2_authenticationLength;    // whole frame
+            c = &msg->payload[len_a];                              // MIC is at the end of the frame
+            len_c = msg->l2_authenticationLength;                  // length of the encrypted part
             break;
-        case IEEE154_ASH_SLF_TYPE_ENC_MIC_32:  // authentication + encryption cases
+        case IEEE154_ASH_SLF_TYPE_ENC_MIC_32:                      // authentication + encryption cases
         case IEEE154_ASH_SLF_TYPE_ENC_MIC_64:
         case IEEE154_ASH_SLF_TYPE_ENC_MIC_128:
-            a = msg->payload;             // first byte of the frame
-            c = msg->l2_payload;          // first byte where we should start decrypting
-            len_a = c - a;                // part that is only authenticated is the difference of two pointers
-            len_c = msg->length - len_a;  // part that is decrypted+authenticated is the rest of the frame
+            a = msg->payload;                                      // first byte of the frame
+            c = msg->l2_payload;                                   // first byte where we should start decrypting
+            len_a = c - a;                                         // part that is only authenticated is the difference of two pointers
+            len_c = msg->length - len_a;                           // part that is decrypted+authenticated is the rest of the frame
             break;
-        case IEEE154_ASH_SLF_TYPE_ENC:    // encryption only
+        case IEEE154_ASH_SLF_TYPE_ENC:                             // encryption only
             // unsecure, should not support it
             return E_FAIL;
         default:
@@ -392,7 +391,7 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t *msg) {
         return E_FAIL;
     }
 
-    //decrypt and/or verify authenticity of the frame
+    // decrypt and/or verify authenticity of the frame
     outStatus = aes128_ccms_dec(a,
                                 len_a,
                                 c,
@@ -402,11 +401,10 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t *msg) {
                                 key,
                                 msg->l2_authenticationLength);
 
-    //verify if any error occurs
+    // verify if any error occurs
     if (outStatus != E_SUCCESS) {
         openserial_printError(COMPONENT_SECURITY, ERR_SECURITY,
-                              (errorparameter_t) msg->l2_frameType,
-                              (errorparameter_t) 12);
+                              (errorparameter_t) msg->l2_frameType, (errorparameter_t) 12);
     }
 
     packetfunctions_tossFooter(msg, msg->l2_authenticationLength);
@@ -445,9 +443,11 @@ uint8_t IEEE802154_security_authLengthChecking(uint8_t securityLevel) {
 /**
 \brief Identification of the length of the IEEE802.15.4 Auxiliary Security Header.
 */
-uint8_t IEEE802154_security_auxLengthChecking(uint8_t KeyIdMode,
-                                              uint8_t frameCounterSuppression,
-                                              uint8_t frameCounterSize) {
+uint8_t IEEE802154_security_auxLengthChecking(
+        uint8_t KeyIdMode,
+        uint8_t frameCounterSuppression,
+        uint8_t frameCounterSize) {
+
     uint8_t auxilary_len;
     uint8_t frameCntLength;
 
@@ -541,7 +541,7 @@ bool IEEE802154_security_acceptableLevel(OpenQueueEntry_t *msg, ieee802154_heade
     return FALSE;
 }
 
-#else /* L2_SECURITY_ACTIVE */
+#else /* OPENWSN_IEEE802154_SEC_C */
 
 void IEEE802154_security_prependAuxiliarySecurityHeader(OpenQueueEntry_t *msg) {
     return;
@@ -575,5 +575,5 @@ bool IEEE802154_security_acceptableLevel(OpenQueueEntry_t *msg, ieee802154_heade
     return TRUE;
 }
 
-#endif /* L2_SECURITY_ACTIVE */
+#endif /* OPENWSN_IEEE802154E_SECURITY_C */
 

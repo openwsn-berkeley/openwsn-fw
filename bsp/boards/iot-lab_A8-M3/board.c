@@ -4,6 +4,8 @@
 \author Alaeddine Weslati <alaeddine.weslati@inria.fr>, January 2014.
 \author Tengfei Chang <tengfei.chang@inria.fr>,  May 2017.
 */
+
+#include "config.h"
 #include "stm32f10x_lib.h"
 #include "board.h"
 // bsp modules
@@ -96,6 +98,10 @@ void board_init(void){
     debugpins_init();
     //enable nvic for the radio
     NVIC_radio();
+
+#if defined(BOARD_CRYPTOENGINE_ENABLED)
+    cryptoengine_init();
+#enabled
 }
 
 void board_sleep(void) {

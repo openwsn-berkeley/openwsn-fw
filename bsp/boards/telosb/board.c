@@ -62,6 +62,10 @@ void board_init(void) {
    spi_init();
    radio_init();
    sctimer_init();
+
+#if defined(BOARD_CRYPTOENGINE_ENABLED)
+   cryptoengine_init();
+#endif
    
    // enable interrupts
    __bis_SR_register(GIE);

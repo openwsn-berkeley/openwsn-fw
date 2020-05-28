@@ -84,7 +84,10 @@ void board_init(void) {
    radio_init();
    i2c_init();
    sensors_init();
-   cryptoengine_init();  
+
+#if defined(BOARD_CRYPTOENGINE_ENABLED)
+   cryptoengine_init();
+#endif
 }
 
 void antenna_init(void) {

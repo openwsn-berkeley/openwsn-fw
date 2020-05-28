@@ -149,8 +149,6 @@
 /**
  * \def OPENWSN_USERIALBRIDGE_C
  *
- *
- *
  * Requires: OPENWSN_UDP_C
  *
  */
@@ -176,6 +174,7 @@
  * Implementation of the CoAP protocol.
  *
  * Requires: OPENWSN_UDP_C
+ *
  */
 
 #define OPENWSN_COAP_C
@@ -204,9 +203,9 @@
  *
  */
 
-#define OPENWSN_6LO_FRAGMENTATION_C
-#define OPENWSN_MAX_PKTSIZE_SUPPORTED   1320
-#define OPENWSN_MAX_NUM_BIGPKTS         2
+// #define OPENWSN_6LO_FRAGMENTATION_C
+// #define OPENWSN_MAX_PKTSIZE_SUPPORTED   1320
+// #define OPENWSN_MAX_NUM_BIGPKTS         2
 
 /**
  * \def OPENWSN_ADAPTIVE_MSF
@@ -214,14 +213,23 @@
  * Allow the MSF algorithm to dynamically remove and allocate slots, based on the traffic load in the network.
  *
  */
-#define OPENWSN_ADAPTIVE_MSF
+// #define OPENWSN_ADAPTIVE_MSF
 
 /**
  * \def OPENWSN_ICMPV6ECHO_c
  *
  * Enables the icmpv6 echo (ping) functionality
  */
-#define OPENWSN_ICMPV6ECHO_C
+// #define OPENWSN_ICMPV6ECHO_C
+
+/**
+ * \def OPENWSN_IEEE802154E_SECURITY_C
+ *
+ * Enables link-layer security. When this is enabled you should also use BOARD_CRYPTOENGINE_ENABLED where possible.
+ *
+ * Requires: OPENWSN_CJOIN_C, OPENWSN_COAP_C, OPENWSN_UDP_C
+ */
+#define OPENWSN_IEEE802154E_SECURITY_C
 
 // ======================== Board configuration ========================
 
@@ -232,12 +240,13 @@
  * cannot be combined with the python board.
  *
  */
-// #define BOARD_CRYPTOENGINE_ENABLED
+#define BOARD_CRYPTOENGINE_ENABLED
 
 /**
  * \def BOARD_OPENSERIAL_PRINTF
  *
  * Enable usage of openserial_printf function to print strings over the serial port.
+ * WARNING: this feature links in nano.specs and nosys.specs adding roughly 3Kb of Flash usage.
  *
  */
 // #define BOARD_OPENSERIAL_PRINTF

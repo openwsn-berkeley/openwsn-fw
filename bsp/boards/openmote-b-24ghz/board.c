@@ -75,7 +75,10 @@ void board_init(void) {
     i2c_init();
 
     // sensors_init();
+
+#if defined(BOARD_CRYPTOENGINE_ENABLED)
     cryptoengine_init();
+#endif
 }
 
 void antenna_init(void) {

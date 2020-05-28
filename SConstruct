@@ -81,8 +81,6 @@ project:
     forcetopology  Force the topology to the one indicated in the
                    openstack/02a-MAClow/topology.c file.
     noadaptivesync Do not use adaptive synchronization.
-    l2_security   Use hop-by-hop encryption and authentication.
-                  0 (off), 1 (on)
     ide           qtcreator
     fix_channel   Set single channel hopping for debugging
                   0 (off, default), i (on, channel=i [11:26])
@@ -150,7 +148,6 @@ command_line_options = {
     'debug': ['0', '1'],
     'atmel_24ghz': ['0', '1'],
     'noadaptivesync': ['0', '1'],
-    'l2_security': ['0', '1'],
     'fix_channel': ['0'] + map(str, range(11, 27)),
     'deadline_option': ['0', '1'],
     'ide': ['none', 'qtcreator'],
@@ -285,13 +282,6 @@ command_line_vars.AddVariables(
         'noadaptivesync',  # key
         '',  # help
         command_line_options['noadaptivesync'][0],  # default
-        validate_option,  # validator
-        int,  # converter
-    ),
-    (
-        'l2_security',  # key
-        '',  # help
-        command_line_options['l2_security'][0],  # default
         validate_option,  # validator
         int,  # converter
     ),
