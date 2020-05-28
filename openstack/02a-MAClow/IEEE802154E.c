@@ -345,7 +345,6 @@ void isr_ieee154e_newSlot(opentimers_id_t id) {
     );
     ieee154e_vars.slotDuration = TsSlotDuration;
 
-    // radiotimer_setPeriod(ieee154e_vars.slotDuration);
     if (ieee154e_vars.isSync == FALSE) {
         if (idmanager_getIsDAGroot() == TRUE) {
             changeIsSync(TRUE);
@@ -998,7 +997,6 @@ port_INLINE void activity_ti1ORri1(void) {
                     isr_ieee154e_newSlot                              // callback
             );
             ieee154e_vars.slotDuration = TsSlotDuration * (ieee154e_vars.numOfSleepSlots);
-            // radiotimer_setPeriod(TsSlotDuration*(ieee154e_vars.numOfSleepSlots));
 
             //increase ASN by numOfSleepSlots-1 slots as at this slot is already incremented by 1
             for (i = 0; i < ieee154e_vars.numOfSleepSlots - 1; i++) {
@@ -1114,7 +1112,6 @@ port_INLINE void activity_ti1ORri1(void) {
                         TIME_TICS,                                        // timetype
                         isr_ieee154e_timer                                // callback
                 );
-                // radiotimer_schedule(DURATION_tt1);
 #endif
                 break;
             }
@@ -1172,8 +1169,6 @@ port_INLINE void activity_ti2(void) {
             TIME_TICS,                                        // timetype
             isr_ieee154e_timer                                // callback
     );
-    // radiotimer_schedule(DURATION_tt2);
-
     // make a local copy of the frame
     packetfunctions_duplicatePacket(&ieee154e_vars.localCopyForTransmission, ieee154e_vars.dataToSend);
 
@@ -1344,7 +1339,6 @@ port_INLINE void activity_ti5(PORT_TIMER_WIDTH capturedTime) {
                 TIME_TICS,                                        // timetype
                 isr_ieee154e_timer                                // callback
         );
-        // radiotimer_schedule(DURATION_tt5);
 #endif
     } else {
         // indicate succesful Tx to schedule to keep statistics
@@ -1374,7 +1368,6 @@ port_INLINE void activity_ti6(void) {
             TIME_TICS,                                        // timetype
             isr_ieee154e_timer                                // callback
     );
-    // radiotimer_schedule(DURATION_tt6);
 
     // configure the radio to listen to the default synchronizing channel
     radio_setFrequency(ieee154e_vars.freq, FREQ_RX);
@@ -1472,7 +1465,6 @@ port_INLINE void activity_ti8(PORT_TIMER_WIDTH capturedTime) {
             TIME_TICS,                                        // timetype
             isr_ieee154e_timer                                // callback
     );
-    // radiotimer_schedule(DURATION_tt8);
 #endif
 }
 
@@ -1502,7 +1494,6 @@ port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
             TIME_TICS,                                        // timetype
             isr_ieee154e_newSlot                              // callback
     );
-    // radiotimer_cancel();
 #endif
     // turn off the radio
     radio_rfOff();

@@ -1,5 +1,5 @@
-#ifndef __IEEE802154E_H
-#define __IEEE802154E_H
+#ifndef OPENWSN_IEEE802154E_H
+#define OPENWSN_IEEE802154E_H
 
 /**
 \addtogroup MAClow
@@ -354,5 +354,5 @@ bool debugPrint_macStats(void);
 \}
 */
 
-#endif
+#endif /* OPENWSN_IEEE802154E_H */
 
