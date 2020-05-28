@@ -1,5 +1,5 @@
-#ifndef __SIXTOP_H
-#define __SIXTOP_H
+#ifndef OPENWSN_SIXTOP_H
+#define OPENWSN_SIXTOP_H
 
 /**
 \addtogroup MAChigh
@@ -160,6 +160,6 @@ bool debugPrint_kaPeriod(void);
 \}
 */
 
-#endif
+#endif /* OPENWSN_SIXTOP_H */
 
 
