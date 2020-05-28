@@ -78,7 +78,6 @@ project:
                    cannot send commands to the mote (e.g. IoT-LAB platform), 
                    use this flag to build a firmware image which is, by 
                    default, in DAG root mode.
-    noadaptivesync Do not use adaptive synchronization.
     ide           qtcreator
     fix_channel   Set single channel hopping for debugging
                   0 (off, default), i (on, channel=i [11:26])
@@ -144,7 +143,6 @@ command_line_options = {
     'dagroot': ['0', '1'],
     'debug': ['0', '1'],
     'atmel_24ghz': ['0', '1'],
-    'noadaptivesync': ['0', '1'],
     'fix_channel': ['0'] + map(str, range(11, 27)),
     'deadline_option': ['0', '1'],
     'ide': ['none', 'qtcreator'],
@@ -265,13 +263,6 @@ command_line_vars.AddVariables(
         'atmel_24ghz',  # key
         '',  # help
         command_line_options['atmel_24ghz'][0],  # default
-        validate_option,  # validator
-        int,  # converter
-    ),
-    (
-        'noadaptivesync',  # key
-        '',  # help
-        command_line_options['noadaptivesync'][0],  # default
         validate_option,  # validator
         int,  # converter
     ),

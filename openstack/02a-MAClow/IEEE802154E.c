@@ -1,3 +1,4 @@
+#include "config.h"
 #include "opendefs.h"
 #include "IEEE802154E.h"
 #include "radio.h"
@@ -354,7 +355,7 @@ void isr_ieee154e_newSlot(opentimers_id_t id) {
             activity_synchronize_newSlot();
         }
     } else {
-#ifdef ADAPTIVE_SYNC
+#if defined(OPENWSN_ADAPTIVE_SYNC_C)
         // adaptive synchronization
         adaptive_sync_countCompensationTimeout();
 #endif
@@ -2605,8 +2606,8 @@ void synchronizePacket(PORT_TIMER_WIDTH timeReceived) {
             isr_ieee154e_newSlot                              // callback
     );
     ieee154e_vars.slotDuration = newPeriod;
-#ifdef ADAPTIVE_SYNC
     // indicate time correction to adaptive sync module
+#if defined(OPENWSN_ADAPTIVE_SYNC_C)
     adaptive_sync_indicateTimeCorrection(timeCorrection,ieee154e_vars.dataReceived->l2_nextORpreviousHop);
 #endif
     // reset the de-synchronization timeout
@@ -2654,7 +2655,8 @@ void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
 
     // reset the de-synchronization timeout
     ieee154e_vars.deSyncTimeout = DESYNCTIMEOUT;
-#ifdef ADAPTIVE_SYNC
+
+#if defined(OPENWSN_ADAPTIVE_SYNC_C)
     // indicate time correction to adaptive sync module
     adaptive_sync_indicateTimeCorrection((-timeCorrection),ieee154e_vars.ackReceived->l2_nextORpreviousHop);
 #endif

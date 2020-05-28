@@ -63,7 +63,10 @@ void openstack_init(void) {
     openrandom_init();
 
     //-- 02a-TSCH
-    // adaptive_sync_init();
+#if defined(OPENWSN_ADAPTIVE_SYNC_C)
+    adaptive_sync_init();
+#endif
+
     ieee154e_init();
     //-- 02b-RES
     schedule_init();

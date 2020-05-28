@@ -191,6 +191,7 @@
 
 #define OPENWSN_UDP_C
 
+
 /**
  * \def OPENWSN_6LO_FRAGMENTATION_C
  *
@@ -207,6 +208,7 @@
 // #define OPENWSN_MAX_PKTSIZE_SUPPORTED   1320
 // #define OPENWSN_MAX_NUM_BIGPKTS         2
 
+
 /**
  * \def OPENWSN_ADAPTIVE_MSF
  *
@@ -215,12 +217,14 @@
  */
 // #define OPENWSN_ADAPTIVE_MSF
 
+
 /**
  * \def OPENWSN_ICMPV6ECHO_c
  *
  * Enables the icmpv6 echo (ping) functionality
  */
 // #define OPENWSN_ICMPV6ECHO_C
+
 
 /**
  * \def OPENWSN_IEEE802154E_SECURITY_C
@@ -231,6 +235,7 @@
  */
 #define OPENWSN_IEEE802154E_SECURITY_C
 
+
 /**
  * \def OPENWSN_FORCETOPOLOGY_C
  *
@@ -238,6 +243,15 @@
  *
  */
 // #define OPENWSN_FORCETOPOLOGY_C
+
+
+/**
+ * \def OPENWSN_ADAPTIVESYNC_C
+ *
+ * Force the networks topology according the code in topology.c
+ *
+ */
+// #define OPENWSN_ADAPTIVE_SYNC_C
 
 // ======================== Board configuration ========================
 

@@ -86,8 +86,6 @@ if env['dagroot'] == 1:
     env.Append(CPPDEFINES='DAGROOT')
 if env['atmel_24ghz'] == 1:
     env.Append(CPPDEFINES='ATMEL_24GHZ')
-if env['noadaptivesync'] == 1:
-    env.Append(CPPDEFINES='NOADAPTIVESYNC')
 if 11 <= env['fix_channel'] <= 26:
     env.Append(CPPDEFINES={'IEEE802154E_SINGLE_CHANNEL': env['fix_channel']})
 if env['deadline_option'] == 1:
