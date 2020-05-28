@@ -1,5 +1,5 @@
-#ifndef __IEEE802154_H
-#define __IEEE802154_H
+#ifndef OPENWSN_IEEE802154_H
+#define OPENWSN_IEEE802154_H
 
 /**
 \addtogroup MAClow
@@ -162,4 +162,4 @@ void ieee802154_retrieveHeader (OpenQueueEntry_t*      msg,
 \}
 */
 
-#endif
+#endif /* OPENWSN_IEEE802154_H */
