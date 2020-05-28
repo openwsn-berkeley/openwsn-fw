@@ -1,5 +1,5 @@
-#ifndef __ICMPv6ECHO_H
-#define __ICMPv6ECHO_H
+#ifndef OPENWSN_ICMPv6ECHO_H
+#define OPENWSN_ICMPv6ECHO_H
 
 /**
 \addtogroup IPv6
@@ -37,4 +37,4 @@ void icmpv6echo_setIsReplyEnabled(bool isEnabled);
 \}
 */
 
-#endif
+#endif /* OPENWSN_ICMPV6ECHO_H */
