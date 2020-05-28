@@ -233,6 +233,7 @@ owerror_t openserial_printData(uint8_t *buffer, uint8_t length) {
 }
 
 owerror_t openserial_printSniffedPacket(uint8_t *buffer, uint8_t length, uint8_t channel) {
+#ifdef BOARD_OPENSERIAL_SNIFFER
     uint8_t i;
 
     outputHdlcOpen();
@@ -248,11 +249,12 @@ owerror_t openserial_printSniffedPacket(uint8_t *buffer, uint8_t length, uint8_t
     // start TX'ing
     openserial_flush();
 
+#endif
     return E_SUCCESS;
 }
 
 owerror_t openserial_printf(char *buffer, ...) {
-#ifdef OPENWSN_OPENSERIAL_PRINTF
+#ifdef BOARD_OPENSERIAL_PRINTF
     uint8_t  i;
     char *ptr, *tmp;
     int d;

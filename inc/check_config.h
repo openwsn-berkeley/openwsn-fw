@@ -23,11 +23,12 @@
     defined(WSN430V14) || \
     defined(GINA) || \
     defined(Z1)) && \
-    !defined(OPENWSN_AES_HW)
-#warning 'Software encryption might be too slow on certain hardware. It is recommend to use OPENWSN_AES_HW where possible.'
+    defined(L2_SECURITY_ACTIVE) && \
+    !defined(BOARD_CRYPTOENGINE_ENABLED)
+#warning 'Software encryption might be too slow on certain hardware. It is recommend to use BOARD_CRYTPOENGINE_ENABLED where possible.'
 #endif
 
-#if defined(PYTHON_BOARD) && defined(OPENWSN_AES_HW)
+#if defined(PYTHON_BOARD) && defined(BOARD_CRYPTOENGINE_ENABLED)
 #error 'Python board does not support hardware acceleration.'
 #endif
 

@@ -157,25 +157,28 @@
 
 // #define OPENWSN_USERIALBRIDGE_C
 
-// ========================== Application Layer ==========================
+/**
+ * \def OPENWSN_CJOIN_C
+ *
+ * The CJOIN protocol performs a secure joining and install link-layer keys
+ *
+ * Requires: OPENWSN_UDP_C, OPENWSN_COAP_C
+ *
+ */
+
+#define OPENWSN_CJOIN_C
+
+// ======================= OpenWeb configuration =======================
 
 /**
  * \def OPENWSN_COAP_C
  *
  * Implementation of the CoAP protocol.
  *
+ * Requires: OPENWSN_UDP_C
  */
 
 #define OPENWSN_COAP_C
-
-/**
- * \def OPENWSN_CJOIN_C
- *
- * The CJOIN protocol performs a secure joining and install link-layer keys
- *
- */
-
-#define OPENWSN_CJOIN_C
 
 
 // ======================== Stack configuration ========================
@@ -206,29 +209,40 @@
 #define OPENWSN_MAX_NUM_BIGPKTS         2
 
 /**
- * \def OPENWSN_AES_HW
- *
- * Enable AES hardware acceleration. This options is only available on boards that support hardware acceleration. It
- * cannot be combined with the python board.
- *
- */
-// #define OPENWSN_AES_HW
-
-/**
- * \def OPENWSN_OPENSERIAL_PRINTF
- *
- * Enable usage of openserial_printf function to print strings over the serial port.
- *
- */
-// #define OPENWSN_OPENSERIAL_PRINTF
-
-/**
  * \def OPENWSN_ADAPTIVE_MSF
  *
  * Allow the MSF algorithm to dynamically remove and allocate slots, based on the traffic load in the network.
  *
  */
 #define OPENWSN_ADAPTIVE_MSF
+
+// ======================== Board configuration ========================
+
+/**
+ * \def BOARD_CRYPTOENGINE_ENABLED
+ *
+ * Enable AES hardware acceleration. This options is only available on boards that support hardware acceleration. It
+ * cannot be combined with the python board.
+ *
+ */
+// #define BOARD_CRYPTOENGINE_ENABLED
+
+/**
+ * \def BOARD_OPENSERIAL_PRINTF
+ *
+ * Enable usage of openserial_printf function to print strings over the serial port.
+ *
+ */
+// #define BOARD_OPENSERIAL_PRINTF
+
+
+/**
+ * \def BOARD_OPENSERIAL_SNIFFER
+ *
+ * Prints sniffed packet over serial.
+ *
+ */
+// #define BOARD_OPENSERIAL_SNIFFER
 
 #include "check_config.h"
 
