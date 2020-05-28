@@ -216,6 +216,13 @@
  */
 #define OPENWSN_ADAPTIVE_MSF
 
+/**
+ * \def OPENWSN_ICMPV6ECHO_c
+ *
+ * Enables the icmpv6 echo (ping) functionality
+ */
+#define OPENWSN_ICMPV6ECHO_C
+
 // ======================== Board configuration ========================
 
 /**

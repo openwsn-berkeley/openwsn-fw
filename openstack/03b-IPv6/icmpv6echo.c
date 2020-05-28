@@ -1,3 +1,7 @@
+#include "config.h"
+
+#if defined(OPENWSN_ICMPV6ECHO_C)
+
 #include "opendefs.h"
 #include "icmpv6echo.h"
 #include "icmpv6.h"
@@ -161,4 +165,5 @@ void icmpv6echo_setIsReplyEnabled(bool isEnabled) {
     icmpv6echo_vars.isReplyEnabled = isEnabled;
 }
 
+#endif /* OPENWSN_ICMPV6ECHO_C */
 //=========================== private =========================================

@@ -81,7 +81,11 @@ void openstack_init(void) {
     //-- 03b-IPv6
     forwarding_init();
     icmpv6_init();
+
+#if defined(OPENWSN_ICMPV6_C)
     icmpv6echo_init();
+#endif
+
     icmpv6rpl_init();
     //-- 04-TRAN
 
