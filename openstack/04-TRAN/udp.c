@@ -1,9 +1,9 @@
 #include "config.h"
 
-#if defined(OPENWSN_OPENUDP_C)
+#if defined(OPENWSN_UDP_C)
 
 #include "opendefs.h"
-#include "openudp.h"
+#include "udp.h"
 #include "openserial.h"
 #include "packetfunctions.h"
 #include "forwarding.h"
@@ -245,4 +245,4 @@ static void openudp_receive_default_handler(OpenQueueEntry_t* msg) {
    openqueue_freePacketBuffer(msg);
 }
 
-#endif /* OPENWSN_OPENUDP_C */
+#endif /* OPENWSN_UDP_C */

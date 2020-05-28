@@ -9,7 +9,7 @@
 */
 
 #include "config.h"
-#include "openudp.h"
+#include "udp.h"
 
 //=========================== define ==========================================
 

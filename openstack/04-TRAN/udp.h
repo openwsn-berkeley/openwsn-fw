@@ -1,10 +1,10 @@
-#ifndef __OPENUDP_H
-#define __OPENUDP_H
+#ifndef OPENWSN_UDP_H
+#define OPENWSN_UDP_H
 
 /**
 \addtogroup Transport
 \{
-\addtogroup OpenUdp
+\addtogroup Udp
 \{
 */
 
@@ -77,4 +77,4 @@ bool    openudp_debugPrint(void);
 \}
 */
 
-#endif
+#endif /* OPENWSN_UDP_H */

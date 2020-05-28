@@ -151,7 +151,7 @@
  *
  *
  *
- * Requires: OPENWSN_OPENUDP_C
+ * Requires: OPENWSN_UDP_C
  *
  */
 
@@ -181,13 +181,13 @@
 // ======================== Stack configuration ========================
 
 /**
- * \def OPENWSN_OPENUDP_C
+ * \def OPENWSN_UDP_C
  *
  * Implementation of the UDP protocol.
  *
  */
 
-#define OPENWSN_OPENUDP_C
+#define OPENWSN_UDP_C
 
 /**
  * \def OPENWSN_6LO_FRAGMENTATION_C

@@ -45,7 +45,7 @@
 #error "A CoAP dependent application is defined, but CoAP is not included in the build."
 #endif
 
-#if !defined(OPENWSN_OPENUDP_C) && (\
+#if !defined(OPENWSN_UDP_C) && (\
     defined(OPENWSN_USERIALBRIDGE_C) || \
     defined(OPENWN_UECHO_C) || \
     defined(OPENWSN_UINJECT_C) || \
@@ -69,7 +69,7 @@
 #endif
 
 #if defined(OPENWSN_COAP_C) && (\
-    !defined(OPENWSN_OPENUDP_C) && !defined(OPEWSN_TCP_C))
+    !defined(OPENWSN_UDP_C) && !defined(OPEWSN_TCP_C))
 
 #error "CoAP requires a transport layer, i.e. UDP or TCP."
 #endif

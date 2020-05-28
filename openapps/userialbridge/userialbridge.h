@@ -10,7 +10,7 @@
 
 #include "config.h"
 #include "openserial.h"
-#include "openudp.h"
+#include "udp.h"
 
 
 //=========================== define ==========================================

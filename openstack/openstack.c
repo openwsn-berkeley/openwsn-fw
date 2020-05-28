@@ -33,7 +33,7 @@
 #include "icmpv6echo.h"
 #include "icmpv6rpl.h"
 //-- 04-TRAN
-#include "openudp.h"
+#include "udp.h"
 
 //===== coap-layer
 #include "openweb.h"
@@ -85,7 +85,7 @@ void openstack_init(void) {
     icmpv6rpl_init();
     //-- 04-TRAN
 
-#if defined(OPEWSN_OPENUDP_C)
+#if defined(OPENWSN_UDP_C)
     openudp_init();
 #endif
 

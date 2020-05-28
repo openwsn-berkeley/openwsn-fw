@@ -28,7 +28,7 @@
 #include "icmpv6rpl_obj.h"
 #include "coap_obj.h"
 #include "oscore_obj.h"
-#include "openudp_obj.h"
+#include "udp_obj.h"
 #include "idmanager_obj.h"
 #include "openqueue_obj.h"
 #include "openrandom_obj.h"
