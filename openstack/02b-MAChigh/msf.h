@@ -1,5 +1,5 @@
-#ifndef __MSF_H
-#define __MSF_H
+#ifndef OPENWSN_MSF_H
+#define OPENWSN_MSF_H
 
 /**
 \addtogroup MAChigh
@@ -88,4 +88,4 @@ uint8_t msf_getPreviousNumCellsUsed(cellType_t cellType);
 \}
 */
 
-#endif
+#endif /* OPENWSN_MSF_H */
