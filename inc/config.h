@@ -231,6 +231,14 @@
  */
 #define OPENWSN_IEEE802154E_SECURITY_C
 
+/**
+ * \def OPENWSN_FORCETOPOLOGY_C
+ *
+ * Force the networks topology according the code in topology.c
+ *
+ */
+// #define OPENWSN_FORCETOPOLOGY_C
+
 // ======================== Board configuration ========================
 
 /**

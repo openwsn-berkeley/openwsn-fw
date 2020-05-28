@@ -84,8 +84,6 @@ if env['panid']:
     env.Append(CPPDEFINES={'PANID_DEFINED': env['panid']})
 if env['dagroot'] == 1:
     env.Append(CPPDEFINES='DAGROOT')
-if env['forcetopology'] == 1:
-    env.Append(CPPDEFINES='FORCETOPOLOGY')
 if env['atmel_24ghz'] == 1:
     env.Append(CPPDEFINES='ATMEL_24GHZ')
 if env['noadaptivesync'] == 1:

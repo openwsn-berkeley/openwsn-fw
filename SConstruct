@@ -78,8 +78,6 @@ project:
                    cannot send commands to the mote (e.g. IoT-LAB platform), 
                    use this flag to build a firmware image which is, by 
                    default, in DAG root mode.
-    forcetopology  Force the topology to the one indicated in the
-                   openstack/02a-MAClow/topology.c file.
     noadaptivesync Do not use adaptive synchronization.
     ide           qtcreator
     fix_channel   Set single channel hopping for debugging
@@ -144,7 +142,6 @@ command_line_options = {
     'simhostpy': [''],  # No reasonable default
     'panid': [''],
     'dagroot': ['0', '1'],
-    'forcetopology': ['0', '1'],
     'debug': ['0', '1'],
     'atmel_24ghz': ['0', '1'],
     'noadaptivesync': ['0', '1'],
@@ -254,13 +251,6 @@ command_line_vars.AddVariables(
         'dagroot',  # key
         '',  # help
         command_line_options['dagroot'][0],  # default
-        validate_option,  # validator
-        int,  # converter
-    ),
-    (
-        'forcetopology',  # key
-        '',  # help
-        command_line_options['forcetopology'][0],  # default
         validate_option,  # validator
         int,  # converter
     ),
