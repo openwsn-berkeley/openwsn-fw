@@ -48,7 +48,6 @@ void msf_init(void) {
     open_addr_t temp_neighbor;
 
     memset(&msf_vars, 0, sizeof(msf_vars_t));
-    msf_vars.numAppPacketsPerSlotFrame = 0;
     sixtop_setSFcallback(
             (sixtop_sf_getsfid_cbt) msf_getsfid,
             (sixtop_sf_getmetadata_cbt) msf_getMetadata,
@@ -385,10 +384,6 @@ void msf_trigger6pDelete(void) {
             0,                      // list command offset (not used)
             0                       // list command maximum celllist (not used)
     );
-}
-
-void msf_appPktPeriod(uint8_t numAppPacketsPerSlotFrame) {
-    msf_vars.numAppPacketsPerSlotFrame = numAppPacketsPerSlotFrame;
 }
 
 bool msf_candidateAddCellList(

@@ -30,7 +30,6 @@
 
 typedef struct {
     bool f_hashCollision;
-    uint8_t numAppPacketsPerSlotFrame;
     uint8_t backoff;
     uint8_t numCellsElapsed_tx;
     uint8_t numCellsUsed_tx;
@@ -55,8 +54,6 @@ typedef struct {
 
 // admin
 void msf_init(void);
-
-void msf_appPktPeriod(uint8_t numAppPacketsPerSlotFrame);
 
 uint8_t msf_getsfid(void);
 
