@@ -119,26 +119,24 @@ void IEEE802154_security_prependAuxiliarySecurityHeader(OpenQueueEntry_t *msg) {
         *((uint8_t * )(msg->payload)) = temp8b;
     }
 
-    //insert the keyIdMode field
+    // insert the keyIdMode field
     switch (msg->l2_keyIdMode) {
-        case IEEE154_ASH_KEYIDMODE_IMPLICIT: //no KeyIDMode field - implicit
-        case IEEE154_ASH_KEYIDMODE_DEFAULTKEYSOURCE:// macDefaultKeySource
+        case IEEE154_ASH_KEYIDMODE_IMPLICIT: // no KeyIDMode field - implicit
+        case IEEE154_ASH_KEYIDMODE_DEFAULTKEYSOURCE: // macDefaultKeySource
             break;
-        case IEEE154_ASH_KEYIDMODE_EXPLICIT_16: //keySource with 16b address
+        case IEEE154_ASH_KEYIDMODE_EXPLICIT_16: // keySource with 16b address
             temp_keySource = &msg->l2_keySource;
             packetfunctions_reserveHeaderSize(msg, sizeof(uint8_t));
             *((uint8_t * )(msg->payload)) = temp_keySource->addr_64b[6];
             packetfunctions_reserveHeaderSize(msg, sizeof(uint8_t));
             *((uint8_t * )(msg->payload)) = temp_keySource->addr_64b[7];
             break;
-        case IEEE154_ASH_KEYIDMODE_EXPLICIT_64: //keySource with 64b address
+        case IEEE154_ASH_KEYIDMODE_EXPLICIT_64: // keySource with 64b address
             temp_keySource = &msg->l2_keySource;
             packetfunctions_writeAddress(msg, temp_keySource, OW_LITTLE_ENDIAN);
             break;
-        default://error
-            openserial_printLog(LOG_ERROR, COMPONENT_SECURITY, ERR_SECURITY,
-                                  (errorparameter_t) msg->l2_frameType,
-                                  (errorparameter_t) 0);
+        default: // error
+            LOG_ERROR(COMPONENT_SECURITY, ERR_SECURITY, (errorparameter_t) msg->l2_frameType, (errorparameter_t) 0);
             return;
     }
 
@@ -206,9 +204,7 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t *msg) {
 
     // assert
     if (len_a + len_m > 125) {
-        openserial_printLog(LOG_ERROR, COMPONENT_SECURITY, ERR_SECURITY,
-                              (errorparameter_t) msg->l2_frameType,
-                              (errorparameter_t) 2);
+        LOG_ERROR(COMPONENT_SECURITY, ERR_SECURITY, (errorparameter_t) msg->l2_frameType, (errorparameter_t) 2);
         return E_FAIL;
     }
 
@@ -230,9 +226,7 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t *msg) {
 
     // verify that no errors occurred
     if (outStatus != E_SUCCESS) {
-        openserial_printLog(LOG_ERROR, COMPONENT_SECURITY, ERR_SECURITY,
-                              (errorparameter_t) msg->l2_frameType,
-                              (errorparameter_t) 3);
+        LOG_ERROR(COMPONENT_SECURITY, ERR_SECURITY, (errorparameter_t) msg->l2_frameType, (errorparameter_t) 3);
     }
 
     return outStatus;
@@ -289,9 +283,7 @@ void IEEE802154_security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t *msg, 
         }
 
         if (l2_frameCounter.byte4 == 0xff) { //frame counter overflow
-            openserial_printLog(LOG_ERROR, COMPONENT_SECURITY, ERR_SECURITY,
-                                  (errorparameter_t) msg->l2_frameType,
-                                  (errorparameter_t) 4);
+            LOG_ERROR(COMPONENT_SECURITY, ERR_SECURITY, (errorparameter_t) msg->l2_frameType, (errorparameter_t) 4);
             return;
         }
 
@@ -319,9 +311,7 @@ void IEEE802154_security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t *msg, 
             tempheader->headerLength += 8;
             break;
         default: //error
-            openserial_printLog(LOG_ERROR, COMPONENT_SECURITY, ERR_SECURITY,
-                                  (errorparameter_t) msg->l2_frameType,
-                                  (errorparameter_t) 5);
+            LOG_ERROR(COMPONENT_SECURITY, ERR_SECURITY, (errorparameter_t) msg->l2_frameType, (errorparameter_t) 5);
             return;
     }
 
@@ -385,9 +375,7 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t *msg) {
 
     // assert
     if (len_a + len_c > 125) {
-        openserial_printLog(LOG_ERROR, COMPONENT_SECURITY, ERR_SECURITY,
-                              (errorparameter_t) msg->l2_frameType,
-                              (errorparameter_t) 11);
+        LOG_ERROR(COMPONENT_SECURITY, ERR_SECURITY, (errorparameter_t) msg->l2_frameType, (errorparameter_t) 11);
         return E_FAIL;
     }
 
@@ -403,9 +391,7 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t *msg) {
 
     // verify if any error occurs
     if (outStatus != E_SUCCESS) {
-        openserial_printLog(LOG_ERROR, COMPONENT_SECURITY, ERR_SECURITY,
-                              (errorparameter_t) msg->l2_frameType,
-                              (errorparameter_t) 12);
+        LOG_ERROR(COMPONENT_SECURITY, ERR_SECURITY, (errorparameter_t) msg->l2_frameType, (errorparameter_t) 12);
     }
 
     packetfunctions_tossFooter(msg, msg->l2_authenticationLength);

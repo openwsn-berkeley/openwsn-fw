@@ -161,9 +161,7 @@ owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t *pkt) {
             if ((OpenQueueBigEntry_t *) pkt == &openqueue_vars.big_queue[i]) {
                 if (openqueue_vars.big_queue[i].standard_entry.owner == COMPONENT_NULL) {
                     // log the error
-                    openserial_printLog(LOG_CRITICAL, COMPONENT_OPENQUEUE, ERR_FREEING_UNUSED,
-                                             (errorparameter_t) 0,
-                                             (errorparameter_t) 0);
+                    LOG_CRITICAL(COMPONENT_OPENQUEUE, ERR_FREEING_UNUSED,(errorparameter_t) 0,(errorparameter_t) 0);
                 }
 
                 openqueue_reset_big_entry((OpenQueueBigEntry_t *) pkt);
@@ -177,9 +175,7 @@ owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t *pkt) {
             if (&openqueue_vars.queue[i] == pkt) {
                 if (openqueue_vars.queue[i].owner == COMPONENT_NULL) {
                     // log the error
-                    openserial_printLog(LOG_CRITICAL, COMPONENT_OPENQUEUE, ERR_FREEING_UNUSED,
-                                             (errorparameter_t) 0,
-                                             (errorparameter_t) 0);
+                    LOG_CRITICAL(COMPONENT_OPENQUEUE, ERR_FREEING_UNUSED, (errorparameter_t) 0, (errorparameter_t) 0);
                 }
                 openqueue_reset_entry(&(openqueue_vars.queue[i]));
                 ENABLE_INTERRUPTS();
@@ -191,9 +187,7 @@ owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t *pkt) {
 #endif
 
     // log the error
-    openserial_printLog(LOG_CRITICAL, COMPONENT_OPENQUEUE, ERR_FREEING_ERROR,
-                             (errorparameter_t) 0,
-                             (errorparameter_t) 0);
+    LOG_CRITICAL(COMPONENT_OPENQUEUE, ERR_FREEING_ERROR, (errorparameter_t) 0, (errorparameter_t) 0);
     ENABLE_INTERRUPTS();
     return E_FAIL;
 }

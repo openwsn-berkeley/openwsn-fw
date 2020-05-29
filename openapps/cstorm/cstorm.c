@@ -202,9 +202,7 @@ void cstorm_task_cb(void) {
     // get a packet
     pkt = openqueue_getFreePacketBuffer(COMPONENT_CSTORM);
     if (pkt == NULL) {
-        openserial_printLog(LOG_ERROR, COMPONENT_CSTORM, ERR_NO_FREE_PACKET_BUFFER,
-                              (errorparameter_t) 0,
-                              (errorparameter_t) 0);
+        LOG_ERROR(COMPONENT_CSTORM, ERR_NO_FREE_PACKET_BUFFER, (errorparameter_t) 0, (errorparameter_t) 0);
         return;
     }
 

@@ -9,8 +9,8 @@
 \author Luigi Alfredo Grieco <alfredo.grieco@poliba.it>
 */
 
-#ifndef __OPENDEFS_H
-#define __OPENDEFS_H
+#ifndef OPENWSN_OPENDEFS_H
+#define OPENWSN_OPENDEFS_H
 
 // general
 #include <stdint.h>               // needed for uin8_t, uint16_t
@@ -207,7 +207,7 @@ enum {
    ERR_UNSUPPORTED_PORT_NUMBER         = 0x09, // unsupported port number {0} (code location {1})
    ERR_INVALID_CHECKSUM                = 0x0a, // invalid checksum, expected 0x{:04x}, found 0x{:04x}
    // l3
-   ERR_RCVD_ECHO_REQUEST               = 0x0b, // received an echo request
+   ERR_RCVD_ECHO_REQUEST               = 0x0b, // received an echo request (length: {0})
    ERR_RCVD_ECHO_REPLY                 = 0x0c, // received an echo reply
    ERR_6LORH_DEADLINE_EXPIRED          = 0x0d, // the received packet has expired
    ERR_6LORH_DEADLINE_DROPPED          = 0x0e, // packet expiry time reached, dropped
@@ -432,4 +432,4 @@ END_PACK
 
 //=========================== prototypes ======================================
 
-#endif
+#endif /* OPENWSN_OPENDEFS_H */

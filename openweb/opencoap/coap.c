@@ -150,11 +150,8 @@ void coap_receive(OpenQueueEntry_t *msg) {
 
     // reject unsupported header
     if (coap_header.Ver != COAP_VERSION || coap_header.TKL > COAP_MAX_TKL) {
-        openserial_printLog(
-                LOG_ERROR, COMPONENT_OPENCOAP, ERR_WRONG_TRAN_PROTOCOL,
-                (errorparameter_t) 0,
-                (errorparameter_t) coap_header.Ver
-        );
+        LOG_ERROR(COMPONENT_OPENCOAP, ERR_WRONG_TRAN_PROTOCOL, (errorparameter_t) 0,
+                (errorparameter_t) coap_header.Ver);
         openqueue_freePacketBuffer(msg);
         return;
     }
@@ -555,11 +552,7 @@ void coap_sendDone(OpenQueueEntry_t *msg, owerror_t error) {
 
     // if you get here, no valid creator was found
 
-    openserial_printLog(
-            LOG_ERROR, COMPONENT_OPENCOAP, ERR_UNEXPECTED_SENDDONE,
-            (errorparameter_t) 0,
-            (errorparameter_t) 0
-    );
+    LOG_ERROR(COMPONENT_OPENCOAP, ERR_UNEXPECTED_SENDDONE, (errorparameter_t) 0, (errorparameter_t) 0);
     openqueue_freePacketBuffer(msg);
 }
 
@@ -1189,13 +1182,7 @@ void coap_forward_message(OpenQueueEntry_t *msg,
 
     outgoingPacket = openqueue_getFreePacketBuffer(COMPONENT_OPENCOAP);
     if (outgoingPacket == NULL) {
-        openserial_printLog(
-                LOG_ERROR,
-                COMPONENT_OPENCOAP,
-                ERR_NO_FREE_PACKET_BUFFER,
-                (errorparameter_t) 0,
-                (errorparameter_t) 0
-        );
+        LOG_ERROR(COMPONENT_OPENCOAP, ERR_NO_FREE_PACKET_BUFFER, (errorparameter_t) 0, (errorparameter_t) 0);
         return;
     }
 

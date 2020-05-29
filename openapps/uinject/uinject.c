@@ -64,10 +64,7 @@ void uinject_init(void) {
 void uinject_sendDone(OpenQueueEntry_t *msg, owerror_t error) {
 
     if (error == E_FAIL) {
-        openserial_printLog(
-                LOG_ERROR,
-                COMPONENT_UINJECT,
-                ERR_MAXRETRIES_REACHED,
+        LOG_ERROR(COMPONENT_UINJECT, ERR_MAXRETRIES_REACHED,
                 (errorparameter_t) uinject_vars.counter,
                 (errorparameter_t) 0
         );
@@ -135,13 +132,7 @@ void uinject_task_cb(void) {
     // get a free packet buffer
     pkt = openqueue_getFreePacketBuffer(COMPONENT_UINJECT);
     if (pkt == NULL) {
-        openserial_printLog(
-                LOG_ERROR,
-                COMPONENT_UINJECT,
-                ERR_NO_FREE_PACKET_BUFFER,
-                (errorparameter_t) 0,
-                (errorparameter_t) 0
-        );
+        LOG_ERROR(COMPONENT_UINJECT, ERR_NO_FREE_PACKET_BUFFER, (errorparameter_t) 0, (errorparameter_t) 0);
         return;
     }
 

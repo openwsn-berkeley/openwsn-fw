@@ -97,13 +97,7 @@ void uexpiration_task_cb(void) {
 
     reply = openqueue_getFreePacketBuffer(COMPONENT_UEXPIRATION);
     if (reply == NULL) {
-        openserial_printLog(
-                LOG_ERROR,
-                COMPONENT_UEXPIRATION,
-                ERR_NO_FREE_PACKET_BUFFER,
-                (errorparameter_t) 0,
-                (errorparameter_t) 0
-        );
+        LOG_ERROR(COMPONENT_UEXPIRATION, ERR_NO_FREE_PACKET_BUFFER, (errorparameter_t) 0, (errorparameter_t) 0);
         return;
     }
 

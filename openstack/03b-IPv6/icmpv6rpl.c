@@ -221,9 +221,9 @@ void icmpv6rpl_sendDone(OpenQueueEntry_t *msg, owerror_t error) {
 
     // make sure I created it
     if (msg->creator != COMPONENT_ICMPv6RPL) {
-        openserial_printLog(LOG_ERROR, COMPONENT_ICMPv6RPL, ERR_UNEXPECTED_SENDDONE,
-                            (errorparameter_t) 0,
-                            (errorparameter_t) 0);
+        LOG_ERROR(COMPONENT_ICMPv6RPL, ERR_UNEXPECTED_SENDDONE,
+                  (errorparameter_t) 0,
+                  (errorparameter_t) 0);
     }
 
     // I'm not busy sending DIO/DAO anymore
@@ -276,15 +276,11 @@ void icmpv6rpl_receive(OpenQueueEntry_t *msg) {
 
         case IANA_ICMPv6_RPL_DAO:
             // this should never happen
-            openserial_printLog(LOG_ERROR, COMPONENT_ICMPv6RPL, ERR_UNEXPECTED_DAO,
-                                (errorparameter_t) 0,
-                                (errorparameter_t) 0);
+            LOG_ERROR(COMPONENT_ICMPv6RPL, ERR_UNEXPECTED_DAO, (errorparameter_t) 0, (errorparameter_t) 0);
             break;
         default:
             // this should never happen
-            openserial_printLog(LOG_ERROR, COMPONENT_ICMPv6RPL, ERR_MSG_UNKNOWN_TYPE,
-                                (errorparameter_t) icmpv6code,
-                                (errorparameter_t) 0);
+            LOG_ERROR(COMPONENT_ICMPv6RPL, ERR_MSG_UNKNOWN_TYPE, (errorparameter_t) icmpv6code, (errorparameter_t) 0);
             break;
 
     }
@@ -338,9 +334,9 @@ bool icmpv6rpl_isPreferredParent(open_addr_t *address) {
             neighbors_getNeighborEui64(&temp, ADDR_64B, icmpv6rpl_vars.ParentIndex);
             return packetfunctions_sameAddress(address, &temp);
         default:
-            openserial_printLog(LOG_CRITICAL, COMPONENT_ICMPv6RPL, ERR_WRONG_ADDR_TYPE,
-                                (errorparameter_t) address->type,
-                                (errorparameter_t) 3);
+            LOG_CRITICAL(COMPONENT_ICMPv6RPL, ERR_WRONG_ADDR_TYPE,
+                         (errorparameter_t) address->type,
+                         (errorparameter_t) 3);
             return FALSE;
     }
 }
@@ -620,9 +616,9 @@ void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t *msg) {
                         ) {
                     // the new DAGrank looks suspiciously high, only increment a bit
                     neighbors_setNeighborRank(i, neighborRank + ((3 * DEFAULTLINKCOST - 2) * 2 * MINHOPRANKINCREASE));
-                    openserial_printLog(LOG_ERROR, COMPONENT_ICMPv6RPL, ERR_LARGE_DAGRANK,
-                                        (errorparameter_t) icmpv6rpl_vars.incomingDio->rank,
-                                        (errorparameter_t) neighborRank);
+                    LOG_ERROR(COMPONENT_ICMPv6RPL, ERR_LARGE_DAGRANK,
+                              (errorparameter_t) icmpv6rpl_vars.incomingDio->rank,
+                              (errorparameter_t) neighborRank);
                 } else {
                     neighbors_setNeighborRank(i, icmpv6rpl_vars.incomingDio->rank);
                 }
@@ -723,9 +719,7 @@ void sendDIO(void) {
     // reserve a free packet buffer for DIO
     msg = openqueue_getFreePacketBuffer(COMPONENT_ICMPv6RPL);
     if (msg == NULL) {
-        openserial_printLog(LOG_ERROR, COMPONENT_ICMPv6RPL, ERR_NO_FREE_PACKET_BUFFER,
-                            (errorparameter_t) 0,
-                            (errorparameter_t) 0);
+        LOG_ERROR(COMPONENT_ICMPv6RPL, ERR_NO_FREE_PACKET_BUFFER, (errorparameter_t) 0, (errorparameter_t) 0);
 
         return;
     }
@@ -905,9 +899,7 @@ void sendDAO(void) {
     // reserve a free packet buffer for DAO
     msg = openqueue_getFreePacketBuffer(COMPONENT_ICMPv6RPL);
     if (msg == NULL) {
-        openserial_printLog(LOG_ERROR, COMPONENT_ICMPv6RPL, ERR_NO_FREE_PACKET_BUFFER,
-                            (errorparameter_t) 0,
-                            (errorparameter_t) 0);
+        LOG_ERROR(COMPONENT_ICMPv6RPL, ERR_NO_FREE_PACKET_BUFFER, (errorparameter_t) 0, (errorparameter_t) 0);
         return;
     }
 

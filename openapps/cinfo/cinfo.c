@@ -11,7 +11,6 @@
 #include "coap.h"
 #include "openqueue.h"
 #include "packetfunctions.h"
-#include "openserial.h"
 #include "openrandom.h"
 #include "board.h"
 #include "idmanager.h"

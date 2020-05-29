@@ -118,9 +118,7 @@ open_addr_t* idmanager_getMyID(uint8_t type) {
         case ADDR_128B:
             // you don't ask for my full address, rather for prefix, then 64b
         default:
-            openserial_printLog(LOG_CRITICAL, COMPONENT_IDMANAGER, ERR_WRONG_ADDR_TYPE,
-                                (errorparameter_t) type,
-                                (errorparameter_t) 0);
+            LOG_CRITICAL(COMPONENT_IDMANAGER, ERR_WRONG_ADDR_TYPE, (errorparameter_t) type, (errorparameter_t) 0);
             res = NULL;
             break;
     }
@@ -147,9 +145,8 @@ owerror_t idmanager_setMyID(open_addr_t *newID) {
         case ADDR_128B:
             //don't set 128b, but rather prefix and 64b
         default:
-            openserial_printLog(LOG_CRITICAL, COMPONENT_IDMANAGER, ERR_WRONG_ADDR_TYPE,
-                                (errorparameter_t) newID->type,
-                                (errorparameter_t) 1);
+            LOG_CRITICAL(COMPONENT_IDMANAGER, ERR_WRONG_ADDR_TYPE, (errorparameter_t) newID->type,
+                         (errorparameter_t) 1);
             ENABLE_INTERRUPTS();
             return E_FAIL;
             ENABLE_INTERRUPTS();
@@ -190,9 +187,7 @@ bool idmanager_isMyAddress(open_addr_t *addr) {
             ENABLE_INTERRUPTS();
             return res;
         default:
-            openserial_printLog(LOG_CRITICAL, COMPONENT_IDMANAGER, ERR_WRONG_ADDR_TYPE,
-                                (errorparameter_t) addr->type,
-                                (errorparameter_t) 2);
+            LOG_CRITICAL(COMPONENT_IDMANAGER, ERR_WRONG_ADDR_TYPE, (errorparameter_t) addr->type, (errorparameter_t) 2);
             ENABLE_INTERRUPTS();
             return FALSE;
     }
@@ -209,9 +204,9 @@ void idmanager_triggerAboutRoot(void) {
     //=== get command from OpenSerial
     number_bytes_from_input_buffer = openserial_getInputBuffer(input_buffer, sizeof(input_buffer));
     if (number_bytes_from_input_buffer != sizeof(input_buffer)) {
-        openserial_printLog(LOG_ERROR, COMPONENT_IDMANAGER, ERR_INPUTBUFFER_LENGTH,
-                            (errorparameter_t) number_bytes_from_input_buffer,
-                            (errorparameter_t) 0);
+        LOG_ERROR(COMPONENT_IDMANAGER, ERR_INPUTBUFFER_LENGTH,
+                  (errorparameter_t) number_bytes_from_input_buffer,
+                  (errorparameter_t) 0);
         return;
     };
 

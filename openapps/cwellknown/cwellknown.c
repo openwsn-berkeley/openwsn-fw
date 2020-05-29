@@ -7,7 +7,6 @@
 #include "coap.h"
 #include "openqueue.h"
 #include "packetfunctions.h"
-#include "openserial.h"
 #include "idmanager.h"
 
 //=========================== variables =======================================

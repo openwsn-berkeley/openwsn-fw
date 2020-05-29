@@ -14,7 +14,11 @@
 
 //=========================== define ==========================================
 
+#ifndef PACKETQUEUE_LENGTH
 #define QUEUELENGTH  20
+#else
+#define QUEUELENGTH  PACKETQUEUE_LENGTH
+#endif
 
 #if defined(OPENWSN_6LO_FRAGMENTATION_C)
 #define BIGQUEUELENGTH  OPENWSN_MAX_NUM_BIGPKTS

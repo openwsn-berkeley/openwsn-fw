@@ -289,11 +289,7 @@ owerror_t schedule_addActiveSlot(
     // abort it schedule overflow
     if (entry_found == FALSE) {
         ENABLE_INTERRUPTS();
-        openserial_printLog(
-                LOG_ERROR, COMPONENT_SCHEDULE, ERR_SCHEDULE_OVERFLOWN,
-                (errorparameter_t) 0,
-                (errorparameter_t) 0
-        );
+        LOG_ERROR(COMPONENT_SCHEDULE, ERR_SCHEDULE_OVERFLOWN, (errorparameter_t) 0, (errorparameter_t) 0);
         return E_FAIL;
     }
 
@@ -420,11 +416,9 @@ owerror_t schedule_addActiveSlot(
             }
             if (previousSlotWalker->slotOffset == slotContainer->slotOffset) {
                 // slot is already in schedule
-                openserial_printLog(
-                        LOG_ERROR, COMPONENT_SCHEDULE, ERR_SCHEDULE_ADDDUPLICATESLOT,
-                        (errorparameter_t) slotContainer->slotOffset,
-                        (errorparameter_t) 0
-                );
+                LOG_ERROR(COMPONENT_SCHEDULE, ERR_SCHEDULE_ADDDUPLICATESLOT,
+                          (errorparameter_t) slotContainer->slotOffset,
+                          (errorparameter_t) 0);
                 // reset the entry
                 slotContainer->slotOffset = 0;
                 slotContainer->type = CELLTYPE_OFF;
@@ -500,11 +494,7 @@ owerror_t schedule_removeActiveSlot(slotOffset_t slotOffset, cellType_t type, bo
     // abort it could not find
     if (entry_found == FALSE) {
         ENABLE_INTERRUPTS();
-        openserial_printLog(
-                LOG_CRITICAL, COMPONENT_SCHEDULE, ERR_FREEING_ERROR,
-                (errorparameter_t) 0,
-                (errorparameter_t) 0
-        );
+        LOG_CRITICAL(COMPONENT_SCHEDULE, ERR_FREEING_ERROR, (errorparameter_t) 0, (errorparameter_t) 0);
         return E_FAIL;
     }
 

@@ -152,9 +152,9 @@ void openudp_sendDone(OpenQueueEntry_t *msg, owerror_t error) {
     }
 
     if (udp_send_done_callback_ptr == NULL) {
-        openserial_printLog(LOG_ERROR, COMPONENT_OPENUDP, ERR_UNSUPPORTED_PORT_NUMBER,
-                              (errorparameter_t) msg->l4_sourcePortORicmpv6Type,
-                              (errorparameter_t) 5);
+        LOG_ERROR(COMPONENT_OPENUDP, ERR_UNSUPPORTED_PORT_NUMBER,
+                  (errorparameter_t) msg->l4_sourcePortORicmpv6Type,
+                  (errorparameter_t) 5);
         openqueue_freePacketBuffer(msg);
         return;
     }
@@ -222,9 +222,9 @@ void openudp_receive(OpenQueueEntry_t *msg) {
     }
 
     if (udp_receive_done_callback_ptr == NULL) {
-        openserial_printLog(LOG_ERROR, COMPONENT_OPENUDP, ERR_UNSUPPORTED_PORT_NUMBER,
-                              (errorparameter_t) msg->l4_destination_port,
-                              (errorparameter_t) 6);
+        LOG_ERROR(COMPONENT_OPENUDP, ERR_UNSUPPORTED_PORT_NUMBER,
+                  (errorparameter_t) msg->l4_destination_port,
+                  (errorparameter_t) 6);
         openqueue_freePacketBuffer(msg);
     } else {
         // forward message to resource

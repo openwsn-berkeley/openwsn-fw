@@ -67,13 +67,7 @@ void userialbridge_task_cb(void) {
     // get a free packet buffer
     pkt = openqueue_getFreePacketBuffer(COMPONENT_USERIALBRIDGE);
     if (pkt == NULL) {
-        openserial_printLog(
-                LOG_ERROR,
-                COMPONENT_USERIALBRIDGE,
-                ERR_NO_FREE_PACKET_BUFFER,
-                (errorparameter_t) 0,
-                (errorparameter_t) 0
-        );
+        LOG_ERROR(COMPONENT_USERIALBRIDGE, ERR_NO_FREE_PACKET_BUFFER, (errorparameter_t) 0, (errorparameter_t) 0);
         return;
     }
 

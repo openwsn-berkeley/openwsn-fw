@@ -1,6 +1,24 @@
 #ifndef OPENWSN_CONFIG_H
 #define OPENWSN_CONFIG_H
 
+// =========================== Debugging ============================
+
+/**
+ * \def OPENWSN_DEBUG_LEVEL
+ *
+ * Specifies the debugging level used in the OpenWSN stack.
+ * - level 0: no debugging
+ * - level 1: only critical logs
+ * - level 2: critical and error logs
+ * - level 3: critical, error, and success
+ * - level 4: critical, error, success, and warning
+ * - level 5: critical, error, success, warning, and info
+ * - level 6: critical, error, success, warning, info, and verbose
+ *
+ */
+
+#define OPENWSN_DEBUG_LEVEL         6
+
 // ========================== Applications ==========================
 
 /**
@@ -255,13 +273,22 @@
 
 
 /**
- * \def OPENWSN_IEEE802154E_SINGLE_CHANNEL
+ * \def IEEE802154E_SINGLE_CHANNEL
  *
  * Sets channel to a fixed value (acceptable values are [11 - 26] and [0])
  * When the channel is set to 0, frequency hopping is enabled, otherwise a single channel is used.
  *
  */
 #define IEEE802154E_SINGLE_CHANNEL      11
+
+/**
+ * \def PACKETQUEUE_LENGTH
+ *
+ * Specifies the size of the packet queue. Large queue sizes are required to support fragmentation but significantly
+ * increase RAM usage.
+ *
+ */
+#define PACKETQUEUE_LENGTH              10
 
 // ======================== Board configuration ========================
 

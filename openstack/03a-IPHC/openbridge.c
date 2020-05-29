@@ -28,9 +28,7 @@ void openbridge_triggerData(void) {
     // MAC header is 13B + 8 next hop so we cannot accept packets that are longer than 118B
     if (numDataBytes > (136 - 10/*21*/) || numDataBytes < 8) {
         //to prevent too short or too long serial frames to kill the stack
-        openserial_printLog(LOG_ERROR, COMPONENT_OPENBRIDGE, ERR_INPUTBUFFER_LENGTH,
-                            (errorparameter_t) numDataBytes,
-                            (errorparameter_t) 0);
+        LOG_ERROR(COMPONENT_OPENBRIDGE, ERR_INPUTBUFFER_LENGTH, (errorparameter_t) numDataBytes, (errorparameter_t) 0);
         return;
     }
 
@@ -40,9 +38,7 @@ void openbridge_triggerData(void) {
     if (idmanager_getIsDAGroot() == TRUE && numDataBytes > 0) {
         pkt = openqueue_getFreePacketBuffer(COMPONENT_OPENBRIDGE);
         if (pkt == NULL) {
-            openserial_printLog(LOG_ERROR, COMPONENT_OPENBRIDGE, ERR_NO_FREE_PACKET_BUFFER,
-                                (errorparameter_t) 0,
-                                (errorparameter_t) 0);
+            LOG_ERROR(COMPONENT_OPENBRIDGE, ERR_NO_FREE_PACKET_BUFFER, (errorparameter_t) 0, (errorparameter_t) 0);
             return;
         }
         //admin
@@ -65,9 +61,7 @@ void openbridge_triggerData(void) {
 void openbridge_sendDone(OpenQueueEntry_t *msg, owerror_t error) {
     msg->owner = COMPONENT_OPENBRIDGE;
     if (msg->creator != COMPONENT_OPENBRIDGE) {
-        openserial_printLog(LOG_ERROR, COMPONENT_OPENBRIDGE, ERR_UNEXPECTED_SENDDONE,
-                            (errorparameter_t) 0,
-                            (errorparameter_t) 0);
+        LOG_ERROR(COMPONENT_OPENBRIDGE, ERR_UNEXPECTED_SENDDONE, (errorparameter_t) 0, (errorparameter_t) 0);
     }
     openqueue_freePacketBuffer(msg);
 }

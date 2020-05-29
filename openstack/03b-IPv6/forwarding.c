@@ -231,13 +231,7 @@ void forwarding_sendDone(OpenQueueEntry_t *msg, owerror_t error) {
         // this is a relayed packet
 
         if (error == E_FAIL) {
-            openserial_printLog(
-                    LOG_ERROR,
-                    COMPONENT_FORWARDING,
-                    ERR_MAXRETRIES_REACHED,
-                    (errorparameter_t) 1,
-                    (errorparameter_t) 0
-            );
+            LOG_ERROR(COMPONENT_FORWARDING, ERR_MAXRETRIES_REACHED, (errorparameter_t) 1, (errorparameter_t) 0);
         }
 
         // free packet
@@ -257,13 +251,9 @@ void forwarding_sendDone(OpenQueueEntry_t *msg, owerror_t error) {
                 break;
             default:
                 // log error
-                openserial_printLog(
-                        LOG_CRITICAL,
-                        COMPONENT_FORWARDING,
-                        ERR_WRONG_TRAN_PROTOCOL,
-                        (errorparameter_t) msg->l4_protocol,
-                        (errorparameter_t) 0
-                );
+                LOG_CRITICAL(COMPONENT_FORWARDING, ERR_WRONG_TRAN_PROTOCOL,
+                             (errorparameter_t) msg->l4_protocol,
+                             (errorparameter_t) 0);
 
                 // free packet
                 openqueue_freePacketBuffer(msg);
@@ -330,12 +320,9 @@ void forwarding_receive(
                 break;
             default:
                 // log error
-                openserial_printLog(
-                        LOG_ERROR,
-                        COMPONENT_FORWARDING, ERR_WRONG_TRAN_PROTOCOL,
-                        (errorparameter_t) msg->l4_protocol,
-                        (errorparameter_t) 1
-                );
+                LOG_ERROR(COMPONENT_FORWARDING, ERR_WRONG_TRAN_PROTOCOL,
+                          (errorparameter_t) msg->l4_protocol,
+                          (errorparameter_t) 1);
 
                 // free packet
                 openqueue_freePacketBuffer(msg);
@@ -351,13 +338,8 @@ void forwarding_receive(
             // Deadline Option : Drop
             if( (deadline_option->time_left <= 0) && (deadline_option->d_flag == 1) ) { // packet expired
                deadline_option->time_left = 0;
-               openserial_printLog(
-                       LOG_WARNING,
-                       COMPONENT_FORWARDING,
-                       ERR_6LORH_DEADLINE_DROPPED,
-                       (errorparameter_t)0,
-                       (errorparameter_t)0
-               );
+               LOG_WARNING(COMPONENT_FORWARDING, ERR_6LORH_DEADLINE_DROPPED, (errorparameter_t)0, (errorparameter_t)0);
+
                openqueue_freePacketBuffer(msg);
                return;
            }
@@ -365,16 +347,9 @@ void forwarding_receive(
 #endif
 
         if (openqueue_isHighPriorityEntryEnough() == FALSE) {
-            // after change the creator to COMPONENT_FORWARDING,
-            // there is no space for high priority packet, drop this message
-            // by free the buffer.
-            openserial_printLog(
-                    LOG_ERROR,
-                    COMPONENT_FORWARDING,
-                    ERR_FORWARDING_PACKET_DROPPED,
-                    (errorparameter_t) 0,
-                    (errorparameter_t) 0
-            );
+            // after change the creator to COMPONENT_FORWARDING, there is no space for high priority packet,
+            // drop this message by free the buffer.
+            LOG_WARNING(COMPONENT_FORWARDING, ERR_FORWARDING_PACKET_DROPPED, (errorparameter_t)0, (errorparameter_t)0);
             openqueue_freePacketBuffer(msg);
             return;
         }
@@ -384,27 +359,18 @@ void forwarding_receive(
             senderRank = rpl_option->senderRank;
             if ((flags & O_FLAG) != 0) {
                 // wrong direction
-                // log error
-                openserial_printLog(
-                        LOG_ERROR,
-                        COMPONENT_FORWARDING,
-                        ERR_WRONG_DIRECTION,
-                        (errorparameter_t) flags,
-                        (errorparameter_t) senderRank
-                );
+                LOG_ERROR(COMPONENT_FORWARDING, ERR_WRONG_DIRECTION,
+                          (errorparameter_t) flags,
+                          (errorparameter_t) senderRank);
             }
             if (senderRank < icmpv6rpl_getMyDAGrank()) {
                 // loop detected
                 // set flag
                 rpl_option->flags |= R_FLAG;
                 // log error
-                openserial_printLog(
-                        LOG_ERROR,
-                        COMPONENT_FORWARDING,
-                        ERR_LOOP_DETECTED,
-                        (errorparameter_t) senderRank,
-                        (errorparameter_t) icmpv6rpl_getMyDAGrank()
-                );
+                LOG_ERROR(COMPONENT_FORWARDING, ERR_LOOP_DETECTED,
+                          (errorparameter_t) senderRank,
+                          (errorparameter_t) icmpv6rpl_getMyDAGrank());
             }
             forwarding_createRplOption(rpl_option, rpl_option->flags);
 
@@ -437,13 +403,7 @@ void forwarding_receive(
 #endif
                                                        rpl_option) == E_FAIL) {
                 // log error
-                openserial_printLog(
-                        LOG_ERROR,
-                        COMPONENT_FORWARDING,
-                        ERR_INVALID_FWDMODE,
-                        (errorparameter_t) 0,
-                        (errorparameter_t) 0
-                );
+                LOG_ERROR(COMPONENT_FORWARDING, ERR_INVALID_FWDMODE, (errorparameter_t) 0, (errorparameter_t) 0);
             }
         }
     }
@@ -512,12 +472,9 @@ owerror_t forwarding_send_internal_RoutingTable(
     }
 
     if (msg->l2_nextORpreviousHop.type == ADDR_NONE) {
-        openserial_printLog(
-                LOG_ERROR,
-                COMPONENT_FORWARDING,
-                ERR_NO_NEXTHOP,
-                (errorparameter_t) msg->l3_destinationAdd.addr_128b[14],
-                (errorparameter_t) msg->l3_destinationAdd.addr_128b[15]
+        LOG_ERROR(COMPONENT_FORWARDING, ERR_NO_NEXTHOP,
+                  (errorparameter_t) msg->l3_destinationAdd.addr_128b[14],
+                  (errorparameter_t) msg->l3_destinationAdd.addr_128b[15]
         );
         return E_FAIL;
     }
@@ -787,13 +744,9 @@ owerror_t forwarding_send_internal_SourceRouting(
         }
     } else {
         // log error
-        openserial_printLog(
-                LOG_ERROR,
-                COMPONENT_FORWARDING,
-                ERR_6LOWPAN_UNSUPPORTED,
-                (errorparameter_t) 16,
-                (errorparameter_t)(temp_addr64.addr_64b[7])
-        );
+        LOG_ERROR(COMPONENT_FORWARDING, ERR_6LOWPAN_UNSUPPORTED,
+                  (errorparameter_t) 16,
+                  (errorparameter_t)(temp_addr64.addr_64b[7]));
     }
     // copy RH3s before toss them
     if (
@@ -823,26 +776,18 @@ owerror_t forwarding_send_internal_SourceRouting(
         if ((flags & O_FLAG) != O_FLAG) {
             // wrong direction
             // log error
-            openserial_printLog(
-                    LOG_ERROR,
-                    COMPONENT_FORWARDING,
-                    ERR_WRONG_DIRECTION,
-                    (errorparameter_t) flags,
-                    (errorparameter_t) senderRank
-            );
+            LOG_ERROR(COMPONENT_FORWARDING, ERR_WRONG_DIRECTION,
+                      (errorparameter_t) flags,
+                      (errorparameter_t) senderRank);
         }
         if (senderRank > icmpv6rpl_getMyDAGrank()) {
             // loop detected
             // set flag
             rpl_option->flags |= R_FLAG;
             // log error
-            openserial_printLog(
-                    LOG_ERROR,
-                    COMPONENT_FORWARDING,
-                    ERR_LOOP_DETECTED,
-                    (errorparameter_t) senderRank,
-                    (errorparameter_t) icmpv6rpl_getMyDAGrank()
-            );
+            LOG_ERROR(COMPONENT_FORWARDING, ERR_LOOP_DETECTED,
+                      (errorparameter_t) senderRank,
+                      (errorparameter_t) icmpv6rpl_getMyDAGrank());
         }
         forwarding_createRplOption(rpl_option, rpl_option->flags);
 

@@ -205,9 +205,7 @@ void rrt_sendCoAPMsg(char actionMsg, uint8_t *ipv6mote) {
 
     pkt = openqueue_getFreePacketBuffer(COMPONENT_RRT);
     if (pkt == NULL) {
-        openserial_printLog(LOG_ERROR, COMPONENT_RRT, ERR_BUSY_SENDING,
-                            (errorparameter_t) 0,
-                            (errorparameter_t) 0);
+        LOG_ERROR(COMPONENT_RRT, ERR_BUSY_SENDING, (errorparameter_t) 0, (errorparameter_t) 0);
         return;
     }
 

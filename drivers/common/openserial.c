@@ -33,7 +33,7 @@
 
 openserial_vars_t openserial_vars;
 
-#define DEBUGPRINT_PERIOD 100 // in ms
+#define STATUSPRINT_PERIOD 100 // in ms
 
 //=========================== prototypes ======================================
 
@@ -103,27 +103,20 @@ void openserial_init(void) {
     openserial_vars.debugPrint_timerId = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_OPENSERIAL);
     opentimers_scheduleIn(
             openserial_vars.debugPrint_timerId,
-            DEBUGPRINT_PERIOD,
+            STATUSPRINT_PERIOD,
             TIME_MS,
             TIMER_PERIODIC,
             openserial_debugPrint_timer_cb
     );
 
     // UART
-    uart_setCallbacks(
-            isr_openserial_tx,
-            isr_openserial_rx
-    );
+    uart_setCallbacks(isr_openserial_tx, isr_openserial_rx);
     uart_enableInterrupts();
 }
 
 //===== transmitting
 
-owerror_t openserial_printStatus(
-        uint8_t statusElement,
-        uint8_t *buffer,
-        uint8_t length
-) {
+owerror_t openserial_printStatus(uint8_t statusElement, uint8_t *buffer, uint8_t length) {
     uint8_t i;
 
     outputHdlcOpen();
@@ -153,22 +146,22 @@ owerror_t openserial_printLog(
     char severity;
 
     switch (log_level) {
-        case LOG_VERBOSE:
+        case VERBOSE:
             severity = SERFRAME_MOTE2PC_VERBOSE;
             break;
-        case LOG_INFO:
+        case INFO:
             severity = SERFRAME_MOTE2PC_INFO;
             break;
-        case LOG_WARNING:
+        case WARNING:
             severity = SERFRAME_MOTE2PC_WARNING;
             break;
-        case LOG_SUCCESS:
+        case SUCCESS:
             severity = SERFRAME_MOTE2PC_SUCCESS;
             break;
-        case LOG_ERROR:
+        case ERROR:
             severity = SERFRAME_MOTE2PC_ERROR;
             break;
-        case LOG_CRITICAL:
+        case CRITICAL:
             severity = SERFRAME_MOTE2PC_CRITICAL;
             // blink error LED, this is serious
             leds_error_blink();
@@ -428,13 +421,9 @@ uint8_t openserial_getInputBuffer(uint8_t *bufferToWrite, uint8_t maxNumBytes) {
     //>>>>>>>>>>>>>>>>>>>>>>>
 
     if (maxNumBytes < inputBufFillLevel - 1) {
-        openserial_printLog(
-                LOG_ERROR,
-                COMPONENT_OPENSERIAL,
-                ERR_GETDATA_ASKS_TOO_FEW_BYTES,
-                (errorparameter_t) maxNumBytes,
-                (errorparameter_t) inputBufFillLevel - 1
-        );
+        LOG_ERROR(COMPONENT_OPENSERIAL, ERR_GETDATA_ASKS_TOO_FEW_BYTES,
+                  (errorparameter_t) maxNumBytes,
+                  (errorparameter_t) inputBufFillLevel - 1);
         numBytesWritten = 0;
     } else {
         numBytesWritten = inputBufFillLevel - 1;
@@ -757,16 +746,12 @@ port_INLINE void inputHdlcClose(void) {
 
 void task_printInputBufferOverflow(void) {
     // input buffer overflow
-    openserial_printLog(LOG_ERROR, COMPONENT_OPENSERIAL, ERR_INPUT_BUFFER_OVERFLOW,
-                        (errorparameter_t) 0,
-                        (errorparameter_t) 0);
+    LOG_ERROR(COMPONENT_OPENSERIAL, ERR_INPUT_BUFFER_OVERFLOW, (errorparameter_t) 0, (errorparameter_t) 0);
 }
 
 void task_printWrongCRCInput(void) {
     // invalid HDLC frame
-    openserial_printLog(LOG_ERROR, COMPONENT_OPENSERIAL, ERR_WRONG_CRC_INPUT,
-                        (errorparameter_t) 0,
-                        (errorparameter_t) 0);
+    LOG_ERROR(COMPONENT_OPENSERIAL, ERR_WRONG_CRC_INPUT, (errorparameter_t) 0, (errorparameter_t) 0);
 }
 
 //=========================== interrupt handlers ==============================

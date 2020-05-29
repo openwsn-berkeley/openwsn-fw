@@ -323,13 +323,7 @@ void csensors_task_cb(void) {
     // create a CoAP RD packet
     pkt = openqueue_getFreePacketBuffer(COMPONENT_CSENSORS);
     if (pkt == NULL) {
-        openserial_printLog(
-                LOG_ERROR,
-                COMPONENT_CSENSORS,
-                ERR_NO_FREE_PACKET_BUFFER,
-                (errorparameter_t) 0,
-                (errorparameter_t) 0
-        );
+        LOG_ERROR(COMPONENT_CSENSORS, ERR_NO_FREE_PACKET_BUFFER, (errorparameter_t) 0, (errorparameter_t) 0);
         return;
     }
 
