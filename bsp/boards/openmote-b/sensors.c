@@ -4,6 +4,10 @@
     \author Xavier Vilajosana <xvilajosana@eecs.berkeley.edu>, March 2017.
 */
 
+#include "config.h"
+
+#if defined(BOARD_SENSORS_ENABLED)
+
 #include "adc_sensor.h"
 #include "board.h"
 #include "sensors.h"
@@ -26,18 +30,18 @@ sensors_vars_t sensors_vars;
    \brief Initialize sensors on the board
 */
 void sensors_init(void) {
-   
-   memset(&sensors_vars,0,sizeof(sensors_vars_t));
-   
-   if (si70x_is_present()==1) {
-      si70x_init();
-      sensors_vars.sensorsTypes[SENSOR_TEMPERATURE] = 1;
-      sensors_vars.sensorsTypes[SENSOR_HUMIDITY] = 1;
-   }
-    
-   adc_sensor_init();
-   sensors_vars.sensorsTypes[SENSOR_ADCTEMPERATURE] = 1;
-   
+
+    memset(&sensors_vars, 0, sizeof(sensors_vars_t));
+
+    if (si70x_is_present() == 1) {
+        si70x_init();
+        sensors_vars.sensorsTypes[SENSOR_TEMPERATURE] = 1;
+        sensors_vars.sensorsTypes[SENSOR_HUMIDITY] = 1;
+    }
+
+    adc_sensor_init();
+    sensors_vars.sensorsTypes[SENSOR_ADCTEMPERATURE] = 1;
+
 }
 
 /**
@@ -46,7 +50,7 @@ void sensors_init(void) {
    \param[out] returnVal presence of the sensor.
 */
 bool sensors_is_present(uint8_t sensorType) {
-   return sensors_vars.sensorsTypes[sensorType];
+    return sensors_vars.sensorsTypes[sensorType];
 }
 
 /**
@@ -55,18 +59,18 @@ bool sensors_is_present(uint8_t sensorType) {
    \param[out] callback for reading data.
 */
 callbackRead_cbt sensors_getCallbackRead(uint8_t sensorType) {
-   
-   switch (sensorType) {
-      case SENSOR_TEMPERATURE:
-         return &si70x_read_temperature;
-      case SENSOR_HUMIDITY:
-         return &si70x_read_humidity;
-      case SENSOR_ADCTEMPERATURE:
-         return &adc_sens_read_temperature;
-      default:
-         return NULL;
-   }
-   
+
+    switch (sensorType) {
+        case SENSOR_TEMPERATURE:
+            return &si70x_read_temperature;
+        case SENSOR_HUMIDITY:
+            return &si70x_read_humidity;
+        case SENSOR_ADCTEMPERATURE:
+            return &adc_sens_read_temperature;
+        default:
+            return NULL;
+    }
+
 }
 
 /**
@@ -75,18 +79,20 @@ callbackRead_cbt sensors_getCallbackRead(uint8_t sensorType) {
    \param[out] callback for converting data.
 */
 callbackConvert_cbt sensors_getCallbackConvert(uint8_t sensorType) {
-   
-   switch (sensorType) {
-      case SENSOR_TEMPERATURE:
-         return &si70x_convert_temperature;
-      case SENSOR_HUMIDITY:
-         return &si70x_convert_humidity;
-      case SENSOR_ADCTEMPERATURE:
-         return &adc_sens_convert_temperature;
-      default:
-         return NULL;
-   }
-   
+
+    switch (sensorType) {
+        case SENSOR_TEMPERATURE:
+            return &si70x_convert_temperature;
+        case SENSOR_HUMIDITY:
+            return &si70x_convert_humidity;
+        case SENSOR_ADCTEMPERATURE:
+            return &adc_sens_convert_temperature;
+        default:
+            return NULL;
+    }
+
 }
 
 //=========================== private =========================================
+
+#endif /* BOARD_SENSORS_ENABLED */

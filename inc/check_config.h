@@ -57,6 +57,10 @@
 #error "A CoAP dependent application is defined, but CoAP is not included in the build."
 #endif
 
+#if defined(OPENWSN_CSENSORS_C) && !defined(BOARD_SENSORS_ENABLED)
+#error "The CSENSORS app requires the sensor drivers."
+#endif
+
 #if !defined(OPENWSN_UDP_C) && (\
     defined(OPENWSN_USERIALBRIDGE_C) || \
     defined(OPENWN_UECHO_C) || \

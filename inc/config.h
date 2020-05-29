@@ -292,6 +292,15 @@
  */
 // #define BOARD_OPENSERIAL_SNIFFER
 
+
+/**
+ * \def BOARD_SENSORS_ENABLED
+ *
+ * Includes the sensor driver
+ *
+ */
+// #define BOARD_SENSORS_ENABLED
+
 #include "check_config.h"
 
 #endif /* OPENWSN_CONFIG_H */

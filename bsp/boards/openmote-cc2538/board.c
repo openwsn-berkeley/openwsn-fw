@@ -18,6 +18,7 @@
 #include <source/gptimer.h>
 #include <source/sys_ctrl.h>
 
+#include "config.h"
 #include "board.h"
 #include "debugpins.h"
 #include "i2c.h"
@@ -90,13 +91,16 @@ void board_init(void) {
 
     i2c_init();
 
-    sensors_init();
-
 #if defined(BOARD_CRYPTOENGINE_ENABLED)
     cryptoengine_init();
 #endif
 
-    pwm_init();
+
+#if defined(BOARD_SENSORS_ENABLED)
+    sensors_init();
+#endif
+
+   pwm_init();
 }
 
 /**
