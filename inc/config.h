@@ -272,7 +272,7 @@
  * cannot be combined with the python board.
  *
  */
-#define BOARD_CRYPTOENGINE_ENABLED
+// #define BOARD_CRYPTOENGINE_ENABLED
 
 /**
  * \def BOARD_OPENSERIAL_PRINTF

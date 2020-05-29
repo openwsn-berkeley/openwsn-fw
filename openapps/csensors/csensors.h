@@ -27,22 +27,22 @@
 //=========================== typedef =========================================
 
 typedef struct {
-   coap_resource_desc_t         desc;
-   opensensors_resource_desc_t* opensensors_resource;
-   uint16_t                     period;
-   opentimers_id_t             timerId;
+    coap_resource_desc_t desc;
+    opensensors_resource_desc_t *opensensors_resource;
+    uint16_t period;
+    opentimers_id_t timerId;
 } csensors_resource_t;
 
 //=========================== module variables ================================
 
 typedef struct {
-   coap_resource_desc_t         desc;
-   csensors_resource_t          csensors_resource[NUMSENSORS];
-   uint8_t                      numCsensors;
-   uint8_t                      cb_list[CSENSORSTASKLIST];
-   uint8_t                      cb_put;
-   uint8_t                      cb_get;
-   uint8_t                      medType;
+    coap_resource_desc_t desc;
+    csensors_resource_t csensors_resource[NUMSENSORS];
+    uint8_t numCsensors;
+    uint8_t cb_list[CSENSORSTASKLIST];
+    uint8_t cb_put;
+    uint8_t cb_get;
+    uint8_t medType;
 } csensors_vars_t;
 
 //=========================== variables =======================================

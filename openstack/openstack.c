@@ -103,6 +103,6 @@ void openstack_init(void) {
     //===== applications
     openapps_init();
 
-    openserial_printInfo(COMPONENT_OPENWSN, ERR_BOOTED, (errorparameter_t) 0, (errorparameter_t) 0);
+    openserial_printLog(LOG_SUCCESS, COMPONENT_OPENWSN, ERR_BOOTED, (errorparameter_t) 0, (errorparameter_t) 0);
 }
 

@@ -40,7 +40,10 @@
 // frames sent mote->PC
 #define SERFRAME_MOTE2PC_DATA                    ((uint8_t)'D')
 #define SERFRAME_MOTE2PC_STATUS                  ((uint8_t)'S')
+#define SERFRAME_MOTE2PC_VERBOSE                 ((uint8_t)'V')
 #define SERFRAME_MOTE2PC_INFO                    ((uint8_t)'I')
+#define SERFRAME_MOTE2PC_WARNING                 ((uint8_t)'W')
+#define SERFRAME_MOTE2PC_SUCCESS                 ((uint8_t)'U')
 #define SERFRAME_MOTE2PC_ERROR                   ((uint8_t)'E')
 #define SERFRAME_MOTE2PC_CRITICAL                ((uint8_t)'C')
 #define SERFRAME_MOTE2PC_SNIFFED_PACKET          ((uint8_t)'P')
@@ -53,6 +56,15 @@
 #define SERFRAME_PC2MOTE_TRIGGERSERIALECHO       ((uint8_t)'S')
 
 //=========================== typedef =========================================
+
+enum {
+    LOG_VERBOSE,
+    LOG_INFO,
+    LOG_WARNING,
+    LOG_SUCCESS,
+    LOG_ERROR,
+    LOG_CRITICAL
+};
 
 //=========================== variables =======================================
 
@@ -90,41 +102,21 @@ owerror_t openserial_printStatus(
         uint8_t length
 );
 
-owerror_t openserial_printInfo(
+owerror_t openserial_printLog(
+        uint8_t log_level,
         uint8_t calling_component,
         uint8_t error_code,
         errorparameter_t arg1,
         errorparameter_t arg2
 );
 
-owerror_t openserial_printError(
-        uint8_t calling_component,
-        uint8_t error_code,
-        errorparameter_t arg1,
-        errorparameter_t arg2
-);
+owerror_t openserial_printData(uint8_t *buffer, uint8_t length);
 
-owerror_t openserial_printCritical(
-        uint8_t calling_component,
-        uint8_t error_code,
-        errorparameter_t arg1,
-        errorparameter_t arg2
-);
-
-owerror_t openserial_printData(
-        uint8_t *buffer,
-        uint8_t length
-);
-
-owerror_t openserial_printSniffedPacket(
-        uint8_t *buffer,
-        uint8_t length,
-        uint8_t channel
-);
+owerror_t openserial_printSniffedPacket(uint8_t *buffer, uint8_t length, uint8_t channel);
 
 void task_openserial_debugPrint(void);
 
-owerror_t openserial_printf(char* buffer, ...);
+owerror_t openserial_printf(char *buffer, ...);
 
 // receiving
 uint8_t openserial_getInputBufferFillLevel(void);

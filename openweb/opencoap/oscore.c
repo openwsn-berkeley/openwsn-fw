@@ -220,8 +220,8 @@ owerror_t oscore_protect_message(
 
     if (aadLen > AAD_MAX_LEN) {
         // corruption
-        openserial_printError(
-                COMPONENT_OSCORE, ERR_BUFFER_OVERFLOW,
+        openserial_printLog(
+                LOG_ERROR, COMPONENT_OSCORE, ERR_BUFFER_OVERFLOW,
                 (errorparameter_t) 0,
                 (errorparameter_t) 0
         );
@@ -324,8 +324,8 @@ owerror_t oscore_unprotect_message(
 
     if (is_request(code)) {
         if (replay_window_check(context, sequenceNumber) == FALSE) {
-            openserial_printError(
-                    COMPONENT_OSCORE, ERR_REPLAY_FAILED,
+            openserial_printLog(
+                    LOG_ERROR, COMPONENT_OSCORE, ERR_REPLAY_FAILED,
                     (errorparameter_t) 0,
                     (errorparameter_t) 0
             );
@@ -356,8 +356,8 @@ owerror_t oscore_unprotect_message(
 
     if (aadLen > AAD_MAX_LEN) {
         // corruption
-        openserial_printError(
-                COMPONENT_OSCORE, ERR_BUFFER_OVERFLOW,
+        openserial_printLog(
+                LOG_ERROR, COMPONENT_OSCORE, ERR_BUFFER_OVERFLOW,
                 (errorparameter_t) 0,
                 (errorparameter_t) 0
         );
@@ -382,8 +382,8 @@ owerror_t oscore_unprotect_message(
                                 AES_CCM_16_64_128_TAG_LEN);
 
     if (decStatus != E_SUCCESS) {
-        openserial_printError(
-                COMPONENT_OSCORE, ERR_DECRYPTION_FAILED,
+        openserial_printLog(
+                LOG_ERROR, COMPONENT_OSCORE, ERR_DECRYPTION_FAILED,
                 (errorparameter_t) 0,
                 (errorparameter_t) 0
         );
@@ -407,8 +407,8 @@ owerror_t oscore_unprotect_message(
 
 uint16_t oscore_get_sequence_number(oscore_security_context_t *context) {
     if (context->sequenceNumber == 0xffff) {
-        openserial_printError(
-                COMPONENT_OSCORE, ERR_SEQUENCE_NUMBER_OVERFLOW,
+        openserial_printLog(
+                LOG_ERROR, COMPONENT_OSCORE, ERR_SEQUENCE_NUMBER_OVERFLOW,
                 (errorparameter_t) 0,
                 (errorparameter_t) 0
         );
@@ -548,8 +548,8 @@ uint8_t oscore_construct_aad(uint8_t *buffer,
 
     if (externalAADLen > EAAD_MAX_LEN) {
         // corruption
-        openserial_printError(
-                COMPONENT_OSCORE, ERR_BUFFER_OVERFLOW,
+        openserial_printLog(
+                LOG_ERROR, COMPONENT_OSCORE, ERR_BUFFER_OVERFLOW,
                 (errorparameter_t) 0,
                 (errorparameter_t) 0
         );

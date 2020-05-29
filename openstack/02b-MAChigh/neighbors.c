@@ -171,9 +171,9 @@ bool neighbors_isStableNeighbor(open_addr_t *address) {
             packetfunctions_ip128bToMac64b(address, &temp_prefix, &temp_addr_64b);
             break;
         default:
-            openserial_printCritical(COMPONENT_NEIGHBORS, ERR_WRONG_ADDR_TYPE,
-                                     (errorparameter_t) address->type,
-                                     (errorparameter_t) 0);
+            openserial_printLog(LOG_CRITICAL, COMPONENT_NEIGHBORS, ERR_WRONG_ADDR_TYPE,
+                                (errorparameter_t) address->type,
+                                (errorparameter_t) 0);
             return returnVal;
     }
 
@@ -218,9 +218,9 @@ bool neighbors_isInsecureNeighbor(open_addr_t *address) {
         case ADDR_64B:
             break;
         default:
-            openserial_printCritical(COMPONENT_NEIGHBORS, ERR_WRONG_ADDR_TYPE,
-                                     (errorparameter_t) address->type,
-                                     (errorparameter_t) 1);
+            openserial_printLog(LOG_CRITICAL, COMPONENT_NEIGHBORS, ERR_WRONG_ADDR_TYPE,
+                                (errorparameter_t) address->type,
+                                (errorparameter_t) 1);
             return returnVal;
     }
 
@@ -459,9 +459,9 @@ bool neighbors_getNeighborEui64(open_addr_t *address, uint8_t addr_type, uint8_t
             ReturnVal = neighbors_vars.neighbors[index].used;
             break;
         default:
-            openserial_printCritical(COMPONENT_NEIGHBORS, ERR_WRONG_ADDR_TYPE,
-                                     (errorparameter_t) addr_type,
-                                     (errorparameter_t) 2);
+            openserial_printLog(LOG_CRITICAL, COMPONENT_NEIGHBORS, ERR_WRONG_ADDR_TYPE,
+                                (errorparameter_t) addr_type,
+                                (errorparameter_t) 2);
             break;
     }
     return ReturnVal;
@@ -513,7 +513,7 @@ bool neighbors_backoffHitZero(open_addr_t *address) {
         // doesn't need to be in the neighbor table.
 
         // currently, just allow the packet to be send without backoff checking.
-        // performence to be tested...
+        // performance to be tested...
         returnVal = TRUE;
     }
     return returnVal;
@@ -605,13 +605,11 @@ void neighbors_removeOld(void) {
     PORT_TIMER_WIDTH timeSinceHeard;
     open_addr_t addressToWrite;
 
-    if (
-            icmpv6rpl_getPreferredParentEui64(&addressToWrite) == FALSE ||
-            (
-                    icmpv6rpl_getPreferredParentEui64(&addressToWrite) &&
-                    schedule_hasAutonomousTxRxCellUnicast(&addressToWrite) == FALSE
-            )
-            ) {
+    if (icmpv6rpl_getPreferredParentEui64(&addressToWrite) == FALSE ||
+        (
+                icmpv6rpl_getPreferredParentEui64(&addressToWrite) &&
+                schedule_hasAutonomousTxRxCellUnicast(&addressToWrite) == FALSE
+        )) {
         return;
     }
 
@@ -624,14 +622,13 @@ void neighbors_removeOld(void) {
                 /**
                     don't remove neighbor marked as:
                     - 6P no resource
-                    - pareferred parent
+                    - preferred parent
                 */
 
                 if (neighbors_vars.neighbors[i].f6PNORES == FALSE &&
                     neighbors_vars.neighbors[i].parentPreference == 0) {
-
                     // remove neighbor only when there is no packet in queue
-                    if (openqueue_macGetUnicastPakcet(&(neighbors_vars.neighbors[i].addr_64b)) == NULL) {
+                    if (openqueue_macGetUnicastPacket(&(neighbors_vars.neighbors[i].addr_64b)) == NULL) {
                         removeNeighbor(i);
                     }
                 }
@@ -671,9 +668,9 @@ void registerNewNeighbor(open_addr_t *address,
 
     // filter errors
     if (address->type != ADDR_64B) {
-        openserial_printCritical(COMPONENT_NEIGHBORS, ERR_WRONG_ADDR_TYPE,
-                                 (errorparameter_t) address->type,
-                                 (errorparameter_t) 3);
+        openserial_printLog(LOG_CRITICAL, COMPONENT_NEIGHBORS, ERR_WRONG_ADDR_TYPE,
+                            (errorparameter_t) address->type,
+                            (errorparameter_t) 3);
         return;
     }
     // add this neighbor
@@ -712,9 +709,9 @@ void registerNewNeighbor(open_addr_t *address,
             i++;
         }
         if (i == MAXNUMNEIGHBORS) {
-            openserial_printError(COMPONENT_NEIGHBORS, ERR_NEIGHBORS_FULL,
-                                  (errorparameter_t) MAXNUMNEIGHBORS,
-                                  (errorparameter_t) 0);
+            openserial_printLog(LOG_CRITICAL, COMPONENT_NEIGHBORS, ERR_NEIGHBORS_FULL,
+                                (errorparameter_t) MAXNUMNEIGHBORS,
+                                (errorparameter_t) 0);
             return;
         }
     }
@@ -759,9 +756,9 @@ bool isThisRowMatching(open_addr_t *address, uint8_t rowNumber) {
             return neighbors_vars.neighbors[rowNumber].used &&
                    packetfunctions_sameAddress(address, &neighbors_vars.neighbors[rowNumber].addr_64b);
         default:
-            openserial_printCritical(COMPONENT_NEIGHBORS, ERR_WRONG_ADDR_TYPE,
-                                     (errorparameter_t) address->type,
-                                     (errorparameter_t) 4);
+            openserial_printLog(LOG_CRITICAL, COMPONENT_NEIGHBORS, ERR_WRONG_ADDR_TYPE,
+                                (errorparameter_t) address->type,
+                                (errorparameter_t) 4);
             return FALSE;
     }
 }

@@ -23,12 +23,12 @@ const uint8_t cled_path0[] = "l";
 //=========================== prototypes ======================================
 
 owerror_t cled_receive(OpenQueueEntry_t *msg,
-                        coap_header_iht *coap_header,
-                        coap_option_iht *coap_incomingOptions,
-                        coap_option_iht *coap_outgoingOptions,
-                        uint8_t *coap_outgoingOptionsLen);
+                       coap_header_iht *coap_header,
+                       coap_option_iht *coap_incomingOptions,
+                       coap_option_iht *coap_outgoingOptions,
+                       uint8_t *coap_outgoingOptionsLen);
 
-void cled_sendDone( OpenQueueEntry_t *msg, owerror_t error );
+void cled_sendDone(OpenQueueEntry_t *msg, owerror_t error);
 
 //=========================== public ==========================================
 
@@ -62,10 +62,10 @@ void cled_init(void) {
 \return Whether the response is prepared successfully.
 */
 owerror_t cled_receive(OpenQueueEntry_t *msg,
-                        coap_header_iht *coap_header,
-                        coap_option_iht *coap_incomingOptions,
-                        coap_option_iht *coap_outgoingOptions,
-                        uint8_t *coap_outgoingOptionsLen) {
+                       coap_header_iht *coap_header,
+                       coap_option_iht *coap_incomingOptions,
+                       coap_option_iht *coap_outgoingOptions,
+                       uint8_t *coap_outgoingOptionsLen) {
     owerror_t outcome;
 
     switch (coap_header->Code) {

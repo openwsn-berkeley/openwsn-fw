@@ -39,7 +39,7 @@ openserial_vars_t openserial_vars;
 
 
 // printing
-owerror_t openserial_printInfoErrorCritical(
+owerror_t internal_openserial_print(
         char severity,
         uint8_t calling_component,
         uint8_t error_code,
@@ -142,67 +142,53 @@ owerror_t openserial_printStatus(
     return E_SUCCESS;
 }
 
-owerror_t openserial_printInfo(
-        uint8_t calling_component,
-        uint8_t error_code,
-        errorparameter_t arg1,
-        errorparameter_t arg2
-) {
-    return openserial_printInfoErrorCritical(
-            SERFRAME_MOTE2PC_INFO,
-            calling_component,
-            error_code,
-            arg1,
-            arg2
-    );
-}
-
-owerror_t openserial_printError(
-        uint8_t calling_component,
-        uint8_t error_code,
-        errorparameter_t arg1,
-        errorparameter_t arg2
-) {
-    // toggle error LED
-    leds_error_toggle();
-
-    return openserial_printInfoErrorCritical(
-            SERFRAME_MOTE2PC_ERROR,
-            calling_component,
-            error_code,
-            arg1,
-            arg2
-    );
-}
-
-owerror_t openserial_printCritical(
+owerror_t openserial_printLog(
+        uint8_t log_level,
         uint8_t calling_component,
         uint8_t error_code,
         errorparameter_t arg1,
         errorparameter_t arg2
 ) {
     uint32_t reference;
+    char severity;
 
-    // blink error LED, this is serious
-    leds_error_blink();
+    switch (log_level) {
+        case LOG_VERBOSE:
+            severity = SERFRAME_MOTE2PC_VERBOSE;
+            break;
+        case LOG_INFO:
+            severity = SERFRAME_MOTE2PC_INFO;
+            break;
+        case LOG_WARNING:
+            severity = SERFRAME_MOTE2PC_WARNING;
+            break;
+        case LOG_SUCCESS:
+            severity = SERFRAME_MOTE2PC_SUCCESS;
+            break;
+        case LOG_ERROR:
+            severity = SERFRAME_MOTE2PC_ERROR;
+            break;
+        case LOG_CRITICAL:
+            severity = SERFRAME_MOTE2PC_CRITICAL;
+            // blink error LED, this is serious
+            leds_error_blink();
 
-    // schedule for the mote to reboot in 10s
-    reference = opentimers_getValue();
-    opentimers_scheduleAbsolute(
-            openserial_vars.reset_timerId,  // timerId
-            10000,                          // duration
-            reference,                      // reference
-            TIME_MS,                        // timetype
-            openserial_board_reset_cb       // callback
-    );
+            // schedule for the mote to reboot in 10s
+            reference = opentimers_getValue();
+            opentimers_scheduleAbsolute(
+                    openserial_vars.reset_timerId,  // timerId
+                    10000,                          // duration
+                    reference,                      // reference
+                    TIME_MS,                        // timetype
+                    openserial_board_reset_cb       // callback
+            );
+            break;
+        default:
+            // unknown logging level
+            return E_FAIL;
+    }
 
-    return openserial_printInfoErrorCritical(
-            SERFRAME_MOTE2PC_CRITICAL,
-            calling_component,
-            error_code,
-            arg1,
-            arg2
-    );
+    return internal_openserial_print(severity, calling_component, error_code, arg1, arg2);
 }
 
 owerror_t openserial_printData(uint8_t *buffer, uint8_t length) {
@@ -442,7 +428,8 @@ uint8_t openserial_getInputBuffer(uint8_t *bufferToWrite, uint8_t maxNumBytes) {
     //>>>>>>>>>>>>>>>>>>>>>>>
 
     if (maxNumBytes < inputBufFillLevel - 1) {
-        openserial_printError(
+        openserial_printLog(
+                LOG_ERROR,
                 COMPONENT_OPENSERIAL,
                 ERR_GETDATA_ASKS_TOO_FEW_BYTES,
                 (errorparameter_t) maxNumBytes,
@@ -572,7 +559,7 @@ bool debugPrint_outBufferIndexes(void) {
 
 //===== printing
 
-owerror_t openserial_printInfoErrorCritical(
+owerror_t internal_openserial_print(
         char severity,
         uint8_t calling_component,
         uint8_t error_code,
@@ -770,22 +757,16 @@ port_INLINE void inputHdlcClose(void) {
 
 void task_printInputBufferOverflow(void) {
     // input buffer overflow
-    openserial_printError(
-            COMPONENT_OPENSERIAL,
-            ERR_INPUT_BUFFER_OVERFLOW,
-            (errorparameter_t) 0,
-            (errorparameter_t) 0
-    );
+    openserial_printLog(LOG_ERROR, COMPONENT_OPENSERIAL, ERR_INPUT_BUFFER_OVERFLOW,
+                        (errorparameter_t) 0,
+                        (errorparameter_t) 0);
 }
 
 void task_printWrongCRCInput(void) {
     // invalid HDLC frame
-    openserial_printError(
-            COMPONENT_OPENSERIAL,
-            ERR_WRONG_CRC_INPUT,
-            (errorparameter_t) 0,
-            (errorparameter_t) 0
-    );
+    openserial_printLog(LOG_ERROR, COMPONENT_OPENSERIAL, ERR_WRONG_CRC_INPUT,
+                        (errorparameter_t) 0,
+                        (errorparameter_t) 0);
 }
 
 //=========================== interrupt handlers ==============================

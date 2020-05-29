@@ -231,7 +231,8 @@ void forwarding_sendDone(OpenQueueEntry_t *msg, owerror_t error) {
         // this is a relayed packet
 
         if (error == E_FAIL) {
-            openserial_printError(
+            openserial_printLog(
+                    LOG_ERROR,
                     COMPONENT_FORWARDING,
                     ERR_MAXRETRIES_REACHED,
                     (errorparameter_t) 1,
@@ -256,7 +257,8 @@ void forwarding_sendDone(OpenQueueEntry_t *msg, owerror_t error) {
                 break;
             default:
                 // log error
-                openserial_printCritical(
+                openserial_printLog(
+                        LOG_CRITICAL,
                         COMPONENT_FORWARDING,
                         ERR_WRONG_TRAN_PROTOCOL,
                         (errorparameter_t) msg->l4_protocol,
@@ -328,7 +330,8 @@ void forwarding_receive(
                 break;
             default:
                 // log error
-                openserial_printError(
+                openserial_printLog(
+                        LOG_ERROR,
                         COMPONENT_FORWARDING, ERR_WRONG_TRAN_PROTOCOL,
                         (errorparameter_t) msg->l4_protocol,
                         (errorparameter_t) 1
@@ -348,11 +351,12 @@ void forwarding_receive(
             // Deadline Option : Drop
             if( (deadline_option->time_left <= 0) && (deadline_option->d_flag == 1) ) { // packet expired
                deadline_option->time_left = 0;
-               openserial_printError(
-                         COMPONENT_FORWARDING,
-                         ERR_6LORH_DEADLINE_DROPPED,
-                         (errorparameter_t)0,
-                         (errorparameter_t)0
+               openserial_printLog(
+                       LOG_WARNING,
+                       COMPONENT_FORWARDING,
+                       ERR_6LORH_DEADLINE_DROPPED,
+                       (errorparameter_t)0,
+                       (errorparameter_t)0
                );
                openqueue_freePacketBuffer(msg);
                return;
@@ -364,7 +368,8 @@ void forwarding_receive(
             // after change the creator to COMPONENT_FORWARDING,
             // there is no space for high priority packet, drop this message
             // by free the buffer.
-            openserial_printError(
+            openserial_printLog(
+                    LOG_ERROR,
                     COMPONENT_FORWARDING,
                     ERR_FORWARDING_PACKET_DROPPED,
                     (errorparameter_t) 0,
@@ -380,7 +385,8 @@ void forwarding_receive(
             if ((flags & O_FLAG) != 0) {
                 // wrong direction
                 // log error
-                openserial_printError(
+                openserial_printLog(
+                        LOG_ERROR,
                         COMPONENT_FORWARDING,
                         ERR_WRONG_DIRECTION,
                         (errorparameter_t) flags,
@@ -392,7 +398,8 @@ void forwarding_receive(
                 // set flag
                 rpl_option->flags |= R_FLAG;
                 // log error
-                openserial_printError(
+                openserial_printLog(
+                        LOG_ERROR,
                         COMPONENT_FORWARDING,
                         ERR_LOOP_DETECTED,
                         (errorparameter_t) senderRank,
@@ -424,19 +431,14 @@ void forwarding_receive(
             }
         } else {
             // source routing header present
-            if (
-                    forwarding_send_internal_SourceRouting(
-                            msg,
-                            ipv6_outer_header,
-                            ipv6_inner_header,
+            if (forwarding_send_internal_SourceRouting(msg, ipv6_outer_header, ipv6_inner_header,
 #ifdef DEADLINE_OPTION_ENABLED
-                            deadline_option,
+                    deadline_option,
 #endif
-                            rpl_option
-                    ) == E_FAIL
-                    ) {
+                                                       rpl_option) == E_FAIL) {
                 // log error
-                openserial_printError(
+                openserial_printLog(
+                        LOG_ERROR,
                         COMPONENT_FORWARDING,
                         ERR_INVALID_FWDMODE,
                         (errorparameter_t) 0,
@@ -510,7 +512,8 @@ owerror_t forwarding_send_internal_RoutingTable(
     }
 
     if (msg->l2_nextORpreviousHop.type == ADDR_NONE) {
-        openserial_printError(
+        openserial_printLog(
+                LOG_ERROR,
                 COMPONENT_FORWARDING,
                 ERR_NO_NEXTHOP,
                 (errorparameter_t) msg->l3_destinationAdd.addr_128b[14],
@@ -784,7 +787,8 @@ owerror_t forwarding_send_internal_SourceRouting(
         }
     } else {
         // log error
-        openserial_printError(
+        openserial_printLog(
+                LOG_ERROR,
                 COMPONENT_FORWARDING,
                 ERR_6LOWPAN_UNSUPPORTED,
                 (errorparameter_t) 16,
@@ -819,7 +823,8 @@ owerror_t forwarding_send_internal_SourceRouting(
         if ((flags & O_FLAG) != O_FLAG) {
             // wrong direction
             // log error
-            openserial_printError(
+            openserial_printLog(
+                    LOG_ERROR,
                     COMPONENT_FORWARDING,
                     ERR_WRONG_DIRECTION,
                     (errorparameter_t) flags,
@@ -831,7 +836,8 @@ owerror_t forwarding_send_internal_SourceRouting(
             // set flag
             rpl_option->flags |= R_FLAG;
             // log error
-            openserial_printError(
+            openserial_printLog(
+                    LOG_ERROR,
                     COMPONENT_FORWARDING,
                     ERR_LOOP_DETECTED,
                     (errorparameter_t) senderRank,

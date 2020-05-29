@@ -193,7 +193,8 @@ void cjoin_retransmission_task_cb(void) {
     joinProxy = neighbors_getJoinProxy();
     if (joinProxy == NULL) {
         // keep the retransmission timer, in case it synchronized at next time
-        openserial_printError(
+        openserial_printLog(
+                LOG_WARNING,
                 COMPONENT_CJOIN,
                 ERR_ABORT_JOIN_PROCESS,
                 (errorparameter_t) 0,
@@ -263,7 +264,8 @@ owerror_t cjoin_sendJoinRequest(open_addr_t *joinProxy) {
     // create a CoAP RD packet
     pkt = openqueue_getFreePacketBuffer(COMPONENT_CJOIN);
     if (pkt == NULL) {
-        openserial_printError(
+        openserial_printLog(
+                LOG_ERROR,
                 COMPONENT_CJOIN,
                 ERR_NO_FREE_PACKET_BUFFER,
                 (errorparameter_t) 0,
@@ -311,7 +313,7 @@ owerror_t cjoin_sendJoinRequest(open_addr_t *joinProxy) {
     memcpy(pkt->payload, tmp, payload_len);
     // send
 
-    openserial_printInfo(COMPONENT_CJOIN, ERR_JOIN_REQUEST, (errorparameter_t) 0, (errorparameter_t) 0);
+    openserial_printLog(LOG_VERBOSE, COMPONENT_CJOIN, ERR_JOIN_REQUEST, (errorparameter_t) 0, (errorparameter_t) 0);
 
     outcome = coap_send(
             pkt,
@@ -363,7 +365,7 @@ void cjoin_setIsJoined(bool newValue) {
 
     if (newValue == TRUE) {
         // log the info
-        openserial_printInfo(COMPONENT_CJOIN, ERR_JOINED, (errorparameter_t) 0, (errorparameter_t) 0);
+        openserial_printLog(LOG_SUCCESS, COMPONENT_CJOIN, ERR_JOINED, (errorparameter_t) 0, (errorparameter_t) 0);
     }
 }
 

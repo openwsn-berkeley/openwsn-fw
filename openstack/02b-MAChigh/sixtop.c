@@ -186,12 +186,12 @@ owerror_t sixtop_request(
     // get a free packet buffer
     pkt = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP_RES);
     if (pkt == NULL) {
-        openserial_printError(
+        openserial_printLog(
+                LOG_ERROR,
                 COMPONENT_SIXTOP_RES,
                 ERR_NO_FREE_PACKET_BUFFER,
                 (errorparameter_t) 0,
-                (errorparameter_t) 0
-        );
+                (errorparameter_t) 0);
         return E_FAIL;
     }
 
@@ -205,7 +205,7 @@ owerror_t sixtop_request(
     }
     sixtop_vars.cellOptions = cellOptions;
 
-    len  = 0;
+    len = 0;
     if (code == IANA_6TOP_CMD_ADD || code == IANA_6TOP_CMD_DELETE || code == IANA_6TOP_CMD_RELOCATE) {
         // append 6p celllists
         if (code == IANA_6TOP_CMD_ADD || code == IANA_6TOP_CMD_RELOCATE) {
@@ -370,7 +370,12 @@ void task_sixtopNotifSendDone(void) {
     // get recently-sent packet from openqueue
     msg = openqueue_sixtopGetSentPacket();
     if (msg == NULL) {
-        openserial_printCritical(COMPONENT_SIXTOP, ERR_NO_SENT_PACKET, (errorparameter_t) 0, (errorparameter_t) 0);
+        openserial_printLog(
+                LOG_CRITICAL,
+                COMPONENT_SIXTOP,
+                ERR_NO_SENT_PACKET,
+                (errorparameter_t) 0,
+                (errorparameter_t) 0);
         return;
     }
 
@@ -429,7 +434,12 @@ void task_sixtopNotifReceive(void) {
     // get received packet from openqueue
     msg = openqueue_sixtopGetReceivedPacket();
     if (msg == NULL) {
-        openserial_printCritical(COMPONENT_SIXTOP, ERR_NO_RECEIVED_PACKET, (errorparameter_t) 0, (errorparameter_t) 0);
+        openserial_printLog(
+                LOG_CRITICAL,
+                COMPONENT_SIXTOP,
+                ERR_NO_RECEIVED_PACKET,
+                (errorparameter_t) 0,
+                (errorparameter_t) 0);
         return;
     }
 
@@ -493,9 +503,12 @@ void task_sixtopNotifReceive(void) {
             // free the packet's RAM memory
             openqueue_freePacketBuffer(msg);
             // log the error
-            openserial_printError(COMPONENT_SIXTOP, ERR_MSG_UNKNOWN_TYPE, (errorparameter_t) msg->l2_frameType,
-                                  (errorparameter_t) 0
-            );
+            openserial_printLog(
+                    LOG_ERROR,
+                    COMPONENT_SIXTOP,
+                    ERR_MSG_UNKNOWN_TYPE,
+                    (errorparameter_t) msg->l2_frameType,
+                    (errorparameter_t) 0);
             break;
     }
 }
@@ -705,7 +718,12 @@ port_INLINE void sixtop_sendEB(void) {
     // if I get here, I will schedule an EB, get a free packet buffer
     eb = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP);
     if (eb == NULL) {
-        openserial_printError(COMPONENT_SIXTOP, ERR_NO_FREE_PACKET_BUFFER, (errorparameter_t) 0, (errorparameter_t) 0);
+        openserial_printLog(
+                LOG_ERROR,
+                COMPONENT_SIXTOP,
+                ERR_NO_FREE_PACKET_BUFFER,
+                (errorparameter_t) 0,
+                (errorparameter_t) 0);
         return;
     }
 
@@ -820,12 +838,12 @@ port_INLINE void sixtop_sendKA(void) {
     // get a free packet buffer
     kaPkt = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP);
     if (kaPkt == NULL) {
-        openserial_printError(
+        openserial_printLog(
+                LOG_ERROR,
                 COMPONENT_SIXTOP,
                 ERR_NO_FREE_PACKET_BUFFER,
                 (errorparameter_t) 1,
-                (errorparameter_t) 0
-        );
+                (errorparameter_t) 0);
         return;
     }
 
@@ -988,7 +1006,7 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t *msg, owerror_t error) {
     openqueue_freePacketBuffer(msg);
 }
 
-port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE) {
+port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
     uint8_t ptr;
     uint8_t temp_8b;
     uint8_t subtypeid,code,sfid,version,type,seqNum;
@@ -1006,7 +1024,7 @@ port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE) {
     // check ietf ie group id, type
     if ((temp_16b & IEEE802154E_DESC_LEN_PAYLOAD_ID_TYPE_MASK) != (IANA_IETF_IE_GROUP_ID | IANA_IETF_IE_TYPE)){
         // wrong IE ID or type, record and drop the packet
-        openserial_printError(COMPONENT_SIXTOP,ERR_UNSUPPORTED_FORMAT,0,0);
+        openserial_printLog(LOG_ERROR, COMPONENT_SIXTOP, ERR_UNSUPPORTED_FORMAT, 0, 0);
         return FALSE;
     }
     len = temp_16b & IEEE802154E_DESC_LEN_PAYLOAD_IE_MASK;
@@ -1017,7 +1035,7 @@ port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE) {
     ptr += 1;
     if (subtypeid != IANA_6TOP_SUBIE_ID){
         // wrong subtypeID, record and drop the packet
-        openserial_printError(COMPONENT_SIXTOP, ERR_UNSUPPORTED_FORMAT, (errorparameter_t)1, (errorparameter_t)0);
+        openserial_printLog(LOG_ERROR, COMPONENT_SIXTOP,ERR_UNSUPPORTED_FORMAT,1,0);
         return FALSE;
     }
     headerlen += 1;
@@ -1028,7 +1046,7 @@ port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE) {
     // 6p doesn't define type 3
     if (temp_8b >> IANA_6TOP_TYPE_SHIFT == 3){
         // wrong type, record and drop the packet
-        openserial_printError(COMPONENT_SIXTOP, ERR_UNSUPPORTED_FORMAT, (errorparameter_t)2, (errorparameter_t)0);
+        openserial_printLog(LOG_ERROR, COMPONENT_SIXTOP,ERR_UNSUPPORTED_FORMAT,2,0);
         return FALSE;
     }
     version = temp_8b & IANA_6TOP_VESION_MASK;
@@ -1093,7 +1111,10 @@ void sixtop_six2six_notifyReceive(
         // get a free packet buffer
         response_pkt = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP_RES);
         if (response_pkt == NULL) {
-            openserial_printError(COMPONENT_SIXTOP_RES, ERR_NO_FREE_PACKET_BUFFER,
+            openserial_printLog(
+                    LOG_ERROR,
+                    COMPONENT_SIXTOP_RES,
+                    ERR_NO_FREE_PACKET_BUFFER,
                     (errorparameter_t) 0,
                     (errorparameter_t) 0);
             return;
@@ -1129,12 +1150,12 @@ void sixtop_six2six_notifyReceive(
             }
             // metadata meaning check
             if (sixtop_vars.cb_sf_translateMetadata() != METADATA_TYPE_FRAMEID) {
-                openserial_printError(
+                openserial_printLog(
+                        LOG_ERROR,
                         COMPONENT_SIXTOP,
                         ERR_UNSUPPORTED_METADATA,
                         sixtop_vars.cb_sf_translateMetadata(),
-                        0
-                );
+                        0);
                 returnCode = IANA_6TOP_RC_ERROR;
                 break;
             }
@@ -1533,9 +1554,12 @@ void sixtop_six2six_notifyReceive(
                     numCells = *((uint8_t * )(pkt->payload) + ptr);
                     numCells |= (*((uint8_t * )(pkt->payload) + ptr + 1)) << 8;
                     ptr += 2;
-                    openserial_printInfo( COMPONENT_SIXTOP, ERR_SIXTOP_COUNT,
-                            (errorparameter_t)numCells,
-                            (errorparameter_t)sixtop_vars.six2six_state);
+                    openserial_printLog(
+                            LOG_INFO,
+                            COMPONENT_SIXTOP,
+                            ERR_SIXTOP_COUNT,
+                            (errorparameter_t) numCells,
+                            (errorparameter_t) sixtop_vars.six2six_state);
                     neighbors_updateSequenceNumber(&(pkt->l2_nextORpreviousHop));
                     break;
                 case SIX_STATE_WAIT_LISTRESPONSE:
@@ -1552,7 +1576,10 @@ void sixtop_six2six_notifyReceive(
                         i++;
                     }
                     // print out first two cells in the list
-                    openserial_printInfo(COMPONENT_SIXTOP, ERR_SIXTOP_LIST,
+                    openserial_printLog(
+                            LOG_INFO,
+                            COMPONENT_SIXTOP,
+                            ERR_SIXTOP_LIST,
                             (errorparameter_t) celllist_list[0].slotoffset,
                             (errorparameter_t) celllist_list[1].slotoffset);
                     neighbors_updateSequenceNumber(&(pkt->l2_nextORpreviousHop));
@@ -1572,7 +1599,10 @@ void sixtop_six2six_notifyReceive(
         } else {
             sixtop_vars.cb_sf_handleRCError(code, &(pkt->l2_nextORpreviousHop));
         }
-        openserial_printInfo(COMPONENT_SIXTOP, ERR_SIXTOP_RETURNCODE,
+        openserial_printLog(
+                LOG_INFO,
+                COMPONENT_SIXTOP,
+                ERR_SIXTOP_RETURNCODE,
                 (errorparameter_t) code,
                 (errorparameter_t) sixtop_vars.six2six_state);
 

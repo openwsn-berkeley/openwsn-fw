@@ -83,9 +83,9 @@ owerror_t iphc_sendFromForwarding(
     // error checking
     if (idmanager_getIsDAGroot() == TRUE &&
         packetfunctions_isAllRoutersMulticast(&(msg->l3_destinationAdd)) == FALSE) {
-        openserial_printCritical(COMPONENT_IPHC, ERR_BRIDGE_MISMATCH,
-                                 (errorparameter_t) 0,
-                                 (errorparameter_t) 0);
+        openserial_printLog(LOG_CRITICAL, COMPONENT_IPHC, ERR_BRIDGE_MISMATCH,
+                            (errorparameter_t) 0,
+                            (errorparameter_t) 0);
         return E_FAIL;
     }
 
@@ -93,9 +93,9 @@ owerror_t iphc_sendFromForwarding(
     if (ipv6_outer_header->src.type != ADDR_NONE) {
         // there is IPinIP check hop limit in ip in ip encapsulation
         if (ipv6_outer_header->hop_limit == 0) {
-            openserial_printError(COMPONENT_IPHC, ERR_HOP_LIMIT_REACHED,
-                                  (errorparameter_t) 0,
-                                  (errorparameter_t) 0);
+            openserial_printLog(LOG_ERROR, COMPONENT_IPHC, ERR_HOP_LIMIT_REACHED,
+                                (errorparameter_t) 0,
+                                (errorparameter_t) 0);
             return E_FAIL;
         } else {
             // decrement the packet's hop limit
@@ -103,9 +103,9 @@ owerror_t iphc_sendFromForwarding(
         }
     } else {
         if (ipv6_inner_header->hop_limit == 0) {
-            openserial_printError(COMPONENT_IPHC, ERR_HOP_LIMIT_REACHED,
-                                  (errorparameter_t) 0,
-                                  (errorparameter_t) 0);
+            openserial_printLog(LOG_ERROR, COMPONENT_IPHC, ERR_HOP_LIMIT_REACHED,
+                                (errorparameter_t) 0,
+                                (errorparameter_t) 0);
             return E_FAIL;
         } else {
             // decrement the packet's hop limit
@@ -225,9 +225,9 @@ owerror_t iphc_sendFromBridge(OpenQueueEntry_t *msg) {
     msg->owner = COMPONENT_IPHC;
     // error checking
     if (idmanager_getIsDAGroot() == FALSE) {
-        openserial_printCritical(COMPONENT_IPHC, ERR_BRIDGE_MISMATCH,
-                                 (errorparameter_t) 1,
-                                 (errorparameter_t) 0);
+        openserial_printLog(LOG_CRITICAL, COMPONENT_IPHC, ERR_BRIDGE_MISMATCH,
+                            (errorparameter_t) 1,
+                            (errorparameter_t) 0);
         return E_FAIL;
     }
 
@@ -362,7 +362,8 @@ owerror_t iphc_prependIPv6Header(
                 // tengfei: to do
             } else {
                 if (value_dest->type != ADDR_16B) {
-                    openserial_printCritical(
+                    openserial_printLog(
+                            LOG_CRITICAL,
                             COMPONENT_IPHC,
                             ERR_WRONG_ADDR_TYPE,
                             (errorparameter_t) value_dest->type,
@@ -378,7 +379,8 @@ owerror_t iphc_prependIPv6Header(
                 // tengfei: to do
             } else {
                 if (value_dest->type != ADDR_64B) {
-                    openserial_printCritical(
+                    openserial_printLog(
+                            LOG_CRITICAL,
                             COMPONENT_IPHC,
                             ERR_WRONG_ADDR_TYPE,
                             (errorparameter_t) value_dest->type,
@@ -394,7 +396,8 @@ owerror_t iphc_prependIPv6Header(
                 // tengfei: to do
             } else {
                 if (value_dest->type != ADDR_128B) {
-                    openserial_printCritical(
+                    openserial_printLog(
+                            LOG_CRITICAL,
                             COMPONENT_IPHC,
                             ERR_WRONG_ADDR_TYPE,
                             (errorparameter_t) value_dest->type,
@@ -406,7 +409,8 @@ owerror_t iphc_prependIPv6Header(
             }
             break;
         default:
-            openserial_printCritical(
+            openserial_printLog(
+                    LOG_CRITICAL,
                     COMPONENT_IPHC,
                     ERR_6LOWPAN_UNSUPPORTED,
                     (errorparameter_t) 0,
@@ -425,7 +429,8 @@ owerror_t iphc_prependIPv6Header(
             }
             if (fw_SendOrfw_Rcv == PCKTFORWARD) {
                 if (value_src->type != ADDR_16B) {
-                    openserial_printCritical(
+                    openserial_printLog(
+                            LOG_CRITICAL,
                             COMPONENT_IPHC,
                             ERR_WRONG_ADDR_TYPE,
                             (errorparameter_t) value_src->type,
@@ -442,7 +447,8 @@ owerror_t iphc_prependIPv6Header(
             }
             if (fw_SendOrfw_Rcv == PCKTFORWARD) {
                 if (value_src->type != ADDR_64B) {
-                    openserial_printCritical(
+                    openserial_printLog(
+                            LOG_CRITICAL,
                             COMPONENT_IPHC,
                             ERR_WRONG_ADDR_TYPE,
                             (errorparameter_t) value_src->type,
@@ -460,7 +466,8 @@ owerror_t iphc_prependIPv6Header(
             }
             if (fw_SendOrfw_Rcv == PCKTFORWARD) {
                 if (value_src->type != ADDR_128B) {
-                    openserial_printCritical(
+                    openserial_printLog(
+                            LOG_CRITICAL,
                             COMPONENT_IPHC,
                             ERR_WRONG_ADDR_TYPE,
                             (errorparameter_t) value_src->type,
@@ -472,7 +479,8 @@ owerror_t iphc_prependIPv6Header(
             }
             break;
         default:
-            openserial_printCritical(
+            openserial_printLog(
+                    LOG_CRITICAL,
                     COMPONENT_IPHC,
                     ERR_6LOWPAN_UNSUPPORTED,
                     (errorparameter_t) 1,
@@ -492,7 +500,8 @@ owerror_t iphc_prependIPv6Header(
         case IPHC_HLIM_255:
             break;
         default:
-            openserial_printCritical(
+            openserial_printLog(
+                    LOG_CRITICAL,
                     COMPONENT_IPHC,
                     ERR_6LOWPAN_UNSUPPORTED,
                     (errorparameter_t) 2,
@@ -511,7 +520,8 @@ owerror_t iphc_prependIPv6Header(
             //do nothing, the next header will be there
             break;
         default:
-            openserial_printCritical(
+            openserial_printLog(
+                    LOG_CRITICAL,
                     COMPONENT_IPHC,
                     ERR_6LOWPAN_UNSUPPORTED,
                     (errorparameter_t) 3,
@@ -537,7 +547,8 @@ owerror_t iphc_prependIPv6Header(
         case IPHC_TF_1B:
             //unsupported
         default:
-            openserial_printCritical(
+            openserial_printLog(
+                    LOG_CRITICAL,
                     COMPONENT_IPHC,
                     ERR_6LOWPAN_UNSUPPORTED,
                     (errorparameter_t) 4,
@@ -621,7 +632,8 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t *msg, ipv6_header_iht *ipv6_outer_
                     lorh_type = *((uint8_t * )(msg->payload) + *page_length + extention_header_length + 1);
                     if (lorh_type <= RH3_6LOTH_TYPE_4) {
                         if (rh3_index == MAXNUM_RH3) {
-                            openserial_printError(
+                            openserial_printLog(
+                                    LOG_ERROR,
                                     COMPONENT_IPHC,
                                     ERR_6LOWPAN_UNSUPPORTED,
                                     (errorparameter_t) 13,
@@ -678,7 +690,8 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t *msg, ipv6_header_iht *ipv6_outer_
                             }
                         } else {
                             //log wrong inf
-                            openserial_printError(
+                            openserial_printLog(
+                                    LOG_ERROR,
                                     COMPONENT_IPHC,
                                     ERR_6LOWPAN_UNSUPPORTED,
                                     (errorparameter_t) 14,
@@ -732,7 +745,8 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t *msg, ipv6_header_iht *ipv6_outer_
                                     break;
                                 default:
                                     // do not support other length yet and destination address will be in RH3 or IPHC
-                                    openserial_printError(
+                                    openserial_printLog(
+                                            LOG_ERROR,
                                             COMPONENT_IPHC,
                                             ERR_6LOWPAN_UNSUPPORTED,
                                             (errorparameter_t) 12,
@@ -751,7 +765,8 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t *msg, ipv6_header_iht *ipv6_outer_
 #endif
                     else {
                         //unknown elective packet, print error and skip it
-                        openserial_printError(
+                        openserial_printLog(
+                                LOG_ERROR,
                                 COMPONENT_IPHC,
                                 ERR_6LOWPAN_UNSUPPORTED,
                                 (errorparameter_t) 13,
@@ -840,7 +855,8 @@ uint8_t iphc_retrieveIphcHeader(open_addr_t *temp_addr_16b,
             case IPHC_DISPATCH_IPHC:
                 break;
             default:
-                openserial_printError(
+                openserial_printLog(
+                        LOG_ERROR,
                         COMPONENT_IPHC,
                         ERR_6LOWPAN_UNSUPPORTED,
                         (errorparameter_t) 5,
@@ -872,7 +888,8 @@ uint8_t iphc_retrieveIphcHeader(open_addr_t *temp_addr_16b,
             case IPHC_TF_1B:
                 //unsupported
             default:
-                openserial_printError(
+                openserial_printLog(
+                        LOG_ERROR,
                         COMPONENT_IPHC,
                         ERR_6LOWPAN_UNSUPPORTED,
                         (errorparameter_t) 6,
@@ -898,7 +915,8 @@ uint8_t iphc_retrieveIphcHeader(open_addr_t *temp_addr_16b,
                 ipv6_header->next_header_compressed = TRUE;
                 break;
             default:
-                openserial_printError(
+                openserial_printLog(
+                        LOG_ERROR,
                         COMPONENT_IPHC,
                         ERR_6LOWPAN_UNSUPPORTED,
                         (errorparameter_t) 7,
@@ -923,7 +941,8 @@ uint8_t iphc_retrieveIphcHeader(open_addr_t *temp_addr_16b,
                 ipv6_header->hop_limit = 255;
                 break;
             default:
-                openserial_printError(
+                openserial_printLog(
+                        LOG_ERROR,
                         COMPONENT_IPHC,
                         ERR_6LOWPAN_UNSUPPORTED,
                         (errorparameter_t) 8,
@@ -957,7 +976,8 @@ uint8_t iphc_retrieveIphcHeader(open_addr_t *temp_addr_16b,
                 ipv6_header->header_length += 16 * sizeof(uint8_t);
                 break;
             default:
-                openserial_printError(
+                openserial_printLog(
+                        LOG_ERROR,
                         COMPONENT_IPHC,
                         ERR_6LOWPAN_UNSUPPORTED,
                         (errorparameter_t) 9,
@@ -985,7 +1005,8 @@ uint8_t iphc_retrieveIphcHeader(open_addr_t *temp_addr_16b,
                     // tengfei: todo
                     break;
                 default:
-                    openserial_printError(
+                    openserial_printLog(
+                            LOG_ERROR,
                             COMPONENT_IPHC,
                             ERR_6LOWPAN_UNSUPPORTED,
                             (errorparameter_t) 10,
@@ -1018,7 +1039,8 @@ uint8_t iphc_retrieveIphcHeader(open_addr_t *temp_addr_16b,
                     ipv6_header->header_length += 16 * sizeof(uint8_t);
                     break;
                 default:
-                    openserial_printError(
+                    openserial_printLog(
+                            LOG_ERROR,
                             COMPONENT_IPHC,
                             ERR_6LOWPAN_UNSUPPORTED,
                             (errorparameter_t) 10,
@@ -1081,7 +1103,8 @@ uint8_t iphc_retrieveIphcHeader(open_addr_t *temp_addr_16b,
                                 break;
                             default:
                                 // do not support other length yet and destination address will be in RH3 or IPHC
-                                openserial_printError(
+                                openserial_printLog(
+                                        LOG_ERROR,
                                         COMPONENT_IPHC,
                                         ERR_6LOWPAN_UNSUPPORTED,
                                         (errorparameter_t) 12,
@@ -1262,7 +1285,8 @@ uint8_t iphc_retrieveIPv6HopByHopHeader(
             length += sizeof(uint8_t);
         }
     } else {
-        openserial_printError(
+        openserial_printLog(
+                LOG_ERROR,
                 COMPONENT_IPHC,
                 ERR_6LOWPAN_UNSUPPORTED,
                 (errorparameter_t) 14,
@@ -1327,12 +1351,12 @@ void iphc_retrieveIPv6DeadlineHeader(
        deadline_option->time_left = ieee154e_computeAsnDiff(&exp_asn, &my_asn);
        if (deadline_option->time_left < 0) {
           deadline_option->time_left = 0;
-          openserial_printError(
-                            COMPONENT_IPHC,
-                                ERR_6LORH_DEADLINE_EXPIRED,
-                                (errorparameter_t)0,
-                                (errorparameter_t)0
-                        );
+          openserial_printLog(
+                  LOG_ERROR,
+                  COMPONENT_IPHC,
+                  ERR_6LORH_DEADLINE_EXPIRED,
+                  (errorparameter_t)0,
+                  (errorparameter_t)0 );
        }
        monitor_expiration_vars.time_left = deadline_option->time_left;
 
@@ -1347,12 +1371,12 @@ void iphc_retrieveIPv6DeadlineHeader(
        }
 
    } else {
-       openserial_printError(
-          COMPONENT_IPHC,
-          ERR_6LOWPAN_UNSUPPORTED,
-          (errorparameter_t)14,
-          (errorparameter_t)type
-       );
+       openserial_printLog(
+               LOG_ERROR,
+               COMPONENT_IPHC,
+               ERR_6LOWPAN_UNSUPPORTED,
+               (errorparameter_t)14,
+               (errorparameter_t)type);
    }
 }
 

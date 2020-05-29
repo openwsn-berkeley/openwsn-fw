@@ -136,7 +136,7 @@ void IEEE802154_security_prependAuxiliarySecurityHeader(OpenQueueEntry_t *msg) {
             packetfunctions_writeAddress(msg, temp_keySource, OW_LITTLE_ENDIAN);
             break;
         default://error
-            openserial_printError(COMPONENT_SECURITY, ERR_SECURITY,
+            openserial_printLog(LOG_ERROR, COMPONENT_SECURITY, ERR_SECURITY,
                                   (errorparameter_t) msg->l2_frameType,
                                   (errorparameter_t) 0);
             return;
@@ -206,7 +206,7 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t *msg) {
 
     // assert
     if (len_a + len_m > 125) {
-        openserial_printError(COMPONENT_SECURITY, ERR_SECURITY,
+        openserial_printLog(LOG_ERROR, COMPONENT_SECURITY, ERR_SECURITY,
                               (errorparameter_t) msg->l2_frameType,
                               (errorparameter_t) 2);
         return E_FAIL;
@@ -230,7 +230,7 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t *msg) {
 
     // verify that no errors occurred
     if (outStatus != E_SUCCESS) {
-        openserial_printError(COMPONENT_SECURITY, ERR_SECURITY,
+        openserial_printLog(LOG_ERROR, COMPONENT_SECURITY, ERR_SECURITY,
                               (errorparameter_t) msg->l2_frameType,
                               (errorparameter_t) 3);
     }
@@ -289,7 +289,7 @@ void IEEE802154_security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t *msg, 
         }
 
         if (l2_frameCounter.byte4 == 0xff) { //frame counter overflow
-            openserial_printError(COMPONENT_SECURITY, ERR_SECURITY,
+            openserial_printLog(LOG_ERROR, COMPONENT_SECURITY, ERR_SECURITY,
                                   (errorparameter_t) msg->l2_frameType,
                                   (errorparameter_t) 4);
             return;
@@ -319,7 +319,7 @@ void IEEE802154_security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t *msg, 
             tempheader->headerLength += 8;
             break;
         default: //error
-            openserial_printError(COMPONENT_SECURITY, ERR_SECURITY,
+            openserial_printLog(LOG_ERROR, COMPONENT_SECURITY, ERR_SECURITY,
                                   (errorparameter_t) msg->l2_frameType,
                                   (errorparameter_t) 5);
             return;
@@ -385,7 +385,7 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t *msg) {
 
     // assert
     if (len_a + len_c > 125) {
-        openserial_printError(COMPONENT_SECURITY, ERR_SECURITY,
+        openserial_printLog(LOG_ERROR, COMPONENT_SECURITY, ERR_SECURITY,
                               (errorparameter_t) msg->l2_frameType,
                               (errorparameter_t) 11);
         return E_FAIL;
@@ -403,8 +403,9 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t *msg) {
 
     // verify if any error occurs
     if (outStatus != E_SUCCESS) {
-        openserial_printError(COMPONENT_SECURITY, ERR_SECURITY,
-                              (errorparameter_t) msg->l2_frameType, (errorparameter_t) 12);
+        openserial_printLog(LOG_ERROR, COMPONENT_SECURITY, ERR_SECURITY,
+                              (errorparameter_t) msg->l2_frameType,
+                              (errorparameter_t) 12);
     }
 
     packetfunctions_tossFooter(msg, msg->l2_authenticationLength);

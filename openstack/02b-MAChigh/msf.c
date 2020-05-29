@@ -567,11 +567,7 @@ uint8_t msf_getPreviousNumCellsUsed(cellType_t cellType) {
     }
 }
 
-bool debugPrint_msf(){
-    openserial_printStatus(
-            STATUS_MSF,
-            (uint8_t*)&msf_vars_debug,
-            sizeof(msf_vars_debug_t)
-    );
+bool debugPrint_msf() {
+    openserial_printStatus(STATUS_MSF, (uint8_t * ) & msf_vars_debug, sizeof(msf_vars_debug_t));
     return TRUE;
 }

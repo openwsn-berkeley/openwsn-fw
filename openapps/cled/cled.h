@@ -18,7 +18,7 @@
 //=========================== variables =======================================
 
 typedef struct {
-   coap_resource_desc_t desc;
+    coap_resource_desc_t desc;
 } cled_vars_t;
 
 //=========================== prototypes ======================================

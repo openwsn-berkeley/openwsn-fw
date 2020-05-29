@@ -33,7 +33,8 @@ void uecho_receive(OpenQueueEntry_t *request) {
     reply = openqueue_getFreeBigPacketBuffer(COMPONENT_UECHO);
 
     if (reply == NULL) {
-        openserial_printError(
+        openserial_printLog(
+                LOG_ERROR,
                 COMPONENT_UECHO,
                 ERR_NO_FREE_PACKET_BUFFER,
                 (errorparameter_t) 0,

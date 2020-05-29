@@ -9,8 +9,6 @@
 #include "IEEE802154E.h"
 #include "icmpv6rpl.h"
 #include "neighbors.h"
-// telosb need debugpins to indicate the ISR activity
-#include "debugpins.h"
 
 //=========================== definition ======================================
 
@@ -108,19 +106,13 @@ bool debugPrint_schedule(void) {
     temp.type = schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].type;
     temp.shared = schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].shared;
     temp.channelOffset = schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].channelOffset;
-    memcpy(
-            &temp.neighbor,
-            &schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].neighbor,
-            sizeof(open_addr_t)
-    );
+
+    memcpy(&temp.neighbor, &schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].neighbor, sizeof(open_addr_t));
+
     temp.numRx = schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numRx;
     temp.numTx = schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numTx;
     temp.numTxACK = schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numTxACK;
-    memcpy(
-            &temp.lastUsedAsn,
-            &schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].lastUsedAsn,
-            sizeof(asn_t)
-    );
+    memcpy(&temp.lastUsedAsn, &schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].lastUsedAsn, sizeof(asn_t));
 
     // send status data over serial port
     openserial_printStatus(STATUS_SCHEDULE, (uint8_t * ) & temp, sizeof(debugScheduleEntry_t));
@@ -243,12 +235,12 @@ void schedule_getSlotInfo(slotOffset_t slotOffset, slotinfo_element_t *info) {
    none)
 */
 owerror_t schedule_addActiveSlot(
-    slotOffset_t    slotOffset,
-    cellType_t      type,
-    bool            shared,
-    bool            isAutoCell,
-    channelOffset_t channelOffset,
-    open_addr_t*    neighbor
+        slotOffset_t slotOffset,
+        cellType_t type,
+        bool shared,
+        bool isAutoCell,
+        channelOffset_t channelOffset,
+        open_addr_t *neighbor
 ) {
     uint8_t asn[5];
     scheduleEntry_t *slotContainer;
@@ -273,8 +265,7 @@ owerror_t schedule_addActiveSlot(
     do {
         if (slotContainer->type != CELLTYPE_OFF) {
             if (slotContainer->slotOffset == slotOffset) {
-                // found one entry with same slotoffset in schedule
-                // check if there is space in second entries
+                // found one entry with same slotoffset in schedule, check if there is space in second entries
 
                 for (i = 0; i < MAXBACKUPSLOTS; i++) {
                     if (slotContainer->backupEntries[i].type == CELLTYPE_OFF) {
@@ -298,8 +289,8 @@ owerror_t schedule_addActiveSlot(
     // abort it schedule overflow
     if (entry_found == FALSE) {
         ENABLE_INTERRUPTS();
-        openserial_printError(
-                COMPONENT_SCHEDULE, ERR_SCHEDULE_OVERFLOWN,
+        openserial_printLog(
+                LOG_ERROR, COMPONENT_SCHEDULE, ERR_SCHEDULE_OVERFLOWN,
                 (errorparameter_t) 0,
                 (errorparameter_t) 0
         );
@@ -346,8 +337,8 @@ owerror_t schedule_addActiveSlot(
             backupEntry->next = slotContainer->next;
 
             // add cell to schedule
-            slotContainer->type                 = type;
-            slotContainer->shared               = shared;
+            slotContainer->type = type;
+            slotContainer->shared = shared;
             slotContainer->channelOffset = channelOffset;
             slotContainer->isAutoCell = isAutoCell;
             memcpy(&(slotContainer->neighbor), neighbor, sizeof(open_addr_t));
@@ -429,8 +420,8 @@ owerror_t schedule_addActiveSlot(
             }
             if (previousSlotWalker->slotOffset == slotContainer->slotOffset) {
                 // slot is already in schedule
-                openserial_printError(
-                        COMPONENT_SCHEDULE, ERR_SCHEDULE_ADDDUPLICATESLOT,
+                openserial_printLog(
+                        LOG_ERROR, COMPONENT_SCHEDULE, ERR_SCHEDULE_ADDDUPLICATESLOT,
                         (errorparameter_t) slotContainer->slotOffset,
                         (errorparameter_t) 0
                 );
@@ -463,12 +454,7 @@ owerror_t schedule_addActiveSlot(
 \param neighbor         The neighbor associated with this cell (all 0's if
    none)
 */
-owerror_t schedule_removeActiveSlot(
-        slotOffset_t slotOffset,
-        cellType_t type,
-        bool isShared,
-        open_addr_t *neighbor
-) {
+owerror_t schedule_removeActiveSlot(slotOffset_t slotOffset, cellType_t type, bool isShared, open_addr_t *neighbor) {
     uint8_t i;
     bool entry_found;
     bool isbackupEntry;
@@ -514,8 +500,8 @@ owerror_t schedule_removeActiveSlot(
     // abort it could not find
     if (entry_found == FALSE) {
         ENABLE_INTERRUPTS();
-        openserial_printCritical(
-                COMPONENT_SCHEDULE, ERR_FREEING_ERROR,
+        openserial_printLog(
+                LOG_CRITICAL, COMPONENT_SCHEDULE, ERR_FREEING_ERROR,
                 (errorparameter_t) 0,
                 (errorparameter_t) 0
         );
