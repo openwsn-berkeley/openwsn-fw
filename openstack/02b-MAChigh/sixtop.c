@@ -315,6 +315,7 @@ owerror_t sixtop_request(
     outcome = sixtop_send(pkt);
 
     if (outcome == E_SUCCESS) {
+        openserial_printLog(LOG_INFO, COMPONENT_SIXTOP, ERR_SIXTOP_REQUEST, (errorparameter_t) code, 0);
         //update states
         switch (code) {
             case IANA_6TOP_CMD_ADD:

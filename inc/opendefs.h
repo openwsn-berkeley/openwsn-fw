@@ -236,55 +236,56 @@ enum {
    ERR_NO_RECEIVED_PACKET              = 0x24, // there is no received packet in queue
    ERR_SCHEDULE_OVERFLOWN              = 0x25, // schedule overflown
    ERR_SIXTOP_RETURNCODE               = 0x26, // sixtop return code {0} at sixtop state {1}
-   ERR_SIXTOP_COUNT                    = 0x27, // there are {0} cells to request mote
-   ERR_SIXTOP_LIST                     = 0x28, // the cells reserved to request mote contains slot {0} and slot {1}
+   ERR_SIXTOP_REQUEST                  = 0x27, // sending a 6top request
+   ERR_SIXTOP_COUNT                    = 0x28, // there are {0} cells to request mote
+   ERR_SIXTOP_LIST                     = 0x29, // the cells reserved to request mote contains slot {0} and slot {1}
    // l3a
-   ERR_WRONG_CELLTYPE                  = 0x29, // wrong celltype {0} at slotOffset {1}
-   ERR_IEEE154_UNSUPPORTED             = 0x2a, // unsupported IEEE802.15.4 parameter {1} at location {0}
-   ERR_DESYNCHRONIZED                  = 0x2b, // got desynchronized at slotOffset {0}
-   ERR_SYNCHRONIZED                    = 0x2c, // synchronized at slotOffset {0}
-   ERR_LARGE_TIMECORRECTION            = 0x2d, // large timeCorr.: {0} ticks (code loc. {1})
-   ERR_WRONG_STATE_IN_ENDFRAME_SYNC    = 0x2e, // wrong state {0} in end of frame+sync
-   ERR_WRONG_STATE_IN_STARTSLOT        = 0x2f, // wrong state {0} in startSlot, at slotOffset {1}
-   ERR_WRONG_STATE_IN_TIMERFIRES       = 0x30, // wrong state {0} in timer fires, at slotOffset {1}
-   ERR_WRONG_STATE_IN_NEWSLOT          = 0x31, // wrong state {0} in start of frame, at slotOffset {1}
-   ERR_WRONG_STATE_IN_ENDOFFRAME       = 0x32, // wrong state {0} in end of frame, at slotOffset {1}
-   ERR_MAXTXDATAPREPARE_OVERFLOW       = 0x33, // maxTxDataPrepare overflows while at state {0} in slotOffset {1}
-   ERR_MAXRXACKPREPARE_OVERFLOWS       = 0x34, // maxRxAckPrepapare overflows while at state {0} in slotOffset {1}
-   ERR_MAXRXDATAPREPARE_OVERFLOWS      = 0x35, // maxRxDataPrepapre overflows while at state {0} in slotOffset {1}
-   ERR_MAXTXACKPREPARE_OVERFLOWS       = 0x36, // maxTxAckPrepapre overflows while at state {0} in slotOffset {1}
-   ERR_WDDATADURATION_OVERFLOWS        = 0x37, // wdDataDuration overflows while at state {0} in slotOffset {1}
-   ERR_WDRADIO_OVERFLOWS               = 0x38, // wdRadio overflows while at state {0} in slotOffset {1}
-   ERR_WDRADIOTX_OVERFLOWS             = 0x39, // wdRadioTx overflows while at state {0} in slotOffset {1}
-   ERR_WDACKDURATION_OVERFLOWS         = 0x3a, // wdAckDuration overflows while at state {0} in slotOffset {1}
-   ERR_SECURITY                        = 0x3b, // security error on frameType {0}, code location {1}
+   ERR_WRONG_CELLTYPE                  = 0x2a, // wrong celltype {0} at slotOffset {1}
+   ERR_IEEE154_UNSUPPORTED             = 0x2b, // unsupported IEEE802.15.4 parameter {1} at location {0}
+   ERR_DESYNCHRONIZED                  = 0x2c, // got desynchronized at slotOffset {0}
+   ERR_SYNCHRONIZED                    = 0x2d, // synchronized at slotOffset {0}
+   ERR_LARGE_TIMECORRECTION            = 0x2e, // large timeCorr.: {0} ticks (code loc. {1})
+   ERR_WRONG_STATE_IN_ENDFRAME_SYNC    = 0x2f, // wrong state {0} in end of frame+sync
+   ERR_WRONG_STATE_IN_STARTSLOT        = 0x31, // wrong state {0} in startSlot, at slotOffset {1}
+   ERR_WRONG_STATE_IN_TIMERFIRES       = 0x31, // wrong state {0} in timer fires, at slotOffset {1}
+   ERR_WRONG_STATE_IN_NEWSLOT          = 0x32, // wrong state {0} in start of frame, at slotOffset {1}
+   ERR_WRONG_STATE_IN_ENDOFFRAME       = 0x33, // wrong state {0} in end of frame, at slotOffset {1}
+   ERR_MAXTXDATAPREPARE_OVERFLOW       = 0x34, // maxTxDataPrepare overflows while at state {0} in slotOffset {1}
+   ERR_MAXRXACKPREPARE_OVERFLOWS       = 0x35, // maxRxAckPrepapare overflows while at state {0} in slotOffset {1}
+   ERR_MAXRXDATAPREPARE_OVERFLOWS      = 0x36, // maxRxDataPrepapre overflows while at state {0} in slotOffset {1}
+   ERR_MAXTXACKPREPARE_OVERFLOWS       = 0x37, // maxTxAckPrepapre overflows while at state {0} in slotOffset {1}
+   ERR_WDDATADURATION_OVERFLOWS        = 0x38, // wdDataDuration overflows while at state {0} in slotOffset {1}
+   ERR_WDRADIO_OVERFLOWS               = 0x39, // wdRadio overflows while at state {0} in slotOffset {1}
+   ERR_WDRADIOTX_OVERFLOWS             = 0x3a, // wdRadioTx overflows while at state {0} in slotOffset {1}
+   ERR_WDACKDURATION_OVERFLOWS         = 0x3b, // wdAckDuration overflows while at state {0} in slotOffset {1}
+   ERR_SECURITY                        = 0x3c, // security error on frameType {0}, code location {1}
    // cross layer
-   ERR_GETDATA_ASKS_TOO_FEW_BYTES      = 0x3c, // getData asks for too few bytes, maxNumBytes={0}, fill level={1}
-   ERR_INPUT_BUFFER_OVERFLOW           = 0x3d, // the input buffer has overflown
+   ERR_GETDATA_ASKS_TOO_FEW_BYTES      = 0x3d, // getData asks for too few bytes, maxNumBytes={0}, fill level={1}
+   ERR_INPUT_BUFFER_OVERFLOW           = 0x3e, // the input buffer has overflown
    // general
-   ERR_BUSY_SENDING                    = 0x3e, // busy sending
-   ERR_UNEXPECTED_SENDDONE             = 0x3f, // sendDone for packet I didn't send
-   ERR_NO_FREE_PACKET_BUFFER           = 0x40, // no free packet buffer (code location {0})
-   ERR_NO_FREE_TIMER_OR_QUEUE_ENTRY    = 0x41, // no free timer or queue entry (code location {0})
-   ERR_FREEING_UNUSED                  = 0x42, // freeing unused memory
-   ERR_FREEING_ERROR                   = 0x43, // freeing memory unsupported memory
-   ERR_UNSUPPORTED_COMMAND             = 0x44, // unsupported command {0}
-   ERR_MSG_UNKNOWN_TYPE                = 0x45, // unknown message type {0}
-   ERR_WRONG_ADDR_TYPE                 = 0x46, // wrong address type {0} (code location {1})
-   ERR_BRIDGE_MISMATCH                 = 0x47, // bridge mismatch (code location {0})
-   ERR_HEADER_TOO_LONG                 = 0x48, // header too long, length {1} (code location {0})
-   ERR_INPUTBUFFER_LENGTH              = 0x49, // input length problem, length={0}
-   ERR_BOOTED                          = 0x4a, // booted
-   ERR_INVALIDSERIALFRAME              = 0x4b, // invalid serial frame
-   ERR_INVALIDPACKETFROMRADIO          = 0x4c, // invalid packet from radio, length {1} (code location {0})
-   ERR_BUSY_RECEIVING                  = 0x4d, // busy receiving when stop of serial activity, buffer input length {1} (code location {0})
-   ERR_WRONG_CRC_INPUT                 = 0x4e, // wrong CRC in input Buffer
-   ERR_PACKET_SYNC                     = 0x4f, // synchronized when received a packet
-   ERR_SCHEDULE_ADDDUPLICATESLOT       = 0x50, // the slot {0} to be added is already in schedule
-   ERR_UNSUPPORTED_FORMAT              = 0x51, // the received packet format is not supported (code location {0})
-   ERR_UNSUPPORTED_METADATA            = 0x52, // the metadata type is not suppored
-   ERR_MAXRETRIES_REACHED              = 0x53, // maxretries reached (counter: {0})
-   ERR_EMPTY_QUEUE_OR_UNKNOWN_TIMER    = 0x54, // empty queue or trying to remove unknown timer id (code location {0})
+   ERR_BUSY_SENDING                    = 0x3f, // busy sending
+   ERR_UNEXPECTED_SENDDONE             = 0x40, // sendDone for packet I didn't send
+   ERR_NO_FREE_PACKET_BUFFER           = 0x41, // no free packet buffer (code location {0})
+   ERR_NO_FREE_TIMER_OR_QUEUE_ENTRY    = 0x42, // no free timer or queue entry (code location {0})
+   ERR_FREEING_UNUSED                  = 0x43, // freeing unused memory
+   ERR_FREEING_ERROR                   = 0x44, // freeing memory unsupported memory
+   ERR_UNSUPPORTED_COMMAND             = 0x45, // unsupported command {0}
+   ERR_MSG_UNKNOWN_TYPE                = 0x46, // unknown message type {0}
+   ERR_WRONG_ADDR_TYPE                 = 0x47, // wrong address type {0} (code location {1})
+   ERR_BRIDGE_MISMATCH                 = 0x48, // bridge mismatch (code location {0})
+   ERR_HEADER_TOO_LONG                 = 0x49, // header too long, length {1} (code location {0})
+   ERR_INPUTBUFFER_LENGTH              = 0x4a, // input length problem, length={0}
+   ERR_BOOTED                          = 0x4b, // booted
+   ERR_INVALIDSERIALFRAME              = 0x4c, // invalid serial frame
+   ERR_INVALIDPACKETFROMRADIO          = 0x4d, // invalid packet from radio, length {1} (code location {0})
+   ERR_BUSY_RECEIVING                  = 0x4e, // busy receiving when stop of serial activity, buffer input length {1} (code location {0})
+   ERR_WRONG_CRC_INPUT                 = 0x4f, // wrong CRC in input Buffer
+   ERR_PACKET_SYNC                     = 0x50, // synchronized when received a packet
+   ERR_SCHEDULE_ADDDUPLICATESLOT       = 0x51, // the slot {0} to be added is already in schedule
+   ERR_UNSUPPORTED_FORMAT              = 0x52, // the received packet format is not supported (code location {0})
+   ERR_UNSUPPORTED_METADATA            = 0x53, // the metadata type is not suppored
+   ERR_MAXRETRIES_REACHED              = 0x54, // maxretries reached (counter: {0})
+   ERR_EMPTY_QUEUE_OR_UNKNOWN_TIMER    = 0x55, // empty queue or trying to remove unknown timer id (code location {0})
 };
 
 //=========================== typedef =========================================
