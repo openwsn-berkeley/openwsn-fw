@@ -20,8 +20,8 @@
  *
  * \author    Gregory Cristian ( Semtech )
  */
-#ifndef __SPI_H__
-#define __SPI_H__
+#ifndef __SPILORA_H__
+#define __SPILORA_H__
 
 #ifdef __cplusplus
 extern "C"
@@ -51,18 +51,6 @@ typedef struct Spi_s
     Gpio_t Nss;
 }Spi_t;
 
-typedef struct SX1276_s
-{
-    Gpio_t        Reset;
-    Gpio_t        DIO0;
-    Gpio_t        DIO1;
-    Gpio_t        DIO2;
-    Gpio_t        DIO3;
-    Gpio_t        DIO4;
-    Gpio_t        DIO5;
-    Spi_t         Spi;
-    RadioSettings_t Settings;
-}SX1276_t;
 /*!
  * \brief Initializes the SPI object and MCU peripheral
  *
@@ -75,7 +63,7 @@ typedef struct SX1276_s
  * \param [IN] sclk SPI SCLK pin name to be used
  * \param [IN] nss  SPI NSS pin name to be used
  */
-void SpiInit( Spi_t *obj, SpiId_t spiId, PinNames mosi, PinNames miso, PinNames sclk, PinNames nss );
+//void SpiInit( Spi_t *obj, SpiId_t spiId, PinNames mosi, PinNames miso, PinNames sclk, PinNames nss );
 
 /*!
  * \brief De-initializes the SPI object and MCU peripheral

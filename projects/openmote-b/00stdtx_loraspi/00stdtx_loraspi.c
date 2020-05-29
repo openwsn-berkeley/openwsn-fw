@@ -26,7 +26,7 @@
 //#include "radio_sx1276.h"
 //#include "delay.h"
 #include "sx1276.h"
-#include "sx1276-board.h"
+//#include "sx1276-board.h"
 
 
 //================== Semtech defines ====================
@@ -176,11 +176,11 @@ void spi_init(){
     SX1276Send( uint8_t *buffer, uint8_t size );*/
     SX1276Send( lora_buffer, sizeof(lora_buffer));
     
-    
     //Clear the GPIO
     GPIOPinWrite(GPIO_C_BASE, GPIO_PIN_3, 0);
     
     //This function corresponds to the Interruption Dio0 which is specified for the sent packet
+    //\param [IN] context User defined data object pointer to pass back on IRQ handler callback
     //SX1276OnDio0Irq( void* context );  
     
     //If TxDone interruption were called, set the GPIO to High

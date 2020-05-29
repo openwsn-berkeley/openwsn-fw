@@ -24,8 +24,8 @@
  *
  * \author    Gregory Cristian ( Semtech )
  */
-#ifndef __GPIO_H__
-#define __GPIO_H__
+#ifndef __GPIOLORA_H__
+#define __GPIOLORA_H__
 
 #ifdef __cplusplus
 extern "C"

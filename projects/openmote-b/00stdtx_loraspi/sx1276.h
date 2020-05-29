@@ -32,10 +32,10 @@ extern "C"
 #include <stdbool.h>
 //#include "gpioLora.h"
 #include "spiLora.h"
-#include "radio_sx1276.h"
-#include "sx1276Regs-Fsk.h"
-#include "sx1276Regs-LoRa.h"
-
+//#include "radio_sx1276.h"
+//#include "sx1276Regs-Fsk.h"
+//#include "sx1276Regs-LoRa.h"
+#include "combineRegRadio.h"
 /*!
  * Radio wake-up time from sleep
  */
@@ -136,7 +136,18 @@ typedef struct
 /*!
  * Radio hardware and global parameters
  */
-
+typedef struct SX1276_s
+{
+    Gpio_t        Reset;
+    Gpio_t        DIO0;
+    Gpio_t        DIO1;
+    Gpio_t        DIO2;
+    Gpio_t        DIO3;
+    Gpio_t        DIO4;
+    Gpio_t        DIO5;
+    Spi_t         Spi;
+    RadioSettings_t Settings;
+}SX1276_t;
 
 /*!
  * Hardware IO IRQ callback function definition
