@@ -48,6 +48,11 @@ typedef struct {
     uint8_t previousNumCellsUsed_rx;
 } msf_vars_t;
 
+typedef struct {
+    uint8_t numCellsUsed_tx;
+    uint8_t numCellsUsed_rx;
+} msf_vars_debug_t;
+
 //=========================== module variables ================================
 
 //=========================== prototypes ======================================
@@ -83,6 +88,8 @@ void msf_setHashCollisionFlag(bool isCollision);
 bool msf_getHashCollisionFlag(void);
 
 uint8_t msf_getPreviousNumCellsUsed(cellType_t cellType);
+
+bool debugPrint_msf(void);
 /**
 \}
 \}

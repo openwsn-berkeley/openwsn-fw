@@ -10,12 +10,14 @@
 #include "IEEE802154E.h"
 #include "openqueue.h"
 #include "packetfunctions.h"
+#include "openserial.h"
 
 //=========================== definition =====================================
 
 //=========================== variables =======================================
 
 msf_vars_t msf_vars;
+msf_vars_debug_t msf_vars_debug;
 
 //=========================== prototypes ======================================
 
@@ -48,6 +50,7 @@ void msf_init(void) {
     open_addr_t temp_neighbor;
 
     memset(&msf_vars, 0, sizeof(msf_vars_t));
+    memset(&msf_vars_debug, 0, sizeof(msf_vars_debug_t));
     sixtop_setSFcallback(
             (sixtop_sf_getsfid_cbt) msf_getsfid,
             (sixtop_sf_getmetadata_cbt) msf_getMetadata,
@@ -87,7 +90,6 @@ void msf_updateCellsElapsed(open_addr_t *neighbor, cellType_t type) {
     }
 
     // update numcellselapsed
-
     switch (type) {
         case CELLTYPE_TX:
             msf_vars.numCellsElapsed_tx++;
@@ -109,6 +111,9 @@ void msf_updateCellsElapsed(open_addr_t *neighbor, cellType_t type) {
 
         msf_vars.previousNumCellsUsed_tx = msf_vars.numCellsUsed_tx;
 
+        // for debugging purposes
+        msf_vars_debug.numCellsUsed_tx = msf_vars.numCellsUsed_tx;
+
         if (msf_vars.numCellsUsed_tx > LIM_NUMCELLSUSED_HIGH) {
             msf_vars.needAddTx = TRUE;
             scheduler_push_task(msf_trigger6pAdd, TASKPRIO_MSF);
@@ -127,7 +132,7 @@ void msf_updateCellsElapsed(open_addr_t *neighbor, cellType_t type) {
         return;
     }
 
-    // addapt to downward traffic
+    // adapt to downward traffic
 
     if (msf_vars.numCellsElapsed_rx == MAX_NUMCELLS) {
 
@@ -135,6 +140,9 @@ void msf_updateCellsElapsed(open_addr_t *neighbor, cellType_t type) {
         msf_vars.needDeleteRx = FALSE;
 
         msf_vars.previousNumCellsUsed_rx = msf_vars.numCellsUsed_rx;
+
+        // for debugging purposes
+        msf_vars_debug.numCellsUsed_rx = msf_vars.numCellsUsed_rx;
 
         if (msf_vars.numCellsUsed_rx > LIM_NUMCELLSUSED_HIGH) {
             msf_vars.needAddRx = TRUE;
@@ -557,4 +565,13 @@ uint8_t msf_getPreviousNumCellsUsed(cellType_t cellType) {
             // not appliable
             return 0;
     }
+}
+
+bool debugPrint_msf(){
+    openserial_printStatus(
+            STATUS_MSF,
+            (uint8_t*)&msf_vars_debug,
+            sizeof(msf_vars_debug_t)
+    );
+    return TRUE;
 }
