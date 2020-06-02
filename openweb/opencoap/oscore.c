@@ -220,7 +220,7 @@ owerror_t oscore_protect_message(
 
     if (aadLen > AAD_MAX_LEN) {
         // corruption
-        LOG_ERROR(COMPONENT_OSCORE, ERR_BUFFER_OVERFLOW, (errorparameter_t) 0, (errorparameter_t) 0);
+        LOG_ERROR(COMPONENT_OSCORE, ERR_BUFFER_OVERFLOW, (errorparameter_t) 0, (errorparameter_t) 1);
         return E_FAIL;
     }
 

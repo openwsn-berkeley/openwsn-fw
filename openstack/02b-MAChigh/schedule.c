@@ -416,7 +416,7 @@ owerror_t schedule_addActiveSlot(
             }
             if (previousSlotWalker->slotOffset == slotContainer->slotOffset) {
                 // slot is already in schedule
-                LOG_ERROR(COMPONENT_SCHEDULE, ERR_SCHEDULE_ADDDUPLICATESLOT,
+                LOG_ERROR(COMPONENT_SCHEDULE, ERR_SCHEDULE_ADD_DUPLICATE_SLOT,
                           (errorparameter_t) slotContainer->slotOffset,
                           (errorparameter_t) 0);
                 // reset the entry

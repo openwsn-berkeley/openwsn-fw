@@ -139,7 +139,7 @@ owerror_t frag_fragment6LoPacket(OpenQueueEntry_t *msg) {
 
                 cleanup_fragments(frag_vars.global_tag);
 
-                LOG_ERROR(COMPONENT_FRAG, ERR_FRAG_BUFFER_OV, (errorparameter_t) 0, (errorparameter_t) 0);
+                LOG_ERROR(COMPONENT_FRAG, ERR_BUFFER_OVERFLOW, (errorparameter_t) 1, (errorparameter_t) 0);
                 return E_FAIL;
             }
 
@@ -175,7 +175,7 @@ owerror_t frag_fragment6LoPacket(OpenQueueEntry_t *msg) {
             if (frag_vars.fragmentBuf[i].datagram_tag == frag_vars.global_tag) {
                 // try to send the fragment. If this fails, abort the transmission of the other fragments.
                 if (sixtop_send(frag_vars.fragmentBuf[i].pFragment) == E_FAIL) {
-                    LOG_ERROR(COMPONENT_FRAG, ERR_FRAG_TX_FAIL,
+                    LOG_ERROR(COMPONENT_FRAG, ERR_PUSH_LOWER_LAYER,
                               (errorparameter_t) frag_vars.global_tag,
                               (errorparameter_t) frag_vars.fragmentBuf[i].datagram_offset);
                     cleanup_fragments(frag_vars.global_tag);
@@ -477,7 +477,7 @@ static void store_fragment(OpenQueueEntry_t *msg, uint16_t size, uint16_t tag, u
 
     // if we don't find any buffer space, delete all the related fragments
     if (i == FRAGMENT_BUFFER_SIZE) {
-        LOG_ERROR(COMPONENT_FRAG, ERR_FRAG_BUFFER_OV, (errorparameter_t) 0, (errorparameter_t) 0);
+        LOG_ERROR(COMPONENT_FRAG, ERR_BUFFER_OVERFLOW, (errorparameter_t) 0, (errorparameter_t) 0);
         cleanup_fragments(tag);
         return;
     }
@@ -659,7 +659,7 @@ static void fast_forward_frags(uint16_t tag, uint16_t size, uint8_t vrb_pos) {
 
             LOCK(frag_vars.fragmentBuf[i]);
             if (sixtop_send(frag_vars.fragmentBuf[i].pFragment) == E_FAIL) {
-                LOG_ERROR(COMPONENT_FRAG, ERR_FRAG_TX_FAIL,
+                LOG_ERROR(COMPONENT_FRAG, ERR_PUSH_LOWER_LAYER,
                           (errorparameter_t) frag_vars.fragmentBuf[i].datagram_tag,
                           (errorparameter_t) frag_vars.fragmentBuf[i].datagram_offset);
             };

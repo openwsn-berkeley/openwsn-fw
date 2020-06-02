@@ -296,7 +296,7 @@ void packetfunctions_reserveHeaderSize(OpenQueueEntry_t *pkt, uint16_t header_le
     pkt->payload -= header_length;
     pkt->length += header_length;
     if ((uint8_t * )(pkt->payload) < (uint8_t * )(pkt->packet)) {
-        LOG_CRITICAL(COMPONENT_PACKETFUNCTIONS, ERR_HEADER_TOO_LONG,
+        LOG_CRITICAL(COMPONENT_PACKETFUNCTIONS, ERR_PACKET_TOO_LONG,
                      (errorparameter_t) 0,
                      (errorparameter_t) pkt->length);
     }
@@ -315,7 +315,7 @@ void packetfunctions_tossHeader(OpenQueueEntry_t *pkt, uint16_t header_length) {
     pkt->length -= header_length;
 
     if ((uint8_t * )(pkt->payload) > (uint8_t * )(pkt->packet + size)) {
-        LOG_ERROR(COMPONENT_PACKETFUNCTIONS, ERR_HEADER_TOO_LONG,
+        LOG_ERROR(COMPONENT_PACKETFUNCTIONS, ERR_PACKET_TOO_LONG,
                   (errorparameter_t) 1,
                   (errorparameter_t) pkt->length);
     }
@@ -331,7 +331,7 @@ void packetfunctions_reserveFooterSize(OpenQueueEntry_t *pkt, uint16_t header_le
     pkt->length += header_length;
 
     if (pkt->length > size) {
-        LOG_CRITICAL(COMPONENT_PACKETFUNCTIONS, ERR_HEADER_TOO_LONG,
+        LOG_CRITICAL(COMPONENT_PACKETFUNCTIONS, ERR_PACKET_TOO_LONG,
                      (errorparameter_t) 2,
                      (errorparameter_t) pkt->length);
     }
@@ -348,7 +348,7 @@ void packetfunctions_tossFooter(OpenQueueEntry_t *pkt, uint16_t header_length) {
 #endif
 
     if (pkt->length > max_length) {//wraps around, so a negative value will be >128
-        LOG_ERROR(COMPONENT_PACKETFUNCTIONS, ERR_HEADER_TOO_LONG, (errorparameter_t) 3, (errorparameter_t) pkt->length);
+        LOG_ERROR(COMPONENT_PACKETFUNCTIONS, ERR_PACKET_TOO_LONG, (errorparameter_t) 3, (errorparameter_t) pkt->length);
     }
 }
 

@@ -746,7 +746,7 @@ port_INLINE void inputHdlcClose(void) {
 
 void task_printInputBufferOverflow(void) {
     // input buffer overflow
-    LOG_ERROR(COMPONENT_OPENSERIAL, ERR_INPUT_BUFFER_OVERFLOW, (errorparameter_t) 0, (errorparameter_t) 0);
+    LOG_ERROR(COMPONENT_OPENSERIAL, ERR_BUFFER_OVERFLOW, (errorparameter_t) 0, (errorparameter_t) 0);
 }
 
 void task_printWrongCRCInput(void) {
