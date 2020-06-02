@@ -30,11 +30,7 @@ extern "C"
 
 #include <stdint.h>
 #include <stdbool.h>
-//#include "gpioLora.h"
 #include "spiLora.h"
-//#include "radio_sx1276.h"
-//#include "sx1276Regs-Fsk.h"
-//#include "sx1276Regs-LoRa.h"
 #include "combineRegRadio.h"
 /*!
  * Radio wake-up time from sleep
