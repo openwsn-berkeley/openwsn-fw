@@ -34,15 +34,13 @@ bool is_request(uint8_t code);
 
 uint8_t oscore_construct_aad(uint8_t *buffer,
                              uint8_t version,
-                             uint8_t code,
-                             uint8_t *optionsSerialized,
-                             uint8_t optionsSerializedLen,
                              uint8_t aeadAlgorithm,
                              uint8_t *requestKid,
                              uint8_t requestKidLen,
                              uint8_t *requestSeq,
-                             uint8_t requestSeqLen
-);
+                             uint8_t requestSeqLen,
+                             uint8_t *optionsSerialized,
+                             uint8_t optionsSerializedLen);
 
 void oscore_encode_compressed_COSE(OpenQueueEntry_t *msg,
                                    uint8_t *requestSeq, uint8_t requestSeqLen,
@@ -210,14 +208,13 @@ owerror_t oscore_protect_message(
 
     aadLen = oscore_construct_aad(aad,
                                   version,
-                                  code,
-                                  NULL,
-                                  0, // do not support Class I options at the moment
                                   AES_CCM_16_64_128,
                                   requestKid,
                                   requestKidLen,
                                   requestSeq,
-                                  requestSeqLen);
+                                  requestSeqLen,
+				  NULL,
+                                  0); // do not support Class I options at the moment
 
     if (aadLen > AAD_MAX_LEN) {
         // corruption
@@ -338,14 +335,13 @@ owerror_t oscore_unprotect_message(
 
     aadLen = oscore_construct_aad(aad,
                                   version,
-                                  code,
-                                  NULL,
-                                  0, // do not support Class I options at the moment
                                   AES_CCM_16_64_128,
                                   requestKid,
                                   requestKidLen,
                                   requestSeq,
-                                  requestSeqLen);
+                                  requestSeqLen,
+				  NULL,
+                                  0); // do not support Class I options at the moment
 
     if (aadLen > AAD_MAX_LEN) {
         // corruption
@@ -509,14 +505,13 @@ bool is_request(uint8_t code) {
 
 uint8_t oscore_construct_aad(uint8_t *buffer,
                              uint8_t version,
-                             uint8_t code,
-                             uint8_t *optionsSerialized,
-                             uint8_t optionsSerializedLen,
                              uint8_t aeadAlgorithm,
                              uint8_t *requestKid,
                              uint8_t requestKidLen,
                              uint8_t *requestSeq,
-                             uint8_t requestSeqLen
+                             uint8_t requestSeqLen,
+                             uint8_t *optionsSerialized,
+                             uint8_t optionsSerializedLen
 ) {
     uint8_t externalAAD[EAAD_MAX_LEN];
     uint8_t externalAADLen;
@@ -526,13 +521,13 @@ uint8_t oscore_construct_aad(uint8_t *buffer,
     ret = 0;
     externalAADLen = 0;
 
-    externalAADLen += cborencoder_put_array(&externalAAD[externalAADLen], 6);
+    externalAADLen += cborencoder_put_array(&externalAAD[externalAADLen], 5);
     externalAADLen += cborencoder_put_unsigned(&externalAAD[externalAADLen], version);
-    externalAADLen += cborencoder_put_unsigned(&externalAAD[externalAADLen], code);
-    externalAADLen += cborencoder_put_bytes(&externalAAD[externalAADLen], optionsSerialized, optionsSerializedLen);
+    externalAADLen += cborencoder_put_array(&externalAAD[externalAADLen], 1);
     externalAADLen += cborencoder_put_unsigned(&externalAAD[externalAADLen], aeadAlgorithm);
     externalAADLen += cborencoder_put_bytes(&externalAAD[externalAADLen], requestKid, requestKidLen);
     externalAADLen += cborencoder_put_bytes(&externalAAD[externalAADLen], requestSeq, requestSeqLen);
+    externalAADLen += cborencoder_put_bytes(&externalAAD[externalAADLen], optionsSerialized, optionsSerializedLen);
 
     if (externalAADLen > EAAD_MAX_LEN) {
         // corruption
