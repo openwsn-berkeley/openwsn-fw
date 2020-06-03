@@ -210,39 +210,20 @@ void coap_receive(OpenQueueEntry_t *msg) {
         objectSecurity = NULL;
     }
     if (objectSecurity) {
-        if ((objectSecurity->length == 0 && msg->length == 0) ||
-            (objectSecurity->length != 0 && msg->length != 0)) {
+        if (objectSecurity->length == 0 && msg->length == 0) {
             // malformated object security message
             return;
         }
 
-        if (objectSecurity->length == 0) {
-            index = oscore_parse_compressed_COSE(&msg->payload[0],
-                                                 msg->length,
-                                                 &rcvdSequenceNumber,
-						 &rcvdKidContext,
-						 &rcvdKidContextLen,
-                                                 &rcvdKid,
-                                                 &rcvdKidLen);
-            if (index == 0) {
-                return;
-            }
-            packetfunctions_tossHeader(&msg, index);
-        } else {
-            index = oscore_parse_compressed_COSE(objectSecurity->pValue,
-                                                 objectSecurity->length,
-                                                 &rcvdSequenceNumber,
-						 &rcvdKidContext,
-						 &rcvdKidContextLen,
-                                                 &rcvdKid,
-                                                 &rcvdKidLen);
-
-            if (index == 0) {
-                return;
-            }
-            objectSecurity->length -= index;
-            objectSecurity->pValue += index;
-        }
+        if (oscore_parse_compressed_COSE(objectSecurity->pValue,
+                                             objectSecurity->length,
+                                             &rcvdSequenceNumber,
+					     &rcvdKidContext,
+					     &rcvdKidContextLen,
+                                             &rcvdKid,
+         				     &rcvdKidLen) == E_FAIL) {
+            return;
+	}
     }
 
     //=== step 2. find the resource to handle the packet
@@ -273,7 +254,7 @@ void coap_receive(OpenQueueEntry_t *msg) {
                 coap_incomingOptionsLen = MAX_COAP_OPTIONS;
                 decStatus = oscore_unprotect_message(blindContext,
                                                      coap_header.Ver,
-                                                     coap_header.Code,
+                                                     &coap_header.Code,
                                                      coap_incomingOptions,
                                                      &coap_incomingOptionsLen,
                                                      msg,
@@ -393,7 +374,7 @@ void coap_receive(OpenQueueEntry_t *msg) {
                         coap_incomingOptionsLen = MAX_COAP_OPTIONS;
                         decStatus = oscore_unprotect_message(temp_desc->securityContext,
                                                              coap_header.Ver,
-                                                             coap_header.Code,
+                                                             &coap_header.Code,
                                                              coap_incomingOptions,
                                                              &coap_incomingOptionsLen,
                                                              msg,

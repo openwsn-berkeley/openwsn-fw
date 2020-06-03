@@ -42,7 +42,16 @@ uint8_t oscore_construct_aad(uint8_t *buffer,
                              uint8_t *optionsSerialized,
                              uint8_t optionsSerializedLen);
 
-void oscore_encode_compressed_COSE(OpenQueueEntry_t *msg,
+void oscore_construct_nonce(uint8_t *buffer,
+		            uint8_t *partialIV,
+			    uint8_t partialIVLen,
+			    uint8_t *idPiv,
+			    uint8_t idPivLen,
+			    uint8_t *commonIV,
+			    uint8_t commonIVLen);
+
+uint8_t oscore_encode_compressed_COSE(uint8_t *buf,
+		                   uint8_t bufMaxLen,
                                    uint8_t *requestSeq,
 				   uint8_t requestSeqLen,
 				   uint8_t *kidContext,
@@ -139,7 +148,7 @@ void oscore_init_security_context(oscore_security_context_t *ctx,
 owerror_t oscore_protect_message(
         oscore_security_context_t *context,
         uint8_t version,
-        uint8_t code,
+        coap_code_t code,
         coap_option_iht *incomingOptions,
         uint8_t incomingOptionsLen,
         OpenQueueEntry_t *msg,
@@ -155,9 +164,10 @@ owerror_t oscore_protect_message(
     uint8_t requestSeqLen;
     uint8_t *requestKid;
     uint8_t requestKidLen;
+    uint8_t *idContext;
+    uint8_t idContextLen;
     owerror_t encStatus;
     coap_option_iht *objectSecurity;
-    bool payloadPresent;
     uint8_t option_count;
     uint8_t option_index;
 
@@ -187,17 +197,18 @@ owerror_t oscore_protect_message(
     }
 
     if (msg->length > 0) { // contains payload, add payload marker
-        payloadPresent = TRUE;
         if (packetfunctions_reserveHeader(&msg, 1) == E_FAIL){
             return E_FAIL;
         }
         msg->payload[0] = COAP_PAYLOAD_MARKER;
-    } else {
-        payloadPresent = FALSE;
     }
 
     // encode the options to the openqueue payload buffer
     coap_options_encode(msg, incomingOptions, incomingOptionsLen, COAP_OPTION_CLASS_E);
+
+    // encode CoAP code
+    packetfunctions_reserveHeaderSize(msg, 1);
+    msg->payload[0] = code;
 
     payload = &msg->payload[0];
     payloadLen = msg->length;
@@ -225,18 +236,29 @@ owerror_t oscore_protect_message(
         return E_FAIL;
     }
 
-    // construct nonce
+
+
     if (is_request(code)) {
-        xor_arrays(context->commonIV, partialIV, nonce, AES_CCM_16_64_128_IV_LEN);
+	idContext = context->idContext;
+	idContextLen = context->idContextLen;
     } else {
-        flip_first_bit(context->commonIV, nonce, AES_CCM_16_64_128_IV_LEN);
-        xor_arrays(nonce, partialIV, nonce, AES_CCM_16_64_128_IV_LEN);
         // do not encode sequence number and ID in the response
         requestSeq = NULL;
         requestSeqLen = 0;
         requestKid = NULL;
         requestKidLen = 0;
+	idContext = NULL;
+	idContextLen = 0;
     }
+
+    // construct nonce
+    oscore_construct_nonce(nonce,
+		           requestSeq,
+			   requestSeqLen,
+			   requestKid,
+			   requestKidLen,
+			   context->commonIV,
+			   AES_CCM_16_64_128_IV_LEN);
 
     encStatus = aes128_ccms_enc(aad,
                                 aadLen,
@@ -252,21 +274,14 @@ owerror_t oscore_protect_message(
     }
 
     // encode compressed COSE
-    oscore_encode_compressed_COSE(msg, requestSeq, requestSeqLen, context->idContext, context->idContextLen, requestKid, requestKidLen);
-
-
-    if (payloadPresent) {
-        // set the object security option to 0 length
-        // as the value will be carried in message payload
-        objectSecurity->length = 0;
-        objectSecurity->pValue = NULL;
-    } else {
-        objectSecurity->length = msg->length;
-        // FIXME use the upper bytes in the msg->packet buffer
-        memcpy(&msg->packet[0], &msg->payload[0], msg->length);
-        objectSecurity->pValue = &msg->packet[0];
-        packetfunctions_tossHeader(&msg, msg->length); // reset packet to zero as objectSecurity option will cary payload
-    }
+    objectSecurity->length = oscore_encode_compressed_COSE(objectSecurity->pValue,
+		    objectSecurity->length,
+		    requestSeq,
+		    requestSeqLen,
+		    idContext,
+		    idContextLen,
+		    requestKid,
+		    requestKidLen);
 
     return E_SUCCESS;
 }
@@ -274,7 +289,7 @@ owerror_t oscore_protect_message(
 owerror_t oscore_unprotect_message(
         oscore_security_context_t *context,
         uint8_t version,
-        uint8_t code,
+        coap_code_t *code,
         coap_option_iht *incomingOptions,
         uint8_t *incomingOptionsLen,
         OpenQueueEntry_t *msg,
@@ -292,7 +307,6 @@ owerror_t oscore_unprotect_message(
     owerror_t decStatus;
     uint8_t *ciphertext;
     uint8_t ciphertextLen;
-    bool payloadInObjSec;
     uint8_t index;
     uint8_t option_count;
     uint8_t option_index;
@@ -309,17 +323,10 @@ owerror_t oscore_unprotect_message(
         return E_FAIL;
     }
 
-    if (objectSecurity->length != 0) {
-        ciphertext = objectSecurity->pValue;
-        ciphertextLen = objectSecurity->length;
-        payloadInObjSec = TRUE;
-    } else {
-        ciphertext = &msg->payload[0];
-        ciphertextLen = msg->length;
-        payloadInObjSec = FALSE;
-    }
+    ciphertext = &msg->payload[0];
+    ciphertextLen = msg->length;
 
-    if (is_request(code)) {
+    if (is_request(*code)) {
         if (replay_window_check(context, sequenceNumber) == FALSE) {
             LOG_ERROR(COMPONENT_OSCORE, ERR_REPLAY_FAILED, (errorparameter_t) 0, (errorparameter_t) 0);
             return E_FAIL;
@@ -352,13 +359,13 @@ owerror_t oscore_unprotect_message(
         return E_FAIL;
     }
 
-    // construct nonce
-    if (is_request(code)) {
-        xor_arrays(context->commonIV, partialIV, nonce, AES_CCM_16_64_128_IV_LEN);
-    } else {
-        flip_first_bit(context->commonIV, nonce, AES_CCM_16_64_128_IV_LEN);
-        xor_arrays(nonce, partialIV, nonce, AES_CCM_16_64_128_IV_LEN);
-    }
+    oscore_construct_nonce(nonce,
+		           requestSeq,
+			   requestSeqLen,
+			   requestKid,
+			   requestKidLen,
+			   context->commonIV,
+			   AES_CCM_16_64_128_IV_LEN);
 
     decStatus = aes128_ccms_dec(aad,
                                 aadLen,
@@ -374,17 +381,18 @@ owerror_t oscore_unprotect_message(
         return E_FAIL;
     }
 
-    if (is_request(code)) {
+    if (is_request(*code)) {
         replay_window_update(context, sequenceNumber);
     }
 
-    if (payloadInObjSec) {
-        coap_options_parse(objectSecurity->pValue, objectSecurity->length, incomingOptions, incomingOptionsLen);
-    } else {
-        packetfunctions_tossFooter(&msg, AES_CCM_16_64_128_TAG_LEN);
-        index = coap_options_parse(&msg->payload[0], msg->length, incomingOptions, incomingOptionsLen);
-        packetfunctions_tossHeader(&msg, index);
-    }
+    packetfunctions_tossFooter(&msg, AES_CCM_16_64_128_TAG_LEN);
+
+    // parse code from plaintext
+    *code = msg->payload[0];
+    packetfunctions_tossHeader(&msg, 1);
+    // parse inner coap options
+    index = coap_options_parse(&msg->payload[0], msg->length, incomingOptions, incomingOptionsLen);
+    packetfunctions_tossHeader(&msg, index);
 
     return E_SUCCESS;
 }
@@ -398,14 +406,14 @@ uint16_t oscore_get_sequence_number(oscore_security_context_t *context) {
     return context->sequenceNumber;
 }
 
-uint8_t oscore_parse_compressed_COSE(uint8_t *buffer,
+owerror_t oscore_parse_compressed_COSE(uint8_t *buffer,
                                      uint8_t bufferLen,
                                      uint16_t *sequenceNumber,
 				     uint8_t **kidContext,
 				     uint8_t *kidContextLen,
                                      uint8_t **kid,
-                                     uint8_t *kidLen
-) {
+                                     uint8_t *kidLen)
+{
     uint8_t index;
     uint8_t n;
     uint8_t k;
@@ -419,7 +427,7 @@ uint8_t oscore_parse_compressed_COSE(uint8_t *buffer,
     reserved = (buffer[index] >> 5) & 0x07;
 
     if (reserved) {
-        return 0;
+        return E_FAIL;
     }
 
     index++;
@@ -447,7 +455,7 @@ uint8_t oscore_parse_compressed_COSE(uint8_t *buffer,
         index += *kidLen;
     }
 
-    return index;
+    return E_SUCCESS;
 }
 
 
@@ -464,8 +472,8 @@ owerror_t hkdf_derive_parameter(uint8_t *buffer,
 				uint8_t idContextLen,
                                 uint8_t algorithm,
                                 oscore_derivation_t type,
-                                uint8_t length
-) {
+                                uint8_t length)
+{
 
     const uint8_t iv[] = "IV";
     const uint8_t key[] = "Key";
@@ -555,7 +563,48 @@ uint8_t oscore_construct_aad(uint8_t *buffer,
     return ret;
 }
 
-void oscore_encode_compressed_COSE(OpenQueueEntry_t *msg,
+//              <- nonce length minus 6 B -> <-- 5 bytes -->
+//         +---+-------------------+--------+---------+-----+
+//         | S |      padding      | ID_PIV | padding | PIV |----+
+//         +---+-------------------+--------+---------+-----+    |
+//                                                               |
+//          <---------------- nonce length ---------------->     |
+//         +------------------------------------------------+    |
+//         |                   Common IV                    |->(XOR)
+//         +------------------------------------------------+    |
+//                                                               |
+//          <---------------- nonce length ---------------->     |
+//         +------------------------------------------------+    |
+//         |                     Nonce                      |<---+
+//         +------------------------------------------------+
+void oscore_construct_nonce(uint8_t *buffer, // needs to hold AES_CCM_16_64_128_IV_LEN bytes
+		            uint8_t *partialIV,
+			    uint8_t partialIVLen,
+			    uint8_t *idPiv,
+			    uint8_t idPivLen,
+			    uint8_t *commonIV,
+			    uint8_t commonIVLen) {
+    uint8_t temp[AES_CCM_16_64_128_IV_LEN];
+
+    if (commonIVLen != AES_CCM_16_64_128_IV_LEN) {
+        return;
+    }
+
+    memset(temp, 0x00, AES_CCM_16_64_128_IV_LEN);
+    /* Step 1 */
+    memcpy(&temp[commonIVLen - partialIVLen], partialIV, partialIVLen);
+    /* Step 2 */
+    memcpy(&temp[commonIVLen - 5 - idPivLen], idPiv, idPivLen);
+    /* Step 3 */
+    temp[0] = idPivLen;
+    /* Now XOR with Common IV */
+    xor_arrays(commonIV, temp, buffer, commonIVLen);
+
+    return;
+}
+
+uint8_t oscore_encode_compressed_COSE(uint8_t *buf,
+                                   uint8_t bufMaxLen,
                                    uint8_t *partialIV,
 				   uint8_t partialIVLen,
 				   uint8_t *kidContext,
@@ -563,8 +612,11 @@ void oscore_encode_compressed_COSE(OpenQueueEntry_t *msg,
                                    uint8_t *kid,
                                    uint8_t kidLen) {
     // ciphertext is already encoded and of length msg->length
+    uint8_t *tmp;
     uint8_t k;
     uint8_t h;
+
+    tmp = buf;
 
     if (kidLen != 0) {
         k = 1;
@@ -578,26 +630,33 @@ void oscore_encode_compressed_COSE(OpenQueueEntry_t *msg,
         h = 0;
     }
 
-    if (k) {
-        packetfunctions_reserveHeader(&msg, kidLen);
-        memcpy(&msg->payload[0], kid, kidLen);
+    // flag byte
+    *tmp = ((h << 4) | (k << 3) | (partialIVLen & 0x07));
+    tmp++;
+
+    if (partialIVLen) {
+        memcpy(tmp, partialIV, partialIVLen);
+	tmp += partialIVLen;
     }
 
     if (h) {
-        packetfunctions_reserveHeader(&msg, kidContextLen);
-	memcpy(&msg->payload[0], kidContext, kidContextLen);
-	packetfunctions_reserveHeader(&msg, 1);
-	msg->payload[0] = kidContextLen;
+	*tmp = kidContextLen;
+	tmp++;
+	memcpy(tmp, kidContext, kidContextLen);
+	tmp += kidContextLen;
     }
 
-    if (partialIVLen) {
-        packetfunctions_reserveHeader(&msg, partialIVLen);
-        memcpy(&msg->payload[0], partialIV, partialIVLen);
+    if (k) {
+        memcpy(tmp, kid, kidLen);
+	tmp += kidLen;
     }
 
-    // flag byte
-    packetfunctions_reserveHeader(&msg, 1);
-    msg->payload[0] = ((h << 4) | (k << 3) | (partialIVLen & 0x07));
+    if (tmp - buf > bufMaxLen) {
+        // corruption
+        LOG_ERROR(COMPONENT_OSCORE, ERR_BUFFER_OVERFLOW, (errorparameter_t) 0, (errorparameter_t) 1);
+        return 0;
+    }
+    return tmp - buf;
 }
 
 

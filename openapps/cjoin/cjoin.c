@@ -282,8 +282,10 @@ owerror_t cjoin_sendJoinRequest(open_addr_t *joinProxy) {
     options[1].pValue = (uint8_t *) cjoin_path0;
 
     // object security option
-    // length and value are set by the CoAP library
+    // length and value are overwritten by the CoAP library
     options[2].type = COAP_OPTION_NUM_OSCORE;
+    options[2].length = OSCORE_OPT_MAX_LEN;
+    options[2].pValue = cjoin_vars.oscoreOptValue;
 
     // ProxyScheme set to "coap"
     options[3].type = COAP_OPTION_NUM_PROXYSCHEME;

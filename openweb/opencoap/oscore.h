@@ -53,7 +53,7 @@ void oscore_init_security_context(oscore_security_context_t *ctx,
 
 owerror_t oscore_protect_message(oscore_security_context_t *context,
                                  uint8_t version,
-                                 uint8_t code,
+                                 coap_code_t code,
                                  coap_option_iht *options,
                                  uint8_t optionsLen,
                                  OpenQueueEntry_t *msg,
@@ -61,7 +61,7 @@ owerror_t oscore_protect_message(oscore_security_context_t *context,
 
 owerror_t oscore_unprotect_message(oscore_security_context_t *context,
                                    uint8_t version,
-                                   uint8_t code,
+                                   coap_code_t *code,
                                    coap_option_iht *options,
                                    uint8_t *optionsLen,
                                    OpenQueueEntry_t *msg,
@@ -69,7 +69,7 @@ owerror_t oscore_unprotect_message(oscore_security_context_t *context,
 
 uint16_t oscore_get_sequence_number(oscore_security_context_t *context);
 
-uint8_t oscore_parse_compressed_COSE(uint8_t *buffer,
+owerror_t oscore_parse_compressed_COSE(uint8_t *buffer,
                                      uint8_t bufferLen,
                                      uint16_t *sequenceNumber,
 				     uint8_t **kidContext,

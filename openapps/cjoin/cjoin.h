@@ -21,6 +21,7 @@ typedef struct {
     bool isJoined;
     oscore_security_context_t context;
     uint8_t medType;
+    uint8_t oscoreOptValue[OSCORE_OPT_MAX_LEN];
 } cjoin_vars_t;
 
 //=========================== variables =======================================
