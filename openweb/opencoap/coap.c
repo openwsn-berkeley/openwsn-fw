@@ -242,7 +242,9 @@ void coap_receive(OpenQueueEntry_t *msg) {
             do {
                 if (temp_desc->securityContext != NULL &&
                     temp_desc->securityContext->recipientIDLen == rcvdKidLen &&
-                    memcmp(rcvdKid, temp_desc->securityContext->recipientID, rcvdKidLen) == 0) {
+                    memcmp(rcvdKid, temp_desc->securityContext->recipientID, rcvdKidLen) == 0 &&
+		    temp_desc->securityContext->idContextLen == rcvdKidContextLen &&
+		    memcmp(rcvdKidContext, temp_desc->securityContext->idContext, rcvdKidContextLen) == 0) {
 
                     blindContext = temp_desc->securityContext;
                     break;
