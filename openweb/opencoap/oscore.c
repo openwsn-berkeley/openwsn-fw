@@ -621,13 +621,13 @@ uint8_t oscore_encode_compressed_COSE(uint8_t *buf,
 
     tmp = buf;
 
-    if (kidLen != 0) {
+    if (kid != NULL) {
         k = 1;
     } else {
         k = 0;
     }
 
-    if (kidContextLen != 0) {
+    if (kidContext != NULL) {
         h = 1;
     } else {
         h = 0;
