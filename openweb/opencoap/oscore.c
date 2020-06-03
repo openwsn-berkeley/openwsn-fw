@@ -90,6 +90,9 @@ void oscore_init_security_context(oscore_security_context_t *ctx,
     // common context
     ctx->aeadAlgorithm = AES_CCM_16_64_128;
 
+    memcpy(ctx->idContext, idContext, idContextLen);
+    ctx->idContextLen = idContextLen;
+
     // invoke HKDF to get common IV
     hkdf_derive_parameter(ctx->commonIV,
                           masterSecret,
