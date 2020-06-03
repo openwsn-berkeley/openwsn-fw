@@ -72,6 +72,8 @@ uint16_t oscore_get_sequence_number(oscore_security_context_t *context);
 uint8_t oscore_parse_compressed_COSE(uint8_t *buffer,
                                      uint8_t bufferLen,
                                      uint16_t *sequenceNumber,
+				     uint8_t **kidContext,
+				     uint8_t *kidContextLen,
                                      uint8_t **kid,
                                      uint8_t *kidLen);
 /**

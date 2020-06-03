@@ -401,18 +401,22 @@ uint16_t oscore_get_sequence_number(oscore_security_context_t *context) {
 uint8_t oscore_parse_compressed_COSE(uint8_t *buffer,
                                      uint8_t bufferLen,
                                      uint16_t *sequenceNumber,
+				     uint8_t **kidContext,
+				     uint8_t *kidContextLen,
                                      uint8_t **kid,
                                      uint8_t *kidLen
 ) {
     uint8_t index;
-    uint8_t pivsz;
+    uint8_t n;
     uint8_t k;
+    uint8_t h;
     uint8_t reserved;
 
     index = 0;
-    pivsz = (buffer[index] >> 0) & 0x07;
+    n = (buffer[index] >> 0) & 0x07;
     k = (buffer[index] >> 3) & 0x01;
-    reserved = (buffer[index] >> 4) & 0x0f;
+    h = (buffer[index] >> 4) & 0x01;
+    reserved = (buffer[index] >> 5) & 0x07;
 
     if (reserved) {
         return 0;
@@ -420,25 +424,27 @@ uint8_t oscore_parse_compressed_COSE(uint8_t *buffer,
 
     index++;
 
-    if (pivsz > 2) {
+    if (n > 2) {
         return 0;
-    } else if (pivsz == 1) {
+    } else if (n == 1) {
         *sequenceNumber = buffer[index];
         index++;
-    } else if (pivsz == 2) {
+    } else if (n == 2) {
         *sequenceNumber = packetfunctions_ntohs(&buffer[index]);
         index += 2;
     }
 
-    if (k) {
-        *kidLen = buffer[index];
-        index++;
-        *kid = &buffer[index];
-        index += *kidLen;
+    if (h) {
+        *kidContextLen = buffer[index];
+	index++;
+	*kidContext = &buffer[index];
+	index += *kidContextLen;
     }
 
-    if (index > bufferLen) {
-        return 0;
+    if (k) {
+        *kidLen = bufferLen - index;
+        *kid = (*kidLen == 0) ? NULL : &buffer[index];
+        index += *kidLen;
     }
 
     return index;

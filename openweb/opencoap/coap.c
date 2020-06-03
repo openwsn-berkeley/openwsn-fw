@@ -118,6 +118,8 @@ void coap_receive(OpenQueueEntry_t *msg) {
     coap_option_iht *proxyScheme;
     coap_option_iht *statelessProxy;
     uint16_t rcvdSequenceNumber;
+    uint8_t *rcvdKidContext;
+    uint8_t rcvdKidContextLen;
     uint8_t *rcvdKid;
     uint8_t rcvdKidLen;
     oscore_security_context_t *blindContext;
@@ -218,6 +220,8 @@ void coap_receive(OpenQueueEntry_t *msg) {
             index = oscore_parse_compressed_COSE(&msg->payload[0],
                                                  msg->length,
                                                  &rcvdSequenceNumber,
+						 &rcvdKidContext,
+						 &rcvdKidContextLen,
                                                  &rcvdKid,
                                                  &rcvdKidLen);
             if (index == 0) {
@@ -228,6 +232,8 @@ void coap_receive(OpenQueueEntry_t *msg) {
             index = oscore_parse_compressed_COSE(objectSecurity->pValue,
                                                  objectSecurity->length,
                                                  &rcvdSequenceNumber,
+						 &rcvdKidContext,
+						 &rcvdKidContextLen,
                                                  &rcvdKid,
                                                  &rcvdKidLen);
 
