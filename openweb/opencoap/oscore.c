@@ -11,6 +11,7 @@
 
 #define EAAD_MAX_LEN            9 + OSCOAP_MAX_ID_LEN // assumes no Class I options
 #define AAD_MAX_LEN            12 + EAAD_MAX_LEN
+#define INFO_MAX_LEN           2 * OSCOAP_MAX_ID_LEN + 2 + 1 + 4 + 1 + 3 
 
 //=========================== variables =======================================
 
@@ -22,6 +23,8 @@ owerror_t hkdf_derive_parameter(uint8_t *buffer,
                                 uint8_t masterSaltLen,
                                 uint8_t *identifier,
                                 uint8_t identifierLen,
+				uint8_t *idContext,
+				uint8_t idContextLen,
                                 uint8_t algorithm,
                                 oscore_derivation_t type,
                                 uint8_t length
@@ -63,6 +66,8 @@ void oscore_init_security_context(oscore_security_context_t *ctx,
                                   uint8_t senderIDLen,
                                   uint8_t *recipientID,
                                   uint8_t recipientIDLen,
+				  uint8_t *idContext,
+				  uint8_t idContextLen,
                                   uint8_t *masterSecret,
                                   uint8_t masterSecretLen,
                                   uint8_t *masterSalt,
@@ -75,6 +80,21 @@ void oscore_init_security_context(oscore_security_context_t *ctx,
     // common context
     ctx->aeadAlgorithm = AES_CCM_16_64_128;
 
+    // invoke HKDF to get common IV
+    hkdf_derive_parameter(ctx->commonIV,
+                          masterSecret,
+                          masterSecretLen,
+                          masterSalt,
+                          masterSaltLen,
+                          NULL,
+                          0,
+			  idContext,
+			  idContextLen,
+                          AES_CCM_16_64_128,
+                          OSCOAP_DERIVATION_TYPE_IV,
+                          AES_CCM_16_64_128_IV_LEN);
+
+
     // sender context
     memcpy(ctx->senderID, senderID, senderIDLen);
     ctx->senderIDLen = senderIDLen;
@@ -86,21 +106,11 @@ void oscore_init_security_context(oscore_security_context_t *ctx,
                           masterSaltLen,
                           senderID,
                           senderIDLen,
+			  idContext,
+			  idContextLen,
                           AES_CCM_16_64_128,
                           OSCOAP_DERIVATION_TYPE_KEY,
                           AES_CCM_16_64_128_KEY_LEN);
-    // invoke HKDF to get sender IV
-    hkdf_derive_parameter(ctx->senderIV,
-                          masterSecret,
-                          masterSecretLen,
-                          masterSalt,
-                          masterSaltLen,
-                          senderID,
-                          senderIDLen,
-                          AES_CCM_16_64_128,
-                          OSCOAP_DERIVATION_TYPE_IV,
-                          AES_CCM_16_64_128_IV_LEN);
-
     ctx->sequenceNumber = 0;
 
     // recipient context
@@ -114,21 +124,11 @@ void oscore_init_security_context(oscore_security_context_t *ctx,
                           masterSaltLen,
                           recipientID,
                           recipientIDLen,
+			  idContext,
+			  idContextLen,
                           AES_CCM_16_64_128,
                           OSCOAP_DERIVATION_TYPE_KEY,
                           AES_CCM_16_64_128_KEY_LEN);
-
-    // invoke HKDF to get recipient IV
-    hkdf_derive_parameter(ctx->recipientIV,
-                          masterSecret,
-                          masterSecretLen,
-                          masterSalt,
-                          masterSaltLen,
-                          recipientID,
-                          recipientIDLen,
-                          AES_CCM_16_64_128,
-                          OSCOAP_DERIVATION_TYPE_IV,
-                          AES_CCM_16_64_128_IV_LEN);
 
     ctx->window.bitArray = 0x01; // LSB set
     ctx->window.rightEdge = 0;
@@ -227,9 +227,9 @@ owerror_t oscore_protect_message(
 
     // construct nonce
     if (is_request(code)) {
-        xor_arrays(context->senderIV, partialIV, nonce, AES_CCM_16_64_128_IV_LEN);
+        xor_arrays(context->commonIV, partialIV, nonce, AES_CCM_16_64_128_IV_LEN);
     } else {
-        flip_first_bit(context->senderIV, nonce, AES_CCM_16_64_128_IV_LEN);
+        flip_first_bit(context->commonIV, nonce, AES_CCM_16_64_128_IV_LEN);
         xor_arrays(nonce, partialIV, nonce, AES_CCM_16_64_128_IV_LEN);
         // do not encode sequence number and ID in the response
         requestSeq = NULL;
@@ -355,9 +355,9 @@ owerror_t oscore_unprotect_message(
 
     // construct nonce
     if (is_request(code)) {
-        xor_arrays(context->recipientIV, partialIV, nonce, AES_CCM_16_64_128_IV_LEN);
+        xor_arrays(context->commonIV, partialIV, nonce, AES_CCM_16_64_128_IV_LEN);
     } else {
-        flip_first_bit(context->recipientIV, nonce, AES_CCM_16_64_128_IV_LEN);
+        flip_first_bit(context->commonIV, nonce, AES_CCM_16_64_128_IV_LEN);
         xor_arrays(nonce, partialIV, nonce, AES_CCM_16_64_128_IV_LEN);
     }
 
@@ -455,6 +455,8 @@ owerror_t hkdf_derive_parameter(uint8_t *buffer,
                                 uint8_t masterSaltLen,
                                 uint8_t *identifier,
                                 uint8_t identifierLen,
+				uint8_t *idContext,
+				uint8_t idContextLen,
                                 uint8_t algorithm,
                                 oscore_derivation_t type,
                                 uint8_t length
@@ -462,13 +464,18 @@ owerror_t hkdf_derive_parameter(uint8_t *buffer,
 
     const uint8_t iv[] = "IV";
     const uint8_t key[] = "Key";
-    uint8_t info[20];
+    uint8_t info[INFO_MAX_LEN];
     uint8_t infoLen;
     uint8_t ret;
 
     infoLen = 0;
-    infoLen += cborencoder_put_array(&info[infoLen], 4);
+    infoLen += cborencoder_put_array(&info[infoLen], 5);
     infoLen += cborencoder_put_bytes(&info[infoLen], identifier, identifierLen);
+    if (idContextLen && idContext) {
+        infoLen += cborencoder_put_bytes(&info[infoLen], idContext, idContextLen);
+    } else {
+        infoLen += cborencoder_put_null(&info[infoLen]);
+    }
     infoLen += cborencoder_put_unsigned(&info[infoLen], algorithm);
 
     if (type == OSCOAP_DERIVATION_TYPE_KEY) {

@@ -161,17 +161,18 @@ typedef struct {
 typedef struct {
     // common context
     uint8_t aeadAlgorithm;
+    uint8_t commonIV[AES_CCM_16_64_128_IV_LEN];
+    uint8_t idContext[OSCOAP_MAX_ID_LEN];
+    uint8_t idContextLen;
     // sender context 
     uint8_t senderID[OSCOAP_MAX_ID_LEN];
     uint8_t senderIDLen;
     uint8_t senderKey[AES_CCM_16_64_128_KEY_LEN];
-    uint8_t senderIV[AES_CCM_16_64_128_IV_LEN];
     uint16_t sequenceNumber;
     // recipient context
     uint8_t recipientID[OSCOAP_MAX_ID_LEN];
     uint8_t recipientIDLen;
     uint8_t recipientKey[AES_CCM_16_64_128_KEY_LEN];
-    uint8_t recipientIV[AES_CCM_16_64_128_IV_LEN];
     replay_window_t window;
 } oscore_security_context_t;
 

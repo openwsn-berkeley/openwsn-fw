@@ -112,6 +112,8 @@ void cjoin_init_security_context(void) {
                                  sizeof(senderID),
                                  recipientID,
                                  sizeof(recipientID),
+				 NULL,
+				 0,
                                  joinKey,
                                  16,
                                  NULL,
