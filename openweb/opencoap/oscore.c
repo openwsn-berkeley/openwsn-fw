@@ -161,7 +161,7 @@ owerror_t oscore_protect_message(
     uint8_t option_index;
 
     // find object security option in the list of passed options
-    option_count = coap_find_option(incomingOptions, incomingOptionsLen, COAP_OPTION_NUM_OBJECTSECURITY,
+    option_count = coap_find_option(incomingOptions, incomingOptionsLen, COAP_OPTION_NUM_OSCORE,
                                     &option_index);
     if (option_count >= 1) {
         objectSecurity = &incomingOptions[option_index];
@@ -298,7 +298,7 @@ owerror_t oscore_unprotect_message(
     uint8_t option_index;
 
     // find object security option in the list of passed options
-    option_count = coap_find_option(incomingOptions, *incomingOptionsLen, COAP_OPTION_NUM_OBJECTSECURITY,
+    option_count = coap_find_option(incomingOptions, *incomingOptionsLen, COAP_OPTION_NUM_OSCORE,
                                     &option_index);
     if (option_count >= 1) {
         objectSecurity = &incomingOptions[option_index];

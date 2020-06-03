@@ -200,7 +200,7 @@ void coap_receive(OpenQueueEntry_t *msg) {
 
 
     //== Object Security Option
-    option_count = coap_find_option(coap_incomingOptions, coap_incomingOptionsLen, COAP_OPTION_NUM_OBJECTSECURITY,
+    option_count = coap_find_option(coap_incomingOptions, coap_incomingOptionsLen, COAP_OPTION_NUM_OSCORE,
                                     &option_index);
     if (option_count >= 1) {
         objectSecurity = &coap_incomingOptions[option_index];
@@ -430,7 +430,7 @@ void coap_receive(OpenQueueEntry_t *msg) {
         }
 
         if (temp_desc->securityContext != NULL) {
-            coap_outgoingOptions[coap_outgoingOptionsLen++].type = COAP_OPTION_NUM_OBJECTSECURITY;
+            coap_outgoingOptions[coap_outgoingOptionsLen++].type = COAP_OPTION_NUM_OSCORE;
             if (coap_outgoingOptionsLen > MAX_COAP_OPTIONS) {
                 securityReturnCode = COAP_CODE_RESP_SERVERERROR; // no space for object security option
             }
@@ -810,7 +810,7 @@ coap_option_class_t coap_get_option_class(coap_option_t type) {
         case COAP_OPTION_NUM_URIPORT:
         case COAP_OPTION_NUM_PROXYURI:
         case COAP_OPTION_NUM_PROXYSCHEME:
-        case COAP_OPTION_NUM_OBJECTSECURITY:
+        case COAP_OPTION_NUM_OSCORE:
             return COAP_OPTION_CLASS_U;
         default:
             return COAP_OPTION_CLASS_U;
