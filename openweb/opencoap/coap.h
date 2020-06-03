@@ -45,8 +45,6 @@ static const uint8_t ipAddr_ringmaster[] = {0xbb, 0xbb, 0x00, 0x00, 0x00, 0x00, 
 
 #define OSCOAP_MASTER_SECRET_LEN       16
 
-#define OSCOAP_MAX_MASTER_SALT_LEN     0
-
 #define OSCORE_OPT_MAX_LEN             1 + 2 + 1 + OSCOAP_MAX_ID_LEN + OSCOAP_MAX_ID_LEN
 
 #define AES_CCM_16_64_128              10   // algorithm value as defined in COSE spec
