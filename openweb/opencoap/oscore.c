@@ -43,7 +43,10 @@ uint8_t oscore_construct_aad(uint8_t *buffer,
                              uint8_t optionsSerializedLen);
 
 void oscore_encode_compressed_COSE(OpenQueueEntry_t *msg,
-                                   uint8_t *requestSeq, uint8_t requestSeqLen,
+                                   uint8_t *requestSeq,
+				   uint8_t requestSeqLen,
+				   uint8_t *kidContext,
+				   uint8_t kidContextLen,
                                    uint8_t *requestKid,
                                    uint8_t requestKidLen);
 
@@ -249,7 +252,7 @@ owerror_t oscore_protect_message(
     }
 
     // encode compressed COSE
-    oscore_encode_compressed_COSE(msg, requestSeq, requestSeqLen, requestKid, requestKidLen);
+    oscore_encode_compressed_COSE(msg, requestSeq, requestSeqLen, context->idContext, context->idContextLen, requestKid, requestKidLen);
 
 
     if (payloadPresent) {
@@ -547,31 +550,48 @@ uint8_t oscore_construct_aad(uint8_t *buffer,
 }
 
 void oscore_encode_compressed_COSE(OpenQueueEntry_t *msg,
-                                   uint8_t *partialIV, uint8_t partialIVLen,
+                                   uint8_t *partialIV,
+				   uint8_t partialIVLen,
+				   uint8_t *kidContext,
+				   uint8_t kidContextLen,
                                    uint8_t *kid,
                                    uint8_t kidLen) {
     // ciphertext is already encoded and of length msg->length
-    uint8_t kidFlag;
+    uint8_t k;
+    uint8_t h;
 
     if (kidLen != 0) {
-        kidFlag = 1;
+        k = 1;
     } else {
-        kidFlag = 0;
+        k = 0;
     }
 
-    if (kidFlag) {
-        packetfunctions_reserveHeader(&msg, kidLen + 1);
-        msg->payload[0] = kidLen;
-        memcpy(&msg->payload[1], kid, kidLen);
+    if (kidContextLen != 0) {
+        h = 1;
+    } else {
+        h = 0;
+    }
+
+    if (k) {
+        packetfunctions_reserveHeader(&msg, kidLen);
+        memcpy(&msg->payload[0], kid, kidLen);
+    }
+
+    if (h) {
+        packetfunctions_reserveHeader(&msg, kidContextLen);
+	memcpy(&msg->payload[0], kidContext, kidContextLen);
+	packetfunctions_reserveHeader(&msg, 1);
+	msg->payload[0] = kidContextLen;
     }
 
     if (partialIVLen) {
         packetfunctions_reserveHeader(&msg, partialIVLen);
         memcpy(&msg->payload[0], partialIV, partialIVLen);
     }
+
     // flag byte
     packetfunctions_reserveHeader(&msg, 1);
-    msg->payload[0] = ((kidFlag << 3) | partialIVLen);
+    msg->payload[0] = ((h << 4) | (k << 3) | (partialIVLen & 0x07));
 }
 
 
