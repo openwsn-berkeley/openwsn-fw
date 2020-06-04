@@ -151,7 +151,7 @@ void oscore_init_security_context(oscore_security_context_t *ctx,
 owerror_t oscore_protect_message(
         oscore_security_context_t *context,
         uint8_t version,
-        coap_code_t code,
+        coap_code_t *code,
         coap_option_iht *incomingOptions,
         uint8_t incomingOptionsLen,
         OpenQueueEntry_t *msg,
@@ -191,7 +191,7 @@ owerror_t oscore_protect_message(
     requestSeq = &partialIV[AES_CCM_16_64_128_IV_LEN - 2];
     requestSeqLen = oscore_convert_sequence_number(sequenceNumber, &requestSeq);
 
-    if (is_request(code)) {
+    if (is_request(*code)) {
         requestKid = context->senderID;
         requestKidLen = context->senderIDLen;
     } else {
@@ -211,7 +211,7 @@ owerror_t oscore_protect_message(
 
     // encode CoAP code
     packetfunctions_reserveHeaderSize(msg, 1);
-    msg->payload[0] = code;
+    msg->payload[0] = *code;
 
     payload = &msg->payload[0];
     payloadLen = msg->length;
@@ -241,10 +241,13 @@ owerror_t oscore_protect_message(
 
 
 
-    if (is_request(code)) {
+    if (is_request(*code)) {
+	// return "encrypted" code
+	*code = COAP_CODE_REQ_POST;
 	idContext = context->idContext;
 	idContextLen = context->idContextLen;
     } else {
+	*code = COAP_CODE_RESP_CHANGED;
         // do not encode sequence number and ID in the response
         requestSeq = NULL;
         requestSeqLen = 0;

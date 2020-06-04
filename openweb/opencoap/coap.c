@@ -427,7 +427,7 @@ void coap_receive(OpenQueueEntry_t *msg) {
             encStatus = oscore_protect_message(
                     temp_desc->securityContext,
                     COAP_VERSION,
-                    coap_header.Code,
+                    &coap_header.Code,
                     coap_outgoingOptions,
                     coap_outgoingOptionsLen,
                     msg,
@@ -735,7 +735,7 @@ owerror_t coap_send(
         ret = oscore_protect_message(
                 descSender->securityContext,
                 COAP_VERSION,
-                code,
+                &code,
                 options,
                 optionsLen,
                 msg,

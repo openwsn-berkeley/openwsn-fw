@@ -53,7 +53,7 @@ void oscore_init_security_context(oscore_security_context_t *ctx,
 
 owerror_t oscore_protect_message(oscore_security_context_t *context,
                                  uint8_t version,
-                                 coap_code_t code,
+                                 coap_code_t *code,
                                  coap_option_iht *options,
                                  uint8_t optionsLen,
                                  OpenQueueEntry_t *msg,
