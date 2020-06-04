@@ -247,7 +247,7 @@ void forwarding_sendDone(OpenQueueEntry_t *msg, owerror_t error) {
         switch (msg->l4_protocol) {
 #if OPENWSN_UDP_C
             case IANA_UDP:
-                openudp_sendDone(msg, error);
+                udp_sendDone(msg, error);
                 break;
 #endif
             case IANA_ICMPv6:
@@ -316,7 +316,7 @@ void forwarding_receive(
         switch (msg->l4_protocol) {
 #if OPENWSN_UDP_C
             case IANA_UDP:
-                openudp_receive(msg);
+                udp_receive(msg);
                 break;
 #endif
             case IANA_ICMPv6:

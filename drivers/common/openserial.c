@@ -236,8 +236,10 @@ owerror_t openserial_printf(char *buffer, ...) {
 #if BOARD_OPENSERIAL_PRINTF
     uint8_t  i;
     char *ptr, *tmp;
+    char c;
+    void* p;
     int d;
-    char intgr[16];
+    char buf[16];
     char *fail = " - unknown format specifier - ";
 
     uint8_t  asn[5];
@@ -261,6 +263,10 @@ owerror_t openserial_printf(char *buffer, ...) {
         if (*ptr == '%') {
               ptr++;
               switch (*ptr) {
+                  case 'c':
+                      c = va_arg(ap, int);
+                      outputHdlcWrite(c);
+                      break;
                   case 's':
                       tmp = va_arg(ap, char*);
                       while (*tmp != '\0'){
@@ -270,8 +276,8 @@ owerror_t openserial_printf(char *buffer, ...) {
                       break;
                   case 'd':
                       d = va_arg(ap, int);
-                      snprintf(intgr, 16, "%d", d);
-                      tmp = intgr;
+                      snprintf(buf, 16, "%d", d);
+                      tmp = buf;
                       while (*tmp != '\0'){
                           outputHdlcWrite(*tmp);
                           tmp++;
@@ -279,8 +285,17 @@ owerror_t openserial_printf(char *buffer, ...) {
                       break;
                   case 'x':
                       d = va_arg(ap, int);
-                      snprintf(intgr, 16, "%x", d);
-                      tmp = intgr;
+                      snprintf(buf, 16, "%x", d);
+                      tmp = buf;
+                      while (*tmp != '\0'){
+                          outputHdlcWrite(*tmp);
+                          tmp++;
+                      }
+                      break;
+                  case 'p':
+                      p = va_arg(ap, void*);
+                      snprintf(buf, 16, "%p", p);
+                      tmp = buf;
                       while (*tmp != '\0'){
                           outputHdlcWrite(*tmp);
                           tmp++;

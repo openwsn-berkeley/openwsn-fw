@@ -84,6 +84,9 @@ OpenQueueEntry_t* openqueue_macGetKaPacket(open_addr_t *toNeighbor);
 OpenQueueEntry_t* openqueue_macGetDIOPacket(void);
 
 OpenQueueEntry_t* openqueue_macGetUnicastPacket(open_addr_t *toNeighbor);
+
+// called by transport layer
+OpenQueueEntry_t* openqueue_getPacketByComponent(uint8_t component);
 /**
 \}
 \}

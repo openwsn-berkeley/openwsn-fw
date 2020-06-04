@@ -46,7 +46,6 @@ void uinject_init(void) {
     uinject_vars.desc.port = WKP_UDP_INJECT;
     uinject_vars.desc.callbackReceive = &uinject_receive;
     uinject_vars.desc.callbackSendDone = &uinject_sendDone;
-    openudp_register(&uinject_vars.desc);
 
     uinject_vars.period = UINJECT_PERIOD_MS;
     // start periodic timer
@@ -216,12 +215,6 @@ void uinject_task_cb(void) {
     pkt->payload[1] = (uint8_t)((ticksInTotal & 0x0000ff00) >> 8);
     pkt->payload[0] = (uint8_t)(ticksInTotal & 0x000000ff);
 
-    if ((openudp_send(pkt)) == E_FAIL) {
-        openqueue_freePacketBuffer(pkt);
-    } else {
-        // set busySending to TRUE
-        uinject_vars.busySendingUinject = TRUE;
-    }
 }
 
 #endif /* OPENWSN_UINJECT_C */

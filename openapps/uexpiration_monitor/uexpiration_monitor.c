@@ -13,28 +13,18 @@
 #endif
 
 //=========================== variables =======================================
-umonitor_vars_t umonitor_vars;
 
 //=========================== prototypes ======================================
 
 //=========================== public ==========================================
 
 void umonitor_init(void) {
-    // clear local variables
-    memset(&umonitor_vars, 0, sizeof(umonitor_vars_t));
-
-    // register at UDP stack
-    umonitor_vars.desc.port = WKP_UDP_MONITOR;
-    umonitor_vars.desc.callbackReceive = &umonitor_receive;
-    umonitor_vars.desc.callbackSendDone = &umonitor_sendDone;
-    openudp_register(&umonitor_vars.desc);
 }
 
 void umonitor_receive(OpenQueueEntry_t *request) {
     uint16_t temp_l4_destination_port;
     OpenQueueEntry_t *reply;
 #ifdef DEADLINE_OPTION
-    monitor_expiration_vars_t	deadline;
 #endif
 
     reply = openqueue_getFreePacketBuffer(COMPONENT_UMONITOR);
@@ -55,21 +45,14 @@ void umonitor_receive(OpenQueueEntry_t *request) {
 
     /*************** Packet Payload  ********************/
     // [Expiration time, Delay]
-    if (packetfunctions_reserveHeader(&reply, (2 * sizeof(uint16_t))) == E_FAIL) {
-        openqueue_freePacketBuffer(reply);
-        return;
-    }
+    packetfunctions_reserveHeaderSize(reply, (2 * sizeof(uint16_t)));
 #ifdef DEADLINE_OPTION
-    memset(&deadline, 0, sizeof(monitor_expiration_vars_t));
     iphc_getDeadlineInfo(&deadline);
     memcpy(&reply->payload[0],&deadline.time_elapsed,sizeof(uint16_t));
     memcpy(&reply->payload[2],&deadline.time_left,sizeof(uint16_t));
 #endif
     openqueue_freePacketBuffer(request);
 
-    if ((openudp_send(reply)) == E_FAIL) {
-        openqueue_freePacketBuffer(reply);
-    }
 }
 
 void umonitor_sendDone(OpenQueueEntry_t *msg, owerror_t error) {

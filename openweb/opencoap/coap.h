@@ -210,7 +210,6 @@ typedef struct {
 //=========================== module variables ================================
 
 typedef struct {
-    udp_resource_desc_t desc;
     coap_resource_desc_t *resources;
     bool busySending;
     uint8_t delayCounter;

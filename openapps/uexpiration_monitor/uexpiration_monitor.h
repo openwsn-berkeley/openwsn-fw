@@ -17,9 +17,6 @@
 
 //=========================== variables =======================================
 
-typedef struct {
-    udp_resource_desc_t desc;  ///< resource descriptor for this module, used to register at UDP stack
-} umonitor_vars_t;
 
 //=========================== prototypes ======================================
 

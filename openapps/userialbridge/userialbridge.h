@@ -24,7 +24,6 @@
 typedef struct {
     uint8_t txbuf[USERIALBRIDGE_MAXPAYLEN];
     uint8_t txbufLen;
-    udp_resource_desc_t desc;  ///< resource descriptor for this module, used to register at UDP stack
 } userialbridge_vars_t;
 
 //=========================== prototypes ======================================

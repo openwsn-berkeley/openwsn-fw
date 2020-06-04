@@ -435,6 +435,22 @@ void openqueue_updateNextHopPayload(open_addr_t *newNextHop) {
     ENABLE_INTERRUPTS();
 }
 
+OpenQueueEntry_t*  openqueue_getPacketByComponent(uint8_t component) {
+    uint8_t i;
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+
+    for (i = 0; i < QUEUELENGTH; i++) {
+        if (openqueue_vars.queue[i].owner == component) {
+            ENABLE_INTERRUPTS();
+            return &openqueue_vars.queue[i];
+        }
+    }
+
+    ENABLE_INTERRUPTS();
+    return NULL;
+}
+
 OpenQueueEntry_t*  openqueue_macGetUnicastPacket(open_addr_t* toNeighbor){
     uint8_t i;
     INTERRUPT_DECLARATION();
