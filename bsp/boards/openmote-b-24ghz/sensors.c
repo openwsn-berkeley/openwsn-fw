@@ -27,16 +27,14 @@ sensors_vars_t sensors_vars;
 */
 void sensors_init(void) {
    
-   memset(&sensors_vars,0,sizeof(sensors_vars_t));
+    memset(&sensors_vars,0,sizeof(sensors_vars_t));
    
-   if (si70x_is_present()==1) {
-      si70x_init();
-      sensors_vars.sensorsTypes[SENSOR_TEMPERATURE] = 1;
-      sensors_vars.sensorsTypes[SENSOR_HUMIDITY] = 1;
-   }
+    si70x_init();
+    sensors_vars.sensorsTypes[SENSOR_TEMPERATURE] = 1;
+    sensors_vars.sensorsTypes[SENSOR_HUMIDITY] = 1;
     
-   adc_sensor_init();
-   sensors_vars.sensorsTypes[SENSOR_ADCTEMPERATURE] = 1;
+    adc_sensor_init();
+    sensors_vars.sensorsTypes[SENSOR_ADCTEMPERATURE] = 1;
    
 }
 

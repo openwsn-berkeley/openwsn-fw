@@ -13,7 +13,7 @@
 
 //=========================== define ==========================================
 
-#define SI70X_ADDRESS                   ( 0x80 )
+#define SI70X_ADDRESS                   ( 0x40 )
 
 #define SI70X_USER_REG_READ             ( 0xE7 )
 #define SI70X_USER_REG_WRITE            ( 0xE6 )
@@ -65,14 +65,6 @@ void si70x_init(void) {
     // Setup the configuration vector, the first position holds address
     // and the second position holds the actual configuration
     config[0] = SI70X_USER_REG_WRITE;
-    config[1] = 0;
-
-    // Read the current configuration according to the datasheet (pag. 9, fig. 18)
-    i2c_write_byte(SI70X_ADDRESS, SI70X_USER_REG_READ);
-    i2c_read_byte(SI70X_ADDRESS, &config[1]);
-
-    // Clean all the configuration bits except those reserved
-    config[1] &= SI70X_USER_REG_RESERVED_BITS;
 
     // Set the configuration bits without changing those reserved
     config[1] |= SI70X_USER_CONFIG;
@@ -109,7 +101,7 @@ uint16_t si70x_read_temperature(void) {
     i2c_write_byte(SI70X_ADDRESS, SI70X_TEMPERATURE_HM_CMD);
     i2c_read_bytes(SI70X_ADDRESS, si70x_temperature, sizeof(si70x_temperature));
     
-    temperature = (si70x_temperature[0] << 8) | (si70x_temperature[1] & SI70X_STATUS_MASK);
+    temperature = ((uint16_t)(si70x_temperature[0]) << 8) | (uint16_t)(si70x_temperature[1]);
     
     return temperature;
 }
