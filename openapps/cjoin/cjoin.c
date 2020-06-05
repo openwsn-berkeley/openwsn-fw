@@ -94,26 +94,20 @@ void cjoin_init(void) {
 }
 
 void cjoin_init_security_context(void) {
-    uint8_t senderID[9];
-    uint8_t recipientID[9];
+    uint8_t idContext[8];
+    uint8_t recipientID[] = {0x4a, 0x52, 0x43};
     uint8_t *joinKey;
 
-    eui64_get(senderID);
-    senderID[8] = 0x00;      // EUI-64 || 0x00 [minimal-security-03]
-
-    eui64_get(recipientID);
-    recipientID[8] = 0x01;   // EUI-64 || 0x01 [minimal-security-03]
-
+    eui64_get(idContext);
     idmanager_getJoinKey(&joinKey);
 
-    // TODO Pass id_context to the routine
     oscore_init_security_context(&cjoin_vars.context,
-                                 senderID,
-                                 sizeof(senderID),
+                                 NULL,
+                                 0,
                                  recipientID,
                                  sizeof(recipientID),
-				 NULL,
-				 0,
+				 idContext,
+				 sizeof(idContext),
                                  joinKey,
                                  16,
                                  NULL,
