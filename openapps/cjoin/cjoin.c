@@ -270,16 +270,16 @@ owerror_t cjoin_sendJoinRequest(open_addr_t *joinProxy) {
     options[0].length = sizeof(jrcHostName) - 1;
     options[0].pValue = (uint8_t *) jrcHostName;
 
-    // location-path option
-    options[1].type = COAP_OPTION_NUM_URIPATH;
-    options[1].length = sizeof(cjoin_path0) - 1;
-    options[1].pValue = (uint8_t *) cjoin_path0;
-
     // object security option
     // length and value are overwritten by the CoAP library
-    options[2].type = COAP_OPTION_NUM_OSCORE;
-    options[2].length = OSCORE_OPT_MAX_LEN;
-    options[2].pValue = cjoin_vars.oscoreOptValue;
+    options[1].type = COAP_OPTION_NUM_OSCORE;
+    options[1].length = OSCORE_OPT_MAX_LEN;
+    options[1].pValue = cjoin_vars.oscoreOptValue;
+
+    // location-path option
+    options[2].type = COAP_OPTION_NUM_URIPATH;
+    options[2].length = sizeof(cjoin_path0) - 1;
+    options[2].pValue = (uint8_t *) cjoin_path0;
 
     // ProxyScheme set to "coap"
     options[3].type = COAP_OPTION_NUM_PROXYSCHEME;
