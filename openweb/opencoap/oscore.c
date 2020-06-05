@@ -420,17 +420,27 @@ owerror_t oscore_parse_compressed_COSE(uint8_t *buffer,
                                      uint8_t **kid,
                                      uint8_t *kidLen)
 {
+    uint8_t tmp[0];
+    uint8_t *ptr;
     uint8_t index;
     uint8_t n;
     uint8_t k;
     uint8_t h;
     uint8_t reserved;
 
+    if (bufferLen == 0) {
+        tmp[0] = 0x00;
+	ptr = tmp;
+	bufferLen = 1;
+    } else {
+        ptr = buffer;
+    }
+
     index = 0;
-    n = (buffer[index] >> 0) & 0x07;
-    k = (buffer[index] >> 3) & 0x01;
-    h = (buffer[index] >> 4) & 0x01;
-    reserved = (buffer[index] >> 5) & 0x07;
+    n = (ptr[index] >> 0) & 0x07;
+    k = (ptr[index] >> 3) & 0x01;
+    h = (ptr[index] >> 4) & 0x01;
+    reserved = (ptr[index] >> 5) & 0x07;
 
     if (reserved) {
         return E_FAIL;
@@ -441,23 +451,23 @@ owerror_t oscore_parse_compressed_COSE(uint8_t *buffer,
     if (n > 2) {
         return 0;
     } else if (n == 1) {
-        *sequenceNumber = buffer[index];
+        *sequenceNumber = ptr[index];
         index++;
     } else if (n == 2) {
-        *sequenceNumber = packetfunctions_ntohs(&buffer[index]);
+        *sequenceNumber = packetfunctions_ntohs(&ptr[index]);
         index += 2;
     }
 
     if (h) {
-        *kidContextLen = buffer[index];
+        *kidContextLen = ptr[index];
 	index++;
-	*kidContext = &buffer[index];
+	*kidContext = &ptr[index];
 	index += *kidContextLen;
     }
 
     if (k) {
         *kidLen = bufferLen - index;
-        *kid = (*kidLen == 0) ? NULL : &buffer[index];
+        *kid = (*kidLen == 0) ? NULL : &ptr[index];
         index += *kidLen;
     }
 
