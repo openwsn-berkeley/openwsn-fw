@@ -107,6 +107,12 @@ int mote_main(void) {
                         
                 if (app_vars.txpk_txDone){
                     
+                    if (app_vars.time_in_second == BEACON_PERIOD) {
+                        
+                        app_vars.state = S_LISTEN_PROBE;
+                        break;
+                    }
+                    
                     app_vars.txpk_txDone = 0;
                     // led
                     leds_error_toggle();
@@ -165,15 +171,9 @@ int mote_main(void) {
 void cb_scTimerCompare(void) {
     
     if (app_vars.state == S_SEND_BEACON) {
-        
-        if (app_vars.time_in_second == BEACON_PERIOD) {
             
-            app_vars.state = S_LISTEN_PROBE;
-        } else {
-            
-            app_vars.time_in_second++;
-            sctimer_setCompare(sctimer_readCounter()+ TICKS_IN_ONE_SECOND);
-        }
+        app_vars.time_in_second++;
+        sctimer_setCompare(sctimer_readCounter()+ TICKS_IN_ONE_SECOND);
     } else {
         // todo
         
