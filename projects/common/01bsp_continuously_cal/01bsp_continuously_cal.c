@@ -29,8 +29,9 @@ corresponding to the incoming frame.
 //=========================== defines =========================================
 
 #define LENGTH_PACKET           3+LENGTH_CRC // maximum length is 127 bytes
+#define MAX_PKT_LEN             125+LENGTH_CRC
 #define CHANNEL                 11            // 24ghz: 11 = 2.405GHz, subghz: 11 = 865.325 in  FSK operating mode #1
-#define BEACON_PERIOD           10            // in seconds
+#define BEACON_PERIOD           20            // in seconds
 #define TICKS_IN_ONE_SECOND     32768         // (32768>>1) = 500ms @ 32kHz
 #define RX_TIMEOUT              10            // 10         = 300us @ 32kHz 
 
@@ -128,8 +129,9 @@ int mote_main(void) {
                     app_vars.txack_txDone == 1
                 ) {
                     
-                    app_vars.rxpk_rxDone = 0;
-                    app_vars.rx_timeout  = 0;
+                    app_vars.txack_txDone = 0;
+                    app_vars.rxpk_rxDone  = 0;
+                    app_vars.rx_timeout   = 0;
                     
                     radio_rfOff();
                     radio_rxEnable();
@@ -195,6 +197,12 @@ void cb_startFrame(PORT_TIMER_WIDTH timestamp) {
 }
 
 void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
+    
+    uint8_t packet[MAX_PKT_LEN];
+    uint8_t pkt_len;
+     int8_t rssi;
+    uint8_t lqi;
+       bool crc;
 
    if (app_vars.state == S_SEND_BEACON) {
        
@@ -203,13 +211,31 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
        
        if (app_vars.state == S_LISTEN_PROBE) {
            
-            sctimer_disable();
-            app_vars.rxpk_rxDone = 1;
+            radio_getReceivedFrame(
+                packet,
+                &pkt_len,
+                sizeof(packet),
+                &rssi,
+                &lqi,
+                &crc
+            );
+            
+            if (
+                crc                     && 
+                pkt_len==LENGTH_PACKET  && 
+                packet[0]=='S'          &&
+                packet[1]=='C'          &&
+                packet[2]=='M'
+            ) {
+            
+                sctimer_disable();
+                app_vars.rxpk_rxDone = 1;
+            }
        } else {
            
            if (app_vars.state == S_REPLY_ACK) {
                
-               app_vars.txack_txDone = 1;
+                app_vars.txack_txDone = 1;
            }
        }
         
