@@ -19,7 +19,7 @@
 
 #include <math.h>
 #include <string.h>
-#include "sx1276.h"
+#include "radio_sx1276.h"
 #include "sx1276Regs-LoRa.h"
 
 //=========================== variables =======================================
@@ -58,8 +58,8 @@ static void enableInterrupts(void);
 
 //=========================== public ==========================================
 
-uint8_t  spi_tx_buffer[2];
-uint8_t  spi_rx_buffer[2];
+//uint8_t  spi_tx_buffer[2];
+//uint8_t  spi_rx_buffer[2];
 
 void spi_init(){
   
@@ -111,15 +111,17 @@ void spi_init(){
     //spi_tx_buffer[0]     = 0x81;
     //spi_tx_buffer[1]     = 0x80;
     
-    spi_tx_buffer[0]     = REG_LR_OPMODE | (1 << 7);
-    spi_tx_buffer[1]     = 0x81;
+    //spi_tx_buffer[0]     = REG_LR_OPMODE | (1 << 7);
+    //spi_tx_buffer[1]     = 0x81;
     
     // ===========  Call the spi_txrx function =============
     
-    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
+    //spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
     
     //sx1276_spiWriteReg( REG_LR_OPMODE, 0x80);
     
+    radio_rfOn_sx1276();
+    radio_rfOff_sx1276();
     
  //=========== Calling LoRa process transmission functions ================
     
