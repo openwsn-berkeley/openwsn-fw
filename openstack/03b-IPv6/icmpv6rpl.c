@@ -370,8 +370,7 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection(void) {
     // if I'm a DAGroot, my DAGrank is always MINHOPRANKINCREASE
     if ((idmanager_getIsDAGroot()) == TRUE) {
         // the dagrank is not set through setting command, set rank to MINHOPRANKINCREASE here
-        if (icmpv6rpl_vars.myDAGrank !=
-            MINHOPRANKINCREASE) { // test for change so as not to report unchanged value when root
+        if (icmpv6rpl_vars.myDAGrank != MINHOPRANKINCREASE) { // test for change so as not to report unchanged value when root
             icmpv6rpl_vars.myDAGrank = MINHOPRANKINCREASE;
             return;
         }

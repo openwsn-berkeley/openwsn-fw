@@ -594,10 +594,7 @@ void openserial_handleRxFrame() {
             openbridge_triggerData();
             break;
         case SERFRAME_PC2MOTE_TRIGGERSERIALECHO:
-            openserial_handleEcho(
-                    &openserial_vars.inputBuf[1],
-                    openserial_vars.inputBufFillLevel - 1
-            );
+            openserial_handleEcho(&openserial_vars.inputBuf[1], openserial_vars.inputBufFillLevel - 1);
             break;
     }
 }

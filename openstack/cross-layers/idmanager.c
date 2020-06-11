@@ -149,8 +149,8 @@ owerror_t idmanager_setMyID(open_addr_t *newID) {
                          (errorparameter_t) 1);
             ENABLE_INTERRUPTS();
             return E_FAIL;
-            ENABLE_INTERRUPTS();
     }
+    ENABLE_INTERRUPTS();
     return E_SUCCESS;
 }
 
@@ -231,6 +231,9 @@ void idmanager_triggerAboutRoot(void) {
                 idmanager_vars.slotSkip = FALSE;
             }
             break;
+        default:
+            LOG_ERROR(COMPONENT_IDMANAGER, ERR_INVALID_PARAM, (errorparameter_t)0, (errorparameter_t)0);
+            return;
     }
 
     // store prefix (bytes 1-8)
@@ -249,8 +252,6 @@ void idmanager_triggerAboutRoot(void) {
     keyValue = &input_buffer[10];
     IEEE802154_security_setBeaconKey(keyIndex, keyValue);
     IEEE802154_security_setDataKey(keyIndex, keyValue);
-
-    return;
 }
 
 void idmanager_setJoinKey(uint8_t *key) {
