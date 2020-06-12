@@ -31,7 +31,7 @@ corresponding to the incoming frame.
 #define LENGTH_PACKET           3+LENGTH_CRC // maximum length is 127 bytes
 #define MAX_PKT_LEN             125+LENGTH_CRC
 #define CHANNEL                 11            // 24ghz: 11 = 2.405GHz, subghz: 11 = 865.325 in  FSK operating mode #1
-#define BEACON_PERIOD           20            // in seconds
+#define BEACON_PERIOD           5             // in seconds
 #define TICKS_IN_ONE_SECOND     32768         // (32768>>1) = 500ms @ 32kHz
 #define RX_TIMEOUT              10            // 10         = 300us @ 32kHz 
 
@@ -64,6 +64,8 @@ void cb_scTimerCompare(void);
 void cb_startFrame(PORT_TIMER_WIDTH timestamp);
 void cb_endFrame(PORT_TIMER_WIDTH timestamp);
 void send_frame(uint8_t data);
+
+void delay(void);
 
 //=========================== main ============================================
 
@@ -159,6 +161,7 @@ int mote_main(void) {
                         board_sleep();
                     } else {
                         freq_offset = radio_getFrequencyOffset();
+                        delay();
                         send_frame(freq_offset);
                         app_vars.txack_started = 1;
                     }
@@ -271,4 +274,11 @@ void send_frame(uint8_t data) {
     radio_loadPacket(app_vars.txpk_buf,app_vars.txpk_len);
     radio_txEnable();
     radio_txNow();
+}
+
+// 0x0cff indicates rougly 2.3ms running on OpenMote-B
+
+void delay(void) {
+    uint16_t i;
+    for (i=0;i<0x0cff;i++);
 }
