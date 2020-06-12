@@ -37,6 +37,8 @@ typedef uint16_t (*callbackRead_cbt)(void);
 
 typedef float (*callbackConvert_cbt)(uint16_t value);
 
+typedef void (*callbackReset_cbt)(void);
+
 typedef struct {
    uint8_t      sensorsTypes[SENSOR_LAST];
 } sensors_vars_t;
@@ -49,5 +51,6 @@ void sensors_init(void);
 bool sensors_is_present(uint8_t sensorType);
 callbackRead_cbt sensors_getCallbackRead(uint8_t sensorType);
 callbackConvert_cbt sensors_getCallbackConvert(uint8_t sensorType);
+callbackReset_cbt sensors_getCallbackReset(void);
 
 #endif // __SENSORS_H__

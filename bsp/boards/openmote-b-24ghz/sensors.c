@@ -26,16 +26,16 @@ sensors_vars_t sensors_vars;
    \brief Initialize sensors on the board
 */
 void sensors_init(void) {
-   
+
     memset(&sensors_vars,0,sizeof(sensors_vars_t));
-   
+
     si70x_init();
     sensors_vars.sensorsTypes[SENSOR_TEMPERATURE] = 1;
     sensors_vars.sensorsTypes[SENSOR_HUMIDITY] = 1;
-    
+
     adc_sensor_init();
     sensors_vars.sensorsTypes[SENSOR_ADCTEMPERATURE] = 1;
-   
+
 }
 
 /**
@@ -53,7 +53,7 @@ bool sensors_is_present(uint8_t sensorType) {
    \param[out] callback for reading data.
 */
 callbackRead_cbt sensors_getCallbackRead(uint8_t sensorType) {
-   
+
    switch (sensorType) {
       case SENSOR_TEMPERATURE:
          return &si70x_read_temperature;
@@ -64,7 +64,7 @@ callbackRead_cbt sensors_getCallbackRead(uint8_t sensorType) {
       default:
          return NULL;
    }
-   
+
 }
 
 /**
@@ -73,7 +73,7 @@ callbackRead_cbt sensors_getCallbackRead(uint8_t sensorType) {
    \param[out] callback for converting data.
 */
 callbackConvert_cbt sensors_getCallbackConvert(uint8_t sensorType) {
-   
+
    switch (sensorType) {
       case SENSOR_TEMPERATURE:
          return &si70x_convert_temperature;
@@ -84,7 +84,13 @@ callbackConvert_cbt sensors_getCallbackConvert(uint8_t sensorType) {
       default:
          return NULL;
    }
-   
+
 }
 
 //=========================== private =========================================
+
+callbackReset_cbt sensors_getCallbackReset(void) {
+
+   return &si70x_reset;
+
+}

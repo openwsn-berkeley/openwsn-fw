@@ -30,8 +30,8 @@ corresponding to the incoming frame.
 
 #define LENGTH_PACKET           3+LENGTH_CRC // maximum length is 127 bytes
 #define MAX_PKT_LEN             125+LENGTH_CRC
-#define CHANNEL                 11            // 24ghz: 11 = 2.405GHz, subghz: 11 = 865.325 in  FSK operating mode #1
-#define BEACON_PERIOD           5             // in seconds
+#define CHANNEL                 12            // 24ghz: 11 = 2.405GHz, subghz: 11 = 865.325 in  FSK operating mode #1
+#define BEACON_PERIOD           20             // in seconds
 #define TICKS_IN_ONE_SECOND     32768         // (32768>>1) = 500ms @ 32kHz
 #define RX_TIMEOUT              10            // 10         = 300us @ 32kHz 
 
@@ -155,6 +155,8 @@ int mote_main(void) {
                     
                     app_vars.txack_started  = 0;
                     app_vars.state          = S_LISTEN_PROBE;
+                    
+                    sensors_getCallbackReset();
                 } else {
                     
                     if (app_vars.txack_started == 1) {
@@ -280,5 +282,5 @@ void send_frame(uint8_t data) {
 
 void delay(void) {
     uint16_t i;
-    for (i=0;i<0x0cff;i++);
+    for (i=0;i<0xaaff;i++);
 }
