@@ -120,8 +120,9 @@ void spi_init(){
     
     //sx1276_spiWriteReg( REG_LR_OPMODE, 0x80);
     
-    radio_rfOn_sx1276();
-    radio_rfOff_sx1276();
+    SX1276SetSleep();
+    SX1276SetStby();
+    
     
  //=========== Calling LoRa process transmission functions ================
     
