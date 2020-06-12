@@ -145,10 +145,14 @@ void cexample_task_cb(void) {
     pkt->creator = COMPONENT_CEXAMPLE;
     pkt->owner = COMPONENT_CEXAMPLE;
     // CoAP payload
-    packetfunctions_reserveHeaderSize(pkt, PAYLOADLEN);
+    if (packetfunctions_reserveHeader(&pkt, PAYLOADLEN) == E_FAIL) {
+        openqueue_freePacketBuffer(pkt);
+        return;
+    }
     for (i = 0; i < PAYLOADLEN; i++) {
         pkt->payload[i] = i;
     }
+
     avg = openrandom_get16b();
     pkt->payload[0] = (avg >> 8) & 0xff;
     pkt->payload[1] = (avg >> 0) & 0xff;

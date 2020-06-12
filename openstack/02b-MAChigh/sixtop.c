@@ -206,7 +206,9 @@ owerror_t sixtop_request(
         if (code == IANA_6TOP_CMD_ADD || code == IANA_6TOP_CMD_RELOCATE) {
             for (i = 0; i < CELLLIST_MAX_LEN; i++) {
                 if (celllist_toBeAdded[i].isUsed) {
-                    packetfunctions_reserveHeaderSize(pkt, 4);
+                    if (packetfunctions_reserveHeader(&pkt, 4) == E_FAIL){
+                        return E_FAIL;
+                    }
                     pkt->payload[0] = (uint8_t)(celllist_toBeAdded[i].slotoffset & 0x00FF);
                     pkt->payload[1] = (uint8_t)((celllist_toBeAdded[i].slotoffset & 0xFF00) >> 8);
                     pkt->payload[2] = (uint8_t)(celllist_toBeAdded[i].channeloffset & 0x00FF);
@@ -218,7 +220,9 @@ owerror_t sixtop_request(
         if (code == IANA_6TOP_CMD_DELETE || code == IANA_6TOP_CMD_RELOCATE) {
             for (i = 0; i < CELLLIST_MAX_LEN; i++) {
                 if (celllist_toBeDeleted[i].isUsed) {
-                    packetfunctions_reserveHeaderSize(pkt, 4);
+                    if (packetfunctions_reserveHeader(&pkt, 4) == E_FAIL){
+                        return E_FAIL;
+                    }
                     pkt->payload[0] = (uint8_t)(celllist_toBeDeleted[i].slotoffset & 0x00FF);
                     pkt->payload[1] = (uint8_t)((celllist_toBeDeleted[i].slotoffset & 0xFF00) >> 8);
                     pkt->payload[2] = (uint8_t)(celllist_toBeDeleted[i].channeloffset & 0x00FF);
@@ -228,31 +232,41 @@ owerror_t sixtop_request(
             }
         }
         // append 6p numberCells
-        packetfunctions_reserveHeaderSize(pkt, sizeof(uint8_t));
+        if (packetfunctions_reserveHeader(&pkt, sizeof(uint8_t))) {
+            return E_FAIL;
+        }
         *((uint8_t * )(pkt->payload)) = numCells;
         len += 1;
     }
 
     if (code == IANA_6TOP_CMD_LIST) {
         // append 6p max number of cells
-        packetfunctions_reserveHeaderSize(pkt, sizeof(uint16_t));
+        if (packetfunctions_reserveHeader(&pkt, sizeof(uint16_t)) == E_FAIL){
+            return E_FAIL;
+        }
         *((uint8_t * )(pkt->payload)) = (uint8_t)(listingMaxNumCells & 0x00FF);
         *((uint8_t * )(pkt->payload + 1)) = (uint8_t)(listingMaxNumCells & 0xFF00) >> 8;
         len += 2;
         // append 6p listing offset
-        packetfunctions_reserveHeaderSize(pkt, sizeof(uint16_t));
+        if (packetfunctions_reserveHeader(&pkt, sizeof(uint16_t)) == E_FAIL){
+            return E_FAIL;
+        }
         *((uint8_t * )(pkt->payload)) = (uint8_t)(listingOffset & 0x00FF);
         *((uint8_t * )(pkt->payload + 1)) = (uint8_t)(listingOffset & 0xFF00) >> 8;
         len += 2;
         // append 6p Reserved field
-        packetfunctions_reserveHeaderSize(pkt, sizeof(uint8_t));
+        if (packetfunctions_reserveHeader(&pkt, sizeof(uint8_t)) == E_FAIL){
+            return E_FAIL;
+        }
         *((uint8_t * )(pkt->payload)) = 0;
         len += 1;
     }
 
     if (code != IANA_6TOP_CMD_CLEAR) {
         // append 6p celloptions
-        packetfunctions_reserveHeaderSize(pkt, sizeof(uint8_t));
+        if (packetfunctions_reserveHeader(&pkt, sizeof(uint8_t)) == E_FAIL) {
+            return E_FAIL;
+        }
         *((uint8_t * )(pkt->payload)) = cellOptions;
         len += 1;
     } else {
@@ -261,41 +275,55 @@ owerror_t sixtop_request(
     }
 
     // append 6p metadata
-    packetfunctions_reserveHeaderSize(pkt, sizeof(uint16_t));
+    if (packetfunctions_reserveHeader(&pkt, sizeof(uint16_t)) == E_FAIL){
+        return E_FAIL;
+    }
     pkt->payload[0] = (uint8_t)(sixtop_vars.cb_sf_getMetadata() & 0x00FF);
     pkt->payload[1] = (uint8_t)((sixtop_vars.cb_sf_getMetadata() & 0xFF00) >> 8);
     len += 2;
 
     // append 6p Seqnum and schedule Generation
-    packetfunctions_reserveHeaderSize(pkt, sizeof(uint8_t));
+    if (packetfunctions_reserveHeader(&pkt, sizeof(uint8_t)) == E_FAIL) {
+        return E_FAIL;
+    }
     sequenceNumber = neighbors_getSequenceNumber(neighbor);
     *((uint8_t * )(pkt->payload)) = sequenceNumber;
     len += 1;
 
     // append 6p sfid
-    packetfunctions_reserveHeaderSize(pkt, sizeof(uint8_t));
+    if (packetfunctions_reserveHeader(&pkt, sizeof(uint8_t)) == E_FAIL) {
+        return E_FAIL;
+    }
     *((uint8_t * )(pkt->payload)) = sfid;
     len += 1;
 
     // append 6p code
-    packetfunctions_reserveHeaderSize(pkt, sizeof(uint8_t));
+    if (packetfunctions_reserveHeader(&pkt, sizeof(uint8_t)) == E_FAIL) {
+        return E_FAIL;
+    }
     *((uint8_t * )(pkt->payload)) = code;
     // record the code to determine the action after 6p senddone
     pkt->l2_sixtop_command = code;
     len += 1;
 
     // append 6p version, T(type) and  R(reserved)
-    packetfunctions_reserveHeaderSize(pkt, sizeof(uint8_t));
+    if (packetfunctions_reserveHeader(&pkt, sizeof(uint8_t)) == E_FAIL) {
+        return E_FAIL;
+    }
     *((uint8_t * )(pkt->payload)) = IANA_6TOP_6P_VERSION | IANA_6TOP_TYPE_REQUEST;
     len += 1;
 
     // append 6p subtype id
-    packetfunctions_reserveHeaderSize(pkt, sizeof(uint8_t));
+    if (packetfunctions_reserveHeader(&pkt, sizeof(uint8_t)) == E_FAIL) {
+        return E_FAIL;
+    }
     *((uint8_t * )(pkt->payload)) = IANA_6TOP_SUBIE_ID;
     len += 1;
 
     // append IETF IE header (length_groupid_type)
-    packetfunctions_reserveHeaderSize(pkt, sizeof(uint16_t));
+    if (packetfunctions_reserveHeader(&pkt, sizeof(uint16_t)) == E_FAIL) {
+        return E_FAIL;
+    }
     length_groupid_type = len;
     length_groupid_type |= (IANA_IETF_IE_GROUP_ID | IANA_IETF_IE_TYPE);
     pkt->payload[0] = length_groupid_type & 0xFF;
@@ -456,7 +484,7 @@ void task_sixtopNotifReceive(void) {
     }
 
     // toss the header IEs
-    packetfunctions_tossHeader(msg, lenIE);
+    packetfunctions_tossHeader(&msg, lenIE);
 
     // reset it to avoid race conditions with this var.
     msg->l2_joinPriorityPresent = FALSE;
@@ -563,13 +591,15 @@ owerror_t sixtop_send_internal(
     // transmit with the default TX power
     msg->l1_txPower = TX_POWER;
     // add a IEEE802.15.4 header
-    ieee802154_prependHeader(
+    if (ieee802154_prependHeader(
             msg,
             msg->l2_frameType,
             payloadIEPresent,
             msg->l2_dsn,
             &(msg->l2_nextORpreviousHop)
-    );
+    ) == E_FAIL) {
+        return E_FAIL;
+    }
     // change owner to IEEE802154E fetches it from queue
     msg->owner = COMPONENT_SIXTOP_TO_IEEE802154E;
 
@@ -711,7 +741,7 @@ port_INLINE void sixtop_sendEB(void) {
     // in case we none default number of shared cells defined in minimal configuration
     if (ebIEsBytestream[EB_SLOTFRAME_NUMLINK_OFFSET] > 1) {
         for (i = ebIEsBytestream[EB_SLOTFRAME_NUMLINK_OFFSET] - 1; i > 0; i--) {
-            packetfunctions_reserveHeaderSize(eb, 5);
+            packetfunctions_reserveHeader(&eb, 5);
             eb->payload[0] = i;    // slot offset
             eb->payload[1] = 0x00;
             eb->payload[2] = 0x00; // channel offset
@@ -721,7 +751,7 @@ port_INLINE void sixtop_sendEB(void) {
     }
 
     // reserve space for EB IEs
-    packetfunctions_reserveHeaderSize(eb, EB_IE_LEN);
+    packetfunctions_reserveHeader(&eb, EB_IE_LEN);
     for (i = 0; i < EB_IE_LEN; i++) {
         eb->payload[i] = ebIEsBytestream[i];
     }
@@ -1170,7 +1200,7 @@ void sixtop_six2six_notifyReceive(
                                     &channeloffset)
                             ) {
                         // found one cell after slot offset+i
-                        packetfunctions_reserveHeaderSize(response_pkt, 4);
+                        packetfunctions_reserveHeader(&response_pkt, 4);
                         response_pkt->payload[0] = slotoffset & 0x00FF;
                         response_pkt->payload[1] = (slotoffset & 0xFF00) >> 8;
                         response_pkt->payload[2] = channeloffset & 0x00FF;
@@ -1223,7 +1253,7 @@ void sixtop_six2six_notifyReceive(
                     }
                 }
                 returnCode = IANA_6TOP_RC_SUCCESS;
-                packetfunctions_reserveHeaderSize(response_pkt, sizeof(uint16_t));
+                packetfunctions_reserveHeader(&response_pkt, sizeof(uint16_t));
                 response_pkt->payload[0] = numCells & 0x00FF;
                 response_pkt->payload[1] = (numCells & 0xFF00) >> 8;
                 response_pktLen += 2;
@@ -1258,7 +1288,7 @@ void sixtop_six2six_notifyReceive(
                 if (sixtop_areAvailableCellsToBeScheduled(metadata, numCells, response_pkt->l2_sixtop_celllist_add)) {
                     for (i = 0; i < CELLLIST_MAX_LEN; i++) {
                         if (response_pkt->l2_sixtop_celllist_add[i].isUsed) {
-                            packetfunctions_reserveHeaderSize(response_pkt, 4);
+                            packetfunctions_reserveHeader(&response_pkt, 4);
                             response_pkt->payload[0] = (uint8_t)(
                                     response_pkt->l2_sixtop_celllist_add[i].slotoffset & 0x00FF);
                             response_pkt->payload[1] = (uint8_t)(
@@ -1301,7 +1331,7 @@ void sixtop_six2six_notifyReceive(
                     returnCode = IANA_6TOP_RC_SUCCESS;
                     for (i = 0; i < CELLLIST_MAX_LEN; i++) {
                         if (response_pkt->l2_sixtop_celllist_delete[i].isUsed) {
-                            packetfunctions_reserveHeaderSize(response_pkt, 4);
+                            packetfunctions_reserveHeader(&response_pkt, 4);
                             response_pkt->payload[0] = (uint8_t)(
                                     response_pkt->l2_sixtop_celllist_delete[i].slotoffset & 0x00FF);
                             response_pkt->payload[1] = (uint8_t)(
@@ -1367,7 +1397,7 @@ void sixtop_six2six_notifyReceive(
                 if (sixtop_areAvailableCellsToBeScheduled(metadata, numCells, response_pkt->l2_sixtop_celllist_add)) {
                     for (i = 0; i < CELLLIST_MAX_LEN; i++) {
                         if (response_pkt->l2_sixtop_celllist_add[i].isUsed) {
-                            packetfunctions_reserveHeaderSize(response_pkt, 4);
+                            packetfunctions_reserveHeader(&response_pkt, 4);
                             response_pkt->payload[0] = (uint8_t)(
                                     response_pkt->l2_sixtop_celllist_add[i].slotoffset & 0x00FF);
                             response_pkt->payload[1] = (uint8_t)(
@@ -1397,32 +1427,32 @@ void sixtop_six2six_notifyReceive(
         }
 
         // append 6p Seqnum
-        packetfunctions_reserveHeaderSize(response_pkt, sizeof(uint8_t));
+        packetfunctions_reserveHeader(&response_pkt, sizeof(uint8_t));
         *((uint8_t * )(response_pkt->payload)) = seqNum;
         response_pktLen += 1;
 
         // append 6p sfid
-        packetfunctions_reserveHeaderSize(response_pkt, sizeof(uint8_t));
+        packetfunctions_reserveHeader(&response_pkt, sizeof(uint8_t));
         *((uint8_t * )(response_pkt->payload)) = sixtop_vars.cb_sf_getsfid();
         response_pktLen += 1;
 
         // append 6p code
-        packetfunctions_reserveHeaderSize(response_pkt, sizeof(uint8_t));
+        packetfunctions_reserveHeader(&response_pkt, sizeof(uint8_t));
         *((uint8_t * )(response_pkt->payload)) = returnCode;
         response_pktLen += 1;
 
         // append 6p version, T(type) and  R(reserved)
-        packetfunctions_reserveHeaderSize(response_pkt, sizeof(uint8_t));
+        packetfunctions_reserveHeader(&response_pkt, sizeof(uint8_t));
         *((uint8_t * )(response_pkt->payload)) = IANA_6TOP_6P_VERSION | IANA_6TOP_TYPE_RESPONSE;
         response_pktLen += 1;
 
         // append 6p subtype id
-        packetfunctions_reserveHeaderSize(response_pkt, sizeof(uint8_t));
+        packetfunctions_reserveHeader(&response_pkt, sizeof(uint8_t));
         *((uint8_t * )(response_pkt->payload)) = IANA_6TOP_SUBIE_ID;
         response_pktLen += 1;
 
         // append IETF IE header (length_groupid_type)
-        packetfunctions_reserveHeaderSize(response_pkt, sizeof(uint16_t));
+        packetfunctions_reserveHeader(&response_pkt, sizeof(uint16_t));
         length_groupid_type = response_pktLen;
         length_groupid_type |= (IANA_IETF_IE_GROUP_ID | IANA_IETF_IE_TYPE);
         response_pkt->payload[0] = length_groupid_type & 0xFF;
@@ -1555,9 +1585,22 @@ void sixtop_six2six_notifyReceive(
         } else {
             sixtop_vars.cb_sf_handleRCError(code, &(pkt->l2_nextORpreviousHop));
         }
-        LOG_INFO(COMPONENT_SIXTOP, ERR_SIXTOP_RETURNCODE,
-                 (errorparameter_t) code,
-                 (errorparameter_t) sixtop_vars.six2six_state);
+
+        if (code == IANA_6TOP_RC_SUCCESS) {
+            LOG_SUCCESS(COMPONENT_SIXTOP, ERR_SIXTOP_RETURNCODE,
+                        (errorparameter_t)
+            code,
+                    (errorparameter_t)
+            sixtop_vars.six2six_state);
+        } else if (code == IANA_6TOP_RC_EOL || code == IANA_6TOP_RC_BUSY || code == IANA_6TOP_RC_LOCKED) {
+            LOG_INFO(COMPONENT_SIXTOP, ERR_SIXTOP_RETURNCODE,
+                    (errorparameter_t) code,
+                    (errorparameter_t) sixtop_vars.six2six_state);
+        } else {
+            LOG_ERROR(COMPONENT_SIXTOP, ERR_SIXTOP_RETURNCODE,
+                    (errorparameter_t) code,
+                    (errorparameter_t) sixtop_vars.six2six_state);
+        }
 
         memset(&sixtop_vars.neighborToClearCells, 0, sizeof(open_addr_t));
         sixtop_vars.six2six_state = SIX_STATE_IDLE;

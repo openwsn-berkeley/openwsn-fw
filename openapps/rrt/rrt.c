@@ -163,7 +163,10 @@ owerror_t rrt_receive(
 
 void rrt_setGETRespMsg(OpenQueueEntry_t *msg, uint8_t registered) {
     if (registered == 0) {
-        packetfunctions_reserveHeaderSize(msg, 11);
+        if (packetfunctions_reserveHeader(&msg, 11) == E_FAIL) {
+            openqueue_freePacketBuffer(msg);
+            return;
+        }
         msg->payload[0] = 'r';
         msg->payload[1] = 'e';
         msg->payload[2] = 'g';
@@ -179,7 +182,10 @@ void rrt_setGETRespMsg(OpenQueueEntry_t *msg, uint8_t registered) {
         rrt_sendCoAPMsg('D', NULL); //'D' stands for discovery, 0 for ringmaster
 
     } else {
-        packetfunctions_reserveHeaderSize(msg, 10);
+        if (packetfunctions_reserveHeader(&msg, 10) == E_FAIL) {
+            openqueue_freePacketBuffer(msg);
+            return;
+        }
         msg->payload[0] = 'r';
         msg->payload[1] = 'e';
         msg->payload[2] = 'g';
@@ -213,7 +219,10 @@ void rrt_sendCoAPMsg(char actionMsg, uint8_t *ipv6mote) {
     pkt->owner = COMPONENT_RRT;
     pkt->l4_protocol = IANA_UDP;
 
-    packetfunctions_reserveHeaderSize(pkt, 1);
+    if (packetfunctions_reserveHeader(&pkt, 1) == E_FAIL) {
+        openqueue_freePacketBuffer(pkt);
+        return;
+    }
     pkt->payload[0] = actionMsg;
 
     // location-path option

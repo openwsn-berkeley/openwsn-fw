@@ -1,7 +1,10 @@
 #include "config.h"
 #include "packetfunctions.h"
+#include "IEEE802154_security.h"
 #include "openserial.h"
+#include "openqueue.h"
 #include "idmanager.h"
+#include "radio.h"
 
 //=========================== variables =======================================
 
@@ -14,10 +17,7 @@ void onesComplementSum(uint8_t *global_sum, uint8_t *ptr, int length);
 //======= address translation
 
 //assuming an ip128b is a concatenation of prefix64b followed by a mac64b
-void packetfunctions_ip128bToMac64b(
-        open_addr_t *ip128b,
-        open_addr_t *prefix64btoWrite,
-        open_addr_t *mac64btoWrite) {
+void packetfunctions_ip128bToMac64b(open_addr_t *ip128b, open_addr_t *prefix64btoWrite, open_addr_t *mac64btoWrite) {
     if (ip128b->type != ADDR_128B) {
         LOG_CRITICAL(COMPONENT_PACKETFUNCTIONS, ERR_WRONG_ADDR_TYPE,
                      (errorparameter_t) ip128b->type,
@@ -25,16 +25,14 @@ void packetfunctions_ip128bToMac64b(
         mac64btoWrite->type = ADDR_NONE;
         return;
     }
+
     prefix64btoWrite->type = ADDR_PREFIX;
     memcpy(prefix64btoWrite->prefix, &(ip128b->addr_128b[0]), 8);
     mac64btoWrite->type = ADDR_64B;
     memcpy(mac64btoWrite->addr_64b, &(ip128b->addr_128b[8]), 8);
 }
 
-void packetfunctions_mac64bToIp128b(
-        open_addr_t *prefix64b,
-        open_addr_t *mac64b,
-        open_addr_t *ip128bToWrite) {
+void packetfunctions_mac64bToIp128b(open_addr_t *prefix64b, open_addr_t *mac64b, open_addr_t *ip128bToWrite) {
     if (prefix64b->type != ADDR_PREFIX || mac64b->type != ADDR_64B) {
         LOG_CRITICAL(COMPONENT_PACKETFUNCTIONS, ERR_WRONG_ADDR_TYPE,
                      (errorparameter_t) prefix64b->type,
@@ -42,6 +40,7 @@ void packetfunctions_mac64bToIp128b(
         ip128bToWrite->type = ADDR_NONE;
         return;
     }
+
     ip128bToWrite->type = ADDR_128B;
     memcpy(&(ip128bToWrite->addr_128b[0]), &(prefix64b->prefix[0]), 8);
     memcpy(&(ip128bToWrite->addr_128b[8]), &(mac64b->addr_64b[0]), 8);
@@ -56,6 +55,7 @@ void packetfunctions_mac64bToMac16b(open_addr_t *mac64b, open_addr_t *mac16btoWr
         mac16btoWrite->type = ADDR_NONE;
         return;
     }
+
     mac16btoWrite->type = ADDR_16B;
     mac16btoWrite->addr_16b[0] = mac64b->addr_64b[6];
     mac16btoWrite->addr_16b[1] = mac64b->addr_64b[7];
@@ -208,7 +208,6 @@ bool packetfunctions_sameAddress(open_addr_t *address_1, open_addr_t *address_2)
         case ADDR_ANYCAST:
             address_length = 16;
             break;
-
         default:
             LOG_CRITICAL(COMPONENT_PACKETFUNCTIONS, ERR_WRONG_ADDR_TYPE,
                          (errorparameter_t) address_1->type,
@@ -256,7 +255,7 @@ void packetfunctions_readAddress(uint8_t *payload, uint8_t type, open_addr_t *wr
     }
 }
 
-void packetfunctions_writeAddress(OpenQueueEntry_t *msg, open_addr_t *address, bool littleEndian) {
+owerror_t packetfunctions_writeAddress(OpenQueueEntry_t **msg, open_addr_t *address, bool littleEndian) {
     uint8_t i;
     uint8_t address_length;
 
@@ -276,79 +275,235 @@ void packetfunctions_writeAddress(OpenQueueEntry_t *msg, open_addr_t *address, b
             LOG_CRITICAL(COMPONENT_PACKETFUNCTIONS, ERR_WRONG_ADDR_TYPE,
                          (errorparameter_t) address->type,
                          (errorparameter_t) 7);
-            return;
+            return E_FAIL;
     }
 
     for (i = 0; i < address_length; i++) {
-        msg->payload -= sizeof(uint8_t);
-        msg->length += sizeof(uint8_t);
+        if (packetfunctions_reserveHeader(msg, sizeof(uint8_t)) == E_FAIL){
+            return E_FAIL;
+        }
         if (littleEndian) {
-            *((uint8_t * )(msg->payload)) = address->addr_128b[i];
+            *((uint8_t * )((*msg)->payload)) = address->addr_128b[i];
         } else {
-            *((uint8_t * )(msg->payload)) = address->addr_128b[address_length - 1 - i];
+            *((uint8_t * )((*msg)->payload)) = address->addr_128b[address_length - 1 - i];
         }
     }
+
+    return E_SUCCESS;
 }
 
 //======= reserving/tossing headers
 
-void packetfunctions_reserveHeaderSize(OpenQueueEntry_t *pkt, uint16_t header_length) {
-    pkt->payload -= header_length;
-    pkt->length += header_length;
-    if ((uint8_t * )(pkt->payload) < (uint8_t * )(pkt->packet)) {
-        LOG_CRITICAL(COMPONENT_PACKETFUNCTIONS, ERR_PACKET_TOO_LONG,
-                     (errorparameter_t) 0,
-                     (errorparameter_t) pkt->length);
-    }
-}
-
-void packetfunctions_tossHeader(OpenQueueEntry_t *pkt, uint16_t header_length) {
-    uint16_t size;
+owerror_t packetfunctions_reserveHeader(OpenQueueEntry_t **pkt, uint16_t header_length) {
+    int16_t available_bytes;
+    available_bytes = IEEE802154_FRAME_SIZE - LENGTH_CRC - IEEE802154_SECURITY_TAG_LEN;
 
 #if defined(OPENWSN_6LO_FRAGMENTATION_C)
-    size = pkt->is_big_packet == TRUE ? IPV6_PACKET_SIZE : IEEE802154_FRAME_SIZE;
-#else
-    size = IEEE802154_FRAME_SIZE;
-#endif
+    if ((*pkt)->is_big_packet == FALSE && ((*pkt)->length + header_length) > available_bytes) {
+        // CASE 1: small packet exceeding it boundaries, try copy to big packet.
 
-    pkt->payload += header_length;
-    pkt->length -= header_length;
+        // below the fragmentation layer, we cannot use big packets
+        if ((*pkt)->owner < COMPONENT_FRAG) {
+            return E_FAIL;
+        }
 
-    if ((uint8_t * )(pkt->payload) > (uint8_t * )(pkt->packet + size)) {
+        OpenQueueEntry_t *bpkt;
+        if ((bpkt = openqueue_getFreeBigPacketBuffer((*pkt)->creator)) == NULL) {
+            return E_FAIL;
+        }
+
+        memcpy(bpkt, (*pkt), sizeof(OpenQueueEntry_t));
+
+        // reset some packet metadata
+        bpkt->length = 0;
+        bpkt->is_big_packet = TRUE;
+        bpkt->payload = &(((OpenQueueBigEntry_t *) bpkt)->packet_remainder[IPV6_PACKET_SIZE - IEEE802154_FRAME_SIZE]);
+
+        // copy contents from small packet to new packet
+        if (packetfunctions_reserveHeader(&bpkt, (*pkt)->length) == E_FAIL) {
+            openqueue_freePacketBuffer(bpkt);
+            return E_FAIL;
+        }
+        memcpy(bpkt->payload, (*pkt)->payload, (*pkt)->length);
+        bpkt->l4_payload = bpkt->payload + ((*pkt)->payload - (*pkt)->l4_payload);
+
+        // now reserve the original requested allocation
+        if (packetfunctions_reserveHeader(&bpkt, header_length) == E_FAIL) {
+            openqueue_freePacketBuffer(bpkt);
+            return E_FAIL;
+        }
+
+        LOG_VERBOSE(COMPONENT_PACKETFUNCTIONS, ERR_COPY_TO_BPKT, (*pkt)->length + header_length, available_bytes);
+
+        // release normal OpenQueueEntry
+        openqueue_freePacketBuffer((*pkt));
+
+        // set pointer
+        (*pkt) = bpkt;
+    } else if ((*pkt)->is_big_packet == FALSE && (*pkt)->length + header_length <= available_bytes){
+        // CASE 2: within boundaries small packet, do normal allocation
+        (*pkt)->payload -= header_length;
+        (*pkt)->length += header_length;
+
+        // check for buffer overflow on the left and on the right
+        if ((uint8_t * )((*pkt)->payload) < (uint8_t * )((*pkt)->packet) ||
+            (*pkt)->payload + (*pkt)->length > &(*pkt)->packet[IEEE802154_FRAME_SIZE]) {
+            LOG_CRITICAL(COMPONENT_PACKETFUNCTIONS, ERR_PACKET_TOO_LONG,
+                         (errorparameter_t) (*pkt)->length,
+                         (errorparameter_t) header_length);
+            return E_FAIL;
+        }
+
+    } else if ((*pkt)->is_big_packet == TRUE && (*pkt)->length + header_length > IPV6_PACKET_SIZE) {
+        // CASE 3: is big packet already and exceeding, must fail
         LOG_ERROR(COMPONENT_PACKETFUNCTIONS, ERR_PACKET_TOO_LONG,
-                  (errorparameter_t) 1,
-                  (errorparameter_t) pkt->length);
+                (errorparameter_t) (*pkt)->length,
+                (errorparameter_t) header_length);
+        return E_FAIL;
+    } else if ((*pkt)->is_big_packet == TRUE && (*pkt)->length + header_length <= IPV6_PACKET_SIZE) {
+        // CASE 4: is big packet and allocating normally
+        (*pkt)->payload -= header_length;
+        (*pkt)->length += header_length;
+
+        // check for buffer overflow on the left and on the right
+        if ((uint8_t * )((*pkt)->payload) < (uint8_t * )((*pkt)->packet) ||
+            (*pkt)->payload + (*pkt)->length >
+            &(((OpenQueueBigEntry_t *) (*pkt))->packet_remainder[IPV6_PACKET_SIZE - IEEE802154_FRAME_SIZE])) {
+            LOG_CRITICAL(COMPONENT_PACKETFUNCTIONS, ERR_PACKET_TOO_LONG,
+                         (errorparameter_t) (*pkt)->length,
+                         (errorparameter_t) header_length);
+            return E_FAIL;
+        }
+    } else {
+        return E_FAIL;
     }
-}
 
-void packetfunctions_reserveFooterSize(OpenQueueEntry_t *pkt, uint16_t header_length) {
-    uint16_t size;
-
-    // this function is only called from the MAC layer,
-    // there the packets should never be bigger than IEEE802154_FRAME_SIZE
-    size = IEEE802154_FRAME_SIZE;
-
-    pkt->length += header_length;
-
-    if (pkt->length > size) {
-        LOG_CRITICAL(COMPONENT_PACKETFUNCTIONS, ERR_PACKET_TOO_LONG,
-                     (errorparameter_t) 2,
-                     (errorparameter_t) pkt->length);
-    }
-}
-
-void packetfunctions_tossFooter(OpenQueueEntry_t *pkt, uint16_t header_length) {
-    pkt->length -= header_length;
-    uint16_t max_length;
-
-#if defined(OPENWSN_6LO_FRAGMENTATION_C)
-    max_length = IPV6_PACKET_SIZE;
+    return E_SUCCESS;
 #else
-    max_length = IEEE802154_FRAME_SIZE;
-#endif
+    // CRC is allocated with the reserveFooter call, so here the packet should never be greater than 125 bytes
+    if ((*pkt)->length + header_length > available_bytes) {
+        LOG_ERROR(COMPONENT_PACKETFUNCTIONS, ERR_PACKET_TOO_LONG,
+                  (errorparameter_t) (*pkt)->length,
+                  (errorparameter_t) header_length);
+        return E_FAIL;
+    }
 
-    if (pkt->length > max_length) {//wraps around, so a negative value will be >128
-        LOG_ERROR(COMPONENT_PACKETFUNCTIONS, ERR_PACKET_TOO_LONG, (errorparameter_t) 3, (errorparameter_t) pkt->length);
+    (*pkt)->payload -= header_length;
+    (*pkt)->length += header_length;
+
+    // check for buffer overflow on the left and on the right
+    if ((uint8_t * )((*pkt)->payload) < (uint8_t * )((*pkt)->packet) ||
+        (*pkt)->payload + (*pkt)->length > &(*pkt)->packet[IEEE802154_FRAME_SIZE]) {
+        LOG_CRITICAL(COMPONENT_PACKETFUNCTIONS, ERR_PACKET_TOO_LONG,
+                     (errorparameter_t) (*pkt)->length,
+                     (errorparameter_t) header_length);
+        return E_FAIL;
+    }
+
+    return E_SUCCESS;
+#endif
+}
+
+void packetfunctions_tossHeader(OpenQueueEntry_t **pkt, uint16_t header_length) {
+#if defined(OPENWSN_6LO_FRAGMENTATION_C)
+    int16_t available_bytes;
+    available_bytes = IEEE802154_FRAME_SIZE - LENGTH_CRC - IEEE802154_SECURITY_TAG_LEN;
+
+    if ((*pkt)->is_big_packet == FALSE) {
+        // CASE 1: is a small packet, just toss bytes
+        if ((uint8_t * )((*pkt)->payload + header_length) > &((*pkt)->packet[IEEE802154_FRAME_SIZE]) ||
+            (*pkt)->length - header_length < 0) {
+            LOG_CRITICAL(COMPONENT_PACKETFUNCTIONS, ERR_PACKET_TOO_SHORT,
+                         (errorparameter_t) (*pkt)->length,
+                         (errorparameter_t) header_length);
+            return;
+        }
+
+        (*pkt)->payload += header_length;
+        (*pkt)->length -= header_length;
+    } else {
+        // CASE 2: is a big packet
+        if ((uint8_t * )((*pkt)->payload + header_length) >
+            &(((OpenQueueBigEntry_t *) (*pkt))->packet_remainder[IPV6_PACKET_SIZE - IEEE802154_FRAME_SIZE]) ||
+            (*pkt)->length - header_length < 0) {
+            LOG_CRITICAL(COMPONENT_PACKETFUNCTIONS, ERR_PACKET_TOO_SHORT,
+                         (errorparameter_t) (*pkt)->length,
+                         (errorparameter_t) header_length);
+            return;
+
+        }
+        if ((*pkt)->length - header_length <= available_bytes){
+            // update length and payload pointer
+            (*pkt)->payload += header_length;
+            (*pkt)->length -= header_length;
+
+            // try moving to a smaller packet
+            OpenQueueEntry_t *spkt;
+            if ((spkt = openqueue_getFreePacketBuffer((*pkt)->creator)) == NULL) {
+                return;
+            }
+
+            memcpy(spkt, (*pkt), sizeof(OpenQueueEntry_t));
+
+            spkt->length = 0;
+            spkt->is_big_packet = FALSE;
+            spkt->payload = &spkt->packet[available_bytes];
+
+            if (packetfunctions_reserveHeader(&spkt, (*pkt)->length) == E_FAIL) {
+                openqueue_freePacketBuffer(spkt);
+                return;
+            }
+
+            memcpy(spkt->payload, (*pkt)->payload, (*pkt)->length);
+            spkt->l4_payload = spkt->payload + ((*pkt)->payload - (*pkt)->l4_payload);
+
+            LOG_VERBOSE(COMPONENT_PACKETFUNCTIONS, ERR_COPY_TO_SPKT, (*pkt)->length, available_bytes);
+
+            // release OpenQueueBigEntry
+            openqueue_freePacketBuffer((*pkt));
+
+            // set pointer
+            (*pkt) = spkt;
+        } else {
+            (*pkt)->payload += header_length;
+            (*pkt)->length -= header_length;
+        }
+    }
+#else
+    if ((uint8_t * )((*pkt)->payload + header_length) > &(*pkt)->packet[IEEE802154_FRAME_SIZE] ||
+        (*pkt)->length - header_length < 0) {
+        LOG_CRITICAL(COMPONENT_PACKETFUNCTIONS, ERR_PACKET_TOO_SHORT,
+                     (errorparameter_t) (*pkt)->length,
+                     (errorparameter_t) header_length);
+    }
+
+    (*pkt)->payload += header_length;
+    (*pkt)->length -= header_length;
+#endif
+}
+
+owerror_t packetfunctions_reserveFooter(OpenQueueEntry_t **pkt, uint16_t footer_length) {
+    (*pkt)->length += footer_length;
+
+    // function is only called from the MAC layer, there the packets should never be bigger than IEEE802154_FRAME_SIZE
+    if ((*pkt)->length > IEEE802154_FRAME_SIZE) {
+        LOG_ERROR(COMPONENT_PACKETFUNCTIONS, ERR_PACKET_TOO_LONG,
+                  (errorparameter_t) (*pkt)->length,
+                  (errorparameter_t) footer_length);
+        return E_FAIL;
+    }
+
+    return E_SUCCESS;
+}
+
+void packetfunctions_tossFooter(OpenQueueEntry_t **pkt, uint16_t footer_length) {
+    (*pkt)->length -= footer_length;
+
+    // function is only called from the MAC layer
+    if ((*pkt)->length < 0) {
+        LOG_CRITICAL(COMPONENT_PACKETFUNCTIONS, ERR_PACKET_TOO_SHORT,
+                     (errorparameter_t) (*pkt)->length,
+                     (errorparameter_t) footer_length);
     }
 }
 
@@ -360,23 +515,10 @@ void packetfunctions_tossFooter(OpenQueueEntry_t *pkt, uint16_t header_length) {
 void packetfunctions_duplicatePacket(OpenQueueEntry_t *dst, OpenQueueEntry_t *src) {
     // make a copy of the frame
 
-#if defined(OPENWSN_6LO_FRAGMENTATION_C)
-    if (src->is_big_packet){
-        memcpy(dst, src, sizeof(OpenQueueEntry_t));
-
-        // local copy is never a big packet
-        dst->is_big_packet = FALSE;
-        dst->payload -= src->length;
-        memcpy(dst->payload, src->payload, src->length);
-    } else {
-#endif
     memcpy(dst, src, sizeof(OpenQueueEntry_t));
 
     // Calculate where payload starts in the buffer
     dst->payload = &dst->packet[src->payload - src->packet]; // update pointers
-#if defined(OPENWSN_6LO_FRAGMENTATION_C)
-    }
-#endif
 
     // update l2_FrameCounter pointer
     dst->l2_FrameCounter = dst->payload + (src->l2_FrameCounter - src->payload);

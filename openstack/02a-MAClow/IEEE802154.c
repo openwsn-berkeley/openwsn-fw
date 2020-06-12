@@ -26,11 +26,11 @@ Note that we are writing the field from the end of the header to the beginning.
 \param[in]     sequenceNumber   Sequence number of this frame.
 \param[in]     nextHop          Address of the next hop
 */
-void ieee802154_prependHeader(OpenQueueEntry_t *msg,
-                              uint8_t frameType,
-                              bool payloadIEPresent,
-                              uint8_t sequenceNumber,
-                              open_addr_t *nextHop) {
+owerror_t ieee802154_prependHeader(OpenQueueEntry_t *msg,
+                                   uint8_t frameType,
+                                   bool payloadIEPresent,
+                                   uint8_t sequenceNumber,
+                                   open_addr_t *nextHop) {
     uint8_t temp_8b;
     uint8_t ielistpresent = IEEE154_IELIST_NO;
     bool securityEnabled;
@@ -49,7 +49,9 @@ void ieee802154_prependHeader(OpenQueueEntry_t *msg,
     if (payloadIEPresent == TRUE) {
         ielistpresent = IEEE154_IELIST_YES;
         //add header termination IE (id=0x7e)
-        packetfunctions_reserveHeaderSize(msg, TERMINATIONIE_LEN);
+        if (packetfunctions_reserveHeader(&msg, TERMINATIONIE_LEN) == E_FAIL) {
+            goto fail;
+        }
         msg->payload[0] = HEADER_TERMINATION_1_IE & 0xFF;
         msg->payload[1] = (HEADER_TERMINATION_1_IE >> 8) & 0xFF;
 
@@ -63,7 +65,9 @@ void ieee802154_prependHeader(OpenQueueEntry_t *msg,
             // no need for termination IE.
             if (headerIEPresent == TRUE) {
                 ielistpresent = IEEE154_IELIST_YES;
-                packetfunctions_reserveHeaderSize(msg, TERMINATIONIE_LEN);
+                if (packetfunctions_reserveHeader(&msg, TERMINATIONIE_LEN) == E_FAIL) {
+                    goto fail;
+                }
                 msg->payload[0] = HEADER_TERMINATION_2_IE & 0xFF;
                 msg->payload[1] = (HEADER_TERMINATION_2_IE >> 8) & 0xFF;
             } else {
@@ -82,7 +86,9 @@ void ieee802154_prependHeader(OpenQueueEntry_t *msg,
     if (frameType == IEEE154_TYPE_ACK) {
         timeCorrection = (int16_t)(ieee154e_getTimeCorrection());
         // add the payload to the ACK (i.e. the timeCorrection)
-        packetfunctions_reserveHeaderSize(msg, sizeof(uint16_t));
+        if (packetfunctions_reserveHeader(&msg, sizeof(uint16_t)) == E_FAIL) {
+            goto fail;
+        }
         timeCorrection *= PORT_US_PER_TICK;
         timeSyncInfo = ((uint16_t) timeCorrection) & 0x0fff;
         if (msg->l2_isNegativeACK) {
@@ -92,7 +98,9 @@ void ieee802154_prependHeader(OpenQueueEntry_t *msg,
         msg->payload[1] = (uint8_t)(((timeSyncInfo) >> 8) & 0xff);
 
         // add header IE header -- xv poipoi -- pkt is filled in reverse order..
-        packetfunctions_reserveHeaderSize(msg, sizeof(uint16_t));
+        if (packetfunctions_reserveHeader(&msg, sizeof(uint16_t)) == E_FAIL) {
+            goto fail;
+        }
         //create the header for ack IE
         length_elementid_type = sizeof(uint16_t) |
                                 (IEEE802154E_ACK_NACK_TIMECORRECTION_ELEMENTID
@@ -104,23 +112,33 @@ void ieee802154_prependHeader(OpenQueueEntry_t *msg,
 
     //if security is enabled, the Auxiliary Security Header need to be added to the IEEE802.15.4 MAC header
     if (securityEnabled) {
-        IEEE802154_security_prependAuxiliarySecurityHeader(msg);
+        if (IEEE802154_security_prependAuxiliarySecurityHeader(msg) == E_FAIL){
+            goto fail;
+        }
     }
 
     // previousHop address (always 64-bit)
-    packetfunctions_writeAddress(msg, idmanager_getMyID(ADDR_64B), OW_LITTLE_ENDIAN);
+    if (packetfunctions_writeAddress(&msg, idmanager_getMyID(ADDR_64B), OW_LITTLE_ENDIAN) == E_FAIL){
+        goto fail;
+    }
     // nextHop address
     if (packetfunctions_isBroadcastMulticast(nextHop)) {
         //broadcast address is always 16-bit
-        packetfunctions_reserveHeaderSize(msg, sizeof(uint8_t));
+        if (packetfunctions_reserveHeader(&msg, sizeof(uint8_t)) == E_FAIL) {
+            goto fail;
+        }
         *((uint8_t * )(msg->payload)) = 0xFF;
-        packetfunctions_reserveHeaderSize(msg, sizeof(uint8_t));
+        if (packetfunctions_reserveHeader(&msg, sizeof(uint8_t)) == E_FAIL) {
+            goto fail;
+        }
         *((uint8_t * )(msg->payload)) = 0xFF;
     } else {
         switch (nextHop->type) {
             case ADDR_16B:
             case ADDR_64B:
-                packetfunctions_writeAddress(msg, nextHop, OW_LITTLE_ENDIAN);
+                if (packetfunctions_writeAddress(&msg, nextHop, OW_LITTLE_ENDIAN) == E_FAIL) {
+                    goto fail;
+                }
                 break;
             default:
                 LOG_CRITICAL(COMPONENT_IEEE802154, ERR_WRONG_ADDR_TYPE,
@@ -133,14 +151,20 @@ void ieee802154_prependHeader(OpenQueueEntry_t *msg,
     msg->l2_nextHop_payload = msg->payload;
 
     // destpan -- se page 41 of 15.4-2011 std. DEST PANID only sent as it is equal to SRC PANID
-    packetfunctions_writeAddress(msg, idmanager_getMyID(ADDR_PANID), OW_LITTLE_ENDIAN);
+    if (packetfunctions_writeAddress(&msg, idmanager_getMyID(ADDR_PANID), OW_LITTLE_ENDIAN) == E_FAIL){
+        goto fail;
+    }
 
     //dsn
-    packetfunctions_reserveHeaderSize(msg, sizeof(uint8_t));
+    if (packetfunctions_reserveHeader(&msg, sizeof(uint8_t)) == E_FAIL) {
+        goto fail;
+    }
     *((uint8_t * )(msg->payload)) = sequenceNumber;
 
     //fcf (2nd byte)
-    packetfunctions_reserveHeaderSize(msg, sizeof(uint8_t));
+    if (packetfunctions_reserveHeader(&msg, sizeof(uint8_t)) == E_FAIL) {
+        goto fail;
+    }
     temp_8b = 0;
     if (packetfunctions_isBroadcastMulticast(nextHop)) {
         temp_8b |= IEEE154_ADDR_SHORT << IEEE154_FCF_DEST_ADDR_MODE;
@@ -166,7 +190,9 @@ void ieee802154_prependHeader(OpenQueueEntry_t *msg,
 
     *((uint8_t * )(msg->payload)) = temp_8b;
     //fcf (1st byte)
-    packetfunctions_reserveHeaderSize(msg, sizeof(uint8_t));
+    if (packetfunctions_reserveHeader(&msg, sizeof(uint8_t)) == E_FAIL) {
+        goto fail;
+    }
     temp_8b = 0;
     temp_8b |= frameType << IEEE154_FCF_FRAME_TYPE;
     temp_8b |= securityEnabled << IEEE154_FCF_SECURITY_ENABLED;
@@ -186,6 +212,11 @@ void ieee802154_prependHeader(OpenQueueEntry_t *msg,
         }
     }
     *((uint8_t * )(msg->payload)) = temp_8b;
+
+    return E_SUCCESS;
+
+    fail:
+    return E_FAIL;
 }
 
 /**

@@ -55,7 +55,10 @@ void umonitor_receive(OpenQueueEntry_t *request) {
 
     /*************** Packet Payload  ********************/
     // [Expiration time, Delay]
-    packetfunctions_reserveHeaderSize(reply, (2 * sizeof(uint16_t)));
+    if (packetfunctions_reserveHeader(&reply, (2 * sizeof(uint16_t))) == E_FAIL) {
+        openqueue_freePacketBuffer(reply);
+        return;
+    }
 #ifdef DEADLINE_OPTION_ENABLED
     memset(&deadline, 0, sizeof(monitor_expiration_vars_t));
     iphc_getDeadlineInfo(&deadline);

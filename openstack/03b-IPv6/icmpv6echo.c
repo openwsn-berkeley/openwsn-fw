@@ -61,10 +61,19 @@ void icmpv6echo_trigger(void) {
         //l3
         memcpy(&(msg->l3_destinationAdd), &icmpv6echo_vars.hisAddress, sizeof(open_addr_t));
         //payload
-        packetfunctions_reserveHeaderSize(msg, 4);
+        if (packetfunctions_reserveHeader(&msg, 4) == E_FAIL) {
+            openqueue_freePacketBuffer(msg);
+            return;
+        }
+
         packetfunctions_htonl(0x789abcde, (uint8_t * )(msg->payload));
         //ICMPv6 header
-        packetfunctions_reserveHeaderSize(msg, sizeof(ICMPv6_ht));
+
+        if (packetfunctions_reserveHeader(&msg, sizeof(ICMPv6_ht)) == E_FAIL) {
+            openqueue_freePacketBuffer(msg);
+            return;
+        }
+
         ((ICMPv6_ht *) (msg->payload))->type = msg->l4_sourcePortORicmpv6Type;
         ((ICMPv6_ht *) (msg->payload))->code = 0;
         // Below Identifier might need to be replaced by the identifier used by icmpv6rpl
@@ -94,12 +103,9 @@ void icmpv6echo_receive(OpenQueueEntry_t *msg) {
     msg->owner = COMPONENT_ICMPv6ECHO;
     switch (msg->l4_sourcePortORicmpv6Type) {
         case IANA_ICMPv6_ECHO_REQUEST:
-            LOG_INFO(COMPONENT_ICMPv6ECHO, ERR_RCVD_ECHO_REQUEST, (errorparameter_t)msg->length, (errorparameter_t)0);
-#if defined(OPENWSN_6LO_FRAGMENTATION_C)
-            reply = openqueue_getFreeBigPacketBuffer(COMPONENT_ICMPv6ECHO);
-#else
+            LOG_INFO(COMPONENT_ICMPv6ECHO, ERR_RCVD_ECHO_REQUEST, (errorparameter_t) msg->length, (errorparameter_t) 0);
+
             reply = openqueue_getFreePacketBuffer(COMPONENT_ICMPv6ECHO);
-#endif
 
             if (reply == NULL) {
                 LOG_ERROR(COMPONENT_ICMPv6ECHO, ERR_NO_FREE_PACKET_BUFFER,
@@ -113,7 +119,11 @@ void icmpv6echo_receive(OpenQueueEntry_t *msg) {
             reply->owner = COMPONENT_ICMPv6ECHO;
 
             // copy payload from msg to (end of) reply
-            packetfunctions_reserveHeaderSize(reply, msg->length);
+            if (packetfunctions_reserveHeader(&reply, msg->length) == E_FAIL){
+                openqueue_freePacketBuffer(msg);
+                return;
+            }
+
             memcpy(reply->payload, msg->payload, msg->length);
 
             // copy source of msg in destination of reply

@@ -269,9 +269,13 @@ void iphc_sendDone(OpenQueueEntry_t *msg, owerror_t error);
 
 void iphc_receive(OpenQueueEntry_t *msg);
 
-// called by forwarding when IPHC inner header required
+/**
+\brief Prepend a compressed IPv6 header to a message.
+
+This function follows the compression rules specified in RFC 6282.
+*/
 owerror_t iphc_prependIPv6Header(
-        OpenQueueEntry_t *msg,
+        OpenQueueEntry_t **msg,
         uint8_t tf,
         uint32_t value_flowLabel,
         uint8_t nh,
@@ -289,16 +293,15 @@ owerror_t iphc_prependIPv6Header(
         uint8_t fw_SendOrfw_Rcv
 );
 
-uint8_t iphc_retrieveIPv6HopByHopHeader(
-        OpenQueueEntry_t *msg,
-        rpl_option_ht *rpl_option
-);
+uint8_t iphc_retrieveIPv6HopByHopHeader(OpenQueueEntry_t *msg, rpl_option_ht *rpl_option);
 
-void iphc_retrieveIPv6Header(
-   OpenQueueEntry_t* msg,
-   ipv6_header_iht* ipv6_outer_header,
-   ipv6_header_iht* ipv6_inner_header,
-   uint8_t*         page_length
+/**
+\brief Retrieve an IPv6 header from a message.
+*/
+owerror_t iphc_retrieveIPv6Header(OpenQueueEntry_t *msg,
+                                  ipv6_header_iht *ipv6_outer_header,
+                                  ipv6_header_iht *ipv6_inner_header,
+                                  uint8_t *page_length
 );
 
 #ifdef DEADLINE_OPTION_ENABLED

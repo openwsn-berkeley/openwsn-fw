@@ -26,8 +26,7 @@ uinject_vars_t uinject_vars;
 
 static const uint8_t uinject_payload[] = "uinject";
 static const uint8_t uinject_dst_addr[] = {
-        0xbb, 0xbb, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01
+        0xbb, 0xbb, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01
 };
 
 //=========================== prototypes ======================================
@@ -65,8 +64,8 @@ void uinject_sendDone(OpenQueueEntry_t *msg, owerror_t error) {
 
     if (error == E_FAIL) {
         LOG_ERROR(COMPONENT_UINJECT, ERR_MAXRETRIES_REACHED,
-                (errorparameter_t) uinject_vars.counter,
-                (errorparameter_t) 0
+                  (errorparameter_t) uinject_vars.counter,
+                  (errorparameter_t) 0
         );
     }
 
@@ -145,15 +144,27 @@ void uinject_task_cb(void) {
     memcpy(&pkt->l3_destinationAdd.addr_128b[0], uinject_dst_addr, 16);
 
     // add payload
-    packetfunctions_reserveHeaderSize(pkt, sizeof(uinject_payload) - 1);
+    if (packetfunctions_reserveHeader(&pkt, sizeof(uinject_payload) - 1) == E_FAIL) {
+        openqueue_freePacketBuffer(pkt);
+        return;
+    }
     memcpy(&pkt->payload[0], uinject_payload, sizeof(uinject_payload) - 1);
 
-    packetfunctions_reserveHeaderSize(pkt, sizeof(uint16_t));
+    if (packetfunctions_reserveHeader(&pkt, sizeof(uint16_t)) == E_FAIL) {
+        openqueue_freePacketBuffer(pkt);
+        return;
+    }
+
     pkt->payload[1] = (uint8_t)((uinject_vars.counter & 0xff00) >> 8);
     pkt->payload[0] = (uint8_t)(uinject_vars.counter & 0x00ff);
     uinject_vars.counter++;
 
-    packetfunctions_reserveHeaderSize(pkt, sizeof(asn_t));
+    if (packetfunctions_reserveHeader(&pkt, sizeof(asn_t)) == E_FAIL) {
+        openqueue_freePacketBuffer(pkt);
+        return;
+    }
+
+
     ieee154e_getAsn(asnArray);
     pkt->payload[0] = asnArray[0];
     pkt->payload[1] = asnArray[1];
@@ -161,26 +172,45 @@ void uinject_task_cb(void) {
     pkt->payload[3] = asnArray[3];
     pkt->payload[4] = asnArray[4];
 
-    packetfunctions_reserveHeaderSize(pkt, sizeof(uint8_t));
+    if (packetfunctions_reserveHeader(&pkt, sizeof(uint8_t)) == E_FAIL) {
+        openqueue_freePacketBuffer(pkt);
+        return;
+    }
     numCellsUsed = msf_getPreviousNumCellsUsed(CELLTYPE_TX);
     pkt->payload[0] = numCellsUsed;
 
-    packetfunctions_reserveHeaderSize(pkt, sizeof(uint8_t));
+    if (packetfunctions_reserveHeader(&pkt, sizeof(uint8_t)) == E_FAIL) {
+        openqueue_freePacketBuffer(pkt);
+        return;
+    }
+
     numCellsUsed = msf_getPreviousNumCellsUsed(CELLTYPE_RX);
     pkt->payload[0] = numCellsUsed;
 
-    packetfunctions_reserveHeaderSize(pkt, sizeof(uint16_t));
+    if (packetfunctions_reserveHeader(&pkt, sizeof(uint16_t)) == E_FAIL) {
+        openqueue_freePacketBuffer(pkt);
+        return;
+    }
+
     pkt->payload[1] = (uint8_t)(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
     pkt->payload[0] = (uint8_t)(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
 
     ieee154e_getTicsInfo(&ticksOn, &ticksInTotal);
-    packetfunctions_reserveHeaderSize(pkt, sizeof(uint32_t));
+
+    if (packetfunctions_reserveHeader(&pkt, sizeof(uint32_t)) == E_FAIL) {
+        openqueue_freePacketBuffer(pkt);
+        return;
+    }
+
     pkt->payload[3] = (uint8_t)((ticksOn & 0xff000000) >> 24);
     pkt->payload[2] = (uint8_t)((ticksOn & 0x00ff0000) >> 16);
     pkt->payload[1] = (uint8_t)((ticksOn & 0x0000ff00) >> 8);
     pkt->payload[0] = (uint8_t)(ticksOn & 0x000000ff);
 
-    packetfunctions_reserveHeaderSize(pkt, sizeof(uint32_t));
+    if (packetfunctions_reserveHeader(&pkt, sizeof(uint32_t)) == E_FAIL) {
+        openqueue_freePacketBuffer(pkt);
+        return;
+    }
     pkt->payload[3] = (uint8_t)((ticksInTotal & 0xff000000) >> 24);
     pkt->payload[2] = (uint8_t)((ticksInTotal & 0x00ff0000) >> 16);
     pkt->payload[1] = (uint8_t)((ticksInTotal & 0x0000ff00) >> 8);

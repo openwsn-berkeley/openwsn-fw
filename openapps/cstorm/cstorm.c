@@ -95,7 +95,10 @@ owerror_t cstorm_receive(
             msg->length = 0;
 
             // add CoAP payload
-            packetfunctions_reserveHeaderSize(msg, 2);
+            if (packetfunctions_reserveHeader(&msg, 2) == E_FAIL) {
+                openqueue_freePacketBuffer(msg);
+                return;
+            }
             // return as big endian
             msg->payload[0] = (uint8_t)(cstorm_vars.period >> 8);
             msg->payload[1] = (uint8_t)(cstorm_vars.period & 0xff);
@@ -211,10 +214,12 @@ void cstorm_task_cb(void) {
     pkt->owner = COMPONENT_CSTORM;
 
     //The contents of the message are written in reverse order : the payload first
-    //packetfunctions_reserveHeaderSize moves the index pkt->payload
 
     // add payload
-    packetfunctions_reserveHeaderSize(pkt, sizeof(cstorm_payload) - 1);
+    if (packetfunctions_reserveHeader(&pkt, sizeof(cstorm_payload) - 1) == E_FAIL) {
+        openqueue_freePacketBuffer(pkt);
+        return;
+    }
     memcpy(&pkt->payload[0], cstorm_payload, sizeof(cstorm_payload) - 1);
 
     // location-path option

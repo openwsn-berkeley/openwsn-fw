@@ -2,6 +2,10 @@
 \brief Implementation of Constrained Join Protocol (CoJP) from minimal-security-06 draft.
 */
 
+#include "config.h"
+
+#if defined(OPENWSN_CJOIN_C)
+
 #include "opendefs.h"
 #include "cjoin.h"
 #include "coap.h"
@@ -233,7 +237,6 @@ void cjoin_task_cb(void) {
     // that may be set over the serial
     cjoin_init_security_context();
 
-
     cjoin_sendJoinRequest(joinProxy);
 }
 
@@ -297,11 +300,15 @@ owerror_t cjoin_sendJoinRequest(open_addr_t *joinProxy) {
     join_request.role = COJP_ROLE_VALUE_6N; // regular non-6LBR node
     join_request.pan_id = idmanager_getMyID(ADDR_PANID); // pre-configured PAN ID
     payload_len = cojp_cbor_encode_join_request_object(tmp, &join_request);
-    packetfunctions_reserveHeaderSize(pkt, payload_len);
+
+    if (packetfunctions_reserveHeader(&pkt, payload_len) == E_FAIL) {
+        openqueue_freePacketBuffer(pkt);
+        return E_FAIL;
+    }
     memcpy(pkt->payload, tmp, payload_len);
     // send
 
-    LOG_VERBOSE(COMPONENT_CJOIN, ERR_JOIN_REQUEST, (errorparameter_t) 0, (errorparameter_t) 0);
+    LOG_INFO(COMPONENT_CJOIN, ERR_JOIN_REQUEST, (errorparameter_t) 0, (errorparameter_t) 0);
 
     outcome = coap_send(
             pkt,
@@ -357,3 +364,4 @@ void cjoin_setIsJoined(bool newValue) {
     }
 }
 
+#endif /* OPENWSN_CJOIN_H */

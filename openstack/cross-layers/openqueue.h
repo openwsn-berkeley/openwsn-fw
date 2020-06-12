@@ -53,7 +53,7 @@ bool debugPrint_queue(void);
 OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator);
 
 #if defined(OPENWSN_6LO_FRAGMENTATION_C)
-OpenQueueEntry_t*  openqueue_getFreeBigPacketBuffer(uint8_t creator);
+OpenQueueEntry_t* openqueue_getFreeBigPacketBuffer(uint8_t creator);
 #endif
 
 owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t *pkt);

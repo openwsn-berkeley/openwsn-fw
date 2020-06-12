@@ -440,7 +440,10 @@ void csensors_fillpayload(OpenQueueEntry_t *msg,
     uint16_t value;
 
     value = csensors_vars.csensors_resource[id].opensensors_resource->callbackRead();
-    packetfunctions_reserveHeaderSize(msg, 2);
+    if (packetfunctions_reserveHeader(&msg, 2)) == E_FAIL){
+        openqueue_freePacketBuffer(msg);
+        return;
+    }
 
     // add value
     msg->payload[0] = (value >> 8) & 0x00ff;

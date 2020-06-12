@@ -17,8 +17,7 @@
 userialbridge_vars_t userialbridge_vars;
 
 static const uint8_t userialbridge_dst_addr[] = {
-        0xbb, 0xbb, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01
+        0xbb, 0xbb, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01
 };
 
 //=========================== prototypes ======================================
@@ -79,7 +78,10 @@ void userialbridge_task_cb(void) {
     pkt->l3_destinationAdd.type = ADDR_128B;
     memcpy(&pkt->l3_destinationAdd.addr_128b[0], userialbridge_dst_addr, 16);
 
-    packetfunctions_reserveHeaderSize(pkt, userialbridge_vars.txbufLen);
+    if (packetfunctions_reserveHeader(&pkt, userialbridge_vars.txbufLen) == E_FAIL) {
+        openqueue_freePacketBuffer(pkt);
+        return;
+    }
     memcpy(&pkt->payload[0], &userialbridge_vars.txbuf[0], userialbridge_vars.txbufLen);
 
     if ((openudp_send(pkt)) == E_FAIL) {

@@ -69,8 +69,10 @@ owerror_t openudp_send(OpenQueueEntry_t *msg) {
     // fill in the header in the packet
     if (msg->l4_protocol_compressed) {
 
-        //add checksum space in the packet.
-        packetfunctions_reserveHeaderSize(msg, 2);
+        // add checksum space in the packet.
+        if (packetfunctions_reserveHeader(&msg, 2) == E_FAIL) {
+            return E_FAIL;
+        }
         //keep position and calculatre checksum at the end.
         checksum_position = &msg->payload[0];
 
@@ -88,33 +90,54 @@ owerror_t openudp_send(OpenQueueEntry_t *msg) {
             case NHC_UDP_PORTS_16S_8D:
                 // dest port:   0xf0  +  8 bits in-line
                 // source port:         16 bits in-line
-                packetfunctions_reserveHeaderSize(msg, 1);
+                if (packetfunctions_reserveHeader(&msg, 1) == E_FAIL) {
+                    return E_FAIL;
+                }
                 msg->payload[0] = (uint8_t)(msg->l4_destination_port & 0x00ff);
-                packetfunctions_reserveHeaderSize(msg, 2);
+
+                if (packetfunctions_reserveHeader(&msg, 2) == E_FAIL) {
+                    return E_FAIL;
+                }
                 packetfunctions_htons(msg->l4_sourcePortORicmpv6Type, &(msg->payload[0]));
+
                 //write proper LOWPAN_NHC
-                packetfunctions_reserveHeaderSize(msg, 1);
+                if (packetfunctions_reserveHeader(&msg, 1) == E_FAIL) {
+                    return E_FAIL;
+                }
                 msg->payload[0] = NHC_UDP_ID | NHC_UDP_PORTS_16S_8D;
                 break;
             case NHC_UDP_PORTS_8S_16D:
                 // dest port:   0xf0  + 16 bits in-line
                 // source port: 0xf0  +  8 bits in-line
-                packetfunctions_reserveHeaderSize(msg, 2);
+                if (packetfunctions_reserveHeader(&msg, 2) == E_FAIL) {
+                    return E_FAIL;
+                }
                 packetfunctions_htons(msg->l4_destination_port, &(msg->payload[0]));
-                packetfunctions_reserveHeaderSize(msg, 1);
+
+                if (packetfunctions_reserveHeader(&msg, 1) == E_FAIL) {
+                    return E_FAIL;
+                }
                 msg->payload[0] = (uint8_t)(msg->l4_sourcePortORicmpv6Type & 0x00ff);
+
                 //write proper LOWPAN_NHC
-                packetfunctions_reserveHeaderSize(msg, 1);
+                if (packetfunctions_reserveHeader(&msg, 1) == E_FAIL) {
+                    return E_FAIL;
+                }
                 msg->payload[0] = NHC_UDP_ID | NHC_UDP_PORTS_8S_16D;
                 break;
             case NHC_UDP_PORTS_4S_4D:
                 // source port: 0xf0b +  4 bits in-line (high 4)
                 // dest port:   0xf0b +  4 bits in-line  (low 4)
-                packetfunctions_reserveHeaderSize(msg, 1);
+                if (packetfunctions_reserveHeader(&msg, 1) == E_FAIL) {
+                    return E_FAIL;
+                }
                 msg->payload[0] = (msg->l4_sourcePortORicmpv6Type & 0x000f) << 4;
                 msg->payload[0] |= (msg->l4_destination_port & 0x000f);
+
                 //write proper LOWPAN_NHC
-                packetfunctions_reserveHeaderSize(msg, 1);
+                if (packetfunctions_reserveHeader(&msg, 1) == E_FAIL) {
+                    return E_FAIL;
+                }
                 msg->payload[0] = NHC_UDP_ID | NHC_UDP_PORTS_4S_4D;
                 break;
         }
@@ -123,7 +146,9 @@ owerror_t openudp_send(OpenQueueEntry_t *msg) {
         packetfunctions_calculateChecksum(msg, checksum_position);
 
     } else {
-        packetfunctions_reserveHeaderSize(msg, sizeof(udp_ht));
+        if (packetfunctions_reserveHeader(&msg, sizeof(udp_ht)) == E_FAIL) {
+            return E_FAIL;
+        }
         packetfunctions_htons(msg->l4_sourcePortORicmpv6Type, &(msg->payload[0]));
         packetfunctions_htons(msg->l4_destination_port, &(msg->payload[2]));
         //TODO check this as the lenght MUST be ommited.
@@ -173,41 +198,41 @@ void openudp_receive(OpenQueueEntry_t *msg) {
     if (msg->l4_protocol_compressed == TRUE) {
         // get the UDP header encoding byte
         temp_8b = *((uint8_t * )(msg->payload));
-        packetfunctions_tossHeader(msg, sizeof(temp_8b));
+        packetfunctions_tossHeader(&msg, sizeof(temp_8b));
         switch (temp_8b & NHC_UDP_PORTS_MASK) {
             case NHC_UDP_PORTS_INLINE:
                 // source port:         16 bits in-line
                 // dest port:           16 bits in-line
                 msg->l4_sourcePortORicmpv6Type = msg->payload[0] * 256 + msg->payload[1];
                 msg->l4_destination_port = msg->payload[2] * 256 + msg->payload[3];
-                packetfunctions_tossHeader(msg, 2 + 2);
+                packetfunctions_tossHeader(&msg, 2 + 2);
                 break;
             case NHC_UDP_PORTS_16S_8D:
                 // source port:         16 bits in-line
                 // dest port:   0xf0  +  8 bits in-line
                 msg->l4_sourcePortORicmpv6Type = msg->payload[0] * 256 + msg->payload[1];
                 msg->l4_destination_port = 0xf000 + msg->payload[2];
-                packetfunctions_tossHeader(msg, 2 + 1);
+                packetfunctions_tossHeader(&msg, 2 + 1);
                 break;
             case NHC_UDP_PORTS_8S_16D:
                 // source port: 0xf0  +  8 bits in-line
                 // dest port:   0xf0  +  8 bits in-line
                 msg->l4_sourcePortORicmpv6Type = 0xf000 + msg->payload[0];
                 msg->l4_destination_port = msg->payload[1] * 256 + msg->payload[2];
-                packetfunctions_tossHeader(msg, 1 + 2);
+                packetfunctions_tossHeader(&msg, 1 + 2);
                 break;
             case NHC_UDP_PORTS_4S_4D:
                 // source port: 0xf0b +  4 bits in-line
                 // dest port:   0xf0b +  4 bits in-line
                 msg->l4_sourcePortORicmpv6Type = 0xf0b0 + ((msg->payload[0] >> 4) & 0x0f);
                 msg->l4_destination_port = 0xf0b0 + ((msg->payload[0] >> 0) & 0x0f);
-                packetfunctions_tossHeader(msg, 1);
+                packetfunctions_tossHeader(&msg, 1);
                 break;
         }
     } else {
         msg->l4_sourcePortORicmpv6Type = msg->payload[0] * 256 + msg->payload[1];
         msg->l4_destination_port = msg->payload[2] * 256 + msg->payload[3];
-        packetfunctions_tossHeader(msg, sizeof(udp_ht));
+        packetfunctions_tossHeader(&msg, sizeof(udp_ht));
     }
 
     // iterate list of registered resources

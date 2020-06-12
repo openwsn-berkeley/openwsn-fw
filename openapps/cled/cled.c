@@ -75,7 +75,10 @@ owerror_t cled_receive(OpenQueueEntry_t *msg,
             msg->length = 0;
 
             // add CoAP payload
-            packetfunctions_reserveHeaderSize(msg, 1);
+            if (packetfunctions_reserveHeader(&msg, 1) == E_FAIL) {
+                openqueue_freePacketBuffer(msg);
+                return E_FAIL;
+            }
 
             if (leds_error_isOn() == 1) {
                 msg->payload[0] = '1';

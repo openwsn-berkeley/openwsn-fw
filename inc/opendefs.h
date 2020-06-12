@@ -212,7 +212,7 @@ enum {
    ERR_6LORH_DEADLINE_DROPPED          = 0x0d, // packet expiry time reached, dropped
    ERR_UNEXPECTED_DAO                  = 0x0e, // unexpected DAO (code location {0}). A change maybe happened on dagroot node.
    ERR_UNSUPPORTED_ICMPV6_TYPE         = 0x0f, // unsupported ICMPv6 type {0} (code location {1})
-   ERR_6LOWPAN_UNSUPPORTED             = 0x10, // unsupported 6LoWPAN parameter {1} at location {0}
+   ERR_6LOWPAN_UNSUPPORTED             = 0x10, // unsupported 6LoWPAN parameter {1} at location {0}, dropping packet
    ERR_NO_NEXTHOP                      = 0x11, // no next hop for layer 3 destination {0:x}{1:x}
    ERR_INVALID_FWDMODE                 = 0x12, // invalid forward mode
    ERR_LARGE_DAGRANK                   = 0x13, // large DAGrank {0}, set to {1}
@@ -264,22 +264,25 @@ enum {
    ERR_GETDATA_ASKS_TOO_FEW_BYTES      = 0x3f, // getData asks for too few bytes, maxNumBytes={0}, fill level={1}
    ERR_WRONG_CRC_INPUT                 = 0x40, // wrong CRC in input Buffer
    // cross layer
-   ERR_BUFFER_OVERFLOW                 = 0x41, // buffer overflow detected (code location {0})
-   ERR_BUSY_SENDING                    = 0x42, // busy sending
-   ERR_UNEXPECTED_SENDDONE             = 0x43, // sendDone for packet I didn't send
-   ERR_NO_FREE_PACKET_BUFFER           = 0x44, // no free packet buffer (code location {0})
-   ERR_NO_FREE_TIMER_OR_QUEUE_ENTRY    = 0x45, // no free timer or queue entry (code location {0})
-   ERR_FREEING_UNUSED                  = 0x46, // freeing unused memory
-   ERR_FREEING_ERROR                   = 0x47, // freeing memory unsupported memory
-   ERR_MSG_UNKNOWN_TYPE                = 0x48, // unknown message type {0}
-   ERR_WRONG_ADDR_TYPE                 = 0x49, // wrong address type {0} (code location {1})
-   ERR_PACKET_TOO_LONG                 = 0x4a, // total packet size is too long, length {1} (code location {0})
-   ERR_INPUTBUFFER_LENGTH              = 0x4b, // input length problem, length={0}
-   ERR_BOOTED                          = 0x4c, // booted
-   ERR_MAXRETRIES_REACHED              = 0x4d, // maxretries reached (counter: {0})
-   ERR_EMPTY_QUEUE_OR_UNKNOWN_TIMER    = 0x4e, // empty queue or trying to remove unknown timer id (code location {0})
-   ERR_PUSH_LOWER_LAYER                = 0x4f, // failed to push to lower layer
-   ERR_INVALID_PARAM                   = 0x50, // received an invalid parameter
+   ERR_BUFFER_OVERFLOW                 = 0x43, // buffer overflow detected (code location {0})
+   ERR_BUSY_SENDING                    = 0x44, // busy sending
+   ERR_UNEXPECTED_SENDDONE             = 0x45, // sendDone for packet I didn't send
+   ERR_NO_FREE_PACKET_BUFFER           = 0x46, // no free packet buffer (code location {0})
+   ERR_NO_FREE_TIMER_OR_QUEUE_ENTRY    = 0x47, // no free timer or queue entry (code location {0})
+   ERR_FREEING_UNUSED                  = 0x48, // freeing unused memory
+   ERR_FREEING_ERROR                   = 0x49, // freeing memory unsupported memory
+   ERR_MSG_UNKNOWN_TYPE                = 0x4a, // unknown message type {0}
+   ERR_WRONG_ADDR_TYPE                 = 0x4b, // wrong address type {0} (code location {1})
+   ERR_PACKET_TOO_LONG                 = 0x4c, // total packet size is too long, length {0} (adding {1} bytes)
+   ERR_PACKET_TOO_SHORT                = 0x4d, // total packet size is too short, length {0} (removing {1} bytes)
+   ERR_INPUTBUFFER_LENGTH              = 0x4e, // input length problem, length={0}
+   ERR_BOOTED                          = 0x4f, // booted
+   ERR_MAXRETRIES_REACHED              = 0x50, // maxretries reached (counter: {0})
+   ERR_EMPTY_QUEUE_OR_UNKNOWN_TIMER    = 0x51, // empty queue or trying to remove unknown timer id (code location {0})
+   ERR_PUSH_LOWER_LAYER                = 0x52, // failed to push to lower layer
+   ERR_INVALID_PARAM                   = 0x53, // received an invalid parameter
+   ERR_COPY_TO_SPKT                    = 0x54, // copy packet content to small packet (pkt len {} < max len {})
+   ERR_COPY_TO_BPKT                    = 0x55, // copy packet content to big packet (pkt len {} > max len {})
 };
 
 //=========================== typedef =========================================
@@ -324,15 +327,18 @@ typedef struct {
    uint8_t       creator;                                       // the component which called getFreePacketBuffer()
    uint8_t       owner;                                         // the component which currently owns the entry
    uint8_t*      payload;                                       // pointer to the start of the payload within 'packet'
-   uint16_t      length;                                        // length in bytes of the payload
+   int16_t       length;                                        // length in bytes of the payload
    //l7
+#if defined(DEADLINE_OPTION)
    uint16_t      max_delay;                                     // Max delay in milliseconds before which the packet should be delivered to the receiver
    bool          orgination_time_flag;
    bool          drop_flag;
+#endif
    bool          is_cjoin_response;
 #if defined(OPENWSN_6LO_FRAGMENTATION_C)
    bool          is_big_packet;
 #endif
+
    //l4
    uint8_t       l4_protocol;                                   // l4 protocol to be used
    bool          l4_protocol_compressed;                        // is the l4 protocol header compressed?
@@ -340,12 +346,14 @@ typedef struct {
    uint16_t      l4_destination_port;                           // l4 destination port
    uint8_t*      l4_payload;                                    // pointer to the start of the payload of l4 (used for retransmits)
    uint8_t       l4_length;                                     // length of the payload of l4 (used for retransmits)
+
    //l3
    open_addr_t   l3_destinationAdd;                             // 128b IPv6 destination (down stack)
    open_addr_t   l3_sourceAdd;                                  // 128b IPv6 source address
    bool          l3_useSourceRouting;                           // TRUE when the packet goes downstream
+
 #if defined(OPENWSN_6LO_FRAGMENTATION_C)
-   bool          l3_isFragment;                                 // TRUE when this is a 6LowPAN fragment
+    bool         l3_isFragment;
 #endif
    //l2
    owerror_t     l2_sendDoneError;                              // outcome of trying to send this packet
@@ -386,14 +394,14 @@ typedef struct {
    uint8_t       l1_lqi;                                        // LQI of received packet
    bool          l1_crc;                                        // did received packet pass CRC check?
    //the packet
-   uint8_t       packet[1+1+125+2+1];                           // 1B spi address, 1B length, 125B data, 2B CRC, 1B LQI
+   uint8_t       packet[IEEE802154_FRAME_SIZE];                 // 1B spi address, 1B length, 125B data, 2B CRC, 1B LQI
 } OpenQueueEntry_t;
 
 
 #if defined(OPENWSN_6LO_FRAGMENTATION_C)
 typedef struct {
     OpenQueueEntry_t standard_entry;
-    uint8_t packet_remainder[IPV6_PACKET_SIZE - 130];           // 130 byts alread allocated in the normal OpenQueueEntry
+    uint8_t packet_remainder[IPV6_PACKET_SIZE - IEEE802154_FRAME_SIZE]; // 127 bytzs alread allocated in the OpenQueueEntry
 } OpenQueueBigEntry_t;
 #endif
 

@@ -21,13 +21,13 @@
 coap_vars_t coap_vars;
 
 //=========================== prototype =======================================
-void coap_header_encode(OpenQueueEntry_t *msg,
-                        uint8_t version,
-                        coap_type_t type,
-                        uint8_t TKL,
-                        coap_code_t code,
-                        uint16_t messageID,
-                        uint8_t *token);
+owerror_t coap_header_encode(OpenQueueEntry_t *msg,
+                             uint8_t version,
+                             coap_type_t type,
+                             uint8_t TKL,
+                             coap_code_t code,
+                             uint16_t messageID,
+                             uint8_t *token);
 
 void coap_handle_proxy_scheme(OpenQueueEntry_t *msg,
                               coap_header_iht *header,
@@ -83,7 +83,7 @@ void coap_init(void) {
 
     // register at UDP stack
     coap_vars.desc.port = WKP_UDP_COAP;
-    coap_vars.desc.callbackReceive = &coap_receive;
+    coap_vars.desc.callbackReceive = coap_receive;
     coap_vars.desc.callbackSendDone = coap_sendDone;
     openudp_register(&coap_vars.desc);
 }
@@ -103,7 +103,7 @@ void coap_receive(OpenQueueEntry_t *msg) {
     uint8_t index;
     coap_resource_desc_t *temp_desc;
     bool found;
-    owerror_t outcome = 0;
+    owerror_t outcome;
     coap_type_t response_type;
     // local variables passed to the handlers (with msg)
     coap_header_iht coap_header;
@@ -113,7 +113,7 @@ void coap_receive(OpenQueueEntry_t *msg) {
     uint8_t coap_outgoingOptionsLen;
     uint8_t option_count;
     uint8_t option_index;
-    owerror_t decStatus;
+    owerror_t decStatus, encStatus;
     coap_option_iht *objectSecurity;
     coap_option_iht *proxyScheme;
     coap_option_iht *statelessProxy;
@@ -151,7 +151,7 @@ void coap_receive(OpenQueueEntry_t *msg) {
     // reject unsupported header
     if (coap_header.Ver != COAP_VERSION || coap_header.TKL > COAP_MAX_TKL) {
         LOG_ERROR(COMPONENT_OPENCOAP, ERR_WRONG_TRAN_PROTOCOL, (errorparameter_t) 0,
-                (errorparameter_t) coap_header.Ver);
+                  (errorparameter_t) coap_header.Ver);
         openqueue_freePacketBuffer(msg);
         return;
     }
@@ -161,13 +161,13 @@ void coap_receive(OpenQueueEntry_t *msg) {
     index += coap_header.TKL;
 
     // remove the CoAP header
-    packetfunctions_tossHeader(msg, index);
+    packetfunctions_tossHeader(&msg, index);
 
     // parse options and toss header
     index = coap_options_parse(&msg->payload[0], msg->length, coap_incomingOptions, &coap_incomingOptionsLen);
 
     // toss options
-    packetfunctions_tossHeader(msg, index);
+    packetfunctions_tossHeader(&msg, index);
 
     // process handled options
     //== Stateless Proxy option
@@ -223,7 +223,7 @@ void coap_receive(OpenQueueEntry_t *msg) {
             if (index == 0) {
                 return;
             }
-            packetfunctions_tossHeader(msg, index);
+            packetfunctions_tossHeader(&msg, index);
         } else {
             index = oscore_parse_compressed_COSE(objectSecurity->pValue,
                                                  objectSecurity->length,
@@ -244,10 +244,7 @@ void coap_receive(OpenQueueEntry_t *msg) {
     // find the resource this applies to
     found = FALSE;
 
-    if (
-            coap_header.Code >= COAP_CODE_REQ_GET &&
-            coap_header.Code <= COAP_CODE_REQ_DELETE
-            ) {
+    if (coap_header.Code >= COAP_CODE_REQ_GET && coap_header.Code <= COAP_CODE_REQ_DELETE) {
         // this is a request: target resource is indicated as COAP_OPTION_LOCATIONPATH option(s)
 
         // first, we need to decrypt the request and to do so find the right security context
@@ -394,8 +391,7 @@ void coap_receive(OpenQueueEntry_t *msg) {
                                                              coap_incomingOptions,
                                                              &coap_incomingOptionsLen,
                                                              msg,
-                                                             temp_desc->last_request.oscoreSeqNum
-                        );
+                                                             temp_desc->last_request.oscoreSeqNum);
 
                         if (decStatus != E_SUCCESS) {
                             return;
@@ -428,16 +424,18 @@ void coap_receive(OpenQueueEntry_t *msg) {
 
         // call the resource's callback
         outcome = temp_desc->callbackRx(msg, &coap_header, &coap_incomingOptions[0], coap_outgoingOptions, &coap_outgoingOptionsLen);
+
         if (outcome == E_FAIL) {
             securityReturnCode = COAP_CODE_RESP_METHODNOTALLOWED;
         }
+
         if (temp_desc->securityContext != NULL) {
             coap_outgoingOptions[coap_outgoingOptionsLen++].type = COAP_OPTION_NUM_OBJECTSECURITY;
             if (coap_outgoingOptionsLen > MAX_COAP_OPTIONS) {
                 securityReturnCode = COAP_CODE_RESP_SERVERERROR; // no space for object security option
             }
             // protect the message in the openqueue buffer
-            oscore_protect_message(
+            encStatus = oscore_protect_message(
                     temp_desc->securityContext,
                     COAP_VERSION,
                     coap_header.Code,
@@ -445,6 +443,10 @@ void coap_receive(OpenQueueEntry_t *msg) {
                     coap_outgoingOptionsLen,
                     msg,
                     rcvdSequenceNumber);
+            if (encStatus == E_FAIL) {
+                openqueue_freePacketBuffer(msg);
+                return;
+            }
             class = COAP_OPTION_CLASS_U;
         } else {
             class = COAP_OPTION_CLASS_ALL;
@@ -481,12 +483,18 @@ void coap_receive(OpenQueueEntry_t *msg) {
     //=== step 4. add the payload marker and encode options
 
     if (msg->length > 0) { // contains payload, add payload marker
-        packetfunctions_reserveHeaderSize(msg, 1);
+        if (packetfunctions_reserveHeader(&msg, 1) == E_FAIL) {
+            openqueue_freePacketBuffer(msg);
+            return;
+        }
         msg->payload[0] = COAP_PAYLOAD_MARKER;
     }
 
     // once header is reserved, encode the options to the openqueue payload buffer
-    coap_options_encode(msg, coap_outgoingOptions, coap_outgoingOptionsLen, class);
+    if (coap_options_encode(msg, coap_outgoingOptions, coap_outgoingOptionsLen, class) == E_FAIL) {
+        openqueue_freePacketBuffer(msg);
+        return;
+    }
 
     //=== step 5. send that packet back
 
@@ -506,13 +514,16 @@ void coap_receive(OpenQueueEntry_t *msg) {
     memcpy(&msg->l3_destinationAdd.addr_128b[0], &msg->l3_sourceAdd.addr_128b[0], LENGTH_ADDR128b);
 
     // fill in CoAP header
-    coap_header_encode(msg,
-                       COAP_VERSION,
-                       response_type,
-                       coap_header.TKL,
-                       coap_header.Code,
-                       coap_header.messageID,
-                       &coap_header.token[0]);
+    if (coap_header_encode(msg,
+                           COAP_VERSION,
+                           response_type,
+                           coap_header.TKL,
+                           coap_header.Code,
+                           coap_header.messageID,
+                           &coap_header.token[0]) == E_FAIL) {
+        openqueue_freePacketBuffer(msg);
+        return;
+    }
 
     if ((openudp_send(msg)) == E_FAIL) {
         openqueue_freePacketBuffer(msg);
@@ -585,21 +596,36 @@ void coap_writeLinks(OpenQueueEntry_t *msg, uint8_t componentID) {
                 ) {
 
             // write ending '>'
-            packetfunctions_reserveHeaderSize(msg, 1);
+            if (packetfunctions_reserveHeader(&msg, 1) == E_FAIL) {
+                openqueue_freePacketBuffer(msg);
+                return;
+            }
             msg->payload[0] = '>';
 
             // write path1
             if (temp_resource->path1len > 0) {
-                packetfunctions_reserveHeaderSize(msg, temp_resource->path1len);
+                if (packetfunctions_reserveHeader(&msg, temp_resource->path1len) == E_FAIL) {
+                    openqueue_freePacketBuffer(msg);
+                    return;
+                }
                 memcpy(&msg->payload[0], temp_resource->path1val, temp_resource->path1len);
-                packetfunctions_reserveHeaderSize(msg, 1);
+                if (packetfunctions_reserveHeader(&msg, 1) == E_FAIL) {
+                    openqueue_freePacketBuffer(msg);
+                    return;
+                }
                 msg->payload[0] = '/';
             }
 
             // write path0
-            packetfunctions_reserveHeaderSize(msg, temp_resource->path0len);
+            if (packetfunctions_reserveHeader(&msg, temp_resource->path0len) == E_FAIL) {
+                openqueue_freePacketBuffer(msg);
+                return;
+            }
             memcpy(msg->payload, temp_resource->path0val, temp_resource->path0len);
-            packetfunctions_reserveHeaderSize(msg, 2);
+            if (packetfunctions_reserveHeader(&msg, 2) == E_FAIL) {
+                openqueue_freePacketBuffer(msg);
+                return;
+            }
             msg->payload[1] = '/';
 
             // write opening '>'
@@ -607,7 +633,10 @@ void coap_writeLinks(OpenQueueEntry_t *msg, uint8_t componentID) {
 
             // write separator between links
             if (temp_resource->next != NULL) {
-                packetfunctions_reserveHeaderSize(msg, 1);
+                if (packetfunctions_reserveHeader(&msg, 1) == E_FAIL) {
+                    openqueue_freePacketBuffer(msg);
+                    return;
+                }
                 msg->payload[0] = ',';
             }
         }
@@ -731,18 +760,22 @@ owerror_t coap_send(
 
     // add payload marker
     if (msg->length) {
-        packetfunctions_reserveHeaderSize(msg, 1);
+        if (packetfunctions_reserveHeader(&msg, 1) == E_FAIL) {
+            openqueue_freePacketBuffer(msg);
+            return E_FAIL;
+        }
         msg->payload[0] = COAP_PAYLOAD_MARKER;
     }
 
     // once header is reserved, encode the options to the openqueue payload buffer
-    coap_options_encode(msg,
-                        options,
-                        optionsLen,
-                        class);
+    if (coap_options_encode(msg, options, optionsLen, class) == E_FAIL) {
+        return E_FAIL;
+    }
 
-    // pre-pend CoAP header (version,type,TKL,code,messageID,Token)
-    coap_header_encode(msg, COAP_VERSION, type, request->TKL, code, request->messageID, request->token);
+    // pre-pend CoAP header (version, type, TKL, code, messageID, Token)
+    if (coap_header_encode(msg, COAP_VERSION, type, request->TKL, code, request->messageID, request->token) == E_FAIL) {
+        return E_FAIL;
+    }
 
     return openudp_send(msg);
 }
@@ -856,16 +889,24 @@ owerror_t coap_options_encode(
             }
 
             // write to packet in reversed order
-            packetfunctions_reserveHeaderSize(msg, options[i].length);
+            if (packetfunctions_reserveHeader(&msg, options[i].length) == E_FAIL) {
+                return E_FAIL;
+            }
             memcpy(&msg->payload[0], options[i].pValue, options[i].length);
 
-            packetfunctions_reserveHeaderSize(msg, optionLengthExtLen);
+            if (packetfunctions_reserveHeader(&msg, optionLengthExtLen) == E_FAIL) {
+                return E_FAIL;
+            }
             memcpy(&msg->payload[0], optionLengthExt, optionLengthExtLen);
 
-            packetfunctions_reserveHeaderSize(msg, optionDeltaExtLen);
+            if (packetfunctions_reserveHeader(&msg, optionDeltaExtLen) == E_FAIL) {
+                return E_FAIL;
+            }
             memcpy(&msg->payload[0], optionDeltaExt, optionDeltaExtLen);
 
-            packetfunctions_reserveHeaderSize(msg, 1);
+            if (packetfunctions_reserveHeader(&msg, 1) == E_FAIL) {
+                return E_FAIL;
+            }
             msg->payload[0] = (optionDelta << 4) | optionLength;
         }
     }
@@ -1127,15 +1168,17 @@ void coap_handle_stateless_proxy(OpenQueueEntry_t *msg,
     coap_forward_message(msg, header, outgoingOptions, outgoingOptionsLen, &destIP, portNumber);
 }
 
-void coap_header_encode(OpenQueueEntry_t *msg,
-                        uint8_t version,
-                        coap_type_t type,
-                        uint8_t TKL,
-                        coap_code_t code,
-                        uint16_t messageID,
-                        uint8_t *token) {
+owerror_t coap_header_encode(OpenQueueEntry_t *msg,
+                             uint8_t version,
+                             coap_type_t type,
+                             uint8_t TKL,
+                             coap_code_t code,
+                             uint16_t messageID,
+                             uint8_t *token) {
     // pre-pend CoAP header (version,type,TKL,code,messageID,Token)
-    packetfunctions_reserveHeaderSize(msg, 4 + TKL);
+    if (packetfunctions_reserveHeader(&msg, 4 + TKL) == E_FAIL) {
+        return E_FAIL;
+    }
     msg->payload[0] = (version << 6) |
                       (type << 4) |
                       (TKL << 0);
@@ -1144,6 +1187,8 @@ void coap_header_encode(OpenQueueEntry_t *msg,
     msg->payload[3] = (messageID >> 0) & 0xff;
 
     memcpy(&msg->payload[4], token, TKL);
+
+    return E_SUCCESS;
 }
 
 void coap_add_stateless_proxy_option(coap_option_iht *option,
@@ -1199,27 +1244,41 @@ void coap_forward_message(OpenQueueEntry_t *msg,
 
     // fill payload
     if (msg->length) {
-        packetfunctions_reserveHeaderSize(outgoingPacket, msg->length);
+        if (packetfunctions_reserveHeader(&outgoingPacket, msg->length) == E_FAIL) {
+            goto fail;
+        }
         memcpy(outgoingPacket->payload, msg->payload, msg->length);
-        packetfunctions_reserveHeaderSize(outgoingPacket, 1);
+        if (packetfunctions_reserveHeader(&outgoingPacket, 1) == E_FAIL) {
+            goto fail;
+        }
         outgoingPacket->payload[0] = COAP_PAYLOAD_MARKER;
     }
 
     // encode options
-    coap_options_encode(outgoingPacket, outgoingOptions, outgoingOptionsLen, COAP_OPTION_CLASS_ALL);
+    if (coap_options_encode(outgoingPacket, outgoingOptions, outgoingOptionsLen, COAP_OPTION_CLASS_ALL) == E_FAIL) {
+        goto fail;
+    }
 
     // encode CoAP header
-    coap_header_encode(outgoingPacket,
-                       header->Ver,
-                       header->T,
-                       header->TKL,
-                       header->Code,
-                       header->messageID,
-                       header->token);
+    if (coap_header_encode(outgoingPacket,
+                           header->Ver,
+                           header->T,
+                           header->TKL,
+                           header->Code,
+                           header->messageID,
+                           header->token) == E_FAIL) {
+        goto fail;
+    }
 
     if ((openudp_send(outgoingPacket)) == E_FAIL) {
-        openqueue_freePacketBuffer(outgoingPacket);
+        goto fail;
     }
+
+    return;
+
+    fail:
+    openqueue_freePacketBuffer(outgoingPacket);
+    return;
 }
 
 #endif /* OPENWSN_COAP_C */

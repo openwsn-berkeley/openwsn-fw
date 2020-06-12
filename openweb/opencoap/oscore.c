@@ -187,22 +187,23 @@ owerror_t oscore_protect_message(
 
     if (msg->length > 0) { // contains payload, add payload marker
         payloadPresent = TRUE;
-        packetfunctions_reserveHeaderSize(msg, 1);
+        if (packetfunctions_reserveHeader(&msg, 1) == E_FAIL){
+            return E_FAIL;
+        }
         msg->payload[0] = COAP_PAYLOAD_MARKER;
     } else {
         payloadPresent = FALSE;
     }
 
     // encode the options to the openqueue payload buffer
-    coap_options_encode(msg,
-                        incomingOptions,
-                        incomingOptionsLen,
-                        COAP_OPTION_CLASS_E);
+    coap_options_encode(msg, incomingOptions, incomingOptionsLen, COAP_OPTION_CLASS_E);
 
     payload = &msg->payload[0];
     payloadLen = msg->length;
     // shift payload to leave space for authentication tag
-    packetfunctions_reserveHeaderSize(msg, AES_CCM_16_64_128_TAG_LEN);
+    if (packetfunctions_reserveHeader(&msg, AES_CCM_16_64_128_TAG_LEN) == E_FAIL){
+        return E_FAIL;
+    }
     memcpy(&msg->payload[0], payload, payloadLen);
     // update payload pointer but leave length intact
     payload = &msg->payload[0];
@@ -264,7 +265,7 @@ owerror_t oscore_protect_message(
         // FIXME use the upper bytes in the msg->packet buffer
         memcpy(&msg->packet[0], &msg->payload[0], msg->length);
         objectSecurity->pValue = &msg->packet[0];
-        packetfunctions_tossHeader(msg, msg->length); // reset packet to zero as objectSecurity option will cary payload
+        packetfunctions_tossHeader(&msg, msg->length); // reset packet to zero as objectSecurity option will cary payload
     }
 
     return E_SUCCESS;
@@ -381,9 +382,9 @@ owerror_t oscore_unprotect_message(
     if (payloadInObjSec) {
         coap_options_parse(objectSecurity->pValue, objectSecurity->length, incomingOptions, incomingOptionsLen);
     } else {
-        packetfunctions_tossFooter(msg, AES_CCM_16_64_128_TAG_LEN);
+        packetfunctions_tossFooter(&msg, AES_CCM_16_64_128_TAG_LEN);
         index = coap_options_parse(&msg->payload[0], msg->length, incomingOptions, incomingOptionsLen);
-        packetfunctions_tossHeader(msg, index);
+        packetfunctions_tossHeader(&msg, index);
     }
 
     return E_SUCCESS;
@@ -557,17 +558,17 @@ void oscore_encode_compressed_COSE(OpenQueueEntry_t *msg,
     }
 
     if (kidFlag) {
-        packetfunctions_reserveHeaderSize(msg, kidLen + 1);
+        packetfunctions_reserveHeader(&msg, kidLen + 1);
         msg->payload[0] = kidLen;
         memcpy(&msg->payload[1], kid, kidLen);
     }
 
     if (partialIVLen) {
-        packetfunctions_reserveHeaderSize(msg, partialIVLen);
+        packetfunctions_reserveHeader(&msg, partialIVLen);
         memcpy(&msg->payload[0], partialIV, partialIVLen);
     }
     // flag byte
-    packetfunctions_reserveHeaderSize(msg, 1);
+    packetfunctions_reserveHeader(&msg, 1);
     msg->payload[0] = ((kidFlag << 3) | partialIVLen);
 }
 

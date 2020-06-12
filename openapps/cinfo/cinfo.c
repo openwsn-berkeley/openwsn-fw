@@ -92,26 +92,51 @@ owerror_t cinfo_receive(
             //=== prepare  CoAP response
 
             // radio name
-            packetfunctions_reserveHeaderSize(msg, sizeof(infoRadioName) - 1);
+            if (packetfunctions_reserveHeader(&msg, sizeof(infoRadioName) - 1) == E_FAIL) {
+                openqueue_freePacketBuffer(msg);
+                return;
+            }
             memcpy(&msg->payload[0], &infoRadioName, sizeof(infoRadioName) - 1);
 
             // uC name
-            packetfunctions_reserveHeaderSize(msg, 1);
+            if (packetfunctions_reserveHeader(&msg, 1) == E_FAIL) {
+                openqueue_freePacketBuffer(msg);
+                return;
+            }
             msg->payload[0] = '\n';
-            packetfunctions_reserveHeaderSize(msg, sizeof(infouCName) - 1);
+
+            if (packetfunctions_reserveHeader(&msg, sizeof(infouCName) - 1) == E_FAIL) {
+                openqueue_freePacketBuffer(msg);
+                return;
+            }
             memcpy(&msg->payload[0], &infouCName, sizeof(infouCName) - 1);
 
             // board name
-            packetfunctions_reserveHeaderSize(msg, 1);
+            if (packetfunctions_reserveHeader(&msg, 1) == E_FAIL) {
+                openqueue_freePacketBuffer(msg);
+                return;
+            }
             msg->payload[0] = '\n';
-            packetfunctions_reserveHeaderSize(msg, sizeof(infoBoardname) - 1);
+
+            if (packetfunctions_reserveHeader(&msg, sizeof(infoBoardname) - 1) == E_FAIL) {
+                openqueue_freePacketBuffer(msg);
+                return;
+            }
             memcpy(&msg->payload[0], &infoBoardname, sizeof(infoBoardname) - 1);
 
             // stack name and version
-            packetfunctions_reserveHeaderSize(msg, 1);
+            if (packetfunctions_reserveHeader(&msg, 1) == E_FAIL) {
+                openqueue_freePacketBuffer(msg);
+                return;
+            }
             msg->payload[0] = '\n';
-            packetfunctions_reserveHeaderSize(msg, sizeof(infoStackName) - 1 + 6);
+
+            if (packetfunctions_reserveHeader(&msg, sizeof(infoStackName)) == E_FAIL) {
+                openqueue_freePacketBuffer(msg);
+                return;
+            }
             memcpy(&msg->payload[0], &infoStackName, sizeof(infoStackName) - 1);
+
             msg->payload[sizeof(infoStackName) - 1 + 6 - 6] = '0' + OPENWSN_VERSION_MAJOR;
             msg->payload[sizeof(infoStackName) - 1 + 6 - 5] = '.';
             msg->payload[sizeof(infoStackName) - 1 + 6 - 4] = '0' + OPENWSN_VERSION_MINOR / 10;

@@ -773,7 +773,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
         }
 
         // toss CRC (2 last bytes)
-        packetfunctions_tossFooter(ieee154e_vars.dataReceived, LENGTH_CRC);
+        packetfunctions_tossFooter(&ieee154e_vars.dataReceived, LENGTH_CRC);
 
         // break if invalid CRC
         if (ieee154e_vars.dataReceived->l1_crc == FALSE) {
@@ -814,7 +814,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
 
         // toss the IEEE802.15.4 header -- this does not include IEs as they are processed
         // next.
-        packetfunctions_tossHeader(ieee154e_vars.dataReceived, ieee802514_header.headerLength);
+        packetfunctions_tossHeader(&ieee154e_vars.dataReceived, ieee802514_header.headerLength);
 
         // process IEs
         lenIE = 0;
@@ -837,7 +837,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
         ieee154e_vars.radioOnTics += (sctimer_readCounter() - ieee154e_vars.radioOnInit);
 
         // toss the IEs
-        packetfunctions_tossHeader(ieee154e_vars.dataReceived, lenIE);
+        packetfunctions_tossHeader(&ieee154e_vars.dataReceived, lenIE);
 
         // synchronize (for the first time) to the sender's EB
         synchronizePacket(ieee154e_vars.syncCapturedTime);
@@ -1071,8 +1071,14 @@ port_INLINE void activity_ti1ORri1(void) {
                         return;
                     }
                 }
+
                 // add 2 CRC bytes only to the local copy as we end up here for each retransmission
-                packetfunctions_reserveFooterSize(&ieee154e_vars.localCopyForTransmission, 2);
+                OpenQueueEntry_t* copy;
+                localCopy = &ieee154e_vars.localCopyForTransmission;
+                if (packetfunctions_reserveFooter(&localCopy, 2) == E_FAIL){
+                    endSlot();
+                    return;
+                }
                 
                 // configure the radio to listen to the default synchronizing channel
                 radio_setFrequency(ieee154e_vars.freq, FREQ_TX);
@@ -1167,7 +1173,16 @@ port_INLINE void activity_ti2(void) {
     }
 
     // add 2 CRC bytes only to the local copy as we end up here for each retransmission
-    packetfunctions_reserveFooterSize(&ieee154e_vars.localCopyForTransmission, 2);
+
+    OpenQueueEntry_t* localCopy;
+    localCopy = &ieee154e_vars.localCopyForTransmission;
+    if (packetfunctions_reserveFooter(&localCopy, 2) == E_FAIL){
+        // packet too big, will never successfully be transmitted, drop immediately
+        // set retries to 1, so after it get decremented in endSlot, we drop the packet
+        ieee154e_vars.dataToSend->l2_retriesLeft = 1;
+        endSlot();
+        return;
+    }
 
     // configure the radio to listen to the default synchronizing channel
     radio_setFrequency(ieee154e_vars.freq, FREQ_TX);
@@ -1528,7 +1543,7 @@ port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
         }
 
         // toss CRC (2 last bytes)
-        packetfunctions_tossFooter(ieee154e_vars.ackReceived, LENGTH_CRC);
+        packetfunctions_tossFooter(&ieee154e_vars.ackReceived, LENGTH_CRC);
 
         // break if invalid CRC
         if (ieee154e_vars.ackReceived->l1_crc == FALSE) {
@@ -1563,7 +1578,7 @@ port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
         }
 
         // toss the IEEE802.15.4 header
-        packetfunctions_tossHeader(ieee154e_vars.ackReceived, ieee802514_header.headerLength);
+        packetfunctions_tossHeader(&ieee154e_vars.ackReceived, ieee802514_header.headerLength);
 
         // break if invalid ACK
         if (isValidAck(&ieee802514_header, ieee154e_vars.dataToSend) == FALSE) {
@@ -1768,7 +1783,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
         }
 
         // toss CRC (2 last bytes)
-        packetfunctions_tossFooter(ieee154e_vars.dataReceived, LENGTH_CRC);
+        packetfunctions_tossFooter(&ieee154e_vars.dataReceived, LENGTH_CRC);
 
         // if CRC doesn't check, stop
         if (ieee154e_vars.dataReceived->l1_crc == FALSE) {
@@ -1805,7 +1820,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
             }
                 // bypass authentication of beacons during join process
             else if (ieee154e_vars.dataReceived->l2_frameType == IEEE154_TYPE_BEACON) { // not joined yet
-                packetfunctions_tossFooter(ieee154e_vars.dataReceived,
+                packetfunctions_tossFooter(&ieee154e_vars.dataReceived,
                                            ieee154e_vars.dataReceived->l2_authenticationLength);
             } else {
                 break;
@@ -1813,7 +1828,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
         }
 
         // toss the IEEE802.15.4 header
-        packetfunctions_tossHeader(ieee154e_vars.dataReceived, ieee802514_header.headerLength);
+        packetfunctions_tossHeader(&ieee154e_vars.dataReceived, ieee802514_header.headerLength);
 
         if (
                 ieee802514_header.frameType == IEEE154_TYPE_BEACON &&
@@ -1828,7 +1843,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
         }
 
         // toss the IEs including Synch
-        packetfunctions_tossHeader(ieee154e_vars.dataReceived, lenIE);
+        packetfunctions_tossHeader(&ieee154e_vars.dataReceived, lenIE);
 
         // record the captured time
         ieee154e_vars.lastCapturedTime = capturedTime;
@@ -1901,7 +1916,10 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
                 }
             }
             // space for 2-byte CRC
-            packetfunctions_reserveFooterSize(ieee154e_vars.ackToSend, 2);
+            if (packetfunctions_reserveFooter(&ieee154e_vars.ackToSend, 2) == E_FAIL){
+                endSlot();
+                return;
+            }
             // 1. schedule timer for loading packet
             sctimer_scheduleActionIn(ACTION_LOAD_PACKET, ieee154e_vars.startOfSlotReference + DURATION_rt5);
             // set tx buffer address and length to prepare loading packet (packet is NOT loaded at this moment)
@@ -2033,7 +2051,10 @@ port_INLINE void activity_ri6(void) {
         }
     }
     // space for 2-byte CRC
-    packetfunctions_reserveFooterSize(ieee154e_vars.ackToSend, 2);
+    if (packetfunctions_reserveFooter(&ieee154e_vars.ackToSend, 2) == E_FAIL){
+        endSlot();
+        return;
+    }
     // configure the radio to listen to the default synchronizing channel
     radio_setFrequency(ieee154e_vars.freq, FREQ_TX);
 
@@ -2286,7 +2307,7 @@ bool isValidJoin(OpenQueueEntry_t *eb, ieee802154_header_iht *parsedHeader) {
     uint16_t lenIE;
 
     // toss the header in order to get to IEs
-    packetfunctions_tossHeader(eb, parsedHeader->headerLength);
+    packetfunctions_tossHeader(&eb, parsedHeader->headerLength);
 
     // process IEs
     // at this stage, this can work only if EB is authenticated but not encrypted
@@ -2305,7 +2326,10 @@ bool isValidJoin(OpenQueueEntry_t *eb, ieee802154_header_iht *parsedHeader) {
 
     // put everything back in place in order to invoke security-incoming on the correct frame length and correct
     // pointers (first byte of the frame)
-    packetfunctions_reserveHeaderSize(eb, parsedHeader->headerLength);
+    if (packetfunctions_reserveHeader(&eb, parsedHeader->headerLength) == E_FAIL){
+        // this should not happen!
+        return FALSE;
+    }
 
     // verify EB's authentication tag if keys are configured
     if (IEEE802154_security_isConfigured()) {
@@ -2314,7 +2338,7 @@ bool isValidJoin(OpenQueueEntry_t *eb, ieee802154_header_iht *parsedHeader) {
         }
     } else {
         // bypass authentication check for beacons if security is not configured
-        packetfunctions_tossFooter(eb, eb->l2_authenticationLength);
+        packetfunctions_tossFooter(&eb, eb->l2_authenticationLength);
         return TRUE;
     }
 
@@ -2833,9 +2857,7 @@ void endSlot(void) {
 
     // clean up dataToSend
     if (ieee154e_vars.dataToSend != NULL) {
-        // if everything went well, dataToSend was set to NULL in ti9
-        // getting here means transmit failed
-
+        // if everything went well, dataToSend was set to NULL in ti9, getting here means transmit failed
         // indicate Tx fail to schedule to update stats
         schedule_indicateTx(&ieee154e_vars.asn, FALSE);
 

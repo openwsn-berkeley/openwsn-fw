@@ -252,7 +252,7 @@ void icmpv6rpl_receive(OpenQueueEntry_t *msg) {
     icmpv6code = (((ICMPv6_ht *) (msg->payload))->code);
 
     // toss ICMPv6 header
-    packetfunctions_tossHeader(msg, sizeof(ICMPv6_ht));
+    packetfunctions_tossHeader(&msg, sizeof(ICMPv6_ht));
 
     // handle message
     switch (icmpv6code) {
@@ -369,8 +369,9 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection(void) {
 
     // if I'm a DAGroot, my DAGrank is always MINHOPRANKINCREASE
     if ((idmanager_getIsDAGroot()) == TRUE) {
-        // the dagrank is not set through setting command, set rank to MINHOPRANKINCREASE here
-        if (icmpv6rpl_vars.myDAGrank != MINHOPRANKINCREASE) { // test for change so as not to report unchanged value when root
+        // the dagrank is not set through setting command, set
+        // test for change so as not to report unchanged value when root rank to MINHOPRANKINCREASE here
+        if (icmpv6rpl_vars.myDAGrank != MINHOPRANKINCREASE) {
             icmpv6rpl_vars.myDAGrank = MINHOPRANKINCREASE;
             return;
         }
@@ -381,10 +382,7 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection(void) {
     prevRankIncrease = icmpv6rpl_vars.rankIncrease;
     // update my rank to current parent first
     if (icmpv6rpl_vars.haveParent == TRUE) {
-
-        if (
-                neighbors_getNeighborNoResource(icmpv6rpl_vars.ParentIndex) == TRUE
-                ) {
+        if (neighbors_getNeighborNoResource(icmpv6rpl_vars.ParentIndex) == TRUE) {
             icmpv6rpl_vars.myDAGrank = 65535;
         } else {
             if (neighbors_reachedMinimalTransmission(icmpv6rpl_vars.ParentIndex) == FALSE) {
@@ -719,7 +717,6 @@ void sendDIO(void) {
     msg = openqueue_getFreePacketBuffer(COMPONENT_ICMPv6RPL);
     if (msg == NULL) {
         LOG_ERROR(COMPONENT_ICMPv6RPL, ERR_NO_FREE_PACKET_BUFFER, (errorparameter_t) 0, (errorparameter_t) 0);
-
         return;
     }
 
@@ -736,14 +733,13 @@ void sendDIO(void) {
     memcpy(&(msg->l3_destinationAdd), &icmpv6rpl_vars.dioDestination, sizeof(open_addr_t));
 
     //===== Configuration option
-    packetfunctions_reserveHeaderSize(msg, sizeof(icmpv6rpl_config_ht));
+    if (packetfunctions_reserveHeader(&msg, sizeof(icmpv6rpl_config_ht)) == E_FAIL) {
+        openqueue_freePacketBuffer(msg);
+        return;
+    }
 
     //copy the PIO in the packet
-    memcpy(
-            ((icmpv6rpl_config_ht *) (msg->payload)),
-            &(icmpv6rpl_vars.conf),
-            sizeof(icmpv6rpl_config_ht)
-    );
+    memcpy(((icmpv6rpl_config_ht *) (msg->payload)), &(icmpv6rpl_vars.conf), sizeof(icmpv6rpl_config_ht));
 
     ((icmpv6rpl_config_ht *) (msg->payload))->maxRankIncrease =
             (icmpv6rpl_vars.conf.maxRankIncrease << 8) | (icmpv6rpl_vars.conf.maxRankIncrease >> 8); //  2048
@@ -756,7 +752,10 @@ void sendDIO(void) {
 
     //===== PIO payload
 
-    packetfunctions_reserveHeaderSize(msg, sizeof(icmpv6rpl_pio_t));
+    if (packetfunctions_reserveHeader(&msg, sizeof(icmpv6rpl_pio_t)) == E_FAIL) {
+        openqueue_freePacketBuffer(msg);
+        return;
+    }
 
     // copy my prefix into the PIO
 
@@ -773,29 +772,26 @@ void sendDIO(void) {
     );*/
 
     //copy the PIO in the packet
-    memcpy(
-            ((icmpv6rpl_pio_t *) (msg->payload)),
-            &(icmpv6rpl_vars.pio),
-            sizeof(icmpv6rpl_pio_t)
-    );
-
+    memcpy(((icmpv6rpl_pio_t *) (msg->payload)), &(icmpv6rpl_vars.pio), sizeof(icmpv6rpl_pio_t));
 
     //===== DIO payload
     // note: DIO is already mostly populated
     icmpv6rpl_vars.dio.rank = icmpv6rpl_getMyDAGrank();
-    packetfunctions_reserveHeaderSize(msg, sizeof(icmpv6rpl_dio_ht));
-    memcpy(
-            ((icmpv6rpl_dio_ht *) (msg->payload)),
-            &(icmpv6rpl_vars.dio),
-            sizeof(icmpv6rpl_dio_ht)
-    );
+    if (packetfunctions_reserveHeader(&msg, sizeof(icmpv6rpl_dio_ht)) == E_FAIL) {
+        openqueue_freePacketBuffer(msg);
+        return;
+    }
+    memcpy(((icmpv6rpl_dio_ht *) (msg->payload)), &(icmpv6rpl_vars.dio), sizeof(icmpv6rpl_dio_ht));
 
     // reverse the rank bytes order in Big Endian
     *(msg->payload + 2) = (icmpv6rpl_vars.dio.rank >> 8) & 0xFF;
     *(msg->payload + 3) = icmpv6rpl_vars.dio.rank & 0xFF;
 
     //===== ICMPv6 header
-    packetfunctions_reserveHeaderSize(msg, sizeof(ICMPv6_ht));
+    if (packetfunctions_reserveHeader(&msg, sizeof(ICMPv6_ht)) == E_FAIL) {
+        openqueue_freePacketBuffer(msg);
+        return;
+    }
     ((ICMPv6_ht *) (msg->payload))->type = msg->l4_sourcePortORicmpv6Type;
     ((ICMPv6_ht *) (msg->payload))->code = IANA_ICMPv6_RPL_DIO;
     packetfunctions_calculateChecksum(msg, (uint8_t * ) & (((ICMPv6_ht *) (msg->payload))->checksum));//call last
@@ -922,9 +918,15 @@ void sendDAO(void) {
     //getting only preferred parent as transit
     numTransitParents = 0;
     icmpv6rpl_getPreferredParentEui64(&address);
-    packetfunctions_writeAddress(msg, &address, OW_BIG_ENDIAN);
+    if (packetfunctions_writeAddress(&msg, &address, OW_BIG_ENDIAN) == E_FAIL) {
+        openqueue_freePacketBuffer(msg);
+        return;
+    }
     prefix = idmanager_getMyID(ADDR_PREFIX);
-    packetfunctions_writeAddress(msg, prefix, OW_BIG_ENDIAN);
+    if (packetfunctions_writeAddress(&msg, prefix, OW_BIG_ENDIAN) == E_FAIL) {
+        openqueue_freePacketBuffer(msg);
+        return;
+    }
     // update transit info fields
     // from rfc6550 p.55 -- Variable, depending on whether or not the DODAG ParentAddress subfield is present.
     // poipoi xv: it is not very clear if this includes all fields in the header. or as target info 2 bytes are removed.
@@ -934,7 +936,10 @@ void sendDAO(void) {
     icmpv6rpl_vars.dao_transit.type = OPTION_TRANSIT_INFORMATION_TYPE;
 
     // write transit info in packet
-    packetfunctions_reserveHeaderSize(msg, sizeof(icmpv6rpl_dao_transit_ht));
+    if (packetfunctions_reserveHeader(&msg, sizeof(icmpv6rpl_dao_transit_ht)) == E_FAIL) {
+        openqueue_freePacketBuffer(msg);
+        return;
+    }
     memcpy(
             ((icmpv6rpl_dao_transit_ht *) (msg->payload)),
             &(icmpv6rpl_vars.dao_transit),
@@ -954,9 +959,15 @@ void sendDAO(void) {
 
             // write it's address in DAO RFC6550 page 80 check point 1.
             neighbors_getNeighborEui64(&address, ADDR_64B, nbrIdx);
-            packetfunctions_writeAddress(msg, &address, OW_BIG_ENDIAN);
+            if (packetfunctions_writeAddress(&msg, &address, OW_BIG_ENDIAN) == E_FAIL) {
+                openqueue_freePacketBuffer(msg);
+                return;
+            }
             prefix = idmanager_getMyID(ADDR_PREFIX);
-            packetfunctions_writeAddress(msg, prefix, OW_BIG_ENDIAN);
+            if (packetfunctions_writeAddress(&msg, prefix, OW_BIG_ENDIAN) == E_FAIL) {
+                openqueue_freePacketBuffer(msg);
+                return;
+            }
 
             // update target info fields
             // from rfc6550 p.55 -- Variable, length of the option in octets excluding the Type and Length fields.
@@ -968,7 +979,10 @@ void sendDAO(void) {
             icmpv6rpl_vars.dao_target.prefixLength = 128; //128 leading bits  -- full address.
 
             // write transit info in packet
-            packetfunctions_reserveHeaderSize(msg, sizeof(icmpv6rpl_dao_target_ht));
+            if (packetfunctions_reserveHeader(&msg, sizeof(icmpv6rpl_dao_target_ht)) == E_FAIL) {
+                openqueue_freePacketBuffer(msg);
+                return;
+            }
             memcpy(
                     ((icmpv6rpl_dao_target_ht *) (msg->payload)),
                     &(icmpv6rpl_vars.dao_target),
@@ -996,7 +1010,10 @@ void sendDAO(void) {
 
 
     //=== DAO header
-    packetfunctions_reserveHeaderSize(msg, sizeof(icmpv6rpl_dao_ht));
+    if (packetfunctions_reserveHeader(&msg, sizeof(icmpv6rpl_dao_ht)) == E_FAIL) {
+        openqueue_freePacketBuffer(msg);
+        return;
+    }
     icmpv6rpl_vars.dao.DAOSequence++;
     memcpy(
             ((icmpv6rpl_dao_ht *) (msg->payload)),
@@ -1005,7 +1022,10 @@ void sendDAO(void) {
     );
 
     //=== ICMPv6 header
-    packetfunctions_reserveHeaderSize(msg, sizeof(ICMPv6_ht));
+    if (packetfunctions_reserveHeader(&msg, sizeof(ICMPv6_ht)) == E_FAIL) {
+        openqueue_freePacketBuffer(msg);
+        return;
+    }
     ((ICMPv6_ht *) (msg->payload))->type = msg->l4_sourcePortORicmpv6Type;
     ((ICMPv6_ht *) (msg->payload))->code = IANA_ICMPv6_RPL_DAO;
     packetfunctions_calculateChecksum(msg, (uint8_t * ) & (((ICMPv6_ht *) (msg->payload))->checksum)); //call last

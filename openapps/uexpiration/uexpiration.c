@@ -117,7 +117,10 @@ void uexpiration_task_cb(void) {
     memcpy(&reply->l3_destinationAdd.addr_128b[0], &req.l3_sourceAdd.addr_128b[0], 16);
 
     // Seq number in payload
-    packetfunctions_reserveHeaderSize(reply, sizeof(uint16_t));
+    if (packetfunctions_reserveHeader(&reply, sizeof(uint16_t)) == E_FAIL) {
+        openqueue_freePacketBuffer(reply);
+        return;
+    }
     reply->payload[1] = (uint8_t)((seqno & 0xff00) >> 8);
     reply->payload[0] = (uint8_t)(seqno & 0x00ff);
 

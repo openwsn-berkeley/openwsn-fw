@@ -15,6 +15,7 @@
 #include "idmanager.h"
 #include "openserial.h"
 #include "neighbors.h"
+#include "radio.h"
 #include "IEEE802154_security.h"
 #include "ccms.h"
 
@@ -88,7 +89,7 @@ void IEEE802154_security_setDynamicKeying(void) {
 /**
 \brief Adding of Auxiliary Security Header to the IEEE802.15.4 MAC header
 */
-void IEEE802154_security_prependAuxiliarySecurityHeader(OpenQueueEntry_t *msg) {
+owerror_t IEEE802154_security_prependAuxiliarySecurityHeader(OpenQueueEntry_t *msg) {
 
     uint8_t frameCounterSuppression;
     uint8_t temp8b;
@@ -106,16 +107,18 @@ void IEEE802154_security_prependAuxiliarySecurityHeader(OpenQueueEntry_t *msg) {
                                                             frameCounterSuppression,    // frame counter suppressed
                                                             0);                         //length of Key ID field
 
-
-    if ((msg->length + auxiliaryLength + msg->l2_authenticationLength + 2) >= 128) { // 2 bytes of CRC, 127 MaxPHYPacketSize
-        return;
+    // 2 bytes of CRC, 127 MaxPHYPacketSize
+    if ((msg->length + auxiliaryLength + msg->l2_authenticationLength + LENGTH_CRC) >= 128) {
+        return E_FAIL;
     }
 
     //start setting the Auxiliary Security Header
     if (msg->l2_keyIdMode !=
         IEEE154_ASH_KEYIDMODE_IMPLICIT) {//if the KeyIdMode is zero, keyIndex and KeySource are omitted
         temp8b = msg->l2_keyIndex; //key index field
-        packetfunctions_reserveHeaderSize(msg, sizeof(uint8_t));
+        if (packetfunctions_reserveHeader(&msg, sizeof(uint8_t)) == E_FAIL) {
+            return E_FAIL;
+        }
         *((uint8_t * )(msg->payload)) = temp8b;
     }
 
@@ -126,22 +129,30 @@ void IEEE802154_security_prependAuxiliarySecurityHeader(OpenQueueEntry_t *msg) {
             break;
         case IEEE154_ASH_KEYIDMODE_EXPLICIT_16: // keySource with 16b address
             temp_keySource = &msg->l2_keySource;
-            packetfunctions_reserveHeaderSize(msg, sizeof(uint8_t));
+            if (packetfunctions_reserveHeader(&msg, sizeof(uint8_t)) == E_FAIL) {
+                return E_FAIL;
+            }
             *((uint8_t * )(msg->payload)) = temp_keySource->addr_64b[6];
-            packetfunctions_reserveHeaderSize(msg, sizeof(uint8_t));
+            if (packetfunctions_reserveHeader(&msg, sizeof(uint8_t)) == E_FAIL) {
+                return E_FAIL;
+            }
             *((uint8_t * )(msg->payload)) = temp_keySource->addr_64b[7];
             break;
         case IEEE154_ASH_KEYIDMODE_EXPLICIT_64: // keySource with 64b address
             temp_keySource = &msg->l2_keySource;
-            packetfunctions_writeAddress(msg, temp_keySource, OW_LITTLE_ENDIAN);
+            if (packetfunctions_writeAddress(&msg, temp_keySource, OW_LITTLE_ENDIAN) == E_FAIL) {
+                return E_FAIL;
+            }
             break;
         default: // error
             LOG_ERROR(COMPONENT_SECURITY, ERR_SECURITY, (errorparameter_t) msg->l2_frameType, (errorparameter_t) 0);
-            return;
+            return E_FAIL;
     }
 
     //security control field
-    packetfunctions_reserveHeaderSize(msg, sizeof(uint8_t));
+    if (packetfunctions_reserveHeader(&msg, sizeof(uint8_t)) == E_FAIL){
+        return E_FAIL;
+    }
 
     temp8b = 0;
     temp8b |= msg->l2_securityLevel << IEEE154_ASH_SCF_SECURITY_LEVEL;//3b
@@ -152,6 +163,8 @@ void IEEE802154_security_prependAuxiliarySecurityHeader(OpenQueueEntry_t *msg) {
 
     temp8b |= 0 << 1;//1b reserved
     *((uint8_t * )(msg->payload)) = temp8b;
+
+    return E_SUCCESS;
 }
 
 /**
@@ -210,7 +223,9 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t *msg) {
 
     if (msg->l2_authenticationLength != 0) {
         // update the length of the packet
-        packetfunctions_reserveFooterSize(msg, msg->l2_authenticationLength);
+        if (packetfunctions_reserveFooter(&msg, msg->l2_authenticationLength) == E_FAIL) {
+            return E_FAIL;
+        }
     }
 
     // Encryption and/or authentication
@@ -394,7 +409,7 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t *msg) {
         LOG_ERROR(COMPONENT_SECURITY, ERR_SECURITY, (errorparameter_t) msg->l2_frameType, (errorparameter_t) 12);
     }
 
-    packetfunctions_tossFooter(msg, msg->l2_authenticationLength);
+    packetfunctions_tossFooter(&msg, msg->l2_authenticationLength);
 
     return outStatus;
 }
@@ -530,8 +545,8 @@ bool IEEE802154_security_acceptableLevel(OpenQueueEntry_t *msg, ieee802154_heade
 
 #else /* OPENWSN_IEEE802154_SEC_C */
 
-void IEEE802154_security_prependAuxiliarySecurityHeader(OpenQueueEntry_t *msg) {
-    return;
+owerror_t IEEE802154_security_prependAuxiliarySecurityHeader(OpenQueueEntry_t *msg) {
+    return E_SUCCESS;
 }
 
 void IEEE802154_security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t *msg, ieee802154_header_iht *tempheader) {

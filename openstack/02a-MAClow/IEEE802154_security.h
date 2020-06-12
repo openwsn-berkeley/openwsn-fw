@@ -67,7 +67,7 @@ typedef struct {
 
 void IEEE802154_security_init(void);
 
-void IEEE802154_security_prependAuxiliarySecurityHeader(OpenQueueEntry_t *msg);
+owerror_t IEEE802154_security_prependAuxiliarySecurityHeader(OpenQueueEntry_t *msg);
 
 void IEEE802154_security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t *msg, ieee802154_header_iht *tempheader);
 

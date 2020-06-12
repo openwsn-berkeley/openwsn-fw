@@ -4,10 +4,9 @@
 #include "openserial.h"
 #include "packetfunctions.h"
 #include "IEEE802154E.h"
+#include "radio.h"
 #include "IEEE802154_security.h"
 #include "sixtop.h"
-// telosb need debugpins to indicate ISR activity
-#include "debugpins.h"
 
 //=========================== defination =====================================
 
@@ -110,37 +109,6 @@ OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
     return NULL;
 }
 
-#if defined(OPENWSN_6LO_FRAGMENTATION_C)
-OpenQueueEntry_t* openqueue_getFreeBigPacketBuffer(uint8_t creator) {
-    uint8_t i;
-
-    INTERRUPT_DECLARATION();
-    DISABLE_INTERRUPTS();
-
-    // refuse to allocate if we're not in sync
-    if (ieee154e_isSynch() == FALSE) {
-        ENABLE_INTERRUPTS();
-        return NULL;
-    }
-
-    for (i = 0; i < BIGQUEUELENGTH; i++) {
-        if (openqueue_vars.big_queue[i].standard_entry.owner == COMPONENT_NULL) {
-
-            openqueue_vars.big_queue[i].standard_entry.creator = creator;
-            openqueue_vars.big_queue[i].standard_entry.owner = COMPONENT_OPENQUEUE;
-            openqueue_vars.big_queue[i].standard_entry.is_big_packet = TRUE;
-
-            ENABLE_INTERRUPTS();
-            return &openqueue_vars.big_queue[i].standard_entry;
-
-        }
-    }
-
-    ENABLE_INTERRUPTS();
-    return NULL;
-}
-#endif
-
 /**
 \brief Free a previously-allocated packet buffer.
 
@@ -191,6 +159,37 @@ owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t *pkt) {
     ENABLE_INTERRUPTS();
     return E_FAIL;
 }
+
+#if defined(OPENWSN_6LO_FRAGMENTATION_C)
+OpenQueueEntry_t* openqueue_getFreeBigPacketBuffer(uint8_t creator) {
+    uint8_t i;
+
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+
+    // refuse to allocate if we're not in sync
+    if (ieee154e_isSynch() == FALSE) {
+        ENABLE_INTERRUPTS();
+        return NULL;
+    }
+
+    for (i = 0; i < BIGQUEUELENGTH; i++) {
+        if (openqueue_vars.big_queue[i].standard_entry.owner == COMPONENT_NULL) {
+
+            openqueue_vars.big_queue[i].standard_entry.creator = creator;
+            openqueue_vars.big_queue[i].standard_entry.owner = COMPONENT_OPENQUEUE;
+            openqueue_vars.big_queue[i].standard_entry.is_big_packet = TRUE;
+
+            ENABLE_INTERRUPTS();
+            return &openqueue_vars.big_queue[i].standard_entry;
+
+        }
+    }
+
+    ENABLE_INTERRUPTS();
+    return NULL;
+}
+#endif
 
 /**
 \brief Free all the packet buffers created by a specific module.
@@ -498,7 +497,7 @@ void openqueue_reset_entry(OpenQueueEntry_t *entry) {
     entry->owner = COMPONENT_NULL;
 
     // Footer is longer if security is used
-    entry->payload = &(entry->packet[IEEE802154_FRAME_SIZE - IEEE802154_SECURITY_TAG_LEN]);
+    entry->payload = &(entry->packet[IEEE802154_FRAME_SIZE - LENGTH_CRC - IEEE802154_SECURITY_TAG_LEN]);
     entry->length = 0;
     entry->is_cjoin_response = FALSE;
 #if defined(OPENWSN_6LO_FRAGMENTATION_C)
@@ -531,7 +530,7 @@ void openqueue_reset_entry(OpenQueueEntry_t *entry) {
 void openqueue_reset_big_entry(OpenQueueBigEntry_t *entry) {
     openqueue_reset_entry(&(entry->standard_entry));
 
-    // make pointer point to the end op the extended buffer
+    // reset pointer to the end op the extended buffer
     entry->standard_entry.payload = &(entry->standard_entry.packet[IPV6_PACKET_SIZE]);
 }
 #endif
