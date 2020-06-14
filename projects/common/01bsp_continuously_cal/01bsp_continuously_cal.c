@@ -30,7 +30,7 @@ corresponding to the incoming frame.
 
 #define LENGTH_PACKET           3+LENGTH_CRC // maximum length is 127 bytes
 #define MAX_PKT_LEN             125+LENGTH_CRC
-#define CHANNEL                 12            // 24ghz: 11 = 2.405GHz, subghz: 11 = 865.325 in  FSK operating mode #1
+#define CHANNEL                 11            // 24ghz: 11 = 2.405GHz, subghz: 11 = 865.325 in  FSK operating mode #1
 #define BEACON_PERIOD           20             // in seconds
 #define TICKS_IN_ONE_SECOND     32768         // (32768>>1) = 500ms @ 32kHz
 #define RX_TIMEOUT              10            // 10         = 300us @ 32kHz 
@@ -262,14 +262,20 @@ void send_frame(uint8_t data) {
     // prepare packet
     app_vars.txpk_len           = sizeof(app_vars.txpk_buf);
     
-    // calculate the temperature
-    read                        = app_vars.read_temperature();
-    result  = -46.85;
-    result += 175.72 * read / 65536;
-    temperature = (int16_t)(result);
+    // calculate the temperature only when replying ack
+    if (app_vars.state == S_REPLY_ACK) {
+        
+        read                        = app_vars.read_temperature();
+        result  = -46.85;
+        result += 175.72 * read / 65536;
+        temperature = (int16_t)(result);
+        
+        app_vars.txpk_buf[0]        = (uint8_t)((temperature & 0xff00)>>8);
+        app_vars.txpk_buf[1]        = (uint8_t)(temperature & 0x00ff);
+    }
     
-    app_vars.txpk_buf[0]        = (uint8_t)((temperature & 0xff00)>>8);
-    app_vars.txpk_buf[1]        = (uint8_t)(temperature & 0x00ff);
+    // app_vars.txpk_buf[0]        = (uint8_t)((temperature & 0xff00)>>8);
+    // app_vars.txpk_buf[1]        = (uint8_t)(temperature & 0x00ff);
     app_vars.txpk_buf[2]        = data;
     
     // send packet
@@ -282,5 +288,5 @@ void send_frame(uint8_t data) {
 
 void delay(void) {
     uint16_t i;
-    for (i=0;i<0xaaff;i++);
+    for (i=0;i<0x70ff;i++);
 }
