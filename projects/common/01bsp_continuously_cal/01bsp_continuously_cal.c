@@ -33,7 +33,9 @@ corresponding to the incoming frame.
 #define CHANNEL                 11            // 24ghz: 11 = 2.405GHz, subghz: 11 = 865.325 in  FSK operating mode #1
 #define BEACON_PERIOD           20             // in seconds
 #define TICKS_IN_ONE_SECOND     32768         // (32768>>1) = 500ms @ 32kHz
-#define RX_TIMEOUT              10            // 10         = 300us @ 32kHz 
+#define TICKS_IN_ONE_MS         33            // (32768>>1) = 500ms @ 32kHz
+#define RX_TIMEOUT              10            // 10         = 300us @ 32kHz
+#define DELAY_TX                20            // 20         = 605us @ 32kHz
 
 //=========================== variables =======================================
 
@@ -54,6 +56,9 @@ typedef struct {
     uint8_t              txpk_len;
     app_state_t          state;
     callbackRead_cbt     read_temperature;
+    
+    uint8_t              schedule_ack;
+    uint8_t              ok_to_send_ack;
 } app_vars_t;
 
 app_vars_t app_vars;
@@ -63,7 +68,7 @@ app_vars_t app_vars;
 void cb_scTimerCompare(void);
 void cb_startFrame(PORT_TIMER_WIDTH timestamp);
 void cb_endFrame(PORT_TIMER_WIDTH timestamp);
-void send_frame(uint8_t data);
+void prepare_frame(uint8_t data);
 
 void delay(void);
 
@@ -120,7 +125,8 @@ int mote_main(void) {
                     // led
                     leds_error_toggle();
                     
-                    send_frame(app_vars.time_in_second);
+                    prepare_frame(app_vars.time_in_second);
+                    radio_txNow();
                 } else {
                     board_sleep();
                 }
@@ -163,8 +169,9 @@ int mote_main(void) {
                         board_sleep();
                     } else {
                         freq_offset = radio_getFrequencyOffset();
-                        delay();
-                        send_frame(freq_offset);
+                        prepare_frame(freq_offset);
+                        while(app_vars.ok_to_send_ack==0);
+                        radio_txNow();
                         app_vars.txack_started = 1;
                     }
                 }
@@ -182,9 +189,16 @@ void cb_scTimerCompare(void) {
         app_vars.time_in_second++;
         sctimer_setCompare(sctimer_readCounter()+ TICKS_IN_ONE_SECOND);
     } else {
-        // todo
-        
-        app_vars.rx_timeout = 1;
+        if (
+            app_vars.state == S_REPLY_ACK && 
+            app_vars.schedule_ack == 1
+        ) {
+            app_vars.schedule_ack   = 0;
+            app_vars.ok_to_send_ack = 1;
+        } else {
+            
+            app_vars.rx_timeout     = 1;
+        }        
     }
 }
 
@@ -228,13 +242,16 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
             if (
                 crc                     && 
                 pkt_len==LENGTH_PACKET  && 
-                packet[0]=='S'          &&
-                packet[1]=='C'          &&
-                packet[2]=='M'
+                packet[0]=='C'          &&
+                packet[1]=='F'
             ) {
             
                 sctimer_disable();
                 app_vars.rxpk_rxDone = 1;
+                
+                app_vars.schedule_ack   = 1;
+                app_vars.ok_to_send_ack = 0;
+                sctimer_setCompare(timestamp+((uint16_t)packet[2])*TICKS_IN_ONE_MS-DELAY_TX);
             }
        } else {
            
@@ -252,7 +269,7 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
 
 // ========================== private =========================================
 
-void send_frame(uint8_t data) {
+void prepare_frame(uint8_t data) {
     
     uint16_t temperature;
     uint16_t read;
@@ -281,7 +298,6 @@ void send_frame(uint8_t data) {
     // send packet
     radio_loadPacket(app_vars.txpk_buf,app_vars.txpk_len);
     radio_txEnable();
-    radio_txNow();
 }
 
 // 0x0cff indicates rougly 2.3ms running on OpenMote-B
