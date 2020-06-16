@@ -102,10 +102,10 @@ void msf_updateCellsElapsed(open_addr_t *neighbor, cellType_t type) {
             return;
     }
 
-    // addapt to upward traffic
-
+    // adapt to upward traffic
     if (msf_vars.numCellsElapsed_tx == MAX_NUMCELLS) {
 
+        LOG_VERBOSE(COMPONENT_MSF, ERR_TX_CELL_USAGE, msf_vars.numCellsUsed_tx, 0);
         msf_vars.needAddTx = FALSE;
         msf_vars.needDeleteTx = FALSE;
 
@@ -127,15 +127,14 @@ void msf_updateCellsElapsed(open_addr_t *neighbor, cellType_t type) {
     }
 
     // adapt to downward traffic when there are negotiated Tx cells in schedule
-
     if (schedule_getNumberOfNegotiatedCells(neighbor, CELLTYPE_TX) == 0) {
         return;
     }
 
     // adapt to downward traffic
-
     if (msf_vars.numCellsElapsed_rx == MAX_NUMCELLS) {
 
+        LOG_VERBOSE(COMPONENT_MSF, ERR_RX_CELL_USAGE, msf_vars.numCellsUsed_rx, 0);
         msf_vars.needAddRx = FALSE;
         msf_vars.needDeleteRx = FALSE;
 
@@ -194,10 +193,7 @@ metadata_t msf_translateMetadata(void) {
 void msf_handleRCError(uint8_t code, open_addr_t *address) {
     uint16_t waitDuration;
 
-    if (
-            code == IANA_6TOP_RC_RESET ||
-            code == IANA_6TOP_RC_LOCKED
-            ) {
+    if (code == IANA_6TOP_RC_RESET || code == IANA_6TOP_RC_LOCKED) {
         // waitretry
         msf_vars.waitretry = TRUE;
         waitDuration = WAITDURATION_MIN + openrandom_get16b() % WAITDURATION_RANDOM_RANGE;
@@ -210,18 +206,11 @@ void msf_handleRCError(uint8_t code, open_addr_t *address) {
         );
     }
 
-    if (
-            code == IANA_6TOP_RC_ERROR ||
-            code == IANA_6TOP_RC_VER_ERR ||
-            code == IANA_6TOP_RC_SFID_ERR
-            ) {
+    if (code == IANA_6TOP_RC_ERROR || code == IANA_6TOP_RC_VER_ERR || code == IANA_6TOP_RC_SFID_ERR) {
         // quarantine
     }
 
-    if (
-            code == IANA_6TOP_RC_SEQNUM_ERR ||
-            code == IANA_6TOP_RC_CELLLIST_ERR
-            ) {
+    if (code == IANA_6TOP_RC_SEQNUM_ERR || code == IANA_6TOP_RC_CELLLIST_ERR) {
         // clear
         scheduler_push_task(msf_timer_clear_task, TASKPRIO_MSF);
     }
@@ -298,7 +287,6 @@ void msf_trigger6pAdd(void) {
     }
 
     // get preferred parent
-
     foundNeighbor = icmpv6rpl_getPreferredParentEui64(&neighbor);
     if (foundNeighbor == FALSE) {
         return;
@@ -364,7 +352,6 @@ void msf_trigger6pDelete(void) {
     }
 
     // check what type of cell need to delete
-
     if (msf_vars.needDeleteTx) {
         cellOptions = CELLOPTIONS_TX;
     } else {

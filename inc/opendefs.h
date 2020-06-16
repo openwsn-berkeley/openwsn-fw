@@ -152,38 +152,39 @@ enum {
    COMPONENT_NEIGHBORS                 = 0x0d,
    COMPONENT_SCHEDULE                  = 0x0e,
    COMPONENT_SIXTOP_RES                = 0x0f,
+   COMPONENT_MSF                       = 0x10,
    //IPHC
-   COMPONENT_OPENBRIDGE                = 0x10,
-   COMPONENT_IPHC                      = 0x11,
-   COMPONENT_FRAG                      = 0x12,
+   COMPONENT_OPENBRIDGE                = 0x11,
+   COMPONENT_IPHC                      = 0x12,
+   COMPONENT_FRAG                      = 0x13,
    //IPv6
-   COMPONENT_FORWARDING                = 0x13,
-   COMPONENT_ICMPv6                    = 0x14,
-   COMPONENT_ICMPv6ECHO                = 0x15,
-   COMPONENT_ICMPv6ROUTER              = 0x16,
-   COMPONENT_ICMPv6RPL                 = 0x17,
+   COMPONENT_FORWARDING                = 0x14,
+   COMPONENT_ICMPv6                    = 0x15,
+   COMPONENT_ICMPv6ECHO                = 0x16,
+   COMPONENT_ICMPv6ROUTER              = 0x17,
+   COMPONENT_ICMPv6RPL                 = 0x18,
    //TRAN
-   COMPONENT_OPENUDP                   = 0x18,
-   COMPONENT_OPENCOAP                  = 0x19,
+   COMPONENT_OPENUDP                   = 0x19,
+   COMPONENT_OPENCOAP                  = 0x1a,
    // secure join
-   COMPONENT_CJOIN                     = 0x1a,
-   COMPONENT_OSCORE                    = 0x1b,
+   COMPONENT_CJOIN                     = 0x1b,
+   COMPONENT_OSCORE                    = 0x1c,
    // applications
-   COMPONENT_C6T                       = 0x1c,
-   COMPONENT_CEXAMPLE                  = 0x1d,
-   COMPONENT_CINFO                     = 0x1e,
-   COMPONENT_CLEDS                     = 0x1f,
-   COMPONENT_CSENSORS                  = 0x20,
-   COMPONENT_CSTORM                    = 0x21,
-   COMPONENT_CWELLKNOWN                = 0x22,
-   COMPONENT_UECHO                     = 0x23,
-   COMPONENT_UINJECT                   = 0x24,
-   COMPONENT_RRT                       = 0x25,
-   COMPONENT_SECURITY                  = 0x26,
-   COMPONENT_USERIALBRIDGE             = 0x27,
-   COMPONENT_UEXPIRATION               = 0x28,
-   COMPONENT_UMONITOR                  = 0x29,
-   COMPONENT_CINFRARED                 = 0x2a,
+   COMPONENT_C6T                       = 0x1d,
+   COMPONENT_CEXAMPLE                  = 0x1e,
+   COMPONENT_CINFO                     = 0x1f,
+   COMPONENT_CLEDS                     = 0x20,
+   COMPONENT_CSENSORS                  = 0x21,
+   COMPONENT_CSTORM                    = 0x22,
+   COMPONENT_CWELLKNOWN                = 0x23,
+   COMPONENT_UECHO                     = 0x24,
+   COMPONENT_UINJECT                   = 0x25,
+   COMPONENT_RRT                       = 0x26,
+   COMPONENT_SECURITY                  = 0x27,
+   COMPONENT_USERIALBRIDGE             = 0x28,
+   COMPONENT_UEXPIRATION               = 0x29,
+   COMPONENT_UMONITOR                  = 0x2a,
+   COMPONENT_CINFRARED                 = 0x2b,
 };
 
 /**
@@ -239,30 +240,32 @@ enum {
    ERR_SIXTOP_LIST                     = 0x28, // the cells reserved to request mote contains slot {0} and slot {1}
    ERR_UNSUPPORTED_FORMAT              = 0x29, // the received packet format is not supported (code location {0})
    ERR_UNSUPPORTED_METADATA            = 0x2a, // the metadata type is not suppored
+   ERR_TX_CELL_USAGE                   = 0x2b, // TX cell usage during last period: {}
+   ERR_RX_CELL_USAGE                   = 0x2c, // RX cell usage during last period: {}
    // l2a
-   ERR_WRONG_CELLTYPE                  = 0x2b, // wrong celltype {0} at slotOffset {1}
-   ERR_IEEE154_UNSUPPORTED             = 0x2c, // unsupported IEEE802.15.4 parameter {1} at location {0}
-   ERR_DESYNCHRONIZED                  = 0x2d, // got desynchronized at slotOffset {0}
-   ERR_SYNCHRONIZED                    = 0x2e, // synchronized at slotOffset {0}
-   ERR_LARGE_TIMECORRECTION            = 0x2f, // large timeCorr.: {0} ticks (code loc. {1})
-   ERR_WRONG_STATE_IN_ENDFRAME_SYNC    = 0x30, // wrong state {0} in end of frame+sync
-   ERR_WRONG_STATE_IN_STARTSLOT        = 0x31, // wrong state {0} in startSlot, at slotOffset {1}
-   ERR_WRONG_STATE_IN_TIMERFIRES       = 0x32, // wrong state {0} in timer fires, at slotOffset {1}
-   ERR_WRONG_STATE_IN_NEWSLOT          = 0x33, // wrong state {0} in start of frame, at slotOffset {1}
-   ERR_WRONG_STATE_IN_ENDOFFRAME       = 0x34, // wrong state {0} in end of frame, at slotOffset {1}
-   ERR_MAXTXDATAPREPARE_OVERFLOW       = 0x35, // maxTxDataPrepare overflows while at state {0} in slotOffset {1}
-   ERR_MAXRXACKPREPARE_OVERFLOWS       = 0x36, // maxRxAckPrepapare overflows while at state {0} in slotOffset {1}
-   ERR_MAXRXDATAPREPARE_OVERFLOWS      = 0x37, // maxRxDataPrepapre overflows while at state {0} in slotOffset {1}
-   ERR_MAXTXACKPREPARE_OVERFLOWS       = 0x38, // maxTxAckPrepapre overflows while at state {0} in slotOffset {1}
-   ERR_WDDATADURATION_OVERFLOWS        = 0x39, // wdDataDuration overflows while at state {0} in slotOffset {1}
-   ERR_WDRADIO_OVERFLOWS               = 0x3a, // wdRadio overflows while at state {0} in slotOffset {1}
-   ERR_WDRADIOTX_OVERFLOWS             = 0x3b, // wdRadioTx overflows while at state {0} in slotOffset {1}
-   ERR_WDACKDURATION_OVERFLOWS         = 0x3c, // wdAckDuration overflows while at state {0} in slotOffset {1}
-   ERR_SECURITY                        = 0x3d, // security error on frameType {0}, code location {1}
-   ERR_INVALID_PACKET_FROM_RADIO       = 0x3e,
+   ERR_WRONG_CELLTYPE                  = 0x2d, // wrong celltype {0} at slotOffset {1}
+   ERR_IEEE154_UNSUPPORTED             = 0x2e, // unsupported IEEE802.15.4 parameter {1} at location {0}
+   ERR_DESYNCHRONIZED                  = 0x2f, // got desynchronized at slotOffset {0}
+   ERR_SYNCHRONIZED                    = 0x30, // synchronized at slotOffset {0}
+   ERR_LARGE_TIMECORRECTION            = 0x31, // large timeCorr.: {0} ticks (code loc. {1})
+   ERR_WRONG_STATE_IN_ENDFRAME_SYNC    = 0x32, // wrong state {0} in end of frame+sync
+   ERR_WRONG_STATE_IN_STARTSLOT        = 0x33, // wrong state {0} in startSlot, at slotOffset {1}
+   ERR_WRONG_STATE_IN_TIMERFIRES       = 0x34, // wrong state {0} in timer fires, at slotOffset {1}
+   ERR_WRONG_STATE_IN_NEWSLOT          = 0x35, // wrong state {0} in start of frame, at slotOffset {1}
+   ERR_WRONG_STATE_IN_ENDOFFRAME       = 0x36, // wrong state {0} in end of frame, at slotOffset {1}
+   ERR_MAXTXDATAPREPARE_OVERFLOW       = 0x37, // maxTxDataPrepare overflows while at state {0} in slotOffset {1}
+   ERR_MAXRXACKPREPARE_OVERFLOWS       = 0x38, // maxRxAckPrepapare overflows while at state {0} in slotOffset {1}
+   ERR_MAXRXDATAPREPARE_OVERFLOWS      = 0x39, // maxRxDataPrepapre overflows while at state {0} in slotOffset {1}
+   ERR_MAXTXACKPREPARE_OVERFLOWS       = 0x3a, // maxTxAckPrepapre overflows while at state {0} in slotOffset {1}
+   ERR_WDDATADURATION_OVERFLOWS        = 0x3b, // wdDataDuration overflows while at state {0} in slotOffset {1}
+   ERR_WDRADIO_OVERFLOWS               = 0x3c, // wdRadio overflows while at state {0} in slotOffset {1}
+   ERR_WDRADIOTX_OVERFLOWS             = 0x3d, // wdRadioTx overflows while at state {0} in slotOffset {1}
+   ERR_WDACKDURATION_OVERFLOWS         = 0x3e, // wdAckDuration overflows while at state {0} in slotOffset {1}
+   ERR_SECURITY                        = 0x3f, // security error on frameType {0}, code location {1}
+   ERR_INVALID_PACKET_FROM_RADIO       = 0x40, // invalid packet from radio
    // drivers
-   ERR_GETDATA_ASKS_TOO_FEW_BYTES      = 0x3f, // getData asks for too few bytes, maxNumBytes={0}, fill level={1}
-   ERR_WRONG_CRC_INPUT                 = 0x40, // wrong CRC in input Buffer
+   ERR_GETDATA_ASKS_TOO_FEW_BYTES      = 0x41, // getData asks for too few bytes, maxNumBytes={0}, fill level={1}
+   ERR_WRONG_CRC_INPUT                 = 0x42, // wrong CRC in input Buffer
    // cross layer
    ERR_BUFFER_OVERFLOW                 = 0x43, // buffer overflow detected (code location {0})
    ERR_BUSY_SENDING                    = 0x44, // busy sending

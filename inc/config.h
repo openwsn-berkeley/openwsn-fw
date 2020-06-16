@@ -233,7 +233,7 @@
  * Allow the MSF algorithm to dynamically remove and allocate slots, based on the traffic load in the network.
  *
  */
-// #define OPENWSN_ADAPTIVE_MSF
+#define OPENWSN_ADAPTIVE_MSF
 
 
 /**
@@ -241,7 +241,7 @@
  *
  * Enables the icmpv6 echo (ping) functionality
  */
-// #define OPENWSN_ICMPV6ECHO_C
+#define OPENWSN_ICMPV6ECHO_C
 
 
 /**
@@ -299,7 +299,7 @@
  * cannot be combined with the python board.
  *
  */
-// #define BOARD_CRYPTOENGINE_ENABLED
+#define BOARD_CRYPTOENGINE_ENABLED
 
 /**
  * \def BOARD_OPENSERIAL_PRINTF
