@@ -3,7 +3,7 @@
 #include <string.h>
 #include "sx1276Regs-LoRa.h"
 #include "def_spitxrx.h"
-
+#include "radio_sx1276.h"
 
 
 //=========================== defines =========================================
@@ -12,9 +12,6 @@
 //=========================== variables ==========================================
 
 //=========================== public ==========================================
-
-//static void radio_read_isr_sx1276(void);
-//static void radio_clear_isr_sx1276(void);
 
 uint8_t  spi_tx_buffer[2];
 uint8_t  spi_rx_buffer[2];
@@ -95,11 +92,11 @@ void SX1276SetCad( void ){
 
 void SX1276SetTxConfig(){
 
-    //Modem = LoRa
+    //Modem = LoRa -- Set the device in SLEEP mode
     SX1276SetSleep();
 
     //Set frequency == 868 MHz
-
+    SX1276SetChannel( 868000000 );
 
     //TX_OUTPUT_POWER max= +14dBm
     //MaxPower for exemple = 4 --> Pmax=10.8+0.6*MaxPower= 13.2 dB
@@ -113,14 +110,24 @@ void SX1276SetTxConfig(){
     spi_tx_buffer[1]     = 0x72;
     spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
 
-    //Spreading Factor = SF9 = 512 -- CRC enable
+    //Spreading Factor = SF9 = 512 -- CRC disable
+    // 7-4 : SF
+    // 3 : 0 normal mode / 1: continous mode
+    // 2 : 0 CRC disable / 1: CRC enable
+    // 1-0 : RxTimeout
+
     spi_tx_buffer[0]     = REG_LR_MODEMCONFIG2 | (1 << 7);
-    spi_tx_buffer[1]     = 0x94;
+    spi_tx_buffer[1]     = 0x90;
     spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
 
-    //Preamble length
-    spi_tx_buffer[0]     = REG_LR_PREAMBLEMSB | (1 << 7);
+    //Preamble Length LSB = 8 + MSB length = 0
+
+    spi_tx_buffer[0]     = REG_LR_PREAMBLELSB | (1 << 7);
     spi_tx_buffer[1]     = 0x08;
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
+
+    spi_tx_buffer[0]     = REG_LR_PREAMBLEMSB | (1 << 7);
+    spi_tx_buffer[1]     = 0x00;
     spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
 
     //HopPeriod
@@ -138,72 +145,170 @@ void SX1276SetTxConfig(){
     //fixLen 
 }
 
-//void SX1276SetRxConfig( void );
+void SX1276SetRxConfig( void ){
 
+    //Modem = LoRa -- Set the device in SLEEP mode
+    SX1276SetSleep();
 
+    //LORA_BANDWIDTH = 125 KHZ & CodingRate = 4/5
+    spi_tx_buffer[0]     = REG_LR_MODEMCONFIG1 | (1 << 7);
+    spi_tx_buffer[1]     = 0x72;
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
 
-/*void radio_init_sx1276(){
-       
-    RxChainCalibration( );
+    //Spreading Factor = SF9 = 512 -- CRC disable
+    // 7-4 : SF
+    // 3 : 0 normal mode / 1: continous mode
+    // 2 : 0 CRC disable / 1: CRC enable
+    // 1-0 : RxTimeout MSB 
+
+    spi_tx_buffer[0]     = REG_LR_MODEMCONFIG2 | (1 << 7);
+    spi_tx_buffer[1]     = 0x90;
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
+
+    //Preamble Length LSB = 8 + MSB length = 0
+
+    spi_tx_buffer[0]     = REG_LR_PREAMBLELSB | (1 << 7);
+    spi_tx_buffer[1]     = 0x08;
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
+
+    spi_tx_buffer[0]     = REG_LR_PREAMBLEMSB | (1 << 7);
+    spi_tx_buffer[1]     = 0x00;
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
+
+    //HopPeriod
+    spi_tx_buffer[0]     = REG_LR_HOPPERIOD | (1 << 7);
+    spi_tx_buffer[1]     = 0x00;
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
+
+    //iqInverted
+    spi_tx_buffer[0]     = REG_LR_INVERTIQ  | (1 << 7);
+    spi_tx_buffer[1]     = 0x00;
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
+
+    //symbTimeout  RxTimeout LSB
+    spi_tx_buffer[0]     = REG_LR_SYMBTIMEOUTLSB   | (1 << 7);
+    spi_tx_buffer[1]     = 0x05;
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
 
 }
 
-static void RxChainCalibration( void )
+
+void SX1276SetChannel( uint32_t freq )
 {
-    uint8_t regPaConfigInitVal;
-    uint32_t initialFreq;
+    //SX1276.Settings.Channel = freq;
+    freq = ( uint32_t )( ( double )freq / ( double )FREQ_STEP );
 
-    // Save context
-    regPaConfigInitVal = SX1276Read( REG_PACONFIG );
-    initialFreq = ( double )( ( ( uint32_t )SX1276Read( REG_FRFMSB ) << 16 ) |
-                              ( ( uint32_t )SX1276Read( REG_FRFMID ) << 8 ) |
-                              ( ( uint32_t )SX1276Read( REG_FRFLSB ) ) ) * ( double )FREQ_STEP;
+    //SX1276Write( REG_FRFMSB, ( uint8_t )( ( freq >> 16 ) & 0xFF ) );
+    spi_tx_buffer[0]     = REG_LR_FRFMSB  | (1 << 7);
+    spi_tx_buffer[1]     = ( uint8_t )( ( freq >> 16 ) & 0xFF );
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
 
-    // Cut the PA just in case, RFO output, power = -1 dBm
-    SX1276Write( REG_PACONFIG, 0x00 );
+    //SX1276Write( REG_FRFMID, ( uint8_t )( ( freq >> 8 ) & 0xFF ) );
+    spi_tx_buffer[0]     = REG_LR_FRFMID | (1 << 7);
+    spi_tx_buffer[1]     = ( uint8_t )( ( freq >> 8 ) & 0xFF );
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
 
-    // Launch Rx chain calibration for LF band
-    SX1276Write( REG_IMAGECAL, ( SX1276Read( REG_IMAGECAL ) & RF_IMAGECAL_IMAGECAL_MASK ) | RF_IMAGECAL_IMAGECAL_START );
-    while( ( SX1276Read( REG_IMAGECAL ) & RF_IMAGECAL_IMAGECAL_RUNNING ) == RF_IMAGECAL_IMAGECAL_RUNNING )
-    {
-    }
+    //SX1276Write( REG_FRFLSB, ( uint8_t )( freq & 0xFF ) );
+    spi_tx_buffer[0]     = REG_LR_FRFLSB | (1 << 7);
+    spi_tx_buffer[1]     = ( uint8_t )( freq & 0xFF );
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
 
-    // Sets a Frequency in HF band
-    SX1276SetChannel( 868000000 );
+}
 
-    // Launch Rx chain calibration for HF band
-    SX1276Write( REG_IMAGECAL, ( SX1276Read( REG_IMAGECAL ) & RF_IMAGECAL_IMAGECAL_MASK ) | RF_IMAGECAL_IMAGECAL_START );
-    while( ( SX1276Read( REG_IMAGECAL ) & RF_IMAGECAL_IMAGECAL_RUNNING ) == RF_IMAGECAL_IMAGECAL_RUNNING )
-    {
-    }
 
-    // Restore context
-    SX1276Write( REG_PACONFIG, regPaConfigInitVal );
-    SX1276SetChannel( initialFreq );
+ void sx1276WriteFifo(void){
+
+    // FIFO operations can not take place in Sleep mode
+    SX1276SetStby();
+
+    //SPI address pointer in FIFO data buffer
+    //SX1276Write( REG_LR_FIFOADDRPTR, 0 );
+    spi_tx_buffer[0]     = REG_LR_FIFOADDRPTR  | (1 << 7);
+    spi_tx_buffer[1]     = 0x05;
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
+
+    //Write base address in FIFO data buffer for TX modulator
+    //SX1276Write( REG_LR_FIFOTXBASEADDR, 0 );
+    spi_tx_buffer[0]     = REG_LR_FIFOTXBASEADDR | (1 << 7);
+    spi_tx_buffer[1]     = 0x05;
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
+
+ }
+
+void sx1276ReadFifo(void){
+
+    // FIFO operations can not take place in Sleep mode
+    SX1276SetStby();
+
+    // Read base address in FIFO data buffer for RX demodulator
+    spi_tx_buffer[0]     = REG_LR_FIFORXBASEADDR  & (~(1 << 7));
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
+
+}
+
+/*void radio_getReceivedFrame_sx1276(
+    uint8_t* bufRead,
+    uint8_t* lenRead,
+    uint8_t  maxBufLen,
+    int8_t*  rssi,
+    uint8_t* lqi,
+    bool*    crc)
+{*
+
+
 }*/
 
+void  sx1276Send(void){
 
-/*void radio_setConfigTx_sx1276(){
-// put any static configuration here
-    //SX1276SetTxConfig ()
+    //Set the radio in STDBY mode
+    SX1276SetStby();
+
+    //Tx_init
+    SX1276SetTxConfig();
+
+    //Write Data FIFO
+    sx1276WriteFifo();
+
+    //TX Mode request
+    SX1276SetTx();
+
+    //IRQ TxDone Interrupt
+
+    //STDBY mode 
+    SX1276SetStby();
 }
-void radio_setConfigRx_sx1276(){
-// put any static configuration here
-    //SX1276SetRxConfig ()
+
+void sx1276Receive(void){
+
+    //Set the radio in STDBY mode
+    SX1276SetStby();
+
+    //Rx_init
+    SX1276SetRxConfig();
+
+    //RXsingle mode
+    SX1276SetRxSingle();
+
+    //RxDone Interrupt
+
+
+    //CRC error interrupt
+
+
+    //Read DATA
+    sx1276ReadFifo();
+
+    //STDBY mode 
+    SX1276SetStby();
+
 }
 
-
-void radio_setStartFrameCb_sx1276() {
+/*void radio_setStartFrameCb_sx1276() {
     // will take care of it later
 }
 
 void radio_setEndFrameCb_sx1276() {
     // will take care of it later
-}
-
-void radio_setFrequency_sx1276() {
-    // set the frequency
-    //SX1276SetChannel()
 }
 
 
@@ -223,7 +328,6 @@ void radio_txNow_sx1276(void) {
 }
 
 
-
 //===== RX
 
 void radio_rxEnable_sx1276(void) {
@@ -236,14 +340,7 @@ void radio_rxNow_sx1276(void){
    // SX1276SetRx()
 }
 
-void radio_getReceivedFrame_sx1276(
-    uint8_t* bufRead,
-    uint8_t* lenRead,
-    uint8_t  maxBufLen,
-    int8_t*  rssi,
-    uint8_t* lqi,
-    bool*    crc
-) */
+
 
 //=========================== private =========================================
 
