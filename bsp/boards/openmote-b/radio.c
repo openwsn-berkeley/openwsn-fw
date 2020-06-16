@@ -250,11 +250,19 @@ void radio_setConfig (radioSetting_t radioSetting){
 
 
 void radio_setStartFrameCb (radio_capture_cbt cb) {
-    dyn_funcs [selected_radioSetting].radio_setStartFrameCb(cb);
+    // setting the callback for the at86rf215 radio driver
+    dyn_funcs [RADIOSETTING_FSK_OPTION1_FEC].radio_setStartFrameCb(cb);
+    
+    // setting the callback for the cc2538 radio driver
+    dyn_funcs [RADIOSETTING_24GHZ].radio_setStartFrameCb(cb);
 }
 
 void radio_setEndFrameCb (radio_capture_cbt cb) {
-    dyn_funcs [selected_radioSetting].radio_setEndFrameCb(cb);
+    // setting the callback for the at86rf215 radio driver
+    dyn_funcs [RADIOSETTING_FSK_OPTION1_FEC].radio_setEndFrameCb(cb);
+    
+    // setting the callback for the cc2538 radio driver
+    dyn_funcs [RADIOSETTING_24GHZ].radio_setEndFrameCb(cb);
 }
 
 //===== RF admin
@@ -287,6 +295,26 @@ void radio_txEnable (void) {
 }
 
 void radio_txNow (void) {
+  switch (selected_radioSetting){
+  case (RADIOSETTING_FSK_OPTION1_FEC):
+    debugpins_radio_toggle();
+    debugpins_radio_toggle();
+    break;
+  case (RADIOSETTING_24GHZ):
+    debugpins_radio_toggle();
+    debugpins_radio_toggle();
+    debugpins_radio_toggle();
+    debugpins_radio_toggle();
+    break;
+  case (RADIOSETTING_OFDM_OPTION_1_MCS3):
+    debugpins_radio_toggle();
+    debugpins_radio_toggle();
+    debugpins_radio_toggle();
+    debugpins_radio_toggle();
+    debugpins_radio_toggle();
+    debugpins_radio_toggle();
+    break;
+  }
     dyn_funcs [selected_radioSetting].radio_txNow();
 }
 

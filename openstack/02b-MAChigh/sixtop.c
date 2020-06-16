@@ -107,6 +107,7 @@ void sixtop_init(void) {
     sixtop_vars.periodMaintenance  = 872 +(openrandom_get16b()&0xff);
     sixtop_vars.busySendingKA      = FALSE;
     sixtop_vars.busySendingEB      = FALSE;
+    sixtop_vars.ebCounter          = 0;
     sixtop_vars.dsn                = 0;
     sixtop_vars.mgtTaskCounter     = 0;
     sixtop_vars.kaPeriod           = MAXKAPERIOD;
@@ -427,8 +428,11 @@ void task_sixtopNotifSendDone(void) {
     switch (msg->creator) {
         case COMPONENT_SIXTOP:
             if (msg->l2_frameType==IEEE154_TYPE_BEACON) {
+                
                 // this is a EB
-
+                // this decrement should never end up less than 0 if protocol is running correctly.
+                sixtop_vars.ebCounter --;
+                
                 // not busy sending EB anymore
                 sixtop_vars.busySendingEB = FALSE;
             } else {
@@ -649,8 +653,11 @@ owerror_t sixtop_send_internal(
     already. No need to push a task again.
 */
 void sixtop_sendingEb_timer_cb(opentimers_id_t id){
-
+  // if multiple minimal cells are allocated, call the EB firing mechanism for
+  // each cell
+  for (uint8_t i =0;i<SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;i++){
     timer_sixtop_sendEb_fired();
+  }
 }
 
 /**
@@ -749,6 +756,7 @@ port_INLINE void sixtop_sendEB(void) {
         // I'm not busy sending an EB or KA
         sixtop_vars.busySendingEB = FALSE;
         sixtop_vars.busySendingKA = FALSE;
+        sixtop_vars.ebCounter     = 0;
 
         // stop here
         return;
@@ -835,8 +843,15 @@ port_INLINE void sixtop_sendEB(void) {
     // put in queue for MAC to handle
     sixtop_send_internal(eb,eb->l2_payloadIEpresent);
 
-    // I'm now busy sending an EB
-    sixtop_vars.busySendingEB = TRUE;
+    //update ebCounter
+    sixtop_vars.ebCounter++;    
+
+    if (sixtop_vars.ebCounter >= SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS){
+      // I have created enough EB packets for all minimal cells. 
+      // I'm now busy sending an EB
+      sixtop_vars.busySendingEB = TRUE;
+    }
+
 }
 
 /**
@@ -857,6 +872,7 @@ port_INLINE void sixtop_sendKA(void) {
         openqueue_removeAllCreatedBy(COMPONENT_SIXTOP);
 
         // I'm not busy sending an EB or KA
+        sixtop_vars.ebCounter     = 0;
         sixtop_vars.busySendingEB = FALSE;
         sixtop_vars.busySendingKA = FALSE;
 
@@ -880,6 +896,7 @@ port_INLINE void sixtop_sendKA(void) {
         openqueue_removeAllCreatedBy(COMPONENT_SIXTOP);
 
         // I'm not busy sending an EB or KA
+        sixtop_vars.ebCounter     = 0;
         sixtop_vars.busySendingEB = FALSE;
         sixtop_vars.busySendingKA = FALSE;
 

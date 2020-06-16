@@ -160,8 +160,7 @@ void ieee154e_init(void) {
         SLOT_40ms_OFDM1MCS0_3_SUBGHZ , RADIOSETTING_OFDM_OPTION_1_MCS2
         SLOT_40ms_OFDM1MCS0_3_SUBGHZ , RADIOSETTING_OFDM_OPTION_1_MCS3
     */
-    ieee154e_select_slot_template (SLOT_20ms_24GHZ);
-    ieee154e_vars.slotDuration      = slotTemplate.slotDuration;
+    ieee154e_select_slot_template (SLOT_40ms_24GHZ);
 
     //set the radio setting to use, default is RADIOSETTING_24GHZ
     radio_setConfig (RADIOSETTING_24GHZ); 
@@ -270,6 +269,8 @@ void ieee154e_select_slot_template(slotType_t slotType)
     slotTemplate.wdRadioTx           =   slot_154e_vars [slotType].wdRadioTx;
     slotTemplate.wdDataDuration      =   slot_154e_vars [slotType].wdDataDuration;
     slotTemplate.wdAckDuration       =   slot_154e_vars [slotType].wdAckDuration;
+    
+    ieee154e_vars.slotDuration      = slotTemplate.slotDuration;
   
 }
 
@@ -859,7 +860,10 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
          // break from the do-while loop and execute the clean-up code below
          break;
       }
-
+      
+      // store the cellRadioSetting used while receiving this packet
+      ieee154e_vars.dataReceived->l1_cellRadioSetting =schedule_getCellRadioSetting ();
+        
       // store header details in packet buffer
       ieee154e_vars.dataReceived->l2_frameType = ieee802514_header.frameType;
       ieee154e_vars.dataReceived->l2_dsn       = ieee802514_header.dsn;
@@ -1042,7 +1046,10 @@ port_INLINE void activity_ti1ORri1(void) {
         // retrieve the radio setting to be used in this cell
         ieee154e_vars.radioSetting = cellRadioSettingMap[schedule_getCellRadioSetting()];
         
-            /* select the desired slot template to use, default is SLOT_20ms_24GHZ
+        // configure the radio setting
+        radio_setConfig (ieee154e_vars.radioSetting);
+
+        /* select the desired slot template to use, default is SLOT_20ms_24GHZ
        currently, the following slot template/radio setting combinations are supported:
 
         SLOT_20ms_24GHZ              , RADIOSETTING_24GHZ --> Default
@@ -1140,13 +1147,20 @@ port_INLINE void activity_ti1ORri1(void) {
                         if (ieee154e_vars.dataToSend==NULL){
                             couldSendEB=TRUE;
                             // look for an EB packet in the queue
+                            debugpins_slot_toggle();
+                            debugpins_slot_toggle();
                             ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
+                            if (ieee154e_vars.dataToSend == NULL){
+                               debugpins_frame_toggle();
+                               debugpins_frame_toggle();
+                            }
+                            
                         }
                         }
                         }
 
             if (ieee154e_vars.dataToSend==NULL) {
-                if (cellType==CELLTYPE_TX) {
+                if (cellType==CELLTYPE_TX) {               
                     // abort
                     endSlot();
                     break;
@@ -1159,6 +1173,8 @@ port_INLINE void activity_ti1ORri1(void) {
                 if (couldSendEB==TRUE) {        // I will be sending an EB
                     //copy synch IE  -- should be Little endian???
                     // fill in the ASN field of the EB
+                    debugpins_slot_toggle();
+                    debugpins_slot_toggle();
                     ieee154e_getAsn(asn);
                     join_priority = (icmpv6rpl_getMyDAGrank()/MINHOPRANKINCREASE)-1; //poipoi -- use dagrank(rank)-1
                     memcpy(ieee154e_vars.dataToSend->l2_ASNpayload,&asn[0],sizeof(asn_t));
@@ -1289,9 +1305,6 @@ port_INLINE void activity_ti2(void) {
     // configure the radio to listen to the default synchronizing channel
     radio_setFrequency(ieee154e_vars.freq, FREQ_TX);
     
-    // configure the radio setting
-    radio_setConfig (ieee154e_vars.radioSetting);
-    
     // load the packet in the radio's Tx buffer
     radio_loadPacket(ieee154e_vars.localCopyForTransmission.payload,
                     ieee154e_vars.localCopyForTransmission.length);
@@ -1332,6 +1345,8 @@ port_INLINE void activity_ti3(void) {
 
     // give the 'go' to transmit
     radio_txNow();
+    debugpins_slot_toggle();
+    debugpins_slot_toggle();
 #endif
 }
 
@@ -1757,10 +1772,7 @@ port_INLINE void activity_ri2(void) {
         isr_ieee154e_timer                                // callback
     );
     // radiotimer_schedule(DURATION_rt2);
-    
-    // configure the radio setting
-    radio_setConfig (ieee154e_vars.radioSetting);
-    
+       
     // configure the radio to listen to the default synchronizing channel
     radio_setFrequency(ieee154e_vars.freq, FREQ_RX);
 
@@ -1938,7 +1950,10 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
                             ieee154e_vars.dataReceived->length);
             break;
         }
-
+        
+        // store the cellRadioSetting used while receiving this packet
+        ieee154e_vars.dataReceived->l1_cellRadioSetting =schedule_getCellRadioSetting ();
+      
         // toss CRC (2 last bytes)
         packetfunctions_tossFooter(   ieee154e_vars.dataReceived, LENGTH_CRC);
 
@@ -1947,7 +1962,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
             // jump to the error code below this do-while loop
             break;
         }
-
+        
         // parse the IEEE802.15.4 header (RX DATA)
         ieee802154_retrieveHeader(ieee154e_vars.dataReceived,&ieee802514_header);
 
@@ -2166,6 +2181,7 @@ port_INLINE void activity_ri6(void) {
         openserial_printError(COMPONENT_IEEE802154E,ERR_NO_FREE_PACKET_BUFFER,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
+        
         // indicate we received a packet anyway (we don't want to loose any)
         notif_receive(ieee154e_vars.dataReceived);
         // free local variable
@@ -2544,7 +2560,7 @@ bool isValidEbFormat(OpenQueueEntry_t* pkt, uint16_t* lenIE){
     uint16_t slotoffset;
     uint16_t channeloffset;
     uint16_t linkoptions;
-    uint8_t  cellRadioSetting;
+    cellRadioSetting_t  cellRadioSetting;
     
     chTemplate_checkPass        = FALSE;
     tsTemplate_checkpass        = FALSE;
@@ -2636,19 +2652,18 @@ bool isValidEbFormat(OpenQueueEntry_t* pkt, uint16_t* lenIE){
                     // shared TXRX anycast slot(s)
                     memset(&temp_neighbor,0,sizeof(temp_neighbor));
                     temp_neighbor.type             = ADDR_ANYCAST;
-
                     for (i=0;i<numlinks;i++){
                         slotoffset     = *((uint8_t*)(pkt->payload+ptr+5+5*i));   // slot offset
-                        slotoffset    |= *((uint8_t*)(pkt->payload+ptr+5+5*i+1))<<8;
+                         slotoffset    |= *((uint8_t*)(pkt->payload+ptr+5+5*i+1))<<8;
 
                         channeloffset  = *((uint8_t*)(pkt->payload+ptr+5+5*i+2));   // channel offset
                         channeloffset |= *((uint8_t*)(pkt->payload+ptr+5+5*i+3))<<8;
 
-                        linkoptions  = *((uint8_t*)(pkt->payload+ptr+5+5*i+5));   // link options
-                        linkoptions |= *((uint8_t*)(pkt->payload+ptr+5+5*i+6))<<8;
+                        linkoptions  = *((uint8_t*)(pkt->payload+ptr+5+5*i+4));   // link options
+                        //linkoptions |= *((uint8_t*)(pkt->payload+ptr+5+5*i+6))<<8;
                         
                         //extract cell radiosetting with bitmask 0x60
-                        cellRadioSetting = (linkoptions  & 0x60)>>5;
+                        cellRadioSetting = (cellRadioSetting_t)(linkoptions  & 0x60)>>5;
                         schedule_addActiveSlot(
                             slotoffset,         // slot offset
                             CELLTYPE_TXRX,      // type of slot

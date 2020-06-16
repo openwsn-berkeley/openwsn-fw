@@ -97,6 +97,7 @@ status information about several modules in the OpenWSN stack.
 \returns TRUE if this function printed something, FALSE otherwise.
 */
 bool debugPrint_schedule(void) {
+
    debugScheduleEntry_t temp;
 
    // increment the row just printed
@@ -112,6 +113,8 @@ bool debugPrint_schedule(void) {
       schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].shared;
    temp.channelOffset                  = \
       schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].channelOffset;
+   //temp.cellRadioSetting               = \
+      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].cellRadioSetting;
    memcpy(
       &temp.neighbor,
       &schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].neighbor,

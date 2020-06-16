@@ -61,6 +61,28 @@ typedef enum
 
 } radioSetting_t;
 
+// radio settings indexes for cell options.
+// these settings will be mapped to any subset of the available settings 
+// in the Open Radio interface
+
+typedef enum{
+    CELLRADIOSETTING_1 ,
+    CELLRADIOSETTING_2 ,
+    CELLRADIOSETTING_3 ,
+    MAX_CELLRADIOSETTINGS 
+} cellRadioSetting_t;
+
+// the radiosetting used for gallback (ebs, sixtop initial negotiation, ka)
+#define CELLRADIOSETTING_FALLBACK       CELLRADIOSETTING_2
+
+// mapping of MAC-level cellRadioSetting_t (in schedule.h) to Open Radio 
+// radioSetting_t (in opendefs.h)
+static const radioSetting_t cellRadioSettingMap [MAX_CELLRADIOSETTINGS]= {
+    RADIOSETTING_24GHZ,
+    RADIOSETTING_FSK_OPTION1_FEC,
+    RADIOSETTING_OFDM_OPTION_1_MCS3
+};
+
 // maximum celllist length
 #define CELLLIST_MAX_LEN 5
 
@@ -397,6 +419,7 @@ typedef struct {
    uint8_t       commandFrameIdentifier;                        // used in case of Command Frames
    uint8_t*      l2_FrameCounter;                               // pointer to the FrameCounter in the MAC header
    //l1 (drivers)
+   cellRadioSetting_t  l1_cellRadioSetting;                     // radio setting for this packet 
    uint8_t       l1_txPower;                                    // power for packet to Tx at
    int8_t        l1_rssi;                                       // RSSI of received packet
    uint8_t       l1_lqi;                                        // LQI of received packet
