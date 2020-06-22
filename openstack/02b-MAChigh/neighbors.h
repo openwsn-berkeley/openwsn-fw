@@ -69,18 +69,19 @@ uint8_t       neighbors_getNumTx(uint8_t index);
 uint8_t       neighbors_getSequenceNumber(open_addr_t* address);
 // setters
 void          neighbors_setNeighborRank(uint8_t index, dagrank_t rank);
-void          neighbors_setNeighborNoResource(open_addr_t* address);
+void          neighbors_setNeighborNoResource(open_addr_t* address, cellRadioSetting_t cellRadioSetting);
 void          neighbors_setPreferredParent(uint8_t index, bool isPreferred);
 // interrogators
-bool          neighbors_isStableNeighbor(open_addr_t* address);
+bool          neighbors_isStableNeighbor(open_addr_t* address, cellRadioSetting_t cellRadioSetting);
 bool          neighbors_isStableNeighborByIndex(uint8_t index);
-bool          neighbors_isInsecureNeighbor(open_addr_t* address);
+bool          neighbors_isInsecureNeighbor(open_addr_t* address, cellRadioSetting_t cellRadioSetting);
 bool          neighbors_isNeighborWithHigherDAGrank(uint8_t index);
 bool          neighbors_reachedMinimalTransmission(uint8_t index);
 
 // updating neighbor information
 void          neighbors_indicateRx(
    open_addr_t*         l2_src,
+   cellRadioSetting_t   cellRadioSetting,
    int8_t               rssi,
    asn_t*               asnTimestamp,
    bool                 joinPrioPresent,
@@ -89,6 +90,7 @@ void          neighbors_indicateRx(
 );
 void          neighbors_indicateTx(
    open_addr_t*         dest,
+   cellRadioSetting_t   cellRadioSetting,
    uint8_t              numTxAttempts,
    bool                 sentOnTxCell,
    bool                 was_finally_acked,

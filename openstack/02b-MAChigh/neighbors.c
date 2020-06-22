@@ -16,16 +16,18 @@ static neighbors_vars_t neighbors_vars;
 
 void registerNewNeighbor(
         open_addr_t* neighborID,
+        cellRadioSetting_t cellRadioSetting,
         int8_t       rssi,
         asn_t*       asnTimestamp,
         bool         joinPrioPresent,
         uint8_t      joinPrio,
         bool         insecure
      );
-bool isNeighbor(open_addr_t* neighbor);
+bool isNeighbor(open_addr_t* neighbor,cellRadioSetting_t cellRadioSetting);
 void removeNeighbor(uint8_t neighborIndex);
 bool isThisRowMatching(
         open_addr_t* address,
+        cellRadioSetting_t cellRadioSetting,
         uint8_t      rowNumber
      );
 
@@ -152,12 +154,13 @@ uint8_t neighbors_getSequenceNumber(open_addr_t* address){
 
 /**
 \brief Indicate whether some neighbor is a stable neighbor
+\param[in] cellRadioSetting used with this neighbor.
 
 \param[in] address The address of the neighbor, a full 128-bit IPv6 addres.
 
 \returns TRUE if that neighbor is stable, FALSE otherwise.
 */
-bool neighbors_isStableNeighbor(open_addr_t* address) {
+bool neighbors_isStableNeighbor(open_addr_t* address, cellRadioSetting_t cellRadioSetting) {
    uint8_t     i;
    open_addr_t temp_addr_64b;
    open_addr_t temp_prefix;
@@ -180,7 +183,7 @@ bool neighbors_isStableNeighbor(open_addr_t* address) {
 
    // iterate through neighbor table
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
-      if (isThisRowMatching(&temp_addr_64b,i) && neighbors_vars.neighbors[i].stableNeighbor==TRUE) {
+      if (isThisRowMatching(&temp_addr_64b,cellRadioSetting, i) && neighbors_vars.neighbors[i].stableNeighbor==TRUE) {
          returnVal  = TRUE;
          break;
       }
@@ -208,7 +211,7 @@ bool neighbors_isStableNeighborByIndex(uint8_t index) {
 
 \returns TRUE if that neighbor is insecure, FALSE otherwise.
 */
-bool neighbors_isInsecureNeighbor(open_addr_t* address) {
+bool neighbors_isInsecureNeighbor(open_addr_t* address, cellRadioSetting_t cellRadioSetting) {
    uint8_t     i;
    bool        returnVal;
 
@@ -227,7 +230,7 @@ bool neighbors_isInsecureNeighbor(open_addr_t* address) {
 
    // iterate through neighbor table
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
-      if (isThisRowMatching(address,i)) {
+      if (isThisRowMatching(address,cellRadioSetting,i)) {
          returnVal  = neighbors_vars.neighbors[i].insecure;
          break;
       }
@@ -289,12 +292,15 @@ The fields which are updated are:
 \param[in] l2_src MAC source address of the packet, i.e. the neighbor who sent
    the packet just received.
 \param[in] rssi   RSSI with which this packet was received.
+\param[in] cellRadioSetting  the cellRadioSetting used for the reception of 
+the ppacket.
 \param[in] asnTs  ASN at which this packet was received.
 \param[in] joinPrioPresent Whether a join priority was present in the received
    packet.
 \param[in] joinPrio The join priority present in the packet, if any.
 */
 void neighbors_indicateRx(open_addr_t* l2_src,
+                          cellRadioSetting_t cellRadioSetting,
                           int8_t       rssi,
                           asn_t*       asnTs,
                           bool         joinPrioPresent,
@@ -306,7 +312,7 @@ void neighbors_indicateRx(open_addr_t* l2_src,
    // update existing neighbor
    newNeighbor = TRUE;
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
-      if (isThisRowMatching(l2_src,i)) {
+      if (isThisRowMatching(l2_src,cellRadioSetting,i)) {
 
          // this is not a new neighbor
          newNeighbor = FALSE;
@@ -353,7 +359,7 @@ void neighbors_indicateRx(open_addr_t* l2_src,
 
    // register new neighbor
    if (newNeighbor==TRUE) {
-      registerNewNeighbor(l2_src, rssi, asnTs, joinPrioPresent, joinPrio, insecure);
+      registerNewNeighbor(l2_src, cellRadioSetting, rssi, asnTs, joinPrioPresent, joinPrio, insecure);
    }
 }
 
@@ -370,6 +376,7 @@ The fields which are updated are:
 
 \param[in] l2_dest MAC destination address of the packet, i.e. the neighbor
    who I just sent the packet to.
+\param[in] cellRadioSetting used with this neighbor.
 \param[in] numTxAttempts Number of transmission attempts to this neighbor.
 \param[in] was_finally_acked TRUE iff the packet was ACK'ed by the neighbor
    on final transmission attempt.
@@ -377,6 +384,7 @@ The fields which are updated are:
 */
 void neighbors_indicateTx(
     open_addr_t* l2_dest,
+    cellRadioSetting_t   cellRadioSetting,
     uint8_t      numTxAttempts,
     bool         sentOnTxCell,
     bool         was_finally_acked,
@@ -390,7 +398,7 @@ void neighbors_indicateTx(
 
     // loop through neighbor table
     for (i=0;i<MAXNUMNEIGHBORS;i++) {
-        if (isThisRowMatching(l2_dest,i)) {
+        if (isThisRowMatching(l2_dest,cellRadioSetting,i)) {
             // found the target neighbor
 
             // reset backoff variable
@@ -538,12 +546,12 @@ void neighbors_setNeighborRank(uint8_t index, dagrank_t rank) {
 
 }
 
-void neighbors_setNeighborNoResource(open_addr_t* address){
+void neighbors_setNeighborNoResource(open_addr_t* address, cellRadioSetting_t cellRadioSetting){
    uint8_t i;
 
    // loop through neighbor table
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
-      if (isThisRowMatching(address,i)) {
+      if (isThisRowMatching(address,cellRadioSetting,i)) {
           neighbors_vars.neighbors[i].f6PNORES = TRUE;
           icmpv6rpl_updateMyDAGrankAndParentSelection();
           break;
@@ -668,6 +676,7 @@ bool debugPrint_neighbors(void) {
 //=========================== private =========================================
 
 void registerNewNeighbor(open_addr_t* address,
+                         cellRadioSetting_t cellRadioSetting,
                          int8_t       rssi,
                          asn_t*       asnTimestamp,
                          bool         joinPrioPresent,
@@ -683,7 +692,7 @@ void registerNewNeighbor(open_addr_t* address,
         return;
     }
     // add this neighbor
-    if (isNeighbor(address)==FALSE) {
+    if (isNeighbor(address,cellRadioSetting)==FALSE) {
         i=0;
         while(i<MAXNUMNEIGHBORS) {
             if (neighbors_vars.neighbors[i].used==FALSE) {
@@ -693,6 +702,7 @@ void registerNewNeighbor(open_addr_t* address,
                 // add this neighbor
                 neighbors_vars.neighbors[i].used                   = TRUE;
                 neighbors_vars.neighbors[i].insecure               = insecure;
+                neighbors_vars.neighbors[i].cellRadioSetting       = cellRadioSetting;
                 // neighbors_vars.neighbors[i].stableNeighbor         = FALSE;
                 // Note: all new neighbors are consider stable
                 neighbors_vars.neighbors[i].stableNeighbor         = TRUE;
@@ -726,10 +736,10 @@ void registerNewNeighbor(open_addr_t* address,
     }
 }
 
-bool isNeighbor(open_addr_t* neighbor) {
+bool isNeighbor(open_addr_t* neighbor, cellRadioSetting_t cellRadioSetting) {
    uint8_t i=0;
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
-      if (isThisRowMatching(neighbor,i)) {
+      if (isThisRowMatching(neighbor, cellRadioSetting,i)) {
          return TRUE;
       }
    }
@@ -759,11 +769,14 @@ void removeNeighbor(uint8_t neighborIndex) {
 
 //=========================== helpers =========================================
 
-bool isThisRowMatching(open_addr_t* address, uint8_t rowNumber) {
+bool isThisRowMatching(open_addr_t* address, 
+                       cellRadioSetting_t cellRadioSetting, 
+                       uint8_t rowNumber) {
    switch (address->type) {
       case ADDR_64B:
          return neighbors_vars.neighbors[rowNumber].used &&
-                packetfunctions_sameAddress(address,&neighbors_vars.neighbors[rowNumber].addr_64b);
+                packetfunctions_sameAddress(address,&neighbors_vars.neighbors[rowNumber].addr_64b) &&
+                neighbors_vars.neighbors[rowNumber].cellRadioSetting == cellRadioSetting ;
       default:
          openserial_printCritical(COMPONENT_NEIGHBORS,ERR_WRONG_ADDR_TYPE,
                                (errorparameter_t)address->type,

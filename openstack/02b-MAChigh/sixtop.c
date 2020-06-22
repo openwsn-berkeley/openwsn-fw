@@ -409,6 +409,7 @@ void task_sixtopNotifSendDone(void) {
     if (msg->l2_sendDoneError==E_SUCCESS) {
         neighbors_indicateTx(
             &(msg->l2_nextORpreviousHop),
+            msg->l2_cellRadioSetting,
             msg->l2_numTxAttempts,
             msg->l2_sendOnTxCell,
             TRUE,
@@ -417,6 +418,7 @@ void task_sixtopNotifSendDone(void) {
     } else {
         neighbors_indicateTx(
              &(msg->l2_nextORpreviousHop),
+             msg->l2_cellRadioSetting,
              msg->l2_numTxAttempts,
              msg->l2_sendOnTxCell,
              FALSE,
@@ -475,6 +477,7 @@ void task_sixtopNotifReceive(void) {
     // update neighbor statistics
     neighbors_indicateRx(
         &(msg->l2_nextORpreviousHop),
+        msg->l2_cellRadioSetting,
         msg->l1_rssi,
         &msg->l2_asn,
         msg->l2_joinPriorityPresent,
@@ -1660,7 +1663,7 @@ void sixtop_six2six_notifyReceive(
                 break;
             }
         } else {
-            sixtop_vars.cb_sf_handleRCError(code, &(pkt->l2_nextORpreviousHop));
+            sixtop_vars.cb_sf_handleRCError(code, &(pkt->l2_nextORpreviousHop), pkt->l2_cellRadioSetting);
         }
         openserial_printInfo(
             COMPONENT_SIXTOP,

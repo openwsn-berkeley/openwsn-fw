@@ -160,10 +160,10 @@ void ieee154e_init(void) {
         SLOT_40ms_OFDM1MCS0_3_SUBGHZ , RADIOSETTING_OFDM_OPTION_1_MCS2
         SLOT_40ms_OFDM1MCS0_3_SUBGHZ , RADIOSETTING_OFDM_OPTION_1_MCS3
     */
-    ieee154e_select_slot_template (SLOT_40ms_24GHZ);
+    ieee154e_select_slot_template (SLOT_40ms_FSK_SUBGHZ);
 
     //set the radio setting to use, default is RADIOSETTING_24GHZ
-    radio_setConfig (RADIOSETTING_24GHZ); 
+    radio_setConfig (RADIOSETTING_FSK_OPTION1_FEC); 
     
     // switch radio on
     radio_rfOn();
@@ -862,7 +862,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
       }
       
       // store the cellRadioSetting used while receiving this packet
-      ieee154e_vars.dataReceived->l1_cellRadioSetting =schedule_getCellRadioSetting ();
+      ieee154e_vars.dataReceived->l2_cellRadioSetting =schedule_getCellRadioSetting ();
         
       // store header details in packet buffer
       ieee154e_vars.dataReceived->l2_frameType = ieee802514_header.frameType;
@@ -1952,7 +1952,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
         }
         
         // store the cellRadioSetting used while receiving this packet
-        ieee154e_vars.dataReceived->l1_cellRadioSetting =schedule_getCellRadioSetting ();
+        ieee154e_vars.dataReceived-> l2_cellRadioSetting =schedule_getCellRadioSetting ();
       
         // toss CRC (2 last bytes)
         packetfunctions_tossFooter(   ieee154e_vars.dataReceived, LENGTH_CRC);

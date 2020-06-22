@@ -487,7 +487,7 @@ uint8_t IEEE802154_security_getSecurityLevel(OpenQueueEntry_t *msg) {
         return IEEE802154_SECURITY_LEVEL;
       }
 
-    if(neighbors_isInsecureNeighbor(&msg->l2_nextORpreviousHop) &&
+    if(neighbors_isInsecureNeighbor(&msg->l2_nextORpreviousHop, &msg-> l2_cellRadioSetting) &&
        ieee802154_security_vars.joinPermitted == TRUE) {
         return IEEE154_ASH_SLF_TYPE_NOSEC;
       }
@@ -512,7 +512,7 @@ bool IEEE802154_security_acceptableLevel(OpenQueueEntry_t* msg, ieee802154_heade
     if (IEEE802154_security_isConfigured()               == TRUE &&
         msg->l2_securityLevel == IEEE154_ASH_SLF_TYPE_NOSEC      &&
         ieee802154_security_vars.joinPermitted           == TRUE &&
-        neighbors_isInsecureNeighbor(&parsedHeader->src) == TRUE) {
+        neighbors_isInsecureNeighbor(&parsedHeader->src, &msg->l2_cellRadioSetting) == TRUE) {
         return TRUE;
              }
 

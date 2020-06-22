@@ -85,7 +85,7 @@ typedef enum {
 typedef uint8_t                 (*sixtop_sf_getsfid_cbt)(void);
 typedef uint16_t                (*sixtop_sf_getmetadata_cbt)(void);
 typedef metadata_t              (*sixtop_sf_translatemetadata_cbt)(void);
-typedef void (*sixtop_sf_handle_callback_cbt)(uint8_t arg, open_addr_t* address);
+typedef void (*sixtop_sf_handle_callback_cbt)(uint8_t arg, open_addr_t* address, cellRadioSetting_t cellRadioSetting);
 
 #define SIXTOP_MINIMAL_EBPERIOD     5 // minist period of sending EB
 

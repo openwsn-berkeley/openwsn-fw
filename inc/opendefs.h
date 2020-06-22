@@ -388,6 +388,7 @@ typedef struct {
    //l2
    owerror_t     l2_sendDoneError;                              // outcome of trying to send this packet
    open_addr_t   l2_nextORpreviousHop;                          // 64b IEEE802.15.4 next (down stack) or previous (up) hop address
+   cellRadioSetting_t  l2_cellRadioSetting;                     // radio setting for this packet 
    uint8_t       l2_frameType;                                  // beacon, data, ack, cmd
    uint8_t       l2_dsn;                                        // sequence number of the received frame
    uint8_t       l2_retriesLeft;                                // number Tx retries left before packet dropped (dropped when hits 0)
@@ -419,7 +420,6 @@ typedef struct {
    uint8_t       commandFrameIdentifier;                        // used in case of Command Frames
    uint8_t*      l2_FrameCounter;                               // pointer to the FrameCounter in the MAC header
    //l1 (drivers)
-   cellRadioSetting_t  l1_cellRadioSetting;                     // radio setting for this packet 
    uint8_t       l1_txPower;                                    // power for packet to Tx at
    int8_t        l1_rssi;                                       // RSSI of received packet
    uint8_t       l1_lqi;                                        // LQI of received packet
@@ -444,6 +444,7 @@ typedef struct {
    uint8_t          switchStabilityCounter;
    open_addr_t      addr_64b;
    dagrank_t        DAGrank;
+   cellRadioSetting_t cellRadioSetting;
    int8_t           rssi;
    uint8_t          numRx;
    uint8_t          numTx;

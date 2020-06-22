@@ -22,7 +22,7 @@ msf_vars_t msf_vars;
 // sixtop callback
 uint16_t msf_getMetadata(void);
 metadata_t msf_translateMetadata(void);
-void msf_handleRCError(uint8_t code, open_addr_t* address);
+void msf_handleRCError(uint8_t code, open_addr_t* address, cellRadioSetting_t cellRadioSetting);
 
 void msf_timer_housekeeping_cb(opentimers_id_t id);
 void msf_timer_housekeeping_task(void);
@@ -179,7 +179,7 @@ metadata_t msf_translateMetadata(void){
     return METADATA_TYPE_FRAMEID;
 }
 
-void msf_handleRCError(uint8_t code, open_addr_t* address){
+void msf_handleRCError(uint8_t code, open_addr_t* address, cellRadioSetting_t cellRadioSetting){
     uint16_t waitDuration;
 
     if (
@@ -216,7 +216,7 @@ void msf_handleRCError(uint8_t code, open_addr_t* address){
 
     if (code==IANA_6TOP_RC_BUSY){
         // mark neighbor f6NORES
-        neighbors_setNeighborNoResource(address);
+        neighbors_setNeighborNoResource(address,cellRadioSetting);
     }
 
     neighbors_updateSequenceNumber(address);
