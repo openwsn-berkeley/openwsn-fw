@@ -1,4 +1,6 @@
 #include "spi.h"
+#include "gpio.h"
+#include <headers/hw_memmap.h>
 #include <math.h>
 #include <string.h>
 #include "sx1276Regs-LoRa.h"
@@ -98,11 +100,11 @@ void SX1276SetTxConfig(){
     //Set frequency == 868 MHz
     SX1276SetChannel( 868000000 );
 
-    //TX_OUTPUT_POWER max= +14dBm
-    //MaxPower for exemple = 4 --> Pmax=10.8+0.6*MaxPower= 13.2 dB
-    //Output power : 
+    //TX_OUTPUT_POWER max= +14dBm  --> 0
+    //MaxPower for exemple = 5 --> Pmax=10.8+0.6*MaxPower= 13.8 dB --> 101
+    //Output power :  15 - 15 --> 1111
     spi_tx_buffer[0]     = REG_LR_PACONFIG | (1 << 7);
-    spi_tx_buffer[1]     = 0x00; //0b0100xxxx
+    spi_tx_buffer[1]     = 0x5F; //0b0100xxxx
     spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
 
     //LORA_BANDWIDTH = 125 KHZ & CodingRate = 4/5
@@ -224,13 +226,13 @@ void SX1276SetChannel( uint32_t freq )
     //SPI address pointer in FIFO data buffer
     //SX1276Write( REG_LR_FIFOADDRPTR, 0 );
     spi_tx_buffer[0]     = REG_LR_FIFOADDRPTR  | (1 << 7);
-    spi_tx_buffer[1]     = 0x05;
+    spi_tx_buffer[1]     = 0x00;
     spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
 
     //Write base address in FIFO data buffer for TX modulator
     //SX1276Write( REG_LR_FIFOTXBASEADDR, 0 );
     spi_tx_buffer[0]     = REG_LR_FIFOTXBASEADDR | (1 << 7);
-    spi_tx_buffer[1]     = 0x05;
+    spi_tx_buffer[1]     = 0x00;
     spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
 
  }
@@ -273,6 +275,7 @@ void  sx1276Send(void){
     SX1276SetTx();
 
     //IRQ TxDone Interrupt
+    SX1276OnDio0Irq();
 
     //STDBY mode 
     SX1276SetStby();
@@ -290,7 +293,7 @@ void sx1276Receive(void){
     SX1276SetRxSingle();
 
     //RxDone Interrupt
-
+    
 
     //CRC error interrupt
 
@@ -300,6 +303,18 @@ void sx1276Receive(void){
 
     //STDBY mode 
     SX1276SetStby();
+
+}
+
+void SX1276OnDio0Irq(void){
+
+    GPIOPinWrite(GPIO_A_BASE, GPIO_PIN_7, 0);
+
+    spi_tx_buffer[0]     = REG_LR_IRQFLAGS | (1 << 7);
+    spi_tx_buffer[1]     = RFLR_IRQFLAGS_TXDONE ;
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
+
+    GPIOPinWrite(GPIO_A_BASE, GPIO_PIN_7, 1);
 
 }
 

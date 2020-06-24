@@ -33,3 +33,10 @@ void sx1276ReadFifo(void);
 //======== SX1276 Send/Receive ========
 void sx1276Send(void);
 void sx1276Receive(void);
+
+//======== SX1276 callback functions =============
+
+/*!
+ * \brief DIO 0 IRQ callback
+ */
+void SX1276OnDio0Irq( void );

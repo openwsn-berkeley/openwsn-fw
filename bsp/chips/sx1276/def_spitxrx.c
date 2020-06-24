@@ -22,6 +22,7 @@
 #include "radio_sx1276.h"
 #include "sx1276Regs-LoRa.h"
 
+
 //=========================== variables =======================================
 
 typedef struct {
@@ -51,10 +52,6 @@ spi_vars_t spi_vars;
 #define SPI_PIN_SSI_RX              GPIO_PIN_2      //    MISO
 #define SPI_PIN_SSI_TX              GPIO_PIN_3      //    MOSI
 #define SPI_GPIO_SSI_BASE           GPIO_B_BASE
-
-//=========================== prototypes ======================================
-static void disableInterrupts(void);
-static void enableInterrupts(void);
 
 //=========================== public ==========================================
 
@@ -120,27 +117,21 @@ void spi_init(){
     
     //sx1276_spiWriteReg( REG_LR_OPMODE, 0x80);
     
-    SX1276SetSleep();
+    /*SX1276SetSleep();
     SX1276SetStby();
     SX1276SetFstx();
     SX1276SetTx();
     SX1276SetFsrx();
     SX1276SetRxContinuous();
-    SX1276SetRxSingle();
+    SX1276SetRxSingle();*/
     
     
- //=========== Calling LoRa process transmission functions ================
-    
+ //=========== Calling LoRa process transmission function ================
+    sx1276Send();
     
     
  //====================== End LoRa process ================================
 }
-
-#ifdef SPI_IN_INTERRUPT_MODE
-void spi_setCb(spi_cbt cb) {
-   spi_vars.spi_cb = cb;
-}
-#endif
 
 //======================= SPI TX_RX definition ===========================
 
@@ -197,7 +188,11 @@ void    spi_txrx(uint8_t*     bufTx,
     GPIOPinWrite(GPIO_C_BASE, GPIO_PIN_3, 0);
 }
 
-
+#ifdef SPI_IN_INTERRUPT_MODE
+void spi_setCb(spi_cbt cb) {
+   spi_vars.spi_cb = cb;
+}
+#endif
 
 //=========================== private =========================================
 
