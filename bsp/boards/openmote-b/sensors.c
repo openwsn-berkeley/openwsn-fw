@@ -8,7 +8,7 @@
 #include "board.h"
 #include "sensors.h"
 
-#include "si70x.h"
+//#include "si70x.h"
 
 //=========================== defines =========================================
 
@@ -25,7 +25,7 @@ sensors_vars_t sensors_vars;
 /**
    \brief Initialize sensors on the board
 */
-void sensors_init(void) {
+/*void sensors_init(void) {
    
    memset(&sensors_vars,0,sizeof(sensors_vars_t));
    
@@ -38,23 +38,23 @@ void sensors_init(void) {
    adc_sensor_init();
    sensors_vars.sensorsTypes[SENSOR_ADCTEMPERATURE] = 1;
    
-}
+}*/
 
 /**
    \brief Returns a bool value indicating if a given sensor is present
    \param[in] sensorType sensor type polled.
    \param[out] returnVal presence of the sensor.
 */
-bool sensors_is_present(uint8_t sensorType) {
+/*bool sensors_is_present(uint8_t sensorType) {
    return sensors_vars.sensorsTypes[sensorType];
-}
+}*/
 
 /**
    \brief Returns the callback for reading data from a given sensor
    \param[in] sensorType sensor type used to associate the callback.
    \param[out] callback for reading data.
 */
-callbackRead_cbt sensors_getCallbackRead(uint8_t sensorType) {
+/*callbackRead_cbt sensors_getCallbackRead(uint8_t sensorType) {
    
    switch (sensorType) {
       case SENSOR_TEMPERATURE:
@@ -67,14 +67,14 @@ callbackRead_cbt sensors_getCallbackRead(uint8_t sensorType) {
          return NULL;
    }
    
-}
+}*/
 
 /**
    \brief Returns the callback for converting data from a given sensor
    \param[in] sensorType sensor type used to associate the callback.
    \param[out] callback for converting data.
 */
-callbackConvert_cbt sensors_getCallbackConvert(uint8_t sensorType) {
+/*callbackConvert_cbt sensors_getCallbackConvert(uint8_t sensorType) {
    
    switch (sensorType) {
       case SENSOR_TEMPERATURE:
@@ -87,6 +87,6 @@ callbackConvert_cbt sensors_getCallbackConvert(uint8_t sensorType) {
          return NULL;
    }
    
-}
+}*/
 
 //=========================== private =========================================

@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <workspace>
+	<project>
+        <path>$WS_DIR$\00stdtx_loraspi\00stdtx_loraspi.ewp</path>
+    </project>
     <project>
         <path>$WS_DIR$\00std_spi\00std_spi.ewp</path>
     </project>
