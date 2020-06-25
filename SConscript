@@ -98,7 +98,10 @@ if env['toolchain'] == 'mspgcc':
     # compiler
     env.Replace(CC='msp430-gcc')
     env.Append(CCFLAGS='-Wstrict-prototypes')
+    env.Append(CCFLAGS='-ffunction-sections')
+    env.Append(CCFLAGS='-fdata-sections')
     env.Append(CCFLAGS='')
+
     # archiver
     env.Replace(AR='msp430-ar')
     env.Append(ARFLAGS='')
@@ -109,24 +112,15 @@ if env['toolchain'] == 'mspgcc':
     env.Append(LINKFLAGS='')
 
     # convert ELF to iHex
-    elf2iHexFunc = Builder(
-        action='msp430-objcopy --output-target=ihex $SOURCE $TARGET',
-        suffix='.ihex',
-    )
+    elf2iHexFunc = Builder(action='msp430-objcopy --output-target=ihex $SOURCE $TARGET', suffix='.ihex')
     env.Append(BUILDERS={'Elf2iHex': elf2iHexFunc})
 
     # convert ELF to bin
-    elf2BinFunc = Builder(
-        action='msp430-objcopy --output-target=binary $SOURCE $TARGET',
-        suffix='.bin',
-    )
+    elf2BinFunc = Builder(action='msp430-objcopy --output-target=binary $SOURCE $TARGET', suffix='.bin')
     env.Append(BUILDERS={'Elf2iBin': elf2BinFunc})
 
     # print sizes
-    printSizeFunc = Builder(
-        action='msp430-size $SOURCE',
-        suffix='.phonysize',
-    )
+    printSizeFunc = Builder(action='msp430-size $SOURCE', suffix='.phonysize')
     env.Append(BUILDERS={'PrintSize': printSizeFunc})
 
 elif env['toolchain'] == 'iar':
@@ -163,10 +157,12 @@ elif env['toolchain'] == 'iar':
     env.Replace(INCPREFIX='-I ')
     env.Replace(CCCOM='$CC $SOURCES -o $TARGET $CFLAGS $CCFLAGS $_CCCOMCOM')
     env.Replace(RANLIBCOM='')
+
     # archiver
     env.Replace(AR='"' + os.path.join(iarEw430BinDir, 'xar') + '"')
     env.Replace(ARCOM='$AR $SOURCES -o $TARGET')
     env.Append(ARFLAGS='')
+
     # linker
     env.Replace(LINK='"' + os.path.join(iarEw430BinDir, 'xlink') + '"')
     env.Replace(PROGSUFFIX='.exe')
@@ -186,23 +182,15 @@ elif env['toolchain'] == 'iar':
     env.Append(LINKFLAGS='-Ointel-standard')
     env.Replace(LINKCOM='$LINK $SOURCES -o $TARGET $LINKFLAGS $__RPATH $_LIBDIRFLAGS $_LIBFLAGS')
 
-
     # converts ELF to iHex
     def change_ext_function(target, source, env):
         base_name = str(target[0]).split('.')[0]
         from_extension = '.a43'
         to_extension = '.ihex'
         print 'change extension {0} {1}->{2}'.format(base_name, from_extension, to_extension)
-        os.rename(
-            base_name + from_extension,
-            base_name + to_extension,
-        )
+        os.rename(base_name + from_extension,base_name + to_extension)
 
-
-    change_ext_builder = Builder(
-        action=change_ext_function,
-        suffix='.ihex'
-    )
+    change_ext_builder = Builder(action=change_ext_function,suffix='.ihex')
     env.Append(BUILDERS={'Elf2iHex': change_ext_builder})
 
     # convert ELF to bin
@@ -229,11 +217,7 @@ elif env['toolchain'] == 'iar-proj':
         Exit(-1)
 
     iar_proj_builder_func = Builder(
-        action='"{0}" $SOURCE Debug'.format(
-            os.path.join(iarEw430CommonBinDir, 'IarBuild')
-        ),
-        src_suffix='.ewp',
-    )
+        action='"{0}" $SOURCE Debug'.format(os.path.join(iarEw430CommonBinDir, 'IarBuild')),src_suffix='.ewp')
     env.Append(BUILDERS={'iarProjBuilder': iar_proj_builder_func})
 
     # converts ELF to iHex
@@ -1086,12 +1070,12 @@ env.AddMethod(extras, 'PostBuildExtras')
 # ============================ helpers =========================================
 
 def buildLibs(projectDir):
+    # this order needed for mspgcc
     libs_dict = {
         '00std': [],
         '01bsp': ['libbsp'],
         '02drv': ['libkernel', 'libdrivers', 'libbsp'],
-        '03oos': ['libopenstack', 'libopenapps', 'libopenweb', 'libopenstack', 'libkernel', 'libdrivers', 'libbsp'],
-        # this order needed for mspgcc
+        '03oos': ['libopenstack', 'libopenapps', 'libopenweb', 'libkernel', 'libdrivers', 'libbsp'],
     }
 
     return_val = None
@@ -1099,19 +1083,23 @@ def buildLibs(projectDir):
         if projectDir.startswith(k):
             return_val = v
 
-    assert return_val != None
+    assert return_val is not None
 
     return return_val
 
 
-def buildIncludePath(projectDir, localEnv):
-    if projectDir.startswith('03oos_'):
-        localEnv.Append(
+def buildIncludePath(project_dir, local_env):
+    if project_dir.startswith('03oos_'):
+        local_env.Append(
             CPPPATH=[
+                os.path.join('#', 'inc'),
+                os.path.join('#', 'kernel'),
                 os.path.join('#', 'openstack'),
-                os.path.join('#', 'openstack', '03b-IPv6'),
-                os.path.join('#', 'openstack', '02b-MAChigh'),
                 os.path.join('#', 'openstack', '02a-MAClow'),
+                os.path.join('#', 'openstack', '02b-MAChigh'),
+                os.path.join('#', 'openstack', '03a-IPHC'),
+                os.path.join('#', 'openstack', '03b-IPv6'),
+                os.path.join('#', 'openstack', '04-TRAN'),
                 os.path.join('#', 'openstack', 'cross-layers'),
                 os.path.join('#', 'drivers', 'common'),
             ]
@@ -1136,113 +1124,90 @@ def project_finder(localEnv):
 
     if env['toolchain'] == 'iar-proj':
         # no VariantDir is used
-        PATH_TO_BOARD_PROJECTS = os.getcwd()
+        projects = os.getcwd()
     else:
         # VariantDir is used
-        PATH_TO_BOARD_PROJECTS = os.path.join('..', '..', '..', '..', 'projects', os.path.split(os.getcwd())[-1])
-    tempsubdirs = os.listdir(PATH_TO_BOARD_PROJECTS)
-    subdirs = [name for name in tempsubdirs if os.path.isdir(os.path.join(PATH_TO_BOARD_PROJECTS, name))]
+        projects = os.path.join('..', '..', '..', '..', 'projects', os.path.split(os.getcwd())[-1])
+
+    sub_dirs = [name for name in os.listdir(projects) if os.path.isdir(os.path.join(projects, name))]
 
     # parse dirs and build targets
-    for projectDir in subdirs:
+    for project_dir in sub_dirs:
 
-        src_dir = os.path.join(PATH_TO_BOARD_PROJECTS, projectDir)
-        variant_dir = os.path.join(env['VARDIR'], 'projects', projectDir)
+        src_dir = os.path.join(projects, project_dir)
+        variant_dir = os.path.join(env['VARDIR'], 'projects', project_dir)
 
         added = False
-        targetName = projectDir[2:]
+        target_name = project_dir[2:]
 
-        if (
-                ('{0}.c'.format(projectDir) in os.listdir(os.path.join(PATH_TO_BOARD_PROJECTS, projectDir))) and
-                (localEnv['toolchain'] != 'iar-proj') and
-                (localEnv['board'] != 'python')
-        ):
+        if '{0}.c'.format(project_dir) in os.listdir(os.path.join(projects, project_dir)) and \
+                localEnv['toolchain'] != 'iar-proj' and localEnv['board'] != 'python':
             # "normal" case
+            localEnv.VariantDir(src_dir=src_dir, variant_dir=variant_dir)
 
-            localEnv.VariantDir(
-                src_dir=src_dir,
-                variant_dir=variant_dir,
-            )
+            target = project_dir
+            source = [os.path.join(project_dir, '{0}.c'.format(project_dir))]
+            libs = buildLibs(project_dir)
 
-            target = projectDir
-            source = [
-                os.path.join(projectDir, '{0}.c'.format(projectDir)),
-            ]
-            libs = buildLibs(projectDir)
-
-            buildIncludePath(projectDir, localEnv)
+            buildIncludePath(project_dir, localEnv)
 
             # In Linux, you cannot have the same target name as the name of the
             # directory name.
             target = target + "_prog"
 
-            exe = localEnv.Program(
-                target=target,
-                source=source,
-                LIBS=libs,
-            )
-            targetAction = localEnv.PostBuildExtras(exe)
+            exe = localEnv.Program(target=target, source=source, LIBS=libs)
+            target_action = localEnv.PostBuildExtras(exe)
 
-            Alias(targetName, [targetAction])
+            Alias(target_name, [target_action])
             added = True
 
-        elif (
-                ('{0}.c'.format(projectDir) in os.listdir(os.path.join(PATH_TO_BOARD_PROJECTS, projectDir))) and
-                (localEnv['board'] == 'python')
-        ):
+        elif '{0}.c'.format(project_dir) in os.listdir(os.path.join(projects, project_dir)) and \
+                localEnv['board'] == 'python':
             # Python case
 
             # build the artifacts in a separate directory
-            localEnv.VariantDir(
-                src_dir=src_dir,
-                variant_dir=variant_dir,
-            )
+            localEnv.VariantDir(src_dir=src_dir, variant_dir=variant_dir)
 
             # build both the application's and the Python module's main files
             sources_c = [
-                os.path.join(projectDir, '{0}.c'.format(projectDir)),
-                os.path.join(projectDir, 'openwsnmodule.c'),
+                os.path.join(project_dir, '{0}.c'.format(project_dir)),
+                os.path.join(project_dir, 'openwsnmodule.c'),
             ]
 
             localEnv.Command(
-                os.path.join(projectDir, 'openwsnmodule.c'),
+                os.path.join(project_dir, 'openwsnmodule.c'),
                 os.path.join('#', 'bsp', 'boards', 'python', 'openwsnmodule.c'),
-                [
-                    Copy('$TARGET', '$SOURCE')
-                ]
+                [Copy('$TARGET', '$SOURCE')]
             )
 
             # objectify those two files
             for s in sources_c:
-                localEnv.Objectify(
-                    target=localEnv.ObjectifiedFilename(s),
-                    source=s,
-                )
+                localEnv.Objectify(target=localEnv.ObjectifiedFilename(s), source=s)
 
             # prepare environment for this build
             if os.name != 'nt' and localEnv['simhost'].endswith('-windows'):
                 # Cross-build handling -- find DLL, rather than hardcode version,
                 # like 'python27.dll'
-                pathnames = sconsUtils.findPattern('python*.dll', localEnv['simhostpy'])
-                if pathnames:
-                    pathname = pathnames[0]
+                path_names = sconsUtils.findPattern('python*.dll', localEnv['simhostpy'])
+                if path_names:
+                    path_name = path_names[0]
                 else:
                     print c.Fore.RED + "Can't find python dll in provided simhostpy" + c.Fore.RESET
                     Exit(-1)
 
                 # ':' means no prefix, like 'lib', for shared library name
-                pysyslib = ':{0}'.format(os.path.basename(pathname))
+                pysyslib = ':{0}'.format(os.path.basename(path_name))
                 pylib_ext = '.pyd'
             else:
                 pysyslib = 'python' + distutils.sysconfig.get_config_var('VERSION')
                 pylib_ext = distutils.sysconfig.get_config_var('SO')
 
-            target = targetName
+            target = target_name
             source = [localEnv.ObjectifiedFilename(s) for s in sources_c]
-            libs = buildLibs(projectDir)
+            libs = buildLibs(project_dir)
             libs += [[pysyslib]]
 
-            buildIncludePath(projectDir, localEnv)
+            buildIncludePath(project_dir, localEnv)
 
             # build a shared library (a Python extension module) rather than an exe
 
@@ -1254,26 +1219,26 @@ def project_finder(localEnv):
                 SHLIBSUFFIX=pylib_ext,
             )
 
-            Alias(targetName, [targetAction])
+            Alias(target_name, [targetAction])
             added = True
 
         elif (
-                ('{0}.ewp'.format(projectDir) in os.listdir(os.path.join(PATH_TO_BOARD_PROJECTS, projectDir))) and
+                ('{0}.ewp'.format(project_dir) in os.listdir(os.path.join(projects, project_dir))) and
                 (localEnv['toolchain'] == 'iar-proj')
         ):
             # iar-proj case
 
-            source = [os.path.join(projectDir, '{0}.ewp'.format(projectDir)), ]
+            source = [os.path.join(project_dir, '{0}.ewp'.format(project_dir)), ]
 
             targetAction = localEnv.iarProjBuilder(
                 source=source,
             )
 
-            Alias(targetName, [targetAction])
+            Alias(target_name, [targetAction])
             added = True
 
         if added:
-            populateTargetGroup(localEnv, targetName)
+            populateTargetGroup(localEnv, target_name)
 
 
 env.AddMethod(project_finder, 'ProjectFinder')

@@ -337,7 +337,6 @@ env.SConscript('SConscript', exports=['env'])
 for k, v in env['targets'].items():
     Alias(k, v)
 
-
 # ============================ admin targets ===================================
 
 # ===== list
@@ -345,7 +344,7 @@ for k, v in env['targets'].items():
 def list_function(env, target, source):
     output = []
     output += ['\n']
-    output += ['Avaiable targets for board={0} toolchain={1}'.format(env['board'], env['toolchain'])]
+    output += ['Available targets for board={0} toolchain={1}'.format(env['board'], env['toolchain'])]
     output += ['\n']
     for k, v in env['targets'].items():
         output += [' - {0}'.format(k)]
@@ -364,7 +363,6 @@ Alias('list', list_output)
 
 def env_function(env, target, source):
     print env.Dump()
-
 
 env_command = env.Command('env', None, env_function)
 AlwaysBuild(env_command)
