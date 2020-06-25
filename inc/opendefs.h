@@ -369,6 +369,7 @@ typedef struct {                                 // always written big endian, i
 } open_addr_t;
 END_PACK
 
+
 typedef struct {
    //admin
    uint8_t       creator;                                       // the component which called getFreePacketBuffer()
@@ -467,6 +468,11 @@ typedef struct {
 } neighborRow_t;
 END_PACK
 
+//ideally this struct should be in the neighbor table as an ID. 
+typedef struct {
+    open_addr_t*      open_addr;
+    cellRadioSetting_t cellRadioSetting;
+} neighborKey_t;
 
 //=========================== variables =======================================
 

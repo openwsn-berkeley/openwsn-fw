@@ -48,7 +48,7 @@ void        cjoin_timer_cb(opentimers_id_t id);
 void        cjoin_task_cb(void);
 void        cjoin_sendDone(OpenQueueEntry_t* msg,
                        owerror_t error);
-owerror_t   cjoin_sendJoinRequest(open_addr_t *joinProxy);
+owerror_t   cjoin_sendJoinRequest(neighborKey_t joinProxy);
 void        cjoin_retransmission_cb(opentimers_id_t id);
 void        cjoin_retransmission_task_cb(void);
 bool        cjoin_getIsJoined(void);
@@ -175,7 +175,7 @@ void cjoin_retransmission_cb(opentimers_id_t id) {
 }
 
 void cjoin_retransmission_task_cb(void) {
-    open_addr_t* joinProxy;
+    neighborKey_t joinProxy;
 
     if (ieee154e_isSynch() == FALSE){
         // keep the retransmission timer, in case it synchronized at next time
@@ -183,7 +183,7 @@ void cjoin_retransmission_task_cb(void) {
     }
 
     joinProxy = neighbors_getJoinProxy();
-    if(joinProxy == NULL) {
+    if(joinProxy.open_addr == NULL) {
         // keep the retransmission timer, in case it synchronized at next time
         openserial_printError(
             COMPONENT_CJOIN,
@@ -198,7 +198,7 @@ void cjoin_retransmission_task_cb(void) {
 }
 
 void cjoin_task_cb(void) {
-    open_addr_t *joinProxy;
+    neighborKey_t joinProxy;
 
     // don't run if not synch
     if (ieee154e_isSynch() == FALSE){
@@ -212,7 +212,7 @@ void cjoin_task_cb(void) {
     }
 
     joinProxy = neighbors_getJoinProxy();
-    if(joinProxy == NULL) {
+    if(joinProxy.open_addr == NULL) {
         return;
     }
 
@@ -237,7 +237,7 @@ void cjoin_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
     openqueue_freePacketBuffer(msg);
 }
 
-owerror_t cjoin_sendJoinRequest(open_addr_t* joinProxy) {
+owerror_t cjoin_sendJoinRequest(neighborKey_t joinProxy) {
     OpenQueueEntry_t*            pkt;
     owerror_t                    outcome;
     coap_option_iht              options[5];
@@ -290,8 +290,9 @@ owerror_t cjoin_sendJoinRequest(open_addr_t* joinProxy) {
     pkt->l3_destinationAdd.type    = ADDR_128B;
     pkt->l3_destinationAdd.addr_128b[0] = 0xfe;
     pkt->l3_destinationAdd.addr_128b[1] = 0x80;
+    pkt->l2_cellRadioSetting = joinProxy.cellRadioSetting;
     memset(&pkt->l3_destinationAdd.addr_128b[2], 0x00, 6);
-    memcpy(&pkt->l3_destinationAdd.addr_128b[8],joinProxy->addr_64b,8); // set host to eui-64 of the join proxy
+    memcpy(&pkt->l3_destinationAdd.addr_128b[8],joinProxy.open_addr->addr_64b,8); // set host to eui-64 of the join proxy
 
     // encode Join_Request object in the payload
     join_request.role = COJP_ROLE_VALUE_6N; // regular non-6LBR node
