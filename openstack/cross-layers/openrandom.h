@@ -1,5 +1,5 @@
-#ifndef __OPENRANDOM_H
-#define __OPENRANDOM_H
+#ifndef OPENWSN_OPENRANDOM_H
+#define OPENWSN_OPENRANDOM_H
 
 /**
 \addtogroup cross-layers
@@ -33,4 +33,4 @@ uint16_t openrandom_getRandomizePeriod(uint16_t period, uint16_t range);
 \}
 */
 
-#endif
+#endif /* OPENWSN_OPENRANDOM_H */

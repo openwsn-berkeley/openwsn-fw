@@ -1,5 +1,5 @@
-#ifndef _CBORENCODER_H
-#define _CBORENCODER_H
+#ifndef OPENWSN_CBORENCODER_H
+#define OPENWSN_CBORENCODER_H
 
 #include "opendefs.h"
 
@@ -16,4 +16,4 @@ uint8_t cborencoder_put_array(uint8_t *buffer, uint8_t elements);
 
 uint8_t cborencoder_put_map(uint8_t *buffer, uint8_t elements);
 
-#endif /* _CBORENCODER_H */
+#endif /* OPENWSN_CBORENCODER_H */

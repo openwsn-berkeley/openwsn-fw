@@ -1,5 +1,5 @@
-#ifndef __OPENCOAP_H
-#define __OPENCOAP_H
+#ifndef OPENWSN_OPENWEB_H
+#define OPENWSN_OPENWEB_H
 
 //=========================== define ==========================================
 
@@ -11,4 +11,4 @@
 
 void openweb_init(void);
 
-#endif /* __OPENCOAP_H */
+#endif /* OPENWSN_OPENWEB_H */

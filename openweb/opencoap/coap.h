@@ -1,5 +1,5 @@
-#ifndef __COAP_H
-#define __COAP_H
+#ifndef OPENWSN_COAP_H
+#define OPENWSN_COAP_H
 
 /**
 \addtogroup Transport
@@ -261,4 +261,4 @@ uint8_t coap_find_option(coap_option_iht *array, uint8_t arrayLen, coap_option_t
 \}
 */
 
-#endif
+#endif /* OPENWSN_COAP_H */

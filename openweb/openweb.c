@@ -12,7 +12,7 @@
 #include "coap.h"
 #endif
 
-void openweb_init() {
+void openweb_init(void) {
 
 #if defined(OPENWSN_COAP_C)
     coap_init();

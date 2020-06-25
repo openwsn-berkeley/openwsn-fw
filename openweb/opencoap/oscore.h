@@ -1,5 +1,5 @@
-#ifndef __OPENOSCOAP_H
-#define __OPENOSCOAP_H
+#ifndef OPENWSN_OSCORE_H
+#define OPENWSN_OSCORE_H
 
 /**
 \addtogroup Transport
@@ -77,4 +77,4 @@ uint8_t oscore_parse_compressed_COSE(uint8_t *buffer,
 \}
 */
 
-#endif
+#endif /* OPENWSN_OSCORE_H*/
