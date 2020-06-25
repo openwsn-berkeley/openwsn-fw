@@ -77,11 +77,19 @@ typedef enum{
 
 // mapping of MAC-level cellRadioSetting_t (in schedule.h) to Open Radio 
 // radioSetting_t (in opendefs.h)
-static const radioSetting_t cellRadioSettingMap [MAX_CELLRADIOSETTINGS]= {
+static const radioSetting_t cellRadioSettingMap[MAX_CELLRADIOSETTINGS]= {
     RADIOSETTING_24GHZ,
     RADIOSETTING_FSK_OPTION1_FEC,
     RADIOSETTING_OFDM_OPTION_1_MCS3
 };
+// mapping of MAC-level cellRadioSetting_t (in schedule.h) to DAGRank increases 
+// ordered by range from shortest to longest
+static const uint8_t cellRadioSettingMinRankFactor [MAX_CELLRADIOSETTINGS]= {
+    1,         //24GHZ 
+    3,       //FSK
+    2        //OFDM
+};
+
 
 // maximum celllist length
 #define CELLLIST_MAX_LEN 5

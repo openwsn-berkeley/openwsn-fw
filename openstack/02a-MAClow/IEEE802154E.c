@@ -1176,7 +1176,7 @@ port_INLINE void activity_ti1ORri1(void) {
                     debugpins_slot_toggle();
                     debugpins_slot_toggle();
                     ieee154e_getAsn(asn);
-                    join_priority = (icmpv6rpl_getMyDAGrank()/MINHOPRANKINCREASE)-1; //poipoi -- use dagrank(rank)-1
+                    join_priority = ((cellRadioSettingMinRankFactor[schedule_getCellRadioSetting()]*icmpv6rpl_getMyDAGrank())/MINHOPRANKINCREASE)-1; //poipoi -- use dagrank(rank)-1
                     memcpy(ieee154e_vars.dataToSend->l2_ASNpayload,&asn[0],sizeof(asn_t));
                     memcpy(ieee154e_vars.dataToSend->l2_ASNpayload+sizeof(asn_t),&join_priority,sizeof(uint8_t));
                 }
