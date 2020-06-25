@@ -62,49 +62,49 @@
 #endif
 
 #if (OPENWSN_DEBUG_LEVEL >= 6)
-#define LOG_VERBOSE(component, message, p1, p2)   openserial_printLog(VERBOSE, (component), (message), (p1), (p2))
+#define LOG_VERBOSE(component, message, p1, p2)   openserial_printLog(L_VERBOSE, (component), (message), (p1), (p2))
 #else
 #define LOG_VERBOSE(component, message, p1, p2)
 #endif
 
 #if (OPENWSN_DEBUG_LEVEL >= 5)
-#define LOG_INFO(component, message, p1, p2)   openserial_printLog(INFO, (component), (message), (p1), (p2))
+#define LOG_INFO(component, message, p1, p2)   openserial_printLog(L_INFO, (component), (message), (p1), (p2))
 #else
 #define LOG_INFO(component, message, p1, p2)
 #endif
 
 #if (OPENWSN_DEBUG_LEVEL >= 4)
-#define LOG_WARNING(component, message, p1, p2)   openserial_printLog(WARNING, (component), (message), (p1), (p2))
+#define LOG_WARNING(component, message, p1, p2)   openserial_printLog(L_WARNING, (component), (message), (p1), (p2))
 #else
 #define LOG_WARNING(component, message, p1, p2)
 #endif
 
 #if (OPENWSN_DEBUG_LEVEL >= 3)
-#define LOG_SUCCESS(component, message, p1, p2)   openserial_printLog(SUCCESS, (component), (message), (p1), (p2))
+#define LOG_SUCCESS(component, message, p1, p2)   openserial_printLog(L_SUCCESS, (component), (message), (p1), (p2))
 #else
 #define LOG_SUCCESS(component, message, p1, p2)
 #endif
 
 #if (OPENWSN_DEBUG_LEVEL >= 2)
-#define LOG_ERROR(component, message, p1, p2)   openserial_printLog(ERROR, (component), (message), (p1), (p2))
+#define LOG_ERROR(component, message, p1, p2)   openserial_printLog(L_ERROR, (component), (message), (p1), (p2))
 #else
 #define LOG_ERROR(component, message, p1, p2)
 #endif
 
 #if (OPENWSN_DEBUG_LEVEL >= 1)
-#define LOG_CRITICAL(component, message, p1, p2)   openserial_printLog(CRITICAL, (component), (message), (p1), (p2))
+#define LOG_CRITICAL(component, message, p1, p2)   openserial_printLog(L_CRITICAL, (component), (message), (p1), (p2))
 #else
 #define LOG_CRITICAL(component, message, p1, p2)
 #endif
 //=========================== typedef =========================================
 
 enum {
-    CRITICAL = 1,
-    ERROR = 2,
-    SUCCESS = 3,
-    WARNING = 4,
-    INFO = 5,
-    VERBOSE = 6
+    L_CRITICAL = 1,
+    L_ERROR = 2,
+    L_SUCCESS = 3,
+    L_WARNING = 4,
+    L_INFO = 5,
+    L_VERBOSE = 6
 };
 
 //=========================== variables =======================================

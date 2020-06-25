@@ -146,22 +146,22 @@ owerror_t openserial_printLog(
     char severity;
 
     switch (log_level) {
-        case VERBOSE:
+        case L_VERBOSE:
             severity = SERFRAME_MOTE2PC_VERBOSE;
             break;
-        case INFO:
+        case L_INFO:
             severity = SERFRAME_MOTE2PC_INFO;
             break;
-        case WARNING:
+        case L_WARNING:
             severity = SERFRAME_MOTE2PC_WARNING;
             break;
-        case SUCCESS:
+        case L_SUCCESS:
             severity = SERFRAME_MOTE2PC_SUCCESS;
             break;
-        case ERROR:
+        case L_ERROR:
             severity = SERFRAME_MOTE2PC_ERROR;
             break;
-        case CRITICAL:
+        case L_CRITICAL:
             severity = SERFRAME_MOTE2PC_CRITICAL;
             // blink error LED, this is serious
             leds_error_blink();
