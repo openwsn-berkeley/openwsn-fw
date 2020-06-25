@@ -101,7 +101,7 @@ void board_init(void){
 
 #if defined(BOARD_CRYPTOENGINE_ENABLED)
     cryptoengine_init();
-#enabled
+#endif
 }
 
 void board_sleep(void) {
