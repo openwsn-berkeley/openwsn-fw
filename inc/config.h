@@ -182,7 +182,7 @@
  *
  */
 
-#define OPENWSN_CJOIN_C
+// #define OPENWSN_CJOIN_C
 
 // ======================= OpenWeb configuration =======================
 
@@ -195,7 +195,7 @@
  *
  */
 
-#define OPENWSN_COAP_C
+// #define OPENWSN_COAP_C
 
 
 // ======================== Stack configuration ========================
@@ -207,7 +207,7 @@
  *
  */
 
-#define OPENWSN_UDP_C
+// #define OPENWSN_UDP_C
 
 
 /**
@@ -233,7 +233,7 @@
  * Allow the MSF algorithm to dynamically remove and allocate slots, based on the traffic load in the network.
  *
  */
-#define OPENWSN_ADAPTIVE_MSF
+// #define OPENWSN_ADAPTIVE_MSF
 
 
 /**
@@ -241,7 +241,7 @@
  *
  * Enables the icmpv6 echo (ping) functionality
  */
-#define OPENWSN_ICMPV6ECHO_C
+// #define OPENWSN_ICMPV6ECHO_C
 
 
 /**
@@ -251,7 +251,7 @@
  *
  * Requires: OPENWSN_CJOIN_C, OPENWSN_COAP_C, OPENWSN_UDP_C
  */
-#define OPENWSN_IEEE802154E_SECURITY_C
+// #define OPENWSN_IEEE802154E_SECURITY_C
 
 
 /**
@@ -288,7 +288,7 @@
  * increase RAM usage.
  *
  */
-#define PACKETQUEUE_LENGTH              10
+#define PACKETQUEUE_LENGTH              20
 
 // ======================== Board configuration ========================
 
@@ -299,7 +299,7 @@
  * cannot be combined with the python board.
  *
  */
-#define BOARD_CRYPTOENGINE_ENABLED
+// #define BOARD_CRYPTOENGINE_ENABLED
 
 /**
  * \def BOARD_OPENSERIAL_PRINTF
