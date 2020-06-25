@@ -52,8 +52,12 @@ elif env['board'] == 'agilefox':
     env.Append(CPPDEFINES='AGILEFOX')
 elif env['board'] == 'iot-lab_M3':
     env.Append(CPPDEFINES='IOTLAB_M3')
+elif env['board'] == 'iot-lab_A8-M3':
+    env.Append(CPPDEFINES='IOTLAB_A8_M3')
 elif env['board'] == 'nrf52840':
     env.Append(CPPDEFINES='NRF52840')
+elif env['board'] == 'samr21_xpro':
+    env.Append(CPPDEFINES='SAMR21_XPRO')
 else:
     print c.Fore.RED + "Unsupported board: {}".format(env['board']) + c.Fore.RESET
     Exit(-1)
