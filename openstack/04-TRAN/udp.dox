@@ -1,5 +1,5 @@
 /**
-\defgroup OpenUdp OpenUdp
+\defgroup Udp Udp
 
 \brief UDP implementation.
 

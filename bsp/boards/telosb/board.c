@@ -6,6 +6,7 @@
 
 #include "msp430f1611.h"
 #include "board.h"
+#include "config.h"
 // bsp modules
 #include "debugpins.h"
 #include "leds.h"
@@ -62,7 +63,15 @@ void board_init(void) {
    spi_init();
    radio_init();
    sctimer_init();
+
+#if defined(BOARD_CRYPTOENGINE_ENABLED)
+   cryptoengine_init();
+#endif
    
+#if defined(BOARD_SENSORS_ENABLED)
+    sensors_init();
+#endif
+
    // enable interrupts
    __bis_SR_register(GIE);
 }

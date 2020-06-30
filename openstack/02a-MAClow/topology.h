@@ -1,5 +1,5 @@
-#ifndef __TOPOLOGY_H
-#define __TOPOLOGY_H
+#ifndef OPENWSN_TOPOLOGY_H
+#define OPENWSN_TOPOLOGY_H
 
 /**
 \addtogroup MAClow
@@ -21,11 +21,11 @@
 
 //=========================== prototypes ======================================
 
-bool topology_isAcceptablePacket(ieee802154_header_iht* ieee802514_header);
+bool topology_isAcceptablePacket(ieee802154_header_iht *ieee802514_header);
 
 /**
 \}
 \}
 */
 
-#endif
+#endif /* OPENWSN_FORCE_TOPOLOGY */

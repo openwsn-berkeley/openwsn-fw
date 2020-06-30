@@ -4,6 +4,7 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2010
 */
 
+#include "config.h"
 #include "board.h"
 #include "scheduler.h"
 #include "openstack.h"

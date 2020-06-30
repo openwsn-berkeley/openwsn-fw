@@ -18,6 +18,7 @@
 #include <source/gptimer.h>
 #include <source/sys_ctrl.h>
 
+#include "config.h"
 #include "board.h"
 #include "board_info.h"
 #include "debugpins.h"
@@ -74,8 +75,13 @@ void board_init(void) {
     radio_init();
     i2c_init();
 
-    // sensors_init();
+#if defined(BOARD_SENSORS_ENABLED)
+    sensors_init();
+#endif
+
+#if defined(BOARD_CRYPTOENGINE_ENABLED)
     cryptoengine_init();
+#endif
 }
 
 void antenna_init(void) {

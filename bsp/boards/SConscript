@@ -15,13 +15,9 @@ sources_h = [
     'uart.h',
     'sctimer.h',
     'sensors.h',
-    os.path.join('common', 'openccms.h'),
-    os.path.join('common', 'openaes.h'),
 ]
 
 sources_c = [
-    os.path.join('common', 'openccms.c'),
-    os.path.join('common', 'openaes.c'),
 ]
 
 target = 'libbsp'

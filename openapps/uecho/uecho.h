@@ -8,7 +8,8 @@
 \{
 */
 
-#include "openudp.h"
+#include "config.h"
+#include "udp.h"
 
 //=========================== define ==========================================
 
@@ -17,14 +18,17 @@
 //=========================== variables =======================================
 
 typedef struct {
-   udp_resource_desc_t desc;  ///< resource descriptor for this module, used to register at UDP stack
+    udp_resource_desc_t desc;  ///< resource descriptor for this module, used to register at UDP stack
 } uecho_vars_t;
 
 //=========================== prototypes ======================================
 
 void uecho_init(void);
-void uecho_receive(OpenQueueEntry_t* msg);
-void uecho_sendDone(OpenQueueEntry_t* msg, owerror_t error);
+
+void uecho_receive(OpenQueueEntry_t *msg);
+
+void uecho_sendDone(OpenQueueEntry_t *msg, owerror_t error);
+
 bool uecho_debugPrint(void);
 
 /**

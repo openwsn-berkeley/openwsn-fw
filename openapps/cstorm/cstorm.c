@@ -1,12 +1,15 @@
+#include "config.h"
+
+#if defined(OPENWSN_CSTORM_C)
+
 #include "opendefs.h"
 #include "cstorm.h"
-#include "opencoap.h"
+#include "coap.h"
 #include "openqueue.h"
 #include "packetfunctions.h"
 #include "openserial.h"
 #include "openrandom.h"
 #include "scheduler.h"
-//#include "ADC_Channel.h"
 #include "IEEE802154E.h"
 #include "schedule.h"
 #include "icmpv6rpl.h"
@@ -14,11 +17,11 @@
 
 //=========================== defines =========================================
 
-const uint8_t cstorm_path0[]    = "storm";
-const uint8_t cstorm_payload[]  = "OpenWSN";
+const uint8_t cstorm_path0[] = "storm";
+const uint8_t cstorm_payload[] = "OpenWSN";
 static const uint8_t dst_addr[] = {
-   0xbb, 0xbb, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01
+        0xbb, 0xbb, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01
 };
 
 //=========================== variables =======================================
@@ -28,31 +31,33 @@ cstorm_vars_t cstorm_vars;
 //=========================== prototypes ======================================
 
 owerror_t cstorm_receive(
-   OpenQueueEntry_t* msg,
-   coap_header_iht*  coap_header,
-   coap_option_iht*  coap_incomingOptions,
-   coap_option_iht*  coap_outgoingOptions,
-   uint8_t*          coap_outgoingOptionsLen);
+        OpenQueueEntry_t *msg,
+        coap_header_iht *coap_header,
+        coap_option_iht *coap_incomingOptions,
+        coap_option_iht *coap_outgoingOptions,
+        uint8_t *coap_outgoingOptionsLen);
 
 void cstorm_timer_cb(opentimers_id_t id);
+
 void cstorm_task_cb(void);
-void cstorm_sendDone(OpenQueueEntry_t* msg, owerror_t error);
+
+void cstorm_sendDone(OpenQueueEntry_t *msg, owerror_t error);
 
 //=========================== public ==========================================
 
 void cstorm_init(void) {
 
     // register to OpenCoAP module
-    cstorm_vars.desc.path0len              = sizeof(cstorm_path0)-1;
-    cstorm_vars.desc.path0val              = (uint8_t*)(&cstorm_path0);
-    cstorm_vars.desc.path1len              = 0;
-    cstorm_vars.desc.path1val              = NULL;
-    cstorm_vars.desc.componentID           = COMPONENT_CSTORM;
-    cstorm_vars.desc.securityContext       = NULL;
-    cstorm_vars.desc.discoverable          = TRUE;
-    cstorm_vars.desc.callbackRx            = &cstorm_receive;
-    cstorm_vars.desc.callbackSendDone      = &cstorm_sendDone;
-    opencoap_register(&cstorm_vars.desc);
+    cstorm_vars.desc.path0len = sizeof(cstorm_path0) - 1;
+    cstorm_vars.desc.path0val = (uint8_t * )(&cstorm_path0);
+    cstorm_vars.desc.path1len = 0;
+    cstorm_vars.desc.path1val = NULL;
+    cstorm_vars.desc.componentID = COMPONENT_CSTORM;
+    cstorm_vars.desc.securityContext = NULL;
+    cstorm_vars.desc.discoverable = TRUE;
+    cstorm_vars.desc.callbackRx = &cstorm_receive;
+    cstorm_vars.desc.callbackSendDone = &cstorm_sendDone;
+    coap_register(&cstorm_vars.desc);
 
     //start a periodic timer
     //comment : not running by default
@@ -73,77 +78,80 @@ void cstorm_init(void) {
 //=========================== private =========================================
 
 owerror_t cstorm_receive(
-        OpenQueueEntry_t* msg,
-        coap_header_iht*  coap_header,
-        coap_option_iht*  coap_incomingOptions,
-        coap_option_iht*  coap_outgoingOptions,
-        uint8_t*          coap_outgoingOptionsLen
-   ) {
-   owerror_t outcome;
+        OpenQueueEntry_t *msg,
+        coap_header_iht *coap_header,
+        coap_option_iht *coap_incomingOptions,
+        coap_option_iht *coap_outgoingOptions,
+        uint8_t *coap_outgoingOptionsLen
+) {
+    owerror_t outcome;
 
-   switch (coap_header->Code) {
+    switch (coap_header->Code) {
 
-      case COAP_CODE_REQ_GET:
+        case COAP_CODE_REQ_GET:
 
-         // reset packet payload
-         msg->payload             = &(msg->packet[127]);
-         msg->length              = 0;
+            // reset packet payload
+            msg->payload = &(msg->packet[127]);
+            msg->length = 0;
 
-         // add CoAP payload
-         packetfunctions_reserveHeaderSize(msg, 2);
-         // return as big endian
-         msg->payload[0]          = (uint8_t)(cstorm_vars.period >> 8);
-         msg->payload[1]          = (uint8_t)(cstorm_vars.period & 0xff);
+            // add CoAP payload
+            if (packetfunctions_reserveHeader(&msg, 2) == E_FAIL) {
+                openqueue_freePacketBuffer(msg);
+                return;
+            }
+            // return as big endian
+            msg->payload[0] = (uint8_t)(cstorm_vars.period >> 8);
+            msg->payload[1] = (uint8_t)(cstorm_vars.period & 0xff);
 
-         // set the CoAP header
-         coap_header->Code        = COAP_CODE_RESP_CONTENT;
+            // set the CoAP header
+            coap_header->Code = COAP_CODE_RESP_CONTENT;
 
-         outcome                  = E_SUCCESS;
-         break;
+            outcome = E_SUCCESS;
+            break;
 
-      case COAP_CODE_REQ_PUT:
+        case COAP_CODE_REQ_PUT:
 
-         if (msg->length!=2) {
-            outcome               = E_FAIL;
-            coap_header->Code     = COAP_CODE_RESP_BADREQ;
-         }
+            if (msg->length != 2) {
+                outcome = E_FAIL;
+                coap_header->Code = COAP_CODE_RESP_BADREQ;
+            }
 
-         // read the new period
-         cstorm_vars.period     = 0;
-         cstorm_vars.period    |= (msg->payload[0] << 8);
-         cstorm_vars.period    |= msg->payload[1];
+            // read the new period
+            cstorm_vars.period = 0;
+            cstorm_vars.period |= (msg->payload[0] << 8);
+            cstorm_vars.period |= msg->payload[1];
 
-         /*
-         // stop and start again only if period > 0
-         opentimers_cancel(cstorm_vars.timerId);
+            /*
+            // stop and start again only if period > 0
+            opentimers_cancel(cstorm_vars.timerId);
 
-         if(cstorm_vars.period > 0) {
-               opentimers_scheduleIn(
-                   cstorm_vars.timerId,
-                   cstorm_vars.period,
-                   TIME_MS,
-                   TIMER_PERIODIC,
-                   cstorm_timer_cb
-               );
-         }
-         */
+            if(cstorm_vars.period > 0) {
+                  opentimers_scheduleIn(
+                      cstorm_vars.timerId,
+                      cstorm_vars.period,
+                      TIME_MS,
+                      TIMER_PERIODIC,
+                      cstorm_timer_cb
+                  );
+            }
+            */
 
-         // reset packet payload
-         msg->payload             = &(msg->packet[127]);
-         msg->length              = 0;
+            // reset packet payload
+            msg->payload = &(msg->packet[127]);
+            msg->length = 0;
 
-         // set the CoAP header
-         coap_header->Code        = COAP_CODE_RESP_CHANGED;
+            // set the CoAP header
+            coap_header->Code = COAP_CODE_RESP_CHANGED;
 
-         outcome                  = E_SUCCESS;
-         break;
+            outcome = E_SUCCESS;
+            break;
 
-      default:
-         outcome = E_FAIL;
-         break;
-   }
+        default:
+            outcome = E_FAIL;
+            break;
+    }
 
-   return outcome;
+    return outcome;
 }
 
 void cstorm_timer_cb(opentimers_id_t id) {
@@ -153,13 +161,13 @@ void cstorm_timer_cb(opentimers_id_t id) {
 }
 
 void cstorm_task_cb(void) {
-    OpenQueueEntry_t*    pkt;
-    owerror_t            outcome;
-    coap_option_iht      options[2];
-    uint8_t              medType;
+    OpenQueueEntry_t *pkt;
+    owerror_t outcome;
+    coap_option_iht options[2];
+    uint8_t medType;
 
-    open_addr_t          parentNeighbor;
-    bool                 foundNeighbor;
+    open_addr_t parentNeighbor;
+    bool foundNeighbor;
 
     // don't run if not synch
     if (ieee154e_isSynch() == FALSE) {
@@ -173,7 +181,7 @@ void cstorm_task_cb(void) {
     }
 
     foundNeighbor = icmpv6rpl_getPreferredParentEui64(&parentNeighbor);
-    if (foundNeighbor==FALSE) {
+    if (foundNeighbor == FALSE) {
         return;
     }
 
@@ -181,38 +189,38 @@ void cstorm_task_cb(void) {
         return;
     }
 
-    if (cstorm_vars.busySendingCstorm==TRUE) {
+    if (cstorm_vars.busySendingCstorm == TRUE) {
         // don't continue if I'm still sending a previous cstorm
         return;
     }
 
-    if(cstorm_vars.period == 0) {
-      // stop the periodic timer
-      opentimers_cancel(cstorm_vars.timerId);
-      return;
+    if (cstorm_vars.period == 0) {
+        // stop the periodic timer
+        opentimers_cancel(cstorm_vars.timerId);
+        return;
     }
 
     // if you get here, send a packet
 
     // get a packet
     pkt = openqueue_getFreePacketBuffer(COMPONENT_CSTORM);
-    if (pkt==NULL) {
-        openserial_printError(COMPONENT_CSTORM,ERR_NO_FREE_PACKET_BUFFER,
-                            (errorparameter_t)0,
-                            (errorparameter_t)0);
+    if (pkt == NULL) {
+        LOG_ERROR(COMPONENT_CSTORM, ERR_NO_FREE_PACKET_BUFFER, (errorparameter_t) 0, (errorparameter_t) 0);
         return;
     }
 
     // take ownership over that packet
-    pkt->creator    = COMPONENT_CSTORM;
-    pkt->owner      = COMPONENT_CSTORM;
+    pkt->creator = COMPONENT_CSTORM;
+    pkt->owner = COMPONENT_CSTORM;
 
     //The contents of the message are written in reverse order : the payload first
-    //packetfunctions_reserveHeaderSize moves the index pkt->payload
 
     // add payload
-    packetfunctions_reserveHeaderSize(pkt,sizeof(cstorm_payload)-1);
-    memcpy(&pkt->payload[0],cstorm_payload,sizeof(cstorm_payload)-1);
+    if (packetfunctions_reserveHeader(&pkt, sizeof(cstorm_payload) - 1) == E_FAIL) {
+        openqueue_freePacketBuffer(pkt);
+        return;
+    }
+    memcpy(&pkt->payload[0], cstorm_payload, sizeof(cstorm_payload) - 1);
 
     // location-path option
     options[0].type = COAP_OPTION_NUM_URIPATH;
@@ -229,37 +237,33 @@ void cstorm_task_cb(void) {
     // metadata
     pkt->l4_destination_port = WKP_UDP_COAP;
     pkt->l3_destinationAdd.type = ADDR_128B;
-    memcpy(&pkt->l3_destinationAdd.addr_128b[0],&dst_addr,16);
+    memcpy(&pkt->l3_destinationAdd.addr_128b[0], &dst_addr, 16);
 
     // send
-    outcome = opencoap_send(
-        pkt,
-        COAP_TYPE_NON,
-        COAP_CODE_REQ_PUT,
-        1, // token len
-        options,
-        2, // options len
-        &cstorm_vars.desc
+    outcome = coap_send(
+            pkt,
+            COAP_TYPE_NON,
+            COAP_CODE_REQ_PUT,
+            1, // token len
+            options,
+            2, // options len
+            &cstorm_vars.desc
     );
 
     // avoid overflowing the queue if fails
-    if (outcome==E_FAIL) {
+    if (outcome == E_FAIL) {
         openqueue_freePacketBuffer(pkt);
     } else {
-        cstorm_vars.busySendingCstorm=FALSE;
+        cstorm_vars.busySendingCstorm = FALSE;
     }
 }
 
-void cstorm_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
+void cstorm_sendDone(OpenQueueEntry_t *msg, owerror_t error) {
     // free the packet buffer entry
     openqueue_freePacketBuffer(msg);
 
     // allow to send next cstorm packet
-    cstorm_vars.busySendingCstorm=FALSE;
+    cstorm_vars.busySendingCstorm = FALSE;
 }
 
-
-
-
-
-
+#endif /* OPENWSN_CSTORM_C */

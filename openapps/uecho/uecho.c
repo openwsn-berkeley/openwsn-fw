@@ -1,3 +1,7 @@
+#include "config.h"
+
+#if defined(OPENWSN_UECHO_C)
+
 #include "opendefs.h"
 #include "uecho.h"
 #include "openqueue.h"
@@ -26,15 +30,10 @@ void uecho_init(void) {
 void uecho_receive(OpenQueueEntry_t *request) {
     OpenQueueEntry_t *reply;
 
-    reply = openqueue_getFreeBigPacketBuffer(COMPONENT_UECHO);
+    reply = openqueue_getFreePacketBuffer(COMPONENT_UECHO);
 
     if (reply == NULL) {
-        openserial_printError(
-                COMPONENT_UECHO,
-                ERR_NO_FREE_PACKET_BUFFER,
-                (errorparameter_t) 0,
-                (errorparameter_t) 0
-        );
+        LOG_ERROR(COMPONENT_UECHO, ERR_NO_FREE_PACKET_BUFFER, (errorparameter_t) 0, (errorparameter_t) 0);
         openqueue_freePacketBuffer(request); //clear the request packet as well
         return;
     }
@@ -51,7 +50,10 @@ void uecho_receive(OpenQueueEntry_t *request) {
     // copy source to destination to echo.
     memcpy(&reply->l3_destinationAdd.addr_128b[0], &request->l3_sourceAdd.addr_128b[0], 16);
 
-    packetfunctions_reserveHeaderSize(reply, request->length);
+    if (packetfunctions_reserveHeader(&reply, request->length) == E_FAIL) {
+        openqueue_freePacketBuffer(reply);
+        return;
+    }
     memcpy(&reply->payload[0], &request->payload[0], request->length);
 
     openqueue_freePacketBuffer(request);
@@ -70,3 +72,5 @@ bool uecho_debugPrint(void) {
 }
 
 //=========================== private =========================================
+
+#endif /* OPENWSN_UECHO_C */

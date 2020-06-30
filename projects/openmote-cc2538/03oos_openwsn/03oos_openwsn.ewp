@@ -168,7 +168,7 @@
         <debug>1</debug>
         <option>
           <name>CCDefines</name>
-          <state>L2_SECURITY_ACTIVE</state>
+          <state>OPENWSN_IEEE802154E_SECURITY_C</state>
         </option>
         <option>
           <name>CCPreprocFile</name>
@@ -2401,10 +2401,10 @@
         <name>$PROJ_DIR$\..\..\..\openapps\opencoap\opencoap.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\opencoap\openoscoap.c</name>
+        <name>$PROJ_DIR$\..\..\..\openapps\opencoap\oscore.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\opencoap\openoscoap.h</name>
+        <name>$PROJ_DIR$\..\..\..\openapps\opencoap\oscore.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openapps\opencoap\sha-private.h</name>

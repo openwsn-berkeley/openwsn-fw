@@ -4,11 +4,12 @@
 /**
 \addtogroup AppCoAP
 \{
-\addtogroup cleds
+\addtogroup cled
 \{
 */
 
-#include "opencoap.h"
+#include "config.h"
+#include "coap.h"
 
 //=========================== define ==========================================
 
@@ -17,12 +18,12 @@
 //=========================== variables =======================================
 
 typedef struct {
-   coap_resource_desc_t desc;
-} cleds_vars_t;
+    coap_resource_desc_t desc;
+} cled_vars_t;
 
 //=========================== prototypes ======================================
 
-void cleds__init(void);
+void cled_init(void);
 
 /**
 \}

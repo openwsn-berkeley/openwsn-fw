@@ -15,6 +15,8 @@
 #include <source/cpu.h>
 #include <source/interrupt.h>
 
+#include "config.h"
+
 //=========================== defines =========================================
 
 //===== interrupt state
@@ -71,11 +73,11 @@
     #define PORT_maxRxDataPrepare                4    //  122us (measured  22us)
     #define PORT_maxTxAckPrepare                10    //  122us (measured  94us)
     // radio speed related
-    #ifdef L2_SECURITY_ACTIVE
+#ifdef OPENWSN_IEEE802154E_SECURITY_C
     #define PORT_delayTx                        14    //  366us (measured xxxus)
-    #else
+#else
     #define PORT_delayTx                        12    //  366us (measured xxxus)
-    #endif
+#endif
     #define PORT_delayRx                         0    //    0us (can not measure)
     // radio watchdog
 #endif
