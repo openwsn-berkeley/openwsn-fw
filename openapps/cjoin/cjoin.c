@@ -312,7 +312,7 @@ owerror_t cjoin_sendJoinRequest(open_addr_t *joinProxy) {
             pkt,
             COAP_TYPE_NON,
             COAP_CODE_REQ_POST,
-            0, // token len
+            1, // token len
             options,
             4, // options len
             &cjoin_vars.desc
