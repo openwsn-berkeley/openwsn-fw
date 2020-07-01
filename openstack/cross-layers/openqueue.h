@@ -30,6 +30,11 @@ typedef struct {
    OpenQueueBigEntry_t big_queue[BIGQUEUELENGTH];
 } openqueue_vars_t;
 
+typedef struct 
+{
+	uint8_t                   maxBuffSize;              // max packets in the buffer
+    uint8_t                   minBuffSize;              // min packets in the buffer
+} openqueue_stats_t;
 //=========================== prototypes ======================================
 
 // admin
@@ -41,6 +46,9 @@ OpenQueueEntry_t*  openqueue_getFreeBigPacketBuffer(uint8_t creator);
 owerror_t          openqueue_freePacketBuffer(OpenQueueEntry_t* pkt);
 void               openqueue_removeAllCreatedBy(uint8_t creator);
 bool               openqueue_isHighPriorityEntryEnough(void);
+openqueue_stats_t  openqueue_get_stats(void);
+void  openqueue_reset_stats(void);
+
 // called by ICMPv6
 void               openqueue_updateNextHopPayload(open_addr_t* newNextHop);
 // called by res
