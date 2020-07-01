@@ -210,7 +210,7 @@ owerror_t oscore_protect_message(
     coap_options_encode(msg, incomingOptions, incomingOptionsLen, COAP_OPTION_CLASS_E);
 
     // encode CoAP code
-    packetfunctions_reserveHeaderSize(msg, 1);
+    packetfunctions_reserveHeader(&msg, 1);
     msg->payload[0] = *code;
 
     payload = &msg->payload[0];
