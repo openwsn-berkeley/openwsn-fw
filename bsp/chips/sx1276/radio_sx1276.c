@@ -268,13 +268,10 @@ void  sx1276Send(void){
 
     GPIOPinWrite(GPIO_A_BASE, GPIO_PIN_7, 0);
 
-    while(SX1276ReadTxDone()==0x08){
-        if(SX1276ReadTxDone()==0x00) break;
-    }
+    while( SX1276ReadTxDone() == 0 );
        
     GPIOPinWrite(GPIO_A_BASE, GPIO_PIN_7, 1);
     
-
     //STDBY mode 
     SX1276SetStby();
 }
@@ -312,11 +309,8 @@ uint8_t SX1276ReadTxDone(void){
     
     spi_tx_buffer[0]     = REG_LR_IRQFLAGS  & (~(1 << 7));
     spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
-    value = spi_tx_buffer[1];
+    return spi_rx_buffer[1] & (1<<3);
 
-    value |= (1 << 3);
-
-    return value;
 
     //if !( value & (1 << 3) )  return false;
     //else return true;
