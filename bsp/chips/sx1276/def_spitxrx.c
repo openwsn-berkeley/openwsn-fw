@@ -127,7 +127,7 @@ void spi_init(){
     
     
  //=========== Calling LoRa process transmission function ================
-    sx1276Send();
+    while(1) sx1276Send();
     
     
  //====================== End LoRa process ================================

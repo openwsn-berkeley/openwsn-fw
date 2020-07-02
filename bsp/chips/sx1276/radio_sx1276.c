@@ -18,6 +18,14 @@
 uint8_t  spi_tx_buffer[2];
 uint8_t  spi_rx_buffer[2];
 
+uint8_t lora_tx_buffer[2];
+uint8_t lora_rx_buffer[2];
+
+//static char lora_buffer[]="MessageToSend";
+
+
+// uint8_t *lora_buffer;
+// Declarer le lora buffer en externe
 
 /*!
  * \brief Sets the radio in SLEEP mode
@@ -101,10 +109,10 @@ void SX1276SetTxConfig(){
     SX1276SetChannel( 868000000 );
 
     //TX_OUTPUT_POWER max= +14dBm  --> 0
-    //MaxPower for exemple = 5 --> Pmax=10.8+0.6*MaxPower= 13.8 dB --> 101
+    //MaxPower for exemple = 7 --> Pmax=10.8+0.6*MaxPower= 15 dB --> 111
     //Output power :  15 - 15 --> 1111
     spi_tx_buffer[0]     = REG_LR_PACONFIG | (1 << 7);
-    spi_tx_buffer[1]     = 0x5F; //0b0100xxxx
+    spi_tx_buffer[1]     = 0x7F; //0111 1111
     spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
 
     //LORA_BANDWIDTH = 125 KHZ & CodingRate = 4/5
@@ -218,47 +226,29 @@ void SX1276SetChannel( uint32_t freq )
 }
 
 
- void sx1276WriteFifo(void){
+void SX1276WriteFifoBuffer(uint8_t addr){
 
     // FIFO operations can not take place in Sleep mode
     SX1276SetStby();
 
-    //SPI address pointer in FIFO data buffer
-    //SX1276Write( REG_LR_FIFOADDRPTR, 0 );
-    spi_tx_buffer[0]     = REG_LR_FIFOADDRPTR  | (1 << 7);
-    spi_tx_buffer[1]     = 0x00;
-    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
+    lora_tx_buffer[0]     = addr  | (1 << 7);
+    //lora_tx_buffer[1]     = (uint8_t)(lora_buffer); //lora_buffer;
+    lora_tx_buffer[1]  = 200;
+    spi_txrx(lora_tx_buffer, sizeof(lora_tx_buffer),SPI_FIRSTBYTE,lora_rx_buffer,sizeof(lora_rx_buffer),SPI_FIRST,SPI_LAST);
+}
 
-    //Write base address in FIFO data buffer for TX modulator
-    //SX1276Write( REG_LR_FIFOTXBASEADDR, 0 );
-    spi_tx_buffer[0]     = REG_LR_FIFOTXBASEADDR | (1 << 7);
-    spi_tx_buffer[1]     = 0x00;
-    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
 
- }
 
-void sx1276ReadFifo(void){
+void sx1276ReadFifoBuffer(uint8_t addr){
 
     // FIFO operations can not take place in Sleep mode
     SX1276SetStby();
 
-    // Read base address in FIFO data buffer for RX demodulator
-    spi_tx_buffer[0]     = REG_LR_FIFORXBASEADDR  & (~(1 << 7));
-    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
+    lora_tx_buffer[0]     = addr  | (~(1 << 7));
+    spi_txrx(lora_tx_buffer, sizeof(lora_tx_buffer),SPI_FIRSTBYTE,lora_rx_buffer,sizeof(lora_rx_buffer),SPI_FIRST,SPI_LAST);
 
 }
 
-/*void radio_getReceivedFrame_sx1276(
-    uint8_t* bufRead,
-    uint8_t* lenRead,
-    uint8_t  maxBufLen,
-    int8_t*  rssi,
-    uint8_t* lqi,
-    bool*    crc)
-{*
-
-
-}*/
 
 void  sx1276Send(void){
 
@@ -269,13 +259,21 @@ void  sx1276Send(void){
     SX1276SetTxConfig();
 
     //Write Data FIFO
-    sx1276WriteFifo();
+    SX1276WriteFifoBuffer(0);
 
     //TX Mode request
     SX1276SetTx();
 
     //IRQ TxDone Interrupt
-    SX1276OnDio0Irq();
+
+    GPIOPinWrite(GPIO_A_BASE, GPIO_PIN_7, 0);
+
+    while(SX1276ReadTxDone()==0x08){
+        if(SX1276ReadTxDone()==0x00) break;
+    }
+       
+    GPIOPinWrite(GPIO_A_BASE, GPIO_PIN_7, 1);
+    
 
     //STDBY mode 
     SX1276SetStby();
@@ -293,30 +291,79 @@ void sx1276Receive(void){
     SX1276SetRxSingle();
 
     //RxDone Interrupt
-    
+    //SX1276ReadClearRxDone();
 
     //CRC error interrupt
-
+    //SX1276ReadClearCrcError();
 
     //Read DATA
-    sx1276ReadFifo();
+    sx1276ReadFifoBuffer(0);
 
     //STDBY mode 
     SX1276SetStby();
 
 }
 
-void SX1276OnDio0Irq(void){
 
-    GPIOPinWrite(GPIO_A_BASE, GPIO_PIN_7, 0);
+//Txdone interrupt 
+uint8_t SX1276ReadTxDone(void){
 
-    spi_tx_buffer[0]     = REG_LR_IRQFLAGS | (1 << 7);
-    spi_tx_buffer[1]     = RFLR_IRQFLAGS_TXDONE ;
+    uint8_t value=0;
+    
+    spi_tx_buffer[0]     = REG_LR_IRQFLAGS  & (~(1 << 7));
     spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
+    value = spi_tx_buffer[1];
+
+    value |= (1 << 3);
+
+    return value;
+
+    //if !( value & (1 << 3) )  return false;
+    //else return true;
+
+}
+
+//RxDone interrupt 
+/*void  SX1276ReadClearRxDone(void){
+
+    uint8_t value=0;
+
+    GPIOPinWrite(GPIO_A_BASE, GPIO_PIN_7, 0); 
+
+    spi_tx_buffer[0]     = REG_LR_IRQFLAGS  & (~(1 << 7));
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
+    value = spi_tx_buffer[1];
+
+    value &= (1 << 6);
+
+    if !( value & (1 << 6) ){
+        while(1);
+    }
 
     GPIOPinWrite(GPIO_A_BASE, GPIO_PIN_7, 1);
 
 }
+
+//CRC error interrupt 
+void  SX1276ReadClearCrcError(void){
+
+    uint8_t value=0;
+
+    GPIOPinWrite(GPIO_A_BASE, GPIO_PIN_7, 0); 
+
+    spi_tx_buffer[0]     = REG_LR_IRQFLAGS  & (~(1 << 7));
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
+    value = spi_tx_buffer[1];
+
+    value &= (1 << 5);
+
+    if !( value & (1 << 5) ){
+        while(1);
+    }
+
+    GPIOPinWrite(GPIO_A_BASE, GPIO_PIN_7, 1);
+
+}*/
 
 /*void radio_setStartFrameCb_sx1276() {
     // will take care of it later
@@ -379,4 +426,28 @@ void radio_isr_internal_sx1276(void){
 void kick_scheduler_t_radio_isr_sx1276(void){
 
   //ignore this now
+}*/
+
+//SPI address pointer in FIFO data buffer
+    //SX1276Write( REG_LR_FIFOADDRPTR, 0 );
+    /*spi_tx_buffer[0]     = REG_LR_FIFOADDRPTR  | (1 << 7);
+    spi_tx_buffer[1]     = 0x00;
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
+
+    //Write base address in FIFO data buffer for TX modulator
+    //SX1276Write( REG_LR_FIFOTXBASEADDR, 0 );
+    spi_tx_buffer[0]     = REG_LR_FIFOTXBASEADDR | (1 << 7);
+    spi_tx_buffer[1]     = 0x00;
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);*/
+
+/*void radio_getReceivedFrame_sx1276(
+    uint8_t* bufRead,
+    uint8_t* lenRead,
+    uint8_t  maxBufLen,
+    int8_t*  rssi,
+    uint8_t* lqi,
+    bool*    crc)
+{*
+ 
+
 }*/
