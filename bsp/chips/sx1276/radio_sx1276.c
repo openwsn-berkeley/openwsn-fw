@@ -288,17 +288,25 @@ void sx1276Receive(void){
     SX1276SetRxSingle();
 
     //RxDone Interrupt
-    //SX1276ReadClearRxDone();
+    GPIOPinWrite(GPIO_A_BASE, GPIO_PIN_7, 0);
+
+    while( SX1276ReadRxDone() == 0 );
+       
+    GPIOPinWrite(GPIO_A_BASE, GPIO_PIN_7, 1);
 
     //CRC error interrupt
-    //SX1276ReadClearCrcError();
+    
+    GPIOPinWrite(GPIO_A_BASE, GPIO_PIN_7, 0);
 
+    while( SX1276ReadCrcError == 0 );
+       
+    GPIOPinWrite(GPIO_A_BASE, GPIO_PIN_7, 1);
+   
     //Read DATA
     sx1276ReadFifoBuffer(0);
 
     //STDBY mode 
     SX1276SetStby();
-
 }
 
 
@@ -318,46 +326,25 @@ uint8_t SX1276ReadTxDone(void){
 }
 
 //RxDone interrupt 
-/*void  SX1276ReadClearRxDone(void){
+void  SX1276ReadRxDone(void){
 
     uint8_t value=0;
-
-    GPIOPinWrite(GPIO_A_BASE, GPIO_PIN_7, 0); 
-
+    
     spi_tx_buffer[0]     = REG_LR_IRQFLAGS  & (~(1 << 7));
     spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
-    value = spi_tx_buffer[1];
-
-    value &= (1 << 6);
-
-    if !( value & (1 << 6) ){
-        while(1);
-    }
-
-    GPIOPinWrite(GPIO_A_BASE, GPIO_PIN_7, 1);
+    return spi_rx_buffer[1] & (1<<6);
 
 }
 
 //CRC error interrupt 
-void  SX1276ReadClearCrcError(void){
+void  SX1276ReadCrcError(void){
 
     uint8_t value=0;
-
-    GPIOPinWrite(GPIO_A_BASE, GPIO_PIN_7, 0); 
-
+    
     spi_tx_buffer[0]     = REG_LR_IRQFLAGS  & (~(1 << 7));
     spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
-    value = spi_tx_buffer[1];
-
-    value &= (1 << 5);
-
-    if !( value & (1 << 5) ){
-        while(1);
-    }
-
-    GPIOPinWrite(GPIO_A_BASE, GPIO_PIN_7, 1);
-
-}*/
+    return spi_rx_buffer[1] & (1<<5);
+}
 
 /*void radio_setStartFrameCb_sx1276() {
     // will take care of it later
