@@ -125,9 +125,10 @@ void spi_init(){
     SX1276SetRxContinuous();
     SX1276SetRxSingle();*/
     
-    
+    SX1276SetStby();
+    exercice();
  //=========== Calling LoRa process transmission function ================
-    while(1) sx1276Send();
+    //while(1) sx1276Send();
     
  //====================== End LoRa process ================================
 }

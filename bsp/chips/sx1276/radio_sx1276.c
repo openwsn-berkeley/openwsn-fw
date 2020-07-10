@@ -4,6 +4,7 @@
 #include <math.h>
 #include <string.h>
 #include "sx1276Regs-LoRa.h"
+#include "sx1276Regs-FSK.h"
 #include "def_spitxrx.h"
 #include "radio_sx1276.h"
 
@@ -32,7 +33,8 @@ uint8_t lora_rx_buffer[2];
  */
 void SX1276SetSleep( void ){
     spi_tx_buffer[0]     = REG_LR_OPMODE | (1 << 7);
-    spi_tx_buffer[1]     = 0x80;
+    //spi_tx_buffer[1]     = 0x80;
+    spi_tx_buffer[1]     =  RFLR_OPMODE_SLEEP;
     spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
 }
 
@@ -41,7 +43,8 @@ void SX1276SetSleep( void ){
  */
 void SX1276SetStby( void ){
     spi_tx_buffer[0]     = REG_LR_OPMODE | (1 << 7);
-    spi_tx_buffer[1]     = 0x81;
+    //spi_tx_buffer[1]     = 0x81;
+    spi_tx_buffer[1]     =  RFLR_OPMODE_STANDBY ;
     spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
 }
 
@@ -50,7 +53,8 @@ void SX1276SetStby( void ){
  */
 void SX1276SetFstx( void ){
     spi_tx_buffer[0]     = REG_LR_OPMODE | (1 << 7);
-    spi_tx_buffer[1]     = 0x82;
+    //spi_tx_buffer[1]     = 0x82;
+    spi_tx_buffer[1]     =  RFLR_OPMODE_SYNTHESIZER_TX ;
     spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
 }
 
@@ -60,7 +64,8 @@ void SX1276SetFstx( void ){
  */
 void SX1276SetTx( void ){
     spi_tx_buffer[0]     = REG_LR_OPMODE | (1 << 7);
-    spi_tx_buffer[1]     = 0x83;
+    //spi_tx_buffer[1]     = 0x83;
+    spi_tx_buffer[1]     =  RFLR_OPMODE_TRANSMITTER ;
     spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
 }
 
@@ -69,7 +74,8 @@ void SX1276SetTx( void ){
  */
 void SX1276SetFsrx( void ){
     spi_tx_buffer[0]     = REG_LR_OPMODE | (1 << 7);
-    spi_tx_buffer[1]     = 0x84;
+    //spi_tx_buffer[1]     = 0x84;
+    spi_tx_buffer[1]     =  RFLR_OPMODE_SYNTHESIZER_RX;
     spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
 }
 
@@ -78,7 +84,8 @@ void SX1276SetFsrx( void ){
  */
 void SX1276SetRxContinuous( void ){
     spi_tx_buffer[0]     = REG_LR_OPMODE | (1 << 7);
-    spi_tx_buffer[1]     = 0x85;
+    //spi_tx_buffer[1]     = 0x85;
+    spi_tx_buffer[1]     =  RFLR_OPMODE_RECEIVER ;
     spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
 }
 
@@ -87,7 +94,8 @@ void SX1276SetRxContinuous( void ){
  */
 void SX1276SetRxSingle( void ){
     spi_tx_buffer[0]     = REG_LR_OPMODE | (1 << 7);
-    spi_tx_buffer[1]     = 0x86;
+    //spi_tx_buffer[1]     = 0x86;
+    spi_tx_buffer[1]     =  RFLR_OPMODE_RECEIVER_SINGLE;
     spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
 }
 
@@ -96,7 +104,8 @@ void SX1276SetRxSingle( void ){
  */
 void SX1276SetCad( void ){
     spi_tx_buffer[0]     = REG_LR_OPMODE | (1 << 7);
-    spi_tx_buffer[1]     = 0x87;
+    //spi_tx_buffer[1]     = 0x87;
+    spi_tx_buffer[1]     =  RFLR_OPMODE_CAD ;
     spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
 }
 
@@ -225,8 +234,66 @@ void SX1276SetChannel( uint32_t freq )
 
 }
 
+void exercice(void){
 
-void SX1276WriteFifoBuffer(uint8_t addr){
+    spi_tx_buffer[0]     = REG_LR_FIFOADDRPTR   | (1 << 7);
+    spi_tx_buffer[1]     = 17;
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
+
+    spi_tx_buffer[0]     = REG_LR_FIFO    | (1 << 7);
+    spi_tx_buffer[1]     = 1;
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
+
+    spi_tx_buffer[0]     = REG_LR_FIFO    | (1 << 7);
+    spi_tx_buffer[1]     = 2;
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
+
+    spi_tx_buffer[0]     = REG_LR_FIFO    | (1 << 7);
+    spi_tx_buffer[1]     = 3;
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
+
+    spi_tx_buffer[0]     = REG_LR_FIFOADDRPTR   | (1 << 7);
+    spi_tx_buffer[1]     = 233;
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
+
+    spi_tx_buffer[0]     = REG_LR_FIFO    | (1 << 7);
+    spi_tx_buffer[1]     = 10;
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
+
+    spi_tx_buffer[0]     = REG_LR_FIFO    | (1 << 7);
+    spi_tx_buffer[1]     = 11;
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
+
+    spi_tx_buffer[0]     = REG_LR_FIFO    | (1 << 7);
+    spi_tx_buffer[1]     = 12;
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
+
+    spi_tx_buffer[0]     = REG_LR_FIFO    | (1 << 7);
+    spi_tx_buffer[1]     = 13;
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
+
+    spi_tx_buffer[0]     = REG_LR_FIFO    | (1 << 7);
+    spi_tx_buffer[1]     = 14;
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
+
+}
+
+void SX1276WriteFifoBuffer(uint8_t addr, uint8_t size){
+
+    //Initializes the payload size
+    spi_tx_buffer[0]     = REG_LR_PAYLOADLENGTH   | (1 << 7);
+    spi_tx_buffer[1]     = size;
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
+
+    // Full buffer used for Tx
+    spi_tx_buffer[0]     = REG_LR_FIFOTXBASEADDR   | (1 << 7);
+    spi_tx_buffer[1]     = 0;
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
+
+    spi_tx_buffer[0]     = REG_LR_FIFOADDRPTR   | (1 << 7);
+    spi_tx_buffer[1]     = 0;
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
+
 
     // FIFO operations can not take place in Sleep mode
     SX1276SetStby();
@@ -259,7 +326,7 @@ void  sx1276Send(void){
     SX1276SetTxConfig();
 
     //Write Data FIFO
-    SX1276WriteFifoBuffer(0);
+    //SX1276WriteFifoBuffer(0);
 
     //TX Mode request
     SX1276SetTx();
@@ -298,7 +365,7 @@ void sx1276Receive(void){
     
     GPIOPinWrite(GPIO_A_BASE, GPIO_PIN_7, 0);
 
-    while( SX1276ReadCrcError == 0 );
+    while( SX1276ReadCrcError() == 0 );
        
     GPIOPinWrite(GPIO_A_BASE, GPIO_PIN_7, 1);
    
@@ -313,11 +380,11 @@ void sx1276Receive(void){
 //Txdone interrupt 
 uint8_t SX1276ReadTxDone(void){
 
-    uint8_t value=0;
+    //uint8_t value=0;
     
     spi_tx_buffer[0]     = REG_LR_IRQFLAGS  & (~(1 << 7));
     spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
-    return spi_rx_buffer[1] & (1<<3);
+    return (spi_rx_buffer[1] & (1<<3));
 
 
     //if !( value & (1 << 3) )  return false;
@@ -326,9 +393,9 @@ uint8_t SX1276ReadTxDone(void){
 }
 
 //RxDone interrupt 
-void  SX1276ReadRxDone(void){
+uint8_t  SX1276ReadRxDone(void){
 
-    uint8_t value=0;
+    //uint8_t value=0;
     
     spi_tx_buffer[0]     = REG_LR_IRQFLAGS  & (~(1 << 7));
     spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
@@ -337,9 +404,9 @@ void  SX1276ReadRxDone(void){
 }
 
 //CRC error interrupt 
-void  SX1276ReadCrcError(void){
+uint8_t  SX1276ReadCrcError(void){
 
-    uint8_t value=0;
+    //uint8_t value=0;
     
     spi_tx_buffer[0]     = REG_LR_IRQFLAGS  & (~(1 << 7));
     spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
