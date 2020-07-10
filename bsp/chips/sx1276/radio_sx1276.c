@@ -235,7 +235,8 @@ void SX1276SetChannel( uint32_t freq )
 }
 
 void exercice(void){
-
+  
+    //writing from address 17 values 1 2 3 
     spi_tx_buffer[0]     = REG_LR_FIFOADDRPTR   | (1 << 7);
     spi_tx_buffer[1]     = 17;
     spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
@@ -251,7 +252,8 @@ void exercice(void){
     spi_tx_buffer[0]     = REG_LR_FIFO    | (1 << 7);
     spi_tx_buffer[1]     = 3;
     spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
-
+         
+    //writing from address 233 values 10 11 12 13 14
     spi_tx_buffer[0]     = REG_LR_FIFOADDRPTR   | (1 << 7);
     spi_tx_buffer[1]     = 233;
     spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
@@ -275,7 +277,28 @@ void exercice(void){
     spi_tx_buffer[0]     = REG_LR_FIFO    | (1 << 7);
     spi_tx_buffer[1]     = 14;
     spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
-
+    
+    
+    //reading from address 17 
+    spi_tx_buffer[0]     = REG_LR_FIFOADDRPTR   | (1 << 7);
+    spi_tx_buffer[1]     = 17;
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
+    
+    for (int i=0; i<3; i++){
+      spi_tx_buffer[0]     = REG_LR_FIFO    & ~(1 << 7);
+      spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
+    }
+    
+    //reading from address 233
+    spi_tx_buffer[0]     = REG_LR_FIFOADDRPTR   | (1 << 7);
+    spi_tx_buffer[1]     = 233;
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
+    
+    for (int i=0; i<3; i++){
+      spi_tx_buffer[0]     = REG_LR_FIFO    & ~(1 << 7);
+      spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
+    }
+    
 }
 
 void SX1276WriteFifoBuffer(uint8_t addr, uint8_t size){
