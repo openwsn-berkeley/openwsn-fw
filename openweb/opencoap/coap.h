@@ -45,7 +45,7 @@ static const uint8_t ipAddr_ringmaster[] = {0xbb, 0xbb, 0x00, 0x00, 0x00, 0x00, 
 
 #define OSCOAP_MASTER_SECRET_LEN       16
 
-#define OSCOAP_MAX_MASTER_SALT_LEN     0
+#define OSCORE_OPT_MAX_LEN             1 + 2 + 1 + OSCOAP_MAX_ID_LEN + OSCOAP_MAX_ID_LEN
 
 #define AES_CCM_16_64_128              10   // algorithm value as defined in COSE spec
 
@@ -106,6 +106,7 @@ typedef enum {
     COAP_OPTION_NUM_IFNONEMATCH = 5,
     COAP_OPTION_NUM_URIPORT = 7,
     COAP_OPTION_NUM_LOCATIONPATH = 8,
+    COAP_OPTION_NUM_OSCORE = 9,
     COAP_OPTION_NUM_URIPATH = 11,
     COAP_OPTION_NUM_CONTENTFORMAT = 12,
     COAP_OPTION_NUM_MAXAGE = 14,
@@ -114,7 +115,6 @@ typedef enum {
     COAP_OPTION_NUM_LOCATIONQUERY = 20,
     COAP_OPTION_NUM_PROXYURI = 35,
     COAP_OPTION_NUM_PROXYSCHEME = 39,
-    COAP_OPTION_NUM_OBJECTSECURITY = 21,
     COAP_OPTION_NUM_STATELESSPROXY = 40,
 } coap_option_t;
 
@@ -161,17 +161,18 @@ typedef struct {
 typedef struct {
     // common context
     uint8_t aeadAlgorithm;
+    uint8_t commonIV[AES_CCM_16_64_128_IV_LEN];
+    uint8_t idContext[OSCOAP_MAX_ID_LEN];
+    uint8_t idContextLen;
     // sender context 
     uint8_t senderID[OSCOAP_MAX_ID_LEN];
     uint8_t senderIDLen;
     uint8_t senderKey[AES_CCM_16_64_128_KEY_LEN];
-    uint8_t senderIV[AES_CCM_16_64_128_IV_LEN];
     uint16_t sequenceNumber;
     // recipient context
     uint8_t recipientID[OSCOAP_MAX_ID_LEN];
     uint8_t recipientIDLen;
     uint8_t recipientKey[AES_CCM_16_64_128_KEY_LEN];
-    uint8_t recipientIV[AES_CCM_16_64_128_IV_LEN];
     replay_window_t window;
 } oscore_security_context_t;
 

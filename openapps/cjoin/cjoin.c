@@ -94,24 +94,20 @@ void cjoin_init(void) {
 }
 
 void cjoin_init_security_context(void) {
-    uint8_t senderID[9];
-    uint8_t recipientID[9];
+    uint8_t idContext[8];
+    uint8_t recipientID[] = {0x4a, 0x52, 0x43};
     uint8_t *joinKey;
 
-    eui64_get(senderID);
-    senderID[8] = 0x00;      // EUI-64 || 0x00 [minimal-security-03]
-
-    eui64_get(recipientID);
-    recipientID[8] = 0x01;   // EUI-64 || 0x01 [minimal-security-03]
-
+    eui64_get(idContext);
     idmanager_getJoinKey(&joinKey);
 
-    // TODO Pass id_context to the routine
     oscore_init_security_context(&cjoin_vars.context,
-                                 senderID,
-                                 sizeof(senderID),
+                                 NULL,
+                                 0,
                                  recipientID,
                                  sizeof(recipientID),
+				 idContext,
+				 sizeof(idContext),
                                  joinKey,
                                  16,
                                  NULL,
@@ -274,14 +270,16 @@ owerror_t cjoin_sendJoinRequest(open_addr_t *joinProxy) {
     options[0].length = sizeof(jrcHostName) - 1;
     options[0].pValue = (uint8_t *) jrcHostName;
 
-    // location-path option
-    options[1].type = COAP_OPTION_NUM_URIPATH;
-    options[1].length = sizeof(cjoin_path0) - 1;
-    options[1].pValue = (uint8_t *) cjoin_path0;
-
     // object security option
-    // length and value are set by the CoAP library
-    options[2].type = COAP_OPTION_NUM_OBJECTSECURITY;
+    // length and value are overwritten by the CoAP library
+    options[1].type = COAP_OPTION_NUM_OSCORE;
+    options[1].length = OSCORE_OPT_MAX_LEN;
+    options[1].pValue = cjoin_vars.oscoreOptValue;
+
+    // location-path option
+    options[2].type = COAP_OPTION_NUM_URIPATH;
+    options[2].length = sizeof(cjoin_path0) - 1;
+    options[2].pValue = (uint8_t *) cjoin_path0;
 
     // ProxyScheme set to "coap"
     options[3].type = COAP_OPTION_NUM_PROXYSCHEME;
@@ -314,7 +312,7 @@ owerror_t cjoin_sendJoinRequest(open_addr_t *joinProxy) {
             pkt,
             COAP_TYPE_NON,
             COAP_CODE_REQ_POST,
-            0, // token len
+            1, // token len
             options,
             4, // options len
             &cjoin_vars.desc

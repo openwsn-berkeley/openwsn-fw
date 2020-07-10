@@ -118,6 +118,8 @@ void coap_receive(OpenQueueEntry_t *msg) {
     coap_option_iht *proxyScheme;
     coap_option_iht *statelessProxy;
     uint16_t rcvdSequenceNumber;
+    uint8_t *rcvdKidContext;
+    uint8_t rcvdKidContextLen;
     uint8_t *rcvdKid;
     uint8_t rcvdKidLen;
     oscore_security_context_t *blindContext;
@@ -200,7 +202,7 @@ void coap_receive(OpenQueueEntry_t *msg) {
 
 
     //== Object Security Option
-    option_count = coap_find_option(coap_incomingOptions, coap_incomingOptionsLen, COAP_OPTION_NUM_OBJECTSECURITY,
+    option_count = coap_find_option(coap_incomingOptions, coap_incomingOptionsLen, COAP_OPTION_NUM_OSCORE,
                                     &option_index);
     if (option_count >= 1) {
         objectSecurity = &coap_incomingOptions[option_index];
@@ -208,35 +210,20 @@ void coap_receive(OpenQueueEntry_t *msg) {
         objectSecurity = NULL;
     }
     if (objectSecurity) {
-        if ((objectSecurity->length == 0 && msg->length == 0) ||
-            (objectSecurity->length != 0 && msg->length != 0)) {
+        if (objectSecurity->length == 0 && msg->length == 0) {
             // malformated object security message
             return;
         }
 
-        if (objectSecurity->length == 0) {
-            index = oscore_parse_compressed_COSE(&msg->payload[0],
-                                                 msg->length,
-                                                 &rcvdSequenceNumber,
-                                                 &rcvdKid,
-                                                 &rcvdKidLen);
-            if (index == 0) {
-                return;
-            }
-            packetfunctions_tossHeader(&msg, index);
-        } else {
-            index = oscore_parse_compressed_COSE(objectSecurity->pValue,
-                                                 objectSecurity->length,
-                                                 &rcvdSequenceNumber,
-                                                 &rcvdKid,
-                                                 &rcvdKidLen);
-
-            if (index == 0) {
-                return;
-            }
-            objectSecurity->length -= index;
-            objectSecurity->pValue += index;
-        }
+        if (oscore_parse_compressed_COSE(objectSecurity->pValue,
+                                             objectSecurity->length,
+                                             &rcvdSequenceNumber,
+					     &rcvdKidContext,
+					     &rcvdKidContextLen,
+                                             &rcvdKid,
+         				     &rcvdKidLen) == E_FAIL) {
+            return;
+	}
     }
 
     //=== step 2. find the resource to handle the packet
@@ -255,7 +242,9 @@ void coap_receive(OpenQueueEntry_t *msg) {
             do {
                 if (temp_desc->securityContext != NULL &&
                     temp_desc->securityContext->recipientIDLen == rcvdKidLen &&
-                    memcmp(rcvdKid, temp_desc->securityContext->recipientID, rcvdKidLen) == 0) {
+                    memcmp(rcvdKid, temp_desc->securityContext->recipientID, rcvdKidLen) == 0 &&
+		    temp_desc->securityContext->idContextLen == rcvdKidContextLen &&
+		    memcmp(rcvdKidContext, temp_desc->securityContext->idContext, rcvdKidContextLen) == 0) {
 
                     blindContext = temp_desc->securityContext;
                     break;
@@ -267,7 +256,7 @@ void coap_receive(OpenQueueEntry_t *msg) {
                 coap_incomingOptionsLen = MAX_COAP_OPTIONS;
                 decStatus = oscore_unprotect_message(blindContext,
                                                      coap_header.Ver,
-                                                     coap_header.Code,
+                                                     &coap_header.Code,
                                                      coap_incomingOptions,
                                                      &coap_incomingOptionsLen,
                                                      msg,
@@ -387,7 +376,7 @@ void coap_receive(OpenQueueEntry_t *msg) {
                         coap_incomingOptionsLen = MAX_COAP_OPTIONS;
                         decStatus = oscore_unprotect_message(temp_desc->securityContext,
                                                              coap_header.Ver,
-                                                             coap_header.Code,
+                                                             &coap_header.Code,
                                                              coap_incomingOptions,
                                                              &coap_incomingOptionsLen,
                                                              msg,
@@ -430,7 +419,7 @@ void coap_receive(OpenQueueEntry_t *msg) {
         }
 
         if (temp_desc->securityContext != NULL) {
-            coap_outgoingOptions[coap_outgoingOptionsLen++].type = COAP_OPTION_NUM_OBJECTSECURITY;
+            coap_outgoingOptions[coap_outgoingOptionsLen++].type = COAP_OPTION_NUM_OSCORE;
             if (coap_outgoingOptionsLen > MAX_COAP_OPTIONS) {
                 securityReturnCode = COAP_CODE_RESP_SERVERERROR; // no space for object security option
             }
@@ -438,7 +427,7 @@ void coap_receive(OpenQueueEntry_t *msg) {
             encStatus = oscore_protect_message(
                     temp_desc->securityContext,
                     COAP_VERSION,
-                    coap_header.Code,
+                    &coap_header.Code,
                     coap_outgoingOptions,
                     coap_outgoingOptionsLen,
                     msg,
@@ -746,7 +735,7 @@ owerror_t coap_send(
         ret = oscore_protect_message(
                 descSender->securityContext,
                 COAP_VERSION,
-                code,
+                &code,
                 options,
                 optionsLen,
                 msg,
@@ -810,7 +799,7 @@ coap_option_class_t coap_get_option_class(coap_option_t type) {
         case COAP_OPTION_NUM_URIPORT:
         case COAP_OPTION_NUM_PROXYURI:
         case COAP_OPTION_NUM_PROXYSCHEME:
-        case COAP_OPTION_NUM_OBJECTSECURITY:
+        case COAP_OPTION_NUM_OSCORE:
             return COAP_OPTION_CLASS_U;
         default:
             return COAP_OPTION_CLASS_U;
