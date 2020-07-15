@@ -264,11 +264,10 @@ void exercice(void){
     spi_tx_buffer[5]     = 14;
     spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
     
-     
-    for (int i=0; i<9; i++){
-      spi_tx_buffer[0]     = REG_LR_FIFO    & ~(1 << 7);
-      spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
-    }
+    //Reading multiple bytes
+    spi_tx_buffer[0]     = REG_LR_FIFO    & ~(1 << 7);
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
+    
        
 }
 
