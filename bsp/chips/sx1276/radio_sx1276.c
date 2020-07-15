@@ -16,8 +16,8 @@
 
 //=========================== public ==========================================
 
-uint8_t  spi_tx_buffer[2];
-uint8_t  spi_rx_buffer[2];
+uint8_t  spi_tx_buffer[6];
+uint8_t  spi_rx_buffer[6];
 
 uint8_t lora_tx_buffer[2];
 uint8_t lora_rx_buffer[2];
@@ -231,7 +231,10 @@ void SX1276SetChannel( uint32_t freq )
     spi_tx_buffer[0]     = REG_LR_FRFLSB | (1 << 7);
     spi_tx_buffer[1]     = ( uint8_t )( freq & 0xFF );
     spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
-
+    
+        
+    spi_tx_buffer[0]     = REG_LR_FIFOADDRPTR     & ~(1 << 7);
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
 }
 
 void exercice(void){
@@ -243,62 +246,30 @@ void exercice(void){
 
     spi_tx_buffer[0]     = REG_LR_FIFO    | (1 << 7);
     spi_tx_buffer[1]     = 1;
+    spi_tx_buffer[2]     = 2;
+    spi_tx_buffer[3]     = 3;
     spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
 
-    spi_tx_buffer[0]     = REG_LR_FIFO    | (1 << 7);
-    spi_tx_buffer[1]     = 2;
-    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
-
-    spi_tx_buffer[0]     = REG_LR_FIFO    | (1 << 7);
-    spi_tx_buffer[1]     = 3;
-    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
-         
+        
     //writing from address 233 values 10 11 12 13 14
     spi_tx_buffer[0]     = REG_LR_FIFOADDRPTR   | (1 << 7);
     spi_tx_buffer[1]     = 233;
     spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
 
     spi_tx_buffer[0]     = REG_LR_FIFO    | (1 << 7);
-    spi_tx_buffer[1]     = 10;
-    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
-
-    spi_tx_buffer[0]     = REG_LR_FIFO    | (1 << 7);
-    spi_tx_buffer[1]     = 11;
-    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
-
-    spi_tx_buffer[0]     = REG_LR_FIFO    | (1 << 7);
-    spi_tx_buffer[1]     = 12;
-    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
-
-    spi_tx_buffer[0]     = REG_LR_FIFO    | (1 << 7);
-    spi_tx_buffer[1]     = 13;
-    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
-
-    spi_tx_buffer[0]     = REG_LR_FIFO    | (1 << 7);
-    spi_tx_buffer[1]     = 14;
+    spi_tx_buffer[1]     = 10;  
+    spi_tx_buffer[2]     = 11; 
+    spi_tx_buffer[3]     = 12;    
+    spi_tx_buffer[4]     = 13;
+    spi_tx_buffer[5]     = 14;
     spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
     
-    
-    //reading from address 17 
-    /*spi_tx_buffer[0]     = REG_LR_FIFOADDRPTR   | (1 << 7);
-    spi_tx_buffer[1]     = 17;
-    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);*/
-    
+     
     for (int i=0; i<9; i++){
       spi_tx_buffer[0]     = REG_LR_FIFO    & ~(1 << 7);
       spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
     }
-    
-    //reading from address 233
-    /*spi_tx_buffer[0]     = REG_LR_FIFOADDRPTR   | (1 << 7);
-    spi_tx_buffer[1]     = 233;
-    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
-    
-    for (int i=0; i<5; i++){
-      spi_tx_buffer[0]     = REG_LR_FIFO    & ~(1 << 7);
-      spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
-    }*/
-    
+       
 }
 
 void SX1276WriteFifoBuffer(uint8_t addr, uint8_t size){
