@@ -6,10 +6,6 @@
 #include "spi.h"
 #include "def_spitxrx.h"
 
-//regValueToWrite = REG_LR_OPMODE & NOT( ((1 << 0) | (1 << 1) | (1 << 2)) )
-//regValueToWrite = 0b10xx0000 == 0x80 -- SLEEP Mode
-//regValueToWrite = 0b10xx0001 == 0x81 -- STDBY Mode
-
 
 void sx1276_spiWriteReg(uint8_t reg, uint8_t regValueToWrite) {
 
