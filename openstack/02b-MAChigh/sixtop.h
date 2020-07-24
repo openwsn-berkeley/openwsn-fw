@@ -81,7 +81,9 @@ typedef enum {
 // >2^4*3*(101/9)*15=8080 (2^MAXEB * maxretries * (slotframe / numberOfsharedCellsFor6p)*slotlength) (ms))
 // on the receiver side of sixtop, it may has mutiple sixtop request in the queue to response (most of them will return with RC BUSY)
 // increase the timeout longer than calculated value
+#ifndef SIX2SIX_TIMEOUT_MS
 #define SIX2SIX_TIMEOUT_MS      65535
+#endif
 
 typedef uint8_t                 (*sixtop_sf_getsfid_cbt)(void);
 

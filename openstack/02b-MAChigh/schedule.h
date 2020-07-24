@@ -17,10 +17,15 @@
 
 The superframe reappears over time and can be arbitrarily long.
 */
+
+#ifndef SLOTFRAME_LENGTH
 #define SLOTFRAME_LENGTH    101 //should be 101
+#endif
 
 //draft-ietf-6tisch-minimal-06
+#ifndef SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS
 #define SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS                      1
+#endif
 #define SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET                        0
 #define SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET                     0
 #define SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE          0 //id of slotframe
@@ -37,7 +42,9 @@ The superframe reappears over time and can be arbitrarily long.
   for serial port to transmit data to dagroot.
 */
 
+#ifndef NUMSLOTSOFF
 #define NUMSLOTSOFF          20
+#endif
 
 /**
 \brief Maximum number of active slots in a superframe.
@@ -49,7 +56,9 @@ in that table; a slot is "active" when it is not of type CELLTYPE_OFF.
 Set this number to the exact number of active slots you are planning on having
 in your schedule, so not to waste RAM.
 */
+#ifndef MAXACTIVESLOTS
 #define MAXACTIVESLOTS       SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS+NUMSLOTSOFF
+#endif
 
 /**
 \brief Maximum number of alternative slots (more than one cells with same slotOffset)
@@ -59,8 +68,9 @@ Note that for each slot entry, it has a table of alternative slots. All
 those slots's next pointer is pointing to the same entries.
 
 */
-
+#ifndef MAXBACKUPSLOTS
 #define MAXBACKUPSLOTS   2
+#endif
 
 /**
 \brief Minimum backoff exponent.
