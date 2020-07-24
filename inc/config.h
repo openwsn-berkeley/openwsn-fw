@@ -16,8 +16,9 @@
  * - level 6: critical, error, success, warning, info, and verbose
  *
  */
-
+#ifndef OPENWSN_DEBUG_LEVEL
 #define OPENWSN_DEBUG_LEVEL         6
+#endif
 
 // ========================== Applications ==========================
 
@@ -221,11 +222,16 @@
  *  - OPENWSN_MAX_NUM_BIGPKTS: defines how many static buffer space will be allocated for processing large packets.
  *
  */
-
 // #define OPENWSN_6LO_FRAGMENTATION_C
-// #define OPENWSN_MAX_PKTSIZE_SUPPORTED   1320
-// #define OPENWSN_MAX_NUM_BIGPKTS         2
 
+#ifdef OPENWSN_6LO_FRAGMENTATION_C
+#ifndef OPENWSN_MAX_PKTSIZE_SUPPORTED
+#define OPENWSN_MAX_PKTSIZE_SUPPORTED   1320
+#endif
+#ifndef OPENWSN_MAX_NUM_BIGPKTS
+#define OPENWSN_MAX_NUM_BIGPKTS         2
+#endif
+#endif
 
 /**
  * \def OPENWSN_ADAPTIVE_MSF
@@ -279,7 +285,9 @@
  * When the channel is set to 0, frequency hopping is enabled, otherwise a single channel is used.
  *
  */
+#ifndef IEEE802154E_SINGLE_CHANNEL
 #define IEEE802154E_SINGLE_CHANNEL      11
+#endif
 
 /**
  * \def PACKETQUEUE_LENGTH
@@ -288,7 +296,9 @@
  * increase RAM usage.
  *
  */
+#ifndef PACKETQUEUE_LENGTH
 #define PACKETQUEUE_LENGTH              20
+#endif
 
 // ======================== Board configuration ========================
 

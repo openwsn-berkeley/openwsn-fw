@@ -13,10 +13,18 @@
 //=========================== define ==========================================
 
 #define MAXPREFERENCE             2
+#ifndef BADNEIGHBORMAXRSSI
 #define BADNEIGHBORMAXRSSI        -70 //dBm
+#endif
+#ifndef GOODNEIGHBORMINRSSI
 #define GOODNEIGHBORMINRSSI       -80 //dBm
+#endif
+#ifndef SWITCHSTABILITYTHRESHOLD
 #define SWITCHSTABILITYTHRESHOLD  3
+#endif
+#ifndef DEFAULTLINKCOST
 #define DEFAULTLINKCOST           4
+#endif
 #define MINIMAL_NUM_TX            16
 
 #define MAXDAGRANK                0xffff
