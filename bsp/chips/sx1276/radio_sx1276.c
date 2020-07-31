@@ -7,7 +7,7 @@
 #include "sx1276Regs-FSK.h"
 #include "def_spitxrx.h"
 #include "radio_sx1276.h"
-#include "sx1276.h"
+
 
 
 //=========================== defines =========================================
@@ -17,7 +17,8 @@
 
 //=========================== public ==========================================
 
-
+uint8_t spi_tx_buffer[2];
+uint8_t spi_rx_buffer[2];
 /*!
  * \brief Sets the radio in SLEEP mode
  */
@@ -170,29 +171,23 @@ void SX1276SetChannel( uint32_t freq )
 
 }
 
-/*
+
 void exercice(void){
+
+
+    uint8_t spi_tx_buffer[6];
+    uint8_t spi_rx_buffer[6];
   
     //writing from address 17 values 1 2 3 
-    /*spi_tx_buffer[0]     = REG_LR_FIFOADDRPTR   | (1 << 7);
-    spi_tx_buffer[1]     = 17;
-    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
-
     sx1276_spiWriteReg(REG_LR_FIFOADDRPTR , 17);
-
+ 
     spi_tx_buffer[0]     = REG_LR_FIFO    | (1 << 7);
     spi_tx_buffer[1]     = 1;
     spi_tx_buffer[2]     = 2;
     spi_tx_buffer[3]     = 3;
-    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
-
-    sx1276_spiWriteMultiplevalues(REG_LR_FRFLSB , ( uint8_t )( freq & 0xFF ));
+    spi_txrx(spi_tx_buffer, 4, SPI_FIRSTBYTE,spi_rx_buffer, 4, SPI_FIRST, SPI_LAST);
 
     //writing from address 233 values 10 11 12 13 14
-    /*spi_tx_buffer[0]     = REG_LR_FIFOADDRPTR   | (1 << 7);
-    spi_tx_buffer[1]     = 233;
-    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
-
     sx1276_spiWriteReg(REG_LR_FIFOADDRPTR, 233);
 
     spi_tx_buffer[0]     = REG_LR_FIFO    | (1 << 7);
@@ -203,21 +198,53 @@ void exercice(void){
     spi_tx_buffer[5]     = 14;
     spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
 
-    sx1276_spiWriteMultiplevalues(REG_LR_FRFLSB , ( uint8_t )( freq & 0xFF ));
-    
+ 
     //Reading multiple bytes
-    /*spi_tx_buffer[0]     = REG_LR_FIFO    & ~(1 << 7);
-    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
-
     sx1276_spiWriteReg(REG_LR_FIFOADDRPTR , 17);
-    //MultipleRegisters ????
     sx1276_spiReadReg(REG_LR_FIFO);
 
     sx1276_spiWriteReg(REG_LR_FIFOADDRPTR , 233);
     sx1276_spiReadReg(REG_LR_FIFO);
           
-}*/
+}
 
+
+void sx1276_spiWriteReg(uint8_t reg, uint8_t regValueToWrite) {
+
+    reg = reg | (1 << 7);
+    spi_tx_buffer[0]     = reg ;
+    spi_tx_buffer[1]     = regValueToWrite;
+
+
+    spi_txrx(
+        spi_tx_buffer,              // bufTx
+        sizeof(spi_tx_buffer),      // lenbufTx
+        SPI_FIRSTBYTE,              // returnType
+        spi_rx_buffer,              // bufRx
+        sizeof(spi_rx_buffer),      // maxLenBufRx
+        SPI_FIRST,                  // isFirst
+        SPI_LAST                    // isLast
+    );
+}
+
+
+uint8_t sx1276_spiReadReg(uint8_t reg) {
+
+    reg = reg & (~(1 << 7));
+
+    spi_tx_buffer[0]  = reg;
+
+    spi_txrx(
+        spi_tx_buffer,              // bufTx
+        sizeof(spi_tx_buffer),      // lenbufTx
+        SPI_BUFFER,                 // returnType
+        spi_rx_buffer,              // bufRx
+        sizeof(spi_rx_buffer),      // maxLenBufRx
+        SPI_FIRST,                  // isFirst
+        SPI_LAST                    // isLast
+    );
+    return spi_rx_buffer[1];
+}
 
 void SX1276WriteFifo(uint8_t size){
 

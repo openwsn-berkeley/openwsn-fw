@@ -27,6 +27,10 @@ void SX1276SetRxConfig();
 void SX1276SetChannel( uint32_t freq );
 
 //======== Radio FIFO buffer Write/Read ========
+
+void sx1276_spiWriteReg    (uint8_t reg, uint8_t regValueToWrite);
+uint8_t sx1276_spiReadReg  (uint8_t reg);
+
 void SX1276WriteFifo(uint8_t size);
 void SX1276WriteFifoBuffer(uint8_t buffer);
 uint8_t sx1276ReadFifoBuffer(void);
@@ -36,10 +40,7 @@ void sx1276Send(void);
 void sx1276Receive(void);
 
 //======== SX1276 callback functions =============
-//void exercice(void);
-/*!
- * \brief DIO 0 IRQ callback
- */
+void exercice(void);
 
 uint8_t SX1276ReadTxDone(void);
 uint8_t SX1276ReadRxDone(void);
