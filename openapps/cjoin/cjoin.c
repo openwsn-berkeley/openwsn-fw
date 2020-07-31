@@ -210,7 +210,7 @@ void cjoin_task_cb(void) {
     }
 
     // don't run if DAG root
-    if (idmanager_getIsDAGroot() == TRUE) {
+    if (idmanager_isPanCoordinator() == TRUE) {
         opentimers_destroy(cjoin_vars.timerId);
         return;
     }

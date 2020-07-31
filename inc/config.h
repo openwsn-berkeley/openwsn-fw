@@ -279,7 +279,8 @@
  * When the channel is set to 0, frequency hopping is enabled, otherwise a single channel is used.
  *
  */
-#define IEEE802154E_SINGLE_CHANNEL      11
+// #define IEEE802154E_SINGLE_CHANNEL      11
+
 
 /**
  * \def PACKETQUEUE_LENGTH
@@ -289,6 +290,18 @@
  *
  */
 #define PACKETQUEUE_LENGTH              20
+
+
+/**
+ * \def ROLE_DEFAULT
+ *
+ * Includes the sensor driver
+ *
+ */
+#ifndef ROLE_DEFAULT
+#define ROLE_DEFAULT    ROLE_COORDINATOR
+#endif
+
 
 // ======================== Board configuration ========================
 

@@ -20,7 +20,7 @@ def buf2hex(buf):
 
 class moteProbe(threading.Thread):
     
-    CMD_SET_DAGROOT = '7e5259bbbb0000000000000c347e'
+    CMD_SET_PAN_COORDINATOR = '7e5259bbbb0000000000000c347e'
     
     XOFF           = 0x13
     XON            = 0x11
@@ -41,7 +41,7 @@ class moteProbe(threading.Thread):
         self.busyReceiving        = False
         self.inputBuf             = ''
         self.last_counter         = None
-        self.outputBuf            = [binascii.unhexlify(self.CMD_SET_DAGROOT)]
+        self.outputBuf            = [binascii.unhexlify(self.CMD_SET_PAN_COORDINATOR)]
         self.outputBufLock        = threading.RLock()
         self.dataLock             = threading.Lock()
         

@@ -211,7 +211,7 @@ enum {
    ERR_RCVD_ECHO_REPLY                 = 0x0b, // received an echo reply
    ERR_6LORH_DEADLINE_EXPIRED          = 0x0c, // the received packet has expired
    ERR_6LORH_DEADLINE_DROPPED          = 0x0d, // packet expiry time reached, dropped
-   ERR_UNEXPECTED_DAO                  = 0x0e, // unexpected DAO (code location {0}). A change maybe happened on dagroot node.
+   ERR_UNEXPECTED_DAO                  = 0x0e, // unexpected DAO (code location {0}). A change maybe happened on PAN coordinator node.
    ERR_UNSUPPORTED_ICMPV6_TYPE         = 0x0f, // unsupported ICMPv6 type {0} (code location {1})
    ERR_6LOWPAN_UNSUPPORTED             = 0x10, // unsupported 6LoWPAN parameter {1} at location {0}, dropping packet
    ERR_NO_NEXTHOP                      = 0x11, // no next hop for layer 3 destination {0:x}{1:x}

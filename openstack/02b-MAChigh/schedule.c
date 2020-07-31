@@ -46,15 +46,15 @@ void schedule_init(void) {
     schedule_vars.backoffExponenton = MINBE - 1;
     schedule_vars.maxActiveSlots = MAXACTIVESLOTS;
 
-    if (idmanager_getIsDAGroot() == TRUE) {
-        schedule_startDAGroot();
+     if (idmanager_isPanCoordinator() == TRUE) {
+        schedule_startPanCoordinator();
     }
 }
 
 /**
-\brief Starting the DAGroot schedule propagation.
+\brief Starting the PAN Coordinator schedule propagation.
 */
-void schedule_startDAGroot(void) {
+void schedule_startPanCoordinator(void) {
     slotOffset_t start_slotOffset;
     slotOffset_t running_slotOffset;
     open_addr_t temp_neighbor;

@@ -43,4 +43,4 @@ in schedule.h file, such as:
 
 Test
 -------------------------------------------------------------------------------
-With those changes, you should be able to have one OpenMote acting as dagroot (set through OV), one SCuM acting as a child of dagroot. They are communicating on channel 11 with 6TiSCH protocol. When receiving the DAO from SCuM, you should be able to ping SCuM.
+With those changes, you should be able to have one OpenMote acting as PAN coordinator (set through OV), one SCuM acting as a child of PAN coordinator. They are communicating on channel 11 with 6TiSCH protocol. When receiving the DAO from SCuM, you should be able to ping SCuM.

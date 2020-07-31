@@ -44,7 +44,7 @@ void c6t_sendDone(
 //=========================== public ==========================================
 
 void c6t_init(void) {
-    if (idmanager_getIsDAGroot() == TRUE) return;
+    if (idmanager_isPanCoordinator() == TRUE) return;
 
     // prepare the resource descriptor for the /6t path
     c6t_vars.desc.path0len = sizeof(c6t_path0) - 1;

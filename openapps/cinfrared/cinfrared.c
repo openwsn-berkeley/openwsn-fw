@@ -44,7 +44,7 @@ void cinrared_turnOnOrOff(uint8_t turnOnOrOff);
 //=========================== public ==========================================
 
 void cinfrared_init(void) {
-    if (idmanager_getIsDAGroot() == TRUE) return;
+    if (idmanager_isPanCoordinator() == TRUE) return;
 
     // prepare the resource descriptor for the /6t path
     cinfrared_vars.desc.path0len = sizeof(cinfrared_path0) - 1;

@@ -317,7 +317,7 @@ void frag_receive(OpenQueueEntry_t *msg) {
             return;
         }
 
-        if (idmanager_getIsDAGroot() == TRUE) {
+        if (idmanager_isPanCoordinator() == TRUE) {
             openbridge_receive(msg);
             return;
         } else {
@@ -353,7 +353,7 @@ void frag_receive(OpenQueueEntry_t *msg) {
             return;
         }
 
-        if (idmanager_getIsDAGroot() == TRUE) {
+        if (idmanager_isPanCoordinator() == TRUE) {
             openbridge_receive(msg);
         } else {
             packetfunctions_tossHeader(&msg, FRAGN_HEADER_SIZE);

@@ -34,7 +34,7 @@ The superframe reappears over time and can be arbitrarily long.
         MAXACTIVESLOTS < SLOTFRAME_LENGTH
 
   This would make sure number of slots are available (SLOTFRAME_LENGTH-MAXACTIVESLOTS)
-  for serial port to transmit data to dagroot.
+  for serial port to transmit data to PAN coordinator.
 */
 
 #define NUMSLOTSOFF          20
@@ -175,7 +175,7 @@ typedef struct {
 // admin
 void schedule_init(void);
 
-void schedule_startDAGroot(void);
+void schedule_startPanCoordinator(void);
 
 bool debugPrint_schedule(void);
 
