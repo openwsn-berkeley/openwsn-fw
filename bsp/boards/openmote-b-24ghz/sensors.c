@@ -60,7 +60,7 @@ bool sensors_is_present(uint8_t sensorType) {
 */
 callbackRead_cbt sensors_getCallbackRead(uint8_t sensorType) {
 
-   switch (sensorType) {
+    switch (sensorType) {
         case SENSOR_TEMPERATURE:
             return &si70x_read_temperature;
         case SENSOR_HUMIDITY:
@@ -69,7 +69,7 @@ callbackRead_cbt sensors_getCallbackRead(uint8_t sensorType) {
             return &adc_sens_read_temperature;
         default:
             return NULL;
-   }
+    }
 
 }
 
@@ -80,7 +80,7 @@ callbackRead_cbt sensors_getCallbackRead(uint8_t sensorType) {
 */
 callbackConvert_cbt sensors_getCallbackConvert(uint8_t sensorType) {
 
-   switch (sensorType) {
+    switch (sensorType) {
         case SENSOR_TEMPERATURE:
             return &si70x_convert_temperature;
         case SENSOR_HUMIDITY:
@@ -89,7 +89,7 @@ callbackConvert_cbt sensors_getCallbackConvert(uint8_t sensorType) {
             return &adc_sens_convert_temperature;
         default:
             return NULL;
-   }
+    }
 
 }
 
