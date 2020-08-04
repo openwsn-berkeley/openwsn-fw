@@ -1,11 +1,15 @@
 import os
-import sys
 import platform
+import sys
+
+import colorama as c
 import SCons
 
-#============================ banner ==========================================
+c.init()
 
-banner  = []
+# ============================ banner ==========================================
+
+banner = []
 banner += [""]
 banner += [" ___                 _ _ _  ___  _ _ "]
 banner += ["| . | ___  ___ ._ _ | | | |/ __>| \ |"]
@@ -13,10 +17,10 @@ banner += ["| | || . \/ ._>| ' || | | |\__ \|   |"]
 banner += ["`___'|  _/\___.|_|_||__/_/ <___/|_\_|"]
 banner += ["     |_|                  openwsn.org"]
 banner += [""]
-banner  = '\n'.join(banner)
+banner = '\n'.join(banner)
 print banner
 
-#===== help text
+# ===== help text
 
 Help('''
 Usage:
@@ -74,18 +78,7 @@ project:
                    cannot send commands to the mote (e.g. IoT-LAB platform), 
                    use this flag to build a firmware image which is, by 
                    default, in DAG root mode.
-    forcetopology  Force the topology to the one indicated in the
-                   openstack/02a-MAClow/topology.c file.
-    noadaptivesync Do not use adaptive synchronization.
-    l2_security   Use hop-by-hop encryption and authentication.
-                  0 (off), 1 (on)
-    msf_adapting_to_traffic enable/disable MSF for adding/deleting cell to adapt to traffic
-                  0 (disable), 1 (enable)
-    printf        Sends the string messages to openvisualizer  
-                  0 (off ), 1 (on, default)
     ide           qtcreator
-    fix_channel   Set single channel hopping for debugging
-                  0 (off, default), i (on, channel=i [11:26])
 
     Common variables:
     verbose        Print each complete compile/link command.
@@ -99,11 +92,11 @@ help-option:
                  scons scommand.
 '''.format(os.sep))
 
-#============================ options =========================================
+# ============================ options =========================================
 
 # first value is default
 command_line_options = {
-    'board':       [
+    'board': [
         # MSP430
         'telosb',
         'gina',
@@ -128,7 +121,7 @@ command_line_options = {
         # misc.
         'python',
     ],
-    'toolchain':   [
+    'toolchain': [
         'mspgcc',
         'iar',
         'iar-proj',
@@ -139,416 +132,238 @@ command_line_options = {
         'openos',
         'freertos',
     ],
-    'fet_version':              ['2','3'],
-    'verbose':                  ['0','1'],
-    'fastsim':                  ['1','0'],
-    'simhost':                  ['amd64-linux','x86-linux','amd64-windows','x86-windows'],
-    'simhostpy':                [''],                               # No reasonable default
-    'panid':                    [''],
-    'dagroot':                  ['0','1'],
-    'forcetopology':            ['0','1'],
-    'debug':                    ['0','1'],
-    'atmel_24ghz':              ['0','1'],
-    'noadaptivesync':           ['0','1'],
-    'l2_security':              ['0','1'],
-    'fix_channel':              ['0'] + map(str, range(11, 27)),
-    'msf_adapting_to_traffic':  ['0','1'],
-    'printf':                   ['1','0'],          # 1=on (default),  0=off
-    'deadline_option':          ['0','1'],
-    'ide':                      ['none','qtcreator'],
-    'revision':                 ['']
+    'fet_version': ['2', '3'],
+    'verbose': ['0', '1'],
+    'fastsim': ['0', '1'],
+    'simhost': ['amd64-linux', 'x86-linux', 'amd64-windows', 'x86-windows'],
+    'simhostpy': [''],  # No reasonable default
+    'panid': [''],
+    'dagroot': ['0', '1'],
+    'debug': ['0', '1'],
+    'atmel_24ghz': ['0', '1'],
+    'deadline_option': ['0', '1'],
+    'ide': ['none', 'qtcreator'],
+    'revision': ['']
 }
+
 
 def validate_option(key, value, env):
     if key not in command_line_options:
-        raise ValueError("Unknown switch {0}.".format(key))
+        print c.Fore.RED + "Unknown switch {0}.".format(key) + c.Fore.RESET
+        Exit(-1)
     if value not in command_line_options[key]:
-        raise ValueError("Unknown {0} \"{1}\". Options are {2}.\n\n".format(key,value,','.join(command_line_options[key])))
+        print c.Fore.RED + "Unknown {0} \"{1}\". Options are {2}.\n\n".format(key, value, ','.join(
+            command_line_options[key])) + c.Fore.RESET
+        Exit(-1)
 
-def validate_apps(key, value, env):
-    assert key=='apps'
-    if not value.strip():
-        return
-    requestedApps = value.split(',')
-    availableApps = [f for f in os.listdir('openapps') if not os.path.isfile(os.path.join('openapps',f))]
-    unknownApps   = list(set(requestedApps) - set(availableApps))
-    
-    if unknownApps:
-        raise ValueError(
-            "Unknown app(s) {0}. Available apps are {1}.\n\n".format(
-                ','.join(unknownApps),
-                ','.join(availableApps),
-            )
-        )
 
 # Define default value for simhost option
-if os.name=='nt':
+if os.name == 'nt':
     defaultHost = 2
 else:
-    defaultHost = 0 if platform.architecture()[0]=='64bit' else 1
+    defaultHost = 0 if platform.architecture()[0] == '64bit' else 1
 
 command_line_vars = Variables()
 command_line_vars.AddVariables(
     (
-        'board',                                           # key
-        '',                                                # help
-        command_line_options['board'][0],                  # default
-        validate_option,                                   # validator
-        None,                                              # converter
+        'board',  # key
+        '',  # help
+        command_line_options['board'][0],  # default
+        validate_option,  # validator
+        None,  # converter
     ),
     (
-        'toolchain',                                       # key
-        '',                                                # help
-        command_line_options['toolchain'][0],              # default
-        validate_option,                                   # validator
-        None,                                              # converter
+        'toolchain',  # key
+        '',  # help
+        command_line_options['toolchain'][0],  # default
+        validate_option,  # validator
+        None,  # converter
     ),
     (
-        'kernel',                                          # key
-        '',                                                # help
-        command_line_options['kernel'][0],                 # default
-        validate_option,                                   # validator
-        None,                                              # converter
+        'kernel',  # key
+        '',  # help
+        command_line_options['kernel'][0],  # default
+        validate_option,  # validator
+        None,  # converter
     ),
     (
-        'jtag',                                            # key
-        '',                                                # help
-        '',                                                # default
-        None,                                              # validator
-        None,                                              # converter
+        'jtag',  # key
+        '',  # help
+        '',  # default
+        None,  # validator
+        None,  # converter
     ),
     (
-        'fet_version',                                     # key
-        '',                                                # help
-        command_line_options['fet_version'][0],            # default
-        validate_option,                                   # validator
-        int,                                               # converter
+        'fet_version',  # key
+        '',  # help
+        command_line_options['fet_version'][0],  # default
+        validate_option,  # validator
+        int,  # converter
     ),
     (
-        'bootload',                                        # key
-        '',                                                # help
-        '',                                                # default
-        None,                                              # validator
-        None,                                              # converter
+        'bootload',  # key
+        '',  # help
+        '',  # default
+        None,  # validator
+        None,  # converter
     ),
     (
-        'verbose',                                         # key
-        '',                                                # help
-        command_line_options['verbose'][0],                # default
-        validate_option,                                   # validator
-        int,                                               # converter
+        'verbose',  # key
+        '',  # help
+        command_line_options['verbose'][0],  # default
+        validate_option,  # validator
+        int,  # converter
     ),
     (
-        'fastsim',                                         # key
-        '',                                                # help
-        command_line_options['fastsim'][0],                # default
-        validate_option,                                   # validator
-        int,                                               # converter
+        'fastsim',  # key
+        '',  # help
+        command_line_options['fastsim'][1],  # default
+        validate_option,  # validator
+        int,  # converter
     ),
     (
-        'simhost',                                         # key
-        '',                                                # help
-        command_line_options['simhost'][defaultHost],      # default
-        validate_option,                                   # validator
-        None,                                              # converter
+        'simhost',  # key
+        '',  # help
+        command_line_options['simhost'][defaultHost],  # default
+        validate_option,  # validator
+        None,  # converter
     ),
     (
-        'simhostpy',                                       # key
-        '',                                                # help
-        command_line_options['simhostpy'][0],              # default
-        None,                                              # validator
-        None,                                              # converter
+        'simhostpy',  # key
+        '',  # help
+        command_line_options['simhostpy'][0],  # default
+        None,  # validator
+        None,  # converter
     ),
     (
-        'panid',                                           # key
-        '0xFFFF',                                          # help
-        command_line_options['panid'][0],                  # default
-        None,                                              # validator
-        None,                                              # converter
+        'panid',  # key
+        '0xFFFF',  # help
+        command_line_options['panid'][0],  # default
+        None,  # validator
+        None,  # converter
     ),
     (
-        'dagroot',                                         # key
-        '',                                                # help
-        command_line_options['dagroot'][0],                # default
-        validate_option,                                   # validator
-        int,                                               # converter
+        'dagroot',  # key
+        '',  # help
+        command_line_options['dagroot'][0],  # default
+        validate_option,  # validator
+        int,  # converter
     ),
     (
-        'forcetopology',                                   # key
-        '',                                                # help
-        command_line_options['forcetopology'][0],          # default
-        validate_option,                                   # validator
-        int,                                               # converter
+        'debug',  # key
+        '',  # help
+        command_line_options['debug'][0],  # default
+        validate_option,  # validator
+        int,  # converter
     ),
     (
-        'debug',                                           # key
-        '',                                                # help
-        command_line_options['debug'][0],                  # default
-        validate_option,                                   # validator
-        int,                                               # converter
+        'atmel_24ghz',  # key
+        '',  # help
+        command_line_options['atmel_24ghz'][0],  # default
+        validate_option,  # validator
+        int,  # converter
     ),
     (
-        'atmel_24ghz',                                     # key
-        '',                                                # help
-        command_line_options['atmel_24ghz'][0],            # default
-        validate_option,                                   # validator
-        int,                                               # converter
+        'deadline_option',  # key
+        '',  # help
+        command_line_options['deadline_option'][0],  # default
+        validate_option,  # validator
+        int,  # converter
     ),
     (
-        'noadaptivesync',                                  # key
-        '',                                                # help
-        command_line_options['noadaptivesync'][0],         # default
-        validate_option,                                   # validator
-        int,                                               # converter
+        'ide',  # key
+        'qtcreator by now',  # help
+        command_line_options['ide'][0],  # default
+        validate_option,  # validator
+        None,  # converter
     ),
     (
-        'l2_security',                                     # key
-        '',                                                # help
-        command_line_options['l2_security'][0],            # default
-        validate_option,                                   # validator
-        int,                                               # converter
-    ),
-    (
-        'fix_channel',                                     # key
-        '',                                                # help
-        command_line_options['fix_channel'][0],            # default
-        validate_option,                                   # validator
-        int,                                               # converter
-    ),
-    (
-        'msf_adapting_to_traffic',                         # key
-        '',                                                # help
-        command_line_options['msf_adapting_to_traffic'][1],# default
-        validate_option,                                   # validator
-        int,                                               # converter
-    ),
-    (
-        'toolchain',                                       # key
-        '',                                                # help
-        command_line_options['toolchain'][0],              # default
-        validate_option,                                   # validator
-        None,                                              # converter
-    ),
-    (
-        'kernel',                                          # key
-        '',                                                # help
-        command_line_options['kernel'][0],                 # default
-        validate_option,                                   # validator
-        None,                                              # converter
-    ),
-    (
-        'jtag',                                            # key
-        '',                                                # help
-        '',                                                # default
-        None,                                              # validator
-        None,                                              # converter
-    ),
-    (
-        'fet_version',                                     # key
-        '',                                                # help
-        command_line_options['fet_version'][0],            # default
-        validate_option,                                   # validator
-        int,                                               # converter
-    ),
-    (
-        'bootload',                                        # key
-        '',                                                # help
-        '',                                                # default
-        None,                                              # validator
-        None,                                              # converter
-    ),
-    (
-        'verbose',                                         # key
-        '',                                                # help
-        command_line_options['verbose'][0],                # default
-        validate_option,                                   # validator
-        int,                                               # converter
-    ),
-    (
-        'fastsim',                                         # key
-        '',                                                # help
-        command_line_options['fastsim'][0],                # default
-        validate_option,                                   # validator
-        int,                                               # converter
-    ),
-    (
-        'simhost',                                         # key
-        '',                                                # help
-        command_line_options['simhost'][defaultHost],      # default
-        validate_option,                                   # validator
-        None,                                              # converter
-    ),
-    (
-        'simhostpy',                                       # key
-        '',                                                # help
-        command_line_options['simhostpy'][0],              # default
-        None,                                              # validator
-        None,                                              # converter
-    ),
-    (
-        'panid',                                           # key
-        '0xFFFF',                                          # help
-        command_line_options['panid'][0],                  # default
-        None,                                              # validator
-        None,                                              # converter
-    ),
-    (
-        'dagroot',                                         # key
-        '',                                                # help
-        command_line_options['dagroot'][0],                # default
-        validate_option,                                   # validator
-        int,                                               # converter
-    ),
-    (
-        'forcetopology',                                   # key
-        '',                                                # help
-        command_line_options['forcetopology'][0],          # default
-        validate_option,                                   # validator
-        int,                                               # converter
-    ),
-    (
-        'debug',                                           # key
-        '',                                                # help
-        command_line_options['debug'][0],                  # default
-        validate_option,                                   # validator
-        int,                                               # converter
-    ),
-    (
-        'noadaptivesync',                                  # key
-        '',                                                # help
-        command_line_options['noadaptivesync'][0],         # default
-        validate_option,                                   # validator
-        int,                                               # converter
-    ),
-    (
-        'l2_security',                                     # key
-        '',                                                # help
-        command_line_options['l2_security'][0],            # default
-        validate_option,                                   # validator
-        int,                                               # converter
-    ),
-    (
-        'printf',                                          # key
-        '',                                                # help
-        command_line_options['printf'][0],                 # default
-        validate_option,                                   # validator
-        int,                                               # converter
-    ),
-    (
-        'deadline_option',                                     # key
-        '',                                                # help
-        command_line_options['deadline_option'][1],            # default
-        validate_option,                                   # validator
-        int,                                               # converter
-    ),
-    (
-        'apps',                                            # key
-        'comma-separated list of user applications',       # help
-        '',                                                # default
-        validate_apps,                                     # validator
-        None,                                              # converter
-    ),
-    (
-        'ide',                                             # key
-        'qtcreator by now',                                # help
-        command_line_options['ide'][0],                    # default
-        validate_option,                                   # validator
-        None,                                              # converter
-    ),
-    (
-        'revision',                                        # key
-        'board revision',                                  # help
-        command_line_options['revision'][0],               # default
-        None,                                              # validator
-        None,                                              # converter
+        'revision',  # key
+        'board revision',  # help
+        command_line_options['revision'][0],  # default
+        None,  # validator
+        None,  # converter
     ),
 )
 
-if os.name=='nt':
+if os.name == 'nt':
     env = Environment(
-        tools     = ['mingw'],
-        variables = command_line_vars
+        tools=['mingw'],
+        variables=command_line_vars
     )
 else:
     simhost = ARGUMENTS.get('simhost', 'none')
-    board   = ARGUMENTS.get('board', 'none')
-    if board=='python' and simhost.endswith('-windows'):
+    board = ARGUMENTS.get('board', 'none')
+    if board == 'python' and simhost.endswith('-windows'):
         # Cross-compile for simulation on Windows
         env = Environment(
             # crossMingw64 requires 'mingw_prefer_amd64' key
-            tools              = ['crossMingw64'],
-            mingw_prefer_amd64 = simhost.startswith('amd64-'),
-            variables          = command_line_vars
+            tools=['crossMingw64'],
+            mingw_prefer_amd64=simhost.startswith('amd64-'),
+            variables=command_line_vars
         )
     else:
-        env = Environment(
-            variables = command_line_vars
-        )
+        env = Environment(variables=command_line_vars)
 
-def default(env,target,source): print SCons.Script.help_text
+
+def default(env, target, source):
+    print SCons.Script.help_text
+
+
 Default(env.Command('default', None, default))
 
-#============================ verbose =========================================
+# ============================ verbose =========================================
 
 if not env['verbose']:
-   env[    'CCCOMSTR']  = "Compiling          $TARGET"
-   env[  'SHCCCOMSTR']  = "Compiling (shared) $TARGET"
-   env[    'ARCOMSTR']  = "Archiving          $TARGET"
-   env['RANLIBCOMSTR']  = "Indexing           $TARGET"
-   env[  'LINKCOMSTR']  = "Linking            $TARGET"
-   env['SHLINKCOMSTR']  = "Linking (shared)   $TARGET"
+    env['CCCOMSTR'] = "Compiling          $TARGET"
+    env['SHCCCOMSTR'] = "Compiling (shared) $TARGET"
+    env['ARCOMSTR'] = "Archiving          $TARGET"
+    env['RANLIBCOMSTR'] = "Indexing           $TARGET"
+    env['LINKCOMSTR'] = "Linking            $TARGET"
+    env['SHLINKCOMSTR'] = "Linking (shared)   $TARGET"
 
-#============================ load SConscript's ===============================
+# ============================ load SConscript's ===============================
 
-# initialize targets
-env['targets'] = {
-   'all':     [],
-   'all_std': [],
-   'all_bsp': [],
-   'all_drv': [],
-   'all_oos': [],
-}
+# Initialize targets
+env['targets'] = {'all': [], 'all_std': [], 'all_bsp': [], 'all_drv': [], 'all_oos': []}
 
-# include docs SConscript
-env.SConscript(
-    os.path.join('docs','SConscript'),
-    exports = ['env'],
-)
+# Include docs SConscript
+env.SConscript(os.path.join('docs', 'SConscript'), exports=['env'])
 
-# include main SConscript
-# which will discover targets for this board/toolchain
-env.SConscript(
-    'SConscript',
-    exports = ['env'],
-)
+# Include main SConscript which will discover targets for this board/toolchain
+env.SConscript('SConscript', exports=['env'])
 
 # declare target group alias
-for k,v in env['targets'].items():
-   Alias(k,v)
+for k, v in env['targets'].items():
+    Alias(k, v)
 
-#============================ admin targets ===================================
+# ============================ admin targets ===================================
 
-#===== list
+# ===== list
 
-def listFunction(env,target,source):
-    output  = []
+def list_function(env, target, source):
+    output = []
     output += ['\n']
-    output += ['Avaiable targets for board={0} toolchain={1}'.format(env['board'],env['toolchain'])]
+    output += ['Available targets for board={0} toolchain={1}'.format(env['board'], env['toolchain'])]
     output += ['\n']
-    for k,v in env['targets'].items():
+    for k, v in env['targets'].items():
         output += [' - {0}'.format(k)]
         for t in v:
             output += ['    - {0}'.format(t)]
     output = '\n'.join(output)
     print output
-list = env.Command('list', None, listFunction)
-AlwaysBuild(list)
-Alias('list',list)
 
-#===== env
 
-def envFunction(env,target,source):
+list_output = env.Command('list', None, list_function)
+AlwaysBuild(list_output)
+Alias('list', list_output)
+
+
+# ===== env
+
+def env_function(env, target, source):
     print env.Dump()
-envCommand = env.Command('env', None, envFunction)
-AlwaysBuild(envCommand)
-Alias('env',envCommand)
+
+env_command = env.Command('env', None, env_function)
+AlwaysBuild(env_command)
+Alias('env', env_command)

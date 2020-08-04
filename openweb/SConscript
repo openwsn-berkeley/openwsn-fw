@@ -1,0 +1,69 @@
+import os
+
+Import('env')
+
+localEnv = env.Clone()
+
+target = 'libopenweb'
+sources_c = [
+    "openweb.c",
+    # ==== opencoap
+    os.path.join("opencoap", "cborencoder.c"),
+    os.path.join("opencoap", "coap.c"),
+    os.path.join("opencoap", "oscore.c"),
+]
+
+sources_h = [
+    "openweb.h",
+    # ==== opencoap
+    os.path.join("opencoap", "cborencoder.h"),
+    os.path.join("opencoap", "coap.h"),
+    os.path.join("opencoap", "oscore.h"),
+]
+
+if localEnv['board']=='python':
+
+    for s in sources_c+sources_h:
+        temp = localEnv.Objectify(
+            target = localEnv.ObjectifiedFilename(s),
+            source = s,
+        )
+        #localEnv.AlwaysBuild(temp)
+
+    libopenweb = localEnv.Library(
+        target = target,
+        source = [localEnv.ObjectifiedFilename(s) for s in sources_c],
+    )
+    localEnv.Depends(libopenweb, [localEnv.ObjectifiedFilename(s) for s in sources_h])
+
+else:
+
+    localEnv.Append(
+        CPPPATH =  [
+            # inc
+            os.path.join('#','inc'),
+            # kernel
+            os.path.join('#','kernel'),
+            # drivers
+            os.path.join('#','drivers','common'),
+            os.path.join('#','drivers','common','crypto'),
+            # openstack
+            os.path.join('#','openstack'),
+            os.path.join('#','openstack','02a-MAClow'),
+            os.path.join('#','openstack','02b-MAChigh'),
+            os.path.join('#','openstack','03a-IPHC'),
+            os.path.join('#','openstack','03b-IPv6'),
+            os.path.join('#','openstack','04-TRAN'),
+            os.path.join('#','openstack','cross-layers'),
+            # openapps
+            os.path.join('#','openweb'),
+            os.path.join('#','openweb','opencoap'),
+        ],
+    )
+
+    libopenweb = localEnv.Library(
+        target = target,
+        source = sources_c,
+    )
+
+Alias('libopenweb', libopenweb)

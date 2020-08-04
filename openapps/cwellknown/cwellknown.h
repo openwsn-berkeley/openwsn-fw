@@ -8,7 +8,8 @@
 \{
 */
 
-#include "opencoap.h"
+#include "config.h"
+#include "coap.h"
 
 //=========================== define ==========================================
 
@@ -17,8 +18,8 @@
 //=========================== variables =======================================
 
 typedef struct {
-   coap_resource_desc_t desc;
-   uint8_t medType;
+    coap_resource_desc_t desc;
+    uint8_t medType;
 } cwellknown_vars_t;
 
 //=========================== prototypes ======================================

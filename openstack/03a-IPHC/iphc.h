@@ -1,5 +1,5 @@
-#ifndef __IPHC_H
-#define __IPHC_H
+#ifndef OPENWSN_IPHC_H
+#define OPENWSN_IPHC_H
 
 /**
 \addtogroup LoWPAN
@@ -47,18 +47,18 @@ enum IPHC_NH_enums {
 
 enum NHC_enums {
     // IPv6 Extension Header Encoding starts with b1110 xxxx
-            NHC_IPv6EXT_MASK = 0xf0,          // b1111 0000
-    NHC_IPv6EXT_ID = 0xe0,          // b1110 0000
-    // UDP Header Encoding            starts with b1111 0xxx
-            NHC_UDP_MASK = 0xf8,          // b1111 1000
-    NHC_UDP_ID = 0xf0,          // b1111 0000
+    NHC_IPv6EXT_MASK = 0xf0,            // b1111 0000
+    NHC_IPv6EXT_ID = 0xe0,              // b1110 0000
+    // UDP Header Encoding starts with b1111 0xxx
+    NHC_UDP_MASK = 0xf8,                // b1111 1000
+    NHC_UDP_ID = 0xf0,                  // b1111 0000
     // EID Encoding
-            NHC_EID_MASK = 0x0e,
+    NHC_EID_MASK = 0x0e,
     NHC_EID_HOP_VAL = 0x00,
     NHC_EID_ROUTING_VAL = 0x01,
     NHC_EID_IPv6_VAL = 0x07,
     // next header is iphc
-            NHC_IPHC_ID = 0xe7,
+    NHC_IPHC_ID = 0xe7,
 };
 
 enum NHC_NH_enums {
@@ -145,7 +145,7 @@ enum TYPE_6LORH_enums {
     RPI_6LOTH_TYPE = 0x05,
     IPECAP_6LOTH_TYPE = 0x06,
 #ifdef DEADLINE_OPTION_ENABLED
-    DEADLINE_6LOTH_TYPE      = 0x07,
+    DEADLINE_6LOTH_TYPE = 0x07,
 #endif
 };
 
@@ -169,7 +169,7 @@ typedef struct {
     uint8_t *routing_header[MAXNUM_RH3];
     uint8_t *hopByhop_option;
 #ifdef DEADLINE_OPTION_ENABLED
-    uint8_t*    deadline_option;
+    uint8_t* deadline_option;
 #endif
     uint8_t hop_limit;
     uint8_t rhe_length;
@@ -223,17 +223,17 @@ END_PACK
 #ifdef DEADLINE_OPTION_ENABLED
 BEGIN_PACK
 typedef struct {
-   uint8_t    optionType;
-   uint8_t    o_flag:1;
-   uint8_t    d_flag:1;
-   uint8_t    exp_etl:3;
-   uint8_t    org_otl:3;
-   uint8_t    time_unit:2; 		//exp_er,org_or
-   uint8_t	  exponent:3;
-   uint8_t    rsv:3;
-   uint8_t	  et_val[8];
-   uint8_t	  ot_val[8];
-   int16_t	  time_left;
+   uint8_t optionType;
+   uint8_t o_flag:1;
+   uint8_t d_flag:1;
+   uint8_t exp_etl:3;
+   uint8_t org_otl:3;
+   uint8_t time_unit:2; 		//exp_er,org_or
+   uint8_t exponent:3;
+   uint8_t rsv:3;
+   uint8_t et_val[8];
+   uint8_t ot_val[8];
+   int16_t time_left;
 } deadline_option_ht;
 END_PACK
 #endif
@@ -269,9 +269,13 @@ void iphc_sendDone(OpenQueueEntry_t *msg, owerror_t error);
 
 void iphc_receive(OpenQueueEntry_t *msg);
 
-// called by forwarding when IPHC inner header required
+/**
+\brief Prepend a compressed IPv6 header to a message.
+
+This function follows the compression rules specified in RFC 6282.
+*/
 owerror_t iphc_prependIPv6Header(
-        OpenQueueEntry_t *msg,
+        OpenQueueEntry_t **msg,
         uint8_t tf,
         uint32_t value_flowLabel,
         uint8_t nh,
@@ -289,28 +293,25 @@ owerror_t iphc_prependIPv6Header(
         uint8_t fw_SendOrfw_Rcv
 );
 
-uint8_t iphc_retrieveIPv6HopByHopHeader(
-        OpenQueueEntry_t *msg,
-        rpl_option_ht *rpl_option
-);
+uint8_t iphc_retrieveIPv6HopByHopHeader(OpenQueueEntry_t *msg, rpl_option_ht *rpl_option);
 
-void iphc_retrieveIPv6Header(
-   OpenQueueEntry_t* msg,
-   ipv6_header_iht* ipv6_outer_header,
-   ipv6_header_iht* ipv6_inner_header,
-   uint8_t*         page_length
+/**
+\brief Retrieve an IPv6 header from a message.
+*/
+owerror_t iphc_retrieveIPv6Header(OpenQueueEntry_t *msg,
+                                  ipv6_header_iht *ipv6_outer_header,
+                                  ipv6_header_iht *ipv6_inner_header,
+                                  uint8_t *page_length
 );
 
 #ifdef DEADLINE_OPTION_ENABLED
 void iphc_retrieveIPv6DeadlineHeader(
-   OpenQueueEntry_t*    msg,
-   uint8_t*       deadline_msg_ptr,
-   deadline_option_ht*       deadline_option
+   OpenQueueEntry_t* msg,
+   uint8_t* deadline_msg_ptr,
+   deadline_option_ht* deadline_option
 );
 
-void iphc_getDeadlineInfo(
-   monitor_expiration_vars_t*	stats
-);
+void iphc_getDeadlineInfo(monitor_expiration_vars_t* stats);
 
 #endif
 /**
@@ -318,4 +319,4 @@ void iphc_getDeadlineInfo(
 \}
 */
 
-#endif
+#endif /* OPENWSN_IPHC_H */

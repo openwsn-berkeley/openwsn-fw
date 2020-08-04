@@ -5,8 +5,8 @@
 \author Timothy Claeys <timothy.claeys@inria.fr>, January 2020.
 */
 
-#ifndef __FRAG_H
-#define __FRAG_H
+#ifndef OPENWSN_FRAG_H
+#define OPENWSN_FRAG_H
 
 /**
 \addtogroup LoWPAN
@@ -15,6 +15,7 @@
 \{
 */
 
+#include "config.h"
 
 #include "opendefs.h"
 #include "openqueue.h"
@@ -113,4 +114,4 @@ void frag_receive(OpenQueueEntry_t *msg);
 
 owerror_t frag_fragment6LoPacket(OpenQueueEntry_t *msg);
 
-#endif
+#endif /* OPENWSN_FRAG_H */

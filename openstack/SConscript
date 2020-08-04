@@ -11,7 +11,7 @@ sources_c = [
     os.path.join('02a-MAClow','topology.c'),
     os.path.join('02a-MAClow','IEEE802154.c'),
     os.path.join('02a-MAClow','IEEE802154E.c'),
-    # os.path.join('02a-MAClow','adaptive_sync.c'),
+    os.path.join('02a-MAClow','adaptive_sync.c'),
     os.path.join('02a-MAClow','IEEE802154_security.c'),
     #=== 02b-MAChigh
     os.path.join('02b-MAChigh','neighbors.c'),
@@ -28,7 +28,7 @@ sources_c = [
     os.path.join('03b-IPv6','icmpv6echo.c'),
     os.path.join('03b-IPv6','icmpv6rpl.c'),
     #=== 04-TRAN
-    os.path.join('04-TRAN','openudp.c'),
+    os.path.join('04-TRAN','udp.c'),
     #=== cross-layers
     os.path.join('cross-layers','idmanager.c'),
     os.path.join('cross-layers','openqueue.c'),
@@ -58,14 +58,12 @@ sources_h = [
     os.path.join('03b-IPv6','icmpv6echo.h'),
     os.path.join('03b-IPv6','icmpv6rpl.h'),
     #=== 04-TRAN
-    os.path.join('04-TRAN','openudp.h'),
+    os.path.join('04-TRAN','udp.h'),
     #=== cross-layers
     os.path.join('cross-layers','idmanager.h'),
     os.path.join('cross-layers','openqueue.h'),
     os.path.join('cross-layers','openrandom.h'),
     os.path.join('cross-layers','packetfunctions.h'),
-    #=== apps
-    os.path.join('#','openapps','userialbridge','userialbridge.h'),
 ]
 
 if localEnv['board']=='python':
@@ -75,8 +73,7 @@ if localEnv['board']=='python':
             target = localEnv.ObjectifiedFilename(s),
             source = s,
         )
-        #localEnv.AlwaysBuild(temp)
-    
+
     libopenstack = localEnv.Library(
         target = target,
         source = [localEnv.ObjectifiedFilename(s) for s in sources_c],
@@ -93,6 +90,7 @@ else:
             os.path.join('#','kernel'),
             # drivers
             os.path.join('#','drivers','common'),
+            os.path.join('#','drivers','common','crypto'),
             # openstack
             os.path.join('#','openstack'),
             os.path.join('#','openstack','02a-MAClow'),
@@ -101,22 +99,10 @@ else:
             os.path.join('#','openstack','03b-IPv6'),
             os.path.join('#','openstack','04-TRAN'),
             os.path.join('#','openstack','cross-layers'),
+            # openweb
+            os.path.join('#','openweb'),
             # openapps
-            # TODO: remove once cleaned-up?
-            os.path.join('#','openapps','opencoap'),
-            os.path.join('#','openapps','c6t'),
-            os.path.join('#','openapps','cexample'),
-            os.path.join('#','openapps','cinfo'),
-            os.path.join('#','openapps','cleds'),
-            os.path.join('#','openapps','cstorm'),
-            os.path.join('#','openapps','cwellknown'),
-            os.path.join('#','openapps','rrt'),
-            os.path.join('#','openapps','uecho'),
-            os.path.join('#','openapps','uinject'),
-            os.path.join('#','openapps','userialbridge'),
-            os.path.join('#','openapps','cjoin'),
-            os.path.join('#','openapps','uexpiration'),
-            os.path.join('#','openapps','uexpiration_monitor'),
+            os.path.join('#','openapps')
         ],
     )
     
