@@ -50,7 +50,7 @@ void sensors_init(void) {
    \param[out] returnVal presence of the sensor.
 */
 bool sensors_is_present(uint8_t sensorType) {
-   return sensors_vars.sensorsTypes[sensorType];
+    return sensors_vars.sensorsTypes[sensorType];
 }
 
 /**
@@ -61,14 +61,14 @@ bool sensors_is_present(uint8_t sensorType) {
 callbackRead_cbt sensors_getCallbackRead(uint8_t sensorType) {
 
    switch (sensorType) {
-      case SENSOR_TEMPERATURE:
-         return &si70x_read_temperature;
-      case SENSOR_HUMIDITY:
-         return &si70x_read_humidity;
-      case SENSOR_ADCTEMPERATURE:
-         return &adc_sens_read_temperature;
-      default:
-         return NULL;
+        case SENSOR_TEMPERATURE:
+            return &si70x_read_temperature;
+        case SENSOR_HUMIDITY:
+            return &si70x_read_humidity;
+        case SENSOR_ADCTEMPERATURE:
+            return &adc_sens_read_temperature;
+        default:
+            return NULL;
    }
 
 }
@@ -81,14 +81,14 @@ callbackRead_cbt sensors_getCallbackRead(uint8_t sensorType) {
 callbackConvert_cbt sensors_getCallbackConvert(uint8_t sensorType) {
 
    switch (sensorType) {
-      case SENSOR_TEMPERATURE:
-         return &si70x_convert_temperature;
-      case SENSOR_HUMIDITY:
-         return &si70x_convert_humidity;
-      case SENSOR_ADCTEMPERATURE:
-         return &adc_sens_convert_temperature;
-      default:
-         return NULL;
+        case SENSOR_TEMPERATURE:
+            return &si70x_convert_temperature;
+        case SENSOR_HUMIDITY:
+            return &si70x_convert_humidity;
+        case SENSOR_ADCTEMPERATURE:
+            return &adc_sens_convert_temperature;
+        default:
+            return NULL;
    }
 
 }
@@ -97,7 +97,7 @@ callbackConvert_cbt sensors_getCallbackConvert(uint8_t sensorType) {
 
 callbackReset_cbt sensors_getCallbackReset(void) {
 
-   return &si70x_reset;
+    return &si70x_reset;
 
 }
 #endif /* BOARD_SENSORS_ENABLED */
