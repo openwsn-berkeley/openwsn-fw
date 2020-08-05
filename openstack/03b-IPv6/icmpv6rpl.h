@@ -12,7 +12,7 @@
 
 //=========================== define ==========================================
 
-#define DIO_PERIOD             10000   // in miliseconds
+#define DIO_PERIOD             20000   // in miliseconds //original 10000
 #define DAO_PERIOD             60000   // in miliseconds
 
 // Non-Storing Mode of Operation (1)

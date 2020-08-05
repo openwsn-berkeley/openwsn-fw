@@ -50,9 +50,9 @@ void          timer_sixtop_sendEb_fired(void);
 void          timer_sixtop_management_fired(void);
 void          sixtop_sendEB(void);
 void          sixtop_sendKA(void);
+uint8_t       get_dynamic_eb_portion (void);
 
 //=== six2six task
-
 void          timer_sixtop_six2six_timeout_fired(void);
 void          sixtop_six2six_sendDone(
    OpenQueueEntry_t*    msg,
@@ -674,9 +674,17 @@ void sixtop_timeout_timer_cb(opentimers_id_t id) {
 
 //======= EB/KA task
 
+uint8_t get_dynamic_eb_portion (void){
+    uint8_t i = neighbors_getNumNeighbors ();
+    if (i<EB_PORTION){
+        return EB_PORTION;
+    }else{
+        return i;
+    }
+}
 void timer_sixtop_sendEb_fired(void) {
-
-    if(openrandom_get16b()<(0xffff/EB_PORTION)){
+    uint8_t eb_portion = get_dynamic_eb_portion();
+    if(openrandom_get16b()<(0xffff/eb_portion)){
         sixtop_sendEB();
     }
 }

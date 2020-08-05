@@ -6,6 +6,7 @@
 #include "scheduler.h"
 #include "IEEE802154E.h"
 #include "schedule.h"
+#include "neighbors.h"
 #include "icmpv6rpl.h"
 #include "idmanager.h"
 #include "openrandom.h"
@@ -14,7 +15,7 @@
 
 //=========================== defines =========================================
 
-#define UINJECT_TRAFFIC_RATE 2 ///> the value X indicates 1 packet/X minutes
+#define UINJECT_TRAFFIC_RATE 1 ///> the value X indicates 1 packet/X minutes
 
 //=========================== variables =======================================
 
@@ -93,10 +94,14 @@ void uinject_task_cb(void) {
     OpenQueueEntry_t*    pkt;
     uint8_t              asnArray[5];
     uint8_t              numCellsUsed;
+    uint8_t              numNeighbors;
+    uint16_t             DAGRank;
     open_addr_t          parentNeighbor;
     bool                 foundNeighbor;
 
     uint32_t             ticksOn;
+    uint32_t             ticksTx;
+    uint32_t             ticksRx;
     uint32_t             ticksInTotal;
 
     // don't run if not synch
@@ -163,6 +168,7 @@ void uinject_task_cb(void) {
     pkt->payload[3] = asnArray[3];
     pkt->payload[4] = asnArray[4];
 
+    // number of cells
     packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
     numCellsUsed = msf_getPreviousNumCellsUsed(CELLTYPE_TX);
     pkt->payload[0] = numCellsUsed;
@@ -171,10 +177,33 @@ void uinject_task_cb(void) {
     numCellsUsed = msf_getPreviousNumCellsUsed(CELLTYPE_RX);
     pkt->payload[0] = numCellsUsed;
 
+    // number of neighbors
+    packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
+    numNeighbors = neighbors_getNumNeighbors();
+    pkt->payload[0] = numNeighbors;
+    
+    // queue stats
+    openqueue_stats_t oqs = openqueue_get_stats();
+    openqueue_reset_stats();
+
+    packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
+    pkt->payload[0] = oqs.maxBuffSize;
+
+    packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
+    pkt->payload[0] = oqs.minBuffSize;
+
+    // address
     packetfunctions_reserveHeaderSize(pkt,sizeof(uint16_t));
     pkt->payload[1] = (uint8_t)(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
     pkt->payload[0] = (uint8_t)(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+    
+    // DAG Rank
+    DAGRank = icmpv6rpl_getMyDAGrank();
+    packetfunctions_reserveHeaderSize(pkt,sizeof(uint16_t));
+    pkt->payload[1] = (uint8_t)((DAGRank & 0x0000ff00) >> 8);
+    pkt->payload[0] = (uint8_t)( DAGRank & 0x000000ff);
 
+    // duty cycle info
     ieee154e_getTicsInfo(&ticksOn, &ticksInTotal);
     packetfunctions_reserveHeaderSize(pkt,sizeof(uint32_t));
     pkt->payload[3] = (uint8_t)((ticksOn & 0xff000000) >> 24);
@@ -182,12 +211,26 @@ void uinject_task_cb(void) {
     pkt->payload[1] = (uint8_t)((ticksOn & 0x0000ff00) >> 8);
     pkt->payload[0] = (uint8_t)( ticksOn & 0x000000ff);
 
+    ieee154e_getRadioTicsInfo(&ticksTx, &ticksRx, &ticksInTotal);
+    packetfunctions_reserveHeaderSize(pkt,sizeof(uint32_t));
+    pkt->payload[3] = (uint8_t)((ticksTx & 0xff000000) >> 24);
+    pkt->payload[2] = (uint8_t)((ticksTx & 0x00ff0000) >> 16);
+    pkt->payload[1] = (uint8_t)((ticksTx & 0x0000ff00) >> 8);
+    pkt->payload[0] = (uint8_t)( ticksTx & 0x000000ff);
+    packetfunctions_reserveHeaderSize(pkt,sizeof(uint32_t));
+    pkt->payload[3] = (uint8_t)((ticksRx & 0xff000000) >> 24);
+    pkt->payload[2] = (uint8_t)((ticksRx & 0x00ff0000) >> 16);
+    pkt->payload[1] = (uint8_t)((ticksRx & 0x0000ff00) >> 8);
+    pkt->payload[0] = (uint8_t)( ticksRx & 0x000000ff);
+
     packetfunctions_reserveHeaderSize(pkt,sizeof(uint32_t));
     pkt->payload[3] = (uint8_t)((ticksInTotal & 0xff000000) >> 24);
     pkt->payload[2] = (uint8_t)((ticksInTotal & 0x00ff0000) >> 16);
     pkt->payload[1] = (uint8_t)((ticksInTotal & 0x0000ff00) >> 8);
     pkt->payload[0] = (uint8_t)( ticksInTotal & 0x000000ff);
-
+    // resettin mac stats
+    ieee154e_resetStats();
+    
     if ((openudp_send(pkt))==E_FAIL) {
         openqueue_freePacketBuffer(pkt);
     } else {
