@@ -41,7 +41,7 @@ static const uint8_t ebIEsBytestream[] = {
 #define TXRETRIES                   15 // number of MAC retries before declaring failed
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to successfully synchronize
-#define EB_PORTION                  4 // set EB on minimal cell for 1/EB_PORTION portion
+#define EB_PORTION                  10 // set EB on minimal cell for 1/EB_PORTION portion
 #define MAXKAPERIOD               1000  // in slots: 1500@20ms per slot -> ~30 seconds. Max value used by adaptive synchronization.
 #define DESYNCTIMEOUT             1750  // in slots: 1750@20ms per slot -> ~35 seconds. A larger DESYNCTIMEOUT is needed if using a larger KATIMEOUT.
 #define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"
@@ -274,6 +274,9 @@ typedef struct {
 
    PORT_TIMER_WIDTH          radioOnInit;             // when within the slot the radio turns on
    PORT_TIMER_WIDTH          radioOnTics;             // how many tics within the slot the radio is on
+   PORT_TIMER_WIDTH          radioTxRxInit;           // when within the slot the radio tx/rx activity begins
+   PORT_TIMER_WIDTH          radioTxTics;             // how many tics within the slot the radio is transmitting
+   PORT_TIMER_WIDTH          radioRxTics;             // how many tics within the slot the radio is receiving
    bool                      radioOnThisSlot;         // to control if the radio has been turned on in a slot.
 
     // control
@@ -303,6 +306,8 @@ typedef struct {
    uint8_t                   numDeSync;               // number of times a desync happened
    uint32_t                  numTicsOn;               // mac dutyCycle
    uint32_t                  numTicsTotal;            // total tics for which the dutycycle is computed
+   uint32_t                  numTxTics;               // mac  tx dutyCycle
+   uint32_t                  numRxTics;               // mac rx dutyCycle   
 } ieee154e_stats_t;
 END_PACK
 
@@ -337,6 +342,7 @@ uint16_t           ieee154e_getSlotDuration(void);
 
 uint16_t           ieee154e_getTimeCorrection(void);
 void               ieee154e_getTicsInfo(uint32_t* numTicsOn, uint32_t* numTicsTotal);
+void               ieee154e_getRadioTicsInfo(uint32_t* numTxTics, uint32_t* numRxTics, uint32_t* numTicsTotal);
 // events
 void               ieee154e_startOfFrame(PORT_TIMER_WIDTH capturedTime);
 void               ieee154e_endOfFrame(PORT_TIMER_WIDTH capturedTime);
@@ -344,6 +350,7 @@ void               ieee154e_endOfFrame(PORT_TIMER_WIDTH capturedTime);
 bool               debugPrint_asn(void);
 bool               debugPrint_isSync(void);
 bool               debugPrint_macStats(void);
+void               ieee154e_resetStats(void);
 
 /**
 \}
