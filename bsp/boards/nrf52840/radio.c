@@ -28,6 +28,7 @@
 #include "board_info.h"
 #include "debugpins.h"
 #include "sctimer.h"
+#include "radio_ble.h"
 
 
 //=========================== defines =========================================
@@ -55,6 +56,13 @@
 #define WAIT_FOR_RADIO_DISABLE    (0)         ///< whether the driver shall wait until the radio is disabled upon calling radio_rfOff()
 #define WAIT_FOR_RADIO_ENABLE     (1)         ///< whether the driver shall wait until the radio is enabled upon calling radio_txEnable() or radio_rxEnable()
 
+#define RADIO_CRCINIT_24BIT       0x555555
+#define RADIO_CRCPOLY_24BIT       0x0000065B  /// ref: https://devzone.nordicsemi.com/f/nordic-q-a/44111/crc-register-values-for-a-24-bit-crc
+
+#define MAX_PAYLOAD_LENGTH        (252)
+#define INTERFRAM_SPACING         (150)       // in us
+
+#define BLE_ACCESS_ADDR           0x8E89BED6  // the actual address is 0xD6, 0xBE, 0x89, 0x8E
 
 //=========================== variables =======================================
 
@@ -73,6 +81,7 @@ static radio_vars_t radio_vars;
 
 static uint32_t swap_bits(uint32_t inp);
 static uint32_t bytewise_bitswap(uint32_t inp);
+static uint8_t  ble_channel_to_frequency(channel);
 
 //=========================== public ==========================================
 
@@ -101,7 +110,7 @@ void radio_init(void) {
     NRF_RADIO->PCNF1 |= ((uint32_t) MAX_PACKET_SIZE << RADIO_PCNF1_MAXLEN_Pos);
 
     // set start of frame delimiter
-    NRF_RADIO->SFD= (SFD_OCTET << RADIO_SFD_SFD_Pos) & RADIO_SFD_SFD_Msk;
+    NRF_RADIO->SFD = (SFD_OCTET << RADIO_SFD_SFD_Pos) & RADIO_SFD_SFD_Msk;
 
     // set CRC to be included
     NRF_RADIO->PCNF0 &= (~RADIO_PCNF0_CRCINC_Msk);
@@ -134,6 +143,34 @@ void radio_init(void) {
     NVIC_EnableIRQ(RADIO_IRQn);
 }
 
+void radio_ble_init(void){
+    
+    NRF_RADIO->PCNF0 =   (((1UL) << RADIO_PCNF0_S0LEN_Pos) & RADIO_PCNF0_S0LEN_Msk) | 
+                         (((0UL) << RADIO_PCNF0_S1LEN_Pos) & RADIO_PCNF0_S1LEN_Msk) |
+                         (((8UL) << RADIO_PCNF0_LFLEN_Pos) & RADIO_PCNF0_LFLEN_Msk);
+
+    NRF_RADIO->PCNF1 =   (((RADIO_PCNF1_ENDIAN_Little)    << RADIO_PCNF1_ENDIAN_Pos)  & RADIO_PCNF1_ENDIAN_Msk)  |
+                         (((3UL)                          << RADIO_PCNF1_BALEN_Pos)   & RADIO_PCNF1_BALEN_Msk)   |
+                         (((0UL)                          << RADIO_PCNF1_STATLEN_Pos) & RADIO_PCNF1_STATLEN_Msk) |
+                         ((((uint32_t)MAX_PAYLOAD_LENGTH) << RADIO_PCNF1_MAXLEN_Pos)  & RADIO_PCNF1_MAXLEN_Msk)  |
+                         ((RADIO_PCNF1_WHITEEN_Enabled    << RADIO_PCNF1_WHITEEN_Pos) & RADIO_PCNF1_WHITEEN_Msk);
+    
+    NRF_RADIO->CRCPOLY      = RADIO_CRCPOLY_24BIT;
+    NRF_RADIO->CRCCNF       = (
+                                ((RADIO_CRCCNF_SKIPADDR_Skip) << RADIO_CRCCNF_SKIPADDR_Pos) & RADIO_CRCCNF_SKIPADDR_Msk) |
+                                (((RADIO_CRCCNF_LEN_Three)    << RADIO_CRCCNF_LEN_Pos)      & RADIO_CRCCNF_LEN_Msk
+                              );
+    NRF_RADIO->CRCINIT      = RADIO_CRCINIT_24BIT;
+
+    NRF_RADIO->TXADDRESS    = 0;
+    NRF_RADIO->RXADDRESSES  = 1;
+
+    NRF_RADIO->MODE         = ((RADIO_MODE_MODE_Ble_1Mbit) << RADIO_MODE_MODE_Pos) & RADIO_MODE_MODE_Msk;
+    NRF_RADIO->TIFS         = INTERFRAM_SPACING;
+    NRF_RADIO->PREFIX0      = ((BLE_ACCESS_ADDR & 0xff000000) >> 24);
+    NRF_RADIO->BASE0        = ((BLE_ACCESS_ADDR & 0x00ffffff) << 8 );
+}
+
 
 void radio_setStartFrameCb(radio_capture_cbt cb) {
 
@@ -160,6 +197,14 @@ void radio_reset(void) {
 void radio_setFrequency(uint8_t frequency, radio_freq_t tx_or_rx) {
 
     NRF_RADIO->FREQUENCY = FREQUENCY_STEP*(frequency-FREQUENCY_OFFSET);
+
+    radio_vars.state     = RADIOSTATE_FREQUENCY_SET;
+}
+
+void radio_ble_setFrequency(uint8_t channel) {
+
+    NRF_RADIO->FREQUENCY   = ble_channel_to_frequency(channel);
+    NRF_RADIO->DATAWHITEIV = channel; 
 
     radio_vars.state  = RADIOSTATE_FREQUENCY_SET;
 }
@@ -205,6 +250,21 @@ void radio_loadPacket(uint8_t* packet, uint16_t len) {
     if ((len > 0) && (len <= MAX_PACKET_SIZE)) {
         radio_vars.payload[0]= len;
         memcpy(&radio_vars.payload[1], packet, len);
+    }
+
+    // (re)set payload pointer
+    NRF_RADIO->PACKETPTR = (uint32_t)(radio_vars.payload);
+
+    radio_vars.state  = RADIOSTATE_PACKET_LOADED;
+}
+
+void radio_ble_loadPacket(uint8_t* packet, uint16_t len) {
+    radio_vars.state  = RADIOSTATE_LOADING_PACKET;
+
+    ///< note: 1st byte should be the payload size (for Nordic), and
+    ///   the two last bytes are used by the MAC layer for CRC
+    if ((len > 0) && (len <= MAX_PACKET_SIZE)) {
+        memcpy(&radio_vars.payload[0], packet, len);
     }
 
     // (re)set payload pointer
@@ -311,6 +371,40 @@ void radio_getReceivedFrame(uint8_t* pBufRead,
     *pCrc = (NRF_RADIO->CRCSTATUS == 1U);
 }
 
+void                radio_ble_getReceivedFrame(uint8_t* pBufRead,
+                            uint8_t* pLenRead,
+                            uint8_t  maxBufLen,
+                             int8_t* pRssi,
+                            uint8_t* pLqi,
+                               bool* pCrc) 
+{
+    // check for length parameter; if too long, payload won't fit into memory
+    uint8_t len;
+
+    len = radio_vars.payload[1];
+
+    if (len == 0) {
+        return; 
+    }
+
+    if (len > MAX_PACKET_SIZE) {
+        len = MAX_PACKET_SIZE; 
+    }
+
+    if (len > maxBufLen) {
+        len = maxBufLen; 
+    }
+
+    // copy payload
+    memcpy(pBufRead, &radio_vars.payload[0], len+3);
+
+    // store other parameters
+    *pLenRead = len+2;
+
+    *pCrc = (NRF_RADIO->CRCSTATUS == 1U);
+
+}
+
 
 //=========================== private =========================================
 
@@ -335,6 +429,39 @@ static uint32_t bytewise_bitswap(uint32_t inp) {
           | (swap_bits(inp >> 16) << 16)
           | (swap_bits(inp >> 8) << 8)
           | (swap_bits(inp));
+}
+
+static uint8_t ble_channel_to_frequency(channel) {
+
+    uint8_t frequency;
+    
+    if (channel<=10) {
+
+        frequency = 4+2*channel;
+    } else {
+        if (channel >=11 && channel <=36) {
+            
+            frequency = 28+2*(channel-11);
+        } else {
+            switch(channel){
+                case 37:
+                    frequency = 2;
+                break;
+                case 38:
+                    frequency = 26;
+                break;
+                case 39:
+                    frequency = 80;
+                break;
+                default:
+                    // something goes wrong
+                    frequency = 2;
+
+            }
+        }
+    }
+
+    return frequency;
 }
 
 
