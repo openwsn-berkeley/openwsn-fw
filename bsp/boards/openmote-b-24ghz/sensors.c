@@ -95,4 +95,9 @@ callbackConvert_cbt sensors_getCallbackConvert(uint8_t sensorType) {
 
 //=========================== private =========================================
 
+callbackReset_cbt sensors_getCallbackReset(void) {
+
+    return &si70x_reset;
+
+}
 #endif /* BOARD_SENSORS_ENABLED */
