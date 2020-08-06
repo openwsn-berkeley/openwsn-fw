@@ -32,7 +32,9 @@ extern int mote_main(void);
 int main(void) {
     return mote_main();
 }
-
+//=========================== variables =======================================
+slot_board_vars_t slot_board_vars [MAX_SLOT_TYPES];
+slotType_t selected_slot_type;
 //=========================== public ==========================================
 
 void board_init(void){
@@ -95,6 +97,36 @@ void board_init(void){
     debugpins_init();
     //enable nvic for the radio
     NVIC_radio();
+    board_init_slot_vars();
+}
+
+//==== bootstrapping slot info lookup table
+
+//===== IEEE802154E timing
+void board_init_slot_vars(void){
+    // 20ms slot
+    slot_board_vars [SLOT_20ms_24GHZ].slotDuration                   =  655   ; // ms  
+    slot_board_vars [SLOT_20ms_24GHZ].maxTxDataPrepare               =  66  ;  // 2014us (not measured)
+    slot_board_vars [SLOT_20ms_24GHZ].maxRxAckPrepare                =  20   ; // 610us (not measured)
+    slot_board_vars [SLOT_20ms_24GHZ].maxRxDataPrepare               =  33   ; // 1007us (not measured)
+    slot_board_vars [SLOT_20ms_24GHZ].maxTxAckPrepare                =  30   ; // 915us (not measured)
+    slot_board_vars [SLOT_20ms_24GHZ].delayTx                        =  10   ; // 305us (not measured)
+    slot_board_vars [SLOT_20ms_24GHZ].delayRx                        =  0    ; // 0us (can not measure)
+   
+}
+
+// To get the current slotDuration at any time
+// used during initialization by sixtop to fire the first sixtop EB
+uint16_t board_getSlotDuration (void)
+{
+    return slot_board_vars [selected_slot_type].slotDuration;
+}
+
+// Setter/Getter function for slot_board_vars
+slot_board_vars_t board_selectSlotTemplate (slotType_t slot_type)
+{
+  selected_slot_type = slot_type;
+  return slot_board_vars [selected_slot_type];
 }
 
 void board_sleep(void) {
@@ -123,24 +155,24 @@ void board_reset(void){
 void GPIO_Config_ALL_AIN(void){
     GPIO_InitTypeDef GPIO_InitStructure;
 
-    /* Enable GPIOD and GPIOE clock */
+    //Enable GPIOD and GPIOE clock 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB 
                          | RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOD 
                          | RCC_APB2Periph_AFIO, ENABLE);
 
-    /* PA  */
+    //PA  
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_All;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
-      /* PB  */
+      //PB  
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_All;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
     GPIO_Init(GPIOB, &GPIO_InitStructure);
-      /* PC  */
+      //PC  
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_All;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
     GPIO_Init(GPIOC, &GPIO_InitStructure);
-        /* PD  */
+        //PD  
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_All;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
     GPIO_Init(GPIOD, &GPIO_InitStructure);
