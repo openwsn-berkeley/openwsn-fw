@@ -27,7 +27,7 @@ end of frame event), it will turn on its error LED.
 
 #define LENGTH_PACKET   125+LENGTH_CRC  ///< maximum length is 127 bytes
 #define CHANNEL         38              ///< 0~39
-#define TIMER_PERIOD    (0xffff>>1)     ///< 0xffff = 2s@32kHz
+#define TIMER_PERIOD    (0xffff>>2)     ///< 0xffff = 2s@32kHz
 #define TXPOWER         0xD5            ///< 2's complement format, 0xD8 = -40dbm
 
 const static uint8_t ble_device_addr[6] = { 
