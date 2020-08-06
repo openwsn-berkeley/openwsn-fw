@@ -47,6 +47,29 @@ typedef enum {
    FREQ_RX                        = 0x02,
 } radio_freq_t;
 
+// radio settings available for the MAC layer and supported by openmote-b
+typedef enum 
+{
+    
+    // different "modulations" (AT86RF215-specific)
+    // At83rf215 settings start at index 0 because they are used directly in a sub-array in the atmel driver.
+    RADIOSETTING_FSK_OPTION1_FEC,
+    RADIOSETTING_OQPSK_RATE3,
+    RADIOSETTING_OFDM_OPTION_1_MCS0,
+    RADIOSETTING_OFDM_OPTION_1_MCS1,
+    RADIOSETTING_OFDM_OPTION_1_MCS2,
+    RADIOSETTING_OFDM_OPTION_1_MCS3,
+
+    // default
+    RADIOSETTING_24GHZ,
+ 
+    // can be useful for switching receiver between OFDMx MCS modes.
+    RADIOSETTING_NONE,
+    
+    RADIOSETTING_MAX 
+
+} radioSetting_t;
+
 //=========================== typedef =========================================
 
 typedef void  (*radio_capture_cbt)(PORT_TIMER_WIDTH timestamp);
@@ -57,13 +80,14 @@ typedef void  (*radio_capture_cbt)(PORT_TIMER_WIDTH timestamp);
 
 // admin
 void                radio_init(void);
+void                radio_powerOn(void);
 void                radio_setStartFrameCb(radio_capture_cbt cb);
 void                radio_setEndFrameCb(radio_capture_cbt cb);
 // reset
 void                radio_reset(void);
 // RF admin
-void                radio_setFrequency(uint8_t frequency, radio_freq_t tx_or_rx);
-//void                radio_setFrequency(uint8_t frequency);
+void                radio_setFrequency(uint16_t frequency, radio_freq_t tx_or_rx);
+void                radio_setConfig(radioSetting_t radioSetting);
 void                radio_rfOn(void);
 void                radio_rfOff(void);
 int8_t              radio_getFrequencyOffset(void);
@@ -75,6 +99,8 @@ void                radio_loadPacket(uint8_t* packet, uint16_t len);
 void                radio_txEnable(void);
 void                radio_txNow(void);
 // RX
+
+//referenced in the MAC in scum context only.
 void                radio_rxPacket_prepare(void);
 void                radio_rxEnable(void);
 void                radio_rxEnable_scum(void);
