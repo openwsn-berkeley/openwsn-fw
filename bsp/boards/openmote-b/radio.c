@@ -38,7 +38,7 @@ typedef void                (*radio_init_cb_t)(void);
 typedef void                (*radio_setConfig_cb_t)(radioSetting_t radioSetting);
 typedef void                (*radio_setStartFrameCb_cb_t)(radio_capture_cbt cb);
 typedef void                (*radio_setEndFrameCb_cb_t)(radio_capture_cbt cb);
-typedef void                (*radio_setFrequency_cb_t)(uint16_t channel, radio_freq_t tx_or_rx);
+typedef void                (*radio_setFrequency_cb_t)(uint8_t channel, radio_freq_t tx_or_rx);
 typedef void                (*radio_rfOn_cb_t)(void);
 typedef void                (*radio_rfOff_cb_t)(void);
 typedef int8_t              (*radio_getFrequencyOffset_cb_t)(void);
@@ -96,7 +96,7 @@ void radio_bootstrap (void)
     // RADIOSETTING_FSK_OPTION1_FEC
     dyn_funcs [RADIOSETTING_FSK_OPTION1_FEC].radio_reset                 =   radio_reset_at86rf215; 
     dyn_funcs [RADIOSETTING_FSK_OPTION1_FEC].radio_init                  =   radio_init_at86rf215; 
-    dyn_funcs [RADIOSETTING_FSK_OPTION1_FEC].radio_setConfig        =   radio_setConfig_at86rf215; 
+    dyn_funcs [RADIOSETTING_FSK_OPTION1_FEC].radio_setConfig             =   radio_setConfig_at86rf215; 
     dyn_funcs [RADIOSETTING_FSK_OPTION1_FEC].radio_setStartFrameCb       =   radio_setStartFrameCb_at86rf215; 
     dyn_funcs [RADIOSETTING_FSK_OPTION1_FEC].radio_setEndFrameCb         =   radio_setEndFrameCb_at86rf215; 
     dyn_funcs [RADIOSETTING_FSK_OPTION1_FEC].radio_setFrequency          =   radio_setFrequency_at86rf215; 
@@ -115,7 +115,7 @@ void radio_bootstrap (void)
  //RADIOSETTING_OQPSK_RATE3
     dyn_funcs [RADIOSETTING_OQPSK_RATE3].radio_reset                 =   radio_reset_at86rf215; 
     dyn_funcs [RADIOSETTING_OQPSK_RATE3].radio_init                  =   radio_init_at86rf215; 
-    dyn_funcs [RADIOSETTING_OQPSK_RATE3].radio_setConfig     =   radio_setConfig_at86rf215; 
+    dyn_funcs [RADIOSETTING_OQPSK_RATE3].radio_setConfig             =   radio_setConfig_at86rf215; 
     dyn_funcs [RADIOSETTING_OQPSK_RATE3].radio_setStartFrameCb       =   radio_setStartFrameCb_at86rf215; 
     dyn_funcs [RADIOSETTING_OQPSK_RATE3].radio_setEndFrameCb         =   radio_setEndFrameCb_at86rf215; 
     dyn_funcs [RADIOSETTING_OQPSK_RATE3].radio_setFrequency          =   radio_setFrequency_at86rf215; 
@@ -133,7 +133,7 @@ void radio_bootstrap (void)
     //RADIOSETTING_OFDM_OPTION_1_MCS0
     dyn_funcs [RADIOSETTING_OFDM_OPTION_1_MCS0].radio_reset                 =   radio_reset_at86rf215; 
     dyn_funcs [RADIOSETTING_OFDM_OPTION_1_MCS0].radio_init                  =   radio_init_at86rf215; 
-    dyn_funcs [RADIOSETTING_OFDM_OPTION_1_MCS0].radio_setConfig         =   radio_setConfig_at86rf215; 
+    dyn_funcs [RADIOSETTING_OFDM_OPTION_1_MCS0].radio_setConfig             =   radio_setConfig_at86rf215; 
     dyn_funcs [RADIOSETTING_OFDM_OPTION_1_MCS0].radio_setStartFrameCb       =   radio_setStartFrameCb_at86rf215; 
     dyn_funcs [RADIOSETTING_OFDM_OPTION_1_MCS0].radio_setEndFrameCb         =   radio_setEndFrameCb_at86rf215; 
     dyn_funcs [RADIOSETTING_OFDM_OPTION_1_MCS0].radio_setFrequency          =   radio_setFrequency_at86rf215; 
@@ -259,7 +259,7 @@ void radio_setEndFrameCb (radio_capture_cbt cb) {
 
 //===== RF admin
 
-void radio_setFrequency (uint16_t channel, radio_freq_t tx_or_rx) {
+void radio_setFrequency (uint8_t channel, radio_freq_t tx_or_rx) {
     dyn_funcs [selected_radioSetting].radio_setFrequency(channel, tx_or_rx);
 }
 

@@ -61,7 +61,7 @@ void     radio_setEndFrameCb_at86rf215(radio_capture_cbt cb);
 // reset
 void     radio_reset_at86rf215(void);
 // RF admin
-void     radio_setFrequency_at86rf215(uint16_t channel, radio_freq_t tx_or_rx);
+void     radio_setFrequency_at86rf215(uint8_t channel, radio_freq_t tx_or_rx);
 int8_t  radio_getFrequencyOffset_at86rf215(void);
 void     radio_rfOn_at86rf215(void);
 void     radio_rfOff_at86rf215(void);

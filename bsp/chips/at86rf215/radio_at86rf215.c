@@ -183,7 +183,7 @@ void radio_setEndFrameCb_at86rf215(radio_capture_cbt cb) {
 //channel spacing in KHz
 //frequency_0 in kHz
 //frequency_nb integer
-void radio_setFrequency_at86rf215(uint16_t channel, radio_freq_t tx_or_rx) {
+void radio_setFrequency_at86rf215(uint8_t channel, radio_freq_t tx_or_rx) {
 
     uint16_t frequency_0;
 
@@ -197,8 +197,8 @@ void radio_setFrequency_at86rf215(uint16_t channel, radio_freq_t tx_or_rx) {
         at86rf215_spiWriteReg(RG_RF09_CS, (uint8_t)(DEFAULT_CHANNEL_SPACING_FSK_OPTION_1/25));
         at86rf215_spiWriteReg(RG_RF09_CCF0L, (uint8_t)(frequency_0%256));
         at86rf215_spiWriteReg(RG_RF09_CCF0H, (uint8_t)(frequency_0/256));
-        at86rf215_spiWriteReg(RG_RF09_CNL, (uint8_t)(channel%256));
-        at86rf215_spiWriteReg(RG_RF09_CNM, (uint8_t)(channel/256));
+        at86rf215_spiWriteReg(RG_RF09_CNL, channel%256);
+        at86rf215_spiWriteReg(RG_RF09_CNM, channel/256);
     } else {
         frequency_0 = (DEFAULT_CENTER_FREQUENCY_0_OQPSK_24GHZ/25);
         at86rf215_spiWriteReg(RG_RF24_CS, (uint8_t)(DEFAULT_CHANNEL_SPACING_OQPSK_24GHZ/25));

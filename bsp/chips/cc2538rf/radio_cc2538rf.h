@@ -125,7 +125,7 @@ void     radio_setEndFrameCb_cc2538rf(radio_capture_cbt cb);
 // reset
 void     radio_reset_cc2538rf(void);
 // RF admin
-void     radio_setFrequency_cc2538rf(uint16_t channel, radio_freq_t tx_or_rx);
+void     radio_setFrequency_cc2538rf(uint8_t channel, radio_freq_t tx_or_rx);
 int8_t  radio_getFrequencyOffset_cc2538rf(void);
 void     radio_rfOn_cc2538rf(void);
 void     radio_rfOff_cc2538rf(void);

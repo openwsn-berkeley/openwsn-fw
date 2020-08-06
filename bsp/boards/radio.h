@@ -86,7 +86,7 @@ void                radio_setEndFrameCb(radio_capture_cbt cb);
 // reset
 void                radio_reset(void);
 // RF admin
-void                radio_setFrequency(uint16_t frequency, radio_freq_t tx_or_rx);
+void                radio_setFrequency(uint8_t frequency, radio_freq_t tx_or_rx);
 void                radio_setConfig(radioSetting_t radioSetting);
 void                radio_rfOn(void);
 void                radio_rfOff(void);

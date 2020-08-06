@@ -176,7 +176,7 @@ void radio_reset_cc2538rf(void) {
 
 //===== RF admin
 
-void radio_setFrequency_cc2538rf(uint16_t frequency, radio_freq_t tx_or_rx) {
+void radio_setFrequency_cc2538rf(uint8_t frequency, radio_freq_t tx_or_rx) {
 
    // change state
    radio_vars_cc2538rf.state = RADIOSTATE_SETTING_FREQUENCY;
