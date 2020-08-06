@@ -189,7 +189,7 @@ void radio_setConfig (radioSetting_t radioSetting){
 }
 
 
-void radio_setFrequency(uint16_t frequency, radio_freq_t tx_or_rx) {
+void radio_setFrequency(uint8_t frequency, radio_freq_t tx_or_rx) {
 
    // change state
    radio_vars.state = RADIOSTATE_SETTING_FREQUENCY;

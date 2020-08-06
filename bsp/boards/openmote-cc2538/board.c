@@ -40,6 +40,9 @@
 #else
 #define CC2538_FLASH_ADDRESS            ( 0x0027F800 )
 #endif
+
+slot_board_vars_t slot_board_vars [MAX_SLOT_TYPES];
+slotType_t selected_slot_type;
 //=========================== prototypes ======================================
 
 void board_timer_init(void);
