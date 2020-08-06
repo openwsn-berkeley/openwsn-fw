@@ -122,7 +122,7 @@ void sixtop_init(void) {
     sixtop_vars.ebSendingTimerId = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_SIXTOP);
     opentimers_scheduleIn(
             sixtop_vars.ebSendingTimerId,
-            SLOTFRAME_LENGTH * SLOTDURATION,
+            SLOTFRAME_LENGTH * SLOTDURATION_MS,
             TIME_MS,
             TIMER_PERIODIC,
             sixtop_sendingEb_timer_cb

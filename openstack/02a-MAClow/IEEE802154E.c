@@ -26,6 +26,8 @@
 ieee154e_vars_t ieee154e_vars;
 ieee154e_stats_t ieee154e_stats;
 ieee154e_dbg_t ieee154e_dbg;
+slotTemplate_t      slotTemplate;
+slot_154e_vars_t    slot_154e_vars [MAX_SLOT_TYPES];
 
 //=========================== prototypes ======================================
 
@@ -139,7 +141,6 @@ void notif_sendDone(OpenQueueEntry_t *packetSent, owerror_t error);
 void notif_receive(OpenQueueEntry_t *packetReceived);
 
 // statistics
-void resetStats(void);
 
 void updateStats(PORT_SIGNED_INT_WIDTH timeCorrection);
 
@@ -183,7 +184,7 @@ void ieee154e_init(void) {
 #endif
     ieee154e_vars.isAckEnabled = TRUE;
     ieee154e_vars.isSecurityEnabled = FALSE;
-    ieee154e_vars.slotDuration = TsSlotDuration;
+
     ieee154e_vars.numOfSleepSlots = 1;
 
     // default hopping template
@@ -213,11 +214,11 @@ void ieee154e_init(void) {
         SLOT_40ms_OFDM1MCS0_3_SUBGHZ , RADIOSETTING_OFDM_OPTION_1_MCS2
         SLOT_40ms_OFDM1MCS0_3_SUBGHZ , RADIOSETTING_OFDM_OPTION_1_MCS3
     */
-    ieee154e_select_slot_template (SLOT_20ms_24GHZ);
+    ieee154e_select_slot_template (SLOT_40ms_OFDM1MCS0_3_SUBGHZ);
     ieee154e_vars.slotDuration      = slotTemplate.slotDuration;
 
     //set the radio setting to use, default is RADIOSETTING_24GHZ
-    radio_setConfig (RADIOSETTING_24GHZ); 
+    radio_setConfig (RADIOSETTING_OFDM_OPTION_1_MCS3); 
     
     // switch radio on
     radio_rfOn();
@@ -439,12 +440,12 @@ void isr_ieee154e_newSlot(opentimers_id_t id) {
 
     opentimers_scheduleAbsolute(
             ieee154e_vars.timerId,                  // timerId
-            TsSlotDuration,                         // duration
+            slotTemplate.slotDuration,                         // duration
             ieee154e_vars.startOfSlotReference,     // reference
             TIME_TICS,                              // timetype
             isr_ieee154e_newSlot                    // callback
     );
-    ieee154e_vars.slotDuration = TsSlotDuration;
+    ieee154e_vars.slotDuration = slotTemplate.slotDuration;
 
     if (ieee154e_vars.isSync == FALSE) {
         if (idmanager_getIsDAGroot() == TRUE) {
@@ -1082,12 +1083,12 @@ port_INLINE void activity_ti1ORri1(void) {
 
             opentimers_scheduleAbsolute(
                     ieee154e_vars.timerId,                            // timerId
-                    TsSlotDuration * (ieee154e_vars.numOfSleepSlots),   // duration
+                    slotTemplate.slotDuration * (ieee154e_vars.numOfSleepSlots),   // duration
                     ieee154e_vars.startOfSlotReference,               // reference
                     TIME_TICS,                                        // timetype
                     isr_ieee154e_newSlot                              // callback
             );
-            ieee154e_vars.slotDuration = TsSlotDuration * (ieee154e_vars.numOfSleepSlots);
+            ieee154e_vars.slotDuration = slotTemplate.slotDuration * (ieee154e_vars.numOfSleepSlots);
 
             //increase ASN by numOfSleepSlots-1 slots as at this slot is already incremented by 1
             for (i = 0; i < ieee154e_vars.numOfSleepSlots - 1; i++) {
@@ -1967,7 +1968,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
 
         // record the timeCorrection and print out at end of slot
         ieee154e_vars.dataReceived->l2_timeCorrection = (PORT_SIGNED_INT_WIDTH)(
-                (PORT_SIGNED_INT_WIDTH) TsTxOffset - (PORT_SIGNED_INT_WIDTH) ieee154e_vars.syncCapturedTime);
+                (PORT_SIGNED_INT_WIDTH) slotTemplate.TsTxOffset - (PORT_SIGNED_INT_WIDTH) ieee154e_vars.syncCapturedTime);
 
         // check if ack requested
         if (ieee802514_header.ackRequested == 1 && ieee154e_vars.isAckEnabled == TRUE) {
@@ -1992,7 +1993,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
             // calculate the time timeCorrection (this is the time the sender is off w.r.t to this node. A negative number means
             // the sender is too late.
             ieee154e_vars.timeCorrection = (PORT_SIGNED_INT_WIDTH)(
-                    (PORT_SIGNED_INT_WIDTH) TsTxOffset - (PORT_SIGNED_INT_WIDTH) ieee154e_vars.syncCapturedTime);
+                    (PORT_SIGNED_INT_WIDTH) slotTemplate.TsTxOffset - (PORT_SIGNED_INT_WIDTH) ieee154e_vars.syncCapturedTime);
 
             // prepend the IEEE802.15.4 header to the ACK
             ieee154e_vars.ackToSend->l2_frameType = IEEE154_TYPE_ACK;
@@ -2128,7 +2129,7 @@ port_INLINE void activity_ri6(void) {
     // calculate the time timeCorrection (this is the time the sender is off w.r.t to this node. A negative number means
     // the sender is too late.
     ieee154e_vars.timeCorrection = (PORT_SIGNED_INT_WIDTH)(
-            (PORT_SIGNED_INT_WIDTH) TsTxOffset - (PORT_SIGNED_INT_WIDTH) ieee154e_vars.syncCapturedTime);
+            (PORT_SIGNED_INT_WIDTH) slotTemplate.TsTxOffset - (PORT_SIGNED_INT_WIDTH) ieee154e_vars.syncCapturedTime);
 
     // prepend the IEEE802.15.4 header to the ACK
     ieee154e_vars.ackToSend->l2_frameType = IEEE154_TYPE_ACK;
@@ -2666,7 +2667,7 @@ void synchronizePacket(PORT_TIMER_WIDTH timeReceived) {
     currentPeriod = ieee154e_vars.slotDuration;
 
     // calculate new period
-    timeCorrection = (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH) timeReceived - (PORT_SIGNED_INT_WIDTH) TsTxOffset);
+    timeCorrection = (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH) timeReceived - (PORT_SIGNED_INT_WIDTH) slotTemplate.TsTxOffset);
 
     // The interrupt beginning a new slot can either occur after the packet has been or while it is being received,
     // possibly because the mote is not yet synchronized. In the former case we simply take the usual slotLength and
@@ -2684,7 +2685,7 @@ void synchronizePacket(PORT_TIMER_WIDTH timeReceived) {
     // length to be 2 slots long
     if ((PORT_SIGNED_INT_WIDTH) newPeriod - (PORT_SIGNED_INT_WIDTH) currentValue <
         (PORT_SIGNED_INT_WIDTH) RESYNCHRONIZATIONGUARD) {
-        newPeriod += TsSlotDuration;
+        newPeriod += slotTemplate.slotDuration;
         incrementAsnOffset();
     }
 
@@ -2775,7 +2776,7 @@ void changeIsSync(bool newIsSync) {
 
     if (ieee154e_vars.isSync == TRUE) {
         leds_sync_on();
-        resetStats();
+        ieee154e_resetStats();
     } else {
         leds_sync_off();
         schedule_resetBackoff();
@@ -2813,7 +2814,7 @@ void notif_receive(OpenQueueEntry_t *packetReceived) {
 
 //======= stats
 
-port_INLINE void resetStats(void) {
+port_INLINE void ieee154e_resetStats(void) {
     ieee154e_stats.numSyncPkt = 0;
     ieee154e_stats.numSyncAck = 0;
     ieee154e_stats.minCorrection = 127;
