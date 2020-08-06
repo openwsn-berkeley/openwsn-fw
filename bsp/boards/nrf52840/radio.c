@@ -59,7 +59,7 @@
 #define RADIO_CRCINIT_24BIT       0x555555
 #define RADIO_CRCPOLY_24BIT       0x0000065B  /// ref: https://devzone.nordicsemi.com/f/nordic-q-a/44111/crc-register-values-for-a-24-bit-crc
 
-#define MAX_PAYLOAD_LENGTH        (252)
+#define MAX_PAYLOAD_LENGTH        (127)
 #define INTERFRAM_SPACING         (150)       // in us
 
 #define BLE_ACCESS_ADDR           0x8E89BED6  // the actual address is 0xD6, 0xBE, 0x89, 0x8E
@@ -396,7 +396,7 @@ void                radio_ble_getReceivedFrame(uint8_t* pBufRead,
     }
 
     // copy payload
-    memcpy(pBufRead, &radio_vars.payload[0], len+3);
+    memcpy(pBufRead, &radio_vars.payload[0], len+2);
 
     // store other parameters
     *pLenRead = len+2;

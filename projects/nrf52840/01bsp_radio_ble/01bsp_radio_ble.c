@@ -28,7 +28,7 @@ end of frame event), it will turn on its error LED.
 #define LENGTH_PACKET   125+LENGTH_CRC  ///< maximum length is 127 bytes
 #define CHANNEL         38              ///< 0~39
 #define TIMER_PERIOD    (0xffff>>1)     ///< 0xffff = 2s@32kHz
-#define TXPOWER         0xE2            ///< 2's complement format, 0xE2 = -30dbm
+#define TXPOWER         0xD5            ///< 2's complement format, 0xD8 = -40dbm
 
 const static uint8_t ble_device_addr[6] = { 
     0xaa, 0xbb, 0xcc, 0xcc, 0xbb, 0xaa
@@ -244,18 +244,14 @@ void assemble_ibeacon_packet(void) {
 
     memset( app_vars.packet, 0x00, sizeof(app_vars.packet) );
 
-    app_vars.packet[i++]  = 0x42;               // BLE ADV_SCAN_IND
-    app_vars.packet[i++]  = 0x24;               // Payload length
+    app_vars.packet[i++]  = 0x42;               // BLE ADV_NONCONN_IND (this is a must)
+    app_vars.packet[i++]  = 0x21;               // Payload length
     app_vars.packet[i++]  = ble_device_addr[0]; // BLE adv address byte 0
     app_vars.packet[i++]  = ble_device_addr[1]; // BLE adv address byte 1
     app_vars.packet[i++]  = ble_device_addr[2]; // BLE adv address byte 2
     app_vars.packet[i++]  = ble_device_addr[3]; // BLE adv address byte 3
     app_vars.packet[i++]  = ble_device_addr[4]; // BLE adv address byte 4
     app_vars.packet[i++]  = ble_device_addr[5]; // BLE adv address byte 5
-
-    app_vars.packet[i++]  = 0x02; 
-    app_vars.packet[i++]  = 0x01;
-    app_vars.packet[i++]  = 0x06;
 
     app_vars.packet[i++]  = 0x1a;
     app_vars.packet[i++]  = 0xff;
