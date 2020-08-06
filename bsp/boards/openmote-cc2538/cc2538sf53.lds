@@ -55,15 +55,6 @@ SECTIONS
         _ebss = .;
     } > SRAM
 
-    .heap (COPY):
-    {
-       __HeapBase = .;
-       __end__ = .;
-       end = __end__;
-       KEEP(*(.heap*))
-       __HeapLimit = .;
-    } > SRAM
-
     .flashcca :
     {
         KEEP(*(.flashcca))

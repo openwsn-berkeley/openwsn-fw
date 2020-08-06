@@ -45,6 +45,9 @@ typedef struct {
 
 radio_vars_t radio_vars;
 
+// global radio selection, will use the slowest by default at initialization. 
+uint8_t selected_radioSetting      =       RADIOSETTING_24GHZ;
+
 //=========================== prototypes ======================================
 
 void enable_radio_interrupts(void);
