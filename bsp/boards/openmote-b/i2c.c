@@ -21,10 +21,10 @@
 
 #define I2C_PERIPHERAL          ( SYS_CTRL_PERIPH_I2C )
 #define I2C_BASE                ( GPIO_B_BASE )
-#define I2C_SCL                 ( GPIO_PIN_3 )
+#define I2C_SCL                 ( GPIO_PIN_5 )
 #define I2C_SDA                 ( GPIO_PIN_4 )
-#define I2C_BAUDRATE            ( 100000 )
-#define I2C_MAX_DELAY_US        ( 100000 )
+#define I2C_BAUDRATE            ( 400000 )
+#define I2C_MAX_DELAY_US        ( 400000 )
 
 //=========================== variables =======================================
 
