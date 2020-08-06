@@ -187,6 +187,11 @@ void radio_reset(void) {
 
 //===== RF admin
 
+void radio_setConfig (radioSetting_t radioSetting){
+    selected_radioSetting = radioSetting;
+    //do nothing
+}
+
 void radio_setFrequency(uint8_t frequency, radio_freq_t tx_or_rx) {
 
     // change state
