@@ -3992,22 +3992,22 @@ void at86rf215_readBurst(uint16_t reg, uint8_t* regValueRead, uint16_t size);
 
 
 
-static const registerSetting_t basic_settings_fsk_option1 []={
+static  registerSetting_t basic_settings_fsk_option1 []={
   {RG_RF09_CMD,       0x02}, //we make sure we are in the trxoff state
   {RG_RF09_IRQM,      0x1F}, // TRXERR, BATLOW, EDC, TRXRDY, WAKEUP interrupts enabled
   {RG_RF24_IRQM,      0x00},
   {RG_RF09_RXBWC,     0x00},
-  {RG_RF09_RXDFE,     0x2A},
-  {RG_RF09_AGCC,      0x01},
-  {RG_RF09_AGCS,      0x37},
-  {RG_RF09_EDD,       0x7A},
-  {RG_RF09_TXCUTC,    0xC0},
+  {RG_RF09_RXDFE,     0x2A}, // receiver digital front end. Cutoff frequency (0.375/2) *fs and sample rate of 2000khz
+  {RG_RF09_AGCC,      0x01}, // receiver automatic gain control enabled, 8 samples is Average Time in Number of Samples
+  {RG_RF09_AGCS,      0x37}, // AGC target is lowest value of -42 dB
+  {RG_RF09_EDD,       0x7A}, // Energy detection duration
+  {RG_RF09_TXCUTC,    0xC0}, // Transmitter cutoff freq 80khz and pwr ramp 32 us 
   {RG_RF09_TXDFE,     0x98},
-  {RG_RF09_PAC,       0x7F},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
-  {RG_BBC0_IRQM,      0x1F},// TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
+  {RG_RF09_PAC,       0x7F}, // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
+  {RG_BBC0_IRQM,      0x1F}, // TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
   {RG_BBC1_IRQM,      0x00},
-  {RG_BBC0_PC,        0x1D},// No FCS filter, 32 bits FCS, FSK. >Mina: used to be 15. Set to 1D to use 16 bit FCS
-  {RG_BBC0_FSKDM,     0x01},//Direct modulation and preemphasis enabled.
+  {RG_BBC0_PC,        0x1D}, // No FCS filter, 16 bits FCS, FSK. 
+  {RG_BBC0_FSKDM,     0x01}, //Direct modulation and preemphasis enabled.
   {RG_BBC0_FSKC0,     0xD6},
   {RG_BBC0_FSKC1,     0x00},
 //  {RG_BBC0_FSKC2,     0x00},
@@ -4071,8 +4071,8 @@ static const registerSetting_t basic_settings_fsk_option3 []={  //DO NOT USE
   {RG_BBC0_FSKPHRTX,  0x00},// No data whitening SFD0 used.
 };
 //------------------------------------ OQPSK -----------------------------------//
-static const registerSetting_t basic_settings_oqpsk_rate1[] = {
-    {RG_BBC0_PC,        0x17},
+static const registerSetting_t basic_settings_oqpsk_rate0[] = {
+    {RG_BBC0_PC,        0x1F}, // 16bit FCS
     {RG_BBC0_OQPSKPHRTX, 0x00}, // MR-OQPSK, rate mode 0
     {RG_BBC0_OQPSKC0,   0x10},  // 100kchips/s, RC-0.8 shaping, direct-modulation enabled
 //  {RG_BBC0_OQPSKC1,   0x3F},  // MINIMUM preamble-detection sensitivities, rx-override disabled
@@ -4092,7 +4092,7 @@ static const registerSetting_t basic_settings_oqpsk_rate1[] = {
     {RG_RF09_PAC,       0x7F},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
 };
 
-static const registerSetting_t basic_settings_oqpsk_rate2[] = {
+static const registerSetting_t basic_settings_oqpsk_rate1[] = {
     {RG_BBC0_PC,        0x17},
     {RG_BBC0_OQPSKPHRTX, 0x02}, // MR-OQPSK, rate mode 0
     {RG_BBC0_OQPSKC0,   0x10},  // 100kchips/s, RC-0.8 shaping, direct-modulation enabled
@@ -4113,9 +4113,9 @@ static const registerSetting_t basic_settings_oqpsk_rate2[] = {
     {RG_RF09_PAC,       0x7F},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
 };
 
-static const registerSetting_t basic_settings_oqpsk_rate3[] = {
+static const registerSetting_t basic_settings_oqpsk_rate2[] = {
     {RG_BBC0_PC,        0x1F},  // Mina: used to be 17 but change to 1F make 2B FCS
-    {RG_BBC0_OQPSKPHRTX, 0x04}, // MR-OQPSK, rate mode 0
+    {RG_BBC0_OQPSKPHRTX, 0x04}, // MR-OQPSK, rate mode 3
     {RG_BBC0_OQPSKC0,   0x10},  // 100kchips/s, RC-0.8 shaping, direct-modulation enabled
 //  {RG_BBC0_OQPSKC1,   0x3F},  // MINIMUM preamble-detection sensitivities, rx-override disabled
 //  {RG_BBC0_OQPSKC2,   0x00},  // listen for MR-OQPSK frames only
@@ -4134,9 +4134,9 @@ static const registerSetting_t basic_settings_oqpsk_rate3[] = {
     {RG_RF09_PAC,       0x7F},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
 };
 
-static const registerSetting_t basic_settings_oqpsk_rate4[] = {
-    {RG_BBC0_PC,        0x17},
-    {RG_BBC0_OQPSKPHRTX, 0x06}, // MR-OQPSK, rate mode 0
+static  registerSetting_t basic_settings_oqpsk_rate3[] = {
+    {RG_BBC0_PC,        0x1F},  // 16 bit FCS
+    {RG_BBC0_OQPSKPHRTX, 0x06}, // MR-OQPSK, rate mode 0//ERORR
     {RG_BBC0_OQPSKC0,   0x10},  // 100kchips/s, RC-0.8 shaping, direct-modulation enabled
 //  {RG_BBC0_OQPSKC1,   0x3F},  // MINIMUM preamble-detection sensitivities, rx-override disabled
 //  {RG_BBC0_OQPSKC2,   0x00},  // listen for MR-OQPSK frames only
@@ -4178,7 +4178,7 @@ static const registerSetting_t basic_settings_oqpsk_250kbps[] = {
 //------------------------------------ OFDM -----------------------------------//
 /** Preferred settings for OFDM */
 
-static const registerSetting_t basic_settings_ofdm_1_mcs0[] = {
+static  registerSetting_t basic_settings_ofdm_1_mcs0[] = {
   {RG_RF09_CMD,       0x02},
   {RG_RF09_IRQM,      0x1F},
   {RG_RF24_IRQM,      0x00},
@@ -4196,7 +4196,7 @@ static const registerSetting_t basic_settings_ofdm_1_mcs0[] = {
   {RG_BBC0_OFDMPHRTX, 0x00},
 };
 
-static const registerSetting_t basic_settings_ofdm_1_mcs1[] = {
+static  registerSetting_t basic_settings_ofdm_1_mcs1[] = {
   {RG_RF09_CMD,       0x02},
   {RG_RF09_IRQM,      0x1F},
   {RG_RF24_IRQM,      0x00},
@@ -4214,7 +4214,7 @@ static const registerSetting_t basic_settings_ofdm_1_mcs1[] = {
   {RG_BBC0_OFDMPHRTX, 0x01},
 };
 
-static const registerSetting_t basic_settings_ofdm_1_mcs2[] = {
+static  registerSetting_t basic_settings_ofdm_1_mcs2[] = {
   {RG_RF09_CMD,       0x02},
   {RG_RF09_IRQM,      0x1F},
   {RG_RF24_IRQM,      0x00},
@@ -4232,7 +4232,7 @@ static const registerSetting_t basic_settings_ofdm_1_mcs2[] = {
   {RG_BBC0_OFDMPHRTX, 0x02},
 };
 
-static const registerSetting_t basic_settings_ofdm_1_mcs3[] = {  //TODO
+static  registerSetting_t basic_settings_ofdm_1_mcs3[] = {  //TODO
   {RG_RF09_CMD,       0x02},
   {RG_RF09_IRQM,      0x1F},
   {RG_RF24_IRQM,      0x00},
