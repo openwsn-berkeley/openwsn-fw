@@ -6,6 +6,7 @@
 #include "neighbors.h"
 #include "schedule.h"
 #include "IEEE802154_security.h"
+#include "icmpv6rpl.h"
 
 //=========================== variables =======================================
 
