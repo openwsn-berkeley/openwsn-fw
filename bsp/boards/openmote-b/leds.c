@@ -140,7 +140,7 @@ void leds_circular_shift(void) {
     // incrementally turn LED on
     for (i=0;i<10;i++) {
         bspLedSet(BSP_LED_1);
-        for (delay=0xffff;delay>0;delay--)
+        for (delay=0xffff;delay>0;delay--);
         bspLedClear(BSP_LED_1);
         bspLedSet(BSP_LED_2);
         for (delay=0xffff;delay>0;delay--);

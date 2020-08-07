@@ -16,6 +16,7 @@ settings
 /.sconsign.dblite
 *.map
 *.lst
+*.bak
 *~
 /projects/telosb/00std_button/path.txt
 /projects/telosb/00std_xon_xoff/path.txt
