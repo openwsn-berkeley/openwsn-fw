@@ -4,7 +4,6 @@
 */
 #include "board.h"
 
-#include "spi.h"
 #include "debugpins.h"
 #include "leds.h"
 #include "sctimer.h"
