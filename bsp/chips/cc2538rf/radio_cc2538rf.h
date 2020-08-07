@@ -78,40 +78,40 @@
  * \brief Send an RX ON command strobe to the CSP
  */
 #define CC2538_RF_CSP_ISRXON()    \
-  do { HWREG(RFCORE_SFR_RFST) = CC2538_RF_CSP_OP_ISRXON; } while(0)
+    do { HWREG(RFCORE_SFR_RFST) = CC2538_RF_CSP_OP_ISRXON; } while(0)
 
 /**
  * \brief Send a TX ON command strobe to the CSP
  */
 #define CC2538_RF_CSP_ISTXON()    \
-  do { HWREG(RFCORE_SFR_RFST) = CC2538_RF_CSP_OP_ISTXON; } while(0)
+    do { HWREG(RFCORE_SFR_RFST) = CC2538_RF_CSP_OP_ISTXON; } while(0)
 
 /**
  * \brief Send a RF OFF command strobe to the CSP
  */
 #define CC2538_RF_CSP_ISRFOFF()   \
-  do { HWREG(RFCORE_SFR_RFST) = CC2538_RF_CSP_OP_ISRFOFF; } while(0)
+    do { HWREG(RFCORE_SFR_RFST) = CC2538_RF_CSP_OP_ISRFOFF; } while(0)
 
 /**
  * \brief Flush the RX FIFO
  */
 #define CC2538_RF_CSP_ISFLUSHRX()  do { \
-  HWREG(RFCORE_SFR_RFST) = CC2538_RF_CSP_OP_ISFLUSHRX; \
-  HWREG(RFCORE_SFR_RFST) = CC2538_RF_CSP_OP_ISFLUSHRX; \
+    HWREG(RFCORE_SFR_RFST) = CC2538_RF_CSP_OP_ISFLUSHRX; \
+    HWREG(RFCORE_SFR_RFST) = CC2538_RF_CSP_OP_ISFLUSHRX; \
 } while(0)
 
 /**
  * \brief Flush the TX FIFO
  */
 #define CC2538_RF_CSP_ISFLUSHTX()  do { \
-  HWREG(RFCORE_SFR_RFST) = CC2538_RF_CSP_OP_ISFLUSHTX; \
-  HWREG(RFCORE_SFR_RFST) = CC2538_RF_CSP_OP_ISFLUSHTX; \
+    HWREG(RFCORE_SFR_RFST) = CC2538_RF_CSP_OP_ISFLUSHTX; \
+    HWREG(RFCORE_SFR_RFST) = CC2538_RF_CSP_OP_ISFLUSHTX; \
 } while(0)
 /*---------------------------------------------------------------------------*/
 typedef struct {
-   radio_capture_cbt         startFrame_cb;
-   radio_capture_cbt         endFrame_cb;
-   radio_state_t             state;
+    radio_capture_cbt         startFrame_cb;
+    radio_capture_cbt         endFrame_cb;
+    radio_state_t             state;
 } radio_vars_cc2538rf_t;
 
 //=========================== variables =======================================
@@ -139,11 +139,11 @@ void     radio_txNow_cc2538rf(void);
 void     radio_rxEnable_cc2538rf(void);
 void     radio_rxNow_cc2538rf(void);
 void     radio_getReceivedFrame_cc2538rf(uint8_t* bufRead,
-                                uint8_t* lenRead,
-                                uint8_t  maxBufLen,
-                                 int8_t* rssi,
-                                uint8_t* lqi,
-                                   bool* crc);
+                                         uint8_t* lenRead,
+                                         uint8_t  maxBufLen,
+                                         int8_t* rssi,
+                                         uint8_t* lqi,
+                                         bool* crc);
 
 // interrupt handlers
 kick_scheduler_t     radio_isr_cc2538rf(void);

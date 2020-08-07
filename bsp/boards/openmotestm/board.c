@@ -103,10 +103,10 @@ void board_init(void){
 //==== bootstrapping slot info lookup table
 
 //===== IEEE802154E timing
-void board_init_slot_vars(void){
+void board_init_slot_vars(void) {
     // 20ms slot
-    slot_board_vars [SLOT_20ms_24GHZ].slotDuration                   =  655   ; // ms  
-    slot_board_vars [SLOT_20ms_24GHZ].maxTxDataPrepare               =  66  ;  // 2014us (not measured)
+    slot_board_vars [SLOT_20ms_24GHZ].slotDuration                   =  655  ; // ms  
+    slot_board_vars [SLOT_20ms_24GHZ].maxTxDataPrepare               =  66   ; // 2014us (not measured)
     slot_board_vars [SLOT_20ms_24GHZ].maxRxAckPrepare                =  20   ; // 610us (not measured)
     slot_board_vars [SLOT_20ms_24GHZ].maxRxDataPrepare               =  33   ; // 1007us (not measured)
     slot_board_vars [SLOT_20ms_24GHZ].maxTxAckPrepare                =  30   ; // 915us (not measured)
@@ -117,14 +117,12 @@ void board_init_slot_vars(void){
 
 // To get the current slotDuration at any time
 // used during initialization by sixtop to fire the first sixtop EB
-uint16_t board_getSlotDuration (void)
-{
+uint16_t board_getSlotDuration (void) {
     return slot_board_vars [selected_slot_type].slotDuration;
 }
 
 // Setter/Getter function for slot_board_vars
-slot_board_vars_t board_selectSlotTemplate (slotType_t slot_type)
-{
+slot_board_vars_t board_selectSlotTemplate (slotType_t slot_type) {
   selected_slot_type = slot_type;
   return slot_board_vars [selected_slot_type];
 }

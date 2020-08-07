@@ -29,23 +29,23 @@ void board_init(OpenMote* self) {
    printf("C@0x%x: board_init()...\n",self);
 #endif
    
-   // initialize bsp modules
-   debugpins_init(self);
-   leds_init(self);
-   sctimer_init(self);
-   uart_init(self);
-   radio_init(self);
-   
-   board_init_slot_vars();
+    // initialize bsp modules
+    debugpins_init(self);
+    leds_init(self);
+    sctimer_init(self);
+    uart_init(self);
+    radio_init(self);
 
-   // forward to Python
-   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_board_init],NULL);
-   if (result == NULL) {
+    board_init_slot_vars();
+
+    // forward to Python
+    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_board_init],NULL);
+    if (result == NULL) {
       printf("[CRITICAL] board_init() returned NULL\r\n");
       return;
-   }
-   Py_DECREF(result);
-   
+    }
+    Py_DECREF(result);
+
 #ifdef TRACE_ON
    printf("C@0x%x: ...done.\n",self);
 #endif
@@ -66,14 +66,12 @@ void board_init_slot_vars(void){
 
 // To get the current slotDuration at any time
 // used during initialization by sixtop to fire the first sixtop EB
-uint16_t board_getSlotDuration (void)
-{
+uint16_t board_getSlotDuration (void){
     return slot_board_vars [selected_slot_type].slotDuration;
 }
 
 // Setter/Getter function for slot_board_vars
-slot_board_vars_t board_selectSlotTemplate (slotType_t slot_type)
-{
+slot_board_vars_t board_selectSlotTemplate (slotType_t slot_type){
   selected_slot_type = slot_type;
   return slot_board_vars [selected_slot_type];
 }

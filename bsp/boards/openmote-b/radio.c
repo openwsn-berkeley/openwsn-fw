@@ -151,7 +151,7 @@ void radio_bootstrap (void)
  //RADIOSETTING_OFDM_OPTION_1_MCS1
     dyn_funcs [RADIOSETTING_OFDM_OPTION_1_MCS1].radio_reset                 =   radio_reset_at86rf215; 
     dyn_funcs [RADIOSETTING_OFDM_OPTION_1_MCS1].radio_init                  =   radio_init_at86rf215; 
-    dyn_funcs [RADIOSETTING_OFDM_OPTION_1_MCS1].radio_setConfig     =   radio_setConfig_at86rf215; 
+    dyn_funcs [RADIOSETTING_OFDM_OPTION_1_MCS1].radio_setConfig             =   radio_setConfig_at86rf215; 
     dyn_funcs [RADIOSETTING_OFDM_OPTION_1_MCS1].radio_setStartFrameCb       =   radio_setStartFrameCb_at86rf215; 
     dyn_funcs [RADIOSETTING_OFDM_OPTION_1_MCS1].radio_setEndFrameCb         =   radio_setEndFrameCb_at86rf215; 
     dyn_funcs [RADIOSETTING_OFDM_OPTION_1_MCS1].radio_setFrequency          =   radio_setFrequency_at86rf215; 
@@ -169,7 +169,7 @@ void radio_bootstrap (void)
  //RADIOSETTING_OFDM_OPTION_1_MCS2
     dyn_funcs [RADIOSETTING_OFDM_OPTION_1_MCS2].radio_reset                 =   radio_reset_at86rf215; 
     dyn_funcs [RADIOSETTING_OFDM_OPTION_1_MCS2].radio_init                  =   radio_init_at86rf215; 
-    dyn_funcs [RADIOSETTING_OFDM_OPTION_1_MCS2].radio_setConfig     =   radio_setConfig_at86rf215; 
+    dyn_funcs [RADIOSETTING_OFDM_OPTION_1_MCS2].radio_setConfig             =   radio_setConfig_at86rf215; 
     dyn_funcs [RADIOSETTING_OFDM_OPTION_1_MCS2].radio_setStartFrameCb       =   radio_setStartFrameCb_at86rf215; 
     dyn_funcs [RADIOSETTING_OFDM_OPTION_1_MCS2].radio_setEndFrameCb         =   radio_setEndFrameCb_at86rf215; 
     dyn_funcs [RADIOSETTING_OFDM_OPTION_1_MCS2].radio_setFrequency          =   radio_setFrequency_at86rf215; 
@@ -187,7 +187,7 @@ void radio_bootstrap (void)
  //RADIOSETTING_OFDM_OPTION_1_MCS3
     dyn_funcs [RADIOSETTING_OFDM_OPTION_1_MCS3].radio_reset                 =   radio_reset_at86rf215; 
     dyn_funcs [RADIOSETTING_OFDM_OPTION_1_MCS3].radio_init                  =   radio_init_at86rf215; 
-    dyn_funcs [RADIOSETTING_OFDM_OPTION_1_MCS3].radio_setConfig     =   radio_setConfig_at86rf215; 
+    dyn_funcs [RADIOSETTING_OFDM_OPTION_1_MCS3].radio_setConfig             =   radio_setConfig_at86rf215; 
     dyn_funcs [RADIOSETTING_OFDM_OPTION_1_MCS3].radio_setStartFrameCb       =   radio_setStartFrameCb_at86rf215; 
     dyn_funcs [RADIOSETTING_OFDM_OPTION_1_MCS3].radio_setEndFrameCb         =   radio_setEndFrameCb_at86rf215; 
     dyn_funcs [RADIOSETTING_OFDM_OPTION_1_MCS3].radio_setFrequency          =   radio_setFrequency_at86rf215; 
@@ -226,6 +226,7 @@ void radio_bootstrap (void)
 //=========================== public ==========================================
 
 //===== admin
+
 void radio_init (void) {
     //bootstrapping the radio look-up matrix
     radio_bootstrap();

@@ -246,8 +246,8 @@ void ieee154e_init(void) {
 
 Call this function once, preferrably at end of the ieee154e_init function
 */
-void ieee154e_slot_template_init(void)
-{   
+void ieee154e_slot_template_init(void){   
+    
     //10ms slot
     slot_154e_vars [SLOT_10ms_24GHZ].TsTxOffset                  =  ( 2120  /PORT_US_PER_TICK ) ;   //  2120us
     slot_154e_vars [SLOT_10ms_24GHZ].TsLongGT                    =  ( 1100  /PORT_US_PER_TICK ) ;   //  1100us
@@ -299,8 +299,8 @@ void ieee154e_slot_template_init(void)
 
 Call this function once, preferrably at end of the ieee154e_init function
 */
-void ieee154e_select_slot_template(slotType_t slotType)
-{   
+void ieee154e_select_slot_template(slotType_t slotType){
+
     slot_board_vars_t slot_board_vars= board_selectSlotTemplate(slotType);
       
     // board-specific template details
@@ -320,7 +320,6 @@ void ieee154e_select_slot_template(slotType_t slotType)
     slotTemplate.wdRadioTx           =   slot_154e_vars [slotType].wdRadioTx;
     slotTemplate.wdDataDuration      =   slot_154e_vars [slotType].wdDataDuration;
     slotTemplate.wdAckDuration       =   slot_154e_vars [slotType].wdAckDuration;
-  
 }
 //=========================== public ==========================================
 

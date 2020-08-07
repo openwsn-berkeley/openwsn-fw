@@ -174,37 +174,37 @@ typedef struct {
 
 // This slotTemplate should be instantiated only once for the currently used slotTemplate
 typedef struct {
-  
-// 1. slot template variables
-//  data transmission template
-uint16_t TsTxOffset;         //tx
-uint16_t TsLongGT;           //rx
+      
+    // 1. slot template variables
+    //  data transmission template
+    uint16_t TsTxOffset;         //tx
+    uint16_t TsLongGT;           //rx
 
-// ack transmission template
-uint16_t TsTxAckDelay;       //tx
-uint16_t TsShortGT;          //rx
+    // ack transmission template
+    uint16_t TsTxAckDelay;       //tx
+    uint16_t TsShortGT;          //rx
 
-// watchdog (safety check) template
-uint16_t wdRadioTx;      
-uint16_t wdDataDuration;
-uint16_t wdAckDuration;
+    // watchdog (safety check) template
+    uint16_t wdRadioTx;      
+    uint16_t wdDataDuration;
+    uint16_t wdAckDuration;
 
-// 2. board/implementation specific durations
-// note that these variables MUST respect (i.e. fit) the slot template section 1 in order for the scedule to maintain its integrity. 
+    // 2. board/implementation specific durations
+    // note that these variables MUST respect (i.e. fit) the slot template section 1 in order for the scedule to maintain its integrity. 
 
-uint16_t slotDuration;
-uint16_t maxTxDataPrepare;
-uint16_t maxRxAckPrepare;
-uint16_t maxRxDataPrepare;
-uint16_t maxTxAckPrepare;
+    uint16_t slotDuration;
+    uint16_t maxTxDataPrepare;
+    uint16_t maxRxAckPrepare;
+    uint16_t maxRxDataPrepare;
+    uint16_t maxTxAckPrepare;
 
-//3. radio setting specific durations
+    //3. radio setting specific durations
 
-// this parameter is specifically helpful in tuning the radio transmission timing to meet the TsTxOffset for accurate synchronization
-uint16_t delayTx;       // between GO signal and SFD
+    // this parameter is specifically helpful in tuning the radio transmission timing to meet the TsTxOffset for accurate synchronization
+    uint16_t delayTx;       // between GO signal and SFD
 
-// this parameter is helpful to have the radio listen later or earlier to save energy in listening state.
-uint16_t delayRx;        // between GO signal and start listening
+    // this parameter is helpful to have the radio listen later or earlier to save energy in listening state.
+    uint16_t delayRx;        // between GO signal and start listening
 } slotTemplate_t;
 
 //shift of bytes in the linkOption bitmap: draft-ietf-6tisch-minimal-10.txt: page 6

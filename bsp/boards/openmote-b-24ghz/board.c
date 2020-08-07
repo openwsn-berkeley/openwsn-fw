@@ -61,7 +61,7 @@ static void SysCtrlWakeupSetting(void);
 extern int mote_main(void);
 
 int main(void) {
-   return mote_main();
+    return mote_main();
 }
 
 //=========================== public ==========================================
@@ -117,36 +117,34 @@ void board_init_slot_vars(void){
 
 // To get the current slotDuration at any time
 // used during initialization by sixtop to fire the first sixtop EB
-uint16_t board_getSlotDuration (void)
-{
+uint16_t board_getSlotDuration (void){
     return slot_board_vars [selected_slot_type].slotDuration;
 }
 
 // Setter/Getter function for slot_board_vars
-slot_board_vars_t board_selectSlotTemplate (slotType_t slot_type)
-{
-  selected_slot_type = slot_type;
-  return slot_board_vars [selected_slot_type];
+slot_board_vars_t board_selectSlotTemplate (slotType_t slot_type){
+    selected_slot_type = slot_type;
+    return slot_board_vars [selected_slot_type];
 }
 
 void antenna_init(void) {
-  /* Configure GPIO as output */
-  GPIOPinTypeGPIOOutput(BSP_ANTENNA_BASE, BSP_ANTENNA_CC2538_24GHZ);
-  GPIOPinTypeGPIOOutput(BSP_ANTENNA_BASE, BSP_ANTENNA_AT215_24GHZ);
+    /* Configure GPIO as output */
+    GPIOPinTypeGPIOOutput(BSP_ANTENNA_BASE, BSP_ANTENNA_CC2538_24GHZ);
+    GPIOPinTypeGPIOOutput(BSP_ANTENNA_BASE, BSP_ANTENNA_AT215_24GHZ);
 
-  /* Use CC2538 antenna by default */
-  GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_CC2538_24GHZ, 0);
-  GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_AT215_24GHZ, BSP_ANTENNA_AT215_24GHZ);
+    /* Use CC2538 antenna by default */
+    GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_CC2538_24GHZ, 0);
+    GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_AT215_24GHZ, BSP_ANTENNA_AT215_24GHZ);
 }
 
 void antenna_cc2538(void) {
-  GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_CC2538_24GHZ, 0);
-  GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_AT215_24GHZ, BSP_ANTENNA_AT215_24GHZ);  
+    GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_CC2538_24GHZ, 0);
+    GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_AT215_24GHZ, BSP_ANTENNA_AT215_24GHZ);  
 }
 
 void antenna_at86rf215(void) {
-  GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_AT215_24GHZ, 0);
-  GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_CC2538_24GHZ, BSP_ANTENNA_CC2538_24GHZ);
+    GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_AT215_24GHZ, 0);
+    GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_CC2538_24GHZ, BSP_ANTENNA_CC2538_24GHZ);
 }  
 
 /**
@@ -273,78 +271,78 @@ static void button_init(void) {
 }
 
 static void SysCtrlRunSetting(void) {
-  /* Disable General Purpose Timers 0, 1, 2, 3 when running */
-  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_GPT0);
-  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_GPT1);
-  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_GPT3);
+    /* Disable General Purpose Timers 0, 1, 2, 3 when running */
+    SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_GPT0);
+    SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_GPT1);
+    SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_GPT3);
 
-  /* Disable SSI 0, 1 when running */
-  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_SSI0);
-  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_SSI1);
+    /* Disable SSI 0, 1 when running */
+    SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_SSI0);
+    SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_SSI1);
 
-  /* Disable UART1 when running */
-  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_UART1);
+    /* Disable UART1 when running */
+    SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_UART1);
 
-  /* Disable I2C, AES and PKA when running */
-  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_I2C);
-  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_PKA);
-  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_AES);
+    /* Disable I2C, AES and PKA when running */
+    SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_I2C);
+    SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_PKA);
+    SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_AES);
 
-  /* Enable UART0 and RFC when running */
-  SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_GPT2);
-  SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_UART0);
-  SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_RFC);
+    /* Enable UART0 and RFC when running */
+    SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_GPT2);
+    SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_UART0);
+    SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_RFC);
 }
 
 static void SysCtrlSleepSetting(void) {
-  /* Disable General Purpose Timers 0, 1, 2, 3 during sleep */
-  SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_GPT0);
-  SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_GPT1);
-  SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_GPT3);
+    /* Disable General Purpose Timers 0, 1, 2, 3 during sleep */
+    SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_GPT0);
+    SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_GPT1);
+    SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_GPT3);
 
-  /* Disable SSI 0, 1 during sleep */
-  SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_SSI0);
-  SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_SSI1);
+    /* Disable SSI 0, 1 during sleep */
+    SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_SSI0);
+    SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_SSI1);
 
-  /* Disable UART 0, 1 during sleep */
-  SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_UART1);
+    /* Disable UART 0, 1 during sleep */
+    SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_UART1);
 
-  /* Disable I2C, PKA, AES during sleep */
-  SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_I2C);
-  SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_PKA);
-  SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_AES);
+    /* Disable I2C, PKA, AES during sleep */
+    SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_I2C);
+    SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_PKA);
+    SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_AES);
 
-  /* Enable UART and RFC during sleep */
-  SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_GPT2);
-  SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_UART0);
-  SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_RFC);
+    /* Enable UART and RFC during sleep */
+    SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_GPT2);
+    SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_UART0);
+    SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_RFC);
 }
 
 static void SysCtrlDeepSleepSetting(void) {
-  /* Disable General Purpose Timers 0, 1, 2, 3 during deep sleep */
-  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_GPT0);
-  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_GPT1);
-  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_GPT2);
-  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_GPT3);
+    /* Disable General Purpose Timers 0, 1, 2, 3 during deep sleep */
+    SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_GPT0);
+    SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_GPT1);
+    SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_GPT2);
+    SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_GPT3);
 
-  /* Disable SSI 0, 1 during deep sleep */
-  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_SSI0);
-  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_SSI1);
+    /* Disable SSI 0, 1 during deep sleep */
+    SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_SSI0);
+    SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_SSI1);
 
-  /* Disable UART 0, 1 during deep sleep */
-  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_UART0);
-  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_UART1);
+    /* Disable UART 0, 1 during deep sleep */
+    SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_UART0);
+    SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_UART1);
 
-  /* Disable I2C, PKA, AES during deep sleep */
-  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_I2C);
-  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_PKA);
-  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_AES);
-  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_RFC);
+    /* Disable I2C, PKA, AES during deep sleep */
+    SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_I2C);
+    SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_PKA);
+    SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_AES);
+    SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_RFC);
 }
 
 static void SysCtrlWakeupSetting(void) {
   /* Allow the SMTimer to wake up the processor */
-  GPIOIntWakeupEnable(GPIO_IWE_SM_TIMER);
+    GPIOIntWakeupEnable(GPIO_IWE_SM_TIMER);
 }
 
 //=========================== interrupt handlers ==============================

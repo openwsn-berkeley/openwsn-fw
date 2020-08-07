@@ -57,6 +57,7 @@ static void SysCtrlRunSetting(void);
 static void SysCtrlWakeupSetting(void);
 
 //=========================== variables =======================================
+
 slot_board_vars_t slot_board_vars [MAX_SLOT_TYPES];
 slotType_t selected_slot_type;
 
@@ -64,13 +65,13 @@ slotType_t selected_slot_type;
    
 extern int mote_main(void);
 
-int main(void) {
-   return mote_main();
+int main(void){
+  return mote_main();
 }
 
 //=========================== public ==========================================
 
-void board_init(void) {
+void board_init(void){
 
     gpio_init();
     clock_init();
@@ -85,11 +86,11 @@ void board_init(void) {
     i2c_init();
     board_init_slot_vars();
 #if defined(BOARD_CRYPTOENGINE_ENABLED)
-   cryptoeng
+    cryptoeng
 #endif
 }
 
-void antenna_init(void) {
+void antenna_init(void){
     // Configure GPIO as output 
     GPIOPinTypeGPIOOutput(BSP_ANTENNA_BASE, BSP_ANTENNA_CC2538_24GHZ);
     GPIOPinTypeGPIOOutput(BSP_ANTENNA_BASE, BSP_ANTENNA_AT215_24GHZ);
@@ -106,20 +107,20 @@ void antenna_init(void) {
 #endif
 }
 
-void antenna_cc2538(void) {
-  GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_CC2538_24GHZ, 0);
-  GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_AT215_24GHZ, BSP_ANTENNA_AT215_24GHZ);
+void antenna_cc2538(void){
+    GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_CC2538_24GHZ, 0);
+    GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_AT215_24GHZ, BSP_ANTENNA_AT215_24GHZ);
 }
 
-void antenna_at86rf215(void) {
-  GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_AT215_24GHZ, 0);
-  GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_CC2538_24GHZ, BSP_ANTENNA_CC2538_24GHZ);
+void antenna_at86rf215(void){
+    GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_AT215_24GHZ, 0);
+    GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_CC2538_24GHZ, BSP_ANTENNA_CC2538_24GHZ);
 }
 
 
  // Puts the board to sleep
  
-void board_sleep(void) {
+void board_sleep(void){
     SysCtrlPowerModeSet(SYS_CTRL_PM_NOACTION);
     SysCtrlSleep();
 }
@@ -128,7 +129,7 @@ void board_sleep(void) {
  // Timer runs at 32 MHz and is 32-bit wide
  // The timer is divided by 32, whichs gives a 1 microsecond ticks
 
-void board_timer_init(void) {
+void board_timer_init(void){
     //Configure the timer 
     TimerConfigure(GPTIMER2_BASE, GPTIMER_CFG_PERIODIC_UP);
 
@@ -137,10 +138,10 @@ void board_timer_init(void) {
 }
 
 
- // Returns the current value of the timer
- // The timer is divided by 32, whichs gives a 1 microsecond ticks
+// Returns the current value of the timer
+// The timer is divided by 32, whichs gives a 1 microsecond ticks
 
-uint32_t board_timer_get(void) {
+uint32_t board_timer_get(void){
     uint32_t current;
 
     //Get the current timer value
@@ -153,7 +154,7 @@ uint32_t board_timer_get(void) {
  // Returns true if the timer has expired
  // The timer is divided by 32, whichs gives a 1 microsecond ticks
 
-bool board_timer_expired(uint32_t future) {
+bool board_timer_expired(uint32_t future){
     uint32_t current;
     int32_t remaining;
 
@@ -164,7 +165,7 @@ bool board_timer_expired(uint32_t future) {
     remaining = (int32_t) (future - current);
 
     //Return if timer has expired
-    if (remaining > 0) {
+    if (remaining > 0){
         return false;
     } else {
         return true;
@@ -174,38 +175,38 @@ bool board_timer_expired(uint32_t future) {
 //==== bootstrapping slot info lookup table
 void board_init_slot_vars(void){
     //10ms slot
-    slot_board_vars [SLOT_10ms_24GHZ].slotDuration                         = 328  ;  // ms 
-    slot_board_vars [SLOT_10ms_24GHZ].maxTxDataPrepare                     = 10  ;  // 305us (measured  82us)
-    slot_board_vars [SLOT_10ms_24GHZ].maxRxAckPrepare                      = 10  ;  // 305us (measured  83us)
-    slot_board_vars [SLOT_10ms_24GHZ].maxRxDataPrepare                     =  4  ;  // 122us (measured  22us)
-    slot_board_vars [SLOT_10ms_24GHZ].maxTxAckPrepare                      = 10  ;  // 122us (measured  94us)
-    #ifdef L2_SECURITY_ACTIVE                                             
-    slot_board_vars [SLOT_10ms_24GHZ].delayTx                              = 14  ;  // 366us (measured xxxus)
+    slot_board_vars [SLOT_10ms_24GHZ].slotDuration                   = 328    ;  // ms 
+    slot_board_vars [SLOT_10ms_24GHZ].maxTxDataPrepare               = 10     ;  // 305us (measured  82us)
+    slot_board_vars [SLOT_10ms_24GHZ].maxRxAckPrepare                = 10     ;  // 305us (measured  83us)
+    slot_board_vars [SLOT_10ms_24GHZ].maxRxDataPrepare               =  4     ;  // 122us (measured  22us)
+    slot_board_vars [SLOT_10ms_24GHZ].maxTxAckPrepare                = 10     ;  // 122us (measured  94us)
+    #ifdef L2_SECURITY_ACTIVE                                               
+    slot_board_vars [SLOT_10ms_24GHZ].delayTx                        = 14     ;  // 366us (measured xxxus)
     #else                                                                 
-    slot_board_vars [SLOT_10ms_24GHZ].delayTx                              = 12  ;  // 366us (measured xxxus)
+    slot_board_vars [SLOT_10ms_24GHZ].delayTx                        = 12     ;  // 366us (measured xxxus)
     #endif                                                                
-    slot_board_vars [SLOT_10ms_24GHZ].delayRx                              =  0  ;  // 0us (can not measure)
+    slot_board_vars [SLOT_10ms_24GHZ].delayRx                        =  0     ;  // 0us (can not measure)
 
     // 20ms slot
-    slot_board_vars [SLOT_20ms_24GHZ].slotDuration                   =  655  ; // tics  
-    slot_board_vars [SLOT_20ms_24GHZ].maxTxDataPrepare               =  15   ;  // 457us (based on measurement)
-    slot_board_vars [SLOT_20ms_24GHZ].maxRxAckPrepare                =  10   ; // 305us (based on measurement)
-    slot_board_vars [SLOT_20ms_24GHZ].maxRxDataPrepare               =  10   ; // 305us (based on measurement)
-    slot_board_vars [SLOT_20ms_24GHZ].maxTxAckPrepare                =  15   ; // 457us (based on measurement)
-    slot_board_vars [SLOT_20ms_24GHZ].delayTx                        =  6    ; // 183us (based on measurement)
-    slot_board_vars [SLOT_20ms_24GHZ].delayRx                        =  0    ; // 0us (can not measure)
+    slot_board_vars [SLOT_20ms_24GHZ].slotDuration                   =  655   ; // tics  
+    slot_board_vars [SLOT_20ms_24GHZ].maxTxDataPrepare               =  15    ;  // 457us (based on measurement)
+    slot_board_vars [SLOT_20ms_24GHZ].maxRxAckPrepare                =  10    ; // 305us (based on measurement)
+    slot_board_vars [SLOT_20ms_24GHZ].maxRxDataPrepare               =  10    ; // 305us (based on measurement)
+    slot_board_vars [SLOT_20ms_24GHZ].maxTxAckPrepare                =  15    ; // 457us (based on measurement)
+    slot_board_vars [SLOT_20ms_24GHZ].delayTx                        =  6     ; // 183us (based on measurement)
+    slot_board_vars [SLOT_20ms_24GHZ].delayRx                        =  0     ; // 0us (can not measure)
     
     //40ms slot for 24ghz cc2538
     slot_board_vars [SLOT_40ms_24GHZ].slotDuration                   =   1310 ;  // tics 
-    slot_board_vars [SLOT_40ms_24GHZ].maxTxDataPrepare               =   15  ;  // 457us (based on measurement) 
-    slot_board_vars [SLOT_40ms_24GHZ].maxRxAckPrepare                =   10  ;  // 305us (based on measurement)
-    slot_board_vars [SLOT_40ms_24GHZ].maxRxDataPrepare               =   10  ;  // 305us (based on measurement)
-    slot_board_vars [SLOT_40ms_24GHZ].maxTxAckPrepare                =   15  ;  // 457us (based on measurement)
-    slot_board_vars [SLOT_40ms_24GHZ].delayTx                        =   6   ;  // 183us (measured xxxus)
-    slot_board_vars [SLOT_40ms_24GHZ].delayRx                        =   0  ;  // 0us (can not measure)
+    slot_board_vars [SLOT_40ms_24GHZ].maxTxDataPrepare               =   15   ;  // 457us (based on measurement) 
+    slot_board_vars [SLOT_40ms_24GHZ].maxRxAckPrepare                =   10   ;  // 305us (based on measurement)
+    slot_board_vars [SLOT_40ms_24GHZ].maxRxDataPrepare               =   10   ;  // 305us (based on measurement)
+    slot_board_vars [SLOT_40ms_24GHZ].maxTxAckPrepare                =   15   ;  // 457us (based on measurement)
+    slot_board_vars [SLOT_40ms_24GHZ].delayTx                        =   6    ;  // 183us (measured xxxus)
+    slot_board_vars [SLOT_40ms_24GHZ].delayRx                        =   0    ;  // 0us (can not measure)
 
     //40ms slot for FSK
-    slot_board_vars [SLOT_40ms_FSK_SUBGHZ].slotDuration              =   1310   ;  // tics  
+    slot_board_vars [SLOT_40ms_FSK_SUBGHZ].slotDuration              =   1310 ;  // tics  
     slot_board_vars [SLOT_40ms_FSK_SUBGHZ].maxTxDataPrepare          =   50   ;  // 1525us  (based on measurement)
     slot_board_vars [SLOT_40ms_FSK_SUBGHZ].maxRxAckPrepare           =   10   ;  // 305µs   (based on measurement)
     slot_board_vars [SLOT_40ms_FSK_SUBGHZ].maxRxDataPrepare          =   10   ;  // 305µs   (based on measurement)
@@ -214,7 +215,7 @@ void board_init_slot_vars(void){
     slot_board_vars [SLOT_40ms_FSK_SUBGHZ].delayRx                   =   16   ;  // 488µs. This parameter is usually set to 0, however for Atmel on openmote-b, it takes at least 1ms for the transmission to occure because of spi delay (or other implementation specific overhead), so reciver is expected to wait a little more before turning on the radio. 
     
     //40ms slot for OFDM1 MCS0-3    
-    slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].slotDuration      =  1310    ;  // tics  
+    slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].slotDuration      =  1310  ;  // tics  
     slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].maxTxDataPrepare  =  50    ;  // 1525us (based on measurement) 
     slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].maxRxAckPrepare   =  10    ;  // 305us (based on measurement) 
     slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].maxRxDataPrepare  =  10    ;  // 305us (based on measurement) 
@@ -225,28 +226,26 @@ void board_init_slot_vars(void){
 
 // To get the current slotDuration at any time (in tics)
 // if you need the value in MS, divide by PORT_TICS_PER_MS (which varies by board and clock frequency and defined in board_info.h)
-uint16_t board_getSlotDuration (void)
-{
+uint16_t board_getSlotDuration (void){
     return slot_board_vars [selected_slot_type].slotDuration;
 }
 
 // Setter/Getter function for slot_board_vars
-slot_board_vars_t board_selectSlotTemplate (slotType_t slot_type)
-{
-  selected_slot_type = slot_type;
-  return slot_board_vars [selected_slot_type];
+slot_board_vars_t board_selectSlotTemplate (slotType_t slot_type){
+    selected_slot_type = slot_type;
+    return slot_board_vars [selected_slot_type];
 }
 
 
  // Resets the board
 
-void board_reset(void) {
+void board_reset(void){
     SysCtrlReset();
 }
 
 //=========================== private =========================================
 
-static void gpio_init(void) {
+static void gpio_init(void){
     // Configure all GPIO as input
     GPIOPinTypeGPIOInput(GPIO_A_BASE, 0xFF);
     GPIOPinTypeGPIOInput(GPIO_B_BASE, 0xFF);
@@ -254,7 +253,7 @@ static void gpio_init(void) {
     GPIOPinTypeGPIOInput(GPIO_D_BASE, 0xFF);
 }
 
-static void clock_init(void) {
+static void clock_init(void){
     // Disable global interrupts
     bool bIntDisabled = IntMasterDisable();
 
@@ -284,7 +283,7 @@ static void clock_init(void) {
     SysCtrlWakeupSetting();
 
     // Re-enable interrupt if initially enabled
-    if (!bIntDisabled) {
+    if (!bIntDisabled){
         IntMasterEnable();
     }
 }
@@ -292,7 +291,7 @@ static void clock_init(void) {
 
  // Configures the user button as input source
 
-static void button_init(void) {
+static void button_init(void){
     // The button is an input GPIO on falling edge
     GPIOPinTypeGPIOInput(BSP_BUTTON_BASE, BSP_BUTTON_USER);
     GPIOIntTypeSet(BSP_BUTTON_BASE, BSP_BUTTON_USER, GPIO_FALLING_EDGE);
@@ -305,79 +304,79 @@ static void button_init(void) {
     GPIOPinIntEnable(BSP_BUTTON_BASE, BSP_BUTTON_USER);
 }
 
-static void SysCtrlRunSetting(void) {
-  // Disable General Purpose Timers 0, 1, 2, 3 when running
-  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_GPT0);
-  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_GPT1);
-  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_GPT3);
+static void SysCtrlRunSetting(void){
+    // Disable General Purpose Timers 0, 1, 2, 3 when running
+    SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_GPT0);
+    SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_GPT1);
+    SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_GPT3);
 
-  // Disable SSI 0, 1 when running
-  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_SSI0);
-  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_SSI1);
+    // Disable SSI 0, 1 when running
+    SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_SSI0);
+    SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_SSI1);
 
-  // Disable UART1 when running
-  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_UART1);
+    // Disable UART1 when running
+    SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_UART1);
 
-  // Disable I2C, AES and PKA when running
-  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_I2C);
-  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_PKA);
-  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_AES);
+    // Disable I2C, AES and PKA when running
+    SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_I2C);
+    SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_PKA);
+    SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_AES);
 
-  // Enable UART0 and RFC when running
-  SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_GPT2);
-  SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_UART0);
-  SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_RFC);
+    // Enable UART0 and RFC when running
+    SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_GPT2);
+    SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_UART0);
+    SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_RFC);
 }
 
-static void SysCtrlSleepSetting(void) {
-  // Disable General Purpose Timers 0, 1, 2, 3 during sleep
-  SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_GPT0);
-  SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_GPT1);
-  SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_GPT3);
+static void SysCtrlSleepSetting(void){
+    // Disable General Purpose Timers 0, 1, 2, 3 during sleep
+    SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_GPT0);
+    SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_GPT1);
+    SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_GPT3);
 
-  // Disable SSI 0, 1 during sleep
-  SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_SSI0);
-  SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_SSI1);
+    // Disable SSI 0, 1 during sleep
+    SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_SSI0);
+    SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_SSI1);
 
-  // Disable UART 0, 1 during sleep
-  SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_UART1);
+    // Disable UART 0, 1 during sleep
+    SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_UART1);
 
-  // Disable I2C, PKA, AES during sleep
-  SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_I2C);
-  SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_PKA);
-  SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_AES);
+    // Disable I2C, PKA, AES during sleep
+    SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_I2C);
+    SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_PKA);
+    SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_AES);
 
-  // Enable UART and RFC during sleep
-  SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_GPT2);
-  SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_UART0);
-  SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_RFC);
+    // Enable UART and RFC during sleep
+    SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_GPT2);
+    SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_UART0);
+    SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_RFC);
 }
 
-static void SysCtrlDeepSleepSetting(void) {
-  // Disable General Purpose Timers 0, 1, 2, 3 during deep sleep
-  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_GPT0);
-  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_GPT1);
-  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_GPT2);
-  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_GPT3);
+static void SysCtrlDeepSleepSetting(void){
+    // Disable General Purpose Timers 0, 1, 2, 3 during deep sleep
+    SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_GPT0);
+    SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_GPT1);
+    SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_GPT2);
+    SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_GPT3);
 
-  // Disable SSI 0, 1 during deep sleep
-  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_SSI0);
-  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_SSI1);
+    // Disable SSI 0, 1 during deep sleep
+    SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_SSI0);
+    SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_SSI1);
 
-  // Disable UART 0, 1 during deep sleep
-  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_UART0);
-  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_UART1);
+    // Disable UART 0, 1 during deep sleep
+    SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_UART0);
+    SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_UART1);
 
-  // Disable I2C, PKA, AES during deep sleep
-  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_I2C);
-  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_PKA);
-  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_AES);
-  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_RFC);
+    // Disable I2C, PKA, AES during deep sleep
+    SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_I2C);
+    SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_PKA);
+    SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_AES);
+    SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_RFC);
 }
 
-static void SysCtrlWakeupSetting(void) {
-  // Allow the SMTimer to wake up the processor
-  GPIOIntWakeupEnable(GPIO_IWE_SM_TIMER);
+static void SysCtrlWakeupSetting(void){
+    // Allow the SMTimer to wake up the processor
+    GPIOIntWakeupEnable(GPIO_IWE_SM_TIMER);
 }
 
 //=========================== interrupt handlers ==============================

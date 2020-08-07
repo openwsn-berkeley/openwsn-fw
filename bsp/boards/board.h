@@ -16,16 +16,18 @@
 #include "toolchain_defs.h"
 
 //=========================== define ==========================================
+
 #define SLOTDURATION_MS     board_getSlotDuration()/PORT_TICS_PER_MS
 
 typedef enum {
-   DO_NOT_KICK_SCHEDULER = 0,
-   KICK_SCHEDULER        = 1,
+    DO_NOT_KICK_SCHEDULER = 0,
+    KICK_SCHEDULER        = 1,
 } kick_scheduler_t;
 
 
 
 //=========================== typedef =========================================
+
 typedef struct {
     uint16_t slotDuration;
 
@@ -66,5 +68,6 @@ slot_board_vars_t board_selectSlotTemplate(slotType_t slot_type);
 \}
 */
 //=========================== private =========================================
+
 void              board_init_slot_vars(void);
 #endif
