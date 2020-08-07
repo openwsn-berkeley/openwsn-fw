@@ -44,7 +44,7 @@ typedef struct {
 
 // available slot templates
 typedef enum{
-    SLOT_10ms,
+    SLOT_10ms_24GHZ,
     SLOT_20ms_24GHZ,
     SLOT_40ms_24GHZ,
     SLOT_40ms_FSK_SUBGHZ,

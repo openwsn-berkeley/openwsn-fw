@@ -249,13 +249,13 @@ Call this function once, preferrably at end of the ieee154e_init function
 void ieee154e_slot_template_init(void)
 {   
     //10ms slot
-    slot_154e_vars [SLOT_10ms].TsTxOffset                        =  ( 2120  /PORT_US_PER_TICK ) ;   //  2120us
-    slot_154e_vars [SLOT_10ms].TsLongGT                          =  ( 1100  /PORT_US_PER_TICK ) ;   //  1100us
-    slot_154e_vars [SLOT_10ms].TsTxAckDelay                      =  ( 1000  /PORT_US_PER_TICK ) ;   //  1000us
-    slot_154e_vars [SLOT_10ms].TsShortGT                         =  ( 500   /PORT_US_PER_TICK ) ;   //  500us; The standardlized value for this is 400/2=200us(7ticks). Currectly 7 doesn't work for short packet; change it back to 7 when found the problem.
-    slot_154e_vars [SLOT_10ms].wdRadioTx                         =  ( 1342  /PORT_US_PER_TICK ) ;   //  1000us (needs to be >delayTx) (SCuM need a larger value; 45 is tested and works)
-    slot_154e_vars [SLOT_10ms].wdDataDuration                    =  ( 5000  /PORT_US_PER_TICK ) ;   //  5000us (measured 4280us with max payload)
-    slot_154e_vars [SLOT_10ms].wdAckDuration                     =  ( 3000  /PORT_US_PER_TICK ) ;   //  3000us (measured 1000us)
+    slot_154e_vars [SLOT_10ms_24GHZ].TsTxOffset                  =  ( 2120  /PORT_US_PER_TICK ) ;   //  2120us
+    slot_154e_vars [SLOT_10ms_24GHZ].TsLongGT                    =  ( 1100  /PORT_US_PER_TICK ) ;   //  1100us
+    slot_154e_vars [SLOT_10ms_24GHZ].TsTxAckDelay                =  ( 1000  /PORT_US_PER_TICK ) ;   //  1000us
+    slot_154e_vars [SLOT_10ms_24GHZ].TsShortGT                   =  ( 500   /PORT_US_PER_TICK ) ;   //  500us; The standardlized value for this is 400/2=200us(7ticks). Currectly 7 doesn't work for short packet; change it back to 7 when found the problem.
+    slot_154e_vars [SLOT_10ms_24GHZ].wdRadioTx                   =  ( 1342  /PORT_US_PER_TICK ) ;   //  1000us (needs to be >delayTx) (SCuM need a larger value; 45 is tested and works)
+    slot_154e_vars [SLOT_10ms_24GHZ].wdDataDuration              =  ( 5000  /PORT_US_PER_TICK ) ;   //  5000us (measured 4280us with max payload)
+    slot_154e_vars [SLOT_10ms_24GHZ].wdAckDuration               =  ( 3000  /PORT_US_PER_TICK ) ;   //  3000us (measured 1000us)
     
     // 20ms slot for 24ghz cc2538
     slot_154e_vars [SLOT_20ms_24GHZ].TsTxOffset                  =  ( 5215  /PORT_US_PER_TICK ) ;   //  5215us
