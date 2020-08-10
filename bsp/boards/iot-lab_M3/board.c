@@ -97,6 +97,7 @@ void board_init(void){
     debugpins_init();
     //enable nvic for the radio
     NVIC_radio();
+    board_init_slot_vars();
 
 #if defined(BOARD_CRYPTOENGINE_ENABLED)
     cryptoengine_init();
