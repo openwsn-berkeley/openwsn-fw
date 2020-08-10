@@ -35,14 +35,14 @@ static char stringToPrint[]       = "02drv_openserial\r\n";
 typedef void (*task_cbt)(void);
 
 typedef enum {
-   TASKPRIO_NONE                  = 0x00,
-   TASKPRIO_MAX                   = 0x01,
+    TASKPRIO_NONE                  = 0x00,
+    TASKPRIO_MAX                   = 0x01,
 } task_prio_t;
 
 typedef struct {
-   bool        timerFired;
-   bool        fInhibit;
-   open_addr_t addr;
+    bool        timerFired;
+    bool        fInhibit;
+    open_addr_t addr;
 } app_vars_t;
 
 app_vars_t app_vars;
@@ -69,36 +69,36 @@ int mote_main(void) {
    sctimer_setCompare(sctimer_readCounter()+SCTIMER_PERIOD);
 
    while(1) {
-      board_sleep();
-      debugpins_task_set();
-      if (app_vars.timerFired==TRUE) {
-         app_vars.timerFired = FALSE;
-         openserial_print_str(stringToPrint, sizeof(stringToPrint));
-         if (app_vars.fInhibit==TRUE) {
-            debugpins_slot_clr();
-            openserial_inhibitStart();
-            app_vars.fInhibit = FALSE;
-         } else {
-            debugpins_slot_set();
-            openserial_inhibitStop();
-            app_vars.fInhibit = TRUE;
-         }
-      }
-      debugpins_task_clr();
+        board_sleep();
+        debugpins_task_set();
+        if (app_vars.timerFired==TRUE) {
+            app_vars.timerFired = FALSE;
+            openserial_printf("%s",stringToPrint);
+            if (app_vars.fInhibit==TRUE) {
+                debugpins_slot_clr();
+                openserial_inhibitStart();
+                app_vars.fInhibit = FALSE;
+            } else {
+                debugpins_slot_set();
+                openserial_inhibitStop();
+                app_vars.fInhibit = TRUE;
+            }
+        }
+        debugpins_task_clr();
    }
 }
 
 //=========================== callbacks =======================================
 
 void cb_compare(void) {
-   app_vars.timerFired = TRUE;
-   sctimer_setCompare(sctimer_readCounter()+SCTIMER_PERIOD);
+    app_vars.timerFired = TRUE;
+    sctimer_setCompare(sctimer_readCounter()+SCTIMER_PERIOD);
 }
 
 //=========================== stub functions ==================================
 
 open_addr_t* idmanager_getMyID(uint8_t type) {
-   return &app_vars.addr;
+    return &app_vars.addr;
 }
 
 void scheduler_push_task(task_cbt task_cb, task_prio_t prio){}
@@ -149,35 +149,38 @@ void msf_appPktPeriod(uint8_t numAppPacketsPerSlotFrame){}
 uint8_t msf_getsfid(void) {return 0;}
 
 bool debugPrint_isSync(void) {
-   return FALSE;
+    return FALSE;
 }
 bool debugPrint_id(void) {
-   return FALSE;
+    return FALSE;
 }
 bool debugPrint_kaPeriod(void) {
-   return FALSE;
+    return FALSE;
 }
 bool debugPrint_myDAGrank(void) {
-   return FALSE;
+    return FALSE;
 }
 bool debugPrint_asn(void) {
-   return FALSE;
+    return FALSE;
 }
 bool debugPrint_macStats(void) {
-   return FALSE;
+    return FALSE;
 }
 bool debugPrint_schedule(void) {
-   return FALSE;
+    return FALSE;
 }
 bool debugPrint_backoff(void) {
-   return FALSE;
+    return FALSE;
 }
 bool debugPrint_queue(void) {
-   return FALSE;
+    return FALSE;
 }
 bool debugPrint_neighbors(void) {
-   return FALSE;
+    return FALSE;
 }
 bool debugPrint_joined(void) {
-   return FALSE;
+    return FALSE;
+}
+bool debugPrint_msf(void) {
+    return FALSE;
 }
