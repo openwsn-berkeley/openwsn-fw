@@ -40,8 +40,7 @@ void board_enableHardFaultExceptionHandler(void);
 
 //=========================== public ==========================================
 
-void board_init(void)
-{
+void board_init(void){
     RCC_Configuration();//Configure rcc
     NVIC_Configuration();//configure NVIC and Vector Table
 
@@ -120,14 +119,12 @@ void board_init_slot_vars(void){
 
 // To get the current slotDuration at any time
 // used during initialization by sixtop to fire the first sixtop EB
-uint16_t board_getSlotDuration (void)
-{
+uint16_t board_getSlotDuration (void){
     return slot_board_vars [selected_slot_type].slotDuration;
 }
 
 // Setter/Getter function for slot_board_vars
-slot_board_vars_t board_selectSlotTemplate (slotType_t slot_type)
-{
+slot_board_vars_t board_selectSlotTemplate (slotType_t slot_type){
   selected_slot_type = slot_type;
   return slot_board_vars [selected_slot_type];
 }

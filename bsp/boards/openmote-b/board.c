@@ -3,6 +3,8 @@
  //         Pere Tuset (peretuset@openmote.com)
  // Date:   July 2013
  // Description: CC2538-specific definition of the "board" bsp module.
+ // Updated by: Mina Rady (mina1.rady@orange.com)
+ // Update date: April 2020
 
 
 #include <headers/hw_ioc.h>
