@@ -54,22 +54,6 @@ to this board.
 #define PORT_PIN_RADIO_RESET_HIGH()         P4OUT |=  0x40;
 #define PORT_PIN_RADIO_RESET_LOW()          P4OUT &= ~0x40;
 
-//===== IEEE802154E timing
-
-#define SLOTDURATION 20 // in miliseconds
-
-// time-slot related
-#define PORT_TsSlotDuration                 655   //    20ms
-
-// execution speed related
-#define PORT_maxTxDataPrepare               110   //  3355us (measured 2989us)
-#define PORT_maxRxAckPrepare                20    //   610us (measured  409us)
-#define PORT_maxRxDataPrepare               33    //  1000us (measured  477us)
-#define PORT_maxTxAckPrepare                50    //  1525us (measured 1405us)
-
-// radio speed related
-#define PORT_delayTx                        18    //   549us (measured  539us)
-#define PORT_delayRx                        0     //     0us (can not measure)
 
 //===== adaptive_sync accuracy
 

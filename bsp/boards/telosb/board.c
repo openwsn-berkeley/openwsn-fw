@@ -17,6 +17,9 @@
 
 //=========================== variables =======================================
 
+slot_board_vars_t slot_board_vars [MAX_SLOT_TYPES];
+slotType_t selected_slot_type;
+
 //=========================== prototypes ======================================
 
 
@@ -44,28 +47,28 @@ int main(void) {
 //=========================== public ==========================================
 
 void board_init(void) {
-   // disable watchdog timer
-   WDTCTL     =  WDTPW + WDTHOLD;
-   
-   // setup clock speed
-   DCOCTL    |=  DCO0 | DCO1 | DCO2;             // MCLK at ~8MHz
-   BCSCTL1   |=  RSEL0 | RSEL1 | RSEL2;          // MCLK at ~8MHz
-                                                 // by default, ACLK from 32kHz XTAL which is running
-   
-   // initialize pins
-   P4DIR     |=  0x20;                           // [P4.5] radio VREG:  output
-   P4DIR     |=  0x40;                           // [P4.6] radio reset: output
-   
-   // initialize bsp modules
-   debugpins_init();
-   leds_init();
-   uart_init();
-   spi_init();
-   radio_init();
-   sctimer_init();
+    // disable watchdog timer
+    WDTCTL     =  WDTPW + WDTHOLD;
 
+    // setup clock speed
+    DCOCTL    |=  DCO0 | DCO1 | DCO2;             // MCLK at ~8MHz
+    BCSCTL1   |=  RSEL0 | RSEL1 | RSEL2;          // MCLK at ~8MHz
+                                                 // by default, ACLK from 32kHz XTAL which is running
+
+    // initialize pins
+    P4DIR     |=  0x20;                           // [P4.5] radio VREG:  output
+    P4DIR     |=  0x40;                           // [P4.6] radio reset: output
+
+    // initialize bsp modules
+    debugpins_init();
+    leds_init();
+    uart_init();
+    spi_init();
+    radio_init();
+    sctimer_init();
+    board_init_slot_vars();
 #if defined(BOARD_CRYPTOENGINE_ENABLED)
-   cryptoengine_init();
+    cryptoengine_init();
 #endif
    
 #if defined(BOARD_SENSORS_ENABLED)
@@ -74,6 +77,37 @@ void board_init(void) {
 
    // enable interrupts
    __bis_SR_register(GIE);
+}
+
+//====  IEEE802154E timing: bootstrapping slot info lookup table
+// 1 clock tick = 30.5 us
+void board_init_slot_vars(void){
+
+    // 20ms slot
+    slot_board_vars [SLOT_20ms_24GHZ].slotDuration                   = 655 ; // tics  
+    slot_board_vars [SLOT_20ms_24GHZ].maxTxDataPrepare               = 110 ; // 3355us (based on measurement)
+    slot_board_vars [SLOT_20ms_24GHZ].maxRxAckPrepare                = 20  ; // 610us (based on measurement)
+    slot_board_vars [SLOT_20ms_24GHZ].maxRxDataPrepare               = 33  ; // 1000us (based on measurement)
+    slot_board_vars [SLOT_20ms_24GHZ].maxTxAckPrepare                = 50  ; // 1525us (based on measurement)
+    
+    #ifdef OPENWSN_IEEE802154E_SECURITY_C
+        slot_board_vars [SLOT_20ms_24GHZ].delayTx                    = 7   ; // 214us (measured xxxus)
+    #else
+        slot_board_vars [SLOT_20ms_24GHZ].delayTx                    = 18  ; // 549us (measured xxxus)
+    #endif
+    slot_board_vars [SLOT_20ms_24GHZ].delayRx                        = 0   ; // 0us (can not measure)
+}
+
+// To get the current slotDuration at any time (in tics)
+// if you need the value in MS, divide by PORT_TICS_PER_MS (which varies by board and clock frequency and defined in board_info.h)
+uint16_t board_getSlotDuration (void){
+    return slot_board_vars [selected_slot_type].slotDuration;
+}
+
+// Setter/Getter function for slot_board_vars
+slot_board_vars_t board_selectSlotTemplate (slotType_t slot_type){
+    selected_slot_type = slot_type;
+    return slot_board_vars [selected_slot_type];
 }
 
 void board_sleep(void) {
