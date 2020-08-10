@@ -134,8 +134,7 @@ void board_init_slot_vars(void){
 
 // To get the current slotDuration at any time
 // used during initialization by sixtop to fire the first sixtop EB
-uint16_t board_getSlotDuration (void)
-{
+uint16_t board_getSlotDuration (void){
     return slot_board_vars [selected_slot_type].slotDuration;
 }
 
