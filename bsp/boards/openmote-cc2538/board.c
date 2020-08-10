@@ -115,10 +115,11 @@ void board_init_slot_vars(void){
     slot_board_vars [SLOT_10ms_24GHZ].maxRxAckPrepare                      = 10  ;  // 305us (measured  83us)
     slot_board_vars [SLOT_10ms_24GHZ].maxRxDataPrepare                     =  4  ;  // 122us (measured  22us)
     slot_board_vars [SLOT_10ms_24GHZ].maxTxAckPrepare                      = 10  ;  // 122us (measured  94us)
-    #ifdef L2_SECURITY_ACTIVE                                             
-    slot_board_vars [SLOT_10ms_24GHZ].delayTx                              = 14  ;  // 366us (measured xxxus)
+
+    #ifdef OPENWSN_IEEE802154E_SECURITY_C                                             
+        slot_board_vars [SLOT_10ms_24GHZ].delayTx                          = 14  ;  // 366us (measured xxxus)
     #else                                                                 
-    slot_board_vars [SLOT_10ms_24GHZ].delayTx                              = 12  ;  // 366us (measured xxxus)
+        slot_board_vars [SLOT_10ms_24GHZ].delayTx                          = 12  ;  // 366us (measured xxxus)
     #endif                                                                
     slot_board_vars [SLOT_10ms_24GHZ].delayRx                              =  0  ;  // 0us (can not measure)
 
