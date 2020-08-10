@@ -55,13 +55,13 @@ void board_init(OpenMote* self) {
 //==== bootstrapping slot info lookup table
 void board_init_slot_vars(void){
     //10ms slot
-    slot_board_vars [SLOT_10ms].slotDuration                         = 328  ;   // ms 
-    slot_board_vars [SLOT_10ms].maxTxDataPrepare                     = 10  ;  //  305us (measured  82us)
-    slot_board_vars [SLOT_10ms].maxRxAckPrepare                      = 10  ;  //  305us (measured  83us)
-    slot_board_vars [SLOT_10ms].maxRxDataPrepare                     =  4  ;  //  122us (measured  22us)
-    slot_board_vars [SLOT_10ms].maxTxAckPrepare                      =  4  ;  //  122us (measured  94us)
-    slot_board_vars [SLOT_10ms].delayTx                              =  7  ;  //  213us (measured xxxus)
-    slot_board_vars [SLOT_10ms].delayRx                              =  0  ; //    0us (can not measure)
+    slot_board_vars [SLOT_10ms_24GHZ].slotDuration                         = 328  ;   // ms 
+    slot_board_vars [SLOT_10ms_24GHZ].maxTxDataPrepare                     = 10  ;  //  305us (measured  82us)
+    slot_board_vars [SLOT_10ms_24GHZ].maxRxAckPrepare                      = 10  ;  //  305us (measured  83us)
+    slot_board_vars [SLOT_10ms_24GHZ].maxRxDataPrepare                     =  4  ;  //  122us (measured  22us)
+    slot_board_vars [SLOT_10ms_24GHZ].maxTxAckPrepare                      =  4  ;  //  122us (measured  94us)
+    slot_board_vars [SLOT_10ms_24GHZ].delayTx                              =  7  ;  //  213us (measured xxxus)
+    slot_board_vars [SLOT_10ms_24GHZ].delayRx                              =  0  ; //    0us (can not measure)
 }
 
 // To get the current slotDuration at any time
