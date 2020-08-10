@@ -174,7 +174,8 @@ bool board_timer_expired(uint32_t future){
     }
 }
 
-//==== bootstrapping slot info lookup table
+//====  IEEE802154E timing: bootstrapping slot info lookup table
+// 1 clock tick = 30.5 us
 void board_init_slot_vars(void){
     //10ms slot
     slot_board_vars [SLOT_10ms_24GHZ].slotDuration                   = 328    ;  // ms 
