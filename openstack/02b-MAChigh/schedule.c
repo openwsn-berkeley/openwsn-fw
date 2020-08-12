@@ -113,7 +113,7 @@ bool debugPrint_schedule(void) {
       schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].shared;
    temp.channelOffset                  = \
       schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].channelOffset;
-   //temp.cellRadioSetting               = \
+   temp.cellRadioSetting               = \
       schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].cellRadioSetting;
    memcpy(
       &temp.neighbor,
