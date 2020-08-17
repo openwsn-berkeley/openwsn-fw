@@ -272,6 +272,7 @@ owerror_t schedule_addActiveSlot(
     scheduleEntry_t* nextSlotWalker;
 
     backupEntry_t*   backupEntry;
+    scheduleEntry_t* availableContainer;
 
     uint8_t          i;
     bool             entry_found;
@@ -285,7 +286,9 @@ owerror_t schedule_addActiveSlot(
     // find an empty schedule entry container
     entry_found     = FALSE;
     inBackupEntries = FALSE;
-    slotContainer = &schedule_vars.scheduleBuf[0];
+    slotContainer   = &schedule_vars.scheduleBuf[0];
+    availableContainer = NULL;
+
     do {
         if (slotContainer->type != CELLTYPE_OFF) {
             if (slotContainer->slotOffset == slotOffset) {
@@ -304,11 +307,16 @@ owerror_t schedule_addActiveSlot(
                     break;
                 }
             }
-            slotContainer++;
         } else {
             entry_found = TRUE;
-            break;
+            // mark the first available entry
+            if (availableContainer==NULL) {
+                availableContainer = slotContainer;
+            }
+            // don't break in case the target slot is occupied
+            // in following entries
         }
+        slotContainer++;
     } while (slotContainer <= &schedule_vars.scheduleBuf[schedule_vars.maxActiveSlots-1]);
 
     // abort it schedule overflow
@@ -398,6 +406,8 @@ owerror_t schedule_addActiveSlot(
         }
         ENABLE_INTERRUPTS();
         return E_SUCCESS;
+    } else {
+        slotContainer = availableContainer;
     }
 
     // fill that schedule entry with parameters passed
@@ -453,7 +463,7 @@ owerror_t schedule_addActiveSlot(
                 openserial_printError(
                    COMPONENT_SCHEDULE,ERR_SCHEDULE_ADDDUPLICATESLOT,
                    (errorparameter_t)slotContainer->slotOffset,
-                   (errorparameter_t)0
+                   (errorparameter_t)slotContainer->isAutoCell
                 );
                 // reset the entry
                 slotContainer->slotOffset                = 0;

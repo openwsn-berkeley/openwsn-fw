@@ -368,8 +368,7 @@ OpenQueueEntry_t*  openqueue_macGetUnicastPakcet(open_addr_t* toNeighbor){
            (
                toNeighbor->type == ADDR_64B &&
                packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)
-           ) &&
-           openqueue_vars.queue[i].l2_sixtop_messageType == SIXTOP_CELL_RESPONSE
+           )
        ){
           ENABLE_INTERRUPTS();
           return &openqueue_vars.queue[i];
@@ -392,6 +391,30 @@ OpenQueueEntry_t*  openqueue_macGetUnicastPakcet(open_addr_t* toNeighbor){
     ENABLE_INTERRUPTS();
     return NULL;
 
+}
+
+bool openqueue_macHasPacketToNeighbor(open_addr_t* toNeighbor){
+    uint8_t i;
+    bool packetFound;
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+
+    // looking for any packets wait to be sent to the neighbor
+    packetFound = FALSE;
+    for (i=0;i<QUEUELENGTH;i++) {
+        if (
+            openqueue_vars.queue[i].creator != COMPONENT_IEEE802154E &&
+            (
+                toNeighbor->type == ADDR_64B &&
+                packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)
+            )
+        ) {
+            packetFound = TRUE;
+            break;
+        }
+    }
+    ENABLE_INTERRUPTS();
+    return packetFound;
 }
 
 

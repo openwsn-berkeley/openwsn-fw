@@ -3005,7 +3005,7 @@ void endSlot(void) {
         // if no, remove the cell
 
         schedule_getNeighbor(&slotNeighbor);
-        if (openqueue_macGetUnicastPakcet(&slotNeighbor)==NULL) {
+        if (openqueue_macHasPacketToNeighbor(&slotNeighbor)==FALSE) {
             schedule_removeActiveSlot(
                 ieee154e_vars.slotOffset,
                 CELLTYPE_TX,

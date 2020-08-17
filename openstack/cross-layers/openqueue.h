@@ -51,6 +51,7 @@ OpenQueueEntry_t*  openqueue_macGetEBPacket(void);
 OpenQueueEntry_t*  openqueue_macGetKaPacket(open_addr_t* toNeighbor);
 OpenQueueEntry_t*  openqueue_macGetDIOPacket(void);
 OpenQueueEntry_t*  openqueue_macGetUnicastPakcet(open_addr_t* toNeighbor);
+bool               openqueue_macHasPacketToNeighbor(open_addr_t* toNeighbor);
 /**
 \}
 \}

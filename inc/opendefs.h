@@ -258,7 +258,7 @@ enum {
    ERR_BUSY_RECEIVING                  = 0x42, // busy receiving when stop of serial activity, buffer input length {1} (code location {0})
    ERR_WRONG_CRC_INPUT                 = 0x43, // wrong CRC in input Buffer
    ERR_PACKET_SYNC                     = 0x44, // synchronized when received a packet
-   ERR_SCHEDULE_ADDDUPLICATESLOT       = 0x45, // the slot {0} to be added is already in schedule
+   ERR_SCHEDULE_ADDDUPLICATESLOT       = 0x45, // the slot {0} (autocell: {1}) to be added is already in schedule
    ERR_UNSUPPORTED_FORMAT              = 0x46, // the received packet format is not supported (code location {0})
    ERR_UNSUPPORTED_METADATA            = 0x47, // the metadata type is not suppored
    ERR_MAXRETRIES_REACHED              = 0x48, // maxretries reached (counter: {0})
