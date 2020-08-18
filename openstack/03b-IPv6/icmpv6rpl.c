@@ -312,6 +312,7 @@ bool icmpv6rpl_getPreferredParentIndex(uint8_t* indexptr) {
    return icmpv6rpl_vars.haveParent;
 }
 
+
 /**
 \brief Retrieve my preferred parent's EUI64 address.
 \param[out] addressToWrite Where to copy the preferred parent's address to.
@@ -322,6 +323,21 @@ bool icmpv6rpl_getPreferredParentEui64(open_addr_t* addressToWrite) {
         neighbors_getNeighborNoResource(icmpv6rpl_vars.ParentIndex)    == FALSE
     ){
         return neighbors_getNeighborEui64(addressToWrite,ADDR_64B,icmpv6rpl_vars.ParentIndex);
+    } else {
+        return FALSE;
+    }
+}
+
+/**
+\brief Retrieve my preferred parent's neighborKey (addr and radio setting)
+\param[out] neighborKey Where to copy the preferred parent's address to.
+*/
+bool icmpv6rpl_getPreferredParentKey(neighborKey_t* key) {
+    if (
+        icmpv6rpl_vars.haveParent &&
+        neighbors_getNeighborNoResource(icmpv6rpl_vars.ParentIndex)    == FALSE
+    ){
+        return neighbors_getNeighborKey(key,icmpv6rpl_vars.ParentIndex);
     } else {
         return FALSE;
     }

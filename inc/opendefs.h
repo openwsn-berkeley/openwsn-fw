@@ -355,6 +355,7 @@ typedef struct {
     bool      isUsed;
     uint16_t  slotoffset;
     uint16_t  channeloffset;
+    cellRadioSetting_t cellRadioSetting;
 } cellInfo_ht;
 
 typedef struct {                                 // always written big endian, i.e. MSB in addr[0]

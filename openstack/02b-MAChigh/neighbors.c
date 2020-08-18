@@ -479,6 +479,20 @@ bool  neighbors_getNeighborEui64(open_addr_t* address, uint8_t addr_type, uint8_
    }
    return ReturnVal;
 }
+//===== write radio setting
+
+/**
+\brief Write the neighbor key of some neighbor to some location.
+// Returns false if neighbor not in use or address type is not 64bits
+*/
+
+bool  neighbors_getNeighborKey(neighborKey_t* neighborKey, uint8_t index){
+   bool ReturnVal = FALSE;
+   memcpy(&(neighborKey->open_addr),&(neighbors_vars.neighbors[index].addr_64b),LENGTH_ADDR64b);
+   memcpy(&(neighborKey->cellRadioSetting),&(neighbors_vars.neighbors[index].cellRadioSetting),sizeof(cellRadioSetting_t));
+   ReturnVal=neighbors_vars.neighbors[index].used;
+   return ReturnVal;
+}
 // ==== update backoff
 void neighbors_updateBackoff(open_addr_t* address){
     uint8_t i;

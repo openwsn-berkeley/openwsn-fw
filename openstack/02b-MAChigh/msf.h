@@ -59,7 +59,8 @@ void    msf_appPktPeriod(uint8_t numAppPacketsPerSlotFrame);
 uint8_t msf_getsfid(void);
 bool    msf_candidateAddCellList(
     cellInfo_ht* cellList,
-    uint8_t requiredCells
+    uint8_t requiredCells,
+    cellRadioSetting_t cellRadioSetting
 );
 bool    msf_candidateRemoveCellList(
     cellInfo_ht* cellList,

@@ -233,7 +233,8 @@ owerror_t sixtop_request(
                     pkt->payload[1] = (uint8_t)((celllist_toBeAdded[i].slotoffset        & 0xFF00)>>8);
                     pkt->payload[2] = (uint8_t)(celllist_toBeAdded[i].channeloffset      & 0x00FF);
                     pkt->payload[3] = (uint8_t)((celllist_toBeAdded[i].channeloffset     & 0xFF00)>>8);
-                    len += 4;
+                    pkt->payload[4] = (uint8_t)(celllist_toBeAdded[i].cellRadioSetting);
+                    len += 5;
                 }
             }
         }
@@ -1364,13 +1365,14 @@ void sixtop_six2six_notifyReceive(
                 i = 0;
                 memset(response_pkt->l2_sixtop_celllist_add,0,sizeof(response_pkt->l2_sixtop_celllist_add));
                 while(pktLen>0){
-                    response_pkt->l2_sixtop_celllist_add[i].slotoffset     =  *((uint8_t*)(pkt->payload)+ptr);
-                    response_pkt->l2_sixtop_celllist_add[i].slotoffset    |= (*((uint8_t*)(pkt->payload)+ptr+1))<<8;
-                    response_pkt->l2_sixtop_celllist_add[i].channeloffset  =  *((uint8_t*)(pkt->payload)+ptr+2);
-                    response_pkt->l2_sixtop_celllist_add[i].channeloffset |= (*((uint8_t*)(pkt->payload)+ptr+3))<<8;
-                    response_pkt->l2_sixtop_celllist_add[i].isUsed         = TRUE;
-                    ptr    += 4;
-                    pktLen -= 4;
+                    response_pkt->l2_sixtop_celllist_add[i].slotoffset           =  *((uint8_t*)(pkt->payload)+ptr);
+                    response_pkt->l2_sixtop_celllist_add[i].slotoffset          |= (*((uint8_t*)(pkt->payload)+ptr+1))<<8;
+                    response_pkt->l2_sixtop_celllist_add[i].channeloffset        =  *((uint8_t*)(pkt->payload)+ptr+2);
+                    response_pkt->l2_sixtop_celllist_add[i].channeloffset       |= (*((uint8_t*)(pkt->payload)+ptr+3))<<8;
+                    response_pkt->l2_sixtop_celllist_add[i].cellRadioSetting     =  *((uint8_t*)(pkt->payload)+ptr+4);
+                    response_pkt->l2_sixtop_celllist_add[i].isUsed               = TRUE;
+                    ptr    += 5;
+                    pktLen -= 5;
                     i++;
                 }
                 if (sixtop_areAvailableCellsToBeScheduled(metadata,numCells,response_pkt->l2_sixtop_celllist_add)){
@@ -1381,7 +1383,8 @@ void sixtop_six2six_notifyReceive(
                             response_pkt->payload[1] = (uint8_t)((response_pkt->l2_sixtop_celllist_add[i].slotoffset        & 0xFF00)>>8);
                             response_pkt->payload[2] = (uint8_t)(response_pkt->l2_sixtop_celllist_add[i].channeloffset      & 0x00FF);
                             response_pkt->payload[3] = (uint8_t)((response_pkt->l2_sixtop_celllist_add[i].channeloffset     & 0xFF00)>>8);
-                            response_pktLen += 4;
+                            response_pkt->payload[4] = (uint8_t)((response_pkt->l2_sixtop_celllist_add[i].cellRadioSetting);
+                            response_pktLen += 5;
                         }
                     }
                 }
@@ -1433,13 +1436,14 @@ void sixtop_six2six_notifyReceive(
                 memset(response_pkt->l2_sixtop_celllist_delete,0,sizeof(response_pkt->l2_sixtop_celllist_delete));
                 temp16 = numCells;
                 while(temp16>0){
-                    response_pkt->l2_sixtop_celllist_delete[i].slotoffset     =  *((uint8_t*)(pkt->payload)+ptr);
-                    response_pkt->l2_sixtop_celllist_delete[i].slotoffset    |= (*((uint8_t*)(pkt->payload)+ptr+1))<<8;
-                    response_pkt->l2_sixtop_celllist_delete[i].channeloffset  =  *((uint8_t*)(pkt->payload)+ptr+2);
-                    response_pkt->l2_sixtop_celllist_delete[i].channeloffset |= (*((uint8_t*)(pkt->payload)+ptr+3))<<8;
+                    response_pkt->l2_sixtop_celllist_delete[i].slotoffset        =  *((uint8_t*)(pkt->payload)+ptr);
+                    response_pkt->l2_sixtop_celllist_delete[i].slotoffset       |= (*((uint8_t*)(pkt->payload)+ptr+1))<<8;
+                    response_pkt->l2_sixtop_celllist_delete[i].channeloffset     =  *((uint8_t*)(pkt->payload)+ptr+2);
+                    response_pkt->l2_sixtop_celllist_delete[i].channeloffset    |= (*((uint8_t*)(pkt->payload)+ptr+3))<<8;
+                    response_pkt->l2_sixtop_celllist_delete[i].cellRadioSetting  = (*((uint8_t*)(pkt->payload)+ptr+4));
                     response_pkt->l2_sixtop_celllist_delete[i].isUsed         = TRUE;
-                    ptr    += 4;
-                    pktLen -= 4;
+                    ptr    += 5;
+                    pktLen -= 5;
                     temp16--;
                     i++;
                 }
@@ -1456,13 +1460,14 @@ void sixtop_six2six_notifyReceive(
                 i = 0;
                 memset(response_pkt->l2_sixtop_celllist_add,0,sizeof(response_pkt->l2_sixtop_celllist_add));
                 while(pktLen>0){
-                    response_pkt->l2_sixtop_celllist_add[i].slotoffset     =  *((uint8_t*)(pkt->payload)+ptr);
-                    response_pkt->l2_sixtop_celllist_add[i].slotoffset    |= (*((uint8_t*)(pkt->payload)+ptr+1))<<8;
-                    response_pkt->l2_sixtop_celllist_add[i].channeloffset  =  *((uint8_t*)(pkt->payload)+ptr+2);
-                    response_pkt->l2_sixtop_celllist_add[i].channeloffset |= (*((uint8_t*)(pkt->payload)+ptr+3))<<8;
-                    response_pkt->l2_sixtop_celllist_add[i].isUsed         = TRUE;
-                    ptr    += 4;
-                    pktLen -= 4;
+                    response_pkt->l2_sixtop_celllist_add[i].slotoffset           =  *((uint8_t*)(pkt->payload)+ptr);
+                    response_pkt->l2_sixtop_celllist_add[i].slotoffset          |= (*((uint8_t*)(pkt->payload)+ptr+1))<<8;
+                    response_pkt->l2_sixtop_celllist_add[i].channeloffset        =  *((uint8_t*)(pkt->payload)+ptr+2);
+                    response_pkt->l2_sixtop_celllist_add[i].channeloffset       |= (*((uint8_t*)(pkt->payload)+ptr+3))<<8;
+                    response_pkt->l2_sixtop_celllist_add[i].cellRadioSetting     = (*((uint8_t*)(pkt->payload)+ptr+4));
+                    response_pkt->l2_sixtop_celllist_add[i].isUsed               = TRUE;
+                    ptr    += 5;
+                    pktLen -= 5;
                     i++;
                 }
                 if (sixtop_areAvailableCellsToBeScheduled(metadata,numCells,response_pkt->l2_sixtop_celllist_add)){
@@ -1473,7 +1478,8 @@ void sixtop_six2six_notifyReceive(
                             response_pkt->payload[1] = (uint8_t)((response_pkt->l2_sixtop_celllist_add[i].slotoffset        & 0xFF00)>>8);
                             response_pkt->payload[2] = (uint8_t)(response_pkt->l2_sixtop_celllist_add[i].channeloffset      & 0x00FF);
                             response_pkt->payload[3] = (uint8_t)((response_pkt->l2_sixtop_celllist_add[i].channeloffset     & 0xFF00)>>8);
-                            response_pktLen += 4;
+                            response_pkt->payload[4] = (uint8_t)((response_pkt->l2_sixtop_celllist_add[i].cellRadioSetting);
+                            response_pktLen += 5;
                         }
                     }
                 }
@@ -1548,13 +1554,14 @@ void sixtop_six2six_notifyReceive(
                 i = 0;
                 memset(pkt->l2_sixtop_celllist_add,0,sizeof(pkt->l2_sixtop_celllist_add));
                 while(pktLen>0){
-                    pkt->l2_sixtop_celllist_add[i].slotoffset     =  *((uint8_t*)(pkt->payload)+ptr);
-                    pkt->l2_sixtop_celllist_add[i].slotoffset    |= (*((uint8_t*)(pkt->payload)+ptr+1))<<8;
-                    pkt->l2_sixtop_celllist_add[i].channeloffset  =  *((uint8_t*)(pkt->payload)+ptr+2);
-                    pkt->l2_sixtop_celllist_add[i].channeloffset |= (*((uint8_t*)(pkt->payload)+ptr+3))<<8;
+                    pkt->l2_sixtop_celllist_add[i].slotoffset            =  *((uint8_t*)(pkt->payload)+ptr);
+                    pkt->l2_sixtop_celllist_add[i].slotoffset           |= (*((uint8_t*)(pkt->payload)+ptr+1))<<8;
+                    pkt->l2_sixtop_celllist_add[i].channeloffset         =  *((uint8_t*)(pkt->payload)+ptr+2);
+                    pkt->l2_sixtop_celllist_add[i].channeloffset        |= (*((uint8_t*)(pkt->payload)+ptr+3))<<8;
+                    pkt->l2_sixtop_celllist_add[i].cellRadioSetting      = (*((uint8_t*)(pkt->payload)+ptr+4));
                     pkt->l2_sixtop_celllist_add[i].isUsed         = TRUE;
-                    ptr    += 4;
-                    pktLen -= 4;
+                    ptr    += 5;
+                    pktLen -= 5;
                     i++;
                 }
                 sixtop_addCells(
@@ -1590,13 +1597,14 @@ void sixtop_six2six_notifyReceive(
                 i = 0;
                 memset(pkt->l2_sixtop_celllist_add,0,sizeof(pkt->l2_sixtop_celllist_add));
                 while(pktLen>0){
-                    pkt->l2_sixtop_celllist_add[i].slotoffset     =  *((uint8_t*)(pkt->payload)+ptr);
-                    pkt->l2_sixtop_celllist_add[i].slotoffset    |= (*((uint8_t*)(pkt->payload)+ptr+1))<<8;
-                    pkt->l2_sixtop_celllist_add[i].channeloffset  =  *((uint8_t*)(pkt->payload)+ptr+2);
-                    pkt->l2_sixtop_celllist_add[i].channeloffset |= (*((uint8_t*)(pkt->payload)+ptr+3))<<8;
-                    pkt->l2_sixtop_celllist_add[i].isUsed         = TRUE;
-                    ptr    += 4;
-                    pktLen -= 4;
+                    pkt->l2_sixtop_celllist_add[i].slotoffset            =  *((uint8_t*)(pkt->payload)+ptr);
+                    pkt->l2_sixtop_celllist_add[i].slotoffset           |= (*((uint8_t*)(pkt->payload)+ptr+1))<<8;
+                    pkt->l2_sixtop_celllist_add[i].channeloffset         =  *((uint8_t*)(pkt->payload)+ptr+2);
+                    pkt->l2_sixtop_celllist_add[i].channeloffset        |= (*((uint8_t*)(pkt->payload)+ptr+3))<<8;
+                    pkt->l2_sixtop_celllist_add[i].cellRadioSetting      = (*((uint8_t*)(pkt->payload)+ptr+4));
+                    pkt->l2_sixtop_celllist_add[i].isUsed                = TRUE;
+                    ptr    += 5;
+                    pktLen -= 5;
                     i++;
                 }
                 sixtop_removeCells(

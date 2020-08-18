@@ -118,7 +118,7 @@ void ieee154e_init(void) {
     // initialize variables
     memset(&ieee154e_vars,0,sizeof(ieee154e_vars_t));
     memset(&ieee154e_dbg,0,sizeof(ieee154e_dbg_t));
-#define IEEE802154E_SINGLE_CHANNEL 11
+// #define IEEE802154E_SINGLE_CHANNEL 11
     // set singleChannel to 0 to enable channel hopping.
 #if IEEE802154E_SINGLE_CHANNEL  
     ieee154e_vars.singleChannel     = IEEE802154E_SINGLE_CHANNEL;

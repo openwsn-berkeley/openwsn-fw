@@ -103,6 +103,8 @@ void          neighbors_resetSequenceNumber(open_addr_t* address);
 
 // get addresses
 bool          neighbors_getNeighborEui64(open_addr_t* address,uint8_t addr_type,uint8_t index);
+// get key
+bool          neighbors_getNeighborKey(neighborKey_t* neighborKey, uint8_t index);
 // update backoff field
 void          neighbors_updateBackoff(open_addr_t* address);
 void          neighbors_decreaseBackoff(open_addr_t* address);
