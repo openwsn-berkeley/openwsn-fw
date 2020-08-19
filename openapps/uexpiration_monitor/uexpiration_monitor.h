@@ -22,12 +22,6 @@
 
 void umonitor_init(void);
 
-void umonitor_receive(OpenQueueEntry_t *msg);
-
-void umonitor_sendDone(OpenQueueEntry_t *msg, owerror_t error);
-
-bool umonitor_debugPrint(void);
-
 /**
 \}
 \}
