@@ -31,9 +31,6 @@ typedef struct {
 
 void uinject_init(void);
 
-void uinject_sendDone(OpenQueueEntry_t *msg, owerror_t error);
-
-void uinject_receive(OpenQueueEntry_t *msg);
 /**
 \}
 \}
