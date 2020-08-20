@@ -59,7 +59,7 @@ void openstack_init(void) {
 
     //===== stack
     //-- cross-layer
-    idmanager_init();    // call first since initializes EUI64 and isDAGroot
+    idmanager_init();    // call first since initializes EUI64 and role
     openqueue_init();
     openrandom_init();
 

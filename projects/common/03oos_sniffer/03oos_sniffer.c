@@ -190,7 +190,7 @@ void ieee154e_setIsAckEnabled(bool isEnabled) { return; }
 
 void ieee154e_getAsn(uint8_t *array) { return; }
 
-void schedule_startDAGroot(void) { return; }
+void schedule_startPanCoordinator(void) { return; }
 
 void schedule_setFrameLength(uint16_t frameLength) { return; }
 

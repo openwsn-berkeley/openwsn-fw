@@ -79,8 +79,8 @@ void csensors_init(void) {
     uint8_t i;
     uint8_t numSensors;
 
-    // do not run if DAGroot
-    if (idmanager_getIsDAGroot() == TRUE) return;
+    // do not run if PAN coordinator
+    if (idmanager_isPanCoordinator() == TRUE) return;
 
     opensensors_init();
     memset(&csensors_vars, 0, sizeof(csensors_vars_t));

@@ -73,11 +73,11 @@ project:
                    shared library.
     
     Variables for special use cases.
-    dagroot        Setting a mote as DAG root is typically done through
+    role           Setting a mote's role is typically done through
                    OpenVisualizer. In some rare cases when the OpenVisualizer
                    cannot send commands to the mote (e.g. IoT-LAB platform), 
-                   use this flag to build a firmware image which is, by 
-                   default, in DAG root mode.
+                   use this flag to build a firmware image with a specific role.
+                   root, coord, leaf. (default coord)
     ide           qtcreator
 
     Common variables:
@@ -138,7 +138,7 @@ command_line_options = {
     'simhost': ['amd64-linux', 'x86-linux', 'amd64-windows', 'x86-windows'],
     'simhostpy': [''],  # No reasonable default
     'panid': [''],
-    'dagroot': ['0', '1'],
+    'role': ['', 'root', 'coord', 'leaf'],
     'debug': ['0', '1'],
     'atmel_24ghz': ['0', '1'],
     'deadline_option': ['0', '1'],
@@ -243,11 +243,11 @@ command_line_vars.AddVariables(
         None,  # converter
     ),
     (
-        'dagroot',  # key
+        'role',  # key
         '',  # help
-        command_line_options['dagroot'][0],  # default
+        '',  # default
         validate_option,  # validator
-        int,  # converter
+        None,  # converter
     ),
     (
         'debug',  # key

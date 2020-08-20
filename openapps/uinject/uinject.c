@@ -106,8 +106,8 @@ void uinject_task_cb(void) {
         return;
     }
 
-    // don't run on dagroot
-    if (idmanager_getIsDAGroot()) {
+    // don't run on PAN coordinator
+    if (idmanager_isPanCoordinator()) {
         opentimers_destroy(uinject_vars.timerId);
         return;
     }

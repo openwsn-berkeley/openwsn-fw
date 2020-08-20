@@ -44,7 +44,7 @@ int mote_main(void) {
     scheduler_init();
     openstack_init();
     if (idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x16) {
-        idmanager_setIsDAGroot(TRUE);
+        idmanager_setRole(ROLE_PAN_COORDINATOR);
     }
     scheduler_start();
     return 0; // this line should never be reached
@@ -62,7 +62,7 @@ void macpong_initSend(opentimers_id_t id) {
             break;
     }
 
-    if (idmanager_getIsDAGroot() == TRUE) {
+    if (idmanager_isPanCoordinator() == TRUE) {
         return;
     }
 
@@ -166,7 +166,7 @@ bool icmpv6rpl_getPreferredParentIndex(uint8_t *indexptr) {
 
 bool icmpv6rpl_getPreferredParentEui64(open_addr_t *addressToWrite) {
 
-    if (idmanager_getIsDAGroot() == TRUE) {
+    if (idmanager_isPanCoordinator() == TRUE) {
         return FALSE;
     }
 
@@ -179,7 +179,7 @@ bool icmpv6rpl_getPreferredParentEui64(open_addr_t *addressToWrite) {
 bool icmpv6rpl_isPreferredParent(open_addr_t *address) {
 
     open_addr_t temp;
-    if (idmanager_getIsDAGroot() == TRUE) {
+    if (idmanager_isPanCoordinator() == TRUE) {
         return FALSE;
     }
 
