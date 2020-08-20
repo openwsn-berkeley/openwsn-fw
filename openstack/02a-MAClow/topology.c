@@ -52,7 +52,7 @@ topology.
 \return FALSE if the packet should be silently dropped.
 */
 bool topology_isAcceptablePacket(ieee802154_header_iht* ieee802514_header) {
-#if defined(OPENWSN_FORCETOPOLOGY_C)
+#if OPENWSN_FORCETOPOLOGY_C
    bool returnVal;
    
    returnVal=FALSE;

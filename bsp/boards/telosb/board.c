@@ -64,11 +64,11 @@ void board_init(void) {
    radio_init();
    sctimer_init();
 
-#if defined(BOARD_CRYPTOENGINE_ENABLED)
+#if BOARD_CRYPTOENGINE_ENABLED
    cryptoengine_init();
 #endif
    
-#if defined(BOARD_SENSORS_ENABLED)
+#if BOARD_SENSORS_ENABLED
     sensors_init();
 #endif
 
@@ -143,4 +143,3 @@ ISR(TIMERB1) {
 // TIMERB0_VECTOR
 
 // NMI_VECTOR
-

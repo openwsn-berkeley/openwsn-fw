@@ -4,7 +4,7 @@
 
 #include "config.h"
 
-#if defined(OPENWSN_RRT_C)
+#if OPENWSN_RRT_C
 
 #include "opendefs.h"
 #include "rrt.h"

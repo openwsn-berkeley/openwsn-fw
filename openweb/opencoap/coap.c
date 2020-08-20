@@ -1,6 +1,6 @@
 #include "config.h"
 
-#if defined(OPENWSN_COAP_C)
+#if OPENWSN_COAP_C
 
 #include "opendefs.h"
 #include "coap.h"

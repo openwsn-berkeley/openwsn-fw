@@ -17,7 +17,7 @@
 
 //=========================== prototypes ======================================
 
-#ifndef BOARD_CRYPTOENGINE_ENABLED
+#if !BOARD_CRYPTOENGINE_ENABLED
 
 static owerror_t aes_cbc_mac(uint8_t *a,
                              uint8_t len_a,
@@ -56,7 +56,7 @@ owerror_t aes128_ccms_enc(uint8_t *a,
                           uint8_t key[16],
                           uint8_t len_mac) {
 
-#ifdef BOARD_CRYPTOENGINE_ENABLED
+#if BOARD_CRYPTOENGINE_ENABLED
     return cryptoengine_aes_ccms_enc(a, len_a, m, len_m, nonce, l, key, len_mac);
 #else
     uint8_t mac[CBC_MAX_MAC_SIZE];
@@ -87,7 +87,7 @@ owerror_t aes128_ccms_dec(uint8_t *a,
                           uint8_t key[16],
                           uint8_t len_mac) {
 
-#ifdef BOARD_CRYPTOENGINE_ENABLED
+#if BOARD_CRYPTOENGINE_ENABLED
     return cryptoengine_aes_ccms_dec(a, len_a, m, len_m, nonce, l, key, len_mac);
 #else
     uint8_t mac[CBC_MAX_MAC_SIZE];
@@ -113,7 +113,7 @@ owerror_t aes128_ccms_dec(uint8_t *a,
 }
 
 //=========================== private =========================================
-#ifndef BOARD_CRYPTOENGINE_ENABLED
+#if !BOARD_CRYPTOENGINE_ENABLED
 
 /**
 \brief CBC-MAC generation specific to CCM*.

@@ -4,7 +4,7 @@
 
 #include "config.h"
 
-#if defined(OPENWSN_CJOIN_C)
+#if OPENWSN_CJOIN_C
 
 #include "opendefs.h"
 #include "cjoin.h"

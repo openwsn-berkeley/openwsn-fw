@@ -6,7 +6,7 @@
 
 #include "config.h"
 
-#if defined(OPENWSN_CSENSORS_C)
+#if OPENWSN_CSENSORS_C
 
 #include "opendefs.h"
 #include "csensors.h"

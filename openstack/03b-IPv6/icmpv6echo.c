@@ -1,6 +1,6 @@
 #include "config.h"
 
-#if defined(OPENWSN_ICMPV6ECHO_C)
+#if OPENWSN_ICMPV6ECHO_C
 
 #include "opendefs.h"
 #include "icmpv6echo.h"

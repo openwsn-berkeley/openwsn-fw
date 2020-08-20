@@ -95,7 +95,7 @@ void board_init(void)
     //enable nvic for the radio
     NVIC_radio();
 
-#if defined(BOARD_CRYPTOENGINE_ENABLED)
+#if BOARD_CRYPTOENGINE_ENABLED
     cryptoengine_init();
 #endif
 }
@@ -123,4 +123,3 @@ void board_enableHardFaultExceptionHandler(void){
     //    bit3. unaligned access traps
     SCB->CCR = 0x00000210;
 }
-

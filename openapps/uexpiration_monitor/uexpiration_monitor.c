@@ -1,6 +1,6 @@
 #include "config.h"
 
-#if defined(OPENWSN_UEXP_MONITOR_C)
+#if OPENWSN_UEXP_MONITOR_C
 
 #include "opendefs.h"
 #include "uexpiration_monitor.h"

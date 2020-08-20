@@ -24,7 +24,7 @@
 
 //=========================== define ==========================================
 
-#ifdef OPENWSN_IEEE802154E_SECURITY_C  // Configuring security levels
+#if OPENWSN_IEEE802154E_SECURITY_C  // Configuring security levels
 
 #define IEEE802154_SECURITY_SUPPORTED        1
 #define IEEE802154_SECURITY_LEVEL            IEEE154_ASH_SLF_TYPE_ENC_MIC_32  // encryption + 4 byte authentication tag   

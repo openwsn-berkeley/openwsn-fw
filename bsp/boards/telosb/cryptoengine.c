@@ -6,7 +6,7 @@
 
 #include "config.h"
 
-#if defined(BOARD_CRYPTOENGINE_ENABLED)
+#if BOARD_CRYPTOENGINE_ENABLED
 
 #include "opendefs.h"
 #include "board.h"
@@ -363,4 +363,3 @@ static void reverse(uint8_t *start, uint8_t len) {
 }
 
 #endif /* BOARD_CRYPTOENGINE_ENABLED */
-

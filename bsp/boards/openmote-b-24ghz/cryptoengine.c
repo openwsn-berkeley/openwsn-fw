@@ -6,7 +6,7 @@
 
 #include "config.h"
 
-#if defined(BOARD_CRYPTOENGINE_ENABLED)
+#if BOARD_CRYPTOENGINE_ENABLED
 
 #include <stdint.h>
 

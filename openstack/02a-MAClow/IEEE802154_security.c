@@ -85,7 +85,7 @@ void IEEE802154_security_setDynamicKeying(void) {
 }
 
 //=========================== public ==========================================
-#ifdef OPENWSN_IEEE802154E_SECURITY_C
+#if OPENWSN_IEEE802154E_SECURITY_C
 /**
 \brief Adding of Auxiliary Security Header to the IEEE802.15.4 MAC header
 */
@@ -578,4 +578,3 @@ bool IEEE802154_security_acceptableLevel(OpenQueueEntry_t *msg, ieee802154_heade
 }
 
 #endif /* OPENWSN_IEEE802154E_SECURITY_C */
-

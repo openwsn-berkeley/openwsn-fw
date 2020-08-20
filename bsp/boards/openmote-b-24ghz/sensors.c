@@ -6,7 +6,7 @@
 
 #include "config.h"
 
-#if defined(BOARD_SENSORS_ENABLED)
+#if BOARD_SENSORS_ENABLED
 
 #include "adc_sensor.h"
 #include "board.h"

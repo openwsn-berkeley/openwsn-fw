@@ -1,6 +1,6 @@
 #include "config.h"
 
-#if defined(OPENWSN_CSTORM_C)
+#if OPENWSN_CSTORM_C
 
 #include "opendefs.h"
 #include "cstorm.h"

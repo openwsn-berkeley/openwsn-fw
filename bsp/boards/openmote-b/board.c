@@ -85,11 +85,11 @@ void board_init(void) {
    radio_init();
    i2c_init();
 
-#if defined(BOARD_CRYPTOENGINE_ENABLED)
+#if BOARD_CRYPTOENGINE_ENABLED
    cryptoengine_init();
 #endif
 
-#if defined(BOARD_SENSORS_ENABLED)
+#if BOARD_SENSORS_ENABLED
     sensors_init();
 #endif
 }

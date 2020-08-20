@@ -90,7 +90,7 @@ void board_init(void) {
 
     i2c_init();
 
-#if defined(BOARD_SENSORS_ENABLED)
+#if BOARD_SENSORS_ENABLED
     sensors_init();
 #endif
 }
@@ -135,4 +135,3 @@ static void button_init(void)
 }
 
 //=========================== interrupt handlers ==============================
-

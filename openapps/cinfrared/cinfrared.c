@@ -6,7 +6,7 @@
 
 #include "config.h"
 
-#if defined(OPENWSN_CINFRARED_C)
+#if OPENWSN_CINFRARED_C
 
 #include "opendefs.h"
 #include "cinfrared.h"

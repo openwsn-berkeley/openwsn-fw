@@ -45,7 +45,7 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 // frame sizes
 #define IEEE802154_FRAME_SIZE   127
 
-#if defined(OPENWSN_6LO_FRAGMENTATION_C)
+#if OPENWSN_6LO_FRAGMENTATION_C
 #define IPV6_PACKET_SIZE        OPENWSN_MAX_PKTSIZE_SUPPORTED
 #else
 #define IPV6_PACKET_SIZE        0
@@ -338,7 +338,7 @@ typedef struct {
    bool          drop_flag;
 #endif
    bool          is_cjoin_response;
-#if defined(OPENWSN_6LO_FRAGMENTATION_C)
+#if OPENWSN_6LO_FRAGMENTATION_C
    bool          is_big_packet;
 #endif
 
@@ -355,7 +355,7 @@ typedef struct {
    open_addr_t   l3_sourceAdd;                                  // 128b IPv6 source address
    bool          l3_useSourceRouting;                           // TRUE when the packet goes downstream
 
-#if defined(OPENWSN_6LO_FRAGMENTATION_C)
+#if OPENWSN_6LO_FRAGMENTATION_C
     bool         l3_isFragment;
 #endif
    //l2
@@ -401,7 +401,7 @@ typedef struct {
 } OpenQueueEntry_t;
 
 
-#if defined(OPENWSN_6LO_FRAGMENTATION_C)
+#if OPENWSN_6LO_FRAGMENTATION_C
 typedef struct {
     OpenQueueEntry_t standard_entry;
     uint8_t packet_remainder[IPV6_PACKET_SIZE - IEEE802154_FRAME_SIZE]; // 127 bytzs alread allocated in the OpenQueueEntry

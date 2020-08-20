@@ -438,7 +438,7 @@ void task_sixtopNotifSendDone(void) {
             break;
         default:
             // send the rest up the stack
-#if defined(OPENWSN_6LO_FRAGMENTATION_C)
+#if OPENWSN_6LO_FRAGMENTATION_C
             frag_sendDone(msg, msg->l2_sendDoneError);
 #else
             iphc_sendDone(msg, msg->l2_sendDoneError);
@@ -502,7 +502,7 @@ void task_sixtopNotifReceive(void) {
                     break;
                 }
                 // send to upper layer
-#if defined(OPENWSN_6LO_FRAGMENTATION_C)
+#if OPENWSN_6LO_FRAGMENTATION_C
                 frag_receive(msg);
 #else
                 iphc_receive(msg);
