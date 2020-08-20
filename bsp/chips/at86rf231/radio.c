@@ -25,6 +25,9 @@ typedef struct {
 
 radio_vars_t radio_vars;
 
+// global radio selection. 
+uint8_t selected_radioSetting      =       RADIOSETTING_24GHZ;
+
 //=========================== prototypes ======================================
 
 void    radio_spiWriteReg(uint8_t reg_addr, uint8_t reg_setting);
@@ -86,6 +89,10 @@ void radio_reset(void) {
 
 //===== RF admin
 
+void radio_setConfig (radioSetting_t radioSetting){
+    selected_radioSetting = radioSetting;
+    //do nothing
+}
 void radio_setFrequency(uint8_t frequency, radio_freq_t tx_or_rx) {
    // change state
    radio_vars.state = RADIOSTATE_SETTING_FREQUENCY;

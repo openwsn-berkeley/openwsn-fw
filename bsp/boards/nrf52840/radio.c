@@ -193,6 +193,10 @@ void radio_reset(void) {
     radio_vars.state  = RADIOSTATE_STOPPED;
 }
 
+void radio_setConfig (radioSetting_t radioSetting){
+    selected_radioSetting = radioSetting;
+    //do nothing
+}
 
 void radio_setFrequency(uint8_t frequency, radio_freq_t tx_or_rx) {
 

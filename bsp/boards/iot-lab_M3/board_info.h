@@ -49,23 +49,6 @@ to return the board's description.
 #define PORT_PIN_RADIO_RESET_LOW()        //GPIOC->ODR &= ~0X0040;// nothing
 //#define PORT_PIN_RADIO_RESET_LOW()            GPIOC->ODR &= ~(1<<1);
 
-//===== IEEE802154E timing
-
-#define SLOTDURATION 20 // in miliseconds
-
-// time-slot related
-#define PORT_TsSlotDuration                 655   //    20ms
-
-// execution speed related
-#define PORT_maxTxDataPrepare               110   //  3355us (not measured)
-#define PORT_maxRxAckPrepare                20    //   610us (not measured)
-#define PORT_maxRxDataPrepare               33    //  1000us (not measured)
-#define PORT_maxTxAckPrepare                50    //  1525us (not measured)
-
-// radio speed related
-#define PORT_delayTx                        18    //   549us (not measured)
-#define PORT_delayRx                        0     //     0us (can not measure)
-// radio watchdog
 
 //===== adaptive_sync accuracy
 

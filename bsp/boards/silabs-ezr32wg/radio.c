@@ -109,6 +109,11 @@ PORT_TIMER_WIDTH radio_getTimerPeriod(void) {
 
 //===== RF admin
 
+void radio_setConfig (radioSetting_t radioSetting){
+    selected_radioSetting = radioSetting;
+    //do nothing
+}
+
 void radio_setFrequency(uint8_t frequency) {
 
 	// change state

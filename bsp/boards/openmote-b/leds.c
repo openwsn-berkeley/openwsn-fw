@@ -59,34 +59,34 @@ uint8_t leds_error_isOn(void) {
     return (uint8_t)(ui32Toggle & BSP_LED_1)>>4;
 }
 
-// orange
-void    leds_sync_on(void) {
-    bspLedSet(BSP_LED_2);
-}
-void    leds_sync_off(void) {
-    bspLedClear(BSP_LED_2);
-}
-void    leds_sync_toggle(void) {
-    bspLedToggle(BSP_LED_2);
-}
-uint8_t leds_sync_isOn(void) {
-    uint32_t ui32Toggle = GPIOPinRead(BSP_LED_BASE, BSP_LED_2);
-    return (uint8_t)(ui32Toggle & BSP_LED_2)>>5;
-}
-
 // green
-void    leds_radio_on(void) {
+void    leds_sync_on(void) {
     bspLedSet(BSP_LED_4);
 }
-void    leds_radio_off(void) {
+void    leds_sync_off(void) {
     bspLedClear(BSP_LED_4);
 }
-void    leds_radio_toggle(void) {
+void    leds_sync_toggle(void) {
     bspLedToggle(BSP_LED_4);
 }
-uint8_t leds_radio_isOn(void) {
+uint8_t leds_sync_isOn(void) {
     uint32_t ui32Toggle = GPIOPinRead(BSP_LED_BASE, BSP_LED_4);
-    return (uint8_t)(ui32Toggle & BSP_LED_4)>>7;
+    return (uint8_t)(ui32Toggle & BSP_LED_4)>>5;
+}
+
+// orange
+void    leds_radio_on(void) {
+    bspLedSet(BSP_LED_2);
+}
+void    leds_radio_off(void) {
+    bspLedClear(BSP_LED_2);
+}
+void    leds_radio_toggle(void) {
+    bspLedToggle(BSP_LED_2);
+}
+uint8_t leds_radio_isOn(void) {
+    uint32_t ui32Toggle = GPIOPinRead(BSP_LED_BASE, BSP_LED_2);
+    return (uint8_t)(ui32Toggle & BSP_LED_2)>>7;
 }
 
 // yellow

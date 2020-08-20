@@ -18,20 +18,20 @@
 //=========================== variables =======================================
 
 typedef struct {
-   // information about the current transaction
-   uint8_t*        pNextTxByte;
-   uint8_t         numTxedBytes;
-   uint8_t         txBytesLeft;
-   spi_return_t    returnType;
-   uint8_t*        pNextRxByte;
-   uint8_t         maxRxBytes;
-   spi_first_t     isFirst;
-   spi_last_t      isLast;
-   // state of the module
-   uint8_t         busy;
+    // information about the current transaction
+    uint8_t*        pNextTxByte;
+    uint8_t         numTxedBytes;
+    uint8_t         txBytesLeft;
+    spi_return_t    returnType;
+    uint8_t*        pNextRxByte;
+    uint8_t         maxRxBytes;
+    spi_first_t     isFirst;
+    spi_last_t      isLast;
+    // state of the module
+    uint8_t         busy;
 #ifdef SPI_IN_INTERRUPT_MODE
-   // callback when module done
-   spi_cbt         callback;
+    // callback when module done
+    spi_cbt         callback;
 #endif
 } spi_vars_t;
 
@@ -42,7 +42,7 @@ spi_vars_t spi_vars;
 //=========================== public ==========================================
 
 void spi_init(void) {
-   // clear variables
+    // clear variables
     memset(&spi_vars,0,sizeof(spi_vars_t));
    
     SPI_InitTypeDef  SPI_InitStructure;

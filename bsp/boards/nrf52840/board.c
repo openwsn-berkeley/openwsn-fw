@@ -90,9 +90,55 @@ void board_init(void) {
 
     i2c_init();
 
+    board_init_slot_vars();
+
 #if defined(BOARD_SENSORS_ENABLED)
     sensors_init();
 #endif
+}
+
+//====  IEEE802154E timing: bootstrapping slot info lookup table
+// 1 clock tick = 30.5 us
+void board_init_slot_vars(void){
+
+
+    //10ms slot
+    slot_board_vars [SLOT_10ms_24GHZ].slotDuration                   = 328    ;  // tics
+    slot_board_vars [SLOT_10ms_24GHZ].maxTxDataPrepare               = 13     ;  // ~397us (measured 364us)
+    slot_board_vars [SLOT_10ms_24GHZ].maxRxAckPrepare                = 13     ;  // ~397us (measured 364us)
+    slot_board_vars [SLOT_10ms_24GHZ].maxRxDataPrepare               = 13     ;  // ~397us (measured 364us)
+    slot_board_vars [SLOT_10ms_24GHZ].maxTxAckPrepare                = 13     ;  // ~397us (measured 364us)                                                                
+    slot_board_vars [SLOT_10ms_24GHZ].delayTx                        = 10     ;  //  305us (measured 282us; radio_txNow() to RADIO_IRQHandler() / NRF_RADIO->EVENTS_READY)
+    slot_board_vars [SLOT_10ms_24GHZ].delayRx                        =  5     ;  // ~153us (measured 147us; radio_rxNow() to RADIO_IRQHandler() / NRF_RADIO->EVENTS_READY)
+
+    // 20ms slot
+    slot_board_vars [SLOT_20ms_24GHZ].slotDuration                   =  655   ; // tics  
+    slot_board_vars [SLOT_20ms_24GHZ].maxTxDataPrepare               =  13    ; // ~397us (measured 364us)
+    slot_board_vars [SLOT_20ms_24GHZ].maxRxAckPrepare                =  13    ; // ~397us (measured 364us)
+    slot_board_vars [SLOT_20ms_24GHZ].maxRxDataPrepare               =  13    ; // ~397us (measured 364us)
+    slot_board_vars [SLOT_20ms_24GHZ].maxTxAckPrepare                =  13    ; // ~397us (measured 364us)
+    #if BOARD_PCA10056
+    // nrf52840-DK
+        slot_board_vars [SLOT_20ms_24GHZ].delayTx                    =  1     ; // 305us (measured 282us; radio_txNow() to RADIO_IRQHandler() / NRF_RADIO->EVENTS_READY)
+        slot_board_vars [SLOT_20ms_24GHZ].delayRx                    =  0     ; // ~153us (measured 147us; radio_rxNow() to RADIO_IRQHandler() / NRF_RADIO->EVENTS_READY)
+    #endif
+    #if BOARD_PCA10059
+    // nrf52840-DONGLE
+        slot_board_vars [SLOT_20ms_24GHZ].delayTx                    = 10     ; // 305us (measured 282us; radio_txNow() to RADIO_IRQHandler() / NRF_RADIO->EVENTS_READY)
+        slot_board_vars [SLOT_20ms_24GHZ].delayRx                    =  5     ; // ~153us (measured 147us; radio_rxNow() to RADIO_IRQHandler() / NRF_RADIO->EVENTS_READY)
+    #endif
+}
+
+// To get the current slotDuration at any time (in tics)
+// if you need the value in MS, divide by PORT_TICS_PER_MS (which varies by board and clock frequency and defined in board_info.h)
+uint16_t board_getSlotDuration (void){
+    return slot_board_vars [selected_slot_type].slotDuration;
+}
+
+// Setter/Getter function for slot_board_vars
+slot_board_vars_t board_selectSlotTemplate (slotType_t slot_type){
+    selected_slot_type = slot_type;
+    return slot_board_vars [selected_slot_type];
 }
 
 /**

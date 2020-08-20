@@ -53,37 +53,6 @@
 #define PORT_PIN_RADIO_RESET_HIGH()    // nothing
 #define PORT_PIN_RADIO_RESET_LOW()     // nothing
 
-//===== IEEE802154E timing
-#ifdef GOLDEN_IMAGE_ROOT
-// time-slot related
-#define PORT_TsSlotDuration                 328   // counter counts one extra count, see datasheet
-// execution speed related
-#define PORT_maxTxDataPrepare               10    //  305us (measured  82us)
-#define PORT_maxRxAckPrepare                10    //  305us (measured  83us)
-#define PORT_maxRxDataPrepare                4    //  122us (measured  22us)
-#define PORT_maxTxAckPrepare                10    //  122us (measured  94us)
-// radio speed related
-#ifdef OPENWSN_IEEE802154E_SECURITY_C
-#define PORT_delayTx                         7    //  366us (measured xxxus)
-#else
-#define PORT_delayTx                        12    //  366us (measured xxxus)
-#endif
-#define PORT_delayRx                         0    //    0us (can not measure)
-// radio watchdog
-#else
-// time-slot related
-#define PORT_TsSlotDuration                 492   // counter counts one extra count, see datasheet
-// execution speed related
-#define PORT_maxTxDataPrepare               66    // 2014us (measured 746us)
-#define PORT_maxRxAckPrepare                10    //  305us (measured  83us)
-#define PORT_maxRxDataPrepare               33    // 1007us (measured  84us)
-#define PORT_maxTxAckPrepare                22    //  305us (measured 219us)
-// radio speed related
-#define PORT_delayTx                        12    //  214us (measured 219us)
-#define PORT_delayRx                        0     //    0us (can not measure)
-// radio watchdog
-#endif
-
 //===== adaptive_sync accuracy
 
 #define SYNC_ACCURACY                       1     // ticks

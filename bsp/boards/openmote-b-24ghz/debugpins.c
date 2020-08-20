@@ -47,13 +47,13 @@ void debugpins_init(void) {
 
 // PA7
 void debugpins_frame_toggle(void) {
-   bspDBpinToggle(BSP_PINA_BASE, BSP_PINA_7);
+    bspDBpinToggle(BSP_PINA_BASE, BSP_PINA_7);
 }
 void debugpins_frame_clr(void) {
     GPIOPinWrite(BSP_PINA_BASE, BSP_PINA_7, 0);
 }
 void debugpins_frame_set(void) {
-   GPIOPinWrite(BSP_PINA_BASE, BSP_PINA_7, BSP_PINA_7);
+    GPIOPinWrite(BSP_PINA_BASE, BSP_PINA_7, BSP_PINA_7);
 }
 
 // PB3
@@ -122,8 +122,7 @@ void debugpins_isruarttx_set(void) {}
 
 //------------ private ------------//
 
-void bspDBpinToggle(uint32_t base, uint8_t ui8Pin)
-{
+void bspDBpinToggle(uint32_t base, uint8_t ui8Pin){
     // Get current pin values of selected bits
     uint32_t ui32Toggle = GPIOPinRead(base, ui8Pin);
 
