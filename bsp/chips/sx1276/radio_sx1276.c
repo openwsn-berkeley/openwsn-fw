@@ -1,4 +1,4 @@
-#include "spi.h"
+//#include "spi.h"
 #include "gpio.h"
 #include <headers/hw_memmap.h>
 #include <math.h>
@@ -201,10 +201,15 @@ void exercice(void){
  
     //Reading multiple bytes
     sx1276_spiWriteReg(REG_LR_FIFOADDRPTR , 17);
-    sx1276_spiReadReg(REG_LR_FIFO);
+    for(int i=0;i<3;i++){
+        sx1276_spiReadReg(REG_LR_FIFO);
+    }
+    
 
     sx1276_spiWriteReg(REG_LR_FIFOADDRPTR , 233);
-    sx1276_spiReadReg(REG_LR_FIFO);
+    for(int i=0;i<5;i++){
+        sx1276_spiReadReg(REG_LR_FIFO);
+    }
           
 }
 
