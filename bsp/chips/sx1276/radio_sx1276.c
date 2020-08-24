@@ -19,6 +19,9 @@
 
 uint8_t spi_tx_buffer[2];
 uint8_t spi_rx_buffer[2];
+
+uint8_t spi_tx_exobuffer[6];
+uint8_t spi_rx_exobuffer[6];
 /*!
  * \brief Sets the radio in SLEEP mode
  */
@@ -175,28 +178,25 @@ void SX1276SetChannel( uint32_t freq )
 void exercice(void){
 
 
-    uint8_t spi_tx_buffer[6];
-    uint8_t spi_rx_buffer[6];
-  
     //writing from address 17 values 1 2 3 
     sx1276_spiWriteReg(REG_LR_FIFOADDRPTR , 17);
  
-    spi_tx_buffer[0]     = REG_LR_FIFO    | (1 << 7);
-    spi_tx_buffer[1]     = 1;
-    spi_tx_buffer[2]     = 2;
-    spi_tx_buffer[3]     = 3;
-    spi_txrx(spi_tx_buffer, 4, SPI_FIRSTBYTE,spi_rx_buffer, 4, SPI_FIRST, SPI_LAST);
+    spi_tx_exobuffer[0]     = REG_LR_FIFO    | (1 << 7);
+    spi_tx_exobuffer[1]     = 1;
+    spi_tx_exobuffer[2]     = 2;
+    spi_tx_exobuffer[3]     = 3;
+    spi_txrx(spi_tx_exobuffer, 4, SPI_FIRSTBYTE,spi_rx_exobuffer, 4, SPI_FIRST, SPI_LAST);
 
     //writing from address 233 values 10 11 12 13 14
     sx1276_spiWriteReg(REG_LR_FIFOADDRPTR, 233);
 
-    spi_tx_buffer[0]     = REG_LR_FIFO    | (1 << 7);
-    spi_tx_buffer[1]     = 10;  
-    spi_tx_buffer[2]     = 11; 
-    spi_tx_buffer[3]     = 12;    
-    spi_tx_buffer[4]     = 13;
-    spi_tx_buffer[5]     = 14;
-    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer),SPI_FIRSTBYTE,spi_rx_buffer,sizeof(spi_rx_buffer),SPI_FIRST,SPI_LAST);
+    spi_tx_exobuffer[0]     = REG_LR_FIFO    | (1 << 7);
+    spi_tx_exobuffer[1]     = 10;  
+    spi_tx_exobuffer[2]     = 11; 
+    spi_tx_exobuffer[3]     = 12;    
+    spi_tx_exobuffer[4]     = 13;
+    spi_tx_exobuffer[5]     = 14;
+    spi_txrx(spi_tx_exobuffer, sizeof(spi_tx_exobuffer),SPI_FIRSTBYTE,spi_rx_exobuffer,sizeof(spi_rx_exobuffer),SPI_FIRST,SPI_LAST);
 
  
     //Reading multiple bytes
