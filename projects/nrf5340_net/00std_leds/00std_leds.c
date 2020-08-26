@@ -1,5 +1,5 @@
 /**
-\brief nRF5340-specific standalone leds project.
+\brief nRF5340_network-specific standalone leds project.
 
 \author Tengfei Chang <tengfei.chang@gmail.com>, August 2020.
 */
@@ -46,7 +46,7 @@ int main(void) {
 
         output_status = ((uint32_t)(1 << LED_ERROR)) & (NRF_P0_NS->OUT);
 
-        if (output_status==0){
+        if (output_status==0) {
             // it is on , turn off led
             NRF_P0_NS->OUTSET =  1 << LED_ERROR;
         } else {
