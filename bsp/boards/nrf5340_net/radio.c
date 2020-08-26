@@ -8,7 +8,6 @@
 #include "nrf5340_network_bitfields.h"
 #include "board.h"
 #include "radio.h"
-#include "radio_ble.h"
 #include "debugpins.h"
 #include "leds.h"
 
