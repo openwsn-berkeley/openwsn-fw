@@ -201,19 +201,12 @@ void exercice(void){
  
     //Reading multiple bytes
     sx1276_spiWriteReg(REG_LR_FIFOADDRPTR , 17);
-    /*for(int i=0;i<3;i++){
-        sx1276_spiReadReg(REG_LR_FIFO);
-    }*/
     spi_tx_exobuffer[0] = REG_LR_FIFO;
     spi_txrx(spi_tx_exobuffer, 4,SPI_FIRSTBYTE,spi_rx_exobuffer, 4,SPI_FIRST,SPI_LAST);
-    //sx1276_spiReadMutipleValues(REG_LR_FIFO,4);
+    
     
 
     sx1276_spiWriteReg(REG_LR_FIFOADDRPTR , 233);
-    /*for(int i=0;i<5;i++){
-        sx1276_spiReadReg(REG_LR_FIFO);
-    }*/
-    //sx1276_spiReadMutipleValues(REG_LR_FIFO,6);
     spi_tx_exobuffer[0] = REG_LR_FIFO;
     spi_txrx(spi_tx_exobuffer, 6,SPI_FIRSTBYTE,spi_rx_exobuffer, 6,SPI_FIRST,SPI_LAST);      
 }
@@ -256,7 +249,7 @@ uint8_t sx1276_spiReadReg(uint8_t reg) {
     return spi_rx_buffer[1];
 }
 
-void sx1276_spiReadMutipleValues(uint8_t reg, int size_buffer) {
+/*void sx1276_spiReadMutipleValues(uint8_t reg, int size_buffer) {
 
     reg = reg & (~(1 << 7));
 
@@ -271,7 +264,7 @@ void sx1276_spiReadMutipleValues(uint8_t reg, int size_buffer) {
         SPI_FIRST,                  // isFirst
         SPI_LAST                    // isLast
     );
-}
+}*/
 
 void SX1276WriteFifo(uint8_t size){
 
@@ -324,7 +317,7 @@ void  sx1276Send(void){
     SX1276SetTx();
 
     //IRQ TxDone Interrupt
-
+    GPIOPinTypeGPIOOutput(GPIO_A_BASE, GPIO_PIN_7);
     GPIOPinWrite(GPIO_A_BASE, GPIO_PIN_7, 0);
 
     while( SX1276ReadTxDone() == 0 );
