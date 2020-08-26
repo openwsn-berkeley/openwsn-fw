@@ -1,5 +1,5 @@
 <!DOCTYPE CrossStudio_Project_File>
-<solution Name="nrf5340-ble" target="8" version="2">
+<solution Name="nrf5340_net" target="8" version="2">
   <configuration
     Name="Debug"
     c_preprocessor_definitions="DEBUG"
@@ -39,13 +39,13 @@
       arm_compiler_variant="gcc"
       arm_core_type="Cortex-M33"
       arm_endian="Little"
-      arm_fp_abi="Hard"
+      arm_fp_abi="Soft"
       arm_fpu_type="FPv5-SP-D16"
       arm_linker_variant="GNU"
       arm_rtl_variant="Embedded Studio"
       arm_simulator_memory_simulation_parameter="RX 00ff8000,00001000,FFFFFFFF;RWX 20000000,00080000,CDCDCDCD"
       arm_target_device_name="nRF5340_xxAA_NET"
-      c_preprocessor_definitions="nRF5340_xxAA_NET"
+      c_preprocessor_definitions="NRF5340_XXAA_NET"
       c_user_include_directories=".;../../../bsp/boards/nrf5340_net/sdk"
       debug_start_from_entry_point_symbol="No"
       gcc_entry_point="Reset_Handler"

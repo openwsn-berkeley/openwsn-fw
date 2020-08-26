@@ -4,8 +4,8 @@
 \author Tengfei Chang <tengfei.chang@gmail.com>, August 2020.
 */
 
-#include "nrf5340_application.h"
-#include "nrf5340_application_bitfields.h"
+#include "nrf5340_network.h"
+#include "nrf5340_network_bitfields.h"
 
 //=========================== defines =========================================
 
@@ -29,7 +29,6 @@ int main(void) {
 
     volatile uint32_t output_status;
     uint32_t delay;
-    uint8_t  i;
 
     clocks_start();
 
@@ -43,36 +42,20 @@ int main(void) {
 
     // toggle gpio
 
-    i = 0;
-    while (i<10) {
+    while (1) {
 
-        output_status = ((uint32_t)(1 << LED_ERROR)) & (NRF_P0_S->OUT);
+        output_status = ((uint32_t)(1 << LED_ERROR)) & (NRF_P0_NS->OUT);
 
         if (output_status==0){
             // it is on , turn off led
-            NRF_P0_S->OUTSET =  1 << LED_ERROR;
+            NRF_P0_NS->OUTSET =  1 << LED_ERROR;
         } else {
             // it is off, turn on led
-            NRF_P0_S->OUTCLR =  1 << LED_ERROR;
+            NRF_P0_NS->OUTCLR =  1 << LED_ERROR;
         }
 
-        for (delay=0;delay<0xffff;delay++);
-        i++;
+        for (delay=0;delay<0xfffff;delay++);
     }
-
-    // release GPIO: P0.19-31
-
-    for (i=19;i<32;i++) {
-        NRF_P0_S->PIN_CNF[i] |= 0x10000000;
-    }
-
-    // release networking core
-
-    if (NRF_RESET_S->NETWORK.FORCEOFF == 0x1) {
-        NRF_RESET_S->NETWORK.FORCEOFF = 0x0;
-    }
-
-    while(1);
 
  }
 
@@ -85,18 +68,18 @@ int main(void) {
 void clocks_start( void ){
 
     // Start HFCLK and wait for it to start.
-    NRF_CLOCK_S->EVENTS_HFCLKSTARTED = 0;
-    NRF_CLOCK_S->TASKS_HFCLKSTART = 1;
-    while (NRF_CLOCK_S->EVENTS_HFCLKSTARTED == 0);
+    NRF_CLOCK_NS->EVENTS_HFCLKSTARTED = 0;
+    NRF_CLOCK_NS->TASKS_HFCLKSTART = 1;
+    while (NRF_CLOCK_NS->EVENTS_HFCLKSTARTED == 0);
 
-    while (NRF_CLOCK_S->EVENTS_HFCLKSTARTED == 0);
+    while (NRF_CLOCK_NS->EVENTS_HFCLKSTARTED == 0);
 }
 
 
 void nrf_gpio_cfg_output(uint32_t pin_number){
  
 
-    NRF_P0_S->PIN_CNF[pin_number] =   \
+    NRF_P0_NS->PIN_CNF[pin_number] =   \
            ((uint32_t)GPIO_PIN_CNF_DIR_Output << GPIO_PIN_CNF_DIR_Pos)
          | ((uint32_t)GPIO_PIN_CNF_INPUT_Disconnect << GPIO_PIN_CNF_INPUT_Pos)
          | ((uint32_t)GPIO_PIN_CNF_PULL_Disabled << GPIO_PIN_CNF_PULL_Pos)
