@@ -1,0 +1,65 @@
+<!DOCTYPE CrossStudio_Project_File>
+<solution Name="nrf5340-ble" target="8" version="2">
+  <configuration
+    Name="Debug"
+    c_preprocessor_definitions="DEBUG"
+    gcc_debugging_level="Level 3"
+    gcc_optimization_level="None" />
+  <configuration
+    Name="Release"
+    c_preprocessor_definitions="NDEBUG"
+    gcc_debugging_level="None"
+    gcc_omit_frame_pointer="Yes"
+    gcc_optimization_level="Level 1" />
+  <project Name="00std_leds">
+    <configuration
+      Name="Common"
+      arm_architecture="v8M_Mainline"
+      arm_core_type="Cortex-M33"
+      arm_endian="Little"
+      arm_fpu_type="FPv5-SP-D16"
+      arm_linker_heap_size="1024"
+      arm_linker_process_stack_size="0"
+      arm_linker_stack_size="1024"
+      arm_linker_variant="SEGGER"
+      arm_simulator_memory_simulation_parameter="RX 00000000,00100000,FFFFFFFF;RWX 20000000,00040000,CDCDCDCD"
+      arm_target_device_name="NRF5340_XXAA_APP"
+      arm_target_interface_type="SWD"
+      c_user_include_directories="SEGGER"
+      debug_target_connection="J-Link"
+      link_linker_script_file="../../../bsp/boards/nrf5340_app/sdk/nrf5340_xxaa_application.ld"
+      linker_output_format="hex"
+      linker_section_placements_segments="FLASH1 RX 0x00000000 0x00100000;RAM1 RWX 0x20000000 0x00040000"
+      project_directory="00std_leds"
+      project_type="Executable" />
+    <configuration
+      Name="Debug"
+      arm_architecture="v8M_Mainline"
+      arm_assembler_variant="gcc"
+      arm_compiler_variant="gcc"
+      arm_core_type="Cortex-M33"
+      arm_endian="Little"
+      arm_fp_abi="Hard"
+      arm_fpu_type="FPv5-SP-D16"
+      arm_linker_variant="GNU"
+      arm_rtl_variant="Embedded Studio"
+      arm_simulator_memory_simulation_parameter="RX 00ff8000,00001000,FFFFFFFF;RWX 20000000,00080000,CDCDCDCD"
+      arm_target_device_name="nRF5340_xxAA_APP"
+      c_preprocessor_definitions="NRF5340_XXAA_APP"
+      c_user_include_directories=".;../../../bsp/boards/nrf5340_app/sdk"
+      debug_start_from_entry_point_symbol="No"
+      gcc_entry_point="Reset_Handler"
+      link_linker_script_file="../../../bsp/boards/nrf5340_app/sdk/nrf5340_application.ld"
+      link_use_linker_script_file="Yes"
+      linker_additional_files=""
+      linker_section_placement_file="flash_placement.xml"
+      linker_section_placements_segments="FLASH1 RX 0x00ff8000 0x00001000;RAM1 RWX 0x20000000 0x00080000" />
+    <folder
+      Name="sdk"
+      exclude=""
+      filter="*.c;*.h;*.s;*.S"
+      path="../../../bsp/boards/nrf5340_app/sdk"
+      recurse="Yes" />
+    <file file_name="00std_leds.c" />
+  </project>
+</solution>
