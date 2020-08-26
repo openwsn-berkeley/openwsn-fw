@@ -20,6 +20,9 @@
 uint8_t spi_tx_buffer[2];
 uint8_t spi_rx_buffer[2];
 
+static char stringToPrint[]="MessageToTest";
+
+
 uint8_t spi_tx_exobuffer[6];
 uint8_t spi_rx_exobuffer[6];
 /*!
@@ -279,7 +282,7 @@ void SX1276WriteFifo(uint8_t size){
     if( sx1276_spiReadReg(REG_LR_OPMODE)  == RFLR_OPMODE_SLEEP ) SX1276SetStby();
     
     //Write Paylaod buffer
-    SX1276WriteFifoBuffer((uint8_t)("MessageToSend"));
+    SX1276WriteFifoBuffer((uint8_t)stringToPrint);
 
 }
 
@@ -311,7 +314,7 @@ void  sx1276Send(void){
     SX1276SetTxConfig();
 
     //Write Data FIFO
-    SX1276WriteFifo(1);
+    SX1276WriteFifo(sizeof(stringToPrint));
 
     //TX Mode request
     SX1276SetTx();
