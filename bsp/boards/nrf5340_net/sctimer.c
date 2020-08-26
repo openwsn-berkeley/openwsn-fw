@@ -16,9 +16,9 @@
 #define MINIMUM_COMPAREVALE_ADVANCE     5  // nRF52840_PS_v1.0: 2 (page 337)
 
 // LFCLK
-#define LFCLK_SRC_RC          0x0 // RC oscillator 
-#define LFCLK_SRC_XTAL        0x1 // crystal oscillator
-#define LFCLK_SRC_SYNTH       0x2 // synthesized from HFCLK
+#define LFCLK_SRC_RC          0x1 // RC oscillator 
+#define LFCLK_SRC_XTAL        0x2 // crystal oscillator
+#define LFCLK_SRC_SYNTH       0x3 // synthesized from HFCLK
 #define LFCLK_STATE_RUNNING_MASK   ((uint32_t)(0x01))<<16
 
 // RTC
@@ -107,7 +107,7 @@ void sctimer_setCompare(PORT_TIMER_WIDTH val){
         | ((uint32_t)0)<<RTC_COMPARE2_SHIFT
         | ((uint32_t)0)<<RTC_COMPARE3_SHIFT;
 
-    if ( NRF_RTC0_NS->COUNTER- val < TIMERLOOP_THRESHOLD){
+    if ( NRF_RTC0_NS->COUNTER- val < TIMERLOOP_THRESHOLD) {
         // the timer is already late, schedule the ISR right now manually
         NRF_RTC0_NS->EVENTS_COMPARE[0] = (uint32_t)1;
     } else {

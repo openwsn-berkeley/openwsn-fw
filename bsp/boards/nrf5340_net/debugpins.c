@@ -12,10 +12,10 @@
 
 #define NRF_GPIO_PIN_MAP(port, pin) (((port) << 5) | ((pin) & 0x1F))
 
-#define PIN_FRAME         NRF_GPIO_PIN_MAP(0,19)    // p0.19
-#define PIN_SLOT          NRF_GPIO_PIN_MAP(0,20)    // p0.20
-#define PIN_FSM           NRF_GPIO_PIN_MAP(0,21)    // p0.21
-#define PIN_TASK          NRF_GPIO_PIN_MAP(0,22)    // p0.22
+#define PIN_FRAME         NRF_GPIO_PIN_MAP(0,04)    // p0.04
+#define PIN_SLOT          NRF_GPIO_PIN_MAP(0,05)    // p0.05
+#define PIN_FSM           NRF_GPIO_PIN_MAP(0,06)    // p0.06
+#define PIN_TASK          NRF_GPIO_PIN_MAP(0,07)    // p0.07
 #define PIN_ISR           NRF_GPIO_PIN_MAP(0,23)    // p0.23
 #define PIN_RADIO         NRF_GPIO_PIN_MAP(0,24)    // p0.24
 #define PIN_ISRUART_TX    NRF_GPIO_PIN_MAP(0,25)    // p0.25
