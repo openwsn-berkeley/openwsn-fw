@@ -46,10 +46,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /*lint ++flb "Enter library region */
 
-#include "nrf51_erratas.h"
-#include "nrf52_erratas.h"
 #include "nrf53_erratas.h"
-#include "nrf91_erratas.h"
 
 /*lint --flb "Leave library region" */
 
