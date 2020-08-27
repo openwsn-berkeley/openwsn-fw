@@ -7,7 +7,7 @@
  * \def OPENWSN_DEBUG_LEVEL
  *
  * Specifies the debugging level used in the OpenWSN stack.
- * - level 0: no debugging
+ * - level 0: no logging
  * - level 1: only critical logs
  * - level 2: critical and error logs
  * - level 3: critical, error, and success
