@@ -49,9 +49,11 @@ project:
                    (MinGW on Windows build host).
                    mspgcc, iar, iar-proj, gcc
 
-    Software modules/apps to include:
+    Software modules/apps to include and stack/board configuration:
     modules        A comma, separated list of modules to include in the build.
     apps           A comma, separated list of apps to include in the build.
+    stackcfg       A comma, separated list of stack configuration options.
+    boardopt       A comma, separated list of board options.
 
     Connected hardware variables:
     bootload       Location of the board to bootload the binary on. 
@@ -122,7 +124,9 @@ command_line_options = {
     ],
     'apps': ['c6t', 'cexample', 'cinfo', 'cinfrared', 'cled', 'csensors', 'cstorm', 'cwellknown', 'rrt', 'uecho',
              'uexpiration', 'uexp-monitor', 'uinject', 'userialbridge', 'cjoin', ''],
-    'modules': ['coap', 'udp', 'fragmentation', 'adaptive-msf', 'icmpv6echo', 'l2-security', ''],
+    'modules': ['coap', 'udp', 'fragmentation', 'icmpv6echo', 'l2-security', ''],
+    'stackcfg': ['adaptive-msf', 'dagroot', ''],
+    'boardopt' : ['hw-crypto', 'printf', 'fastsim', ''],
     'fet_version': ['2', '3'],
     'verbose': ['0', '1'],
     'simhost': ['amd64-linux', 'x86-linux', 'amd64-windows', 'x86-windows'],
@@ -136,10 +140,17 @@ def validate_option(key, value, env):
     if key not in command_line_options:
         print c.Fore.RED + "Unknown switch {0}.".format(key) + c.Fore.RESET
         Exit(-1)
-    if value not in command_line_options[key]:
-        print c.Fore.RED + "Unknown {0} \"{1}\". Options are {2}.\n\n".format(key, value, ','.join(
-            command_line_options[key])) + c.Fore.RESET
-        Exit(-1)
+
+    if key == 'modules' or key == 'apps':
+        values = value.split(',')
+    else:
+        values = [value]
+
+    for v in values:
+        if v not in command_line_options[key]:
+            print c.Fore.RED + "Unknown {0} \"{1}\". Options are: {2}.\n\n".format(key, v, ', '.join(
+                command_line_options[key])) + c.Fore.RESET
+            Exit(-1)
 
 
 # Define default value for simhost option
@@ -201,6 +212,20 @@ command_line_vars.AddVariables(
     ),
     (
         'apps',  # key
+        '',  # help
+        '',  # default
+        validate_option,  # validator
+        None,  # converter
+    ),
+    (
+        'stackcfg',  # key
+        '',  # help
+        '',  # default
+        validate_option,  # validator
+        None,  # converter
+    ),
+    (
+        'boardopt',  # key
         '',  # help
         '',  # default
         validate_option,  # validator
