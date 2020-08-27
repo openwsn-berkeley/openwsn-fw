@@ -324,7 +324,7 @@ void ieee154e_init(void);
 // public
 PORT_TIMER_WIDTH ieee154e_asnDiff(asn_t *someASN);
 
-#ifdef DEADLINE_OPTION_ENABLED
+#ifdef OPENWSN_DEADLINE_OPTION
 int16_t ieee154e_computeAsnDiff(asn_t *h_asn, asn_t *l_asn);
 
 void ieee154e_calculateExpTime(uint16_t max_delay, uint8_t *et_asn);

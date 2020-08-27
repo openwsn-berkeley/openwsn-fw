@@ -249,7 +249,7 @@ PORT_TIMER_WIDTH ieee154e_asnDiff(asn_t *someASN) {
     return diff;
 }
 
-#ifdef DEADLINE_OPTION_ENABLED
+#ifdef OPENWSN_DEADLINE_OPTION
 /**
 /brief Difference between two ASN values
 

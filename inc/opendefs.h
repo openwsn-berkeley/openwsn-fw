@@ -332,7 +332,7 @@ typedef struct {
    uint8_t*      payload;                                       // pointer to the start of the payload within 'packet'
    int16_t       length;                                        // length in bytes of the payload
    //l7
-#if defined(DEADLINE_OPTION)
+#if defined(OPENWSN_DEADLINE_OPTION)
    uint16_t      max_delay;                                     // Max delay in milliseconds before which the packet should be delivered to the receiver
    bool          orgination_time_flag;
    bool          drop_flag;

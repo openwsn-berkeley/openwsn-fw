@@ -227,6 +227,15 @@
 #define OPENWSN_UDP_C (0)
 #endif
 
+/**
+ * \def OPENWSN_DEADLINE_OPTION
+ *
+ * Activates IPv6 DEADLINE OPTION.
+ *
+ */
+#ifdef OPENWSN_DEADLINE_OPTION
+#define OPENWSN_DEADLINE_OPTION (0)
+#endif
 
 /**
  * \def OPENWSN_6LO_FRAGMENTATION_C

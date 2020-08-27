@@ -138,7 +138,6 @@ command_line_options = {
     'dagroot': ['0', '1'],
     'debug': ['0', '1'],
     'atmel_24ghz': ['0', '1'],
-    'deadline_option': ['0', '1'],
     'revision': ['']
 }
 
@@ -249,13 +248,6 @@ command_line_vars.AddVariables(
         'atmel_24ghz',  # key
         '',  # help
         command_line_options['atmel_24ghz'][0],  # default
-        validate_option,  # validator
-        int,  # converter
-    ),
-    (
-        'deadline_option',  # key
-        '',  # help
-        command_line_options['deadline_option'][0],  # default
         validate_option,  # validator
         int,  # converter
     ),

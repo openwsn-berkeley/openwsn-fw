@@ -89,8 +89,6 @@ if env['dagroot'] == 1:
     env.Append(CPPDEFINES='DAGROOT')
 if env['atmel_24ghz'] == 1:
     env.Append(CPPDEFINES='ATMEL_24GHZ')
-if env['deadline_option'] == 1:
-    env.Append(CPPDEFINES='DEADLINE_OPTION_ENABLED')
 
 if env['toolchain'] == 'mspgcc':
     if env['board'] not in ['telosb', 'wsn430v13b', 'wsn430v14', 'gina', 'z1']:
