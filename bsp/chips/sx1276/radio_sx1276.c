@@ -321,11 +321,15 @@ void  sx1276Send(void){
 
     //IRQ TxDone Interrupt
     GPIOPinTypeGPIOOutput(GPIO_A_BASE, GPIO_PIN_7);
+
     GPIOPinWrite(GPIO_A_BASE, GPIO_PIN_7, 0);
 
     while( SX1276ReadTxDone() == 0 );
        
     GPIOPinWrite(GPIO_A_BASE, GPIO_PIN_7, 1);
+
+    //Reset the TXDONE flag to 0
+    sx1276_spiWriteReg(REG_LR_IRQFLAGS, RFLR_IRQFLAGS_TXDONE);
     
     //STDBY mode 
     SX1276SetStby();
@@ -372,7 +376,7 @@ uint8_t SX1276ReadTxDone(void){
 
     value = sx1276_spiReadReg(REG_LR_IRQFLAGS);
 
-    return value & (1<<3);
+    return value &  RFLR_IRQFLAGS_TXDONE;
 }
 
 //RxDone interrupt 
@@ -382,7 +386,7 @@ uint8_t  SX1276ReadRxDone(void){
     
     value = sx1276_spiReadReg(REG_LR_IRQFLAGS);
 
-    return value & (1<<6);
+    return value & RFLR_IRQFLAGS_RXDONE ;
 }
 
 //CRC error interrupt 
@@ -392,7 +396,7 @@ uint8_t  SX1276ReadCrcError(void){
 
     value = sx1276_spiReadReg(REG_LR_IRQFLAGS);
 
-    return value & (1<<5);
+    return value & RFLR_IRQFLAGS_PAYLOADCRCERROR;
 }
 
 

@@ -131,6 +131,11 @@ void spi_init(){
  //=========== Calling LoRa process transmission function ================
     //while(1) sx1276Send();
     sx1276Send();
+    /*GPIOPinTypeGPIOOutput(GPIO_A_BASE, GPIO_PIN_7);
+    GPIOPinWrite(GPIO_A_BASE, GPIO_PIN_7, 0);
+
+   
+    GPIOPinWrite(GPIO_A_BASE, GPIO_PIN_7, 1);*/
     
  //====================== End LoRa process ================================
 }
