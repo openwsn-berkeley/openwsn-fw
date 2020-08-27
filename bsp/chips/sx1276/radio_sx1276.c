@@ -20,11 +20,11 @@
 uint8_t spi_tx_buffer[2];
 uint8_t spi_rx_buffer[2];
 
-static char stringToPrint[]="MessageToTest";
+//static char stringToPrint[]="MessageToTest";
 
 
-uint8_t spi_tx_exobuffer[6];
-uint8_t spi_rx_exobuffer[6];
+uint8_t spi_tx_exobuffer[14];
+uint8_t spi_rx_exobuffer[14];
 /*!
  * \brief Sets the radio in SLEEP mode
  */
@@ -252,24 +252,9 @@ uint8_t sx1276_spiReadReg(uint8_t reg) {
     return spi_rx_buffer[1];
 }
 
-/*void sx1276_spiReadMutipleValues(uint8_t reg, int size_buffer) {
 
-    reg = reg & (~(1 << 7));
 
-    spi_tx_exobuffer[0]  = reg;
-
-    spi_txrx(
-        spi_tx_exobuffer,              // bufTx
-        2,      // lenbufTx
-        SPI_BUFFER,                 // returnType
-        spi_rx_exobuffer,              // bufRx
-        size_buffer,      // maxLenBufRx
-        SPI_FIRST,                  // isFirst
-        SPI_LAST                    // isLast
-    );
-}*/
-
-void SX1276WriteFifo(uint8_t size){
+void SX1276WriteFifo(uint8_t* bufToWrite, uint8_t size){
 
     //Initializes the payload size
     sx1276_spiWriteReg(REG_LR_PAYLOADLENGTH , size);
@@ -282,16 +267,39 @@ void SX1276WriteFifo(uint8_t size){
     if( sx1276_spiReadReg(REG_LR_OPMODE)  == RFLR_OPMODE_SLEEP ) SX1276SetStby();
     
     //Write Paylaod buffer
-    SX1276WriteFifoBuffer((uint8_t)stringToPrint);
+    spi_tx_exobuffer[0]     = REG_LR_FIFO  | (1 << 7);
+    memcpy( &spi_tx_exobuffer[1], bufToWrite, size );
+
+    spi_txrx(spi_tx_exobuffer, sizeof(spi_tx_exobuffer),SPI_FIRSTBYTE,spi_rx_exobuffer,sizeof(spi_rx_exobuffer),SPI_FIRST,SPI_LAST);
 
 }
 
+/*void SX1276WriteFifo(char stringToPrint[], uint8_t size){
 
-void SX1276WriteFifoBuffer(uint8_t buffer){
+    //Initializes the payload size
+    sx1276_spiWriteReg(REG_LR_PAYLOADLENGTH , size);
+
+    // Full buffer used for Tx
+    sx1276_spiWriteReg(REG_LR_FIFOTXBASEADDR  , 0);
+    sx1276_spiWriteReg(REG_LR_FIFOADDRPTR  , 0);
+
+    // FIFO operations can not take place in Sleep mode
+    if( sx1276_spiReadReg(REG_LR_OPMODE)  == RFLR_OPMODE_SLEEP ) SX1276SetStby();
+    
+    //Write Paylaod buffer
+    //SX1276WriteFifoBuffer((uint8_t)stringToPrint);
+    spi_tx_exobuffer[0]     = REG_LR_FIFO  | (1 << 7);
+    spi_tx_exobuffer[1]     = (uint8_t)stringToPrint;  
+    spi_txrx(spi_tx_exobuffer, sizeof(spi_tx_exobuffer),SPI_FIRSTBYTE,spi_rx_exobuffer,sizeof(spi_rx_exobuffer),SPI_FIRST,SPI_LAST);
+
+}*/
+
+
+/*void SX1276WriteFifoBuffer(uint8_t buffer){
 
     sx1276_spiWriteReg(REG_LR_FIFO, buffer);
 
-}
+}*/
 
 
 uint8_t sx1276ReadFifoBuffer(){
@@ -314,7 +322,7 @@ void  sx1276Send(void){
     SX1276SetTxConfig();
 
     //Write Data FIFO
-    SX1276WriteFifo(sizeof(stringToPrint));
+    SX1276WriteFifo("MessageToTest",sizeof("MessageToTest"));
 
     //TX Mode request
     SX1276SetTx();

@@ -32,7 +32,7 @@ void sx1276_spiWriteReg    (uint8_t reg, uint8_t regValueToWrite);
 uint8_t sx1276_spiReadReg  (uint8_t reg);
 void sx1276_spiReadMutipleValues(uint8_t reg, int size_buffer);
 
-void SX1276WriteFifo(uint8_t size);
+void SX1276WriteFifo(uint8_t* bufToWrite, uint8_t size);
 void SX1276WriteFifoBuffer(uint8_t buffer);
 uint8_t sx1276ReadFifoBuffer(void);
 
