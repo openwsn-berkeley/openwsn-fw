@@ -125,7 +125,6 @@ command_line_options = {
     'simhost': ['amd64-linux', 'x86-linux', 'amd64-windows', 'x86-windows'],
     'simhostpy': [''],  # No reasonable default
     'panid': [''],
-    'debug': ['0', '1'],
     'atmel_24ghz': ['0', '1'],
     'revision': ['']
 }
@@ -212,14 +211,6 @@ command_line_vars.AddVariables(
         None,  # validator
         None,  # converter
     ),
-    (
-        'debug',  # key
-        '',  # help
-        command_line_options['debug'][0],  # default
-        validate_option,  # validator
-        int,  # converter
-    ),
-    (
         'atmel_24ghz',  # key
         '',  # help
         command_line_options['atmel_24ghz'][0],  # default
