@@ -9,7 +9,6 @@ import SCons
 import colorama as c
 import distutils.sysconfig
 import sconsUtils
-from tools import qtcreator as q
 
 Import('env')
 
@@ -610,12 +609,6 @@ elif env['toolchain'] == 'gcc':
 else:
     print c.Fore.RED + 'Unexpected toolchain {0}'.format(env['toolchain']) + c.Fore.RESET
     Exit(-1)
-
-if env['ide'] == 'qtcreator':
-    print env['board']
-    q.QtCreatorManager().initialize(env['board'])
-else:
-    print env['ide']
 
 
 # ============================ upload over JTAG ================================

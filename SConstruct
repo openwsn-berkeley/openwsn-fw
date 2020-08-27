@@ -78,8 +78,6 @@ project:
                    cannot send commands to the mote (e.g. IoT-LAB platform), 
                    use this flag to build a firmware image which is, by 
                    default, in DAG root mode.
-    ide           qtcreator
-
     Common variables:
     verbose        Print each complete compile/link command.
                    0 (off), 1 (on)
@@ -142,7 +140,6 @@ command_line_options = {
     'debug': ['0', '1'],
     'atmel_24ghz': ['0', '1'],
     'deadline_option': ['0', '1'],
-    'ide': ['none', 'qtcreator'],
     'revision': ['']
 }
 
@@ -269,13 +266,6 @@ command_line_vars.AddVariables(
         command_line_options['deadline_option'][0],  # default
         validate_option,  # validator
         int,  # converter
-    ),
-    (
-        'ide',  # key
-        'qtcreator by now',  # help
-        command_line_options['ide'][0],  # default
-        validate_option,  # validator
-        None,  # converter
     ),
     (
         'revision',  # key
