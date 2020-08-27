@@ -85,8 +85,6 @@ dummyFunc = Builder(action='', suffix='.ihex')
 # add the build variables
 if env['panid']:
     env.Append(CPPDEFINES={'PANID_DEFINED': env['panid']})
-if env['dagroot'] == 1:
-    env.Append(CPPDEFINES='DAGROOT')
 if env['atmel_24ghz'] == 1:
     env.Append(CPPDEFINES='ATMEL_24GHZ')
 

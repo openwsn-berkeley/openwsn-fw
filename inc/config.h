@@ -339,6 +339,16 @@
 #define PACKETQUEUE_LENGTH              20
 #endif
 
+/**
+ * \def OPENWSN_DAGROOT
+ *
+ * Set this mote as the DODAG root.
+ *
+ */
+#ifndef OPENWSN_DAGROOT
+#define OPENWSN_DAGROOT (0)
+#endif
+
 // ======================== Board configuration ========================
 
 /**

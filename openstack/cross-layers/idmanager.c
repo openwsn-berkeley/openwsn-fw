@@ -23,7 +23,7 @@ void idmanager_init(void) {
     idmanager_vars.slotSkip = FALSE;
 
     // isDAGroot
-#ifdef DAGROOT
+#if OPENWSN_DAGROOT
     idmanager_vars.isDAGroot = TRUE;
 #else
     idmanager_vars.isDAGroot = FALSE;
@@ -40,7 +40,7 @@ void idmanager_init(void) {
 #endif
     // myPrefix
     idmanager_vars.myPrefix.type = ADDR_PREFIX;
-#ifdef DAGROOT
+#if OPENWSN_DAGROOT
     idmanager_vars.myPrefix.prefix[0]  = 0xbb;
     idmanager_vars.myPrefix.prefix[1]  = 0xbb;
     idmanager_vars.myPrefix.prefix[2]  = 0x00;
