@@ -1272,8 +1272,8 @@ buildEnv.SConscript(
 )
 
 # kernel
-kernelDir = os.path.join('#', 'kernel', buildEnv['kernel'])
-kernelVarDir = os.path.join(buildEnv['VARDIR'], 'kernel', buildEnv['kernel'])
+kernelDir = os.path.join('#', 'kernel', 'openos')
+kernelVarDir = os.path.join(buildEnv['VARDIR'], 'kernel', 'openos')
 buildEnv.SConscript(
     os.path.join(kernelDir, 'SConscript'),
     exports={'env': buildEnv},
