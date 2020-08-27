@@ -97,7 +97,7 @@ void uart_init(void) {
     NRF_UARTE0_NS->ENABLE = (uint32_t)UARTE_ENABLE_ENABLE_Enabled;
 
     // start to rx (tx is started when sending byte)
-    NRF_UARTE0_NS->RXD.PTR        = &uart_vars.rx_byte;
+    NRF_UARTE0_NS->RXD.PTR        = (uint32_t)(&uart_vars.rx_byte);
     NRF_UARTE0_NS->RXD.MAXCNT     = 1;
     NRF_UARTE0_NS->TASKS_STARTRX  = (uint32_t)1;
 

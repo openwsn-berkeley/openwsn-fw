@@ -10,6 +10,7 @@
 #include "radio.h"
 #include "debugpins.h"
 #include "leds.h"
+#include "radio_df.h"
 
 //=========================== defines =========================================
 
@@ -72,7 +73,6 @@ radio_vars_t radio_vars;
 //=========================== private =========================================
 
 uint32_t ble_channel_to_frequency(uint8_t channel);
-void     radio_configure_direction_finding(void);
 
 //=========================== public ==========================================
 
@@ -137,8 +137,6 @@ void radio_init(void) {
        ((uint32_t)1) << ( ((uint32_t)RADIO_IRQn) & 0x1f);
 
     radio_vars.state  = RADIOSTATE_STOPPED;
-
-    radio_configure_direction_finding();
 }
 
 void radio_setStartFrameCb(radio_capture_cbt cb) {
@@ -387,7 +385,9 @@ void radio_configure_direction_finding(void) {
     NRF_RADIO_NS->DFEPACKET.MAXCNT  = NUM_SAMPLES;
     NRF_RADIO_NS->DFEPACKET.PTR     = (uint32_t)(&radio_vars.bf_samples[0]);
 
-    // configure 
+void radio_get_df_samples(uint32_t* sample_buffer, uint16_t length) {
+    
+    memcpy(sample_buffer, &radio_vars.bf_samples[0], 4*sizeof(uint32_t)); 
 }
 
 uint32_t ble_channel_to_frequency(uint8_t channel) {
