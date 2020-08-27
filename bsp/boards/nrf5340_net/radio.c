@@ -65,7 +65,7 @@ typedef struct {
     radio_capture_cbt         endFrame_cb;
     radio_state_t             state;
     uint8_t                   payload[MAX_PACKET_SIZE] __attribute__ ((aligned));
-    uint32_t                  bf_samples[MAX_IQSAMPLES];
+    uint32_t                  df_samples[MAX_IQSAMPLES];
 } radio_vars_t;
 
 radio_vars_t radio_vars;
@@ -245,7 +245,6 @@ void radio_txNow(void) {
 
 void radio_rxEnable(void) {
 
-    
     radio_vars.state  = RADIOSTATE_ENABLING_RX;
 
     if (NRF_RADIO_NS->STATE != STATE_RX){
@@ -383,11 +382,14 @@ void radio_configure_direction_finding(void) {
                                       (uint32_t)(TSAMPLESPACING << 16);
 
     NRF_RADIO_NS->DFEPACKET.MAXCNT  = NUM_SAMPLES;
-    NRF_RADIO_NS->DFEPACKET.PTR     = (uint32_t)(&radio_vars.bf_samples[0]);
+    NRF_RADIO_NS->DFEPACKET.PTR     = (uint32_t)(&radio_vars.df_samples[0]);
+}
 
 void radio_get_df_samples(uint32_t* sample_buffer, uint16_t length) {
     
-    memcpy(sample_buffer, &radio_vars.bf_samples[0], 4*sizeof(uint32_t)); 
+    memcpy(sample_buffer, &radio_vars.df_samples[0], 4*sizeof(uint32_t)); 
+    // reset sample buffer once accessed
+    memset(&radio_vars.df_samples[0], 0, 4*sizeof(uint32_t));
 }
 
 uint32_t ble_channel_to_frequency(uint8_t channel) {
