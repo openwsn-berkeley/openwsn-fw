@@ -132,7 +132,6 @@ command_line_options = {
     ],
     'fet_version': ['2', '3'],
     'verbose': ['0', '1'],
-    'fastsim': ['0', '1'],
     'simhost': ['amd64-linux', 'x86-linux', 'amd64-windows', 'x86-windows'],
     'simhostpy': [''],  # No reasonable default
     'panid': [''],
@@ -208,13 +207,6 @@ command_line_vars.AddVariables(
         'verbose',  # key
         '',  # help
         command_line_options['verbose'][0],  # default
-        validate_option,  # validator
-        int,  # converter
-    ),
-    (
-        'fastsim',  # key
-        '',  # help
-        command_line_options['fastsim'][1],  # default
         validate_option,  # validator
         int,  # converter
     ),

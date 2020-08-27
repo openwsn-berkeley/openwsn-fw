@@ -574,9 +574,6 @@ elif env['toolchain'] == 'gcc':
     if env['board'] in ['python']:
         env.Append(CPPDEFINES='OPENSIM')
 
-    if env['fastsim'] == 1:
-        env.Append(CPPDEFINES='FASTSIM')
-
     if os.name != 'nt':
         if env['simhost'].endswith('linux'):
             # enabling shared library to be reallocated 

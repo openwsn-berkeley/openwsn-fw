@@ -60,6 +60,16 @@
 #error 'Python board does not support hardware acceleration.'
 #endif
 
+#if BOARD_FASTSIM_ENABLED && !defined(PYTHON_BOARD)
+#error 'FASTSIM is only supported in simulation mode.'
+
+#endif
+
+#if !BOARD_FASTSIM_ENABLED && defined(PYTHON_BOARD)
+#warning 'You are not using FASTSIM for UART communication in simulation mode.'
+
+#endif
+
 #if ((IEEE802154E_SINGLE_CHANNEL != 0) && \
     ((IEEE802154E_SINGLE_CHANNEL < 11) || \
     (IEEE802154E_SINGLE_CHANNEL > 26)))

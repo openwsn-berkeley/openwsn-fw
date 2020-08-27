@@ -376,6 +376,19 @@
 #define BOARD_SENSORS_ENABLED (0)
 #endif
 
+/**
+ * \def BOARD_FASTSIM_ENABLED
+ *
+ * Enables fast UART printing in simulation mode. Active by default.
+ *
+ */
+#if !defined(BOARD_FASTSIM_ENABLED) && defined(PYTHON_BOARD)
+#define BOARD_FASTSIM_ENABLED (1)
+#else
+#define BOARD_FASTSIM_ENABLED (0)
+#endif
+
+
 #include "check_config.h"
 
 #endif /* OPENWSN_CONFIG_H */
