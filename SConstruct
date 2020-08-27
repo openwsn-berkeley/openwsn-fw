@@ -48,7 +48,11 @@ project:
     toolchain      Toolchain implementation. The 'python' board requires gcc
                    (MinGW on Windows build host).
                    mspgcc, iar, iar-proj, gcc
-    
+
+    Software modules/apps to include:
+    modules        A comma, separated list of modules to include in the build.
+    apps           A comma, separated list of apps to include in the build.
+
     Connected hardware variables:
     bootload       Location of the board to bootload the binary on. 
                    COMx for Windows, /dev entries for Linux
@@ -59,10 +63,6 @@ project:
     fet_version    Firmware version running on the MSP-FET430uif for jtag.
                    2, 3
     
-    Simulation variables:
-    fastsim        Compiles the firmware for fast simulation.
-                   1 (on), 0 (off)
-
     These simulation variables are for a cross-platform build, and are valid
     only from an amd64-linux build host.
     simhost        Host platform and OS for simulation. Default selection is
@@ -120,6 +120,9 @@ command_line_options = {
         'armgcc',
         'gcc',
     ],
+    'apps': ['c6t', 'cexample', 'cinfo', 'cinfrared', 'cled', 'csensors', 'cstorm', 'cwellknown', 'rrt', 'uecho',
+             'uexpiration', 'uexp-monitor', 'uinject', 'userialbridge', 'cjoin', ''],
+    'modules': ['coap', 'udp', 'fragmentation', 'adaptive-msf', 'icmpv6echo', 'l2-security', ''],
     'fet_version': ['2', '3'],
     'verbose': ['0', '1'],
     'simhost': ['amd64-linux', 'x86-linux', 'amd64-windows', 'x86-windows'],
@@ -188,6 +191,20 @@ command_line_vars.AddVariables(
         command_line_options['verbose'][0],  # default
         validate_option,  # validator
         int,  # converter
+    ),
+    (
+        'modules',  # key
+        '',  # help
+        '',  # default
+        validate_option,  # validator
+        None,  # converter
+    ),
+    (
+        'apps',  # key
+        '',  # help
+        '',  # default
+        validate_option,  # validator
+        None,  # converter
     ),
     (
         'simhost',  # key
