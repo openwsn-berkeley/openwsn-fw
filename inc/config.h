@@ -215,7 +215,7 @@
 #endif
 
 
-// ======================== Stack configuration ========================
+// ========================== Stack modules ===========================
 
 /**
  * \def OPENWSN_UDP_C
@@ -261,18 +261,6 @@
 #endif
 #endif
 
-
-/**
- * \def OPENWSN_ADAPTIVE_MSF
- *
- * Allow the MSF algorithm to dynamically remove and allocate slots, based on the traffic load in the network.
- *
- */
-#ifndef OPENWSN_ADAPTIVE_MSF
-#define OPENWSN_ADAPTIVE_MSF (0)
-#endif
-
-
 /**
  * \def OPENWSN_ICMPV6ECHO_C
  *
@@ -314,6 +302,19 @@
  */
 #ifndef OPENWSN_ADAPTIVE_SYNC_C
 #define OPENWSN_ADAPTIVE_SYNC_C (0)
+#endif
+
+
+// ========================== Stack configuration ===========================
+
+/**
+ * \def OPENWSN_ADAPTIVE_MSF
+ *
+ * Allow the MSF algorithm to dynamically remove and allocate slots, based on the traffic load in the network.
+ *
+ */
+#ifndef OPENWSN_ADAPTIVE_MSF
+#define OPENWSN_ADAPTIVE_MSF (0)
 #endif
 
 
