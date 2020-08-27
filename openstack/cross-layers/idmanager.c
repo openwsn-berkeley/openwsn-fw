@@ -31,7 +31,7 @@ void idmanager_init(void) {
 
     // myPANID
     idmanager_vars.myPANID.type = ADDR_PANID;
-#ifdef PANID_DEFINED
+#ifdef OPENWSN_PANID_DEFINED
     idmanager_vars.myPANID.panid[0] = PANID_DEFINED & 0x00ff;
     idmanager_vars.myPANID.panid[1] =(PANID_DEFINED & 0xff00)>>8;
 #else
