@@ -13,61 +13,7 @@
 
 //=========================== defines =========================================
 
-#define MAX_PKT_LEN             128
-
-#define RADIO_POWER_POWER_POS   0
-
-#define RADIO_PCNF0_LFLEN       8
-#define RADIO_PCNF0_LFLEN_POS   0
-#define RADIO_PCNF0_S0LEN       0
-#define RADIO_PCNF0_S0LEN_POS   8
-#define RADIO_PCNF0_S1LEN       0
-#define RADIO_PCNF0_S1LEN_POS   16
-
-#define RADIO_PCNF1_MAXLEN          MAX_PKT_LEN
-#define RADIO_PCNF1_MAXLEN_POS      0
-#define RADIO_PCNF1_STATLEN         0
-#define RADIO_PCNF1_STATLEN_POS     8
-#define RADIO_PCNF1_BALEN           2
-#define RADIO_PCNF1_BALEN_POS       16
-#define RADIO_PCNF1_ENDIAN          0
-#define RADIO_PCNF1_ENDIAN_POS      24
-#define RADIO_PCNF1_WHITEEN         1   // enable data whiteen
-#define RADIO_PCNF1_WHITEEN_POS     25
-
-// CRC poly: x^24+x^10+x^9+x^6+x^4+x^3+x+1  
-// Refer to: https://devzone.nordicsemi.com/f/nordic-q-a/44111/crc-register-values-for-a-24-bit-crc
-#define RADIO_CRCPOLY_24BIT         0x0000065B
-
-#define RADIO_CRCINIT_24BIT         0x555555
-
-#define RADIO_CRCCNF_LEN            3
-#define RADIO_CRCCNF_LEN_POS        0
-#define RADIO_CRCCNF_SKIPADDR       1
-#define RADIO_CRCCNF_SKIPADDR_POS   8
-
-#define RADIO_TXADDRESS_ADDR0       0
-#define RADIO_TXADDRESS_ADDR0_POS   0
-
-#define RADIO_RXADDRESSES_ADDR0     1
-#define RADIO_RXADDRESSES_ADDR0_POS 0
-
-// RADIO mode
-#define Nrf_1Mbit                   0
-#define Nrf_2Mbit                   1
-#define Ble_1Mbit                   3
-#define Ble_2Mbit                   4
-#define Ble_LR125Kbit               5
-#define Ble_LR500Kbit               6
-#define Ieeee802154_250Kbit         15
-#define RADIO_MODE_MODE_POS         0
-
-#define RADIO_TIFS_TIFS             150 // interframe spacing in us
-
-#define RADIO_INTENSET_ADDRESS_POS  1
-#define RADIO_INTENSET_END_POS      3
-
-#define RADIO_TXPOWER_TXPOWER       0 // 2 = 2dbm, 0xFC = -4dbm
+#define RADIO_POWER_POWER_POS       0
 
 #define STATE_DISABLED              0
 #define STATE_RXRU                  1
@@ -79,39 +25,97 @@
 #define STATE_TX                    11
 #define STATE_TXDIABLE              12
 
-#define DEFAULT_FREQUENCY           4 // frequency = 2400MHz+DEFAULT_FREQUENCY
-#define DEFAULT_CHANNEL             0 // default channel 0
+#define MAX_PACKET_SIZE           (255)       ///< maximal size of radio packet (one more byte at the beginning needed to store the length)
+#define CRC_POLYNOMIAL            (0x11021)   ///< polynomial used for CRC calculation in 802.15.4 frames (x^16 + x^12 + x^5 + 1)
 
-#define BASEADDRESS_0               0xca
-#define BASEADDRESS_1               0xfe
-#define BASEADDRESS_PREFIX          0xff
+#define WAIT_FOR_RADIO_DISABLE    (0)         ///< whether the driver shall wait until the radio is disabled upon calling radio_rfOff()
+#define WAIT_FOR_RADIO_ENABLE     (1)         ///< whether the driver shall wait until the radio is enabled upon calling radio_txEnable() or radio_rxEnable()
 
+#define RADIO_CRCINIT_24BIT       0x555555
+#define RADIO_CRCPOLY_24BIT       0x0000065B  /// ref: https://devzone.nordicsemi.com/f/nordic-q-a/44111/crc-register-values-for-a-24-bit-crc
+
+#define INTERFRAM_SPACING         (150)       // in us
+
+#define BLE_ACCESS_ADDR           0x8E89BED6  // the actual address is 0xD6, 0xBE, 0x89, 0x8E
+
+#define RADIO_TXPOWER             0 // in 2-compilant format
+
+#define DFEOPMODE_DISABLE         0
+#define DFEOPMODE_AOD             2
+#define DFEOPMODE_AOA             3
+
+
+#define ANT_SWITCH_PORT   0
+#define ANT_SWITCH_PIN0   4    // p0.04
+#define ANT_SWITCH_PIN1   5    // p0.05
+#define ANT_SWITCH_PIN2   6    // p0.06
+#define ANT_SWITCH_PIN3   7    // p0.07
+#define ANT_SWITCH_PIN4   23   // p0.23
+#define ANT_SWITCH_PIN5   24   // p0.24
+#define ANT_SWITCH_PIN6   25   // p0.25
+#define ANT_SWITCH_PIN7   26   // p0.26
+
+// the maxmium should be ((1<<14)-1), but need larger .bss size
+#define MAX_IQSAMPLES     ((1<<8)-1) 
 //=========================== variables =======================================
-
-// BLE advertising accesses address
-const static uint8_t ble_access_addr[4] = { 0xD6, 0xBE, 0x89, 0x8E };
-
 
 typedef struct {
     radio_capture_cbt         startFrame_cb;
     radio_capture_cbt         endFrame_cb;
     radio_state_t             state;
-    uint8_t                   trx_frame_buffer[MAX_PKT_LEN];
+    uint8_t                   payload[MAX_PACKET_SIZE] __attribute__ ((aligned));
+    uint32_t                  bf_samples[MAX_IQSAMPLES];
 } radio_vars_t;
 
 radio_vars_t radio_vars;
 
 //=========================== private =========================================
 
-uint32_t ble_freq_calculate(uint8_t channel);
+uint32_t ble_channel_to_frequency(uint8_t channel);
+void     radio_configure_direction_finding(void);
 
 //=========================== public ==========================================
 
 //===== admin
 
 void radio_init(void) {
+
     // clear variables
     memset(&radio_vars,0,sizeof(radio_vars_t));
+
+    // set radio configuration parameters
+    NRF_RADIO_NS->TXPOWER  = (uint32_t)RADIO_TXPOWER;
+
+    // configure packet
+    NRF_RADIO_NS->PCNF0    =   (((1UL) << RADIO_PCNF0_S0LEN_Pos) & RADIO_PCNF0_S0LEN_Msk) | 
+                         (((0UL) << RADIO_PCNF0_S1LEN_Pos) & RADIO_PCNF0_S1LEN_Msk) |
+                         (((8UL) << RADIO_PCNF0_LFLEN_Pos) & RADIO_PCNF0_LFLEN_Msk);
+
+    NRF_RADIO_NS->PCNF1    =   (((RADIO_PCNF1_ENDIAN_Little)    << RADIO_PCNF1_ENDIAN_Pos)  & RADIO_PCNF1_ENDIAN_Msk)  |
+                         (((3UL)                          << RADIO_PCNF1_BALEN_Pos)   & RADIO_PCNF1_BALEN_Msk)   |
+                         (((0UL)                          << RADIO_PCNF1_STATLEN_Pos) & RADIO_PCNF1_STATLEN_Msk) |
+                         ((((uint32_t)MAX_PACKET_SIZE)    << RADIO_PCNF1_MAXLEN_Pos)  & RADIO_PCNF1_MAXLEN_Msk)  |
+                         ((RADIO_PCNF1_WHITEEN_Enabled    << RADIO_PCNF1_WHITEEN_Pos) & RADIO_PCNF1_WHITEEN_Msk);
+
+        
+    NRF_RADIO_NS->CRCPOLY  = RADIO_CRCPOLY_24BIT;
+    NRF_RADIO_NS->CRCCNF   = (
+                                ((RADIO_CRCCNF_SKIPADDR_Skip) << RADIO_CRCCNF_SKIPADDR_Pos) & RADIO_CRCCNF_SKIPADDR_Msk) |
+                                (((RADIO_CRCCNF_LEN_Three)    << RADIO_CRCCNF_LEN_Pos)      & RADIO_CRCCNF_LEN_Msk
+                          );
+    NRF_RADIO_NS->CRCINIT      = RADIO_CRCINIT_24BIT;
+
+    NRF_RADIO_NS->TXADDRESS    = 0;
+    NRF_RADIO_NS->RXADDRESSES  = 1;
+
+    NRF_RADIO_NS->MODE         = ((RADIO_MODE_MODE_Ble_1Mbit) << RADIO_MODE_MODE_Pos) & RADIO_MODE_MODE_Msk;
+    NRF_RADIO_NS->TIFS         = INTERFRAM_SPACING;
+    NRF_RADIO_NS->PREFIX0      = ((BLE_ACCESS_ADDR & 0xff000000) >> 24);
+    NRF_RADIO_NS->BASE0        = ((BLE_ACCESS_ADDR & 0x00ffffff) << 8 );
+
+    NRF_RADIO_NS->PACKETPTR = (uint32_t)(radio_vars.payload);
+
+    NRF_RADIO_NS->SHORTS = RADIO_SHORTS_END_DISABLE_Msk;
 
     // set priority and disable interrupt in NVIC
     NVIC->IPR[((uint32_t)RADIO_IRQn)] = 
@@ -123,56 +127,9 @@ void radio_init(void) {
     NVIC->ICER[((uint32_t)RADIO_IRQn)>>5] = 
        ((uint32_t)1) << ( ((uint32_t)RADIO_IRQn) & 0x1f);
 
-    radio_reset();
-
-    // configure packet
-    NRF_RADIO_NS->PCNF0 =   
-          (((uint32_t)RADIO_PCNF0_LFLEN) << RADIO_PCNF0_LFLEN_POS)
-        | (((uint32_t)RADIO_PCNF0_S0LEN) << RADIO_PCNF0_S0LEN_POS)
-        | (((uint32_t)RADIO_PCNF0_S1LEN) << RADIO_PCNF0_S1LEN_POS);
-
-    NRF_RADIO_NS->PCNF1 =   
-           (((uint32_t)RADIO_PCNF1_MAXLEN)  << RADIO_PCNF1_MAXLEN_POS)
-         | (((uint32_t)RADIO_PCNF1_STATLEN) << RADIO_PCNF1_STATLEN_POS)
-         | (((uint32_t)RADIO_PCNF1_BALEN)   << RADIO_PCNF1_BALEN_POS)
-         | (((uint32_t)RADIO_PCNF1_ENDIAN)  << RADIO_PCNF1_ENDIAN_POS)
-         | (((uint32_t)RADIO_PCNF1_WHITEEN) << RADIO_PCNF1_WHITEEN_POS);
-
-        
-    NRF_RADIO_NS->CRCPOLY  = RADIO_CRCPOLY_24BIT;
-    NRF_RADIO_NS->CRCCNF   = 
-           (((uint32_t)RADIO_CRCCNF_LEN)  << RADIO_CRCCNF_LEN_POS)
-         | (((uint32_t)RADIO_CRCCNF_SKIPADDR) << RADIO_CRCCNF_SKIPADDR_POS);
-
-    NRF_RADIO_NS->TXADDRESS = 
-        (((uint32_t)RADIO_TXADDRESS_ADDR0)  << RADIO_TXADDRESS_ADDR0_POS);
-
-    NRF_RADIO_NS->RXADDRESSES = 
-        (((uint32_t)RADIO_RXADDRESSES_ADDR0)  << RADIO_RXADDRESSES_ADDR0_POS);
-        
-
-    NRF_RADIO_NS->MODE = 
-        (((uint32_t)Ble_2Mbit)  << RADIO_MODE_MODE_POS);
-
-    NRF_RADIO_NS->TIFS = (uint32_t)RADIO_TIFS_TIFS;
-
-    NRF_RADIO_NS->PREFIX0 = ble_access_addr[3];
-    NRF_RADIO_NS->BASE0   = ( (((uint32_t)ble_access_addr[2]) << 24) 
-                         | (((uint32_t)ble_access_addr[1]) << 16)
-                         | (((uint32_t)ble_access_addr[0]) << 8) );
-
-    NRF_RADIO_NS->CRCINIT = (uint32_t)RADIO_CRCINIT_24BIT;
-
-    NRF_RADIO_NS->TXPOWER = (uint32_t)RADIO_TXPOWER_TXPOWER;
-
-    NRF_RADIO_NS->PACKETPTR = (uint32_t)(radio_vars.trx_frame_buffer);
-
-    NRF_RADIO_NS->SHORTS = RADIO_SHORTS_END_DISABLE_Msk;
-
     // enable address and payload interrupts 
-    NRF_RADIO_NS->INTENSET =
-           (((uint32_t)1)   << RADIO_INTENSET_ADDRESS_POS)
-         | (((uint32_t)1)   << RADIO_INTENSET_END_POS);
+    NRF_RADIO_NS->INTENSET = RADIO_INTENSET_ADDRESS_Enabled << RADIO_INTENSET_ADDRESS_Pos |
+                          RADIO_INTENSET_END_Enabled     << RADIO_INTENSET_END_Pos;
     
     NVIC->ICPR[((uint32_t)RADIO_IRQn)>>5] = 
        ((uint32_t)1) << ( ((uint32_t)RADIO_IRQn) & 0x1f);
@@ -180,6 +137,8 @@ void radio_init(void) {
        ((uint32_t)1) << ( ((uint32_t)RADIO_IRQn) & 0x1f);
 
     radio_vars.state  = RADIOSTATE_STOPPED;
+
+    radio_configure_direction_finding();
 }
 
 void radio_setStartFrameCb(radio_capture_cbt cb) {
@@ -207,21 +166,10 @@ void radio_reset(void) {
 
 void radio_setFrequency(uint8_t channel, radio_freq_t tx_or_rx) {
 
+    NRF_RADIO_NS->FREQUENCY    = ble_channel_to_frequency(channel);
+    NRF_RADIO_NS->DATAWHITEIV  = channel; 
 
-    uint8_t channel_to_set;
-    radio_vars.state  = RADIOSTATE_SETTING_FREQUENCY;
-
-    if (channel>39){
-        channel_to_set = DEFAULT_CHANNEL;
-    } else {
-        channel_to_set = channel;
-    }
-
-    // frequency is calculated as: Frequency = 2400 + FREQUENCY (MHz)
-    NRF_RADIO_NS->DATAWHITEIV = (uint32_t)(channel_to_set);
-    NRF_RADIO_NS->FREQUENCY   = ble_freq_calculate(channel_to_set);
-     
-    radio_vars.state  = RADIOSTATE_FREQUENCY_SET;
+    radio_vars.state        = RADIOSTATE_FREQUENCY_SET;
 }
 
 void radio_rfOn(void) {
@@ -262,15 +210,12 @@ void radio_loadPacket(uint8_t* packet, uint16_t len) {
 
     radio_vars.state  = RADIOSTATE_LOADING_PACKET;
 
-    // base address: 2 byte BA + 1 byte prefix
-    radio_vars.trx_frame_buffer[0] = BASEADDRESS_0;
-    radio_vars.trx_frame_buffer[1] = BASEADDRESS_1;
-    radio_vars.trx_frame_buffer[2] = BASEADDRESS_PREFIX;
-    
-    // length field
-    radio_vars.trx_frame_buffer[3] = (uint8_t)len;
+    if ((len != 0) && (len <= MAX_PACKET_SIZE)) {
+        memcpy(&radio_vars.payload[0], packet, len);
+    }
 
-    memcpy(&radio_vars.trx_frame_buffer[4], packet, len);
+    // (re)set payload pointer
+    NRF_RADIO_NS->PACKETPTR = (uint32_t)(radio_vars.payload);
 
     radio_vars.state  = RADIOSTATE_PACKET_LOADED;
 }
@@ -338,58 +283,144 @@ void radio_getReceivedFrame(
       bool*    crc
    ) {
 
-    if (NRF_RADIO_NS->EVENTS_CRCERROR) {
-        *crc        = 0;
-    } else {
-        *crc        = 1;
-    }
-    NRF_RADIO_NS->EVENTS_CRCERROR = (uint32_t)0;
-    
-    if (
-        radio_vars.trx_frame_buffer[0] != BASEADDRESS_0 ||
-        radio_vars.trx_frame_buffer[1] != BASEADDRESS_1 ||
-        radio_vars.trx_frame_buffer[2] != BASEADDRESS_PREFIX
-    ){
-        return;
+    // check for length parameter; if too long, payload won't fit into memory
+    uint8_t len;
+
+    len = radio_vars.payload[1];
+
+    if (len == 0) {
+        return; 
     }
 
-
-    *lenRead        = radio_vars.trx_frame_buffer[3];
-    *lqi            = radio_vars.trx_frame_buffer[*lenRead+1];
-    *rssi           = (int8_t)(0-NRF_RADIO_NS->RSSISAMPLE); 
-
-    if (*lenRead<=maxBufLen) {
-        memcpy(bufRead,&(radio_vars.trx_frame_buffer[4]),*lenRead);
+    if (len > MAX_PACKET_SIZE) {
+        len = MAX_PACKET_SIZE; 
     }
+
+    if (len > maxBufLen) {
+        len = maxBufLen; 
+    }
+
+    // copy payload
+    memcpy(bufRead, &radio_vars.payload[0], len+2);
+
+    // store other parameters
+    *bufRead = len+2;
+
+    *crc = (NRF_RADIO_NS->CRCSTATUS == 1U);
 }
 
 //=========================== private =========================================
 
-uint32_t ble_freq_calculate(uint8_t channel){
+#define NUM_SWITCH_PINS     8
+#define NUM_SAMPLES         80
+
+// DFECTRL1 register values
+#define LEN_CTE             20 // in unit of 8 us
+#define DFEINEXTENSION      1  // 1:crc  0:payload
+#define TSWITCHSPACING      2  // 1:4us 2:2us 3: 1us
+#define TSAMPLESPACINGREF   2  // 1:4us 2:2us 3: 1us 4:500ns 5:250ns 6:125ns
+#define SAMPLETYPE          0  // 0: IQ  1: magPhase
+#define TSAMPLESPACING      2  // 1:4us 2:2us 3: 1us 4:500ns 5:250ns 6:125ns 
+
+void radio_configure_direction_finding(void) {
+
+    uint8_t i;
+
+    // enable direction finding in AoA mode
+    NRF_RADIO_NS->DFEMODE = DFEOPMODE_AOA;
+
+    // configure GPIO pins
+    NRF_RADIO_NS->PSEL.DFEGPIO[0] = (uint32_t)(
+                                        (ANT_SWITCH_PORT << 5)      |
+                                        (ANT_SWITCH_PIN0 << 0)      |
+                                        (0 << 31)
+                                    );
+    NRF_RADIO_NS->PSEL.DFEGPIO[1] = (uint32_t)(
+                                        (ANT_SWITCH_PORT << 5)      |
+                                        (ANT_SWITCH_PIN1 << 0)      |
+                                        (0 << 31)
+                                    );
+    NRF_RADIO_NS->PSEL.DFEGPIO[2] = (uint32_t)(
+                                        (ANT_SWITCH_PORT << 5)      |
+                                        (ANT_SWITCH_PIN2 << 0)      |
+                                        (0 << 31)
+                                    );
+    NRF_RADIO_NS->PSEL.DFEGPIO[3] = (uint32_t)(
+                                        (ANT_SWITCH_PORT << 5)      |
+                                        (ANT_SWITCH_PIN3 << 0)      |
+                                        (0 << 31)
+                                    );
+    NRF_RADIO_NS->PSEL.DFEGPIO[4] = (uint32_t)(
+                                        (ANT_SWITCH_PORT << 5)      |
+                                        (ANT_SWITCH_PIN4 << 0)      |
+                                        (0 << 31)
+                                    );
+    NRF_RADIO_NS->PSEL.DFEGPIO[5] = (uint32_t)(
+                                        (ANT_SWITCH_PORT << 5)      |
+                                        (ANT_SWITCH_PIN5 << 0)      |
+                                        (0 << 31)
+                                    );
+    NRF_RADIO_NS->PSEL.DFEGPIO[6] = (uint32_t)(
+                                        (ANT_SWITCH_PORT << 5)      |
+                                        (ANT_SWITCH_PIN6 << 0)      |
+                                        (0 << 31)
+                                    );
+    NRF_RADIO_NS->PSEL.DFEGPIO[7] = (uint32_t)(
+                                        (ANT_SWITCH_PORT << 5)      |
+                                        (ANT_SWITCH_PIN7 << 0)      |
+                                        (0 << 31)
+                                    );
+
+    // write switch pattern
+    NRF_RADIO_NS->CLEARPATTERN    = 1;
+    for (i=0; i<NUM_SWITCH_PINS; i++) {
+        NRF_RADIO_NS->SWITCHPATTERN   = (uint32_t)(1<<i);
+    }
+
+    NRF_RADIO_NS->DFECTRL1          = (uint32_t)(LEN_CTE << 0)            | 
+                                      (uint32_t)(DFEINEXTENSION << 7)     |
+                                      (uint32_t)(TSWITCHSPACING << 8)     |
+                                      (uint32_t)(TSAMPLESPACINGREF << 12) |
+                                      (uint32_t)(SAMPLETYPE << 15)        |
+                                      (uint32_t)(TSAMPLESPACING << 16);
+
+    NRF_RADIO_NS->DFEPACKET.MAXCNT  = NUM_SAMPLES;
+    NRF_RADIO_NS->DFEPACKET.PTR     = (uint32_t)(&radio_vars.bf_samples[0]);
+
+    // configure 
+}
+
+uint32_t ble_channel_to_frequency(uint8_t channel) {
+
+    uint32_t frequency;
     
-    if (channel<=10){
-        return (uint32_t)(4+2*channel);
+    if (channel<=10) {
+
+        frequency = 4+2*channel;
     } else {
-        if(channel<=36){
-            return (uint32_t)(28+2*(channel-11));
+        if (channel >=11 && channel <=36) {
+            
+            frequency = 28+2*(channel-11);
         } else {
             switch(channel){
-            case 37:
-                return (uint32_t)2;
+                case 37:
+                    frequency = 2;
+                break;
+                case 38:
+                    frequency = 26;
+                break;
+                case 39:
+                    frequency = 80;
+                break;
+                default:
+                    // something goes wrong
+                    frequency = 2;
 
-            break;
-            case 38:
-                return (uint32_t)26;
-            break;
-            case 39:
-                return (uint32_t)80;
-            break;
-            default:
-                // invalid channel
-                return  (uint32_t)DEFAULT_FREQUENCY;
             }
         }
     }
+
+    return frequency;
 }
 
 void RADIO_IRQHandler(void){
@@ -411,9 +442,6 @@ kick_scheduler_t    radio_isr(void){
 
     // start of frame (payload)
     if (NRF_RADIO_NS->EVENTS_ADDRESS){
-        
-        // start sampling rssi
-        NRF_RADIO_NS->TASKS_RSSISTART = (uint32_t)1;
 
         if (radio_vars.startFrame_cb!=NULL){
             radio_vars.startFrame_cb(time_stampe);
