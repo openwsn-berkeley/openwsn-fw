@@ -134,6 +134,10 @@ void SX1276SetRxConfig( void ){
     //Modem = LoRa -- Set the device in SLEEP mode
     SX1276SetSleep();
 
+    //Set frequency == 868 MHz
+    SX1276SetChannel( 868000000 );
+
+    
     //LORA_BANDWIDTH = 125 KHZ & CodingRate = 4/5
     sx1276_spiWriteReg(REG_LR_MODEMCONFIG1, 0x72);
 
