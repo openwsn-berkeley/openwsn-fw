@@ -22,7 +22,6 @@ uint8_t spi_rx_buffer[2];
 
 //static char stringToPrint[]="MessageToTest";
 
-
 uint8_t spi_tx_exobuffer[14];
 uint8_t spi_rx_exobuffer[14];
 /*!
@@ -178,7 +177,7 @@ void SX1276SetChannel( uint32_t freq )
 }
 
 
-void exercice(void){
+/*void exercice(void){
 
 
     //writing from address 17 values 1 2 3 
@@ -212,7 +211,7 @@ void exercice(void){
     sx1276_spiWriteReg(REG_LR_FIFOADDRPTR , 233);
     spi_tx_exobuffer[0] = REG_LR_FIFO;
     spi_txrx(spi_tx_exobuffer, 6,SPI_FIRSTBYTE,spi_rx_exobuffer, 6,SPI_FIRST,SPI_LAST);      
-}
+}*/
 
 
 void sx1276_spiWriteReg(uint8_t reg, uint8_t regValueToWrite) {
@@ -274,42 +273,26 @@ void SX1276WriteFifo(uint8_t* bufToWrite, uint8_t size){
 
 }
 
-/*void SX1276WriteFifo(char stringToPrint[], uint8_t size){
 
-    //Initializes the payload size
-    sx1276_spiWriteReg(REG_LR_PAYLOADLENGTH , size);
 
-    // Full buffer used for Tx
-    sx1276_spiWriteReg(REG_LR_FIFOTXBASEADDR  , 0);
+void sx1276ReadFifoBuffer(void){
+
+    uint8_t* bufToReceive;
+
+    // Full buffer used for Rx
+    sx1276_spiWriteReg(REG_LR_FIFORXBASEADDR  , 0);
     sx1276_spiWriteReg(REG_LR_FIFOADDRPTR  , 0);
 
     // FIFO operations can not take place in Sleep mode
     if( sx1276_spiReadReg(REG_LR_OPMODE)  == RFLR_OPMODE_SLEEP ) SX1276SetStby();
     
-    //Write Paylaod buffer
-    //SX1276WriteFifoBuffer((uint8_t)stringToPrint);
-    spi_tx_exobuffer[0]     = REG_LR_FIFO  | (1 << 7);
-    spi_tx_exobuffer[1]     = (uint8_t)stringToPrint;  
-    spi_txrx(spi_tx_exobuffer, sizeof(spi_tx_exobuffer),SPI_FIRSTBYTE,spi_rx_exobuffer,sizeof(spi_rx_exobuffer),SPI_FIRST,SPI_LAST);
+    //Read Paylaod buffer
+    spi_tx_exobuffer[0] = REG_LR_FIFO;
+    spi_txrx(spi_tx_exobuffer, 14,SPI_FIRSTBYTE,spi_rx_exobuffer, 14,SPI_FIRST,SPI_LAST);
+    
+    memcpy( bufToReceive, &spi_rx_exobuffer[1], sizeof(spi_rx_exobuffer) );
 
-}*/
-
-
-/*void SX1276WriteFifoBuffer(uint8_t buffer){
-
-    sx1276_spiWriteReg(REG_LR_FIFO, buffer);
-
-}*/
-
-
-uint8_t sx1276ReadFifoBuffer(){
-
-    uint8_t buffer=0;
-
-    buffer = sx1276_spiReadReg(REG_LR_FIFO);
-
-    return buffer;
-
+    printf("bufToReceive : %s\n",bufToReceive);
 }
 
 
@@ -365,7 +348,7 @@ void sx1276Receive(void){
     
     GPIOPinWrite(GPIO_A_BASE, GPIO_PIN_7, 0);
 
-    while( SX1276ReadCrcError() == 0 );
+    while( SX1276ReadCrcError() == 1 );
        
     GPIOPinWrite(GPIO_A_BASE, GPIO_PIN_7, 1);
    

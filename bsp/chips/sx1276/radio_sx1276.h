@@ -33,8 +33,9 @@ uint8_t sx1276_spiReadReg  (uint8_t reg);
 void sx1276_spiReadMutipleValues(uint8_t reg, int size_buffer);
 
 void SX1276WriteFifo(uint8_t* bufToWrite, uint8_t size);
-void SX1276WriteFifoBuffer(uint8_t buffer);
-uint8_t sx1276ReadFifoBuffer(void);
+//void SX1276WriteFifo(uint8_t size)
+//void SX1276WriteFifoBuffer(uint8_t buffer);
+void sx1276ReadFifoBuffer(void);
 
 //======== SX1276 Send/Receive ========
 void sx1276Send(void);
