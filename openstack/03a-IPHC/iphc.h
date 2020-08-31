@@ -144,7 +144,7 @@ enum TYPE_6LORH_enums {
     RH3_6LOTH_TYPE_4 = 0x04,
     RPI_6LOTH_TYPE = 0x05,
     IPECAP_6LOTH_TYPE = 0x06,
-#ifdef OPENWSN_DEADLINE_OPTION
+#if OPENWSN_DEADLINE_OPTION
     DEADLINE_6LOTH_TYPE = 0x07,
 #endif
 };
@@ -168,7 +168,7 @@ typedef struct {
     uint8_t next_header;
     uint8_t *routing_header[MAXNUM_RH3];
     uint8_t *hopByhop_option;
-#ifdef OPENWSN_DEADLINE_OPTION
+#if OPENWSN_DEADLINE_OPTION
     uint8_t* deadline_option;
 #endif
     uint8_t hop_limit;
@@ -220,7 +220,7 @@ typedef struct {
 } rpl_option_ht;
 END_PACK
 
-#ifdef OPENWSN_DEADLINE_OPTION
+#if OPENWSN_DEADLINE_OPTION
 BEGIN_PACK
 typedef struct {
    uint8_t optionType;
@@ -254,7 +254,7 @@ owerror_t iphc_sendFromForwarding(
         ipv6_header_iht *ipv6_outer_header,
         ipv6_header_iht *ipv6_inner_header,
         rpl_option_ht *rpl_option,
-#ifdef OPENWSN_DEADLINE_OPTION
+#if OPENWSN_DEADLINE_OPTION
         deadline_option_ht*	deadline_option,
 #endif
         uint32_t *flow_label,
@@ -304,7 +304,7 @@ owerror_t iphc_retrieveIPv6Header(OpenQueueEntry_t *msg,
                                   uint8_t *page_length
 );
 
-#ifdef OPENWSN_DEADLINE_OPTION
+#if OPENWSN_DEADLINE_OPTION
 void iphc_retrieveIPv6DeadlineHeader(
    OpenQueueEntry_t* msg,
    uint8_t* deadline_msg_ptr,
