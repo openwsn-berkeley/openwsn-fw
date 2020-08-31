@@ -1,5 +1,5 @@
-#ifndef __SCHEDULER_H
-#define __SCHEDULER_H
+#ifndef OPENWSN_SCHEDULER_H
+#define OPENWSN_SCHEDULER_H
 
 /**
 \addtogroup kernel
@@ -72,4 +72,4 @@ void scheduler_push_task(task_cbt task_cb, task_prio_t prio);
 \}
 */
 
-#endif
+#endif /* OPENWSN_SCHEDULER_H */

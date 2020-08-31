@@ -1,6 +1,6 @@
 #include "config.h"
 
-#if defined(OPENWSN_CWELLKNOWN_C)
+#if OPENWSN_CWELLKNOWN_C
 
 #include "opendefs.h"
 #include "cwellknown.h"

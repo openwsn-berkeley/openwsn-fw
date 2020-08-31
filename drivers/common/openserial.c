@@ -212,7 +212,7 @@ owerror_t openserial_printData(uint8_t *buffer, uint8_t length) {
 }
 
 owerror_t openserial_printSniffedPacket(uint8_t *buffer, uint8_t length, uint8_t channel) {
-#ifdef BOARD_OPENSERIAL_SNIFFER
+#if BOARD_OPENSERIAL_SNIFFER
     uint8_t i;
 
     outputHdlcOpen();
@@ -233,7 +233,7 @@ owerror_t openserial_printSniffedPacket(uint8_t *buffer, uint8_t length, uint8_t
 }
 
 owerror_t openserial_printf(char *buffer, ...) {
-#ifdef BOARD_OPENSERIAL_PRINTF
+#if BOARD_OPENSERIAL_PRINTF
     uint8_t  i;
     char *ptr, *tmp;
     int d;
@@ -447,7 +447,7 @@ void openserial_flush(void) {
     if (openserial_vars.fBusyFlushing == FALSE) {
         if (openserial_vars.ctsStateChanged == TRUE) {
             // send CTS
-#ifdef FASTSIM
+#if BOARD_FASTSIM_ENABLED
 #else
             if (openserial_vars.fInhibited == TRUE) {
                 uart_setCTS(FALSE);
@@ -464,7 +464,7 @@ void openserial_flush(void) {
                 if (openserial_vars.outputBufIdxW != openserial_vars.outputBufIdxR) {
                     // I have some bytes to transmit
 
-#ifdef FASTSIM
+#if BOARD_FASTSIM_ENABLED
                     uart_writeCircularBuffer_FASTSIM(
                         openserial_vars.outputBuf,
                         &openserial_vars.outputBufIdxR,
@@ -488,7 +488,7 @@ void openserial_inhibitStart(void) {
     // DISABLE_INTERRUPT is not necessary here.
 
     openserial_vars.fInhibited = TRUE;
-#ifdef FASTSIM
+#if BOARD_FASTSIM_ENABLED
 #else
     openserial_vars.ctsStateChanged = TRUE;
 #endif
@@ -503,7 +503,7 @@ void openserial_inhibitStop(void) {
     //<<<<<<<<<<<<<<<<<<<<<<<
     DISABLE_INTERRUPTS();
     openserial_vars.fInhibited = FALSE;
-#ifdef FASTSIM
+#if BOARD_FASTSIM_ENABLED
 #else
     openserial_vars.ctsStateChanged = TRUE;
 #endif
@@ -853,6 +853,3 @@ uint8_t isr_openserial_rx(void) {
 
     return returnVal;
 }
-
-
-

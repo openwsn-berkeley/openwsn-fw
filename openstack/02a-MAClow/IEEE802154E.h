@@ -42,9 +42,15 @@ static const uint8_t ebIEsBytestream[] = {
 #define TXRETRIES                   15  // number of MAC retries before declaring failed
 #define TX_POWER                    31  // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5  // in 32kHz ticks. min distance to the end of the slot to successfully synchronize
-#define EB_PORTION                  10  // set EB on minimal cell for 1/EB_PORTION portion
+#ifndef EB_PORTION
+#define EB_PORTION                  10 // set EB on minimal cell for 1/EB_PORTION portion
+#endif
+#ifndef MAXKAPERIOD
 #define MAXKAPERIOD               1000  // in slots: 1500@20ms per slot -> ~30 seconds. Max value used by adaptive synchronization.
+#endif
+#ifndef DESYNCTIMEOUT
 #define DESYNCTIMEOUT             1750  // in slots: 1750@20ms per slot -> ~35 seconds. A larger DESYNCTIMEOUT is needed if using a larger KATIMEOUT.
+#endif
 #define LIMITLARGETIMECORRECTION     5  // threshold number of ticks to declare a timeCorrection "large"
 #define LENGTH_IEEE154_MAX         128  // max length of a valid radio packet
 #define DUTY_CYCLE_WINDOW_LIMIT    (0xFFFFFFFF>>1) // limit of the dutycycle window
@@ -318,7 +324,7 @@ void ieee154e_init(void);
 // public
 PORT_TIMER_WIDTH ieee154e_asnDiff(asn_t *someASN);
 
-#ifdef DEADLINE_OPTION_ENABLED
+#ifdef OPENWSN_DEADLINE_OPTION
 int16_t ieee154e_computeAsnDiff(asn_t *h_asn, asn_t *l_asn);
 
 void ieee154e_calculateExpTime(uint16_t max_delay, uint8_t *et_asn);

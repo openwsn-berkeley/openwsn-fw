@@ -4,7 +4,7 @@
 
 #include "config.h"
 
-#if defined(OPENWSN_CINFO_C)
+#if OPENWSN_CINFO_C
 
 #include "opendefs.h"
 #include "cinfo.h"

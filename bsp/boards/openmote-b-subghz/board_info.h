@@ -6,8 +6,8 @@
  * Description: CC2538-specific board information bsp module.
  */
 
-#ifndef __BOARD_INFO_H
-#define __BOARD_INFO_H
+#ifndef OPENWSN_BOARD_INFO_H
+#define OPENWSN_BOARD_INFO_H
 
 #include <stdint.h>
 #include <string.h>
@@ -72,7 +72,7 @@
     #define PORT_maxRxDataPrepare                4    //  122us (measured  22us)
     #define PORT_maxTxAckPrepare                10    //  122us (measured  94us)
     // radio speed related
-#ifdef OPENWSN_IEEE802154E_SECURITY_C
+#if OPENWSN_IEEE802154E_SECURITY_C
     #define PORT_delayTx                        14    //  366us (measured xxxus)
 #else
     #define PORT_delayTx                        12    //  366us (measured xxxus)
@@ -120,7 +120,6 @@
 #define BSP_ANTENNA_BASE            GPIO_D_BASE
 #define BSP_ANTENNA_CC2538_24GHZ    GPIO_PIN_4      //!< PD4 -- 2.4ghz
 #define BSP_ANTENNA_AT215_24GHZ     GPIO_PIN_3      //!< PD3 -- subghz
-//#define DAGROOT
 
 //=========================== typedef  ========================================
 

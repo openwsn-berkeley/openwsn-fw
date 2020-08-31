@@ -5,7 +5,7 @@
 */
 #include "config.h"
 
-#if defined(OPENWSN_ADAPTIVE_SYNC_C)
+#if OPENWSN_ADAPTIVE_SYNC_C
 
 #include "opendefs.h"
 #include "adaptive_sync.h"

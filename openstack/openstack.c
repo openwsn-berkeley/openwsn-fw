@@ -64,7 +64,7 @@ void openstack_init(void) {
     openrandom_init();
 
     //-- 02a-TSCH
-#if defined(OPENWSN_ADAPTIVE_SYNC_C)
+#if OPENWSN_ADAPTIVE_SYNC_C
     adaptive_sync_init();
 #endif
 
@@ -78,7 +78,7 @@ void openstack_init(void) {
     openbridge_init();
     iphc_init();
 
-#if defined(OPENWSN_6LO_FRAGMENTATION_C)
+#if OPENWSN_6LO_FRAGMENTATION_C
     frag_init();
 #endif
 
@@ -86,14 +86,14 @@ void openstack_init(void) {
     forwarding_init();
     icmpv6_init();
 
-#if defined(OPENWSN_ICMPV6_C)
+#if OPENWSN_ICMPV6_ECHO_C
     icmpv6echo_init();
 #endif
 
     icmpv6rpl_init();
     //-- 04-TRAN
 
-#if defined(OPENWSN_UDP_C)
+#if OPENWSN_UDP_C
     openudp_init();
 #endif
 
@@ -105,4 +105,3 @@ void openstack_init(void) {
 
     LOG_SUCCESS(COMPONENT_OPENWSN, ERR_BOOTED, (errorparameter_t) 0, (errorparameter_t) 0);
 }
-

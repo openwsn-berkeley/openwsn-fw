@@ -1045,4 +1045,3 @@ bool icmpv6rpl_daoSent(void) {
     }
     return icmpv6rpl_vars.daoSent;
 }
-

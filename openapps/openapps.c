@@ -8,47 +8,47 @@
 #include "config.h"
 #include "opendefs.h"
 
-#if defined(OPENWSN_C6T_C)
+#if OPENWSN_C6T_C
 #include "c6t.h"
 #endif
 
-#if defined(OPENWSN_CLED_C)
+#if OPENWSN_CLED_C
 #include "cled.h"
 #endif
 
-#if defined(OPENWSN_CINFO_C)
+#if OPENWSN_CINFO_C
 #include "cinfo.h"
 #endif
 
-#if defined(OPENWSN_CWELLKNOWN_C)
+#if OPENWSN_CWELLKNOWN_C
 #include "cwellknown.h"
 #endif
 
-#if defined(OPENWSN_RRT_C)
+#if OPENWSN_RRT_C
 #include "rrt.h"
 #endif
 
-#if defined(OPENWSN_UECHO_C)
+#if OPENWSN_UECHO_C
 #include "uecho.h"
 #endif
 
-#if defined(OPENWSN_UINJECT_C)
+#if OPENWSN_UINJECT_C
 #include "uinject.h"
 #endif
 
-#if defined(OPENWSN_USERIALBRIDGE_C)
+#if OPENWSN_USERIALBRIDGE_C
 #include "userialbridge.h"
 #endif
 
-#if defined(OPENWSN_UEXPIRATION_C)
+#if OPENWSN_UEXPIRATION_C
 #include "uexpiration.h"
 #endif
 
-#if defined(OPENWSN_UEXP_MONITOR_C)
+#if OPENWSN_UEXP_MONITOR_C
 #include "uexpiration_monitor.h"
 #endif
 
-#if defined(OPENWSN_CJOIN_C)
+#if OPENWSN_CJOIN_C
 #include "cjoin.h"
 #endif
 
@@ -61,47 +61,47 @@
 //=========================== private =========================================
 
 void openapps_init(void) {
-#if defined(OPENWSN_CJOIN_C)
+#if OPENWSN_CJOIN_C
     cjoin_init();
 #endif
 
-#if defined(OPENWSN_C6T_C)
+#if OPENWSN_C6T_C
     c6t_init();
 #endif
 
-#if defined(OPENWSN_CINFO_C)
+#if OPENWSN_CINFO_C
     cinfo_init();
 #endif
 
-#if defined(OPENWSN_CLED_C)
+#if OPENWSN_CLED_C
     cled_init();
 #endif
 
-#if defined(OPENWSN_CWELLKNOWN_C)
+#if OPENWSN_CWELLKNOWN_C
     cwellknown_init();
 #endif
 
-#if defined(OPENWSN_RRT_C)
+#if OPENWSN_RRT_C
     rrt_init();
 #endif
 
-#if defined(OPENWSN_UECHO_C)
+#if OPENWSN_UECHO_C
     uecho_init();
 #endif
 
-#if defined(OPENWSN_UINJECT_C)
+#if OPENWSN_UINJECT_C
     uinject_init();
 #endif
 
-#if defined(OPENWSN_USERIALBRIDGE_C)
+#if OPENWSN_USERIALBRIDGE_C
     userialbridge_init();
 #endif
 
-#if defined(OPENWSN_UEXPIRATION_C)
+#if OPENWSN_UEXPIRATION_C
     uexpiration_init();
 #endif
 
-#if defined(OPENWSN_UEXP_MONITOR_C)
+#if OPENWSN_UEXP_MONITOR_C
     umonitor_init();
 #endif
 

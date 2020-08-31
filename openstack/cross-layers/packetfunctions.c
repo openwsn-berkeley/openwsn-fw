@@ -298,7 +298,7 @@ owerror_t packetfunctions_reserveHeader(OpenQueueEntry_t **pkt, uint16_t header_
     int16_t available_bytes;
     available_bytes = IEEE802154_FRAME_SIZE - LENGTH_CRC - IEEE802154_SECURITY_TAG_LEN;
 
-#if defined(OPENWSN_6LO_FRAGMENTATION_C)
+#if OPENWSN_6LO_FRAGMENTATION_C
     if ((*pkt)->is_big_packet == FALSE && ((*pkt)->length + header_length) > available_bytes) {
         // CASE 1: small packet exceeding it boundaries, try copy to big packet.
 
@@ -405,7 +405,7 @@ owerror_t packetfunctions_reserveHeader(OpenQueueEntry_t **pkt, uint16_t header_
 }
 
 void packetfunctions_tossHeader(OpenQueueEntry_t **pkt, uint16_t header_length) {
-#if defined(OPENWSN_6LO_FRAGMENTATION_C)
+#if OPENWSN_6LO_FRAGMENTATION_C
     int16_t available_bytes;
     available_bytes = IEEE802154_FRAME_SIZE - LENGTH_CRC - IEEE802154_SECURITY_TAG_LEN;
 

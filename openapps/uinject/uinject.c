@@ -1,6 +1,6 @@
 #include "config.h"
 
-#if defined(OPENWSN_UINJECT_C)
+#if OPENWSN_UINJECT_C
 
 #include "opendefs.h"
 #include "uinject.h"

@@ -15,7 +15,7 @@
 
 static const uint8_t dagroot_mac64b[] = {0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01};
 
-#ifdef DEADLINE_OPTION_ENABLED
+#if OPENWSN_DEADLINE_OPTION
 static monitor_expiration_vars_t  monitor_expiration_vars;
 #endif
 
@@ -37,7 +37,7 @@ owerror_t iphc_retrieveIphcHeader(open_addr_t *temp_addr_16b,
 //===== IPv6 hop-by-hop header
 owerror_t iphc_prependIPv6HopByHopHeader(OpenQueueEntry_t **msg, uint8_t nextheader, rpl_option_ht *rpl_option);
 
-#ifdef DEADLINE_OPTION_ENABLED
+#if OPENWSN_DEADLINE_OPTION
 // IPv6 Deadline hop-by-hop header
 owerror_t iphc_prependIPv6DeadlineHeader(OpenQueueEntry_t **msg);
 
@@ -55,7 +55,7 @@ owerror_t iphc_sendFromForwarding(
         ipv6_header_iht *ipv6_outer_header,
         ipv6_header_iht *ipv6_inner_header,
         rpl_option_ht *rpl_option,
-#ifdef DEADLINE_OPTION_ENABLED
+#if OPENWSN_DEADLINE_OPTION
         deadline_option_ht*	deadline_option,
 #endif
         uint32_t *flow_label,
@@ -178,7 +178,7 @@ owerror_t iphc_sendFromForwarding(
         }
     }
 
-#ifdef DEADLINE_OPTION_ENABLED
+#if OPENWSN_DEADLINE_OPTION
     if ((msg->creator == COMPONENT_UEXPIRATION) && (deadline_option != NULL)) {
         if (
                 deadline_option->optionType == DEADLINE_HOPBYHOP_HEADER_OPTION_TYPE &&
@@ -221,7 +221,7 @@ owerror_t iphc_sendFromForwarding(
         *((uint8_t * )(msg->payload)) = PAGE_DISPATCH_NO_1;
     }
 
-#if defined(OPENWSN_6LO_FRAGMENTATION_C)
+#if OPENWSN_6LO_FRAGMENTATION_C
     return frag_fragment6LoPacket(msg);
 #else
     return sixtop_send(msg);
@@ -256,7 +256,7 @@ void iphc_receive(OpenQueueEntry_t *msg) {
     uint8_t page_length;
     rpl_option_ht rpl_option;
     uint8_t rpi_length;
-#ifdef DEADLINE_OPTION_ENABLED
+#if OPENWSN_DEADLINE_OPTION
     deadline_option_ht *deadline_ptr = NULL;
     deadline_option_ht curr_deadline_option;
 #endif
@@ -267,7 +267,7 @@ void iphc_receive(OpenQueueEntry_t *msg) {
     memset(&ipv6_inner_header, 0, sizeof(ipv6_header_iht));
     memset(&rpl_option, 0, sizeof(rpl_option_ht));
 
-#ifdef DEADLINE_OPTION_ENABLED
+#if OPENWSN_DEADLINE_OPTION
     ipv6_outer_header.deadline_option = NULL;
 #endif
 
@@ -283,7 +283,7 @@ void iphc_receive(OpenQueueEntry_t *msg) {
         if (ipv6_outer_header.next_header == IANA_IPv6HOPOPT && ipv6_outer_header.hopByhop_option != NULL) {
             // retrieve hop-by-hop header (includes RPL option)
             rpi_length = iphc_retrieveIPv6HopByHopHeader(msg, &rpl_option);
-#ifdef DEADLINE_OPTION_ENABLED
+#if OPENWSN_DEADLINE_OPTION
             if (ipv6_outer_header.deadline_option) {
                 memset(&curr_deadline_option, 0, sizeof(curr_deadline_option));
                 iphc_retrieveIPv6DeadlineHeader(msg, ipv6_outer_header.deadline_option, &curr_deadline_option);
@@ -299,7 +299,7 @@ void iphc_receive(OpenQueueEntry_t *msg) {
                 msg,
                 &ipv6_outer_header,
                 &ipv6_inner_header,
-#ifdef DEADLINE_OPTION_ENABLED
+#if OPENWSN_DEADLINE_OPTION
                 deadline_ptr,
 #endif
                 &rpl_option
@@ -705,7 +705,7 @@ owerror_t iphc_retrieveIPv6Header(OpenQueueEntry_t *msg, ipv6_header_iht *ipv6_o
                             }
                         }
                     }
-#ifdef DEADLINE_OPTION_ENABLED
+#if OPENWSN_DEADLINE_OPTION
                     else if (lorh_type == DEADLINE_6LOTH_TYPE) {
                         ipv6_outer_header->deadline_option = (uint8_t * )(msg->payload) + *page_length + \
                                 extention_header_length;
@@ -1077,7 +1077,7 @@ owerror_t iphc_prependIPv6HopByHopHeader(OpenQueueEntry_t **msg, uint8_t nexthea
     return E_SUCCESS;
 }
 
-#ifdef DEADLINE_OPTION_ENABLED
+#if OPENWSN_DEADLINE_OPTION
 //===== IPv6 Deadline hop-by-hop header
 /**
 \brief Prepend an IPv6 Deadline hop-by-hop header to a message.
@@ -1215,7 +1215,7 @@ uint8_t iphc_retrieveIPv6HopByHopHeader(OpenQueueEntry_t *msg, rpl_option_ht *rp
     return length;
 }
 
-#ifdef DEADLINE_OPTION_ENABLED
+#if OPENWSN_DEADLINE_OPTION
 /**
 \brief Retrieve a Deadline hop-by-hop header from a message.
 

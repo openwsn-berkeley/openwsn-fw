@@ -7,7 +7,7 @@
 
 #include "config.h"
 
-#if defined(OPENWSN_C6T_C)
+#if OPENWSN_C6T_C
 
 #include "opendefs.h"
 #include "coap.h"

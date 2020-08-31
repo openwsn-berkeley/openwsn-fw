@@ -1,6 +1,6 @@
 #include "config.h"
 
-#if defined(OPENWSN_USERIALBRIDGE_C)
+#if OPENWSN_USERIALBRIDGE_C
 
 #include "opendefs.h"
 #include "userialbridge.h"

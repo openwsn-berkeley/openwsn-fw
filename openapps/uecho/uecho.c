@@ -1,6 +1,6 @@
 #include "config.h"
 
-#if defined(OPENWSN_UECHO_C)
+#if OPENWSN_UECHO_C
 
 #include "opendefs.h"
 #include "uecho.h"

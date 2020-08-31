@@ -9,7 +9,6 @@ import SCons
 import colorama as c
 import distutils.sysconfig
 import sconsUtils
-from tools import qtcreator as q
 
 Import('env')
 
@@ -62,6 +61,65 @@ else:
     print c.Fore.RED + "Unsupported board: {}".format(env['board']) + c.Fore.RESET
     Exit(-1)
 
+# check which modules we have to include in the build
+if 'coap' in env['modules'].split(','):
+    env.Append(CPPDEFINES='OPENWSN_COAP_C')
+if 'udp' in env['modules'].split(','):
+    env.Append(CPPDEFINES='OPENWSN_UDP_C')
+if 'l2-security' in env['modules'].split(','):
+    env.Append(CPPDEFINES='OPENWSN_IEEE802154E_SECURITY_C')
+if 'fragmentation' in env['modules'].split(','):
+    env.Append(CPPDEFINES='OPENWSN_6LO_FRAGMENTATION_C')
+if 'icmpv6echo' in env['modules'].split(','):
+    env.Append(CPPDEFINES='OPENWSN_ICMPV6ECHO_C')
+
+# check which apps we have to include in the build
+if 'c6t' in env['apps'].split(','):
+    env.Append(CPPDEFINES='OPENWSN_C6T_C')
+if 'cexample' in env['apps'].split(','):
+    env.Append(CPPDEFINES='OPENWSN_CEXAMPLE_C')
+if 'cinfo' in env['apps'].split(','):
+    env.Append(CPPDEFINES='OPENWSN_CINFO_C')
+if 'cinfrared' in env['apps'].split(','):
+    env.Append(CPPDEFINES='OPENWSN_CINFRARED_C')
+if 'cled' in env['apps'].split(','):
+    env.Append(CPPDEFINES='OPENWSN_CLED_C')
+if 'csensors' in env['apps'].split(','):
+    env.Append(CPPDEFINES='OPENWSN_CSENSORS_C')
+if 'cstorm' in env['apps'].split(','):
+    env.Append(CPPDEFINES='OPENWSN_CSTORM_C')
+if 'cwellknown' in env['apps'].split(','):
+    env.Append(CPPDEFINES='OPENWSN_CWELLKNOWN_C')
+if 'rrt' in env['apps'].split(','):
+    env.Append(CPPDEFINES='OPENWSN_RRT_C')
+if 'uecho' in env['apps'].split(','):
+    env.Append(CPPDEFINES='OPENWSN_UECHO_C')
+if 'uexpiration' in env['apps'].split(','):
+    env.Append(CPPDEFINES='OPENWSN_UEXPIRATION_C')
+if 'uexp-monitor' in env['apps'].split(','):
+    env.Append(CPPDEFINES='OPENWSN_UEXP_MONITOR_C')
+if 'uinject' in env['apps'].split(','):
+    env.Append(CPPDEFINES='OPENWSN_UINJECT_C')
+if 'userialbridge' in env['apps'].split(','):
+    env.Append(CPPDEFINES='OPENWSN_USERIALBRIDGE_C')
+if 'cjoin' in env['apps'].split(','):
+    env.Append(CPPDEFINES='OPENWSN_CJOIN_C')
+
+# check the stack configuration
+if 'adaptive-msf' in env['stackcfg'].split(','):
+    env.Append(CPPDEFINES='OPENWSN_ADAPTIVE_MSF')
+if 'dagroot' in env['stackcfg'].split(','):
+    env.Append(CPPDEFINES='OPENWSN_DAGROOT')
+
+# check the board features
+if 'hw-crypto' in env['boardopt'].split(','):
+    env.Append(CPPDEFINES='BOARD_CRYPTOENGINE_ENABLED')
+if 'printf' in env['boardopt'].split(','):
+    env.Append(CPPDEFINES='BOARD_OPENSERIAL_PRINTF')
+if 'fastsim' in env['boardopt'].split(','):
+    env.Append(CPPDEFINES='BOARD_FASTSIM_ENABLED')
+
+
 # common include paths
 if env['board'] != 'python':
     env.Append(
@@ -84,14 +142,8 @@ if env['board'] != 'python':
 dummyFunc = Builder(action='', suffix='.ihex')
 
 # add the build variables
-if env['panid']:
-    env.Append(CPPDEFINES={'PANID_DEFINED': env['panid']})
-if env['dagroot'] == 1:
-    env.Append(CPPDEFINES='DAGROOT')
 if env['atmel_24ghz'] == 1:
     env.Append(CPPDEFINES='ATMEL_24GHZ')
-if env['deadline_option'] == 1:
-    env.Append(CPPDEFINES='DEADLINE_OPTION_ENABLED')
 
 if env['toolchain'] == 'mspgcc':
     if env['board'] not in ['telosb', 'wsn430v13b', 'wsn430v14', 'gina', 'z1']:
@@ -575,9 +627,6 @@ elif env['toolchain'] == 'gcc':
     if env['board'] in ['python']:
         env.Append(CPPDEFINES='OPENSIM')
 
-    if env['fastsim'] == 1:
-        env.Append(CPPDEFINES='FASTSIM')
-
     if os.name != 'nt':
         if env['simhost'].endswith('linux'):
             # enabling shared library to be reallocated 
@@ -610,12 +659,6 @@ elif env['toolchain'] == 'gcc':
 else:
     print c.Fore.RED + 'Unexpected toolchain {0}'.format(env['toolchain']) + c.Fore.RESET
     Exit(-1)
-
-if env['ide'] == 'qtcreator':
-    print env['board']
-    q.QtCreatorManager().initialize(env['board'])
-else:
-    print env['ide']
 
 
 # ============================ upload over JTAG ================================
@@ -1286,8 +1329,8 @@ buildEnv.SConscript(
 )
 
 # kernel
-kernelDir = os.path.join('#', 'kernel', buildEnv['kernel'])
-kernelVarDir = os.path.join(buildEnv['VARDIR'], 'kernel', buildEnv['kernel'])
+kernelDir = os.path.join('#', 'kernel', 'openos')
+kernelVarDir = os.path.join(buildEnv['VARDIR'], 'kernel', 'openos')
 buildEnv.SConscript(
     os.path.join(kernelDir, 'SConscript'),
     exports={'env': buildEnv},

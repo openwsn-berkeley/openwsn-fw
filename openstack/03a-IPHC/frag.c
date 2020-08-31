@@ -9,7 +9,7 @@ This module implements 6LoWPAN fragmentation according to RFC 4944,
 
 #include "config.h"
 
-#if defined(OPENWSN_6LO_FRAGMENTATION_C)
+#if OPENWSN_6LO_FRAGMENTATION_C
 
 #include "opendefs.h"
 #include "frag.h"

@@ -20,7 +20,7 @@ openqueue_vars_t openqueue_vars;
 
 void openqueue_reset_entry(OpenQueueEntry_t *entry);
 
-#if defined(OPENWSN_6LO_FRAGMENTATION_C)
+#if OPENWSN_6LO_FRAGMENTATION_C
 void openqueue_reset_big_entry(OpenQueueBigEntry_t *entry);
 #endif
 
@@ -37,7 +37,7 @@ void openqueue_init() {
         openqueue_reset_entry(&(openqueue_vars.queue[i]));
     }
 
-#if defined(OPENWSN_6LO_FRAGMENTATION_C)
+#if OPENWSN_6LO_FRAGMENTATION_C
     for (i = 0; i < BIGQUEUELENGTH; i++) {
         openqueue_reset_big_entry(&(openqueue_vars.big_queue[i]));
     }
@@ -123,7 +123,7 @@ owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t *pkt) {
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
 
-#if defined(OPENWSN_6LO_FRAGMENTATION_C)
+#if OPENWSN_6LO_FRAGMENTATION_C
     if (pkt->is_big_packet) {
         for (i = 0; i < BIGQUEUELENGTH; i++) {
             if ((OpenQueueBigEntry_t *) pkt == &openqueue_vars.big_queue[i]) {
@@ -150,7 +150,7 @@ owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t *pkt) {
                 return E_SUCCESS;
             }
         }
-#if defined(OPENWSN_6LO_FRAGMENTATION_C)
+#if OPENWSN_6LO_FRAGMENTATION_C
     }
 #endif
 
@@ -160,7 +160,7 @@ owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t *pkt) {
     return E_FAIL;
 }
 
-#if defined(OPENWSN_6LO_FRAGMENTATION_C)
+#if OPENWSN_6LO_FRAGMENTATION_C
 OpenQueueEntry_t* openqueue_getFreeBigPacketBuffer(uint8_t creator) {
     uint8_t i;
 
@@ -209,7 +209,7 @@ void openqueue_removeAllCreatedBy(uint8_t creator) {
         }
     }
 
-#if defined(OPENWSN_6LO_FRAGMENTATION_C)
+#if OPENWSN_6LO_FRAGMENTATION_C
     for (i = 0; i < BIGQUEUELENGTH; i++) {
         if (openqueue_vars.big_queue[i].standard_entry.creator == creator) {
             openqueue_reset_big_entry(&(openqueue_vars.big_queue[i]));
@@ -234,7 +234,7 @@ OpenQueueEntry_t* openqueue_sixtopGetSentPacket() {
         }
     }
 
-#if defined(OPENWSN_6LO_FRAGMENTATION_C)
+#if OPENWSN_6LO_FRAGMENTATION_C
     for (i = 0; i < BIGQUEUELENGTH; i++) {
         if (((OpenQueueEntry_t*)&openqueue_vars.big_queue[i])->owner == COMPONENT_IEEE802154E_TO_SIXTOP &&
             ((OpenQueueEntry_t*)&openqueue_vars.big_queue[i])->creator != COMPONENT_IEEE802154E) {
@@ -470,7 +470,7 @@ OpenQueueEntry_t*  openqueue_macGetUnicastPacket(open_addr_t* toNeighbor){
         }
     }
 
-#if defined(OPENWSN_6LO_FRAGMENTATION_C)
+#if OPENWSN_6LO_FRAGMENTATION_C
     for (i = 0; i < BIGQUEUELENGTH; i++) {
         if (
                 ((OpenQueueEntry_t*)&openqueue_vars.big_queue[i])->owner == COMPONENT_SIXTOP_TO_IEEE802154E &&
@@ -500,7 +500,7 @@ void openqueue_reset_entry(OpenQueueEntry_t *entry) {
     entry->payload = &(entry->packet[IEEE802154_FRAME_SIZE - LENGTH_CRC - IEEE802154_SECURITY_TAG_LEN]);
     entry->length = 0;
     entry->is_cjoin_response = FALSE;
-#if defined(OPENWSN_6LO_FRAGMENTATION_C)
+#if OPENWSN_6LO_FRAGMENTATION_C
     entry->is_big_packet = FALSE;
 #endif
     //l4
@@ -510,7 +510,7 @@ void openqueue_reset_entry(OpenQueueEntry_t *entry) {
     entry->l3_destinationAdd.type = ADDR_NONE;
     entry->l3_sourceAdd.type = ADDR_NONE;
     entry->l3_useSourceRouting = FALSE;
-#if defined(OPENWSN_6LO_FRAGMENTATION_C)
+#if OPENWSN_6LO_FRAGMENTATION_C
     entry->l3_isFragment = FALSE;
 #endif
     //l2
@@ -526,7 +526,7 @@ void openqueue_reset_entry(OpenQueueEntry_t *entry) {
     entry->l2_securityLevel = 0;
 }
 
-#if defined(OPENWSN_6LO_FRAGMENTATION_C)
+#if OPENWSN_6LO_FRAGMENTATION_C
 void openqueue_reset_big_entry(OpenQueueBigEntry_t *entry) {
     openqueue_reset_entry(&(entry->standard_entry));
 

@@ -20,7 +20,7 @@
 #define QUEUELENGTH  PACKETQUEUE_LENGTH
 #endif
 
-#if defined(OPENWSN_6LO_FRAGMENTATION_C)
+#if OPENWSN_6LO_FRAGMENTATION_C
 #define BIGQUEUELENGTH  OPENWSN_MAX_NUM_BIGPKTS
 #else
 #define BIGQUEUELENGTH  0
@@ -37,7 +37,7 @@ typedef struct {
 
 typedef struct {
     OpenQueueEntry_t queue[QUEUELENGTH];
-#if defined(OPENWSN_6LO_FRAGMENTATION_C)
+#if OPENWSN_6LO_FRAGMENTATION_C
     OpenQueueBigEntry_t big_queue[BIGQUEUELENGTH];
 #endif
 } openqueue_vars_t;
@@ -52,7 +52,7 @@ bool debugPrint_queue(void);
 // called by any component
 OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator);
 
-#if defined(OPENWSN_6LO_FRAGMENTATION_C)
+#if OPENWSN_6LO_FRAGMENTATION_C
 OpenQueueEntry_t* openqueue_getFreeBigPacketBuffer(uint8_t creator);
 #endif
 

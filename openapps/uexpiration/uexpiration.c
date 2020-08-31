@@ -1,6 +1,6 @@
 #include "config.h"
 
-#if defined(OPENWSN_UEXPIRATION_C)
+#if OPENWSN_UEXPIRATION_C
 
 #include "stdlib.h"
 #include "opendefs.h"

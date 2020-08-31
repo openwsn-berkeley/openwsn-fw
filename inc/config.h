@@ -7,7 +7,7 @@
  * \def OPENWSN_DEBUG_LEVEL
  *
  * Specifies the debugging level used in the OpenWSN stack.
- * - level 0: no debugging
+ * - level 0: no logging
  * - level 1: only critical logs
  * - level 2: critical and error logs
  * - level 3: critical, error, and success
@@ -16,8 +16,9 @@
  * - level 6: critical, error, success, warning, info, and verbose
  *
  */
-
+#ifndef OPENWSN_DEBUG_LEVEL
 #define OPENWSN_DEBUG_LEVEL         6
+#endif
 
 // ========================== Applications ==========================
 
@@ -29,8 +30,9 @@
  * Requires: OPENWSN_COAP_C
  *
  */
-
-// #define OPENWSN_C6T_C
+#ifndef OPENWSN_C6T_C
+#define OPENWSN_C6T_C (0)
+#endif
 
 /**
  * \def OPENWSN_CEXAMPLE_C
@@ -40,8 +42,9 @@
  * Requires: OPENWSN_COAP_C
  *
  */
-
-// #define OPENWSN_CEXAMPLE_C
+#ifndef OPENWSN_CEXAMPLE_C
+#define OPENWSN_CEXAMPLE_C (0)
+#endif
 
 /**
  * \def OPENWSN_CINFO_C
@@ -51,8 +54,9 @@
  * Requires: OPENWSN_COAP_C
  *
  */
-
-// #define OPENWSN_CINFO_C
+#ifndef OPENWSN_CINFO_C
+#define OPENWSN_CINFO_C (0)
+#endif
 
 /**
  * \def OPENWSN_CINFRARED_C
@@ -62,8 +66,9 @@
  * Requires: OPENWSN_COAP_C
  *
  */
-
-// #define OPENWSN_CINFRARED_C
+#ifndef OPENWSN_CINFRARED_C
+#define OPENWSN_CINFRARED_C (0)
+#endif
 
 /**
  * \def OPENWSN_CLED_C
@@ -73,8 +78,9 @@
  * Requires: OPENWSN_COAP_C
  *
  */
-
-// #define OPENWSN_CLED_C
+#ifndef OPENWSN_CLED_C
+#define OPENWSN_CLED_C (0)
+#endif
 
 /**
  * \def OPENWSN_CSENSORS_C
@@ -84,8 +90,9 @@
  * Requires: OPENWSN_COAP_C
  *
  */
-
-// #define OPENWSN_CSENSORS_C
+#ifndef OPENWSN_CSENSORS_C
+#define OPENWSN_CSENSORS_C (0)
+#endif
 
 /**
  * \def OPENWSN_CSTORM_C
@@ -95,8 +102,9 @@
  * Requires: OPENWSN_COAP_C
  *
  */
-
-// #define OPENWSN_CSTORM_C
+#ifndef OPENWSN_CSTORM_C
+#define OPENWSN_CSTORM_C (0)
+#endif
 
 /**
  * \def OPENWSN_CWELLKNOWN_C
@@ -106,8 +114,9 @@
  * Requires: OPENWSN_COAP_C
  *
  */
-
-// #define OPENWSN_CWELLKNOWN_C
+#ifndef OPENWSN_CWELLKNOWN_C
+#define OPENWSN_CWELLKNOWN_C (0)
+#endif
 
 /**
  * \def OPENWSN_RRT_C
@@ -117,8 +126,9 @@
  * Requires: OPENWSN_COAP_C
  *
  */
-
-// #define OPENWSN_RRT_C
+#ifndef OPENWSN_RRT_C
+#define OPENWSN_RRT_C (0)
+#endif
 
 /**
  * \def OPENWSN_UECHO_C
@@ -128,8 +138,9 @@
  * Requires: OPENWSN_UDP_C
  *
  */
-
-// #define OPENWSN_UECHO_C
+#ifndef OPENWSN_UECHO_C
+#define OPENWSN_UECHO_C (0)
+#endif
 
 /**
  * \def OPENWSN_UEXPIRATION_C
@@ -139,8 +150,9 @@
  * Requires: OPENWSN_UDP_C
  *
  */
-
-// #define OPENWSN_UEXPIRATION_C
+#ifndef OPENWSN_UEXPIRATION_C
+#define OPENWSN_UEXPIRATION_C (0)
+#endif
 
 /**
  * \def OPENWSN_UEXP_MONITOR_C
@@ -150,8 +162,9 @@
  * Requires: OPENWSN_UDP_C
  *
  */
-
-// #define OPENWSN_UEXP_MONITOR_C
+#ifndef OPENWSN_UEXP_MONITOR_C
+#define OPENWSN_UEXP_MONITOR_C (0)
+#endif
 
 /**
  * \def OPENWSN_UINJECT_C
@@ -161,8 +174,9 @@
  * Requires: OPENWSN_UDP_C
  *
  */
-
-// #define OPENWSN_UINJECT_C
+#ifndef OPENWSN_UINJECT_C
+#define OPENWSN_UINJECT_C (0)
+#endif
 
 /**
  * \def OPENWSN_USERIALBRIDGE_C
@@ -170,8 +184,9 @@
  * Requires: OPENWSN_UDP_C
  *
  */
-
-// #define OPENWSN_USERIALBRIDGE_C
+#ifndef OPENWSN_USERIALBRIDGE_C
+#define OPENWSN_USERIALBRIDGE_C (0)
+#endif
 
 /**
  * \def OPENWSN_CJOIN_C
@@ -181,8 +196,9 @@
  * Requires: OPENWSN_UDP_C, OPENWSN_COAP_C
  *
  */
-
-// #define OPENWSN_CJOIN_C
+#ifndef OPENWSN_CJOIN_C
+#define OPENWSN_CJOIN_C (0)
+#endif
 
 // ======================= OpenWeb configuration =======================
 
@@ -194,11 +210,12 @@
  * Requires: OPENWSN_UDP_C
  *
  */
+#ifndef OPENWSN_COAP_C
+#define OPENWSN_COAP_C (0)
+#endif
 
-// #define OPENWSN_COAP_C
 
-
-// ======================== Stack configuration ========================
+// ========================== Stack modules ===========================
 
 /**
  * \def OPENWSN_UDP_C
@@ -206,9 +223,9 @@
  * Implementation of the UDP protocol.
  *
  */
-
-// #define OPENWSN_UDP_C
-
+#ifndef OPENWSN_UDP_C
+#define OPENWSN_UDP_C (0)
+#endif
 
 /**
  * \def OPENWSN_6LO_FRAGMENTATION_C
@@ -221,27 +238,27 @@
  *  - OPENWSN_MAX_NUM_BIGPKTS: defines how many static buffer space will be allocated for processing large packets.
  *
  */
+#ifndef OPENWSN_6LO_FRAGMENTATION_C
+#define OPENWSN_6LO_FRAGMENTATION_C (0)
+#endif
 
-// #define OPENWSN_6LO_FRAGMENTATION_C
-// #define OPENWSN_MAX_PKTSIZE_SUPPORTED   1320
-// #define OPENWSN_MAX_NUM_BIGPKTS         2
-
-
-/**
- * \def OPENWSN_ADAPTIVE_MSF
- *
- * Allow the MSF algorithm to dynamically remove and allocate slots, based on the traffic load in the network.
- *
- */
-// #define OPENWSN_ADAPTIVE_MSF
-
+#if OPENWSN_6LO_FRAGMENTATION_C
+#ifndef OPENWSN_MAX_PKTSIZE_SUPPORTED
+#define OPENWSN_MAX_PKTSIZE_SUPPORTED   1320
+#endif
+#ifndef OPENWSN_MAX_NUM_BIGPKTS
+#define OPENWSN_MAX_NUM_BIGPKTS         2
+#endif
+#endif
 
 /**
- * \def OPENWSN_ICMPV6ECHO_c
+ * \def OPENWSN_ICMPV6ECHO_C
  *
  * Enables the icmpv6 echo (ping) functionality
  */
-// #define OPENWSN_ICMPV6ECHO_C
+#ifndef OPENWSN_ICMPV6ECHO_C
+#define OPENWSN_ICMPV6ECHO_C (0)
+#endif
 
 
 /**
@@ -251,7 +268,9 @@
  *
  * Requires: OPENWSN_CJOIN_C, OPENWSN_COAP_C, OPENWSN_UDP_C
  */
-// #define OPENWSN_IEEE802154E_SECURITY_C
+#ifndef OPENWSN_IEEE802154E_SECURITY_C
+#define OPENWSN_IEEE802154E_SECURITY_C (0)
+#endif
 
 
 /**
@@ -260,7 +279,9 @@
  * Force the networks topology according the code in topology.c
  *
  */
-// #define OPENWSN_FORCETOPOLOGY_C
+#ifndef OPENWSN_FORCETOPOLOGY_C
+#define OPENWSN_FORCETOPOLOGY_C (0)
+#endif
 
 
 /**
@@ -269,7 +290,32 @@
  * Force the networks topology according the code in topology.c
  *
  */
-// #define OPENWSN_ADAPTIVE_SYNC_C
+#ifndef OPENWSN_ADAPTIVE_SYNC_C
+#define OPENWSN_ADAPTIVE_SYNC_C (0)
+#endif
+
+
+// ========================== Stack configuration ===========================
+
+/**
+ * \def OPENWSN_DEADLINE_OPTION
+ *
+ * Activates IPv6 DEADLINE OPTION.
+ *
+ */
+#ifndef OPENWSN_DEADLINE_OPTION
+#define OPENWSN_DEADLINE_OPTION (0)
+#endif
+
+/**
+ * \def OPENWSN_ADAPTIVE_MSF
+ *
+ * Allow the MSF algorithm to dynamically remove and allocate slots, based on the traffic load in the network.
+ *
+ */
+#ifndef OPENWSN_ADAPTIVE_MSF
+#define OPENWSN_ADAPTIVE_MSF (0)
+#endif
 
 
 /**
@@ -279,7 +325,9 @@
  * When the channel is set to 0, frequency hopping is enabled, otherwise a single channel is used.
  *
  */
+#ifndef IEEE802154E_SINGLE_CHANNEL
 #define IEEE802154E_SINGLE_CHANNEL      11
+#endif
 
 /**
  * \def PACKETQUEUE_LENGTH
@@ -288,7 +336,19 @@
  * increase RAM usage.
  *
  */
+#ifndef PACKETQUEUE_LENGTH
 #define PACKETQUEUE_LENGTH              20
+#endif
+
+/**
+ * \def OPENWSN_DAGROOT
+ *
+ * Set this mote as the DODAG root.
+ *
+ */
+#ifndef OPENWSN_DAGROOT
+#define OPENWSN_DAGROOT (0)
+#endif
 
 // ======================== Board configuration ========================
 
@@ -299,7 +359,9 @@
  * cannot be combined with the python board.
  *
  */
-// #define BOARD_CRYPTOENGINE_ENABLED
+#ifndef BOARD_CRYPTOENGINE_ENABLED
+#define BOARD_CRYPTOENGINE_ENABLED (0)
+#endif
 
 /**
  * \def BOARD_OPENSERIAL_PRINTF
@@ -308,7 +370,9 @@
  * WARNING: this feature links in nano.specs and nosys.specs adding roughly 3Kb of Flash usage.
  *
  */
-// #define BOARD_OPENSERIAL_PRINTF
+#ifndef BOARD_OPENSERIAL_PRINTF
+#define BOARD_OPENSERIAL_PRINTF (0)
+#endif
 
 
 /**
@@ -317,7 +381,9 @@
  * Prints sniffed packet over serial.
  *
  */
-// #define BOARD_OPENSERIAL_SNIFFER
+#ifndef BOARD_OPENSERIAL_SNIFFER
+#define BOARD_OPENSERIAL_SNIFFER (0)
+#endif
 
 
 /**
@@ -326,7 +392,22 @@
  * Includes the sensor driver
  *
  */
-// #define BOARD_SENSORS_ENABLED
+#ifndef BOARD_SENSORS_ENABLED
+#define BOARD_SENSORS_ENABLED (0)
+#endif
+
+/**
+ * \def BOARD_FASTSIM_ENABLED
+ *
+ * Enables fast UART printing in simulation mode. Active by default.
+ *
+ */
+#if !defined(BOARD_FASTSIM_ENABLED) && defined(PYTHON_BOARD)
+#define BOARD_FASTSIM_ENABLED (1)
+#else
+#define BOARD_FASTSIM_ENABLED (0)
+#endif
+
 
 #include "check_config.h"
 

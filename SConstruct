@@ -48,7 +48,13 @@ project:
     toolchain      Toolchain implementation. The 'python' board requires gcc
                    (MinGW on Windows build host).
                    mspgcc, iar, iar-proj, gcc
-    
+
+    Software modules/apps to include and stack/board configuration:
+    modules        A comma, separated list of modules to include in the build.
+    apps           A comma, separated list of apps to include in the build.
+    stackcfg       A comma, separated list of stack configuration options.
+    boardopt       A comma, separated list of board options.
+
     Connected hardware variables:
     bootload       Location of the board to bootload the binary on. 
                    COMx for Windows, /dev entries for Linux
@@ -59,10 +65,6 @@ project:
     fet_version    Firmware version running on the MSP-FET430uif for jtag.
                    2, 3
     
-    Simulation variables:
-    fastsim        Compiles the firmware for fast simulation.
-                   1 (on), 0 (off)
-
     These simulation variables are for a cross-platform build, and are valid
     only from an amd64-linux build host.
     simhost        Host platform and OS for simulation. Default selection is
@@ -72,14 +74,6 @@ project:
     simhostpy      Home directory for simhost cross-build Python headers and 
                    shared library.
     
-    Variables for special use cases.
-    dagroot        Setting a mote as DAG root is typically done through
-                   OpenVisualizer. In some rare cases when the OpenVisualizer
-                   cannot send commands to the mote (e.g. IoT-LAB platform), 
-                   use this flag to build a firmware image which is, by 
-                   default, in DAG root mode.
-    ide           qtcreator
-
     Common variables:
     verbose        Print each complete compile/link command.
                    0 (off), 1 (on)
@@ -128,21 +122,16 @@ command_line_options = {
         'armgcc',
         'gcc',
     ],
-    'kernel': [
-        'openos',
-        'freertos',
-    ],
+    'apps': ['c6t', 'cexample', 'cinfo', 'cinfrared', 'cled', 'csensors', 'cstorm', 'cwellknown', 'rrt', 'uecho',
+             'uexpiration', 'uexp-monitor', 'uinject', 'userialbridge', 'cjoin', ''],
+    'modules': ['coap', 'udp', 'fragmentation', 'icmpv6echo', 'l2-security', ''],
+    'stackcfg': ['adaptive-msf', 'dagroot', ''],
+    'boardopt' : ['hw-crypto', 'printf', 'fastsim', ''],
     'fet_version': ['2', '3'],
     'verbose': ['0', '1'],
-    'fastsim': ['0', '1'],
     'simhost': ['amd64-linux', 'x86-linux', 'amd64-windows', 'x86-windows'],
     'simhostpy': [''],  # No reasonable default
-    'panid': [''],
-    'dagroot': ['0', '1'],
-    'debug': ['0', '1'],
     'atmel_24ghz': ['0', '1'],
-    'deadline_option': ['0', '1'],
-    'ide': ['none', 'qtcreator'],
     'revision': ['']
 }
 
@@ -151,10 +140,17 @@ def validate_option(key, value, env):
     if key not in command_line_options:
         print c.Fore.RED + "Unknown switch {0}.".format(key) + c.Fore.RESET
         Exit(-1)
-    if value not in command_line_options[key]:
-        print c.Fore.RED + "Unknown {0} \"{1}\". Options are {2}.\n\n".format(key, value, ','.join(
-            command_line_options[key])) + c.Fore.RESET
-        Exit(-1)
+
+    if key == 'modules' or key == 'apps':
+        values = value.split(',')
+    else:
+        values = [value]
+
+    for v in values:
+        if v not in command_line_options[key]:
+            print c.Fore.RED + "Unknown {0} \"{1}\". Options are: {2}.\n\n".format(key, v, ', '.join(
+                command_line_options[key])) + c.Fore.RESET
+            Exit(-1)
 
 
 # Define default value for simhost option
@@ -176,13 +172,6 @@ command_line_vars.AddVariables(
         'toolchain',  # key
         '',  # help
         command_line_options['toolchain'][0],  # default
-        validate_option,  # validator
-        None,  # converter
-    ),
-    (
-        'kernel',  # key
-        '',  # help
-        command_line_options['kernel'][0],  # default
         validate_option,  # validator
         None,  # converter
     ),
@@ -215,11 +204,32 @@ command_line_vars.AddVariables(
         int,  # converter
     ),
     (
-        'fastsim',  # key
+        'modules',  # key
         '',  # help
-        command_line_options['fastsim'][1],  # default
+        '',  # default
         validate_option,  # validator
-        int,  # converter
+        None,  # converter
+    ),
+    (
+        'apps',  # key
+        '',  # help
+        '',  # default
+        validate_option,  # validator
+        None,  # converter
+    ),
+    (
+        'stackcfg',  # key
+        '',  # help
+        '',  # default
+        validate_option,  # validator
+        None,  # converter
+    ),
+    (
+        'boardopt',  # key
+        '',  # help
+        '',  # default
+        validate_option,  # validator
+        None,  # converter
     ),
     (
         'simhost',  # key
@@ -236,46 +246,11 @@ command_line_vars.AddVariables(
         None,  # converter
     ),
     (
-        'panid',  # key
-        '0xFFFF',  # help
-        command_line_options['panid'][0],  # default
-        None,  # validator
-        None,  # converter
-    ),
-    (
-        'dagroot',  # key
-        '',  # help
-        command_line_options['dagroot'][0],  # default
-        validate_option,  # validator
-        int,  # converter
-    ),
-    (
-        'debug',  # key
-        '',  # help
-        command_line_options['debug'][0],  # default
-        validate_option,  # validator
-        int,  # converter
-    ),
-    (
         'atmel_24ghz',  # key
         '',  # help
         command_line_options['atmel_24ghz'][0],  # default
         validate_option,  # validator
         int,  # converter
-    ),
-    (
-        'deadline_option',  # key
-        '',  # help
-        command_line_options['deadline_option'][0],  # default
-        validate_option,  # validator
-        int,  # converter
-    ),
-    (
-        'ide',  # key
-        'qtcreator by now',  # help
-        command_line_options['ide'][0],  # default
-        validate_option,  # validator
-        None,  # converter
     ),
     (
         'revision',  # key

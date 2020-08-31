@@ -249,7 +249,7 @@ PORT_TIMER_WIDTH ieee154e_asnDiff(asn_t *someASN) {
     return diff;
 }
 
-#ifdef DEADLINE_OPTION_ENABLED
+#if OPENWSN_DEADLINE_OPTION
 /**
 /brief Difference between two ASN values
 
@@ -350,7 +350,7 @@ void isr_ieee154e_newSlot(opentimers_id_t id) {
             activity_synchronize_newSlot();
         }
     } else {
-#if defined(OPENWSN_ADAPTIVE_SYNC_C)
+#if OPENWSN_ADAPTIVE_SYNC_C
         // adaptive synchronization
         adaptive_sync_countCompensationTimeout();
 #endif
@@ -2593,7 +2593,7 @@ void synchronizePacket(PORT_TIMER_WIDTH timeReceived) {
     );
     ieee154e_vars.slotDuration = newPeriod;
     // indicate time correction to adaptive sync module
-#if defined(OPENWSN_ADAPTIVE_SYNC_C)
+#if OPENWSN_ADAPTIVE_SYNC_C
     adaptive_sync_indicateTimeCorrection(timeCorrection,ieee154e_vars.dataReceived->l2_nextORpreviousHop);
 #endif
     // reset the de-synchronization timeout
@@ -2642,7 +2642,7 @@ void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
     // reset the de-synchronization timeout
     ieee154e_vars.deSyncTimeout = DESYNCTIMEOUT;
 
-#if defined(OPENWSN_ADAPTIVE_SYNC_C)
+#if OPENWSN_ADAPTIVE_SYNC_C
     // indicate time correction to adaptive sync module
     adaptive_sync_indicateTimeCorrection((-timeCorrection),ieee154e_vars.ackReceived->l2_nextORpreviousHop);
 #endif

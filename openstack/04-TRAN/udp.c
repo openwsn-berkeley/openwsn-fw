@@ -1,6 +1,6 @@
 #include "config.h"
 
-#if defined(OPENWSN_UDP_C)
+#if OPENWSN_UDP_C
 
 #include "opendefs.h"
 #include "udp.h"

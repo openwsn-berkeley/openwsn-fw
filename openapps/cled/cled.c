@@ -5,7 +5,7 @@
 
 #include "config.h"
 
-#if defined(OPENWSN_CLED_C)
+#if OPENWSN_CLED_C
 
 #include "opendefs.h"
 #include "cled.h"

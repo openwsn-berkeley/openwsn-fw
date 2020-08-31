@@ -4,7 +4,7 @@
 
 #include "config.h"
 
-#if defined(OPENWSN_EXAMPLE_C)
+#if OPENWSN_EXAMPLE_C
 
 #include "opendefs.h"
 #include "cexample.h"
