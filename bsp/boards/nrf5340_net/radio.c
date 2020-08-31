@@ -299,37 +299,15 @@ void radio_getReceivedFrame(
 //=========================== private =========================================
 
 #define ANT_SWITCH_PORT           1
+
 #define ANT_SWITCH_PIN0           6
 #define ANT_SWITCH_PIN1           7
 #define ANT_SWITCH_PIN2           8
 #define ANT_SWITCH_PIN3           9
 #define ANT_SWITCH_PIN4           10
 
-#define NUM_SWITCH_PINS           5
-
-
-// DFECTRL1 register values
-
-#define NUMBEROF8US         10 // in unit of 8 us
-#define DFEINEXTENSION      1  // 1:crc  0:payload
-#define TSWITCHSPACING      1  // 1:4us 2:2us 3: 1us
-#define TSAMPLESPACINGREF   1  // 1:4us 2:2us 3: 1us 4:500ns 5:250ns 6:125ns
-#define SAMPLETYPE          1  // 0: IQ  1: magPhase
-#define TSAMPLESPACING      2  // 1:4us 2:2us 3: 1us 4:500ns 5:250ns 6:125ns 
-
-#define SAMPLE_MAXCNT       (4+8*NUMBEROF8US) // (2*(8/TSAMPLESPACINGREF + (8*NUMBEROF8US-12)/TSAMPLESPACING))
-
-// DFECTRL2 register values
-
-#define TSWITCHOFFSET             0 //  
-#define TSAMPLEOFFSET             0 // 
-
-#define DFEOPMODE_DISABLE         0
-#define DFEOPMODE_AOD             2
-#define DFEOPMODE_AOA             3
-
-void radio_configure_direction_finding_rx(void) {
-
+void radio_configure_direction_finding_antenna_switch(void) {
+    
     uint8_t i;
 
     nrf_gpio_cfg_output(ANT_SWITCH_PORT,  ANT_SWITCH_PIN0);
@@ -338,7 +316,7 @@ void radio_configure_direction_finding_rx(void) {
     nrf_gpio_cfg_output(ANT_SWITCH_PORT,  ANT_SWITCH_PIN3);
     nrf_gpio_cfg_output(ANT_SWITCH_PORT,  ANT_SWITCH_PIN4);
 
-    NRF_P1_NS->OUTSET = 0x000007C0;
+    NRF_P1_NS->OUTCLR = 0x000007C0;
         
     // configure GPIO pins
     NRF_RADIO_NS->PSEL.DFEGPIO[0] = (uint32_t)(
@@ -376,9 +354,39 @@ void radio_configure_direction_finding_rx(void) {
     NRF_RADIO_NS->SWITCHPATTERN = (uint32_t)(1<<2);
     NRF_RADIO_NS->SWITCHPATTERN = (uint32_t)(1<<3);
     NRF_RADIO_NS->SWITCHPATTERN = (uint32_t)(1<<4);
+}
+
+
+// DFECTRL1 register values
+
+#define NUMBEROF8US         10 // in unit of 8 us
+#define DFEINEXTENSION      1  // 1:crc  0:payload
+#define TSWITCHSPACING      2  // 1:4us 2:2us 3: 1us
+#define TSAMPLESPACINGREF   3  // 1:4us 2:2us 3: 1us 4:500ns 5:250ns 6:125ns
+#define SAMPLETYPE          0  // 0: IQ  1: magPhase
+#define TSAMPLESPACING      2  // 1:4us 2:2us 3: 1us 4:500ns 5:250ns 6:125ns 
+
+#define SAMPLE_MAXCNT       (4+8*NUMBEROF8US) // (2*(8/TSAMPLESPACINGREF + (8*NUMBEROF8US-12)/TSAMPLESPACING))
+
+// DFECTRL2 register values
+
+#define TSWITCHOFFSET             0 // 
+#define TSAMPLEOFFSET             3 //
+
+// DFEMODE
+
+#define DFEOPMODE_DISABLE         0 //
+#define DFEOPMODE_AOD             2 //
+#define DFEOPMODE_AOA             3 //
+
+void radio_configure_direction_finding_manual(void) {
+
+    radio_configure_direction_finding_antenna_switch();
 
     // enable direction finding in AoA mode
     NRF_RADIO_NS->DFEMODE = (uint32_t)DFEOPMODE_AOA;
+
+    NRF_RADIO_NS->CTEINLINECONF     = (uint32_t)0;
 
     NRF_RADIO_NS->DFECTRL1          = (uint32_t)(NUMBEROF8US << 0)        | 
                                       (uint32_t)(DFEINEXTENSION << 7)     |
@@ -395,11 +403,45 @@ void radio_configure_direction_finding_rx(void) {
     NRF_RADIO_NS->DFEPACKET.PTR     = (uint32_t)(&radio_vars.df_samples[0]);
 }
 
-void radio_configure_direction_finding_tx(void) {
+#define CTEINLINECTRLEN     1 // 1: enabled 0: disabled
+#define CTEINFOINS1         1 // 1: data channel PDU  0: advertising channel PDU
+#define CTEERRORHANDLING    0 // 1: sampling and antenna switch when crc is not OK, 0: no sampling and antenna ...
+#define CTETIMEVALIDRANGE   0 // 0: 20, 1: 31, 2: 63 (in uint of 8 us)
+// sample spacing in switching period: 
+#define CTEINLINERXMODE1US  2 // 1 4us, 2 2us, 3 1us, 4 0.5us, 5 0.25us, 6 0.125us (used when tswitchingspace is set to 2us)
+#define CTEINLINERXMODE2US  2 // 1 4us, 2 2us, 3 1us, 4 0.5us, 5 0.25us, 6 0.125us (used when tswitchingspace is set to 4us)
+#define S0CONF              0x20
+#define S0MASK              0x20
 
-    NRF_RADIO_NS->DFEMODE  = (uint32_t)DFEOPMODE_AOA;
-    NRF_RADIO_NS->DFECTRL1 = (uint32_t)(NUMBEROF8US << 0)   | 
-                             (uint32_t)(DFEINEXTENSION << 7);
+void radio_configure_direction_finding_inline(void) {
+    
+    radio_configure_direction_finding_antenna_switch();
+
+    // enable direction finding in AoA mode
+    NRF_RADIO_NS->DFEMODE = (uint32_t)DFEOPMODE_AOA;
+
+    NRF_RADIO_NS->CTEINLINECONF     = (uint32_t)(CTEINLINECTRLEN    << 0) |
+                                      (uint32_t)(CTEINFOINS1        << 3) |
+                                      (uint32_t)(CTEERRORHANDLING   << 4) |
+                                      (uint32_t)(CTETIMEVALIDRANGE  << 6) |
+                                      (uint32_t)(CTEINLINERXMODE1US << 10)|
+                                      (uint32_t)(CTEINLINERXMODE2US << 13)|
+                                      (uint32_t)(S0CONF             << 16)|
+                                      (uint32_t)(S0MASK             << 24);
+
+    NRF_RADIO_NS->DFECTRL1          = (uint32_t)(NUMBEROF8US        << 0) | 
+                                      (uint32_t)(DFEINEXTENSION     << 7) |
+                                      (uint32_t)(TSWITCHSPACING     << 8) |
+                                      (uint32_t)(TSAMPLESPACINGREF  << 12)|
+                                      (uint32_t)(SAMPLETYPE         << 15)|
+                                      (uint32_t)(TSAMPLESPACING     << 16);
+
+    NRF_RADIO_NS->DFECTRL2          = (uint32_t)(TSWITCHOFFSET      << 0) |
+                                      (uint32_t)(TSAMPLEOFFSET      << 0);
+  
+
+    NRF_RADIO_NS->DFEPACKET.MAXCNT  = SAMPLE_MAXCNT;
+    NRF_RADIO_NS->DFEPACKET.PTR     = (uint32_t)(&radio_vars.df_samples[0]);
 }
 
 void radio_get_df_samples(uint32_t* sample_buffer, uint16_t length) {
