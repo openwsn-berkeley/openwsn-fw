@@ -246,7 +246,7 @@ bool neighbors_isNeighborWithHigherDAGrank(uint8_t index) {
     bool returnVal;
 
     if (neighbors_vars.neighbors[index].used == TRUE &&
-        neighbors_vars.neighbors[index].DAGrank >= icmpv6rpl_getMyDAGrank()) {
+        neighbors_vars.neighbors[index].DAGrank > icmpv6rpl_getMyDAGrank()) {
         returnVal = TRUE;
     } else {
         returnVal = FALSE;
