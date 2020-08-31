@@ -84,7 +84,7 @@ void msf_init(void) {
 // called by schedule
 void msf_updateCellsElapsed(open_addr_t *neighbor, cellType_t type) {
 
-#if OPENWSN_ADAPTIVE_MSF
+#if ADAPTIVE_MSF
     if (icmpv6rpl_isPreferredParent(neighbor) == FALSE) {
         return;
     }

@@ -8,7 +8,7 @@
 #include "openserial.h"
 #include "packetfunctions.h"
 
-#ifdef OPENWSN_DEADLINE_OPTION
+#ifdef DEADLINE_OPTION
 #include "iphc.h"
 #endif
 
@@ -33,7 +33,7 @@ void umonitor_init(void) {
 void umonitor_receive(OpenQueueEntry_t *request) {
     uint16_t temp_l4_destination_port;
     OpenQueueEntry_t *reply;
-#ifdef OPENWSN_DEADLINE_OPTION
+#ifdef DEADLINE_OPTION
     monitor_expiration_vars_t	deadline;
 #endif
 
@@ -59,7 +59,7 @@ void umonitor_receive(OpenQueueEntry_t *request) {
         openqueue_freePacketBuffer(reply);
         return;
     }
-#ifdef OPENWSN_DEADLINE_OPTION
+#ifdef DEADLINE_OPTION
     memset(&deadline, 0, sizeof(monitor_expiration_vars_t));
     iphc_getDeadlineInfo(&deadline);
     memcpy(&reply->payload[0],&deadline.time_elapsed,sizeof(uint16_t));

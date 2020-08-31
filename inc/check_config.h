@@ -66,7 +66,7 @@
 #endif
 
 #if !BOARD_FASTSIM_ENABLED && defined(PYTHON_BOARD)
-#warning 'You are not using FASTSIM for UART communication in simulation mode.'
+#warning 'FASTSIM not enabled for UART communication in simulation mode.'
 
 #endif
 
@@ -105,8 +105,8 @@
 #endif
 
 #if !OPENWSN_6LO_FRAGMENTATION_C && (\
-    OPENWSN_MAX_PKTSIZE_SUPPORTED || \
-    OPENWSN_MAX_NUM_BIGPKTS)
+    MAX_PKTSIZE_SUPPORTED || \
+    MAX_NUM_BIGPKTS)
 #error "6LoWPAN fragmentation options specified, but 6LoWPAN fragmentation is not included in the build."
 #endif
 

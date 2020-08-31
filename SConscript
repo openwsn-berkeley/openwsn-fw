@@ -107,9 +107,9 @@ if 'cjoin' in env['apps'].split(','):
 
 # check the stack configuration
 if 'adaptive-msf' in env['stackcfg'].split(','):
-    env.Append(CPPDEFINES='OPENWSN_ADAPTIVE_MSF')
+    env.Append(CPPDEFINES='ADAPTIVE_MSF')
 if 'dagroot' in env['stackcfg'].split(','):
-    env.Append(CPPDEFINES='OPENWSN_DAGROOT')
+    env.Append(CPPDEFINES='DAGROOT')
 
 # check the board features
 if 'hw-crypto' in env['boardopt'].split(','):
@@ -618,9 +618,10 @@ elif env['toolchain'] == 'gcc':
 
     # compiler (C)
     env.Append(CCFLAGS='-Wall')
+    env.Append(CCFLAGS='-O3')
 
     if env['board'] not in ['python']:
-        print c.Fore.Red + 'Toolchain {0} can not be used for board {1}'.format(env['toolchain'],
+        print c.Fore.RED + 'Toolchain {0} can not be used for board {1}'.format(env['toolchain'],
                                                                                 env['board']) + c.Fore.RESET
         Exit(-1)
 

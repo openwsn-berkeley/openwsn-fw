@@ -14,7 +14,7 @@
 
 #define RPL_HOPBYHOP_HEADER_OPTION_TYPE  0x63
 
-#if OPENWSN_DEADLINE_OPTION
+#if DEADLINE_OPTION
 #define DEADLINE_HOPBYHOP_HEADER_OPTION_TYPE  0xAB 
 #endif
 
@@ -66,7 +66,7 @@ void forwarding_receive(
         OpenQueueEntry_t *msg,
         ipv6_header_iht *ipv6_outer_header,
         ipv6_header_iht *ipv6_inner_header,
-#if OPENWSN_DEADLINE_OPTION
+#if DEADLINE_OPTION
         deadline_option_ht* deadline_option,
 #endif
         rpl_option_ht *rpl_option
