@@ -10,37 +10,32 @@
 
 //=========================== defines =========================================
 
-#define NRF_GPIO_PIN_MAP(port, pin) (((port) << 5) | ((pin) & 0x1F))
+#define PIN_PORT          0
 
-#define PIN_FRAME         NRF_GPIO_PIN_MAP(0,04)    // p0.04
-#define PIN_SLOT          NRF_GPIO_PIN_MAP(0,05)    // p0.05
-#define PIN_FSM           NRF_GPIO_PIN_MAP(0,06)    // p0.06
-#define PIN_TASK          NRF_GPIO_PIN_MAP(0,07)    // p0.07
-#define PIN_ISR           NRF_GPIO_PIN_MAP(0,23)    // p0.23
-#define PIN_RADIO         NRF_GPIO_PIN_MAP(0,24)    // p0.24
-#define PIN_ISRUART_TX    NRF_GPIO_PIN_MAP(0,25)    // p0.25
-#define PIN_ISRUART_RX    NRF_GPIO_PIN_MAP(0,26)    // p0.26
-#define PIN_INTDISABLED   NRF_GPIO_PIN_MAP(0,27)    // p0.27
+#define PIN_FRAME         24    // p0.24
+#define PIN_SLOT          3     // p0.03
+#define PIN_FSM           4     // p0.04
+#define PIN_TASK          5     // p0.05
+#define PIN_ISR           23    // p0.23
+#define PIN_RADIO         7     // p0.07
 
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
+
+extern void nrf_gpio_cfg_output(uint8_t port_number, uint32_t pin_number);
 
 //=========================== public ==========================================
 
 // init
 void debugpins_init(void) {
 
-    nrf_gpio_cfg_output(PIN_FRAME);
-    nrf_gpio_cfg_output(PIN_SLOT);
-    nrf_gpio_cfg_output(PIN_FSM);
-    nrf_gpio_cfg_output(PIN_TASK);
-    nrf_gpio_cfg_output(PIN_ISR);
-    nrf_gpio_cfg_output(PIN_RADIO);
-    nrf_gpio_cfg_output(PIN_ISRUART_TX);
-    nrf_gpio_cfg_output(PIN_ISRUART_RX);
-    nrf_gpio_cfg_output(PIN_INTDISABLED);
-
+    nrf_gpio_cfg_output(PIN_PORT, PIN_FRAME);
+    nrf_gpio_cfg_output(PIN_PORT, PIN_SLOT);
+    nrf_gpio_cfg_output(PIN_PORT, PIN_FSM);
+    nrf_gpio_cfg_output(PIN_PORT, PIN_TASK);
+    nrf_gpio_cfg_output(PIN_PORT, PIN_ISR);
+    nrf_gpio_cfg_output(PIN_PORT, PIN_RADIO);
 }
 
 // frame
@@ -50,7 +45,7 @@ void debugpins_frame_toggle(void) {
 
     output_status = ((uint32_t)(1 << PIN_FRAME)) & (NRF_P0_NS->OUT);
 
-    if (output_status>0){
+    if (output_status>0) {
         // it is on , turn off led
         NRF_P0_NS->OUTCLR =  1 << PIN_FRAME;
     } else {
@@ -203,77 +198,47 @@ void debugpins_radio_set(void) {
 // isruarttx
 void debugpins_isruarttx_toggle(void) {
     
-    volatile uint32_t output_status;
-
-    output_status = ((uint32_t)(1 << PIN_ISRUART_TX)) & (NRF_P0_NS->OUT);
-
-    if (output_status>0){
-        // it is on , turn off led
-        NRF_P0_NS->OUTCLR =  1 << PIN_ISRUART_TX;
-    } else {
-        // it is off, turn on led
-        NRF_P0_NS->OUTSET =  1 << PIN_ISRUART_TX;
-    }
+    // TODO
 }
 
 void debugpins_isruarttx_clr(void) {
     
-    NRF_P0_NS->OUTCLR =  1 << PIN_ISRUART_TX;
+    // TODO
 }
 
 void debugpins_isruarttx_set(void) {
-    
-    NRF_P0_NS->OUTSET =  1 << PIN_ISRUART_TX;
+
+    // TODO
 }
 
 // isruartrx
 void debugpins_isruartrx_toggle(void) {
     
-    volatile uint32_t output_status;
-
-    output_status = ((uint32_t)(1 << PIN_ISRUART_RX)) & (NRF_P0_NS->OUT);
-
-    if (output_status>0){
-        // it is on , turn off led
-        NRF_P0_NS->OUTCLR =  1 << PIN_ISRUART_RX;
-    } else {
-        // it is off, turn on led
-        NRF_P0_NS->OUTSET =  1 << PIN_ISRUART_RX;
-    }
+    // TODO
 }
 
 void debugpins_isruartrx_clr(void) {
     
-    NRF_P0_NS->OUTCLR =  1 << PIN_ISRUART_RX;
+    // TODO
 }
 
 void debugpins_isruartrx_set(void) {
     
-    NRF_P0_NS->OUTSET =  1 << PIN_ISRUART_RX;
+    // TODO
 }
 
 // intdisabled
 void debugpins_intdisabled_toggle(void) {
     
-    volatile uint32_t output_status;
-
-    output_status = ((uint32_t)(1 << PIN_INTDISABLED)) & (NRF_P0_NS->OUT);
-
-    if (output_status>0){
-        // it is on , turn off led
-        NRF_P0_NS->OUTCLR =  1 << PIN_INTDISABLED;
-    } else {
-        // it is off, turn on led
-        NRF_P0_NS->OUTSET =  1 << PIN_INTDISABLED;
-    }
+    // TODO
 }
 void debugpins_intdisabled_clr(void) {
 
-    NRF_P0_NS->OUTCLR =  1 << PIN_INTDISABLED;
+    // TODO
 }
 void debugpins_intdisabled_set(void) {
     
-    NRF_P0_NS->OUTSET =  1 << PIN_INTDISABLED;
+    // TODO
 }
 
 //=========================== private =========================================

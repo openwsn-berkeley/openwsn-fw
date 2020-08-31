@@ -32,7 +32,7 @@ end of frame event), it will turn on its error LED.
 #define TIMER_PERIOD    (0xffff>>2)     ///< 0xffff = 2s@32kHz
 #define TXPOWER         0xD5            ///< 2's complement format, 0xD8 = -40dbm
 
-#define NUM_SAMPLES     80
+#define NUM_SAMPLES     84
 #define LEN_UART_BUFFER 320
 
 const static uint8_t ble_device_addr[6] = { 
@@ -41,7 +41,6 @@ const static uint8_t ble_device_addr[6] = {
 
 // get from https://openuuid.net/signin/:  a24e7112-a03f-4623-bb56-ae67bd653c73
 const static uint8_t ble_uuid[16]       = {
-
     0xa2, 0x4e, 0x71, 0x12, 0xa0, 0x3f, 
     0x46, 0x23, 0xbb, 0x56, 0xae, 0x67,
     0xbd, 0x65, 0x3c, 0x73
@@ -101,7 +100,7 @@ void     assemble_ibeacon_packet(void);
 \brief The program starts executing here.
 */
 int mote_main(void) {
-    uint8_t i;
+    uint16_t i;
 
     uint8_t freq_offset;
     uint8_t sign;
@@ -112,7 +111,6 @@ int mote_main(void) {
 
     // initialize board
     board_init();
-    radio_configure_direction_finding();
 
     uart_setCallbacks(cb_uartTxDone,cb_uartRxCb);
     uart_enableInterrupts();
@@ -133,6 +131,8 @@ int mote_main(void) {
     radio_rfOn();
     // freq type only effects on scum port
     radio_setFrequency(CHANNEL, FREQ_RX);
+
+    radio_configure_direction_finding_rx();
 
     // switch in RX by default
     radio_rxEnable();
@@ -196,10 +196,10 @@ int mote_main(void) {
                             &app_vars.rxpk_crc
                         );
 
-                        radio_get_df_samples(&app_vars.sample_buffer[0], NUM_SAMPLES);
-                        memcpy(&app_vars.uart_buffer_to_send[0], (uint8_t*)(&app_vars.sample_buffer[0]), 80);
-                        app_vars.uart_lastTxByteIndex = 0;
-                        uart_writeByte(app_vars.uart_buffer_to_send[0]);
+                        //radio_get_df_samples(&app_vars.sample_buffer[0], NUM_SAMPLES);
+                        //memcpy(&app_vars.uart_buffer_to_send[0], (uint8_t*)(&app_vars.sample_buffer[0]), 80);
+                        //app_vars.uart_lastTxByteIndex = 0;
+                        //uart_writeByte(app_vars.uart_buffer_to_send[0]);
 
                         // led
                         leds_error_off();
@@ -210,10 +210,14 @@ int mote_main(void) {
                     case APP_STATE_TX:
                         // done sending a packet
 
-                        memset( app_vars.packet, 0x00, sizeof(app_vars.packet) );
+                        memset(app_vars.packet, 0x00, sizeof(app_vars.packet));
 
+                        radio_configure_direction_finding_rx();
+
+                        debugpins_frame_toggle();
                         // switch to RX mode
                         radio_rxEnable();
+                        debugpins_frame_toggle();
                         radio_rxNow();
                         app_vars.state = APP_STATE_RX;
 
@@ -234,6 +238,8 @@ int mote_main(void) {
                     // stop listening
                     radio_rfOff();
 
+                    //radio_configure_direction_finding_tx();
+
                     // prepare packet
                     app_vars.packet_len = sizeof(app_vars.packet);
                     
@@ -241,7 +247,12 @@ int mote_main(void) {
 
                     // start transmitting packet
                     radio_loadPacket(app_vars.packet,LENGTH_PACKET);
+
+                    debugpins_frame_toggle();
+
                     radio_txEnable();
+
+                    debugpins_frame_toggle();
                     radio_txNow();
 
                     app_vars.state = APP_STATE_TX;
