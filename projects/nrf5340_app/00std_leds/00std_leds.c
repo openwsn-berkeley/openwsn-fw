@@ -9,19 +9,18 @@
 
 //=========================== defines =========================================
 
-#define NRF_GPIO_PIN_MAP(port, pin) (((port) << 5) | ((pin) & 0x1F))
-
-#define LED_ERROR          NRF_GPIO_PIN_MAP(0,28) // p0.28
-#define LED_RADIO          NRF_GPIO_PIN_MAP(0,29) // p0.29
-#define LED_SYNC           NRF_GPIO_PIN_MAP(0,30) // p0.30
-#define LED_DEBUG          NRF_GPIO_PIN_MAP(0,31) // p0.31
+#define LED_PORT          0
+#define LED_ERROR         28 // p0.28
+#define LED_RADIO         29 // p0.29
+#define LED_SYNC          30 // p0.30
+#define LED_DEBUG         31 // p0.31
 
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
 
 void clocks_start(void);
-void nrf_gpio_cfg_output(uint32_t pin_number);
+void nrf_gpio_cfg_output(uint8_t port_number, uint32_t pin_number);
 
 //=========================== main ============================================
 
@@ -35,10 +34,10 @@ int main(void) {
 
     // init gpio
 
-    nrf_gpio_cfg_output(LED_ERROR);
-    nrf_gpio_cfg_output(LED_RADIO);
-    nrf_gpio_cfg_output(LED_SYNC);
-    nrf_gpio_cfg_output(LED_DEBUG);
+    nrf_gpio_cfg_output(LED_PORT, LED_ERROR);
+    nrf_gpio_cfg_output(LED_PORT, LED_RADIO);
+    nrf_gpio_cfg_output(LED_PORT, LED_SYNC);
+    nrf_gpio_cfg_output(LED_PORT, LED_DEBUG);
 
 
     // toggle gpio
@@ -64,6 +63,10 @@ int main(void) {
 
     for (i=19;i<32;i++) {
         NRF_P0_S->PIN_CNF[i] |= 0x10000000;
+    }
+
+    for (i=4;i<16;i++) {
+        NRF_P1_S->PIN_CNF[i] |= 0x10000000;
     }
 
     // release networking core
@@ -92,15 +95,27 @@ void clocks_start( void ){
     while (NRF_CLOCK_S->EVENTS_HFCLKSTARTED == 0);
 }
 
-
-void nrf_gpio_cfg_output(uint32_t pin_number){
+void nrf_gpio_cfg_output(uint8_t port_number, uint32_t pin_number){
  
-
-    NRF_P0_S->PIN_CNF[pin_number] =   \
-           ((uint32_t)GPIO_PIN_CNF_DIR_Output << GPIO_PIN_CNF_DIR_Pos)
-         | ((uint32_t)GPIO_PIN_CNF_INPUT_Disconnect << GPIO_PIN_CNF_INPUT_Pos)
-         | ((uint32_t)GPIO_PIN_CNF_PULL_Disabled << GPIO_PIN_CNF_PULL_Pos)
-         | ((uint32_t)GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos)
-         | ((uint32_t)GPIO_PIN_CNF_SENSE_Disabled << GPIO_PIN_CNF_SENSE_Pos);
-
+    switch (port_number) {
+    case 0:
+        NRF_P0_S->PIN_CNF[pin_number] =   \
+               ((uint32_t)GPIO_PIN_CNF_DIR_Output << GPIO_PIN_CNF_DIR_Pos)
+             | ((uint32_t)GPIO_PIN_CNF_INPUT_Disconnect << GPIO_PIN_CNF_INPUT_Pos)
+             | ((uint32_t)GPIO_PIN_CNF_PULL_Disabled << GPIO_PIN_CNF_PULL_Pos)
+             | ((uint32_t)GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos)
+             | ((uint32_t)GPIO_PIN_CNF_SENSE_Disabled << GPIO_PIN_CNF_SENSE_Pos);
+        break; 
+    case 1:
+        NRF_P1_S->PIN_CNF[pin_number] =   \
+               ((uint32_t)GPIO_PIN_CNF_DIR_Output << GPIO_PIN_CNF_DIR_Pos)
+             | ((uint32_t)GPIO_PIN_CNF_INPUT_Disconnect << GPIO_PIN_CNF_INPUT_Pos)
+             | ((uint32_t)GPIO_PIN_CNF_PULL_Disabled << GPIO_PIN_CNF_PULL_Pos)
+             | ((uint32_t)GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos)
+             | ((uint32_t)GPIO_PIN_CNF_SENSE_Disabled << GPIO_PIN_CNF_SENSE_Pos);
+        break;
+    default:
+        // invalid port number
+        break;
+    }
 }
