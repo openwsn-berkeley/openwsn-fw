@@ -78,7 +78,7 @@ void radio_init(void) {
 
     // configure packet
     NRF_RADIO_NS->PCNF0    =   (((1UL) << RADIO_PCNF0_S0LEN_Pos) & RADIO_PCNF0_S0LEN_Msk) | 
-                         (((0UL) << RADIO_PCNF0_S1LEN_Pos) & RADIO_PCNF0_S1LEN_Msk) |
+                         (((8UL) << RADIO_PCNF0_S1LEN_Pos) & RADIO_PCNF0_S1LEN_Msk) |
                          (((8UL) << RADIO_PCNF0_LFLEN_Pos) & RADIO_PCNF0_LFLEN_Msk);
 
     NRF_RADIO_NS->PCNF1    =   (((RADIO_PCNF1_ENDIAN_Little)    << RADIO_PCNF1_ENDIAN_Pos)  & RADIO_PCNF1_ENDIAN_Msk)  |
@@ -105,7 +105,7 @@ void radio_init(void) {
 
     NRF_RADIO_NS->PACKETPTR = (uint32_t)(radio_vars.payload);
 
-    NRF_RADIO_NS->SHORTS = RADIO_SHORTS_END_DISABLE_Msk;
+    NRF_RADIO_NS->SHORTS = RADIO_SHORTS_PHYEND_DISABLE_Enabled << RADIO_SHORTS_PHYEND_DISABLE_Pos;
 
     // set priority and disable interrupt in NVIC
     NVIC->IPR[((uint32_t)RADIO_IRQn)] = 
@@ -118,8 +118,9 @@ void radio_init(void) {
        ((uint32_t)1) << ( ((uint32_t)RADIO_IRQn) & 0x1f);
 
     // enable address and payload interrupts 
-    NRF_RADIO_NS->INTENSET = RADIO_INTENSET_ADDRESS_Enabled << RADIO_INTENSET_ADDRESS_Pos |
-                          RADIO_INTENSET_END_Enabled     << RADIO_INTENSET_END_Pos;
+    NRF_RADIO_NS->INTENSET = RADIO_INTENSET_ADDRESS_Set << RADIO_INTENSET_ADDRESS_Pos |
+                          RADIO_INTENSET_PHYEND_Enabled << RADIO_INTENSET_PHYEND_Pos  |
+                          RADIO_INTENSET_CTEPRESENT_Set << RADIO_INTENSET_CTEPRESENT_Pos;
     
     NVIC->ICPR[((uint32_t)RADIO_IRQn)>>5] = 
        ((uint32_t)1) << ( ((uint32_t)RADIO_IRQn) & 0x1f);
@@ -275,10 +276,6 @@ void radio_getReceivedFrame(
 
     len = radio_vars.payload[1];
 
-    if (len == 0) {
-        return; 
-    }
-
     if (len > MAX_PACKET_SIZE) {
         len = MAX_PACKET_SIZE; 
     }
@@ -291,7 +288,7 @@ void radio_getReceivedFrame(
     memcpy(bufRead, &radio_vars.payload[0], len+2);
 
     // store other parameters
-    *bufRead = len+2;
+    *lenRead = len+2;
 
     *crc = (NRF_RADIO_NS->CRCSTATUS == 1U);
 }
@@ -309,6 +306,10 @@ void radio_getReceivedFrame(
 void radio_configure_direction_finding_antenna_switch(void) {
     
     uint8_t i;
+
+    NRF_RADIO_NS->EVENTS_DISABLED = (uint32_t)0;
+    NRF_RADIO_NS->TASKS_DISABLE = (uint32_t)1;
+    while(NRF_RADIO_NS->EVENTS_DISABLED == 0);
 
     nrf_gpio_cfg_output(ANT_SWITCH_PORT,  ANT_SWITCH_PIN0);
     nrf_gpio_cfg_output(ANT_SWITCH_PORT,  ANT_SWITCH_PIN1);
@@ -414,11 +415,9 @@ void radio_configure_direction_finding_manual(void) {
 #define S0MASK              0x20
 
 void radio_configure_direction_finding_inline(void) {
-    
-    radio_configure_direction_finding_antenna_switch();
 
     // enable direction finding in AoA mode
-    NRF_RADIO_NS->DFEMODE = (uint32_t)DFEOPMODE_AOA;
+    NRF_RADIO_NS->DFEMODE           = (uint32_t)DFEOPMODE_AOA;
 
     NRF_RADIO_NS->CTEINLINECONF     = (uint32_t)(CTEINLINECTRLEN    << 0) |
                                       (uint32_t)(CTEINFOINS1        << 3) |
@@ -512,14 +511,25 @@ kick_scheduler_t    radio_isr(void){
         return KICK_SCHEDULER;
     }
 
-    // end of frame
-    if (NRF_RADIO_NS->EVENTS_END){
+     // CTE presence
+    if (NRF_RADIO_NS->EVENTS_CTEPRESENT){
 
+        leds_debug_toggle();
+        
+        NRF_RADIO_NS->EVENTS_CTEPRESENT = (uint32_t)0;
+        return KICK_SCHEDULER;
+    }
+
+    // end of frame
+    if (NRF_RADIO_NS->EVENTS_PHYEND){
+
+        debugpins_frame_toggle();
+        
         if (radio_vars.endFrame_cb!=NULL){
             radio_vars.endFrame_cb(time_stampe);
         }
         
-        NRF_RADIO_NS->EVENTS_END = (uint32_t)0;
+        NRF_RADIO_NS->EVENTS_PHYEND = (uint32_t)0;
         return KICK_SCHEDULER;
     }
     return DO_NOT_KICK_SCHEDULER;

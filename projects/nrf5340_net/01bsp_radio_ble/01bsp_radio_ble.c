@@ -113,6 +113,8 @@ int mote_main(void) {
     // initialize board
     board_init();
 
+    radio_configure_direction_finding_antenna_switch();
+
     uart_setCallbacks(cb_uartTxDone,cb_uartRxCb);
     uart_enableInterrupts();
 
@@ -133,7 +135,7 @@ int mote_main(void) {
     // freq type only effects on scum port
     radio_setFrequency(CHANNEL, FREQ_RX);
 
-    radio_configure_direction_finding_inline();
+    radio_configure_direction_finding_manual();
 
     // switch in RX by default
     radio_rxEnable();
@@ -213,8 +215,6 @@ int mote_main(void) {
 
                         memset(app_vars.packet, 0x00, sizeof(app_vars.packet));
 
-                        radio_configure_direction_finding_inline();
-
                         debugpins_frame_toggle();
                         // switch to RX mode
                         radio_rxEnable();
@@ -244,7 +244,7 @@ int mote_main(void) {
                     // prepare packet
                     app_vars.packet_len = sizeof(app_vars.packet);
                     
-                    assemble_data_pdu_df_packet();
+                    assemble_ibeacon_packet();
 
                     // start transmitting packet
                     radio_loadPacket(app_vars.packet,LENGTH_PACKET);
@@ -307,8 +307,8 @@ void assemble_data_pdu_df_packet(void) {
     memset( app_vars.packet, 0x00, sizeof(app_vars.packet) );
 
     app_vars.packet[i++]  = 0x20;        // data channel pdu (CP bit set)
-    app_vars.packet[i++]  = 0x00;        // payload length
-    app_vars.packet[i++]  = 0x50;        // 01010 +> CTY timing=10 0=RFU 00=AoA CTE
+    app_vars.packet[i++]  = 0x01;        // payload length
+    app_vars.packet[i++]  = 0x0C;        // 01010 +> CTY timing=10 0=RFU 00=AoA CTE
 }
 
 //=========================== callbacks =======================================
