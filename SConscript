@@ -1141,6 +1141,7 @@ def buildIncludePath(project_dir, local_env):
             CPPPATH=[
                 os.path.join('#', 'inc'),
                 os.path.join('#', 'kernel'),
+                os.path.join('#', 'kernel', 'openos'),
                 os.path.join('#', 'openstack'),
                 os.path.join('#', 'openstack', '02a-MAClow'),
                 os.path.join('#', 'openstack', '02b-MAChigh'),

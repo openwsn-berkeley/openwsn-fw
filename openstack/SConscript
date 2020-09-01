@@ -88,6 +88,7 @@ else:
             os.path.join('#','inc'),
             # kernel
             os.path.join('#','kernel'),
+            os.path.join('#','kernel', 'openos'),
             # drivers
             os.path.join('#','drivers','common'),
             os.path.join('#','drivers','common','crypto'),
