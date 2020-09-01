@@ -29,11 +29,11 @@ end of frame event), it will turn on its error LED.
 #define LENGTH_BLE_CRC  3
 #define LENGTH_PACKET   125+LENGTH_BLE_CRC  ///< maximum length is 127 bytes
 #define CHANNEL         0              ///< 0~39
-#define TIMER_PERIOD    (0xffff>>2)     ///< 0xffff = 2s@32kHz
+#define TIMER_PERIOD    (0xffff>>1)     ///< 0xffff = 2s@32kHz
 #define TXPOWER         0xD5            ///< 2's complement format, 0xD8 = -40dbm
 
-#define NUM_SAMPLES     84
-#define LEN_UART_BUFFER 320
+#define NUM_SAMPLES     SAMPLE_MAXCNT
+#define LEN_UART_BUFFER ((NUM_SAMPLES*4)+2)
 
 const static uint8_t ble_device_addr[6] = { 
     0xaa, 0xbb, 0xcc, 0xcc, 0xbb, 0xaa
@@ -77,7 +77,7 @@ typedef struct {
                 bool            rxpk_crc;
                 uint32_t        sample_buffer[NUM_SAMPLES];
                 uint8_t         uart_buffer_to_send[LEN_UART_BUFFER];
-                uint8_t         uart_lastTxByteIndex;
+                uint16_t        uart_lastTxByteIndex;
      volatile   uint8_t         uartDone;
 } app_vars_t;
 
@@ -93,7 +93,6 @@ void     cb_uartTxDone(void);
 uint8_t  cb_uartRxCb(void);
 
 void     assemble_ibeacon_packet(void);
-void     assemble_data_pdu_df_packet(void);
 
 //=========================== main ============================================
 
@@ -199,10 +198,17 @@ int mote_main(void) {
                             &app_vars.rxpk_crc
                         );
 
-                        //radio_get_df_samples(&app_vars.sample_buffer[0], NUM_SAMPLES);
-                        //memcpy(&app_vars.uart_buffer_to_send[0], (uint8_t*)(&app_vars.sample_buffer[0]), 80);
-                        //app_vars.uart_lastTxByteIndex = 0;
-                        //uart_writeByte(app_vars.uart_buffer_to_send[0]);
+                        radio_get_df_samples(app_vars.sample_buffer,NUM_SAMPLES);
+                        for (i=0;i<NUM_SAMPLES;i++) {
+                            app_vars.uart_buffer_to_send[4*i+0] = (app_vars.sample_buffer[i] >>24) & 0x000000ff;
+                            app_vars.uart_buffer_to_send[4*i+1] = (app_vars.sample_buffer[i] >>16) & 0x000000ff;
+                            app_vars.uart_buffer_to_send[4*i+2] = (app_vars.sample_buffer[i] >> 8) & 0x000000ff;
+                            app_vars.uart_buffer_to_send[4*i+3] = (app_vars.sample_buffer[i] >> 0) & 0x000000ff;
+                        }
+                        app_vars.uart_buffer_to_send[LEN_UART_BUFFER-2] = '\r';
+                        app_vars.uart_buffer_to_send[LEN_UART_BUFFER-1] = '\n';
+                        app_vars.uart_lastTxByteIndex = 0;
+                        uart_writeByte(app_vars.uart_buffer_to_send[0]);
 
                         // led
                         leds_error_off();
@@ -215,10 +221,8 @@ int mote_main(void) {
 
                         memset(app_vars.packet, 0x00, sizeof(app_vars.packet));
 
-                        debugpins_frame_toggle();
                         // switch to RX mode
                         radio_rxEnable();
-                        debugpins_frame_toggle();
                         radio_rxNow();
                         app_vars.state = APP_STATE_RX;
 
@@ -249,11 +253,7 @@ int mote_main(void) {
                     // start transmitting packet
                     radio_loadPacket(app_vars.packet,LENGTH_PACKET);
 
-                    debugpins_frame_toggle();
-
                     radio_txEnable();
-
-                    debugpins_frame_toggle();
                     radio_txNow();
 
                     app_vars.state = APP_STATE_TX;
@@ -297,18 +297,6 @@ void assemble_ibeacon_packet(void) {
     app_vars.packet[i++]  = 0x00;               // minor
     app_vars.packet[i++]  = 0x0f;
     app_vars.packet[i++]  = TXPOWER;            // power level
-}
-
-void assemble_data_pdu_df_packet(void) {
-
-    uint8_t i;
-    i=0;
-
-    memset( app_vars.packet, 0x00, sizeof(app_vars.packet) );
-
-    app_vars.packet[i++]  = 0x20;        // data channel pdu (CP bit set)
-    app_vars.packet[i++]  = 0x01;        // payload length
-    app_vars.packet[i++]  = 0x0C;        // 01010 +> CTY timing=10 0=RFU 00=AoA CTE
 }
 
 //=========================== callbacks =======================================

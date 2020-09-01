@@ -360,14 +360,12 @@ void radio_configure_direction_finding_antenna_switch(void) {
 
 // DFECTRL1 register values
 
-#define NUMBEROF8US         10 // in unit of 8 us
+#define NUMBEROF8US         3 // in unit of 8 us
 #define DFEINEXTENSION      1  // 1:crc  0:payload
 #define TSWITCHSPACING      2  // 1:4us 2:2us 3: 1us
 #define TSAMPLESPACINGREF   3  // 1:4us 2:2us 3: 1us 4:500ns 5:250ns 6:125ns
-#define SAMPLETYPE          0  // 0: IQ  1: magPhase
+#define SAMPLETYPE          1  // 0: IQ  1: magPhase
 #define TSAMPLESPACING      2  // 1:4us 2:2us 3: 1us 4:500ns 5:250ns 6:125ns 
-
-#define SAMPLE_MAXCNT       (4+8*NUMBEROF8US) // (2*(8/TSAMPLESPACINGREF + (8*NUMBEROF8US-12)/TSAMPLESPACING))
 
 // DFECTRL2 register values
 
@@ -444,10 +442,15 @@ void radio_configure_direction_finding_inline(void) {
 }
 
 void radio_get_df_samples(uint32_t* sample_buffer, uint16_t length) {
-    
-    memcpy(sample_buffer, &radio_vars.df_samples[0], 4*sizeof(uint32_t)); 
+
+    uint16_t i;
+
+    for (i=0;i<length;i++) {
+        sample_buffer[i] = radio_vars.df_samples[i];        
+    }
+
     // reset sample buffer once accessed
-    memset(&radio_vars.df_samples[0], 0, 4*sizeof(uint32_t));
+    memset((uint8_t*)&radio_vars.df_samples[0], 0, 4*MAX_IQSAMPLES);
 }
 
 uint32_t ble_channel_to_frequency(uint8_t channel) {
