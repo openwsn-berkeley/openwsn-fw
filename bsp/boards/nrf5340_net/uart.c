@@ -37,6 +37,7 @@ typedef struct {
     uart_rx_cbt rxCb;
     bool        fXonXoffEscaping;
     uint8_t     xonXoffEscapedByte;
+    uint8_t     byteToSend;
     uint8_t     rx_byte;
 } uart_vars_t;
 
@@ -151,17 +152,16 @@ void uart_setCTS(bool state) {
 
 void uart_writeByte(uint8_t byteToWrite){
 
-    uint8_t byteToSend;
+    //if (byteToWrite==XON || byteToWrite==XOFF || byteToWrite==XONXOFF_ESCAPE) {
+    //    uart_vars.fXonXoffEscaping     = 0x01;
+    //    uart_vars.xonXoffEscapedByte   = byteToWrite;
+    //    byteToSend = XONXOFF_ESCAPE;
+    //} else {
+    //    byteToSend = byteToWrite;
+    //}
 
-    if (byteToWrite==XON || byteToWrite==XOFF || byteToWrite==XONXOFF_ESCAPE) {
-        uart_vars.fXonXoffEscaping     = 0x01;
-        uart_vars.xonXoffEscapedByte   = byteToWrite;
-        byteToSend = XONXOFF_ESCAPE;
-    } else {
-        byteToSend = byteToWrite;
-    }
-
-    NRF_UARTE0_NS->TXD.PTR        = &byteToSend;
+    uart_vars.byteToSend = byteToWrite;
+    NRF_UARTE0_NS->TXD.PTR        = &uart_vars.byteToSend;
     NRF_UARTE0_NS->TXD.MAXCNT     = 1;
     NRF_UARTE0_NS->TASKS_STARTTX  = 1;
 }
@@ -199,19 +199,23 @@ kick_scheduler_t uart_tx_isr(void) {
 
     uint8_t byteToSend;
     
-    if (uart_vars.fXonXoffEscaping==0x01) {
-        uart_vars.fXonXoffEscaping = 0x00;
-        byteToSend = uart_vars.xonXoffEscapedByte^XONXOFF_MASK;
+    //if (uart_vars.fXonXoffEscaping==0x01) {
+    //    uart_vars.fXonXoffEscaping = 0x00;
+    //    byteToSend = uart_vars.xonXoffEscapedByte^XONXOFF_MASK;
 
-        NRF_UARTE0_NS->TXD.PTR        = &byteToSend;
-        NRF_UARTE0_NS->TXD.MAXCNT     = 1;
-        NRF_UARTE0_NS->TASKS_STARTTX  = 1;
+    //    NRF_UARTE0_NS->TXD.PTR        = &byteToSend;
+    //    NRF_UARTE0_NS->TXD.MAXCNT     = 1;
+    //    NRF_UARTE0_NS->TASKS_STARTTX  = 1;
 
-    } else {
-        if (uart_vars.txCb != NULL){
-            uart_vars.txCb();
-            return KICK_SCHEDULER;
-        }
+    //} else {
+    //    if (uart_vars.txCb != NULL){
+    //        uart_vars.txCb();
+    //        return KICK_SCHEDULER;
+    //    }
+    //}
+    if (uart_vars.txCb != NULL){
+        uart_vars.txCb();
+        return KICK_SCHEDULER;
     }
 
     return DO_NOT_KICK_SCHEDULER;

@@ -33,7 +33,7 @@ end of frame event), it will turn on its error LED.
 #define TXPOWER         0xD5            ///< 2's complement format, 0xD8 = -40dbm
 
 #define NUM_SAMPLES     SAMPLE_MAXCNT
-#define LEN_UART_BUFFER ((NUM_SAMPLES*4)+2)
+#define LEN_UART_BUFFER ((NUM_SAMPLES*4)+4)
 
 const static uint8_t ble_device_addr[6] = { 
     0xaa, 0xbb, 0xcc, 0xcc, 0xbb, 0xaa
@@ -205,8 +205,10 @@ int mote_main(void) {
                             app_vars.uart_buffer_to_send[4*i+2] = (app_vars.sample_buffer[i] >> 8) & 0x000000ff;
                             app_vars.uart_buffer_to_send[4*i+3] = (app_vars.sample_buffer[i] >> 0) & 0x000000ff;
                         }
-                        app_vars.uart_buffer_to_send[LEN_UART_BUFFER-2] = '\r';
-                        app_vars.uart_buffer_to_send[LEN_UART_BUFFER-1] = '\n';
+                        app_vars.uart_buffer_to_send[4*i+0]     = 0xff;
+                        app_vars.uart_buffer_to_send[4*i+1]     = 0xff;
+                        app_vars.uart_buffer_to_send[4*i+2]     = 0xff;
+                        app_vars.uart_buffer_to_send[4*i+3]     = 0xff;
                         app_vars.uart_lastTxByteIndex = 0;
                         uart_writeByte(app_vars.uart_buffer_to_send[0]);
 
