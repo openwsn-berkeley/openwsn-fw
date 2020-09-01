@@ -9,9 +9,13 @@ sources_c = [
     'scheduler.c',
 ]
 
+sources_h = [
+    'scheduler_types.h',
+]
+
 if localEnv['board']=='python':
     
-    for s in sources_c:
+    for s in sources_c + sources_h:
         temp = localEnv.Objectify(
             target = localEnv.ObjectifiedFilename(s),
             source = s,
@@ -26,6 +30,11 @@ else:
     
     localEnv.Append(
         CPPPATH =  [
+            # inc
+            os.path.join('#','inc'),
+            # kernel
+            os.path.join('#','kernel'),
+            os.path.join('#','kernel', 'openos'),
         ],
     )
     
