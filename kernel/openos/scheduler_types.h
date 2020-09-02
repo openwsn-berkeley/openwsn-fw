@@ -19,14 +19,14 @@ typedef struct task_llist_t {
 typedef struct {
    taskList_item_t                taskBuf[TASK_LIST_DEPTH];
    taskList_item_t*               task_list;
-   uint8_t                        numTasksCur;
-   uint8_t                        numTasksMax;
 } scheduler_vars_t;
 
+#if SCHEDULER_DEBUG_ENABLE
 typedef struct {
    uint8_t                        numTasksCur;
    uint8_t                        numTasksMax;
 } scheduler_dbg_t;
+#endif
 
 /**
 \}
