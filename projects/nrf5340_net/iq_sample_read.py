@@ -25,6 +25,8 @@ new_sample_read = False
     
 s = serial.Serial(nrf5340_port[key], baudrate=115200)
 
+data = {'samples':[]}
+
 while 1:
 
     c = s.read(1)
@@ -46,9 +48,10 @@ while 1:
                 magnitude, phase = struct.unpack('>Hh', ''.join(input_data[4*i: 4*(i+1)]))
                 sample['magnitude'] = magnitude
                 sample['phase']     = phase
-                samples.append(sample)
+                data['samples'].append(sample)
             with open('samples_{0}.txt'.format(key), 'a') as f:
-                f.write(str(samples)+'\n')
+                f.write(str(data)+'\n')
+                data['samples'] = []
         else:
             print len(input_data)
             

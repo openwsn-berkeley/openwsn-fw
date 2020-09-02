@@ -118,9 +118,10 @@ void radio_init(void) {
        ((uint32_t)1) << ( ((uint32_t)RADIO_IRQn) & 0x1f);
 
     // enable address and payload interrupts 
-    NRF_RADIO_NS->INTENSET = RADIO_INTENSET_ADDRESS_Set << RADIO_INTENSET_ADDRESS_Pos |
-                          RADIO_INTENSET_PHYEND_Enabled << RADIO_INTENSET_PHYEND_Pos  |
-                          RADIO_INTENSET_CTEPRESENT_Set << RADIO_INTENSET_CTEPRESENT_Pos;
+    NRF_RADIO_NS->INTENSET = RADIO_INTENSET_ADDRESS_Set    << RADIO_INTENSET_ADDRESS_Pos |
+                             RADIO_INTENSET_END_Set        << RADIO_INTENSET_END_Pos     |
+                             RADIO_INTENSET_PHYEND_Set     << RADIO_INTENSET_PHYEND_Pos  |
+                             RADIO_INTENSET_CTEPRESENT_Set << RADIO_INTENSET_CTEPRESENT_Pos;
     
     NVIC->ICPR[((uint32_t)RADIO_IRQn)>>5] = 
        ((uint32_t)1) << ( ((uint32_t)RADIO_IRQn) & 0x1f);
@@ -350,7 +351,6 @@ void radio_configure_direction_finding_antenna_switch(void) {
     NRF_RADIO_NS->CLEARPATTERN  = (uint32_t)1;
 
     NRF_RADIO_NS->SWITCHPATTERN = (uint32_t)(1<<0);
-    NRF_RADIO_NS->SWITCHPATTERN = (uint32_t)(1<<0);
     NRF_RADIO_NS->SWITCHPATTERN = (uint32_t)(1<<1);
     NRF_RADIO_NS->SWITCHPATTERN = (uint32_t)(1<<2);
     NRF_RADIO_NS->SWITCHPATTERN = (uint32_t)(1<<3);
@@ -520,6 +520,13 @@ kick_scheduler_t    radio_isr(void){
         leds_debug_toggle();
         
         NRF_RADIO_NS->EVENTS_CTEPRESENT = (uint32_t)0;
+        return KICK_SCHEDULER;
+    }
+
+    // END 
+    if (NRF_RADIO_NS->EVENTS_END) {
+        
+        NRF_RADIO_NS->EVENTS_END = (uint32_t)0;
         return KICK_SCHEDULER;
     }
 

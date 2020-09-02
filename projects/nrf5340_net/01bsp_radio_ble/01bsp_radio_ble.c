@@ -245,8 +245,6 @@ int mote_main(void) {
                     // stop listening
                     radio_rfOff();
 
-                    //radio_configure_direction_finding_tx();
-
                     // prepare packet
                     app_vars.packet_len = sizeof(app_vars.packet);
                     
@@ -331,7 +329,6 @@ void cb_timer(void) {
 
 void cb_uartTxDone(void) {
 
-   leds_debug_toggle();
    app_vars.uart_lastTxByteIndex++;
    if (app_vars.uart_lastTxByteIndex<LEN_UART_BUFFER) {
       uart_writeByte(app_vars.uart_buffer_to_send[app_vars.uart_lastTxByteIndex]);
