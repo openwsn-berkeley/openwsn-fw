@@ -137,6 +137,8 @@ for option in env['stackcfg'].split(','):
         env.Append(CPPDEFINES='ADAPTIVE_MSF')
     elif name == 'channel':
         env.Append(CPPDEFINES='IEEE802154E_SINGLE_CHANNEL={}'.format(value))
+    elif name == 'panid':
+        env.Append(CPPDEFINES='PANID_DEFINED={}'.format(value))
     else:
         print c.Fore.RED + 'Unknown or invalid option for stackcfg: {}'.format(name) + c.Fore.RESET
 

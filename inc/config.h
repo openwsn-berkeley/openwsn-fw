@@ -350,6 +350,16 @@
 #define DAGROOT (0)
 #endif
 
+/**
+ * \def DAGROOT
+ *
+ * Set this mote as the DODAG root.
+ *
+ */
+#ifndef PANID_DEFINED
+#define PANID_DEFINED   (0xcafe)
+#endif
+
 // ======================== Board configuration ========================
 
 /**
