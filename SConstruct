@@ -75,6 +75,8 @@ project:
                    shared library.
     
     Common variables:
+    oflag          Change the compiler optimization level. Default is -O0.
+
     verbose        Print each complete compile/link command.
                    0 (off), 1 (on)
     
@@ -122,16 +124,18 @@ command_line_options = {
         'armgcc',
         'gcc',
     ],
+    'logging': [str(l) for l in range(6)],
     'apps': ['c6t', 'cexample', 'cinfo', 'cinfrared', 'cled', 'csensors', 'cstorm', 'cwellknown', 'rrt', 'uecho',
              'uexpiration', 'uexp-monitor', 'uinject', 'userialbridge', 'cjoin', ''],
     'modules': ['coap', 'udp', 'fragmentation', 'icmpv6echo', 'l2-security', ''],
-    'stackcfg': ['adaptive-msf', 'dagroot', ''],
+    'stackcfg': ['adaptive-msf', 'dagroot', 'channel', 'pktqueue', 'panid', ''],
     'boardopt' : ['hw-crypto', 'printf', 'fastsim', ''],
     'fet_version': ['2', '3'],
     'verbose': ['0', '1'],
     'simhost': ['amd64-linux', 'x86-linux', 'amd64-windows', 'x86-windows'],
     'simhostpy': [''],  # No reasonable default
     'atmel_24ghz': ['0', '1'],
+    'oflag': ['-O0', '-O1', '-O2', '-O3', '-Os'],
     'revision': ['']
 }
 
@@ -143,10 +147,14 @@ def validate_option(key, value, env):
 
     if key == 'modules' or key == 'apps':
         values = value.split(',')
+    elif key == 'stackcfg':
+        values = value.split(',')
     else:
         values = [value]
 
     for v in values:
+        if ':' in v:
+            v = v.split(':')[0]
         if v not in command_line_options[key]:
             print c.Fore.RED + "Unknown {0} \"{1}\". Options are: {2}.\n\n".format(key, v, ', '.join(
                 command_line_options[key])) + c.Fore.RESET
@@ -173,6 +181,20 @@ command_line_vars.AddVariables(
         '',  # help
         command_line_options['toolchain'][0],  # default
         validate_option,  # validator
+        None,  # converter
+    ),
+    (
+        'logging',  # key
+        '',  # help
+        command_line_options['logging'][5],  # default
+        validate_option, # validator
+        None,  # converter
+    ),
+    (
+        'oflag',  # key
+        '',  # help
+        command_line_options['oflag'][0],  # default
+        validate_option, # validator
         None,  # converter
     ),
     (

@@ -233,9 +233,9 @@
  * Implements 6LoWPAN fragmentation.
  *
  * Configuration options:
- *  - OPENWSN_MAX_PKTSIZE_SUPPORTED: defines the maximum IPV6 packet size (header + payload) the mote supports. Default
+ *  - MAX_PKTSIZE_SUPPORTED: defines the maximum IPV6 packet size (header + payload) the mote supports. Default
  *  value is 1320. This corresponds to a 40-byte IPv6 header + the minimal IPv6 MTU of 1280 bytes.
- *  - OPENWSN_MAX_NUM_BIGPKTS: defines how many static buffer space will be allocated for processing large packets.
+ *  - MAX_NUM_BIGPKTS: defines how many static buffer space will be allocated for processing large packets.
  *
  */
 #ifndef OPENWSN_6LO_FRAGMENTATION_C
@@ -243,11 +243,11 @@
 #endif
 
 #if OPENWSN_6LO_FRAGMENTATION_C
-#ifndef OPENWSN_MAX_PKTSIZE_SUPPORTED
-#define OPENWSN_MAX_PKTSIZE_SUPPORTED   1320
+#ifndef MAX_PKTSIZE_SUPPORTED
+#define MAX_PKTSIZE_SUPPORTED   1320
 #endif
-#ifndef OPENWSN_MAX_NUM_BIGPKTS
-#define OPENWSN_MAX_NUM_BIGPKTS         2
+#ifndef MAX_NUM_BIGPKTS
+#define MAX_NUM_BIGPKTS         2
 #endif
 #endif
 
@@ -298,23 +298,23 @@
 // ========================== Stack configuration ===========================
 
 /**
- * \def OPENWSN_DEADLINE_OPTION
+ * \def DEADLINE_OPTION
  *
  * Activates IPv6 DEADLINE OPTION.
  *
  */
-#ifndef OPENWSN_DEADLINE_OPTION
-#define OPENWSN_DEADLINE_OPTION (0)
+#ifndef DEADLINE_OPTION
+#define DEADLINE_OPTION (0)
 #endif
 
 /**
- * \def OPENWSN_ADAPTIVE_MSF
+ * \def ADAPTIVE_MSF
  *
  * Allow the MSF algorithm to dynamically remove and allocate slots, based on the traffic load in the network.
  *
  */
-#ifndef OPENWSN_ADAPTIVE_MSF
-#define OPENWSN_ADAPTIVE_MSF (0)
+#ifndef ADAPTIVE_MSF
+#define ADAPTIVE_MSF (0)
 #endif
 
 
@@ -341,13 +341,23 @@
 #endif
 
 /**
- * \def OPENWSN_DAGROOT
+ * \def DAGROOT
  *
  * Set this mote as the DODAG root.
  *
  */
-#ifndef OPENWSN_DAGROOT
-#define OPENWSN_DAGROOT (0)
+#ifndef DAGROOT
+#define DAGROOT (0)
+#endif
+
+/**
+ * \def DAGROOT
+ *
+ * Set this mote as the DODAG root.
+ *
+ */
+#ifndef PANID_DEFINED
+#define PANID_DEFINED   (0xcafe)
 #endif
 
 // ======================== Board configuration ========================

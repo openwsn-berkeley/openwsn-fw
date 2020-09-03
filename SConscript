@@ -107,9 +107,9 @@ if 'cjoin' in env['apps'].split(','):
 
 # check the stack configuration
 if 'adaptive-msf' in env['stackcfg'].split(','):
-    env.Append(CPPDEFINES='OPENWSN_ADAPTIVE_MSF')
+    env.Append(CPPDEFINES='ADAPTIVE_MSF')
 if 'dagroot' in env['stackcfg'].split(','):
-    env.Append(CPPDEFINES='OPENWSN_DAGROOT')
+    env.Append(CPPDEFINES='DAGROOT')
 
 # check the board features
 if 'hw-crypto' in env['boardopt'].split(','):
@@ -119,6 +119,28 @@ if 'printf' in env['boardopt'].split(','):
 if 'fastsim' in env['boardopt'].split(','):
     env.Append(CPPDEFINES='BOARD_FASTSIM_ENABLED')
 
+# set logging level OpenWSN
+env.Append(CPPDEFINES='OPENWSN_DEBUG_LEVEL={}'.format(env['logging']))
+
+# set stack configuration options
+for option in env['stackcfg'].split(','):
+    if option == '':
+        continue
+
+    name, _, value = option.partition(':')
+
+    if name == 'pktqueue':
+        env.Append(CPPDEFINES='PACKETQUEUE_LENGTH={}'.format(value))
+    elif name == 'dagroot':
+        env.Append(CPPDEFINES='DAGROOT')
+    elif name == 'adaptive-msf':
+        env.Append(CPPDEFINES='ADAPTIVE_MSF')
+    elif name == 'channel':
+        env.Append(CPPDEFINES='IEEE802154E_SINGLE_CHANNEL={}'.format(value))
+    elif name == 'panid':
+        env.Append(CPPDEFINES='PANID_DEFINED={}'.format(value))
+    else:
+        print c.Fore.RED + 'Unknown or invalid option for stackcfg: {}'.format(name) + c.Fore.RESET
 
 # common include paths
 if env['board'] != 'python':
@@ -156,7 +178,7 @@ if env['toolchain'] == 'mspgcc':
     env.Append(CCFLAGS='-Wstrict-prototypes')
     env.Append(CCFLAGS='-ffunction-sections')
     env.Append(CCFLAGS='-fdata-sections')
-    env.Append(CCFLAGS='')
+    env.Append(CCFLAGS=env['oflag'])
 
     # archiver
     env.Replace(AR='msp430-ar')
@@ -302,7 +324,7 @@ elif env['toolchain'] == 'armgcc':
 
         # compiler (C)
         env.Replace(CC='arm-none-eabi-gcc')
-        env.Append(CCFLAGS='-O0')
+        env.Append(CCFLAGS=env['oflag'])
         env.Append(CCFLAGS='-Wall')
         env.Append(CCFLAGS='-Wa,-adhlns=${TARGET.base}.lst')
         env.Append(CCFLAGS='-c')
@@ -350,7 +372,7 @@ elif env['toolchain'] == 'armgcc':
     elif env['board'] == 'silabs-ezr32wg':
         # compiler (C)
         env.Replace(CC='arm-none-eabi-gcc')
-        env.Append(CCFLAGS='-O0')
+        env.Append(CCFLAGS=env['oflag'])
         env.Append(CCFLAGS='-Wall')
         env.Append(CCFLAGS='-Wa,-adhlns=${TARGET.base}.lst')
         env.Append(CCFLAGS='-c')
@@ -408,7 +430,7 @@ elif env['toolchain'] == 'armgcc':
         env.Append(CCFLAGS='-ggdb')
         env.Append(CCFLAGS='-g3')
         env.Append(CCFLAGS='-std=gnu99')
-        env.Append(CCFLAGS='-O0')
+        env.Append(CCFLAGS=env['oflag'])
         env.Append(CCFLAGS='-Wall')
         env.Append(CCFLAGS='-Wstrict-prototypes')
         env.Append(CCFLAGS='-mcpu=cortex-m3')
@@ -454,7 +476,7 @@ elif env['toolchain'] == 'armgcc':
 
         # compiler (C)
         env.Replace(CC='arm-none-eabi-gcc')
-        env.Append(CCFLAGS='-O1')
+        env.Append(CCFLAGS=env['oflag'])
         env.Append(CCFLAGS='-Wall')
         env.Append(CCFLAGS='-Wa,-adhlns=${TARGET.base}.lst')
         env.Append(CCFLAGS='-c')
@@ -495,7 +517,7 @@ elif env['toolchain'] == 'armgcc':
 
         # compiler (C)
         env.Replace(CC='arm-none-eabi-gcc')
-        env.Append(CCFLAGS='-O0')
+        env.Append(CCFLAGS=env['oflag'])
         env.Append(CCFLAGS='-Wall')
         env.Append(CCFLAGS='-Wa,-adhlns=${TARGET.base}.lst')
         env.Append(CCFLAGS='-c')
@@ -558,7 +580,7 @@ elif env['toolchain'] == 'armgcc':
 
         # compiler (C)
         env.Replace(CC='arm-none-eabi-gcc')
-        env.Append(CCFLAGS='-O3')
+        env.Append(CCFLAGS=env['oflag'])
         env.Append(CCFLAGS='-Wall')
         env.Append(CCFLAGS='-mcpu=cortex-m0')
         env.Append(CCFLAGS='-mthumb')
@@ -618,9 +640,10 @@ elif env['toolchain'] == 'gcc':
 
     # compiler (C)
     env.Append(CCFLAGS='-Wall')
+    env.Append(CCFLAGS='-O3')
 
     if env['board'] not in ['python']:
-        print c.Fore.Red + 'Toolchain {0} can not be used for board {1}'.format(env['toolchain'],
+        print c.Fore.RED + 'Toolchain {0} can not be used for board {1}'.format(env['toolchain'],
                                                                                 env['board']) + c.Fore.RESET
         Exit(-1)
 

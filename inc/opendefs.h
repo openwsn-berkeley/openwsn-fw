@@ -46,9 +46,9 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 #define IEEE802154_FRAME_SIZE   127
 
 #if OPENWSN_6LO_FRAGMENTATION_C
-#define IPV6_PACKET_SIZE        OPENWSN_MAX_PKTSIZE_SUPPORTED
+#define IPV6_PACKET_SIZE        MAX_PKTSIZE_SUPPORTED
 #else
-#define IPV6_PACKET_SIZE        0
+#define IPV6_PACKET_SIZE        IEEE802154_FRAME_SIZE
 #endif
 
 enum {
@@ -332,7 +332,7 @@ typedef struct {
    uint8_t*      payload;                                       // pointer to the start of the payload within 'packet'
    int16_t       length;                                        // length in bytes of the payload
    //l7
-#if defined(OPENWSN_DEADLINE_OPTION)
+#if DEADLINE_OPTION
    uint16_t      max_delay;                                     // Max delay in milliseconds before which the packet should be delivered to the receiver
    bool          orgination_time_flag;
    bool          drop_flag;

@@ -23,7 +23,7 @@ void idmanager_init(void) {
     idmanager_vars.slotSkip = FALSE;
 
     // isDAGroot
-#if OPENWSN_DAGROOT
+#if DAGROOT
     idmanager_vars.isDAGroot = TRUE;
 #else
     idmanager_vars.isDAGroot = FALSE;
@@ -31,16 +31,12 @@ void idmanager_init(void) {
 
     // myPANID
     idmanager_vars.myPANID.type = ADDR_PANID;
-#ifdef OPENWSN_PANID_DEFINED
     idmanager_vars.myPANID.panid[0] = PANID_DEFINED & 0x00ff;
     idmanager_vars.myPANID.panid[1] =(PANID_DEFINED & 0xff00)>>8;
-#else
-    idmanager_vars.myPANID.panid[0] = 0xca;
-    idmanager_vars.myPANID.panid[1] = 0xfe;
-#endif
+
     // myPrefix
     idmanager_vars.myPrefix.type = ADDR_PREFIX;
-#if OPENWSN_DAGROOT
+#if DAGROOT
     idmanager_vars.myPrefix.prefix[0]  = 0xbb;
     idmanager_vars.myPrefix.prefix[1]  = 0xbb;
     idmanager_vars.myPrefix.prefix[2]  = 0x00;
