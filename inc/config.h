@@ -408,6 +408,17 @@
 #define BOARD_FASTSIM_ENABLED (0)
 #endif
 
+// ======================== Kernel configuration ========================
+
+/**
+ * \def SCHEDULER_DEBUG_ENABLE
+ *
+ * Enables storing of scheduler debug variables (scheduler_debug_vars)
+ *
+ */
+#ifndef SCHEDULER_DEBUG_ENABLE
+#define SCHEDULER_DEBUG_ENABLE (0)
+#endif
 
 #include "check_config.h"
 

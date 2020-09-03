@@ -230,7 +230,9 @@ struct OpenMote {
     openserial_vars_t openserial_vars;
     // kernel
     scheduler_vars_t scheduler_vars;
+#if SCHEDULER_DEBUG_ENABLE
     scheduler_dbg_t scheduler_dbg;
+#endif
     //===== openapps
     //
     coap_vars_t coap_vars;

@@ -69,7 +69,9 @@ static PyObject* OpenMote_getState(OpenMote* self) {
    PyObject* random_vars;
    PyObject* openserial_vars;
    PyObject* scheduler_vars;
+#if SCHEDULER_DEBUG_ENABLE
    PyObject* scheduler_dbg;
+#endif
    
    returnVal = PyDict_New();
    
@@ -181,10 +183,11 @@ static PyObject* OpenMote_getState(OpenMote* self) {
    PyDict_SetItemString(returnVal, "scheduler_vars", scheduler_vars);
    
    // scheduler_dbg
+#if SCHEDULER_DEBUG_ENABLE
    scheduler_dbg = PyDict_New();
    // TODO
    PyDict_SetItemString(returnVal, "scheduler_dbg", scheduler_dbg);
-   
+#endif
    return returnVal;
 }
 
