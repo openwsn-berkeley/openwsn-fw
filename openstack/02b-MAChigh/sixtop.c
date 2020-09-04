@@ -1383,7 +1383,7 @@ void sixtop_six2six_notifyReceive(
                             response_pkt->payload[1] = (uint8_t)((response_pkt->l2_sixtop_celllist_add[i].slotoffset        & 0xFF00)>>8);
                             response_pkt->payload[2] = (uint8_t)(response_pkt->l2_sixtop_celllist_add[i].channeloffset      & 0x00FF);
                             response_pkt->payload[3] = (uint8_t)((response_pkt->l2_sixtop_celllist_add[i].channeloffset     & 0xFF00)>>8);
-                            response_pkt->payload[4] = (uint8_t)((response_pkt->l2_sixtop_celllist_add[i].cellRadioSetting);
+                            response_pkt->payload[4] = (uint8_t)(response_pkt->l2_sixtop_celllist_add[i].cellRadioSetting);
                             response_pktLen += 5;
                         }
                     }
@@ -1478,7 +1478,7 @@ void sixtop_six2six_notifyReceive(
                             response_pkt->payload[1] = (uint8_t)((response_pkt->l2_sixtop_celllist_add[i].slotoffset        & 0xFF00)>>8);
                             response_pkt->payload[2] = (uint8_t)(response_pkt->l2_sixtop_celllist_add[i].channeloffset      & 0x00FF);
                             response_pkt->payload[3] = (uint8_t)((response_pkt->l2_sixtop_celllist_add[i].channeloffset     & 0xFF00)>>8);
-                            response_pkt->payload[4] = (uint8_t)((response_pkt->l2_sixtop_celllist_add[i].cellRadioSetting);
+                            response_pkt->payload[4] = (uint8_t)(response_pkt->l2_sixtop_celllist_add[i].cellRadioSetting);
                             response_pktLen += 5;
                         }
                     }
@@ -1730,7 +1730,7 @@ bool sixtop_addCells(
                 // retrieved from cellList [i].cellRadioSetting from the 
                 // sixtop add cells requestion from the neighbor
                 
-                CELLRADIOSETTING_FALLBACK,
+                cellList[i].cellRadioSetting,
                 cellList[i].channeloffset,
                 &temp_neighbor
             );
