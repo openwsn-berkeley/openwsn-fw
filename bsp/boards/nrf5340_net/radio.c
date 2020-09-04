@@ -42,7 +42,7 @@
 #define RADIO_TXPOWER             0 // in 2-compilant format
 
 // the maxmium should be ((1<<14)-1), but need larger .bss size
-#define MAX_IQSAMPLES            ((1<<8)-1) 
+#define MAX_IQSAMPLES            ((1<<8)-1)
 
 //=========================== variables =======================================
 
@@ -372,12 +372,12 @@ void radio_configure_direction_finding_antenna_switch(void) {
 
 // DFECTRL1 register values
 
-#define NUMBEROF8US         3 // in unit of 8 us
+#define NUMBEROF8US         3  // in unit of 8 us
 #define DFEINEXTENSION      1  // 1:crc  0:payload
 #define TSWITCHSPACING      2  // 1:4us 2:2us 3: 1us
-#define TSAMPLESPACINGREF   3  // 1:4us 2:2us 3: 1us 4:500ns 5:250ns 6:125ns
+#define TSAMPLESPACINGREF   6  // 1:4us 2:2us 3: 1us 4:500ns 5:250ns 6:125ns
 #define SAMPLETYPE          1  // 0: IQ  1: magPhase
-#define TSAMPLESPACING      2  // 1:4us 2:2us 3: 1us 4:500ns 5:250ns 6:125ns 
+#define TSAMPLESPACING      6  // 1:4us 2:2us 3: 1us 4:500ns 5:250ns 6:125ns
 
 // DFECTRL2 register values
 
@@ -410,7 +410,7 @@ void radio_configure_direction_finding_manual(void) {
                                       (uint32_t)(TSAMPLEOFFSET << 0);
   
 
-    NRF_RADIO_NS->DFEPACKET.MAXCNT  = SAMPLE_MAXCNT;
+    NRF_RADIO_NS->DFEPACKET.MAXCNT  = MAX_IQSAMPLES;
     NRF_RADIO_NS->DFEPACKET.PTR     = (uint32_t)(&radio_vars.df_samples[0]);
 }
 
@@ -449,20 +449,28 @@ void radio_configure_direction_finding_inline(void) {
                                       (uint32_t)(TSAMPLEOFFSET      << 0);
   
 
-    NRF_RADIO_NS->DFEPACKET.MAXCNT  = SAMPLE_MAXCNT;
+    NRF_RADIO_NS->DFEPACKET.MAXCNT  = MAX_IQSAMPLES;
     NRF_RADIO_NS->DFEPACKET.PTR     = (uint32_t)(&radio_vars.df_samples[0]);
 }
 
-void radio_get_df_samples(uint32_t* sample_buffer, uint16_t length) {
+bool radio_get_df_samples(uint32_t* sample_buffer, uint16_t length) {
 
     uint16_t i;
+    uint16_t num_transfered_samples;
+    
+    num_transfered_samples = NRF_RADIO_NS->DFEPACKET.AMOUNT;
+    if (length < num_transfered_samples) {
+        return FALSE;
+    }
 
-    for (i=0;i<length;i++) {
+    for (i=0;i<num_transfered_samples;i++) {
         sample_buffer[i] = radio_vars.df_samples[i];        
     }
 
     // reset sample buffer once accessed
     memset((uint8_t*)&radio_vars.df_samples[0], 0, 4*MAX_IQSAMPLES);
+
+    return TRUE;
 }
 
 uint32_t ble_channel_to_frequency(uint8_t channel) {
