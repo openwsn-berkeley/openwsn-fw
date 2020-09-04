@@ -289,9 +289,21 @@ void radio_getReceivedFrame(
     memcpy(bufRead, &radio_vars.payload[0], len+2);
 
     // store other parameters
-    *lenRead = len+2;
+    *lenRead = len+2 + 1; // 2 bytes header and 1 byte s1 field
+
+    *rssi = (int8_t)(0-NRF_RADIO_NS->RSSISAMPLE); 
 
     *crc = (NRF_RADIO_NS->CRCSTATUS == 1U);
+}
+
+void radio_get_crc(uint8_t* crc24){
+
+    uint32_t crc;
+    crc = NRF_RADIO_NS->RXCRC;
+
+    crc24[0] = (uint8_t)((crc & 0x00ff0000) >> 16);
+    crc24[1] = (uint8_t)((crc & 0x0000ff00) >> 8);
+    crc24[2] = (uint8_t)((crc & 0x000000ff) >> 0);
 }
 
 //=========================== private =========================================
@@ -506,6 +518,9 @@ kick_scheduler_t    radio_isr(void){
     // start of frame (payload)
     if (NRF_RADIO_NS->EVENTS_ADDRESS){
 
+        // start sampling rssi
+        NRF_RADIO_NS->TASKS_RSSISTART = (uint32_t)1;
+
         if (radio_vars.startFrame_cb!=NULL){
             radio_vars.startFrame_cb(time_stampe);
         }
@@ -516,8 +531,6 @@ kick_scheduler_t    radio_isr(void){
 
      // CTE presence
     if (NRF_RADIO_NS->EVENTS_CTEPRESENT){
-
-        leds_debug_toggle();
         
         NRF_RADIO_NS->EVENTS_CTEPRESENT = (uint32_t)0;
         return KICK_SCHEDULER;

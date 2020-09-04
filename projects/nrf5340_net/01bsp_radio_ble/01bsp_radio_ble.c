@@ -33,7 +33,9 @@ end of frame event), it will turn on its error LED.
 #define TXPOWER         0xD5            ///< 2's complement format, 0xD8 = -40dbm
 
 #define NUM_SAMPLES     SAMPLE_MAXCNT
-#define LEN_UART_BUFFER ((NUM_SAMPLES*4)+4)
+#define LEN_UART_BUFFER ((NUM_SAMPLES*4)+5)
+
+#define DF_ENABLE
 
 const static uint8_t ble_device_addr[6] = { 
     0xaa, 0xbb, 0xcc, 0xcc, 0xbb, 0xaa
@@ -112,8 +114,10 @@ int mote_main(void) {
     // initialize board
     board_init();
 
+#ifdef DF_ENABLE
     radio_configure_direction_finding_antenna_switch();
 
+#endif
     uart_setCallbacks(cb_uartTxDone,cb_uartRxCb);
     uart_enableInterrupts();
 
@@ -134,7 +138,9 @@ int mote_main(void) {
     // freq type only effects on scum port
     radio_setFrequency(CHANNEL, FREQ_RX);
 
+#ifdef DF_ENABLE
     radio_configure_direction_finding_manual();
+#endif
 
     // switch in RX by default
     radio_rxEnable();
@@ -205,10 +211,11 @@ int mote_main(void) {
                             app_vars.uart_buffer_to_send[4*i+2] = (app_vars.sample_buffer[i] >> 8) & 0x000000ff;
                             app_vars.uart_buffer_to_send[4*i+3] = (app_vars.sample_buffer[i] >> 0) & 0x000000ff;
                         }
-                        app_vars.uart_buffer_to_send[4*i+0]     = 0xff;
+                        app_vars.uart_buffer_to_send[4*i+0]     = app_vars.rxpk_rssi;
                         app_vars.uart_buffer_to_send[4*i+1]     = 0xff;
                         app_vars.uart_buffer_to_send[4*i+2]     = 0xff;
                         app_vars.uart_buffer_to_send[4*i+3]     = 0xff;
+                        app_vars.uart_buffer_to_send[4*i+4]     = 0xff;
                         app_vars.uart_lastTxByteIndex = 0;
                         uart_writeByte(app_vars.uart_buffer_to_send[0]);
 
