@@ -17,10 +17,10 @@
 
 The superframe reappears over time and can be arbitrarily long.
 */
-#define SLOTFRAME_LENGTH    101 //should be 101
+#define SLOTFRAME_LENGTH    19 //should be 101
 
 //draft-ietf-6tisch-minimal-06
-#define SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS                      1
+#define SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS                      3
 #define SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET                        0
 #define SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET                     0
 #define SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE          0 //id of slotframe
@@ -88,9 +88,11 @@ typedef enum{
     CELLOPTIONS_RX              = 1<<1,
     CELLOPTIONS_SHARED          = 1<<2,
     CELLOPTIONS_TIMEKEPPING     = 1<<3,
-    CELLOPTIONS_PRIORITY        = 1<<4
+    CELLOPTIONS_PRIORITY        = 1<<4,
 }linkOptions_t;
 
+
+  
 //=========================== typedef =========================================
 
 typedef uint8_t    channelOffset_t;
@@ -105,31 +107,33 @@ typedef enum {
 } cellType_t;
 
 typedef struct {
-    cellType_t      type;
-    bool            shared;
-    bool            isAutoCell;
-    uint8_t         channelOffset;
-    open_addr_t     neighbor;
-    uint8_t         numRx;
-    uint8_t         numTx;
-    uint8_t         numTxACK;
-    asn_t           lastUsedAsn;
-    void*           next;
+    cellType_t           type;
+    bool                 shared;
+    bool                 isAutoCell;
+    cellRadioSetting_t   cellRadioSetting;
+    uint8_t              channelOffset;
+    open_addr_t          neighbor;
+    uint8_t              numRx;
+    uint8_t              numTx;
+    uint8_t              numTxACK;
+    asn_t                lastUsedAsn;
+    void*                next;
 } backupEntry_t;
 
 typedef struct {
-    slotOffset_t    slotOffset;
-    cellType_t      type;
-    bool            shared;
-    bool            isAutoCell;
-    uint8_t         channelOffset;
-    open_addr_t     neighbor;
-    uint8_t         numRx;
-    uint8_t         numTx;
-    uint8_t         numTxACK;
-    asn_t           lastUsedAsn;
-    backupEntry_t   backupEntries[MAXBACKUPSLOTS];
-    void*           next;
+    slotOffset_t         slotOffset;
+    cellType_t           type;
+    bool                 shared;
+    bool                 isAutoCell;
+    cellRadioSetting_t   cellRadioSetting;
+    uint8_t              channelOffset;
+    open_addr_t          neighbor;
+    uint8_t              numRx;
+    uint8_t              numTx;
+    uint8_t              numTxACK;
+    asn_t                lastUsedAsn;
+    backupEntry_t        backupEntries[MAXBACKUPSLOTS];
+    void*                next;
 } scheduleEntry_t;
 
 BEGIN_PACK
@@ -138,6 +142,7 @@ typedef struct {
    slotOffset_t    slotOffset;
    uint8_t         type;
    bool            shared;
+   cellRadioSetting_t   cellRadioSetting;
    uint8_t         channelOffset;
    open_addr_t     neighbor;
    uint8_t         numRx;
@@ -153,6 +158,7 @@ typedef struct {
   bool             shared;
   slotOffset_t     slotOffset;
   channelOffset_t  channelOffset;
+  cellRadioSetting_t cellRadioSetting;
   bool             isAutoCell;
 }slotinfo_element_t;
 
@@ -187,6 +193,7 @@ owerror_t          schedule_addActiveSlot(
     cellType_t           type,
     bool                 shared,
     bool                 isAutoCell,
+    cellRadioSetting_t   cellRadioSetting,
     uint8_t              channelOffset,
     open_addr_t*         neighbor
 );
@@ -234,6 +241,7 @@ bool               schedule_getShared(void);
 bool               schedule_getIsAutoCell(void);
 void               schedule_getNeighbor(open_addr_t* addrToWrite);
 slotOffset_t       schedule_getSlottOffset(void);
+cellRadioSetting_t schedule_getCellRadioSetting(void);
 channelOffset_t    schedule_getChannelOffset(void);
 bool               schedule_getOkToSend(void);
 void               schedule_resetBackoff(void);
