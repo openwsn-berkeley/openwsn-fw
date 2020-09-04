@@ -296,6 +296,7 @@
       arm_target_device_name="nRF5340_xxAA_NET"
       c_preprocessor_definitions="NRF5340_XXAA_NET"
       c_user_include_directories="../../../bsp/boards/nrf5340_net/sdk;../../../bsp/boards/nrf5340_net;../../../bsp/boards/;../../../inc/"
+      debug_restrict_memory_access="No"
       debug_start_from_entry_point_symbol="No"
       gcc_entry_point="Reset_Handler"
       link_linker_script_file="../../../bsp/boards/nrf5340_net/sdk/nrf5340_network.ld"

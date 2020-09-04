@@ -164,12 +164,13 @@ void RTC0_IRQHandler(void){
 
 kick_scheduler_t sctimer_isr(void) {
     debugpins_isr_set();
+     NRF_RTC0_NS->EVENTS_COMPARE[0] = (uint32_t)0;
     if (sctimer_vars.sctimer_cb!=NULL) {
-        NRF_RTC0_NS->EVENTS_COMPARE[0] = (uint32_t)0;
         sctimer_vars.sctimer_cb();
         debugpins_isr_clr();
         return KICK_SCHEDULER;
     }
+    
     debugpins_isr_clr();
     return DO_NOT_KICK_SCHEDULER;
 }
