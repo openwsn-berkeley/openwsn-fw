@@ -16,7 +16,7 @@
 //=========================== variables =======================================
 
 msf_vars_t msf_vars;
-
+open_addr_t myaddr;
 //=========================== prototypes ======================================
 
 // sixtop callback
@@ -309,10 +309,9 @@ void msf_trigger6pAdd(void){
         // failed to get cell list to add
         return;
     }
-
     sixtop_request(
         IANA_6TOP_CMD_ADD,           // code
-        &neighbor.open_addr,         // neighbor
+        &neighbor.open_addr,          // neighbor
         NUMCELLS_MSF,                // number cells
         cellOptions,                 // cellOptions
         celllist_add,                // celllist to add
@@ -345,7 +344,7 @@ void msf_trigger6pDelete(void){
     }
 
     if (msf_vars.needDeleteTx) {
-        if (schedule_getNumberOfNegotiatedCells(&neighbor, CELLTYPE_TX)<=1){
+        if (schedule_getNumberOfNegotiatedCells(&(neighbor.open_addr), CELLTYPE_TX)<=1){
             // at least one negotiated Tx cell presents
             msf_vars.needDeleteTx = FALSE;
         }
@@ -364,14 +363,14 @@ void msf_trigger6pDelete(void){
         }
     }
 
-    if (msf_candidateRemoveCellList(celllist_delete,&neighbor,NUMCELLS_MSF, cellOptions)==FALSE){
+    if (msf_candidateRemoveCellList(celllist_delete,&(neighbor.open_addr),NUMCELLS_MSF, cellOptions)==FALSE){
         // failed to get cell list to delete
         return;
     }
 
     sixtop_request(
         IANA_6TOP_CMD_DELETE,   // code
-        &neighbor.open_addr,    // neighbor
+        &(neighbor.open_addr),    // neighbor
         NUMCELLS_MSF,           // number cells
         cellOptions,            // cellOptions
         NULL,                   // celllist to add (not used)
@@ -501,8 +500,11 @@ void msf_housekeeping(void){
     }
 
     memset(celllist_delete, 0, CELLLIST_MAX_LEN*sizeof(cellInfo_ht));
+
+    // later on parentNeighbor should be of type neighborKey. 
     if (schedule_getCellsToBeRelocated(&parentNeighbor, celllist_delete)){
-        if (msf_candidateAddCellList(celllist_add,NUMCELLS_MSF)==FALSE){
+      // hack: using default settin for relocation, later on this will come from the parentNeighbor neighborKey
+        if (msf_candidateAddCellList(celllist_add,NUMCELLS_MSF,CELLRADIOSETTING_FALLBACK)==FALSE){
             // failed to get cell list to add
             return;
         }

@@ -471,7 +471,7 @@ END_PACK
 
 //ideally this struct should be in the neighbor table as an ID. 
 typedef struct {
-    open_addr_t*      open_addr;
+    open_addr_t        open_addr;
     cellRadioSetting_t cellRadioSetting;
 } neighborKey_t;
 

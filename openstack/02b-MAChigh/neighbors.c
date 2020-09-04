@@ -114,12 +114,10 @@ with lowest join priority metric to send join traffic through.
 
 \returns A pointer to the neighbor's address, or NULL if no join proxy is found.
 */
-neighborKey_t neighbors_getJoinProxy(void) {
+void neighbors_getJoinProxy(bool* foundProxy, neighborKey_t* joinProxyKey) {
     uint8_t i;
     uint8_t joinPrioMinimum;
-    neighborKey_t joinProxyKey; 
-    joinProxyKey.open_addr=NULL;
-    
+
     joinPrioMinimum = 0xff;
     for (i=0;i<MAXNUMNEIGHBORS;i++) {
         if (
@@ -127,13 +125,14 @@ neighborKey_t neighbors_getJoinProxy(void) {
             neighbors_vars.neighbors[i].stableNeighbor==TRUE &&
             neighbors_vars.neighbors[i].joinPrio <= joinPrioMinimum
         ) {
-            joinProxyKey.open_addr= &(neighbors_vars.neighbors[i].addr_64b);
-            joinProxyKey.cellRadioSetting = neighbors_vars.neighbors[i].cellRadioSetting;
+            //joinProxyKey.open_addr.type= neighbors_vars.neighbors[i].addr_64b.type;
+            //joinProxyKey->open_addr.addr_64b = neighbors_vars.neighbors[i].addr_64b.addr_64b;
+            memcpy(&(joinProxyKey->open_addr.addr_64b[0]),&(neighbors_vars.neighbors[i].addr_64b.addr_64b[0]),8);
+            joinProxyKey->cellRadioSetting = neighbors_vars.neighbors[i].cellRadioSetting;
             joinPrioMinimum = neighbors_vars.neighbors[i].joinPrio;
+            *foundProxy = TRUE;
         }
     }
-    return joinProxyKey;
-
 }
 
 bool neighbors_getNeighborNoResource(uint8_t index){
@@ -488,7 +487,7 @@ bool  neighbors_getNeighborEui64(open_addr_t* address, uint8_t addr_type, uint8_
 
 bool  neighbors_getNeighborKey(neighborKey_t* neighborKey, uint8_t index){
    bool ReturnVal = FALSE;
-   memcpy(&(neighborKey->open_addr),&(neighbors_vars.neighbors[index].addr_64b),LENGTH_ADDR64b);
+   memcpy(&(neighborKey->open_addr.addr_64b[0]),&(neighbors_vars.neighbors[index].addr_64b.addr_64b[0]),LENGTH_ADDR64b);
    memcpy(&(neighborKey->cellRadioSetting),&(neighbors_vars.neighbors[index].cellRadioSetting),sizeof(cellRadioSetting_t));
    ReturnVal=neighbors_vars.neighbors[index].used;
    return ReturnVal;
