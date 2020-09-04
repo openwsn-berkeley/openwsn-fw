@@ -21,7 +21,7 @@
 //=========================== defines =========================================
 
 /// inter-packet period (in ms)
-#define TIMEOUT                 60000
+#define TIMEOUT                 15000
 
 const uint8_t cjoin_path0[] = "j";
 
@@ -176,14 +176,16 @@ void cjoin_retransmission_cb(opentimers_id_t id) {
 
 void cjoin_retransmission_task_cb(void) {
     neighborKey_t joinProxy;
+    bool foundProxy = FALSE;
 
     if (ieee154e_isSynch() == FALSE){
         // keep the retransmission timer, in case it synchronized at next time
         return;
     }
 
-    joinProxy = neighbors_getJoinProxy();
-    if(joinProxy.open_addr == NULL) {
+    neighbors_getJoinProxy(&foundProxy,&joinProxy);
+    
+    if(foundProxy==0) {
         // keep the retransmission timer, in case it synchronized at next time
         openserial_printError(
             COMPONENT_CJOIN,
@@ -199,7 +201,8 @@ void cjoin_retransmission_task_cb(void) {
 
 void cjoin_task_cb(void) {
     neighborKey_t joinProxy;
-
+    bool foundProxy = false;
+    
     // don't run if not synch
     if (ieee154e_isSynch() == FALSE){
         return;
@@ -211,8 +214,9 @@ void cjoin_task_cb(void) {
         return;
     }
 
-    joinProxy = neighbors_getJoinProxy();
-    if(joinProxy.open_addr == NULL) {
+    neighbors_getJoinProxy(&foundProxy,&joinProxy);
+    
+    if(!foundProxy) {
         return;
     }
 
@@ -292,7 +296,7 @@ owerror_t cjoin_sendJoinRequest(neighborKey_t joinProxy) {
     pkt->l3_destinationAdd.addr_128b[1] = 0x80;
     pkt->l2_cellRadioSetting = joinProxy.cellRadioSetting;
     memset(&pkt->l3_destinationAdd.addr_128b[2], 0x00, 6);
-    memcpy(&pkt->l3_destinationAdd.addr_128b[8],joinProxy.open_addr->addr_64b,8); // set host to eui-64 of the join proxy
+    memcpy(&pkt->l3_destinationAdd.addr_128b[8],joinProxy.open_addr.addr_64b,8); // set host to eui-64 of the join proxy
 
     // encode Join_Request object in the payload
     join_request.role = COJP_ROLE_VALUE_6N; // regular non-6LBR node
