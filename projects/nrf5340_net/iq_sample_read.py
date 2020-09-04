@@ -1,7 +1,7 @@
 import serial
 import struct
 
-NUM_SAMPLES  = 112
+NUM_SAMPLES  = 160
 
 nrf5340_port = {
     'red'  : 'COM9',
