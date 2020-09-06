@@ -203,21 +203,22 @@ int mote_main(void) {
                             &app_vars.rxpk_lqi,
                             &app_vars.rxpk_crc
                         );
-
-                        radio_get_df_samples(app_vars.sample_buffer,NUM_SAMPLES);
-                        for (i=0;i<NUM_SAMPLES;i++) {
-                            app_vars.uart_buffer_to_send[4*i+0] = (app_vars.sample_buffer[i] >>24) & 0x000000ff;
-                            app_vars.uart_buffer_to_send[4*i+1] = (app_vars.sample_buffer[i] >>16) & 0x000000ff;
-                            app_vars.uart_buffer_to_send[4*i+2] = (app_vars.sample_buffer[i] >> 8) & 0x000000ff;
-                            app_vars.uart_buffer_to_send[4*i+3] = (app_vars.sample_buffer[i] >> 0) & 0x000000ff;
+                        if (app_vars.rxpk_crc && app_vars.packet_len==5) {
+                            radio_get_df_samples(app_vars.sample_buffer,NUM_SAMPLES);
+                            for (i=0;i<NUM_SAMPLES;i++) {
+                                app_vars.uart_buffer_to_send[4*i+0] = (app_vars.sample_buffer[i] >>24) & 0x000000ff;
+                                app_vars.uart_buffer_to_send[4*i+1] = (app_vars.sample_buffer[i] >>16) & 0x000000ff;
+                                app_vars.uart_buffer_to_send[4*i+2] = (app_vars.sample_buffer[i] >> 8) & 0x000000ff;
+                                app_vars.uart_buffer_to_send[4*i+3] = (app_vars.sample_buffer[i] >> 0) & 0x000000ff;
+                            }
+                            app_vars.uart_buffer_to_send[4*i+0]     = app_vars.rxpk_rssi;
+                            app_vars.uart_buffer_to_send[4*i+1]     = 0xff;
+                            app_vars.uart_buffer_to_send[4*i+2]     = 0xff;
+                            app_vars.uart_buffer_to_send[4*i+3]     = 0xff;
+                            app_vars.uart_buffer_to_send[4*i+4]     = 0xff;
+                            app_vars.uart_lastTxByteIndex = 0;
+                            uart_writeByte(app_vars.uart_buffer_to_send[0]);
                         }
-                        app_vars.uart_buffer_to_send[4*i+0]     = app_vars.rxpk_rssi;
-                        app_vars.uart_buffer_to_send[4*i+1]     = 0xff;
-                        app_vars.uart_buffer_to_send[4*i+2]     = 0xff;
-                        app_vars.uart_buffer_to_send[4*i+3]     = 0xff;
-                        app_vars.uart_buffer_to_send[4*i+4]     = 0xff;
-                        app_vars.uart_lastTxByteIndex = 0;
-                        uart_writeByte(app_vars.uart_buffer_to_send[0]);
 
                         // led
                         leds_error_off();
