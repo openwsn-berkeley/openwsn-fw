@@ -1,0 +1,1 @@
+how  zephyr build project: https://docs.zephyrproject.org/latest/guides/build/index.html
