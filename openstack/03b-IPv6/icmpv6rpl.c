@@ -1045,3 +1045,23 @@ bool icmpv6rpl_daoSent(void) {
     }
     return icmpv6rpl_vars.daoSent;
 }
+
+//======= debugging
+
+/**
+\brief Trigger this module to print status information, over serial.
+
+debugPrint_* functions are used by the openserial module to continuously print
+status information about several modules in the OpenWSN stack.
+
+\returns TRUE if this function printed something, FALSE otherwise.
+*/
+bool debugPrint_myDAGrank(void) {
+    uint16_t output;
+
+    output = 0;
+    output = icmpv6rpl_getMyDAGrank();
+    openserial_printStatus(STATUS_DAGRANK, (uint8_t * ) & output, sizeof(uint16_t));
+    return TRUE;
+}
+

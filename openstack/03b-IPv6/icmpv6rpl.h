@@ -240,6 +240,8 @@ void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t *msg);
 
 bool icmpv6rpl_daoSent(void);
 
+// debugging
+bool debugPrint_myDAGrank(void);
 
 /**
 \}
