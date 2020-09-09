@@ -33,9 +33,9 @@ end of frame event), it will turn on its error LED.
 #define TXPOWER         0xD5            ///< 2's complement format, 0xD8 = -40dbm
 
 #define NUM_SAMPLES     SAMPLE_MAXCNT
-#define LEN_UART_BUFFER ((NUM_SAMPLES*4)+5)
+#define LEN_UART_BUFFER ((NUM_SAMPLES*4)+8)
 
-#define DF_ENABLE
+#define ENABLE_DF       1
 
 const static uint8_t ble_device_addr[6] = { 
     0xaa, 0xbb, 0xcc, 0xcc, 0xbb, 0xaa
@@ -77,6 +77,7 @@ typedef struct {
                 int8_t          rxpk_rssi;
                 uint8_t         rxpk_lqi;
                 bool            rxpk_crc;
+                uint16_t        num_samples;
                 uint32_t        sample_buffer[NUM_SAMPLES];
                 uint8_t         uart_buffer_to_send[LEN_UART_BUFFER];
                 uint16_t        uart_lastTxByteIndex;
@@ -114,7 +115,7 @@ int mote_main(void) {
     // initialize board
     board_init();
 
-#ifdef DF_ENABLE
+#if ENABLE_DF == 1
     radio_configure_direction_finding_antenna_switch();
 
 #endif
@@ -138,7 +139,7 @@ int mote_main(void) {
     // freq type only effects on scum port
     radio_setFrequency(CHANNEL, FREQ_RX);
 
-#ifdef DF_ENABLE
+#if ENABLE_DF == 1
     radio_configure_direction_finding_manual();
 #endif
 
@@ -203,27 +204,39 @@ int mote_main(void) {
                             &app_vars.rxpk_lqi,
                             &app_vars.rxpk_crc
                         );
-                        if (app_vars.rxpk_crc && app_vars.packet_len==5) {
-                            radio_get_df_samples(app_vars.sample_buffer,NUM_SAMPLES);
-                            for (i=0;i<NUM_SAMPLES;i++) {
+                        if (app_vars.rxpk_crc && ENABLE_DF) {
+                            
+                            app_vars.num_samples = radio_get_df_samples(app_vars.sample_buffer,NUM_SAMPLES);
+
+                            // record the samples
+                            for (i=0;i<app_vars.num_samples;i++) {
                                 app_vars.uart_buffer_to_send[4*i+0] = (app_vars.sample_buffer[i] >>24) & 0x000000ff;
                                 app_vars.uart_buffer_to_send[4*i+1] = (app_vars.sample_buffer[i] >>16) & 0x000000ff;
                                 app_vars.uart_buffer_to_send[4*i+2] = (app_vars.sample_buffer[i] >> 8) & 0x000000ff;
                                 app_vars.uart_buffer_to_send[4*i+3] = (app_vars.sample_buffer[i] >> 0) & 0x000000ff;
                             }
+
+                            // recoard rssi
                             app_vars.uart_buffer_to_send[4*i+0]     = app_vars.rxpk_rssi;
-                            app_vars.uart_buffer_to_send[4*i+1]     = 0xff;
-                            app_vars.uart_buffer_to_send[4*i+2]     = 0xff;
-                            app_vars.uart_buffer_to_send[4*i+3]     = 0xff;
+                            // record scum settings for transmitting
+                            app_vars.uart_buffer_to_send[4*i+1]     = app_vars.packet[3];
+                            app_vars.uart_buffer_to_send[4*i+2]     = app_vars.packet[4];
+                            app_vars.uart_buffer_to_send[4*i+3]     = app_vars.packet[5];
+                            // frame split identifier
                             app_vars.uart_buffer_to_send[4*i+4]     = 0xff;
+                            app_vars.uart_buffer_to_send[4*i+5]     = 0xff;
+                            app_vars.uart_buffer_to_send[4*i+6]     = 0xff;
+                            app_vars.uart_buffer_to_send[4*i+7]     = 0xff;
+
                             app_vars.uart_lastTxByteIndex = 0;
                             uart_writeByte(app_vars.uart_buffer_to_send[0]);
                         }
 
                         // led
                         leds_error_off();
-
+          
                         // continue to listen
+                        radio_rxEnable();
                         radio_rxNow();
                         break;
                     case APP_STATE_TX:
