@@ -151,6 +151,8 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg);
 void upper_sendDone(OpenQueueEntry_t *msg, owerror_t error);
 void upper_receive(OpenQueueEntry_t *msg);
 
+void sixtop_indicate_recv(uint8_t code);
+
 // from lower layer
 void task_sixtopNotifSendDone(void);
 
