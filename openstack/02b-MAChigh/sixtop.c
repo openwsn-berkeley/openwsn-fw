@@ -438,11 +438,7 @@ void task_sixtopNotifSendDone(void) {
             break;
         default:
             // send the rest up the stack
-#if OPENWSN_6LO_FRAGMENTATION_C
-            frag_sendDone(msg, msg->l2_sendDoneError);
-#else
-            iphc_sendDone(msg, msg->l2_sendDoneError);
-#endif
+            upper_sendDone(msg, msg->l2_sendDoneError);
             break;
     }
 }
@@ -502,11 +498,7 @@ void task_sixtopNotifReceive(void) {
                     break;
                 }
                 // send to upper layer
-#if OPENWSN_6LO_FRAGMENTATION_C
-                frag_receive(msg);
-#else
-                iphc_receive(msg);
-#endif
+                upper_receive(msg);
             } else {
                 // free up the RAM
                 openqueue_freePacketBuffer(msg);
