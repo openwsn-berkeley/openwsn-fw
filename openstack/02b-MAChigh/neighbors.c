@@ -114,25 +114,46 @@ with lowest join priority metric to send join traffic through.
 
 \returns A pointer to the neighbor's address, or NULL if no join proxy is found.
 */
-void neighbors_getJoinProxy(bool* foundProxy, neighborKey_t* joinProxyKey) {
+open_addr_t* neighbors_getJoinProxy(void) {
     uint8_t i;
     uint8_t joinPrioMinimum;
+    open_addr_t *joinProxy;
 
     joinPrioMinimum = 0xff;
-    for (i=0;i<MAXNUMNEIGHBORS;i++) {
+    joinProxy = NULL;
+    for (i = 0; i < MAXNUMNEIGHBORS; i++) {
         if (
-            neighbors_vars.neighbors[i].used==TRUE &&
-            neighbors_vars.neighbors[i].stableNeighbor==TRUE &&
-            neighbors_vars.neighbors[i].joinPrio <= joinPrioMinimum
-        ) {
-            //joinProxyKey.open_addr.type= neighbors_vars.neighbors[i].addr_64b.type;
-            //joinProxyKey->open_addr.addr_64b = neighbors_vars.neighbors[i].addr_64b.addr_64b;
-            memcpy(&(joinProxyKey->open_addr.addr_64b[0]),&(neighbors_vars.neighbors[i].addr_64b.addr_64b[0]),8);
-            joinProxyKey->cellRadioSetting = neighbors_vars.neighbors[i].cellRadioSetting;
+                neighbors_vars.neighbors[i].used == TRUE &&
+                neighbors_vars.neighbors[i].stableNeighbor == TRUE &&
+                neighbors_vars.neighbors[i].joinPrio <= joinPrioMinimum
+                ) {
+            joinProxy = &(neighbors_vars.neighbors[i].addr_64b);
             joinPrioMinimum = neighbors_vars.neighbors[i].joinPrio;
-            *foundProxy = TRUE;
         }
     }
+
+    return joinProxy;
+}
+
+cellRadioSetting_t* neighbors_getJoinProxyRadio(void) {
+    uint8_t i;
+    uint8_t joinPrioMinimum;
+    cellRadioSetting_t *JoinProxyRadio;
+
+    joinPrioMinimum = 0xff;
+    JoinProxyRadio = NULL;
+    for (i = 0; i < MAXNUMNEIGHBORS; i++) {
+        if (
+                neighbors_vars.neighbors[i].used == TRUE &&
+                neighbors_vars.neighbors[i].stableNeighbor == TRUE &&
+                neighbors_vars.neighbors[i].joinPrio <= joinPrioMinimum
+                ) {
+            JoinProxyRadio = &(neighbors_vars.neighbors[i].cellRadioSetting);
+            joinPrioMinimum = neighbors_vars.neighbors[i].joinPrio;
+        }
+    }
+
+    return JoinProxyRadio;
 }
 
 bool neighbors_getNeighborNoResource(uint8_t index){
@@ -485,13 +506,24 @@ bool  neighbors_getNeighborEui64(open_addr_t* address, uint8_t addr_type, uint8_
 // Returns false if neighbor not in use or address type is not 64bits
 */
 
-bool  neighbors_getNeighborKey(neighborKey_t* neighborKey, uint8_t index){
-   bool ReturnVal = FALSE;
-   memcpy(&(neighborKey->open_addr.addr_64b[0]),&(neighbors_vars.neighbors[index].addr_64b.addr_64b[0]),LENGTH_ADDR64b);
-   memcpy(&(neighborKey->cellRadioSetting),&(neighbors_vars.neighbors[index].cellRadioSetting),sizeof(cellRadioSetting_t));
-   ReturnVal=neighbors_vars.neighbors[index].used;
-   return ReturnVal;
+bool  neighbors_getNeighborKey(open_addr_t* address, uint8_t addr_type, cellRadioSetting_t* cellRadioSetting, uint8_t index){
+    bool ReturnVal = FALSE;
+    switch (addr_type) {
+        case ADDR_64B:
+            memcpy(&(address->addr_64b), &(neighbors_vars.neighbors[index].addr_64b.addr_64b), LENGTH_ADDR64b);
+            address->type = ADDR_64B;
+            memcpy(&(cellRadioSetting), &(neighbors_vars.neighbors[index].cellRadioSetting), 1);
+            ReturnVal = neighbors_vars.neighbors[index].used;
+            break;
+        default:
+         openserial_printCritical(COMPONENT_NEIGHBORS,ERR_WRONG_ADDR_TYPE,
+                               (errorparameter_t)addr_type,
+                               (errorparameter_t)2);
+         break;
+    }
+    return ReturnVal;
 }
+
 // ==== update backoff
 void neighbors_updateBackoff(open_addr_t* address){
     uint8_t i;

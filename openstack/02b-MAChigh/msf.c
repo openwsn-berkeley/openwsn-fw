@@ -270,7 +270,8 @@ void msf_timer_clear_task(void){
 //=========================== private =========================================
 
 void msf_trigger6pAdd(void){
-    neighborKey_t    neighbor;
+    open_addr_t    neighbor;
+    cellRadioSetting_t neighborRadio;
     bool           foundNeighbor;
     cellInfo_ht    celllist_add[CELLLIST_MAX_LEN];
 
@@ -286,7 +287,7 @@ void msf_trigger6pAdd(void){
 
     // get preferred parent
 
-    foundNeighbor = icmpv6rpl_getPreferredParentKey(&neighbor);
+    foundNeighbor = icmpv6rpl_getPreferredParentKey(&neighbor,&neighborRadio);
     
     if (foundNeighbor==FALSE) {
         return;
@@ -305,13 +306,13 @@ void msf_trigger6pAdd(void){
         }
     }
 
-    if (msf_candidateAddCellList(celllist_add,NUMCELLS_MSF,neighbor.cellRadioSetting)==FALSE){
+    if (msf_candidateAddCellList(celllist_add,NUMCELLS_MSF,neighborRadio)==FALSE){
         // failed to get cell list to add
         return;
     }
     sixtop_request(
         IANA_6TOP_CMD_ADD,           // code
-        &neighbor.open_addr,          // neighbor
+        &neighbor,          // neighbor
         NUMCELLS_MSF,                // number cells
         cellOptions,                 // cellOptions
         celllist_add,                // celllist to add
@@ -323,7 +324,8 @@ void msf_trigger6pAdd(void){
 }
 
 void msf_trigger6pDelete(void){
-    neighborKey_t    neighbor;
+    open_addr_t    neighbor;
+    cellRadioSetting_t neighborRadio;
     bool           foundNeighbor;
     cellInfo_ht    celllist_delete[CELLLIST_MAX_LEN];
 
@@ -338,13 +340,13 @@ void msf_trigger6pDelete(void){
     }
 
     // get preferred parent
-    foundNeighbor = icmpv6rpl_getPreferredParentKey(&neighbor);
+    foundNeighbor = icmpv6rpl_getPreferredParentKey(&neighbor,&neighborRadio);
     if (foundNeighbor==FALSE) {
         return;
     }
 
     if (msf_vars.needDeleteTx) {
-        if (schedule_getNumberOfNegotiatedCells(&(neighbor.open_addr), CELLTYPE_TX)<=1){
+        if (schedule_getNumberOfNegotiatedCells(&(neighbor), CELLTYPE_TX)<=1){
             // at least one negotiated Tx cell presents
             msf_vars.needDeleteTx = FALSE;
         }
@@ -363,14 +365,14 @@ void msf_trigger6pDelete(void){
         }
     }
 
-    if (msf_candidateRemoveCellList(celllist_delete,&(neighbor.open_addr),NUMCELLS_MSF, cellOptions)==FALSE){
+    if (msf_candidateRemoveCellList(celllist_delete,&(neighbor),NUMCELLS_MSF, cellOptions)==FALSE){
         // failed to get cell list to delete
         return;
     }
 
     sixtop_request(
         IANA_6TOP_CMD_DELETE,   // code
-        &(neighbor.open_addr),    // neighbor
+        &neighbor,    // neighbor
         NUMCELLS_MSF,           // number cells
         cellOptions,            // cellOptions
         NULL,                   // celllist to add (not used)

@@ -332,12 +332,12 @@ bool icmpv6rpl_getPreferredParentEui64(open_addr_t* addressToWrite) {
 \brief Retrieve my preferred parent's neighborKey (addr and radio setting)
 \param[out] neighborKey Where to copy the preferred parent's address to.
 */
-bool icmpv6rpl_getPreferredParentKey(neighborKey_t* key) {
+bool icmpv6rpl_getPreferredParentKey(open_addr_t* addressToWrite, cellRadioSetting_t* radioToWrite) {
     if (
         icmpv6rpl_vars.haveParent &&
         neighbors_getNeighborNoResource(icmpv6rpl_vars.ParentIndex)    == FALSE
     ){
-        return neighbors_getNeighborKey(key,icmpv6rpl_vars.ParentIndex);
+        return neighbors_getNeighborKey(addressToWrite,ADDR_64B, radioToWrite, icmpv6rpl_vars.ParentIndex);
     } else {
         return FALSE;
     }

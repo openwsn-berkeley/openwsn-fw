@@ -72,8 +72,9 @@ owerror_t c6t_receive(OpenQueueEntry_t* msg,
         uint8_t*          coap_outgoingOptionsLen
 ) {
    owerror_t            outcome;
-   open_addr_t          neighbor;
-   bool                 foundNeighbor;
+   open_addr_t    neighbor;
+   cellRadioSetting_t neighborRadio;
+   bool           foundNeighbor;
    cellInfo_ht          celllist_add[CELLLIST_MAX_LEN];
    cellInfo_ht          celllist_delete[CELLLIST_MAX_LEN];
 
@@ -87,14 +88,14 @@ owerror_t c6t_receive(OpenQueueEntry_t* msg,
          msg->length                   = 0;
 
          // get preferred parent
-         foundNeighbor = icmpv6rpl_getPreferredParentEui64(&neighbor);
+         foundNeighbor = icmpv6rpl_getPreferredParentKey(&neighbor,&neighborRadio);
          if (foundNeighbor==FALSE) {
             outcome                    = E_FAIL;
             coap_header->Code          = COAP_CODE_RESP_PRECONDFAILED;
             break;
          }
 
-         if (msf_candidateAddCellList(celllist_add,1)==FALSE){
+         if (msf_candidateAddCellList(celllist_add,1,neighborRadio)==FALSE){
             // set the CoAP header
             outcome                       = E_FAIL;
             coap_header->Code             = COAP_CODE_RESP_CHANGED;

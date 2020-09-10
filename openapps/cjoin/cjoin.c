@@ -48,7 +48,7 @@ void        cjoin_timer_cb(opentimers_id_t id);
 void        cjoin_task_cb(void);
 void        cjoin_sendDone(OpenQueueEntry_t* msg,
                        owerror_t error);
-owerror_t   cjoin_sendJoinRequest(neighborKey_t joinProxy);
+owerror_t   cjoin_sendJoinRequest(open_addr_t *joinProxy, cellRadioSetting_t *joinProxyRadio);
 void        cjoin_retransmission_cb(opentimers_id_t id);
 void        cjoin_retransmission_task_cb(void);
 bool        cjoin_getIsJoined(void);
@@ -175,17 +175,18 @@ void cjoin_retransmission_cb(opentimers_id_t id) {
 }
 
 void cjoin_retransmission_task_cb(void) {
-    neighborKey_t joinProxy;
-    bool foundProxy = FALSE;
+    open_addr_t *joinProxy;
+    cellRadioSetting_t *joinProxyRadio;
 
     if (ieee154e_isSynch() == FALSE){
         // keep the retransmission timer, in case it synchronized at next time
         return;
     }
 
-    neighbors_getJoinProxy(&foundProxy,&joinProxy);
+    joinProxy= neighbors_getJoinProxy();
+    joinProxyRadio = neighbors_getJoinProxyRadio();
     
-    if(foundProxy==0) {
+    if(joinProxy == NULL) {
         // keep the retransmission timer, in case it synchronized at next time
         openserial_printError(
             COMPONENT_CJOIN,
@@ -196,12 +197,12 @@ void cjoin_retransmission_task_cb(void) {
         return;
     }
 
-    cjoin_sendJoinRequest(joinProxy);
+    cjoin_sendJoinRequest(joinProxy,joinProxyRadio);
 }
 
 void cjoin_task_cb(void) {
-    neighborKey_t joinProxy;
-    bool foundProxy = false;
+    open_addr_t *joinProxy;
+    cellRadioSetting_t *joinProxyRadio;
     
     // don't run if not synch
     if (ieee154e_isSynch() == FALSE){
@@ -214,9 +215,10 @@ void cjoin_task_cb(void) {
         return;
     }
 
-    neighbors_getJoinProxy(&foundProxy,&joinProxy);
+    joinProxy= neighbors_getJoinProxy();
+    joinProxyRadio = neighbors_getJoinProxyRadio();
     
-    if(!foundProxy) {
+    if(joinProxy == NULL) {
         return;
     }
 
@@ -233,7 +235,7 @@ void cjoin_task_cb(void) {
     // that may be set over the serial
     cjoin_init_security_context();
 
-    cjoin_sendJoinRequest(joinProxy);
+    cjoin_sendJoinRequest(joinProxy,joinProxyRadio);
 }
 
 void cjoin_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
@@ -241,7 +243,7 @@ void cjoin_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
     openqueue_freePacketBuffer(msg);
 }
 
-owerror_t cjoin_sendJoinRequest(neighborKey_t joinProxy) {
+owerror_t cjoin_sendJoinRequest(open_addr_t *joinProxy, cellRadioSetting_t *joinProxyRadio) {
     OpenQueueEntry_t*            pkt;
     owerror_t                    outcome;
     coap_option_iht              options[5];
@@ -294,9 +296,9 @@ owerror_t cjoin_sendJoinRequest(neighborKey_t joinProxy) {
     pkt->l3_destinationAdd.type    = ADDR_128B;
     pkt->l3_destinationAdd.addr_128b[0] = 0xfe;
     pkt->l3_destinationAdd.addr_128b[1] = 0x80;
-    pkt->l2_cellRadioSetting = joinProxy.cellRadioSetting;
+    pkt->l2_cellRadioSetting = *joinProxyRadio;
     memset(&pkt->l3_destinationAdd.addr_128b[2], 0x00, 6);
-    memcpy(&pkt->l3_destinationAdd.addr_128b[8],joinProxy.open_addr.addr_64b,8); // set host to eui-64 of the join proxy
+    memcpy(&pkt->l3_destinationAdd.addr_128b[8],joinProxy->addr_64b,8); // set host to eui-64 of the join proxy
 
     // encode Join_Request object in the payload
     join_request.role = COJP_ROLE_VALUE_6N; // regular non-6LBR node

@@ -62,7 +62,9 @@ dagrank_t     neighbors_getNeighborRank(uint8_t index);
 uint8_t       neighbors_getNumNeighbors(void);
 uint16_t      neighbors_getLinkMetric(uint8_t index);
 open_addr_t*  neighbors_getKANeighbor(uint16_t kaPeriod);
-void          neighbors_getJoinProxy(bool* foundProxy, neighborKey_t* joinProxyKey);
+open_addr_t*  neighbors_getJoinProxy(void);
+cellRadioSetting_t* neighbors_getJoinProxyRadio(void);
+
 bool          neighbors_getNeighborNoResource(uint8_t index);
 int8_t        neighbors_getRssi(uint8_t index);
 uint8_t       neighbors_getNumTx(uint8_t index);
@@ -103,8 +105,8 @@ void          neighbors_resetSequenceNumber(open_addr_t* address);
 
 // get addresses
 bool          neighbors_getNeighborEui64(open_addr_t* address,uint8_t addr_type,uint8_t index);
-// get key
-bool          neighbors_getNeighborKey(neighborKey_t* neighborKey, uint8_t index);
+bool          neighbors_getNeighborKey(open_addr_t* address, uint8_t addr_type, cellRadioSetting_t* cellRadioSetting, uint8_t index);
+
 // update backoff field
 void          neighbors_updateBackoff(open_addr_t* address);
 void          neighbors_decreaseBackoff(open_addr_t* address);

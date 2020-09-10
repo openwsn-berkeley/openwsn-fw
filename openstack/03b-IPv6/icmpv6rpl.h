@@ -221,7 +221,7 @@ void     icmpv6rpl_setDIOPeriod(uint16_t dioPeriod);
 void     icmpv6rpl_setDAOPeriod(uint16_t daoPeriod);
 bool     icmpv6rpl_getPreferredParentIndex(uint8_t* indexptr);
 bool     icmpv6rpl_getPreferredParentEui64(open_addr_t* addressToWrite);
-bool     icmpv6rpl_getPreferredParentKey(neighborKey_t* key);
+bool     icmpv6rpl_getPreferredParentKey(open_addr_t* addressToWrite, cellRadioSetting_t* radioToWrite);
 void     icmpv6rpl_updateNexthopAddress(open_addr_t* addressToWrite);
 bool     icmpv6rpl_isPreferredParent(open_addr_t* address);
 dagrank_t icmpv6rpl_getMyDAGrank(void);
