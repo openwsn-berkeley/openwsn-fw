@@ -512,7 +512,8 @@ bool  neighbors_getNeighborKey(open_addr_t* address, uint8_t addr_type, cellRadi
         case ADDR_64B:
             memcpy(&(address->addr_64b), &(neighbors_vars.neighbors[index].addr_64b.addr_64b), LENGTH_ADDR64b);
             address->type = ADDR_64B;
-            memcpy(&(cellRadioSetting), &(neighbors_vars.neighbors[index].cellRadioSetting), 1);
+            //memcpy(&(cellRadioSetting), &(neighbors_vars.neighbors[index].cellRadioSetting), 1);
+            *cellRadioSetting = neighbors_vars.neighbors[index].cellRadioSetting;
             ReturnVal = neighbors_vars.neighbors[index].used;
             break;
         default:

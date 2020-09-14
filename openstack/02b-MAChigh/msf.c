@@ -305,14 +305,18 @@ void msf_trigger6pAdd(void){
             return;
         }
     }
-
+    
+    //define the neighbor radio in the linkOptions byte.
+    cellOptions |= neighborRadio <<5;
+    //cellOptions |= CELLRADIOSETTING_3 <<5;
+    
     if (msf_candidateAddCellList(celllist_add,NUMCELLS_MSF,neighborRadio)==FALSE){
         // failed to get cell list to add
         return;
     }
     sixtop_request(
         IANA_6TOP_CMD_ADD,           // code
-        &neighbor,          // neighbor
+        &neighbor,                   // neighbor
         NUMCELLS_MSF,                // number cells
         cellOptions,                 // cellOptions
         celllist_add,                // celllist to add

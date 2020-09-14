@@ -233,8 +233,7 @@ owerror_t sixtop_request(
                     pkt->payload[1] = (uint8_t)((celllist_toBeAdded[i].slotoffset        & 0xFF00)>>8);
                     pkt->payload[2] = (uint8_t)(celllist_toBeAdded[i].channeloffset      & 0x00FF);
                     pkt->payload[3] = (uint8_t)((celllist_toBeAdded[i].channeloffset     & 0xFF00)>>8);
-                    pkt->payload[4] = (uint8_t)(celllist_toBeAdded[i].cellRadioSetting);
-                    len += 5;
+                    len += 4;
                 }
             }
         }
@@ -1165,6 +1164,7 @@ void sixtop_six2six_notifyReceive(
     uint8_t           returnCode        = -1;
     uint16_t          metadata          = -1;
     uint8_t           cellOptions       = -1;
+    cellRadioSetting_t cellRadioSetting;
     uint8_t           cellOptions_transformed;
     uint16_t          offset;
     uint16_t          length_groupid_type;
@@ -1260,6 +1260,13 @@ void sixtop_six2six_notifyReceive(
             }
 
             cellOptions  = *((uint8_t*)(pkt->payload)+ptr);
+            
+            // extract radio setting
+            cellRadioSetting = (cellRadioSetting_t)((cellOptions & SIXTOP_CELLREQUEST_RADIOSETTING_MASK)>>5);
+            
+            // keep only link options bits
+            // cellOptions = cellOptions & SIXTOP_CELLREQUEST_LINKOPTIONS_MASK;
+            
             ptr         += 1;
             pktLen      -= 1;
 
@@ -1369,10 +1376,10 @@ void sixtop_six2six_notifyReceive(
                     response_pkt->l2_sixtop_celllist_add[i].slotoffset          |= (*((uint8_t*)(pkt->payload)+ptr+1))<<8;
                     response_pkt->l2_sixtop_celllist_add[i].channeloffset        =  *((uint8_t*)(pkt->payload)+ptr+2);
                     response_pkt->l2_sixtop_celllist_add[i].channeloffset       |= (*((uint8_t*)(pkt->payload)+ptr+3))<<8;
-                    response_pkt->l2_sixtop_celllist_add[i].cellRadioSetting     =  *((uint8_t*)(pkt->payload)+ptr+4);
+                    response_pkt->l2_sixtop_celllist_add[i].cellRadioSetting     =  cellRadioSetting;
                     response_pkt->l2_sixtop_celllist_add[i].isUsed               = TRUE;
-                    ptr    += 5;
-                    pktLen -= 5;
+                    ptr    += 4;
+                    pktLen -= 4;
                     i++;
                 }
                 if (sixtop_areAvailableCellsToBeScheduled(metadata,numCells,response_pkt->l2_sixtop_celllist_add)){
@@ -1383,8 +1390,7 @@ void sixtop_six2six_notifyReceive(
                             response_pkt->payload[1] = (uint8_t)((response_pkt->l2_sixtop_celllist_add[i].slotoffset        & 0xFF00)>>8);
                             response_pkt->payload[2] = (uint8_t)(response_pkt->l2_sixtop_celllist_add[i].channeloffset      & 0x00FF);
                             response_pkt->payload[3] = (uint8_t)((response_pkt->l2_sixtop_celllist_add[i].channeloffset     & 0xFF00)>>8);
-                            response_pkt->payload[4] = (uint8_t)(response_pkt->l2_sixtop_celllist_add[i].cellRadioSetting);
-                            response_pktLen += 5;
+                            response_pktLen += 4;
                         }
                     }
                 }
@@ -1440,10 +1446,10 @@ void sixtop_six2six_notifyReceive(
                     response_pkt->l2_sixtop_celllist_delete[i].slotoffset       |= (*((uint8_t*)(pkt->payload)+ptr+1))<<8;
                     response_pkt->l2_sixtop_celllist_delete[i].channeloffset     =  *((uint8_t*)(pkt->payload)+ptr+2);
                     response_pkt->l2_sixtop_celllist_delete[i].channeloffset    |= (*((uint8_t*)(pkt->payload)+ptr+3))<<8;
-                    response_pkt->l2_sixtop_celllist_delete[i].cellRadioSetting  = (*((uint8_t*)(pkt->payload)+ptr+4));
+                    response_pkt->l2_sixtop_celllist_delete[i].cellRadioSetting  = cellRadioSetting;
                     response_pkt->l2_sixtop_celllist_delete[i].isUsed         = TRUE;
-                    ptr    += 5;
-                    pktLen -= 5;
+                    ptr    += 4;
+                    pktLen -= 4;
                     temp16--;
                     i++;
                 }
@@ -1464,10 +1470,10 @@ void sixtop_six2six_notifyReceive(
                     response_pkt->l2_sixtop_celllist_add[i].slotoffset          |= (*((uint8_t*)(pkt->payload)+ptr+1))<<8;
                     response_pkt->l2_sixtop_celllist_add[i].channeloffset        =  *((uint8_t*)(pkt->payload)+ptr+2);
                     response_pkt->l2_sixtop_celllist_add[i].channeloffset       |= (*((uint8_t*)(pkt->payload)+ptr+3))<<8;
-                    response_pkt->l2_sixtop_celllist_add[i].cellRadioSetting     = (*((uint8_t*)(pkt->payload)+ptr+4));
+                    response_pkt->l2_sixtop_celllist_add[i].cellRadioSetting     = cellRadioSetting;
                     response_pkt->l2_sixtop_celllist_add[i].isUsed               = TRUE;
-                    ptr    += 5;
-                    pktLen -= 5;
+                    ptr    += 4;
+                    pktLen -= 4;
                     i++;
                 }
                 if (sixtop_areAvailableCellsToBeScheduled(metadata,numCells,response_pkt->l2_sixtop_celllist_add)){
@@ -1478,8 +1484,7 @@ void sixtop_six2six_notifyReceive(
                             response_pkt->payload[1] = (uint8_t)((response_pkt->l2_sixtop_celllist_add[i].slotoffset        & 0xFF00)>>8);
                             response_pkt->payload[2] = (uint8_t)(response_pkt->l2_sixtop_celllist_add[i].channeloffset      & 0x00FF);
                             response_pkt->payload[3] = (uint8_t)((response_pkt->l2_sixtop_celllist_add[i].channeloffset     & 0xFF00)>>8);
-                            response_pkt->payload[4] = (uint8_t)(response_pkt->l2_sixtop_celllist_add[i].cellRadioSetting);
-                            response_pktLen += 5;
+                            response_pktLen += 4;
                         }
                     }
                 }
@@ -1492,7 +1497,11 @@ void sixtop_six2six_notifyReceive(
         response_pkt->l2_sixtop_command     = code;
         response_pkt->l2_sixtop_returnCode  = returnCode;
         response_pkt->l2_sixtop_frameID     = metadata;
-        // revert tx and rx link option bits
+        
+        // fill the radio setting back into the cellOptions. 
+        response_pkt->l2_sixtop_cellOptions = cellOptions | cellRadioSetting;
+        
+        // revert tx and rx link option bits 
         if ((cellOptions & (CELLOPTIONS_TX | CELLOPTIONS_RX)) != (CELLOPTIONS_TX | CELLOPTIONS_RX)){
             response_pkt->l2_sixtop_cellOptions = cellOptions ^ (CELLOPTIONS_TX | CELLOPTIONS_RX);
         } else {
@@ -1545,10 +1554,14 @@ void sixtop_six2six_notifyReceive(
     }
 
     if (type == SIXTOP_CELL_RESPONSE) {
-        // this is a 6p response message
-
-        // if the code is SUCCESS
+       // this is a 6p response message
+        
+      // if the code is SUCCESS
         if (code == IANA_6TOP_RC_SUCCESS || code == IANA_6TOP_RC_EOL){
+            
+            // extract radio setting
+            cellRadioSetting = (cellRadioSetting_t)(sixtop_vars.cellOptions & SIXTOP_CELLREQUEST_RADIOSETTING_MASK)>>5;
+            
             switch(sixtop_vars.six2six_state){
             case SIX_STATE_WAIT_ADDRESPONSE:
                 i = 0;
@@ -1558,10 +1571,10 @@ void sixtop_six2six_notifyReceive(
                     pkt->l2_sixtop_celllist_add[i].slotoffset           |= (*((uint8_t*)(pkt->payload)+ptr+1))<<8;
                     pkt->l2_sixtop_celllist_add[i].channeloffset         =  *((uint8_t*)(pkt->payload)+ptr+2);
                     pkt->l2_sixtop_celllist_add[i].channeloffset        |= (*((uint8_t*)(pkt->payload)+ptr+3))<<8;
-                    pkt->l2_sixtop_celllist_add[i].cellRadioSetting      = (*((uint8_t*)(pkt->payload)+ptr+4));
+                    pkt->l2_sixtop_celllist_add[i].cellRadioSetting      = cellRadioSetting ;
                     pkt->l2_sixtop_celllist_add[i].isUsed         = TRUE;
-                    ptr    += 5;
-                    pktLen -= 5;
+                    ptr    += 4;
+                    pktLen -= 4;
                     i++;
                 }
                 sixtop_addCells(
@@ -1601,10 +1614,10 @@ void sixtop_six2six_notifyReceive(
                     pkt->l2_sixtop_celllist_add[i].slotoffset           |= (*((uint8_t*)(pkt->payload)+ptr+1))<<8;
                     pkt->l2_sixtop_celllist_add[i].channeloffset         =  *((uint8_t*)(pkt->payload)+ptr+2);
                     pkt->l2_sixtop_celllist_add[i].channeloffset        |= (*((uint8_t*)(pkt->payload)+ptr+3))<<8;
-                    pkt->l2_sixtop_celllist_add[i].cellRadioSetting      = (*((uint8_t*)(pkt->payload)+ptr+4));
+                    pkt->l2_sixtop_celllist_add[i].cellRadioSetting      = cellRadioSetting;
                     pkt->l2_sixtop_celllist_add[i].isUsed                = TRUE;
-                    ptr    += 5;
-                    pktLen -= 5;
+                    ptr    += 4;
+                    pktLen -= 4;
                     i++;
                 }
                 sixtop_removeCells(
@@ -1700,15 +1713,16 @@ bool sixtop_addCells(
     bool        hasCellsAdded;
 
     // translate cellOptions to cell type
-    if (cellOptions == CELLOPTIONS_TX){
+
+    if ((cellOptions & SIXTOP_CELLREQUEST_LINKOPTIONS_MASK) == CELLOPTIONS_TX){
         type     = CELLTYPE_TX;
         isShared = FALSE;
     }
-    if (cellOptions == CELLOPTIONS_RX){
+    if ((cellOptions & SIXTOP_CELLREQUEST_LINKOPTIONS_MASK) == CELLOPTIONS_RX){
         type     = CELLTYPE_RX;
         isShared = FALSE;
     }
-    if (cellOptions == (CELLOPTIONS_TX | CELLOPTIONS_RX | CELLOPTIONS_SHARED)){
+    if ((cellOptions & SIXTOP_CELLREQUEST_LINKOPTIONS_MASK) == (CELLOPTIONS_TX | CELLOPTIONS_RX | CELLOPTIONS_SHARED)){
         type     = CELLTYPE_TXRX;
         isShared = TRUE;
     }
@@ -1753,15 +1767,15 @@ bool sixtop_removeCells(
     bool        hasCellsRemoved;
 
     // translate cellOptions to cell type
-    if (cellOptions == CELLOPTIONS_TX){
+    if ((cellOptions & SIXTOP_CELLREQUEST_LINKOPTIONS_MASK) == CELLOPTIONS_TX){
         type     = CELLTYPE_TX;
         isShared = FALSE;
     }
-    if (cellOptions == CELLOPTIONS_RX){
+    if ((cellOptions & SIXTOP_CELLREQUEST_LINKOPTIONS_MASK) == CELLOPTIONS_RX){
         type     = CELLTYPE_RX;
         isShared = FALSE;
     }
-    if (cellOptions == (CELLOPTIONS_TX | CELLOPTIONS_RX | CELLOPTIONS_SHARED)){
+    if ((cellOptions & SIXTOP_CELLREQUEST_LINKOPTIONS_MASK) == (CELLOPTIONS_TX | CELLOPTIONS_RX | CELLOPTIONS_SHARED)){
         type     = CELLTYPE_TXRX;
         isShared = TRUE;
     }
@@ -1848,13 +1862,13 @@ bool sixtop_areAvailableCellsToBeRemoved(
     available           = TRUE;
 
     // translate cellOptions to cell type
-    if (cellOptions == CELLOPTIONS_TX){
+    if ((cellOptions & SIXTOP_CELLREQUEST_LINKOPTIONS_MASK) == CELLOPTIONS_TX){
         type = CELLTYPE_TX;
     }
-    if (cellOptions == CELLOPTIONS_RX){
+    if ((cellOptions & SIXTOP_CELLREQUEST_LINKOPTIONS_MASK) == CELLOPTIONS_RX){
         type = CELLTYPE_RX;
     }
-    if (cellOptions == (CELLOPTIONS_TX | CELLOPTIONS_RX | CELLOPTIONS_SHARED)){
+    if ((cellOptions & SIXTOP_CELLREQUEST_LINKOPTIONS_MASK) == (CELLOPTIONS_TX | CELLOPTIONS_RX | CELLOPTIONS_SHARED)){
         type = CELLTYPE_TXRX;
         memset(&anycastAddr,0,sizeof(open_addr_t));
         anycastAddr.type = ADDR_ANYCAST;

@@ -47,11 +47,17 @@
 // SF ID
 #define SFID_SF0  0
 
+// cellRadioSetting mask in the linkOptions byte of the sixtop request
+#define SIXTOP_CELLREQUEST_RADIOSETTING_MASK  0x60
+
+// linkOptions mask in the linkOptions byte of the sixtop request
+#define SIXTOP_CELLREQUEST_LINKOPTIONS_MASK  0x1F
 typedef enum {
     SIXTOP_CELL_REQUEST       = 0x00,
     SIXTOP_CELL_RESPONSE      = 0x01,
     SIXTOP_CELL_CONFIRMATION  = 0x02,
 }sixtop_message_t;
+
 
 // states of the sixtop-to-sixtop state machine
 typedef enum {
