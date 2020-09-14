@@ -648,12 +648,15 @@ void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t* msg) {
               (icmpv6rpl_vars.incomingDio->rank - neighborRank) > ((3*DEFAULTLINKCOST-2)*MINHOPRANKINCREASE)
             ) {
                // the new DAGrank looks suspiciously high, only increment a bit
-               neighbors_setNeighborRank(i,neighborRank + ((3*DEFAULTLINKCOST-2)*2*MINHOPRANKINCREASE));
+               
+               neighbors_setNeighborRank(i,neighborRank + ((3*DEFAULTLINKCOST-2)*2*MINHOPRANKINCREASE
+                                                           * ((uint8_t) msg->l2_cellRadioSetting +1))); // temp hack for testing
                openserial_printError(COMPONENT_ICMPv6RPL,ERR_LARGE_DAGRANK,
                                (errorparameter_t)icmpv6rpl_vars.incomingDio->rank,
                                (errorparameter_t)neighborRank);
             } else {
-               neighbors_setNeighborRank(i,icmpv6rpl_vars.incomingDio->rank);
+               neighbors_setNeighborRank(i,icmpv6rpl_vars.incomingDio->rank 
+                                         * ((uint8_t) msg->l2_cellRadioSetting +1)); // temp hack for testing
             }
             // since changes were made to neighbors DAG rank, run the routing algorithm again
             icmpv6rpl_updateMyDAGrankAndParentSelection();
