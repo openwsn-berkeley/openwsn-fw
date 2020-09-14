@@ -16,8 +16,8 @@
 
 //=========================== definition ======================================
 
-#define DIO_PORTION 10
-#define DAO_PORTION 60
+#define DIO_PORTION 4 //10
+#define DAO_PORTION 8 //60
 
 //=========================== variables =======================================
 
@@ -565,6 +565,7 @@ void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t* msg) {
    uint8_t          temp_8b;
    dagrank_t        neighborRank;
    open_addr_t      NeighborAddress;
+   cellRadioSetting_t NeighborRadioSetting;
    open_addr_t      myPrefix;
    uint8_t*         current;
    uint8_t          optionsLen;
@@ -637,8 +638,10 @@ void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t* msg) {
 
    // update rank of that neighbor in table
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
-      if (neighbors_getNeighborEui64(&NeighborAddress, ADDR_64B, i)) { // this neighbor entry is in use
-         if (packetfunctions_sameAddress(&(msg->l2_nextORpreviousHop),&NeighborAddress)) { // matching address
+     
+      if (neighbors_getNeighborKey(&NeighborAddress, ADDR_64B, &NeighborRadioSetting, i)) { // this neighbor entry is in use
+         if (packetfunctions_sameAddress(&(msg->l2_nextORpreviousHop),&NeighborAddress) 
+             && (msg->l2_cellRadioSetting == NeighborRadioSetting)) { // matching address and radio setting
             neighborRank=neighbors_getNeighborRank(i);
             if (
               (icmpv6rpl_vars.incomingDio->rank > neighborRank) &&
