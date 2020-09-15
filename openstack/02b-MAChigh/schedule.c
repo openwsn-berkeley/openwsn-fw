@@ -592,7 +592,7 @@ owerror_t schedule_removeActiveSlot(
             // move the backup entry to the schedule
             slotContainer->type                      = slotContainer->backupEntries[candidate_index].type;
             slotContainer->shared                    = slotContainer->backupEntries[candidate_index].shared;
-            slotContainer->cellRadioSetting         = slotContainer->backupEntries[candidate_index].cellRadioSetting;
+            slotContainer->cellRadioSetting          = slotContainer->backupEntries[candidate_index].cellRadioSetting;
             slotContainer->channelOffset             = slotContainer->backupEntries[candidate_index].channelOffset;
             slotContainer->isAutoCell                = slotContainer->backupEntries[candidate_index].isAutoCell;
             memcpy(&slotContainer->neighbor,&(slotContainer->backupEntries[candidate_index].neighbor),sizeof(open_addr_t));
@@ -693,7 +693,8 @@ bool schedule_isSlotOffsetAvailable(uint16_t slotOffset){
 
 void schedule_removeAllNegotiatedCellsToNeighbor(
     uint8_t        slotframeID,
-    open_addr_t*   neighbor
+    open_addr_t*   neighbor,
+    cellRadioSetting_t neighborRadio
 ){
     uint8_t i;
 
@@ -701,6 +702,7 @@ void schedule_removeAllNegotiatedCellsToNeighbor(
     for(i=0;i<MAXACTIVESLOTS;i++){
         if (
             packetfunctions_sameAddress(&(schedule_vars.scheduleBuf[i].neighbor),neighbor) &&
+              schedule_vars.scheduleBuf[i].cellRadioSetting == neighborRadio               &&
             (
                 schedule_vars.scheduleBuf[i].type == CELLTYPE_TX ||
                 schedule_vars.scheduleBuf[i].type == CELLTYPE_RX
@@ -734,7 +736,7 @@ uint8_t schedule_getNumberOfFreeEntries(){
     return counter;
 }
 
-uint8_t schedule_getNumberOfNegotiatedCells(open_addr_t* neighbor, cellType_t cell_type){
+uint8_t schedule_getNumberOfNegotiatedCells(open_addr_t* neighbor, cellRadioSetting_t cellRadioSetting, cellType_t cell_type){
     uint8_t i;
     uint8_t j;
     uint8_t counter;
@@ -747,7 +749,8 @@ uint8_t schedule_getNumberOfNegotiatedCells(open_addr_t* neighbor, cellType_t ce
         if(
             schedule_vars.scheduleBuf[i].shared == FALSE       &&
             schedule_vars.scheduleBuf[i].type   == cell_type &&
-            packetfunctions_sameAddress(&schedule_vars.scheduleBuf[i].neighbor, neighbor) == TRUE
+            packetfunctions_sameAddress(&schedule_vars.scheduleBuf[i].neighbor, neighbor) == TRUE &&
+            schedule_vars.scheduleBuf[i].cellRadioSetting == cellRadioSetting
         ){
             counter++;
         } else {
@@ -756,8 +759,9 @@ uint8_t schedule_getNumberOfNegotiatedCells(open_addr_t* neighbor, cellType_t ce
                     if(
                         schedule_vars.scheduleBuf[i].backupEntries[j].type   == CELLTYPE_TX &&
                         packetfunctions_sameAddress(&(schedule_vars.scheduleBuf[i].backupEntries[j].neighbor), neighbor) == TRUE &&
-                        schedule_vars.scheduleBuf[i].backupEntries[j].shared == FALSE
-                    ){
+                        schedule_vars.scheduleBuf[i].backupEntries[j].shared == FALSE &&
+                        schedule_vars.scheduleBuf[i].backupEntries[j].cellRadioSetting == cellRadioSetting
+                    ){  
                         counter++;
                         // at most one negotiated Tx cell to a neighbor in backup entries
                         break;
@@ -772,7 +776,7 @@ uint8_t schedule_getNumberOfNegotiatedCells(open_addr_t* neighbor, cellType_t ce
     return counter;
 }
 
-bool schedule_isNumTxWrapped(open_addr_t* neighbor){
+bool schedule_isNumTxWrapped(open_addr_t* neighbor, cellRadioSetting_t cellRadioSetting){
     uint8_t i;
     bool    returnVal;
 
@@ -782,7 +786,8 @@ bool schedule_isNumTxWrapped(open_addr_t* neighbor){
     returnVal = FALSE;
     for(i=0;i<MAXACTIVESLOTS;i++){
         if(
-            packetfunctions_sameAddress(&schedule_vars.scheduleBuf[i].neighbor, neighbor) == TRUE
+            packetfunctions_sameAddress(&schedule_vars.scheduleBuf[i].neighbor, neighbor) == TRUE &&
+            schedule_vars.scheduleBuf[i].cellRadioSetting == cellRadioSetting
         ){
             if (schedule_vars.scheduleBuf[i].numTx>0xFF/2){
                 returnVal = TRUE;
@@ -796,7 +801,7 @@ bool schedule_isNumTxWrapped(open_addr_t* neighbor){
 
 }
 
-bool schedule_getCellsToBeRelocated(open_addr_t* neighbor, cellInfo_ht* celllist){
+bool schedule_getCellsToBeRelocated(open_addr_t* neighbor, cellRadioSetting_t cellRadioSetting, cellInfo_ht* celllist){
     uint8_t     i;
 
     uint16_t    cellPDR;
@@ -807,7 +812,8 @@ bool schedule_getCellsToBeRelocated(open_addr_t* neighbor, cellInfo_ht* celllist
     // found the cell with higest PDR
     for(i=0;i<MAXACTIVESLOTS;i++) {
         if(
-            packetfunctions_sameAddress(&schedule_vars.scheduleBuf[i].neighbor, neighbor) == TRUE
+            packetfunctions_sameAddress(&schedule_vars.scheduleBuf[i].neighbor, neighbor) == TRUE &&
+            schedule_vars.scheduleBuf[i].cellRadioSetting == cellRadioSetting
         ){
             if (schedule_vars.scheduleBuf[i].numTx>MINIMAL_NUM_TX){
                 cellPDR = 100*schedule_vars.scheduleBuf[i].numTxACK/schedule_vars.scheduleBuf[i].numTx;
@@ -920,12 +926,17 @@ bool schedule_hasNegotiatedCellToNeighbor(open_addr_t* neighbor, cellType_t cell
 \brief check whether there is negotiated tx cell to non-parent in schedule
 
 \param parentNeighbor           The parent address.
+\param parentNeighborRadio      The parent radio.
 \param nonParentNeighbor        The neighbor address of the negotiated tx cell.
+\param nonParentNeighborRadio   The neighbor radio of the negotiated tx cell.
+
 */
 
 bool schedule_hasNegotiatedTxCellToNonParent(
-    open_addr_t* parentNeighbor,
-    open_addr_t* nonParentNeighbor
+    open_addr_t*        parentNeighbor,
+    cellRadioSetting_t*   parentNeighborRadio,
+    open_addr_t*        nonParentNeighbor,
+    cellRadioSetting_t*   nonParentNeighborRadio
 ){
     uint8_t i;
 
@@ -937,9 +948,13 @@ bool schedule_hasNegotiatedTxCellToNonParent(
             schedule_vars.scheduleBuf[i].type          == CELLTYPE_TX   &&
             schedule_vars.scheduleBuf[i].shared        == FALSE         &&
             schedule_vars.scheduleBuf[i].neighbor.type == ADDR_64B      &&
-            packetfunctions_sameAddress(parentNeighbor,&schedule_vars.scheduleBuf[i].neighbor) == FALSE
+            ( 
+             packetfunctions_sameAddress(parentNeighbor,&schedule_vars.scheduleBuf[i].neighbor) == FALSE ||
+             *parentNeighborRadio != schedule_vars.scheduleBuf[i].cellRadioSetting
+            )
         ){
             memcpy(nonParentNeighbor,&schedule_vars.scheduleBuf[i].neighbor,sizeof(open_addr_t));
+            *nonParentNeighborRadio = schedule_vars.scheduleBuf[i].cellRadioSetting;
             ENABLE_INTERRUPTS();
             return TRUE;
         }
@@ -1298,13 +1313,13 @@ bool schedule_getOneCellAfterOffset(uint8_t metadata,uint8_t offset,open_addr_t*
     DISABLE_INTERRUPTS();
 
     // translate cellOptions to cell type
-    if (cellOptions == CELLOPTIONS_TX){
+    if ((cellOptions & SIXTOP_CELLREQUEST_LINKOPTIONS_MASK) == CELLOPTIONS_TX){
         type = CELLTYPE_TX;
     }
-    if (cellOptions == CELLOPTIONS_RX){
+    if ((cellOptions & SIXTOP_CELLREQUEST_LINKOPTIONS_MASK) == CELLOPTIONS_RX){
         type = CELLTYPE_RX;
     }
-    if (cellOptions == (CELLOPTIONS_TX | CELLOPTIONS_RX | CELLOPTIONS_SHARED)){
+    if ((cellOptions & SIXTOP_CELLREQUEST_LINKOPTIONS_MASK) == (CELLOPTIONS_TX | CELLOPTIONS_RX | CELLOPTIONS_SHARED)){
         type = CELLTYPE_TXRX;
     }
 

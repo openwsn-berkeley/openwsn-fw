@@ -212,12 +212,14 @@ void              schedule_removeAllAutonomousTxRxCellUnicast(void);
 bool              schedule_isSlotOffsetAvailable(uint16_t slotOffset);
 void              schedule_removeAllNegotiatedCellsToNeighbor(
     uint8_t             slotframeID,
-    open_addr_t*        neighbor
+    open_addr_t*        neighbor,
+    cellRadioSetting_t neighborRadio
 );
 uint8_t           schedule_getNumberOfFreeEntries(void);
-uint8_t           schedule_getNumberOfNegotiatedCells(open_addr_t* neighbor, cellType_t cell_type);
-bool              schedule_isNumTxWrapped(open_addr_t* neighbor);
-bool              schedule_getCellsToBeRelocated(open_addr_t* neighbor, cellInfo_ht* celllist);
+uint8_t           schedule_getNumberOfNegotiatedCells(open_addr_t* neighbor,  cellRadioSetting_t cellRadioSetting, cellType_t cell_type);
+bool              schedule_isNumTxWrapped(open_addr_t* neighbor, cellRadioSetting_t cellRadioSetting);
+
+bool              schedule_getCellsToBeRelocated(open_addr_t* neighbor,cellRadioSetting_t cellRadioSetting, cellInfo_ht* celllist);
 bool              schedule_hasAutonomousTxRxCellUnicast(open_addr_t* neighbor);
 bool              schedule_getAutonomousTxRxCellUnicastNeighbor(open_addr_t* neighbor);
 bool              schedule_hasAutoTxCellToNeighbor(open_addr_t* neighbor);
@@ -227,8 +229,10 @@ bool              schedule_hasNonParentManagedTxCell(open_addr_t* neighbor);
 
 void              schedule_hasNegotiatedTxCell(open_addr_t* address);
 bool              schedule_hasNegotiatedTxCellToNonParent(
-    open_addr_t* parentNeighbor,
-    open_addr_t* nonParentNeighbor
+    open_addr_t*        parentNeighbor,
+    cellRadioSetting_t*   parentNeighborRadio,
+    open_addr_t*        nonParentNeighbor,
+    cellRadioSetting_t*   nonParentNeighborRadio
 );
 
 // from IEEE802154E
