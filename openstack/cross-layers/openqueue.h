@@ -42,7 +42,7 @@ owerror_t          openqueue_freePacketBuffer(OpenQueueEntry_t* pkt);
 void               openqueue_removeAllCreatedBy(uint8_t creator);
 bool               openqueue_isHighPriorityEntryEnough(void);
 // called by ICMPv6
-void               openqueue_updateNextHopPayload(open_addr_t* newNextHop);
+void               openqueue_updateNextHopPayload(open_addr_t* newNextHop, cellRadioSetting_t* newNextHopRadio);
 // called by res
 OpenQueueEntry_t*  openqueue_sixtopGetSentPacket(void);
 OpenQueueEntry_t*  openqueue_sixtopGetReceivedPacket(void);

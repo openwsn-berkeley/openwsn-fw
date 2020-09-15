@@ -398,10 +398,11 @@ OpenQueueEntry_t*  openqueue_macGetDIOPacket(){
 }
 
 /**
-\Brief replace the upstream packet nexthop payload by given newNextHop address
+\Brief replace the upstream packet nexthop payload by given newNextHop address and RadioSetting
 \param newNextHop.
+\param newNextHopRadio.
 */
-void openqueue_updateNextHopPayload(open_addr_t *newNextHop) {
+void openqueue_updateNextHopPayload(open_addr_t *newNextHop, cellRadioSetting_t* newNextHopRadio) {
 
     uint8_t i, j;
     INTERRUPT_DECLARATION();
@@ -423,6 +424,7 @@ void openqueue_updateNextHopPayload(open_addr_t *newNextHop) {
                 for (j = 0; j < 8; j++) {
                     *((uint8_t *) openqueue_vars.queue[i].l2_nextHop_payload + j) = newNextHop->addr_64b[j];
                 }
+                openqueue_vars.queue[i].l2_cellRadioSetting = *newNextHopRadio;
             }
         }
     }
