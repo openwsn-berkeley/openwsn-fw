@@ -405,6 +405,7 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection(void) {
     uint32_t  tentativeDAGrank;
 
     open_addr_t newParent;
+    cellRadioSetting_t newParentRadioSetting;
 
     // if I'm a DAGroot, my DAGrank is always MINHOPRANKINCREASE
     if ((idmanager_getIsDAGroot())==TRUE) {
@@ -501,8 +502,8 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection(void) {
             neighbors_setPreferredParent(icmpv6rpl_vars.ParentIndex, TRUE);
 
             // update the upstream traffic nexthop address to new parent
-            neighbors_getNeighborEui64(&newParent,ADDR_64B,icmpv6rpl_vars.ParentIndex);
-            icmpv6rpl_updateNexthopAddress(&newParent);
+            neighbors_getNeighborKey(&newParent,ADDR_64B,&newParentRadioSetting,icmpv6rpl_vars.ParentIndex);
+            icmpv6rpl_updateNexthopAddressAndRadio(&newParent,&newParentRadioSetting);
 
 
         } else {
@@ -519,8 +520,8 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection(void) {
                 neighbors_setPreferredParent(icmpv6rpl_vars.ParentIndex, TRUE);
 
                 // update the upstream traffic nexthop address to new parent
-                neighbors_getNeighborEui64(&newParent,ADDR_64B,icmpv6rpl_vars.ParentIndex);
-                icmpv6rpl_updateNexthopAddress(&newParent);
+                neighbors_getNeighborKey(&newParent,ADDR_64B,&newParentRadioSetting,icmpv6rpl_vars.ParentIndex);
+                icmpv6rpl_updateNexthopAddressAndRadio(&newParent,&newParentRadioSetting);
             }
         }
     } else {
@@ -542,10 +543,11 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection(void) {
 \brief In case of parent changed, update the nexthop of the IPv6 packet in the queue
 
 \param newParent. the new parent address
+\param newParentRadio. the new parent radio
 */
-void icmpv6rpl_updateNexthopAddress(open_addr_t* newParent){
+void icmpv6rpl_updateNexthopAddressAndRadio (open_addr_t* newParent, cellRadioSetting_t* newParentRadioSetting){
 
-    openqueue_updateNextHopPayload(newParent);
+    openqueue_updateNextHopPayload(newParent, newParentRadioSetting);
 }
 
 /**
