@@ -118,7 +118,7 @@ void ieee154e_init(void) {
     // initialize variables
     memset(&ieee154e_vars,0,sizeof(ieee154e_vars_t));
     memset(&ieee154e_dbg,0,sizeof(ieee154e_dbg_t));
-// #define IEEE802154E_SINGLE_CHANNEL 11
+ #define IEEE802154E_SINGLE_CHANNEL 11
     // set singleChannel to 0 to enable channel hopping.
 #if IEEE802154E_SINGLE_CHANNEL  
     ieee154e_vars.singleChannel     = IEEE802154E_SINGLE_CHANNEL;
@@ -1044,7 +1044,8 @@ port_INLINE void activity_ti1ORri1(void) {
         ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset());
 
         // retrieve the radio setting to be used in this cell
-        ieee154e_vars.radioSetting = cellRadioSettingMap[schedule_getCellRadioSetting()];
+        ieee154e_vars.cellRadioSetting = schedule_getCellRadioSetting(); //l2 radioSetting
+        ieee154e_vars.radioSetting = cellRadioSettingMap[ieee154e_vars.cellRadioSetting]; //l1 radioSetting
         
         // configure the radio setting
         radio_setConfig (ieee154e_vars.radioSetting);
@@ -1139,7 +1140,7 @@ port_INLINE void activity_ti1ORri1(void) {
                             ieee154e_vars.dataToSend->l2_sendOnTxCell = TRUE;
                             msf_updateCellsUsed(&neighbor, CELLTYPE_TX);
                         }
-                        msf_updateCellsElapsed(&neighbor, CELLTYPE_TX);
+                        msf_updateCellsElapsed(&neighbor,ieee154e_vars.cellRadioSetting, CELLTYPE_TX);
                     }
                 } else {
                         // this is minimal cell
@@ -3142,13 +3143,13 @@ void endSlot(void) {
             if (icmpv6rpl_getPreferredParentEui64(&parentAddress)){
                 if (schedule_hasNegotiatedCellToNeighbor(&parentAddress, CELLTYPE_RX) == FALSE) {
                     // adapt traffic on auto rx for downstream traffic
-                    msf_updateCellsElapsed(&parentAddress, CELLTYPE_RX);
+                    msf_updateCellsElapsed(&parentAddress, ieee154e_vars.cellRadioSetting, CELLTYPE_RX);
                 }
             }
         } else {
             // update numelapsed on rx cell (msf will check whether it
             // is to parent or not)
-            msf_updateCellsElapsed(&info.address, CELLTYPE_RX);
+            msf_updateCellsElapsed(&info.address, ieee154e_vars.cellRadioSetting, CELLTYPE_RX);
         }
     }
     ieee154e_vars.receivedFrameFromParent = FALSE;

@@ -257,7 +257,8 @@ typedef struct {
    // misc
    asn_t                     asn;                     // current absolute slot number
    slotOffset_t              slotOffset;              // current slot offset
-   radioSetting_t            radioSetting;            // current slot radio setting
+   radioSetting_t            radioSetting;            // current slot layer 1 radio setting
+   cellRadioSetting_t        cellRadioSetting;        // current slot layer 2 radio setting
    slotOffset_t              nextActiveSlotOffset;    // next active slot offset
    PORT_TIMER_WIDTH          deSyncTimeout;           // how many slots left before looses sync
    bool                      isSync;                  // TRUE iff mote is synchronized to network
