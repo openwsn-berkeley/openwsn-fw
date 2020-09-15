@@ -453,10 +453,11 @@ void neighbors_indicateTx(
     }
 }
 
-void neighbors_updateSequenceNumber(open_addr_t* address){
+void neighbors_updateSequenceNumber(open_addr_t* address, cellRadioSetting_t cellRadioSetting){
     uint8_t i;
     for (i=0;i<MAXNUMNEIGHBORS;i++){
-        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b)){
+        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b) &&
+            neighbors_vars.neighbors[i].cellRadioSetting == cellRadioSetting){
             neighbors_vars.neighbors[i].sequenceNumber = (neighbors_vars.neighbors[i].sequenceNumber+1) & 0xFF;
             // rollover from 0xff to 0x01
             if (neighbors_vars.neighbors[i].sequenceNumber == 0){
@@ -467,10 +468,11 @@ void neighbors_updateSequenceNumber(open_addr_t* address){
     }
 }
 
-void neighbors_resetSequenceNumber(open_addr_t* address){
+void neighbors_resetSequenceNumber(open_addr_t* address, cellRadioSetting_t cellRadioSetting){
     uint8_t i;
     for (i=0;i<MAXNUMNEIGHBORS;i++){
-        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b)){
+        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b)&&
+            neighbors_vars.neighbors[i].cellRadioSetting == cellRadioSetting){
             neighbors_vars.neighbors[i].sequenceNumber = 0;
             break;
         }

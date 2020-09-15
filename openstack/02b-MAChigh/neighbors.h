@@ -100,8 +100,8 @@ void          neighbors_indicateTx(
    bool                 was_finally_acked,
    asn_t*               asnTimestamp
 );
-void          neighbors_updateSequenceNumber(open_addr_t* address);
-void          neighbors_resetSequenceNumber(open_addr_t* address);
+void          neighbors_updateSequenceNumber(open_addr_t* address, cellRadioSetting_t cellRadioSetting);
+void          neighbors_resetSequenceNumber(open_addr_t* address, cellRadioSetting_t cellRadioSetting);
 
 // get addresses
 bool          neighbors_getNeighborEui64(open_addr_t* address,uint8_t addr_type,uint8_t index);
