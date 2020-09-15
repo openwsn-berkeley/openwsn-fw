@@ -74,7 +74,7 @@ void msf_init(void) {
 }
 
 // called by schedule
-void    msf_updateCellsElapsed(open_addr_t* neighbor, cellType_t type){
+void    msf_updateCellsElapsed(open_addr_t* neighbor, cellRadioSetting_t cellRadioSetting, cellType_t type){
 
 #ifdef MSF_ADAPTING_TO_TRAFFIC
     if (icmpv6rpl_isPreferredParent(neighbor)==FALSE){
@@ -118,7 +118,7 @@ void    msf_updateCellsElapsed(open_addr_t* neighbor, cellType_t type){
 
     // adapt to downward traffic when there are negotiated Tx cells in schedule
 
-    if (schedule_getNumberOfNegotiatedCells(neighbor, CELLTYPE_TX)==0){
+    if (schedule_getNumberOfNegotiatedCells(neighbor, cellRadioSetting, CELLTYPE_TX)==0){
         return;
     }
 
@@ -218,7 +218,7 @@ void msf_handleRCError(uint8_t code, open_addr_t* address, cellRadioSetting_t ce
         neighbors_setNeighborNoResource(address,cellRadioSetting);
     }
 
-    neighbors_updateSequenceNumber(address);
+    neighbors_updateSequenceNumber(address,cellRadioSetting);
 }
 
 void msf_timer_waitretry_cb(opentimers_id_t id){
@@ -246,19 +246,20 @@ void msf_timer_housekeeping_task(void){
 
 void msf_timer_clear_task(void){
     open_addr_t    neighbor;
+    cellRadioSetting_t    neighborRadio;
     bool           foundNeighbor;
 
     // get preferred parent
-    foundNeighbor = icmpv6rpl_getPreferredParentEui64(&neighbor);
+    foundNeighbor = icmpv6rpl_getPreferredParentKey(&neighbor, &neighborRadio);
     if (foundNeighbor==FALSE) {
         return;
     }
-
+  uint8_t cellOptions = CELLOPTIONS_MSF | (neighborRadio << 5);
     sixtop_request(
         IANA_6TOP_CMD_CLEAR,       // code
         &neighbor,                 // neighbor
         NUMCELLS_MSF,              // number cells
-        CELLOPTIONS_MSF,           // cellOptions (not used)
+        cellOptions,               // cellOptions (not used)
         NULL,                      // celllist to add (not used)
         NULL,                      // celllist to delete (not used)
         IANA_6TISCH_SFID_MSF,      // sfid
@@ -308,7 +309,6 @@ void msf_trigger6pAdd(void){
     
     //define the neighbor radio in the linkOptions byte.
     cellOptions |= neighborRadio <<5;
-    //cellOptions |= CELLRADIOSETTING_3 <<5;
     
     if (msf_candidateAddCellList(celllist_add,NUMCELLS_MSF,neighborRadio)==FALSE){
         // failed to get cell list to add
@@ -350,7 +350,7 @@ void msf_trigger6pDelete(void){
     }
 
     if (msf_vars.needDeleteTx) {
-        if (schedule_getNumberOfNegotiatedCells(&(neighbor), CELLTYPE_TX)<=1){
+        if (schedule_getNumberOfNegotiatedCells(&(neighbor), neighborRadio, CELLTYPE_TX)<=1){
             // at least one negotiated Tx cell presents
             msf_vars.needDeleteTx = FALSE;
         }
@@ -459,7 +459,9 @@ bool msf_candidateRemoveCellList(
 void msf_housekeeping(void){
 
     open_addr_t    parentNeighbor;
+    cellRadioSetting_t    parentNeighborRadio;
     open_addr_t    nonParentNeighbor;
+    cellRadioSetting_t    nonParentNeighborRadio;
     bool           foundNeighbor;
     cellInfo_ht    celllist_add[CELLLIST_MAX_LEN];
     cellInfo_ht    celllist_delete[CELLLIST_MAX_LEN];
@@ -468,30 +470,36 @@ void msf_housekeeping(void){
         return;
     }
 
-    foundNeighbor = icmpv6rpl_getPreferredParentEui64(&parentNeighbor);
+    foundNeighbor = icmpv6rpl_getPreferredParentKey(&parentNeighbor,&parentNeighborRadio);
     if (foundNeighbor==FALSE) {
         return;
     }
-
-    if (schedule_hasNegotiatedTxCellToNonParent(&parentNeighbor, &nonParentNeighbor)==TRUE){
-
-        // send a clear request to the non-parent neighbor
-
-        sixtop_request(
-            IANA_6TOP_CMD_CLEAR,     // code
-            &nonParentNeighbor,      // neighbor
-            NUMCELLS_MSF,            // number cells
-            CELLOPTIONS_MSF,         // cellOptions
-            NULL,                    // celllist to add (not used)
-            NULL,                    // celllist to delete (not used)
-            IANA_6TISCH_SFID_MSF,    // sfid
-            0,                       // list command offset (not used)
-            0                        // list command maximum celllist (not used)
-        );
-        return;
+    // WRONG: this needs to be done the opposite way: it clears nonParent when and only when cells are negotiated with the new parent
+    if (schedule_hasNegotiatedTxCellToNonParent(
+          &parentNeighbor, 
+          &parentNeighborRadio, 
+          &nonParentNeighbor, 
+          &nonParentNeighborRadio)==TRUE
+        ){
+          // send a clear request to the non-parent neighbor
+          
+          uint8_t cellOptions = CELLOPTIONS_MSF | (nonParentNeighborRadio<<5);
+          
+          sixtop_request(
+              IANA_6TOP_CMD_CLEAR,     // code
+              &nonParentNeighbor,      // neighbor
+              NUMCELLS_MSF,            // number cells
+              cellOptions,             // cellOptions
+              NULL,                    // celllist to add (not used)
+              NULL,                    // celllist to delete (not used)
+              IANA_6TISCH_SFID_MSF,    // sfid
+              0,                       // list command offset (not used)
+              0                        // list command maximum celllist (not used)
+          );
+          return;
     }
 
-    if (schedule_getNumberOfNegotiatedCells(&parentNeighbor, CELLTYPE_TX)==0){
+    if (schedule_getNumberOfNegotiatedCells(&parentNeighbor, parentNeighborRadio, CELLTYPE_TX)==0){
         msf_vars.needAddTx = TRUE;
         msf_trigger6pAdd();
         return;
@@ -501,24 +509,23 @@ void msf_housekeeping(void){
         return;
     }
 
-    if (schedule_isNumTxWrapped(&parentNeighbor)==FALSE){
+    if (schedule_isNumTxWrapped(&parentNeighbor, parentNeighborRadio)==FALSE){
         return;
     }
 
     memset(celllist_delete, 0, CELLLIST_MAX_LEN*sizeof(cellInfo_ht));
 
-    // later on parentNeighbor should be of type neighborKey. 
-    if (schedule_getCellsToBeRelocated(&parentNeighbor, celllist_delete)){
-      // hack: using default settin for relocation, later on this will come from the parentNeighbor neighborKey
-        if (msf_candidateAddCellList(celllist_add,NUMCELLS_MSF,CELLRADIOSETTING_FALLBACK)==FALSE){
+    if (schedule_getCellsToBeRelocated(&parentNeighbor, parentNeighborRadio, celllist_delete)){
+        if (msf_candidateAddCellList(celllist_add, NUMCELLS_MSF, parentNeighborRadio)==FALSE){
             // failed to get cell list to add
             return;
         }
+        uint8_t cellOptions = CELLOPTIONS_MSF | (parentNeighborRadio << 5);
         sixtop_request(
             IANA_6TOP_CMD_RELOCATE,  // code
             &parentNeighbor,         // neighbor
             NUMCELLS_MSF,            // number cells
-            CELLOPTIONS_MSF,         // cellOptions
+            cellOptions,             // cellOptions
             celllist_add,            // celllist to add
             celllist_delete,         // celllist to delete
             IANA_6TISCH_SFID_MSF,    // sfid

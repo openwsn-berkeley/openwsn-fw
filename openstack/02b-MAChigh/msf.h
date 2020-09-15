@@ -69,7 +69,7 @@ bool    msf_candidateRemoveCellList(
     uint8_t cellOptions
 );
 // called by schedule
-void    msf_updateCellsElapsed(open_addr_t* neighbor, cellType_t cellType);
+void    msf_updateCellsElapsed(open_addr_t* neighbor,  cellRadioSetting_t cellRadioSetting, cellType_t cellType);
 void    msf_updateCellsUsed(open_addr_t* neighbor, cellType_t cellType);
 
 uint16_t msf_hashFunction_getSlotoffset(open_addr_t* address);
