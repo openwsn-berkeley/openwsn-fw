@@ -280,6 +280,7 @@ owerror_t sixtop_request(
     } else {
         // record the neighbor in case no response  for clear
         memcpy(&sixtop_vars.neighborToClearCells,neighbor,sizeof(open_addr_t));
+        sixtop_vars.neighborRadioToClearCells = (cellOptions & SIXTOP_CELLREQUEST_RADIOSETTING_MASK)>>5;
     }
 
     // append 6p metadata
@@ -953,9 +954,10 @@ void timer_sixtop_six2six_timeout_fired(void) {
         // no response for the 6p clear, just clear locally
         schedule_removeAllNegotiatedCellsToNeighbor(
             sixtop_vars.cb_sf_getMetadata(),
-            &sixtop_vars.neighborToClearCells
+            &sixtop_vars.neighborToClearCells,
+            sixtop_vars.neighborRadioToClearCells
         );
-        neighbors_resetSequenceNumber(&sixtop_vars.neighborToClearCells);
+        neighbors_resetSequenceNumber(&sixtop_vars.neighborToClearCells, sixtop_vars.neighborRadioToClearCells);
         memset(&sixtop_vars.neighborToClearCells,0,sizeof(open_addr_t));
     }
     // timeout timer fired, reset the state of sixtop to idle
@@ -1021,7 +1023,7 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
     // if this is a response send done
     if (msg->l2_sixtop_messageType == SIXTOP_CELL_RESPONSE){
         if(error == E_SUCCESS) {
-            neighbors_updateSequenceNumber(&(msg->l2_nextORpreviousHop));
+            neighbors_updateSequenceNumber(&(msg->l2_nextORpreviousHop), msg->l2_cellRadioSetting );
             // in case a response is sent out, check the return code
             if (msg->l2_sixtop_returnCode == IANA_6TOP_RC_SUCCESS){
                 if (msg->l2_sixtop_command == IANA_6TOP_CMD_ADD){
@@ -1060,9 +1062,10 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
                 if ( msg->l2_sixtop_command == IANA_6TOP_CMD_CLEAR){
                     schedule_removeAllNegotiatedCellsToNeighbor(
                         msg->l2_sixtop_frameID,
-                        &(msg->l2_nextORpreviousHop)
+                        &(msg->l2_nextORpreviousHop),
+                        msg->l2_cellRadioSetting
                     );
-                    neighbors_resetSequenceNumber(&(msg->l2_nextORpreviousHop));
+                    neighbors_resetSequenceNumber(&(msg->l2_nextORpreviousHop),msg->l2_cellRadioSetting);
                 }
             } else {
                 // the return code doesn't end up with SUCCESS
@@ -1075,9 +1078,10 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
             if ( msg->l2_sixtop_command == IANA_6TOP_CMD_CLEAR){
                 schedule_removeAllNegotiatedCellsToNeighbor(
                     msg->l2_sixtop_frameID,
-                    &(msg->l2_nextORpreviousHop)
+                    &(msg->l2_nextORpreviousHop),
+                    msg->l2_cellRadioSetting
                 );
-                neighbors_resetSequenceNumber(&(msg->l2_nextORpreviousHop));
+                neighbors_resetSequenceNumber(&(msg->l2_nextORpreviousHop),msg->l2_cellRadioSetting);
             }
         }
     }
@@ -1583,7 +1587,7 @@ void sixtop_six2six_notifyReceive(
                     &(pkt->l2_nextORpreviousHop), // neighbor that cells to be added to
                     sixtop_vars.cellOptions       // cell options
                 );
-                neighbors_updateSequenceNumber(&(pkt->l2_nextORpreviousHop));
+                neighbors_updateSequenceNumber(&(pkt->l2_nextORpreviousHop),pkt->l2_cellRadioSetting);
                 break;
             case SIX_STATE_WAIT_DELETERESPONSE:
                 i = 0;
@@ -1593,6 +1597,7 @@ void sixtop_six2six_notifyReceive(
                     pkt->l2_sixtop_celllist_delete[i].slotoffset    |= (*((uint8_t*)(pkt->payload)+ptr+1))<<8;
                     pkt->l2_sixtop_celllist_delete[i].channeloffset  =  *((uint8_t*)(pkt->payload)+ptr+2);
                     pkt->l2_sixtop_celllist_delete[i].channeloffset |= (*((uint8_t*)(pkt->payload)+ptr+3))<<8;
+                    pkt->l2_sixtop_celllist_delete[i].cellRadioSetting = cellRadioSetting;
                     pkt->l2_sixtop_celllist_delete[i].isUsed         = TRUE;
                     ptr    += 4;
                     pktLen -= 4;
@@ -1604,7 +1609,7 @@ void sixtop_six2six_notifyReceive(
                     &(pkt->l2_nextORpreviousHop),
                     sixtop_vars.cellOptions
                 );
-                neighbors_updateSequenceNumber(&(pkt->l2_nextORpreviousHop));
+                neighbors_updateSequenceNumber(&(pkt->l2_nextORpreviousHop),pkt->l2_cellRadioSetting);
                 break;
             case SIX_STATE_WAIT_RELOCATERESPONSE:
                 i = 0;
@@ -1632,7 +1637,7 @@ void sixtop_six2six_notifyReceive(
                     &(pkt->l2_nextORpreviousHop), // neighbor that cells to be added to
                     sixtop_vars.cellOptions       // cell options
                 );
-                neighbors_updateSequenceNumber(&(pkt->l2_nextORpreviousHop));
+                neighbors_updateSequenceNumber(&(pkt->l2_nextORpreviousHop),pkt->l2_cellRadioSetting);
                 break;
             case SIX_STATE_WAIT_COUNTRESPONSE:
                 numCells  = *((uint8_t*)(pkt->payload)+ptr);
@@ -1644,7 +1649,7 @@ void sixtop_six2six_notifyReceive(
                     (errorparameter_t)numCells,
                     (errorparameter_t)sixtop_vars.six2six_state
                 );
-                neighbors_updateSequenceNumber(&(pkt->l2_nextORpreviousHop));
+                neighbors_updateSequenceNumber(&(pkt->l2_nextORpreviousHop),pkt->l2_cellRadioSetting);
                 break;
             case SIX_STATE_WAIT_LISTRESPONSE:
                 i = 0;
@@ -1666,14 +1671,15 @@ void sixtop_six2six_notifyReceive(
                     (errorparameter_t)celllist_list[0].slotoffset,
                     (errorparameter_t)celllist_list[1].slotoffset
                 );
-                neighbors_updateSequenceNumber(&(pkt->l2_nextORpreviousHop));
+                neighbors_updateSequenceNumber(&(pkt->l2_nextORpreviousHop),pkt->l2_cellRadioSetting);
                 break;
             case SIX_STATE_WAIT_CLEARRESPONSE:
                 schedule_removeAllNegotiatedCellsToNeighbor(
                     sixtop_vars.cb_sf_getMetadata(),
-                    &(pkt->l2_nextORpreviousHop)
+                    &(pkt->l2_nextORpreviousHop),
+                      cellRadioSetting
                 );
-                neighbors_resetSequenceNumber(&(pkt->l2_nextORpreviousHop));
+                neighbors_resetSequenceNumber(&(pkt->l2_nextORpreviousHop),pkt->l2_cellRadioSetting);
                 break;
             default:
                 // The sixtop response arrived after 6P TIMEOUT, or
@@ -1739,11 +1745,6 @@ bool sixtop_addCells(
                 type,
                 isShared,
                 FALSE,
-                
-                // this is a temporay hack, this fallback setting needs to be 
-                // retrieved from cellList [i].cellRadioSetting from the 
-                // sixtop add cells requestion from the neighbor
-                
                 cellList[i].cellRadioSetting,
                 cellList[i].channeloffset,
                 &temp_neighbor

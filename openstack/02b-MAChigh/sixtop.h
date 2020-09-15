@@ -119,6 +119,7 @@ typedef struct {
    sixtop_sf_translatemetadata_cbt  cb_sf_translateMetadata;
    sixtop_sf_handle_callback_cbt    cb_sf_handleRCError;
    open_addr_t          neighborToClearCells;
+   cellRadioSetting_t   neighborRadioToClearCells;
 } sixtop_vars_t;
 
 //=========================== prototypes ======================================
