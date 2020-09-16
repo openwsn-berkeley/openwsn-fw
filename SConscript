@@ -455,6 +455,8 @@ elif env['toolchain'] == 'armgcc':
         env.Append(LINKFLAGS='-mthumb')
         env.Append(LINKFLAGS='-mthumb-interwork')
         env.Append(LINKFLAGS='-nostartfiles')
+        env.Append(LINKFLAGS='-specs=nosys.specs')
+        env.Append(LINKFLAGS='-specs=nano.specs')
         env.Append(LINKFLAGS='-Tbsp/boards/' + env['board'] + '/stm32_flash.ld')
         env.Append(
             LINKFLAGS=os.path.join('build', env['board'] + '_armgcc', 'bsp', 'boards', env['board'], 'startup.o'))
