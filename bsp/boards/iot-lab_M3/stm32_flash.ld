@@ -15,7 +15,7 @@
 **
 **  Environment : Atollic TrueSTUDIO(R)
 **
-**  Distribution: The file is distributed �as is,� without any warranty
+**  Distribution: The file is distributed as is, without any warranty
 **                of any kind.
 **
 **  (c)Copyright Atollic AB.
@@ -151,10 +151,9 @@ SECTIONS
 		PROVIDE(__heap1_max = .);
 	} > RAM
 
-  /*
   PROVIDE ( end = _ebss );
   PROVIDE ( _end = _ebss );
-  */
+
   /* User_heap_stack section, used to check that there is enough RAM left */
   /*
   ._user_heap_stack :
