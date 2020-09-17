@@ -36,7 +36,7 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 #define LENGTH_ADDR64b   8
 #define LENGTH_ADDR128b  16
 
-#define MAXNUMNEIGHBORS  30
+#define MAXNUMNEIGHBORS  130
 
 // radio settings available for the MAC layer and supported by openmote-b
 typedef enum 
@@ -84,10 +84,10 @@ static const radioSetting_t cellRadioSettingMap[MAX_CELLRADIOSETTINGS]= {
 };
 // mapping of MAC-level cellRadioSetting_t (in schedule.h) to DAGRank increases 
 // ordered by range from shortest to longest
-static const uint8_t cellRadioSettingMinRankFactor [MAX_CELLRADIOSETTINGS]= {
+static const uint8_t radioMinHopRankIncreaseFactor [MAX_CELLRADIOSETTINGS]= {
     1,         //24GHZ 
-    3,       //FSK
-    2        //OFDM
+    30,       //FSK
+    5        //OFDM
 };
 
 
