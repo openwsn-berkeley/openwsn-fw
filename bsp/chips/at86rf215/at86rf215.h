@@ -3997,17 +3997,17 @@ static  registerSetting_t basic_settings_fsk_option1 []={
   {RG_RF09_IRQM,      0x1F}, // TRXERR, BATLOW, EDC, TRXRDY, WAKEUP interrupts enabled
   {RG_RF24_IRQM,      0x00},
   {RG_RF09_RXBWC,     0x00},
-  {RG_RF09_RXDFE,     0x2A},
-  {RG_RF09_AGCC,      0x01},
-  {RG_RF09_AGCS,      0x37},
-  {RG_RF09_EDD,       0x7A},
-  {RG_RF09_TXCUTC,    0xC0},
+  {RG_RF09_RXDFE,     0x2A}, // receiver digital front end. Cutoff frequency (0.375/2) *fs and sample rate of 2000khz
+  {RG_RF09_AGCC,      0x01}, // receiver automatic gain control enabled, 8 samples is Average Time in Number of Samples
+  {RG_RF09_AGCS,      0x37}, // AGC target is lowest value of -42 dB
+  {RG_RF09_EDD,       0x7A}, // Energy detection duration
+  {RG_RF09_TXCUTC,    0xC0}, // Transmitter cutoff freq 80khz and pwr ramp 32 us 
   {RG_RF09_TXDFE,     0x98},
-  {RG_RF09_PAC,       0x7F},// Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
-  {RG_BBC0_IRQM,      0x1F},// TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
+  {RG_RF09_PAC,       0x7F}, // Tx Power 5 bits >>. 0x64 = txPwr=>0x04, max: 0x1F.
+  {RG_BBC0_IRQM,      0x1F}, // TXFE, RXEM, RXAM, RXFE, RXFS interrupts enabled
   {RG_BBC1_IRQM,      0x00},
-  {RG_BBC0_PC,        0x1D},// No FCS filter, 16 bits FCS, FSK. 
-  {RG_BBC0_FSKDM,     0x01},//Direct modulation and preemphasis enabled.
+  {RG_BBC0_PC,        0x1D}, // No FCS filter, 16 bits FCS, FSK. 
+  {RG_BBC0_FSKDM,     0x01}, //Direct modulation and preemphasis enabled.
   {RG_BBC0_FSKC0,     0xD6},
   {RG_BBC0_FSKC1,     0x00},
 //  {RG_BBC0_FSKC2,     0x00},
