@@ -16,8 +16,8 @@
 
 //=========================== definition ======================================
 
-#define DIO_PORTION 4 //10
-#define DAO_PORTION 8 //60
+#define DIO_PORTION 10 //10
+#define DAO_PORTION 60 //60
 
 //=========================== variables =======================================
 
@@ -92,6 +92,7 @@ void icmpv6rpl_init(void) {
     memcpy(&icmpv6rpl_vars.dioDestination.addr_128b[0],all_routers_multicast,sizeof(all_routers_multicast));
 
     icmpv6rpl_vars.dioPeriod                 = DIO_PERIOD;
+    icmpv6rpl_vars.dioCounter                = 0;
     icmpv6rpl_vars.timerIdDIO                = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_RPL);
 
     //initialize PIO -> move this to dagroot code
@@ -238,6 +239,9 @@ void icmpv6rpl_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    // I'm not busy sending DIO/DAO anymore
    if (packetfunctions_isBroadcastMulticast(&(msg->l2_nextORpreviousHop))){
         icmpv6rpl_vars.busySendingDIO = FALSE;
+        // this is a DIO
+        // this decrement should never end up less than 0 if protocol is running correctly.
+        icmpv6rpl_vars.dioCounter --;
    } else {
         icmpv6rpl_vars.busySendingDAO = FALSE;
    }
@@ -266,6 +270,8 @@ void icmpv6rpl_receive(OpenQueueEntry_t* msg) {
    // handle message
    switch (icmpv6code) {
       case IANA_ICMPv6_RPL_DIS:
+         // This is a current hack: the DIO is sent as a broadcast in response to DIS
+         // but it is supposed to be sent as a unicast to DIS source.
          icmpv6rpl_timer_DIO_task();
          break;
       case IANA_ICMPv6_RPL_DIO:
@@ -657,8 +663,7 @@ void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t* msg) {
                                (errorparameter_t)icmpv6rpl_vars.incomingDio->rank,
                                (errorparameter_t)neighborRank);
             } else {
-               neighbors_setNeighborRank(i,icmpv6rpl_vars.incomingDio->rank 
-                                         * ((uint8_t) msg->l2_cellRadioSetting +1)); // temp hack for testing
+               neighbors_setNeighborRank(i,icmpv6rpl_vars.incomingDio->rank );
             }
             // since changes were made to neighbors DAG rank, run the routing algorithm again
             icmpv6rpl_updateMyDAGrankAndParentSelection();
@@ -688,7 +693,11 @@ void icmpv6rpl_killPreferredParent(void) {
     already. No need to push a task again.
 */
 void icmpv6rpl_timer_DIO_cb(opentimers_id_t id) {
+  // if multiple minimal cells are allocated, call the DIO firing mechanism for
+  // each cell
+  for (uint8_t i =0;i<SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;i++){
     icmpv6rpl_timer_DIO_task();
+  }
 }
 
 /**
@@ -722,6 +731,7 @@ void sendDIO(void) {
         // I'm not busy sending a DIO/DAO
         icmpv6rpl_vars.busySendingDIO  = FALSE;
         icmpv6rpl_vars.busySendingDAO  = FALSE;
+        icmpv6rpl_vars.dioCounter      = 0;
 
         // stop here
         return;
@@ -748,6 +758,7 @@ void sendDIO(void) {
         // I'm not busy sending a DIO/DAO
         icmpv6rpl_vars.busySendingDIO  = FALSE;
         icmpv6rpl_vars.busySendingDAO  = FALSE;
+        icmpv6rpl_vars.dioCounter      = 0;
 
         return;
     }
@@ -839,7 +850,13 @@ void sendDIO(void) {
 
     //send
     if (icmpv6_send(msg)==E_SUCCESS) {
-        icmpv6rpl_vars.busySendingDIO = TRUE;
+        icmpv6rpl_vars.dioCounter++;
+        
+        if (icmpv6rpl_vars.dioCounter >= SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS){
+          // I have created enough DIO packets for all minimal cells. 
+          // I'm now busy sending a DIO
+          icmpv6rpl_vars.busySendingDIO = TRUE;
+        }
     } else {
         openqueue_freePacketBuffer(msg);
     }
@@ -891,7 +908,7 @@ void sendDAO(void) {
         // I'm not busy sending a DIO/DAO
         icmpv6rpl_vars.busySendingDAO = FALSE;
         icmpv6rpl_vars.busySendingDIO = FALSE;
-
+        icmpv6rpl_vars.dioCounter     = 0;
         // stop here
         return;
     }
@@ -919,6 +936,7 @@ void sendDAO(void) {
         // I'm not busy sending a DIO/DAO
         icmpv6rpl_vars.busySendingDIO  = FALSE;
         icmpv6rpl_vars.busySendingDAO  = FALSE;
+        icmpv6rpl_vars.dioCounter      = 0;
 
         return;
     }

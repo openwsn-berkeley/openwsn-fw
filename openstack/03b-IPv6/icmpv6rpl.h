@@ -187,6 +187,7 @@ typedef struct {
    uint16_t                  dioTimerCounter;         ///< counter to determine when to send DIO.
    opentimers_id_t           timerIdDIO;              ///< ID of the timer used to send DIOs.
    uint16_t                  dioPeriod;               ///< dio period in seconds.
+   uint8_t                   dioCounter;              ///< dio transmit counter for multiple minimal cells.
    // DAO-related
    icmpv6rpl_dao_ht          dao;                     ///< pre-populated DAO packet.
    icmpv6rpl_dao_transit_ht  dao_transit;             ///< pre-populated DAO "Transit Info" option header.
