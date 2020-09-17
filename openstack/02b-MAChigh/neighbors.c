@@ -624,26 +624,27 @@ This really belongs to icmpv6rpl but it would require a much more complex interf
 uint16_t neighbors_getLinkMetric(uint8_t index) {
     uint16_t  rankIncrease;
     uint32_t  rankIncreaseIntermediary; // stores intermediary results of rankIncrease calculation
+    cellRadioSetting_t neighborRadio = neighbors_vars.neighbors[index].cellRadioSetting;
 
     // we assume that this neighbor has already been checked for being in use
     // calculate link cost to this neighbor
     if (neighbors_vars.neighbors[index].numTxACK==0) {
         if (neighbors_vars.neighbors[index].numTx > DEFAULTLINKCOST){
             if (neighbors_vars.neighbors[index].numTx < MINIMAL_NUM_TX){
-                rankIncrease = (3*neighbors_vars.neighbors[index].numTx-2)*MINHOPRANKINCREASE;
+                rankIncrease = (3*neighbors_vars.neighbors[index].numTx-2)*MINHOPRANKINCREASE * radioMinHopRankIncreaseFactor [neighborRadio];
             } else {
                 rankIncrease = 65535;
             }
         } else {
-            rankIncrease = (3*DEFAULTLINKCOST-2)*MINHOPRANKINCREASE;
+            rankIncrease = (3*DEFAULTLINKCOST-2)*MINHOPRANKINCREASE * radioMinHopRankIncreaseFactor [neighborRadio];
         }
     } else {
         //6TiSCH minimal draft using OF0 for rank computation: ((3*numTx/numTxAck)-2)*minHopRankIncrease
         // numTx is on 8 bits, so scaling up 10 bits won't lead to saturation
         // but this <<10 followed by >>10 does not provide any benefit either. Result is the same.
         rankIncreaseIntermediary = (((uint32_t)neighbors_vars.neighbors[index].numTx) << 10);
-        rankIncreaseIntermediary = (3*rankIncreaseIntermediary * MINHOPRANKINCREASE) / ((uint32_t)neighbors_vars.neighbors[index].numTxACK);
-        rankIncreaseIntermediary = rankIncreaseIntermediary - ((uint32_t)(2 * MINHOPRANKINCREASE)<<10);
+        rankIncreaseIntermediary = (3*rankIncreaseIntermediary * MINHOPRANKINCREASE * radioMinHopRankIncreaseFactor [neighborRadio]) / ((uint32_t)neighbors_vars.neighbors[index].numTxACK);
+        rankIncreaseIntermediary = rankIncreaseIntermediary - ((uint32_t)(2 * MINHOPRANKINCREASE * radioMinHopRankIncreaseFactor [neighborRadio])<<10);
         // this could still overflow for numTx large and numTxAck small, Casting to 16 bits will yiel the least significant bits
         if (rankIncreaseIntermediary >= (65536<<10)) {
             rankIncrease = 65535;
