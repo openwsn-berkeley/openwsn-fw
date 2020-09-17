@@ -20,7 +20,7 @@
 #include "board.h"
 #include "board_info.h"
 //=========================== definition ======================================
-
+//#define IEEE802154E_SINGLE_CHANNEL 11
 //=========================== variables =======================================
 
 ieee154e_vars_t     ieee154e_vars;
@@ -118,7 +118,7 @@ void ieee154e_init(void) {
     // initialize variables
     memset(&ieee154e_vars,0,sizeof(ieee154e_vars_t));
     memset(&ieee154e_dbg,0,sizeof(ieee154e_dbg_t));
- #define IEEE802154E_SINGLE_CHANNEL 11
+
     // set singleChannel to 0 to enable channel hopping.
 #if IEEE802154E_SINGLE_CHANNEL  
     ieee154e_vars.singleChannel     = IEEE802154E_SINGLE_CHANNEL;
@@ -1044,7 +1044,7 @@ port_INLINE void activity_ti1ORri1(void) {
         ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset());
 
         // retrieve the radio setting to be used in this cell
-        ieee154e_vars.cellRadioSetting = schedule_getCellRadioSetting(); //l2 radioSetting
+        ieee154e_vars.cellRadioSetting = schedule_getCellRadioSetting(); //l2 radio setting
         ieee154e_vars.radioSetting = cellRadioSettingMap[ieee154e_vars.cellRadioSetting]; //l1 radioSetting
         
         // configure the radio setting
@@ -1148,12 +1148,8 @@ port_INLINE void activity_ti1ORri1(void) {
                         if (ieee154e_vars.dataToSend==NULL){
                             couldSendEB=TRUE;
                             // look for an EB packet in the queue
-                            debugpins_slot_toggle();
-                            debugpins_slot_toggle();
                             ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
                             if (ieee154e_vars.dataToSend == NULL){
-                               debugpins_frame_toggle();
-                               debugpins_frame_toggle();
                             }
                             
                         }
@@ -1174,10 +1170,8 @@ port_INLINE void activity_ti1ORri1(void) {
                 if (couldSendEB==TRUE) {        // I will be sending an EB
                     //copy synch IE  -- should be Little endian???
                     // fill in the ASN field of the EB
-                    debugpins_slot_toggle();
-                    debugpins_slot_toggle();
                     ieee154e_getAsn(asn);
-                    join_priority = ((cellRadioSettingMinRankFactor[schedule_getCellRadioSetting()]*icmpv6rpl_getMyDAGrank())/MINHOPRANKINCREASE)-1; //poipoi -- use dagrank(rank)-1
+                    join_priority = ((radioMinHopRankIncreaseFactor[schedule_getCellRadioSetting()]*icmpv6rpl_getMyDAGrank())/MINHOPRANKINCREASE)-1; //poipoi -- use dagrank(rank)-1
                     memcpy(ieee154e_vars.dataToSend->l2_ASNpayload,&asn[0],sizeof(asn_t));
                     memcpy(ieee154e_vars.dataToSend->l2_ASNpayload+sizeof(asn_t),&join_priority,sizeof(uint8_t));
                 }
@@ -1346,8 +1340,6 @@ port_INLINE void activity_ti3(void) {
 
     // give the 'go' to transmit
     radio_txNow();
-    debugpins_slot_toggle();
-    debugpins_slot_toggle();
 #endif
 }
 
@@ -1828,8 +1820,6 @@ port_INLINE void activity_ri4(PORT_TIMER_WIDTH capturedTime) {
     // change state
     changeState(S_RXDATA);
     //indicate on LA that a frame reception has actually started
-    debugpins_radio_toggle();
-    debugpins_radio_toggle();
 
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
     // cancel rt3
@@ -1877,8 +1867,6 @@ port_INLINE void activity_rie3(void) {
 
 port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
     //indicate on LA that a frame reception has ended
-    debugpins_radio_toggle();
-    debugpins_radio_toggle();
     
     ieee802154_header_iht ieee802514_header;
     uint16_t lenIE=0;
