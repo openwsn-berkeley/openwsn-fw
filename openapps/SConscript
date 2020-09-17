@@ -58,6 +58,8 @@ else:
         CPPPATH = [
             # inc
             os.path.join('#','inc'),
+            # kernel
+            os.path.join('#','kernel'),
             # openstack
             os.path.join('#', 'openstack', '02a-MAClow'),
             os.path.join('#', 'openstack', '02b-MAChigh'),

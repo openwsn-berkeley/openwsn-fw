@@ -55,7 +55,7 @@ uint8_t scheduler_debug_get_TasksCur(void);
 uint8_t scheduler_debug_get_TasksMax(void);
 #endif
 
-#include "scheduler_types.h"
+#include "openos/scheduler_types.h"
 
 /**
 \}
