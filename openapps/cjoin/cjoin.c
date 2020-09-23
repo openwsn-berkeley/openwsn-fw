@@ -21,7 +21,7 @@
 //=========================== defines =========================================
 
 /// inter-packet period (in ms)
-#define TIMEOUT                 15000
+#define TIMEOUT                 60000
 
 const uint8_t cjoin_path0[] = "j";
 
