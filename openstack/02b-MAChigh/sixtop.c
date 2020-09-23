@@ -432,7 +432,7 @@ void task_sixtopNotifSendDone(void) {
         case COMPONENT_SIXTOP:
             if (msg->l2_frameType==IEEE154_TYPE_BEACON) {
                 
-                // this is a EB
+                // this is an EB
                 // this decrement should never end up less than 0 if protocol is running correctly.
                 sixtop_vars.ebCounter --;
                 
@@ -630,19 +630,19 @@ owerror_t sixtop_send_internal(
 
     if (
         packetfunctions_isBroadcastMulticast(&(msg->l2_nextORpreviousHop))   == FALSE &&
-        schedule_hasNegotiatedCellToNeighbor(&(msg->l2_nextORpreviousHop), CELLTYPE_TX) == FALSE &&
+        schedule_hasNegotiatedCellToNeighborKey(&(msg->l2_nextORpreviousHop), msg->l2_cellRadioSetting , CELLTYPE_TX) == FALSE &&
         schedule_hasAutoTxCellToNeighbor(&(msg->l2_nextORpreviousHop))       == FALSE
     ){
         // the frame source address is not broadcast/multicast
         // no negotiated tx cell to that neighbor
         // no auto tx cell to that neighbor
-
+        msg->l2_cellRadioSetting = CELLRADIOSETTING_FALLBACK;
         schedule_addActiveSlot(
             msf_hashFunction_getSlotoffset(&(msg->l2_nextORpreviousHop)),    // slot offset
             CELLTYPE_TX,                                                     // type of slot
             TRUE,                                                            // shared?
             TRUE,                                                            // auto cell?
-            CELLRADIOSETTING_FALLBACK,                                       // default radio setting for first time neogotiation
+            CELLRADIOSETTING_FALLBACK,                                        // msg radio setting
             msf_hashFunction_getChanneloffset(&(msg->l2_nextORpreviousHop)), // channel offset
             &(msg->l2_nextORpreviousHop)                                     // neighbor
         );
