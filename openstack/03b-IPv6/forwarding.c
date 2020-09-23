@@ -16,7 +16,7 @@
 
 //=========================== prototypes ======================================
 
-void forwarding_getNextHop(open_addr_t *destination, open_addr_t *addressToWrite);
+void forwarding_getNextHop(open_addr_t *destination128b, open_addr_t *addressToWrite64b, cellRadioSetting_t *radioSettingToWrite);
 
 owerror_t forwarding_send_internal_RoutingTable(
         OpenQueueEntry_t *msg,
@@ -369,7 +369,7 @@ void forwarding_receive(
             openqueue_freePacketBuffer(msg);
             return;
         }
-
+        // going upstream
         if (ipv6_outer_header->next_header != IANA_IPv6ROUTE) {
             flags = rpl_option->flags;
             senderRank = rpl_option->senderRank;
@@ -383,6 +383,8 @@ void forwarding_receive(
                         (errorparameter_t) senderRank
                 );
             }
+            // because this part is executed in upstream direction only
+            // previous rank must be higher. 
             if (senderRank < icmpv6rpl_getMyDAGrank()) {
                 // loop detected
                 // set flag
@@ -420,6 +422,7 @@ void forwarding_receive(
             }
         } else {
             // source routing header present
+            // going downstream
             if (
                     forwarding_send_internal_SourceRouting(
                             msg,
@@ -451,7 +454,7 @@ void forwarding_receive(
 \param[in]  destination128b  Final IPv6 destination address.
 \param[out] addressToWrite64b Location to write the EUI64 of next hop to.
 */
-void forwarding_getNextHop(open_addr_t *destination128b, open_addr_t *addressToWrite64b) {
+void forwarding_getNextHop(open_addr_t *destination128b, open_addr_t *addressToWrite64b, cellRadioSetting_t *radioSettingToWrite) {
     uint8_t i;
 
     if (packetfunctions_isBroadcastMulticast(destination128b)) {
@@ -462,7 +465,7 @@ void forwarding_getNextHop(open_addr_t *destination128b, open_addr_t *addressToW
         }
     } else {
         // destination is remote, send to preferred parent
-        icmpv6rpl_getPreferredParentEui64(addressToWrite64b);
+        icmpv6rpl_getPreferredParentKey(addressToWrite64b,radioSettingToWrite);
     }
 }
 
@@ -502,7 +505,8 @@ owerror_t forwarding_send_internal_RoutingTable(
                                            &(msg->l2_nextORpreviousHop));
         }
     } else {
-        forwarding_getNextHop(&(msg->l3_destinationAdd), &(msg->l2_nextORpreviousHop));
+      
+      forwarding_getNextHop(&(msg->l3_destinationAdd), &(msg->l2_nextORpreviousHop),&(msg->l2_cellRadioSetting));
     }
 
     if (msg->l2_nextORpreviousHop.type == ADDR_NONE) {
@@ -822,6 +826,8 @@ owerror_t forwarding_send_internal_SourceRouting(
                     (errorparameter_t) senderRank
             );
         }
+        // because this part is executed in downstream direction only
+        // previous rank must be smaller. 
         if (senderRank > icmpv6rpl_getMyDAGrank()) {
             // loop detected
             // set flag
