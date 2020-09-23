@@ -895,6 +895,7 @@ void sendDAO(void) {
     uint8_t              nbrIdx;             // running neighbor index
     uint8_t              numTransitParents,numTargetParents;  // the number of parents indicated in transit option
     open_addr_t          address;
+    cellRadioSetting_t   parentCellRadioSetting;
     open_addr_t*         prefix;
 
     memset(&address,0,sizeof(open_addr_t));
@@ -924,10 +925,10 @@ void sendDAO(void) {
     }
 
     if (
-        icmpv6rpl_getPreferredParentEui64(&address) == FALSE ||
+        icmpv6rpl_getPreferredParentKey(&address,&parentCellRadioSetting) == FALSE ||
         (
-            icmpv6rpl_getPreferredParentEui64(&address) &&
-            schedule_hasNegotiatedCellToNeighbor(&address, CELLTYPE_TX) == FALSE
+            icmpv6rpl_getPreferredParentKey(&address,&parentCellRadioSetting) &&
+            schedule_hasNegotiatedCellToNeighborKey(&address, parentCellRadioSetting, CELLTYPE_TX) == FALSE
         )
     ){
         // delete packets genereted by this module (EB and KA) from openqueue
@@ -978,7 +979,7 @@ void sendDAO(void) {
     //=== transit option -- from RFC 6550, page 55 - 1 transit information header per parent is required.
     //getting only preferred parent as transit
     numTransitParents=0;
-    icmpv6rpl_getPreferredParentEui64(&address);
+    icmpv6rpl_getPreferredParentKey(&address,&parentCellRadioSetting);
     packetfunctions_writeAddress(msg,&address,OW_BIG_ENDIAN);
     prefix=idmanager_getMyID(ADDR_PREFIX);
     packetfunctions_writeAddress(msg,prefix,OW_BIG_ENDIAN);
@@ -1053,6 +1054,8 @@ void sendDAO(void) {
 
     //=== DAO header
     packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_dao_ht));
+    // hack: using the radio setting in the DAO. 
+    icmpv6rpl_vars.dao.reserved = parentCellRadioSetting; 
     icmpv6rpl_vars.dao.DAOSequence++;
     memcpy(
         ((icmpv6rpl_dao_ht*)(msg->payload)),
