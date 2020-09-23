@@ -17,7 +17,7 @@
 
 The superframe reappears over time and can be arbitrarily long.
 */
-#define SLOTFRAME_LENGTH    19 //should be 101
+#define SLOTFRAME_LENGTH    47 //should be 101
 
 //draft-ietf-6tisch-minimal-06
 #define SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS                      3
@@ -224,6 +224,8 @@ bool              schedule_hasAutonomousTxRxCellUnicast(open_addr_t* neighbor);
 bool              schedule_getAutonomousTxRxCellUnicastNeighbor(open_addr_t* neighbor);
 bool              schedule_hasAutoTxCellToNeighbor(open_addr_t* neighbor);
 bool              schedule_hasNegotiatedCellToNeighbor(open_addr_t* neighbor, cellType_t cell_type);
+bool              schedule_hasNegotiatedCellToNeighborKey(open_addr_t* neighbor, cellRadioSetting_t cellRadioSetting, cellType_t cell_type);
+
 bool              schedule_getAutonomousTxRxCellAnycast(uint16_t* slotoffset);
 bool              schedule_hasNonParentManagedTxCell(open_addr_t* neighbor);
 

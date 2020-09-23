@@ -922,6 +922,29 @@ bool schedule_hasNegotiatedCellToNeighbor(open_addr_t* neighbor, cellType_t cell
     return FALSE;
 }
 
+bool schedule_hasNegotiatedCellToNeighborKey(open_addr_t* neighbor, cellRadioSetting_t cellRadioSetting, cellType_t cell_type){
+    uint8_t i;
+
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+
+    for(i=0;i<MAXACTIVESLOTS;i++) {
+        if(
+            schedule_vars.scheduleBuf[i].shared == FALSE &&
+            schedule_vars.scheduleBuf[i].type   == cell_type &&
+            schedule_vars.scheduleBuf[i].neighbor.type == ADDR_64B &&
+            packetfunctions_sameAddress(neighbor,&schedule_vars.scheduleBuf[i].neighbor) &&
+            schedule_vars.scheduleBuf[i].cellRadioSetting == cellRadioSetting
+            
+        ){
+            ENABLE_INTERRUPTS();
+            return TRUE;
+        }
+    }
+
+    ENABLE_INTERRUPTS();
+    return FALSE;
+}
 /**
 \brief check whether there is negotiated tx cell to non-parent in schedule
 
