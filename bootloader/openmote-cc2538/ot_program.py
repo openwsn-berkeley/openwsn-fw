@@ -10,6 +10,105 @@ import os
 #============================ defines =========================================
 BROKER_ADDRESS          = "argus.paris.inria.fr"
 NUMBER_OF_MOTES         = 80 - 4 # 4 motes are used for local test
+BOOT_MODE = "default"    #"default" or "subset"
+
+# subset used for 10% disturbance experiments
+mote_subset1 = [
+"00-12-4b-00-14-b5-b5-95"
+]
+
+# subset used for 10% disturbance experiments
+#mote_subset = [
+#"00-12-4b-00-14-b5-b5-8c",
+#"00-12-4b-00-14-b5-b6-02",
+#"00-12-4b-00-14-b5-b5-7e",
+#"00-12-4b-00-14-b5-b6-1c"
+#]
+temp_subset=[
+"00-12-4b-00-14-b5-b6-46",
+"00-12-4b-00-14-b5-b6-1c",
+"00-12-4b-00-14-b5-b5-57",
+"00-12-4b-00-14-b5-b5-58",
+"00-12-4b-00-14-b5-b5-a3",
+"00-12-4b-00-14-b5-b6-3a",
+"00-12-4b-00-14-b5-b6-18",
+"00-12-4b-00-14-b5-b5-8c",
+"00-12-4b-00-14-b5-b5-71",
+"00-12-4b-00-14-b5-b6-12"
+
+]
+# subset used for 50% density experiments
+#mote_subset = [
+#"00-12-4b-00-14-b5-b4-8d",
+#"00-12-4b-00-14-b5-b5-71",
+#"00-12-4b-00-14-b5-b5-b5",
+#"00-12-4b-00-14-b5-b5-93",
+#"00-12-4b-00-14-b5-b5-a3",
+#"00-12-4b-00-14-b5-b6-02",
+#"00-12-4b-00-14-b5-b6-05",
+#"00-12-4b-00-14-b5-b6-1c",
+#"00-12-4b-00-14-b5-b5-a9",
+#"00-12-4b-00-14-b5-b5-88",
+#"00-12-4b-00-14-b5-b4-62",
+#"00-12-4b-00-14-b5-b6-22",
+#"00-12-4b-00-14-b5-b5-63",
+#"00-12-4b-00-14-b5-b6-0b",
+#"00-12-4b-00-14-b5-b6-40",
+#"00-12-4b-00-14-b5-b5-d8",
+#"00-12-4b-00-14-b5-b6-12",
+#"00-12-4b-00-14-b5-b6-18",
+#"00-12-4b-00-14-b5-b6-3a",
+#"00-12-4b-00-14-b5-b5-57",
+#"00-12-4b-00-14-b5-b6-48"
+#]
+
+# motes in building a
+mote_subset2 = [
+"00-12-4b-00-14-b5-b5-95",     
+"00-12-4b-00-14-b5-b5-d8",     
+"00-12-4b-00-14-b5-b4-8d",     
+"00-12-4b-00-14-b5-b6-22",     
+"00-12-4b-00-14-b5-b6-40",     
+"00-12-4b-00-14-b5-b6-29",     
+"00-12-4b-00-14-b5-b6-46",     
+"00-12-4b-00-14-b5-b6-47",     
+"00-12-4b-00-14-b5-b6-02",     
+"00-12-4b-00-14-b5-b6-1c",     
+"00-12-4b-00-14-b5-b6-1a",     
+"00-12-4b-00-14-b5-b5-e7",     
+"00-12-4b-00-14-b5-b4-62",     
+"00-12-4b-00-14-b5-b4-98",     
+"00-12-4b-00-14-b5-b5-a9",     
+"00-12-4b-00-14-b5-b5-57",     
+"00-12-4b-00-14-b5-b5-58",     
+"00-12-4b-00-14-b5-b5-88",     
+"00-12-4b-00-14-b5-b5-3d",     
+"00-12-4b-00-14-b5-b5-a3",     
+"00-12-4b-00-14-b5-b4-aa",     
+"00-12-4b-00-14-b5-b5-5b",     
+"00-12-4b-00-14-b5-b6-48",     
+"00-12-4b-00-14-b5-b5-7e",     
+"00-12-4b-00-14-b5-b6-3a",     
+"00-12-4b-00-14-b5-b6-38",     
+"00-12-4b-00-14-b5-b5-93",     
+"00-12-4b-00-14-b5-b6-18",     
+"00-12-4b-00-14-b5-b5-b5",     
+"00-12-4b-00-14-b5-b5-f8",     
+"00-12-4b-00-14-b5-b5-b7",     
+"00-12-4b-00-14-b5-b5-8c",     
+"00-12-4b-00-14-b5-b6-0b",     
+"00-12-4b-00-14-b5-b5-f1",     
+"00-12-4b-00-14-b5-b5-f3",     
+"00-12-4b-00-14-b5-b5-f2",     
+"00-12-4b-00-14-b5-b5-bf",     
+"00-12-4b-00-14-b5-b6-05",     
+"00-12-4b-00-14-b5-b5-63",     
+"00-12-4b-00-14-b5-b5-71",     
+"00-12-4b-00-14-b5-b5-65",     
+"00-12-4b-00-14-b5-b6-12"
+]  
+
+mote_subset = temp_subset
 
 #============================ classes =========================================
 class program_over_testbed(object):
@@ -25,7 +124,7 @@ class program_over_testbed(object):
         # initialize parameters
         self.mote       = mote
         self.image      = None
-        
+        print "\tprogramming: {0}".format(mote)
         # check bootload backdoor is configured correctly
         
         bootloader_backdoor_enabled   = False
@@ -66,10 +165,6 @@ class program_over_testbed(object):
             'failed_messages_topic': []
         }
         
-        # mqtt topic string format
-        self.mqtttopic_mote_cmd     = 'opentestbed/deviceType/mote/deviceId/{0}/cmd/{1}'.format(self.mote,self.CMD)
-        self.mqtttopic_mote_resp    = 'opentestbed/deviceType/mote/deviceId/{0}/resp/{1}'.format(self.mote,self.CMD)
-        
         # connect to MQTT
         self.mqttclient                = mqtt.Client(self.CLIENT_ID)
         self.mqttclient.on_connect     = self._on_mqtt_connect
@@ -85,12 +180,33 @@ class program_over_testbed(object):
             'description': self.image_name,
             'hex':         self.image,
         }
-        # publish the cmd message
-        self.mqttclient.publish(
-            topic   = self.mqtttopic_mote_cmd,
-            payload = json.dumps(payload_program_image),
-        )
-        
+        if BOOT_MODE == 'default':
+            # mqtt topic string format
+            self.mqtttopic_mote_cmd     = 'opentestbed/deviceType/mote/deviceId/{0}/cmd/{1}'.format(self.mote,self.CMD)
+            self.mqtttopic_mote_resp    = 'opentestbed/deviceType/mote/deviceId/{0}/resp/{1}'.format(self.mote,self.CMD)
+            print "\tcmd: {}".format(self.mqtttopic_mote_cmd)
+            # publish the cmd message
+            self.mqttclient.publish(
+                topic   = self.mqtttopic_mote_cmd,
+                payload = json.dumps(payload_program_image),
+            )
+        elif BOOT_MODE == "subset":
+            i = 0
+            for m in mote_subset:
+                # mqtt topic string format
+                self.mqtttopic_mote_cmd     = 'opentestbed/deviceType/mote/deviceId/{0}/cmd/{1}'.format(m,self.CMD)
+                self.mqtttopic_mote_resp    = 'opentestbed/deviceType/mote/deviceId/{0}/resp/{1}'.format(m,self.CMD)
+                print "\tcmd: {}".format(self.mqtttopic_mote_cmd)
+                self.mqttclient.publish(
+                    topic   = self.mqtttopic_mote_cmd,
+                    payload = json.dumps(payload_program_image),
+                )
+                # wait =  random.randrange(60, 360, 1) # a random value beween 1 and 3 minutes
+                wait =  5
+                time.sleep(wait)
+                i+=1
+                if i%10==0:
+                    time.sleep(5)
         try:
             # wait maxmium MESSAGE_RESP_TIMEOUT seconds before return
             self.cmd_response_success_queue.get(timeout=self.MESSAGE_RESP_TIMEOUT)
@@ -118,7 +234,8 @@ class program_over_testbed(object):
         '''
         Record the number of message received and success status
         '''
-        
+        print userdata
+        print message
         self.response_success['message_counter'] += 1
         if json.loads(message.payload)['success']:
             self.response_success['success_counter'] += 1
