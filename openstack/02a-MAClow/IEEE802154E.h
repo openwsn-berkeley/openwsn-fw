@@ -284,6 +284,9 @@ typedef struct {
 
    PORT_TIMER_WIDTH          radioOnInit;             // when within the slot the radio turns on
    PORT_TIMER_WIDTH          radioOnTics;             // how many tics within the slot the radio is on
+   PORT_TIMER_WIDTH          radioTxRxInit;           // when within the slot the radio tx/rx activity begins
+   PORT_TIMER_WIDTH          radioTxTics;             // how many tics within the slot the radio is transmitting
+   PORT_TIMER_WIDTH          radioRxTics;             // how many tics within the slot the radio is receiving
    bool                      radioOnThisSlot;         // to control if the radio has been turned on in a slot.
 
     // control
@@ -313,6 +316,8 @@ typedef struct {
    uint8_t                   numDeSync;               // number of times a desync happened
    uint32_t                  numTicsOn;               // mac dutyCycle
    uint32_t                  numTicsTotal;            // total tics for which the dutycycle is computed
+   uint32_t                  numTxTics;               // mac  tx dutyCycle
+   uint32_t                  numRxTics;               // mac rx dutyCycle   
 } ieee154e_stats_t;
 END_PACK
 
@@ -347,6 +352,7 @@ uint16_t           ieee154e_getSlotDuration(void);
 
 uint16_t           ieee154e_getTimeCorrection(void);
 void               ieee154e_getTicsInfo(uint32_t* numTicsOn, uint32_t* numTicsTotal);
+void               ieee154e_getRadioTicsInfo(uint32_t* numTxTics, uint32_t* numRxTics, uint32_t* numTicsTotal);
 // events
 void               ieee154e_startOfFrame(PORT_TIMER_WIDTH capturedTime);
 void               ieee154e_endOfFrame(PORT_TIMER_WIDTH capturedTime);
@@ -354,6 +360,7 @@ void               ieee154e_endOfFrame(PORT_TIMER_WIDTH capturedTime);
 bool               debugPrint_asn(void);
 bool               debugPrint_isSync(void);
 bool               debugPrint_macStats(void);
+void               ieee154e_resetStats(void);
 
 /**
 \}
