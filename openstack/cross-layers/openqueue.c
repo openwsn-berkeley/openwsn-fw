@@ -15,13 +15,17 @@
 //=========================== variables =======================================
 
 openqueue_vars_t openqueue_vars;
-
+openqueue_stats_t openqueue_stats;
 
 //=========================== prototypes ======================================
 
 void openqueue_reset_entry(OpenQueueEntry_t *entry);
 
 void openqueue_reset_big_entry(OpenQueueBigEntry_t *entry);
+
+void openqueue_update_stats(void);
+
+uint8_t  openqueue_getBusyPacketBufferSize(void);
 
 //=========================== public ==========================================
 
@@ -39,6 +43,8 @@ void openqueue_init(void) {
     for (i = 0; i < BIGQUEUELENGTH; i++) {
         openqueue_reset_big_entry(&(openqueue_vars.big_queue[i]));
     }
+    
+    openqueue_reset_stats();
 }
 
 /**
@@ -98,6 +104,7 @@ OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
         if (openqueue_vars.queue[i].owner == COMPONENT_NULL) {
             openqueue_vars.queue[i].creator = creator;
             openqueue_vars.queue[i].owner = COMPONENT_OPENQUEUE;
+            openqueue_update_stats();
             ENABLE_INTERRUPTS();
             return &openqueue_vars.queue[i];
         }
@@ -124,7 +131,6 @@ OpenQueueEntry_t* openqueue_getFreeBigPacketBuffer(uint8_t creator) {
             openqueue_vars.big_queue[i].standard_entry.creator = creator;
             openqueue_vars.big_queue[i].standard_entry.owner = COMPONENT_OPENQUEUE;
             openqueue_vars.big_queue[i].standard_entry.is_big_packet = TRUE;
-
             ENABLE_INTERRUPTS();
             return &openqueue_vars.big_queue[i].standard_entry;
 
@@ -134,6 +140,7 @@ OpenQueueEntry_t* openqueue_getFreeBigPacketBuffer(uint8_t creator) {
     ENABLE_INTERRUPTS();
     return NULL;
 }
+
 
 /**
 \brief Free a previously-allocated packet buffer.
@@ -158,7 +165,6 @@ owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t *pkt) {
                                              (errorparameter_t) 0,
                                              (errorparameter_t) 0);
                 }
-
                 openqueue_reset_big_entry((OpenQueueBigEntry_t *) pkt);
                 ENABLE_INTERRUPTS();
                 return E_SUCCESS;
@@ -175,6 +181,7 @@ owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t *pkt) {
                                              (errorparameter_t) 0);
                 }
                 openqueue_reset_entry(&(openqueue_vars.queue[i]));
+                openqueue_update_stats();
                 ENABLE_INTERRUPTS();
                 return E_SUCCESS;
             }
@@ -189,6 +196,7 @@ owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t *pkt) {
     ENABLE_INTERRUPTS();
     return E_FAIL;
 }
+
 
 /**
 \brief Free all the packet buffers created by a specific module.
@@ -213,7 +221,7 @@ void openqueue_removeAllCreatedBy(uint8_t creator) {
             openqueue_reset_big_entry(&(openqueue_vars.big_queue[i]));
         }
     }
-
+    openqueue_update_stats();
     ENABLE_INTERRUPTS();
 }
 
@@ -484,8 +492,55 @@ OpenQueueEntry_t*  openqueue_macGetUnicastPakcet(open_addr_t* toNeighbor){
 
 }
 
+openqueue_stats_t openqueue_get_stats(void)
+{
+    return openqueue_stats;
+}
 
 //=========================== private =========================================
+
+/**
+\brief Get the size of the busy packet buffer
+
+This is used at the moment for statistical measurements purposes to see the 
+impact of different configurations on the average buffer size. 
+
+\returns an uint with the number of waiting packets in the buffer
+*/
+uint8_t openqueue_getBusyPacketBufferSize() {
+    uint8_t i;
+    uint8_t busy_buffer_size = 0;
+
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+    // walk through queue and find free entry
+    for (i = 0; i < QUEUELENGTH; i++) {
+        if (openqueue_vars.queue[i].owner != COMPONENT_NULL) {
+            busy_buffer_size++;
+        }
+    }
+    ENABLE_INTERRUPTS();
+    return busy_buffer_size;
+}
+
+
+void openqueue_update_stats(void){
+    // update the stats
+    uint8_t buffSize = openqueue_getBusyPacketBufferSize();
+    if (buffSize>openqueue_stats.maxBuffSize){
+        openqueue_stats.maxBuffSize = buffSize;
+    }
+    
+    if (buffSize< openqueue_stats.minBuffSize){
+        openqueue_stats.minBuffSize=buffSize;
+    }
+    
+}
+void openqueue_reset_stats(void){
+    uint8_t size = openqueue_getBusyPacketBufferSize();
+    openqueue_stats.maxBuffSize=size;
+    openqueue_stats.minBuffSize=size;
+}
 
 void openqueue_reset_entry(OpenQueueEntry_t *entry) {
     //admin
