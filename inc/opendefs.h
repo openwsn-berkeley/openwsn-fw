@@ -85,9 +85,9 @@ static const radioSetting_t cellRadioSettingMap[MAX_CELLRADIOSETTINGS]= {
 // mapping of MAC-level cellRadioSetting_t (in schedule.h) to DAGRank increases 
 // ordered by range from shortest to longest
 static const uint8_t radioMinHopRankIncreaseFactor [MAX_CELLRADIOSETTINGS]= {
-    1,         //24GHZ 
-    30,       //FSK
-    5        //OFDM
+    1,        //24GHZ 
+    8,       //FSK
+    4        //OFDM
 };
 
 
@@ -450,6 +450,7 @@ typedef struct {
    bool             used;
    bool             insecure;
    uint8_t          parentPreference;
+   uint8_t          parentNegotiationAttempts;
    bool             stableNeighbor;
    uint8_t          switchStabilityCounter;
    open_addr_t      addr_64b;
