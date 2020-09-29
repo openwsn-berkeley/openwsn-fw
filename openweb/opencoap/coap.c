@@ -51,6 +51,8 @@ void coap_forward_message(OpenQueueEntry_t *msg,
                           open_addr_t *destIP,
                           uint16_t destPortNumber);
 
+void coap_sock_handler(sock_udp_t *sock, sock_async_flags_t type, void *arg);
+
 //=========================== public ==========================================
 
 //===== from stack
@@ -61,6 +63,7 @@ void coap_forward_message(OpenQueueEntry_t *msg,
 void coap_init(void) {
     uint16_t rand;
     uint8_t pos;
+    sock_udp_ep_t local;
 
     pos = 0;
 
@@ -82,9 +85,17 @@ void coap_init(void) {
     coap_vars.statelessProxy.sequenceNumber = 0;
 
     // register at UDP stack
-    coap_vars.desc.port = WKP_UDP_COAP;
-    coap_vars.desc.callbackReceive = coap_receive;
-    coap_vars.desc.callbackSendDone = coap_sendDone;
+    memset(&coap_vars.sock, 0, sizeof(sock_udp_t));
+    local.port = WKP_UDP_COAP;
+
+    if (sock_udp_create(&coap_vars.sock, &local, NULL, 0) < 0) {
+        openserial_printf("Could not create socket\n");
+        return;
+    }
+
+    openserial_printf("Created a UDP socket\n");
+
+    sock_udp_set_cb(&coap_vars.sock, coap_sock_handler, NULL);
 }
 
 /**
@@ -502,13 +513,21 @@ void coap_receive(OpenQueueEntry_t *msg) {
     memcpy(&msg->l3_destinationAdd.addr_128b[0], &msg->l3_sourceAdd.addr_128b[0], LENGTH_ADDR128b);
 
     // fill in CoAP header
-    coap_header_encode(msg,
-                       COAP_VERSION,
-                       response_type,
-                       coap_header.TKL,
-                       coap_header.Code,
-                       coap_header.messageID,
+    if (coap_header_encode(msg,
+                           COAP_VERSION,
+                           response_type,
+                           coap_header.TKL,
+                           coap_header.Code,
+                           coap_header.messageID,
+                           &coap_header.token[0]) == E_FAIL) {
+        openqueue_freePacketBuffer(msg);
+        return;
+    }
 
+/*    if ((openudp_send(msg)) == E_FAIL) {
+        openqueue_freePacketBuffer(msg);
+    }
+*/
 }
 
 /**
@@ -929,6 +948,59 @@ uint8_t coap_find_option(coap_option_iht *array, uint8_t arrayLen, coap_option_t
 }
 
 //=========================== private =========================================
+
+void coap_sock_handler(sock_udp_t *sock, sock_async_flags_t type, void *arg) {
+    (void) arg;
+    sock_udp_ep_t remote;
+    sock_udp_ep_t local;
+    int16_t res;
+    uint16_t footer_length;
+    OpenQueueEntry_t *msg;
+
+    if (type & SOCK_ASYNC_MSG_RECV) {
+
+        msg = openqueue_getFreePacketBuffer(COMPONENT_OPENCOAP);
+
+	if (msg == NULL) {
+            LOG_ERROR(COMPONENT_OPENCOAP, ERR_NO_FREE_PACKET_BUFFER, (errorparameter_t) 0, (errorparameter_t) 0);
+            return;
+        }
+
+	if (packetfunctions_reserveHeader(&msg, IPV6_PACKET_SIZE) == E_FAIL) {
+            openserial_printf("Could not reserve header\n");
+            return;
+        }
+
+        if ((res = sock_udp_recv(sock, msg->payload, IPV6_PACKET_SIZE, 0, &remote)) >= 0) {
+
+            openserial_printf("Received %d bytes from remote endpoint:\n", res);
+            openserial_printf(" - port: %d", remote.port);
+            openserial_printf(" - addr: ", remote.port);
+            for(int i=0; i < 16; i ++) {
+                openserial_printf("%x ", remote.addr.ipv6[i]);
+	    }
+
+            openserial_printf("\n\n");
+
+	    // set the length to the actual received bytes
+    	    footer_length = msg->length - res;
+	    packetfunctions_tossFooter(&msg, footer_length);
+
+	    // fill the metadata
+            msg->l4_protocol_compressed = FALSE;
+            msg->l4_protocol = IANA_UDP;
+            msg->l4_sourcePortORicmpv6Type = remote.port;
+            sock_udp_get_local(sock, &local);
+	    msg->l4_destination_port = local.port;
+	    msg->l4_payload = msg->payload;
+	    msg->l4_length = res;
+            memcpy(&msg->l3_destinationAdd.addr_128b, &local.addr, LENGTH_ADDR128b);
+            memcpy(&msg->l3_sourceAdd.addr_128b, &remote.addr, LENGTH_ADDR128b);
+
+	    coap_receive(msg);
+        }
+    }
+}
 
 uint8_t coap_options_parse(
         uint8_t *buffer,

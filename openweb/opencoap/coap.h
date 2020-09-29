@@ -11,6 +11,8 @@
 #include "config.h"
 #include "opentimers.h"
 #include "udp.h"
+#include "sock.h"
+#include "async.h"
 
 //=========================== define ==========================================
 
@@ -215,6 +217,7 @@ typedef struct {
     uint8_t delayCounter;
     uint16_t messageID;
     coap_statelessproxy_vars_t statelessProxy;
+    sock_udp_t sock;
 } coap_vars_t;
 
 //=========================== prototypes ======================================
