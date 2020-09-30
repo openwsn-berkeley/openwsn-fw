@@ -10,7 +10,6 @@
 
 #include "config.h"
 #include "opentimers.h"
-#include "udp.h"
 #include "sock.h"
 #include "async.h"
 
@@ -36,6 +35,8 @@ static const uint8_t ipAddr_ringmaster[] = {0xbb, 0xbb, 0x00, 0x00, 0x00, 0x00, 
 
 // This value may be reduced as a memory optimization, but would invalidate spec compliance
 #define COAP_MAX_TKL                   8
+
+#define COAP_MAX_MSG_LEN               IPV6_PACKET_SIZE - 20
 
 #define COAP_PAYLOAD_MARKER            0xFF
 

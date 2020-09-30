@@ -53,6 +53,8 @@ void coap_forward_message(OpenQueueEntry_t *msg,
 
 void coap_sock_handler(sock_udp_t *sock, sock_async_flags_t type, void *arg);
 
+owerror_t coap_sock_send_internal(OpenQueueEntry_t *msg);
+
 //=========================== public ==========================================
 
 //===== from stack
@@ -453,7 +455,7 @@ void coap_receive(OpenQueueEntry_t *msg) {
 
     } else {
         // reset packet payload (DO NOT DELETE, we will reuse same buffer for response)
-        msg->payload = &(msg->packet[127]);
+        msg->payload = &(msg->packet[127]); // FIXME use packetfunctions to reset
         msg->length = 0;
         // set the CoAP header
         coap_header.TKL = 0;
@@ -466,7 +468,7 @@ void coap_receive(OpenQueueEntry_t *msg) {
 
     if (outcome == E_FAIL) {
         // reset packet payload (DO NOT DELETE, we will reuse same buffer for response)
-        msg->payload = &(msg->packet[127]);
+        msg->payload = &(msg->packet[127]); // FIXME use packetfunctions to reset
         msg->length = 0;
         // set the CoAP header
         coap_header.TKL = 0;
@@ -524,10 +526,10 @@ void coap_receive(OpenQueueEntry_t *msg) {
         return;
     }
 
-/*    if ((openudp_send(msg)) == E_FAIL) {
+    if ((coap_sock_send_internal(msg)) == E_FAIL) {
         openqueue_freePacketBuffer(msg);
     }
-*/
+
 }
 
 /**
@@ -777,6 +779,7 @@ owerror_t coap_send(
         return E_FAIL;
     }
 
+    return coap_sock_send_internal(msg);
 }
 
 /**
@@ -950,7 +953,6 @@ uint8_t coap_find_option(coap_option_iht *array, uint8_t arrayLen, coap_option_t
 //=========================== private =========================================
 
 void coap_sock_handler(sock_udp_t *sock, sock_async_flags_t type, void *arg) {
-    (void) arg;
     sock_udp_ep_t remote;
     sock_udp_ep_t local;
     int16_t res;
@@ -966,12 +968,12 @@ void coap_sock_handler(sock_udp_t *sock, sock_async_flags_t type, void *arg) {
             return;
         }
 
-	if (packetfunctions_reserveHeader(&msg, IPV6_PACKET_SIZE) == E_FAIL) {
+	if (packetfunctions_reserveHeader(&msg, COAP_MAX_MSG_LEN) == E_FAIL) {
             openserial_printf("Could not reserve header\n");
             return;
         }
 
-        if ((res = sock_udp_recv(sock, msg->payload, IPV6_PACKET_SIZE, 0, &remote)) >= 0) {
+        if ((res = sock_udp_recv(sock, msg->payload, COAP_MAX_MSG_LEN, 0, &remote)) >= 0) {
 
             openserial_printf("Received %d bytes from remote endpoint:\n", res);
             openserial_printf(" - port: %d", remote.port);
@@ -987,6 +989,7 @@ void coap_sock_handler(sock_udp_t *sock, sock_async_flags_t type, void *arg) {
 	    packetfunctions_tossFooter(&msg, footer_length);
 
 	    // fill the metadata
+	    msg->owner = COMPONENT_OPENCOAP;
             msg->l4_protocol_compressed = FALSE;
             msg->l4_protocol = IANA_UDP;
             msg->l4_sourcePortORicmpv6Type = remote.port;
@@ -999,7 +1002,27 @@ void coap_sock_handler(sock_udp_t *sock, sock_async_flags_t type, void *arg) {
 
 	    coap_receive(msg);
         }
+    } else if (type & SOCK_ASYNC_MSG_SENT) {
+        msg = openqueue_getPacketByComponent(COMPONENT_OPENCOAP);
+        coap_sendDone(msg, *(owerror_t *)arg);
     }
+}
+
+owerror_t coap_sock_send_internal(OpenQueueEntry_t *msg) {
+    sock_udp_ep_t remote;
+    int16_t res;
+
+    // init remote endpoint
+    remote.family = AF_INET6;
+    memcpy(&remote.addr, &msg->l3_destinationAdd.addr_128b, LENGTH_ADDR128b);
+    remote.netif = 0;
+    remote.port = msg->l4_destination_port;
+
+    if ((res = sock_udp_send(&coap_vars.sock, msg->payload, msg->length, &remote)) >= 0) {
+        return E_SUCCESS;
+    }
+
+    return E_FAIL;
 }
 
 uint8_t coap_options_parse(
@@ -1296,24 +1319,41 @@ void coap_forward_message(OpenQueueEntry_t *msg,
 
     // fill payload
     if (msg->length) {
-        packetfunctions_reserveHeader(&outgoingPacket, msg->length);
+        if (packetfunctions_reserveHeader(&outgoingPacket, msg->length) == E_FAIL) {
+            goto fail;
+        }
         memcpy(outgoingPacket->payload, msg->payload, msg->length);
-        packetfunctions_reserveHeader(&outgoingPacket, 1);
+        if (packetfunctions_reserveHeader(&outgoingPacket, 1) == E_FAIL) {
+            goto fail;
+        }
         outgoingPacket->payload[0] = COAP_PAYLOAD_MARKER;
     }
 
     // encode options
-    coap_options_encode(outgoingPacket, outgoingOptions, outgoingOptionsLen, COAP_OPTION_CLASS_ALL);
+    if (coap_options_encode(outgoingPacket, outgoingOptions, outgoingOptionsLen, COAP_OPTION_CLASS_ALL) == E_FAIL) {
+        goto fail;
+    }
 
     // encode CoAP header
-    coap_header_encode(outgoingPacket,
-                       header->Ver,
-                       header->T,
-                       header->TKL,
-                       header->Code,
-                       header->messageID,
-                       header->token);
+    if (coap_header_encode(outgoingPacket,
+                           header->Ver,
+                           header->T,
+                           header->TKL,
+                           header->Code,
+                           header->messageID,
+                           header->token) == E_FAIL) {
+        goto fail;
+    }
 
+    if ((coap_sock_send_internal(outgoingPacket)) == E_FAIL) {
+        goto fail;
+    }
+
+    return;
+
+    fail:
+    openqueue_freePacketBuffer(outgoingPacket);
+    return;
 }
 
 #endif /* OPENWSN_COAP_C */
