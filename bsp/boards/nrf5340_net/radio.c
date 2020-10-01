@@ -52,6 +52,7 @@ typedef struct {
     radio_state_t             state;
     uint8_t                   payload[MAX_PACKET_SIZE] __attribute__ ((aligned));
     uint32_t                  df_samples[MAX_IQSAMPLES];
+    uint8_t                   array_to_use;
 } radio_vars_t;
 
 radio_vars_t radio_vars;
@@ -308,13 +309,34 @@ void radio_get_crc(uint8_t* crc24){
 
 //=========================== private =========================================
 
-#define ANT_SWITCH_PORT           1
+// TI BOOSTXL-AOA antenna pin mapping
 
-#define ANT_SWITCH_PIN0           6
-#define ANT_SWITCH_PIN1           7
-#define ANT_SWITCH_PIN2           8
-#define ANT_SWITCH_PIN3           9
-#define ANT_SWITCH_PIN4           10
+//  VALUE   DIO27   DIO28   DIO29   DIO30   Antenna
+//  0x2     0       1       0       0       A2.1
+//  0x4     0       0       1       0       A2.2
+//  0x8     0       0       0       1       A2.3
+//  0x3     1       1       0       0       A1.1
+//  0x5     1       0       1       0       A1.2
+//  0x9     1       0       0       1       A1.3
+
+//  0: 0.0V to 0.2V, 1: 2.5V to 5.0V
+
+#define ANT_SWITCH_PORT           1
+#define ANT_SWITCH_PIN0           6 // DIO27
+#define ANT_SWITCH_PIN1           7 // DIO28
+#define ANT_SWITCH_PIN2           8 // DIO29
+#define ANT_SWITCH_PIN3           9 // DIO30
+
+#define PATTERN_A2_1              0x2
+#define PATTERN_A2_2              0x4
+#define PATTERN_A2_3              0x8
+#define PATTERN_A1_1              0x3
+#define PATTERN_A1_2              0x5
+#define PATTERN_A1_3              0x9
+
+#define LED_PORT                  0
+#define LED_LEFT                  23
+#define LED_RIGHT                 24
 
 void radio_configure_direction_finding_antenna_switch(void) {
     
@@ -328,9 +350,13 @@ void radio_configure_direction_finding_antenna_switch(void) {
     nrf_gpio_cfg_output(ANT_SWITCH_PORT,  ANT_SWITCH_PIN1);
     nrf_gpio_cfg_output(ANT_SWITCH_PORT,  ANT_SWITCH_PIN2);
     nrf_gpio_cfg_output(ANT_SWITCH_PORT,  ANT_SWITCH_PIN3);
-    nrf_gpio_cfg_output(ANT_SWITCH_PORT,  ANT_SWITCH_PIN4);
 
-    NRF_P1_NS->OUTCLR = 0x000007C0;
+    NRF_P1_NS->OUTCLR = 0x000003C0;
+    
+    nrf_gpio_cfg_output(LED_PORT,         LED_LEFT);
+    nrf_gpio_cfg_output(LED_PORT,         LED_RIGHT);
+
+    NRF_P0_NS->OUTCLR = 0x01800000;
         
     // configure GPIO pins
     NRF_RADIO_NS->PSEL.DFEGPIO[0] = (uint32_t)(
@@ -353,20 +379,23 @@ void radio_configure_direction_finding_antenna_switch(void) {
                                         (ANT_SWITCH_PIN3 << 0)      |
                                         (0 << 31)
                                     );
-    NRF_RADIO_NS->PSEL.DFEGPIO[4] = (uint32_t)(
-                                        (ANT_SWITCH_PORT << 5)      |
-                                        (ANT_SWITCH_PIN4 << 0)      |
-                                        (0 << 31)
-                                    );
 
     // write switch pattern
-    NRF_RADIO_NS->CLEARPATTERN  = (uint32_t)1;
 
-    NRF_RADIO_NS->SWITCHPATTERN = (uint32_t)(1<<0);
-    NRF_RADIO_NS->SWITCHPATTERN = (uint32_t)(1<<1);
-    NRF_RADIO_NS->SWITCHPATTERN = (uint32_t)(1<<2);
-    NRF_RADIO_NS->SWITCHPATTERN = (uint32_t)(1<<3);
-    NRF_RADIO_NS->SWITCHPATTERN = (uint32_t)(1<<4);
+    NRF_RADIO_NS->CLEARPATTERN  = (uint32_t)1;
+    if (radio_vars.array_to_use == 2){
+        // use antenna array 2
+        NRF_RADIO_NS->SWITCHPATTERN = (uint32_t)(PATTERN_A2_1);
+        NRF_RADIO_NS->SWITCHPATTERN = (uint32_t)(PATTERN_A2_1);
+        NRF_RADIO_NS->SWITCHPATTERN = (uint32_t)(PATTERN_A2_2);
+        NRF_RADIO_NS->SWITCHPATTERN = (uint32_t)(PATTERN_A2_3);
+    } else {
+        // use antenna array 1 by default
+        NRF_RADIO_NS->SWITCHPATTERN = (uint32_t)(PATTERN_A1_1);
+        NRF_RADIO_NS->SWITCHPATTERN = (uint32_t)(PATTERN_A1_1);
+        NRF_RADIO_NS->SWITCHPATTERN = (uint32_t)(PATTERN_A1_2);
+        NRF_RADIO_NS->SWITCHPATTERN = (uint32_t)(PATTERN_A1_3);
+    }
 }
 
 
@@ -391,8 +420,6 @@ void radio_configure_direction_finding_antenna_switch(void) {
 #define DFEOPMODE_AOA             3 //
 
 void radio_configure_direction_finding_manual(void) {
-
-    radio_configure_direction_finding_antenna_switch();
 
     // enable direction finding in AoA mode
     NRF_RADIO_NS->DFEMODE = (uint32_t)DFEOPMODE_AOA;
@@ -473,6 +500,20 @@ uint16_t radio_get_df_samples(uint32_t* sample_buffer, uint16_t length) {
 
     return num_transfered_samples;
 }
+void     radio_configure_switch_antenna_array(void) {
+
+    if (radio_vars.array_to_use == 2) {
+        radio_vars.array_to_use = 1;
+    } else {
+        radio_vars.array_to_use = 2;
+    }
+}
+
+uint8_t  radio_get_antenna_array_id(void) {
+
+    return radio_vars.array_to_use;
+}
+
 
 uint32_t ble_channel_to_frequency(uint8_t channel) {
 
@@ -486,7 +527,7 @@ uint32_t ble_channel_to_frequency(uint8_t channel) {
             
             frequency = 28+2*(channel-11);
         } else {
-            switch(channel){
+            switch(channel) {
                 case 37:
                     frequency = 2;
                 break;
@@ -507,7 +548,7 @@ uint32_t ble_channel_to_frequency(uint8_t channel) {
     return frequency;
 }
 
-void RADIO_IRQHandler(void){
+void RADIO_IRQHandler(void) {
 
     debugpins_isr_set();
     
@@ -540,7 +581,7 @@ kick_scheduler_t    radio_isr(void){
 
      // CTE presence
     if (NRF_RADIO_NS->EVENTS_CTEPRESENT){
-        
+
         NRF_RADIO_NS->EVENTS_CTEPRESENT = (uint32_t)0;
         return KICK_SCHEDULER;
     }
