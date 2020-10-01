@@ -14,7 +14,7 @@ sample = {
 }
 samples = []
 
-key = 'black'
+key = 'red'
 
 new_read_mark       = 255
 num_new_read_mark   = 4
@@ -43,13 +43,14 @@ while 1:
     
     if new_sample_read:
         new_sample_read = False
-        if len(input_data) == NUM_SAMPLES*4+5:
+        if len(input_data) == NUM_SAMPLES*4+8:
             for i in range(NUM_SAMPLES):
                 magnitude, phase = struct.unpack('>Hh', ''.join(input_data[4*i: 4*(i+1)]))
                 sample['magnitude'] = magnitude
                 sample['phase']     = phase
                 data['samples'].append(sample.copy())
             data['rssi'] = struct.unpack('>b', ''.join(input_data[NUM_SAMPLES*4]))
+            data['setting'] = ((ord(input_data[NUM_SAMPLES*4+1])) << 10 ) | ((ord(input_data[NUM_SAMPLES*4+2])) << 5) | (ord(input_data[NUM_SAMPLES*4+3]))
             with open('samples_{0}.txt'.format(key), 'a') as f:
                 f.write(str(data)+'\n')
                 data['samples'] = []
