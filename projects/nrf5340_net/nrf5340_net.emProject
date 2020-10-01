@@ -459,4 +459,71 @@
       path="../../../inc"
       recurse="Yes" />
   </project>
+  <project Name="01bsp_hornet_monitor">
+    <configuration
+      Name="Common"
+      arm_architecture="v8M_Mainline"
+      arm_core_type="Cortex-M33"
+      arm_endian="Little"
+      arm_fpu_type="FPv5-SP-D16"
+      arm_linker_heap_size="1024"
+      arm_linker_process_stack_size="0"
+      arm_linker_stack_size="1024"
+      arm_linker_variant="SEGGER"
+      arm_simulator_memory_simulation_parameter="RX 00000000,00100000,FFFFFFFF;RWX 20000000,00040000,CDCDCDCD"
+      arm_target_device_name="NRF5340_XXAA_NET"
+      arm_target_interface_type="SWD"
+      c_user_include_directories="SEGGER"
+      debug_target_connection="J-Link"
+      link_linker_script_file="../../../bsp/boards/nrf5340_net/sdk/nrf5340_xxaa_network.ld"
+      linker_output_format="hex"
+      linker_section_placements_segments="FLASH1 RX 0x00000000 0x00100000;RAM1 RWX 0x20000000 0x00040000"
+      project_directory="01bsp_hornet_monitor"
+      project_type="Executable" />
+    <configuration
+      Name="Debug"
+      arm_architecture="v8M_Mainline"
+      arm_assembler_variant="gcc"
+      arm_compiler_variant="gcc"
+      arm_core_type="Cortex-M33"
+      arm_endian="Little"
+      arm_fp_abi="Soft"
+      arm_fpu_type="FPv5-SP-D16"
+      arm_linker_variant="GNU"
+      arm_rtl_variant="Embedded Studio"
+      arm_simulator_memory_simulation_parameter="RX 00ff8000,00001000,FFFFFFFF;RWX 20000000,00080000,CDCDCDCD"
+      arm_target_device_name="nRF5340_xxAA_NET"
+      c_preprocessor_definitions="NRF5340_XXAA_NET"
+      c_user_include_directories="../../../bsp/boards/nrf5340_net/sdk;../../../bsp/boards/nrf5340_net;../../../bsp/boards/;../../../inc/"
+      debug_restrict_memory_access="No"
+      debug_start_from_entry_point_symbol="No"
+      gcc_entry_point="Reset_Handler"
+      link_linker_script_file="../../../bsp/boards/nrf5340_net/sdk/nrf5340_network.ld"
+      link_use_linker_script_file="Yes"
+      linker_additional_files=""
+      linker_section_placement_file="flash_placement.xml"
+      linker_section_placements_segments="FLASH1 RX 0x00ff8000 0x00001000;RAM1 RWX 0x20000000 0x00080000" />
+    <folder
+      Name="application"
+      exclude=""
+      filter="*.c"
+      path="01bsp_hornet_monitor.c"
+      recurse="No" />
+    <folder Name="bsp">
+      <folder Name="board">
+        <folder
+          Name="nrf5340_net"
+          exclude=""
+          filter="*.c;*.s;*.S;*.h"
+          path="../../../bsp/boards/nrf5340_net"
+          recurse="Yes" />
+      </folder>
+    </folder>
+    <folder
+      Name="inc"
+      exclude=""
+      filter="*.h"
+      path="../../../inc"
+      recurse="Yes" />
+  </project>
 </solution>
