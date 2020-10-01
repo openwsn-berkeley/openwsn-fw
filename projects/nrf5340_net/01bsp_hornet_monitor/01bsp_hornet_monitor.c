@@ -17,7 +17,7 @@
 
 #define LENGTH_PACKET         125+LENGTH_CRC // maximum length is 127 bytes
 #define CHANNEL               0             // 24ghz: 11 = 2.405GHz, subghz: 11 = 865.325 in  FSK operating mode #1
-#define LENGTH_SERIAL_FRAME   ((NUM_SAMPLES*4)+5)   // length of the serial frame
+#define LENGTH_SERIAL_FRAME   ((NUM_SAMPLES*4)+8)   // length of the serial frame
 
 #define DF_ENABLE             1
 
@@ -44,9 +44,12 @@ typedef struct {
                 uint8_t    rxpk_freq_offset;
                uint32_t    sample_buffer[NUM_SAMPLES];
                uint16_t    num_samples;
+                uint8_t    setting_coarse;
+                uint8_t    setting_mid;
+                uint8_t    setting_fine;
     // uart
                 uint8_t    uart_txFrame[LENGTH_SERIAL_FRAME];
-                uint8_t    uart_lastTxByte;
+               uint16_t    uart_lastTxByte;
     volatile    uint8_t    uart_done;
 } app_vars_t;
 
@@ -91,6 +94,7 @@ int mote_main(void) {
     radio_setFrequency(CHANNEL, FREQ_RX);
 
 #ifdef DF_ENABLE
+    radio_configure_switch_antenna_array();
     radio_configure_direction_finding_antenna_switch();
     radio_configure_direction_finding_manual();
 #endif
@@ -124,10 +128,15 @@ int mote_main(void) {
             app_vars.uart_txFrame[4*i+3] = (app_vars.sample_buffer[i] >> 0) & 0x000000ff;
         }
         app_vars.uart_txFrame[4*i+0]     = app_vars.rxpk_rssi;
-        app_vars.uart_txFrame[4*i+1]     = 0xff;
-        app_vars.uart_txFrame[4*i+2]     = 0xff;
-        app_vars.uart_txFrame[4*i+3]     = 0xff;
+        // record scum settings for transmitting
+        app_vars.uart_txFrame[4*i+1]     = app_vars.setting_coarse;
+        app_vars.uart_txFrame[4*i+2]     = app_vars.setting_mid;
+        app_vars.uart_txFrame[4*i+3]     = app_vars.setting_fine;
+
         app_vars.uart_txFrame[4*i+4]     = 0xff;
+        app_vars.uart_txFrame[4*i+5]     = 0xff;
+        app_vars.uart_txFrame[4*i+6]     = 0xff;
+        app_vars.uart_txFrame[4*i+7]     = 0xff;
 
         app_vars.uart_done          = 0;
         app_vars.uart_lastTxByte    = 0;
@@ -139,6 +148,8 @@ int mote_main(void) {
         uart_writeByte(app_vars.uart_txFrame[app_vars.uart_lastTxByte]);
         while (app_vars.uart_done==0); // busy wait to finish
         uart_disableInterrupts();
+
+        debugpins_fsm_toggle();
 
         // led
         leds_error_off();
@@ -177,17 +188,20 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
         &app_vars.rxpk_lqi,
         &app_vars.rxpk_crc
     );
-    app_vars.num_samples = radio_get_df_samples(app_vars.sample_buffer,NUM_SAMPLES);
+    app_vars.num_samples    = radio_get_df_samples(app_vars.sample_buffer,NUM_SAMPLES);
+    app_vars.setting_coarse = app_vars.rxpk_buf[2];
+    app_vars.setting_mid    = app_vars.rxpk_buf[3];
+    app_vars.setting_fine   = app_vars.rxpk_buf[4];
 
     if (app_vars.rxpk_crc && app_vars.rxpk_len==5) {
-        leds_debug_toggle();
+        debugpins_slot_toggle();
 
         // indicate I just received a packet from bsp_radio_tx mote
         app_vars.rxpk_done = 1;
     }
 
 #ifdef DF_ENABLE
-    radio_configure_switch_antenna_array();
+    //radio_configure_switch_antenna_array();
     radio_configure_direction_finding_antenna_switch();
     radio_configure_direction_finding_manual();
 #endif
@@ -208,7 +222,7 @@ void cb_uartTxDone(void) {
     // prepare to send the next byte
     app_vars.uart_lastTxByte++;
 
-    if (app_vars.uart_lastTxByte<sizeof(app_vars.uart_txFrame)) {
+    if (app_vars.uart_lastTxByte<LENGTH_SERIAL_FRAME) {
         uart_writeByte(app_vars.uart_txFrame[app_vars.uart_lastTxByte]);
     } else {
         app_vars.uart_done=1;
