@@ -17,7 +17,7 @@
 
 #define LENGTH_PACKET         125+LENGTH_CRC // maximum length is 127 bytes
 #define CHANNEL               0             // 24ghz: 11 = 2.405GHz, subghz: 11 = 865.325 in  FSK operating mode #1
-#define LENGTH_SERIAL_FRAME   ((NUM_SAMPLES*4)+8)   // length of the serial frame
+#define LENGTH_SERIAL_FRAME   ((NUM_SAMPLES*4)+9)   // length of the serial frame
 
 #define DF_ENABLE             1
 
@@ -127,16 +127,19 @@ int mote_main(void) {
             app_vars.uart_txFrame[4*i+2] = (app_vars.sample_buffer[i] >> 8) & 0x000000ff;
             app_vars.uart_txFrame[4*i+3] = (app_vars.sample_buffer[i] >> 0) & 0x000000ff;
         }
+        
         app_vars.uart_txFrame[4*i+0]     = app_vars.rxpk_rssi;
         // record scum settings for transmitting
         app_vars.uart_txFrame[4*i+1]     = app_vars.setting_coarse;
         app_vars.uart_txFrame[4*i+2]     = app_vars.setting_mid;
         app_vars.uart_txFrame[4*i+3]     = app_vars.setting_fine;
 
-        app_vars.uart_txFrame[4*i+4]     = 0xff;
+        app_vars.uart_txFrame[4*i+4]     = radio_get_antenna_array_id();
+
         app_vars.uart_txFrame[4*i+5]     = 0xff;
         app_vars.uart_txFrame[4*i+6]     = 0xff;
         app_vars.uart_txFrame[4*i+7]     = 0xff;
+        app_vars.uart_txFrame[4*i+8]     = 0xff;
 
         app_vars.uart_done          = 0;
         app_vars.uart_lastTxByte    = 0;

@@ -43,14 +43,15 @@ while 1:
     
     if new_sample_read:
         new_sample_read = False
-        if len(input_data) == NUM_SAMPLES*4+8:
+        if len(input_data) == NUM_SAMPLES*4+9:
             for i in range(NUM_SAMPLES):
                 magnitude, phase = struct.unpack('>Hh', ''.join(input_data[4*i: 4*(i+1)]))
                 sample['magnitude'] = magnitude
                 sample['phase']     = phase
                 data['samples'].append(sample.copy())
-            data['rssi'] = struct.unpack('>b', ''.join(input_data[NUM_SAMPLES*4]))
+            data['rssi']    = struct.unpack('>b', ''.join(input_data[NUM_SAMPLES*4]))
             data['setting'] = ((ord(input_data[NUM_SAMPLES*4+1])) << 10 ) | ((ord(input_data[NUM_SAMPLES*4+2])) << 5) | (ord(input_data[NUM_SAMPLES*4+3]))
+            data['array']   = ord(input_data[NUM_SAMPLES*4+4])
             with open('samples_{0}.txt'.format(key), 'a') as f:
                 f.write(str(data)+'\n')
                 data['samples'] = []
