@@ -9,7 +9,7 @@ nrf5340_port = {
     'black': 'COM11',
 }
 
-key = 'black'
+key = 'red'
 
 NUMBEROF8US         = 3  # in unit of 8 us
 TSWITCHSPACING      = 2  # 1:4us 2:2us 3: 1us
@@ -34,7 +34,7 @@ time = reference_time
 for switch in switching_time:
     time += switch
 
-time = [4 + 0.125*i for i in range(8*8)] + [12 + 0.125*i for i in range(12*8)]
+time = [4 + 0.125*i for i in range(8*8)] + [12+1 + 0.125*i for i in range(12*8)]
 
 time_data = time
 
@@ -52,13 +52,42 @@ with open(sample_file, 'r') as f:
         for sample in one_entry_samples['samples']:
             magPhase['mag_data'].append(sample['magnitude'])
             magPhase['phase_data'].append(sample['phase'])
-        ax.plot(time_data, magPhase['mag_data'], '^-', label='mag_data')
-        ax.plot(time_data, magPhase['phase_data'], '*-', label='phase_data')
+        # ax.plot(time_data, magPhase['mag_data'], '^-', label='mag_data')
+        # ax.plot(time_data, magPhase['phase_data'], '*-', label='phase_data')
+        
+        i = 8
+        ax.plot(time_data[:8*i], magPhase['mag_data'][:8*i], '^-', label='mag_data_ant1.1')
+        ax.plot(time_data[:8*i], magPhase['phase_data'][:8*i], '*-', label='phase_data_ant1.1')
+
+        ax.plot(time_data[8*i:8*(i+1)], magPhase['mag_data'][8*i:8*(i+1)], '^-', label='phase_data_antt1.2')
+        ax.plot(time_data[8*i:8*(i+1)], magPhase['phase_data'][8*i:8*(i+1)], '*-', label='phase_data_antt1.2')
+        i += 2
+        ax.plot(time_data[8*i:8*(i+1)], magPhase['mag_data'][8*i:8*(i+1)], '^-', label='phase_data_antt1.3')
+        ax.plot(time_data[8*i:8*(i+1)], magPhase['phase_data'][8*i:8*(i+1)], '*-', label='phase_data_antt1.3')
+        i += 2
+        ax.plot(time_data[8*i:8*(i+1)], magPhase['mag_data'][8*i:8*(i+1)], '^-', label='phase_data_antt1.2')
+        ax.plot(time_data[8*i:8*(i+1)], magPhase['phase_data'][8*i:8*(i+1)], '*-', label='phase_data_antt1.2')
+        i += 2
+        ax.plot(time_data[8*i:8*(i+1)], magPhase['mag_data'][8*i:8*(i+1)], '^-', label='phase_data_antt1.3')
+        ax.plot(time_data[8*i:8*(i+1)], magPhase['phase_data'][8*i:8*(i+1)], '*-', label='phase_data_antt1.3')
+        i += 2
+        ax.plot(time_data[8*i:8*(i+1)], magPhase['mag_data'][8*i:8*(i+1)], '^-', label='phase_data_antt1.2')
+        ax.plot(time_data[8*i:8*(i+1)], magPhase['phase_data'][8*i:8*(i+1)], '*-', label='phase_data_antt1.2')
+        i += 2
+        ax.plot(time_data[8*i:8*(i+1)], magPhase['mag_data'][8*i:8*(i+1)], '^-', label='phase_data_antt1.2')
+        ax.plot(time_data[8*i:8*(i+1)], magPhase['phase_data'][8*i:8*(i+1)], '*-', label='phase_data_antt1.3')
+        
         ax.set_ylim(-400, 400)
         ax.set_xlim(0,    25)
         ax.set_xlabel('time (us)')
         ax.grid(True)
-        ax.legend()
-        fig.savefig('sampe_pkt_{0}'.format(num_pkt))
+        ax.legend(loc=2)
+        fig.savefig('sampe_pkt_{0}_{1}-{2}-{3}'.format(
+                num_pkt,
+                ((one_entry_samples['setting']>>10) & 0x1f), 
+                ((one_entry_samples['setting']>>5)  & 0x1f),
+                ((one_entry_samples['setting']>>0)  & 0x1f)
+            )
+        )
         ax.clear()
         
