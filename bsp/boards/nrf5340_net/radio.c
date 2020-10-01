@@ -335,8 +335,6 @@ void radio_get_crc(uint8_t* crc24){
 #define PATTERN_A1_3              0x9
 
 #define LED_PORT                  0
-#define LED_LEFT                  23
-#define LED_RIGHT                 24
 
 void radio_configure_direction_finding_antenna_switch(void) {
     
@@ -352,11 +350,6 @@ void radio_configure_direction_finding_antenna_switch(void) {
     nrf_gpio_cfg_output(ANT_SWITCH_PORT,  ANT_SWITCH_PIN3);
 
     NRF_P1_NS->OUTCLR = 0x000003C0;
-    
-    nrf_gpio_cfg_output(LED_PORT,         LED_LEFT);
-    nrf_gpio_cfg_output(LED_PORT,         LED_RIGHT);
-
-    NRF_P0_NS->OUTCLR = 0x01800000;
         
     // configure GPIO pins
     NRF_RADIO_NS->PSEL.DFEGPIO[0] = (uint32_t)(

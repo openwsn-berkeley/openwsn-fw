@@ -13,8 +13,8 @@
 #define PIN_PORT          0
 
 #define PIN_FRAME         24    // p0.24
-#define PIN_SLOT          3     // p0.03
-#define PIN_FSM           4     // p0.04
+#define PIN_SLOT          25    // p0.25
+#define PIN_FSM           26    // p0.26
 #define PIN_TASK          5     // p0.05
 #define PIN_ISR           23    // p0.23
 #define PIN_RADIO         7     // p0.07
