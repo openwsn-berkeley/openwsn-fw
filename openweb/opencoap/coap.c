@@ -968,6 +968,9 @@ void coap_sock_handler(sock_udp_t *sock, sock_async_flags_t type, void *arg) {
             return;
         }
 
+	// take ownership over the packet
+	msg->owner = COMPONENT_OPENCOAP;
+
 	if (packetfunctions_reserveHeader(&msg, COAP_MAX_MSG_LEN) == E_FAIL) {
             openserial_printf("Could not reserve header\n");
             return;
