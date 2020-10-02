@@ -454,6 +454,8 @@ void coap_receive(OpenQueueEntry_t *msg) {
         }
 
     } else {
+	// resource not found but success in creating the response
+        outcome = E_SUCCESS;
         // reset packet payload (DO NOT DELETE, we will reuse same buffer for response)
         msg->payload = &(msg->packet[127]); // FIXME use packetfunctions to reset
         msg->length = 0;
