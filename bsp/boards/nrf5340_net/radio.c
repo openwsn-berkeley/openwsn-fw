@@ -163,6 +163,13 @@ void radio_setFrequency(uint8_t channel, radio_freq_t tx_or_rx) {
     radio_vars.state            = RADIOSTATE_FREQUENCY_SET;
 }
 
+
+uint32_t radio_get_frequency(void) {
+
+    // return value, in MHz
+    return (2400 + (NRF_RADIO_NS->FREQUENCY & 0x0000007F));
+}
+
 void radio_rfOn(void) {
 
     // power on radio
