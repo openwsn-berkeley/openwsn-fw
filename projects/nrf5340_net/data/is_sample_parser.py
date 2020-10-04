@@ -66,7 +66,7 @@ def aoa_angle_calculation(phase_data, num_pkt):
         IF = 1 / ((index_2 - index_1) * t_unit * 1e-6)
         freq = CENTER_FREQ + IF
         
-        wave_length = (1/freq) * C  # in meters
+        wave_length = (1.0/freq) * C  # in meters
         reference_phase_data = phase_data[index_1:index_2]
     else:
         return None
@@ -121,30 +121,41 @@ def aoa_angle_calculation(phase_data, num_pkt):
     
     # calculate the phase degree
     
-    print "{0} {1} {2} {3}".format(
-        (sum(phase_diff_ant_1_2)/len(phase_diff_ant_1_2)/402 * wave_length) / ANT_D, 
+    theta_1 = None
+    theta_2 = None
+    
+    print "arccos(x) = {0} phase_diff = {1} wave length = {2} ANT_diff = {3}".format(
+        (((sum(phase_diff_ant_1_2)/len(phase_diff_ant_1_2))/402.0) * wave_length) / ANT_D, 
         (sum(phase_diff_ant_1_2)/len(phase_diff_ant_1_2))/402.0, 
         wave_length, 
         ANT_D
     )
-    theta_1 = math.acos( 
-        (sum(phase_diff_ant_1_2)/len(phase_diff_ant_1_2)/402.0 * wave_length) / ANT_D
-    )
+    
+    arccos_x = (((sum(phase_diff_ant_1_2)/len(phase_diff_ant_1_2))/402.0) * wave_length) / ANT_D
+    if arccos_x <= 1 and arccos_x >= -1:
+        theta_1 = math.acos(arccos_x)
+    else:
+        print("invalid theta_1 {0}!").format(theta_1)
+    
 
-    print "{0} {1} {2} {3}".format(
-        (sum(phase_diff_ant_1_3)/len(phase_diff_ant_1_3)/402 * wave_length) / ANT_D, 
+    print "arccos(x) = {0} phase_diff = {1} wave length = {2} ANT_diff = {3}".format(
+        (((sum(phase_diff_ant_1_3)/len(phase_diff_ant_1_3))/402.0) * wave_length) / ANT_D, 
         (sum(phase_diff_ant_1_3)/len(phase_diff_ant_1_3))/402.0, 
         wave_length, 
         ANT_D
     )
-    theta_2 = math.acos( 
-        (sum(phase_diff_ant_1_3)/len(phase_diff_ant_1_3)/402.0 * wave_length) / ANT_D
-    )
+    arccos_x = (((sum(phase_diff_ant_1_3)/len(phase_diff_ant_1_3))/402.0) * wave_length) / ANT_D
     
-    print "angle_1 {0}  angle_2 {1}".format(
-        theta_1, 
-        theta_2
-    )
+    if arccos_x <= 1 and arccos_x >= -1:
+        theta_2 = math.acos(arccos_x)
+    else:
+        print("invalid theta_2 {0}!").format(theta_2)
+        
+    if theta_1 and theta_2:
+        print "angle_1 {0}  angle_2 {1}".format(
+            180 * theta_1/math.pi, 
+            180 * theta_2/math.pi
+        )
     
     return target_phase_data
     
