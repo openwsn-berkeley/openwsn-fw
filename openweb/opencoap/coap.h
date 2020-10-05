@@ -9,7 +9,6 @@
 */
 
 #include "config.h"
-#include "opentimers.h"
 #include "sock.h"
 #include "async.h"
 
