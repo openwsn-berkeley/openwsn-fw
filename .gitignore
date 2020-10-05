@@ -9,6 +9,7 @@ settings
 *.bin
 *.so
 *.a
+*.idea
 *.pyd
 *.pyc
 /build
