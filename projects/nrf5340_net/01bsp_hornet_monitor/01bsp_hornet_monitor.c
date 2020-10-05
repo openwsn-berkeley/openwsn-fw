@@ -60,6 +60,7 @@ typedef struct {
                 int16_t    reference_data[NUM_SAMPLES+NUM_SAMPLES_REFERENCE];
                 int16_t    angles_1[(NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/4];
                 int16_t    angles_2[(NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/4];
+                uint8_t    antenna_array_id;
 } app_vars_t;
 
 app_vars_t app_vars;
@@ -76,7 +77,7 @@ void cb_uartTxDone(void);
 uint8_t cb_uartRxCb(void);
 // aoa
 float calculate_aoa(void);
-bool    variation_check(int16_t* data, uint8_t length);
+bool  variation_check(int16_t* data, uint8_t length);
 
 //=========================== main ============================================
 
@@ -106,7 +107,7 @@ int mote_main(void) {
     radio_setFrequency(CHANNEL, FREQ_RX);
 
 #ifdef DF_ENABLE
-    radio_configure_switch_antenna_array();
+    //radio_configure_switch_antenna_array();
     radio_configure_direction_finding_antenna_switch();
     radio_configure_direction_finding_manual();
 #endif
@@ -148,7 +149,7 @@ int mote_main(void) {
         app_vars.uart_txFrame[4*i+2]     = app_vars.setting_mid;
         app_vars.uart_txFrame[4*i+3]     = app_vars.setting_fine;
 
-        app_vars.uart_txFrame[4*i+4]     = radio_get_antenna_array_id();
+        app_vars.uart_txFrame[4*i+4]     = app_vars.antenna_array_id;
 
         app_vars.uart_txFrame[4*i+5]     = 0xff;
         app_vars.uart_txFrame[4*i+6]     = 0xff;
@@ -339,13 +340,15 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
 
         // indicate I just received a packet from bsp_radio_tx mote
         app_vars.rxpk_done = 1;
-    }
 
+        app_vars.antenna_array_id = radio_get_antenna_array_id();
+        
 #ifdef DF_ENABLE
-    //radio_configure_switch_antenna_array();
-    radio_configure_direction_finding_antenna_switch();
-    radio_configure_direction_finding_manual();
+        //radio_configure_switch_antenna_array();
+        radio_configure_direction_finding_antenna_switch();
+        radio_configure_direction_finding_manual();
 #endif
+    }
 
     radio_rxEnable();
     radio_rxNow();

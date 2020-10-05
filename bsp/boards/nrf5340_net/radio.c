@@ -130,6 +130,8 @@ void radio_init(void) {
        ((uint32_t)1) << ( ((uint32_t)RADIO_IRQn) & 0x1f);
 
     radio_vars.state        = RADIOSTATE_STOPPED;
+
+    radio_vars.array_to_use = 1;
 }
 
 void radio_setStartFrameCb(radio_capture_cbt cb) {
@@ -385,15 +387,15 @@ void radio_configure_direction_finding_antenna_switch(void) {
     NRF_RADIO_NS->CLEARPATTERN  = (uint32_t)1;
     if (radio_vars.array_to_use == 2){
         // use antenna array 2
-        NRF_RADIO_NS->SWITCHPATTERN = (uint32_t)(PATTERN_A2_1);
-        NRF_RADIO_NS->SWITCHPATTERN = (uint32_t)(PATTERN_A2_1);
         NRF_RADIO_NS->SWITCHPATTERN = (uint32_t)(PATTERN_A2_2);
+        NRF_RADIO_NS->SWITCHPATTERN = (uint32_t)(PATTERN_A2_2);
+        NRF_RADIO_NS->SWITCHPATTERN = (uint32_t)(PATTERN_A2_1);
         NRF_RADIO_NS->SWITCHPATTERN = (uint32_t)(PATTERN_A2_3);
     } else {
         // use antenna array 1 by default
-        NRF_RADIO_NS->SWITCHPATTERN = (uint32_t)(PATTERN_A1_1);
-        NRF_RADIO_NS->SWITCHPATTERN = (uint32_t)(PATTERN_A1_1);
         NRF_RADIO_NS->SWITCHPATTERN = (uint32_t)(PATTERN_A1_2);
+        NRF_RADIO_NS->SWITCHPATTERN = (uint32_t)(PATTERN_A1_2);
+        NRF_RADIO_NS->SWITCHPATTERN = (uint32_t)(PATTERN_A1_1);
         NRF_RADIO_NS->SWITCHPATTERN = (uint32_t)(PATTERN_A1_3);
     }
 }
