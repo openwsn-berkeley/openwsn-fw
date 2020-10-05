@@ -226,10 +226,6 @@ typedef struct {
 // from stack
 void coap_init(void);
 
-void coap_receive(OpenQueueEntry_t *msg);
-
-void coap_sendDone(OpenQueueEntry_t *msg, owerror_t error);
-
 // from CoAP resources
 void coap_writeLinks(OpenQueueEntry_t *msg, uint8_t componentID);
 
@@ -245,7 +241,7 @@ owerror_t coap_send(
         coap_resource_desc_t *descSender
 );
 
-// option handling
+// option handling for OSCORE
 coap_option_class_t coap_get_option_class(coap_option_t type);
 
 uint8_t coap_options_encode(OpenQueueEntry_t *msg,

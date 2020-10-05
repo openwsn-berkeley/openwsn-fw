@@ -21,6 +21,11 @@
 coap_vars_t coap_vars;
 
 //=========================== prototype =======================================
+
+void coap_receive(OpenQueueEntry_t *msg);
+
+void coap_sendDone(OpenQueueEntry_t *msg, owerror_t error);
+
 owerror_t coap_header_encode(OpenQueueEntry_t *msg,
                              uint8_t version,
                              coap_type_t type,
