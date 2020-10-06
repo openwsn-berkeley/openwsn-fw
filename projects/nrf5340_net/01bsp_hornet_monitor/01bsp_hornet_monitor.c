@@ -11,6 +11,7 @@
 #include "uart.h"
 #include "sctimer.h"
 #include "math.h"
+#include "debugpins.h"
 
 //=========================== defines =========================================
 
@@ -22,7 +23,10 @@
 #define LENGTH_SERIAL_FRAME   ((NUM_SAMPLES*4)+9)   // length of the serial frame
 
 #define DF_ENABLE             1
-#define CALCULATE_ON_BOARD    0
+#define CALCULATE_ON_BOARD    1
+#define INVAILD_ANGLE         361.0
+
+#define ANGLE_HISTORY_LEN     64
 
 
 //=========================== variables =======================================
@@ -63,8 +67,9 @@ typedef struct {
                 uint8_t    antenna_array_id;
 
     // store the angle
-                int16_t    angle_array_1; // determine signal from left or right (depends on orientation of ANT board)
-                int16_t    angle_array_2; // determine signal from front or back (depends on orientation of ANT board)
+                  double    angle_array_1[ANGLE_HISTORY_LEN]; // determine signal from left or right (depends on orientation of ANT board)
+                  double    angle_array_2[ANGLE_HISTORY_LEN]; // determine signal from front or back (depends on orientation of ANT board)
+                  uint8_t   angle_index;
 
 } app_vars_t;
 
@@ -81,7 +86,7 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp);
 void cb_uartTxDone(void);
 uint8_t cb_uartRxCb(void);
 // aoa
-float calculate_aoa(void);
+double calculate_aoa(void);
 bool  variation_check(int16_t* data, uint8_t length);
 
 //=========================== main ============================================
@@ -92,6 +97,7 @@ bool  variation_check(int16_t* data, uint8_t length);
 int mote_main(void) {
 
     uint8_t i;
+    double   angle_array_x;
 
     // clear local variables
     memset(&app_vars,0,sizeof(app_vars_t));
@@ -161,10 +167,6 @@ int mote_main(void) {
         app_vars.uart_txFrame[4*i+7]     = 0xff;
         app_vars.uart_txFrame[4*i+8]     = 0xff;
 
-#if CALCULATE_ON_BOARD == 1
-        calculate_aoa();
-#endif
-
         app_vars.uart_done          = 0;
         app_vars.uart_lastTxByte    = 0;
 
@@ -176,7 +178,24 @@ int mote_main(void) {
         while (app_vars.uart_done==0); // busy wait to finish
         uart_disableInterrupts();
 
-        debugpins_fsm_toggle();
+#if CALCULATE_ON_BOARD == 1
+        angle_array_x = calculate_aoa();
+        if (angle_array_x != INVAILD_ANGLE) {
+            app_vars.angle_array_1[app_vars.angle_index] = angle_array_x;
+            app_vars.angle_index = (app_vars.angle_index+1) & 0x3f;
+
+            if (angle_array_x > 0) {
+                // green led on board
+                debugpins_slot_set();
+                debugpins_fsm_clr();
+            } else {
+                // red led on board
+                debugpins_fsm_set();
+                debugpins_slot_clr();
+            }
+
+        }
+#endif
 
         // led
         leds_error_off();
@@ -189,12 +208,12 @@ bool    variation_check(int16_t* data, uint8_t length){
     return TRUE;
 }
 
-float calculate_phase_diff(uint8_t shift){
+double calculate_phase_diff(uint8_t shift){
 
     uint16_t i;
     int16_t diff;
     int16_t sum;
-    float avg_phase_diff;
+    double avg_phase_diff;
 
     int16_t phase_one_ant[(NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/4];
     int16_t reference_one_ant[(NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/4];
@@ -225,13 +244,13 @@ float calculate_phase_diff(uint8_t shift){
     if (
         variation_check(phase_diff, (NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/4) == 0
     ){
-        return NULL;
+        return INVAILD_ANGLE;
     }
 
     for (i=0;i<(NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/4;i++) {
         sum += phase_diff[i];
     }
-    avg_phase_diff = (float)(sum)/((NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/4);
+    avg_phase_diff = (double)(sum)/((NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/4);
 
     return avg_phase_diff;
 }
@@ -240,32 +259,36 @@ float calculate_phase_diff(uint8_t shift){
 #define NUM_SAMPLES_SWITCH_SLOT 8
 #define ANT_DISTANCE            0.035
 
-float calculate_aoa(void) {
+double calculate_aoa(void) {
 
     int16_t diff;
     int16_t sum;
-    float avg_phase_diff_1;
-    float avg_phase_diff_3;
+    double avg_phase_diff_1;
+    double avg_phase_diff_3;
     int16_t reference_data_temp[NUM_SAMPLES+NUM_SAMPLES_REFERENCE];
     
     uint8_t i;
     uint8_t wave_index_start, wave_index_end;
-    float   wave_length; // in meter
+    double   wave_length; // in meter
     uint32_t IF;
     uint32_t frequency;
 
     uint8_t num_reference_sample;
 
-    float   angle;
-    float   angle_1;
-    float   angle_3;
+    double   angle;
+    double   acos_x_1;
+    double   acos_x_3;
+    double   angle_1;
+    double   angle_3;
+
+    uint8_t shift;
 
     wave_index_start = 0;
     wave_index_end   = 0;
     num_reference_sample = 64;
     //==== find a complete wave of the signal
     for (i=0; i<num_reference_sample-1; i++) {
-        if (app_vars.phase_data[i] - app_vars.phase_data[i] > 300) {
+        if (app_vars.phase_data[i] - app_vars.phase_data[i+1] > 300) {
             if (wave_index_start == 0) {
                 wave_index_start = i + 1;
             } else {
@@ -284,9 +307,9 @@ float calculate_aoa(void) {
     ) {
         IF          = 8000000/(wave_index_end-wave_index_start);
         frequency   = frequency*1000000 + IF;
-        wave_length = (float)SPEED_OF_LIGHT / frequency;
+        wave_length = (double)SPEED_OF_LIGHT / frequency;
     } else {
-        return NULL;
+        return INVAILD_ANGLE;
     }
 
     //===== generate the target phase data when reference antenna is used through CTE)
@@ -326,22 +349,32 @@ float calculate_aoa(void) {
 
     //==== calculate the angle
 
-    angle_1  = (avg_phase_diff_1/402.0) * wave_length / ANT_DISTANCE;
-    if (angle_1 >= -1 && angle_1 <= 1) {
-        angle_1  = acos(angle_1);
+    acos_x_1  = (avg_phase_diff_1/402.0) * wave_length / ANT_DISTANCE;
+    if (acos_x_1 >= -1 && acos_x_1 <= 1) {
+        angle_1  = acos(acos_x_1);
     } else {
-        return NULL;
+        return INVAILD_ANGLE;
     }
 
-    angle_3  = (avg_phase_diff_1/402.0) * wave_length / ANT_DISTANCE;
-    if (angle_3 >= -1 && angle_3 <= 1){
-        angle_3  = acos(angle_3);
+    acos_x_3  = (avg_phase_diff_3/402.0) * wave_length / ANT_DISTANCE;
+    if (acos_x_3 >= -1 && acos_x_3 <= 1){
+        angle_3  = acos(acos_x_3);
     } else {
-        return NULL;
+        return INVAILD_ANGLE;
     }
 
     angle = 2*tan(angle_1)*tan(angle_3)/(tan(angle_1)+tan(angle_3));
-    angle = 180 * angle / M_PI;
+    angle = 180 * atan(angle) / M_PI;
+
+    if (angle>0){
+        // green led on board
+        debugpins_slot_set();
+        debugpins_fsm_clr();
+    } else {
+        // red led on board
+        debugpins_fsm_set();
+        debugpins_slot_clr();
+    }
 
     return angle;
 }
@@ -384,7 +417,6 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
     app_vars.setting_fine   = app_vars.rxpk_buf[4];
 
     if (app_vars.rxpk_crc && app_vars.rxpk_len==5) {
-        debugpins_slot_toggle();
 
         // indicate I just received a packet from bsp_radio_tx mote
         app_vars.rxpk_done = 1;
