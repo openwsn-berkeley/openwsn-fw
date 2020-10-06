@@ -61,6 +61,11 @@ typedef struct {
                 int16_t    angles_1[(NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/4];
                 int16_t    angles_2[(NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/4];
                 uint8_t    antenna_array_id;
+
+    // store the angle
+                int16_t    angle_array_1; // determine signal from left or right (depends on orientation of ANT board)
+                int16_t    angle_array_2; // determine signal from front or back (depends on orientation of ANT board)
+
 } app_vars_t;
 
 app_vars_t app_vars;
@@ -184,6 +189,53 @@ bool    variation_check(int16_t* data, uint8_t length){
     return TRUE;
 }
 
+float calculate_phase_diff(uint8_t shift){
+
+    uint16_t i;
+    int16_t diff;
+    int16_t sum;
+    float avg_phase_diff;
+
+    int16_t phase_one_ant[(NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/4];
+    int16_t reference_one_ant[(NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/4];
+    int16_t phase_diff[(NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/4];
+
+    for (i=0;i<3;i++) {
+        memcpy(&phase_one_ant[8*i], &app_vars.phase_data[8*(8+shift+4*i)],sizeof(int16_t)*8);
+        memcpy(&phase_one_ant[8*i], &app_vars.phase_data[8*(8+shift+4*i)],sizeof(int16_t)*8);
+        memcpy(&phase_one_ant[8*i], &app_vars.phase_data[8*(8+shift+4*i)],sizeof(int16_t)*8);
+    }
+    for (i=0;i<3;i++) {
+        memcpy(&reference_one_ant[8*i], &app_vars.reference_data[8*(8+shift+4*i)],sizeof(int16_t)*8);
+        memcpy(&reference_one_ant[8*i], &app_vars.reference_data[8*(8+shift+4*i)],sizeof(int16_t)*8);
+        memcpy(&reference_one_ant[8*i], &app_vars.reference_data[8*(8+shift+4*i)],sizeof(int16_t)*8);
+    }
+    for (i=0;i<(NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/4;i++) {
+        diff = reference_one_ant[i] - phase_one_ant[i];
+        if (diff <= -201) {
+            diff += 402;
+        }
+        if (diff >= 201) {
+            diff -= 402;
+        }
+        phase_diff[i] = diff;
+    }
+
+    //---- DO NOT calculate angle if the phase diff variate too much
+    if (
+        variation_check(phase_diff, (NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/4) == 0
+    ){
+        return NULL;
+    }
+
+    for (i=0;i<(NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/4;i++) {
+        sum += phase_diff[i];
+    }
+    avg_phase_diff = (float)(sum)/((NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/4);
+
+    return avg_phase_diff;
+}
+
 #define SPEED_OF_LIGHT          300000000
 #define NUM_SAMPLES_SWITCH_SLOT 8
 #define ANT_DISTANCE            0.035
@@ -192,11 +244,9 @@ float calculate_aoa(void) {
 
     int16_t diff;
     int16_t sum;
-    float avg_phase_diff;
+    float avg_phase_diff_1;
+    float avg_phase_diff_3;
     int16_t reference_data_temp[NUM_SAMPLES+NUM_SAMPLES_REFERENCE];
-    int16_t phase_one_ant[(NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/2];
-    int16_t reference_one_ant[(NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/2];
-    int16_t phase_diff[(NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/2];
     
     uint8_t i;
     uint8_t wave_index_start, wave_index_end;
@@ -206,14 +256,16 @@ float calculate_aoa(void) {
 
     uint8_t num_reference_sample;
 
-    float   angle; 
+    float   angle;
+    float   angle_1;
+    float   angle_3;
 
     wave_index_start = 0;
     wave_index_end   = 0;
     num_reference_sample = 64;
     //==== find a complete wave of the signal
     for (i=0; i<num_reference_sample-1; i++) {
-        if (app_vars.phase_data[i+1] < app_vars.phase_data[i]) {
+        if (app_vars.phase_data[i] - app_vars.phase_data[i] > 300) {
             if (wave_index_start == 0) {
                 wave_index_start = i + 1;
             } else {
@@ -224,7 +276,12 @@ float calculate_aoa(void) {
     }
 
     frequency       = radio_get_frequency();
-    if (wave_index_start != 0 && wave_index_end != 0) {
+    if (
+        wave_index_start != 0 && 
+        wave_index_end   != 0 &&
+        wave_index_end - wave_index_start > 20 &&
+        wave_index_end - wave_index_start < 44
+    ) {
         IF          = 8000000/(wave_index_end-wave_index_start);
         frequency   = frequency*1000000 + IF;
         wave_length = (float)SPEED_OF_LIGHT / frequency;
@@ -255,45 +312,36 @@ float calculate_aoa(void) {
         sizeof(int16_t)*(NUM_SAMPLES-num_reference_sample)
     );
     
-    //==== generate phase diff between ant_x.1 and ant_x.2; ant_x.1 and ant_x.3
+    //==== generate phase diff between ant_x.2 and ant_x.1; ant_x.3 and ant_x.2
 
-    //---- generate phase diff between ant_x.1 and ant_x.2
-    for (i=0;i<3;i++) {
-        memcpy(&phase_one_ant[8*i], &app_vars.phase_data[8*(8+4*i)],sizeof(int16_t)*8);
-        memcpy(&phase_one_ant[8*i], &app_vars.phase_data[8*(8+4*i)],sizeof(int16_t)*8);
-        memcpy(&phase_one_ant[8*i], &app_vars.phase_data[8*(8+4*i)],sizeof(int16_t)*8);
-    }
-    for (i=0;i<3;i++) {
-        memcpy(&reference_one_ant[8*i], &app_vars.reference_data[8*(8+4*i)],sizeof(int16_t)*8);
-        memcpy(&reference_one_ant[8*i], &app_vars.reference_data[8*(8+4*i)],sizeof(int16_t)*8);
-        memcpy(&reference_one_ant[8*i], &app_vars.reference_data[8*(8+4*i)],sizeof(int16_t)*8);
-    }
-    for (i=0;i<(NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/4;i++) {
-        diff = phase_one_ant[i] - reference_one_ant[i];
-        if (diff <= -201) {
-            diff += 402;
-        }
-        if (diff >= 201) {
-            diff -= 402;
-        }
-        phase_diff[i] = diff;
-    }
+    //---- generate phase diff between ant_x.2 and ant_x.1
 
-    //---- DO NOT calculate angle if the phase diff variate too much
-    if (
-        variation_check(phase_diff, (NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/4) == 0
-    ){
+    shift = 0;
+    avg_phase_diff_1 = calculate_phase_diff(shift);
+
+    //---- generate phase diff between ant_x.3 and ant_x.2
+
+    shift = 2;
+    avg_phase_diff_3 = calculate_phase_diff(shift);
+
+    //==== calculate the angle
+
+    angle_1  = (avg_phase_diff_1/402.0) * wave_length / ANT_DISTANCE;
+    if (angle_1 >= -1 && angle_1 <= 1) {
+        angle_1  = acos(angle_1);
+    } else {
         return NULL;
     }
 
-    for (i=0;i<(NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/4;i++) {
-        sum += phase_diff[i];
+    angle_3  = (avg_phase_diff_1/402.0) * wave_length / ANT_DISTANCE;
+    if (angle_3 >= -1 && angle_3 <= 1){
+        angle_3  = acos(angle_3);
+    } else {
+        return NULL;
     }
-    avg_phase_diff = (float)(sum)/((NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/4);
 
-    //==== calculate the angle
-    angle  = (avg_phase_diff/402.0) * wave_length / ANT_DISTANCE;
-    angle  = 180 * acos(angle) / M_PI;
+    angle = 2*tan(angle_1)*tan(angle_3)/(tan(angle_1)+tan(angle_3));
+    angle = 180 * angle / M_PI;
 
     return angle;
 }
