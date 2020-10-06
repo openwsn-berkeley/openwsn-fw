@@ -163,6 +163,17 @@ def aoa_angle_calculation(phase_data, num_pkt, array):
         math.degrees(theta_2)
     )
     
+    # a better angle calculation
+    arctan_x = 2 * math.tan(theta_1)*math.tan(theta_2)/(math.tan(theta_1)+math.tan(theta_2))
+    
+    print "array {0} calculated angle {1} (angle_1 {2}, angle_2 {3})".format(
+        array,
+        math.degrees(math.atan(arctan_x)),
+        math.degrees(theta_1), 
+        math.degrees(theta_2)
+    )
+    
+    
     return target_phase_data
     
 
