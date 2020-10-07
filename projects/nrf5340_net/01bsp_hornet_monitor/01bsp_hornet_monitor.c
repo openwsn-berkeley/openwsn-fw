@@ -184,17 +184,20 @@ int mote_main(void) {
             app_vars.angle_array_1[app_vars.angle_index] = angle_array_x;
             app_vars.angle_index = (app_vars.angle_index+1) & 0x3f;
 
-            if (angle_array_x > 0) {
+            if (angle_array_x < 90) {
                 // green led on board
-                debugpins_slot_set();
-                debugpins_fsm_clr();
-            } else {
-                // red led on board
                 debugpins_fsm_set();
                 debugpins_slot_clr();
+            } else {
+                // red led on board
+                debugpins_slot_set();
+                debugpins_fsm_clr();
             }
 
         }
+
+        radio_rxEnable();
+        radio_rxNow();
 #endif
 
         // led
@@ -212,7 +215,7 @@ double calculate_phase_diff(uint8_t shift){
 
     uint16_t i;
     int16_t diff;
-    int16_t sum;
+    int32_t sum;
     double avg_phase_diff;
 
     int16_t phase_one_ant[(NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/4];
@@ -230,7 +233,11 @@ double calculate_phase_diff(uint8_t shift){
         memcpy(&reference_one_ant[8*i], &app_vars.reference_data[8*(8+shift+4*i)],sizeof(int16_t)*8);
     }
     for (i=0;i<(NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/4;i++) {
-        diff = reference_one_ant[i] - phase_one_ant[i];
+        if (shift == 2) {
+            diff = phase_one_ant[i] - reference_one_ant[i];
+        } else {
+            diff = reference_one_ant[i] - phase_one_ant[i];
+        }
         if (diff <= -201) {
             diff += 402;
         }
@@ -366,13 +373,15 @@ double calculate_aoa(void) {
     angle = 2*tan(angle_1)*tan(angle_3)/(tan(angle_1)+tan(angle_3));
     angle = 180 * atan(angle) / M_PI;
 
-    if (angle>0){
+    if (angle>0) {
         // green led on board
-        debugpins_slot_set();
+        debugpins_fsm_set();
         debugpins_fsm_clr();
     } else {
+        angle = 180.0 + angle;
+
         // red led on board
-        debugpins_fsm_set();
+        debugpins_slot_set();
         debugpins_slot_clr();
     }
 
@@ -428,10 +437,11 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
         radio_configure_direction_finding_antenna_switch();
         radio_configure_direction_finding_manual();
 #endif
-    }
+    } else {
 
-    radio_rxEnable();
-    radio_rxNow();
+        radio_rxEnable();
+        radio_rxNow();
+    }
 
     // led
     leds_sync_off();
