@@ -496,7 +496,8 @@ void msf_housekeeping(void){
               0,                       // list command offset (not used)
               0                        // list command maximum celllist (not used)
           );
-          return;
+          // will remove this for now to have the node proceed with cell addition even if cell clearing is not successful.
+          //return;
     }
 
     if (schedule_getNumberOfNegotiatedCells(&parentNeighbor, parentNeighborRadio, CELLTYPE_TX)==0){
