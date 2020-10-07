@@ -759,8 +759,8 @@ uint8_t schedule_getNumberOfNegotiatedCells(open_addr_t* neighbor, cellRadioSett
                     if(
                         schedule_vars.scheduleBuf[i].backupEntries[j].type   == CELLTYPE_TX &&
                         packetfunctions_sameAddress(&(schedule_vars.scheduleBuf[i].backupEntries[j].neighbor), neighbor) == TRUE &&
-                        schedule_vars.scheduleBuf[i].backupEntries[j].shared == FALSE &&
-                        schedule_vars.scheduleBuf[i].backupEntries[j].cellRadioSetting == cellRadioSetting
+                        schedule_vars.scheduleBuf[i].backupEntries[j].shared == FALSE //&&
+                        //schedule_vars.scheduleBuf[i].backupEntries[j].cellRadioSetting == cellRadioSetting
                     ){  
                         counter++;
                         // at most one negotiated Tx cell to a neighbor in backup entries
@@ -1374,7 +1374,7 @@ void schedule_resetEntry(scheduleEntry_t* e) {
     e->shared                 = FALSE;
     e->isAutoCell             = FALSE;
     e->channelOffset          = 0;
-
+    e->cellRadioSetting       = 0;  
 
     e->neighbor.type          = ADDR_NONE;
     memset(&e->neighbor.addr_64b[0], 0x00, sizeof(e->neighbor.addr_64b));
