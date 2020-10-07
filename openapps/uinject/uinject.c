@@ -98,10 +98,15 @@ void uinject_task_cb(void) {
     uint16_t             DAGRank;
     open_addr_t          parentNeighbor;
     bool                 foundNeighbor;
-
-    uint32_t             ticksOn;
+    
     uint32_t             ticksTx;
-    uint32_t             ticksRx;
+    uint32_t             ticksOn;
+    uint32_t             ticksTx_0;
+    uint32_t             ticksOn_0;
+    uint32_t             ticksTx_1;
+    uint32_t             ticksOn_1;
+    uint32_t             ticksTx_2;
+    uint32_t             ticksOn_2;
     uint32_t             ticksInTotal;
 
     // don't run if not synch
@@ -169,13 +174,13 @@ void uinject_task_cb(void) {
     pkt->payload[4] = asnArray[4];
 
     // number of cells
-    packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
-    numCellsUsed = msf_getPreviousNumCellsUsed(CELLTYPE_TX);
-    pkt->payload[0] = numCellsUsed;
+//    packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
+//    numCellsUsed = msf_getPreviousNumCellsUsed(CELLTYPE_TX);
+//    pkt->payload[0] = numCellsUsed;
 
-    packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
-    numCellsUsed = msf_getPreviousNumCellsUsed(CELLTYPE_RX);
-    pkt->payload[0] = numCellsUsed;
+//    packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
+//    numCellsUsed = msf_getPreviousNumCellsUsed(CELLTYPE_RX);
+//    pkt->payload[0] = numCellsUsed;
 
     // number of neighbors
     packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
@@ -189,8 +194,8 @@ void uinject_task_cb(void) {
     packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
     pkt->payload[0] = oqs.maxBuffSize;
 
-    packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
-    pkt->payload[0] = oqs.minBuffSize;
+//    packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
+//    pkt->payload[0] = oqs.minBuffSize;
 
     // address
     packetfunctions_reserveHeaderSize(pkt,sizeof(uint16_t));
@@ -204,25 +209,65 @@ void uinject_task_cb(void) {
     pkt->payload[0] = (uint8_t)( DAGRank & 0x000000ff);
 
     // duty cycle info
-    ieee154e_getTicsInfo(&ticksOn, &ticksInTotal);
+    ieee154e_getRadioTicsInfo(
+                               &ticksTx, 
+                               &ticksOn,
+                               &ticksTx_0, 
+                               &ticksOn_0,
+                               &ticksTx_1, 
+                               &ticksOn_1,
+                               &ticksTx_2, 
+                               &ticksOn_2,
+                               &ticksInTotal
+                               );
     packetfunctions_reserveHeaderSize(pkt,sizeof(uint32_t));
     pkt->payload[3] = (uint8_t)((ticksOn & 0xff000000) >> 24);
     pkt->payload[2] = (uint8_t)((ticksOn & 0x00ff0000) >> 16);
     pkt->payload[1] = (uint8_t)((ticksOn & 0x0000ff00) >> 8);
     pkt->payload[0] = (uint8_t)( ticksOn & 0x000000ff);
 
-    ieee154e_getRadioTicsInfo(&ticksTx, &ticksRx, &ticksInTotal);
     packetfunctions_reserveHeaderSize(pkt,sizeof(uint32_t));
     pkt->payload[3] = (uint8_t)((ticksTx & 0xff000000) >> 24);
     pkt->payload[2] = (uint8_t)((ticksTx & 0x00ff0000) >> 16);
     pkt->payload[1] = (uint8_t)((ticksTx & 0x0000ff00) >> 8);
     pkt->payload[0] = (uint8_t)( ticksTx & 0x000000ff);
-    packetfunctions_reserveHeaderSize(pkt,sizeof(uint32_t));
-    pkt->payload[3] = (uint8_t)((ticksRx & 0xff000000) >> 24);
-    pkt->payload[2] = (uint8_t)((ticksRx & 0x00ff0000) >> 16);
-    pkt->payload[1] = (uint8_t)((ticksRx & 0x0000ff00) >> 8);
-    pkt->payload[0] = (uint8_t)( ticksRx & 0x000000ff);
 
+    packetfunctions_reserveHeaderSize(pkt,sizeof(uint32_t));
+    pkt->payload[3] = (uint8_t)((ticksOn_0 & 0xff000000) >> 24);
+    pkt->payload[2] = (uint8_t)((ticksOn_0 & 0x00ff0000) >> 16);
+    pkt->payload[1] = (uint8_t)((ticksOn_0 & 0x0000ff00) >> 8);
+    pkt->payload[0] = (uint8_t)( ticksOn_0 & 0x000000ff);
+
+    packetfunctions_reserveHeaderSize(pkt,sizeof(uint32_t));
+    pkt->payload[3] = (uint8_t)((ticksTx_0 & 0xff000000) >> 24);
+    pkt->payload[2] = (uint8_t)((ticksTx_0 & 0x00ff0000) >> 16);
+    pkt->payload[1] = (uint8_t)((ticksTx_0 & 0x0000ff00) >> 8);
+    pkt->payload[0] = (uint8_t)( ticksTx_0 & 0x000000ff);
+    
+    packetfunctions_reserveHeaderSize(pkt,sizeof(uint32_t));
+    pkt->payload[3] = (uint8_t)((ticksOn_1 & 0xff000000) >> 24);
+    pkt->payload[2] = (uint8_t)((ticksOn_1 & 0x00ff0000) >> 16);
+    pkt->payload[1] = (uint8_t)((ticksOn_1 & 0x0000ff00) >> 8);
+    pkt->payload[0] = (uint8_t)( ticksOn_1 & 0x000000ff);
+
+    packetfunctions_reserveHeaderSize(pkt,sizeof(uint32_t));
+    pkt->payload[3] = (uint8_t)((ticksTx_1 & 0xff000000) >> 24);
+    pkt->payload[2] = (uint8_t)((ticksTx_1 & 0x00ff0000) >> 16);
+    pkt->payload[1] = (uint8_t)((ticksTx_1 & 0x0000ff00) >> 8);
+    pkt->payload[0] = (uint8_t)( ticksTx_1 & 0x000000ff);
+    
+    packetfunctions_reserveHeaderSize(pkt,sizeof(uint32_t));
+    pkt->payload[3] = (uint8_t)((ticksOn_2 & 0xff000000) >> 24);
+    pkt->payload[2] = (uint8_t)((ticksOn_2 & 0x00ff0000) >> 16);
+    pkt->payload[1] = (uint8_t)((ticksOn_2 & 0x0000ff00) >> 8);
+    pkt->payload[0] = (uint8_t)( ticksOn_2 & 0x000000ff);
+
+    packetfunctions_reserveHeaderSize(pkt,sizeof(uint32_t));
+    pkt->payload[3] = (uint8_t)((ticksTx_2 & 0xff000000) >> 24);
+    pkt->payload[2] = (uint8_t)((ticksTx_2 & 0x00ff0000) >> 16);
+    pkt->payload[1] = (uint8_t)((ticksTx_2 & 0x0000ff00) >> 8);
+    pkt->payload[0] = (uint8_t)( ticksTx_2 & 0x000000ff);
+    
     packetfunctions_reserveHeaderSize(pkt,sizeof(uint32_t));
     pkt->payload[3] = (uint8_t)((ticksInTotal & 0xff000000) >> 24);
     pkt->payload[2] = (uint8_t)((ticksInTotal & 0x00ff0000) >> 16);
