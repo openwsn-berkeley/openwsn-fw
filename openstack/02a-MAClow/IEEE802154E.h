@@ -317,7 +317,13 @@ typedef struct {
    uint32_t                  numTicsOn;               // mac dutyCycle
    uint32_t                  numTicsTotal;            // total tics for which the dutycycle is computed
    uint32_t                  numTxTics;               // mac  tx dutyCycle
-   uint32_t                  numRxTics;               // mac rx dutyCycle   
+   uint32_t                  numRxTics;               // mac rx dutyCycle
+   uint32_t                  numTxTics_0;               // mac  tx dutyCycle PHY0
+   uint32_t                  numTicsOn_0;               // mac dutyCycle PHY0
+   uint32_t                  numTxTics_1;               // mac  tx dutyCycle PHY1
+   uint32_t                  numTicsOn_1;               // mac dutyCycle PHY1
+   uint32_t                  numTxTics_2;               // mac  tx dutyCycle PHY2
+   uint32_t                  numTicsOn_2;               // mac dutyCycle PHY2
 } ieee154e_stats_t;
 END_PACK
 
@@ -352,7 +358,17 @@ uint16_t           ieee154e_getSlotDuration(void);
 
 uint16_t           ieee154e_getTimeCorrection(void);
 void               ieee154e_getTicsInfo(uint32_t* numTicsOn, uint32_t* numTicsTotal);
-void               ieee154e_getRadioTicsInfo(uint32_t* numTxTics, uint32_t* numRxTics, uint32_t* numTicsTotal);
+void               ieee154e_getRadioTicsInfo(
+                               uint32_t* numTxTics, 
+                               uint32_t* numTicsOn,
+                               uint32_t* numTxTics_0, 
+                               uint32_t* numTicsOn_0,
+                               uint32_t* numTxTics_1, 
+                               uint32_t* numTicsOn_1,
+                               uint32_t* numTxTics_2, 
+                               uint32_t* numTicsOn_2,
+                               uint32_t* numTicsTotal
+                               );
 // events
 void               ieee154e_startOfFrame(PORT_TIMER_WIDTH capturedTime);
 void               ieee154e_endOfFrame(PORT_TIMER_WIDTH capturedTime);

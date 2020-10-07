@@ -162,8 +162,9 @@ void ieee154e_init(void) {
     ieee154e_select_slot_template (SLOT_40ms_24GHZ);
 
     //set the radio setting to use for scanning, default is RADIOSETTING_24GHZ
-    radio_setConfig (RADIOSETTING_24GHZ); 
-    
+    radio_setConfig (RADIOSETTING_FSK_OPTION1_FEC); 
+    ieee154e_vars.cellRadioSetting = CELLRADIOSETTING_2;
+
     // switch radio on
     radio_rfOn();
 
@@ -692,11 +693,23 @@ port_INLINE void activity_synchronize_newSlot(void) {
         radio_rxEnable();
         radio_rxNow();
     } else {
-        // I'm listening last slot
+        // I was listening last slot
         ieee154e_stats.numTicsOn    += ieee154e_vars.slotDuration;
         ieee154e_stats.numRxTics    += ieee154e_vars.slotDuration;
         ieee154e_stats.numTicsTotal += ieee154e_vars.slotDuration;
-
+        
+        // update radio-specific DC stats
+        switch (ieee154e_vars.cellRadioSetting){
+        case CELLRADIOSETTING_1:
+          ieee154e_stats.numTicsOn_0    += ieee154e_vars.slotDuration;
+          break;
+        case CELLRADIOSETTING_2:
+          ieee154e_stats.numTicsOn_1    += ieee154e_vars.slotDuration;
+          break;
+        case CELLRADIOSETTING_3:
+          ieee154e_stats.numTicsOn_2    += ieee154e_vars.slotDuration;
+          break;
+        } 
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
         sctimer_setCapture(ACTION_RX_SFD_DONE);
         sctimer_setCapture(ACTION_RX_DONE);
@@ -1071,6 +1084,9 @@ port_INLINE void activity_ti1ORri1(void) {
            ieee154e_select_slot_template (SLOT_40ms_FSK_SUBGHZ);
            break;
         case RADIOSETTING_OFDM_OPTION_1_MCS3:
+        case RADIOSETTING_OFDM_OPTION_1_MCS2:
+        case RADIOSETTING_OFDM_OPTION_1_MCS1:
+        case RADIOSETTING_OFDM_OPTION_1_MCS0:
            ieee154e_select_slot_template (SLOT_40ms_OFDM1MCS0_3_SUBGHZ);
            break;
          default:
@@ -2506,11 +2522,27 @@ void ieee154e_getTicsInfo(uint32_t* numTicsOn, uint32_t* numTicsTotal){
     *numTicsTotal = (uint32_t)(ieee154e_stats.numTicsTotal);
 }
 
-void ieee154e_getRadioTicsInfo(uint32_t* numTxTics, uint32_t* numRxTics, uint32_t* numTicsTotal){
+void ieee154e_getRadioTicsInfo(
+                               uint32_t* numTxTics, 
+                               uint32_t* numTicsOn,
+                               uint32_t* numTxTics_0, 
+                               uint32_t* numTicsOn_0,
+                               uint32_t* numTxTics_1, 
+                               uint32_t* numTicsOn_1,
+                               uint32_t* numTxTics_2, 
+                               uint32_t* numTicsOn_2,
+                               uint32_t* numTicsTotal
+                               ){
 
-    *numTxTics    = (uint32_t)(ieee154e_stats.numTxTics);
-    *numRxTics    = (uint32_t)(ieee154e_stats.numRxTics);
-    *numTicsTotal = (uint32_t)(ieee154e_stats.numTicsTotal);
+    *numTxTics      = (uint32_t)(ieee154e_stats.numTxTics);
+    *numTicsOn      = (uint32_t)(ieee154e_stats.numTicsOn);
+    *numTxTics_0    = (uint32_t)(ieee154e_stats.numTxTics_0);
+    *numTicsOn_0    = (uint32_t)(ieee154e_stats.numTicsOn_0);
+    *numTxTics_1    = (uint32_t)(ieee154e_stats.numTxTics_1);
+    *numTicsOn_1    = (uint32_t)(ieee154e_stats.numTicsOn_1);
+    *numTxTics_2    = (uint32_t)(ieee154e_stats.numTxTics_2);
+    *numTicsOn_2    = (uint32_t)(ieee154e_stats.numTicsOn_2);
+    *numTicsTotal   = (uint32_t)(ieee154e_stats.numTicsTotal);
 }
 
 port_INLINE void joinPriorityStoreFromEB(uint8_t jp){
@@ -2976,6 +3008,12 @@ port_INLINE void ieee154e_resetStats(void) {
     ieee154e_stats.numTxTics       =    0;
     ieee154e_stats.numRxTics       =    0;
     ieee154e_stats.numTicsTotal    =    0;
+    ieee154e_stats.numTicsOn_0     =    0;
+    ieee154e_stats.numTxTics_0     =    0;
+    ieee154e_stats.numTicsOn_1     =    0;
+    ieee154e_stats.numTxTics_1     =    0;
+    ieee154e_stats.numTicsOn_2     =    0;
+    ieee154e_stats.numTxTics_2     =    0;
     // do not reset the number of de-synchronizations
 }
 
@@ -3125,8 +3163,26 @@ void endSlot(void) {
     if (ieee154e_stats.numTicsTotal>DUTY_CYCLE_WINDOW_LIMIT){
         ieee154e_stats.numTicsTotal = ieee154e_stats.numTicsTotal>>1;
         ieee154e_stats.numTicsOn    = ieee154e_stats.numTicsOn>>1;
+        ieee154e_stats.numTicsOn_0    = ieee154e_stats.numTicsOn_0>>1;
+        ieee154e_stats.numTicsOn_1    = ieee154e_stats.numTicsOn_1>>1;
+        ieee154e_stats.numTicsOn_2    = ieee154e_stats.numTicsOn_2>>1;
     }
-
+    // updating radio-specific DC stats
+    switch (ieee154e_vars.cellRadioSetting){
+    case CELLRADIOSETTING_1:
+        ieee154e_stats.numTxTics_0+=ieee154e_vars.radioTxTics;//accumulate and tics the radio is transmitting for that window
+        ieee154e_stats.numTicsOn_0+=ieee154e_vars.radioOnTics;//accumulate and tics the radio is on for that window
+        break;
+    case CELLRADIOSETTING_2: 
+        ieee154e_stats.numTxTics_1+=ieee154e_vars.radioTxTics;//accumulate and tics the radio is transmitting for that window
+        ieee154e_stats.numTicsOn_1+=ieee154e_vars.radioOnTics;//accumulate and tics the radio is on for that window
+        break;
+    case CELLRADIOSETTING_3:
+        ieee154e_stats.numTxTics_2+=ieee154e_vars.radioTxTics;//accumulate and tics the radio is transmitting for that window
+        ieee154e_stats.numTicsOn_2+=ieee154e_vars.radioOnTics;//accumulate and tics the radio is on for that window
+        break;
+    }
+    
     // clear vars for duty cycle on this slot
     ieee154e_vars.radioOnTics=0;
     ieee154e_vars.radioTxTics=0;
