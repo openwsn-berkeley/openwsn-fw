@@ -116,10 +116,12 @@ with lowest join priority metric to send join traffic through.
 */
 open_addr_t* neighbors_getJoinProxy(void) {
     uint8_t i;
+    uint8_t proxyIndex;
     uint8_t joinPrioMinimum;
     open_addr_t *joinProxy;
 
     joinPrioMinimum = 0xff;
+    proxyIndex = 0 ;
     joinProxy = NULL;
     for (i = 0; i < MAXNUMNEIGHBORS; i++) {
         if (
@@ -129,9 +131,10 @@ open_addr_t* neighbors_getJoinProxy(void) {
                 ) {
             joinProxy = &(neighbors_vars.neighbors[i].addr_64b);
             joinPrioMinimum = neighbors_vars.neighbors[i].joinPrio;
+            proxyIndex++;
         }
     }
-
+    neighbors_vars.neighbors[proxyIndex].joinPrio = neighbors_vars.neighbors[proxyIndex].joinPrio*2;
     return joinProxy;
 }
 
@@ -631,12 +634,16 @@ uint16_t neighbors_getLinkMetric(uint8_t index) {
     if (neighbors_vars.neighbors[index].numTxACK==0) {
         if (neighbors_vars.neighbors[index].numTx > DEFAULTLINKCOST){
             if (neighbors_vars.neighbors[index].numTx < MINIMAL_NUM_TX){
-                rankIncrease = (3*neighbors_vars.neighbors[index].numTx-2)*MINHOPRANKINCREASE * radioMinHopRankIncreaseFactor [neighborRadio];
+                rankIncrease = (3*neighbors_vars.neighbors[index].numTx-2)
+                  * MINHOPRANKINCREASE 
+                  * radioMinHopRankIncreaseFactor [neighborRadio];
             } else {
                 rankIncrease = 65535;
             }
         } else {
-            rankIncrease = (3*DEFAULTLINKCOST-2)*MINHOPRANKINCREASE * radioMinHopRankIncreaseFactor [neighborRadio];
+            rankIncrease = (3*DEFAULTLINKCOST-2)
+              * MINHOPRANKINCREASE 
+              * radioMinHopRankIncreaseFactor [neighborRadio];
         }
     } else {
         //6TiSCH minimal draft using OF0 for rank computation: ((3*numTx/numTxAck)-2)*minHopRankIncrease
