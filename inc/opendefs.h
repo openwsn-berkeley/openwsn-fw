@@ -66,28 +66,28 @@ typedef enum
 // in the Open Radio interface
 
 typedef enum{
-    CELLRADIOSETTING_1 ,
+    CELLRADIOSETTING_1,
     CELLRADIOSETTING_2 ,
     CELLRADIOSETTING_3 ,
     MAX_CELLRADIOSETTINGS 
 } cellRadioSetting_t;
 
-// the radiosetting used for gallback (ebs, sixtop initial negotiation, ka)
+// the radiosetting used for fallback (autonoumous cells)
 #define CELLRADIOSETTING_FALLBACK       CELLRADIOSETTING_2
 
 // mapping of MAC-level cellRadioSetting_t (in schedule.h) to Open Radio 
 // radioSetting_t (in opendefs.h)
 static const radioSetting_t cellRadioSettingMap[MAX_CELLRADIOSETTINGS]= {
-    RADIOSETTING_24GHZ,
-    RADIOSETTING_FSK_OPTION1_FEC,
-    RADIOSETTING_OFDM_OPTION_1_MCS3
+  RADIOSETTING_24GHZ,
+  RADIOSETTING_FSK_OPTION1_FEC,
+  RADIOSETTING_OFDM_OPTION_1_MCS3,
 };
 // mapping of MAC-level cellRadioSetting_t (in schedule.h) to DAGRank increases 
 // ordered by range from shortest to longest
 static const uint8_t radioMinHopRankIncreaseFactor [MAX_CELLRADIOSETTINGS]= {
-    1,        //24GHZ 
-    8,       //FSK
-    4        //OFDM
+    2,        //24GHZ  2
+    5,       //FSK  7
+    1        //OFDM 1
 };
 
 
@@ -450,7 +450,6 @@ typedef struct {
    bool             used;
    bool             insecure;
    uint8_t          parentPreference;
-   uint8_t          parentNegotiationAttempts;
    bool             stableNeighbor;
    uint8_t          switchStabilityCounter;
    open_addr_t      addr_64b;
