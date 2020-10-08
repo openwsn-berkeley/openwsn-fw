@@ -12,6 +12,7 @@ from sample_reader_from_serial import *
 from threading import Thread
 import os
 import gc
+import sys
 
 def degree_range(n):
     start = np.linspace(0, 180, n+1, endpoint=True)[0:-1]
@@ -47,9 +48,7 @@ def gauge(colors='jet_r', title=''):
 
     [ax.add_patch(p) for p in patches]
 
-    labels = [-90, -60, -30,  0, 30,  60,  90]
-    labels = labels[::-1]
-    mid_points = [0, 30, 60, 90, 120, 150, 180]
+    labels = mid_points = [0, 30, 60, 90, 120, 150, 180]
     
     for mid, lab in zip(mid_points, labels):
     
@@ -81,14 +80,16 @@ def animate(i, data_source, on_board_calculation):
     ang_range, mid_points = degree_range(180)
     
     num_lines = 0
-    if data_source == 's':
-        with open(sample_file, 'r') as f:
-            for line in f:
-                num_lines += 1
-    else:
-        num_lines = i
+    with open(sample_file, 'r') as f:
+        for line in f:
+            num_lines += 1
+    pkt_id = num_lines
+    if data_source == 'r':
+        pkt_id = i
+        sys.stdout.write("{0}/{1}\r".format(pkt_id, num_lines))
+        sys.stdout.flush()
                 
-    angle = get_angle_to_pkt(num_lines, on_board_calculation)
+    angle = get_angle_to_pkt(pkt_id, on_board_calculation)
     if angle:
         pos = mid_points[int(angle)]
         ax.clear()
