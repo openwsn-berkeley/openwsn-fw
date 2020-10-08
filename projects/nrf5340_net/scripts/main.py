@@ -81,7 +81,7 @@ def animate(i, data_source, on_board_calculation):
     ang_range, mid_points = degree_range(180)
     
     num_lines = 0
-    if data_source == 'serial':
+    if data_source == 's':
         with open(sample_file, 'r') as f:
             for line in f:
                 num_lines += 1
@@ -102,15 +102,15 @@ def animate(i, data_source, on_board_calculation):
         
 if __name__ == '__main__':
 
-    data_source             = raw_input("read from file (file) or serial (serial)?")
-    on_board_calculation    = True
+    data_source             = raw_input("Replay from file (r) or real-time from serial (s)?")
+    on_board_calculation    = raw_input("on board angle calculation ? (y/n)")
     
-    if data_source == 'serial':
-        
-        on_board_calculation    = raw_input("on board angle calculation ? (y/n)")
-        
-        if on_board_calculation == 'n':
-            on_board_calculation = False
+    if on_board_calculation == 'n':
+        on_board_calculation = False
+    else:
+        on_board_calculation = True
+    
+    if data_source == 's':
         
         print "start serial reading..."
         serial_thread = Thread( target = start_read)

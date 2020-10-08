@@ -6,6 +6,7 @@
 C                           = 299792458 # speed of ligh 
 ANT_D                       = 0.035     # meter
 CENTER_FREQ                 = (2404*1e6)# channel 0
+M_PI		                = 3.14159265358979323846
 
 NUM_SAMPLES                 = 160
 NUMBEROF8US                 = 3  # in unit of 8 us

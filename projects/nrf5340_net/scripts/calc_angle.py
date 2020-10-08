@@ -38,7 +38,7 @@ def aoa_angle_calculation(phase_data, num_pkt, array):
         phase_data_ant2 += reference_phase_data
     phase_data_ant2 = phase_data_ant2[:64] + phase_data_ant2[64+8:160+8]
     
-    # ---- calculate phase diff bewteen ANT2 and ANT1
+    # ---- calculate phase diff bewteen ANT2 and ANTx
     
     if DEBUG_ON:
         figure, temp = plt.subplots()
@@ -55,11 +55,11 @@ def aoa_angle_calculation(phase_data, num_pkt, array):
             if reversed:
                 diff = 0 - diff
             if diff <= -201:
-                diff += 201
+                diff += 402
             elif diff >= 201:
-                diff -= 201
+                diff -= 402
             phase_diff_ant_2_x.append(diff) 
-            
+
         debug_print("phase_diff_ant2_x and avg_value", phase_diff_ant_2_x, sum(phase_diff_ant_2_x)/len(phase_diff_ant_2_x))
         if DEBUG_ON:
             if reversed:
@@ -99,17 +99,17 @@ def aoa_angle_calculation(phase_data, num_pkt, array):
     # ==== provide one angle from 0 (right) to 180 (left)
     
     if theta_1 != None and theta_2 != None:
-        angle = math.degrees(
+        angle = 180 * (
             math.atan(
                 2 * math.tan(theta_1)*math.tan(theta_2)/(math.tan(theta_1)+math.tan(theta_2))
-            )
+            ) / M_PI
         )
         if angle < 0:
             angle = 180 + angle
     elif theta_1 == None and theta_2 != None:
-        angle = math.degrees(theta_2)
+        angle = 180 * (theta_2) / M_PI
     elif theta_1 != None and theta_2 == None:
-        angle = math.degrees(theta_1)
+        angle = 180 * (theta_1) / M_PI
     else:
         debug_print("illegal data, theta1 = var1 theta2=var2", theta_1, theta_2)
         return None, None
