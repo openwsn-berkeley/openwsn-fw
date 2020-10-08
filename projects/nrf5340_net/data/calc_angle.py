@@ -1,0 +1,118 @@
+import matplotlib.pyplot as plt
+import math
+from config import *
+
+def aoa_angle_calculation(phase_data, num_pkt, array):
+    
+    # find first two adjencent time point when phase wrapped
+    
+    # 64 
+    index_1 = 0
+    index_2 = 0
+    for index in range(num_sample_in_reference-1):
+        # phase varies from -201 to 200 (-180 to 180 degree)
+        if phase_data[index] - phase_data[index+1] > 300:
+            if  index_1 == 0:
+                index_1 = index+1
+            else:
+                index_2 = index+1
+                break
+    
+    if index_1 != 0 and index_2 != 0 and index_2 - index_1 > 15 and index_2 - index_1 < 49:
+        
+        IF = 1 / ((index_2 - index_1) * t_unit * 1e-6)
+        freq = CENTER_FREQ + IF
+        
+        wave_length = (1.0/freq) * C  # in meters
+        reference_phase_data = phase_data[index_1:index_2]
+    else:
+        return None, None
+    
+    # ==== generate phase data for ANT used reference at each sampling point
+    
+    phase_data_ant2 = phase_data[:index_2]
+    
+    # ---- ref: section 3.2 First IQ sample in nwp_036.pdf (Direction Finding nWP-036)
+    
+    while len(phase_data_ant2) < NUM_SAMPLES + num_sample_per_slot: 
+        phase_data_ant2 += reference_phase_data
+    phase_data_ant2 = phase_data_ant2[:64] + phase_data_ant2[64+8:160+8]
+    
+    # ---- calculate phase diff bewteen ANT2 and ANT1
+    
+    if DEBUG_ON:
+        figure, temp = plt.subplots()
+    
+    def calc_phase_diff(shift=0, reversed=False):
+        
+        i = 8 + shift
+        phase_ant_x_data = phase_data[8*i:8*(i+1)]      + phase_data[8*(i+4):8*(i+5)]           + phase_data[8*(i+8):8*(i+9)]
+        phase_ant_2_data = phase_data_ant2[8*i:8*(i+1)] + phase_data_ant2[8*(i+4):8*(i+5)]    + phase_data_ant2[8*(i+8):8*(i+9)]
+        
+        phase_diff_ant_2_x = []
+        for index in range(len(phase_ant_x_data)):
+            diff = phase_ant_2_data[index]-phase_ant_x_data[index]
+            if reversed:
+                diff = 0 - diff
+            if diff <= -201:
+                diff += 201
+            elif diff >= 201:
+                diff -= 201
+            phase_diff_ant_2_x.append(diff) 
+            
+        debug_print("phase_diff_ant2_x and avg_value", phase_diff_ant_2_x, sum(phase_diff_ant_2_x)/len(phase_diff_ant_2_x))
+        if DEBUG_ON:
+            if reversed:
+                x = 3
+            else:
+                x = 1
+            temp.plot(phase_diff_ant_2_x, 'o-', label='phase_diff_ant_2_{0}'.format(x))
+            
+        return (sum(phase_diff_ant_2_x)/len(phase_diff_ant_2_x)) / 402.0
+            
+    avg_phase_diff_ant_2_1 = calc_phase_diff(0, False)
+    avg_phase_diff_ant_3_2 = calc_phase_diff(2, True)
+    
+    if DEBUG_ON:
+        debug_print("phase diff ant2_1 and ant3_2", avg_phase_diff_ant_2_1, avg_phase_diff_ant_3_2)
+        temp.legend()
+        figure.savefig('figs\sampe_pkt_phase_diff_{0}'.format(num_pkt))
+    
+    # ==== calculate the angles according to phase diff
+    
+    theta_1 = None
+    theta_2 = None
+    
+    def calculate_angle(avg_phase_diff):
+        
+        arccos_x = (avg_phase_diff * wave_length) / ANT_D
+        if arccos_x <= 1 and arccos_x >= -1:
+            theta = math.acos(arccos_x)
+        else:
+            return None
+            
+        return theta
+            
+    theta_1 = calculate_angle(avg_phase_diff_ant_2_1)
+    theta_2 = calculate_angle(avg_phase_diff_ant_3_2)
+
+    # ==== provide one angle from 0 (right) to 180 (left)
+    
+    if theta_1 != None and theta_2 != None:
+        angle = math.degrees(
+            math.atan(
+                2 * math.tan(theta_1)*math.tan(theta_2)/(math.tan(theta_1)+math.tan(theta_2))
+            )
+        )
+        if angle < 0:
+            angle = 180 + angle
+    elif theta_1 == None and theta_2 != None:
+        angle = math.degrees(theta_2)
+    elif theta_1 != None and theta_2 == None:
+        angle = math.degrees(theta_1)
+    else:
+        debug_print("illegal data, theta1 = var1 theta2=var2", theta_1, theta_2)
+        return None, None
+    
+    return phase_data_ant2, angle
+    
