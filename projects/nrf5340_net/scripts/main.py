@@ -27,7 +27,7 @@ def rot_text(ang):
 def gauge(colors='jet_r', title=''):
 
     labels = [i for i in range(180)]
-    N = 180
+    N = 18
 
     # if colors is a colormap
     cmap = cm.get_cmap(colors, N)
@@ -47,10 +47,15 @@ def gauge(colors='jet_r', title=''):
 
     [ax.add_patch(p) for p in patches]
 
-    # for mid, lab in zip(mid_points, labels):
-        # ax.text(0.35 * np.cos(np.radians(mid)), 0.35 * np.sin(np.radians(mid)),
-                # lab, ha='center', va='center', fontsize=14, fontweight='bold',
-                # rotation=rot_text(mid))
+    labels = [-90, -60, -30,  0, 30,  60,  90]
+    labels = labels[::-1]
+    mid_points = [0, 30, 60, 90, 120, 150, 180]
+    
+    for mid, lab in zip(mid_points, labels):
+    
+        ax.text(0.42 * np.cos(np.radians(mid)), 0.42 * np.sin(np.radians(mid)),
+                lab, ha='center', va='center', fontsize=14, fontweight='bold',
+                rotation=rot_text(mid))
 
     r = Rectangle((-0.4, -0.1), 0.8, 0.1, facecolor='w', lw=2)
     ax.add_patch(r)
@@ -71,7 +76,7 @@ def gauge(colors='jet_r', title=''):
     ax.axis('equal')
     plt.tight_layout()
     
-def animate(i, data_source):
+def animate(i, data_source, on_board_calculation):
     
     ang_range, mid_points = degree_range(180)
     
@@ -83,9 +88,9 @@ def animate(i, data_source):
     else:
         num_lines = i
                 
-    angle = get_angle_to_pkt(num_lines)
+    angle = get_angle_to_pkt(num_lines, on_board_calculation)
     if angle:
-        pos = mid_points[abs(int(angle)-179)]
+        pos = mid_points[int(angle)]
         ax.clear()
         ax.arrow(
             0, 0, 0.225 * np.cos(np.radians(pos)), 0.225 *
@@ -97,9 +102,16 @@ def animate(i, data_source):
         
 if __name__ == '__main__':
 
-    data_source = raw_input("read from file (file) or serial (serial)?")
+    data_source             = raw_input("read from file (file) or serial (serial)?")
+    on_board_calculation    = True
     
     if data_source == 'serial':
+        
+        on_board_calculation    = raw_input("on board angle calculation ? (y/n)")
+        
+        if on_board_calculation == 'n':
+            on_board_calculation = False
+        
         print "start serial reading..."
         serial_thread = Thread( target = start_read)
         serial_thread.start()
@@ -109,5 +121,5 @@ if __name__ == '__main__':
     
     labels = [i for i in range(180)]
     fig, ax = plt.subplots()
-    anim = animation.FuncAnimation(fig, animate, interval=100, fargs=(data_source,), save_count=0)
+    anim = animation.FuncAnimation(fig, animate, interval=100, fargs=(data_source, on_board_calculation), save_count=0)
     plt.show()

@@ -12,7 +12,7 @@ def generate_time_line():
                 [12+switching_space/2 + t_unit*i for i in range((24-12) * num_sample_per_slot)]
     return time_data
     
-def get_angle_to_pkt(pkt_id = 0):
+def get_angle_to_pkt(pkt_id = 0, on_board_calculation=False):
 
     with open(sample_file, 'r') as f:
         num_pkt = 0
@@ -106,8 +106,14 @@ def get_angle_to_pkt(pkt_id = 0):
                     )
                 )
                 ax.clear()
-            
-            return angle
+                
+            if on_board_calculation == False:
+                return angle
+            else:
+                if one_entry_samples['angle'] == 254:
+                    return None
+                else:
+                    return one_entry_samples['angle']
             
 if __name__ == '__main__':
     get_angle_to_pkt(100)
