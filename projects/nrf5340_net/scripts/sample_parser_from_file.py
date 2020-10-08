@@ -106,5 +106,6 @@ def get_angle_to_pkt(pkt_id = 0):
                 ax.clear()
             
             return angle
-        
-print get_angle_to_pkt(pkt_id=100)
+            
+if __name__ == '__main__':
+    get_angle_to_pkt(100)

@@ -6,7 +6,11 @@ import numpy as np
 import matplotlib.animation as animation
 from matplotlib.patches import Circle, Wedge, Rectangle
 
-from is_sample_parser import *
+from sample_parser_from_file import *
+from sample_reader_from_serial import *
+
+from threading import Thread
+import os
 
 def degree_range(n):
     start = np.linspace(0, 180, n+1, endpoint=True)[0:-1]
@@ -66,21 +70,44 @@ def gauge(colors='jet_r', title=''):
     ax.axis('equal')
     plt.tight_layout()
     
-def animate(i):
+def animate(i, data_source):
     
     ang_range, mid_points = degree_range(180)
-    angle = get_angle_to_pkt(i)
+    
+    num_lines = 0
+    if data_source == '1':
+        with open(sample_file, 'r') as f:
+            for line in f:
+                num_lines += 1
+    else:
+        num_lines = i
+                
+    angle = get_angle_to_pkt(num_lines)
     if angle:
         pos = mid_points[abs(int(angle)-179)]
         ax.clear()
-        ax.arrow(0, 0, 0.225 * np.cos(np.radians(pos)), 0.225 *
-                 np.sin(np.radians(pos)), width=0.01, head_width=0.02,
-                 head_length=0.1, fc='k', ec='k')
+        ax.arrow(
+            0, 0, 0.225 * np.cos(np.radians(pos)), 0.225 *
+            np.sin(np.radians(pos)), width=0.01, head_width=0.02,
+            head_length=0.1, fc='k', ec='k'
+        )
         gauge()
+        
+if __name__ == '__main__':
 
-labels = [i for i in range(180)]
-fig, ax = plt.subplots()
-gauge()
-
-anim = animation.FuncAnimation(fig, animate, interval=10)
-plt.show()
+    data_source = raw_input("read from file (0) or serial (1)?")
+    
+    print type(data_source)
+    
+    if data_source == '1':
+        print "start serial reading..."
+        serial_thread = Thread( target = start_read)
+        serial_thread.start()
+        
+        while os.path.exists(sample_file) == False:
+            pass
+    
+    labels = [i for i in range(180)]
+    fig, ax = plt.subplots()
+    anim = animation.FuncAnimation(fig, animate, interval=100, fargs=(data_source,), save_count=0)
+    plt.show()

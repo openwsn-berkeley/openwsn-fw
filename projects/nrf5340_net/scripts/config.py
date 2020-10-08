@@ -22,6 +22,9 @@ t_unit                      = 0.125 # micro-seconds
 nrf5340_port                = 'COM9'
 sample_file                 = 'samples.txt'
 
+new_read_mark       = 255
+num_new_read_mark   = 4
+
 DEBUG_ON                    = 0
 
 def debug_print(str, var1 = None, var2 = None, var3 = None):
