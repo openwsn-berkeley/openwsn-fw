@@ -20,13 +20,16 @@
 #define LENGTH_PACKET         125+LENGTH_CRC // maximum length is 127 bytes
 #define CHANNEL               0             // 24ghz: 11 = 2.405GHz, subghz: 11 = 865.325 in  FSK operating mode #1
 #define FREQUENCY             
-#define LENGTH_SERIAL_FRAME   ((NUM_SAMPLES*4)+9)   // length of the serial frame
+#define LENGTH_SERIAL_FRAME   ((NUM_SAMPLES*4)+10)   // length of the serial frame
 
 #define DF_ENABLE             1
 #define CALCULATE_ON_BOARD    1
 #define INVAILD_ANGLE         361.0
 
-#define ANGLE_HISTORY_LEN     64
+#define ANGLE_HISTORY_LEN     16
+#define INDEX_MASK            0x0f
+
+#define UART_DEBUG            1
 
 
 //=========================== variables =======================================
@@ -62,14 +65,13 @@ typedef struct {
     // phase data
                 int16_t    phase_data[NUM_SAMPLES];
                 int16_t    reference_data[NUM_SAMPLES+NUM_SAMPLES_REFERENCE];
-                int16_t    angles_1[(NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/4];
-                int16_t    angles_2[(NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/4];
                 uint8_t    antenna_array_id;
 
     // store the angle
                   double    angle_array_1[ANGLE_HISTORY_LEN]; // determine signal from left or right (depends on orientation of ANT board)
                   double    angle_array_2[ANGLE_HISTORY_LEN]; // determine signal from front or back (depends on orientation of ANT board)
-                  uint8_t   angle_index;
+                  uint8_t   angle_index_1;
+                  uint8_t   angle_index_2;
 
 } app_vars_t;
 
@@ -98,6 +100,7 @@ int mote_main(void) {
 
     uint8_t i;
     double   angle_array_x;
+    double   avg_angle_array;
 
     // clear local variables
     memset(&app_vars,0,sizeof(app_vars_t));
@@ -109,15 +112,17 @@ int mote_main(void) {
     radio_setStartFrameCb(cb_startFrame);
     radio_setEndFrameCb(cb_endFrame);
 
+#if UART_DEBUG == 1
     // setup UART
     uart_setCallbacks(cb_uartTxDone,cb_uartRxCb);
+#endif
 
     // prepare radio
     radio_rfOn();
     // freq type only effects on scum port
     radio_setFrequency(CHANNEL, FREQ_RX);
 
-#ifdef DF_ENABLE
+#if DF_ENABLE == 1
     //radio_configure_switch_antenna_array();
     radio_configure_direction_finding_antenna_switch();
     radio_configure_direction_finding_manual();
@@ -143,46 +148,32 @@ int mote_main(void) {
         // led
         leds_error_on();
 
-        // format frame to send over serial port
+#if CALCULATE_ON_BOARD == 1
 
         for (i=0;i<NUM_SAMPLES;i++) {
-            app_vars.uart_txFrame[4*i+0] = (app_vars.sample_buffer[i] >>24) & 0x000000ff;
-            app_vars.uart_txFrame[4*i+1] = (app_vars.sample_buffer[i] >>16) & 0x000000ff;
-            app_vars.uart_txFrame[4*i+2] = (app_vars.sample_buffer[i] >> 8) & 0x000000ff;
-            app_vars.uart_txFrame[4*i+3] = (app_vars.sample_buffer[i] >> 0) & 0x000000ff;
             // get the phase data
             app_vars.phase_data[i]       = (app_vars.sample_buffer[i]     ) & 0x0000ffff;
         }
         
-        app_vars.uart_txFrame[4*i+0]     = app_vars.rxpk_rssi;
-        // record scum settings for transmitting
-        app_vars.uart_txFrame[4*i+1]     = app_vars.setting_coarse;
-        app_vars.uart_txFrame[4*i+2]     = app_vars.setting_mid;
-        app_vars.uart_txFrame[4*i+3]     = app_vars.setting_fine;
-
-        app_vars.uart_txFrame[4*i+4]     = app_vars.antenna_array_id;
-
-        app_vars.uart_txFrame[4*i+5]     = 0xff;
-        app_vars.uart_txFrame[4*i+6]     = 0xff;
-        app_vars.uart_txFrame[4*i+7]     = 0xff;
-        app_vars.uart_txFrame[4*i+8]     = 0xff;
-
-        app_vars.uart_done          = 0;
-        app_vars.uart_lastTxByte    = 0;
-
-        // send app_vars.uart_txFrame over UART
-        uart_clearTxInterrupts();
-        uart_clearRxInterrupts();
-        uart_enableInterrupts();
-        uart_writeByte(app_vars.uart_txFrame[app_vars.uart_lastTxByte]);
-        while (app_vars.uart_done==0); // busy wait to finish
-        uart_disableInterrupts();
-
-#if CALCULATE_ON_BOARD == 1
         angle_array_x = calculate_aoa();
         if (angle_array_x != INVAILD_ANGLE) {
-            app_vars.angle_array_1[app_vars.angle_index] = angle_array_x;
-            app_vars.angle_index = (app_vars.angle_index+1) & 0x3f;
+
+            // indicate new angle
+            leds_debug_toggle();
+
+            if (app_vars.antenna_array_id == 2) {
+                app_vars.angle_array_2[app_vars.angle_index_2] = angle_array_x;
+                app_vars.angle_index_2 = (app_vars.angle_index_2+1) & INDEX_MASK;
+            } else {
+                app_vars.angle_array_1[app_vars.angle_index_1] = angle_array_x;
+                app_vars.angle_index_1 = (app_vars.angle_index_1+1) & INDEX_MASK;
+            }
+
+            avg_angle_array = 0;
+            for (i=0;i<ANGLE_HISTORY_LEN;i++) {
+                avg_angle_array += app_vars.angle_array_1[i];
+            }
+            avg_angle_array = avg_angle_array/ANGLE_HISTORY_LEN;
 
             if (angle_array_x < 90) {
                 // green led on board
@@ -195,10 +186,50 @@ int mote_main(void) {
             }
 
         }
+#endif
+
+        // format frame to send over serial port
+
+        for (i=0;i<NUM_SAMPLES;i++) {
+            app_vars.uart_txFrame[4*i+0] = (app_vars.sample_buffer[i] >>24) & 0x000000ff;
+            app_vars.uart_txFrame[4*i+1] = (app_vars.sample_buffer[i] >>16) & 0x000000ff;
+            app_vars.uart_txFrame[4*i+2] = (app_vars.sample_buffer[i] >> 8) & 0x000000ff;
+            app_vars.uart_txFrame[4*i+3] = (app_vars.sample_buffer[i] >> 0) & 0x000000ff;
+        }
+        
+        app_vars.uart_txFrame[4*i+0]     = app_vars.rxpk_rssi;
+        // record scum settings for transmitting
+        app_vars.uart_txFrame[4*i+1]     = app_vars.setting_coarse;
+        app_vars.uart_txFrame[4*i+2]     = app_vars.setting_mid;
+        app_vars.uart_txFrame[4*i+3]     = app_vars.setting_fine;
+
+        app_vars.uart_txFrame[4*i+4]     = app_vars.antenna_array_id;
+        if (angle_array_x == INVAILD_ANGLE) {
+            app_vars.uart_txFrame[4*i+5] = 0xfe;
+        } else {
+            app_vars.uart_txFrame[4*i+5] = (uint8_t)angle_array_x;
+        }
+
+        app_vars.uart_txFrame[4*i+6]     = 0xff;
+        app_vars.uart_txFrame[4*i+7]     = 0xff;
+        app_vars.uart_txFrame[4*i+8]     = 0xff;
+        app_vars.uart_txFrame[4*i+9]     = 0xff;
+
+#if UART_DEBUG == 1
+        app_vars.uart_done          = 0;
+        app_vars.uart_lastTxByte    = 0;
+
+        // send app_vars.uart_txFrame over UART
+        uart_clearTxInterrupts();
+        uart_clearRxInterrupts();
+        uart_enableInterrupts();
+        uart_writeByte(app_vars.uart_txFrame[app_vars.uart_lastTxByte]);
+        while (app_vars.uart_done==0); // busy wait to finish
+        uart_disableInterrupts();
+#endif
 
         radio_rxEnable();
         radio_rxNow();
-#endif
 
         // led
         leds_error_off();
@@ -207,11 +238,11 @@ int mote_main(void) {
 
 //=========================== private =========================================
 
-bool    variation_check(int16_t* data, uint8_t length){
+bool variation_check(int16_t* data, uint8_t length) {
     return TRUE;
 }
 
-double calculate_phase_diff(uint8_t shift){
+double calculate_phase_diff(uint8_t shift) {
 
     uint16_t i;
     int16_t diff;
@@ -250,10 +281,11 @@ double calculate_phase_diff(uint8_t shift){
     //---- DO NOT calculate angle if the phase diff variate too much
     if (
         variation_check(phase_diff, (NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/4) == 0
-    ){
+    ) {
         return INVAILD_ANGLE;
     }
 
+    sum = 0;
     for (i=0;i<(NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/4;i++) {
         sum += phase_diff[i];
     }
@@ -309,8 +341,8 @@ double calculate_aoa(void) {
     if (
         wave_index_start != 0 && 
         wave_index_end   != 0 &&
-        wave_index_end - wave_index_start > 20 &&
-        wave_index_end - wave_index_start < 44
+        wave_index_end - wave_index_start > 15 &&
+        wave_index_end - wave_index_start < 49
     ) {
         IF          = 8000000/(wave_index_end-wave_index_start);
         frequency   = frequency*1000000 + IF;
@@ -360,18 +392,31 @@ double calculate_aoa(void) {
     if (acos_x_1 >= -1 && acos_x_1 <= 1) {
         angle_1  = acos(acos_x_1);
     } else {
-        return INVAILD_ANGLE;
+        acos_x_1 = INVAILD_ANGLE;
     }
 
     acos_x_3  = (avg_phase_diff_3/402.0) * wave_length / ANT_DISTANCE;
     if (acos_x_3 >= -1 && acos_x_3 <= 1){
         angle_3  = acos(acos_x_3);
     } else {
-        return INVAILD_ANGLE;
+        acos_x_3 = INVAILD_ANGLE;
     }
 
-    angle = 2*tan(angle_1)*tan(angle_3)/(tan(angle_1)+tan(angle_3));
-    angle = 180 * atan(angle) / M_PI;
+    if (acos_x_1 != INVAILD_ANGLE && acos_x_3 != INVAILD_ANGLE) {
+        angle = 2*tan(angle_1)*tan(angle_3)/(tan(angle_1)+tan(angle_3));
+        angle = 180 * atan(angle) / M_PI;
+    } else {
+        if (acos_x_1 != INVAILD_ANGLE && acos_x_3 == INVAILD_ANGLE) {
+            angle = 180 * acos_x_1 / M_PI;
+        } else {
+            if (acos_x_1 == INVAILD_ANGLE && acos_x_3 != INVAILD_ANGLE) {
+                angle = 180 * acos_x_3 / M_PI;
+            } else {
+                return INVAILD_ANGLE;
+            }
+        }
+    }
+
 
     if (angle>0) {
         // green led on board
@@ -432,7 +477,7 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
 
         app_vars.antenna_array_id = radio_get_antenna_array_id();
         
-#ifdef DF_ENABLE
+#if DF_ENABLE == 1
         //radio_configure_switch_antenna_array();
         radio_configure_direction_finding_antenna_switch();
         radio_configure_direction_finding_manual();
