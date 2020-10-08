@@ -6,6 +6,8 @@ def aoa_angle_calculation(phase_data, num_pkt, array):
     
     # find first two adjencent time point when phase wrapped
     
+    debug_print("phase_data :",var1=phase_data)
+    
     # 64 
     index_1 = 0
     index_2 = 0
@@ -59,7 +61,7 @@ def aoa_angle_calculation(phase_data, num_pkt, array):
             elif diff >= 201:
                 diff -= 402
             phase_diff_ant_2_x.append(diff) 
-
+            
         debug_print("phase_diff_ant2_x and avg_value", phase_diff_ant_2_x, sum(phase_diff_ant_2_x)/len(phase_diff_ant_2_x))
         if DEBUG_ON:
             if reversed:
@@ -114,5 +116,6 @@ def aoa_angle_calculation(phase_data, num_pkt, array):
         debug_print("illegal data, theta1 = var1 theta2=var2", theta_1, theta_2)
         return None, None
     
+    debug_print("off-board angle  = {0}".format(angle), theta_1, theta_2)
     return phase_data_ant2, angle
     

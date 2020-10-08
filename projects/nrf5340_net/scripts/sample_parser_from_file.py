@@ -46,7 +46,6 @@ def get_angle_to_pkt(pkt_id = 0, on_board_calculation=False, contine_mode=False)
             
                 if data:
                     ax.plot(time_data, data, '--', label='reference phase data')
-                    debug_print( "angle calculated off-board = {0}".format(angle))
             
                 # only plots samples in sample slots
                 i = 8
