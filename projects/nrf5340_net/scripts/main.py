@@ -11,6 +11,7 @@ from sample_reader_from_serial import *
 
 from threading import Thread
 import os
+import gc
 
 def degree_range(n):
     start = np.linspace(0, 180, n+1, endpoint=True)[0:-1]
@@ -75,7 +76,7 @@ def animate(i, data_source):
     ang_range, mid_points = degree_range(180)
     
     num_lines = 0
-    if data_source == '1':
+    if data_source == 'serial':
         with open(sample_file, 'r') as f:
             for line in f:
                 num_lines += 1
@@ -92,14 +93,13 @@ def animate(i, data_source):
             head_length=0.1, fc='k', ec='k'
         )
         gauge()
+        gc.collect()
         
 if __name__ == '__main__':
 
-    data_source = raw_input("read from file (0) or serial (1)?")
+    data_source = raw_input("read from file (file) or serial (serial)?")
     
-    print type(data_source)
-    
-    if data_source == '1':
+    if data_source == 'serial':
         print "start serial reading..."
         serial_thread = Thread( target = start_read)
         serial_thread.start()

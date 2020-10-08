@@ -15,7 +15,6 @@ def generate_time_line():
 def get_angle_to_pkt(pkt_id = 0):
 
     with open(sample_file, 'r') as f:
-        debug_fig, ax = plt.subplots(figsize=(10,8))
         num_pkt = 0
         for line in f:
             one_entry_samples = eval(line)
@@ -23,8 +22,9 @@ def get_angle_to_pkt(pkt_id = 0):
             if num_pkt != pkt_id:
                 continue
                 
-            print "========================================================================="
-            print "one_entry_samples with length = {0} for pkt {1} (angle_calc_on_board={2})".format(len(one_entry_samples['samples']), num_pkt, one_entry_samples['angle'])
+            debug_print( "=========================================================================")
+            debug_print("one_entry_samples with length = {0} for pkt {1} (angle_calc_on_board={2})".format(len(one_entry_samples['samples']), num_pkt, one_entry_samples['angle']))
+            
             magPhase  = {'mag_data': [], 'phase_data': []}
             for sample in one_entry_samples['samples']:
                 magPhase['mag_data'].append(sample['magnitude'])
@@ -39,7 +39,9 @@ def get_angle_to_pkt(pkt_id = 0):
             data, angle = aoa_angle_calculation(magPhase['phase_data'], num_pkt, one_entry_samples['array'])
             
             if DEBUG_ON:
-                print data
+                
+                debug_fig, ax = plt.subplots(figsize=(10,8))
+            
                 if data:
                     ax.plot(time_data, data, '--', label='reference phase data')
             
