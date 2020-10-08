@@ -271,9 +271,10 @@ double calculate_phase_diff(uint8_t shift) {
         }
         if (diff <= -201) {
             diff += 402;
-        }
-        if (diff >= 201) {
-            diff -= 402;
+        } else {
+            if (diff >= 201) {
+                diff -= 402;
+            }
         }
         phase_diff[i] = diff;
     }
@@ -392,25 +393,25 @@ double calculate_aoa(void) {
     if (acos_x_1 >= -1 && acos_x_1 <= 1) {
         angle_1  = acos(acos_x_1);
     } else {
-        acos_x_1 = INVAILD_ANGLE;
+        angle_1 = INVAILD_ANGLE;
     }
 
     acos_x_3  = (avg_phase_diff_3/402.0) * wave_length / ANT_DISTANCE;
     if (acos_x_3 >= -1 && acos_x_3 <= 1){
         angle_3  = acos(acos_x_3);
     } else {
-        acos_x_3 = INVAILD_ANGLE;
+        angle_3 = INVAILD_ANGLE;
     }
 
-    if (acos_x_1 != INVAILD_ANGLE && acos_x_3 != INVAILD_ANGLE) {
+    if (angle_1 != INVAILD_ANGLE && angle_3 != INVAILD_ANGLE) {
         angle = 2*tan(angle_1)*tan(angle_3)/(tan(angle_1)+tan(angle_3));
         angle = 180 * atan(angle) / M_PI;
     } else {
-        if (acos_x_1 != INVAILD_ANGLE && acos_x_3 == INVAILD_ANGLE) {
-            angle = 180 * acos_x_1 / M_PI;
+        if (angle_1 != INVAILD_ANGLE && angle_3 == INVAILD_ANGLE) {
+            angle = 180 * angle_1 / M_PI;
         } else {
-            if (acos_x_1 == INVAILD_ANGLE && acos_x_3 != INVAILD_ANGLE) {
-                angle = 180 * acos_x_3 / M_PI;
+            if (angle_1 == INVAILD_ANGLE && angle_3 != INVAILD_ANGLE) {
+                angle = 180 * angle_3 / M_PI;
             } else {
                 return INVAILD_ANGLE;
             }
@@ -418,16 +419,8 @@ double calculate_aoa(void) {
     }
 
 
-    if (angle>0) {
-        // green led on board
-        debugpins_fsm_set();
-        debugpins_fsm_clr();
-    } else {
+    if (angle<0) {
         angle = 180.0 + angle;
-
-        // red led on board
-        debugpins_slot_set();
-        debugpins_slot_clr();
     }
 
     return angle;
