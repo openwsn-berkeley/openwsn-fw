@@ -66,12 +66,15 @@ typedef struct {
                 int16_t    phase_data[NUM_SAMPLES];
                 int16_t    reference_data[NUM_SAMPLES+NUM_SAMPLES_REFERENCE];
                 uint8_t    antenna_array_id;
+                bool       array_to_change;
 
     // store the angle
                   double    angle_array_1[ANGLE_HISTORY_LEN]; // determine signal from left or right (depends on orientation of ANT board)
                   double    angle_array_2[ANGLE_HISTORY_LEN]; // determine signal from front or back (depends on orientation of ANT board)
                   uint8_t   angle_index_1;
                   uint8_t   angle_index_2;
+                  double    angle_final[ANGLE_HISTORY_LEN];
+                  uint8_t   angle_final_index;
 
 } app_vars_t;
 
@@ -90,6 +93,7 @@ uint8_t cb_uartRxCb(void);
 // aoa
 double calculate_aoa(void);
 bool  variation_check(int16_t* data, uint8_t length);
+double combine_two_angles(void);
 
 //=========================== main ============================================
 
@@ -161,6 +165,8 @@ int mote_main(void) {
             // indicate new angle
             leds_debug_toggle();
 
+            app_vars.array_to_change = TRUE;
+
             if (app_vars.antenna_array_id == 2) {
                 app_vars.angle_array_2[app_vars.angle_index_2] = angle_array_x;
                 app_vars.angle_index_2 = (app_vars.angle_index_2+1) & INDEX_MASK;
@@ -168,6 +174,9 @@ int mote_main(void) {
                 app_vars.angle_array_1[app_vars.angle_index_1] = angle_array_x;
                 app_vars.angle_index_1 = (app_vars.angle_index_1+1) & INDEX_MASK;
             }
+
+            app_vars.angle_final[app_vars.angle_final_index] = combine_two_angles();
+            app_vars.angle_final_index = (app_vars.angle_final_index+1) & INDEX_MASK;
 
             avg_angle_array = 0;
             for (i=0;i<ANGLE_HISTORY_LEN;i++) {
@@ -228,8 +237,15 @@ int mote_main(void) {
         uart_disableInterrupts();
 #endif
 
+#if DF_ENABLE == 1
+        if (app_vars.array_to_change) {
+            radio_configure_switch_antenna_array();
+            radio_configure_direction_finding_antenna_switch();
+            radio_configure_direction_finding_manual();
+        }
         radio_rxEnable();
         radio_rxNow();
+#endif
 
         // led
         leds_error_off();
@@ -240,6 +256,11 @@ int mote_main(void) {
 
 bool variation_check(int16_t* data, uint8_t length) {
     return TRUE;
+}
+
+double combine_two_angles() {
+    // TODO
+    return app_vars.angle_array_2[(app_vars.angle_index_2-1) & INDEX_MASK];
 }
 
 double calculate_phase_diff(uint8_t shift) {
@@ -470,11 +491,6 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
 
         app_vars.antenna_array_id = radio_get_antenna_array_id();
         
-#if DF_ENABLE == 1
-        //radio_configure_switch_antenna_array();
-        radio_configure_direction_finding_antenna_switch();
-        radio_configure_direction_finding_manual();
-#endif
     } else {
 
         radio_rxEnable();
