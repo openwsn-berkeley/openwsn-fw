@@ -1,6 +1,9 @@
 import serial
 import struct
 from config import *
+from calc_angle import *
+
+latest_angle = [None, None]
 
 def start_read():
 
@@ -44,6 +47,15 @@ def start_read():
                 data['setting']     = ((ord(input_data[NUM_SAMPLES*4+1])) << 10 ) | ((ord(input_data[NUM_SAMPLES*4+2])) << 5) | (ord(input_data[NUM_SAMPLES*4+3]))
                 data['array']       = ord(input_data[NUM_SAMPLES*4+4])
                 data['angle']       = ord(input_data[NUM_SAMPLES*4+5])
+                
+                phase_data  = []
+                for sample in data['samples']:
+                    phase_data.append(sample['phase'])
+                _, angle = aoa_angle_calculation(phase_data, 0, data['array'])
+                
+                if angle:
+                    latest_angle[int(data['array'])-1] = angle
+                
                 with open(sample_file, 'a') as f:
                     f.write(str(data)+'\n')
                     data['samples'] = []

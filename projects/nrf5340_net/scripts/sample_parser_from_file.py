@@ -19,7 +19,7 @@ def get_angle_to_pkt(pkt_id = 0, on_board_calculation=False, contine_mode=False)
         for line in f:
             one_entry_samples = eval(line)
             num_pkt += 1
-            
+
             if contine_mode == False:
                 if num_pkt != pkt_id:
                     continue
@@ -111,13 +111,14 @@ def get_angle_to_pkt(pkt_id = 0, on_board_calculation=False, contine_mode=False)
             
             if contine_mode == False:
                 if on_board_calculation == False:
-                    return angle
+                    return angle, one_entry_samples['array']
                 else:
                     if one_entry_samples['angle'] == 254:
-                        return None
+                        return None, one_entry_samples['array']
                     else:
-                        return one_entry_samples['angle']
+                        return one_entry_samples['angle'], one_entry_samples['array']
             
-            
+        # the pkt_id not exist
+        return None, None  
 if __name__ == '__main__':
     get_angle_to_pkt(pkt_id=3, contine_mode=False)

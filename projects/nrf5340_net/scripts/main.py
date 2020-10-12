@@ -45,6 +45,10 @@ def gauge(colors='jet_r', title=''):
         # arcs
         patches.append(Wedge((0., 0.), .4, *ang, width=0.10,
                              facecolor=c, lw=2, alpha=0.5))
+        
+        ang = [a-90.0 for a in ang]
+        patches.append(Wedge((0.5, -0.5), .4, *ang, width=0.10,
+                     facecolor=c, lw=2, alpha=0.5))
 
     [ax.add_patch(p) for p in patches]
 
@@ -55,6 +59,10 @@ def gauge(colors='jet_r', title=''):
         ax.text(0.42 * np.cos(np.radians(mid)), 0.42 * np.sin(np.radians(mid)),
                 lab, ha='center', va='center', fontsize=14, fontweight='bold',
                 rotation=rot_text(mid))
+                
+        ax.text(0.5+0.42 * np.cos(np.radians(mid-90)), 0.42 * np.sin(np.radians(mid-90))-0.5,
+                lab, ha='center', va='center', fontsize=14, fontweight='bold',
+                rotation=rot_text(mid)-90)
 
     r = Rectangle((-0.4, -0.1), 0.8, 0.1, facecolor='w', lw=2)
     ax.add_patch(r)
@@ -68,6 +76,9 @@ def gauge(colors='jet_r', title=''):
 
     ax.add_patch(Circle((0, 0), radius=0.02, facecolor='k'))
     ax.add_patch(Circle((0, 0), radius=0.01, facecolor='w', zorder=11))
+    
+    ax.add_patch(Circle((0.5, -0.5), radius=0.02, facecolor='k'))
+    ax.add_patch(Circle((0.5, -0.5), radius=0.01, facecolor='w', zorder=11))
 
     ax.set_frame_on(False)
     ax.axes.set_xticks([])
@@ -79,25 +90,83 @@ def animate(i, data_source, on_board_calculation):
     
     ang_range, mid_points = degree_range(180)
     
-    num_lines = 0
-    with open(sample_file, 'r') as f:
-        for line in f:
-            num_lines += 1
-    pkt_id = num_lines
     if data_source == 'r':
+    
+        num_lines = 0
+        with open(sample_file, 'r') as f:
+            for line in f:
+                num_lines += 1
+        pkt_id = num_lines
+    
         pkt_id = i
         sys.stdout.write("{0}/{1}\r".format(pkt_id, num_lines))
         sys.stdout.flush()
-                
-    angle = get_angle_to_pkt(pkt_id, on_board_calculation)
-    if angle:
-        pos = mid_points[int(angle)]
+    else :
         ax.clear()
-        ax.arrow(
-            0, 0, 0.225 * np.cos(np.radians(pos)), 0.225 *
-            np.sin(np.radians(pos)), width=0.01, head_width=0.02,
-            head_length=0.1, fc='k', ec='k'
-        )
+        if latest_angle[0]:
+            pos = mid_points[int(latest_angle[0])]
+            ax.arrow(
+                0, 0, 0.225 * np.cos(np.radians(pos)), 0.225 *
+                np.sin(np.radians(pos)), width=0.01, head_width=0.02,
+                head_length=0.1, fc='k', ec='k'
+            )
+        if latest_angle[1]:
+            pos = mid_points[int(latest_angle[1])] - 90
+            ax.arrow(
+                0.5, -0.5, 0.225 * np.cos(np.radians(pos)), 0.225 *
+                np.sin(np.radians(pos)), width=0.01, head_width=0.02,
+                head_length=0.1, fc='k', ec='k'
+            )
+        gauge()
+        gc.collect()
+        return
+        
+    angle, array = get_angle_to_pkt(pkt_id, on_board_calculation)
+
+    if angle:
+    
+        if array == 1:
+            another_array = 2
+        else:
+            another_array = 1
+        
+        j = 1
+        another_angle = None
+        while (another_array != array or another_angle == None) and pkt_id-j > 0:
+            another_angle, another_array = get_angle_to_pkt(pkt_id-j, on_board_calculation)
+            j += 1
+            
+        if j == pkt_id:
+            # didn't find the previous angle
+            another_angle = None
+        else:
+            print "angother angle and array",  another_angle, another_array
+            
+        if angle or another_angle:
+            ax.clear()
+    
+        angles = [None, None]
+        if array == 1:
+            angles[0] = angle
+            angles[1] = another_angle
+        else:
+            angles[0] = another_angle
+            angles[1] = angle
+
+        if angles[0]:
+            pos = mid_points[int(angles[0])]
+            ax.arrow(
+                0, 0, 0.225 * np.cos(np.radians(pos)), 0.225 *
+                np.sin(np.radians(pos)), width=0.01, head_width=0.02,
+                head_length=0.1, fc='k', ec='k'
+            )
+        if angles[1]:
+            pos = mid_points[int(angles[1])] - 90
+            ax.arrow(
+                0.5, -0.5, 0.225 * np.cos(np.radians(pos)), 0.225 *
+                np.sin(np.radians(pos)), width=0.01, head_width=0.02,
+                head_length=0.1, fc='k', ec='k'
+            )
         gauge()
         gc.collect()
         
@@ -116,9 +185,6 @@ if __name__ == '__main__':
         print "start serial reading..."
         serial_thread = Thread( target = start_read)
         serial_thread.start()
-        
-        while os.path.exists(sample_file) == False:
-            pass
     
     labels = [i for i in range(180)]
     fig, ax = plt.subplots()
