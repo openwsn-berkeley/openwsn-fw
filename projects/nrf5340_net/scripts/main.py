@@ -15,8 +15,8 @@ import gc
 import sys
 
 def degree_range(n):
-    start = np.linspace(0, 180, n+1, endpoint=True)[0:-1]
-    end = np.linspace(0, 180, n+1, endpoint=True)[1::]
+    start = np.linspace(0, 360, n+1, endpoint=True)[0:-1]
+    end = np.linspace(0, 360, n+1, endpoint=True)[1::]
     mid_points = start + ((end-start)/2.)
     return np.c_[start, end], mid_points
 
@@ -27,8 +27,8 @@ def rot_text(ang):
 
 def gauge(colors='jet_r', title=''):
 
-    labels = [i for i in range(180)]
-    N = 18
+    labels = [i for i in range(360)]
+    N = 36
 
     # if colors is a colormap
     cmap = cm.get_cmap(colors, N)
@@ -41,31 +41,23 @@ def gauge(colors='jet_r', title=''):
     patches = []
     for ang, c in zip(ang_range, colors):
         # sectors
-        patches.append(Wedge((0., 0.), .4, *ang, facecolor='w', lw=2))
+        # patches.append(Wedge((0., 0.), .4, *ang, facecolor='w', lw=2))
         # arcs
         patches.append(Wedge((0., 0.), .4, *ang, width=0.10,
                              facecolor=c, lw=2, alpha=0.5))
-        
-        ang = [a-90.0 for a in ang]
-        patches.append(Wedge((0.5, -0.5), .4, *ang, width=0.10,
-                     facecolor=c, lw=2, alpha=0.5))
 
     [ax.add_patch(p) for p in patches]
 
-    labels = mid_points = [0, 30, 60, 90, 120, 150, 180]
+    labels = mid_points = [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330]
     
     for mid, lab in zip(mid_points, labels):
     
         ax.text(0.42 * np.cos(np.radians(mid)), 0.42 * np.sin(np.radians(mid)),
                 lab, ha='center', va='center', fontsize=14, fontweight='bold',
                 rotation=rot_text(mid))
-                
-        ax.text(0.5+0.42 * np.cos(np.radians(mid-90)), 0.42 * np.sin(np.radians(mid-90))-0.5,
-                lab, ha='center', va='center', fontsize=14, fontweight='bold',
-                rotation=rot_text(mid)-90)
 
-    r = Rectangle((-0.4, -0.1), 0.8, 0.1, facecolor='w', lw=2)
-    ax.add_patch(r)
+    # r = Rectangle((-0.4, -0.1), 0.8, 0.1, facecolor='w', lw=2)
+    # ax.add_patch(r)
     ax.text(0, -0.05, title, horizontalalignment='center',
             verticalalignment='center', fontsize=22, fontweight='bold')
 
@@ -76,9 +68,6 @@ def gauge(colors='jet_r', title=''):
 
     ax.add_patch(Circle((0, 0), radius=0.02, facecolor='k'))
     ax.add_patch(Circle((0, 0), radius=0.01, facecolor='w', zorder=11))
-    
-    ax.add_patch(Circle((0.5, -0.5), radius=0.02, facecolor='k'))
-    ax.add_patch(Circle((0.5, -0.5), radius=0.01, facecolor='w', zorder=11))
 
     ax.set_frame_on(False)
     ax.axes.set_xticks([])
@@ -88,7 +77,9 @@ def gauge(colors='jet_r', title=''):
     
 def animate(i, data_source, on_board_calculation):
     
-    ang_range, mid_points = degree_range(180)
+    ang_range, mid_points = degree_range(360)
+    
+    angles = [None, None]
     
     if data_source == 'r':
     
@@ -101,74 +92,65 @@ def animate(i, data_source, on_board_calculation):
         pkt_id = i
         sys.stdout.write("{0}/{1}\r".format(pkt_id, num_lines))
         sys.stdout.flush()
-    else :
-        ax.clear()
-        if latest_angle[0]:
-            pos = mid_points[int(latest_angle[0])]
-            ax.arrow(
-                0, 0, 0.225 * np.cos(np.radians(pos)), 0.225 *
-                np.sin(np.radians(pos)), width=0.01, head_width=0.02,
-                head_length=0.1, fc='k', ec='k'
-            )
-        if latest_angle[1]:
-            pos = mid_points[int(latest_angle[1])] - 90
-            ax.arrow(
-                0.5, -0.5, 0.225 * np.cos(np.radians(pos)), 0.225 *
-                np.sin(np.radians(pos)), width=0.01, head_width=0.02,
-                head_length=0.1, fc='k', ec='k'
-            )
-        gauge()
-        gc.collect()
-        return
         
-    angle, array = get_angle_to_pkt(pkt_id, on_board_calculation)
+        angle, array = get_angle_to_pkt(pkt_id, on_board_calculation)
 
-    if angle:
-    
-        if array == 1:
-            another_array = 2
-        else:
-            another_array = 1
+        if angle:
         
-        j = 1
-        another_angle = None
-        while (another_array != array or another_angle == None) and pkt_id-j > 0:
-            another_angle, another_array = get_angle_to_pkt(pkt_id-j, on_board_calculation)
-            j += 1
+            if array == 1:
+                another_array = 2
+            else:
+                another_array = 1
             
-        if j == pkt_id:
-            # didn't find the previous angle
+            j = 1
             another_angle = None
-        else:
-            print "angother angle and array",  another_angle, another_array
+            while (another_array != array or another_angle == None) and pkt_id-j > 0:
+                another_angle, another_array = get_angle_to_pkt(pkt_id-j, on_board_calculation)
+                j += 1
+                
+            if j == pkt_id:
+                # didn't find the previous angle
+                another_angle = None
+            else:
+                debug_print("angother angle {0}and array {1}".format(another_angle, another_array))
+                
+            if angle or another_angle:
+                ax.clear()
+        
             
-        if angle or another_angle:
-            ax.clear()
+            if array == 1:
+                angles[0] = angle
+                angles[1] = another_angle
+            else:
+                angles[0] = another_angle
+                angles[1] = angle
+    else :    
+        angles = latest_angle
+        
+    if angles[0] != None and angles[1] != None:
     
-        angles = [None, None]
-        if array == 1:
-            angles[0] = angle
-            angles[1] = another_angle
+        ax.clear()  
+    
+        if angles[1] > 90:
+            angle = angles[0]
         else:
-            angles[0] = another_angle
-            angles[1] = angle
-
-        if angles[0]:
-            pos = mid_points[int(angles[0])]
-            ax.arrow(
-                0, 0, 0.225 * np.cos(np.radians(pos)), 0.225 *
-                np.sin(np.radians(pos)), width=0.01, head_width=0.02,
-                head_length=0.1, fc='k', ec='k'
-            )
-        if angles[1]:
-            pos = mid_points[int(angles[1])] - 90
-            ax.arrow(
-                0.5, -0.5, 0.225 * np.cos(np.radians(pos)), 0.225 *
-                np.sin(np.radians(pos)), width=0.01, head_width=0.02,
-                head_length=0.1, fc='k', ec='k'
-            )
+            angle = 360 - angles[0]
+            
+        angle += 45
+            
+        if angle >= 360:
+            angle -= 360
+            
+        pos = mid_points[int(angle)]
+        ax.arrow(
+            0, 0, 0.225 * np.cos(np.radians(pos)), 0.225 *
+            np.sin(np.radians(pos)), width=0.01, head_width=0.02,
+            head_length=0.1, fc='k', ec='k'
+        )
+    
         gauge()
         gc.collect()
+    return
         
 if __name__ == '__main__':
 
