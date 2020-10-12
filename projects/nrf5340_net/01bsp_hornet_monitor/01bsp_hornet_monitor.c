@@ -248,28 +248,55 @@ bool variation_check(int16_t* data, uint8_t length) {
 
 double combine_two_angles() {
     
+    double angle_final_1;
+    double angle_final_2;
     double angle_final;
     uint8_t last_angle_array_1;
     uint8_t last_angle_array_2;
 
     last_angle_array_1 = (app_vars.angle_index_1-1) & INDEX_MASK;
     last_angle_array_2 = (app_vars.angle_index_2-1) & INDEX_MASK;
+
+    // if using ant array 1 as basic degree and ant array 2 to indicate front or back
     
     if (
         app_vars.angle_array_2[last_angle_array_2] > 90
     ) {
         // the signal comes from front
-        angle_final = app_vars.angle_array_1[last_angle_array_1];
+        angle_final_1 = app_vars.angle_array_1[last_angle_array_1];
     } else {
         // the signal comes from back
-        angle_final = 360 - app_vars.angle_array_1[last_angle_array_1];
+        angle_final_1 = 360 - app_vars.angle_array_1[last_angle_array_1];
     }
 
     // apply 45 degrees angle of antenna array
-    angle_final = angle_final + 45;
-    if (angle_final >= 360) {
-        angle_final -= 360;
+    angle_final_1 = angle_final_1 + 45;
+    if (angle_final_1 >= 360) {
+        angle_final_1 -= 360;
     }
+
+    //// if using ant array 2 as basic degree and ant array 1 as front or back indicator
+
+    //if (
+    //    app_vars.angle_array_1[last_angle_array_1] > 90
+    //) {
+    //    // the signal comes from back
+    //    angle_final_2 = 360 - app_vars.angle_array_2[last_angle_array_2];
+    //} else {
+    //    // the signal comes from front
+    //    angle_final_2 = app_vars.angle_array_2[last_;angle_array_2];
+    //}
+
+    //// apply 45 degrees angle of antenna array
+    //angle_final_2 = angle_final_2 - 45;
+    //if (angle_final_2 < 0) {
+    //    angle_final_2 += 360;
+    //}
+
+    //// have average between two calculation
+    //angle_final = (angle_final_1 + angle_final_2)/2;
+
+    angle_final = angle_final_1;
 
     return angle_final;
 }
