@@ -94,6 +94,7 @@ uint8_t cb_uartRxCb(void);
 double calculate_aoa(void);
 bool  variation_check(int16_t* data, uint8_t length);
 double combine_two_angles(void);
+void setup_led_direction(void);
 
 //=========================== main ============================================
 
@@ -178,21 +179,8 @@ int mote_main(void) {
             app_vars.angle_final[app_vars.angle_final_index] = combine_two_angles();
             app_vars.angle_final_index = (app_vars.angle_final_index+1) & INDEX_MASK;
 
-            avg_angle_array = 0;
-            for (i=0;i<ANGLE_HISTORY_LEN;i++) {
-                avg_angle_array += app_vars.angle_array_1[i];
-            }
-            avg_angle_array = avg_angle_array/ANGLE_HISTORY_LEN;
-
-            if (angle_array_x < 90) {
-                // green led on board
-                debugpins_fsm_set();
-                debugpins_slot_clr();
-            } else {
-                // red led on board
-                debugpins_slot_set();
-                debugpins_fsm_clr();
-            }
+            // setup led direction indicator
+            setup_led_direction();
 
         }
 #endif
@@ -259,8 +247,76 @@ bool variation_check(int16_t* data, uint8_t length) {
 }
 
 double combine_two_angles() {
-    // TODO
-    return app_vars.angle_array_2[(app_vars.angle_index_2-1) & INDEX_MASK];
+    
+    double angle_final;
+    uint8_t last_angle_array_1;
+    uint8_t last_angle_array_2;
+
+    last_angle_array_1 = (app_vars.angle_index_1-1) & INDEX_MASK;
+    last_angle_array_2 = (app_vars.angle_index_2-1) & INDEX_MASK;
+    
+    if (
+        app_vars.angle_array_2[last_angle_array_2] > 90
+    ) {
+        // the signal comes from front
+        angle_final = app_vars.angle_array_1[last_angle_array_1];
+    } else {
+        // the signal comes from back
+        angle_final = 360 - app_vars.angle_array_1[last_angle_array_1];
+    }
+
+    // apply 45 degrees angle of antenna array
+    angle_final = angle_final + 45;
+    if (angle_final >= 360) {
+        angle_final -= 360;
+    }
+
+    return angle_final;
+}
+
+void setup_led_direction(void) {
+    
+    double last_angle;
+
+    last_angle = app_vars.angle_final[(app_vars.angle_final_index-1) & INDEX_MASK];
+
+    if (last_angle <90) {
+        // light right and front led
+        debugpins_frame_clr();  // left
+        debugpins_slot_set();   // right
+        debugpins_fsm_clr();    // frone
+        debugpins_task_set();   // back
+    } else {
+        if (last_angle <180) {
+            // light left and front led
+            debugpins_frame_set();  // left
+            debugpins_slot_clr();   // right
+            debugpins_fsm_clr();    // frone
+            debugpins_task_set();   // back
+        } else {
+            if (last_angle <270) {
+                // light left and back led
+                debugpins_frame_set();  // left
+                debugpins_slot_clr();   // right
+                debugpins_fsm_set();    // frone
+                debugpins_task_clr();   // back
+            } else {
+                if (last_angle <360) {
+                    // light right and front led
+                    debugpins_frame_clr();  // left
+                    debugpins_slot_set();   // right
+                    debugpins_fsm_set();    // frone
+                    debugpins_task_clr();   // back
+                } else {
+                    // wrong angle
+                    debugpins_frame_set();  // left
+                    debugpins_slot_set();   // right
+                    debugpins_fsm_set();    // frone
+                    debugpins_task_set();   // back
+                }
+            }
+        }
+    }
 }
 
 double calculate_phase_diff(uint8_t shift) {
