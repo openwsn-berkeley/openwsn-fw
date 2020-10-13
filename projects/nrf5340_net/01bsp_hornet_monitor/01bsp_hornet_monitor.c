@@ -346,12 +346,16 @@ void setup_led_direction(void) {
     }
 }
 
+#define VALID_PHASE_DIFF_RANG 113   // calculated as (402 * ANT_DISTANCE / 0.12468) 
+#define MAX_PHASE_DIFF        402   //
+
 double calculate_phase_diff(uint8_t shift) {
 
     uint16_t i;
     int16_t diff;
     int32_t sum;
     double avg_phase_diff;
+    uint8_t num_diff_sample;
 
     int16_t phase_one_ant[(NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/4];
     int16_t reference_one_ant[(NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/4];
@@ -367,20 +371,26 @@ double calculate_phase_diff(uint8_t shift) {
         memcpy(&reference_one_ant[8*i], &app_vars.reference_data[8*(8+shift+4*i)],sizeof(int16_t)*8);
         memcpy(&reference_one_ant[8*i], &app_vars.reference_data[8*(8+shift+4*i)],sizeof(int16_t)*8);
     }
+
+    num_diff_sample = 0;
     for (i=0;i<(NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/4;i++) {
         if (shift == 2) {
             diff = phase_one_ant[i] - reference_one_ant[i];
         } else {
             diff = reference_one_ant[i] - phase_one_ant[i];
         }
-        if (diff <= -201) {
-            diff += 402;
-        } else {
-            if (diff >= 201) {
-                diff -= 402;
-            }
+
+        //if (diff <= -201) {
+        //    diff += 402;
+        //} else {
+        //    if (diff >= 201) {
+        //        diff -= 402;
+        //    }
+        //}
+
+        if ((diff > (0-VALID_PHASE_DIFF_RANG)) && (diff < VALID_PHASE_DIFF_RANG)) {
+            phase_diff[num_diff_sample++] = diff;
         }
-        phase_diff[i] = diff;
     }
 
     //---- DO NOT calculate angle if the phase diff variate too much
@@ -391,10 +401,15 @@ double calculate_phase_diff(uint8_t shift) {
     }
 
     sum = 0;
-    for (i=0;i<(NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/4;i++) {
+    for (i=0;i<num_diff_sample;i++) {
         sum += phase_diff[i];
     }
-    avg_phase_diff = (double)(sum)/((NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/4);
+
+    if (num_diff_sample>0) {
+        avg_phase_diff = (double)(sum)/num_diff_sample;
+    } else {
+        avg_phase_diff = MAX_PHASE_DIFF;
+    }
 
     return avg_phase_diff;
 }
@@ -490,6 +505,10 @@ double calculate_aoa(void) {
 
     shift = 2;
     avg_phase_diff_3 = calculate_phase_diff(shift);
+
+    if (avg_phase_diff_1 == MAX_PHASE_DIFF || avg_phase_diff_3 == MAX_PHASE_DIFF) {
+        return INVAILD_ANGLE;
+    }
 
     //==== calculate the angle
 
