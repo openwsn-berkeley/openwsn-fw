@@ -26,8 +26,8 @@
 #define CALCULATE_ON_BOARD    1
 #define INVAILD_ANGLE         361.0
 
-#define ANGLE_HISTORY_LEN     16
-#define INDEX_MASK            0x0f
+#define ANGLE_HISTORY_LEN     8
+#define INDEX_MASK            0x07
 
 #define UART_DEBUG            1
 
@@ -75,6 +75,8 @@ typedef struct {
                   uint8_t   angle_index_2;
                   double    angle_final[ANGLE_HISTORY_LEN];
                   uint8_t   angle_final_index;
+                  bool      enough_angle_on_array_1;
+                  bool      enough_angle_on_array_2;
 
 } app_vars_t;
 
@@ -171,16 +173,24 @@ int mote_main(void) {
             if (app_vars.antenna_array_id == 2) {
                 app_vars.angle_array_2[app_vars.angle_index_2] = angle_array_x;
                 app_vars.angle_index_2 = (app_vars.angle_index_2+1) & INDEX_MASK;
+                if (app_vars.angle_index_2 == 0) {
+                    app_vars.enough_angle_on_array_2 = TRUE;
+                }
             } else {
                 app_vars.angle_array_1[app_vars.angle_index_1] = angle_array_x;
                 app_vars.angle_index_1 = (app_vars.angle_index_1+1) & INDEX_MASK;
+                if (app_vars.angle_index_1 == 0) {
+                    app_vars.enough_angle_on_array_1 = TRUE;
+                }
             }
 
             app_vars.angle_final[app_vars.angle_final_index] = combine_two_angles();
             app_vars.angle_final_index = (app_vars.angle_final_index+1) & INDEX_MASK;
-
-            // setup led direction indicator
-            setup_led_direction();
+            
+            if (app_vars.enough_angle_on_array_1 && app_vars.enough_angle_on_array_2) {
+                // setup led direction indicator
+                setup_led_direction();
+            }
 
         }
 #endif
@@ -251,22 +261,37 @@ double combine_two_angles() {
     double angle_final_1;
     double angle_final_2;
     double angle_final;
-    uint8_t last_angle_array_1;
-    uint8_t last_angle_array_2;
 
-    last_angle_array_1 = (app_vars.angle_index_1-1) & INDEX_MASK;
-    last_angle_array_2 = (app_vars.angle_index_2-1) & INDEX_MASK;
+    uint8_t i;
+    double sum;
+
+    // using the last valid angle
+    //angle_final_1 = app_vars.angle_array_1[((app_vars.angle_index_1-1) & INDEX_MASK)];
+    //angle_final_2 = app_vars.angle_array_2[((app_vars.angle_index_2-1) & INDEX_MASK)];
+
+    // using average value of last ANGLE_HISTORY_LEN angles
+    sum = 0;
+    for (i=0;i<ANGLE_HISTORY_LEN;i++) {
+        sum += app_vars.angle_array_1[i];
+    }
+    angle_final_1 = sum/ANGLE_HISTORY_LEN;
+
+    sum = 0;
+    for (i=0;i<ANGLE_HISTORY_LEN;i++) {
+        sum += app_vars.angle_array_2[i];
+    }
+    angle_final_2 = sum/ANGLE_HISTORY_LEN;
 
     // if using ant array 1 as basic degree and ant array 2 to indicate front or back
     
     if (
-        app_vars.angle_array_2[last_angle_array_2] > 90
+        angle_final_2 > 90
     ) {
         // the signal comes from front
-        angle_final_1 = app_vars.angle_array_1[last_angle_array_1];
+        angle_final_1 = angle_final_1;
     } else {
         // the signal comes from back
-        angle_final_1 = 360 - app_vars.angle_array_1[last_angle_array_1];
+        angle_final_1 = 360 -angle_final_1;
     }
 
     // apply 45 degrees angle of antenna array
@@ -274,27 +299,6 @@ double combine_two_angles() {
     if (angle_final_1 >= 360) {
         angle_final_1 -= 360;
     }
-
-    //// if using ant array 2 as basic degree and ant array 1 as front or back indicator
-
-    //if (
-    //    app_vars.angle_array_1[last_angle_array_1] > 90
-    //) {
-    //    // the signal comes from back
-    //    angle_final_2 = 360 - app_vars.angle_array_2[last_angle_array_2];
-    //} else {
-    //    // the signal comes from front
-    //    angle_final_2 = app_vars.angle_array_2[last_;angle_array_2];
-    //}
-
-    //// apply 45 degrees angle of antenna array
-    //angle_final_2 = angle_final_2 - 45;
-    //if (angle_final_2 < 0) {
-    //    angle_final_2 += 360;
-    //}
-
-    //// have average between two calculation
-    //angle_final = (angle_final_1 + angle_final_2)/2;
 
     angle_final = angle_final_1;
 
