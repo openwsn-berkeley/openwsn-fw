@@ -597,8 +597,6 @@ kick_scheduler_t    radio_isr(void){
 
     // end of frame
     if (NRF_RADIO_NS->EVENTS_PHYEND) {
-
-        debugpins_frame_toggle();
         
         if (radio_vars.endFrame_cb!=NULL){
             radio_vars.endFrame_cb(time_stampe);
