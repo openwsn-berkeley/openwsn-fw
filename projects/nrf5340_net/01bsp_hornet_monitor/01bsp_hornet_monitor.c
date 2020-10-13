@@ -171,23 +171,24 @@ int mote_main(void) {
             app_vars.array_to_change = TRUE;
 
             if (app_vars.antenna_array_id == 2) {
-                app_vars.angle_array_2[app_vars.angle_index_2] = angle_array_x;
                 app_vars.angle_index_2 = (app_vars.angle_index_2+1) & INDEX_MASK;
+                app_vars.angle_array_2[app_vars.angle_index_2] = angle_array_x;
                 if (app_vars.angle_index_2 == 0) {
                     app_vars.enough_angle_on_array_2 = TRUE;
                 }
             } else {
-                app_vars.angle_array_1[app_vars.angle_index_1] = angle_array_x;
                 app_vars.angle_index_1 = (app_vars.angle_index_1+1) & INDEX_MASK;
+                app_vars.angle_array_1[app_vars.angle_index_1] = angle_array_x;
                 if (app_vars.angle_index_1 == 0) {
                     app_vars.enough_angle_on_array_1 = TRUE;
                 }
             }
-
-            app_vars.angle_final[app_vars.angle_final_index] = combine_two_angles();
-            app_vars.angle_final_index = (app_vars.angle_final_index+1) & INDEX_MASK;
+            
             
             if (app_vars.enough_angle_on_array_1 && app_vars.enough_angle_on_array_2) {
+
+                app_vars.angle_final_index = (app_vars.angle_final_index+1) & INDEX_MASK;
+                app_vars.angle_final[app_vars.angle_final_index] = combine_two_angles();
                 // setup led direction indicator
                 setup_led_direction();
             }
@@ -211,10 +212,10 @@ int mote_main(void) {
         app_vars.uart_txFrame[4*i+3]     = app_vars.setting_fine;
 
         app_vars.uart_txFrame[4*i+4]     = app_vars.antenna_array_id;
-        if (angle_array_x == INVAILD_ANGLE) {
-            app_vars.uart_txFrame[4*i+5] = 0xfe;
+        if (app_vars.enough_angle_on_array_1 && app_vars.enough_angle_on_array_2 && angle_array_x != INVAILD_ANGLE) {
+            app_vars.uart_txFrame[4*i+5] = (uint8_t)app_vars.angle_final[app_vars.angle_final_index];
         } else {
-            app_vars.uart_txFrame[4*i+5] = (uint8_t)angle_array_x;
+            app_vars.uart_txFrame[4*i+5] = 0xfe;
         }
 
         app_vars.uart_txFrame[4*i+6]     = 0xff;
@@ -266,8 +267,8 @@ double combine_two_angles() {
     double sum;
 
     // using the last valid angle
-    //angle_final_1 = app_vars.angle_array_1[((app_vars.angle_index_1-1) & INDEX_MASK)];
-    //angle_final_2 = app_vars.angle_array_2[((app_vars.angle_index_2-1) & INDEX_MASK)];
+    //angle_final_1 = app_vars.angle_array_1[app_vars.angle_index_1];
+    //angle_final_2 = app_vars.angle_array_2[app_vars.angle_index_2];
 
     // using average value of last ANGLE_HISTORY_LEN angles
     sum = 0;
@@ -288,10 +289,10 @@ double combine_two_angles() {
         angle_final_2 > 90
     ) {
         // the signal comes from front
-        angle_final_1 = angle_final_1;
+        angle_final_1 = 360-angle_final_1;
     } else {
         // the signal comes from back
-        angle_final_1 = 360 -angle_final_1;
+        angle_final_1 = angle_final_1;
     }
 
     // apply 45 degrees angle of antenna array
@@ -309,35 +310,35 @@ void setup_led_direction(void) {
     
     double last_angle;
 
-    last_angle = app_vars.angle_final[(app_vars.angle_final_index-1) & INDEX_MASK];
+    last_angle = app_vars.angle_final[app_vars.angle_final_index];
 
     if (last_angle <90) {
         // light right and front led
         debugpins_frame_clr();  // left
         debugpins_slot_set();   // right
-        debugpins_fsm_clr();    // frone
-        debugpins_task_set();   // back
+        debugpins_fsm_set();    // frone
+        debugpins_task_clr();   // back
     } else {
         if (last_angle <180) {
             // light left and front led
             debugpins_frame_set();  // left
             debugpins_slot_clr();   // right
-            debugpins_fsm_clr();    // frone
-            debugpins_task_set();   // back
+            debugpins_fsm_set();    // frone
+            debugpins_task_clr();   // back
         } else {
             if (last_angle <270) {
                 // light left and back led
                 debugpins_frame_set();  // left
                 debugpins_slot_clr();   // right
-                debugpins_fsm_set();    // frone
-                debugpins_task_clr();   // back
+                debugpins_fsm_clr();    // frone
+                debugpins_task_set();   // back
             } else {
                 if (last_angle <360) {
                     // light right and front led
                     debugpins_frame_clr();  // left
                     debugpins_slot_set();   // right
-                    debugpins_fsm_set();    // frone
-                    debugpins_task_clr();   // back
+                    debugpins_fsm_clr();    // frone
+                    debugpins_task_set();   // back
                 } else {
                     // wrong angle
                     debugpins_frame_set();  // left
@@ -590,7 +591,7 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
     app_vars.setting_mid    = app_vars.rxpk_buf[3];
     app_vars.setting_fine   = app_vars.rxpk_buf[4];
 
-    if (app_vars.rxpk_crc && app_vars.rxpk_len==6) {
+    if (app_vars.rxpk_crc && app_vars.rxpk_len==5) {
 
         // indicate I just received a packet from bsp_radio_tx mote
         app_vars.rxpk_done = 1;
