@@ -5,6 +5,7 @@
 
 C                           = 299792458 # speed of ligh 
 ANT_D                       = 0.035     # meter
+VALID_PHASE_DIFF            = 402 * ANT_D / 0.12468 # 0.12460 is wave length in meter
 CENTER_FREQ                 = (2404*1e6)# channel 0
 M_PI		                = 3.14159265358979323846
 

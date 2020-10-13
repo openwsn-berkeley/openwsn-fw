@@ -27,6 +27,9 @@ def aoa_angle_calculation(phase_data, num_pkt, array):
         
         wave_length = (1.0/freq) * C  # in meters
         reference_phase_data = phase_data[index_1:index_2]
+        step = (phase_data[index_2-1] - phase_data[index_1])/(index_2-index_1-1)
+        
+        debug_print("step={0}".format(step))
     else:
         return None, None
     
@@ -37,7 +40,10 @@ def aoa_angle_calculation(phase_data, num_pkt, array):
     # ---- ref: section 3.2 First IQ sample in nwp_036.pdf (Direction Finding nWP-036)
     
     while len(phase_data_ant2) < NUM_SAMPLES + num_sample_per_slot: 
-        phase_data_ant2 += reference_phase_data
+        new_phase = phase_data_ant2[-1] + step
+        if new_phase > 201:
+            new_phase -= 403
+        phase_data_ant2.append(new_phase)
     phase_data_ant2 = phase_data_ant2[:64] + phase_data_ant2[64+8:160+8]
     
     # ---- calculate phase diff bewteen ANT2 and ANTx
@@ -53,16 +59,19 @@ def aoa_angle_calculation(phase_data, num_pkt, array):
         
         phase_diff_ant_2_x = []
         for index in range(len(phase_ant_x_data)):
+        
             diff = phase_ant_2_data[index]-phase_ant_x_data[index]
+            
             if reversed:
                 diff = 0 - diff
-            if diff <= -201:
-                diff += 402
-            elif diff >= 201:
-                diff -= 402
-            phase_diff_ant_2_x.append(diff) 
+                
+            # if diff <= -201:
+                # diff += 402
+            # elif diff >= 201:
+                # diff -= 402
+            if diff > (0-VALID_PHASE_DIFF) and diff < VALID_PHASE_DIFF:
+                phase_diff_ant_2_x.append(diff)
             
-        debug_print("phase_diff_ant2_x and avg_value", phase_diff_ant_2_x, sum(phase_diff_ant_2_x)/len(phase_diff_ant_2_x))
         if DEBUG_ON:
             if reversed:
                 x = 3
@@ -70,7 +79,11 @@ def aoa_angle_calculation(phase_data, num_pkt, array):
                 x = 1
             temp.plot(phase_diff_ant_2_x, 'o-', label='phase_diff_ant_2_{0}'.format(x))
             
-        return (sum(phase_diff_ant_2_x)/len(phase_diff_ant_2_x)) / 402.0
+        if len(phase_diff_ant_2_x) > 0:
+            debug_print("phase_diff_ant2_x and avg_value", phase_diff_ant_2_x, sum(phase_diff_ant_2_x)/len(phase_diff_ant_2_x))
+            return (sum(phase_diff_ant_2_x)/len(phase_diff_ant_2_x)) / 402.0
+        else:
+            return None
             
     avg_phase_diff_ant_2_1 = calc_phase_diff(0, False)
     avg_phase_diff_ant_3_2 = calc_phase_diff(2, True)
@@ -79,6 +92,9 @@ def aoa_angle_calculation(phase_data, num_pkt, array):
         debug_print("phase diff ant2_1 and ant3_2", avg_phase_diff_ant_2_1, avg_phase_diff_ant_3_2)
         temp.legend()
         figure.savefig('figs\sampe_pkt_phase_diff_{0}'.format(num_pkt))
+        
+    if avg_phase_diff_ant_2_1 == None or avg_phase_diff_ant_3_2 == None:
+        return phase_data_ant2, None
     
     # ==== calculate the angles according to phase diff
     
@@ -101,11 +117,14 @@ def aoa_angle_calculation(phase_data, num_pkt, array):
     # ==== provide one angle from 0 (right) to 180 (left)
     
     if theta_1 != None and theta_2 != None:
-        angle = 180 * (
-            math.atan(
-                2 * math.tan(theta_1)*math.tan(theta_2)/(math.tan(theta_1)+math.tan(theta_2))
-            ) / M_PI
-        )
+        if math.tan(theta_1)+math.tan(theta_2) != 0:
+            angle = 180 * (
+                    math.atan(
+                        2 * math.tan(theta_1)*math.tan(theta_2)/(math.tan(theta_1)+math.tan(theta_2))
+                    ) / M_PI
+            )
+        else:
+            angle = None
         if angle < 0:
             angle = 180 + angle
     elif theta_1 == None and theta_2 != None:
