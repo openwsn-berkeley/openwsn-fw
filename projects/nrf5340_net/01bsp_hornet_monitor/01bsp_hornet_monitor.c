@@ -295,10 +295,10 @@ double combine_two_angles() {
     }
 
     // apply 45 degrees angle of antenna array
-    angle_final_1 = angle_final_1 + 45;
-    if (angle_final_1 >= 360) {
-        angle_final_1 -= 360;
-    }
+    //angle_final_1 = angle_final_1 + 45;
+    //if (angle_final_1 >= 360) {
+    //    angle_final_1 -= 360;
+    //}
 
     angle_final = angle_final_1;
 
@@ -590,7 +590,7 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
     app_vars.setting_mid    = app_vars.rxpk_buf[3];
     app_vars.setting_fine   = app_vars.rxpk_buf[4];
 
-    if (app_vars.rxpk_crc && app_vars.rxpk_len==5) {
+    if (app_vars.rxpk_crc && app_vars.rxpk_len==6) {
 
         // indicate I just received a packet from bsp_radio_tx mote
         app_vars.rxpk_done = 1;
