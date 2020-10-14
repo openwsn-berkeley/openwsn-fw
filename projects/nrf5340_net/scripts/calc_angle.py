@@ -79,10 +79,11 @@ def aoa_angle_calculation(phase_data, num_pkt, array):
                 x = 1
             temp.plot(phase_diff_ant_2_x, 'o-', label='phase_diff_ant_2_{0}'.format(x))
             
-        if len(phase_diff_ant_2_x) > 0:
+        if len(phase_diff_ant_2_x) > 4:
             debug_print("phase_diff_ant2_x and avg_value", phase_diff_ant_2_x, sum(phase_diff_ant_2_x)/len(phase_diff_ant_2_x))
             return (sum(phase_diff_ant_2_x)/len(phase_diff_ant_2_x)) / 402.0
         else:
+            # discard if there are less than 4 valid phase diff
             return None
             
     avg_phase_diff_ant_2_1 = calc_phase_diff(0, False)
@@ -93,9 +94,9 @@ def aoa_angle_calculation(phase_data, num_pkt, array):
         temp.legend()
         figure.savefig('figs\sampe_pkt_phase_diff_{0}'.format(num_pkt))
         
-    if avg_phase_diff_ant_2_1 == None or avg_phase_diff_ant_3_2 == None:
+    if avg_phase_diff_ant_2_1 == None and avg_phase_diff_ant_3_2 == None:
         return phase_data_ant2, None
-    
+        
     # ==== calculate the angles according to phase diff
     
     theta_1 = None
@@ -110,9 +111,12 @@ def aoa_angle_calculation(phase_data, num_pkt, array):
             return None
             
         return theta
-            
-    theta_1 = calculate_angle(avg_phase_diff_ant_2_1)
-    theta_2 = calculate_angle(avg_phase_diff_ant_3_2)
+        
+    if avg_phase_diff_ant_2_1 != None:
+        theta_1 = calculate_angle(avg_phase_diff_ant_2_1)
+        
+    if avg_phase_diff_ant_3_2 != None:
+        theta_2 = calculate_angle(avg_phase_diff_ant_3_2)
 
     # ==== provide one angle from 0 (right) to 180 (left)
     

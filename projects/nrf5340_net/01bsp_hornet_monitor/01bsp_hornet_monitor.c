@@ -358,6 +358,7 @@ void setup_led_direction(void) {
 
 #define VALID_PHASE_DIFF_RANG 113   // calculated as (402 * ANT_DISTANCE / 0.12468) 
 #define MAX_PHASE_DIFF        402   //
+#define MINIMAL_VALID_DIFF    4
 
 double calculate_phase_diff(uint8_t shift) {
 
@@ -415,7 +416,7 @@ double calculate_phase_diff(uint8_t shift) {
         sum += phase_diff[i];
     }
 
-    if (num_diff_sample>0) {
+    if (num_diff_sample>MINIMAL_VALID_DIFF) {
         avg_phase_diff = (double)(sum)/num_diff_sample;
     } else {
         avg_phase_diff = MAX_PHASE_DIFF;
@@ -520,24 +521,26 @@ double calculate_aoa(void) {
     shift = 2;
     avg_phase_diff_3 = calculate_phase_diff(shift);
 
-    if (avg_phase_diff_1 == MAX_PHASE_DIFF || avg_phase_diff_3 == MAX_PHASE_DIFF) {
+    if (avg_phase_diff_1 == MAX_PHASE_DIFF && avg_phase_diff_3 == MAX_PHASE_DIFF) {
         return INVAILD_ANGLE;
     }
 
     //==== calculate the angle
 
-    acos_x_1  = (avg_phase_diff_1/402.0) * wave_length / ANT_DISTANCE;
-    if (acos_x_1 >= -1 && acos_x_1 <= 1) {
-        angle_1  = acos(acos_x_1);
-    } else {
-        angle_1 = INVAILD_ANGLE;
+    angle_1 = INVAILD_ANGLE;
+    if (avg_phase_diff_1 != MAX_PHASE_DIFF) {
+        acos_x_1  = (avg_phase_diff_1/402.0) * wave_length / ANT_DISTANCE;
+        if (acos_x_1 >= -1 && acos_x_1 <= 1) {
+            angle_1  = acos(acos_x_1);
+        }
     }
 
-    acos_x_3  = (avg_phase_diff_3/402.0) * wave_length / ANT_DISTANCE;
-    if (acos_x_3 >= -1 && acos_x_3 <= 1){
-        angle_3  = acos(acos_x_3);
-    } else {
-        angle_3 = INVAILD_ANGLE;
+    angle_3 = INVAILD_ANGLE;
+    if (avg_phase_diff_3 != MAX_PHASE_DIFF) {
+        acos_x_3  = (avg_phase_diff_3/402.0) * wave_length / ANT_DISTANCE;
+        if (acos_x_3 >= -1 && acos_x_3 <= 1){
+            angle_3  = acos(acos_x_3);
+        }
     }
 
     if (angle_1 != INVAILD_ANGLE && angle_3 != INVAILD_ANGLE) {
