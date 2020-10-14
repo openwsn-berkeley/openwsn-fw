@@ -50,7 +50,7 @@ owerror_t internal_openserial_print(
 // command handlers
 void openserial_handleRxFrame(void);
 
-void openserial_handleEcho(uint8_t *but, uint8_t bufLen);
+void openserial_handleEcho(uint8_t *buffer, uint8_t bufLen);
 
 // misc
 void openserial_debugPrint_timer_cb(opentimers_id_t id);
@@ -121,8 +121,8 @@ owerror_t openserial_printStatus(uint8_t statusElement, uint8_t *buffer, uint8_t
 
     outputHdlcOpen();
     outputHdlcWrite(SERFRAME_MOTE2PC_STATUS);
-    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
-    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_type.addr_16b[0]);
+    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_type.addr_16b[1]);
     outputHdlcWrite(statusElement);
     for (i = 0; i < length; i++) {
         outputHdlcWrite(buffer[i]);
@@ -193,8 +193,8 @@ owerror_t openserial_printData(uint8_t *buffer, uint8_t length) {
 
     outputHdlcOpen();
     outputHdlcWrite(SERFRAME_MOTE2PC_DATA);
-    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
-    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_type.addr_16b[0]);
+    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_type.addr_16b[1]);
     outputHdlcWrite(asn[0]);
     outputHdlcWrite(asn[1]);
     outputHdlcWrite(asn[2]);
@@ -211,7 +211,7 @@ owerror_t openserial_printData(uint8_t *buffer, uint8_t length) {
     return E_SUCCESS;
 }
 
-owerror_t openserial_printSniffedPacket(uint8_t *buffer, uint8_t length, uint8_t channel) {
+owerror_t openserial_printSniffedPacket(const uint8_t *buffer, uint8_t length, uint8_t channel) {
 #if BOARD_OPENSERIAL_SNIFFER
     uint8_t i;
 
@@ -228,14 +228,18 @@ owerror_t openserial_printSniffedPacket(uint8_t *buffer, uint8_t length, uint8_t
     // start TX'ing
     openserial_flush();
 
+#else
+    (void) buffer;
+    (void) length;
+    (void) channel;
 #endif
     return E_SUCCESS;
 }
 
-owerror_t openserial_printf(char *buffer, ...) {
+owerror_t openserial_printf(const char *buffer, ...) {
 #if BOARD_OPENSERIAL_PRINTF
     uint8_t  i;
-    char *ptr, *tmp;
+    const char *ptr, *tmp;
     char c;
     void* p;
     int d;
@@ -248,12 +252,12 @@ owerror_t openserial_printf(char *buffer, ...) {
     va_start(ap, buffer);
 
     // retrieve ASN
-    ieee154e_getAsn(asn);
+    openserial_vars.asnCb(asn);
 
     outputHdlcOpen();
     outputHdlcWrite(SERFRAME_MOTE2PC_PRINTF);
-    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
-    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+    outputHdlcWrite(openserial_vars.addrCb(ADDR_16B)->addr_type.addr_16b[0]);
+    outputHdlcWrite(openserial_vars.addrCb(ADDR_16B)->addr_type.addr_16b[1]);
 
     for(i = 0; i < 5; i++) {
         outputHdlcWrite(asn[i]);
@@ -320,6 +324,8 @@ owerror_t openserial_printf(char *buffer, ...) {
 
     // start TX'ing
     openserial_flush();
+#else
+    (void) buffer;
 #endif
     return E_SUCCESS;
 }
@@ -573,8 +579,8 @@ owerror_t internal_openserial_print(
 
     outputHdlcOpen();
     outputHdlcWrite(severity);
-    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
-    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_type.addr_16b[0]);
+    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_type.addr_16b[1]);
     outputHdlcWrite(calling_component);
     outputHdlcWrite(error_code);
     outputHdlcWrite((uint8_t)((arg1 & 0xff00) >> 8));

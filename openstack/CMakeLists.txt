@@ -36,12 +36,12 @@ target_sources(openstack
         03b-IPv6/icmpv6rpl.h
         04-TRAN/udp.c
         04-TRAN/udp.h
-        04-TRAN/async.h
-        04-TRAN/async_types.h
-        04-TRAN/sock.h
-        04-TRAN/sock.c
-        04-TRAN/sock_internal.h
-        04-TRAN/sock_types.h
+        04-TRAN/sock/async.h
+        04-TRAN/sock/async_types.h
+        04-TRAN/sock/sock.h
+        04-TRAN/sock/sock.c
+        04-TRAN/sock/sock_internal.h
+        04-TRAN/sock/sock_types.h
         cross-layers/idmanager.c
         cross-layers/idmanager.h
         cross-layers/openqueue.c

@@ -506,7 +506,7 @@ owerror_t schedule_removeActiveSlot(slotOffset_t slotOffset, cellType_t type, bo
         backupEntry->channelOffset = 0;
 
         backupEntry->neighbor.type = ADDR_NONE;
-        memset(&backupEntry->neighbor.addr_64b[0], 0x00, sizeof(backupEntry->neighbor.addr_64b));
+        memset(&backupEntry->neighbor.addr_type.addr_64b[0], 0x00, sizeof(backupEntry->neighbor.addr_type.addr_64b));
 
         backupEntry->lastUsedAsn.bytes0and1 = 0;
         backupEntry->lastUsedAsn.bytes2and3 = 0;
@@ -1246,7 +1246,7 @@ void schedule_resetEntry(scheduleEntry_t *e) {
 
 
     e->neighbor.type = ADDR_NONE;
-    memset(&e->neighbor.addr_64b[0], 0x00, sizeof(e->neighbor.addr_64b));
+    memset(&e->neighbor.addr_type.addr_64b[0], 0x00, sizeof(e->neighbor.addr_type.addr_64b));
 
     e->numRx = 0;
     e->numTx = 0;
@@ -1264,7 +1264,7 @@ void schedule_resetBackupEntry(backupEntry_t *e) {
     e->channelOffset = 0;
 
     e->neighbor.type = ADDR_NONE;
-    memset(&e->neighbor.addr_64b[0], 0x00, sizeof(e->neighbor.addr_64b));
+    memset(&e->neighbor.addr_type.addr_64b[0], 0x00, sizeof(e->neighbor.addr_type.addr_64b));
 
     e->numRx = 0;
     e->numTx = 0;

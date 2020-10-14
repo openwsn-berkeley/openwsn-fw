@@ -2,10 +2,6 @@
 \brief Implementation of Constrained Join Protocol (CoJP) from minimal-security-06 draft.
 */
 
-#include "config.h"
-
-#if OPENWSN_CJOIN_C
-
 #include "opendefs.h"
 #include "cjoin.h"
 #include "coap.h"
@@ -289,10 +285,12 @@ owerror_t cjoin_sendJoinRequest(open_addr_t *joinProxy) {
     // metadata
     pkt->l4_destination_port = WKP_UDP_COAP;
     pkt->l3_destinationAdd.type = ADDR_128B;
-    pkt->l3_destinationAdd.addr_128b[0] = 0xfe;
-    pkt->l3_destinationAdd.addr_128b[1] = 0x80;
-    memset(&pkt->l3_destinationAdd.addr_128b[2], 0x00, 6);
-    memcpy(&pkt->l3_destinationAdd.addr_128b[8], joinProxy->addr_64b, 8); // set host to eui-64 of the join proxy
+    pkt->l3_destinationAdd.addr_type.addr_128b[0] = 0xfe;
+    pkt->l3_destinationAdd.addr_type.addr_128b[1] = 0x80;
+    memset(&pkt->l3_destinationAdd.addr_type.addr_128b[2], 0x00, 6);
+
+    // set host to eui-64 of the join proxy
+    memcpy(&pkt->l3_destinationAdd.addr_type.addr_128b[8], joinProxy->addr_type.addr_64b, 8);
 
     // encode Join_Request object in the payload
     join_request.role = COJP_ROLE_VALUE_6N; // regular non-6LBR node
@@ -362,4 +360,3 @@ void cjoin_setIsJoined(bool newValue) {
     }
 }
 
-#endif /* OPENWSN_CJOIN_H */

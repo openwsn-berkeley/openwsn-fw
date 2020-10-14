@@ -1,7 +1,3 @@
-#include "config.h"
-
-#if OPENWSN_COAP_C
-
 #include "opendefs.h"
 #include "coap.h"
 #include "oscore.h"
@@ -9,9 +5,6 @@
 #include "openserial.h"
 #include "openrandom.h"
 #include "packetfunctions.h"
-#include "idmanager.h"
-#include "opentimers.h"
-#include "scheduler.h"
 #include "icmpv6rpl.h"
 
 //=========================== defines =========================================
@@ -51,7 +44,7 @@ void coap_add_stateless_proxy_option(coap_option_iht *option,
 
 void coap_forward_message(OpenQueueEntry_t *msg,
                           coap_header_iht *header,
-                          coap_option_iht *outgoinOptions,
+                          coap_option_iht *outgoingOptions,
                           uint8_t outgoingOptionsLen,
                           open_addr_t *destIP,
                           uint16_t destPortNumber);
@@ -67,6 +60,7 @@ owerror_t coap_sock_send_internal(OpenQueueEntry_t *msg);
 /**
 \brief Initialize this module.
 */
+
 void coap_init(void) {
     uint16_t rand;
     uint8_t pos;
@@ -519,7 +513,7 @@ void coap_receive(OpenQueueEntry_t *msg) {
 
     // set destination address as the current source
     msg->l3_destinationAdd.type = ADDR_128B;
-    memcpy(&msg->l3_destinationAdd.addr_128b[0], &msg->l3_sourceAdd.addr_128b[0], LENGTH_ADDR128b);
+    memcpy(&msg->l3_destinationAdd.addr_type.addr_128b[0], &msg->l3_sourceAdd.addr_type.addr_128b[0], LENGTH_ADDR128b);
 
     // fill in CoAP header
     if (coap_header_encode(msg,
@@ -1007,8 +1001,8 @@ void coap_sock_handler(sock_udp_t *sock, sock_async_flags_t type, void *arg) {
 	    msg->l4_destination_port = local.port;
 	    msg->l4_payload = msg->payload;
 	    msg->l4_length = res;
-            memcpy(&msg->l3_destinationAdd.addr_128b, &local.addr, LENGTH_ADDR128b);
-            memcpy(&msg->l3_sourceAdd.addr_128b, &remote.addr, LENGTH_ADDR128b);
+            memcpy(&msg->l3_destinationAdd.addr_type.addr_128b, &local.addr, LENGTH_ADDR128b);
+            memcpy(&msg->l3_sourceAdd.addr_type.addr_128b, &remote.addr, LENGTH_ADDR128b);
 
 	    coap_receive(msg);
         }
@@ -1024,7 +1018,7 @@ owerror_t coap_sock_send_internal(OpenQueueEntry_t *msg) {
 
     // init remote endpoint
     remote.family = AF_INET6;
-    memcpy(&remote.addr, &msg->l3_destinationAdd.addr_128b, LENGTH_ADDR128b);
+    memcpy(&remote.addr, &msg->l3_destinationAdd.addr_type.addr_128b, LENGTH_ADDR128b);
     remote.netif = 0;
     remote.port = msg->l4_destination_port;
 
@@ -1174,16 +1168,15 @@ void coap_handle_proxy_scheme(OpenQueueEntry_t *msg,
     }
 
     coap_add_stateless_proxy_option(&outgoingOptions[outgoingOptionsLen++],
-                                    &msg->l3_sourceAdd.addr_128b[8],
+                                    &msg->l3_sourceAdd.addr_type.addr_128b[8],
                                     8,
                                     msg->l4_sourcePortORicmpv6Type);
 
     // the JRC is co-located with DAG root, get the address from RPL module
     JRCaddress.type = ADDR_128B;
-    if (icmpv6rpl_getRPLDODAGid(JRCaddress.addr_128b) == E_SUCCESS) {
+    if (icmpv6rpl_getRPLDODAGid(JRCaddress.addr_type.addr_128b) == E_SUCCESS) {
         coap_forward_message(msg, header, outgoingOptions, outgoingOptionsLen, &JRCaddress, WKP_UDP_COAP);
     }
-    return;
 }
 
 void coap_handle_stateless_proxy(OpenQueueEntry_t *msg,
@@ -1218,13 +1211,13 @@ void coap_handle_stateless_proxy(OpenQueueEntry_t *msg,
     msg->is_cjoin_response = TRUE;
 
     eui64.type = ADDR_64B;
-    memcpy(eui64.addr_64b, statelessProxy->pValue, 8);
+    memcpy(eui64.addr_type.addr_64b, statelessProxy->pValue, 8);
 
     // use link-local prefix to forward the response
     memset(&link_local_prefix, 0x00, sizeof(open_addr_t));
     link_local_prefix.type = ADDR_PREFIX;
-    link_local_prefix.prefix[0] = 0xfe;
-    link_local_prefix.prefix[1] = 0x80;
+    link_local_prefix.addr_type.prefix[0] = 0xfe;
+    link_local_prefix.addr_type.prefix[1] = 0x80;
 
     packetfunctions_mac64bToIp128b(&link_local_prefix, &eui64, &destIP);
 
@@ -1322,7 +1315,7 @@ void coap_forward_message(OpenQueueEntry_t *msg,
     outgoingPacket->is_cjoin_response = msg->is_cjoin_response;
     outgoingPacket->l4_destination_port = destPortNumber;
     outgoingPacket->l3_destinationAdd.type = ADDR_128B;
-    memcpy(outgoingPacket->l3_destinationAdd.addr_128b, destIP->addr_128b, 16);
+    memcpy(outgoingPacket->l3_destinationAdd.addr_type.addr_128b, destIP->addr_type.addr_128b, 16);
 
     // fill in source port number
     outgoingPacket->l4_sourcePortORicmpv6Type = WKP_UDP_COAP;
@@ -1363,7 +1356,4 @@ void coap_forward_message(OpenQueueEntry_t *msg,
 
     fail:
     openqueue_freePacketBuffer(outgoingPacket);
-    return;
 }
-
-#endif /* OPENWSN_COAP_C */

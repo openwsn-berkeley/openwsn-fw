@@ -9,56 +9,41 @@
 */
 
 #include "config.h"
-#include "sock.h"
-#include "async.h"
+#include "sock/sock.h"
+#include "sock/async.h"
 
 //=========================== define ==========================================
 
-// IPv6 addresses of servers on the Internet
-static const uint8_t ipAddr_ipsoRD[] = {0x26, 0x07, 0xf7, 0x40, 0x00, 0x00, 0x00, 0x3f, \
-                                           0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0e, 0x29};
-static const uint8_t ipAddr_motesEecs[] = {0x20, 0x01, 0x04, 0x70, 0x00, 0x66, 0x00, 0x19, \
-                                           0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02};
-static const uint8_t ipAddr_local[] = {0x26, 0x07, 0xf1, 0x40, 0x04, 0x00, 0x10, 0x36, \
-                                           0x4d, 0xcd, 0xab, 0x54, 0x81, 0x99, 0xc1, 0xf7};
-
-static const uint8_t ipAddr_motedata[] = {0x20, 0x01, 0x04, 0x70, 0x00, 0x66, 0x00, 0x17, \
-                                           0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02};
-
-//bbbb::1415:92cc:0:3 PORT:5683
-static const uint8_t ipAddr_ringmaster[] = {0xbb, 0xbb, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, \
-                                           0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01};
-
 /// the maximum number of options in a RX'ed CoAP message
-#define MAX_COAP_OPTIONS               10 //3 before but we want gets with more options
+#define MAX_COAP_OPTIONS               (10) // 3 before but we want GET requests with more options
 
 // This value may be reduced as a memory optimization, but would invalidate spec compliance
-#define COAP_MAX_TKL                   8
+#define COAP_MAX_TKL                   (8)
 
-#define COAP_MAX_MSG_LEN               IPV6_PACKET_SIZE - 20
+#define COAP_MAX_MSG_LEN               (IPV6_PACKET_SIZE - 20)
 
-#define COAP_PAYLOAD_MARKER            0xFF
+#define COAP_PAYLOAD_MARKER            (0xFF)
 
-#define COAP_VERSION                   1
+#define COAP_VERSION                   (1)
 
 // OSCOAP related defines
 
-#define OSCOAP_MAX_ID_LEN              10
+#define OSCOAP_MAX_ID_LEN              (10)
 
-#define OSCOAP_MASTER_SECRET_LEN       16
+#define OSCOAP_MASTER_SECRET_LEN       (16)
 
-#define OSCORE_OPT_MAX_LEN             1 + 2 + 1 + OSCOAP_MAX_ID_LEN + OSCOAP_MAX_ID_LEN
+#define OSCORE_OPT_MAX_LEN             (1 + 2 + 1 + OSCOAP_MAX_ID_LEN + OSCOAP_MAX_ID_LEN)
 
-#define AES_CCM_16_64_128              10   // algorithm value as defined in COSE spec
+#define AES_CCM_16_64_128              (10)   // algorithm value as defined in COSE spec
 
-#define AES_CCM_16_64_128_KEY_LEN      16
+#define AES_CCM_16_64_128_KEY_LEN      (16)
 
-#define AES_CCM_16_64_128_IV_LEN       13
+#define AES_CCM_16_64_128_IV_LEN       (13)
 
-#define AES_CCM_16_64_128_TAG_LEN      8
+#define AES_CCM_16_64_128_TAG_LEN      (8)
 
-#define STATELESS_PROXY_STATE_LEN      1 + 16 + 2 // seq no, ipv6 address, port number
-#define STATELESS_PROXY_TAG_LEN        4
+#define STATELESS_PROXY_STATE_LEN      (1 + 16 + 2) // seq no, ipv6 address, port number
+#define STATELESS_PROXY_TAG_LEN        (4)
 
 typedef enum {
     COAP_TYPE_CON = 0,

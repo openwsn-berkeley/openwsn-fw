@@ -34,7 +34,7 @@
 #include "icmpv6echo.h"
 #include "icmpv6rpl.h"
 //-- 04-TRAN
-#include "sock.h"
+#include "sock/sock.h"
 
 //===== application-layer
 #include "openweb.h"

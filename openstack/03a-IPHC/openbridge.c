@@ -46,7 +46,7 @@ void openbridge_triggerData(void) {
         pkt->owner = COMPONENT_OPENBRIDGE;
         //l2
         pkt->l2_nextORpreviousHop.type = ADDR_64B;
-        memcpy(&(pkt->l2_nextORpreviousHop.addr_64b[0]), &(input_buffer[0]), 8);
+        memcpy(&(pkt->l2_nextORpreviousHop.addr_type.addr_64b[0]), &(input_buffer[0]), 8);
         //payload
         packetfunctions_reserveHeader(&pkt, numDataBytes - 8);
         memcpy(pkt->payload, &(input_buffer[8]), numDataBytes - 8);
@@ -73,11 +73,11 @@ void openbridge_receive(OpenQueueEntry_t *msg) {
 
     // prepend previous hop
     packetfunctions_reserveHeader(&msg, LENGTH_ADDR64b);
-    memcpy(msg->payload, msg->l2_nextORpreviousHop.addr_64b, LENGTH_ADDR64b);
+    memcpy(msg->payload, msg->l2_nextORpreviousHop.addr_type.addr_64b, LENGTH_ADDR64b);
 
     // prepend next hop (me)
     packetfunctions_reserveHeader(&msg, LENGTH_ADDR64b);
-    memcpy(msg->payload, idmanager_getMyID(ADDR_64B)->addr_64b, LENGTH_ADDR64b);
+    memcpy(msg->payload, idmanager_getMyID(ADDR_64B)->addr_type.addr_64b, LENGTH_ADDR64b);
 
     // send packet over serial (will be memcopied into serial buffer)
     openserial_printData((uint8_t * )(msg->payload), msg->length);

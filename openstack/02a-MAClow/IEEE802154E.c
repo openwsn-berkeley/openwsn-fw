@@ -152,10 +152,6 @@ void changeState(ieee154e_state_t newstate);
 
 void endSlot(void);
 
-bool debugPrint_asn(void);
-
-bool debugPrint_isSync(void);
-
 // interrupts
 void isr_ieee154e_newSlot(opentimers_id_t id);
 
@@ -2329,7 +2325,7 @@ port_INLINE void ieee154e_resetAsn(void) {
     ieee154e_vars.asn.bytes0and1 = 0;
 }
 
-//from upper layer that want to send the ASN to compute timing or latency
+// from upper layer that want to send the ASN to compute timing or latency
 port_INLINE void ieee154e_getAsn(uint8_t *array) {
     array[0] = (ieee154e_vars.asn.bytes0and1 & 0xff);
     array[1] = (ieee154e_vars.asn.bytes0and1 / 256 & 0xff);
@@ -2338,16 +2334,11 @@ port_INLINE void ieee154e_getAsn(uint8_t *array) {
     array[4] = ieee154e_vars.asn.byte4;
 }
 
-port_INLINE uint16_t ieee154e_getTimeCorrection(void) {
+uint16_t ieee154e_getTimeCorrection(void) {
     int16_t returnVal;
 
     returnVal = (uint16_t)(ieee154e_vars.timeCorrection);
     return returnVal;
-}
-
-void ieee154e_getTicsInfo(uint32_t *numTicsOn, uint32_t *numTicsTotal) {
-    *numTicsOn = (uint32_t)(ieee154e_stats.numTicsOn);
-    *numTicsTotal = (uint32_t)(ieee154e_stats.numTicsTotal);
 }
 
 port_INLINE void joinPriorityStoreFromEB(uint8_t jp) {

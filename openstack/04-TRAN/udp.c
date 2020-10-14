@@ -1,9 +1,4 @@
-#include "config.h"
-
-#if OPENWSN_UDP_C
-
-#include "sock_internal.h"
-#include "openserial.h"
+#include "sock/sock_internal.h"
 #include "packetfunctions.h"
 #include "scheduler.h"
 #include "udp.h"
@@ -52,4 +47,3 @@ void udp_transmit(OpenQueueEntry_t *msg) {
     }
 }
 
-#endif /* OPENWSN_UDP_C */

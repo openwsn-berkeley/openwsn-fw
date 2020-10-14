@@ -153,11 +153,11 @@ owerror_t openserial_printLog(
 
 owerror_t openserial_printData(uint8_t *buffer, uint8_t length);
 
-owerror_t openserial_printSniffedPacket(uint8_t *buffer, uint8_t length, uint8_t channel);
+owerror_t openserial_printSniffedPacket(const uint8_t *buffer, uint8_t length, uint8_t channel);
 
 void task_openserial_debugPrint(void);
 
-owerror_t openserial_printf(char *buffer, ...);
+owerror_t openserial_printf(const char *buffer, ...);
 
 // receiving
 uint8_t openserial_getInputBufferFillLevel(void);

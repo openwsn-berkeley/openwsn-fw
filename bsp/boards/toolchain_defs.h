@@ -44,8 +44,8 @@
    #define END_PACK   __pragma(pack(pop));
 #else
    // other
-   #define BEGIN_PACK   _Pragma("pack(1)");
-   #define END_PACK     _Pragma("pack()");
+   #define BEGIN_PACK   _Pragma("pack(1)")
+   #define END_PACK     _Pragma("pack()")
 #endif
 
 #endif

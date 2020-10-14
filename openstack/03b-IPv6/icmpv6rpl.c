@@ -49,8 +49,8 @@ void icmpv6rpl_init(void) {
     uint8_t dodagid[16];
 
     // retrieve my prefix and EUI64
-    memcpy(&dodagid[0], idmanager_getMyID(ADDR_PREFIX)->prefix, 8); // prefix
-    memcpy(&dodagid[8], idmanager_getMyID(ADDR_64B)->addr_64b, 8);  // eui64
+    memcpy(&dodagid[0], idmanager_getMyID(ADDR_PREFIX)->addr_type.prefix, 8); // prefix
+    memcpy(&dodagid[8], idmanager_getMyID(ADDR_64B)->addr_type.addr_64b, 8);  // eui64
 
     //===== reset local variables
     memset(&icmpv6rpl_vars, 0, sizeof(icmpv6rpl_vars_t));
@@ -91,7 +91,7 @@ void icmpv6rpl_init(void) {
     memcpy(&(icmpv6rpl_vars.dio.DODAGID[0]), dodagid, sizeof(icmpv6rpl_vars.dio.DODAGID)); // can be replaced later
 
     icmpv6rpl_vars.dioDestination.type = ADDR_128B;
-    memcpy(&icmpv6rpl_vars.dioDestination.addr_128b[0], all_routers_multicast, sizeof(all_routers_multicast));
+    memcpy(&icmpv6rpl_vars.dioDestination.addr_type.addr_128b[0], all_routers_multicast, sizeof(all_routers_multicast));
 
     icmpv6rpl_vars.dioPeriod = DIO_PERIOD;
     icmpv6rpl_vars.timerIdDIO = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_RPL);
@@ -108,13 +108,13 @@ void icmpv6rpl_init(void) {
     if (idmanager_getIsDAGroot()) {
         memcpy(
                 &(icmpv6rpl_vars.pio.prefix[0]),
-                idmanager_getMyID(ADDR_PREFIX)->prefix,
-                sizeof(idmanager_getMyID(ADDR_PREFIX)->prefix)
+                idmanager_getMyID(ADDR_PREFIX)->addr_type.prefix,
+                sizeof(idmanager_getMyID(ADDR_PREFIX)->addr_type.prefix)
         );
         memcpy(
                 &(icmpv6rpl_vars.pio.prefix[8]),
-                idmanager_getMyID(ADDR_64B)->addr_64b,
-                sizeof(idmanager_getMyID(ADDR_64B)->addr_64b)
+                idmanager_getMyID(ADDR_64B)->addr_type.addr_64b,
+                sizeof(idmanager_getMyID(ADDR_64B)->addr_type.addr_64b)
         );
     }
     //configuration option
@@ -578,9 +578,9 @@ void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t *msg) {
                 // looks like we adopt the prefix from any PIO without a question about this node being our parent??
                 myPrefix.type = ADDR_PREFIX;
                 memcpy(
-                        myPrefix.prefix,
+                        myPrefix.addr_type.prefix,
                         icmpv6rpl_vars.incomingPio->prefix,
-                        sizeof(myPrefix.prefix)
+                        sizeof(myPrefix.addr_type.prefix)
                 );
                 idmanager_setMyID(&myPrefix);
                 optionsLen = optionsLen - current[1] - 2;
@@ -761,8 +761,8 @@ void sendDIO(void) {
 
     memcpy(
             &(icmpv6rpl_vars.pio.prefix[0]),
-            idmanager_getMyID(ADDR_PREFIX)->prefix,
-            sizeof(idmanager_getMyID(ADDR_PREFIX)->prefix)
+            idmanager_getMyID(ADDR_PREFIX)->addr_type.prefix,
+            sizeof(idmanager_getMyID(ADDR_PREFIX)->addr_type.prefix)
     );
     // host address is not needed. Only prefix.
     /* memcpy(
@@ -908,7 +908,7 @@ void sendDAO(void) {
 
     // set DAO destination
     msg->l3_destinationAdd.type = ADDR_128B;
-    memcpy(msg->l3_destinationAdd.addr_128b, icmpv6rpl_vars.dio.DODAGID, sizeof(icmpv6rpl_vars.dio.DODAGID));
+    memcpy(msg->l3_destinationAdd.addr_type.addr_128b, icmpv6rpl_vars.dio.DODAGID, sizeof(icmpv6rpl_vars.dio.DODAGID));
 
     //===== fill in packet
 

@@ -8,9 +8,10 @@
 #include "neighbors.h"
 #include "icmpv6.h"
 #include "icmpv6rpl.h"
+
+#if OPENWSN_UDP_C
 #include "udp.h"
-#include "debugpins.h"
-#include "scheduler.h"
+#endif
 
 //=========================== variables =======================================
 
@@ -107,8 +108,8 @@ owerror_t forwarding_send(OpenQueueEntry_t *msg) {
         packetfunctions_isAllHostsMulticast(&msg->l3_destinationAdd)) {
         memset(&temp_src_prefix, 0x00, sizeof(open_addr_t));
         temp_src_prefix.type = ADDR_PREFIX;
-        temp_src_prefix.prefix[0] = 0xfe;
-        temp_src_prefix.prefix[1] = 0x80;
+        temp_src_prefix.addr_type.prefix[0] = 0xfe;
+        temp_src_prefix.addr_type.prefix[1] = 0x80;
         myprefix = &temp_src_prefix;
         sac = IPHC_SAC_STATELESS;
         dac = IPHC_DAC_STATELESS;
@@ -123,8 +124,8 @@ owerror_t forwarding_send(OpenQueueEntry_t *msg) {
         dac = IPHC_DAC_STATEFUL;
     }
     // myprefix now contains the pointer to the correct prefix to use (link-local or global)
-    memcpy(&(msg->l3_sourceAdd.addr_128b[0]), myprefix->prefix, 8);
-    memcpy(&(msg->l3_sourceAdd.addr_128b[8]), myadd64->addr_64b, 8);
+    memcpy(&(msg->l3_sourceAdd.addr_type.addr_128b[0]), myprefix->addr_type.prefix, 8);
+    memcpy(&(msg->l3_sourceAdd.addr_type.addr_128b[8]), myadd64->addr_type.addr_64b, 8);
 
     // initialize IPv6 header
     memset(&ipv6_outer_header, 0, sizeof(ipv6_header_iht));
@@ -185,22 +186,22 @@ owerror_t forwarding_send(OpenQueueEntry_t *msg) {
     }
 
     if (iphc_prependIPv6Header(&msg,
-                           IPHC_TF_ELIDED,
-                           flow_label, // value_flowlabel
-                           next_header,
-                           msg->l4_protocol, // value nh. If compressed this is ignored as LOWPAN_NH is already there.
-                           IPHC_HLIM_64,
-                           ipv6_outer_header.hop_limit,
-                           IPHC_CID_NO,
-                           sac,
-                           sam,
-                           m,
-                           dac,
-                           dam,
-                           p_dest,
-                           p_src,
-                           PCKTSEND
-    ) == E_FAIL){
+                               IPHC_TF_ELIDED,
+                               flow_label, // value_flowlabel
+                               next_header,
+                               msg->l4_protocol, // value nh. If compressed this is ignored as LOWPAN_NH is already there.
+                               IPHC_HLIM_64,
+                               ipv6_outer_header.hop_limit,
+                               IPHC_CID_NO,
+                               sac,
+                               sam,
+                               m,
+                               dac,
+                               dam,
+                               p_dest,
+                               p_src,
+                               PCKTSEND
+    ) == E_FAIL) {
         return E_FAIL;
     }
 
@@ -429,7 +430,7 @@ void forwarding_getNextHop(open_addr_t *destination128b, open_addr_t *addressToW
         // IP destination is broadcast, send to 0xffffffffffffffff
         addressToWrite64b->type = ADDR_64B;
         for (i = 0; i < 8; i++) {
-            addressToWrite64b->addr_64b[i] = 0xff;
+            addressToWrite64b->addr_type.addr_64b[i] = 0xff;
         }
     } else {
         // destination is remote, send to preferred parent
@@ -475,8 +476,8 @@ owerror_t forwarding_send_internal_RoutingTable(
 
     if (msg->l2_nextORpreviousHop.type == ADDR_NONE) {
         LOG_ERROR(COMPONENT_FORWARDING, ERR_NO_NEXTHOP,
-                  (errorparameter_t) msg->l3_destinationAdd.addr_128b[14],
-                  (errorparameter_t) msg->l3_destinationAdd.addr_128b[15]
+                  (errorparameter_t) msg->l3_destinationAdd.addr_type.addr_128b[14],
+                  (errorparameter_t) msg->l3_destinationAdd.addr_type.addr_128b[15]
         );
         return E_FAIL;
     }
@@ -555,7 +556,7 @@ owerror_t forwarding_send_internal_SourceRouting(
     firstAddr.type = ADDR_128B;
     if (ipv6_outer_header->src.type != ADDR_NONE) {
         if (rpl_option->rplInstanceID == 0) {
-            icmpv6rpl_getRPLDODAGid(&firstAddr.addr_128b[0]);
+            icmpv6rpl_getRPLDODAGid(&firstAddr.addr_type.addr_128b[0]);
         }
     } else {
         memcpy(&firstAddr, &ipv6_inner_header->src, sizeof(open_addr_t));
@@ -563,8 +564,8 @@ owerror_t forwarding_send_internal_SourceRouting(
 
     hlen = 0;
 
-    temp_8b = *((uint8_t * )(msg->payload) + hlen);
-    type = *((uint8_t * )(msg->payload) + hlen + 1);
+    temp_8b = *((uint8_t *) (msg->payload) + hlen);
+    type = *((uint8_t *) (msg->payload) + hlen + 1);
 
     //copy and toss any unknown 6LoRHE
     while ((temp_8b & FORMAT_6LORH_MASK) == ELECTIVE_6LoRH) {
@@ -572,8 +573,8 @@ owerror_t forwarding_send_internal_SourceRouting(
         memcpy(&RH_copy[RH_length], msg->payload, sizeRH + 2);
         packetfunctions_tossHeader(&msg, sizeRH + 2);
         RH_length += 2 + sizeRH;
-        temp_8b = *((uint8_t * )(msg->payload) + hlen);
-        type = *((uint8_t * )(msg->payload) + hlen + 1);
+        temp_8b = *((uint8_t *) (msg->payload) + hlen);
+        type = *((uint8_t *) (msg->payload) + hlen + 1);
     }
 
     hlen += 2;
@@ -581,23 +582,23 @@ owerror_t forwarding_send_internal_SourceRouting(
     // get the first address
     switch (type) {
         case RH3_6LOTH_TYPE_0:
-            memcpy(&firstAddr.addr_128b[15], msg->payload + hlen, 1);
+            memcpy(&firstAddr.addr_type.addr_128b[15], msg->payload + hlen, 1);
             hlen += 1;
             break;
         case RH3_6LOTH_TYPE_1:
-            memcpy(&firstAddr.addr_128b[14], msg->payload + hlen, 2);
+            memcpy(&firstAddr.addr_type.addr_128b[14], msg->payload + hlen, 2);
             hlen += 2;
             break;
         case RH3_6LOTH_TYPE_2:
-            memcpy(&firstAddr.addr_128b[12], msg->payload + hlen, 4);
+            memcpy(&firstAddr.addr_type.addr_128b[12], msg->payload + hlen, 4);
             hlen += 4;
             break;
         case RH3_6LOTH_TYPE_3:
-            memcpy(&firstAddr.addr_128b[8], msg->payload + hlen, 8);
+            memcpy(&firstAddr.addr_type.addr_128b[8], msg->payload + hlen, 8);
             hlen += 8;
             break;
         case RH3_6LOTH_TYPE_4:
-            memcpy(&firstAddr.addr_128b[0], msg->payload + hlen, 16);
+            memcpy(&firstAddr.addr_type.addr_128b[0], msg->payload + hlen, 16);
             hlen += 16;
             break;
     }
@@ -623,25 +624,25 @@ owerror_t forwarding_send_internal_SourceRouting(
             memcpy(&nextAddr, &firstAddr, sizeof(open_addr_t));
             switch (type) {
                 case RH3_6LOTH_TYPE_0:
-                    memcpy(&nextAddr.addr_128b[15], msg->payload + 2, 1);
+                    memcpy(&nextAddr.addr_type.addr_128b[15], msg->payload + 2, 1);
                     break;
                 case RH3_6LOTH_TYPE_1:
-                    memcpy(&nextAddr.addr_128b[14], msg->payload + 2, 2);
+                    memcpy(&nextAddr.addr_type.addr_128b[14], msg->payload + 2, 2);
                     break;
                 case RH3_6LOTH_TYPE_2:
-                    memcpy(&nextAddr.addr_128b[12], msg->payload + 2, 4);
+                    memcpy(&nextAddr.addr_type.addr_128b[12], msg->payload + 2, 4);
                     break;
                 case RH3_6LOTH_TYPE_3:
-                    memcpy(&nextAddr.addr_128b[8], msg->payload + 2, 8);
+                    memcpy(&nextAddr.addr_type.addr_128b[8], msg->payload + 2, 8);
                     break;
                 case RH3_6LOTH_TYPE_4:
-                    memcpy(&nextAddr.addr_128b[0], msg->payload + 2, 16);
+                    memcpy(&nextAddr.addr_type.addr_128b[0], msg->payload + 2, 16);
                     break;
             }
             packetfunctions_ip128bToMac64b(&nextAddr, &temp_prefix, &msg->l2_nextORpreviousHop);
         } else {
-            temp_8b = *((uint8_t * )(msg->payload) + hlen);
-            next_type = *((uint8_t * )(msg->payload) + hlen + 1);
+            temp_8b = *((uint8_t *) (msg->payload) + hlen);
+            next_type = *((uint8_t *) (msg->payload) + hlen + 1);
             if (
                     (temp_8b & FORMAT_6LORH_MASK) == CRITICAL_6LORH &&
                     next_type <= RH3_6LOTH_TYPE_4
@@ -653,19 +654,19 @@ owerror_t forwarding_send_internal_SourceRouting(
                     memcpy(&nextAddr, &firstAddr, sizeof(open_addr_t));
                     switch (next_type) {
                         case RH3_6LOTH_TYPE_0:
-                            memcpy(&nextAddr.addr_128b[15], msg->payload + 2, 1);
+                            memcpy(&nextAddr.addr_type.addr_128b[15], msg->payload + 2, 1);
                             break;
                         case RH3_6LOTH_TYPE_1:
-                            memcpy(&nextAddr.addr_128b[14], msg->payload + 2, 2);
+                            memcpy(&nextAddr.addr_type.addr_128b[14], msg->payload + 2, 2);
                             break;
                         case RH3_6LOTH_TYPE_2:
-                            memcpy(&nextAddr.addr_128b[12], msg->payload + 2, 4);
+                            memcpy(&nextAddr.addr_type.addr_128b[12], msg->payload + 2, 4);
                             break;
                         case RH3_6LOTH_TYPE_3:
-                            memcpy(&nextAddr.addr_128b[8], msg->payload + 2, 8);
+                            memcpy(&nextAddr.addr_type.addr_128b[8], msg->payload + 2, 8);
                             break;
                         case RH3_6LOTH_TYPE_4:
-                            memcpy(&nextAddr.addr_128b[0], msg->payload + 2, 16);
+                            memcpy(&nextAddr.addr_type.addr_128b[0], msg->payload + 2, 16);
                             break;
                     }
                     packetfunctions_ip128bToMac64b(&nextAddr, &temp_prefix, &msg->l2_nextORpreviousHop);
@@ -673,19 +674,19 @@ owerror_t forwarding_send_internal_SourceRouting(
                     hlen += 2;
                     switch (next_type) {
                         case RH3_6LOTH_TYPE_0:
-                            memcpy(&firstAddr.addr_128b[15], msg->payload + hlen, 1);
+                            memcpy(&firstAddr.addr_type.addr_128b[15], msg->payload + hlen, 1);
                             hlen += 1;
                             break;
                         case RH3_6LOTH_TYPE_1:
-                            memcpy(&firstAddr.addr_128b[14], msg->payload + hlen, 2);
+                            memcpy(&firstAddr.addr_type.addr_128b[14], msg->payload + hlen, 2);
                             hlen += 2;
                             break;
                         case RH3_6LOTH_TYPE_2:
-                            memcpy(&firstAddr.addr_128b[12], msg->payload + hlen, 4);
+                            memcpy(&firstAddr.addr_type.addr_128b[12], msg->payload + hlen, 4);
                             hlen += 4;
                             break;
                         case RH3_6LOTH_TYPE_3:
-                            memcpy(&firstAddr.addr_128b[8], msg->payload + hlen, 8);
+                            memcpy(&firstAddr.addr_type.addr_128b[8], msg->payload + hlen, 8);
                             hlen += 8;
                             break;
                     }
@@ -705,31 +706,31 @@ owerror_t forwarding_send_internal_SourceRouting(
                             if (packetfunctions_reserveHeader(&msg, 1) == E_FAIL) {
                                 return E_FAIL;
                             }
-                            msg->payload[0] = firstAddr.addr_128b[15];
+                            msg->payload[0] = firstAddr.addr_type.addr_128b[15];
                             break;
                         case RH3_6LOTH_TYPE_1:
                             if (packetfunctions_reserveHeader(&msg, 2) == E_FAIL) {
                                 return E_FAIL;
                             }
-                            memcpy(&msg->payload[0], &firstAddr.addr_128b[14], 2);
+                            memcpy(&msg->payload[0], &firstAddr.addr_type.addr_128b[14], 2);
                             break;
                         case RH3_6LOTH_TYPE_2:
                             if (packetfunctions_reserveHeader(&msg, 4) == E_FAIL) {
                                 return E_FAIL;
                             }
-                            memcpy(&msg->payload[0], &firstAddr.addr_128b[12], 4);
+                            memcpy(&msg->payload[0], &firstAddr.addr_type.addr_128b[12], 4);
                             break;
                         case RH3_6LOTH_TYPE_3:
                             if (packetfunctions_reserveHeader(&msg, 8) == E_FAIL) {
                                 return E_FAIL;
                             }
-                            memcpy(&msg->payload[0], &firstAddr.addr_128b[8], 8);
+                            memcpy(&msg->payload[0], &firstAddr.addr_type.addr_128b[8], 8);
                             break;
                         case RH3_6LOTH_TYPE_4:
                             if (packetfunctions_reserveHeader(&msg, 16) == E_FAIL) {
                                 return E_FAIL;
                             }
-                            memcpy(&msg->payload[0], &firstAddr.addr_128b[0], 16);
+                            memcpy(&msg->payload[0], &firstAddr.addr_type.addr_128b[0], 16);
                             break;
                     }
                     if (packetfunctions_reserveHeader(&msg, 2) == E_FAIL) {
@@ -749,7 +750,7 @@ owerror_t forwarding_send_internal_SourceRouting(
         // log error
         LOG_ERROR(COMPONENT_FORWARDING, ERR_6LOWPAN_UNSUPPORTED,
                   (errorparameter_t) 16,
-                  (errorparameter_t)(temp_addr64.addr_64b[7]));
+                  (errorparameter_t) (temp_addr64.addr_type.addr_64b[7]));
     }
     // copy RH3s before toss them
     if (ipv6_outer_header->src.type != ADDR_NONE && ipv6_outer_header->hopByhop_option != NULL) {

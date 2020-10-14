@@ -13,8 +13,8 @@ random_vars_t random_vars;
 void openrandom_init(void) {
     // seed the random number generator with the last 2 bytes of the MAC address
     random_vars.shift_reg = 0;
-    random_vars.shift_reg += idmanager_getMyID(ADDR_16B)->addr_16b[0] * 256;
-    random_vars.shift_reg += idmanager_getMyID(ADDR_16B)->addr_16b[1];
+    random_vars.shift_reg += idmanager_getMyID(ADDR_16B)->addr_type.addr_16b[0] * 256;
+    random_vars.shift_reg += idmanager_getMyID(ADDR_16B)->addr_type.addr_16b[1];
 }
 
 uint16_t openrandom_get16b(void) {

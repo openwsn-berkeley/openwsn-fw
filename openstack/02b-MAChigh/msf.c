@@ -517,7 +517,7 @@ uint16_t msf_hashFunction_getSlotoffset(open_addr_t *address) {
 
     uint16_t moteId;
 
-    moteId = (((uint16_t)(address->addr_64b[6])) << 8) + (uint16_t)(address->addr_64b[7]);
+    moteId = (((uint16_t)(address->addr_type.addr_64b[6])) << 8) + (uint16_t)(address->addr_type.addr_64b[7]);
 
     return SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS + \
             (moteId % (SLOTFRAME_LENGTH - SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS));
@@ -527,7 +527,7 @@ uint8_t msf_hashFunction_getChanneloffset(open_addr_t *address) {
 
     uint16_t moteId;
 
-    moteId = (((uint16_t)(address->addr_64b[6])) << 8) + (uint16_t)(address->addr_64b[7]);
+    moteId = (((uint16_t)(address->addr_type.addr_64b[6])) << 8) + (uint16_t)(address->addr_type.addr_64b[7]);
 
     return moteId % NUM_CHANNELS;
 }

@@ -31,8 +31,8 @@ void idmanager_init(void) {
 
     // myPANID
     idmanager_vars.myPANID.type = ADDR_PANID;
-    idmanager_vars.myPANID.panid[0] = PANID_DEFINED & 0x00ff;
-    idmanager_vars.myPANID.panid[1] =(PANID_DEFINED & 0xff00)>>8;
+    idmanager_vars.myPANID.addr_type.panid[0] = PANID_DEFINED & 0x00ff;
+    idmanager_vars.myPANID.addr_type.panid[1] =(PANID_DEFINED & 0xff00)>>8;
 
     // myPrefix
     idmanager_vars.myPrefix.type = ADDR_PREFIX;
@@ -47,19 +47,19 @@ void idmanager_init(void) {
     idmanager_vars.myPrefix.prefix[7]  = 0x00;
 #else
     // set prefix to link-local
-    idmanager_vars.myPrefix.prefix[0] = 0xfe;
-    idmanager_vars.myPrefix.prefix[1] = 0x80;
-    idmanager_vars.myPrefix.prefix[2] = 0x00;
-    idmanager_vars.myPrefix.prefix[3] = 0x00;
-    idmanager_vars.myPrefix.prefix[4] = 0x00;
-    idmanager_vars.myPrefix.prefix[5] = 0x00;
-    idmanager_vars.myPrefix.prefix[6] = 0x00;
-    idmanager_vars.myPrefix.prefix[7] = 0x00;
+    idmanager_vars.myPrefix.addr_type.prefix[0] = 0xfe;
+    idmanager_vars.myPrefix.addr_type.prefix[1] = 0x80;
+    idmanager_vars.myPrefix.addr_type.prefix[2] = 0x00;
+    idmanager_vars.myPrefix.addr_type.prefix[3] = 0x00;
+    idmanager_vars.myPrefix.addr_type.prefix[4] = 0x00;
+    idmanager_vars.myPrefix.addr_type.prefix[5] = 0x00;
+    idmanager_vars.myPrefix.addr_type.prefix[6] = 0x00;
+    idmanager_vars.myPrefix.addr_type.prefix[7] = 0x00;
 #endif
 
     // my64bID
     idmanager_vars.my64bID.type = ADDR_64B;
-    eui64_get(idmanager_vars.my64bID.addr_64b);
+    eui64_get(idmanager_vars.my64bID.addr_type.addr_64b);
 
     // my16bID
     packetfunctions_mac64bToMac16b(&idmanager_vars.my64bID, &idmanager_vars.my16bID);
@@ -170,8 +170,8 @@ bool idmanager_isMyAddress(open_addr_t *addr) {
         case ADDR_128B:
             // build temporary my128bID
             temp_my128bID.type = ADDR_128B;
-            memcpy(&temp_my128bID.addr_128b[0], &idmanager_vars.myPrefix.prefix, 8);
-            memcpy(&temp_my128bID.addr_128b[8], &idmanager_vars.my64bID.addr_64b, 8);
+            memcpy(&temp_my128bID.addr_type.addr_128b[0], &idmanager_vars.myPrefix.addr_type.prefix, 8);
+            memcpy(&temp_my128bID.addr_type.addr_128b[8], &idmanager_vars.my64bID.addr_type.addr_64b, 8);
 
             res = packetfunctions_sameAddress(addr, &temp_my128bID);
             ENABLE_INTERRUPTS();
@@ -239,15 +239,15 @@ void idmanager_triggerAboutRoot(void) {
     // store prefix (bytes 1-8)
     myPrefix.type = ADDR_PREFIX;
     memcpy(
-            myPrefix.prefix,
+            myPrefix.addr_type.prefix,
             &input_buffer[1],
-            sizeof(myPrefix.prefix)
+            sizeof(myPrefix.addr_type.prefix)
     );
     idmanager_setMyID(&myPrefix);
 
     // indicate DODAGid to RPL
-    memcpy(&dodagid[0], idmanager_vars.myPrefix.prefix, 8);  // prefix
-    memcpy(&dodagid[8], idmanager_vars.my64bID.addr_64b, 8); // eui64
+    memcpy(&dodagid[0], idmanager_vars.myPrefix.addr_type.prefix, 8);  // prefix
+    memcpy(&dodagid[8], idmanager_vars.my64bID.addr_type.addr_64b, 8); // eui64
     icmpv6rpl_writeDODAGid(dodagid);
 
     // store L2 security key index and key value
@@ -283,10 +283,10 @@ bool debugPrint_id(void) {
     debugIDManagerEntry_t output;
 
     output.isDAGroot = idmanager_vars.isDAGroot;
-    memcpy(output.myPANID, idmanager_vars.myPANID.panid, 2);
-    memcpy(output.my16bID, idmanager_vars.my16bID.addr_16b, 2);
-    memcpy(output.my64bID, idmanager_vars.my64bID.addr_64b, 8);
-    memcpy(output.myPrefix, idmanager_vars.myPrefix.prefix, 8);
+    memcpy(output.myPANID, idmanager_vars.myPANID.addr_type.panid, 2);
+    memcpy(output.my16bID, idmanager_vars.my16bID.addr_type.addr_16b, 2);
+    memcpy(output.my64bID, idmanager_vars.my64bID.addr_type.addr_64b, 8);
+    memcpy(output.myPrefix, idmanager_vars.myPrefix.addr_type.prefix, 8);
 
     openserial_printStatus(STATUS_ID, (uint8_t * ) & output, sizeof(debugIDManagerEntry_t));
     return TRUE;

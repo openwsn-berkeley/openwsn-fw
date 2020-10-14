@@ -340,7 +340,7 @@ owerror_t iphc_prependIPv6Header(
                 if (packetfunctions_reserveHeader(msg, sizeof(uint8_t)) == E_FAIL) {
                     return E_FAIL;
                 }
-                *((uint8_t * )((*msg)->payload)) = value_dest->addr_128b[15];
+                *((uint8_t * )((*msg)->payload)) = value_dest->addr_type.addr_128b[15];
             } else {
                 //nothing
             }
@@ -671,7 +671,7 @@ owerror_t iphc_retrieveIPv6Header(OpenQueueEntry_t *msg, ipv6_header_iht *ipv6_o
                         // destination address maybe is the first address in RH3 6LoRH OR dest adress in IPHC, reset
                         // first update destination address if necessary after the processing
                         ipv6_outer_header->dest.type = ADDR_NONE;
-                        memset(&(ipv6_outer_header->dest.addr_128b[0]), 0, 16);
+                        memset(&(ipv6_outer_header->dest.addr_type.addr_128b[0]), 0, 16);
                         if (lorh_length == 1) {
                             // source address is root
                             memset(&(ipv6_outer_header->src), 0, sizeof(open_addr_t));
@@ -912,8 +912,8 @@ owerror_t iphc_retrieveIphcHeader(open_addr_t *temp_addr_16b,
             switch (*dam) {
                 case IPHC_DAM_ELIDED:
                     ipv6_header->dest.type = ADDR_128B;
-                    memcpy(&(ipv6_header->dest.addr_128b[0]), all_routers_multicast, sizeof(all_routers_multicast));
-                    ipv6_header->dest.addr_128b[15] = *(msg->payload + ipv6_header->header_length + previousLen);
+                    memcpy(&(ipv6_header->dest.addr_type.addr_128b[0]), all_routers_multicast, sizeof(all_routers_multicast));
+                    ipv6_header->dest.addr_type.addr_128b[15] = *(msg->payload + ipv6_header->header_length + previousLen);
                     ipv6_header->header_length += sizeof(uint8_t);
                     break;
                 case IPHC_DAM_16B:
@@ -985,7 +985,7 @@ owerror_t iphc_retrieveIphcHeader(open_addr_t *temp_addr_16b,
                     // destination address maybe is the first address in RH3 6LoRH OR dest adress in IPHC, reset first
                     // update destination address if necessary after the processing
                     ipv6_header->dest.type = ADDR_NONE;
-                    memset(&(ipv6_header->dest.addr_128b[0]), 0, 16);
+                    memset(&(ipv6_header->dest.addr_type.addr_128b[0]), 0, 16);
                     if (ipinip_length == 1) {
                         // source address is root
                         memset(&(ipv6_header->src), 0, sizeof(open_addr_t));

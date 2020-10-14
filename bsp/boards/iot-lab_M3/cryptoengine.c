@@ -2,10 +2,6 @@
 \brief Implementation of cryptoengine based on AT86RF231's hardware accelerator.
 */
 
-#include "config.h"
-
-#if BOARD_CRYPTOENGINE_ENABLED
-
 #include <stdint.h>
 #include <string.h>
 #include "at86rf231.h"
@@ -522,4 +518,3 @@ static void inc_counter(uint8_t* counter) {
    } while (n);
 }
 
-#endif /* BOARD_CRYPTOENGINE_ENABLED */

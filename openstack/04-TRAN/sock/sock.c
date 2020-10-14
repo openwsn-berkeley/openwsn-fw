@@ -110,7 +110,7 @@ int sock_udp_send(sock_udp_t* sock, const void* data, size_t len, const sock_udp
         }
 
         pkt->l3_destinationAdd.type = ADDR_128B;
-        memcpy(&pkt->l3_destinationAdd.addr_128b, &remote->addr, LENGTH_ADDR128b);
+        memcpy(&pkt->l3_destinationAdd.addr_type.addr_128b, &remote->addr, LENGTH_ADDR128b);
 
         pkt->l4_destination_port = remote->port;
 
@@ -121,7 +121,7 @@ int sock_udp_send(sock_udp_t* sock, const void* data, size_t len, const sock_udp
         }
     } else if (sock != NULL) {
         pkt->l3_destinationAdd.type = ADDR_128B;
-        memcpy(&pkt->l3_destinationAdd.addr_128b, &sock->gen_sock.remote.addr, LENGTH_ADDR128b);
+        memcpy(&pkt->l3_destinationAdd.addr_type.addr_128b, &sock->gen_sock.remote.addr, LENGTH_ADDR128b);
 
         pkt->l4_sourcePortORicmpv6Type = sock->gen_sock.local.port;
         pkt->l4_destination_port = sock->gen_sock.remote.port;
@@ -215,7 +215,7 @@ int sock_udp_recv(sock_udp_t* sock, void* data, size_t max_len, uint32_t timeout
     if (remote != NULL) {
         ep.family = AF_INET6;
         ep.port = sock->txrx->l4_sourcePortORicmpv6Type;
-        memcpy(&ep.addr, sock->txrx->l3_sourceAdd.addr_128b, LENGTH_ADDR128b);
+        memcpy(&ep.addr, sock->txrx->l3_sourceAdd.addr_type.addr_128b, LENGTH_ADDR128b);
         memcpy(remote, &ep, sizeof(sock_udp_ep_t));
     }
 
@@ -321,10 +321,10 @@ static void _sock_get_local_addr(open_addr_t* local) {
     local->type = ADDR_128B;
 
     open_addr_t* prefix_addr = idmanager_getMyID(ADDR_PREFIX);
-    memcpy(local->addr_128b, prefix_addr->prefix, 8);
+    memcpy(local->addr_type.addr_128b, prefix_addr->addr_type.prefix, 8);
 
     open_addr_t* id64b_addr = idmanager_getMyID(ADDR_64B);
-    memcpy(local->addr_128b + 8, id64b_addr->addr_64b, 8);
+    memcpy(local->addr_type.addr_128b + 8, id64b_addr->addr_type.addr_64b, 8);
 }
 
 static bool _sock_valid_addr(sock_udp_ep_t* ep) {

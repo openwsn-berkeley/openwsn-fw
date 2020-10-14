@@ -325,7 +325,7 @@ typedef struct {  // always written big endian, i.e. MSB in addr[0]
         uint8_t addr_128b[16];
         uint8_t panid[2];
         uint8_t prefix[8];
-    };
+    } addr_type;
 } open_addr_t;
 END_PACK
 

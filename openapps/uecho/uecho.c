@@ -1,14 +1,8 @@
-#include "config.h"
-
-#if OPENWSN_UECHO_C
-
 #include "opendefs.h"
 #include "uecho.h"
-#include "sock.h"
-#include "async.h"
-#include "openqueue.h"
+#include "sock/sock.h"
+#include "sock/async.h"
 #include "openserial.h"
-#include "packetfunctions.h"
 
 //=========================== variables =======================================
 
@@ -65,4 +59,3 @@ void uecho_handler(sock_udp_t *sock, sock_async_flags_t type, void *arg) {
 }
 //=========================== private =========================================
 
-#endif /* OPENWSN_UECHO_C */

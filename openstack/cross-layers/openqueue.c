@@ -426,7 +426,7 @@ void openqueue_updateNextHopPayload(open_addr_t *newNextHop) {
                     ) {
                 memcpy(&openqueue_vars.queue[i].l2_nextORpreviousHop, newNextHop, sizeof(open_addr_t));
                 for (j = 0; j < 8; j++) {
-                    *((uint8_t *) openqueue_vars.queue[i].l2_nextHop_payload + j) = newNextHop->addr_64b[j];
+                    *((uint8_t *) openqueue_vars.queue[i].l2_nextHop_payload + j) = newNextHop->addr_type.addr_64b[j];
                 }
             }
         }
