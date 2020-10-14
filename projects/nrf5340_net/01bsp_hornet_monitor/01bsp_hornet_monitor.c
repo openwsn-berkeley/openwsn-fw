@@ -213,7 +213,11 @@ int mote_main(void) {
 
         app_vars.uart_txFrame[4*i+4]     = app_vars.antenna_array_id;
         if (app_vars.enough_angle_on_array_1 && app_vars.enough_angle_on_array_2 && angle_array_x != INVAILD_ANGLE) {
-            app_vars.uart_txFrame[4*i+5] = (uint8_t)app_vars.angle_final[app_vars.angle_final_index];
+            if (app_vars.antenna_array_id == 2) {
+                app_vars.uart_txFrame[4*i+5] = (uint8_t)app_vars.angle_array_2[app_vars.angle_index_2];
+            } else {
+                app_vars.uart_txFrame[4*i+5] = (uint8_t)app_vars.angle_array_1[app_vars.angle_index_1];
+            }
         } else {
             app_vars.uart_txFrame[4*i+5] = 0xfe;
         }
@@ -238,6 +242,7 @@ int mote_main(void) {
 
 #if DF_ENABLE == 1
         if (app_vars.array_to_change) {
+            app_vars.array_to_change = FALSE;
             radio_configure_switch_antenna_array();
             radio_configure_direction_finding_antenna_switch();
             radio_configure_direction_finding_manual();
@@ -433,6 +438,8 @@ double calculate_aoa(void) {
     
     uint8_t i;
     uint8_t wave_index_start, wave_index_end;
+    int16_t step;
+    int16_t estimated_phase;
     double   wave_length; // in meter
     uint32_t IF;
     uint32_t frequency;
@@ -472,6 +479,8 @@ double calculate_aoa(void) {
         IF          = 8000000/(wave_index_end-wave_index_start);
         frequency   = frequency*1000000 + IF;
         wave_length = (double)SPEED_OF_LIGHT / frequency;
+        step        = app_vars.phase_data[wave_index_end-1] - app_vars.phase_data[wave_index_start];
+        step        = step/(wave_index_end-wave_index_start-1);
     } else {
         return INVAILD_ANGLE;
     }
@@ -480,12 +489,12 @@ double calculate_aoa(void) {
     memcpy(reference_data_temp,     app_vars.phase_data, sizeof(int16_t)*wave_index_end);
     i = wave_index_end;
     while (i<(NUM_SAMPLES+NUM_SAMPLES_SWITCH_SLOT)){
-        memcpy(
-            &reference_data_temp[i],
-            &app_vars.phase_data[wave_index_start],
-            sizeof(int16_t)*(wave_index_end-wave_index_start)
-        );
-        i += (wave_index_end-wave_index_start);
+        estimated_phase        = reference_data_temp[i-1] + step;
+        if (estimated_phase > 201) {
+            estimated_phase -= 403;
+        }
+        reference_data_temp[i] = estimated_phase;
+        i++;
     }
 
     memcpy(
