@@ -14,8 +14,8 @@
 
 #define PIN_FRAME         11    // p1.11  // left
 #define PIN_SLOT          12    // p1.12  // right
-#define PIN_FSM           13    // p1.13  // back
-#define PIN_TASK          14    // p1.14  // front
+#define PIN_FSM           13    // p1.13  // down
+#define PIN_TASK          14    // p1.14  // up
 #define PIN_ISR           25    // p1.25
 #define PIN_RADIO         26    // p1.26
 

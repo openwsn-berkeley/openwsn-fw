@@ -321,35 +321,35 @@ void setup_led_direction(void) {
         // light right and front led
         debugpins_frame_clr();  // left
         debugpins_slot_set();   // right
-        debugpins_fsm_set();    // frone
-        debugpins_task_clr();   // back
+        debugpins_fsm_clr();    // down
+        debugpins_task_set();   // up
     } else {
         if (last_angle <180) {
             // light left and front led
             debugpins_frame_set();  // left
             debugpins_slot_clr();   // right
-            debugpins_fsm_set();    // frone
-            debugpins_task_clr();   // back
+            debugpins_fsm_clr();    // down
+            debugpins_task_set();   // up
         } else {
             if (last_angle <270) {
                 // light left and back led
                 debugpins_frame_set();  // left
                 debugpins_slot_clr();   // right
-                debugpins_fsm_clr();    // frone
-                debugpins_task_set();   // back
+                debugpins_fsm_set();    // down
+                debugpins_task_clr();   // up
             } else {
                 if (last_angle <360) {
                     // light right and front led
                     debugpins_frame_clr();  // left
                     debugpins_slot_set();   // right
-                    debugpins_fsm_clr();    // frone
-                    debugpins_task_set();   // back
+                    debugpins_fsm_set();    // down
+                    debugpins_task_clr();   // up
                 } else {
                     // wrong angle
                     debugpins_frame_set();  // left
                     debugpins_slot_set();   // right
-                    debugpins_fsm_set();    // frone
-                    debugpins_task_set();   // back
+                    debugpins_fsm_set();    // down
+                    debugpins_task_set();   // up
                 }
             }
         }
