@@ -53,8 +53,8 @@ def start_read():
                     phase_data.append(sample['phase'])
                 _, angle = aoa_angle_calculation(phase_data, 0, data['array'])
                 
-                if angle:
-                    latest_angle[int(data['array'])-1] = angle
+                if data['angle'] != 254:
+                    latest_angle[int(data['array'])-1] = data['angle']
                 
                 with open(sample_file, 'a') as f:
                     f.write(str(data)+'\n')

@@ -132,14 +132,9 @@ def animate(i, data_source, on_board_calculation):
         ax.clear()  
     
         if angles[1] > 90:
-            angle = angles[0]
-        else:
             angle = 360 - angles[0]
-            
-        angle += 45
-            
-        if angle >= 360:
-            angle -= 360
+        else:
+            angle = angles[0]
             
         pos = mid_points[int(angle)]
         ax.arrow(
