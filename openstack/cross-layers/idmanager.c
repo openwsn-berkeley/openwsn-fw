@@ -96,6 +96,7 @@ bool idmanager_getIsSlotSkip(void) {
 
 open_addr_t* idmanager_getMyID(uint8_t type) {
     open_addr_t *res;
+
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
     switch (type) {
@@ -112,7 +113,7 @@ open_addr_t* idmanager_getMyID(uint8_t type) {
             res = &idmanager_vars.myPrefix;
             break;
         case ADDR_128B:
-            // you don't ask for my full address, rather for prefix, then 64b
+            // build full IPv6 address from prefix and 64b ID.
         default:
             LOG_CRITICAL(COMPONENT_IDMANAGER, ERR_WRONG_ADDR_TYPE, (errorparameter_t) type, (errorparameter_t) 0);
             res = NULL;
@@ -141,7 +142,8 @@ owerror_t idmanager_setMyID(open_addr_t *newID) {
         case ADDR_128B:
             //don't set 128b, but rather prefix and 64b
         default:
-            LOG_CRITICAL(COMPONENT_IDMANAGER, ERR_WRONG_ADDR_TYPE, (errorparameter_t) newID->type,
+            LOG_CRITICAL(COMPONENT_IDMANAGER, ERR_WRONG_ADDR_TYPE,
+                         (errorparameter_t) newID->type,
                          (errorparameter_t) 1);
             ENABLE_INTERRUPTS();
             return E_FAIL;
@@ -183,7 +185,9 @@ bool idmanager_isMyAddress(open_addr_t *addr) {
             ENABLE_INTERRUPTS();
             return res;
         default:
-            LOG_CRITICAL(COMPONENT_IDMANAGER, ERR_WRONG_ADDR_TYPE, (errorparameter_t) addr->type, (errorparameter_t) 2);
+            LOG_CRITICAL(COMPONENT_IDMANAGER, ERR_WRONG_ADDR_TYPE,
+                         (errorparameter_t) addr->type,
+                         (errorparameter_t) 2);
             ENABLE_INTERRUPTS();
             return FALSE;
     }
@@ -234,7 +238,11 @@ void idmanager_triggerAboutRoot(void) {
 
     // store prefix (bytes 1-8)
     myPrefix.type = ADDR_PREFIX;
-    memcpy(myPrefix.prefix, &input_buffer[1], sizeof(myPrefix.prefix));
+    memcpy(
+            myPrefix.prefix,
+            &input_buffer[1],
+            sizeof(myPrefix.prefix)
+    );
     idmanager_setMyID(&myPrefix);
 
     // indicate DODAGid to RPL

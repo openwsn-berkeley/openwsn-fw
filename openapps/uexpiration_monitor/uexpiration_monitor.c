@@ -4,7 +4,8 @@
 
 #include "opendefs.h"
 #include "uexpiration_monitor.h"
-#include "openqueue.h"
+#include "sock.h"
+#include "async.h"
 #include "openserial.h"
 #include "packetfunctions.h"
 
@@ -13,73 +14,57 @@
 #endif
 
 //=========================== variables =======================================
-umonitor_vars_t umonitor_vars;
+
+static sock_udp_t _sock;
 
 //=========================== prototypes ======================================
 
+//=========================== private =========================================
+
+void _sock_handler(sock_udp_t *sock, sock_async_flags_t type, void *arg) {
+    (void) arg;
+
+    uint8_t buf[50];
+    if (type & SOCK_ASYNC_MSG_RECV) {
+        sock_udp_ep_t remote;
+            size_t len = 0;
+        if (sock_udp_recv(sock, buf, sizeof(buf), 0, &remote) >= 0) {
+#ifdef DEADLINE_OPTION
+            monitor_expiration_vars_t deadline = { 0 };
+            iphc_getDeadlineInfo(&deadline);
+            memcpy(&buf[0], &deadline.time_elapsed, sizeof(uint16_t));
+            memcpy(&buf[2], &deadline.time_left, sizeof(int16_t));
+            len += sizeof(uint16_t);
+            len += sizeof(int16_t);
+#endif
+            if (sock_udp_send(sock, (char*) buf, len, &remote) < 0) {
+                LOG_ERROR(COMPONENT_UMONITOR, ERR_PUSH_LOWER_LAYER,
+                          (errorparameter_t) 0,
+                          (errorparameter_t) 0);
+            }
+        }
+    }
+}
+
 //=========================== public ==========================================
 
-void umonitor_init(void) {
+void umonitor_init(void)
+{
     // clear local variables
-    memset(&umonitor_vars, 0, sizeof(umonitor_vars_t));
+    memset(&_sock, 0, sizeof(sock_udp_t));
 
-    // register at UDP stack
-    umonitor_vars.desc.port = WKP_UDP_MONITOR;
-    umonitor_vars.desc.callbackReceive = &umonitor_receive;
-    umonitor_vars.desc.callbackSendDone = &umonitor_sendDone;
-    openudp_register(&umonitor_vars.desc);
-}
+    sock_udp_ep_t local;
+    local.family = AF_INET6;
+    local.port = WKP_UDP_MONITOR;
 
-void umonitor_receive(OpenQueueEntry_t *request) {
-    uint16_t temp_l4_destination_port;
-    OpenQueueEntry_t *reply;
-#ifdef DEADLINE_OPTION
-    monitor_expiration_vars_t	deadline;
-#endif
-
-    reply = openqueue_getFreePacketBuffer(COMPONENT_UMONITOR);
-    if (reply == NULL) {
-        LOG_ERROR(COMPONENT_UMONITOR, ERR_NO_FREE_PACKET_BUFFER, (errorparameter_t) 0, (errorparameter_t) 0);
-        openqueue_freePacketBuffer(request); //clear the request packet as well
+    if (sock_udp_create(&_sock, &local, NULL, 0) < 0) {
+        LOG_ERROR(COMPONENT_UMONITOR, ERR_INVALID_PARAM,
+                (errorparameter_t) 0,
+                (errorparameter_t) 0);
         return;
     }
 
-    reply->owner = COMPONENT_UMONITOR;
-    reply->creator = COMPONENT_UMONITOR;
-    reply->l4_protocol = IANA_UDP;
-    temp_l4_destination_port = request->l4_destination_port;
-    reply->l4_destination_port = request->l4_sourcePortORicmpv6Type;
-    reply->l4_sourcePortORicmpv6Type = temp_l4_destination_port;
-    reply->l3_destinationAdd.type = ADDR_128B;
-    memcpy(&reply->l3_destinationAdd.addr_128b[0], &request->l3_sourceAdd.addr_128b[0], 16);
-
-    /*************** Packet Payload  ********************/
-    // [Expiration time, Delay]
-    if (packetfunctions_reserveHeader(&reply, (2 * sizeof(uint16_t))) == E_FAIL) {
-        openqueue_freePacketBuffer(reply);
-        return;
-    }
-#ifdef DEADLINE_OPTION
-    memset(&deadline, 0, sizeof(monitor_expiration_vars_t));
-    iphc_getDeadlineInfo(&deadline);
-    memcpy(&reply->payload[0],&deadline.time_elapsed,sizeof(uint16_t));
-    memcpy(&reply->payload[2],&deadline.time_left,sizeof(uint16_t));
-#endif
-    openqueue_freePacketBuffer(request);
-
-    if ((openudp_send(reply)) == E_FAIL) {
-        openqueue_freePacketBuffer(reply);
-    }
+    sock_udp_set_cb(&_sock, _sock_handler, NULL);
 }
-
-void umonitor_sendDone(OpenQueueEntry_t *msg, owerror_t error) {
-    openqueue_freePacketBuffer(msg);
-}
-
-bool umonitor_debugPrint(void) {
-    return FALSE;
-}
-
-//=========================== private =========================================
 
 #endif /* OPEWSN_UEXP_MONITOR_C */

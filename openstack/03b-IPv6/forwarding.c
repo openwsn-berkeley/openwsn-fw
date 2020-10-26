@@ -247,7 +247,7 @@ void forwarding_sendDone(OpenQueueEntry_t *msg, owerror_t error) {
         switch (msg->l4_protocol) {
 #if OPENWSN_UDP_C
             case IANA_UDP:
-                openudp_sendDone(msg, error);
+                udp_sendDone(msg, error);
                 break;
 #endif
             case IANA_ICMPv6:
@@ -316,7 +316,7 @@ void forwarding_receive(
         switch (msg->l4_protocol) {
 #if OPENWSN_UDP_C
             case IANA_UDP:
-                openudp_receive(msg);
+                udp_receive(msg);
                 break;
 #endif
             case IANA_ICMPv6:
@@ -463,7 +463,7 @@ owerror_t forwarding_send_internal_RoutingTable(
     open_addr_t temp_prefix64btoWrite;
 
     // retrieve the next hop from the routing table
-    if (msg->is_cjoin_response || msg->creator == COMPONENT_CJOIN) {
+    if (packetfunctions_isLinkLocal(&msg->l3_destinationAdd)) {
         if (neighbors_isStableNeighbor(&(msg->l3_destinationAdd)) || msg->is_cjoin_response) {
             // IP destination is 1-hop neighbor, send directly
             packetfunctions_ip128bToMac64b(&(msg->l3_destinationAdd), &temp_prefix64btoWrite,

@@ -34,7 +34,7 @@
 #include "icmpv6echo.h"
 #include "icmpv6rpl.h"
 //-- 04-TRAN
-#include "udp.h"
+#include "sock.h"
 
 //===== application-layer
 #include "openweb.h"
@@ -94,7 +94,7 @@ void openstack_init(void) {
     //-- 04-TRAN
 
 #if OPENWSN_UDP_C
-    openudp_init();
+    sock_udp_init();
 #endif
 
     //===== application-layer

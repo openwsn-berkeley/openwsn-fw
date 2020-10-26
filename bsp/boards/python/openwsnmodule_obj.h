@@ -28,7 +28,6 @@
 #include "icmpv6rpl_obj.h"
 #include "coap_obj.h"
 #include "oscore_obj.h"
-#include "udp_obj.h"
 #include "idmanager_obj.h"
 #include "openqueue_obj.h"
 #include "openrandom_obj.h"
@@ -42,7 +41,6 @@
 #include "cstorm_obj.h"
 #include "cwellknown_obj.h"
 #include "rrt_obj.h"
-#include "uecho_obj.h"
 #include "uinject_obj.h"
 #include "userialbridge_obj.h"
 
@@ -206,7 +204,6 @@ struct OpenMote {
     // l4
     icmpv6echo_vars_t icmpv6echo_vars;
     icmpv6rpl_vars_t icmpv6rpl_vars;
-    openudp_vars_t openudp_vars;
     // l3
     monitor_expiration_vars_t monitor_expiration_vars;
     frag_vars_t frag_vars;
@@ -244,7 +241,6 @@ struct OpenMote {
     cwellknown_vars_t cwellknown_vars;
     rrt_vars_t rrt_vars;
     cjoin_vars_t cjoin_vars;
-    uecho_vars_t uecho_vars;
     uinject_vars_t uinject_vars;
     userialbridge_vars_t userialbridge_vars;
 };

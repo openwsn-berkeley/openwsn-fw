@@ -33,7 +33,6 @@ void uexpiration_init(void) {
     uexpiration_vars.desc.port = WKP_UDP_EXPIRATION;
     uexpiration_vars.desc.callbackReceive = &uexpiration_receive;
     uexpiration_vars.desc.callbackSendDone = &uexpiration_sendDone;
-    openudp_register(&uexpiration_vars.desc);
 }
 
 void uexpiration_receive(OpenQueueEntry_t *request) {
@@ -137,9 +136,6 @@ void uexpiration_task_cb(void) {
         );
     }
 
-    if ((openudp_send(reply)) == E_FAIL) {
-        openqueue_freePacketBuffer(reply);
-    }
 
 }
 

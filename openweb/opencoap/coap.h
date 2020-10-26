@@ -9,8 +9,8 @@
 */
 
 #include "config.h"
-#include "opentimers.h"
-#include "udp.h"
+#include "sock.h"
+#include "async.h"
 
 //=========================== define ==========================================
 
@@ -34,6 +34,8 @@ static const uint8_t ipAddr_ringmaster[] = {0xbb, 0xbb, 0x00, 0x00, 0x00, 0x00, 
 
 // This value may be reduced as a memory optimization, but would invalidate spec compliance
 #define COAP_MAX_TKL                   8
+
+#define COAP_MAX_MSG_LEN               IPV6_PACKET_SIZE - 20
 
 #define COAP_PAYLOAD_MARKER            0xFF
 
@@ -210,22 +212,18 @@ typedef struct {
 //=========================== module variables ================================
 
 typedef struct {
-    udp_resource_desc_t desc;
     coap_resource_desc_t *resources;
     bool busySending;
     uint8_t delayCounter;
     uint16_t messageID;
     coap_statelessproxy_vars_t statelessProxy;
+    sock_udp_t sock;
 } coap_vars_t;
 
 //=========================== prototypes ======================================
 
 // from stack
 void coap_init(void);
-
-void coap_receive(OpenQueueEntry_t *msg);
-
-void coap_sendDone(OpenQueueEntry_t *msg, owerror_t error);
 
 // from CoAP resources
 void coap_writeLinks(OpenQueueEntry_t *msg, uint8_t componentID);
@@ -242,7 +240,7 @@ owerror_t coap_send(
         coap_resource_desc_t *descSender
 );
 
-// option handling
+// option handling for OSCORE
 coap_option_class_t coap_get_option_class(coap_option_t type);
 
 uint8_t coap_options_encode(OpenQueueEntry_t *msg,

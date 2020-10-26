@@ -21,6 +21,11 @@
 coap_vars_t coap_vars;
 
 //=========================== prototype =======================================
+
+void coap_receive(OpenQueueEntry_t *msg);
+
+void coap_sendDone(OpenQueueEntry_t *msg, owerror_t error);
+
 owerror_t coap_header_encode(OpenQueueEntry_t *msg,
                              uint8_t version,
                              coap_type_t type,
@@ -51,6 +56,10 @@ void coap_forward_message(OpenQueueEntry_t *msg,
                           open_addr_t *destIP,
                           uint16_t destPortNumber);
 
+void coap_sock_handler(sock_udp_t *sock, sock_async_flags_t type, void *arg);
+
+owerror_t coap_sock_send_internal(OpenQueueEntry_t *msg);
+
 //=========================== public ==========================================
 
 //===== from stack
@@ -61,6 +70,7 @@ void coap_forward_message(OpenQueueEntry_t *msg,
 void coap_init(void) {
     uint16_t rand;
     uint8_t pos;
+    sock_udp_ep_t local;
 
     pos = 0;
 
@@ -82,10 +92,17 @@ void coap_init(void) {
     coap_vars.statelessProxy.sequenceNumber = 0;
 
     // register at UDP stack
-    coap_vars.desc.port = WKP_UDP_COAP;
-    coap_vars.desc.callbackReceive = coap_receive;
-    coap_vars.desc.callbackSendDone = coap_sendDone;
-    openudp_register(&coap_vars.desc);
+    memset(&coap_vars.sock, 0, sizeof(sock_udp_t));
+    local.port = WKP_UDP_COAP;
+
+    if (sock_udp_create(&coap_vars.sock, &local, NULL, 0) < 0) {
+        openserial_printf("Could not create socket\n");
+        return;
+    }
+
+    openserial_printf("Created a UDP socket\n");
+
+    sock_udp_set_cb(&coap_vars.sock, coap_sock_handler, NULL);
 }
 
 /**
@@ -442,8 +459,10 @@ void coap_receive(OpenQueueEntry_t *msg) {
         }
 
     } else {
+	// resource not found but success in creating the response
+        outcome = E_SUCCESS;
         // reset packet payload (DO NOT DELETE, we will reuse same buffer for response)
-        msg->payload = &(msg->packet[127]);
+        msg->payload = &(msg->packet[127]); // FIXME use packetfunctions to reset
         msg->length = 0;
         // set the CoAP header
         coap_header.TKL = 0;
@@ -456,7 +475,7 @@ void coap_receive(OpenQueueEntry_t *msg) {
 
     if (outcome == E_FAIL) {
         // reset packet payload (DO NOT DELETE, we will reuse same buffer for response)
-        msg->payload = &(msg->packet[127]);
+        msg->payload = &(msg->packet[127]); // FIXME use packetfunctions to reset
         msg->length = 0;
         // set the CoAP header
         coap_header.TKL = 0;
@@ -514,9 +533,10 @@ void coap_receive(OpenQueueEntry_t *msg) {
         return;
     }
 
-    if ((openudp_send(msg)) == E_FAIL) {
+    if ((coap_sock_send_internal(msg)) == E_FAIL) {
         openqueue_freePacketBuffer(msg);
     }
+
 }
 
 /**
@@ -766,7 +786,7 @@ owerror_t coap_send(
         return E_FAIL;
     }
 
-    return openudp_send(msg);
+    return coap_sock_send_internal(msg);
 }
 
 /**
@@ -938,6 +958,82 @@ uint8_t coap_find_option(coap_option_iht *array, uint8_t arrayLen, coap_option_t
 }
 
 //=========================== private =========================================
+
+void coap_sock_handler(sock_udp_t *sock, sock_async_flags_t type, void *arg) {
+    sock_udp_ep_t remote;
+    sock_udp_ep_t local;
+    int16_t res;
+    uint16_t footer_length;
+    OpenQueueEntry_t *msg;
+
+    if (type & SOCK_ASYNC_MSG_RECV) {
+
+        msg = openqueue_getFreePacketBuffer(COMPONENT_OPENCOAP);
+
+	if (msg == NULL) {
+            LOG_ERROR(COMPONENT_OPENCOAP, ERR_NO_FREE_PACKET_BUFFER, (errorparameter_t) 0, (errorparameter_t) 0);
+            return;
+        }
+
+	// take ownership over the packet
+	msg->owner = COMPONENT_OPENCOAP;
+
+	if (packetfunctions_reserveHeader(&msg, COAP_MAX_MSG_LEN) == E_FAIL) {
+            openserial_printf("Could not reserve header\n");
+            return;
+        }
+
+        if ((res = sock_udp_recv(sock, msg->payload, COAP_MAX_MSG_LEN, 0, &remote)) >= 0) {
+
+            openserial_printf("Received %d bytes from remote endpoint:\n", res);
+            openserial_printf(" - port: %d", remote.port);
+            openserial_printf(" - addr: ", remote.port);
+            for(int i=0; i < 16; i ++) {
+                openserial_printf("%x ", remote.addr.ipv6[i]);
+	    }
+
+            openserial_printf("\n\n");
+
+	    // set the length to the actual received bytes
+    	    footer_length = msg->length - res;
+	    packetfunctions_tossFooter(&msg, footer_length);
+
+	    // fill the metadata
+	    msg->owner = COMPONENT_OPENCOAP;
+            msg->l4_protocol_compressed = FALSE;
+            msg->l4_protocol = IANA_UDP;
+            msg->l4_sourcePortORicmpv6Type = remote.port;
+            sock_udp_get_local(sock, &local);
+	    msg->l4_destination_port = local.port;
+	    msg->l4_payload = msg->payload;
+	    msg->l4_length = res;
+            memcpy(&msg->l3_destinationAdd.addr_128b, &local.addr, LENGTH_ADDR128b);
+            memcpy(&msg->l3_sourceAdd.addr_128b, &remote.addr, LENGTH_ADDR128b);
+
+	    coap_receive(msg);
+        }
+    } else if (type & SOCK_ASYNC_MSG_SENT) {
+        msg = openqueue_getPacketByComponent(COMPONENT_OPENCOAP);
+        coap_sendDone(msg, *(owerror_t *)arg);
+    }
+}
+
+owerror_t coap_sock_send_internal(OpenQueueEntry_t *msg) {
+    sock_udp_ep_t remote;
+    int16_t res;
+
+    // init remote endpoint
+    remote.family = AF_INET6;
+    memcpy(&remote.addr, &msg->l3_destinationAdd.addr_128b, LENGTH_ADDR128b);
+    remote.netif = 0;
+    remote.port = msg->l4_destination_port;
+
+    if ((res = sock_udp_send(&coap_vars.sock, msg->payload, msg->length, &remote)) >= 0) {
+        return E_SUCCESS;
+    }
+
+    return E_FAIL;
+}
 
 uint8_t coap_options_parse(
         uint8_t *buffer,
@@ -1259,7 +1355,7 @@ void coap_forward_message(OpenQueueEntry_t *msg,
         goto fail;
     }
 
-    if ((openudp_send(outgoingPacket)) == E_FAIL) {
+    if ((coap_sock_send_internal(outgoingPacket)) == E_FAIL) {
         goto fail;
     }
 

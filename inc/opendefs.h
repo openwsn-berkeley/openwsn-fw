@@ -17,6 +17,8 @@
 #include "config.h"
 #include "toolchain_defs.h"
 #include "board_info.h"
+#include "af.h"
+
 
 //=========================== define ==========================================
 
@@ -52,79 +54,78 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 #endif
 
 enum {
-   E_SUCCESS                           = 0,
-   E_FAIL                              = 1,
+    E_SUCCESS = 0,
+    E_FAIL = 1,
 };
 
 // types of addresses
 enum {
-   ADDR_NONE                           = 0,
-   ADDR_16B                            = 1,
-   ADDR_64B                            = 2,
-   ADDR_128B                           = 3,
-   ADDR_PANID                          = 4,
-   ADDR_PREFIX                         = 5,
-   ADDR_ANYCAST                        = 6,
+    ADDR_NONE = 0,
+    ADDR_16B = 1,
+    ADDR_64B = 2,
+    ADDR_128B = 3,
+    ADDR_PANID = 4,
+    ADDR_PREFIX = 5,
+    ADDR_ANYCAST = 6,
 };
 
 enum {
-   OW_LITTLE_ENDIAN                    = TRUE,
-   OW_BIG_ENDIAN                       = FALSE,
+    OW_LITTLE_ENDIAN = TRUE,
+    OW_BIG_ENDIAN = FALSE,
 };
 
 // protocol numbers, as defined by the IANA
 enum {
-   IANA_IPv6HOPOPT                     = 0x00,
-   IANA_UDP                            = 0x11,
-   IANA_IPv6ROUTING                    = 0x03,
-   IANA_IPv6ROUTE                      = 0x2b,//used for source routing
-   IANA_ICMPv6                         = 0x3a,
-   IANA_ICMPv6_ECHO_REQUEST            =  128,
-   IANA_ICMPv6_ECHO_REPLY              =  129,
-   IANA_ICMPv6_RS                      =  133,
-   IANA_ICMPv6_RA                      =  134,
-   IANA_ICMPv6_RA_PREFIX_INFORMATION   =    3,
-   IANA_ICMPv6_RPL                     =  155,
-   IANA_ICMPv6_RPL_DIS                 = 0x00,
-   IANA_ICMPv6_RPL_DIO                 = 0x01,
-   IANA_ICMPv6_RPL_DAO                 = 0x02,
-   IANA_RSVP                           =   46,
-   IANA_UNDEFINED                      =  250, //use an unassigned
+    IANA_IPv6HOPOPT = 0x00,
+    IANA_UDP = 0x11,
+    IANA_IPv6ROUTING = 0x03,
+    IANA_IPv6ROUTE = 0x2b,//used for source routing
+    IANA_ICMPv6 = 0x3a,
+    IANA_ICMPv6_ECHO_REQUEST = 128,
+    IANA_ICMPv6_ECHO_REPLY = 129,
+    IANA_ICMPv6_RS = 133,
+    IANA_ICMPv6_RA = 134,
+    IANA_ICMPv6_RA_PREFIX_INFORMATION = 3,
+    IANA_ICMPv6_RPL = 155,
+    IANA_ICMPv6_RPL_DIS = 0x00,
+    IANA_ICMPv6_RPL_DIO = 0x01,
+    IANA_ICMPv6_RPL_DAO = 0x02,
+    IANA_RSVP = 46,
+    IANA_UNDEFINED = 250, //use an unassigned
 };
 
 // well known ports (which we define)
-// warning: first 4 MSB of 2° octect may coincide with previous protocol number
+// warning: first 4 MSB of 2° octet may coincide with previous protocol number
 enum {
-   //UDP
-   WKP_UDP_COAP                        =    5683,
-   WKP_UDP_ECHO                        =       7,
-   WKP_UDP_EXPIRATION                  =       5,
-   WKP_UDP_MONITOR                     =       3,
-   WKP_UDP_INJECT                      =   61617,// 0xf0b1
-   WKP_UDP_RINGMASTER                  =   15000,
-   WKP_UDP_SERIALBRIDGE                =    2001,
+    //UDP
+    WKP_UDP_COAP = 5683,
+    WKP_UDP_ECHO = 7,
+    WKP_UDP_EXPIRATION = 5,
+    WKP_UDP_MONITOR = 3,
+    WKP_UDP_INJECT = 61617,// 0xf0b1
+    WKP_UDP_RINGMASTER = 15000,
+    WKP_UDP_SERIALBRIDGE = 2001,
 };
 
 //status elements
 enum {
-   STATUS_ISSYNC                       =  0,
-   STATUS_ID                           =  1,
-   STATUS_DAGRANK                      =  2,
-   STATUS_OUTBUFFERINDEXES             =  3,
-   STATUS_ASN                          =  4,
-   STATUS_MACSTATS                     =  5,
-   STATUS_SCHEDULE                     =  6,
-   STATUS_BACKOFF                      =  7,
-   STATUS_QUEUE                        =  8,
-   STATUS_NEIGHBORS                    =  9,
-   STATUS_KAPERIOD                     = 10,
-   STATUS_JOINED                       = 11,
-   STATUS_MSF                          = 12,
-   STATUS_MAX                          = 13,
+    STATUS_ISSYNC = 0,
+    STATUS_ID = 1,
+    STATUS_DAGRANK = 2,
+    STATUS_OUTBUFFERINDEXES = 3,
+    STATUS_ASN = 4,
+    STATUS_MACSTATS = 5,
+    STATUS_SCHEDULE = 6,
+    STATUS_BACKOFF = 7,
+    STATUS_QUEUE = 8,
+    STATUS_NEIGHBORS = 9,
+    STATUS_KAPERIOD = 10,
+    STATUS_JOINED = 11,
+    STATUS_MSF = 12,
+    STATUS_MAX = 13,
 };
 
-//component identifiers
-//the order is important because
+// component identifiers, order is important
 enum {
    COMPONENT_NULL                      = 0x00,
    COMPONENT_OPENWSN                   = 0x01,
@@ -164,27 +165,29 @@ enum {
    COMPONENT_ICMPv6ROUTER              = 0x17,
    COMPONENT_ICMPv6RPL                 = 0x18,
    //TRAN
-   COMPONENT_OPENUDP                   = 0x19,
-   COMPONENT_OPENCOAP                  = 0x1a,
+   COMPONENT_UDP                       = 0x19,
+   COMPONENT_SOCK_TO_UDP               = 0x1a,
+   COMPONENT_UDP_TO_SOCK               = 0x1b,
+   COMPONENT_OPENCOAP                  = 0x1c,
    // secure join
-   COMPONENT_CJOIN                     = 0x1b,
-   COMPONENT_OSCORE                    = 0x1c,
+   COMPONENT_CJOIN                     = 0x1d,
+   COMPONENT_OSCORE                    = 0x1e,
    // applications
-   COMPONENT_C6T                       = 0x1d,
-   COMPONENT_CEXAMPLE                  = 0x1e,
-   COMPONENT_CINFO                     = 0x1f,
-   COMPONENT_CLEDS                     = 0x20,
-   COMPONENT_CSENSORS                  = 0x21,
-   COMPONENT_CSTORM                    = 0x22,
-   COMPONENT_CWELLKNOWN                = 0x23,
-   COMPONENT_UECHO                     = 0x24,
-   COMPONENT_UINJECT                   = 0x25,
-   COMPONENT_RRT                       = 0x26,
-   COMPONENT_SECURITY                  = 0x27,
-   COMPONENT_USERIALBRIDGE             = 0x28,
-   COMPONENT_UEXPIRATION               = 0x29,
-   COMPONENT_UMONITOR                  = 0x2a,
-   COMPONENT_CINFRARED                 = 0x2b,
+   COMPONENT_C6T                       = 0x1f,
+   COMPONENT_CEXAMPLE                  = 0x20,
+   COMPONENT_CINFO                     = 0x21,
+   COMPONENT_CLEDS                     = 0x22,
+   COMPONENT_CSENSORS                  = 0x23,
+   COMPONENT_CSTORM                    = 0x24,
+   COMPONENT_CWELLKNOWN                = 0x25,
+   COMPONENT_UECHO                     = 0x26,
+   COMPONENT_UINJECT                   = 0x27,
+   COMPONENT_RRT                       = 0x28,
+   COMPONENT_SECURITY                  = 0x29,
+   COMPONENT_USERIALBRIDGE             = 0x2a,
+   COMPONENT_UEXPIRATION               = 0x2b,
+   COMPONENT_UMONITOR                  = 0x2c,
+   COMPONENT_CINFRARED                 = 0x2d,
 };
 
 /**
@@ -291,37 +294,38 @@ enum {
 //=========================== typedef =========================================
 
 
-typedef uint16_t  errorparameter_t;
-typedef uint16_t  dagrank_t;
-typedef uint8_t   owerror_t;
+typedef uint16_t errorparameter_t;
+typedef uint16_t dagrank_t;
+typedef uint8_t owerror_t;
 
 BEGIN_PACK
 typedef struct {
-   uint8_t  byte4;
-   uint16_t bytes2and3;
-   uint16_t bytes0and1;
+    uint8_t byte4;
+    uint16_t bytes2and3;
+    uint16_t bytes0and1;
 } asn_t;
 END_PACK
 
-typedef asn_t  macFrameCounter_t;
+typedef asn_t
+macFrameCounter_t;
 
 BEGIN_PACK
 
 typedef struct {
-    bool      isUsed;
-    uint16_t  slotoffset;
-    uint16_t  channeloffset;
+    bool isUsed;
+    uint16_t slotoffset;
+    uint16_t channeloffset;
 } cellInfo_ht;
 
-typedef struct {                                 // always written big endian, i.e. MSB in addr[0]
-   uint8_t type;
-   union {
-      uint8_t addr_16b[2];
-      uint8_t addr_64b[8];
-      uint8_t addr_128b[16];
-      uint8_t panid[2];
-      uint8_t prefix[8];
-   };
+typedef struct {  // always written big endian, i.e. MSB in addr[0]
+    uint8_t type;
+    union {
+        uint8_t addr_16b[2];
+        uint8_t addr_64b[8];
+        uint8_t addr_128b[16];
+        uint8_t panid[2];
+        uint8_t prefix[8];
+    };
 } open_addr_t;
 END_PACK
 
@@ -358,77 +362,78 @@ typedef struct {
 #if OPENWSN_6LO_FRAGMENTATION_C
     bool         l3_isFragment;
 #endif
-   //l2
-   owerror_t     l2_sendDoneError;                              // outcome of trying to send this packet
-   open_addr_t   l2_nextORpreviousHop;                          // 64b IEEE802.15.4 next (down stack) or previous (up) hop address
-   uint8_t       l2_frameType;                                  // beacon, data, ack, cmd
-   uint8_t       l2_dsn;                                        // sequence number of the received frame
-   uint8_t       l2_retriesLeft;                                // number Tx retries left before packet dropped (dropped when hits 0)
-   uint8_t       l2_numTxAttempts;                              // number Tx attempts
-   asn_t         l2_asn;                                        // at what ASN the packet was Tx'ed or Rx'ed
-   uint8_t*      l2_payload;                                    // pointer to the start of the payload of l2 (used for MAC to fill in ASN in ADV)
-   cellInfo_ht   l2_sixtop_celllist_add[CELLLIST_MAX_LEN];      // record celllist to be added and will be added when 6P response sendDone
-   cellInfo_ht   l2_sixtop_celllist_delete[CELLLIST_MAX_LEN];   // record celllist to be removed and will be removed when 6P response sendDone
-   uint16_t      l2_sixtop_frameID;                             // frameID in 6P message
-   uint8_t       l2_sixtop_messageType;                         // indicating the sixtop message type
-   uint8_t       l2_sixtop_command;                             // command of the received 6p request, recorded in 6p response
-   uint8_t       l2_sixtop_cellOptions;                         // celloptions, used when 6p response senddone. (it's the same with cellOptions in 6p request but with TX and RX bits have been flipped)
-   uint8_t       l2_sixtop_returnCode;                          // return code in 6P response
-   uint8_t*      l2_ASNpayload;                                 // pointer to the ASN in EB
-   uint8_t*      l2_nextHop_payload;                            // pointer to the nexthop address in frame
-   uint8_t       l2_joinPriority;                               // the join priority received in EB
-   bool          l2_IEListPresent;                              // did have IE field?
-   bool          l2_payloadIEpresent;                           // did I have payload IE field
-   bool          l2_joinPriorityPresent;
-   bool          l2_isNegativeACK;                              // is the negative ACK?
-   int16_t       l2_timeCorrection;                             // record the timeCorrection and print out at endOfslot
-   bool          l2_sendOnTxCell;                               // mark the frame is sent on txCell
-   //layer-2 security
-   uint8_t       l2_securityLevel;                              // the security level specified for the current frame
-   uint8_t       l2_keyIdMode;                                  // the key Identifier mode specified for the current frame
-   uint8_t       l2_keyIndex;                                   // the key Index specified for the current frame
-   open_addr_t   l2_keySource;                                  // the key Source specified for the current frame
-   uint8_t       l2_authenticationLength;                       // the length of the authentication field
-   uint8_t       commandFrameIdentifier;                        // used in case of Command Frames
-   uint8_t*      l2_FrameCounter;                               // pointer to the FrameCounter in the MAC header
-   //l1 (drivers)
-   uint8_t       l1_txPower;                                    // power for packet to Tx at
-   int8_t        l1_rssi;                                       // RSSI of received packet
-   uint8_t       l1_lqi;                                        // LQI of received packet
-   bool          l1_crc;                                        // did received packet pass CRC check?
-   //the packet
-   uint8_t       packet[IEEE802154_FRAME_SIZE];                 // 1B spi address, 1B length, 125B data, 2B CRC, 1B LQI
+    //l2
+    owerror_t l2_sendDoneError;                                // outcome of trying to send this packet
+    open_addr_t l2_nextORpreviousHop;                          // 64b IEEE802.15.4 next (down stack) or previous (up) hop address
+    uint8_t l2_frameType;                                      // beacon, data, ack, cmd
+    uint8_t l2_dsn;                                            // sequence number of the received frame
+    uint8_t l2_retriesLeft;                                    // number Tx retries left before packet dropped (dropped when hits 0)
+    uint8_t l2_numTxAttempts;                                  // number Tx attempts
+    asn_t l2_asn;                                              // at what ASN the packet was Tx'ed or Rx'ed
+    uint8_t *l2_payload;                                       // pointer to the start of the payload of l2 (used for MAC to fill in ASN in ADV)
+    cellInfo_ht l2_sixtop_celllist_add[CELLLIST_MAX_LEN];      // record celllist to be added and will be added when 6P response sendDone
+    cellInfo_ht l2_sixtop_celllist_delete[CELLLIST_MAX_LEN];   // record celllist to be removed and will be removed when 6P response sendDone
+    uint16_t l2_sixtop_frameID;                                // frameID in 6P message
+    uint8_t l2_sixtop_messageType;                             // indicating the sixtop message type
+    uint8_t l2_sixtop_command;                                 // command of the received 6p request, recorded in 6p response
+    uint8_t l2_sixtop_cellOptions;                             // celloptions, used when 6p response senddone. (it's the same with cellOptions in 6p request but with TX and RX bits have been flipped)
+    uint8_t l2_sixtop_returnCode;                              // return code in 6P response
+    uint8_t *l2_ASNpayload;                                    // pointer to the ASN in EB
+    uint8_t *l2_nextHop_payload;                               // pointer to the nexthop address in frame
+    uint8_t l2_joinPriority;                                   // the join priority received in EB
+    bool l2_IEListPresent;                                     // did have IE field?
+    bool l2_payloadIEpresent;                                  // did I have payload IE field
+    bool l2_joinPriorityPresent;
+    bool l2_isNegativeACK;                                     // is the negative ACK?
+    int16_t l2_timeCorrection;                                 // record the timeCorrection and print out at endOfslot
+    bool l2_sendOnTxCell;                                      // mark the frame is sent on txCell
+    //layer-2 security
+    uint8_t l2_securityLevel;                                  // the security level specified for the current frame
+    uint8_t l2_keyIdMode;                                      // the key Identifier mode specified for the current frame
+    uint8_t l2_keyIndex;                                       // the key Index specified for the current frame
+    open_addr_t l2_keySource;                                  // the key Source specified for the current frame
+    uint8_t l2_authenticationLength;                           // the length of the authentication field
+    uint8_t commandFrameIdentifier;                            // used in case of Command Frames
+    uint8_t *l2_FrameCounter;                                  // pointer to the FrameCounter in the MAC header
+    //l1 (drivers)
+    uint8_t l1_txPower;                                        // power for packet to Tx at
+    int8_t l1_rssi;                                            // RSSI of received packet
+    uint8_t l1_lqi;                                            // LQI of received packet
+    bool l1_crc;                                               // did received packet pass CRC check?
+    //the packet
+    uint8_t packet[1 + 1 + 125 + 2 + 1];                       // 1B spi address, 1B length, 125B data, 2B CRC, 1B LQI
 } OpenQueueEntry_t;
 
 
 #if OPENWSN_6LO_FRAGMENTATION_C
 typedef struct {
     OpenQueueEntry_t standard_entry;
-    uint8_t packet_remainder[IPV6_PACKET_SIZE - IEEE802154_FRAME_SIZE]; // 127 bytzs alread allocated in the OpenQueueEntry
+    // 130 bytes alread allocated in the normal OpenQueueEntry
+    uint8_t packet_remainder[IPV6_PACKET_SIZE - 130];
 } OpenQueueBigEntry_t;
 #endif
 
 
 BEGIN_PACK
 typedef struct {
-   bool             used;
-   bool             insecure;
-   uint8_t          parentPreference;
-   bool             stableNeighbor;
-   uint8_t          switchStabilityCounter;
-   open_addr_t      addr_64b;
-   dagrank_t        DAGrank;
-   int8_t           rssi;
-   uint8_t          numRx;
-   uint8_t          numTx;
-   uint8_t          numTxACK;
-   uint8_t          numWraps;//number of times the tx counter wraps. can be removed if memory is a restriction. also check openvisualizer then.
-   asn_t            asn;
-   uint8_t          joinPrio;
-   bool             f6PNORES;
-   uint8_t          sequenceNumber;
-   uint8_t          backoffExponenton;
-   uint8_t          backoff;
+    bool used;
+    bool insecure;
+    uint8_t parentPreference;
+    bool stableNeighbor;
+    uint8_t switchStabilityCounter;
+    open_addr_t addr_64b;
+    dagrank_t DAGrank;
+    int8_t rssi;
+    uint8_t numRx;
+    uint8_t numTx;
+    uint8_t numTxACK;
+    uint8_t numWraps; // number of times the tx counter wraps. can be removed if memory is a restriction. also check openvisualizer then.
+    asn_t asn;
+    uint8_t joinPrio;
+    bool f6PNORES;
+    uint8_t sequenceNumber;
+    uint8_t backoffExponenton;
+    uint8_t backoff;
 } neighborRow_t;
 END_PACK
 

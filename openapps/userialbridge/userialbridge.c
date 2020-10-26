@@ -31,10 +31,6 @@ void userialbridge_init(void) {
     // clear local variables
     memset(&userialbridge_vars, 0, sizeof(userialbridge_vars_t));
     // register at UDP stack
-    userialbridge_vars.desc.port = WKP_UDP_SERIALBRIDGE;
-    userialbridge_vars.desc.callbackReceive = NULL;
-    userialbridge_vars.desc.callbackSendDone = &userialbridge_sendDone;
-    openudp_register(&userialbridge_vars.desc);
 }
 
 void userialbridge_sendDone(OpenQueueEntry_t *msg, owerror_t error) {
@@ -78,15 +74,9 @@ void userialbridge_task_cb(void) {
     pkt->l3_destinationAdd.type = ADDR_128B;
     memcpy(&pkt->l3_destinationAdd.addr_128b[0], userialbridge_dst_addr, 16);
 
-    if (packetfunctions_reserveHeader(&pkt, userialbridge_vars.txbufLen) == E_FAIL) {
-        openqueue_freePacketBuffer(pkt);
-        return;
-    }
+    packetfunctions_reserveHeaderSize(pkt, userialbridge_vars.txbufLen);
     memcpy(&pkt->payload[0], &userialbridge_vars.txbuf[0], userialbridge_vars.txbufLen);
 
-    if ((openudp_send(pkt)) == E_FAIL) {
-        openqueue_freePacketBuffer(pkt);
-    }
 }
 
 #endif /* OPENWSN_USERIALBRIDGE_C */
