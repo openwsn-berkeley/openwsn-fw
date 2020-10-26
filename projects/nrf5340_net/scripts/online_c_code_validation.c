@@ -20,8 +20,7 @@
 
 #define UART_DEBUG            1
 
-int16_t data[] = {
--139, -125, -114, -100, -87, -75, -62, -49, -36, -25, -12, 1, 15, 29, 43, 56, 68, 81, 93, 106, 119, 132, 144, 156, 168, 180, 194, -193, -181, -168, -156, -144, -132, -119, -106, -94, -81, -70, -56, -43, -30, -17, -6, 7, 20, 31, 44, 56, 69, 80, 94, 106, 120, 131, 146, 158, 171, 185, 199, -189, -179, -173, -174, -188, 166, 180, 195, -191, -179, -168, -159, -152, -145, -137, -124, -100, -32, 24, 45, 57, 67, 78, 92, 110, 124, 134, 136, 135, 131, 129, 129, 131, 136, 142, 151, 162, 174, 187, -199, -185, -173, -162, -153, -145, -137, -129, -117, -93, -26, 32, 52, 63, 72, 81, 94, 111, 126, 137, 139, 137, 134, 131, 131, 133, 136, 143, 150, 160, 173, 186, 200, -186, -174, -163, -154, -144, -136, -128, -115, -90, -25, 32, 53, 65, 75, 86, 102, 119, 136, 147, 154, 159, 161, 166, -138, -51, -44, -38, -32, -24
+int16_t data[] = {158, 179, 199, -182, -160, -136, -112, -91, -71, -51, -32, -11, 11, 30, 47, 65, 84, 106, 127, 146, 164, 181, 199, -181, -161, -140, -121, -100, -81, -60, -39, -21, 2, 22, 45, 65, 84, 103, 124, 147, 167, 186, -198, -181, -163, -145, -126, -108, -91, -73, -54, -33, -14, 6, 25, 43, 62, 81, 100, 121, 138,155, 166, 177, 88, 110, 130, 151, 169, 185, 200, -190, -184, -183, -188, 199, 182, 170, 169, 178, 196, -182, -160, -141, -125, -111, -100, -96, -104, -127, -150, -158, -158, -152, -142, -128, -111, -91, -71, -52, -33, -16, -1, 11, 19, 21, 17, 5, -13, -24, -26, -18, 1, 24, 48, 68, 86, 100, 112, 117, 110, 88, 67, 59, 59, 64, 74, 88, 107, 128, 149, 168, 184, 200, -188, -179, -173, -174, -180, -196, 185, 173, 171, 180, 198, -180, -159, -140, -123, -107, -89, -71, -51, -28, 2, 47, 98, 131, 153, 170
 };
 
 typedef struct {
@@ -54,12 +53,16 @@ bool variation_check(int16_t* data, uint8_t length) {
     return true;
 }
 
+#define VALID_PHASE_DIFF_RANG 113   // calculated as (402 * ANT_DISTANCE / 0.12468) 
+#define MAX_PHASE_DIFF        402   //
+
 double calculate_phase_diff(uint8_t shift) {
 
     uint16_t i;
     int16_t diff;
     int32_t sum;
     double avg_phase_diff;
+    uint8_t num_diff_sample;
 
     int16_t phase_one_ant[(NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/4];
     int16_t reference_one_ant[(NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/4];
@@ -75,24 +78,27 @@ double calculate_phase_diff(uint8_t shift) {
         memcpy(&reference_one_ant[8*i], &app_vars.reference_data[8*(8+shift+4*i)],sizeof(int16_t)*8);
         memcpy(&reference_one_ant[8*i], &app_vars.reference_data[8*(8+shift+4*i)],sizeof(int16_t)*8);
     }
+
+    num_diff_sample = 0;
     for (i=0;i<(NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/4;i++) {
         if (shift == 2) {
             diff = phase_one_ant[i] - reference_one_ant[i];
         } else {
             diff = reference_one_ant[i] - phase_one_ant[i];
         }
-        printf("diff=%d ",diff);
-        if (diff <= -201) {
-            diff += 402;
-        } else {
-            if (diff >= 201) {
-                diff -= 402;
-            }
-        }
-        phase_diff[i] = diff;
-    }
 
-    printf("%d, %d",reference_one_ant[2], phase_one_ant[2]);
+        //if (diff <= -201) {
+        //    diff += 402;
+        //} else {
+        //    if (diff >= 201) {
+        //        diff -= 402;
+        //    }
+        //}
+
+        if ((diff > (0-VALID_PHASE_DIFF_RANG)) && (diff < VALID_PHASE_DIFF_RANG)) {
+            phase_diff[num_diff_sample++] = diff;
+        }
+    }
 
     //---- DO NOT calculate angle if the phase diff variate too much
     if (
@@ -101,12 +107,18 @@ double calculate_phase_diff(uint8_t shift) {
         return INVAILD_ANGLE;
     }
 
+    printf("phase_diff ");
+
     sum = 0;
-    for (i=0;i<(NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/4;i++) {
+    for (i=0;i<num_diff_sample;i++) {
         printf("%d, ",phase_diff[i]);
         sum += phase_diff[i];
     }
-    avg_phase_diff = (double)(sum)/((NUM_SAMPLES-NUM_SAMPLES_REFERENCE)/4);
+    if (num_diff_sample>0) {
+        avg_phase_diff = (double)(sum)/num_diff_sample;
+    } else {
+        avg_phase_diff = MAX_PHASE_DIFF;
+    }
 
     printf("\r\n avg_phase_diff = %f\r\n",avg_phase_diff);
 
@@ -116,6 +128,7 @@ double calculate_phase_diff(uint8_t shift) {
 #define SPEED_OF_LIGHT          300000000
 #define NUM_SAMPLES_SWITCH_SLOT 8
 #define ANT_DISTANCE            0.035
+#define CENTER_FREQ             (2404)
 
 double calculate_aoa(void) {
 
@@ -127,6 +140,8 @@ double calculate_aoa(void) {
     
     uint8_t i;
     uint8_t wave_index_start, wave_index_end;
+    int16_t step;
+    int16_t estimated_phase;
     double   wave_length; // in meter
     uint32_t IF;
     uint32_t frequency;
@@ -156,7 +171,7 @@ double calculate_aoa(void) {
         }
     }
 
-    frequency       = 2404;
+    frequency       = CENTER_FREQ;
     if (
         wave_index_start != 0 && 
         wave_index_end   != 0 &&
@@ -166,6 +181,8 @@ double calculate_aoa(void) {
         IF          = 8000000/(wave_index_end-wave_index_start);
         frequency   = frequency*1000000 + IF;
         wave_length = (double)SPEED_OF_LIGHT / frequency;
+        step        = app_vars.phase_data[wave_index_end-1] - app_vars.phase_data[wave_index_start];
+        step        = step/(wave_index_end-wave_index_start-1);
     } else {
         return INVAILD_ANGLE;
     }
@@ -174,13 +191,19 @@ double calculate_aoa(void) {
     memcpy(reference_data_temp,     app_vars.phase_data, sizeof(int16_t)*wave_index_end);
     i = wave_index_end;
     while (i<(NUM_SAMPLES+NUM_SAMPLES_SWITCH_SLOT)){
-        memcpy(
-            &reference_data_temp[i],
-            &app_vars.phase_data[wave_index_start],
-            sizeof(int16_t)*(wave_index_end-wave_index_start)
-        );
-        i += (wave_index_end-wave_index_start);
+        estimated_phase        = reference_data_temp[i-1] + step;
+        if (estimated_phase > 201) {
+            estimated_phase -= 403;
+        }
+        reference_data_temp[i] = estimated_phase;
+        i++;
     }
+    printf("step = %d wave_index_end=%d, wave_index_start=%d\r\n", step, wave_index_end, wave_index_start);
+    printf("reference_data");
+    for (i=0;i<num_reference_sample;i++) {
+        printf("%d ",reference_data_temp[i]);
+    }
+    printf("\r\n");
 
     memcpy(
         app_vars.reference_data,
@@ -204,6 +227,10 @@ double calculate_aoa(void) {
 
     shift = 2;
     avg_phase_diff_3 = calculate_phase_diff(shift);
+
+    if (avg_phase_diff_1 == MAX_PHASE_DIFF || avg_phase_diff_3 == MAX_PHASE_DIFF) {
+        return INVAILD_ANGLE;
+    }
 
     //==== calculate the angle
 
@@ -235,6 +262,7 @@ double calculate_aoa(void) {
             }
         }
     }
+
 
     if (angle<0) {
         angle = 180.0 + angle;
