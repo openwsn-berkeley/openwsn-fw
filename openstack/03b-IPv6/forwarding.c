@@ -463,7 +463,7 @@ owerror_t forwarding_send_internal_RoutingTable(
     open_addr_t temp_prefix64btoWrite;
 
     // retrieve the next hop from the routing table
-    if (msg->is_cjoin_response || msg->creator == COMPONENT_CJOIN) {
+    if (packetfunctions_isLinkLocal(&msg->l3_destinationAdd)) {
         if (neighbors_isStableNeighbor(&(msg->l3_destinationAdd)) || msg->is_cjoin_response) {
             // IP destination is 1-hop neighbor, send directly
             packetfunctions_ip128bToMac64b(&(msg->l3_destinationAdd), &temp_prefix64btoWrite,
