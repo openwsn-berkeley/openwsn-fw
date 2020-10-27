@@ -312,11 +312,26 @@
  *
  * Allow the MSF algorithm to dynamically remove and allocate slots, based on the traffic load in the network.
  *
+ * Configuration options:
+ *  - MSF_MAX_NUMCELLS: cell usage is calculated every MSF_MAX_NUMCELLS elapsed cells.
+ *  - MSF_LIM_NUMCELLSUSED_HIGH: if cell usage is above this value, trigger 6P to add a single cell to the selected parent
+ *  - MSF_LIM_NUMCELLSUSED_LOW: if cell usage is below this value, trigger 6P to remove a single cell to the selected parent
  */
 #ifndef ADAPTIVE_MSF
 #define ADAPTIVE_MSF (0)
 #endif
 
+#if ADAPTIVE_MSF
+#ifndef MSF_MAX_NUMCELLS
+#define MSF_MAX_NUMCELLS            32
+#endif
+#ifndef MSF_LIM_NUMCELLSUSED_HIGH
+#define MSF_LIM_NUMCELLSUSED_HIGH   24
+#endif
+#ifndef MSF_LIM_NUMCELLSUSED_HIGH
+#define MSF_LIM_NUMCELLSUSED_HIGH   8
+#endif
+#endif
 
 /**
  * \def IEEE802154E_SINGLE_CHANNEL
