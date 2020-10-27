@@ -40,6 +40,7 @@ sctimer_vars_t sctimer_vars;
 void sctimer_init(void) {
     // clear local variables
     memset(&sctimer_vars,0,sizeof(sctimer_vars_t));
+    sctimer_vars.convert = TRUE;
     //enable BKP and PWR, Clock
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_BKP|RCC_APB1Periph_PWR , ENABLE);
     
@@ -126,7 +127,7 @@ void sctimer_setCompare(PORT_TIMER_WIDTH val) {
     if (val > OVERFLOW_THRESHOLD && sctimer_vars.convertUnlock){
         // toggle convert
         if (sctimer_vars.convert){
-            sctimer_vars.convert   = TRUE;
+            sctimer_vars.convert   = FALSE;
         } else {
             sctimer_vars.convert   = TRUE;
         }
