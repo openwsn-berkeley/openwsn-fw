@@ -9,6 +9,7 @@
 */
 
 #include "opendefs.h"
+#include "opentimers.h"
 #include "coap.h"
 #include "oscore.h"
 //=========================== define ==========================================
