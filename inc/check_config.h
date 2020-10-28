@@ -52,6 +52,14 @@
 #error 'Hardware encryption not supported on this platform.'
 #endif
 
+#if !BOARD_LEDS && (\
+    !defined(OPENMOTE_CC2538) || \
+    defined(OPENMOTE_B) || \
+    defined(OPENMOTE_B_24GHZ) || \
+    defined(OPENMOTE_B_SUBGHZ))
+#error 'Disabling Leds is not supported by this platform.'
+#endif
+
 #if OPENWSN_IEEE802154E_SECURITY_C && !OPENWSN_CJOIN_C
 #error 'Link-layer security requires CJOIN application.'
 #endif
