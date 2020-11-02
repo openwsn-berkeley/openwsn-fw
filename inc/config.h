@@ -341,7 +341,7 @@
  *
  */
 #ifndef IEEE802154E_SINGLE_CHANNEL
-#define IEEE802154E_SINGLE_CHANNEL      11
+#define IEEE802154E_SINGLE_CHANNEL      0
 #endif
 
 /**
