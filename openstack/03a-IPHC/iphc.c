@@ -46,6 +46,18 @@ uint8_t iphc_getAsnLen(uint8_t* asn);
 
 //=========================== public ==========================================
 
+#if !OPENWSN_6LO_FRAGMENTATION_C
+void upper_sendDone(OpenQueueEntry_t *msg, owerror_t error)
+{
+    iphc_sendDone(msg, error);
+}
+
+void upper_receive(OpenQueueEntry_t *msg)
+{
+    iphc_receive(msg);
+}
+#endif
+
 void iphc_init(void) {
 }
 

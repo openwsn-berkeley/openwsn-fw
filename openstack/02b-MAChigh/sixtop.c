@@ -438,11 +438,7 @@ void task_sixtopNotifSendDone(void) {
             break;
         default:
             // send the rest up the stack
-#if OPENWSN_6LO_FRAGMENTATION_C
-            frag_sendDone(msg, msg->l2_sendDoneError);
-#else
-            iphc_sendDone(msg, msg->l2_sendDoneError);
-#endif
+            upper_sendDone(msg, msg->l2_sendDoneError);
             break;
     }
 }
@@ -502,11 +498,7 @@ void task_sixtopNotifReceive(void) {
                     break;
                 }
                 // send to upper layer
-#if OPENWSN_6LO_FRAGMENTATION_C
-                frag_receive(msg);
-#else
-                iphc_receive(msg);
-#endif
+                upper_receive(msg);
             } else {
                 // free up the RAM
                 openqueue_freePacketBuffer(msg);
@@ -1074,6 +1066,23 @@ port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
     return TRUE;
 }
 
+void __attribute__((weak)) sixtop_indicate_recv(uint8_t code)
+{
+    if (code == IANA_6TOP_RC_SUCCESS) {
+        LOG_SUCCESS(COMPONENT_SIXTOP, ERR_SIXTOP_RETURNCODE,
+                    (errorparameter_t) code,
+                    (errorparameter_t) sixtop_vars.six2six_state);
+    } else if (code == IANA_6TOP_RC_EOL || code == IANA_6TOP_RC_BUSY || code == IANA_6TOP_RC_LOCKED) {
+        LOG_INFO(COMPONENT_SIXTOP, ERR_SIXTOP_RETURNCODE,
+                (errorparameter_t) code,
+                (errorparameter_t) sixtop_vars.six2six_state);
+    } else {
+        LOG_ERROR(COMPONENT_SIXTOP, ERR_SIXTOP_RETURNCODE,
+                (errorparameter_t) code,
+                (errorparameter_t) sixtop_vars.six2six_state);
+    }
+}
+
 void sixtop_six2six_notifyReceive(
         uint8_t version,
         uint8_t type,
@@ -1586,21 +1595,7 @@ void sixtop_six2six_notifyReceive(
             sixtop_vars.cb_sf_handleRCError(code, &(pkt->l2_nextORpreviousHop));
         }
 
-        if (code == IANA_6TOP_RC_SUCCESS) {
-            LOG_SUCCESS(COMPONENT_SIXTOP, ERR_SIXTOP_RETURNCODE,
-                        (errorparameter_t)
-            code,
-                    (errorparameter_t)
-            sixtop_vars.six2six_state);
-        } else if (code == IANA_6TOP_RC_EOL || code == IANA_6TOP_RC_BUSY || code == IANA_6TOP_RC_LOCKED) {
-            LOG_INFO(COMPONENT_SIXTOP, ERR_SIXTOP_RETURNCODE,
-                    (errorparameter_t) code,
-                    (errorparameter_t) sixtop_vars.six2six_state);
-        } else {
-            LOG_ERROR(COMPONENT_SIXTOP, ERR_SIXTOP_RETURNCODE,
-                    (errorparameter_t) code,
-                    (errorparameter_t) sixtop_vars.six2six_state);
-        }
+        sixtop_indicate_recv(code);
 
         memset(&sixtop_vars.neighborToClearCells, 0, sizeof(open_addr_t));
         sixtop_vars.six2six_state = SIX_STATE_IDLE;
