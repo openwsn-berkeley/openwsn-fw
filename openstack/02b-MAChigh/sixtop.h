@@ -153,8 +153,6 @@ void task_sixtopNotifSendDone(void);
 void task_sixtopNotifReceive(void);
 
 // debugging
-bool debugPrint_myDAGrank(void);
-
 bool debugPrint_kaPeriod(void);
 
 /**

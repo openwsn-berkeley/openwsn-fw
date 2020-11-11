@@ -15,6 +15,7 @@
 #include "debugpins.h"
 #include "sixtop.h"
 #include "adaptive_sync.h"
+#include "icmpv6rpl.h"
 #include "sctimer.h"
 #include "openrandom.h"
 #include "msf.h"
