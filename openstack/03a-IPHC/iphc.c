@@ -10,6 +10,7 @@
 #include "neighbors.h"
 #include "openbridge.h"
 #include "icmpv6rpl.h"
+#include "openqueue.h"
 
 //=========================== variables =======================================
 
@@ -145,7 +146,7 @@ owerror_t iphc_sendFromForwarding(
                     return E_FAIL;
                 }
                 *((uint8_t * )(msg->payload)) = IPECAP_6LOTH_TYPE;
-                // length 
+                // length
                 if (packetfunctions_reserveHeader(&msg, sizeof(uint8_t)) == E_FAIL) {
                     return E_FAIL;
                 }
@@ -1221,7 +1222,7 @@ uint8_t iphc_retrieveIPv6HopByHopHeader(OpenQueueEntry_t *msg, rpl_option_ht *rp
 
 \param[in,out] msg            The message to retrieve the header from.
 \param[in] deadline_msg_ptr   Pointer to the Deadline header.
-\param[out] deadline_option   Pointer to the structure to hold the retrieved Deadline option 
+\param[out] deadline_option   Pointer to the structure to hold the retrieved Deadline option
 */
 void iphc_retrieveIPv6DeadlineHeader(
         OpenQueueEntry_t *msg,

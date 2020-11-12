@@ -207,7 +207,7 @@
                 <debug>1</debug>
                 <option>
                     <name>CCDefines</name>
-                    <state></state>
+                    <state>OPENMOTE_B</state>
                 </option>
                 <option>
                     <name>CCPreprocFile</name>
@@ -339,9 +339,9 @@
                     <state>$PROJ_DIR$\..\..\..\bsp\chips\si70x\</state>
                     <state>$PROJ_DIR$\..\..\..\kernel\</state>
                     <state>$PROJ_DIR$\..\..\..\drivers\common\</state>
+                    <state>$PROJ_DIR$\..\..\..\drivers\common\crypto</state>
                     <state>$PROJ_DIR$\..\..\..\inc\</state>
                     <state>$PROJ_DIR$\..\..\..\openstack\</state>
-                    <state>$PROJ_DIR$\..\..\..\openstack\OpenwsnHeads\</state>
                     <state>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\</state>
                     <state>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\</state>
                     <state>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\</state>
@@ -353,10 +353,9 @@
                     <state>$PROJ_DIR$\..\..\..\openapps\cexample\</state>
                     <state>$PROJ_DIR$\..\..\..\openapps\cinfo\</state>
                     <state>$PROJ_DIR$\..\..\..\openapps\cjoin\</state>
-                    <state>$PROJ_DIR$\..\..\..\openapps\cleds\</state>
+                    <state>$PROJ_DIR$\..\..\..\openapps\cled\</state>
                     <state>$PROJ_DIR$\..\..\..\openapps\csensors\</state>
                     <state>$PROJ_DIR$\..\..\..\openapps\cwellknown\</state>
-                    <state>$PROJ_DIR$\..\..\..\openapps\opencoap\</state>
                     <state>$PROJ_DIR$\..\..\..\openapps\uecho\</state>
                     <state>$PROJ_DIR$\..\..\..\openapps\cstorm\</state>
                     <state>$PROJ_DIR$\..\..\..\openapps\rrt\</state>
@@ -364,6 +363,8 @@
                     <state>$PROJ_DIR$\..\..\..\openapps\uexpiration\</state>
                     <state>$PROJ_DIR$\..\..\..\openapps\uexpiration_monitor\</state>
                     <state>$PROJ_DIR$\..\..\..\openapps\userialbridge\</state>
+                    <state>$PROJ_DIR$\..\..\..\openweb\</state>
+                    <state>$PROJ_DIR$\..\..\..\openweb\opencoap\</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\headers\</state>
                     <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\</state>
@@ -1077,11 +1078,11 @@
                 </option>
                 <option>
                     <name>Input description</name>
-                    <state></state>
+                    <state>Automatic choice of formatter, without multibyte support.</state>
                 </option>
                 <option>
                     <name>Output description</name>
-                    <state></state>
+                    <state>Automatic choice of formatter, without multibyte support.</state>
                 </option>
                 <option>
                     <name>GOutputBinary</name>
@@ -1089,7 +1090,7 @@
                 </option>
                 <option>
                     <name>OGCoreOrChip</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>GRuntimeLibSelect</name>
@@ -1103,7 +1104,7 @@
                 </option>
                 <option>
                     <name>RTDescription</name>
-                    <state></state>
+                    <state>Use the normal configuration of the C/C++ runtime library. No locale interface, C locale, no file descriptor support, no multibytes in printf and scanf, and no hex floats in strtod.</state>
                 </option>
                 <option>
                     <name>OGProductVersion</name>
@@ -1123,15 +1124,15 @@
                 </option>
                 <option>
                     <name>OGChipSelectEditMenu</name>
-                    <state>Default	None</state>
+                    <state>CC2538SF53	TexasInstruments CC2538SF53</state>
                 </option>
                 <option>
                     <name>GenLowLevelInterface</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>GEndianModeBE</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>OGBufferedTerminalOutput</name>
@@ -1157,12 +1158,12 @@
                 </option>
                 <option>
                     <name>RTConfigPath2</name>
-                    <state></state>
+                    <state>$TOOLKIT_DIR$\inc\c\DLib_Config_Normal.h</state>
                 </option>
                 <option>
                     <name>GBECoreSlave</name>
-                    <version>25</version>
-                    <state>1</state>
+                    <version>28</version>
+                    <state>38</state>
                 </option>
                 <option>
                     <name>OGUseCmsis</name>
@@ -1178,12 +1179,12 @@
                 </option>
                 <option>
                     <name>CoreVariant</name>
-                    <version>25</version>
-                    <state>0</state>
+                    <version>28</version>
+                    <state>38</state>
                 </option>
                 <option>
                     <name>GFPUDeviceSlave</name>
-                    <state>Default	None</state>
+                    <state>CC2538SF53	TexasInstruments CC2538SF53</state>
                 </option>
                 <option>
                     <name>FPU2</name>
@@ -1201,8 +1202,8 @@
                 </option>
                 <option>
                     <name>GFPUCoreSlave2</name>
-                    <version>25</version>
-                    <state>0</state>
+                    <version>28</version>
+                    <state>38</state>
                 </option>
                 <option>
                     <name>OGCMSISPackSelectDevice</name>
@@ -1252,6 +1253,7 @@
                 <debug>0</debug>
                 <option>
                     <name>CCDefines</name>
+                    <state>OPENMOTE_B</state>
                     <state>NDEBUG</state>
                 </option>
                 <option>
@@ -1361,7 +1363,7 @@
                 </option>
                 <option>
                     <name>OutputFile</name>
-                    <state></state>
+                    <state>$FILE_BNAME$.o</state>
                 </option>
                 <option>
                     <name>CCLibConfigHeader</name>
@@ -1377,7 +1379,43 @@
                 </option>
                 <option>
                     <name>CCIncludePath2</name>
-                    <state></state>
+                    <state>$PROJ_DIR$</state>
+                    <state>$PROJ_DIR$\..\..\..\bsp\</state>
+                    <state>$PROJ_DIR$\..\..\..\bsp\boards\</state>
+                    <state>$PROJ_DIR$\..\..\..\bsp\boards\common\</state>
+                    <state>$PROJ_DIR$\..\..\..\bsp\chips\si70x\</state>
+                    <state>$PROJ_DIR$\..\..\..\kernel\</state>
+                    <state>$PROJ_DIR$\..\..\..\drivers\common\</state>
+                    <state>$PROJ_DIR$\..\..\..\drivers\common\crypto</state>
+                    <state>$PROJ_DIR$\..\..\..\inc\</state>
+                    <state>$PROJ_DIR$\..\..\..\openstack\</state>
+                    <state>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\</state>
+                    <state>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\</state>
+                    <state>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\</state>
+                    <state>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\</state>
+                    <state>$PROJ_DIR$\..\..\..\openstack\04-TRAN\</state>
+                    <state>$PROJ_DIR$\..\..\..\openstack\cross-layers\</state>
+                    <state>$PROJ_DIR$\..\..\..\openapps\</state>
+                    <state>$PROJ_DIR$\..\..\..\openapps\c6t\</state>
+                    <state>$PROJ_DIR$\..\..\..\openapps\cexample\</state>
+                    <state>$PROJ_DIR$\..\..\..\openapps\cinfo\</state>
+                    <state>$PROJ_DIR$\..\..\..\openapps\cjoin\</state>
+                    <state>$PROJ_DIR$\..\..\..\openapps\cled\</state>
+                    <state>$PROJ_DIR$\..\..\..\openapps\csensors\</state>
+                    <state>$PROJ_DIR$\..\..\..\openapps\cwellknown\</state>
+                    <state>$PROJ_DIR$\..\..\..\openapps\uecho\</state>
+                    <state>$PROJ_DIR$\..\..\..\openapps\cstorm\</state>
+                    <state>$PROJ_DIR$\..\..\..\openapps\rrt\</state>
+                    <state>$PROJ_DIR$\..\..\..\openapps\uinject\</state>
+                    <state>$PROJ_DIR$\..\..\..\openapps\uexpiration\</state>
+                    <state>$PROJ_DIR$\..\..\..\openapps\uexpiration_monitor\</state>
+                    <state>$PROJ_DIR$\..\..\..\openapps\userialbridge\</state>
+                    <state>$PROJ_DIR$\..\..\..\openweb\</state>
+                    <state>$PROJ_DIR$\..\..\..\openweb\opencoap\</state>
+                    <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\</state>
+                    <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\headers\</state>
+                    <state>$PROJ_DIR$\..\..\..\bsp\boards\openmote-b\source\</state>
+                    <state>$PROJ_DIR$\..\..\..\projects\common\03oos_openwsn</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
@@ -1402,7 +1440,7 @@
                 </option>
                 <option>
                     <name>CCOptLevelSlave</name>
-                    <state>1</state>
+                    <state>3</state>
                 </option>
                 <option>
                     <name>CompilerMisraRules98</name>
@@ -1627,7 +1665,7 @@
                 </option>
                 <option>
                     <name>AOutputFile</name>
-                    <state></state>
+                    <state>$FILE_BNAME$.o</state>
                 </option>
                 <option>
                     <name>ALimitErrorsCheck</name>
@@ -1732,7 +1770,7 @@
                 </option>
                 <option>
                     <name>IlinkOutputFile</name>
-                    <state>###Unitialized###</state>
+                    <state>03oos_openwsn.out</state>
                 </option>
                 <option>
                     <name>IlinkDebugInfoEnable</name>
@@ -2378,6 +2416,39 @@
         <name>drivers</name>
         <group>
             <name>common</name>
+            <group>
+                <name>crypto</name>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\drivers\common\crypto\aes128.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\drivers\common\crypto\aes128.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\drivers\common\crypto\ccms.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\drivers\common\crypto\ccms.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\drivers\common\crypto\hkdf.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\drivers\common\crypto\hmac.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\drivers\common\crypto\sha-private.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\drivers\common\crypto\sha.h</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\drivers\common\crypto\sha224-256.c</name>
+                </file>
+                <file>
+                    <name>$PROJ_DIR$\..\..\..\drivers\common\crypto\usha.c</name>
+                </file>
+            </group>
             <file>
                 <name>$PROJ_DIR$\..\..\..\drivers\common\openhdlc.c</name>
             </file>
@@ -2406,6 +2477,15 @@
     </group>
     <group>
         <name>inc</name>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\inc\af.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\inc\check_config.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\inc\config.h</name>
+        </file>
         <file>
             <name>$PROJ_DIR$\..\..\..\inc\opendefs.h</name>
         </file>
@@ -2464,12 +2544,12 @@
             </file>
         </group>
         <group>
-            <name>cleds</name>
+            <name>cled</name>
             <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\cleds\cleds.c</name>
+                <name>$PROJ_DIR$\..\..\..\openapps\cled\cled.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\cleds\cleds.h</name>
+                <name>$PROJ_DIR$\..\..\..\openapps\cled\cled.h</name>
             </file>
         </group>
         <group>
@@ -2497,45 +2577,6 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\openapps\cwellknown\cwellknown.h</name>
-            </file>
-        </group>
-        <group>
-            <name>opencoap</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\opencoap\cborencoder.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\opencoap\cborencoder.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\opencoap\hkdf.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\opencoap\hmac.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\opencoap\opencoap.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\opencoap\opencoap.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\opencoap\oscore.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\opencoap\oscore.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\opencoap\sha-private.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\opencoap\sha.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\opencoap\sha224-256.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\openapps\opencoap\usha.c</name>
             </file>
         </group>
         <group>
@@ -2628,9 +2669,6 @@
                 <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154_security.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\ieee802154_security_driver.h</name>
-            </file>
-            <file>
                 <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154E.c</name>
             </file>
             <file>
@@ -2672,6 +2710,12 @@
         </group>
         <group>
             <name>03a-IPHC</name>
+            <file>
+                <name>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\frag.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\frag.h</name>
+            </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\iphc.c</name>
             </file>
@@ -2715,10 +2759,28 @@
         <group>
             <name>04-TRAN</name>
             <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\openudp.c</name>
+                <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\async.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\openudp.h</name>
+                <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\async_types.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\sock.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\sock.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\sock_internal.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\sock_types.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\udp.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\udp.h</name>
             </file>
         </group>
         <group>
@@ -2753,6 +2815,36 @@
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\..\openstack\openstack.h</name>
+        </file>
+    </group>
+    <group>
+        <name>openweb</name>
+        <group>
+            <name>opencoap</name>
+            <file>
+                <name>$PROJ_DIR$\..\..\..\openweb\opencoap\cborencoder.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\..\openweb\opencoap\cborencoder.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\..\openweb\opencoap\coap.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\..\openweb\opencoap\coap.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\..\openweb\opencoap\oscore.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\..\openweb\opencoap\oscore.h</name>
+            </file>
+        </group>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\openweb\openweb.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\openweb\openweb.h</name>
         </file>
     </group>
 </project>

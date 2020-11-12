@@ -23,11 +23,6 @@ struct _sock_tl_ep {
 typedef struct _sock_tl_ep sock_udp_ep_t;
 
 /**
- * @brief   Type for a UDP sock object
- */
-typedef struct sock_udp sock_udp_t;
-
-/**
  * @brief   Initialize the internal UDP socket structures
  */
 void sock_udp_init(void);
