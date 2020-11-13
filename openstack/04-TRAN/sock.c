@@ -18,63 +18,56 @@
 
 sock_udp_t* udp_socket_list;
 
-#if (__ICCARM__)
-  // IAR's errno.h apparently doesn't define EOVERFLOW.
-  #ifndef EOVERFLOW
-  // There is no real good choice for what to set
-  // errno to in this case, so we just pick the
-  // value '1' somewhat arbitrarily.
-  #define EOVERFLOW 1
-  #endif
+// some toolchains errno.h apparently doesn't define all error codes. Use arbitrary placeholder here to cover that.
 
-  // IAR's errno.h apparently doesn't define EINVAL.
-  #ifndef EINVAL
-  // There is no real good choice for what to set
-  // errno to in this case, so we just pick the
-  // value '1' somewhat arbitrarily.
-  #define EINVAL 1
-  #endif
+#ifndef EAFNOSUPPORT
+// There is no real good choice for what to set
+// errno to in this case, so we just pick the
+// value '0x01' somewhat arbitrarily.
+#define EAFNOSUPPORT 0x01
+#endif
 
-  // IAR's errno.h apparently doesn't define ENOMEM.
-  #ifndef ENOMEM
-  // There is no real good choice for what to set
-  // errno to in this case, so we just pick the
-  // value '1' somewhat arbitrarily.
-  #define ENOMEM 1
-  #endif
+#ifndef EADDRINUSE
+// There is no real good choice for what to set
+// errno to in this case, so we just pick the
+// value '0x02' somewhat arbitrarily.
+#define EADDRINUSE 0x02
+#endif
 
-  // IAR's errno.h apparently doesn't define EAFNOSUPPORT.
-  #ifndef EAFNOSUPPORT
-  // There is no real good choice for what to set
-  // errno to in this case, so we just pick the
-  // value '1' somewhat arbitrarily.
-  #define EAFNOSUPPORT 1
-  #endif
+#ifndef ENOTCONN
+// There is no real good choice for what to set
+// errno to in this case, so we just pick the
+// value '0x03' somewhat arbitrarily.
+#define ENOTCONN 0x03
+#endif
 
-  // IAR's errno.h apparently doesn't define EADDRINUSE.
-  #ifndef EADDRINUSE
-  // There is no real good choice for what to set
-  // errno to in this case, so we just pick the
-  // value '1' somewhat arbitrarily.
-  #define EADDRINUSE 1
-  #endif
+#ifndef EOVERFLOW
+// There is no real good choice for what to set
+// errno to in this case, so we just pick the
+// value '0x04' somewhat arbitrarily.
+#define EOVERFLOW 0x04
+#endif
 
-  // IAR's errno.h apparently doesn't define ENOTCONN.
-  #ifndef ENOTCONN
-  // There is no real good choice for what to set
-  // errno to in this case, so we just pick the
-  // value '1' somewhat arbitrarily.
-  #define ENOTCONN 1
-  #endif
+#ifndef ENOMEM
+// There is no real good choice for what to set
+// errno to in this case, so we just pick the
+// value '0x05' somewhat arbitrarily.
+#define ENOMEM 0x05
+#endif
 
-  // IAR's errno.h apparently doesn't define ENOBUFS.
-  #ifndef ENOBUFS
-  // There is no real good choice for what to set
-  // errno to in this case, so we just pick the
-  // value '1' somewhat arbitrarily.
-  #define ENOBUFS 1
-  #endif
-#endif //(__ICCARM__)
+#ifndef EINVAL
+// There is no real good choice for what to set
+// errno to in this case, so we just pick the
+// value '0x06' somewhat arbitrarily.
+#define EINVAL 0x06
+#endif
+
+#ifndef ENOBUFS
+// There is no real good choice for what to set
+// errno to in this case, so we just pick the
+// value '0x07' somewhat arbitrarily.
+#define ENOBUFS 0x07
+#endif
 
 // =========================== variables =======================================
 // =========================== prototypes ======================================
