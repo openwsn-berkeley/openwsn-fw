@@ -178,9 +178,9 @@ void _uinject_task_cb(void) {
     uint32_t ticksOn;
     uint32_t ticksInTotal;
     ieee154e_getTicsInfo(&ticksOn, &ticksInTotal);
-    memcpy(&payload[len], (uint8_t*) ticksOn, sizeof(ticksOn));
+    memcpy(&payload[len],  &ticksOn, sizeof(ticksOn));
     len += sizeof(ticksOn);
-    memcpy(&payload[len], (uint8_t*) ticksInTotal, sizeof(ticksInTotal));
+    memcpy(&payload[len],  &ticksInTotal, sizeof(ticksInTotal));
     len += sizeof(ticksInTotal);
 
     if (sock_udp_send(&_sock, payload, len, &remote) > 0) {
