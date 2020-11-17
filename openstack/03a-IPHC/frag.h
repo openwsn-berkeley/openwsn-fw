@@ -17,6 +17,8 @@
 
 #include "config.h"
 
+#if OPENWSN_6LO_FRAGMENTATION_C
+
 #include "opendefs.h"
 #include "openqueue.h"
 #include "opentimers.h"
@@ -102,7 +104,7 @@ typedef struct {
 
 
 
-//=========================== variables ======================================= 
+//=========================== variables =======================================
 
 //=========================== prototypes ======================================
 
@@ -113,5 +115,7 @@ void frag_sendDone(OpenQueueEntry_t *msg, owerror_t sendError);
 void frag_receive(OpenQueueEntry_t *msg);
 
 owerror_t frag_fragment6LoPacket(OpenQueueEntry_t *msg);
+
+#endif /* OPENWSN_6LO_FRAGMENTATION_C */
 
 #endif /* OPENWSN_FRAG_H */

@@ -206,7 +206,9 @@ struct OpenMote {
     icmpv6rpl_vars_t icmpv6rpl_vars;
     // l3
     monitor_expiration_vars_t monitor_expiration_vars;
+#if OPENWSN_6LO_FRAGMENTATION_C
     frag_vars_t frag_vars;
+#endif
     // l2b
     sixtop_vars_t sixtop_vars;
     neighbors_vars_t neighbors_vars;
