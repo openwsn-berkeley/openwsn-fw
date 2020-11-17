@@ -129,7 +129,7 @@ command_line_options = {
              'uexpiration', 'uexp-monitor', 'uinject', 'userialbridge', 'cjoin', ''],
     'modules': ['coap', 'udp', 'fragmentation', 'icmpv6echo', 'l2-security', ''],
     'stackcfg': ['adaptive-msf', 'dagroot', 'channel', 'pktqueue', 'panid', ''],
-    'boardopt' : ['hw-crypto', 'printf', 'fastsim', ''],
+    'boardopt' : ['hw-crypto', 'printf', 'fastsim', 'sensors', ''],
     'fet_version': ['2', '3'],
     'verbose': ['0', '1'],
     'simhost': ['amd64-linux', 'x86-linux', 'amd64-windows', 'x86-windows'],
