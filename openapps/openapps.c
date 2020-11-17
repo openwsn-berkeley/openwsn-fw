@@ -12,16 +12,20 @@
 #include "c6t.h"
 #endif
 
-#if OPENWSN_CLED_C
-#include "cled.h"
-#endif
-
 #if OPENWSN_CINFO_C
 #include "cinfo.h"
 #endif
 
+#if OPENWSN_CLED_C
+#include "cled.h"
+#endif
+
 #if OPENWSN_CWELLKNOWN_C
 #include "cwellknown.h"
+#endif
+ 
+#if OPENWSN_CSENSORS_C
+#include "csensors.h"
 #endif
 
 #if OPENWSN_RRT_C
@@ -79,6 +83,10 @@ void openapps_init(void) {
 
 #if OPENWSN_CWELLKNOWN_C
     cwellknown_init();
+#endif
+
+#if OPENWSN_CSENSORS_C
+    csensors_init();
 #endif
 
 #if OPENWSN_RRT_C

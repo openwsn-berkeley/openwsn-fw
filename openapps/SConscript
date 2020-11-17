@@ -12,6 +12,7 @@ apps = [
     'cinfo',
     'cled',
     'cwellknown',
+    'csensors',
     'uecho',
     'uinject',
     'userialbridge',
