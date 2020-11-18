@@ -7,6 +7,7 @@
 #ifndef __OPENTIMERS_H
 #define __OPENTIMERS_H
 
+#include "config.h"
 #include "opendefs.h"
 
 /**
@@ -19,7 +20,7 @@
 //=========================== define ==========================================
 
 /// Maximum number of timers that can run concurrently
-#define MAX_NUM_TIMERS             15
+#define MAX_NUM_TIMERS             (15 + TIMER_ISR_NUMBER)
 #define MAX_TICKS_IN_SINGLE_CLOCK  (uint32_t)(((PORT_TIMER_WIDTH)0xFFFFFFFF)>>1)
 #define ERROR_NO_AVAILABLE_ENTRIES 255
 #define MAX_DURATION_ISR           33 // 33@32768Hz = 1ms
@@ -27,9 +28,9 @@
 
 #define TIMER_INHIBIT              0
 #define TIMER_TSCH                 1
+#define TIMER_ISR                  254
 #define TIMER_GENERAL_PURPOSE      255
-
-#define TIMER_NUMBER_NON_GENERAL   2
+#define TIMER_NUMBER_NON_GENERAL   (2 + TIMER_ISR_NUMBER)
 
 #define SPLITE_TIMER_DURATION     15 // in ticks
 #define PRE_CALL_TIMER_WINDOW     PORT_TsSlotDuration
