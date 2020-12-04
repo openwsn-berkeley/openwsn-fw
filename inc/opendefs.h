@@ -98,7 +98,7 @@ enum {
 // warning: first 4 MSB of 2° octet may coincide with previous protocol number
 enum {
     //UDP
-    WKP_UDP_COAP = 5683,
+    WKP_UDP_COAP = OPENWSN_COAP_PORT_DEFAULT,
     WKP_UDP_ECHO = 7,
     WKP_UDP_EXPIRATION = 5,
     WKP_UDP_MONITOR = 3,
