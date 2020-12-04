@@ -234,11 +234,12 @@ enum {
    // l2b
    ERR_SCHEDULE_ADD_DUPLICATE_SLOT     = 0x20, // the slot {0} to be added is already in schedule
    ERR_NEIGHBORS_FULL                  = 0x21, // neighbors table is full (max number of neighbor is {0})
+
    ERR_NO_SENT_PACKET                  = 0x22, // there is no sent packet in queue
    ERR_NO_RECEIVED_PACKET              = 0x23, // there is no received packet in queue
    ERR_SCHEDULE_OVERFLOWN              = 0x24, // schedule overflown
    ERR_SIXTOP_RETURNCODE               = 0x25, // sixtop return code {0} at sixtop state {1}
-   ERR_SIXTOP_REQUEST                  = 0x26, // sending a 6top request
+   ERR_SIXTOP_REQUEST                  = 0x26, // sending a 6top request {0}
    ERR_SIXTOP_COUNT                    = 0x27, // there are {0} cells to request mote
    ERR_SIXTOP_LIST                     = 0x28, // the cells reserved to request mote contains slot {0} and slot {1}
    ERR_UNSUPPORTED_FORMAT              = 0x29, // the received packet format is not supported (code location {0})
