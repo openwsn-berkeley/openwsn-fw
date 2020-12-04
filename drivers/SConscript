@@ -30,14 +30,14 @@ sources_h = [
 ]
 
 if localEnv['board']=='python':
-    
+
     for s in sources_c+sources_h:
         temp = localEnv.Objectify(
             target = localEnv.ObjectifiedFilename(s),
             source = s,
         )
         #localEnv.AlwaysBuild(temp)
-    
+
     libdrivers = localEnv.Library(
         target = target,
         source = [localEnv.ObjectifiedFilename(s) for s in sources_c],
@@ -45,7 +45,7 @@ if localEnv['board']=='python':
     localEnv.Depends(libdrivers,[localEnv.ObjectifiedFilename(s) for s in sources_h])
 
 else:
-    
+
     localEnv.Append(
         CPPPATH =  [
             os.path.join('#','drivers','common'),
@@ -57,13 +57,14 @@ else:
             os.path.join('#','openstack','03a-IPHC'),
             os.path.join('#','openstack','03b-IPv6'),
             os.path.join('#','openstack','04-TRAN'),
+            os.path.join('#','openstack','04-TRAN', 'sock'),
             os.path.join('#','openstack','cross-layers'),
         ],
     )
-    
+
     libdrivers = localEnv.Library(
         target = target,
         source = sources_c,
     )
-    
+
 Alias('libdrivers', libdrivers)
