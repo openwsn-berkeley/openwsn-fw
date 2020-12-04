@@ -41,6 +41,7 @@ typedef struct {
    radio_capture_cbt         startFrame_cb;
    radio_capture_cbt         endFrame_cb;
    radio_state_t             state;
+   bool                      radio_txrx_enabled;
 } radio_vars_t;
 
 radio_vars_t radio_vars;
@@ -259,6 +260,7 @@ void radio_loadPacket(uint8_t* packet, uint16_t len) {
 }
 
 void radio_txEnable(void) {
+   radio_vars.radio_txrx_enabled = true;
 
    // change state
    radio_vars.state = RADIOSTATE_ENABLING_TX;
@@ -299,7 +301,7 @@ void radio_txNow(void) {
 //===== RX
 
 void radio_rxEnable(void) {
-
+   radio_vars.radio_txrx_enabled = true;
    // change state
    radio_vars.state = RADIOSTATE_ENABLING_RX;
 
@@ -404,6 +406,7 @@ void radio_on(void){
 }
 
 void radio_off(void){
+   radio_vars.radio_txrx_enabled = false;
    /* Wait for ongoing TX to complete (e.g. this could be an outgoing ACK) */
    while(HWREG(RFCORE_XREG_FSMSTAT1) & RFCORE_XREG_FSMSTAT1_TX_ACTIVE);
    //CC2538_RF_CSP_ISFLUSHRX();
@@ -537,4 +540,8 @@ void radio_error_isr(void){
       HWREG(RFCORE_XREG_RFERRM) = ~(((0x02)<<RFCORE_XREG_RFERRM_RFERRM_S)&RFCORE_XREG_RFERRM_RFERRM_M);
       //poipoi  -- todo handle error
    }
+}
+
+bool radio_is_enabled(void) {
+   return radio_vars.radio_txrx_enabled;
 }

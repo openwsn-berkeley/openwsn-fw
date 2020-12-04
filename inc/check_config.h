@@ -52,6 +52,13 @@
 #error 'Hardware encryption not supported on this platform.'
 #endif
 
+#if BOARD_DEEP_SLEEP && (\
+    !defined(OPENMOTE_CC2538) && \
+    !defined(OPENMOTE_B) && \
+    !defined(OPENMOTE_B_24GHZ))
+#error 'DEEP_SLEEP is not configured for this platform.'
+#endif
+
 #if OPENWSN_IEEE802154E_SECURITY_C && !OPENWSN_CJOIN_C
 #error 'Link-layer security requires CJOIN application.'
 #endif
