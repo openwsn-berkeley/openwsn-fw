@@ -9,7 +9,7 @@
   *                - Set the initial SP
   *                - Set the initial PC == Reset_Handler,
   *                - Set the vector table entries with the exceptions ISR address,
-  *                - Configure the clock system  
+  *                - Configure the clock system
   *                - Configure external SRAM mounted on STM3210E-EVAL board
   *                  to be used as data memory (optional, to be enabled by user)
   *                - Branches to main in the C library (which eventually
@@ -30,10 +30,10 @@
   ******************************************************************************
   */
 
-    .syntax unified
-	.cpu cortex-m3
-	.fpu softvfp
-	.thumb
+.syntax unified
+.cpu cortex-m3
+.fpu softvfp
+.thumb
 
 .global	g_pfnVectors
 .global	Default_Handler
@@ -60,14 +60,14 @@ defined in linker script */
  * @retval : None
 */
 
-    .section	.text.Reset_Handler
-	.weak	Reset_Handler
-	.type	Reset_Handler, %function
-Reset_Handler:
+.section	.text.Reset_Handler
+.weak	Reset_Handler
+.type	Reset_Handler, %function
 
+Reset_Handler:
+    movs	r1, #0
 /* Copy the data segment initializers from flash to SRAM */
-  movs	r1, #0
-  b	LoopCopyDataInit
+    b	LoopCopyDataInit
 
 CopyDataInit:
 	ldr	r3, =_sidata
@@ -83,6 +83,7 @@ LoopCopyDataInit:
 	bcc	CopyDataInit
 	ldr	r2, =_sbss
 	b	LoopFillZerobss
+
 /* Zero fill the bss segment. */
 FillZerobss:
 	movs	r3, #0
@@ -94,12 +95,13 @@ LoopFillZerobss:
 	bcc	FillZerobss
 
 /* Call the clock system intitialization function.*/
-/*  bl  SystemInit */
+    bl  SystemInit
 /* Call static constructors */
-/*  bl __libc_init_array */
+    // bl __libc_init_array
 /* Call the application's entry point.*/
-	bl	main 
+	bl	main
 	bx	lr
+
 .size	Reset_Handler, .-Reset_Handler
 
 /**
