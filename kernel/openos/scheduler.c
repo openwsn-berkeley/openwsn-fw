@@ -20,8 +20,6 @@ scheduler_dbg_t scheduler_dbg;
 
 //=========================== prototypes ======================================
 
-void consumeTask(uint8_t taskId);
-
 //=========================== public ==========================================
 
 void scheduler_init(void) {

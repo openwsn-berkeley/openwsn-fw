@@ -6,8 +6,9 @@
 
 #include "board_info.h"
 #include "sctimer.h"
-#include "sleepmode.h"
 #include "debugpins.h"
+
+#include <source/sleepmode.h>
 #include <headers/hw_ints.h>
 
 // ========================== define ==========================================

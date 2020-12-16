@@ -17,7 +17,6 @@
 #include "rcc.h"
 #include "nvic.h"
 #include "debugpins.h"
-#include "opentimers.h"
 #include "gpio.h"
 #include "cryptoengine.h"
 

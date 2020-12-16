@@ -2,54 +2,26 @@
 #define OPENWSN_CHECK_CONFIG_H
 
 #if !defined(PYTHON_BOARD) && \
-    !defined(TELOSB) && \
-    !defined(WSN430V13B) && \
-    !defined(WSN430V14) && \
-    !defined(GINA) && \
-    !defined(Z1) && \
-    !defined(OPENMOTESTM) && \
     !defined(OPENMOTE_CC2538) && \
     !defined(OPENMOTE_B) && \
     !defined(OPENMOTE_B_24GHZ) && \
     !defined(OPENMOTE_B_SUBGHZ) && \
-    !defined(AGILEFOX) && \
     !defined(IOTLAB_M3) && \
     !defined(IOTLAB_A8_M3) && \
-    !defined(SAMR21_XPRO) && \
     !defined(NRF52840)
 #error 'Board name must be specified to check for configuration errors'
 #endif
 
-#if (defined(OPENMOTE_CC2538) || \
+#if ((defined(OPENMOTE_CC2538) || \
     defined(OPENMOTE_B) || \
     defined(OPENMOTE_B_24GHZ) || \
     defined(OPENMOTE_B_SUBGHZ) || \
-    defined(TELOSB) || \
-    defined(WSN430V13B) || \
-    defined(WSN430V14) || \
-    defined(OPENMOTESTM) || \
-    defined(GINA) || \
     defined(NRF52840) || \
-    defined(AGILEFOX) || \
     defined(IOTLAB_M3) || \
-    defined(IOTLAB_A8_M3) || \
-    defined(SAMR21_XPRO) || \
-    defined(Z1)) && \
-    OPENWSN_IEEE802154E_SECURITY_C && \
-    !BOARD_CRYPTOENGINE_ENABLED
-#warning 'Software encryption might be too slow on certain hardware. It is recommend to use BOARD_CRYTPOENGINE_ENABLED where possible.'
-#endif
-
-#if BOARD_CRYPTOENGINE_ENABLED && (\
-    defined(WSN430V13B) || \
-    defined(WSN430V14) || \
-    defined(AGILEFOX) || \
-    defined(GINA) || \
-    defined(NRF52840) || \
-    defined(SAMR21_XPRO) || \
-    defined(Z1) || \
-    defined(OPENMOTESTM))
-#error 'Hardware encryption not supported on this platform.'
+    defined(IOTLAB_A8_M3)) && \
+    (OPENWSN_IEEE802154E_SECURITY_C && \
+    !BOARD_CRYPTOENGINE_ENABLED))
+#error 'Use BOARD_CRYTPOENGINE_ENABLED when enabling OPENWSN_IEEE802154E_SECURITY_C.'
 #endif
 
 #if OPENWSN_IEEE802154E_SECURITY_C && !OPENWSN_CJOIN_C
@@ -84,7 +56,7 @@
     OPENWSN_CLED_C || \
     OPENWSN_CSENSORS_C || \
     OPENWSN_CSTORM_C || \
-    OPENWSN_CWELLKNOWN || \
+    OPENWSN_CWELLKNOWN_C || \
     OPENWSN_RRT_C)
 
 #error "A CoAP dependent application is defined, but CoAP is not included in the build."
@@ -99,7 +71,7 @@
     OPENWSN_UINJECT_C || \
     OPENWSN_USERIALBRIDGE_C || \
     OPENWSN_UEXPIRATION_C || \
-    OPENWSN_UEXP_MONITOR)
+    OPENWSN_UEXP_MONITOR_C)
 
 #error "A UDP dependent application is defined, but UDP is not included in the build."
 #endif

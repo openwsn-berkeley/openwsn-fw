@@ -18,7 +18,15 @@ to return the board's description.
 
 //=========================== defines =========================================
 
-//TODO in case previous declaration fails in certain compilers. Remove this 
+#ifndef TRUE
+#define TRUE 1
+#endif
+
+#ifndef FALSE
+#define FALSE 0
+#endif
+
+//TODO in case previous declaration fails in certain compilers. Remove this
 //one if it works with GNU GCC
 //#define PACK_START  _Pragma("pack(1)")
 //#define PACK_END    _Pragma("pack()")
