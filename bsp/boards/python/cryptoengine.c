@@ -4,12 +4,9 @@
 \author Malisa Vucinic <malishav@gmail.com>, March 2015.
 */
 
-#include <stdint.h>
-#include <string.h>
-#include "cryptoengine_obj.h"
+#include "cryptoengine.h"
 
-owerror_t cryptoengine_aes_ccms_enc(OpenMote *self,
-                                    uint8_t *a,
+owerror_t cryptoengine_aes_ccms_enc(uint8_t *a,
                                     uint8_t len_a,
                                     uint8_t *m,
                                     uint8_t *len_m,
@@ -22,8 +19,7 @@ owerror_t cryptoengine_aes_ccms_enc(OpenMote *self,
 
 }
 
-owerror_t cryptoengine_aes_ccms_dec(OpenMote *self,
-                                    uint8_t *a,
+owerror_t cryptoengine_aes_ccms_dec(uint8_t *a,
                                     uint8_t len_a,
                                     uint8_t *m,
                                     uint8_t *len_m,
@@ -34,11 +30,11 @@ owerror_t cryptoengine_aes_ccms_dec(OpenMote *self,
     return E_FAIL;
 }
 
-owerror_t cryptoengine_aes_ecb_enc(OpenMote *self, uint8_t *buffer, uint8_t *key) {
+owerror_t cryptoengine_aes_ecb_enc(uint8_t *buffer, uint8_t *key) {
     return E_FAIL;
 }
 
-owerror_t cryptoengine_init(OpenMote *self) {
-    return E_SUCCESS;
+owerror_t cryptoengine_init(void) {
+    return E_FAIL;
 }
 

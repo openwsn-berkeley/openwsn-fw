@@ -42,9 +42,15 @@ typedef enum {
 typedef void (* task_cbt)(void);
 
 // =========================== prototypes ======================================
-void    scheduler_init(void);
-void    scheduler_start(void);
-void    scheduler_push_task(task_cbt task_cb, task_prio_t prio);
+void            scheduler_init(void);
+
+#if PYTHON_BOARD
+void  scheduler_start(void);
+#else
+_Noreturn void  scheduler_start(void);
+#endif
+
+void            scheduler_push_task(task_cbt task_cb, task_prio_t prio);
 
 #if SCHEDULER_DEBUG_ENABLE
 uint8_t scheduler_debug_get_TasksCur(void);

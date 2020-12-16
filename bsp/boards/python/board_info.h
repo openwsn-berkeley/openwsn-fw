@@ -4,13 +4,21 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, May 2013.
 */
 
-#ifndef __BOARD_INFO_H
-#define __BOARD_INFO_H
+#ifndef OPENWSN_BOARD_INFO_H
+#define OPENWSN_BOARD_INFO_H
 
-#include "stdint.h"
-#include "string.h"
+#include <stdint.h>
+#include <string.h>
 
 //=========================== defines =========================================
+
+#ifndef TRUE
+#define TRUE 1
+#endif
+
+#ifndef FALSE
+#define FALSE 0
+#endif
 
 #define INTERRUPT_DECLARATION()             ;
 #define ENABLE_INTERRUPTS()                 ;
@@ -30,7 +38,7 @@
 #define SCHEDULER_ENABLE_INTERRUPT()
 
 #define SLOTDURATION 10 // in miliseconds
-                        
+
 //===== IEEE802154E timing
 // time-slot related
 #define PORT_TsSlotDuration                328    // counter counts one extra count, see datasheet
@@ -48,16 +56,14 @@
 #define SYNC_ACCURACY                       1 // when using openmoteSTM, change to 2
 
 //===== sctimer scheduling
-#define TIMERTHRESHOLD                     10  
-
-//=========================== typedef  ========================================
+#define TIMERTHRESHOLD                     10
 
 //=========================== variables =======================================
 
-static const uint8_t rreg_uriquery[]        = "h=ucb";
-static const uint8_t infoBoardname[]        = "Python";
-static const uint8_t infouCName[]           = "Python";
-static const uint8_t infoRadioName[]        = "Python";
+static const uint8_t rreg_uriquery[] = "h=ucb";
+static const uint8_t infoBoardname[] = "Python";
+static const uint8_t infouCName[] = "Python";
+static const uint8_t infoRadioName[] = "Python";
 
 //=========================== prototypes ======================================
 
