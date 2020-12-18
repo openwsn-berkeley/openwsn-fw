@@ -1,4 +1,4 @@
-add_library(drivers STATIC "")
+add_library(drivers "")
 
 target_sources(drivers
         PRIVATE

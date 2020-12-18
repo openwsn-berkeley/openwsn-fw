@@ -1,4 +1,4 @@
-add_library(openstack STATIC "")
+add_library(openstack "")
 
 target_sources(openstack
         PRIVATE

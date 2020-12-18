@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 
 project(OpenWSN-FW VERSION 1.0 LANGUAGES C ASM)
-message(STATUS "OpenWSN-FW:............VERSION-${PROJECT_VERSION}")
 
 include(ExternalProject)
 
@@ -17,9 +16,7 @@ if (POLICY CMP0057)
     cmake_policy(SET CMP0057 NEW)
 endif ()
 
-# all supported projects
-set(ALL_PROJECTS oos_openwsn)
-
+# choose project and board
 if (NOT PROJECT)
     set(PROJECT "oos_openwsn" CACHE STRING "Select a project" FORCE)
 endif ()
@@ -40,16 +37,32 @@ endif ()
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel")
 
 # override shared_libs capabilities in case we are switching from cross-compile build to native build or vice-versa
-if (BOARD_PYTHON OR "${BOARD}" STREQUAL "python")
-    SET_PROPERTY(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
+if ("${BOARD}" STREQUAL "python")
+    add_definitions("-DPYTHON_BOARD")
+    set(BUILD_SHARED_LIBS ON)
+    set_property(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
 else ()
-    SET_PROPERTY(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS FALSE)
+    set_property(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS FALSE)
+    set(BUILD_SHARED_LIBS OFF)
+endif ()
+
+if ("${BOARD}" STREQUAL "" OR "${PROJECT}" STREQUAL "")
+    return()
 endif ()
 
 # search for build options
 include(options)
 
+# include the generic definitions used by all libraries
+include_directories(${CMAKE_SOURCE_DIR}/inc)
+
+# include the projects
+include(projects/${PROJECT})
+
+message(STATUS "OpenWSN-FW:............VERSION-${PROJECT_VERSION}")
+message(STATUS "BOARD:.................${BOARD}")
 message(STATUS "PROJECT:...............${PROJECT}")
+message(STATUS "BUILD_SHARED_LIBS......${BUILD_SHARED_LIBS}")
 message(STATUS "CMAKE_BUILD_TYPE:......${CMAKE_BUILD_TYPE}")
 message(STATUS "CJOIN:.................${OPT-CJOIN}")
 message(STATUS "UECHO:.................${OPT-UECHO}")
@@ -60,67 +73,3 @@ message(STATUS "PING:..................${OPT-PING}")
 message(STATUS "ADAPTIVE-MSF:..........${OPT-MSF}")
 message(STATUS "DAGROOT:...............${OPT-DAGROOT}")
 message(STATUS "PRINTF:................${OPT-PRINTF}")
-
-option(BOARD_CC2538 "Cross-compile for the OpenMote-CC2538 board" OFF)
-option(BOARD_PYTHON "Compile for the Python simulation board" OFF)
-option(BOARD_IOT_M3 "Compile for the Python simulation board" OFF)
-
-if (BOARD_CC2538)
-    set(BOARD "openmote-cc2538")
-    message(STATUS "BOARD:.................${BOARD}")
-
-    ExternalProject_Add(OpenMote-CC2538-Builder
-            SOURCE_DIR ${CMAKE_SOURCE_DIR}
-            BINARY_DIR ${CMAKE_BINARY_DIR}/openmote-cc2538
-            CMAKE_CACHE_ARGS
-                -DCMAKE_TOOLCHAIN_FILE:FILEPATH=${CMAKE_SOURCE_DIR}/cmake/toolchains/cc2538.cmake
-                -DBOARD:STRING=${BOARD}
-                -DPROJECT:STRING=${PROJECT}
-                -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-                ${OPTIONS}
-            INSTALL_COMMAND "")
-    return()
-endif ()
-
-if (BOARD_IOT_M3)
-    set(BOARD "iot-lab_M3")
-    message(STATUS "BOARD:.................${BOARD}")
-
-    ExternalProject_Add(IoT-LAB_M3-Builder
-            SOURCE_DIR ${CMAKE_SOURCE_DIR}
-            BINARY_DIR ${CMAKE_BINARY_DIR}/iot-lab_M3
-            CMAKE_CACHE_ARGS
-                -DCMAKE_TOOLCHAIN_FILE:FILEPATH=${CMAKE_SOURCE_DIR}/cmake/toolchains/m3.cmake
-                -DBOARD:STRING=${BOARD}
-                -DPROJECT:STRING=${PROJECT}
-                -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-                ${OPTIONS}
-            INSTALL_COMMAND "")
-    return()
-endif ()
-
-if (BOARD_PYTHON)
-    set(BOARD "python")
-    message(STATUS "BOARD:.................${BOARD}")
-
-    ExternalProject_Add(Python-Builder
-            SOURCE_DIR ${CMAKE_SOURCE_DIR}
-            BINARY_DIR ${CMAKE_BINARY_DIR}/python
-            CMAKE_CACHE_ARGS
-                -DBOARD:STRING=${BOARD}
-                -DPROJECT:STRING=${PROJECT}
-                -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-                ${OPTIONS}
-            INSTALL_COMMAND "")
-    return()
-endif ()
-
-if (BOARD)
-    # include the generic definitions used by all libraries
-    include_directories(${CMAKE_SOURCE_DIR}/inc)
-
-    # include the projects
-    include(projects/${PROJECT})
-endif ()
-
-

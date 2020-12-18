@@ -1,4 +1,4 @@
-add_library(openapps STATIC "")
+add_library(openapps "")
 
 target_sources(openapps
         PUBLIC

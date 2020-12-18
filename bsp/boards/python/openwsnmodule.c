@@ -189,7 +189,7 @@ static PyMethodDef OpenWSN_Methods[] = {
 
 //===== admin
 
-static PyModuleDef openwsnmodule = {
+static PyModuleDef openmotemodule = {
         PyModuleDef_HEAD_INIT,
         .m_name = "openwsn",
         .m_doc = "Python/C extension for the OpenWSN-firmware",
@@ -197,10 +197,10 @@ static PyModuleDef openwsnmodule = {
         .m_methods = OpenWSN_Methods
 };
 
-PyMODINIT_FUNC PyInit_openwsn(void) {
+PyMODINIT_FUNC PyInit_openmote(void) {
     PyObject *m;
 
-    m = PyModule_Create(&openwsnmodule);
+    m = PyModule_Create(&openmotemodule);
     if (m == NULL)
         return NULL;
 

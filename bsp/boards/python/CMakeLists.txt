@@ -1,19 +1,27 @@
-#######################
-## Python Packaging  ##
-#######################
 find_package(Python3 COMPONENTS Interpreter Development)
 
-set(SETUP_PY_IN "setup.py.in")
-set(SETUP_PY "${CMAKE_CURRENT_BINARY_DIR}/openwsn/setup.py")
-set(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/build/timestamp")
+if(Python3_Development_FOUND AND Python3_Interpreter_FOUND)
+    message(STATUS "Found Python3 INCLUDE DIRS: ${Python3_INCLUDE_DIRS}")
+    message(STATUS "Found Python3 LIBRARIES DIRS: ${Python3_LIBRARY_DIRS}")
+    message(STATUS "Found Python3 LIBRARIES: ${Python3_LIBRARIES}")
+else()
+    message(FATAL_ERROR "Could not find Python Interpreter or Development files")
+endif ()
 
-configure_file(${SETUP_PY_IN} ${SETUP_PY})
+add_library(bsp "")
 
-add_custom_command(OUTPUT ${OUTPUT}
-        COMMAND ${Python3_EXECUTABLE} ${SETUP_PY} build
-        COMMAND ${CMAKE_COMMAND} -E touch ${OUTPUT}
-        DEPENDS ${SOURCES})
+file(GLOB HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/../*.h")
+file(GLOB SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*.c" "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
 
-add_custom_target(${PROJECT} ALL DEPENDS ${OUTPUT} SOURCES ${SOURCES})
+target_sources(bsp
+        PRIVATE
+        ${SOURCES}
+        PUBLIC
+        ${HEADERS})
 
-add_custom_target(install_${PROJECT} ALL DEPENDS ${OUTPUT} COMMAND ${Python3_EXECUTABLE} ${SETUP_PY} install --user --prefix=)
+target_include_directories(bsp
+        PUBLIC ..
+        PUBLIC .
+        ${Python3_INCLUDE_DIRS})
+
+# target_link_libraries(bsp ${Python3_LIBRARIES})
