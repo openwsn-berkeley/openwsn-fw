@@ -21,7 +21,7 @@ num_sample_in_reference     = 64
 switching_space             = 2
 t_unit                      = 0.125 # micro-seconds
 
-nrf5340_port                = 'COM9'
+nrf5340_port                = 'COM58'
 sample_file                 = 'samples.txt'
 
 new_read_mark       = 255

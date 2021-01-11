@@ -1,10 +1,13 @@
 import struct
 import numpy                as np
 import matplotlib.pyplot    as plt
+from matplotlib             import  rcParams
 
 # direction finding related
 from config     import *
 from calc_angle import *
+
+rcParams['font.size'] = 20
 
 def generate_time_line():
     
@@ -25,7 +28,7 @@ def get_angle_to_pkt(pkt_id = 0, on_board_calculation=False, contine_mode=False)
                     continue
                 
             debug_print( "=========================================================================")
-            debug_print("one_entry_samples with length = {0} for pkt {1} (angle_calc_on_board={2})".format(len(one_entry_samples['samples']), num_pkt, one_entry_samples['angle']))
+            # debug_print("one_entry_samples with length = {0} for pkt {1} (angle_calc_on_board={2})".format(len(one_entry_samples['samples']), num_pkt, one_entry_samples['angle']))
             
             magPhase  = {'mag_data': [], 'phase_data': []}
             for sample in one_entry_samples['samples']:
@@ -42,41 +45,42 @@ def get_angle_to_pkt(pkt_id = 0, on_board_calculation=False, contine_mode=False)
             
             if DEBUG_ON:
                 
-                debug_fig, ax = plt.subplots(figsize=(10,8))
+                debug_fig, ax = plt.subplots(figsize=(20,4))
             
                 if data:
-                    ax.plot(time_data, data, '--', label='reference phase data')
+                    
+                    ax.plot(time_data[:-8], data[:-8], '--', label='estimated')
             
                 # only plots samples in sample slots
                 i = 8
-                ax.plot(time_data[:8*i], magPhase['mag_data'][:8*i], 'k^', label='mag_data_ant1.2')
-                ax.plot(time_data[:8*i], magPhase['phase_data'][:8*i], '*-', label='phase_data_ant1.2')
+                # ax.plot(time_data[:8*i], magPhase['mag_data'][:8*i], 'k^', label='mag_data_ant1.2')
+                ax.plot(time_data[:8*i], magPhase['phase_data'][:8*i], '*-', label='antenna 1.2')
 
-                ax.plot(
-                    time_data[8*i:8*(i+1)]              + time_data[8*(i+4):8*(i+5)]                + time_data[8*(i+8):8*(i+9)], 
-                    magPhase['mag_data'][8*i:8*(i+1)]   + magPhase['mag_data'][8*(i+4):8*(i+5)]     + magPhase['mag_data'][8*(i+8):8*(i+9)], 
-                    'k^',
-                    label='mag_data_antt1.1'
-                )
+                # ax.plot(
+                    # time_data[8*i:8*(i+1)]              + time_data[8*(i+4):8*(i+5)]                + time_data[8*(i+8):8*(i+9)], 
+                    # magPhase['mag_data'][8*i:8*(i+1)]   + magPhase['mag_data'][8*(i+4):8*(i+5)]     + magPhase['mag_data'][8*(i+8):8*(i+9)], 
+                    # 'k^',
+                    # label='mag_data_antt1.1'
+                # )
                 ax.plot(
                     time_data[8*i:8*(i+1)]              + time_data[8*(i+4):8*(i+5)]                + time_data[8*(i+8):8*(i+9)], 
                     magPhase['phase_data'][8*i:8*(i+1)] + magPhase['phase_data'][8*(i+4):8*(i+5)]   + magPhase['phase_data'][8*(i+8):8*(i+9)], 
-                    '*',
-                    label='phase_data_antt1.1'
+                    '^',
+                    label='antenna 1.1'
                 )
                 i += 2
                 
-                ax.plot(
-                    time_data[8*i:8*(i+1)]              + time_data[8*(i+4):8*(i+5)]                + time_data[8*(i+8):8*(i+9)], 
-                    magPhase['mag_data'][8*i:8*(i+1)]   + magPhase['mag_data'][8*(i+4):8*(i+5)]     + magPhase['mag_data'][8*(i+8):8*(i+9)], 
-                    'k^',
-                    label='mag_data_antt1.3'
-                )
+                # ax.plot(
+                    # time_data[8*i:8*(i+1)]              + time_data[8*(i+4):8*(i+5)]                + time_data[8*(i+8):8*(i+9)], 
+                    # magPhase['mag_data'][8*i:8*(i+1)]   + magPhase['mag_data'][8*(i+4):8*(i+5)]     + magPhase['mag_data'][8*(i+8):8*(i+9)], 
+                    # 'k^',
+                    # label='mag_data_antt1.3'
+                # )
                 ax.plot(
                     time_data[8*i:8*(i+1)]              + time_data[8*(i+4):8*(i+5)]                + time_data[8*(i+8):8*(i+9)], 
                     magPhase['phase_data'][8*i:8*(i+1)] + magPhase['phase_data'][8*(i+4):8*(i+5)]   + magPhase['phase_data'][8*(i+8):8*(i+9)], 
-                    '*',
-                    label='phase_data_antt1.3'
+                    '.',
+                    label='antenna 1.3'
                 )
                 
                 # i += 2
@@ -95,8 +99,9 @@ def get_angle_to_pkt(pkt_id = 0, on_board_calculation=False, contine_mode=False)
                 # ax.plot(time_data[8*i:8*(i+1)], magPhase['mag_data'][8*i:8*(i+1)], '^-', label='phase_data_antt1.2')
                 # ax.plot(time_data[8*i:8*(i+1)], magPhase['phase_data'][8*i:8*(i+1)], '*-', label='phase_data_antt1.3')
                 
-                ax.set_ylim(-500, 500)
-                ax.set_xlim(0,    30)
+                ax.set_ylim(-250, 250)
+                ax.set_xlim(0,    25)
+                ax.set_ylabel('phase ')
                 ax.set_xlabel('time (us)')
                 ax.grid(True)
                 ax.legend(loc=2)
@@ -121,4 +126,5 @@ def get_angle_to_pkt(pkt_id = 0, on_board_calculation=False, contine_mode=False)
         # the pkt_id not exist
         return None, None  
 if __name__ == '__main__':
-    get_angle_to_pkt(pkt_id=3, contine_mode=False)
+    # get_angle_to_pkt(pkt_id=4, contine_mode=False) # packet 4 for nordic_samples
+    get_angle_to_pkt(pkt_id=24, contine_mode=False) # 24 for scum samples to filter, check out others

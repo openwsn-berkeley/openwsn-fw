@@ -24,7 +24,7 @@ remainder of the packet contains an incrementing bytes.
 #define LENGTH_BLE_CRC  3
 #define LENGTH_PACKET   5+LENGTH_BLE_CRC
 #define CHANNEL         0            // 24ghz: 11 = 2.405GHz, subghz: 11 = 865.325 in  FSK operating mode #1
-#define TIMER_PERIOD    (32768>>0)    // (32768>>1) = 500ms @ 32kHz
+#define TIMER_PERIOD    (32768>>2)    // (32768>>1) = 500ms @ 32kHz
 #define ENABLE_DF       1
 
 //=========================== variables =======================================

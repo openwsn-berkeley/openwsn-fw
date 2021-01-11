@@ -1,5 +1,6 @@
 import serial
 import struct
+import datetime
 from config import *
 from calc_angle import *
 
@@ -47,6 +48,7 @@ def start_read():
                 data['setting']     = ((ord(input_data[NUM_SAMPLES*4+1])) << 10 ) | ((ord(input_data[NUM_SAMPLES*4+2])) << 5) | (ord(input_data[NUM_SAMPLES*4+3]))
                 data['array']       = ord(input_data[NUM_SAMPLES*4+4])
                 data['angle']       = ord(input_data[NUM_SAMPLES*4+5])
+                data['timestampe']  = '{0}'.format(datetime.datetime.now())
                 
                 phase_data  = []
                 for sample in data['samples']:
@@ -60,6 +62,6 @@ def start_read():
                     f.write(str(data)+'\n')
                     data['samples'] = []
             else:
-                print len(input_data)
+                print len(input_data), [ord(c) for c in input_data]
                 
             input_data = []
