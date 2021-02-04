@@ -330,11 +330,12 @@ static void _sock_get_local_addr(open_addr_t* local) {
 static bool _sock_valid_addr(sock_udp_ep_t* ep) {
     uint8_t zero_count;
     const uint8_t* p;
+    uint8_t i;
 
     p = (uint8_t* )&ep->addr;
     zero_count = 0;
 
-    for (uint8_t i = 0; i < sizeof(ep->addr); i++) {
+    for (i = 0; i < sizeof(ep->addr); i++) {
         if (p [i] == 0) {
             zero_count++;
         }
