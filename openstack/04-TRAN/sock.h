@@ -4,6 +4,13 @@
 #include "opendefs.h"
 #include "async_types.h"
 
+#if defined (__WIN32__)
+#define EADDRINUSE      (1)
+#define EAFNOSUPPORT    (1)
+#define ENOBUFS         (1)
+#define ENOTCONN        (1)
+#endif
+
 /**
  * @brief   A Common IP-based transport layer endpoint
  */
