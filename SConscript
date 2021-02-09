@@ -11,8 +11,6 @@ import sconsUtils
 
 Import('env')
 
-c.init()
-
 # python2/python2.7 are not recognized in windows so use 'python' directly and assume the right version is installed.
 if os.name == 'nt':  # Windows
     PYTHON_PY = 'python '
