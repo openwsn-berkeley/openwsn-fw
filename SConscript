@@ -6,13 +6,10 @@ import sys
 import threading
 
 import SCons
-import colorama as c
 import distutils.sysconfig
 import sconsUtils
 
 Import('env')
-
-c.init()
 
 # python2/python2.7 are not recognized in windows so use 'python' directly and assume the right version is installed.
 if os.name == 'nt':  # Windows
@@ -58,7 +55,7 @@ elif env['board'] == 'nrf52840':
 elif env['board'] == 'samr21_xpro':
     env.Append(CPPDEFINES='SAMR21_XPRO')
 else:
-    print c.Fore.RED + "Unsupported board: {}".format(env['board']) + c.Fore.RESET
+    print "Unsupported board: {}".format(env['board'])
     Exit(-1)
 
 # check which modules we have to include in the build
@@ -140,7 +137,7 @@ for option in env['stackcfg'].split(','):
     elif name == 'panid':
         env.Append(CPPDEFINES='PANID_DEFINED={}'.format(value))
     else:
-        print c.Fore.RED + 'Unknown or invalid option for stackcfg: {}'.format(name) + c.Fore.RESET
+        print 'Unknown or invalid option for stackcfg: {}'.format(name)
 
 # common include paths
 if env['board'] != 'python':
@@ -169,8 +166,7 @@ if env['atmel_24ghz'] == 1:
 
 if env['toolchain'] == 'mspgcc':
     if env['board'] not in ['telosb', 'wsn430v13b', 'wsn430v14', 'gina', 'z1']:
-        print c.Fore.RED + 'Toolchain {0} can not be used for board {1}'.format(env['toolchain'],
-                                                                                env['board']) + c.Fore.RESET
+        print 'Toolchain {0} can not be used for board {1}'.format(env['toolchain'], env['board'])
         Exit(-1)
 
     # compiler
@@ -204,8 +200,7 @@ if env['toolchain'] == 'mspgcc':
 elif env['toolchain'] == 'iar':
 
     if env['board'] not in ['telosb', 'wsn430v13b', 'wsn430v14', 'gina', 'z1']:
-        print c.Fore.RED + 'Toolchain {0} can not be used for board {1}'.format(env['toolchain'],
-                                                                                env['board']) + c.Fore.RESET
+        print 'Toolchain {0} can not be used for board {1}'.format(env['toolchain'], env['board'])
         Exit(-1)
 
     env['IAR_EW430_INSTALLDIR'] = os.environ['IAR_EW430_INSTALLDIR']
@@ -213,9 +208,9 @@ elif env['toolchain'] == 'iar':
     try:
         iarEw430BinDir = os.path.join(env['IAR_EW430_INSTALLDIR'], '430', 'bin')
     except KeyError as err:
-        print c.Fore.RED + 'You need to install environment variable IAR_EW430_INSTALLDIR which points to the ' \
-                           'installation directory of IAR Embedded Workbench for MSP430.' \
-                           ' Example: C:\Program Files\IAR Systems\Embedded Workbench 6.5' + c.Fore.RESET
+        print 'You need to install environment variable IAR_EW430_INSTALLDIR which points to the ' \
+              'installation directory of IAR Embedded Workbench for MSP430.' \
+              ' Example: C:\Program Files\IAR Systems\Embedded Workbench 6.5'
         Exit(-1)
 
     # compiler
@@ -280,8 +275,7 @@ elif env['toolchain'] == 'iar':
 elif env['toolchain'] == 'iar-proj':
     if env['board'] not in ['telosb', 'gina', 'wsn430v13b', 'wsn430v14', 'z1', 'openmotestm', 'agilefox',
                             'openmote-cc2538', 'openmote-b', 'openmote-b-24ghz', 'openmote-b-subghz', 'iot-lab_M3']:
-        print c.Fore.RED + 'Toolchain {0} can not be used for board {1}'.format(env['toolchain'],
-                                                                                env['board']) + c.Fore.RESET
+        print 'Toolchain {0} can not be used for board {1}'.format(env['toolchain'], env['board'])
         Exit(-1)
 
     env['IAR_EW430_INSTALLDIR'] = os.environ['IAR_EW430_INSTALLDIR']
@@ -289,9 +283,9 @@ elif env['toolchain'] == 'iar-proj':
     try:
         iarEw430CommonBinDir = os.path.join(env['IAR_EW430_INSTALLDIR'], 'common', 'bin')
     except KeyError as err:
-        print c.Fore.RED + 'You need to install environment variable IAR_EW430_INSTALLDIR which points to the ' \
-                           'installation directory of IAR Embedded Workbench for MSP430. ' \
-                           'Example: C:\Program Files\IAR Systems\Embedded Workbench 6.5' + c.Fore.RESET
+        print 'You need to install environment variable IAR_EW430_INSTALLDIR which points to the ' \
+              'installation directory of IAR Embedded Workbench for MSP430. ' \
+              'Example: C:\Program Files\IAR Systems\Embedded Workbench 6.5'
         Exit(-1)
 
     iar_proj_builder_func = Builder(
@@ -311,8 +305,7 @@ elif env['toolchain'] == 'armgcc':
 
     if env['board'] not in ['silabs-ezr32wg', 'openmote-cc2538', 'openmote-b', 'openmote-b-24ghz', 'openmote-b-subghz',
                             'iot-lab_M3', 'iot-lab_A8-M3', 'openmotestm', 'samr21_xpro', 'scum', 'nrf52840']:
-        print c.Fore.RED + 'Toolchain {0} can not be used for board {1}'.format(env['toolchain'],
-                                                                                env['board']) + c.Fore.RESET
+        print 'Toolchain {0} can not be used for board {1}'.format(env['toolchain'], env['board'])
         Exit(-1)
 
     if env['board'] in ['openmote-cc2538', 'openmote-b', 'openmote-b-24ghz', 'openmote-b-subghz']:
@@ -614,7 +607,7 @@ elif env['toolchain'] == 'armgcc':
         env.Replace(SIZE='arm-none-eabi-size')
 
     else:
-        print c.Fore.RED + 'Unexpected board={0}'.format(env['board']) + c.Fore.RESET
+        print 'Unexpected board={0}'.format(env['board'])
         Exit(-1)
 
     # converts ELF to iHex
@@ -645,8 +638,7 @@ elif env['toolchain'] == 'gcc':
     env.Append(CCFLAGS='-O3')
 
     if env['board'] not in ['python']:
-        print c.Fore.RED + 'Toolchain {0} can not be used for board {1}'.format(env['toolchain'],
-                                                                                env['board']) + c.Fore.RESET
+        print 'Toolchain {0} can not be used for board {1}'.format(env['toolchain'], env['board'])
         Exit(-1)
 
     if env['board'] in ['python']:
@@ -682,7 +674,7 @@ elif env['toolchain'] == 'gcc':
     env.Append(BUILDERS={'PrintSize': dummyFunc})
 
 else:
-    print c.Fore.RED + 'Unexpected toolchain {0}'.format(env['toolchain']) + c.Fore.RESET
+    print 'Unexpected toolchain {0}'.format(env['toolchain'])
     Exit(-1)
 
 
@@ -704,7 +696,7 @@ def jtag_upload_func(location):
                     src_suffix='.elf',
                 )
             else:
-                print c.Fore.RED + 'Only nRF52840 DK flashing is supported at the moment.' + c.Fore.RESET
+                print 'Only nRF52840 DK flashing is supported at the moment.'
                 Exit(-1)
     else:
         if env['fet_version'] == 2:
@@ -729,7 +721,7 @@ def jtag_upload_func(location):
                     src_suffix='.ihex',
                 )
         else:
-            print c.Fore.RED + 'fet_version={0} unsupported.'.format(fet_version) + c.Fore.RESET
+            print 'fet_version={0} unsupported.'.format(fet_version)
             Exit(-1)
 
 
@@ -773,7 +765,7 @@ def expand_bootload_port_list(ports):
 
     # Check if new list is empty
     if not ports:
-        print c.Fore.RED + "Bootload port expansion is empty or erroneous!" + c.Fore.RESET
+        print "Bootload port expansion is empty or erroneous!"
         Exit(-1)
 
     return ports
@@ -1109,7 +1101,7 @@ def bootload_func():
             src_suffix='.bin'
         )
     else:
-        print c.Fore.RESET + 'bootloading on board={0} unsupported.'.format(env['board']) + c.Fore.RESET
+        print 'bootloading on board={0} unsupported.'.format(env['board'])
         Exit(-1)
 
 
@@ -1265,7 +1257,7 @@ def project_finder(localEnv):
                 if path_names:
                     path_name = path_names[0]
                 else:
-                    print c.Fore.RED + "Can't find python dll in provided simhostpy" + c.Fore.RESET
+                    print "Can't find python dll in provided simhostpy"
                     Exit(-1)
 
                 # ':' means no prefix, like 'lib', for shared library name
