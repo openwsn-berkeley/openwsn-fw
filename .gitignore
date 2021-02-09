@@ -24,3 +24,8 @@ settings
 /projects/telosb/01bsp_uart/path.txt
 /projects/telosb/03oos_macpong/path.txt
 /projects/telosb/02drv_opentimers/path.txt
+
+Exe
+Obj
+List
+*.ewt

@@ -11,7 +11,7 @@
 
 #define EAAD_MAX_LEN            9 + OSCOAP_MAX_ID_LEN // assumes no Class I options
 #define AAD_MAX_LEN            12 + EAAD_MAX_LEN
-#define INFO_MAX_LEN           2 * OSCOAP_MAX_ID_LEN + 2 + 1 + 4 + 1 + 3 
+#define INFO_MAX_LEN           2 * OSCOAP_MAX_ID_LEN + 2 + 1 + 4 + 1 + 3
 
 //=========================== variables =======================================
 
@@ -420,7 +420,7 @@ owerror_t oscore_parse_compressed_COSE(uint8_t *buffer,
                                      uint8_t **kid,
                                      uint8_t *kidLen)
 {
-    uint8_t tmp[0];
+    uint8_t tmp;
     uint8_t *ptr;
     uint8_t index;
     uint8_t n;
@@ -429,8 +429,8 @@ owerror_t oscore_parse_compressed_COSE(uint8_t *buffer,
     uint8_t reserved;
 
     if (bufferLen == 0) {
-        tmp[0] = 0x00;
-	ptr = tmp;
+        tmp = 0x00;
+	ptr = &tmp;
 	bufferLen = 1;
     } else {
         ptr = buffer;

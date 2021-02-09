@@ -18,6 +18,57 @@
 
 sock_udp_t* udp_socket_list;
 
+// some toolchains errno.h apparently doesn't define all error codes. Use arbitrary placeholder here to cover that.
+
+#ifndef EAFNOSUPPORT
+// There is no real good choice for what to set
+// errno to in this case, so we just pick the
+// value '0x01' somewhat arbitrarily.
+#define EAFNOSUPPORT 0x01
+#endif
+
+#ifndef EADDRINUSE
+// There is no real good choice for what to set
+// errno to in this case, so we just pick the
+// value '0x02' somewhat arbitrarily.
+#define EADDRINUSE 0x02
+#endif
+
+#ifndef ENOTCONN
+// There is no real good choice for what to set
+// errno to in this case, so we just pick the
+// value '0x03' somewhat arbitrarily.
+#define ENOTCONN 0x03
+#endif
+
+#ifndef EOVERFLOW
+// There is no real good choice for what to set
+// errno to in this case, so we just pick the
+// value '0x04' somewhat arbitrarily.
+#define EOVERFLOW 0x04
+#endif
+
+#ifndef ENOMEM
+// There is no real good choice for what to set
+// errno to in this case, so we just pick the
+// value '0x05' somewhat arbitrarily.
+#define ENOMEM 0x05
+#endif
+
+#ifndef EINVAL
+// There is no real good choice for what to set
+// errno to in this case, so we just pick the
+// value '0x06' somewhat arbitrarily.
+#define EINVAL 0x06
+#endif
+
+#ifndef ENOBUFS
+// There is no real good choice for what to set
+// errno to in this case, so we just pick the
+// value '0x07' somewhat arbitrarily.
+#define ENOBUFS 0x07
+#endif
+
 // =========================== variables =======================================
 // =========================== prototypes ======================================
 
