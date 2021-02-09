@@ -2,10 +2,7 @@ import os
 import platform
 import sys
 
-import colorama as c
 import SCons
-
-c.init()
 
 # ============================ banner ==========================================
 
@@ -142,7 +139,7 @@ command_line_options = {
 
 def validate_option(key, value, env):
     if key not in command_line_options:
-        print c.Fore.RED + "Unknown switch {0}.".format(key) + c.Fore.RESET
+        print "Unknown switch {0}.".format(key)
         Exit(-1)
 
     if key == 'modules' or key == 'apps':
@@ -156,8 +153,8 @@ def validate_option(key, value, env):
         if ':' in v:
             v = v.split(':')[0]
         if v not in command_line_options[key]:
-            print c.Fore.RED + "Unknown {0} \"{1}\". Options are: {2}.\n\n".format(key, v, ', '.join(
-                command_line_options[key])) + c.Fore.RESET
+            print "Unknown {0} \"{1}\". Options are: {2}.\n\n".format(key, v, ', '.join(
+                command_line_options[key]))
             Exit(-1)
 
 
