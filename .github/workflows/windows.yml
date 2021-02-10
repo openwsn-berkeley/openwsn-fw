@@ -17,6 +17,14 @@ on:
 jobs:
   # This workflow contains a single job called "build"
   build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { toolchain: gcc, board: python }
+          - { toolchain: armgcc, board: openmote-cc2538}
+          - { toolchain: armgcc, board: iot-lab_M3}
+
     # The type of runner that the job will run on
     runs-on: windows-latest
 
@@ -25,7 +33,6 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      # Runs a single command using the runners shell
       - name: Set up MinGW
         uses: egor-tensin/setup-mingw@v2
         with:
@@ -41,6 +48,15 @@ jobs:
           python-version: '2.7.x'
           architecture: 'x86'
 
+      - name: Setup ARM toolchain
+        uses: fiam/arm-none-eabi-gcc@v1
+        with:
+          release: '9-2020-q2'
+
+      - name: Test ARM toolchain
+        run: |
+          arm-none-eabi-gcc --version
+
       - name: Installing SCons
         run: |
           python -c "import sys; print(sys.version)"
@@ -48,7 +64,7 @@ jobs:
           pip install scons
 
       # Runs a set of commands using the runners shell
-      - name: Build python board
+      - name: Build firmware
         run: |
-          scons board=python toolchain=gcc oos_openwsn
+          scons board=${{ matrix.board }} toolchain=${{ matrix.toolchain }} oos_openwsn
 
