@@ -39,7 +39,7 @@ sources_h += [os.path.join("cjoin", "cojp_cbor.h")]
 #===== build the openapps library
 
 if localEnv['board']=='python':
-    
+
     for s in sources_c+sources_h:
         temp = localEnv.Objectify(
             target = localEnv.ObjectifiedFilename(s),
@@ -51,9 +51,9 @@ if localEnv['board']=='python':
         source = [localEnv.ObjectifiedFilename(s) for s in sources_c],
     )
     localEnv.Depends(libopenapps, [localEnv.ObjectifiedFilename(s) for s in sources_h])
-    
+
 else:
-    
+
     localEnv.Append(
         CPPPATH = [
             # inc
@@ -66,6 +66,7 @@ else:
             os.path.join('#', 'openstack', '03a-IPHC'),
             os.path.join('#', 'openstack', '03b-IPv6'),
             os.path.join('#', 'openstack', '04-TRAN'),
+            os.path.join('#', 'openstack', '04-TRAN', 'sock'),
             os.path.join('#', 'openstack', 'cross-layers'),
             # openapps
             os.path.join('#', 'openweb', 'opencoap'),

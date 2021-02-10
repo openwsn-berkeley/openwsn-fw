@@ -29,7 +29,7 @@ sources_c = [
     os.path.join('03b-IPv6','icmpv6rpl.c'),
     #=== 04-TRAN
     os.path.join('04-TRAN','udp.c'),
-    os.path.join('04-TRAN','sock.c'),
+    os.path.join('04-TRAN','sock','sock.c'),
     #=== cross-layers
     os.path.join('cross-layers','idmanager.c'),
     os.path.join('cross-layers','openqueue.c'),
@@ -60,11 +60,11 @@ sources_h = [
     os.path.join('03b-IPv6','icmpv6rpl.h'),
     #=== 04-TRAN
     os.path.join('04-TRAN','udp.h'),
-    os.path.join('04-TRAN','sock.h'),
-    os.path.join('04-TRAN','async.h'),
-    os.path.join('04-TRAN','sock_types.h'),
-    os.path.join('04-TRAN','sock_internal.h'),
-    os.path.join('04-TRAN','async_types.h'),
+    os.path.join('04-TRAN','sock', 'sock_internal.h'),
+    os.path.join('04-TRAN','sock','sock.h'),
+    os.path.join('04-TRAN','sock','async.h'),
+    os.path.join('04-TRAN','sock','sock_types.h'),
+    os.path.join('04-TRAN','sock','async_types.h'),
     #=== cross-layers
     os.path.join('cross-layers','idmanager.h'),
     os.path.join('cross-layers','openqueue.h'),
@@ -73,7 +73,7 @@ sources_h = [
 ]
 
 if localEnv['board']=='python':
-    
+
     for s in sources_c+sources_h:
         temp = localEnv.Objectify(
             target = localEnv.ObjectifiedFilename(s),
@@ -85,9 +85,9 @@ if localEnv['board']=='python':
         source = [localEnv.ObjectifiedFilename(s) for s in sources_c],
     )
     localEnv.Depends(libopenstack,[localEnv.ObjectifiedFilename(s) for s in sources_h])
-    
+
 else:
-    
+
     localEnv.Append(
         CPPPATH =  [
             # inc
@@ -105,6 +105,7 @@ else:
             os.path.join('#','openstack','03a-IPHC'),
             os.path.join('#','openstack','03b-IPv6'),
             os.path.join('#','openstack','04-TRAN'),
+            os.path.join('#','openstack','04-TRAN','sock'),
             os.path.join('#','openstack','cross-layers'),
             # openweb
             os.path.join('#','openweb'),
@@ -112,7 +113,7 @@ else:
             os.path.join('#','openapps')
         ],
     )
-    
+
     libopenstack = localEnv.Library(
         target = target,
         source = sources_c,

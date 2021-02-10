@@ -646,7 +646,7 @@ elif env['toolchain'] == 'gcc':
 
     if os.name != 'nt':
         if env['simhost'].endswith('linux'):
-            # enabling shared library to be reallocated 
+            # enabling shared library to be reallocated
             env.Append(CCFLAGS='-fPIC')
             if not sys.platform.startswith('darwin'):  # line added per FW-230
                 env.Append(SHLINKFLAGS='-Wl,-Bsymbolic-functions')  # per FW-176
@@ -1165,6 +1165,7 @@ def buildIncludePath(project_dir, local_env):
                 os.path.join('#', 'openstack', '03a-IPHC'),
                 os.path.join('#', 'openstack', '03b-IPv6'),
                 os.path.join('#', 'openstack', '04-TRAN'),
+                os.path.join('#', 'openstack', '04-TRAN', 'sock'),
                 os.path.join('#', 'openstack', 'cross-layers'),
                 os.path.join('#', 'drivers', 'common'),
             ]

@@ -54,6 +54,7 @@ else:
             os.path.join('#','openstack','03a-IPHC'),
             os.path.join('#','openstack','03b-IPv6'),
             os.path.join('#','openstack','04-TRAN'),
+            os.path.join('#','openstack','04-TRAN','sock'),
             os.path.join('#','openstack','cross-layers'),
             # openapps
             os.path.join('#','openweb'),
