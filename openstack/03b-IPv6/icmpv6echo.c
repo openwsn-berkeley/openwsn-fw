@@ -8,7 +8,6 @@
 #include "openserial.h"
 #include "openqueue.h"
 #include "packetfunctions.h"
-#include "debugpins.h"
 
 //=========================== variables =======================================
 

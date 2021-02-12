@@ -3,11 +3,8 @@
 #include "openserial.h"
 #include "openrandom.h"
 #include "packetfunctions.h"
-#include "sixtop.h"
 #include "idmanager.h"
-#include "msf.h"
 #include "IEEE802154E.h"
-#include "icmpv6rpl.h"
 #include "neighbors.h"
 
 //=========================== definition ======================================
@@ -1145,7 +1142,7 @@ void schedule_indicateRx(asn_t *asnTimestamp) {
 /**
 \brief Indicate the transmission of a packet.
 */
-void schedule_indicateTx(asn_t *asnTimestamp, bool succesfullTx) {
+void schedule_indicateTx(asn_t *asnTimestamp, bool successfullTx) {
 
     INTERRUPT_DECLARATION();DISABLE_INTERRUPTS();
 
@@ -1155,7 +1152,7 @@ void schedule_indicateTx(asn_t *asnTimestamp, bool succesfullTx) {
         schedule_vars.currentScheduleEntry->numTxACK /= 2;
     }
     schedule_vars.currentScheduleEntry->numTx++;
-    if (succesfullTx == TRUE) {
+    if (successfullTx == TRUE) {
         schedule_vars.currentScheduleEntry->numTxACK++;
     }
 
@@ -1164,7 +1161,7 @@ void schedule_indicateTx(asn_t *asnTimestamp, bool succesfullTx) {
 
     // update this backoff parameters for shared slots
     if (schedule_vars.currentScheduleEntry->shared == TRUE) {
-        if (succesfullTx == TRUE) {
+        if (successfullTx == TRUE) {
             if (schedule_vars.currentScheduleEntry->neighbor.type == ADDR_ANYCAST) {
                 // reset backoffExponent
                 schedule_vars.backoffExponenton = MINBE - 1;
@@ -1190,12 +1187,18 @@ void schedule_indicateTx(asn_t *asnTimestamp, bool succesfullTx) {
     ENABLE_INTERRUPTS();
 }
 
-bool schedule_getOneCellAfterOffset(uint8_t metadata, uint8_t offset, open_addr_t *neighbor, uint8_t cellOptions,
-                                    uint16_t *slotoffset, uint16_t *channeloffset) {
+bool schedule_getOneCellAfterOffset(uint8_t metadata,
+                                    uint8_t offset,
+                                    open_addr_t *neighbor,
+                                    uint8_t cellOptions,
+                                    uint16_t *slotoffset,
+                                    uint16_t *channeloffset) {
     bool returnVal;
     scheduleEntry_t *scheduleWalker;
     cellType_t type;
+
     INTERRUPT_DECLARATION();
+
     DISABLE_INTERRUPTS();
 
     // translate cellOptions to cell type
@@ -1231,41 +1234,41 @@ bool schedule_getOneCellAfterOffset(uint8_t metadata, uint8_t offset, open_addr_
 /**
 \pre This function assumes interrupts are already disabled.
 */
-void schedule_resetEntry(scheduleEntry_t *e) {
-    e->slotOffset = 0;
-    e->type = CELLTYPE_OFF;
-    e->shared = FALSE;
-    e->isAutoCell = FALSE;
-    e->channelOffset = 0;
+void schedule_resetEntry(scheduleEntry_t *pScheduleEntry) {
+    pScheduleEntry->slotOffset = 0;
+    pScheduleEntry->type = CELLTYPE_OFF;
+    pScheduleEntry->shared = FALSE;
+    pScheduleEntry->isAutoCell = FALSE;
+    pScheduleEntry->channelOffset = 0;
 
 
-    e->neighbor.type = ADDR_NONE;
-    memset(&e->neighbor.addr_type.addr_64b[0], 0x00, sizeof(e->neighbor.addr_type.addr_64b));
+    pScheduleEntry->neighbor.type = ADDR_NONE;
+    memset(&pScheduleEntry->neighbor.addr_type.addr_64b[0], 0x00, sizeof(pScheduleEntry->neighbor.addr_type.addr_64b));
 
-    e->numRx = 0;
-    e->numTx = 0;
-    e->numTxACK = 0;
-    e->lastUsedAsn.bytes0and1 = 0;
-    e->lastUsedAsn.bytes2and3 = 0;
-    e->lastUsedAsn.byte4 = 0;
-    e->next = NULL;
+    pScheduleEntry->numRx = 0;
+    pScheduleEntry->numTx = 0;
+    pScheduleEntry->numTxACK = 0;
+    pScheduleEntry->lastUsedAsn.bytes0and1 = 0;
+    pScheduleEntry->lastUsedAsn.bytes2and3 = 0;
+    pScheduleEntry->lastUsedAsn.byte4 = 0;
+    pScheduleEntry->next = NULL;
 }
 
-void schedule_resetBackupEntry(backupEntry_t *e) {
-    e->type = CELLTYPE_OFF;
-    e->shared = FALSE;
-    e->isAutoCell = FALSE;
-    e->channelOffset = 0;
+void schedule_resetBackupEntry(backupEntry_t *pBackupEntry) {
+    pBackupEntry->type = CELLTYPE_OFF;
+    pBackupEntry->shared = FALSE;
+    pBackupEntry->isAutoCell = FALSE;
+    pBackupEntry->channelOffset = 0;
 
-    e->neighbor.type = ADDR_NONE;
-    memset(&e->neighbor.addr_type.addr_64b[0], 0x00, sizeof(e->neighbor.addr_type.addr_64b));
+    pBackupEntry->neighbor.type = ADDR_NONE;
+    memset(&pBackupEntry->neighbor.addr_type.addr_64b[0], 0x00, sizeof(pBackupEntry->neighbor.addr_type.addr_64b));
 
-    e->numRx = 0;
-    e->numTx = 0;
-    e->numTxACK = 0;
-    e->lastUsedAsn.bytes0and1 = 0;
-    e->lastUsedAsn.bytes2and3 = 0;
-    e->lastUsedAsn.byte4 = 0;
-    e->next = NULL;
+    pBackupEntry->numRx = 0;
+    pBackupEntry->numTx = 0;
+    pBackupEntry->numTxACK = 0;
+    pBackupEntry->lastUsedAsn.bytes0and1 = 0;
+    pBackupEntry->lastUsedAsn.bytes2and3 = 0;
+    pBackupEntry->lastUsedAsn.byte4 = 0;
+    pBackupEntry->next = NULL;
 }
 

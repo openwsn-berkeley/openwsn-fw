@@ -257,7 +257,7 @@ void schedule_resetBackoff(void);
 
 void schedule_indicateRx(asn_t *asnTimestamp);
 
-void schedule_indicateTx(asn_t *asnTimestamp, bool succesfullTx);
+void schedule_indicateTx(asn_t *asnTimestamp, bool successfullTx);
 
 // from sixtop
 bool schedule_getOneCellAfterOffset(
