@@ -40,14 +40,12 @@ typedef struct {
 #if OPENWSN_6LO_FRAGMENTATION_C
     OpenQueueBigEntry_t big_queue[BIGQUEUELENGTH];
 #endif
-} openqueue_vars_t;
+} openqueueVars_t;
 
 //=========================== prototypes ======================================
 
 // admin
 void openqueue_init(void);
-
-bool debugPrint_queue(void);
 
 // called by any component
 OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator);

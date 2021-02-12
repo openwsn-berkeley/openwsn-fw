@@ -14,10 +14,14 @@
 
 //=========================== definition =====================================
 
+typedef struct {
+    statusCtx_t statusMsf;
+} msfStatus_t;
+
 //=========================== variables =======================================
 
-msf_vars_t msf_vars;
-msf_vars_debug_t msf_vars_debug;
+msfVars_t msf_vars;
+msfStatus_t msf_status_ctx;
 
 //=========================== prototypes ======================================
 
@@ -43,14 +47,17 @@ void msf_trigger6pDelete(void);
 
 void msf_housekeeping(void);
 
+static bool statusPrint_msf(void);
+
 //=========================== public ==========================================
 
 void msf_init(void) {
 
     open_addr_t temp_neighbor;
 
-    memset(&msf_vars, 0, sizeof(msf_vars_t));
-    memset(&msf_vars_debug, 0, sizeof(msf_vars_debug_t));
+    memset(&msf_vars, 0, sizeof(msfVars_t));
+    memset(&msf_status_ctx, 0, sizeof(msfStatus_t));
+
     sixtop_setSFcallback(
             (sixtop_sf_getsfid_cbt) msf_getsfid,
             (sixtop_sf_getmetadata_cbt) msf_getMetadata,
@@ -79,6 +86,10 @@ void msf_init(void) {
             msf_timer_housekeeping_cb
     );
     msf_vars.waitretryTimerId = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_MSF);
+
+    msf_status_ctx.statusMsf.id = STATUS_MSF;
+    msf_status_ctx.statusMsf.statusPrint_cb = statusPrint_msf;
+    openserial_appendStatusCtx(&msf_status_ctx.statusMsf);
 }
 
 // called by schedule
@@ -231,8 +242,8 @@ void msf_timer_housekeeping_cb(opentimers_id_t id) {
     PORT_TIMER_WIDTH newDuration;
 
     // update the timer period
-    newDuration = openrandom_getRandomizePeriod(msf_vars.housekeepingPeriod, msf_vars.housekeepingPeriod),
-            opentimers_updateDuration(msf_vars.housekeepingTimerId, newDuration);
+    newDuration = openrandom_getRandomizePeriod(msf_vars.housekeepingPeriod, msf_vars.housekeepingPeriod);
+    opentimers_updateDuration(msf_vars.housekeepingTimerId, newDuration);
 
     // calling the task directly as the timer_cb function is executed in
     // task mode by opentimer already
@@ -517,7 +528,7 @@ uint16_t msf_hashFunction_getSlotoffset(open_addr_t *address) {
 
     uint16_t moteId;
 
-    moteId = (((uint16_t)(address->addr_type.addr_64b[6])) << 8) + (uint16_t)(address->addr_type.addr_64b[7]);
+    moteId = (((uint16_t) (address->addr_type.addr_64b[6])) << 8) + (uint16_t) (address->addr_type.addr_64b[7]);
 
     return SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS + \
             (moteId % (SLOTFRAME_LENGTH - SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS));
@@ -527,7 +538,7 @@ uint8_t msf_hashFunction_getChanneloffset(open_addr_t *address) {
 
     uint16_t moteId;
 
-    moteId = (((uint16_t)(address->addr_type.addr_64b[6])) << 8) + (uint16_t)(address->addr_type.addr_64b[7]);
+    moteId = (((uint16_t) (address->addr_type.addr_64b[6])) << 8) + (uint16_t) (address->addr_type.addr_64b[7]);
 
     return moteId % NUM_CHANNELS;
 }
@@ -554,7 +565,7 @@ uint8_t msf_getPreviousNumCellsUsed(cellType_t cellType) {
     }
 }
 
-bool debugPrint_msf() {
-    openserial_printStatus(STATUS_MSF, (uint8_t * ) & msf_vars_debug, sizeof(msf_vars_debug_t));
+static bool statusPrint_msf() {
+    openserial_printStatus(STATUS_MSF, (uint8_t *) &msf_status_ctx.statusMsf, sizeof(msfStatus_t));
     return TRUE;
 }

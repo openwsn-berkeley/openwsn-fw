@@ -117,7 +117,7 @@ typedef struct {
     sixtop_sf_translatemetadata_cbt cb_sf_translateMetadata;
     sixtop_sf_handle_callback_cbt cb_sf_handleRCError;
     open_addr_t neighborToClearCells;
-} sixtop_vars_t;
+} sixtopVars_t;
 
 //=========================== prototypes ======================================
 
@@ -151,11 +151,6 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg);
 void task_sixtopNotifSendDone(void);
 
 void task_sixtopNotifReceive(void);
-
-// debugging
-bool debugPrint_myDAGrank(void);
-
-bool debugPrint_kaPeriod(void);
 
 /**
 \}

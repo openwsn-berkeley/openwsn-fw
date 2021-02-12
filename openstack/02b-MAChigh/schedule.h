@@ -142,21 +142,6 @@ typedef struct {
     void *next;
 } scheduleEntry_t;
 
-BEGIN_PACK
-typedef struct {
-    uint8_t row;
-    slotOffset_t slotOffset;
-    uint8_t type;
-    bool shared;
-    uint8_t channelOffset;
-    open_addr_t neighbor;
-    uint8_t numRx;
-    uint8_t numTx;
-    uint8_t numTxACK;
-    asn_t lastUsedAsn;
-} debugScheduleEntry_t;
-END_PACK
-
 typedef struct {
     open_addr_t address;
     cellType_t link_type;
@@ -178,7 +163,7 @@ typedef struct {
     uint8_t backoffExponenton;
     uint8_t backoff;
     uint8_t debugPrintRow;
-} schedule_vars_t;
+} scheduleVars_t;
 
 //=========================== prototypes ======================================
 
@@ -186,10 +171,6 @@ typedef struct {
 void schedule_init(void);
 
 void schedule_startDAGroot(void);
-
-bool debugPrint_schedule(void);
-
-bool debugPrint_backoff(void);
 
 // from 6top
 void schedule_setFrameLength(frameLength_t newFrameLength);

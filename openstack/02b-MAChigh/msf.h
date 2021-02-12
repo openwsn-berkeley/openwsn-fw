@@ -60,7 +60,7 @@ typedef struct {
     // for msf status report
     uint8_t previousNumCellsUsed_tx;
     uint8_t previousNumCellsUsed_rx;
-} msf_vars_t;
+} msfVars_t;
 
 typedef struct {
     uint8_t numCellsUsed_tx;
@@ -103,7 +103,6 @@ bool msf_getHashCollisionFlag(void);
 
 uint8_t msf_getPreviousNumCellsUsed(cellType_t cellType);
 
-bool debugPrint_msf(void);
 /**
 \}
 \}

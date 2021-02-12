@@ -8,9 +8,23 @@
 #include "openrandom.h"
 #include "msf.h"
 
+//=========================== typedefs ========================================
+
+BEGIN_PACK
+typedef struct {
+    uint8_t row;
+    neighborRow_t neighborEntry;
+} debugNeighborEntry_t;
+END_PACK
+
+typedef struct {
+    statusCtx_t statusNeighborEntries;
+} neighborStatus_t;
+
 //=========================== variables =======================================
 
-static neighbors_vars_t neighbors_vars;
+neighborsVars_t neighbors_vars;
+neighborStatus_t neighbors_status_ctx;
 
 //=========================== prototypes ======================================
 
@@ -29,6 +43,9 @@ void removeNeighbor(uint8_t neighborIndex);
 
 bool isThisRowMatching(open_addr_t *address, uint8_t rowNumber);
 
+// debug
+static bool statusPrint_neighbors(void);
+
 //=========================== public ==========================================
 
 /**
@@ -36,8 +53,12 @@ bool isThisRowMatching(open_addr_t *address, uint8_t rowNumber);
 */
 void neighbors_init(void) {
     // clear module variables
-    memset(&neighbors_vars, 0, sizeof(neighbors_vars_t));
     // The .used fields get reset to FALSE by this memset.
+    memset(&neighbors_vars, 0, sizeof(neighborsVars_t));
+
+    neighbors_status_ctx.statusNeighborEntries.id = STATUS_NEIGHBORS;
+    neighbors_status_ctx.statusNeighborEntries.statusPrint_cb = statusPrint_neighbors;
+    openserial_appendStatusCtx(&neighbors_status_ctx.statusNeighborEntries);
 }
 
 //===== getters
@@ -454,7 +475,8 @@ bool neighbors_getNeighborEui64(open_addr_t *address, uint8_t addr_type, uint8_t
     bool ReturnVal = FALSE;
     switch (addr_type) {
         case ADDR_64B:
-            memcpy(&(address->addr_type.addr_64b), &(neighbors_vars.neighbors[index].addr_64b), LENGTH_ADDR64b);
+            memcpy(address->addr_type.addr_64b, neighbors_vars.neighbors[index].addr.addr_type.addr_64b,
+                   LENGTH_ADDR64b);
             address->type = ADDR_64B;
             ReturnVal = neighbors_vars.neighbors[index].used;
             break;
@@ -647,8 +669,9 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_neighbors(void) {
+static bool statusPrint_neighbors(void) {
     debugNeighborEntry_t temp;
+
     neighbors_vars.debugRow = (neighbors_vars.debugRow + 1) % MAXNUMNEIGHBORS;
     temp.row = neighbors_vars.debugRow;
     temp.neighborEntry = neighbors_vars.neighbors[neighbors_vars.debugRow];

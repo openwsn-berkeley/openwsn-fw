@@ -29,9 +29,19 @@
 */
 #define MAX6PRESPONSE             1
 
+//=========================== typedefs =======================================
+
+BEGIN_PACK
+typedef struct {
+    statusCtx_t statusDagRank;
+    statusCtx_t statusKaPeriod;
+} sixtopStatus_t;
+END_PACK
+
 //=========================== variables =======================================
 
-sixtop_vars_t sixtop_vars;
+sixtopVars_t sixtop_vars;
+sixtopStatus_t sixtop_status_ctx;
 
 //=========================== prototypes ======================================
 
@@ -79,25 +89,11 @@ void sixtop_six2six_notifyReceive(
 
 //=== helper functions
 
-bool sixtop_addCells(
-        uint8_t slotframeID,
-        cellInfo_ht *cellList,
-        open_addr_t *previousHop,
-        uint8_t cellOptions
-);
+bool sixtop_addCells(uint8_t slotframeID, cellInfo_ht *cellList, open_addr_t *previousHop, uint8_t cellOptions);
 
-bool sixtop_removeCells(
-        uint8_t slotframeID,
-        cellInfo_ht *cellList,
-        open_addr_t *previousHop,
-        uint8_t cellOptions
-);
+bool sixtop_removeCells(uint8_t slotframeID, cellInfo_ht *cellList, open_addr_t *previousHop, uint8_t cellOptions);
 
-bool sixtop_areAvailableCellsToBeScheduled(
-        uint8_t frameID,
-        uint8_t numOfCells,
-        cellInfo_ht *cellList
-);
+bool sixtop_areAvailableCellsToBeScheduled(uint8_t frameID, uint8_t numOfCells, cellInfo_ht *cellList);
 
 bool sixtop_areAvailableCellsToBeRemoved(
         uint8_t frameID,
@@ -106,6 +102,11 @@ bool sixtop_areAvailableCellsToBeRemoved(
         open_addr_t *neighbor,
         uint8_t cellOptions
 );
+
+// debugging
+static bool statusPrint_myDAGrank(void);
+
+static bool statusPrint_kaPeriod(void);
 
 //=========================== public ==========================================
 
@@ -138,18 +139,26 @@ void sixtop_init(void) {
     );
 
     sixtop_vars.timeoutTimerId = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_SIXTOP);
+
+    sixtop_status_ctx.statusDagRank.id = STATUS_DAGRANK;
+    sixtop_status_ctx.statusDagRank.statusPrint_cb = statusPrint_myDAGrank;
+    openserial_appendStatusCtx(&sixtop_status_ctx.statusDagRank);
+
+    sixtop_status_ctx.statusKaPeriod.id = STATUS_KAPERIOD;
+    sixtop_status_ctx.statusKaPeriod.statusPrint_cb = statusPrint_kaPeriod;
+    openserial_appendStatusCtx(&sixtop_status_ctx.statusKaPeriod);
 }
 
-void  sixtop_setSFcallback(
-    sixtop_sf_getsfid_cbt           cb0,
-    sixtop_sf_getmetadata_cbt       cb1,
-    sixtop_sf_translatemetadata_cbt cb2,
-    sixtop_sf_handle_callback_cbt   cb3
-){
-   sixtop_vars.cb_sf_getsfid            = cb0;
-   sixtop_vars.cb_sf_getMetadata        = cb1;
-   sixtop_vars.cb_sf_translateMetadata  = cb2;
-   sixtop_vars.cb_sf_handleRCError      = cb3;
+void sixtop_setSFcallback(
+        sixtop_sf_getsfid_cbt cb0,
+        sixtop_sf_getmetadata_cbt cb1,
+        sixtop_sf_translatemetadata_cbt cb2,
+        sixtop_sf_handle_callback_cbt cb3) {
+
+    sixtop_vars.cb_sf_getsfid = cb0;
+    sixtop_vars.cb_sf_getMetadata = cb1;
+    sixtop_vars.cb_sf_translateMetadata = cb2;
+    sixtop_vars.cb_sf_handleRCError = cb3;
 }
 
 //======= scheduling
@@ -163,8 +172,8 @@ owerror_t sixtop_request(
         cellInfo_ht *celllist_toBeDeleted,
         uint8_t sfid,
         uint16_t listingOffset,
-        uint16_t listingMaxNumCells
-) {
+        uint16_t listingMaxNumCells) {
+
     OpenQueueEntry_t *pkt;
     uint8_t i;
     uint8_t len;
@@ -184,8 +193,7 @@ owerror_t sixtop_request(
     }
 
     // get a free packet buffer
-    pkt = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP_RES);
-    if (pkt == NULL) {
+    if ((pkt = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP_RES)) == NULL) {
         LOG_ERROR(COMPONENT_SIXTOP_RES, ERR_NO_FREE_PACKET_BUFFER, (errorparameter_t) 0, (errorparameter_t) 0);
         return E_FAIL;
     }
@@ -533,7 +541,7 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_myDAGrank(void) {
+static bool statusPrint_myDAGrank(void) {
     uint16_t output;
 
     output = 0;
@@ -550,7 +558,7 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_kaPeriod(void) {
+static bool statusPrint_kaPeriod(void) {
     uint16_t output;
 
     output = sixtop_vars.kaPeriod;

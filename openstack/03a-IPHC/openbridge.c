@@ -12,11 +12,11 @@
 
 //=========================== public ==========================================
 
-void openbridge_init(void) {
+void openbridge_init(void) { openserial_setCb(openbridge_triggerData, CB_BRIDGE);
 }
 
 void openbridge_triggerData(void) {
-    uint8_t input_buffer[136];//worst case: 8B of next hop + 128B of data
+    uint8_t input_buffer[136]; // worst case: 8B of next hop + 128B of data
     OpenQueueEntry_t *pkt;
     uint8_t numDataBytes;
 

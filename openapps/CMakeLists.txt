@@ -19,4 +19,4 @@ target_include_directories(openapps
 target_link_libraries(openapps PRIVATE bsp)
 target_link_libraries(openapps PRIVATE openweb)
 target_link_libraries(openapps PRIVATE openstack)
-target_link_libraries(openapps PRIVATE drivers)
+target_link_libraries(openapps PRIVATE opendrivers)

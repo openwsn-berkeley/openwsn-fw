@@ -15,4 +15,7 @@ target_sources(${PROJECT} PUBLIC openwsn.c openwsn.h)
 
 target_link_libraries(${PROJECT} PUBLIC bsp)
 target_link_libraries(${PROJECT} PUBLIC kernel)
+target_link_libraries(${PROJECT} PUBLIC opendrivers)
 target_link_libraries(${PROJECT} PUBLIC openstack)
+target_link_libraries(${PROJECT} PUBLIC openapps)
+target_link_libraries(${PROJECT} PUBLIC openweb)

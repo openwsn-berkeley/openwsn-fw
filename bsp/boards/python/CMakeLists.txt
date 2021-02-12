@@ -11,13 +11,9 @@ endif ()
 add_library(bsp "")
 
 file(GLOB HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/../*.h")
-file(GLOB SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*.c" "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
+file(GLOB SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/*.c")
 
-target_sources(bsp
-        PRIVATE
-        ${SOURCES}
-        PUBLIC
-        ${HEADERS})
+target_sources(bsp PRIVATE ${SOURCES})
 
 target_include_directories(bsp
         PUBLIC ..

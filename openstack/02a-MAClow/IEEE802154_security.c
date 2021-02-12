@@ -132,11 +132,11 @@ owerror_t IEEE802154_security_prependAuxiliarySecurityHeader(OpenQueueEntry_t *m
             if (packetfunctions_reserveHeader(&msg, sizeof(uint8_t)) == E_FAIL) {
                 return E_FAIL;
             }
-            *((uint8_t * )(msg->payload)) = temp_keySource->addr_64b[6];
+            *((uint8_t * )(msg->payload)) = temp_keySource->addr_type.addr_64b[6];
             if (packetfunctions_reserveHeader(&msg, sizeof(uint8_t)) == E_FAIL) {
                 return E_FAIL;
             }
-            *((uint8_t * )(msg->payload)) = temp_keySource->addr_64b[7];
+            *((uint8_t * )(msg->payload)) = temp_keySource->addr_type.addr_64b[7];
             break;
         case IEEE154_ASH_KEYIDMODE_EXPLICIT_64: // keySource with 64b address
             temp_keySource = &msg->l2_keySource;
@@ -183,7 +183,7 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t *msg) {
                                                    : ieee802154_security_vars.k2.value;
 
     // First 8 bytes of the nonce are always the source address of the frame
-    memcpy(&nonce[0], idmanager_getMyID(ADDR_64B)->addr_64b, 8);
+    memcpy(&nonce[0], idmanager_getMyID(ADDR_64B)->addr_type.addr_64b, 8);
 
     // Fill last 5 bytes with the ASN part of the nonce
     ieee154e_getAsn(&nonce[8]);
@@ -357,7 +357,7 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t *msg) {
                                                    : ieee802154_security_vars.k2.value;
 
     // First 8 bytes of the nonce are always the source address of the frame
-    memcpy(&nonce[0], msg->l2_nextORpreviousHop.addr_64b, 8);
+    memcpy(&nonce[0], msg->l2_nextORpreviousHop.addr_type.addr_64b, 8);
     // Fill last 5 bytes with ASN part of the nonce
     ieee154e_getAsn(&nonce[8]);
     packetfunctions_reverseArrayByteOrder(&nonce[8], 5);  // reverse ASN bytes to big endian

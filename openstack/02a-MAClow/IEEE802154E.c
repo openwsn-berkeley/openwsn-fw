@@ -19,13 +19,39 @@
 #include "openrandom.h"
 #include "msf.h"
 
-//=========================== definition ======================================
+//=========================== typedefs ========================================
+
+/**
+ * @brief A IEEE 802.15.4E status entry. The struct is periodically transmitted over the serial port.
+ */
+BEGIN_PACK
+typedef struct {
+    uint8_t numSyncPkt;              // how many times synchronized on a non-ACK packet
+    uint8_t numSyncAck;              // how many times synchronized on an ACK
+    int16_t minCorrection;           // minimum time correction
+    int16_t maxCorrection;           // maximum time correction
+    uint8_t numDeSync;               // number of times a desync happened
+    uint32_t numTicsOn;              // mac dutyCycle
+    uint32_t numTicsTotal;           // total tics for which the dutycycle is computed
+} ieee154eStatusEntry_t;
+END_PACK
+
+/**
+ * @brief A IEEE 802.15.4E status context structure.
+ */
+BEGIN_PACK
+typedef struct {
+    statusCtx_t asnState;
+    statusCtx_t isSyncState;
+    statusCtx_t macState;
+} ieee154eStatusCtx_t;
+END_PACK
 
 //=========================== variables =======================================
 
-ieee154e_vars_t ieee154e_vars;
-ieee154e_stats_t ieee154e_stats;
-ieee154e_dbg_t ieee154e_dbg;
+ieee154eVars_t ieee154e_vars;
+ieee154eStatusEntry_t ieee154e_status_entry;
+ieee154eStatusCtx_t ieee154e_status_ctx;
 
 #if PYTHON_BOARD
 bool passed_msgBarrier;
@@ -148,7 +174,7 @@ void updateStats(PORT_SIGNED_INT_WIDTH timeCorrection);
 // misc
 uint8_t calculateFrequency(uint8_t channelOffset);
 
-void changeState(ieee154e_state_t newstate);
+void changeState(ieee154eState_t newstate);
 
 void endSlot(void);
 
@@ -158,6 +184,13 @@ void isr_ieee154e_newSlot(opentimers_id_t id);
 void isr_ieee154e_timer(opentimers_id_t id);
 
 void isr_ieee154e_inhibitStart(opentimers_id_t id);
+
+// status printing
+static bool statusPrint_asn(void);
+
+static bool statusPrint_isSync(void);
+
+static bool statusPrint_macStats(void);
 
 //=========================== admin ===========================================
 
@@ -170,8 +203,8 @@ during boot-up.
 void ieee154e_init(void) {
 
     // initialize variables
-    memset(&ieee154e_vars, 0, sizeof(ieee154e_vars_t));
-    memset(&ieee154e_dbg, 0, sizeof(ieee154e_dbg_t));
+    memset(&ieee154e_vars, 0, sizeof(ieee154eVars_t));
+    memset(&ieee154e_status_ctx, 0, sizeof(ieee154eStatusCtx_t));
 
     // set singleChannel to 0 to enable channel hopping.
 #if IEEE802154E_SINGLE_CHANNEL
@@ -194,7 +227,7 @@ void ieee154e_init(void) {
     }
 
     resetStats();
-    ieee154e_stats.numDeSync = 0;
+    ieee154e_status_entry.numDeSync = 0;
 
     // switch radio on
     radio_rfOn();
@@ -215,6 +248,22 @@ void ieee154e_init(void) {
     );
     IEEE802154_security_init();
     ieee154e_vars.serialInhibitTimerId = opentimers_create(TIMER_INHIBIT, TASKPRIO_NONE);
+
+    // set openserial callbacks
+    openserial_setCb(ieee154e_getAsn, CB_ASN);
+
+    // set status print contexts
+    ieee154e_status_ctx.asnState.id = STATUS_ASN;
+    ieee154e_status_ctx.asnState.statusPrint_cb = statusPrint_asn;
+    openserial_appendStatusCtx(&ieee154e_status_ctx.asnState);
+
+    ieee154e_status_ctx.isSyncState.id = STATUS_ISSYNC;
+    ieee154e_status_ctx.isSyncState.statusPrint_cb = statusPrint_isSync;
+    openserial_appendStatusCtx(&ieee154e_status_ctx.isSyncState);
+
+    ieee154e_status_ctx.macState.id = STATUS_MACSTATS;
+    ieee154e_status_ctx.macState.statusPrint_cb = statusPrint_macStats;
+    openserial_appendStatusCtx(&ieee154e_status_ctx.macState);
 }
 
 //=========================== public ==========================================
@@ -364,7 +413,6 @@ void isr_ieee154e_newSlot(opentimers_id_t id) {
 #endif
         activity_ti1ORri1();
     }
-    ieee154e_dbg.num_newSlot++;
 }
 
 /**
@@ -445,7 +493,6 @@ void isr_ieee154e_timer(opentimers_id_t id) {
             endSlot();
             break;
     }
-    ieee154e_dbg.num_timer++;
 }
 
 /**
@@ -503,7 +550,6 @@ void ieee154e_startOfFrame(PORT_TIMER_WIDTH capturedTime) {
                 break;
         }
     }
-    ieee154e_dbg.num_startOfFrame++;
 }
 
 /**
@@ -540,7 +586,6 @@ void ieee154e_endOfFrame(PORT_TIMER_WIDTH capturedTime) {
                 break;
         }
     }
-    ieee154e_dbg.num_endOfFrame++;
 }
 
 //======= misc
@@ -553,7 +598,7 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_asn(void) {
+static bool statusPrint_asn(void) {
     asn_t output;
     output.byte4 = ieee154e_vars.asn.byte4;
     output.bytes2and3 = ieee154e_vars.asn.bytes2and3;
@@ -570,7 +615,7 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_isSync(void) {
+static bool statusPrint_isSync(void) {
     uint8_t output = 0;
     output = ieee154e_vars.isSync;
     openserial_printStatus(STATUS_ISSYNC, (uint8_t * ) & output, sizeof(uint8_t));
@@ -585,9 +630,9 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_macStats(void) {
+static bool statusPrint_macStats(void) {
     // send current stats over serial
-    openserial_printStatus(STATUS_MACSTATS, (uint8_t * ) & ieee154e_stats, sizeof(ieee154e_stats_t));
+    openserial_printStatus(STATUS_MACSTATS, (uint8_t * ) & ieee154e_status_entry, sizeof(ieee154eStatusEntry_t));
     return TRUE;
 }
 
@@ -634,8 +679,8 @@ port_INLINE void activity_synchronize_newSlot(void) {
         radio_rxNow();
     } else {
         // I'm listening last slot
-        ieee154e_stats.numTicsOn += ieee154e_vars.slotDuration;
-        ieee154e_stats.numTicsTotal += ieee154e_vars.slotDuration;
+        ieee154e_status_entry.numTicsOn += ieee154e_vars.slotDuration;
+        ieee154e_status_entry.numTicsTotal += ieee154e_vars.slotDuration;
 
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
         sctimer_setCapture(ACTION_RX_SFD_DONE);
@@ -952,7 +997,7 @@ port_INLINE void activity_ti1ORri1(void) {
                       (errorparameter_t)0);
 
             // update the statistics
-            ieee154e_stats.numDeSync++;
+            ieee154e_status_entry.numDeSync++;
 
             // abort
             endSlot();
@@ -2659,8 +2704,8 @@ void synchronizePacket(PORT_TIMER_WIDTH timeReceived) {
     }
 
     // update the stats
-    ieee154e_stats.numSyncPkt++;
-    updateStats(timeCorrection);
+    ieee154e_status_entry.numSyncPkt++;
+    updateStats(timeCorr);
 
 #ifdef OPENSIM
     debugpins_syncPacket_set();
@@ -2703,7 +2748,7 @@ void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
     }
 
     // update the stats
-    ieee154e_stats.numSyncAck++;
+    ieee154e_status_entry.numSyncAck++;
     updateStats(timeCorrection);
 
 #ifdef OPENSIM
@@ -2756,23 +2801,23 @@ void notif_receive(OpenQueueEntry_t *packetReceived) {
 //======= stats
 
 port_INLINE void resetStats(void) {
-    ieee154e_stats.numSyncPkt = 0;
-    ieee154e_stats.numSyncAck = 0;
-    ieee154e_stats.minCorrection = 127;
-    ieee154e_stats.maxCorrection = -127;
-    ieee154e_stats.numTicsOn = 0;
-    ieee154e_stats.numTicsTotal = 0;
+    ieee154e_status_entry.numSyncPkt = 0;
+    ieee154e_status_entry.numSyncAck = 0;
+    ieee154e_status_entry.minCorrection = 127;
+    ieee154e_status_entry.maxCorrection = -127;
+    ieee154e_status_entry.numTicsOn = 0;
+    ieee154e_status_entry.numTicsTotal = 0;
     // do not reset the number of de-synchronizations
 }
 
 void updateStats(PORT_SIGNED_INT_WIDTH timeCorrection) {
     // update minCorrection
-    if (timeCorrection < ieee154e_stats.minCorrection) {
-        ieee154e_stats.minCorrection = timeCorrection;
+    if (timeCorrection < ieee154e_status_entry.minCorrection) {
+        ieee154e_status_entry.minCorrection = timeCorrection;
     }
     // update maxConnection
-    if (timeCorrection > ieee154e_stats.maxCorrection) {
-        ieee154e_stats.maxCorrection = timeCorrection;
+    if (timeCorrection > ieee154e_status_entry.maxCorrection) {
+        ieee154e_status_entry.maxCorrection = timeCorrection;
     }
 }
 
@@ -2810,7 +2855,7 @@ Besides simply updating the state global variable, this function toggles the FSM
 
 \param[in] newstate The state the IEEE802.15.4e FSM is now in.
 */
-void changeState(ieee154e_state_t newstate) {
+void changeState(ieee154eState_t newstate) {
     // update the state
     ieee154e_vars.state = newstate;
     // wiggle the FSM debug pin
@@ -2904,12 +2949,12 @@ void endSlot(void) {
     ieee154e_vars.syncCapturedTime = 0;
 
     // compute duty cycle.
-    ieee154e_stats.numTicsOn += ieee154e_vars.radioOnTics;//accumulate and tics the radio is on for that window
-    ieee154e_stats.numTicsTotal += ieee154e_vars.slotDuration;//increment total tics by timer period.
+    ieee154e_status_entry.numTicsOn += ieee154e_vars.radioOnTics;//accumulate and tics the radio is on for that window
+    ieee154e_status_entry.numTicsTotal += ieee154e_vars.slotDuration;//increment total tics by timer period.
 
-    if (ieee154e_stats.numTicsTotal > DUTY_CYCLE_WINDOW_LIMIT) {
-        ieee154e_stats.numTicsTotal = ieee154e_stats.numTicsTotal >> 1;
-        ieee154e_stats.numTicsOn = ieee154e_stats.numTicsOn >> 1;
+    if (ieee154e_status_entry.numTicsTotal > DUTY_CYCLE_WINDOW_LIMIT) {
+        ieee154e_status_entry.numTicsTotal = ieee154e_status_entry.numTicsTotal >> 1;
+        ieee154e_status_entry.numTicsOn = ieee154e_status_entry.numTicsOn >> 1;
     }
 
     // clear vars for duty cycle on this slot

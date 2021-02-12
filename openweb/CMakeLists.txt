@@ -1,4 +1,4 @@
-add_library(openweb STATIC "")
+add_library(openweb "")
 
 target_sources(openweb
         PUBLIC
@@ -15,5 +15,5 @@ target_compile_features(openweb PUBLIC c_std_99)
 target_include_directories(openweb PUBLIC "../openweb" "../openweb/opencoap")
 
 target_link_libraries(openweb PRIVATE bsp)
-target_link_libraries(openweb PRIVATE drivers)
+target_link_libraries(openweb PRIVATE opendrivers)
 target_link_libraries(openweb PRIVATE openstack)

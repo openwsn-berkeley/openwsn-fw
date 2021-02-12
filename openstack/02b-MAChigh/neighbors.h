@@ -36,30 +36,11 @@
 
 //=========================== typedef =========================================
 
-BEGIN_PACK
-typedef struct {
-    uint8_t row;
-    neighborRow_t neighborEntry;
-} debugNeighborEntry_t;
-END_PACK
-
-        BEGIN_PACK
-typedef struct {
-    uint8_t last_addr_byte;   // last byte of the neighbor's address
-    int8_t rssi;
-    uint8_t parentPreference;
-    dagrank_t DAGrank;
-    uint16_t asn;
-} netDebugNeigborEntry_t;
-END_PACK
-
-//=========================== module variables ================================
-
 typedef struct {
     neighborRow_t neighbors[MAXNUMNEIGHBORS];
     dagrank_t myDAGrank;
     uint8_t debugRow;
-} neighbors_vars_t;
+} neighborsVars_t;
 
 //=========================== prototypes ======================================
 
@@ -138,9 +119,6 @@ void neighbors_resetBackoff(open_addr_t *address);
 
 // maintenance
 void neighbors_removeOld(void);
-
-// debug
-bool debugPrint_neighbors(void);
 
 /**
 \}

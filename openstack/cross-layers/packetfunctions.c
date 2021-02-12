@@ -2,9 +2,12 @@
 #include "packetfunctions.h"
 #include "IEEE802154_security.h"
 #include "openserial.h"
-#include "openqueue.h"
 #include "idmanager.h"
 #include "radio.h"
+
+#if OPENWSN_6LO_FRAGMENTATION_C
+#include "openqueue.h"
+#endif
 
 //=========================== variables =======================================
 
@@ -214,7 +217,8 @@ bool packetfunctions_sameAddress(open_addr_t *address_1, open_addr_t *address_2)
                          (errorparameter_t) 5);
             return FALSE;
     }
-    if (memcmp((void *) address_1->addr_type.addr_128b, (void *) address_2->addr_type.addr_128b, address_length) == 0) {
+
+    if (memcmp(address_1->addr_type.addr_128b, address_2->addr_type.addr_128b, address_length) == 0) {
         return TRUE;
     }
     return FALSE;

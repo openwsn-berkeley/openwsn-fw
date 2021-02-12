@@ -154,7 +154,7 @@ typedef enum {
     S_TXACKDELAY = 0x17,        // 'go' signal given, waiting for SFD Tx ACK
     S_TXACK = 0x18,             // Tx ACK SFD received, sending bytes
     S_RXPROC = 0x19,            // processing received data
-} ieee154e_state_t;
+} ieee154eState_t;
 
 #define  TIMESLOT_TEMPLATE_ID         0x00
 #define  CHANNELHOPPING_TEMPLATE_ID   0x00
@@ -259,7 +259,7 @@ typedef struct {
     OpenQueueEntry_t localCopyForTransmission;      // copy of the frame used for current TX
     PORT_TIMER_WIDTH numOfSleepSlots;               // number of slots to sleep between active slots
     // as shown on the chronogram
-    ieee154e_state_t state;                         // state of the FSM
+    ieee154eState_t state;                         // state of the FSM
     OpenQueueEntry_t *dataToSend;                   // pointer to the data to send
     OpenQueueEntry_t *dataReceived;                 // pointer to the data received
     OpenQueueEntry_t *ackToSend;                    // pointer to the ack to send
@@ -293,28 +293,8 @@ typedef struct {
 
     // for msf downstream traffic adaptation
     uint32_t receivedFrameFromParent;               // True when received a frame from parent
-
     uint16_t compensatingCounter;
-} ieee154e_vars_t;
-
-BEGIN_PACK
-typedef struct {
-    uint8_t numSyncPkt;              // how many times synchronized on a non-ACK packet
-    uint8_t numSyncAck;              // how many times synchronized on an ACK
-    int16_t minCorrection;           // minimum time correction
-    int16_t maxCorrection;           // maximum time correction
-    uint8_t numDeSync;               // number of times a desync happened
-    uint32_t numTicsOn;              // mac dutyCycle
-    uint32_t numTicsTotal;           // total tics for which the dutycycle is computed
-} ieee154e_stats_t;
-END_PACK
-
-typedef struct {
-    PORT_TIMER_WIDTH num_newSlot;
-    PORT_TIMER_WIDTH num_timer;
-    PORT_TIMER_WIDTH num_startOfFrame;
-    PORT_TIMER_WIDTH num_endOfFrame;
-} ieee154e_dbg_t;
+} ieee154eVars_t;
 
 //=========================== prototypes ======================================
 
@@ -347,13 +327,6 @@ void ieee154e_getTicsInfo(uint32_t *numTicsOn, uint32_t *numTicsTotal);
 void ieee154e_startOfFrame(PORT_TIMER_WIDTH capturedTime);
 
 void ieee154e_endOfFrame(PORT_TIMER_WIDTH capturedTime);
-
-// misc
-bool debugPrint_asn(void);
-
-bool debugPrint_isSync(void);
-
-bool debugPrint_macStats(void);
 
 /**
 \}
