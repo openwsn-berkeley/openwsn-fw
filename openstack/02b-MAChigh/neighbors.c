@@ -738,7 +738,7 @@ void registerNewNeighbor(const open_addr_t *neighborID,
     }
 }
 
-bool isNeighbor(open_addr_t *neighbor) {
+bool isNeighbor(const open_addr_t *neighbor) {
     uint8_t i = 0;
     for (i = 0; i < MAXNUMNEIGHBORS; i++) {
         if (isThisRowMatching(neighbor, i)) {
@@ -771,7 +771,7 @@ void removeNeighbor(uint8_t neighborIndex) {
 
 //=========================== helpers =========================================
 
-bool isThisRowMatching(open_addr_t *address, uint8_t rowNumber) {
+bool isThisRowMatching(const open_addr_t *address, uint8_t rowNumber) {
     switch (address->type) {
         case ADDR_64B:
             return neighbors_vars.neighbors[rowNumber].used &&

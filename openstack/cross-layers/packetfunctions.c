@@ -13,14 +13,14 @@
 
 //=========================== prototypes ======================================
 
-void onesComplementSum(uint8_t *global_sum, uint8_t *ptr, int length);
+void onesComplementSum(uint8_t *global_sum, const uint8_t *ptr, int length);
 
 //=========================== public ==========================================
 
 //======= address translation
 
 //assuming an ip128b is a concatenation of prefix64b followed by a mac64b
-void packetfunctions_ip128bToMac64b(open_addr_t *ip128b, open_addr_t *prefix64btoWrite, open_addr_t *mac64btoWrite) {
+void packetfunctions_ip128bToMac64b(const open_addr_t *ip128b, open_addr_t *prefix64btoWrite, open_addr_t *mac64btoWrite) {
     if (ip128b->type != ADDR_128B) {
         LOG_CRITICAL(COMPONENT_PACKETFUNCTIONS, ERR_WRONG_ADDR_TYPE,
                      (errorparameter_t) ip128b->type,
@@ -35,7 +35,7 @@ void packetfunctions_ip128bToMac64b(open_addr_t *ip128b, open_addr_t *prefix64bt
     memcpy(mac64btoWrite->addr_type.addr_64b, &(ip128b->addr_type.addr_128b[8]), 8);
 }
 
-void packetfunctions_mac64bToIp128b(open_addr_t *prefix64b, open_addr_t *mac64b, open_addr_t *ip128bToWrite) {
+void packetfunctions_mac64bToIp128b(const open_addr_t *prefix64b, const open_addr_t *mac64b, open_addr_t *ip128bToWrite) {
     if (prefix64b->type != ADDR_PREFIX || mac64b->type != ADDR_64B) {
         LOG_CRITICAL(COMPONENT_PACKETFUNCTIONS, ERR_WRONG_ADDR_TYPE,
                      (errorparameter_t) prefix64b->type,
@@ -50,7 +50,7 @@ void packetfunctions_mac64bToIp128b(open_addr_t *prefix64b, open_addr_t *mac64b,
 }
 
 //assuming an mac16b is lower 2B of mac64b
-void packetfunctions_mac64bToMac16b(open_addr_t *mac64b, open_addr_t *mac16btoWrite) {
+void packetfunctions_mac64bToMac16b(const open_addr_t *mac64b, open_addr_t *mac16btoWrite) {
     if (mac64b->type != ADDR_64B) {
         LOG_CRITICAL(COMPONENT_PACKETFUNCTIONS, ERR_WRONG_ADDR_TYPE,
                      (errorparameter_t) mac64b->type,
@@ -64,7 +64,7 @@ void packetfunctions_mac64bToMac16b(open_addr_t *mac64b, open_addr_t *mac16btoWr
     mac16btoWrite->addr_type.addr_16b[1] = mac64b->addr_type.addr_64b[7];
 }
 
-void packetfunctions_mac16bToMac64b(open_addr_t *mac16b, open_addr_t *mac64btoWrite) {
+void packetfunctions_mac16bToMac64b(const open_addr_t *mac16b, open_addr_t *mac64btoWrite) {
     if (mac16b->type != ADDR_16B) {
         LOG_CRITICAL(COMPONENT_PACKETFUNCTIONS, ERR_WRONG_ADDR_TYPE,
                      (errorparameter_t) mac16b->type,
@@ -85,7 +85,7 @@ void packetfunctions_mac16bToMac64b(open_addr_t *mac16b, open_addr_t *mac64btoWr
 
 //======= address recognition
 
-bool packetfunctions_isBroadcastMulticast(open_addr_t *address) {
+bool packetfunctions_isBroadcastMulticast(const open_addr_t *address) {
     uint8_t i;
     uint8_t address_length;
 
@@ -117,6 +117,7 @@ bool packetfunctions_isBroadcastMulticast(open_addr_t *address) {
                          (errorparameter_t) 4);
             return FALSE;
     }
+
     for (i = 0; i < address_length; i++) {
         if (address->addr_type.addr_128b[i] != 0xFF) {
             return FALSE;
@@ -125,7 +126,7 @@ bool packetfunctions_isBroadcastMulticast(open_addr_t *address) {
     return TRUE;
 }
 
-bool packetfunctions_isAllRoutersMulticast(open_addr_t *address) {
+bool packetfunctions_isAllRoutersMulticast(const open_addr_t *address) {
     if (
             address->type == ADDR_128B &&
             address->addr_type.addr_128b[0] == 0xff &&
@@ -150,7 +151,7 @@ bool packetfunctions_isAllRoutersMulticast(open_addr_t *address) {
     return FALSE;
 }
 
-bool packetfunctions_isAllHostsMulticast(open_addr_t *address) {
+bool packetfunctions_isAllHostsMulticast(const open_addr_t *address) {
     if (
             address->type == ADDR_128B &&
             address->addr_type.addr_128b[0] == 0xff &&
@@ -175,7 +176,7 @@ bool packetfunctions_isAllHostsMulticast(open_addr_t *address) {
     return FALSE;
 }
 
-bool packetfunctions_isLinkLocal(open_addr_t *address) {
+bool packetfunctions_isLinkLocal(const open_addr_t *address) {
     if (
             address->type == ADDR_128B &&
             address->addr_type.addr_128b[0] == 0xfe &&
@@ -192,12 +193,14 @@ bool packetfunctions_isLinkLocal(open_addr_t *address) {
     return FALSE;
 }
 
-bool packetfunctions_sameAddress(open_addr_t *address_1, open_addr_t *address_2) {
+bool packetfunctions_sameAddress(const open_addr_t *address_1, const open_addr_t *address_2) {
+
     uint8_t address_length;
 
     if (address_1->type != address_2->type) {
         return FALSE;
     }
+
     switch (address_1->type) {
         case ADDR_16B:
         case ADDR_PANID:
@@ -226,7 +229,7 @@ bool packetfunctions_sameAddress(open_addr_t *address_1, open_addr_t *address_2)
 
 //======= address read/write
 
-void packetfunctions_readAddress(uint8_t *payload, uint8_t type, open_addr_t *writeToAddress, bool littleEndian) {
+void packetfunctions_readAddress(const uint8_t *payload, uint8_t type, open_addr_t *writeToAddress, bool littleEndian) {
     uint8_t i;
     uint8_t address_length;
 
@@ -259,7 +262,7 @@ void packetfunctions_readAddress(uint8_t *payload, uint8_t type, open_addr_t *wr
     }
 }
 
-owerror_t packetfunctions_writeAddress(OpenQueueEntry_t **msg, open_addr_t *address, bool littleEndian) {
+owerror_t packetfunctions_writeAddress(OpenQueueEntry_t **msg, const open_addr_t *address, bool littleEndian) {
     uint8_t i;
     uint8_t address_length;
 
@@ -516,7 +519,7 @@ void packetfunctions_tossFooter(OpenQueueEntry_t **pkt, uint16_t footer_length) 
 // function duplicates a frame from one OpenQueueEntry structure to the other,
 // updating pointers to the new memory location. Used to make a local copy of
 // the frame before transmission (where it can possibly be encrypted). 
-void packetfunctions_duplicatePacket(OpenQueueEntry_t *dst, OpenQueueEntry_t *src) {
+void packetfunctions_duplicatePacket(OpenQueueEntry_t *dst, const OpenQueueEntry_t *src) {
     // make a copy of the frame
 
     memcpy(dst, src, sizeof(OpenQueueEntry_t));
@@ -542,7 +545,7 @@ void packetfunctions_duplicatePacket(OpenQueueEntry_t *dst, OpenQueueEntry_t *sr
 void packetfunctions_calculateCRC(OpenQueueEntry_t *msg) {
     uint16_t crc;
     uint8_t i;
-    uint8_t count;
+    uint16_t count;
     crc = 0;
     for (count = 1; count < msg->length - 2; count++) {
         crc = crc ^ (uint8_t) * (msg->payload + count);
@@ -559,10 +562,10 @@ void packetfunctions_calculateCRC(OpenQueueEntry_t *msg) {
     *(msg->payload + (msg->length - 1)) = crc / 256;
 }
 
-bool packetfunctions_checkCRC(OpenQueueEntry_t *msg) {
+bool packetfunctions_checkCRC(const OpenQueueEntry_t *msg) {
     uint16_t crc;
     uint8_t i;
-    uint8_t count;
+    uint16_t count;
     crc = 0;
     for (count = 0; count < msg->length - 2; count++) {
         crc = crc ^ (uint8_t) * (msg->payload + count);
@@ -647,7 +650,7 @@ void packetfunctions_calculateChecksum(OpenQueueEntry_t *msg, uint8_t *checksum_
 }
 
 
-void onesComplementSum(uint8_t *global_sum, uint8_t *ptr, int length) {
+void onesComplementSum(uint8_t *global_sum, const uint8_t *ptr, int length) {
     uint32_t sum = 0xFFFF & (global_sum[0] << 8 | global_sum[1]);
     while (length > 1) {
         sum += 0xFFFF & (*ptr << 8 | *(ptr + 1));
