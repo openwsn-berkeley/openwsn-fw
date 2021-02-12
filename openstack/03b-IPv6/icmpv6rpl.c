@@ -147,10 +147,9 @@ void icmpv6rpl_init(void) {
                                                FLAG_DAO_C | \
                                                FLAG_DAO_D | \
                                                FLAG_DAO_E | \
-                                               PRF_DIO_C | \
+                                               PRF_DIO_C  | \
                                                FLAG_DAO_F | \
-                                               D_DAO |
-                                   K_DAO;
+                                               D_DAO | K_DAO;
     icmpv6rpl_vars.dao.reserved = 0x00;
     icmpv6rpl_vars.dao.DAOSequence = 0x00;
     memcpy(&(icmpv6rpl_vars.dao.DODAGID[0]), dodagid, sizeof(icmpv6rpl_vars.dao.DODAGID));  // can be replaced later
@@ -603,8 +602,12 @@ void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t *msg) {
 
     // update rank of that neighbor in table
     for (i = 0; i < MAXNUMNEIGHBORS; i++) {
-        if (neighbors_getNeighborEui64(&NeighborAddress, ADDR_64B, i)) { // this neighbor entry is in use
-            if (packetfunctions_sameAddress(&(msg->l2_nextORpreviousHop), &NeighborAddress)) { // matching address
+
+        // Find a used neighbor table entry
+        if (neighbors_getNeighborEui64(&NeighborAddress, ADDR_64B, i)) {
+
+            // check address
+            if (packetfunctions_sameAddress(&(msg->l2_nextORpreviousHop), &NeighborAddress)) {
                 neighborRank = neighbors_getNeighborRank(i);
                 if (
                         (icmpv6rpl_vars.incomingDio->rank > neighborRank) &&

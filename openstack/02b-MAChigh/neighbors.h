@@ -14,10 +14,10 @@
 
 #define MAXPREFERENCE             2
 #ifndef BADNEIGHBORMAXRSSI
-#define BADNEIGHBORMAXRSSI        -70 //dBm
+#define BADNEIGHBORMAXRSSI        (-70) //dBm
 #endif
 #ifndef GOODNEIGHBORMINRSSI
-#define GOODNEIGHBORMINRSSI       -80 //dBm
+#define GOODNEIGHBORMINRSSI       (-80) //dBm
 #endif
 #ifndef SWITCHSTABILITYTHRESHOLD
 #define SWITCHSTABILITYTHRESHOLD  3
@@ -97,7 +97,7 @@ void neighbors_indicateTx(
         open_addr_t *dest,
         uint8_t numTxAttempts,
         bool sentOnTxCell,
-        bool was_finally_acked,
+        bool wasAcked,
         asn_t *asnTimestamp
 );
 

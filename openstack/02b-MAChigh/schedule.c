@@ -729,6 +729,7 @@ bool schedule_isNumTxWrapped(open_addr_t *neighbor) {
     bool returnVal;
 
     INTERRUPT_DECLARATION();
+
     DISABLE_INTERRUPTS();
 
     returnVal = FALSE;
@@ -740,7 +741,9 @@ bool schedule_isNumTxWrapped(open_addr_t *neighbor) {
             return returnVal;
         }
     }
+
     ENABLE_INTERRUPTS();
+
     return returnVal;
 
 }

@@ -51,7 +51,7 @@ static const uint8_t ebIEsBytestream[] = {
 #ifndef DESYNCTIMEOUT
 #define DESYNCTIMEOUT             1750  // in slots: 1750@20ms per slot -> ~35 seconds. A larger DESYNCTIMEOUT is needed if using a larger KATIMEOUT.
 #endif
-#define LIMITLARGETIMECORRECTION     5  // threshold number of ticks to declare a timeCorrection "large"
+#define TIME_CORR_THRESHOLD     5  // threshold number of ticks to declare a timeCorrection "large"
 #define LENGTH_IEEE154_MAX         128  // max length of a valid radio packet
 #define DUTY_CYCLE_WINDOW_LIMIT    (0xFFFFFFFF>>1) // limit of the dutycycle window
 #define SERIALINHIBITGUARD         (1000/PORT_US_PER_TICK) // 32@32kHz ~ 1ms
@@ -167,13 +167,15 @@ typedef enum {
 enum ieee154e_atomicdurations_enum {
 // time-slot related
 #if SLOTDURATION == 10
-    TsTxOffset                =  (2120/PORT_US_PER_TICK),                  //  2120us
-    TsLongGT                  =  (1100/PORT_US_PER_TICK),                  //  1100us
-    TsTxAckDelay              =  (1000/PORT_US_PER_TICK),                  //  1000us
-    TsShortGT                 =   (500/PORT_US_PER_TICK),                  //  500us, The standardlized value for this is 400/2=200us(7ticks). Currectly 7 doesn't work for short packet, change it back to 7 when found the problem.
-    wdRadioTx                 =  (1342/PORT_US_PER_TICK),                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
-    wdDataDuration            =  (5000/PORT_US_PER_TICK),                  //  5000us (measured 4280us with max payload)
-    wdAckDuration             =  (3000/PORT_US_PER_TICK),                  //  3000us (measured 1000us)
+    TsTxOffset = (2120 / PORT_US_PER_TICK),                  //  2120us
+    TsLongGT = (1100 / PORT_US_PER_TICK),                  //  1100us
+    TsTxAckDelay = (1000 / PORT_US_PER_TICK),                  //  1000us
+    TsShortGT = (500 /
+                 PORT_US_PER_TICK),                  //  500us, The standardlized value for this is 400/2=200us(7ticks). Currectly 7 doesn't work for short packet, change it back to 7 when found the problem.
+    wdRadioTx = (1342 /
+                 PORT_US_PER_TICK),                  //  1000us (needs to be >delayTx) (SCuM need a larger value, 45 is tested and works)
+    wdDataDuration = (5000 / PORT_US_PER_TICK),                  //  5000us (measured 4280us with max payload)
+    wdAckDuration = (3000 / PORT_US_PER_TICK),                  //  3000us (measured 1000us)
 #endif
 
 #if SLOTDURATION == 20
@@ -220,32 +222,32 @@ enum ieee154e_linkOption_enum {
 
 // FSM timer durations (combinations of atomic durations)
 // TX
-#define DURATION_tt1 ieee154e_vars.lastCapturedTime+TsTxOffset-delayTx-maxTxDataPrepare
-#define DURATION_tt2 ieee154e_vars.lastCapturedTime+TsTxOffset-delayTx
-#define DURATION_tt3 ieee154e_vars.lastCapturedTime+TsTxOffset-delayTx+wdRadioTx
-#define DURATION_tt4 ieee154e_vars.lastCapturedTime+wdDataDuration
-#define DURATION_tt5 ieee154e_vars.lastCapturedTime+TsTxAckDelay-TsShortGT-delayRx-maxRxAckPrepare
-#define DURATION_tt6 ieee154e_vars.lastCapturedTime+TsTxAckDelay-TsShortGT-delayRx
-#define DURATION_tt7 ieee154e_vars.lastCapturedTime+TsTxAckDelay+TsShortGT
-#define DURATION_tt8 ieee154e_vars.lastCapturedTime+wdAckDuration
+#define DURATION_tt1 (ieee154e_vars.lastCapturedTime + TsTxOffset - delayTx - maxTxDataPrepare)
+#define DURATION_tt2 (ieee154e_vars.lastCapturedTime + TsTxOffset - delayTx)
+#define DURATION_tt3 (ieee154e_vars.lastCapturedTime + TsTxOffset - delayTx+wdRadioTx)
+#define DURATION_tt4 (ieee154e_vars.lastCapturedTime + wdDataDuration)
+#define DURATION_tt5 (ieee154e_vars.lastCapturedTime + TsTxAckDelay - TsShortGT - delayRx - maxRxAckPrepare)
+#define DURATION_tt6 (ieee154e_vars.lastCapturedTime + TsTxAckDelay - TsShortGT-delayRx)
+#define DURATION_tt7 (ieee154e_vars.lastCapturedTime + TsTxAckDelay + TsShortGT)
+#define DURATION_tt8 (ieee154e_vars.lastCapturedTime + wdAckDuration)
 // RX
-#define DURATION_rt1 ieee154e_vars.lastCapturedTime+TsTxOffset-TsLongGT-delayRx-maxRxDataPrepare
-#define DURATION_rt2 ieee154e_vars.lastCapturedTime+TsTxOffset-TsLongGT-delayRx
-#define DURATION_rt3 ieee154e_vars.lastCapturedTime+TsTxOffset+TsLongGT
-#define DURATION_rt4 ieee154e_vars.lastCapturedTime+wdDataDuration
-#define DURATION_rt5 ieee154e_vars.lastCapturedTime+TsTxAckDelay-delayTx-maxTxAckPrepare
-#define DURATION_rt6 ieee154e_vars.lastCapturedTime+TsTxAckDelay-delayTx
-#define DURATION_rt7 ieee154e_vars.lastCapturedTime+TsTxAckDelay-delayTx+wdRadioTx
-#define DURATION_rt8 ieee154e_vars.lastCapturedTime+wdAckDuration
+#define DURATION_rt1 (ieee154e_vars.lastCapturedTime + TsTxOffset - TsLongGT - delayRx - maxRxDataPrepare)
+#define DURATION_rt2 (ieee154e_vars.lastCapturedTime + TsTxOffset - TsLongGT - delayRx)
+#define DURATION_rt3 (ieee154e_vars.lastCapturedTime + TsTxOffset + TsLongGT)
+#define DURATION_rt4 (ieee154e_vars.lastCapturedTime + wdDataDuration)
+#define DURATION_rt5 (ieee154e_vars.lastCapturedTime + TsTxAckDelay - delayTx - maxTxAckPrepare)
+#define DURATION_rt6 (ieee154e_vars.lastCapturedTime + TsTxAckDelay - delayTx)
+#define DURATION_rt7 (ieee154e_vars.lastCapturedTime + TsTxAckDelay - delayTx + wdRadioTx)
+#define DURATION_rt8 (ieee154e_vars.lastCapturedTime + wdAckDuration)
 // serialInhibit
-#define DURATION_si  ieee154e_vars.slotDuration-SERIALINHIBITGUARD
+#define DURATION_si  (ieee154e_vars.slotDuration - SERIALINHIBITGUARD)
 
 //=========================== typedef =========================================
 
 // IEEE802.15.4E acknowledgement (ACK)
 typedef struct {
     PORT_SIGNED_INT_WIDTH timeCorrection;
-} IEEE802154E_ACK_ht;
+} ieee154eHt_t;
 
 //=========================== module variables ================================
 
@@ -305,6 +307,7 @@ void ieee154e_init(void);
 PORT_TIMER_WIDTH ieee154e_asnDiff(asn_t *someASN);
 
 #ifdef DEADLINE_OPTION
+
 int16_t ieee154e_computeAsnDiff(asn_t *h_asn, asn_t *l_asn);
 
 void ieee154e_calculateExpTime(uint16_t max_delay, uint8_t *et_asn);

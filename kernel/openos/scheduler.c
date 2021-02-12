@@ -54,7 +54,9 @@ void scheduler_start(void) {
         while (scheduler_vars.task_list != NULL) {
             // there is still at least one task in the linked-list of tasks
 
-            INTERRUPT_DECLARATION();DISABLE_INTERRUPTS();
+            INTERRUPT_DECLARATION();
+
+            DISABLE_INTERRUPTS();
 
             // the task to execute is the one at the head of the queue
             pThisTask = scheduler_vars.task_list;
@@ -83,16 +85,18 @@ void scheduler_start(void) {
 
 void scheduler_push_task(task_cbt cb, task_prio_t prio) {
     taskList_item_t *taskContainer;
-    taskList_item_t **taskListWalker;INTERRUPT_DECLARATION();
+    taskList_item_t **taskListWalker;
+
+    INTERRUPT_DECLARATION();
 
     DISABLE_INTERRUPTS();
 
     // find an empty task container
     taskContainer = &scheduler_vars.taskBuf[0];
-    while (taskContainer->cb != NULL &&
-           taskContainer <= &scheduler_vars.taskBuf[TASK_LIST_DEPTH - 1]) {
+    while (taskContainer->cb != NULL && taskContainer <= &scheduler_vars.taskBuf[TASK_LIST_DEPTH - 1]) {
         taskContainer++;
     }
+
     if (taskContainer > &scheduler_vars.taskBuf[TASK_LIST_DEPTH - 1]) {
         // task list has overflown. This should never happpen!
 
@@ -102,20 +106,21 @@ void scheduler_push_task(task_cbt cb, task_prio_t prio) {
         // reset the board
         board_reset();
     }
+
     // fill that task container with this task
     taskContainer->cb = cb;
     taskContainer->prio = prio;
 
     // find position in queue
     taskListWalker = &scheduler_vars.task_list;
-    while (*taskListWalker != NULL &&
-           (*taskListWalker)->prio <= taskContainer->prio) {
+    while (*taskListWalker != NULL && (*taskListWalker)->prio <= taskContainer->prio) {
         taskListWalker = (taskList_item_t **) &((*taskListWalker)->next);
     }
     // insert at that position
     taskContainer->next = *taskListWalker;
     *taskListWalker = taskContainer;
     // maintain debug stats
+
 #if SCHEDULER_DEBUG_ENABLE
     scheduler_dbg.numTasksCur++;
     if (scheduler_dbg.numTasksCur>scheduler_dbg.numTasksMax) {
@@ -128,13 +133,11 @@ void scheduler_push_task(task_cbt cb, task_prio_t prio) {
 
 
 #if SCHEDULER_DEBUG_ENABLE
-uint8_t scheduler_debug_get_TasksCur(void)
-{
+uint8_t scheduler_debug_get_TasksCur(void) {
    return scheduler_dbg.numTasksCur;
 }
 
-uint8_t scheduler_debug_get_TasksMax(void)
-{
+uint8_t scheduler_debug_get_TasksMax(void) {
    return scheduler_dbg.numTasksMax;
 }
 #endif

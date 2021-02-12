@@ -422,7 +422,7 @@ typedef struct {
     uint8_t parentPreference;
     bool stableNeighbor;
     uint8_t switchStabilityCounter;
-    open_addr_t addr_64b;
+    open_addr_t addr;
     dagrank_t DAGrank;
     int8_t rssi;
     uint8_t numRx;

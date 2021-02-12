@@ -284,7 +284,6 @@ PORT_TIMER_WIDTH ieee154e_asnDiff(asn_t *someASN) {
         return (PORT_TIMER_WIDTH) 0xFFFFFFFF;;
     }
 
-    diff = 0;
     if (ieee154e_vars.asn.bytes2and3 == someASN->bytes2and3) {
         ENABLE_INTERRUPTS();
         return ieee154e_vars.asn.bytes0and1 - someASN->bytes0and1;
@@ -2643,7 +2642,7 @@ port_INLINE void channelhoppingTemplateIDStoreFromEB(uint8_t id) {
 //======= synchronization
 
 void synchronizePacket(PORT_TIMER_WIDTH timeReceived) {
-    PORT_SIGNED_INT_WIDTH timeCorrection;
+    PORT_SIGNED_INT_WIDTH timeCorr;
     PORT_TIMER_WIDTH newPeriod;
     PORT_TIMER_WIDTH currentPeriod;
     PORT_TIMER_WIDTH currentValue;
@@ -2653,7 +2652,7 @@ void synchronizePacket(PORT_TIMER_WIDTH timeReceived) {
     currentPeriod = ieee154e_vars.slotDuration;
 
     // calculate new period
-    timeCorrection = (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH) timeReceived - (PORT_SIGNED_INT_WIDTH) TsTxOffset);
+    timeCorr = (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH) timeReceived - (PORT_SIGNED_INT_WIDTH) TsTxOffset);
 
     // The interrupt beginning a new slot can either occur after the packet has been or while it is being received,
     // possibly because the mote is not yet synchronized. In the former case we simply take the usual slotLength and
@@ -2662,9 +2661,9 @@ void synchronizePacket(PORT_TIMER_WIDTH timeReceived) {
     // and in this constellation is guaranteed to be positive.
 
     if (currentValue < timeReceived) {
-        newPeriod = (PORT_TIMER_WIDTH) timeCorrection;
+        newPeriod = (PORT_TIMER_WIDTH) timeCorr;
     } else {
-        newPeriod = (PORT_TIMER_WIDTH)((PORT_SIGNED_INT_WIDTH) currentPeriod + timeCorrection);
+        newPeriod = (PORT_TIMER_WIDTH)((PORT_SIGNED_INT_WIDTH) currentPeriod + timeCorr);
     }
 
     // detect whether I'm too close to the edge of the slot, in that case, skip a slot and increase the temporary slot
@@ -2692,14 +2691,10 @@ void synchronizePacket(PORT_TIMER_WIDTH timeReceived) {
     ieee154e_vars.deSyncTimeout = DESYNCTIMEOUT;
 
     // log a large timeCorrection
-    if (
-            ieee154e_vars.isSync == TRUE &&
-            (
-                    timeCorrection < -LIMITLARGETIMECORRECTION || timeCorrection > LIMITLARGETIMECORRECTION
-            )
-            ) {
+    if (ieee154e_vars.isSync == TRUE && (timeCorr < -TIME_CORR_THRESHOLD || timeCorr > TIME_CORR_THRESHOLD)) {
+
         LOG_WARNING(COMPONENT_IEEE802154E, ERR_LARGE_TIMECORRECTION,
-                (errorparameter_t) timeCorrection,
+                (errorparameter_t) timeCorr,
                 (errorparameter_t) 0);
     }
 
@@ -2740,7 +2735,7 @@ void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
 #endif
     // log a large timeCorrection
     if (ieee154e_vars.isSync == TRUE && (
-            timeCorrection < -LIMITLARGETIMECORRECTION || timeCorrection > LIMITLARGETIMECORRECTION
+            timeCorrection < -TIME_CORR_THRESHOLD || timeCorrection > TIME_CORR_THRESHOLD
             )) {
         LOG_WARNING(COMPONENT_IEEE802154E, ERR_LARGE_TIMECORRECTION,
                 (errorparameter_t) timeCorrection,
