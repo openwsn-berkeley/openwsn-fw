@@ -4,6 +4,14 @@ project(OpenWSN-FW VERSION 1.0 LANGUAGES C ASM)
 
 include(ExternalProject)
 
+find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+
+message(STATUS "Found Python3 INCLUDE DIRS: ${Python3_INCLUDE_DIRS}")
+message(STATUS "Found Python3 LIBRARIES DIRS: ${Python3_LIBRARY_DIRS}")
+message(STATUS "Found Python3 LIBRARIES: ${Python3_LIBRARIES}")
+
+link_directories(BEFORE ${Python3_LIBRARY_DIRS})
+
 # set the cmake module path for easy includes
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
@@ -35,6 +43,9 @@ if (NOT CMAKE_BUILD_TYPE)
 endif ()
 
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel")
+
+# parse the opendefs and sixtop definitions
+add_custom_target(def-parser ALL COMMAND python def_exporter.py WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/cmake)
 
 # override shared_libs capabilities in case we are switching from cross-compile build to native build or vice-versa
 if ("${BOARD}" STREQUAL "python")

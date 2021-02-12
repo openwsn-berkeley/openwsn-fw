@@ -5,6 +5,7 @@ openwsn.egg-info/
 
 dist/
 
-openmote.egg-info/
+openwsn/sixtop.py
+openwsn/opendefs.py
 
 *.pyc

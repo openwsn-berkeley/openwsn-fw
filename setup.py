@@ -65,11 +65,9 @@ class CMakeBuild(build_ext):
 
             cmake_args = [
                 '-DCMAKE_BUILD_TYPE=%s' % cfg,
-                # Ask CMake to place the resulting library in the directory
-                # containing the extension
+                # Ask CMake to place the resulting library in the directory containing the extension
                 '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}'.format(cfg.upper(), ext_dir),
-                # Other intermediate static libraries are placed in a
-                # temporary build directory instead
+                # Other intermediate static libraries are placed in a temporary build directory instead
                 '-DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_{}={}'.format(cfg.upper(), self.build_temp),
             ]
 
@@ -103,6 +101,7 @@ class CMakeBuild(build_ext):
 
             # Build
             subprocess.check_call(['cmake', '--build', '.', '--config', cfg], cwd=self.build_temp)
+            pass
 
 
 class CleanCommand(Command):
