@@ -105,7 +105,10 @@
         <file file_name="../../../bsp/boards/nrf52840/sdk/components/toolchain/cmsis/include/core_cm4.h" />
       </folder>
     </folder>
-    <configuration Name="Debug" gcc_optimization_level="None" />
+    <configuration
+      Name="Debug"
+      c_preprocessor_definitions="NRF52840"
+      gcc_optimization_level="None" />
     <configuration Name="Release" gcc_optimization_level="Level 3" />
   </project>
   <configuration
