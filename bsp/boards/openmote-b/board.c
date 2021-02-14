@@ -72,7 +72,7 @@ int main(void) {
 
 void board_init(void) {
    user_button_initialized = FALSE;
-   
+
    gpio_init();
    clock_init();
    antenna_init();
@@ -104,8 +104,19 @@ void antenna_init(void) {
  * Puts the board to sleep
  */
 void board_sleep(void) {
+#if BOARD_DEEP_SLEEP
+    if(radio_is_enabled()) {
+      SysCtrlPowerModeSet(SYS_CTRL_PM_NOACTION);
+      SysCtrlSleep();
+    }
+    else {
+      SysCtrlPowerModeSet(SYS_CTRL_PM_1);
+      SysCtrlDeepSleep();
+    }
+#else
     SysCtrlPowerModeSet(SYS_CTRL_PM_NOACTION);
     SysCtrlSleep();
+#endif
 }
 
 /**
@@ -115,7 +126,7 @@ void board_sleep(void) {
 void board_timer_init(void) {
     // Configure the timer
     TimerConfigure(GPTIMER2_BASE, GPTIMER_CFG_PERIODIC_UP);
-    
+
     // Enable the timer
     TimerEnable(GPTIMER2_BASE, GPTIMER_BOTH);
 }
@@ -126,9 +137,9 @@ void board_timer_init(void) {
  */
 uint32_t board_timer_get(void) {
     uint32_t current;
-    
+
     current = TimerValueGet(GPTIMER2_BASE, GPTIMER_A) >> 5;
-    
+
     return current;
 }
 
@@ -143,7 +154,7 @@ bool board_timer_expired(uint32_t future) {
     current = TimerValueGet(GPTIMER2_BASE, GPTIMER_A) >> 5;
 
     remaining = (int32_t) (future - current);
-    
+
     if (remaining > 0) {
         return false;
     } else {
@@ -325,7 +336,7 @@ static void GPIO_C_Handler(void) {
     FlashMainPageErase(CC2538_FLASH_ADDRESS);
 
     leds_circular_shift();
-    
+
     /* Reset the board */
     SysCtrlReset();
 }

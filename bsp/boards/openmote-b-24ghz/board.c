@@ -96,20 +96,31 @@ void antenna_init(void) {
 
 void antenna_cc2538(void) {
   GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_CC2538_24GHZ, 0);
-  GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_AT215_24GHZ, BSP_ANTENNA_AT215_24GHZ);  
+  GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_AT215_24GHZ, BSP_ANTENNA_AT215_24GHZ);
 }
 
 void antenna_at86rf215(void) {
   GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_AT215_24GHZ, 0);
   GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_CC2538_24GHZ, BSP_ANTENNA_CC2538_24GHZ);
-}  
+}
 
 /**
  * Puts the board to sleep
  */
 void board_sleep(void) {
+#if BOARD_DEEP_SLEEP
+    if(radio_is_enabled()) {
+      SysCtrlPowerModeSet(SYS_CTRL_PM_NOACTION);
+      SysCtrlSleep();
+    }
+    else {
+      SysCtrlPowerModeSet(SYS_CTRL_PM_1);
+      SysCtrlDeepSleep();
+    }
+#else
     SysCtrlPowerModeSet(SYS_CTRL_PM_NOACTION);
     SysCtrlSleep();
+#endif
 }
 
 /**

@@ -41,6 +41,7 @@ typedef struct {
     radio_capture_cbt startFrame_cb;
     radio_capture_cbt endFrame_cb;
     radio_state_t state;
+    bool radio_txrx_enabled;
 } radio_vars_t;
 
 radio_vars_t radio_vars;
@@ -210,7 +211,6 @@ void radio_rfOn(void) {
 }
 
 void radio_rfOff(void) {
-
     // change state
     radio_vars.state = RADIOSTATE_TURNING_OFF;
     radio_off();
@@ -221,7 +221,12 @@ void radio_rfOff(void) {
     disable_radio_interrupts();
 
     // change state
+    radio_vars.radio_txrx_enabled = false;
     radio_vars.state = RADIOSTATE_RFOFF;
+}
+
+bool radio_is_enabled(void) {
+   return radio_vars.radio_txrx_enabled;
 }
 
 int8_t radio_getFrequencyOffset(void) {
@@ -263,6 +268,7 @@ void radio_loadPacket(uint8_t *packet, uint16_t len) {
 
 void radio_txEnable(void) {
 
+    radio_vars.radio_txrx_enabled = true;
     // change state
     radio_vars.state = RADIOSTATE_ENABLING_TX;
 
@@ -303,6 +309,7 @@ void radio_txNow(void) {
 
 void radio_rxEnable(void) {
 
+    radio_vars.radio_txrx_enabled = true;
     // change state
     radio_vars.state = RADIOSTATE_ENABLING_RX;
 

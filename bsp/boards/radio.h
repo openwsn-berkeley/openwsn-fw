@@ -86,6 +86,8 @@ void                radio_getReceivedFrame(uint8_t* bufRead,
                                 uint8_t* lqi,
                                    bool* crc);
 
+bool radio_is_enabled(void);
+
 // interrupt handlers
 kick_scheduler_t    radio_isr(void);
 
