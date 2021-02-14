@@ -65,8 +65,19 @@ opentimers_id_t opentimers_create(uint8_t timer_id, uint8_t task_prio){
         }
     }
 
+    if (timer_id==TIMER_ISR){
+        for (id = TIMER_TSCH + 1; id < TIMER_NUMBER_NON_GENERAL; id++){
+            if (opentimers_vars.timersBuf[id].isUsed  == FALSE){
+                opentimers_vars.timersBuf[id].isUsed   = TRUE;
+                opentimers_vars.timersBuf[id].timer_task_prio = task_prio;
+                ENABLE_INTERRUPTS();
+                return id;
+            }
+        }
+    }
+
     if (timer_id==TIMER_GENERAL_PURPOSE){
-        for (id=TIMER_NUMBER_NON_GENERAL;id<MAX_NUM_TIMERS;id++){
+        for (id =TIMER_NUMBER_NON_GENERAL;id<MAX_NUM_TIMERS;id++){
             if (opentimers_vars.timersBuf[id].isUsed  == FALSE){
                 opentimers_vars.timersBuf[id].isUsed   = TRUE;
                 opentimers_vars.timersBuf[id].timer_task_prio = task_prio;
@@ -370,11 +381,11 @@ void opentimers_timer_callback(void){
         sctimer_setCompare(sctimer_readCounter()+SPLITE_TIMER_DURATION);
         return;
     } else {
-        if (opentimers_vars.timersBuf[TIMER_INHIBIT].currentCompareValue == opentimers_vars.currentCompareValue){
+        if (opentimers_vars.currentCompareValue == opentimers_vars.timersBuf[TIMER_INHIBIT].currentCompareValue){
             // this is the timer interrupt right after inhibit timer, pre call the non-tsch, non-inhibit timer interrupt here to avoid interrupt during receiving serial bytes
             for (i=0;i<MAX_NUM_TIMERS;i++){
                 if (opentimers_vars.timersBuf[i].isrunning==TRUE){
-                    if (i!=TIMER_TSCH && i!=TIMER_INHIBIT && opentimers_vars.timersBuf[i].currentCompareValue - opentimers_vars.currentCompareValue < PRE_CALL_TIMER_WINDOW){
+                    if (i >= TIMER_NUMBER_NON_GENERAL && opentimers_vars.timersBuf[i].currentCompareValue - opentimers_vars.currentCompareValue < PRE_CALL_TIMER_WINDOW){
                         opentimers_vars.timersBuf[i].currentCompareValue = opentimers_vars.currentCompareValue;
                     }
                 }
@@ -385,7 +396,7 @@ void opentimers_timer_callback(void){
                 if (opentimers_vars.currentCompareValue == opentimers_vars.timersBuf[i].currentCompareValue){
                     // this timer expired, mark as expired
                     opentimers_vars.timersBuf[i].lastCompareValue    = opentimers_vars.timersBuf[i].currentCompareValue;
-                    if (i==TIMER_TSCH){
+                    if (i < TIMER_NUMBER_NON_GENERAL && i != 0 ){
                         opentimers_vars.insideISR = TRUE;
                         opentimers_vars.timersBuf[i].isrunning  = FALSE;
                         opentimers_vars.timersBuf[i].callback(i);
