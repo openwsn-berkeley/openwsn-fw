@@ -1,12 +1,9 @@
 add_library(openapps "")
 
 target_sources(openapps
-        PUBLIC
+        PRIVATE
         openapps.c
-        uecho/uecho.h
         uecho/uecho.c
-        cjoin/cjoin.h
-        cjoin/cojp_cbor.h
         cjoin/cojp_cbor.c
         cjoin/cjoin.c)
 
@@ -16,6 +13,7 @@ target_include_directories(openapps
         "../openapps"
         "../openapps/uecho"
         "../openapps/cjoin")
+
 target_link_libraries(openapps PRIVATE bsp)
 target_link_libraries(openapps PRIVATE openweb)
 target_link_libraries(openapps PRIVATE openstack)

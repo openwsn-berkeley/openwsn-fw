@@ -9,8 +9,8 @@
 */
 
 #include "config.h"
-#include "sock/sock.h"
-#include "sock/async.h"
+#include "sock.h"
+#include "async.h"
 
 //=========================== define ==========================================
 

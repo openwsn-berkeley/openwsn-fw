@@ -2,6 +2,8 @@ if ("${BOARD}" STREQUAL "python")
     add_library(${PROJECT} SHARED)
 
     set_target_properties(${PROJECT} PROPERTIES PREFIX "" OUTPUT_NAME openmote LINKER_LANGUAGE C)
+
+    target_include_directories(${PROJECT} PRIVATE ${Python3_INCLUDE_DIRS})
 else ()
     add_executable(${PROJECT} "")
 
@@ -11,7 +13,7 @@ else ()
 endif ()
 
 
-target_sources(${PROJECT} PUBLIC openwsn.c openwsn.h)
+target_sources(${PROJECT} PUBLIC openwsn.c)
 
 target_link_libraries(${PROJECT} PUBLIC bsp)
 target_link_libraries(${PROJECT} PUBLIC kernel)

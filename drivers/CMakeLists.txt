@@ -1,7 +1,7 @@
 add_library(opendrivers "")
 
 target_sources(opendrivers
-        PUBLIC
+        PRIVATE
         opendrivers.c
         common/opensensors.c
         common/openserial.c
@@ -17,6 +17,7 @@ target_sources(opendrivers
 target_compile_features(opendrivers PUBLIC c_std_99)
 target_include_directories(opendrivers
         PUBLIC "."
+        PUBLIC "../inc"
         PUBLIC "common"
         PUBLIC "common/crypto")
 

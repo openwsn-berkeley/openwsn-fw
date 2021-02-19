@@ -4,10 +4,12 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, May 2013.
 */
 
-#include "openwsnmodule.h"
+#include "interface.h"
 #include "radio.h"
 
 //=========================== defines =========================================
+
+typedef void (*radio_capture_cb_t)(PORT_TIMER_WIDTH timestamp);
 
 typedef struct {
     radio_capture_cb_t startFrame_cb;

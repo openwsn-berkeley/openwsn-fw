@@ -10,18 +10,16 @@
 #include "debugpins.h"
 #include "leds.h"
 
-#if PYTHON_BOARD
-
-#include "openwsnmodule.h"
-
-#endif
-
 //=========================== variables =======================================
 
 scheduler_vars_t scheduler_vars;
 
 #if SCHEDULER_DEBUG_ENABLE
 scheduler_dbg_t scheduler_dbg;
+#endif
+
+#if PYTHON_BOARD
+bool quit = FALSE;
 #endif
 
 //=========================== prototypes ======================================
@@ -41,6 +39,7 @@ void scheduler_init(void) {
 }
 
 #if PYTHON_BOARD
+
 void scheduler_start(void) {
 #else
     _Noreturn void scheduler_start(void) {
@@ -130,6 +129,14 @@ void scheduler_push_task(task_cbt cb, task_prio_t prio) {
 
     ENABLE_INTERRUPTS();
 }
+
+#if PYTHON_BOARD
+
+void scheduler_stop(void) {
+    quit = TRUE;
+}
+
+#endif
 
 
 #if SCHEDULER_DEBUG_ENABLE

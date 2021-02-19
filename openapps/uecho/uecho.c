@@ -1,7 +1,7 @@
 #include "opendefs.h"
 #include "uecho.h"
-#include "sock/sock.h"
-#include "sock/async.h"
+#include "sock.h"
+#include "async.h"
 #include "openserial.h"
 
 //=========================== variables =======================================

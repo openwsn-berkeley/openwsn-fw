@@ -4,7 +4,7 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, May 2013.
 */
 
-#include "openwsnmodule.h"
+#include "interface.h"
 #include "leds.h"
 
 //=========================== defines =========================================

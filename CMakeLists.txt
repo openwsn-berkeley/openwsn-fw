@@ -24,6 +24,10 @@ if (POLICY CMP0057)
     cmake_policy(SET CMP0057 NEW)
 endif ()
 
+if (WIN32)
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+endif ()
+
 # choose project and board
 if (NOT PROJECT)
     set(PROJECT "oos_openwsn" CACHE STRING "Select a project" FORCE)
@@ -52,6 +56,14 @@ if ("${BOARD}" STREQUAL "python")
     add_definitions("-DPYTHON_BOARD")
     set(BUILD_SHARED_LIBS ON)
     set_property(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
+
+    find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+
+    message(STATUS "Found Python3 INCLUDE DIRS: ${Python3_INCLUDE_DIRS}")
+    message(STATUS "Found Python3 LIBRARIES DIRS: ${Python3_LIBRARY_DIRS}")
+    message(STATUS "Found Python3 LIBRARIES: ${Python3_LIBRARIES}")
+
+    link_directories(BEFORE ${Python3_LIBRARY_DIRS})
 else ()
     set_property(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS FALSE)
     set(BUILD_SHARED_LIBS OFF)

@@ -5,7 +5,7 @@
 */
 
 #include <Python.h>
-#include "openwsnmodule.h"
+#include "interface.h"
 
 // bsp modules
 #include "board.h"

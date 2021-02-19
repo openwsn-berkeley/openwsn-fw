@@ -9,3 +9,5 @@ openwsn/sixtop.py
 openwsn/opendefs.py
 
 *.pyc
+
+.vs/

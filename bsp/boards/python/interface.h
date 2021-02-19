@@ -10,23 +10,12 @@
 \author Timothy Claeys <timothy.claeys@inria.fr>, September 2020.
 */
 
-#ifndef OPENWSN_OPENWSNMODULE_H
-#define OPENWSN_OPENWSNMODULE_H
-
-#define PY_SSIZE_T_CLEAN
+#ifndef OPENWSN_INTERFACE_H
+#define OPENWSN_INTERFACE_H
 
 #include <Python.h>
-#include <stdio.h>
-
-#include "board_info.h"
 
 //========================= typedefs ==========================================
-
-typedef void (*uart_tx_cb_t)(void);
-
-typedef void (*uart_tx_cb_t)(void);
-
-typedef void (*radio_capture_cb_t)(PORT_TIMER_WIDTH timestamp);
 
 //=========================== enums ===========================================
 
@@ -127,11 +116,7 @@ enum {
     MOTE_NOTIF_LAST
 };
 
-extern PyObject *callbacks[MOTE_NOTIF_LAST];
-extern uint8_t quit;
-
-// entry function
-extern int mote_main(void);
+PyObject *callbacks[MOTE_NOTIF_LAST];
 
 // radio
 void radio_intr_startOfFrame(uint32_t capturedTime);

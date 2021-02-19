@@ -4,7 +4,7 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, May 2013.
 */
 
-#include "openwsnmodule.h"
+#include "interface.h"
 #include "uart.h"
 
 //=========================== defines =========================================
@@ -16,7 +16,6 @@ typedef struct {
     uart_tx_cbt txCb;
     uart_rx_cbt rxCb;
 } uart_icb_t;
-
 
 //=========================== variables =======================================
 
