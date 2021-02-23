@@ -58,9 +58,6 @@ void cjoin_retransmission_cb(opentimers_id_t id);
 
 void cjoin_retransmission_task_cb(void);
 
-bool cjoin_getIsJoined(void);
-
-void cjoin_setIsJoined(bool newValue);
 //=========================== public ==========================================
 
 void cjoin_init(void) {
@@ -69,7 +66,7 @@ void cjoin_init(void) {
 
     // prepare the resource descriptor for the /j path
     cjoin_vars.desc.path0len = sizeof(cjoin_path0) - 1;
-    cjoin_vars.desc.path0val = (uint8_t * )(&cjoin_path0);
+    cjoin_vars.desc.path0val = (uint8_t *) (&cjoin_path0);
     cjoin_vars.desc.path1len = 0;
     cjoin_vars.desc.path1val = NULL;
     cjoin_vars.desc.componentID = COMPONENT_CJOIN;
@@ -102,8 +99,8 @@ void cjoin_init_security_context(void) {
                                  0,
                                  recipientID,
                                  sizeof(recipientID),
-				 idContext,
-				 sizeof(idContext),
+                                 idContext,
+                                 sizeof(idContext),
                                  joinKey,
                                  16,
                                  NULL,
@@ -326,12 +323,10 @@ owerror_t cjoin_sendJoinRequest(open_addr_t *joinProxy) {
 }
 
 bool cjoin_getIsJoined(void) {
-    bool res;
-    INTERRUPT_DECLARATION();
+    bool res;INTERRUPT_DECLARATION();
 
     DISABLE_INTERRUPTS();
-    res = cjoin_vars.isJoined;
-    ENABLE_INTERRUPTS();
+    res = cjoin_vars.isJoined;ENABLE_INTERRUPTS();
 
     return res;
 }

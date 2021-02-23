@@ -9,9 +9,9 @@ target_sources(openweb
 
 target_compile_features(openweb PUBLIC c_std_99)
 target_include_directories(openweb
-        INTERFACE
-        "../openweb"
-        "../openweb/opencoap")
+        PUBLIC
+        "."
+        "opencoap")
 
 target_link_libraries(openweb PRIVATE bsp)
 target_link_libraries(openweb PRIVATE opendrivers)

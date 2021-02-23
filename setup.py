@@ -25,6 +25,20 @@ c_module_name = '_openmote'
 
 enable_configure = False
 
+if not os.path.exists(os.path.join(os.path.abspath('.'), 'build')):
+    os.mkdir(os.path.join(os.path.abspath('.'), 'build'))
+    os.mkdir(os.path.join(os.path.abspath('.'), 'build', 'openwsn'))
+
+    with open('build/openwsn/__init__.py', 'w') as f:
+        f.write('from openmote import *')
+else:
+    if os.path.exists(os.path.join(os.path.abspath('.'), 'build')) and not os.path.exists(
+            os.path.join(os.path.abspath('.'), 'build', 'openwsn')):
+        os.mkdir(os.path.join(os.path.abspath('./build'), 'openwsn'))
+
+    with open('build/openwsn/__init__.py', 'w') as f:
+        f.write('from openmote import *')
+
 # Command line flags forwarded to CMake (for debug purpose)
 cmake_cmd_args = []
 for f in sys.argv:
@@ -109,8 +123,18 @@ class CMakeBuild(build_ext):
                 subprocess.check_call(['ccmake', ext.cmake_lists_dir], cwd=self.build_temp)
 
             # Build
-            subprocess.check_call(['cmake', '--build', '.', '--config', cfg], cwd=self.build_temp)
-            pass
+            try:
+                subprocess.check_call(['cmake', '--build', '.', '--config', cfg], cwd=self.build_temp)
+            except subprocess.CalledProcessError:
+                if colors:
+                    print(c.Fore.RED + "Build process failed" + c.Fore.RESET)
+                else:
+                    print("Build process failed")
+            else:
+                if colors:
+                    print(c.Fore.GREEN + "Build process succeeded" + c.Fore.RESET)
+                else:
+                    print("Build process succeeded")
 
 
 class CleanCommand(Command):

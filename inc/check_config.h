@@ -72,7 +72,6 @@
     OPENWSN_USERIALBRIDGE_C || \
     OPENWSN_UEXPIRATION_C || \
     OPENWSN_UEXP_MONITOR_C)
-
 #error "A UDP dependent application is defined, but UDP is not included in the build."
 #endif
 
@@ -88,6 +87,10 @@
 
 #if OPENWSN_COAP_C && !(OPENWSN_UDP_C || OPENWSN_TCP_C)
 #error "CoAP requires a transport layer, i.e. UDP or TCP."
+#endif
+
+#if PYTHON_BOARD && OPENWSN_CINFRARED_C
+#error "CoAP infrared application not supported on python board"
 #endif
 
 #endif /* OPENWSN_CHECK_CONFIG_H */

@@ -20,6 +20,10 @@
 
 const uint8_t rrt_path0[] = "rt";
 
+static const uint8_t ipAddr_ringmaster[] = {0xbb, 0xbb, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                            0x00, 0x00, 0x00, 0x01};
+
+
 //=========================== variables =======================================
 
 rrt_vars_t rrt_vars;
@@ -34,17 +38,7 @@ owerror_t rrt_receive(
         uint8_t *coap_outgoingOptionsLen
 );
 
-void rrt_sendDone(
-        OpenQueueEntry_t *msg,
-        owerror_t error
-);
-
-void rrt_setGETRespMsg(
-        OpenQueueEntry_t *msg,
-        uint8_t discovered
-);
-
-void rrt_sendCoAPMsg(char actionMsg, uint8_t *ipv6mote);
+void rrt_setGETRespMsg(OpenQueueEntry_t *msg, uint8_t registered);
 
 //=========================== public ==========================================
 
@@ -58,7 +52,7 @@ void rrt_init(void) {
 
     // prepare the resource descriptor for the /rt path
     rrt_vars.desc.path0len = sizeof(rrt_path0) - 1;
-    rrt_vars.desc.path0val = (uint8_t * )(&rrt_path0);
+    rrt_vars.desc.path0val = (uint8_t *) (&rrt_path0);
     rrt_vars.desc.path1len = 0;
     rrt_vars.desc.path1val = NULL;
     rrt_vars.desc.componentID = COMPONENT_RRT;
@@ -90,12 +84,16 @@ owerror_t rrt_receive(
         coap_header_iht *coap_header,
         coap_option_iht *coap_incomingOptions,
         coap_option_iht *coap_outgoingOptions,
-        uint8_t *coap_outgoingOptionsLen
-) {
+        uint8_t *coap_outgoingOptionsLen) {
+
     owerror_t outcome;
     uint8_t mssgRecvd;
     uint8_t moteToSendTo[16];
     uint8_t actionToFwd;
+
+    (void) coap_incomingOptions;
+    (void) coap_outgoingOptions;
+    (void) coap_outgoingOptionsLen;
 
     switch (coap_header->Code) {
         case COAP_CODE_REQ_GET:
@@ -162,6 +160,8 @@ owerror_t rrt_receive(
 }
 
 void rrt_setGETRespMsg(OpenQueueEntry_t *msg, uint8_t registered) {
+    openserial_printf("Got a CoAP GET request\n");
+
     if (registered == 0) {
         if (packetfunctions_reserveHeader(&msg, 11) == E_FAIL) {
             openqueue_freePacketBuffer(msg);
@@ -202,12 +202,13 @@ void rrt_setGETRespMsg(OpenQueueEntry_t *msg, uint8_t registered) {
 /**
  * if mote is 0, then send to the ringmater, defined by ipAddr_ringmaster
 **/
-void rrt_sendCoAPMsg(char actionMsg, uint8_t *ipv6mote) {
+void rrt_sendCoAPMsg(char actionMsg, uint8_t *ipv6Mote) {
     OpenQueueEntry_t *pkt;
     owerror_t outcome;
     coap_option_iht options[2];
     uint8_t medType;
 
+    openserial_printf("Sending a CoAP response\n");
 
     pkt = openqueue_getFreePacketBuffer(COMPONENT_RRT);
     if (pkt == NULL) {
@@ -240,10 +241,10 @@ void rrt_sendCoAPMsg(char actionMsg, uint8_t *ipv6mote) {
     pkt->l4_destination_port = WKP_UDP_RINGMASTER;
     pkt->l3_destinationAdd.type = ADDR_128B;
     // set destination address here
-    if (!ipv6mote) {  //if mote ptr is NULL, then send to ringmaster
-        memcpy(&pkt->l3_destinationAdd.addr_128b[0], &ipAddr_ringmaster, 16);
+    if (!ipv6Mote) {  //if mote ptr is NULL, then send to ringmaster
+        memcpy(&pkt->l3_destinationAdd.addr_type.addr_128b[0], &ipAddr_ringmaster, 16);
     } else {
-        memcpy(&pkt->l3_destinationAdd.addr_128b[0], &ipv6mote[0], 16);
+        memcpy(&pkt->l3_destinationAdd.addr_type.addr_128b[0], &ipv6Mote[0], 16);
     }
 
     //send

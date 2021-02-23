@@ -1,5 +1,5 @@
-#ifndef __CEXAMPLE_H
-#define __CEXAMPLE_H
+#ifndef OPENWSN_CEXAMPLE_H
+#define OPENWSN_CEXAMPLE_H
 
 /**
 \addtogroup AppUdp
@@ -8,6 +8,7 @@
 \{
 */
 
+#include "opentimers.h"
 #include "config.h"
 #include "coap.h"
 
@@ -32,5 +33,5 @@ void cexample_init(void);
 \}
 */
 
-#endif
+#endif /* OPENWSN_CEXAMPLE_H */
 
