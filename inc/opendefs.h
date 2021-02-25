@@ -249,7 +249,7 @@ enum {
     ERR_WRONG_CELLTYPE = 0x2d,                  // wrong celltype {0} at slotOffset {1}
     ERR_IEEE154_UNSUPPORTED = 0x2e,             // unsupported IEEE802.15.4 parameter {1} at location {0}
     ERR_DESYNCHRONIZED = 0x2f,                  // got desynchronized at slotOffset {0}
-    ERR_SYNCHRONIZED = 0x30,                    // synchronized at slotOffset {0}
+    ERR_SYNCHRONIZED = 0x30,                    // synchronized at slotOffset {0} to mote {1}
     ERR_LARGE_TIMECORRECTION = 0x31,            // large timeCorr.: {0} ticks (code loc. {1})
     ERR_WRONG_STATE_IN_ENDFRAME_SYNC = 0x32,    // wrong state {0} in end of frame+sync
     ERR_WRONG_STATE_IN_STARTSLOT = 0x33,        // wrong state {0} in startSlot, at slotOffset {1}

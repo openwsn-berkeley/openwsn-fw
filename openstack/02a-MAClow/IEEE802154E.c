@@ -790,8 +790,8 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
     changeState(S_SYNCPROC);
 
     // get a buffer to put the (received) frame in
-    ieee154e_vars.dataReceived = openqueue_getFreePacketBuffer(COMPONENT_IEEE802154E);
-    if (ieee154e_vars.dataReceived == NULL) {
+
+    if ((ieee154e_vars.dataReceived = openqueue_getFreePacketBuffer(COMPONENT_IEEE802154E)) == NULL) {
         LOG_ERROR(COMPONENT_IEEE802154E, ERR_NO_FREE_PACKET_BUFFER, (errorparameter_t) 0, (errorparameter_t) 0);
         // abort
         return;
@@ -906,7 +906,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
         // log the info
         LOG_SUCCESS(COMPONENT_IEEE802154E, ERR_SYNCHRONIZED,
                 (errorparameter_t) ieee154e_vars.slotOffset,
-                (errorparameter_t) 0);
+                (errorparameter_t) ieee802514_header.src.addr_type.addr_64b[7]);
 
         // send received EB up the stack so RES can update statistics (synchronizing)
         notif_receive(ieee154e_vars.dataReceived);
