@@ -32,21 +32,28 @@ endif ()
 if (NOT PROJECT)
     set(PROJECT "oos_openwsn" CACHE STRING "Select a project" FORCE)
 endif ()
-
 set_property(CACHE PROJECT PROPERTY STRINGS "oos_openwsn")
 
 if (NOT BOARD)
     set(BOARD "python" CACHE STRING "Select a board" FORCE)
 endif ()
-
 set_property(CACHE BOARD PROPERTY STRINGS "python" "openmote-cc2538" "iot-lab_M3")
 
 # force default build type to Debug unless already set (by an IDE or on the command line)
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose the build type: Debug, Release, and MinSizeRel." FORCE)
 endif ()
-
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel")
+
+# sanitizers
+if (CMAKE_C_COMPILER_ID STREQUAL "Clang" AND "${BOARD}" STREQUAL "python")
+    option(SANITIZERS "Enable sanitizing of the *.so/*.dylib libraries in the Python extension" OFF)
+
+    if (SANITIZERS)
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address -shared-libasan -fno-omit-frame-pointer")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address -shared-libasan -fno-omit-frame-pointer")
+    endif ()
+endif ()
 
 # parse the opendefs and sixtop definitions
 add_custom_target(def-parser ALL COMMAND python def_exporter.py WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/cmake)
@@ -91,6 +98,7 @@ message(STATUS "BOARD:.......................${BOARD}")
 message(STATUS "PROJECT:.....................${PROJECT}")
 message(STATUS "BUILD_SHARED_LIBS............${BUILD_SHARED_LIBS}")
 message(STATUS "CMAKE_BUILD_TYPE:............${CMAKE_BUILD_TYPE}")
+message(STATUS "SANITIZERS:..................${SANITIZERS}")
 
 # project-wide settings
 message("")
