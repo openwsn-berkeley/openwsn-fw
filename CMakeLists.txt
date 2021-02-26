@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 
-project(OpenWSN-FW VERSION 1.0 LANGUAGES C ASM)
+project(OpenWSN-FW VERSION 2.0 LANGUAGES C ASM)
 
 include(ExternalProject)
 
@@ -45,6 +45,8 @@ if (CMAKE_C_COMPILER_ID STREQUAL "Clang" AND "${BOARD}" STREQUAL "python")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address -shared-libasan -fno-omit-frame-pointer")
         set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address -shared-libasan -fno-omit-frame-pointer")
     endif ()
+else ()
+    set(SANITIZERS OFF)
 endif ()
 
 # parse the opendefs and sixtop definitions
@@ -86,6 +88,7 @@ message("")
 message(STATUS "OPENWSN-FW:..................VERSION-${PROJECT_VERSION}")
 message(STATUS "COMPILER TOOLCHAIN:..........${CMAKE_C_COMPILER_ID}")
 message(STATUS "COMPILER VERSION:............${CMAKE_C_COMPILER_VERSION}")
+message(STATUS "CMAKE_GENERATOR:.............${CMAKE_GENERATOR}")
 message(STATUS "BOARD:.......................${BOARD}")
 message(STATUS "PROJECT:.....................${PROJECT}")
 message(STATUS "BUILD_SHARED_LIBS............${BUILD_SHARED_LIBS}")
