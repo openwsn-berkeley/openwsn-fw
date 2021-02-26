@@ -93,6 +93,11 @@ class CMakeBuild(build_ext):
             # We can handle some platform-specific settings at our discretion
             if platform.system() == 'Windows':
                 plat = ('x64' if platform.architecture()[0] == '64bit' else 'Win32')
+
+                # When we use CMAKE_BUILD_TYPE=DEBUG we need python3x_d.lib libraries for linking, but Windows often
+                # doesn't include those debug libraries. To prevent issues, force build type to Release
+                cfg = 'Release'
+
                 cmake_args += [
                     # These options are likely to be needed under Windows
                     '-DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=TRUE',
@@ -120,7 +125,11 @@ class CMakeBuild(build_ext):
                 cwd=self.build_temp)
 
             if enable_configure:
-                subprocess.check_call(['ccmake', ext.cmake_lists_dir], cwd=self.build_temp)
+                if platform.system() == 'Windows':
+                    print('ON WINDOWS')
+                    subprocess.check_call(['cmake-gui', ext.cmake_lists_dir], cwd=self.build_temp)
+                else:
+                    subprocess.check_call(['ccmake', ext.cmake_lists_dir], cwd=self.build_temp)
 
             # Build
             try:

@@ -4,14 +4,6 @@ project(OpenWSN-FW VERSION 1.0 LANGUAGES C ASM)
 
 include(ExternalProject)
 
-find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
-
-message(STATUS "Found Python3 INCLUDE DIRS: ${Python3_INCLUDE_DIRS}")
-message(STATUS "Found Python3 LIBRARIES DIRS: ${Python3_LIBRARY_DIRS}")
-message(STATUS "Found Python3 LIBRARIES: ${Python3_LIBRARIES}")
-
-link_directories(BEFORE ${Python3_LIBRARY_DIRS})
-
 # set the cmake module path for easy includes
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 

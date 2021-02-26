@@ -1,0 +1,89 @@
+name: Windows
+
+on: [push, pull_request]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Debug
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['None', '3.6', '3.7', '3.8']
+        board: ['python', 'openmote-cc2538', 'iot-lab_M3']
+        exclude:
+          - board: 'python'
+            python-version: 'None'
+          - board: 'openmote-cc2538'
+            python-version: '3.6'
+          - board: 'openmote-cc2538'
+            python-version: '3.7'
+          - board: 'openmote-cc2538'
+            python-version: '3.8'
+          - board: 'iot-lab_M3'
+            python-version: '3.6'
+          - board: 'iot-lab_M3'
+            python-version: '3.7'
+          - board: 'iot-lab_M3'
+            python-version: '3.8'
+
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - if: ${{ matrix.board == 'python' }}
+        name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: 'x64'
+
+      - if: ${{ matrix.board == 'openmote-cc2538' || matrix.board == 'iot-lab_M3' }}
+        name: Setup compiler toolchain
+        uses: fiam/arm-none-eabi-gcc@v1
+        with:
+          release: '9-2020-q2'
+
+      - if: ${{ matrix.board == 'openmote-cc2538' || matrix.board == 'iot-lab_M3' }}
+        name: Test ARM toolchain
+        run: arm-none-eabi-gcc --version
+
+      - if: ${{ matrix.board == 'python' }}
+        name: Building Python Extension
+        run: |
+          python setup.py install --user -DBOARD=openmote-cc2538 -DOPT-UDP:BOOL=ON -DOPT-COAP:BOOL=ON -DOPT-CJOIN:BOOL=ON
+
+      - if: ${{ matrix.board != 'python' }}
+        name: Create Build Environment
+        run: cmake -E make_directory ${{github.workspace}}/build
+
+      - if: ${{ matrix.board == 'openmote-cc2538' }}
+        name: Configure CMake
+        # Use a bash shell so we can use the same syntax for environment variable
+        # access regardless of the host operating system
+        shell: bash
+        working-directory: ${{github.workspace}}/build
+        # Note the current convention is to use the -S and -B options here to specify source
+        # and build directories, but this is only available with CMake 3.13 and higher.
+        # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
+        run: cmake $GITHUB_WORKSPACE -G"MinGW Makefiles" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/cc2538.cmake -DBOARD=openmote-cc2538 -DBOARD=openmote-cc2538 -DOPT-UDP:BOOL=ON -DOPT-COAP:BOOL=ON -DOPT-CJOIN:BOOL=ON
+
+      - if: ${{ matrix.board == 'iot-lab_M3' }}
+        name: Configure CMake
+        # Use a bash shell so we can use the same syntax for environment variable
+        # access regardless of the host operating system
+        shell: bash
+        working-directory: ${{github.workspace}}/build
+        # Note the current convention is to use the -S and -B options here to specify source
+        # and build directories, but this is only available with CMake 3.13 and higher.
+        # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
+        run: cmake $GITHUB_WORKSPACE -G"MinGW Makefiles" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/m3.cmake -DBOARD=iot-lab_M3 -DBOARD=openmote-cc2538 -DOPT-UDP:BOOL=ON -DOPT-COAP:BOOL=ON -DOPT-CJOIN:BOOL=ON
+
+      - if: ${{ matrix.board != 'python' }}
+        working-directory: ${{github.workspace}}/build
+        shell: bash
+        # Execute the build.  You can specify a specific target with "--target <NAME>"
+        run: cmake --build . --config $BUILD_TYPE
