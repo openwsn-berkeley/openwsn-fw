@@ -1,12 +1,27 @@
 set(LOG_LEVEL "6" CACHE STRING "Select a logging level: 0 (no logs) - 6 (all logs)")
 add_definitions(-DOPENWSN_LOG_LEVEL=${LOG_LEVEL})
+set_property(CACHE LOG_LEVEL PROPERTY STRINGS "0" "1" "2" "3" "4" "5" "6")
 
-set(IEEE154E_CHANNEL "0" CACHE STRING "Pick a channel between 11 and 26, or select 0 for channel hopping")
+set(IEEE154E_CHANNEL "0" CACHE STRING "Pick a fiexed channel between 11 and 26, or select 0 for channel hopping")
 add_definitions(-DIEEE802154E_SINGLE_CHANNEL=${IEEE154E_CHANNEL})
+
+set(DEFAULT_COAP_PORT "5683" CACHE STRING "Set a default CoAP server port")
+add_definitions(-DDEFAULT_COAP_PORT=${DEFAULT_COAP_PORT})
+
+set(PACKETQUEUE_LENGTH "20" CACHE STRING "Set the size of the packet buffer")
+add_definitions(-DPACKETQUEUE_LENGTH=${PACKETQUEUE_LENGTH})
+
+set(PANID "0xcafe" CACHE STRING "Set a 2-byte PAN ID")
+add_definitions(-DPANID_DEFINED=${PANID})
 
 option(OPT-COAP "Enable the COAP protocol" OFF)
 if (OPT-COAP)
     add_definitions(-DOPENWSN_COAP_C)
+endif ()
+
+option(OPT-FORCE-TOPO "Enable a fixed topology. You need to set the topology in openstack/02a-MAClow/topology.c" OFF)
+if (OPT-FORCE-TOPO)
+    add_definitions(-DOPENWSN_FORCETOPOLOGY_C)
 endif ()
 
 option(OPT-UDP "Enable the UDP protocol" OFF)
@@ -14,10 +29,15 @@ if (OPT-UDP)
     add_definitions(-DOPENWSN_UDP_C)
 endif ()
 
+option(OPT-L2-SEC "Enable L2 security" OFF)
+if (OPT-L2-SEC)
+    add_definitions(-DOPENWSN_IEEE802154E_SECURITY_C)
+endif ()
+
 option(OPT-FRAG "Enable 6LoWPAN fragmentation" OFF)
 if (OPT-FRAG)
     add_definitions(-DOPENWSN_6LO_FRAGMENTATION_C)
-endif()
+endif ()
 
 option(OPT-PING "Enable the ping functionality (icmpv6_echo)" OFF)
 if (OPT-PING)
@@ -87,4 +107,9 @@ endif ()
 option(OPT-PRINTF "Enable printf functionality" OFF)
 if (OPT-PRINTF)
     add_definitions(-DBOARD_OPENSERIAL_PRINTF)
+endif ()
+
+option(OPT-CRYPTO-HW "Enable hardware acceleration for crypto operations" OFF)
+if (OPT-CRYPTO-HW)
+    add_definitions(-DBOARD_CRYPTOENGINE_ENABLED)
 endif ()
