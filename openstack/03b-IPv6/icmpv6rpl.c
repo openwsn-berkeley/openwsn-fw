@@ -12,7 +12,6 @@
 #include "IEEE802154E.h"
 #include "IEEE802154_security.h"
 #include "schedule.h"
-#include "msf.h"
 
 //=========================== definition ======================================
 
@@ -147,7 +146,7 @@ void icmpv6rpl_init(void) {
                                                FLAG_DAO_C | \
                                                FLAG_DAO_D | \
                                                FLAG_DAO_E | \
-                                               PRF_DIO_C  | \
+                                               PRF_DIO_C | \
                                                FLAG_DAO_F | \
                                                D_DAO | K_DAO;
     icmpv6rpl_vars.dao.reserved = 0x00;
@@ -214,6 +213,7 @@ owerror_t icmpv6rpl_getRPLDODAGid(uint8_t *address_128b) {
 \param[in] error Outcome of the sending.
 */
 void icmpv6rpl_sendDone(OpenQueueEntry_t *msg, owerror_t error) {
+    (void) error;
 
     // take ownership over that packet
     msg->owner = COMPONENT_ICMPv6RPL;
@@ -362,7 +362,7 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection(void) {
     // temporaries
     uint16_t rankIncrease;
     dagrank_t neighborRank;
-    uint32_t tentativeDAGrank;
+    int32_t tentativeDAGrank;
 
     open_addr_t newParent;
 
@@ -630,14 +630,14 @@ void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t *msg) {
     }
 }
 
-void icmpv6rpl_killPreferredParent(void) {
-    icmpv6rpl_vars.haveParent = FALSE;
-    if (idmanager_getIsDAGroot() == TRUE) {
-        icmpv6rpl_vars.myDAGrank = MINHOPRANKINCREASE;
-    } else {
-        icmpv6rpl_vars.myDAGrank = DEFAULTDAGRANK;
-    }
-}
+// void icmpv6rpl_killPreferredParent(void) {
+//     icmpv6rpl_vars.haveParent = FALSE;
+//     if (idmanager_getIsDAGroot() == TRUE) {
+//         icmpv6rpl_vars.myDAGrank = MINHOPRANKINCREASE;
+//     } else {
+//         icmpv6rpl_vars.myDAGrank = DEFAULTDAGRANK;
+//     }
+// }
 
 //=========================== private =========================================
 
@@ -650,6 +650,8 @@ void icmpv6rpl_killPreferredParent(void) {
     already. No need to push a task again.
 */
 void icmpv6rpl_timer_DIO_cb(opentimers_id_t id) {
+    (void) id;
+
     icmpv6rpl_timer_DIO_task();
 }
 
@@ -797,7 +799,7 @@ void sendDIO(void) {
     }
     ((ICMPv6_ht *) (msg->payload))->type = msg->l4_sourcePortORicmpv6Type;
     ((ICMPv6_ht *) (msg->payload))->code = IANA_ICMPv6_RPL_DIO;
-    packetfunctions_calculateChecksum(msg, (uint8_t * ) & (((ICMPv6_ht *) (msg->payload))->checksum));//call last
+    packetfunctions_calculateChecksum(msg, (uint8_t *) &(((ICMPv6_ht *) (msg->payload))->checksum));//call last
 
     //send
     if (icmpv6_send(msg) == E_SUCCESS) {
@@ -816,6 +818,7 @@ void sendDIO(void) {
     already. No need to push a task again.
 */
 void icmpv6rpl_timer_DAO_cb(opentimers_id_t id) {
+    (void) id;
 
     icmpv6rpl_timer_DAO_task();
 }
@@ -1031,7 +1034,7 @@ void sendDAO(void) {
     }
     ((ICMPv6_ht *) (msg->payload))->type = msg->l4_sourcePortORicmpv6Type;
     ((ICMPv6_ht *) (msg->payload))->code = IANA_ICMPv6_RPL_DAO;
-    packetfunctions_calculateChecksum(msg, (uint8_t * ) & (((ICMPv6_ht *) (msg->payload))->checksum)); //call last
+    packetfunctions_calculateChecksum(msg, (uint8_t *) &(((ICMPv6_ht *) (msg->payload))->checksum)); //call last
 
     //===== send
     if (icmpv6_send(msg) == E_SUCCESS) {

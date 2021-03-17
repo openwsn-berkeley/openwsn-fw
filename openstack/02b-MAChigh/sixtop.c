@@ -19,13 +19,13 @@
 //=========================== define ==========================================
 
 // in seconds: sixtop maintaince is called every 30 seconds
-#define MAINTENANCE_PERIOD        30
+#define MAINTENANCE_PERIOD        (30)
 /**
  Drop the 6P request if number of 6P response with RC RESET in queue is larger
     than MAX6PRESPONSE. Value 0 means that alway drop 6P response when the node
     is in a 6P transcation.
 */
-#define MAX6PRESPONSE             1
+#define MAX6PRESPONSE             (1)
 
 //=========================== typedefs =======================================
 
@@ -362,6 +362,12 @@ owerror_t sixtop_request(
             case IANA_6TOP_CMD_CLEAR:
                 sixtop_vars.six2six_state = SIX_STATE_WAIT_CLEARREQUEST_SENDDONE;
                 break;
+            default:
+                LOG_ERROR(COMPONENT_SIXTOP, ERR_SIXTOP_UNKNOWN, (errorparameter_t) code, (errorparameter_t) 0);
+                openqueue_freePacketBuffer(pkt);
+                outcome = E_FAIL;
+                break;
+
         }
     } else {
         openqueue_freePacketBuffer(pkt);
@@ -632,6 +638,8 @@ owerror_t sixtop_send_internal(OpenQueueEntry_t *msg, bool payloadIEPresent) {
     already. No need to push a task again.
 */
 void sixtop_sendingEb_timer_cb(opentimers_id_t id) {
+    (void) id;
+
     timer_sixtop_sendEb_fired();
 }
 
@@ -642,6 +650,8 @@ void sixtop_sendingEb_timer_cb(opentimers_id_t id) {
     already. No need to push a task again.
 */
 void sixtop_maintenance_timer_cb(opentimers_id_t id) {
+    (void) id;
+
     timer_sixtop_management_fired();
 }
 
@@ -652,6 +662,8 @@ void sixtop_maintenance_timer_cb(opentimers_id_t id) {
     already. No need to push a task again.
 */
 void sixtop_timeout_timer_cb(opentimers_id_t id) {
+    (void) id;
+
     timer_sixtop_six2six_timeout_fired();
 }
 
@@ -1608,12 +1620,9 @@ void sixtop_six2six_notifyReceive(
 
 //======= helper functions
 
-bool sixtop_addCells(
-        uint8_t slotframeID,
-        cellInfo_ht *cellList,
-        open_addr_t *previousHop,
-        uint8_t cellOptions
-) {
+bool sixtop_addCells(uint8_t slotframeID, cellInfo_ht *cellList, open_addr_t *previousHop, uint8_t cellOptions) {
+    (void) slotframeID;
+
     uint8_t i;
     bool isShared;
     open_addr_t temp_neighbor;
@@ -1648,12 +1657,9 @@ bool sixtop_addCells(
     return hasCellsAdded;
 }
 
-bool sixtop_removeCells(
-        uint8_t slotframeID,
-        cellInfo_ht *cellList,
-        open_addr_t *previousHop,
-        uint8_t cellOptions
-) {
+bool sixtop_removeCells(uint8_t slotframeID, cellInfo_ht *cellList, open_addr_t *previousHop, uint8_t cellOptions) {
+    (void) slotframeID;
+
     uint8_t i;
     bool isShared;
     open_addr_t temp_neighbor;
@@ -1693,11 +1699,9 @@ bool sixtop_removeCells(
     return hasCellsRemoved;
 }
 
-bool sixtop_areAvailableCellsToBeScheduled(
-        uint8_t frameID,
-        uint8_t numOfCells,
-        cellInfo_ht *cellList
-) {
+bool sixtop_areAvailableCellsToBeScheduled(uint8_t frameID, uint8_t numOfCells, cellInfo_ht *cellList) {
+    (void) frameID;
+
     uint8_t i;
     uint8_t numbOfavailableCells;
     bool available;
@@ -1742,8 +1746,11 @@ bool sixtop_areAvailableCellsToBeRemoved(
         uint8_t numOfCells,
         cellInfo_ht *cellList,
         open_addr_t *neighbor,
-        uint8_t cellOptions
-) {
+        uint8_t cellOptions) {
+
+    (void) frameID;
+    (void) neighbor;
+
     uint8_t i;
     uint8_t numOfavailableCells;
     bool available;

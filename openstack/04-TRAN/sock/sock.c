@@ -16,16 +16,16 @@
 
 // ============================ defines ========================================
 
-sock_udp_t* udp_socket_list;
+sock_udp_t *udp_socket_list;
 
 // =========================== variables =======================================
 // =========================== prototypes ======================================
 
 static bool _sock_valid_af(uint8_t af);
 
-static bool _sock_valid_addr(sock_udp_ep_t* ep);
+static bool _sock_valid_addr(sock_udp_ep_t *ep);
 
-static void _sock_get_local_addr(open_addr_t* local);
+static void _sock_get_local_addr(open_addr_t *local);
 
 static void _sock_transmit_internal(void);
 
@@ -35,8 +35,8 @@ void sock_udp_init(void) {
     udp_socket_list = NULL;
 }
 
-int sock_udp_create(sock_udp_t* sock, const sock_udp_ep_t* local, const sock_udp_ep_t* remote, uint16_t flags) {
-    sock_udp_t* current;
+int sock_udp_create(sock_udp_t *sock, const sock_udp_ep_t *local, const sock_udp_ep_t *remote, uint16_t flags) {
+    sock_udp_t *current;
 
     if (sock == NULL) {
         return -EINVAL;
@@ -65,7 +65,7 @@ int sock_udp_create(sock_udp_t* sock, const sock_udp_ep_t* local, const sock_udp
             return -EAFNOSUPPORT;
         }
 
-        if (_sock_valid_addr((sock_udp_ep_t*)remote) == FALSE) {
+        if (_sock_valid_addr((sock_udp_ep_t *) remote) == FALSE) {
             return -EINVAL;
         }
 
@@ -81,8 +81,8 @@ int sock_udp_create(sock_udp_t* sock, const sock_udp_ep_t* local, const sock_udp
     return 0;
 }
 
-int sock_udp_send(sock_udp_t* sock, const void* data, size_t len, const sock_udp_ep_t* remote) {
-    OpenQueueEntry_t* pkt;
+int sock_udp_send(sock_udp_t *sock, const void *data, size_t len, const sock_udp_ep_t *remote) {
+    OpenQueueEntry_t *pkt;
 
     if (sock == NULL && remote == NULL) {
         return -EINVAL;
@@ -105,7 +105,7 @@ int sock_udp_send(sock_udp_t* sock, const void* data, size_t len, const sock_udp
             return -EAFNOSUPPORT;
         }
 
-        if (_sock_valid_addr((sock_udp_ep_t*)remote) == FALSE) {
+        if (_sock_valid_addr((sock_udp_ep_t *) remote) == FALSE) {
             return -EINVAL;
         }
 
@@ -152,9 +152,9 @@ int sock_udp_send(sock_udp_t* sock, const void* data, size_t len, const sock_udp
     return len;
 }
 
-void sock_udp_close(sock_udp_t* sock) {
-    sock_udp_t* temp = udp_socket_list;
-    sock_udp_t* prev = udp_socket_list;
+void sock_udp_close(sock_udp_t *sock) {
+    sock_udp_t *temp = udp_socket_list;
+    sock_udp_t *prev = udp_socket_list;
 
     /* check if head is the socket to be closed */
     if (temp != NULL && temp == sock) {
@@ -178,7 +178,7 @@ void sock_udp_close(sock_udp_t* sock) {
     prev->next = temp->next;
 }
 
-int sock_udp_get_local(sock_udp_t* sock, sock_udp_ep_t* ep) {
+int sock_udp_get_local(sock_udp_t *sock, sock_udp_ep_t *ep) {
     if (sock->gen_sock.local.family == AF_UNSPEC) {
         return -EADDRINUSE;
     }
@@ -188,7 +188,7 @@ int sock_udp_get_local(sock_udp_t* sock, sock_udp_ep_t* ep) {
     return 0;
 }
 
-int sock_udp_get_remote(sock_udp_t* sock, sock_udp_ep_t* ep) {
+int sock_udp_get_remote(sock_udp_t *sock, sock_udp_ep_t *ep) {
     if (sock->gen_sock.remote.family == AF_UNSPEC) {
         return -ENOTCONN;
     }
@@ -198,7 +198,9 @@ int sock_udp_get_remote(sock_udp_t* sock, sock_udp_ep_t* ep) {
     return 0;
 }
 
-int sock_udp_recv(sock_udp_t* sock, void* data, size_t max_len, uint32_t timeout, sock_udp_ep_t* remote) {
+int sock_udp_recv(sock_udp_t *sock, void *data, size_t max_len, uint32_t timeout, sock_udp_ep_t *remote) {
+    (void) timeout;
+
     uint16_t bytes_to_copy;
     sock_udp_ep_t ep;
 
@@ -228,8 +230,8 @@ int sock_udp_recv(sock_udp_t* sock, void* data, size_t max_len, uint32_t timeout
 }
 
 void sock_receive_internal(void) {
-    OpenQueueEntry_t* pkt;
-    sock_udp_t* current;
+    OpenQueueEntry_t *pkt;
+    sock_udp_t *current;
 
     pkt = openqueue_getPacketByComponent(COMPONENT_UDP_TO_SOCK);
 
@@ -244,8 +246,7 @@ void sock_receive_internal(void) {
     while (current != NULL) {
         if (current->gen_sock.local.port == pkt->l4_destination_port &&
             current->async_cb != NULL &&
-            idmanager_isMyAddress(&pkt->l3_destinationAdd))
-        {
+            idmanager_isMyAddress(&pkt->l3_destinationAdd)) {
 
             current->txrx = pkt;
             current->async_cb(current, SOCK_ASYNC_MSG_RECV, NULL);
@@ -261,9 +262,11 @@ void sock_receive_internal(void) {
     }
 }
 
-void sock_senddone_internal(OpenQueueEntry_t* msg, owerror_t error) {
-    OpenQueueEntry_t* pkt;
-    sock_udp_t* current;
+void sock_senddone_internal(OpenQueueEntry_t *msg, owerror_t error) {
+    (void) msg;
+
+    OpenQueueEntry_t *pkt;
+    sock_udp_t *current;
 
     pkt = openqueue_getPacketByComponent(COMPONENT_UDP);
 
@@ -277,8 +280,7 @@ void sock_senddone_internal(OpenQueueEntry_t* msg, owerror_t error) {
 
     while (current != NULL) {
         if (current->gen_sock.local.port == pkt->l4_sourcePortORicmpv6Type &&
-            current->async_cb != NULL)
-        {
+            current->async_cb != NULL) {
             current->txrx = pkt;
             current->async_cb(current, SOCK_ASYNC_MSG_SENT, &error);
             break;
@@ -288,7 +290,7 @@ void sock_senddone_internal(OpenQueueEntry_t* msg, owerror_t error) {
     }
 }
 
-void sock_udp_set_cb(sock_udp_t* sock, sock_udp_cb_t cb, void* cb_arg) {
+void sock_udp_set_cb(sock_udp_t *sock, sock_udp_cb_t cb, void *cb_arg) {
     sock->async_cb = cb;
     sock->async_cb_arg = cb_arg;
 }
@@ -296,7 +298,7 @@ void sock_udp_set_cb(sock_udp_t* sock, sock_udp_cb_t cb, void* cb_arg) {
 // ============================= private =======================================
 
 void _sock_transmit_internal(void) {
-    OpenQueueEntry_t* pkt;
+    OpenQueueEntry_t *pkt;
 
     pkt = openqueue_getPacketByComponent(COMPONENT_SOCK_TO_UDP);
 
@@ -317,26 +319,26 @@ static bool _sock_valid_af(uint8_t af) {
     }
 }
 
-static void _sock_get_local_addr(open_addr_t* local) {
+static void _sock_get_local_addr(open_addr_t *local) {
     local->type = ADDR_128B;
 
-    open_addr_t* prefix_addr = idmanager_getMyID(ADDR_PREFIX);
+    open_addr_t *prefix_addr = idmanager_getMyID(ADDR_PREFIX);
     memcpy(local->addr_type.addr_128b, prefix_addr->addr_type.prefix, 8);
 
-    open_addr_t* id64b_addr = idmanager_getMyID(ADDR_64B);
+    open_addr_t *id64b_addr = idmanager_getMyID(ADDR_64B);
     memcpy(local->addr_type.addr_128b + 8, id64b_addr->addr_type.addr_64b, 8);
 }
 
-static bool _sock_valid_addr(sock_udp_ep_t* ep) {
+static bool _sock_valid_addr(sock_udp_ep_t *ep) {
     uint8_t zero_count;
-    const uint8_t* p;
+    const uint8_t *p;
     uint8_t i;
 
-    p = (uint8_t* )&ep->addr;
+    p = (uint8_t *) &ep->addr;
     zero_count = 0;
 
     for (i = 0; i < sizeof(ep->addr); i++) {
-        if (p [i] == 0) {
+        if (p[i] == 0) {
             zero_count++;
         }
     }

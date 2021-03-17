@@ -49,6 +49,10 @@ else ()
     set(SANITIZERS OFF)
 endif ()
 
+if (CMAKE_C_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic -Wall -Wextra -Wunused -Wuninitialized")
+endif ()
+
 # parse the opendefs and sixtop definitions
 add_custom_target(def-parser ALL COMMAND python def_exporter.py WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/cmake)
 
@@ -86,7 +90,7 @@ include(projects/${PROJECT})
 # general build settings
 message("")
 message(STATUS "OPENWSN-FW:..................VERSION-${PROJECT_VERSION}")
-message(STATUS "COMPILER TOOLCHAIN:..........${CMAKE_C_COMPILER_ID}")
+message(STATUS "COMPILER TOOLCHAIN:..........${CMAKE_C_COMPILER}")
 message(STATUS "COMPILER VERSION:............${CMAKE_C_COMPILER_VERSION}")
 message(STATUS "CMAKE_GENERATOR:.............${CMAKE_GENERATOR}")
 message(STATUS "BOARD:.......................${BOARD}")

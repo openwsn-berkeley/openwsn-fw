@@ -165,6 +165,9 @@ void msf_updateCellsElapsed(open_addr_t *neighbor, cellType_t type) {
         msf_vars.numCellsElapsed_rx = 0;
         msf_vars.numCellsUsed_rx = 0;
     }
+#else
+    (void) neighbor;
+    (void) type;
 #endif
 }
 
@@ -235,10 +238,14 @@ void msf_handleRCError(uint8_t code, open_addr_t *address) {
 }
 
 void msf_timer_waitretry_cb(opentimers_id_t id) {
+    (void) id;
+
     msf_vars.waitretry = FALSE;
 }
 
 void msf_timer_housekeeping_cb(opentimers_id_t id) {
+    (void) id;
+
     PORT_TIMER_WIDTH newDuration;
 
     // update the timer period

@@ -546,34 +546,52 @@ bool IEEE802154_security_acceptableLevel(OpenQueueEntry_t *msg, ieee802154_heade
 #else /* OPENWSN_IEEE802154_SEC_C */
 
 owerror_t IEEE802154_security_prependAuxiliarySecurityHeader(OpenQueueEntry_t *msg) {
+    (void) msg;
+
     return E_SUCCESS;
 }
 
 void IEEE802154_security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t *msg, ieee802154_header_iht *tempheader) {
-    return;
+    (void) msg;
+    (void) tempheader;
 }
 
 owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t *msg) {
+    (void) msg;
+
     return E_SUCCESS;
 }
 
 owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t *msg) {
+    (void) msg;
+
     return E_SUCCESS;
 }
 
 uint8_t IEEE802154_security_authLengthChecking(uint8_t sec_level) {
+    (void) sec_level;
+
     return (uint8_t) 0;
 }
 
 uint8_t IEEE802154_security_auxLengthChecking(uint8_t kid, uint8_t sup, uint8_t size) {
+    (void) kid;
+    (void) sup;
+    (void) size;
+
     return (uint8_t) 0;
 }
 
 uint8_t IEEE802154_security_getSecurityLevel(OpenQueueEntry_t *msg) {
+    (void) msg;
+
     return IEEE154_ASH_SLF_TYPE_NOSEC;
 }
 
 bool IEEE802154_security_acceptableLevel(OpenQueueEntry_t *msg, ieee802154_header_iht *parsedheader) {
+    (void) msg;
+    (void) parsedheader;
+
     return TRUE;
 }
 

@@ -19,13 +19,16 @@
 #include "nvic.h"
 #include "debugpins.h"
 #include "gpio.h"
+
+#if BOARD_CRYPTOENGINE_ENABLED
 #include "cryptoengine.h"
+#endif
 
 //=========================== main ============================================
 
 extern int mote_main(void);
 
-int main(void){
+int main(void) {
     return mote_main();
 }
 
@@ -36,8 +39,7 @@ void board_enableHardFaultExceptionHandler(void);
 
 //=========================== public ==========================================
 
-void board_init(void)
-{
+void board_init(void) {
     RCC_Configuration();//Configure rcc
     NVIC_Configuration();//configure NVIC and Vector Table
 
@@ -48,21 +50,21 @@ void board_init(void)
     //configuration GPIO to measure the time from sleep to 72MHz
     GPIO_Configuration();
 
-    GPIO_InitTypeDef  GPIO_InitStructure;
+    GPIO_InitTypeDef GPIO_InitStructure;
 
     //enable GPIOC and GPIOA, Clock
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC , ENABLE);
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA , ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
 
     //Configure PA.02 as SLP_TR pin of RF
-    GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_2;
-    GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
 
     //Configure PC.01 as RST pin of RF
-    GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_1;
-    GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOC, &GPIO_InitStructure);
 
@@ -70,19 +72,19 @@ void board_init(void)
     GPIO_SetBits(GPIOC, GPIO_Pin_1);
 
     // Configure PC.04 as input floating (EXTI Line4)
-    GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_4;
-    GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_IN_FLOATING;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
     GPIO_Init(GPIOC, &GPIO_InitStructure);
 
     GPIO_EXTILineConfig(GPIO_PortSourceGPIOC, GPIO_PinSource4);//Connect EXTI Line4 to PC.4
     EXTI_ClearITPendingBit(EXTI_Line4);
 
     //Configures EXTI line 4 to generate an interrupt on rising edge
-    EXTI_InitTypeDef  EXTI_InitStructure; 
-    EXTI_InitStructure.EXTI_Line    = EXTI_Line4;
-    EXTI_InitStructure.EXTI_Mode    = EXTI_Mode_Interrupt; 
+    EXTI_InitTypeDef EXTI_InitStructure;
+    EXTI_InitStructure.EXTI_Line = EXTI_Line4;
+    EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
     EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
-    EXTI_InitStructure.EXTI_LineCmd = ENABLE; 
+    EXTI_InitStructure.EXTI_LineCmd = ENABLE;
     EXTI_Init(&EXTI_InitStructure);
 
     // initialize board
@@ -116,7 +118,7 @@ void board_reset(void) {
 
 //=========================== private =========================================
 
-void board_enableHardFaultExceptionHandler(void){
+void board_enableHardFaultExceptionHandler(void) {
     // Configures:
     //    bit9. stack alignment on exception entry 
     //    bit4. enables faulting

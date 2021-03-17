@@ -7,12 +7,10 @@
 */
 
 #include "stm32f10x_conf.h"
-#include "stdio.h"
 #include "stdint.h"
 #include "string.h"
 #include "uart.h"
 
-#include "rcc.h"
 #include "nvic.h"
 
 //=========================== defines =========================================
@@ -22,8 +20,8 @@
 typedef struct {
     uart_tx_cbt txCb;
     uart_rx_cbt rxCb;
-    bool        fXonXoffEscaping;
-    uint8_t     xonXoffEscapedByte;
+    bool fXonXoffEscaping;
+    uint8_t xonXoffEscapedByte;
 } uart_vars_t;
 
 uart_vars_t uart_vars;
@@ -33,42 +31,42 @@ uart_vars_t uart_vars;
 //=========================== public ==========================================
 
 void uart_init(void) {
-    
-    GPIO_InitTypeDef  GPIO_InitStructure;
+
+    GPIO_InitTypeDef GPIO_InitStructure;
     USART_InitTypeDef USART_InitStructure;
-    
+
     // reset local variables
-    memset(&uart_vars,0,sizeof(uart_vars_t));
-    
+    memset(&uart_vars, 0, sizeof(uart_vars_t));
+
     // enable GPIO and USART clock
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
-    
+
     // configure USART TX pin as alternate function push-pull
-    GPIO_InitStructure.GPIO_Mode                      = GPIO_Mode_AF_PP;
-    GPIO_InitStructure.GPIO_Pin                       = GPIO_Pin_9;
-    GPIO_InitStructure.GPIO_Speed                     = GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
 
     // configure USART RX as input floating
-    GPIO_InitStructure.GPIO_Mode                      = GPIO_Mode_IN_FLOATING;
-    GPIO_InitStructure.GPIO_Pin                       = GPIO_Pin_10;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
-    
-    USART_InitStructure.USART_BaudRate                = 500000;
-    USART_InitStructure.USART_WordLength              = USART_WordLength_8b;
-    USART_InitStructure.USART_StopBits                = USART_StopBits_1;
-    USART_InitStructure.USART_Parity                  = USART_Parity_No;
-    USART_InitStructure.USART_HardwareFlowControl     = USART_HardwareFlowControl_None;
-    USART_InitStructure.USART_Mode                    = USART_Mode_Rx | USART_Mode_Tx;
+
+    USART_InitStructure.USART_BaudRate = 500000;
+    USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+    USART_InitStructure.USART_StopBits = USART_StopBits_1;
+    USART_InitStructure.USART_Parity = USART_Parity_No;
+    USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+    USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
     USART_Init(USART1, &USART_InitStructure);
-    
+
     // make sure no interrupts fire as we enable the UART
     uart_disableInterrupts();
-    
+
     // enable USART1
     USART_Cmd(USART1, ENABLE);
-    
+
     // enable NVIC uart
     NVIC_uart();
 }
@@ -79,12 +77,12 @@ void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb) {
 }
 
 void uart_enableInterrupts(void) {
-    USART_ITConfig(USART1, USART_IT_TC,   ENABLE);
+    USART_ITConfig(USART1, USART_IT_TC, ENABLE);
     USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
 }
 
 void uart_disableInterrupts(void) {
-    USART_ITConfig(USART1, USART_IT_TC,   DISABLE);
+    USART_ITConfig(USART1, USART_IT_TC, DISABLE);
     USART_ITConfig(USART1, USART_IT_RXNE, DISABLE);
 }
 
@@ -95,35 +93,35 @@ void uart_clearTxInterrupts(void) {
 }
 
 void uart_setCTS(bool state) {
-    
-    if (state==0x01) {
-        USART_SendData(USART1,(uint16_t)XON);
+
+    if (state == 0x01) {
+        USART_SendData(USART1, (uint16_t) XON);
     } else {
-        USART_SendData(USART1,(uint16_t)XOFF);
+        USART_SendData(USART1, (uint16_t) XOFF);
     }
 }
 
 void uart_writeByte(uint8_t byteToWrite) {
-    if (byteToWrite==XON || byteToWrite==XOFF || byteToWrite==XONXOFF_ESCAPE) {
-        uart_vars.fXonXoffEscaping     = 0x01;
-        uart_vars.xonXoffEscapedByte   = byteToWrite;
-        USART_SendData(USART1,(uint16_t)XONXOFF_ESCAPE);
+    if (byteToWrite == XON || byteToWrite == XOFF || byteToWrite == XONXOFF_ESCAPE) {
+        uart_vars.fXonXoffEscaping = 0x01;
+        uart_vars.xonXoffEscapedByte = byteToWrite;
+        USART_SendData(USART1, (uint16_t) XONXOFF_ESCAPE);
     } else {
-        USART_SendData(USART1,(uint16_t)byteToWrite);
+        USART_SendData(USART1, (uint16_t) byteToWrite);
     }
 }
 
 uint8_t uart_readByte(void) {
-    return (uint8_t)USART_ReceiveData(USART1);
+    return (uint8_t) USART_ReceiveData(USART1);
 }
 
 //=========================== interrupt handlers ==============================
 
 kick_scheduler_t uart_tx_isr(void) {
     uart_clearTxInterrupts();
-    if (uart_vars.fXonXoffEscaping==0x01) {
+    if (uart_vars.fXonXoffEscaping == 0x01) {
         uart_vars.fXonXoffEscaping = 0x00;
-        USART_SendData(USART1,(uint16_t)uart_vars.xonXoffEscapedByte^XONXOFF_MASK);
+        USART_SendData(USART1, (uint16_t) uart_vars.xonXoffEscapedByte ^ XONXOFF_MASK);
     } else {
         uart_vars.txCb();
     }

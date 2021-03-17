@@ -57,7 +57,7 @@ Set this number to the exact number of active slots you are planning on having
 in your schedule, so not to waste RAM.
 */
 #ifndef MAXACTIVESLOTS
-#define MAXACTIVESLOTS       SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS+NUMSLOTSOFF
+#define MAXACTIVESLOTS       (SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS + NUMSLOTSOFF)
 #endif
 
 /**
@@ -200,7 +200,7 @@ owerror_t schedule_removeActiveSlot(
         open_addr_t *neighbor
 );
 
-void schedule_removeAllAutonomousTxRxCellUnicast(void);
+// void schedule_removeAllAutonomousTxRxCellUnicast(void);
 
 bool schedule_isSlotOffsetAvailable(uint16_t slotOffset);
 
@@ -216,17 +216,17 @@ bool schedule_getCellsToBeRelocated(open_addr_t *neighbor, cellInfo_ht *celllist
 
 bool schedule_hasAutonomousTxRxCellUnicast(open_addr_t *neighbor);
 
-bool schedule_getAutonomousTxRxCellUnicastNeighbor(open_addr_t *neighbor);
+// bool schedule_getAutonomousTxRxCellUnicastNeighbor(open_addr_t *neighbor);
 
 bool schedule_hasAutoTxCellToNeighbor(open_addr_t *neighbor);
 
 bool schedule_hasNegotiatedCellToNeighbor(open_addr_t *neighbor, cellType_t cell_type);
 
-bool schedule_getAutonomousTxRxCellAnycast(uint16_t *slotoffset);
-
-bool schedule_hasNonParentManagedTxCell(open_addr_t *neighbor);
-
-void schedule_hasNegotiatedTxCell(open_addr_t *address);
+// bool schedule_getAutonomousTxRxCellAnycast(uint16_t *slotoffset);
+//
+// bool schedule_hasNonParentManagedTxCell(open_addr_t *neighbor);
+//
+// void schedule_hasNegotiatedTxCell(open_addr_t *address);
 
 bool schedule_hasNegotiatedTxCellToNonParent(open_addr_t *parentNeighbor, open_addr_t *nonParentNeighbor);
 

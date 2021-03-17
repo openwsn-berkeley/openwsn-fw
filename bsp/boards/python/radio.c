@@ -100,6 +100,8 @@ void radio_setFrequency(uint8_t frequency, radio_freq_t tx_or_rx) {
     PyObject *result;
     PyObject *arglist;
 
+    (void) tx_or_rx;
+
 #ifdef TRACE_ON
     printf("radio_setFrequency (frequency = %d)... \n", frequency);
 #endif
@@ -287,6 +289,8 @@ void radio_getReceivedFrame(uint8_t *pBufRead,
     PyObject *subitem;
     int8_t lenRead;
     int8_t i;
+
+    (void) maxBufLen;
 
 #ifdef TRACE_ON
     printf("radio_getReceivedFrame() ... \n");

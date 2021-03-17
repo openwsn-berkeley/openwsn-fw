@@ -9,8 +9,8 @@ to return the board's description.
 \author Alaeddine Weslati <alaeddine.weslati@inria.fr>,  January 2014.
 */
 
-#ifndef __BOARD_INFO_H
-#define __BOARD_INFO_H
+#ifndef OPENWSN_BOARD_INFO_H
+#define OPENWSN_BOARD_INFO_H
 
 #include "stm32f10x_conf.h"
 #include "stdint.h"
@@ -92,4 +92,4 @@ static const uint8_t infoRadioName[]        = "AT86RF231";
 
 //=========================== private =========================================
 
-#endif
+#endif /* OPENWSN_BOARD_INFO_H */

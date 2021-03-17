@@ -6,8 +6,8 @@
  * Description: CC2538-specific board information bsp module.
  */
 
-#ifndef __BOARD_INFO_H
-#define __BOARD_INFO_H
+#ifndef OPENWSN_BOARD_INFO_H
+#define OPENWSN_BOARD_INFO_H
 
 #include <stdint.h>
 #include <string.h>
@@ -129,4 +129,4 @@ static const uint8_t infoRadioName[]        = "CC2538 SoC";
 
 //=========================== private =========================================
 
-#endif
+#endif /* OPENWSN_BOARD_INFO_H */

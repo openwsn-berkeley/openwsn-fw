@@ -150,7 +150,7 @@ void ieee154e_resetAsn(void);
 
 void ieee154e_syncSlotOffset(void);
 
-void asnStoreFromEB(uint8_t *asn);
+void asnStoreFromEB(const uint8_t *asn);
 
 void joinPriorityStoreFromEB(uint8_t jp);
 
@@ -386,6 +386,7 @@ void ieee154e_orderToASNStructure(uint8_t *in, asn_t *val_asn) {
 This function executes in ISR mode, when the new slot timer fires.
 */
 void isr_ieee154e_newSlot(opentimers_id_t id) {
+    (void) id;
 
 #if PYTHON_BOARD
     board_barrier_slot_sync();
@@ -428,6 +429,8 @@ void isr_ieee154e_newSlot(opentimers_id_t id) {
 This function executes in ISR mode, when the FSM timer fires.
 */
 void isr_ieee154e_timer(opentimers_id_t id) {
+    (void) id;
+
     switch (ieee154e_vars.state) {
         case S_TXDATAOFFSET:
             activity_ti2();
@@ -510,6 +513,8 @@ This needs to happen
 This function executes in ISR mode.
 */
 void isr_ieee154e_inhibitStart(opentimers_id_t id) {
+    (void) id;
+
     // inhibit serial activity
     openserial_inhibitStart(); // activity_inhibitSerial
 }
@@ -786,6 +791,8 @@ port_INLINE void activity_synchronize_startOfFrame(PORT_TIMER_WIDTH capturedTime
 }
 
 port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) {
+    (void) capturedTime;
+
     ieee802154_header_iht ieee802514_header;
     uint16_t lenIE;
 
@@ -973,7 +980,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t *pkt, uint16_t *lenIE) {
 port_INLINE void activity_ti1ORri1(void) {
     cellType_t cellType;
     open_addr_t neighbor;
-    uint8_t i;
+    uint32_t i;
     uint8_t asn[5];
     uint8_t join_priority;
     bool couldSendEB = FALSE;
@@ -2597,7 +2604,7 @@ bool isValidEbFormat(OpenQueueEntry_t *pkt, uint16_t *lenIE) {
     }
 }
 
-port_INLINE void asnStoreFromEB(uint8_t *asn) {
+port_INLINE void asnStoreFromEB(const uint8_t *asn) {
 
     // store the ASN
     ieee154e_vars.asn.bytes0and1 = asn[0] + 256 * asn[1];

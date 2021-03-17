@@ -15,10 +15,8 @@ file(GLOB CHIPS_C
 
 target_sources(bsp
         PRIVATE
-        ${BSP_HEADERS}
         ${BSP_SOURCES}
         ${CHIPS_C}
-        ${CHIPS_H}
         adc_sensor.c
         adc_sensor.h
         board.c
@@ -35,11 +33,11 @@ target_sources(bsp
         sctimer.c
         sensors.c
         startup_gcc.c
-        uart.c
-        PUBLIC
-        ${HEADERS})
+        uart.c)
 
 target_include_directories(bsp
-        PUBLIC ..
-        PUBLIC .
-        PRIVATE ../../chips)
+        PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/.
+        ${CMAKE_CURRENT_SOURCE_DIR}/..
+        PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../chips)

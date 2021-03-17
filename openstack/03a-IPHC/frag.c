@@ -101,6 +101,7 @@ typedef struct {
         } \
     } while (0)
 
+
 //=========================== variables =======================================
 
 frag_vars_t frag_vars;
@@ -128,6 +129,8 @@ owerror_t frag_timerq_enqueue(opentimers_id_t id);
 owerror_t frag_timerq_remove(opentimers_id_t id);
 
 opentimers_id_t frag_timerq_dequeue(void);
+
+
 //============================= public ========================================
 
 void frag_init() {
