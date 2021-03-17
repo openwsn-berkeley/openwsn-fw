@@ -9,7 +9,8 @@ else ()
 
     add_custom_command(
             TARGET "${PROJECT}"
-            POST_BUILD COMMAND ${SIZE_TOOL} ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT})
+            POST_BUILD COMMAND ${SIZE_TOOL} ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT}
+            POST_BUILD COMMAND ${OBJCOPY} -O ihex "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT}" "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT}.ihex")
 endif ()
 
 
