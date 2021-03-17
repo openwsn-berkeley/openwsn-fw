@@ -121,25 +121,20 @@ void openserial_appendStatusCtx(statusCtx_t *ctx) {
     }
 }
 
-void openserial_setCb(const void *cb_method, uint8_t cb_type) {
+void openserial_setAddrCb(getAddr_cb_t cb_method) {
+    openserial_vars.addrCb = cb_method;
+}
 
-    switch (cb_type) {
-        case CB_ADDR:
-            openserial_vars.addrCb = cb_method;
-            break;
-        case CB_ASN:
-            openserial_vars.asnCb = cb_method;
-            break;
-        case CB_ROOT:
-            openserial_vars.rootCb = cb_method;
-            break;
-        case CB_BRIDGE:
-            openserial_vars.bridgeCb = cb_method;
-            break;
-        default:
-            LOG_ERROR(COMPONENT_OPENSERIAL, ERR_INIT_FAILURE, 0, 0);
-            break;
-    }
+void openserial_setAsnCb(getAsn_cb_t cb_method) {
+    openserial_vars.asnCb = cb_method;
+}
+
+void openserial_setRootCb(setRoot_cb_t cb_method) {
+    openserial_vars.rootCb = cb_method;
+}
+
+void openserial_setBridgeCb(callBridge_cb_t cb_method) {
+    openserial_vars.bridgeCb = cb_method;
 }
 
 //===== transmitting

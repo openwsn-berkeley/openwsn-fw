@@ -250,7 +250,7 @@ void ieee154e_init(void) {
     ieee154e_vars.serialInhibitTimerId = opentimers_create(TIMER_INHIBIT, TASKPRIO_NONE);
 
     // set openserial callbacks
-    openserial_setCb(ieee154e_getAsn, CB_ASN);
+    openserial_setAsnCb(ieee154e_getAsn);
 
     // set status print contexts
     ieee154e_status_ctx.asnState.id = STATUS_ASN;
@@ -276,12 +276,22 @@ void ieee154e_init(void) {
 \returns The ASN difference, or 0xffff if more than 65535 different
 */
 PORT_TIMER_WIDTH ieee154e_asnDiff(asn_t *someASN) {
-    PORT_TIMER_WIDTH diff;INTERRUPT_DECLARATION();DISABLE_INTERRUPTS();
-    if (ieee154e_vars.asn.byte4 != someASN->byte4) { ENABLE_INTERRUPTS();
+    PORT_TIMER_WIDTH diff;
+
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+
+    if (ieee154e_vars.asn.byte4 != someASN->byte4) {
+
+        ENABLE_INTERRUPTS();
+
         return (PORT_TIMER_WIDTH) 0xFFFFFFFF;;
     }
 
-    if (ieee154e_vars.asn.bytes2and3 == someASN->bytes2and3) { ENABLE_INTERRUPTS();
+    if (ieee154e_vars.asn.bytes2and3 == someASN->bytes2and3) {
+
+        ENABLE_INTERRUPTS();
+
         return ieee154e_vars.asn.bytes0and1 - someASN->bytes0and1;
     } else if (ieee154e_vars.asn.bytes2and3 - someASN->bytes2and3 == 1) {
         diff = ieee154e_vars.asn.bytes0and1;
@@ -289,7 +299,10 @@ PORT_TIMER_WIDTH ieee154e_asnDiff(asn_t *someASN) {
         diff += 1;
     } else {
         diff = (PORT_TIMER_WIDTH) 0xFFFFFFFF;;
-    }ENABLE_INTERRUPTS();
+    }
+
+    ENABLE_INTERRUPTS();
+
     return diff;
 }
 
@@ -905,8 +918,8 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
         changeIsSync(TRUE);
         // log the info
         LOG_SUCCESS(COMPONENT_IEEE802154E, ERR_SYNCHRONIZED,
-                (errorparameter_t) ieee154e_vars.slotOffset,
-                (errorparameter_t) ieee802514_header.src.addr_type.addr_64b[7]);
+                    (errorparameter_t) ieee154e_vars.slotOffset,
+                    (errorparameter_t) ieee802514_header.src.addr_type.addr_64b[7]);
 
         // send received EB up the stack so RES can update statistics (synchronizing)
         notif_receive(ieee154e_vars.dataReceived);

@@ -104,13 +104,6 @@ typedef enum {
     L_VERBOSE = 6
 } level_t;
 
-typedef enum {
-    CB_ADDR = 0,
-    CB_ASN,
-    CB_ROOT,
-    CB_BRIDGE
-} cb_t;
-
 typedef open_addr_t *(*getAddr_cb_t)(uint8_t addr_type);
 
 typedef void (*getAsn_cb_t)(uint8_t *array);
@@ -165,13 +158,28 @@ typedef struct {
 void openserial_init(void);
 
 /**
- * @brief Set callbacks for serial commands and network packets over serial (e.g., toggle DAG root,
- * call openbridge interface, ...)
  *
  * @param[in] cb_method     Callback method to install
- * @param[in] cb_type       Callback type
  */
-void openserial_setCb(const void *cb_method, uint8_t cb_type);
+void openserial_setAddrCb(getAddr_cb_t cb_method);
+
+/**
+ *
+ * @param[in] cb_method     Callback method to install
+ */
+void openserial_setAsnCb(getAsn_cb_t cb_method);
+
+/**
+ *
+ * @param[in] cb_method     Callback method to install
+ */
+void openserial_setRootCb(setRoot_cb_t cb_method);
+
+/**
+ *
+ * @param[in] cb_method     Callback method to install
+ */
+void openserial_setBridgeCb(callBridge_cb_t cb_method);
 
 /**
  * @brief Append a status context. Status information is printed on a periodic basis

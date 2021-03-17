@@ -12,7 +12,8 @@
 
 //=========================== public ==========================================
 
-void openbridge_init(void) { openserial_setCb(openbridge_triggerData, CB_BRIDGE);
+void openbridge_init(void) {
+    openserial_setBridgeCb(openbridge_triggerData);
 }
 
 void openbridge_triggerData(void) {
@@ -80,7 +81,7 @@ void openbridge_receive(OpenQueueEntry_t *msg) {
     memcpy(msg->payload, idmanager_getMyID(ADDR_64B)->addr_type.addr_64b, LENGTH_ADDR64b);
 
     // send packet over serial (will be memcopied into serial buffer)
-    openserial_printData((uint8_t * )(msg->payload), msg->length);
+    openserial_printData((uint8_t *) (msg->payload), msg->length);
 
     // free packet
     openqueue_freePacketBuffer(msg);
