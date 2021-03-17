@@ -25,6 +25,12 @@ c_module_name = '_openmote'
 
 enable_configure = False
 
+if sys.version_info.major < 3:
+    raise Exception("Must be using Python 3.6 or higher")
+
+if sys.version_info.minor < 6:
+    raise Exception("Must be using Python 3.6 or higher")
+
 if not os.path.exists(os.path.join(os.path.abspath('.'), 'build')):
     os.mkdir(os.path.join(os.path.abspath('.'), 'build'))
     os.mkdir(os.path.join(os.path.abspath('.'), 'build', 'openwsn'))
