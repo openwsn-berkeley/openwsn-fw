@@ -4,14 +4,14 @@ if ("${BOARD}" STREQUAL "python")
     set_target_properties(${PROJECT} PROPERTIES PREFIX "" OUTPUT_NAME openmote LINKER_LANGUAGE C)
 
     target_include_directories(${PROJECT} PRIVATE ${Python3_INCLUDE_DIRS})
+    target_link_libraries(${PROJECT} PRIVATE ${Python3_LIBRARIES})
 else ()
     add_executable(${PROJECT} "")
 
     add_custom_command(
             TARGET ${PROJECT}
             POST_BUILD COMMAND ${SIZE_TOOL} ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT}
-            POST_BUILD COMMAND ${OBJCOPY} -O ihex "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT}" "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT}.ihex"
-            POST_BUILD COMMAND cmake -E touch ${BIN_FILE})
+            POST_BUILD COMMAND ${OBJCOPY} -O ihex "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT}" "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT}.ihex")
 
     if (NOT ${BOOTLOAD} STREQUAL "")
         string(REPLACE " " ";" MOTE_LIST ${BOOTLOAD})

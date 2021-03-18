@@ -11,3 +11,5 @@ target_include_directories(bsp
         .
         PRIVATE
         ${Python3_INCLUDE_DIRS})
+
+target_link_libraries(bsp PRIVATE ${Python3_LIBRARIES})

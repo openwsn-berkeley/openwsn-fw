@@ -54,7 +54,7 @@ jobs:
     - if: ${{ matrix.board == 'python' }}
       name: Building Python Extension
       run: |
-        python setup.py install --user -DBOARD=openmote-cc2538 -DOPT-UDP:BOOL=ON -DOPT-COAP:BOOL=ON -DOPT-CJOIN:BOOL=ON
+        python setup.py install --user -DOPT-UDP:BOOL=ON -DOPT-COAP:BOOL=ON -DOPT-CJOIN:BOOL=ON
 
     - if: ${{ matrix.board != 'python' }}
       name: Create Build Environment
@@ -80,7 +80,7 @@ jobs:
       # Note the current convention is to use the -S and -B options here to specify source
       # and build directories, but this is only available with CMake 3.13 and higher.
       # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/m3.cmake -DBOARD=iot-lab_M3 -DBOARD=openmote-cc2538 -DOPT-UDP:BOOL=ON -DOPT-COAP:BOOL=ON -DOPT-CJOIN:BOOL=ON
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/m3.cmake -DBOARD=iot-lab_M3 -DOPT-UDP:BOOL=ON -DOPT-COAP:BOOL=ON -DOPT-CJOIN:BOOL=ON
 
     - if: ${{ matrix.board != 'python' }}
       working-directory: ${{github.workspace}}/build
