@@ -1,4 +1,4 @@
-add_library(bsp STATIC "")
+add_library(bsp "")
 
 file(GLOB SRCS "${CMAKE_CURRENT_SOURCE_DIR}/*.c" "${CMAKE_CURRENT_SOURCE_DIR}/*.s")
 
@@ -15,8 +15,9 @@ file(GLOB
         "${CMAKE_CURRENT_SOURCE_DIR}/library/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x/*.c")
 
 target_sources(bsp
-        PRIVATE
+        PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/configure/stm32f10x_it.c
+        PRIVATE
         ${SRCS}
         ${DRIVER_SRCS}
         ${CMSIS_CORE}
@@ -25,13 +26,12 @@ target_sources(bsp
 
 target_include_directories(bsp
         PUBLIC
-        .
-        ..
-        configure
-        library/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/inc
-        library/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/CMSIS/CM3/CoreSupport
-        library/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x/
+        ${CMAKE_CURRENT_SOURCE_DIR}/..
+        ${CMAKE_CURRENT_SOURCE_DIR}/.
+        ${CMAKE_CURRENT_SOURCE_DIR}/configure
+        ${CMAKE_CURRENT_SOURCE_DIR}/library/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/inc
+        ${CMAKE_CURRENT_SOURCE_DIR}/library/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/CMSIS/CM3/CoreSupport
+        ${CMAKE_CURRENT_SOURCE_DIR}/library/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x/
         PRIVATE
-        ${CMAKE_SOURCE_DIR}/bsp/chips/at86rf231
-        )
+        ${CMAKE_SOURCE_DIR}/bsp/chips/at86rf231)
 
