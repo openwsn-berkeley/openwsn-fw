@@ -708,8 +708,7 @@ owerror_t coap_send(
         uint8_t TKL,
         coap_option_iht *options,
         uint8_t optionsLen,
-        coap_resource_desc_t *descSender
-) {
+        coap_resource_desc_t *descSender) {
     uint16_t token;
     uint8_t tokenPos = 0;
     coap_header_iht *request;

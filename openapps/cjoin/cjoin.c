@@ -129,7 +129,9 @@ owerror_t cjoin_receive(OpenQueueEntry_t *msg,
                         coap_option_iht *coap_incomingOptions,
                         coap_option_iht *coap_outgoingOptions,
                         uint8_t *coap_outgoingOptionsLen) {
-
+    (void) coap_incomingOptions;
+    (void) coap_outgoingOptionsLen;
+    (void) coap_outgoingOptions;
 
     cojp_configuration_object_t configuration;
     owerror_t ret;
@@ -157,12 +159,14 @@ owerror_t cjoin_receive(OpenQueueEntry_t *msg,
 }
 
 void cjoin_timer_cb(opentimers_id_t id) {
+    (void) id;
     // calling the task directly as the timer_cb function is executed in
     // task mode by opentimer already
     cjoin_task_cb();
 }
 
 void cjoin_retransmission_cb(opentimers_id_t id) {
+    (void) id;
     // calling the task directly as the timer_cb function is executed in
     // task mode by opentimer already
     opentimers_scheduleIn(
@@ -230,6 +234,7 @@ void cjoin_task_cb(void) {
 }
 
 void cjoin_sendDone(OpenQueueEntry_t *msg, owerror_t error) {
+    (void) error;
 
     openqueue_freePacketBuffer(msg);
 }
@@ -241,8 +246,6 @@ owerror_t cjoin_sendJoinRequest(open_addr_t *joinProxy) {
     uint8_t tmp[10];
     uint8_t payload_len;
     cojp_join_request_object_t join_request;
-
-    payload_len = 0;
 
     // if previous cjoin is not sent out, remove them
     openqueue_removeAllCreatedBy(COMPONENT_CJOIN);
@@ -326,7 +329,8 @@ bool cjoin_getIsJoined(void) {
     bool res;INTERRUPT_DECLARATION();
 
     DISABLE_INTERRUPTS();
-    res = cjoin_vars.isJoined;ENABLE_INTERRUPTS();
+    res = cjoin_vars.isJoined;
+    ENABLE_INTERRUPTS();
 
     return res;
 }

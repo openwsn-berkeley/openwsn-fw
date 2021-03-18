@@ -113,17 +113,17 @@ extern void PKAClearInt(void);
 extern void PKARegInt(void(*pfnHandler)(void));
 extern void PKAUnRegInt(void);
 extern tPKAStatus PKAGetOpsStatus(void);
-extern tPKAStatus PKABigNumModStart(uint32_t* pui32BNum, uint8_t ui8BNSize,
-                                    uint32_t* pui32Modulus, uint8_t ui8ModSize,
+extern tPKAStatus PKABigNumModStart(const uint32_t* pui32BNum, uint8_t ui8BNSize,
+                                    const uint32_t* pui32Modulus, uint8_t ui8ModSize,
                                     uint32_t* pui32ResultVector);
 extern tPKAStatus PKABigNumModGetResult(uint32_t* pui32ResultBuf,
                                         uint8_t ui8Size,
                                         uint32_t ui32ResVectorLoc);
-extern tPKAStatus PKABigNumCmpStart(uint32_t* pui32BNum1, uint32_t* pui32BNum2,
+extern tPKAStatus PKABigNumCmpStart(const uint32_t* pui32BNum1, const uint32_t* pui32BNum2,
                                     uint8_t ui8Size);
 extern tPKAStatus PKABigNumCmpGetResult(void);
-extern tPKAStatus PKABigNumInvModStart(uint32_t* pui32BNum, uint8_t ui8BNSize,
-                                       uint32_t* pui32Modulus, uint8_t ui8Size,
+extern tPKAStatus PKABigNumInvModStart(const uint32_t* pui32BNum, uint8_t ui8BNSize,
+                                       const uint32_t* pui32Modulus, uint8_t ui8Size,
                                        uint32_t* pui32ResultVector);
 extern tPKAStatus PKABigNumInvModGetResult(uint32_t* pui32ResultBuf,
                                            uint8_t ui8Size,
@@ -136,8 +136,8 @@ extern tPKAStatus PKABigNumMultiplyStart(uint32_t* pui32Xplicand,
 extern tPKAStatus PKABigNumMultGetResult(uint32_t* pui32ResultBuf,
                                          uint32_t* pui32Len,
                                          uint32_t ui32ResVectorLoc);
-extern tPKAStatus PKABigNumAddStart(uint32_t* pui32BN1, uint8_t ui8BN1Size,
-                                    uint32_t* pui32BN2, uint8_t ui8BN2Size,
+extern tPKAStatus PKABigNumAddStart(const uint32_t* pui32BN1, uint8_t ui8BN1Size,
+                                    const uint32_t* pui32BN2, uint8_t ui8BN2Size,
                                     uint32_t* pui32ResultVector);
 extern tPKAStatus PKABigNumAddGetResult(uint32_t* pui32ResultBuf,
                                         uint32_t* pui32Len,

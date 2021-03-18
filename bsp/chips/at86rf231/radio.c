@@ -20,19 +20,23 @@
 // =========================== variables =======================================
 
 typedef struct {
-    radio_capture_cbt   startFrame_cb;
-    radio_capture_cbt   endFrame_cb;
-    radio_state_t       state;
+    radio_capture_cbt startFrame_cb;
+    radio_capture_cbt endFrame_cb;
+    radio_state_t state;
 } radio_vars_t;
 
 radio_vars_t radio_vars;
 
 // =========================== prototypes ====================================== //
 
-void    radio_spiWriteReg(uint8_t reg_addr, uint8_t reg_setting);
+void radio_spiWriteReg(uint8_t reg_addr, uint8_t reg_setting);
+
 uint8_t radio_spiReadReg(uint8_t reg_addr);
-void    radio_spiWriteTxFifo(uint8_t* bufToWrite, uint8_t lenToWrite);
-void    radio_spiReadRxFifo(uint8_t* pBufRead, uint8_t* pLenRead, uint8_t maxBufLen, uint8_t* pLqi);
+
+void radio_spiWriteTxFifo(uint8_t *bufToWrite, uint8_t lenToWrite);
+
+void radio_spiReadRxFifo(uint8_t *pBufRead, uint8_t *pLenRead, uint8_t maxBufLen, uint8_t *pLqi);
+
 uint8_t radio_spiReadRadioInfo(void);
 
 // =========================== public ========================================== //
@@ -135,12 +139,13 @@ int8_t radio_getFrequencyOffset(void) {
 
 // ===== TX
 
-void radio_loadPacket(uint8_t* packet, uint16_t len) {
+void radio_loadPacket(const uint8_t *packet, uint16_t len) {
     // change state
     radio_vars.state = RADIOSTATE_LOADING_PACKET;
 
     // load packet in TXFIFO
-    radio_spiWriteTxFifo(packet, len);
+    // TODO: check if we can make radio_spiWriteTxFifo use const argument
+    radio_spiWriteTxFifo((uint8_t *) packet, len);
 
     // change state
     radio_vars.state = RADIOSTATE_PACKET_LOADED;
@@ -210,8 +215,8 @@ void radio_rxNow(void) {
     // nothing to do
 }
 
-void radio_getReceivedFrame(uint8_t* pBufRead, uint8_t* pLenRead, uint8_t maxBufLen, int8_t* pRssi, uint8_t* pLqi,
-                            bool* pCrc) {
+void radio_getReceivedFrame(uint8_t *pBufRead, uint8_t *pLenRead, uint8_t maxBufLen, int8_t *pRssi, uint8_t *pLqi,
+                            bool *pCrc) {
     uint8_t temp_reg_value;
 
     // ===== crc
@@ -232,56 +237,56 @@ void radio_getReceivedFrame(uint8_t* pBufRead, uint8_t* pLenRead, uint8_t maxBuf
 
 
 uint8_t radio_spiReadRadioInfo(void) {
-    uint8_t spi_tx_buffer [3];
-    uint8_t spi_rx_buffer [3];
+    uint8_t spi_tx_buffer[3];
+    uint8_t spi_rx_buffer[3];
 
     // prepare buffer to send over SPI
-    spi_tx_buffer [0] =  (0x80 | 0x1E);   // [b7]    Read/Write:    1    (read)
+    spi_tx_buffer[0] = (0x80 | 0x1E);   // [b7]    Read/Write:    1    (read)
     // [b6]    RAM/Register : 1    (register)
     // [b5-0]  address:       0x1E (Manufacturer ID, Lower 16 Bit)
-    spi_tx_buffer [1] =  0x00;      // send a SNOP strobe just to get the reg value
-    spi_tx_buffer [2] =  0x00;      // send a SNOP strobe just to get the reg value
+    spi_tx_buffer[1] = 0x00;      // send a SNOP strobe just to get the reg value
+    spi_tx_buffer[2] = 0x00;      // send a SNOP strobe just to get the reg value
 
     // retrieve radio manufacturer ID over SPI
     spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer), SPI_BUFFER, spi_rx_buffer, sizeof(spi_rx_buffer), SPI_FIRST,
              SPI_LAST);
 
-    return spi_rx_buffer [2];
+    return spi_rx_buffer[2];
 }
 
 void radio_spiWriteReg(uint8_t reg_addr, uint8_t reg_setting) {
-    uint8_t spi_tx_buffer [2];
-    uint8_t spi_rx_buffer [2];
+    uint8_t spi_tx_buffer[2];
+    uint8_t spi_rx_buffer[2];
 
-    spi_tx_buffer [0] = (0xC0 | reg_addr);   // turn addess in a 'reg write' address
-    spi_tx_buffer [1] = reg_setting;
+    spi_tx_buffer[0] = (0xC0 | reg_addr);   // turn addess in a 'reg write' address
+    spi_tx_buffer[1] = reg_setting;
 
-    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer), SPI_BUFFER, (uint8_t*)spi_rx_buffer, sizeof(spi_rx_buffer),
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer), SPI_BUFFER, (uint8_t *) spi_rx_buffer, sizeof(spi_rx_buffer),
              SPI_FIRST, SPI_LAST);
 }
 
 uint8_t radio_spiReadReg(uint8_t reg_addr) {
-    uint8_t spi_tx_buffer [2];
-    uint8_t spi_rx_buffer [2];
+    uint8_t spi_tx_buffer[2];
+    uint8_t spi_rx_buffer[2];
 
-    spi_tx_buffer [0] = (0x80 | reg_addr);  // turn addess in a 'reg read' address
-    spi_tx_buffer [1] = 0x00;               // send a no_operation command just to get the reg value
+    spi_tx_buffer[0] = (0x80 | reg_addr);  // turn addess in a 'reg read' address
+    spi_tx_buffer[1] = 0x00;               // send a no_operation command just to get the reg value
 
-    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer), SPI_BUFFER, (uint8_t*)spi_rx_buffer, sizeof(spi_rx_buffer),
+    spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer), SPI_BUFFER, (uint8_t *) spi_rx_buffer, sizeof(spi_rx_buffer),
              SPI_FIRST, SPI_LAST);
 
 
-    return spi_rx_buffer [1];
+    return spi_rx_buffer[1];
 }
 
 /** for testing purposes, remove if not needed anymore**/
 
-void radio_spiWriteTxFifo(uint8_t* bufToWrite, uint8_t lenToWrite) {
-    uint8_t spi_tx_buffer [2];
-    uint8_t spi_rx_buffer [1 + 1 + 127];    // 1B SPI address, 1B length, max. 127B data
+void radio_spiWriteTxFifo(uint8_t *bufToWrite, uint8_t lenToWrite) {
+    uint8_t spi_tx_buffer[2];
+    uint8_t spi_rx_buffer[1 + 1 + 127];    // 1B SPI address, 1B length, max. 127B data
 
-    spi_tx_buffer [0] = 0x60;               // SPI destination address for TXFIFO
-    spi_tx_buffer [1] = lenToWrite;         // length byte
+    spi_tx_buffer[0] = 0x60;               // SPI destination address for TXFIFO
+    spi_tx_buffer[1] = lenToWrite;         // length byte
 
     spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer), SPI_BUFFER, spi_rx_buffer, sizeof(spi_rx_buffer), SPI_FIRST,
              SPI_NOTLAST);
@@ -289,7 +294,7 @@ void radio_spiWriteTxFifo(uint8_t* bufToWrite, uint8_t lenToWrite) {
     spi_txrx(bufToWrite, lenToWrite, SPI_BUFFER, spi_rx_buffer, sizeof(spi_rx_buffer), SPI_NOTFIRST, SPI_LAST);
 }
 
-void radio_spiReadRxFifo(uint8_t* pBufRead, uint8_t* pLenRead, uint8_t maxBufLen, uint8_t* pLqi) {
+void radio_spiReadRxFifo(uint8_t *pBufRead, uint8_t *pLenRead, uint8_t maxBufLen, uint8_t *pLqi) {
     // when reading the packet over SPI from the RX buffer, you get the following:
     // - *[1B]     dummy byte because of SPI
     // - *[1B]     length byte
@@ -298,15 +303,15 @@ void radio_spiReadRxFifo(uint8_t* pBufRead, uint8_t* pLenRead, uint8_t maxBufLen
     // - *[1B]     LQI
     (void) maxBufLen;
 
-    uint8_t spi_tx_buffer [125];
-    uint8_t spi_rx_buffer [3];
+    uint8_t spi_tx_buffer[125];
+    uint8_t spi_rx_buffer[3];
 
-    spi_tx_buffer [0] = 0x20;
+    spi_tx_buffer[0] = 0x20;
 
     // 2 first bytes
     spi_txrx(spi_tx_buffer, 2, SPI_BUFFER, spi_rx_buffer, sizeof(spi_rx_buffer), SPI_FIRST, SPI_NOTLAST);
 
-    *pLenRead = spi_rx_buffer [1];
+    *pLenRead = spi_rx_buffer[1];
 
     if (*pLenRead > 2 && *pLenRead <= 127) {
         // valid length
@@ -317,7 +322,7 @@ void radio_spiReadRxFifo(uint8_t* pBufRead, uint8_t* pLenRead, uint8_t maxBufLen
         // CRC (2B) and LQI (1B)
         spi_txrx(spi_tx_buffer, 2 + 1, SPI_BUFFER, spi_rx_buffer, 3, SPI_NOTFIRST, SPI_LAST);
 
-        *pLqi = spi_rx_buffer [2];
+        *pLqi = spi_rx_buffer[2];
 
     } else {
         // invalid length

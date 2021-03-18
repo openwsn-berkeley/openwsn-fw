@@ -163,7 +163,7 @@ void radio_rfOff(void) {
 
 //===== TX
 
-void radio_loadPacket(uint8_t *packet, uint16_t len) {
+void radio_loadPacket(const uint8_t *packet, uint16_t len) {
     PyObject *pkt;
     PyObject *arglist;
     PyObject *result;

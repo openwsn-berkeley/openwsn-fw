@@ -22,7 +22,6 @@ target_sources(bsp
         board.c
         board_info.h
         cc2538rf.h
-        cryptoengine.c
         debugpins.c
         eui64.c
         i2c.c
@@ -34,6 +33,10 @@ target_sources(bsp
         sensors.c
         startup_gcc.c
         uart.c)
+
+if (OPT-CRYPTO-HW)
+    target_sources(bsp PRIVATE cryptoengine.c)
+endif ()
 
 target_include_directories(bsp
         PUBLIC

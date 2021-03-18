@@ -64,57 +64,57 @@
 
 // Run mode registers
 static const uint32_t g_pui32RCGCRegs[] =
-{
-    SYS_CTRL_RCGCGPT,
-    SYS_CTRL_RCGCSSI,
-    SYS_CTRL_RCGCUART,
-    SYS_CTRL_RCGCI2C,
-    SYS_CTRL_RCGCSEC,
-    SYS_CTRL_RCGCRFC
-};
+        {
+                SYS_CTRL_RCGCGPT,
+                SYS_CTRL_RCGCSSI,
+                SYS_CTRL_RCGCUART,
+                SYS_CTRL_RCGCI2C,
+                SYS_CTRL_RCGCSEC,
+                SYS_CTRL_RCGCRFC
+        };
 
 // Sleep mode registers
 static const uint32_t g_pui32SCGCRegs[] =
-{
-    SYS_CTRL_SCGCGPT,
-    SYS_CTRL_SCGCSSI,
-    SYS_CTRL_SCGCUART,
-    SYS_CTRL_SCGCI2C,
-    SYS_CTRL_SCGCSEC,
-    SYS_CTRL_SCGCRFC
-};
+        {
+                SYS_CTRL_SCGCGPT,
+                SYS_CTRL_SCGCSSI,
+                SYS_CTRL_SCGCUART,
+                SYS_CTRL_SCGCI2C,
+                SYS_CTRL_SCGCSEC,
+                SYS_CTRL_SCGCRFC
+        };
 
 // Deep sleep mode registers
 static const uint32_t g_pui32DCGCRegs[] =
-{
-    SYS_CTRL_DCGCGPT,
-    SYS_CTRL_DCGCSSI,
-    SYS_CTRL_DCGCUART,
-    SYS_CTRL_DCGCI2C,
-    SYS_CTRL_DCGCSEC,
-    SYS_CTRL_DCGCRFC
-};
+        {
+                SYS_CTRL_DCGCGPT,
+                SYS_CTRL_DCGCSSI,
+                SYS_CTRL_DCGCUART,
+                SYS_CTRL_DCGCI2C,
+                SYS_CTRL_DCGCSEC,
+                SYS_CTRL_DCGCRFC
+        };
 
 // Reset registers
 static const uint32_t g_pui32SRRegs[] =
-{
-    SYS_CTRL_SRGPT,
-    SYS_CTRL_SRSSI,
-    SYS_CTRL_SRUART,
-    SYS_CTRL_SRI2C,
-    SYS_CTRL_SRSEC,
-};
+        {
+                SYS_CTRL_SRGPT,
+                SYS_CTRL_SRSSI,
+                SYS_CTRL_SRUART,
+                SYS_CTRL_SRI2C,
+                SYS_CTRL_SRSEC,
+        };
 
 // Masks for determining if a peripheral is enabled
 static const uint32_t g_pui32DieCfgMask[] =
-{
-    FLASH_CTRL_DIECFG1_GPTM0_EN,
-    FLASH_CTRL_DIECFG1_SSI0_EN,
-    FLASH_CTRL_DIECFG1_UART0_EN,
-    FLASH_CTRL_DIECFG1_I2C_EN,
-    FLASH_CTRL_DIECFG2_PKA_EN,
-    FLASH_CTRL_DIECFG2_RF_CORE_EN
-};
+        {
+                FLASH_CTRL_DIECFG1_GPTM0_EN,
+                FLASH_CTRL_DIECFG1_SSI0_EN,
+                FLASH_CTRL_DIECFG1_UART0_EN,
+                FLASH_CTRL_DIECFG1_I2C_EN,
+                FLASH_CTRL_DIECFG2_PKA_EN,
+                FLASH_CTRL_DIECFG2_RF_CORE_EN
+        };
 
 //*****************************************************************************
 //
@@ -198,20 +198,19 @@ SysCtrlPeripheralValid(uint32_t ui32Peripheral)
 //*****************************************************************************
 void
 SysCtrlClockSet(bool bExternalOsc32k, bool bInternalOsc,
-                uint32_t ui32SysDiv)
-{
+                uint32_t ui32SysDiv) {
     uint32_t ui32STA;
     uint32_t ui32Reg;
     uint32_t ui32TimeoutVal;
     uint32_t ui32Osc;
 
     // check input parameters
-    ASSERT((ui32SysDiv == SYS_CTRL_SYSDIV_32MHZ  ||
-            ui32SysDiv == SYS_CTRL_SYSDIV_16MHZ  ||
-            ui32SysDiv == SYS_CTRL_SYSDIV_8MHZ   ||
-            ui32SysDiv == SYS_CTRL_SYSDIV_4MHZ   ||
-            ui32SysDiv == SYS_CTRL_SYSDIV_2MHZ   ||
-            ui32SysDiv == SYS_CTRL_SYSDIV_1MHZ   ||
+    ASSERT((ui32SysDiv == SYS_CTRL_SYSDIV_32MHZ ||
+            ui32SysDiv == SYS_CTRL_SYSDIV_16MHZ ||
+            ui32SysDiv == SYS_CTRL_SYSDIV_8MHZ ||
+            ui32SysDiv == SYS_CTRL_SYSDIV_4MHZ ||
+            ui32SysDiv == SYS_CTRL_SYSDIV_2MHZ ||
+            ui32SysDiv == SYS_CTRL_SYSDIV_1MHZ ||
             ui32SysDiv == SYS_CTRL_SYSDIV_500KHZ ||
             ui32SysDiv == SYS_CTRL_SYSDIV_250KHZ) &&
            !((ui32SysDiv == SYS_CTRL_SYSDIV_32MHZ) && bInternalOsc));
@@ -219,8 +218,7 @@ SysCtrlClockSet(bool bExternalOsc32k, bool bInternalOsc,
     //
     // Enable AMP detect to make sure XOSC starts correctly
     //
-    if(!bInternalOsc)
-    {
+    if (!bInternalOsc) {
         ui32Reg = HWREG(SYS_CTRL_CLOCK_CTRL) | SYS_CTRL_CLOCK_CTRL_AMP_DET;
         HWREG(SYS_CTRL_CLOCK_CTRL) = ui32Reg;
     }
@@ -231,8 +229,7 @@ SysCtrlClockSet(bool bExternalOsc32k, bool bInternalOsc,
     ui32Reg = HWREG(SYS_CTRL_CLOCK_CTRL);
     ui32Reg &= ~(SYS_CTRL_CLOCK_CTRL_OSC32K | SYS_CTRL_CLOCK_CTRL_OSC |
                  SYS_CTRL_CLOCK_CTRL_SYS_DIV_M);
-    if(!bExternalOsc32k)
-    {
+    if (!bExternalOsc32k) {
         ui32Reg |= SYS_CTRL_CLOCK_CTRL_OSC32K;
     }
     ui32Osc = bInternalOsc ? SYS_CTRL_CLOCK_CTRL_OSC : 0;
@@ -248,9 +245,8 @@ SysCtrlClockSet(bool bExternalOsc32k, bool bInternalOsc,
     //
     ui32STA = HWREG(SYS_CTRL_CLOCK_STA);
     ui32TimeoutVal = 0;
-    while((ui32Osc != (ui32STA & SYS_CTRL_CLOCK_CTRL_OSC)) &&
-            (ui32TimeoutVal < SYS_CTRL_TIMEOUT))
-    {
+    while ((ui32Osc != (ui32STA & SYS_CTRL_CLOCK_CTRL_OSC)) &&
+           (ui32TimeoutVal < SYS_CTRL_TIMEOUT)) {
         SysCtrlDelay(16);
         ui32STA = HWREG(SYS_CTRL_CLOCK_STA);
         ui32TimeoutVal++;
@@ -270,49 +266,47 @@ SysCtrlClockSet(bool bExternalOsc32k, bool bInternalOsc,
 //
 //*****************************************************************************
 uint32_t
-SysCtrlClockGet(void)
-{
+SysCtrlClockGet(void) {
     uint32_t ui32Clk;
     uint32_t ui32STA;
     uint32_t ui32SysDiv;
 
     ui32STA = HWREG(SYS_CTRL_CLOCK_STA);
     ui32SysDiv =
-        (ui32STA & SYS_CTRL_CLOCK_STA_SYS_DIV_M) >> SYS_CTRL_CLOCK_STA_SYS_DIV_S;
+            (ui32STA & SYS_CTRL_CLOCK_STA_SYS_DIV_M) >> SYS_CTRL_CLOCK_STA_SYS_DIV_S;
     ui32Clk = 0;
 
-    switch(ui32SysDiv)
-    {
-    case SYS_CTRL_SYSDIV_32MHZ:
-        ui32Clk = SYS_CTRL_32MHZ;
-        break;
-    case SYS_CTRL_SYSDIV_16MHZ:
-        ui32Clk = SYS_CTRL_16MHZ;
-        break;
-    case SYS_CTRL_SYSDIV_8MHZ:
-        ui32Clk = SYS_CTRL_8MHZ;
-        break;
-    case SYS_CTRL_SYSDIV_4MHZ:
-        ui32Clk = SYS_CTRL_4MHZ;
-        break;
-    case SYS_CTRL_SYSDIV_2MHZ:
-        ui32Clk = SYS_CTRL_2MHZ;
-        break;
-    case SYS_CTRL_SYSDIV_1MHZ:
-        ui32Clk = SYS_CTRL_1MHZ;
-        break;
-    case SYS_CTRL_SYSDIV_500KHZ:
-        ui32Clk = SYS_CTRL_500KHZ;
-        break;
-    case SYS_CTRL_SYSDIV_250KHZ:
-        ui32Clk = SYS_CTRL_250KHZ;
-        break;
+    switch (ui32SysDiv) {
+        case SYS_CTRL_SYSDIV_32MHZ:
+            ui32Clk = SYS_CTRL_32MHZ;
+            break;
+        case SYS_CTRL_SYSDIV_16MHZ:
+            ui32Clk = SYS_CTRL_16MHZ;
+            break;
+        case SYS_CTRL_SYSDIV_8MHZ:
+            ui32Clk = SYS_CTRL_8MHZ;
+            break;
+        case SYS_CTRL_SYSDIV_4MHZ:
+            ui32Clk = SYS_CTRL_4MHZ;
+            break;
+        case SYS_CTRL_SYSDIV_2MHZ:
+            ui32Clk = SYS_CTRL_2MHZ;
+            break;
+        case SYS_CTRL_SYSDIV_1MHZ:
+            ui32Clk = SYS_CTRL_1MHZ;
+            break;
+        case SYS_CTRL_SYSDIV_500KHZ:
+            ui32Clk = SYS_CTRL_500KHZ;
+            break;
+        case SYS_CTRL_SYSDIV_250KHZ:
+            ui32Clk = SYS_CTRL_250KHZ;
+            break;
     }
 
     //
     // Return the computed clock rate.
     //
-    return(ui32Clk);
+    return (ui32Clk);
 } // SysCtrlClockGet
 
 //*****************************************************************************
@@ -337,17 +331,16 @@ SysCtrlClockGet(void)
 //
 //*****************************************************************************
 void
-SysCtrlIOClockSet(uint32_t ui32IODiv)
-{
+SysCtrlIOClockSet(uint32_t ui32IODiv) {
     uint32_t ui32RegVal;
 
     // check input parameters
-    ASSERT(ui32IODiv == SYS_CTRL_SYSDIV_32MHZ  ||
-           ui32IODiv == SYS_CTRL_SYSDIV_16MHZ  ||
-           ui32IODiv == SYS_CTRL_SYSDIV_8MHZ   ||
-           ui32IODiv == SYS_CTRL_SYSDIV_4MHZ   ||
-           ui32IODiv == SYS_CTRL_SYSDIV_2MHZ   ||
-           ui32IODiv == SYS_CTRL_SYSDIV_1MHZ   ||
+    ASSERT(ui32IODiv == SYS_CTRL_SYSDIV_32MHZ ||
+           ui32IODiv == SYS_CTRL_SYSDIV_16MHZ ||
+           ui32IODiv == SYS_CTRL_SYSDIV_8MHZ ||
+           ui32IODiv == SYS_CTRL_SYSDIV_4MHZ ||
+           ui32IODiv == SYS_CTRL_SYSDIV_2MHZ ||
+           ui32IODiv == SYS_CTRL_SYSDIV_1MHZ ||
            ui32IODiv == SYS_CTRL_SYSDIV_500KHZ ||
            ui32IODiv == SYS_CTRL_SYSDIV_250KHZ);
 
@@ -369,50 +362,48 @@ SysCtrlIOClockSet(uint32_t ui32IODiv)
 //
 //*****************************************************************************
 uint32_t
-SysCtrlIOClockGet(void)
-{
+SysCtrlIOClockGet(void) {
     uint32_t ui32Clk;
     uint32_t ui32STA;
     uint32_t ui32IODiv;
 
     ui32STA = HWREG(SYS_CTRL_CLOCK_STA);
     ui32IODiv =
-        (ui32STA & SYS_CTRL_CLOCK_STA_IO_DIV_M) >> SYS_CTRL_CLOCK_STA_IO_DIV_S;
+            (ui32STA & SYS_CTRL_CLOCK_STA_IO_DIV_M) >> SYS_CTRL_CLOCK_STA_IO_DIV_S;
 
     ui32Clk = 0;
 
-    switch(ui32IODiv)
-    {
-    case SYS_CTRL_SYSDIV_32MHZ:
-        ui32Clk = SYS_CTRL_32MHZ;
-        break;
-    case SYS_CTRL_SYSDIV_16MHZ:
-        ui32Clk = SYS_CTRL_16MHZ;
-        break;
-    case SYS_CTRL_SYSDIV_8MHZ:
-        ui32Clk = SYS_CTRL_8MHZ;
-        break;
-    case SYS_CTRL_SYSDIV_4MHZ:
-        ui32Clk = SYS_CTRL_4MHZ;
-        break;
-    case SYS_CTRL_SYSDIV_2MHZ:
-        ui32Clk = SYS_CTRL_2MHZ;
-        break;
-    case SYS_CTRL_SYSDIV_1MHZ:
-        ui32Clk = SYS_CTRL_1MHZ;
-        break;
-    case SYS_CTRL_SYSDIV_500KHZ:
-        ui32Clk = SYS_CTRL_500KHZ;
-        break;
-    case SYS_CTRL_SYSDIV_250KHZ:
-        ui32Clk = SYS_CTRL_250KHZ;
-        break;
+    switch (ui32IODiv) {
+        case SYS_CTRL_SYSDIV_32MHZ:
+            ui32Clk = SYS_CTRL_32MHZ;
+            break;
+        case SYS_CTRL_SYSDIV_16MHZ:
+            ui32Clk = SYS_CTRL_16MHZ;
+            break;
+        case SYS_CTRL_SYSDIV_8MHZ:
+            ui32Clk = SYS_CTRL_8MHZ;
+            break;
+        case SYS_CTRL_SYSDIV_4MHZ:
+            ui32Clk = SYS_CTRL_4MHZ;
+            break;
+        case SYS_CTRL_SYSDIV_2MHZ:
+            ui32Clk = SYS_CTRL_2MHZ;
+            break;
+        case SYS_CTRL_SYSDIV_1MHZ:
+            ui32Clk = SYS_CTRL_1MHZ;
+            break;
+        case SYS_CTRL_SYSDIV_500KHZ:
+            ui32Clk = SYS_CTRL_500KHZ;
+            break;
+        case SYS_CTRL_SYSDIV_250KHZ:
+            ui32Clk = SYS_CTRL_250KHZ;
+            break;
     }
 
     //
     // Return the computed clock rate.
     //
-    return(ui32Clk);
+    return (ui32Clk);
 } // SysCtrlIOClockGet
 
 
@@ -441,13 +432,15 @@ SysCtrlDelay(uint32_t ui32Count)
 }
 #endif
 #if defined(__GNUC__)
+
 void __attribute__((naked))
-SysCtrlDelay(uint32_t ui32Count)
-{
+SysCtrlDelay(uint32_t ui32Count) {
+
     __asm("    subs    r0, #1\n"
           "    bne     SysCtrlDelay\n"
           "    bx      lr");
 }
+
 #endif
 #if defined(__KEIL__) || defined(__ARMCC_VERSION)
 __asm void
@@ -487,8 +480,7 @@ __asm("    .sect \".text:SysCtrlDelay\"\n"
 //
 //*****************************************************************************
 void
-SysCtrlReset(void)
-{
+SysCtrlReset(void) {
     //
     // Perform a software reset request.  This request causes the device to
     // reset, no further code is executed.
@@ -499,8 +491,7 @@ SysCtrlReset(void)
     // The device should have reset, so this should never be reached.  Just in
     // case, loop forever.
     //
-    while(1)
-    {
+    while (1) {
     }
 }
 
@@ -520,8 +511,7 @@ SysCtrlReset(void)
 //
 //*****************************************************************************
 void
-SysCtrlSleep(void)
-{
+SysCtrlSleep(void) {
     //
     // Wait for an interrupt.
     //
@@ -545,25 +535,23 @@ SysCtrlSleep(void)
 //
 //*****************************************************************************
 void
-SysCtrlDeepSleep(void)
-{
+SysCtrlDeepSleep(void) {
 #ifndef NO_CLOCK_DIVIDER_RESTORE
-    bool  bRestoreSys;
-    bool  bRestoreIO;
+    bool bRestoreSys;
+    bool bRestoreIO;
     uint32_t ui32Reg;
 
     ui32Reg = HWREG(SYS_CTRL_CLOCK_STA);
-    bRestoreSys = (ui32Reg & SYS_CTRL_CLOCK_STA_SYS_DIV_M)==0;
-    bRestoreIO  = (ui32Reg & SYS_CTRL_CLOCK_STA_IO_DIV_M)==0;
-    if(bRestoreSys || bRestoreIO)
-    {
+    bRestoreSys = (ui32Reg & SYS_CTRL_CLOCK_STA_SYS_DIV_M) == 0;
+    bRestoreIO = (ui32Reg & SYS_CTRL_CLOCK_STA_IO_DIV_M) == 0;
+    if (bRestoreSys || bRestoreIO) {
         ui32Reg = HWREG(SYS_CTRL_CLOCK_CTRL);
-        ui32Reg |= bRestoreSys? 0x1:0x0;
-        ui32Reg |= bRestoreIO? 0x100:0x0;
+        ui32Reg |= bRestoreSys ? 0x1 : 0x0;
+        ui32Reg |= bRestoreIO ? 0x100 : 0x0;
         HWREG(SYS_CTRL_CLOCK_CTRL) = ui32Reg;
     }
 #endif
-    
+
     //
     // Enable deep-sleep.
     //
@@ -580,11 +568,10 @@ SysCtrlDeepSleep(void)
     HWREG(NVIC_SYS_CTRL) &= ~(NVIC_SYS_CTRL_SLEEPDEEP);
 
 #ifndef NO_CLOCK_DIVIDER_RESTORE
-    if(bRestoreSys || bRestoreIO)
-    {
+    if (bRestoreSys || bRestoreIO) {
         ui32Reg = HWREG(SYS_CTRL_CLOCK_CTRL);
         ui32Reg &= bRestoreSys ? ~SYS_CTRL_CLOCK_CTRL_SYS_DIV_M : 0xffffffff;
-        ui32Reg &= bRestoreIO ?  ~SYS_CTRL_CLOCK_CTRL_IO_DIV_M : 0xffffffff;
+        ui32Reg &= bRestoreIO ? ~SYS_CTRL_CLOCK_CTRL_IO_DIV_M : 0xffffffff;
         HWREG(SYS_CTRL_CLOCK_CTRL) = ui32Reg;
     }
 #endif
@@ -614,40 +601,33 @@ SysCtrlDeepSleep(void)
 //
 //*****************************************************************************
 bool
-SysCtrlPeripheralPresent(uint32_t ui32Peripheral)
-{
+SysCtrlPeripheralPresent(uint32_t ui32Peripheral) {
     uint32_t ui32DieCfg;
     uint32_t ui32Mask;
 
     // Check the arguments.
     ASSERT(SysCtrlPeripheralValid(ui32Peripheral));
 
-    if(SYS_CTRL_PERIPH_INDEX(ui32Peripheral) ==
-            SYS_CTRL_PERIPH_INDEX(SYS_CTRL_PERIPH_PKA) ||
-            SYS_CTRL_PERIPH_INDEX(ui32Peripheral) ==
-            SYS_CTRL_PERIPH_INDEX(SYS_CTRL_PERIPH_AES) ||
-            SYS_CTRL_PERIPH_INDEX(ui32Peripheral) ==
-            SYS_CTRL_PERIPH_INDEX(SYS_CTRL_PERIPH_RFC))
-    {
+    if (SYS_CTRL_PERIPH_INDEX(ui32Peripheral) ==
+        SYS_CTRL_PERIPH_INDEX(SYS_CTRL_PERIPH_PKA) ||
+        SYS_CTRL_PERIPH_INDEX(ui32Peripheral) ==
+        SYS_CTRL_PERIPH_INDEX(SYS_CTRL_PERIPH_AES) ||
+        SYS_CTRL_PERIPH_INDEX(ui32Peripheral) ==
+        SYS_CTRL_PERIPH_INDEX(SYS_CTRL_PERIPH_RFC)) {
         ui32DieCfg = HWREG(FLASH_CTRL_DIECFG2);
-    }
-    else
-    {
+    } else {
         ui32DieCfg = HWREG(FLASH_CTRL_DIECFG1);
     }
 
     ui32Mask = (g_pui32DieCfgMask[SYS_CTRL_PERIPH_INDEX(ui32Peripheral)] <<
-                SYS_CTRL_PERIPH_INSTANCE(ui32Peripheral));
+                                                                         SYS_CTRL_PERIPH_INSTANCE(ui32Peripheral));
 
     // Mask with correct  mask and determine if this peripheral is
     // permanently disabled.
-    if(ui32DieCfg & ui32Mask)
-    {
-        return(true);
-    }
-    else
-    {
-        return(false);
+    if (ui32DieCfg & ui32Mask) {
+        return (true);
+    } else {
+        return (false);
     }
 }
 
@@ -674,8 +654,7 @@ SysCtrlPeripheralPresent(uint32_t ui32Peripheral)
 //
 //*****************************************************************************
 void
-SysCtrlPeripheralReset(uint32_t ui32Peripheral)
-{
+SysCtrlPeripheralReset(uint32_t ui32Peripheral) {
     volatile uint32_t ui32Delay;
 
     // Check the arguments.
@@ -684,14 +663,14 @@ SysCtrlPeripheralReset(uint32_t ui32Peripheral)
 
     // Put the peripheral into the reset state.
     HWREG(g_pui32SRRegs[SYS_CTRL_PERIPH_INDEX(ui32Peripheral)]) |=
-        SYS_CTRL_PERIPH_MASKBIT(ui32Peripheral);
+            SYS_CTRL_PERIPH_MASKBIT(ui32Peripheral);
 
     // Delay for a little bit.
-    for(ui32Delay = 0; ui32Delay < 16; ui32Delay++) { }
+    for (ui32Delay = 0; ui32Delay < 16; ui32Delay++) {}
 
     // Take the peripheral out of the reset state.
     HWREG(g_pui32SRRegs[SYS_CTRL_PERIPH_INDEX(ui32Peripheral)]) &=
-        ~SYS_CTRL_PERIPH_MASKBIT(ui32Peripheral);
+            ~SYS_CTRL_PERIPH_MASKBIT(ui32Peripheral);
 }
 
 
@@ -721,14 +700,13 @@ SysCtrlPeripheralReset(uint32_t ui32Peripheral)
 //
 //*****************************************************************************
 void
-SysCtrlPeripheralEnable(uint32_t ui32Peripheral)
-{
+SysCtrlPeripheralEnable(uint32_t ui32Peripheral) {
     // Check the arguments.
     ASSERT(SysCtrlPeripheralValid(ui32Peripheral));
 
     // Enable module in Run Mode
     HWREG(g_pui32RCGCRegs[SYS_CTRL_PERIPH_INDEX(ui32Peripheral)]) |=
-        SYS_CTRL_PERIPH_MASKBIT(ui32Peripheral);
+            SYS_CTRL_PERIPH_MASKBIT(ui32Peripheral);
 }
 
 
@@ -753,14 +731,13 @@ SysCtrlPeripheralEnable(uint32_t ui32Peripheral)
 //
 //*****************************************************************************
 void
-SysCtrlPeripheralDisable(uint32_t ui32Peripheral)
-{
+SysCtrlPeripheralDisable(uint32_t ui32Peripheral) {
     // Check the arguments.
     ASSERT(SysCtrlPeripheralValid(ui32Peripheral));
 
     // Disable module in Run Mode
     HWREG(g_pui32RCGCRegs[SYS_CTRL_PERIPH_INDEX(ui32Peripheral)]) &=
-        ~SYS_CTRL_PERIPH_MASKBIT(ui32Peripheral);
+            ~SYS_CTRL_PERIPH_MASKBIT(ui32Peripheral);
 }
 
 
@@ -788,14 +765,13 @@ SysCtrlPeripheralDisable(uint32_t ui32Peripheral)
 //
 //*****************************************************************************
 void
-SysCtrlPeripheralSleepEnable(uint32_t ui32Peripheral)
-{
+SysCtrlPeripheralSleepEnable(uint32_t ui32Peripheral) {
     // Check the arguments.
     ASSERT(SysCtrlPeripheralValid(ui32Peripheral));
 
     // Enable this peripheral in sleep mode.
     HWREG(g_pui32SCGCRegs[SYS_CTRL_PERIPH_INDEX(ui32Peripheral)]) |=
-        SYS_CTRL_PERIPH_MASKBIT(ui32Peripheral);
+            SYS_CTRL_PERIPH_MASKBIT(ui32Peripheral);
 }
 
 
@@ -824,14 +800,13 @@ SysCtrlPeripheralSleepEnable(uint32_t ui32Peripheral)
 //
 //*****************************************************************************
 void
-SysCtrlPeripheralSleepDisable(uint32_t ui32Peripheral)
-{
+SysCtrlPeripheralSleepDisable(uint32_t ui32Peripheral) {
     // Check the arguments.
     ASSERT(SysCtrlPeripheralValid(ui32Peripheral));
 
     // Disable this peripheral in sleep mode.
     HWREG(g_pui32SCGCRegs[SYS_CTRL_PERIPH_INDEX(ui32Peripheral)]) &=
-        ~SYS_CTRL_PERIPH_MASKBIT(ui32Peripheral);
+            ~SYS_CTRL_PERIPH_MASKBIT(ui32Peripheral);
 }
 
 
@@ -859,14 +834,13 @@ SysCtrlPeripheralSleepDisable(uint32_t ui32Peripheral)
 //
 //*****************************************************************************
 void
-SysCtrlPeripheralDeepSleepEnable(uint32_t ui32Peripheral)
-{
+SysCtrlPeripheralDeepSleepEnable(uint32_t ui32Peripheral) {
     // Check the arguments.
     ASSERT(SysCtrlPeripheralValid(ui32Peripheral));
 
     // Enable this peripheral in deep-sleep mode.
     HWREG(g_pui32DCGCRegs[SYS_CTRL_PERIPH_INDEX(ui32Peripheral)]) |=
-        SYS_CTRL_PERIPH_MASKBIT(ui32Peripheral);
+            SYS_CTRL_PERIPH_MASKBIT(ui32Peripheral);
 }
 
 
@@ -897,14 +871,13 @@ SysCtrlPeripheralDeepSleepEnable(uint32_t ui32Peripheral)
 //
 //*****************************************************************************
 void
-SysCtrlPeripheralDeepSleepDisable(uint32_t ui32Peripheral)
-{
+SysCtrlPeripheralDeepSleepDisable(uint32_t ui32Peripheral) {
     // Check the arguments.
     ASSERT(SysCtrlPeripheralValid(ui32Peripheral));
 
     // Disable this peripheral in deep-sleep mode.
     HWREG(g_pui32DCGCRegs[SYS_CTRL_PERIPH_INDEX(ui32Peripheral)]) &=
-        ~SYS_CTRL_PERIPH_MASKBIT(ui32Peripheral);
+            ~SYS_CTRL_PERIPH_MASKBIT(ui32Peripheral);
 }
 
 
@@ -931,12 +904,11 @@ SysCtrlPeripheralDeepSleepDisable(uint32_t ui32Peripheral)
 //
 //*****************************************************************************
 void
-SysCtrlPowerModeSet(uint32_t ui32PowerMode)
-{
+SysCtrlPowerModeSet(uint32_t ui32PowerMode) {
     // Check the arguments.
     ASSERT(ui32PowerMode == SYS_CTRL_PM_NOACTION ||
-           ui32PowerMode == SYS_CTRL_PM_1        ||
-           ui32PowerMode == SYS_CTRL_PM_2        ||
+           ui32PowerMode == SYS_CTRL_PM_1 ||
+           ui32PowerMode == SYS_CTRL_PM_2 ||
            ui32PowerMode == SYS_CTRL_PM_3);
 
     // Set power mode
@@ -956,16 +928,14 @@ SysCtrlPowerModeSet(uint32_t ui32PowerMode)
 //
 //*****************************************************************************
 uint32_t
-SysCtrlPowerModeGet(void)
-{
+SysCtrlPowerModeGet(void) {
     uint32_t ui32PowerMode;
 
     ui32PowerMode = HWREG(SYS_CTRL_PMCTL);
     ui32PowerMode &= SYS_CTRL_PMCTL_PM_M;
 
-    return(ui32PowerMode);
+    return (ui32PowerMode);
 }
-
 
 
 //*****************************************************************************
@@ -978,8 +948,7 @@ SysCtrlPowerModeGet(void)
 //
 //*****************************************************************************
 void
-SysCtrlClockLossDetectEnable(void)
-{
+SysCtrlClockLossDetectEnable(void) {
     uint32_t ui32CLD;
 
     ui32CLD = HWREG(SYS_CTRL_CLD);
