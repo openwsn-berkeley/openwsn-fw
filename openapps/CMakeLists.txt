@@ -65,3 +65,7 @@ target_link_libraries(openapps PRIVATE bsp)
 target_link_libraries(openapps PRIVATE openweb)
 target_link_libraries(openapps PRIVATE openstack)
 target_link_libraries(openapps PRIVATE opendrivers)
+
+if (DARWIN AND "${BOARD}" STREQUAL "python")
+    set_target_properties(openapps PROPERTIES SUFFIX ".so")
+endif()

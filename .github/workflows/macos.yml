@@ -41,6 +41,10 @@ jobs:
           python-version: ${{ matrix.python-version }}
           architecture: 'x64'
 
+      - name: Install dependancy
+        run: |
+          pip install appdirs
+
       - if: ${{ matrix.board == 'openmote-cc2538' || matrix.board == 'iot-lab_M3' }}
         name: Setup compiler toolchain
         uses: fiam/arm-none-eabi-gcc@v1

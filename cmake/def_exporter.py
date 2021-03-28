@@ -6,7 +6,7 @@ import re
 try:
     import appdirs
 except ImportError:
-    print("Could not load appdirs, please install with 'python -m pip install appdirs'")
+    print("Couldn't import appdirs, the firmware logging information could not be exported.")
     exit(0)
 
 

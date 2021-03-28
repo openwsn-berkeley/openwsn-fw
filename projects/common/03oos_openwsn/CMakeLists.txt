@@ -5,6 +5,10 @@ if ("${BOARD}" STREQUAL "python")
 
     target_include_directories(${PROJECT} PRIVATE ${Python3_INCLUDE_DIRS})
     target_link_libraries(${PROJECT} PRIVATE ${Python3_LIBRARIES})
+
+    if (DARWIN AND "${BOARD}" STREQUAL "python")
+        set_target_properties(${PROJECT} PROPERTIES SUFFIX ".so")
+    endif()
 else ()
     add_executable(${PROJECT} "")
 

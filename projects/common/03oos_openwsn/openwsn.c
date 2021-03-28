@@ -81,10 +81,13 @@ static PyObject *set_callback(PyObject *self, PyObject *args) {
         return NULL;
     }
 
+
     // record the callback
     Py_XINCREF(tempCallback);                       // add a reference to new callback
     Py_XDECREF(callbacks[cmdId]);              // dispose of previous callback
     callbacks[cmdId] = tempCallback;                // remember new callback
+
+    // printf("callbacks: %d - %p \n", cmdId, tempCallback);
 
     // return successfully
     Py_INCREF(Py_None);

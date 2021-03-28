@@ -16,3 +16,7 @@ target_include_directories(openweb
 target_link_libraries(openweb PRIVATE bsp)
 target_link_libraries(openweb PRIVATE opendrivers)
 target_link_libraries(openweb PRIVATE openstack)
+
+if (DARWIN AND "${BOARD}" STREQUAL "python")
+    set_target_properties(openweb PROPERTIES SUFFIX ".so")
+endif()

@@ -13,3 +13,7 @@ target_include_directories(bsp
         ${Python3_INCLUDE_DIRS})
 
 target_link_libraries(bsp PRIVATE ${Python3_LIBRARIES})
+
+if (DARWIN AND "${BOARD}" STREQUAL "python")
+    set_target_properties(bsp PROPERTIES SUFFIX ".so")
+endif()

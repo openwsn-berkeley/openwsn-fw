@@ -116,7 +116,11 @@ enum {
     MOTE_NOTIF_LAST
 };
 
+#if _WIN32
 PyObject *callbacks[MOTE_NOTIF_LAST];
+#else
+extern PyObject *callbacks[MOTE_NOTIF_LAST];
+#endif
 
 // radio
 void radio_intr_startOfFrame(uint32_t capturedTime);

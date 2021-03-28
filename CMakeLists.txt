@@ -80,7 +80,7 @@ else ()
 endif ()
 
 # parse the opendefs and sixtop definitions (always run)
-add_custom_target(def-parser ALL COMMAND python def_exporter.py WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/cmake)
+add_custom_target(def-parser ALL COMMAND ${Python3_EXECUTABLE} def_exporter.py WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/cmake)
 
 # override shared_libs capabilities in case we are switching from cross-compile build to native build or vice-versa
 if ("${BOARD}" STREQUAL "python")

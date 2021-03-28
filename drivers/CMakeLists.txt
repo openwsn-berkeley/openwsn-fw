@@ -23,3 +23,7 @@ target_include_directories(opendrivers
 
 target_link_libraries(opendrivers PUBLIC bsp)
 target_link_libraries(opendrivers PUBLIC kernel)
+
+if (DARWIN AND "${BOARD}" STREQUAL "python")
+    set_target_properties(opendrivers PROPERTIES SUFFIX ".so")
+endif()

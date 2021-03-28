@@ -4,9 +4,9 @@ import os
 import platform
 import shutil
 import subprocess
+import sys
 
 import setuptools
-import sys
 from setuptools import Extension, Command
 from setuptools.command.build_ext import build_ext
 
@@ -21,7 +21,7 @@ except ImportError:
 here = os.path.abspath('.')
 
 # Filename for the C extension module library
-c_module_name = '_openmote'
+c_module_name = 'openmote'
 
 enable_configure = False
 
@@ -30,20 +30,6 @@ if sys.version_info.major < 3:
 
 if sys.version_info.minor < 6:
     raise Exception("Must be using Python 3.6 or higher")
-
-if not os.path.exists(os.path.join(os.path.abspath('.'), 'build')):
-    os.mkdir(os.path.join(os.path.abspath('.'), 'build'))
-    os.mkdir(os.path.join(os.path.abspath('.'), 'build', 'openwsn'))
-
-    with open('build/openwsn/__init__.py', 'w') as f:
-        f.write('from openmote import *')
-else:
-    if os.path.exists(os.path.join(os.path.abspath('.'), 'build')) and not os.path.exists(
-            os.path.join(os.path.abspath('.'), 'build', 'openwsn')):
-        os.mkdir(os.path.join(os.path.abspath('./build'), 'openwsn'))
-
-    with open('build/openwsn/__init__.py', 'w') as f:
-        f.write('from openmote import *')
 
 # Command line flags forwarded to CMake (for debug purpose)
 cmake_cmd_args = []
@@ -178,8 +164,7 @@ class CleanCommand(Command):
                 shutil.rmtree(path)
 
 
-setuptools.setup(name='openwsn',
-                 packages=setuptools.find_packages(where=os.path.join('build', 'openwsn')),
+setuptools.setup(name='openmote',
                  version=1.0,
                  python_requires='>=3.6',
                  description='An instance of an OpenWSN mote',
