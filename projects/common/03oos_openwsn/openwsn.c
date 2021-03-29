@@ -7,6 +7,7 @@
 #include "config.h"
 
 #if PYTHON_BOARD
+
 #include "Python.h"
 
 #include <signal.h>
@@ -30,10 +31,12 @@
 #endif
 
 #if PYTHON_BOARD
+
 void INThandler(int sig) {
     signal(sig, SIG_IGN);
     scheduler_stop();
 }
+
 #endif
 
 
@@ -58,6 +61,7 @@ int mote_main(void) {
 }
 
 #if PYTHON_BOARD
+
 static PyObject *set_callback(PyObject *self, PyObject *args) {
     (void) self;
 
@@ -217,7 +221,7 @@ static PyMethodDef OpenWSN_Methods[] = {
         {"supply_init",          (PyCFunction) supply_init,          METH_NOARGS,  ""},
         {"supply_on",            (PyCFunction) supply_on,            METH_NOARGS,  ""},
         {"supply_off",           (PyCFunction) supply_off,           METH_NOARGS,  ""},
-        {NULL}
+        {NULL, NULL,                                                 METH_NOARGS,  ""}
 };
 //=========================== openwsn module ==================================
 

@@ -55,6 +55,7 @@ jobs:
       name: Building Python Extension
       run: |
         python setup.py install --user -DOPT-UDP:BOOL=ON -DOPT-COAP:BOOL=ON -DOPT-CJOIN:BOOL=ON
+        python -c "import openmote"
 
     - if: ${{ matrix.board != 'python' }}
       name: Create Build Environment
