@@ -55,7 +55,7 @@ jobs:
         name: Test ARM toolchain
         run: arm-none-eabi-gcc --version
 
-      - if: ${{ matrix.board == 'python' }}
+      - if: ${{ matrix.board == 'python'}}
         name: Building Python Extension
         run: |
           python setup.py install --user -DOPT-UDP:BOOL=ON -DOPT-COAP:BOOL=ON -DOPT-CJOIN:BOOL=ON
