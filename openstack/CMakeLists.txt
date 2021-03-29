@@ -49,4 +49,6 @@ target_link_libraries(openstack PRIVATE kernel)
 
 if (DARWIN AND "${BOARD}" STREQUAL "python")
     set_target_properties(openstack PROPERTIES SUFFIX ".so")
+elseif (WIN32 AND "${BOARD}" STREQUAL "python")
+    set_target_properties(openstack PROPERTIES SUFFIX ".pyd")
 endif()

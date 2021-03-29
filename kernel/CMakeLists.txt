@@ -14,4 +14,6 @@ target_link_libraries(kernel PRIVATE bsp)
 
 if (DARWIN AND "${BOARD}" STREQUAL "python")
     set_target_properties(kernel PROPERTIES SUFFIX ".so")
+elseif (WIN32 AND "${BOARD}" STREQUAL "python")
+    set_target_properties(kernel PROPERTIES SUFFIX ".pyd")
 endif()

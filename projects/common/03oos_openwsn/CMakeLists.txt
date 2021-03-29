@@ -8,6 +8,8 @@ if ("${BOARD}" STREQUAL "python")
 
     if (DARWIN AND "${BOARD}" STREQUAL "python")
         set_target_properties(${PROJECT} PROPERTIES SUFFIX ".so")
+    elseif (WIN32 AND "${BOARD}" STREQUAL "python")
+        set_target_properties(${PROJECT} PROPERTIES SUFFIX ".pyd")
     endif()
 else ()
     add_executable(${PROJECT} "")

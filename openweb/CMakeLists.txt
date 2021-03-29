@@ -19,4 +19,6 @@ target_link_libraries(openweb PRIVATE openstack)
 
 if (DARWIN AND "${BOARD}" STREQUAL "python")
     set_target_properties(openweb PROPERTIES SUFFIX ".so")
+elseif (WIN32 AND "${BOARD}" STREQUAL "python")
+    set_target_properties(openweb PROPERTIES SUFFIX ".pyd")
 endif()

@@ -68,4 +68,6 @@ target_link_libraries(openapps PRIVATE opendrivers)
 
 if (DARWIN AND "${BOARD}" STREQUAL "python")
     set_target_properties(openapps PROPERTIES SUFFIX ".so")
+elseif (WIN32 AND "${BOARD}" STREQUAL "python")
+    set_target_properties(openapps PROPERTIES SUFFIX ".pyd")
 endif()

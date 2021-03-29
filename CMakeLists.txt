@@ -13,7 +13,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 # find Unix-like OS
 if (UNIX AND NOT APPLE)
     set(LINUX TRUE)
-else ()
+elseif (UNIX AND APPLE)
     set(DARWIN TRUE)
 endif ()
 

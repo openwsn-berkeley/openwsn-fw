@@ -16,4 +16,6 @@ target_link_libraries(bsp PRIVATE ${Python3_LIBRARIES})
 
 if (DARWIN AND "${BOARD}" STREQUAL "python")
     set_target_properties(bsp PROPERTIES SUFFIX ".so")
-endif()
+elseif (WIN32 AND "${BOARD}" STREQUAL "python")
+    set_target_properties(bsp PROPERTIES SUFFIX ".pyd")
+endif ()
