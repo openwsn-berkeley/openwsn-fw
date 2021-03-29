@@ -128,9 +128,10 @@ class CMakeBuild(build_ext):
                 subprocess.check_call(['cmake', '--build', '.', '--config', cfg], cwd=self.build_temp)
             except subprocess.CalledProcessError:
                 if colors:
-                    print(c.Fore.RED + "Build process failed" + c.Fore.RESET)
+                    raise Exception(c.Fore.RED + "Build process failed" + c.Fore.RESET)
                 else:
-                    print("Build process failed")
+                    raise Exception("Build process failed")
+
             else:
                 if colors:
                     print(c.Fore.GREEN + "Build process succeeded" + c.Fore.RESET)
