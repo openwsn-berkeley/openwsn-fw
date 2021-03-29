@@ -142,8 +142,9 @@ static PyObject *radio_isr_endFrame(PyObject *self, PyObject *args) {
     return Py_None;
 }
 
-static PyObject *sctimer_isr(PyObject *self) {
+static PyObject *sctimer_isr(PyObject *self, PyObject *args) {
     (void) self;
+    (void) args;
 
     // call the callback
     sctimer_intr_compare();
@@ -153,8 +154,9 @@ static PyObject *sctimer_isr(PyObject *self) {
     return Py_None;
 }
 
-static PyObject *uart_isr_tx(PyObject *self) {
+static PyObject *uart_isr_tx(PyObject *self, PyObject *args) {
     (void) self;
+    (void) args;
 
     // call the callback
     uart_intr_tx();
@@ -164,8 +166,9 @@ static PyObject *uart_isr_tx(PyObject *self) {
     return Py_None;
 }
 
-static PyObject *uart_isr_rx(PyObject *self) {
+static PyObject *uart_isr_rx(PyObject *self, PyObject* args) {
     (void) self;
+    (void) args;
 
     // call the callback
     uart_intr_rx();
@@ -175,8 +178,9 @@ static PyObject *uart_isr_rx(PyObject *self) {
     return Py_None;
 }
 
-static PyObject *supply_on(PyObject *self) {
+static PyObject *supply_on(PyObject *self, PyObject* args) {
     (void) self;
+    (void) args;
 
     // start the mote's execution
 
@@ -188,8 +192,9 @@ static PyObject *supply_on(PyObject *self) {
     return Py_None;
 }
 
-static PyObject *supply_init(PyObject *self) {
+static PyObject *supply_init(PyObject *self, PyObject* args) {
     (void) self;
+    (void) args;
 
     // TODO
     // return successfully
@@ -197,8 +202,9 @@ static PyObject *supply_init(PyObject *self) {
     return Py_None;
 }
 
-static PyObject *supply_off(PyObject *self) {
+static PyObject *supply_off(PyObject *self, PyObject* args) {
     (void) self;
+    (void) args;
 
     // TODO
     // return successfully
@@ -211,16 +217,16 @@ static PyObject *supply_off(PyObject *self) {
 /*
 \brief List of methods of the openwsn module class.
 */
-static PyMethodDef OpenWSN_Methods[] = {
-        {"set_callback",         (PyCFunction) set_callback,         METH_VARARGS, ""},
-        {"radio_isr_startFrame", (PyCFunction) radio_isr_startFrame, METH_VARARGS, ""},
-        {"radio_isr_endFrame",   (PyCFunction) radio_isr_endFrame,   METH_VARARGS, ""},
-        {"sctimer_isr",          (PyCFunction) sctimer_isr,          METH_NOARGS,  ""},
-        {"uart_isr_tx",          (PyCFunction) uart_isr_tx,          METH_NOARGS,  ""},
-        {"uart_isr_rx",          (PyCFunction) uart_isr_rx,          METH_NOARGS,  ""},
-        {"supply_init",          (PyCFunction) supply_init,          METH_NOARGS,  ""},
-        {"supply_on",            (PyCFunction) supply_on,            METH_NOARGS,  ""},
-        {"supply_off",           (PyCFunction) supply_off,           METH_NOARGS,  ""},
+static PyMethodDef OpenMote_Methods[] = {
+        {"set_callback",         set_callback,         METH_VARARGS, ""},
+        {"radio_isr_startFrame", radio_isr_startFrame, METH_VARARGS, ""},
+        {"radio_isr_endFrame",   radio_isr_endFrame,   METH_VARARGS, ""},
+        {"sctimer_isr",          sctimer_isr,          METH_NOARGS,  ""},
+        {"uart_isr_tx",          uart_isr_tx,          METH_NOARGS,  ""},
+        {"uart_isr_rx",          uart_isr_rx,          METH_NOARGS,  ""},
+        {"supply_init",          supply_init,          METH_NOARGS,  ""},
+        {"supply_on",            supply_on,            METH_NOARGS,  ""},
+        {"supply_off",           supply_off,           METH_NOARGS,  ""},
         {NULL, NULL,                                                 METH_NOARGS,  ""}
 };
 //=========================== openwsn module ==================================
@@ -236,7 +242,7 @@ static PyModuleDef openmotemodule = {
         .m_name = "openwsn",
         .m_doc = "Python/C extension for the OpenWSN-firmware",
         .m_size = -1,
-        .m_methods = OpenWSN_Methods
+        .m_methods = OpenMote_Methods
 };
 
 PyMODINIT_FUNC PyInit_openmote(void) {
