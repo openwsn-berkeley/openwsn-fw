@@ -118,7 +118,6 @@ class CMakeBuild(build_ext):
 
             if enable_configure:
                 if platform.system() == 'Windows':
-                    print('ON WINDOWS')
                     subprocess.check_call(['cmake-gui', ext.cmake_lists_dir], cwd=self.build_temp)
                 else:
                     subprocess.check_call(['ccmake', ext.cmake_lists_dir], cwd=self.build_temp)
