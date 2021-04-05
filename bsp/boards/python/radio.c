@@ -309,8 +309,13 @@ void radio_getReceivedFrame(uint8_t *pBufRead,
         return;
     }
     if (PyTuple_Size(result) != 4) {
+#if _WIN32
+        printf("[CRITICAL] radio_getReceivedFrame() did not return a tuple of exactly 4 elements %lld\n",
+               PyList_Size(result));
+#else
         printf("[CRITICAL] radio_getReceivedFrame() did not return a tuple of exactly 4 elements %ld\n",
                PyList_Size(result));
+#endif
         return;
     }
 
