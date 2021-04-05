@@ -24,9 +24,3 @@ target_include_directories(opendrivers
 target_link_libraries(opendrivers PUBLIC bsp)
 target_link_libraries(opendrivers PUBLIC kernel)
 
-if (DARWIN AND "${BOARD}" STREQUAL "python")
-    set_target_properties(opendrivers PROPERTIES SUFFIX ".so")
-elseif (WIN32 AND "${BOARD}" STREQUAL "python")
-    message(STATUS "drivers pyd")
-    set_target_properties(opendrivers PROPERTIES SUFFIX ".pyd")
-endif()
