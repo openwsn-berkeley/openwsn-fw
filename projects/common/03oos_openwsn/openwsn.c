@@ -8,7 +8,7 @@
 
 #if PYTHON_BOARD
 
-#include "Python.h"
+#include <Python.h>
 
 #include <signal.h>
 #include "interface.h"
@@ -37,7 +37,12 @@ void INThandler(int sig) {
     scheduler_stop();
 }
 
+#if _WIN32
+DLL_EXPORT PyObject *callbacks[MOTE_NOTIF_LAST];
 #endif
+
+#endif
+
 
 
 int mote_main(void) {

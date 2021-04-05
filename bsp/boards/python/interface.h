@@ -15,6 +15,14 @@
 
 #include <Python.h>
 
+#if _WIN32
+#ifdef COMPILE_DLL
+#define DLL_EXPORT  __declspec(dllexport)
+#else
+#define DLL_EXPORT  __declspec(dllimport)
+#endif
+#endif
+
 //========================= typedefs ==========================================
 
 //=========================== enums ===========================================
@@ -117,7 +125,7 @@ enum {
 };
 
 #if _WIN32
-PyObject *callbacks[MOTE_NOTIF_LAST];
+DLL_EXPORT PyObject *callbacks[MOTE_NOTIF_LAST];
 #else
 extern PyObject *callbacks[MOTE_NOTIF_LAST];
 #endif
