@@ -34,14 +34,16 @@ endif()
 
 target_compile_features(openstack PUBLIC c_std_99)
 target_include_directories(openstack
-        PUBLIC "../openstack"
-        PUBLIC "../openstack/02a-MAClow"
-        PUBLIC "../openstack/02b-MAChigh"
-        PUBLIC "../openstack/03a-IPHC"
-        PUBLIC "../openstack/03b-IPv6"
-        PUBLIC "../openstack/04-TRAN"
-        PUBLIC "../openstack/04-TRAN/sock"
-        PUBLIC "../openstack/cross-layers")
+        PUBLIC
+        .
+        ${CMAKE_SOURCE_DIR}/inc
+        02a-MAClow
+        02b-MAChigh
+        03a-IPHC
+        03b-IPv6
+        04-TRAN
+        04-TRAN/sock
+        cross-layers)
 
 target_link_libraries(openstack PRIVATE opendrivers)
 target_link_libraries(openstack PRIVATE bsp)

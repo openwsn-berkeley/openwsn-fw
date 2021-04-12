@@ -6,8 +6,10 @@ target_sources(kernel
 
 target_compile_features(kernel PUBLIC c_std_99)
 target_include_directories(kernel
-        PUBLIC "."
-        PUBLIC "../inc"
-        PRIVATE "openos")
+        PUBLIC
+        .
+        ${CMAKE_SOURCE_DIR}/inc
+        PRIVATE
+        openos)
 
 target_link_libraries(kernel PRIVATE bsp)

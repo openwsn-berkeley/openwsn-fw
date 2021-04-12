@@ -16,10 +16,11 @@ target_sources(opendrivers
 
 target_compile_features(opendrivers PUBLIC c_std_99)
 target_include_directories(opendrivers
-        PUBLIC "."
-        PUBLIC "../inc"
-        PUBLIC "common"
-        PUBLIC "common/crypto")
+        PUBLIC
+        .
+        ${CMAKE_SOURCE_DIR}/inc
+        common
+        common/crypto)
 
 target_link_libraries(opendrivers PUBLIC bsp)
 target_link_libraries(opendrivers PUBLIC kernel)

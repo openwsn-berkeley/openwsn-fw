@@ -2,9 +2,7 @@ cmake_minimum_required(VERSION 3.13)
 
 project(OpenWSN-FW VERSION 2.0 LANGUAGES C ASM)
 
-include(ExternalProject)
-
-# Python3 Interpreter is always need (for flashing motes)
+# Python3 Interpreter is always need (for flashing motes and exporting the firmware defines from opendefs & sixtop)
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
 
 # set the cmake module path for easy includes
@@ -17,7 +15,7 @@ elseif (UNIX AND APPLE)
     set(DARWIN TRUE)
 endif ()
 
-# set cmake policies for backwards compatibility
+# set cmake policies for backwards compatibility (relative paths to absolute).
 if (POLICY CMP0076)
     cmake_policy(SET CMP0076 NEW)
 endif ()
@@ -26,28 +24,25 @@ if (POLICY CMP0057)
     cmake_policy(SET CMP0057 NEW)
 endif ()
 
-if (WIN32)
-    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
-endif ()
-
-# choose project and board
+# If PROJECT not set on cmd or by the IDE set to oos_openwsn (FORCE overwrites the cache value)
 if (NOT PROJECT)
     set(PROJECT "oos_openwsn" CACHE STRING "Select a project" FORCE)
 endif ()
 set_property(CACHE PROJECT PROPERTY STRINGS "oos_openwsn")
 
+# If BOARD not set on cmd or by the IDE set to python (FORCE overwrites the cache value)
 if (NOT BOARD)
     set(BOARD "python" CACHE STRING "Select a board" FORCE)
 endif ()
 set_property(CACHE BOARD PROPERTY STRINGS "python" "openmote-cc2538" "iot-lab_M3")
 
-# force default build type to Debug unless already set (by an IDE or on the command line)
+# If CMAKE_BUILD_TYPE not set on cmd or by the IDE set to Debug (FORCE overwrites the cache value)
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose the build type: Debug, Release, and MinSizeRel." FORCE)
 endif ()
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel")
 
-# set USB ports to try flashing if board is not python
+# if BOOTLOAD is not set on the cmd line (or by the IDE), set to empty string
 if (NOT BOOTLOAD)
     if (WIN32)
         set(BOOTLOAD "" CACHE STRING "Select COM* ports to flash." FORCE)
@@ -58,16 +53,7 @@ if (NOT BOOTLOAD)
     endif ()
 endif ()
 
-if ("${BOARD}" STREQUAL "python" AND NOT "${BOOTLOAD}" STREQUAL "")
-    message(WARNING "Python boards cannot be flashed")
-endif ()
-
-# Add these flags to the system compiler when building for Pythob board
-if ((CMAKE_C_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID STREQUAL "GNU") AND NOT CMAKE_TOOLCHAIN_FILE)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic -Wall -Wextra -Wunused -Wuninitialized")
-endif ()
-
-# sanitizers
+# sanitizer flag when building for python and using Clang compiler
 if (CMAKE_C_COMPILER_ID STREQUAL "Clang" AND "${BOARD}" STREQUAL "python")
     option(SANITIZERS "Enable sanitizing of the *.so/*.dylib libraries in the Python extension" OFF)
 
@@ -88,6 +74,19 @@ if ("${BOARD}" STREQUAL "python")
     set(BUILD_SHARED_LIBS ON)
     set_property(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
 
+    # Add these flags to the system compiler when building for Python board
+    if ((CMAKE_C_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID STREQUAL "GNU") AND "${BOARD}" STREQUAL "python")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pedantic -Wall -Wextra -Wunused -Wuninitialized")
+    endif ()
+
+    if (WIN32)
+        set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+    endif ()
+
+    if (NOT "${BOOTLOAD}" STREQUAL "")
+        message(WARNING "Python boards cannot be flashed")
+    endif ()
+
     find_package(Python3 COMPONENTS Development REQUIRED)
 
     message(STATUS "Found Python3 INCLUDE DIRS: ${Python3_INCLUDE_DIRS}")
@@ -104,13 +103,10 @@ if ("${BOARD}" STREQUAL "" OR "${PROJECT}" STREQUAL "")
     return()
 endif ()
 
-# search for build options
+# Pull in build options
 include(options)
 
-# include the generic definitions used by all libraries
-include_directories(${CMAKE_SOURCE_DIR}/inc)
-
-# include the projects
+# Pull in cmake file responsible for building the project
 include(projects/${PROJECT})
 
 # general build settings

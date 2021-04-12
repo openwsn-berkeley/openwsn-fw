@@ -48,18 +48,19 @@ endif ()
 target_compile_features(openapps PUBLIC c_std_99)
 target_include_directories(openapps
         PUBLIC
-        "."
+        .
+        ${CMAKE_SOURCE_DIR}/inc
         PRIVATE
-        "c6t"
-        "cled"
-        "uecho"
-        "cstorm"
-        "cinfrared"
-        "cexample"
-        "cinfo"
-        "rrt"
-        "cwellknown"
-        "cjoin")
+        c6t
+        cled
+        uecho
+        cstorm
+        cinfrared
+        cexample
+        cinfo
+        rrt
+        cwellknown
+        cjoin)
 
 target_link_libraries(openapps PRIVATE bsp)
 target_link_libraries(openapps PRIVATE openweb)

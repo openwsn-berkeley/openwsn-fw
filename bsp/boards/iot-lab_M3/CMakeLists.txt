@@ -26,6 +26,7 @@ target_sources(bsp
 
 target_include_directories(bsp
         PUBLIC
+        ${CMAKE_SOURCE_DIR}/inc
         ${CMAKE_CURRENT_SOURCE_DIR}/..
         ${CMAKE_CURRENT_SOURCE_DIR}/.
         ${CMAKE_CURRENT_SOURCE_DIR}/configure

@@ -10,8 +10,9 @@ target_sources(openweb
 target_compile_features(openweb PUBLIC c_std_99)
 target_include_directories(openweb
         PUBLIC
-        "."
-        "opencoap")
+        .
+        ${CMAKE_SOURCE_DIR}/inc
+        opencoap)
 
 target_link_libraries(openweb PRIVATE bsp)
 target_link_libraries(openweb PRIVATE opendrivers)
