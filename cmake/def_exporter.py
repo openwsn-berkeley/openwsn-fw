@@ -9,6 +9,14 @@ except ImportError:
     print("Couldn't import appdirs, the firmware logging information could not be exported.")
     exit(0)
 
+try:
+    import colorama as c
+
+    colors = True
+    c.init()
+except ImportError:
+    colors = False
+
 
 def extract_component_codes(base_path):
     codes_found = {}
@@ -88,13 +96,19 @@ if __name__ == "__main__":
 
     app_dir = appdirs.user_data_dir("openvisualizer")
 
+    if not os.path.exists(app_dir):
+        os.makedirs(app_dir)
+
     with open(os.path.join(app_dir, 'component-codes.json'), 'w') as f:
         json.dump(extract_component_codes(base_path), f)
 
     with open(os.path.join(app_dir, 'log-descriptions.json'), 'w') as f:
         json.dump(extract_log_descriptions(base_path), f)
 
-    print("Parsed opendefs.h")
+    if colors:
+        print(c.Fore.BLUE + "Extracted opendefs.h definitions" + c.Fore.RESET)
+    else:
+        print("Extracted opendefs.h definitions")
 
     with open(os.path.join(app_dir, 'sixtop-rcs.json'), 'w') as f:
         json.dump(extract_6top_rcs(base_path), f)
@@ -102,4 +116,7 @@ if __name__ == "__main__":
     with open(os.path.join(app_dir, 'sixtop-states.json'), 'w') as f:
         json.dump(extract_6top_states(base_path), f)
 
-    print("Parsed sixtop.h")
+    if colors:
+        print(c.Fore.BLUE + "Extracted sixtop.h definitions" + c.Fore.RESET)
+    else:
+        print("Extracted sixtop.h definitions")

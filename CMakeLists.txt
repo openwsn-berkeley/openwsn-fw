@@ -2,9 +2,6 @@ cmake_minimum_required(VERSION 3.13)
 
 project(OpenWSN-FW VERSION 2.0 LANGUAGES C ASM)
 
-# Python3 Interpreter is always need (for flashing motes and exporting the firmware defines from opendefs & sixtop)
-find_package(Python3 COMPONENTS Interpreter REQUIRED)
-
 # set the cmake module path for easy includes
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
@@ -22,6 +19,13 @@ endif ()
 
 if (POLICY CMP0057)
     cmake_policy(SET CMP0057 NEW)
+endif ()
+
+if (NOT PYTHON_VERSION)
+    # Python3 Interpreter is always need (for flashing motes and exporting the firmware defines from opendefs & sixtop)
+    find_package(Python3 COMPONENTS Interpreter REQUIRED)
+else ()
+    find_package(Python3 ${PYTHON_VERSION} EXACT COMPONENTS Interpreter REQUIRED)
 endif ()
 
 # If PROJECT not set on cmd or by the IDE set to oos_openwsn (FORCE overwrites the cache value)
@@ -87,7 +91,12 @@ if ("${BOARD}" STREQUAL "python")
         message(WARNING "Python boards cannot be flashed")
     endif ()
 
-    find_package(Python3 COMPONENTS Development REQUIRED)
+    if (NOT PYTHON_VERSION)
+        # Python3 Interpreter is always need (for flashing motes and exporting the firmware defines from opendefs & sixtop)
+        find_package(Python3 COMPONENTS Development REQUIRED)
+    else ()
+        find_package(Python3 ${PYTHON_VERSION} EXACT COMPONENTS Development REQUIRED)
+    endif ()
 
     message(STATUS "Found Python3 INCLUDE DIRS: ${Python3_INCLUDE_DIRS}")
     message(STATUS "Found Python3 LIBRARIES DIRS: ${Python3_LIBRARY_DIRS}")
@@ -115,6 +124,7 @@ message(STATUS "OPENWSN-FW:..................VERSION-${PROJECT_VERSION}")
 message(STATUS "COMPILER TOOLCHAIN:..........${CMAKE_C_COMPILER}")
 message(STATUS "COMPILER VERSION:............${CMAKE_C_COMPILER_VERSION}")
 message(STATUS "CMAKE_GENERATOR:.............${CMAKE_GENERATOR}")
+message(STATUS "PYTHON3 VERSION:.............${Python3_VERSION}")
 message(STATUS "BOARD:.......................${BOARD}")
 message(STATUS "PROJECT:.....................${PROJECT}")
 message(STATUS "BUILD_SHARED_LIBS............${BUILD_SHARED_LIBS}")

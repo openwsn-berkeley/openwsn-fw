@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['None', '3.6', '3.7', '3.8']
+        python-version: ['None', '3.6', '3.7', '3.8', '3.9']
         board: ['python', 'openmote-cc2538', 'iot-lab_M3']
         exclude:
           - board: 'python'
@@ -22,12 +22,16 @@ jobs:
             python-version: '3.7'
           - board: 'openmote-cc2538'
             python-version: '3.8'
+          - board: 'openmote-cc2538'
+            python-version: '3.9'
           - board: 'iot-lab_M3'
             python-version: '3.6'
           - board: 'iot-lab_M3'
             python-version: '3.7'
           - board: 'iot-lab_M3'
             python-version: '3.8'
+          - board: 'iot-lab_M3'
+            python-version: '3.9'
 
     runs-on: windows-latest
 
@@ -54,7 +58,9 @@ jobs:
       - if: ${{ matrix.board == 'python' }}
         name: Building Python Extension
         run: |
-          python setup.py install --user -DOPT-UDP:BOOL=ON -DOPT-COAP:BOOL=ON -DOPT-CJOIN:BOOL=ON
+          python --version
+          python -m pip install -r requirements.txt
+          python setup.py install --user -DPYTHON_VERSION:STRING=${{ matrix.python-version }} -DOPT-UDP:BOOL=ON -DOPT-COAP:BOOL=ON -DOPT-CJOIN:BOOL=ON
           python -c "import openmote"
 
       - if: ${{ matrix.board != 'python' }}
