@@ -3,17 +3,12 @@
     \author Nicola Accettura <nicola.accettura@eecs.berkeley.edu>, March 2015.
 */
 
-#include "config.h"
-
-#if BOARD_SENSORS_ENABLED
+#include <sht21/sht21.h>
+#include <max44009/max44009.h>
+#include <adxl346/adxl346.h>
 
 #include "adc_sensor.h"
-#include "board.h"
 #include "sensors.h"
-
-#include "adxl346.h"
-#include "max44009.h"
-#include "sht21.h"
 
 //=========================== defines =========================================
 
@@ -109,9 +104,7 @@ callbackConvert_cbt sensors_getCallbackConvert(uint8_t sensorType) {
         case SENSOR_LIGHT:
             return &max44009_convert_light;
         case SENSOR_XACCELERATION:
-            return NULL;
         case SENSOR_YACCELERATION:
-            return NULL;
         case SENSOR_ZACCELERATION:
             return NULL;
         case SENSOR_ADCTEMPERATURE:
@@ -122,6 +115,3 @@ callbackConvert_cbt sensors_getCallbackConvert(uint8_t sensorType) {
 
 }
 
-//=========================== private =========================================
-
-#endif /* BOARD_SENSORS_ENABLED */

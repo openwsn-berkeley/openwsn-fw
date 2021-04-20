@@ -89,19 +89,20 @@
 //*****************************************************************************
 uint8_t CCMAuthEncryptStart(bool bEncrypt,
                             uint8_t ui8Mval,
-                            uint8_t *pui8N,
-                            uint8_t *pui8M,
+                            const uint8_t *pui8N,
+                            const uint8_t *pui8M,
                             uint16_t ui16LenM,
-                            uint8_t *pui8A,
+                            const uint8_t *pui8A,
                             uint16_t ui16LenA,
                             uint8_t ui8KeyLocation,
-                            uint8_t *pui8Cstate,
+                            const uint8_t *pui8Cstate,
                             uint8_t ui8CCMLVal,
-                            uint8_t ui8IntEnable)
-{
-    uint8_t  ui8A0[16];
+                            uint8_t ui8IntEnable) {
+    (void) pui8Cstate;
+
+    uint8_t ui8A0[16];
     uint32_t ui32CtrlVal;
-    uint8_t  ui8I;
+    uint8_t ui8I;
     g_ui8CurrentAESOp = AES_CCM;
 
     IntDisable(INT_AES);
@@ -115,18 +116,15 @@ uint8_t CCMAuthEncryptStart(bool bEncrypt,
     HWREG(AES_CTRL_INT_CLR) |= (AES_CTRL_INT_CLR_DMA_IN_DONE |
                                 AES_CTRL_INT_CLR_RESULT_AV);
 
-    HWREG(AES_KEY_STORE_READ_AREA) = (uint32_t)ui8KeyLocation;
+    HWREG(AES_KEY_STORE_READ_AREA) = (uint32_t) ui8KeyLocation;
 
     //wait until key is loaded to the AES module
-    do
-    {
+    do {
         ASM_NOP;
-    }
-    while((HWREG(AES_KEY_STORE_READ_AREA) & AES_KEY_STORE_READ_AREA_BUSY));
+    } while ((HWREG(AES_KEY_STORE_READ_AREA) & AES_KEY_STORE_READ_AREA_BUSY));
 
     //check for Key Store read error
-    if((HWREG(AES_CTRL_INT_STAT)& AES_CTRL_INT_STAT_KEY_ST_RD_ERR))
-    {
+    if ((HWREG(AES_CTRL_INT_STAT) & AES_CTRL_INT_STAT_KEY_ST_RD_ERR)) {
         // clear the Keystore Read error bit
         HWREG(AES_CTRL_INT_CLR) |= AES_CTRL_INT_CLR_KEY_ST_RD_ERR;
         return (AES_KEYSTORE_READ_ERROR);
@@ -135,36 +133,31 @@ uint8_t CCMAuthEncryptStart(bool bEncrypt,
     // Prepare the initialization vector
     ui8A0[0] = ui8CCMLVal - 1;  // Lval
 
-    for(ui8I = 0; ui8I < 13; ui8I++)
-    {
+    for (ui8I = 0; ui8I < 13; ui8I++) {
         ui8A0[ui8I + 1] = pui8N[ui8I];
     }
-    if(3 == ui8CCMLVal)
-    {
+    if (3 == ui8CCMLVal) {
         ui8A0[13] = 0;
     }
     ui8A0[14] = 0;  // initialize counter to 0
     ui8A0[15] = 0;  // initialize counter to 0
 
     // write initialization vector
-    HWREG(AES_AES_IV_0) = ((uint32_t  *)&ui8A0)[0];
-    HWREG(AES_AES_IV_1) = ((uint32_t  *)&ui8A0)[1];
-    HWREG(AES_AES_IV_2) = ((uint32_t  *)&ui8A0)[2];
-    HWREG(AES_AES_IV_3) = ((uint32_t  *)&ui8A0)[3];
+    HWREG(AES_AES_IV_0) = ((uint32_t *) &ui8A0)[0];
+    HWREG(AES_AES_IV_1) = ((uint32_t *) &ui8A0)[1];
+    HWREG(AES_AES_IV_2) = ((uint32_t *) &ui8A0)[2];
+    HWREG(AES_AES_IV_3) = ((uint32_t *) &ui8A0)[3];
 
     // configure AES engine
     ui32CtrlVal = ((ui8CCMLVal - 1) <<
-                   AES_AES_CTRL_CCM_L_S);            // CCM_L
+                                    AES_AES_CTRL_CCM_L_S);            // CCM_L
 
-    if(ui8Mval >= 2)
-    {
+    if (ui8Mval >= 2) {
         ui32CtrlVal |= (((ui8Mval - 2) >> 1) <<
-                        AES_AES_CTRL_CCM_M_S);           // CCM_M
-    }
-    else
-    {
+                                             AES_AES_CTRL_CCM_M_S);           // CCM_M
+    } else {
         ui32CtrlVal |= (0 <<
-                        AES_AES_CTRL_CCM_M_S);           // CCM_M
+                          AES_AES_CTRL_CCM_M_S);           // CCM_M
     }
     ui32CtrlVal |= (AES_AES_CTRL_CCM);               // CCM
     ui32CtrlVal |= (1 << AES_AES_CTRL_key_size_S);   // key = 128
@@ -176,35 +169,31 @@ uint8_t CCMAuthEncryptStart(bool bEncrypt,
     HWREG(AES_AES_CTRL) = ui32CtrlVal;
 
     // write the length of the crypto block (lo)
-    HWREG(AES_AES_C_LENGTH_0) = (uint16_t)(ui16LenM) ;
+    HWREG(AES_AES_C_LENGTH_0) = (uint16_t) (ui16LenM);
     // write the length of the crypto block (hi)
-    HWREG(AES_AES_C_LENGTH_1)  =  0;
+    HWREG(AES_AES_C_LENGTH_1) = 0;
 
     // write the length of the AAD data block may be non-block size aligned
     HWREG(AES_AES_AUTH_LENGTH) = ui16LenA;
 
-    if(ui16LenA != 0)
-    {
+    if (ui16LenA != 0) {
         // configure DMAC to fetch the AAD data
         // enable DMA channel 0
-        HWREG(AES_DMAC_CH0_CTRL)     = AES_DMAC_CH0_CTRL_EN;
+        HWREG(AES_DMAC_CH0_CTRL) = AES_DMAC_CH0_CTRL_EN;
         // base address of the AAD input data in ext. memory
-        HWREG(AES_DMAC_CH0_EXTADDR)  = (uint32_t)pui8A;
+        HWREG(AES_DMAC_CH0_EXTADDR) = (uint32_t) pui8A;
         // AAD data length in bytes, equal to the AAD length len
         //({aad data}) (may be non-block size aligned)
 
         HWREG(AES_DMAC_CH0_DMALENGTH) = ui16LenA;
 
         // wait for completion of the AAD data transfer, DMA_IN_DONE
-        do
-        {
+        do {
             ASM_NOP;
-        }
-        while(!(HWREG(AES_CTRL_INT_STAT) & AES_CTRL_INT_STAT_DMA_IN_DONE));
+        } while (!(HWREG(AES_CTRL_INT_STAT) & AES_CTRL_INT_STAT_DMA_IN_DONE));
 
         // check for the absence of error
-        if((HWREG(AES_CTRL_INT_STAT) & AES_CTRL_INT_STAT_DMA_BUS_ERR))
-        {
+        if ((HWREG(AES_CTRL_INT_STAT) & AES_CTRL_INT_STAT_DMA_BUS_ERR)) {
             //clear the DMA error
             HWREG(AES_CTRL_INT_CLR) |= AES_CTRL_INT_CLR_DMA_BUS_ERR;
             return (AES_DMA_BUS_ERROR);
@@ -214,8 +203,7 @@ uint8_t CCMAuthEncryptStart(bool bEncrypt,
     // clear interrupt status
     HWREG(AES_CTRL_INT_CLR) = (AES_CTRL_INT_CLR_DMA_IN_DONE |
                                AES_CTRL_INT_CLR_RESULT_AV);
-    if(ui8IntEnable)
-    {
+    if (ui8IntEnable) {
         IntPendClear(INT_AES);
         IntEnable(INT_AES);
     }
@@ -223,13 +211,12 @@ uint8_t CCMAuthEncryptStart(bool bEncrypt,
     // enable result available bit in interrupt enable
     HWREG(AES_CTRL_INT_EN) = AES_CTRL_INT_EN_RESULT_AV;
 
-    if(bEncrypt)
-    {
+    if (bEncrypt) {
         // configure DMAC
         // enable DMA channel 0
         HWREG(AES_DMAC_CH0_CTRL) = AES_DMAC_CH0_CTRL_EN;
         // base address of the payload data in ext. memory
-        HWREG(AES_DMAC_CH0_EXTADDR) = (uint32_t)pui8M;
+        HWREG(AES_DMAC_CH0_EXTADDR) = (uint32_t) pui8M;
         // payload data length in bytes, equal to the message length
         //len({crypto_data})
         HWREG(AES_DMAC_CH0_DMALENGTH) = (ui16LenM);
@@ -237,7 +224,7 @@ uint8_t CCMAuthEncryptStart(bool bEncrypt,
         // enable DMA channel 1
         HWREG(AES_DMAC_CH1_CTRL) = AES_DMAC_CH1_CTRL_EN;
         // base address of the output data buffer
-        HWREG(AES_DMAC_CH1_EXTADDR) = (uint32_t)pui8M;
+        HWREG(AES_DMAC_CH1_EXTADDR) = (uint32_t) pui8M;
         // output data length in bytes, equal to the result data length
         // len({crypto data})
         HWREG(AES_DMAC_CH1_DMALENGTH) = ui16LenM;
@@ -255,8 +242,7 @@ uint8_t CCMAuthEncryptStart(bool bEncrypt,
 //!
 //
 //*****************************************************************************
-uint8_t CCMAuthEncryptCheckResult(void)
-{
+uint8_t CCMAuthEncryptCheckResult(void) {
     return (((HWREGB(AES_CTRL_INT_STAT) & AES_CTRL_INT_STAT_RESULT_AV)) ||
             ((HWREGB(AES_CTRL_INT_STAT) & AES_CTRL_INT_STAT_DMA_BUS_ERR)) ||
             ((HWREGB(AES_CTRL_INT_STAT) & AES_CTRL_INT_STAT_KEY_ST_WR_ERR)) ||
@@ -276,28 +262,23 @@ uint8_t CCMAuthEncryptCheckResult(void)
 //! \return  AES_SUCCESS if successful.
 //
 //*****************************************************************************
-uint8_t CCMAuthEncryptGetResult(uint8_t ui8Mval,
-                                uint16_t ui16LenM,
-                                uint8_t *pui8Cstate)
+uint8_t CCMAuthEncryptGetResult(uint8_t ui8Mval, uint16_t ui16LenM, uint8_t *pui8Cstate) {
+    (void) ui16LenM;
 
-{
     uint8_t volatile ui8MIC[16];
     uint8_t ui8I;
 
-    if((HWREG(AES_CTRL_INT_STAT) & AES_CTRL_INT_STAT_DMA_BUS_ERR))
-    {
+    if ((HWREG(AES_CTRL_INT_STAT) & AES_CTRL_INT_STAT_DMA_BUS_ERR)) {
         // clear the DMA error bit
         HWREG(AES_CTRL_INT_CLR) |= AES_CTRL_INT_CLR_DMA_BUS_ERR;
         return (AES_DMA_BUS_ERROR);
     }
-    if((HWREG(AES_CTRL_INT_STAT) & AES_CTRL_INT_STAT_KEY_ST_WR_ERR))
-    {
+    if ((HWREG(AES_CTRL_INT_STAT) & AES_CTRL_INT_STAT_KEY_ST_WR_ERR)) {
         // clear the Key Store Write error bit
         HWREG(AES_CTRL_INT_CLR) |= AES_CTRL_INT_CLR_KEY_ST_WR_ERR;
         return (AES_KEYSTORE_WRITE_ERROR);
     }
-    if((HWREG(AES_CTRL_INT_STAT) & AES_CTRL_INT_STAT_KEY_ST_RD_ERR))
-    {
+    if ((HWREG(AES_CTRL_INT_STAT) & AES_CTRL_INT_STAT_KEY_ST_RD_ERR)) {
         // clear the Key Store Read error bit
         HWREG(AES_CTRL_INT_CLR) |= AES_CTRL_INT_CLR_KEY_ST_RD_ERR;
         return (AES_KEYSTORE_READ_ERROR);
@@ -310,26 +291,23 @@ uint8_t CCMAuthEncryptGetResult(uint8_t ui8Mval,
 
     // read tag
     // wait for the context ready bit [30]
-    do
-    {
+    do {
         ASM_NOP;
-    }
-    while((HWREG(AES_AES_CTRL) & AES_AES_CTRL_saved_context_ready) !=
-            AES_AES_CTRL_saved_context_ready);
+    } while ((HWREG(AES_AES_CTRL) & AES_AES_CTRL_saved_context_ready) !=
+             AES_AES_CTRL_saved_context_ready);
 
     // Read the tag registers
-    ((uint32_t  *)&ui8MIC)[0] = HWREG(AES_AES_TAG_OUT_0);
-    ((uint32_t  *)&ui8MIC)[1] = HWREG(AES_AES_TAG_OUT_1);
-    ((uint32_t  *)&ui8MIC)[2] = HWREG(AES_AES_TAG_OUT_2);
-    ((uint32_t  *)&ui8MIC)[3] = HWREG(AES_AES_TAG_OUT_3);
+    ((uint32_t *) &ui8MIC)[0] = HWREG(AES_AES_TAG_OUT_0);
+    ((uint32_t *) &ui8MIC)[1] = HWREG(AES_AES_TAG_OUT_1);
+    ((uint32_t *) &ui8MIC)[2] = HWREG(AES_AES_TAG_OUT_2);
+    ((uint32_t *) &ui8MIC)[3] = HWREG(AES_AES_TAG_OUT_3);
 
     // clear the interrupt status
     HWREG(AES_CTRL_INT_CLR) |= (AES_CTRL_INT_CLR_DMA_IN_DONE |
                                 AES_CTRL_INT_CLR_RESULT_AV);
 
     // copy tag to pui8Cstate
-    for(ui8I = 0; ui8I < ui8Mval; ui8I++)
-    {
+    for (ui8I = 0; ui8I < ui8Mval; ui8I++) {
         pui8Cstate[ui8I] = ui8MIC[ui8I];
     }
     g_ui8CurrentAESOp = AES_NONE;
@@ -379,20 +357,21 @@ uint8_t CCMAuthEncryptGetResult(uint8_t ui8Mval,
 //*****************************************************************************
 uint8_t CCMInvAuthDecryptStart(bool bDecrypt,
                                uint8_t ui8Mval,
-                               uint8_t *pui8N,
-                               uint8_t *pui8C,
+                               const uint8_t *pui8N,
+                               const uint8_t *pui8C,
                                uint16_t ui16LenC,
-                               uint8_t *pui8A,
+                               const uint8_t *pui8A,
                                uint16_t ui16LenA,
                                uint8_t ui8KeyLocation,
-                               uint8_t *pui8Cstate,
+                               const uint8_t *pui8Cstate,
                                uint8_t ui8CCMLVal,
-                               uint8_t ui8IntEnable)
-{
+                               uint8_t ui8IntEnable) {
+    (void) pui8Cstate;
+
     uint16_t ui16LenM = ui16LenC - ui8Mval;
-    uint8_t  ui8A0[16];
+    uint8_t ui8A0[16];
     uint32_t ui32CtrlVal;
-    uint8_t  ui8I;
+    uint8_t ui8I;
     g_ui8CurrentAESOp = AES_CCM;
 
     // workaround for AES registers not retained after PM2
@@ -404,18 +383,15 @@ uint8_t CCMInvAuthDecryptStart(bool bDecrypt,
     HWREG(AES_CTRL_INT_CLR) = (AES_CTRL_INT_CLR_DMA_IN_DONE |
                                AES_CTRL_INT_CLR_RESULT_AV);
 
-    HWREG(AES_KEY_STORE_READ_AREA) = (uint32_t)ui8KeyLocation;
+    HWREG(AES_KEY_STORE_READ_AREA) = (uint32_t) ui8KeyLocation;
 
     //wait until key is loaded to the AES module
-    do
-    {
+    do {
         ASM_NOP;
-    }
-    while((HWREG(AES_KEY_STORE_READ_AREA) & AES_KEY_STORE_READ_AREA_BUSY));
+    } while ((HWREG(AES_KEY_STORE_READ_AREA) & AES_KEY_STORE_READ_AREA_BUSY));
 
     //check for Key Store read error
-    if((HWREG(AES_CTRL_INT_STAT)& AES_CTRL_INT_STAT_KEY_ST_RD_ERR))
-    {
+    if ((HWREG(AES_CTRL_INT_STAT) & AES_CTRL_INT_STAT_KEY_ST_RD_ERR)) {
         // clear the Keystore Read error bit
         HWREG(AES_CTRL_INT_CLR) |= AES_CTRL_INT_CLR_KEY_ST_RD_ERR;
         return (AES_KEYSTORE_READ_ERROR);
@@ -423,35 +399,30 @@ uint8_t CCMInvAuthDecryptStart(bool bDecrypt,
 
     // Prepare the initialization vector
     ui8A0[0] = ui8CCMLVal - 1;          // Lval
-    for(ui8I = 0; ui8I < 13; ui8I++)
-    {
+    for (ui8I = 0; ui8I < 13; ui8I++) {
         ui8A0[ui8I + 1] = pui8N[ui8I];
     }
-    if(3 == ui8CCMLVal)
-    {
+    if (3 == ui8CCMLVal) {
         ui8A0[13] = 0;
     }
     ui8A0[14] = 0;                   // initialize counter to 0
     ui8A0[15] = 0;                   // initialize counter to 0
 
     // write initialization vector
-    HWREG(AES_AES_IV_0) = ((uint32_t  *)&ui8A0)[0];
-    HWREG(AES_AES_IV_1) = ((uint32_t  *)&ui8A0)[1];
-    HWREG(AES_AES_IV_2) = ((uint32_t  *)&ui8A0)[2];
-    HWREG(AES_AES_IV_3) = ((uint32_t  *)&ui8A0)[3];
+    HWREG(AES_AES_IV_0) = ((uint32_t *) &ui8A0)[0];
+    HWREG(AES_AES_IV_1) = ((uint32_t *) &ui8A0)[1];
+    HWREG(AES_AES_IV_2) = ((uint32_t *) &ui8A0)[2];
+    HWREG(AES_AES_IV_3) = ((uint32_t *) &ui8A0)[3];
 
     // configure AES engine
     ui32CtrlVal = ((ui8CCMLVal - 1) <<
-                   AES_AES_CTRL_CCM_L_S);             // CCM_L
-    if(ui8Mval >= 2)
-    {
+                                    AES_AES_CTRL_CCM_L_S);             // CCM_L
+    if (ui8Mval >= 2) {
         ui32CtrlVal |= (((ui8Mval - 2) >> 1) <<
-                        AES_AES_CTRL_CCM_M_S);           // CCM_M
-    }
-    else
-    {
+                                             AES_AES_CTRL_CCM_M_S);           // CCM_M
+    } else {
         ui32CtrlVal |= (0 <<
-                        AES_AES_CTRL_CCM_M_S);           // CCM_M
+                          AES_AES_CTRL_CCM_M_S);           // CCM_M
     }
     ui32CtrlVal |= (AES_AES_CTRL_CCM);                // CCM
     ui32CtrlVal |= (1 << AES_AES_CTRL_key_size_S);    // key = 128
@@ -463,35 +434,31 @@ uint8_t CCMInvAuthDecryptStart(bool bDecrypt,
     HWREG(AES_AES_CTRL) = ui32CtrlVal;
 
     // write the length of the crypto block (lo)
-    HWREG(AES_AES_C_LENGTH_0) = (uint16_t)(ui16LenM) ;
+    HWREG(AES_AES_C_LENGTH_0) = (uint16_t) (ui16LenM);
     // write the length of the crypto block (hi)
-    HWREG(AES_AES_C_LENGTH_1)  =  0;
+    HWREG(AES_AES_C_LENGTH_1) = 0;
 
     // write the length of the AAD data block may be non-block size aligned
     HWREG(AES_AES_AUTH_LENGTH) = ui16LenA;
 
-    if(ui16LenA != 0)
-    {
+    if (ui16LenA != 0) {
         // configure DMAC to fetch the AAD data
         // enable DMA channel 0
-        HWREG(AES_DMAC_CH0_CTRL)      =  AES_DMAC_CH0_CTRL_EN;
+        HWREG(AES_DMAC_CH0_CTRL) = AES_DMAC_CH0_CTRL_EN;
         // base address of the AAD input data in ext. memory
-        HWREG(AES_DMAC_CH0_EXTADDR)   = (uint32_t)pui8A;
+        HWREG(AES_DMAC_CH0_EXTADDR) = (uint32_t) pui8A;
         // AAD data length in bytes, equal to the AAD length len
         //({aad data}) (may be non-block size aligned)
 
         HWREG(AES_DMAC_CH0_DMALENGTH) = ui16LenA;
 
         // wait for completion of the AAD data transfer, DMA_IN_DONE
-        do
-        {
+        do {
             ASM_NOP;
-        }
-        while(!(HWREG(AES_CTRL_INT_STAT) & AES_CTRL_INT_STAT_DMA_IN_DONE));
+        } while (!(HWREG(AES_CTRL_INT_STAT) & AES_CTRL_INT_STAT_DMA_IN_DONE));
 
         // check for the absence of error
-        if((HWREG(AES_CTRL_INT_STAT) & AES_CTRL_INT_STAT_DMA_BUS_ERR))
-        {
+        if ((HWREG(AES_CTRL_INT_STAT) & AES_CTRL_INT_STAT_DMA_BUS_ERR)) {
             HWREG(AES_CTRL_INT_CLR) |= AES_CTRL_INT_CLR_DMA_BUS_ERR;
             return (AES_DMA_BUS_ERROR);
         }
@@ -501,8 +468,7 @@ uint8_t CCMInvAuthDecryptStart(bool bDecrypt,
     HWREG(AES_CTRL_INT_CLR) = (AES_CTRL_INT_CLR_DMA_IN_DONE |
                                AES_CTRL_INT_CLR_RESULT_AV);
 
-    if(ui8IntEnable)
-    {
+    if (ui8IntEnable) {
         IntPendClear(INT_AES);
         IntEnable(INT_AES);
     }
@@ -510,20 +476,19 @@ uint8_t CCMInvAuthDecryptStart(bool bDecrypt,
     // enable result available bit in interrupt enable
     HWREG(AES_CTRL_INT_EN) = AES_CTRL_INT_EN_RESULT_AV;
 
-    if(bDecrypt)
-    {
+    if (bDecrypt) {
         // configure DMAC
         // enable DMA channel 0
         HWREG(AES_DMAC_CH0_CTRL) = AES_DMAC_CH0_CTRL_EN;
         // base address of the payload data in ext. memory
-        HWREG(AES_DMAC_CH0_EXTADDR) = (uint32_t)pui8C;
+        HWREG(AES_DMAC_CH0_EXTADDR) = (uint32_t) pui8C;
         // payload data length in bytes, equal to the message length len({crypto_data})
         HWREG(AES_DMAC_CH0_DMALENGTH) = (ui16LenM);
 
         // enable DMA channel 1
         HWREG(AES_DMAC_CH1_CTRL) = AES_DMAC_CH1_CTRL_EN;
         // base address of the output data buffer
-        HWREG(AES_DMAC_CH1_EXTADDR) = (uint32_t)pui8C;
+        HWREG(AES_DMAC_CH1_EXTADDR) = (uint32_t) pui8C;
         // output data length in bytes, equal to the result data length len({crypto data})
         HWREG(AES_DMAC_CH1_DMALENGTH) = ui16LenM;
     }
@@ -540,8 +505,7 @@ uint8_t CCMInvAuthDecryptStart(bool bDecrypt,
 //! is not yet available or no error occurs returns false
 //
 //*****************************************************************************
-uint8_t CCMInvAuthDecryptCheckResult(void)
-{
+uint8_t CCMInvAuthDecryptCheckResult(void) {
     // check if result is available (or) some error has occured
     return (CCMAuthEncryptCheckResult());
 }
@@ -562,28 +526,24 @@ uint8_t CCMInvAuthDecryptCheckResult(void)
 //
 //*****************************************************************************
 uint8_t CCMInvAuthDecryptGetResult(uint8_t ui8Mval,
-                                   uint8_t *pui8C,
+                                   const uint8_t *pui8C,
                                    uint16_t ui16LenC,
-                                   uint8_t *pui8Cstate)
-{
+                                   uint8_t *pui8Cstate) {
     uint8_t volatile ui8MIC[16];
     uint16_t ui16LenM = ui16LenC - ui8Mval;
     uint8_t ui8I, ui8J;
 
-    if((HWREG(AES_CTRL_INT_STAT) & AES_CTRL_INT_STAT_DMA_BUS_ERR))
-    {
+    if ((HWREG(AES_CTRL_INT_STAT) & AES_CTRL_INT_STAT_DMA_BUS_ERR)) {
         //clear the DMA error
         HWREG(AES_CTRL_INT_CLR) |= AES_CTRL_INT_CLR_DMA_BUS_ERR;
         return (AES_DMA_BUS_ERROR);
     }
-    if((HWREG(AES_CTRL_INT_STAT) & AES_CTRL_INT_STAT_KEY_ST_WR_ERR))
-    {
+    if ((HWREG(AES_CTRL_INT_STAT) & AES_CTRL_INT_STAT_KEY_ST_WR_ERR)) {
         // clear the Key Store Write error bit
         HWREG(AES_CTRL_INT_CLR) |= AES_CTRL_INT_CLR_KEY_ST_WR_ERR;
         return (AES_KEYSTORE_WRITE_ERROR);
     }
-    if((HWREG(AES_CTRL_INT_STAT) & AES_CTRL_INT_STAT_KEY_ST_RD_ERR))
-    {
+    if ((HWREG(AES_CTRL_INT_STAT) & AES_CTRL_INT_STAT_KEY_ST_RD_ERR)) {
         // clear the Key Store Read error bit
         HWREG(AES_CTRL_INT_CLR) |= AES_CTRL_INT_CLR_KEY_ST_RD_ERR;
         return (AES_KEYSTORE_READ_ERROR);
@@ -596,33 +556,28 @@ uint8_t CCMInvAuthDecryptGetResult(uint8_t ui8Mval,
 
     // read tag
     // wait for the context ready bit [30]
-    do
-    {
+    do {
         ASM_NOP;
-    }
-    while((HWREG(AES_AES_CTRL) & AES_AES_CTRL_saved_context_ready) !=
-            AES_AES_CTRL_saved_context_ready);
+    } while ((HWREG(AES_AES_CTRL) & AES_AES_CTRL_saved_context_ready) !=
+             AES_AES_CTRL_saved_context_ready);
 
     // Read the tag registers
-    ((uint32_t  *)&ui8MIC)[0] = HWREG(AES_AES_TAG_OUT_0);
-    ((uint32_t  *)&ui8MIC)[1] = HWREG(AES_AES_TAG_OUT_1);
-    ((uint32_t  *)&ui8MIC)[2] = HWREG(AES_AES_TAG_OUT_2);
-    ((uint32_t  *)&ui8MIC)[3] = HWREG(AES_AES_TAG_OUT_3);
+    ((uint32_t *) &ui8MIC)[0] = HWREG(AES_AES_TAG_OUT_0);
+    ((uint32_t *) &ui8MIC)[1] = HWREG(AES_AES_TAG_OUT_1);
+    ((uint32_t *) &ui8MIC)[2] = HWREG(AES_AES_TAG_OUT_2);
+    ((uint32_t *) &ui8MIC)[3] = HWREG(AES_AES_TAG_OUT_3);
 
     // clear the interrupt status
     HWREG(AES_CTRL_INT_CLR) |= (AES_CTRL_INT_CLR_DMA_IN_DONE |
                                 AES_CTRL_INT_CLR_RESULT_AV);
 
     // copy tag to pui8Cstate
-    for(ui8I = 0; ui8I < ui8Mval; ui8I++)
-    {
+    for (ui8I = 0; ui8I < ui8Mval; ui8I++) {
         pui8Cstate[ui8I] = ui8MIC[ui8I];
     }
 
-    for(ui8J = 0; ui8J < ui8Mval; ui8J++)
-    {
-        if(pui8Cstate[ui8J] != pui8C[ui16LenM + ui8J])
-        {
+    for (ui8J = 0; ui8J < ui8Mval; ui8J++) {
+        if (pui8Cstate[ui8J] != pui8C[ui16LenM + ui8J]) {
             return (CCM_AUTHENTICATION_FAILED);
         }
     }

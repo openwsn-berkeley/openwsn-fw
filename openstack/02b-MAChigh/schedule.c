@@ -3,24 +3,48 @@
 #include "openserial.h"
 #include "openrandom.h"
 #include "packetfunctions.h"
-#include "sixtop.h"
 #include "idmanager.h"
-#include "msf.h"
 #include "IEEE802154E.h"
-#include "icmpv6rpl.h"
 #include "neighbors.h"
 
 //=========================== definition ======================================
 
+BEGIN_PACK
+typedef struct {
+    uint8_t row;
+    slotOffset_t slotOffset;
+    uint8_t type;
+    bool shared;
+    uint8_t channelOffset;
+    open_addr_t neighbor;
+    uint8_t numRx;
+    uint8_t numTx;
+    uint8_t numTxACK;
+    asn_t lastUsedAsn;
+} debugScheduleEntry_t;
+END_PACK
+
+BEGIN_PACK
+typedef struct {
+    statusCtx_t statusSchedule;
+    statusCtx_t statusBackOff;
+} scheduleStatus_t;
+END_PACK
+
 //=========================== variables =======================================
 
-schedule_vars_t schedule_vars;
+scheduleVars_t schedule_vars;
+scheduleStatus_t schedule_status_ctx;
 
 //=========================== prototypes ======================================
 
 void schedule_resetEntry(scheduleEntry_t *pScheduleEntry);
 
 void schedule_resetBackupEntry(backupEntry_t *pBackupEntry);
+
+static bool statusPrint_schedule(void);
+
+static bool statusPrint_backoff(void);
 
 //=========================== public ==========================================
 
@@ -36,7 +60,7 @@ void schedule_init(void) {
     uint8_t running_slotOffset;
 
     // reset local variables
-    memset(&schedule_vars, 0, sizeof(schedule_vars_t));
+    memset(&schedule_vars, 0, sizeof(scheduleVars_t));
     for (running_slotOffset = 0; running_slotOffset < MAXACTIVESLOTS; running_slotOffset++) {
         schedule_resetEntry(&schedule_vars.scheduleBuf[running_slotOffset]);
         for (i = 0; i < MAXBACKUPSLOTS; i++) {
@@ -49,6 +73,14 @@ void schedule_init(void) {
     if (idmanager_getIsDAGroot() == TRUE) {
         schedule_startDAGroot();
     }
+
+    schedule_status_ctx.statusSchedule.id = STATUS_SCHEDULE;
+    schedule_status_ctx.statusSchedule.statusPrint_cb = statusPrint_schedule;
+    openserial_appendStatusCtx(&schedule_status_ctx.statusSchedule);
+
+    schedule_status_ctx.statusBackOff.id = STATUS_BACKOFF;
+    schedule_status_ctx.statusBackOff.statusPrint_cb = statusPrint_backoff;
+    openserial_appendStatusCtx(&schedule_status_ctx.statusBackOff);
 }
 
 /**
@@ -89,12 +121,12 @@ void schedule_startDAGroot(void) {
 /**
 \brief Trigger this module to print status information, over serial.
 
-debugPrint_* functions are used by the openserial module to continuously print
+statusPrint_* functions are used by the openserial module to continuously print
 status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_schedule(void) {
+static bool statusPrint_schedule(void) {
     debugScheduleEntry_t temp;
 
     // increment the row just printed
@@ -115,7 +147,7 @@ bool debugPrint_schedule(void) {
     memcpy(&temp.lastUsedAsn, &schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].lastUsedAsn, sizeof(asn_t));
 
     // send status data over serial port
-    openserial_printStatus(STATUS_SCHEDULE, (uint8_t * ) & temp, sizeof(debugScheduleEntry_t));
+    openserial_printStatus(STATUS_SCHEDULE, (uint8_t *) &temp, sizeof(debugScheduleEntry_t));
 
     return TRUE;
 }
@@ -128,7 +160,7 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_backoff(void) {
+static bool statusPrint_backoff(void) {
     uint8_t temp[2];
 
     // gather status data
@@ -136,7 +168,7 @@ bool debugPrint_backoff(void) {
     temp[1] = schedule_vars.backoff;
 
     // send status data over serial port
-    openserial_printStatus(STATUS_BACKOFF, (uint8_t * ) & temp, sizeof(temp));
+    openserial_printStatus(STATUS_BACKOFF, (uint8_t *) &temp, sizeof(temp));
 
     return TRUE;
 }
@@ -506,7 +538,7 @@ owerror_t schedule_removeActiveSlot(slotOffset_t slotOffset, cellType_t type, bo
         backupEntry->channelOffset = 0;
 
         backupEntry->neighbor.type = ADDR_NONE;
-        memset(&backupEntry->neighbor.addr_64b[0], 0x00, sizeof(backupEntry->neighbor.addr_64b));
+        memset(&backupEntry->neighbor.addr_type.addr_64b[0], 0x00, sizeof(backupEntry->neighbor.addr_type.addr_64b));
 
         backupEntry->lastUsedAsn.bytes0and1 = 0;
         backupEntry->lastUsedAsn.bytes2and3 = 0;
@@ -626,6 +658,8 @@ bool schedule_isSlotOffsetAvailable(uint16_t slotOffset) {
 }
 
 void schedule_removeAllNegotiatedCellsToNeighbor(uint8_t slotframeID, open_addr_t *neighbor) {
+    (void) slotframeID;
+
     uint8_t i;
 
     // remove all entries in schedule with previousHop address
@@ -709,6 +743,7 @@ bool schedule_isNumTxWrapped(open_addr_t *neighbor) {
     bool returnVal;
 
     INTERRUPT_DECLARATION();
+
     DISABLE_INTERRUPTS();
 
     returnVal = FALSE;
@@ -721,7 +756,9 @@ bool schedule_isNumTxWrapped(open_addr_t *neighbor) {
             return returnVal;
         }
     }
+
     ENABLE_INTERRUPTS();
+
     return returnVal;
 
 }
@@ -768,37 +805,41 @@ bool schedule_hasAutonomousTxRxCellUnicast(open_addr_t *neighbor) {
                 schedule_vars.scheduleBuf[i].neighbor.type == ADDR_64B &&
                 packetfunctions_sameAddress(neighbor, &schedule_vars.scheduleBuf[i].neighbor)
                 ) {
+
             ENABLE_INTERRUPTS();
+
             return TRUE;
         }
     }
 
     ENABLE_INTERRUPTS();
+
     return FALSE;
 }
 
-bool schedule_getAutonomousTxRxCellUnicastNeighbor(open_addr_t *neighbor) {
-    uint8_t i;
-
-    INTERRUPT_DECLARATION();
-    DISABLE_INTERRUPTS();
-
-    for (i = 0; i < MAXACTIVESLOTS; i++) {
-        if (
-                schedule_vars.scheduleBuf[i].type == CELLTYPE_TXRX &&
-                schedule_vars.scheduleBuf[i].shared &&
-                schedule_vars.scheduleBuf[i].neighbor.type == ADDR_64B &&
-                packetfunctions_sameAddress(neighbor, &schedule_vars.scheduleBuf[i].neighbor)
-                ) {
-            memcpy(neighbor, &schedule_vars.scheduleBuf[i].neighbor, sizeof(open_addr_t));
-            ENABLE_INTERRUPTS();
-            return TRUE;
-        }
-    }
-
-    ENABLE_INTERRUPTS();
-    return FALSE;
-}
+// bool schedule_getAutonomousTxRxCellUnicastNeighbor(open_addr_t *neighbor) {
+//     uint8_t i;
+//
+//     INTERRUPT_DECLARATION();
+//     DISABLE_INTERRUPTS();
+//
+//     for (i = 0; i < MAXACTIVESLOTS; i++) {
+//         if (
+//                 schedule_vars.scheduleBuf[i].type == CELLTYPE_TXRX &&
+//                 schedule_vars.scheduleBuf[i].shared &&
+//                 schedule_vars.scheduleBuf[i].neighbor.type == ADDR_64B &&
+//                 packetfunctions_sameAddress(neighbor, &schedule_vars.scheduleBuf[i].neighbor)
+//                 ) {
+//             memcpy(neighbor, &schedule_vars.scheduleBuf[i].neighbor, sizeof(open_addr_t));
+//             ENABLE_INTERRUPTS();
+//             return TRUE;
+//         }
+//     }
+//
+//     ENABLE_INTERRUPTS();
+//
+//     return FALSE;
+// }
 
 bool schedule_hasAutoTxCellToNeighbor(open_addr_t *neighbor) {
     uint8_t i;
@@ -813,12 +854,15 @@ bool schedule_hasAutoTxCellToNeighbor(open_addr_t *neighbor) {
                 schedule_vars.scheduleBuf[i].neighbor.type == ADDR_64B &&
                 packetfunctions_sameAddress(neighbor, &schedule_vars.scheduleBuf[i].neighbor)
                 ) {
+
             ENABLE_INTERRUPTS();
+
             return TRUE;
         }
     }
 
     ENABLE_INTERRUPTS();
+
     return FALSE;
 }
 
@@ -841,6 +885,7 @@ bool schedule_hasNegotiatedCellToNeighbor(open_addr_t *neighbor, cellType_t cell
     }
 
     ENABLE_INTERRUPTS();
+
     return FALSE;
 }
 
@@ -865,36 +910,42 @@ bool schedule_hasNegotiatedTxCellToNonParent(open_addr_t *parentNeighbor, open_a
                 packetfunctions_sameAddress(parentNeighbor, &schedule_vars.scheduleBuf[i].neighbor) == FALSE
                 ) {
             memcpy(nonParentNeighbor, &schedule_vars.scheduleBuf[i].neighbor, sizeof(open_addr_t));
+
             ENABLE_INTERRUPTS();
+
             return TRUE;
         }
     }
 
     ENABLE_INTERRUPTS();
+
     return FALSE;
 }
 
-bool schedule_getAutonomousTxRxCellAnycast(uint16_t *slotoffset) {
-    uint8_t i;
-
-    INTERRUPT_DECLARATION();
-    DISABLE_INTERRUPTS();
-
-    for (i = 0; i < MAXACTIVESLOTS; i++) {
-        if (
-                schedule_vars.scheduleBuf[i].type == CELLTYPE_TXRX &&
-                schedule_vars.scheduleBuf[i].shared == FALSE &&
-                schedule_vars.scheduleBuf[i].neighbor.type == ADDR_ANYCAST
-                ) {
-            *slotoffset = schedule_vars.scheduleBuf[i].slotOffset;
-            ENABLE_INTERRUPTS();
-            return TRUE;
-        }
-    }
-
-    ENABLE_INTERRUPTS();
-    return FALSE;
-}
+// bool schedule_getAutonomousTxRxCellAnycast(uint16_t *slotoffset) {
+//     uint8_t i;
+//
+//     INTERRUPT_DECLARATION();
+//     DISABLE_INTERRUPTS();
+//
+//     for (i = 0; i < MAXACTIVESLOTS; i++) {
+//         if (
+//                 schedule_vars.scheduleBuf[i].type == CELLTYPE_TXRX &&
+//                 schedule_vars.scheduleBuf[i].shared == FALSE &&
+//                 schedule_vars.scheduleBuf[i].neighbor.type == ADDR_ANYCAST
+//                 ) {
+//             *slotoffset = schedule_vars.scheduleBuf[i].slotOffset;
+//
+//             ENABLE_INTERRUPTS();
+//
+//             return TRUE;
+//         }
+//     }
+//
+//     ENABLE_INTERRUPTS();
+//
+//     return FALSE;
+// }
 
 //=== from IEEE802154E: reading the schedule and updating statistics
 
@@ -917,6 +968,7 @@ void schedule_advanceSlot(void) {
 
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
+
     schedule_vars.currentScheduleEntry = schedule_vars.currentScheduleEntry->next;
 
     ENABLE_INTERRUPTS();
@@ -1150,7 +1202,7 @@ void schedule_indicateRx(asn_t *asnTimestamp) {
 /**
 \brief Indicate the transmission of a packet.
 */
-void schedule_indicateTx(asn_t *asnTimestamp, bool succesfullTx) {
+void schedule_indicateTx(asn_t *asnTimestamp, bool successfullTx) {
 
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
@@ -1161,7 +1213,7 @@ void schedule_indicateTx(asn_t *asnTimestamp, bool succesfullTx) {
         schedule_vars.currentScheduleEntry->numTxACK /= 2;
     }
     schedule_vars.currentScheduleEntry->numTx++;
-    if (succesfullTx == TRUE) {
+    if (successfullTx == TRUE) {
         schedule_vars.currentScheduleEntry->numTxACK++;
     }
 
@@ -1170,7 +1222,7 @@ void schedule_indicateTx(asn_t *asnTimestamp, bool succesfullTx) {
 
     // update this backoff parameters for shared slots
     if (schedule_vars.currentScheduleEntry->shared == TRUE) {
-        if (succesfullTx == TRUE) {
+        if (successfullTx == TRUE) {
             if (schedule_vars.currentScheduleEntry->neighbor.type == ADDR_ANYCAST) {
                 // reset backoffExponent
                 schedule_vars.backoffExponenton = MINBE - 1;
@@ -1196,11 +1248,19 @@ void schedule_indicateTx(asn_t *asnTimestamp, bool succesfullTx) {
     ENABLE_INTERRUPTS();
 }
 
-bool schedule_getOneCellAfterOffset(uint8_t metadata, uint8_t offset, open_addr_t *neighbor, uint8_t cellOptions,
-                                    uint16_t *slotoffset, uint16_t *channeloffset) {
+bool schedule_getOneCellAfterOffset(uint8_t metadata,
+                                    uint8_t offset,
+                                    open_addr_t *neighbor,
+                                    uint8_t cellOptions,
+                                    uint16_t *slotoffset,
+                                    uint16_t *channeloffset) {
+    (void) metadata;
+    (void) neighbor;
+
     bool returnVal;
     scheduleEntry_t *scheduleWalker;
     cellType_t type;
+
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
 
@@ -1237,41 +1297,41 @@ bool schedule_getOneCellAfterOffset(uint8_t metadata, uint8_t offset, open_addr_
 /**
 \pre This function assumes interrupts are already disabled.
 */
-void schedule_resetEntry(scheduleEntry_t *e) {
-    e->slotOffset = 0;
-    e->type = CELLTYPE_OFF;
-    e->shared = FALSE;
-    e->isAutoCell = FALSE;
-    e->channelOffset = 0;
+void schedule_resetEntry(scheduleEntry_t *pScheduleEntry) {
+    pScheduleEntry->slotOffset = 0;
+    pScheduleEntry->type = CELLTYPE_OFF;
+    pScheduleEntry->shared = FALSE;
+    pScheduleEntry->isAutoCell = FALSE;
+    pScheduleEntry->channelOffset = 0;
 
 
-    e->neighbor.type = ADDR_NONE;
-    memset(&e->neighbor.addr_64b[0], 0x00, sizeof(e->neighbor.addr_64b));
+    pScheduleEntry->neighbor.type = ADDR_NONE;
+    memset(&pScheduleEntry->neighbor.addr_type.addr_64b[0], 0x00, sizeof(pScheduleEntry->neighbor.addr_type.addr_64b));
 
-    e->numRx = 0;
-    e->numTx = 0;
-    e->numTxACK = 0;
-    e->lastUsedAsn.bytes0and1 = 0;
-    e->lastUsedAsn.bytes2and3 = 0;
-    e->lastUsedAsn.byte4 = 0;
-    e->next = NULL;
+    pScheduleEntry->numRx = 0;
+    pScheduleEntry->numTx = 0;
+    pScheduleEntry->numTxACK = 0;
+    pScheduleEntry->lastUsedAsn.bytes0and1 = 0;
+    pScheduleEntry->lastUsedAsn.bytes2and3 = 0;
+    pScheduleEntry->lastUsedAsn.byte4 = 0;
+    pScheduleEntry->next = NULL;
 }
 
-void schedule_resetBackupEntry(backupEntry_t *e) {
-    e->type = CELLTYPE_OFF;
-    e->shared = FALSE;
-    e->isAutoCell = FALSE;
-    e->channelOffset = 0;
+void schedule_resetBackupEntry(backupEntry_t *pBackupEntry) {
+    pBackupEntry->type = CELLTYPE_OFF;
+    pBackupEntry->shared = FALSE;
+    pBackupEntry->isAutoCell = FALSE;
+    pBackupEntry->channelOffset = 0;
 
-    e->neighbor.type = ADDR_NONE;
-    memset(&e->neighbor.addr_64b[0], 0x00, sizeof(e->neighbor.addr_64b));
+    pBackupEntry->neighbor.type = ADDR_NONE;
+    memset(&pBackupEntry->neighbor.addr_type.addr_64b[0], 0x00, sizeof(pBackupEntry->neighbor.addr_type.addr_64b));
 
-    e->numRx = 0;
-    e->numTx = 0;
-    e->numTxACK = 0;
-    e->lastUsedAsn.bytes0and1 = 0;
-    e->lastUsedAsn.bytes2and3 = 0;
-    e->lastUsedAsn.byte4 = 0;
-    e->next = NULL;
+    pBackupEntry->numRx = 0;
+    pBackupEntry->numTx = 0;
+    pBackupEntry->numTxACK = 0;
+    pBackupEntry->lastUsedAsn.bytes0and1 = 0;
+    pBackupEntry->lastUsedAsn.bytes2and3 = 0;
+    pBackupEntry->lastUsedAsn.byte4 = 0;
+    pBackupEntry->next = NULL;
 }
 

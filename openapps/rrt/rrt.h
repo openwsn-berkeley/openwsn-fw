@@ -1,5 +1,5 @@
-#ifndef __RRT_H
-#define __RRT_H
+#ifndef OPENWSN_RRT_H
+#define OPENWSN_RRT_H
 
 /**
 \addtogroup AppCoAP
@@ -28,7 +28,7 @@ typedef struct {
 
 void rrt_init(void);
 
-void rrt_sendCoAPMsg(char actionMsg, uint8_t *ipv6mote);
+void rrt_sendCoAPMsg(char actionMsg, uint8_t *ipv6Mote);
 
 void rrt_sendDone(OpenQueueEntry_t *msg, owerror_t error);
 /**
@@ -36,4 +36,4 @@ void rrt_sendDone(OpenQueueEntry_t *msg, owerror_t error);
 \}
 */
 
-#endif
+#endif  /* OPENWSN_RRT_H */

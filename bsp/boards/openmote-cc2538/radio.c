@@ -5,18 +5,15 @@
  * Description: CC2538-specific definition of the "radio" bsp module.
  */
 
-#include <stdio.h>
 #include <string.h>
 
 #include <headers/hw_ana_regs.h>
 #include <headers/hw_ints.h>
 #include <headers/hw_rfcore_sfr.h>
-#include <headers/hw_rfcore_sfr.h>
 #include <headers/hw_rfcore_xreg.h>
 #include <headers/hw_types.h>
 
 #include <source/interrupt.h>
-#include <source/sys_ctrl.h>
 
 #include "board.h"
 #include "cc2538rf.h"
@@ -185,6 +182,7 @@ void radio_reset(void) {
 //===== RF admin
 
 void radio_setFrequency(uint8_t frequency, radio_freq_t tx_or_rx) {
+    (void) tx_or_rx;
 
     // change state
     radio_vars.state = RADIOSTATE_SETTING_FREQUENCY;
@@ -235,8 +233,8 @@ int8_t radio_getFrequencyOffset(void) {
 
 //===== TX
 
-void radio_loadPacket(uint8_t *packet, uint16_t len) {
-    uint8_t i = 0;
+void radio_loadPacket(const uint8_t *packet, uint16_t len) {
+    uint16_t i;
 
     // change state
     radio_vars.state = RADIOSTATE_LOADING_PACKET;
@@ -336,6 +334,8 @@ void radio_getReceivedFrame(uint8_t *pBufRead,
                             int8_t *pRssi,
                             uint8_t *pLqi,
                             bool *pCrc) {
+    (void) pLqi;
+
     uint8_t crc_corr, i;
 
     uint8_t len = 0;

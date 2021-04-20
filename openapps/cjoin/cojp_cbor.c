@@ -124,7 +124,7 @@ uint8_t cojp_cbor_encode_join_request_object(uint8_t *buf, cojp_join_request_obj
         len += cborencoder_put_unsigned(&buf[len], (uint8_t) join_request->role);
     }
     len += cborencoder_put_unsigned(&buf[len], (uint8_t) COJP_PARAMETERS_LABELS_NETID);
-    len += cborencoder_put_bytes(&buf[len], (join_request->pan_id)->panid, LENGTH_ADDR16b);
+    len += cborencoder_put_bytes(&buf[len], (join_request->pan_id)->addr_type.panid, LENGTH_ADDR16b);
 
     return len;
 }
@@ -315,7 +315,7 @@ owerror_t cojp_cbor_decode_ipv6_address(uint8_t *buf, uint8_t *len, open_addr_t 
     tmp++;
 
     ipv6_address->type = ADDR_128B;
-    memcpy(ipv6_address->addr_128b, tmp, LENGTH_ADDR128b);
+    memcpy(ipv6_address->addr_type.addr_128b, tmp, LENGTH_ADDR128b);
 
     *len = (uint8_t)(tmp - buf);;
     return E_SUCCESS;

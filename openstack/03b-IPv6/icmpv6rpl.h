@@ -232,7 +232,7 @@ bool icmpv6rpl_isPreferredParent(open_addr_t *address);
 
 dagrank_t icmpv6rpl_getMyDAGrank(void);
 
-void icmpv6rpl_killPreferredParent(void);
+// void icmpv6rpl_killPreferredParent(void);
 
 void icmpv6rpl_updateMyDAGrankAndParentSelection(void);
 

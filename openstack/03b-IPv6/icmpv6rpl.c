@@ -12,7 +12,6 @@
 #include "IEEE802154E.h"
 #include "IEEE802154_security.h"
 #include "schedule.h"
-#include "msf.h"
 
 //=========================== definition ======================================
 
@@ -49,8 +48,8 @@ void icmpv6rpl_init(void) {
     uint8_t dodagid[16];
 
     // retrieve my prefix and EUI64
-    memcpy(&dodagid[0], idmanager_getMyID(ADDR_PREFIX)->prefix, 8); // prefix
-    memcpy(&dodagid[8], idmanager_getMyID(ADDR_64B)->addr_64b, 8);  // eui64
+    memcpy(&dodagid[0], idmanager_getMyID(ADDR_PREFIX)->addr_type.prefix, 8); // prefix
+    memcpy(&dodagid[8], idmanager_getMyID(ADDR_64B)->addr_type.addr_64b, 8);  // eui64
 
     //===== reset local variables
     memset(&icmpv6rpl_vars, 0, sizeof(icmpv6rpl_vars_t));
@@ -91,7 +90,7 @@ void icmpv6rpl_init(void) {
     memcpy(&(icmpv6rpl_vars.dio.DODAGID[0]), dodagid, sizeof(icmpv6rpl_vars.dio.DODAGID)); // can be replaced later
 
     icmpv6rpl_vars.dioDestination.type = ADDR_128B;
-    memcpy(&icmpv6rpl_vars.dioDestination.addr_128b[0], all_routers_multicast, sizeof(all_routers_multicast));
+    memcpy(&icmpv6rpl_vars.dioDestination.addr_type.addr_128b[0], all_routers_multicast, sizeof(all_routers_multicast));
 
     icmpv6rpl_vars.dioPeriod = DIO_PERIOD;
     icmpv6rpl_vars.timerIdDIO = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_RPL);
@@ -108,13 +107,13 @@ void icmpv6rpl_init(void) {
     if (idmanager_getIsDAGroot()) {
         memcpy(
                 &(icmpv6rpl_vars.pio.prefix[0]),
-                idmanager_getMyID(ADDR_PREFIX)->prefix,
-                sizeof(idmanager_getMyID(ADDR_PREFIX)->prefix)
+                idmanager_getMyID(ADDR_PREFIX)->addr_type.prefix,
+                sizeof(idmanager_getMyID(ADDR_PREFIX)->addr_type.prefix)
         );
         memcpy(
                 &(icmpv6rpl_vars.pio.prefix[8]),
-                idmanager_getMyID(ADDR_64B)->addr_64b,
-                sizeof(idmanager_getMyID(ADDR_64B)->addr_64b)
+                idmanager_getMyID(ADDR_64B)->addr_type.addr_64b,
+                sizeof(idmanager_getMyID(ADDR_64B)->addr_type.addr_64b)
         );
     }
     //configuration option
@@ -149,8 +148,7 @@ void icmpv6rpl_init(void) {
                                                FLAG_DAO_E | \
                                                PRF_DIO_C | \
                                                FLAG_DAO_F | \
-                                               D_DAO |
-                                   K_DAO;
+                                               D_DAO | K_DAO;
     icmpv6rpl_vars.dao.reserved = 0x00;
     icmpv6rpl_vars.dao.DAOSequence = 0x00;
     memcpy(&(icmpv6rpl_vars.dao.DODAGID[0]), dodagid, sizeof(icmpv6rpl_vars.dao.DODAGID));  // can be replaced later
@@ -215,6 +213,7 @@ owerror_t icmpv6rpl_getRPLDODAGid(uint8_t *address_128b) {
 \param[in] error Outcome of the sending.
 */
 void icmpv6rpl_sendDone(OpenQueueEntry_t *msg, owerror_t error) {
+    (void) error;
 
     // take ownership over that packet
     msg->owner = COMPONENT_ICMPv6RPL;
@@ -363,7 +362,7 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection(void) {
     // temporaries
     uint16_t rankIncrease;
     dagrank_t neighborRank;
-    uint32_t tentativeDAGrank;
+    int32_t tentativeDAGrank;
 
     open_addr_t newParent;
 
@@ -578,9 +577,9 @@ void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t *msg) {
                 // looks like we adopt the prefix from any PIO without a question about this node being our parent??
                 myPrefix.type = ADDR_PREFIX;
                 memcpy(
-                        myPrefix.prefix,
+                        myPrefix.addr_type.prefix,
                         icmpv6rpl_vars.incomingPio->prefix,
-                        sizeof(myPrefix.prefix)
+                        sizeof(myPrefix.addr_type.prefix)
                 );
                 idmanager_setMyID(&myPrefix);
                 optionsLen = optionsLen - current[1] - 2;
@@ -603,8 +602,12 @@ void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t *msg) {
 
     // update rank of that neighbor in table
     for (i = 0; i < MAXNUMNEIGHBORS; i++) {
-        if (neighbors_getNeighborEui64(&NeighborAddress, ADDR_64B, i)) { // this neighbor entry is in use
-            if (packetfunctions_sameAddress(&(msg->l2_nextORpreviousHop), &NeighborAddress)) { // matching address
+
+        // Find a used neighbor table entry
+        if (neighbors_getNeighborEui64(&NeighborAddress, ADDR_64B, i)) {
+
+            // check address
+            if (packetfunctions_sameAddress(&(msg->l2_nextORpreviousHop), &NeighborAddress)) {
                 neighborRank = neighbors_getNeighborRank(i);
                 if (
                         (icmpv6rpl_vars.incomingDio->rank > neighborRank) &&
@@ -627,14 +630,14 @@ void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t *msg) {
     }
 }
 
-void icmpv6rpl_killPreferredParent(void) {
-    icmpv6rpl_vars.haveParent = FALSE;
-    if (idmanager_getIsDAGroot() == TRUE) {
-        icmpv6rpl_vars.myDAGrank = MINHOPRANKINCREASE;
-    } else {
-        icmpv6rpl_vars.myDAGrank = DEFAULTDAGRANK;
-    }
-}
+// void icmpv6rpl_killPreferredParent(void) {
+//     icmpv6rpl_vars.haveParent = FALSE;
+//     if (idmanager_getIsDAGroot() == TRUE) {
+//         icmpv6rpl_vars.myDAGrank = MINHOPRANKINCREASE;
+//     } else {
+//         icmpv6rpl_vars.myDAGrank = DEFAULTDAGRANK;
+//     }
+// }
 
 //=========================== private =========================================
 
@@ -647,6 +650,8 @@ void icmpv6rpl_killPreferredParent(void) {
     already. No need to push a task again.
 */
 void icmpv6rpl_timer_DIO_cb(opentimers_id_t id) {
+    (void) id;
+
     icmpv6rpl_timer_DIO_task();
 }
 
@@ -761,8 +766,8 @@ void sendDIO(void) {
 
     memcpy(
             &(icmpv6rpl_vars.pio.prefix[0]),
-            idmanager_getMyID(ADDR_PREFIX)->prefix,
-            sizeof(idmanager_getMyID(ADDR_PREFIX)->prefix)
+            idmanager_getMyID(ADDR_PREFIX)->addr_type.prefix,
+            sizeof(idmanager_getMyID(ADDR_PREFIX)->addr_type.prefix)
     );
     // host address is not needed. Only prefix.
     /* memcpy(
@@ -794,7 +799,7 @@ void sendDIO(void) {
     }
     ((ICMPv6_ht *) (msg->payload))->type = msg->l4_sourcePortORicmpv6Type;
     ((ICMPv6_ht *) (msg->payload))->code = IANA_ICMPv6_RPL_DIO;
-    packetfunctions_calculateChecksum(msg, (uint8_t * ) & (((ICMPv6_ht *) (msg->payload))->checksum));//call last
+    packetfunctions_calculateChecksum(msg, (uint8_t *) &(((ICMPv6_ht *) (msg->payload))->checksum));//call last
 
     //send
     if (icmpv6_send(msg) == E_SUCCESS) {
@@ -813,6 +818,7 @@ void sendDIO(void) {
     already. No need to push a task again.
 */
 void icmpv6rpl_timer_DAO_cb(opentimers_id_t id) {
+    (void) id;
 
     icmpv6rpl_timer_DAO_task();
 }
@@ -908,7 +914,7 @@ void sendDAO(void) {
 
     // set DAO destination
     msg->l3_destinationAdd.type = ADDR_128B;
-    memcpy(msg->l3_destinationAdd.addr_128b, icmpv6rpl_vars.dio.DODAGID, sizeof(icmpv6rpl_vars.dio.DODAGID));
+    memcpy(msg->l3_destinationAdd.addr_type.addr_128b, icmpv6rpl_vars.dio.DODAGID, sizeof(icmpv6rpl_vars.dio.DODAGID));
 
     //===== fill in packet
 
@@ -1028,7 +1034,7 @@ void sendDAO(void) {
     }
     ((ICMPv6_ht *) (msg->payload))->type = msg->l4_sourcePortORicmpv6Type;
     ((ICMPv6_ht *) (msg->payload))->code = IANA_ICMPv6_RPL_DAO;
-    packetfunctions_calculateChecksum(msg, (uint8_t * ) & (((ICMPv6_ht *) (msg->payload))->checksum)); //call last
+    packetfunctions_calculateChecksum(msg, (uint8_t *) &(((ICMPv6_ht *) (msg->payload))->checksum)); //call last
 
     //===== send
     if (icmpv6_send(msg) == E_SUCCESS) {

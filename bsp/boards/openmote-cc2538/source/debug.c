@@ -53,14 +53,13 @@
 //!
 //
 //*****************************************************************************
-void
-__error__(char *pcFilename, uint32_t ui32Line)
-{
+void __error__(const char *pcFilename, uint32_t ui32Line) {
+    (void) pcFilename;
+    (void) ui32Line;
     //
     // Enter an infinite loop.
     //
-    while(1)
-    {
+    while (1) {
     }
 }
 

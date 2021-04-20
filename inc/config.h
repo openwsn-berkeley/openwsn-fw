@@ -16,8 +16,8 @@
  * - level 6: critical, error, success, warning, info, and verbose
  *
  */
-#ifndef OPENWSN_DEBUG_LEVEL
-#define OPENWSN_DEBUG_LEVEL         6
+#ifndef OPENWSN_LOG_LEVEL
+#define OPENWSN_LOG_LEVEL         6
 #endif
 
 // ========================== Applications ==========================
@@ -220,8 +220,8 @@
  * Defines the default port to use for COAP
  *
  */
-#ifndef OPENWSN_COAP_PORT_DEFAULT
-#define OPENWSN_COAP_PORT_DEFAULT   (5683)
+#ifndef DEFAULT_COAP_PORT
+#define DEFAULT_COAP_PORT   (5683)
 #endif
 
 // ========================== Stack modules ===========================
@@ -253,10 +253,10 @@
 
 #if OPENWSN_6LO_FRAGMENTATION_C
 #ifndef MAX_PKTSIZE_SUPPORTED
-#define MAX_PKTSIZE_SUPPORTED   1320
+#define MAX_PKTSIZE_SUPPORTED   (1320)
 #endif
 #ifndef MAX_NUM_BIGPKTS
-#define MAX_NUM_BIGPKTS         2
+#define MAX_NUM_BIGPKTS         (2)
 #endif
 #endif
 

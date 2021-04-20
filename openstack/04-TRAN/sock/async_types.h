@@ -2,6 +2,11 @@
 #define OPENWSN_ASYNC_TYPES_H
 
 /**
+ * @brief   Type for a UDP sock object
+ */
+typedef struct sock_udp sock_udp_t;   /**< forward declare for async */
+
+/**
  * @brief   Flag types to signify asynchronous sock events
  */
 typedef enum {
@@ -13,7 +18,6 @@ typedef enum {
     SOCK_ASYNC_PATH_PROP = 0x0040, /**< Path property changed event */
 } sock_async_flags_t;
 
-typedef struct sock_udp sock_udp_t;   /**< forward declare for async */
 
 /**
  * @brief   Event callback for @ref sock_udp_t

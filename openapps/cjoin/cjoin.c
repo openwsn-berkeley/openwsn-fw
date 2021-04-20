@@ -2,10 +2,6 @@
 \brief Implementation of Constrained Join Protocol (CoJP) from minimal-security-06 draft.
 */
 
-#include "config.h"
-
-#if OPENWSN_CJOIN_C
-
 #include "opendefs.h"
 #include "cjoin.h"
 #include "coap.h"
@@ -62,9 +58,6 @@ void cjoin_retransmission_cb(opentimers_id_t id);
 
 void cjoin_retransmission_task_cb(void);
 
-bool cjoin_getIsJoined(void);
-
-void cjoin_setIsJoined(bool newValue);
 //=========================== public ==========================================
 
 void cjoin_init(void) {
@@ -73,7 +66,7 @@ void cjoin_init(void) {
 
     // prepare the resource descriptor for the /j path
     cjoin_vars.desc.path0len = sizeof(cjoin_path0) - 1;
-    cjoin_vars.desc.path0val = (uint8_t * )(&cjoin_path0);
+    cjoin_vars.desc.path0val = (uint8_t *) (&cjoin_path0);
     cjoin_vars.desc.path1len = 0;
     cjoin_vars.desc.path1val = NULL;
     cjoin_vars.desc.componentID = COMPONENT_CJOIN;
@@ -106,8 +99,8 @@ void cjoin_init_security_context(void) {
                                  0,
                                  recipientID,
                                  sizeof(recipientID),
-				 idContext,
-				 sizeof(idContext),
+                                 idContext,
+                                 sizeof(idContext),
                                  joinKey,
                                  16,
                                  NULL,
@@ -136,7 +129,9 @@ owerror_t cjoin_receive(OpenQueueEntry_t *msg,
                         coap_option_iht *coap_incomingOptions,
                         coap_option_iht *coap_outgoingOptions,
                         uint8_t *coap_outgoingOptionsLen) {
-
+    (void) coap_incomingOptions;
+    (void) coap_outgoingOptionsLen;
+    (void) coap_outgoingOptions;
 
     cojp_configuration_object_t configuration;
     owerror_t ret;
@@ -164,12 +159,14 @@ owerror_t cjoin_receive(OpenQueueEntry_t *msg,
 }
 
 void cjoin_timer_cb(opentimers_id_t id) {
+    (void) id;
     // calling the task directly as the timer_cb function is executed in
     // task mode by opentimer already
     cjoin_task_cb();
 }
 
 void cjoin_retransmission_cb(opentimers_id_t id) {
+    (void) id;
     // calling the task directly as the timer_cb function is executed in
     // task mode by opentimer already
     opentimers_scheduleIn(
@@ -237,6 +234,7 @@ void cjoin_task_cb(void) {
 }
 
 void cjoin_sendDone(OpenQueueEntry_t *msg, owerror_t error) {
+    (void) error;
 
     openqueue_freePacketBuffer(msg);
 }
@@ -248,8 +246,6 @@ owerror_t cjoin_sendJoinRequest(open_addr_t *joinProxy) {
     uint8_t tmp[10];
     uint8_t payload_len;
     cojp_join_request_object_t join_request;
-
-    payload_len = 0;
 
     // if previous cjoin is not sent out, remove them
     openqueue_removeAllCreatedBy(COMPONENT_CJOIN);
@@ -289,10 +285,12 @@ owerror_t cjoin_sendJoinRequest(open_addr_t *joinProxy) {
     // metadata
     pkt->l4_destination_port = WKP_UDP_COAP;
     pkt->l3_destinationAdd.type = ADDR_128B;
-    pkt->l3_destinationAdd.addr_128b[0] = 0xfe;
-    pkt->l3_destinationAdd.addr_128b[1] = 0x80;
-    memset(&pkt->l3_destinationAdd.addr_128b[2], 0x00, 6);
-    memcpy(&pkt->l3_destinationAdd.addr_128b[8], joinProxy->addr_64b, 8); // set host to eui-64 of the join proxy
+    pkt->l3_destinationAdd.addr_type.addr_128b[0] = 0xfe;
+    pkt->l3_destinationAdd.addr_type.addr_128b[1] = 0x80;
+    memset(&pkt->l3_destinationAdd.addr_type.addr_128b[2], 0x00, 6);
+
+    // set host to eui-64 of the join proxy
+    memcpy(&pkt->l3_destinationAdd.addr_type.addr_128b[8], joinProxy->addr_type.addr_64b, 8);
 
     // encode Join_Request object in the payload
     join_request.role = COJP_ROLE_VALUE_6N; // regular non-6LBR node
@@ -328,8 +326,7 @@ owerror_t cjoin_sendJoinRequest(open_addr_t *joinProxy) {
 }
 
 bool cjoin_getIsJoined(void) {
-    bool res;
-    INTERRUPT_DECLARATION();
+    bool res;INTERRUPT_DECLARATION();
 
     DISABLE_INTERRUPTS();
     res = cjoin_vars.isJoined;
@@ -362,4 +359,3 @@ void cjoin_setIsJoined(bool newValue) {
     }
 }
 
-#endif /* OPENWSN_CJOIN_H */

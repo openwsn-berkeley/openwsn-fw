@@ -1,5 +1,5 @@
-#ifndef __CWELLKNOWN_H
-#define __CWELLKNOWN_H
+#ifndef OPENWSN_CWELLKNOWN_H
+#define OPENWSN_CWELLKNOWN_H
 
 /**
 \addtogroup AppCoAP

@@ -1,70 +1,96 @@
-# This is a basic workflow to help you get started with Actions
+name: Windows
 
-name: SCons build Windows
+on: [push, pull_request]
 
-# Controls when the action will run.
-on:
-  # Triggers the workflow on push or pull request events but only for the develop branch
-  push:
-    branches: [ develop ]
-  pull_request:
-    branches: [ develop ]
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Debug
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   build:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - { toolchain: gcc, board: python }
-          - { toolchain: armgcc, board: openmote-cc2538}
-          - { toolchain: armgcc, board: iot-lab_M3}
+        python-version: ['None', '3.6', '3.7', '3.8', '3.9']
+        board: ['python', 'openmote-cc2538', 'iot-lab_M3']
+        exclude:
+          - board: 'python'
+            python-version: 'None'
+          - board: 'openmote-cc2538'
+            python-version: '3.6'
+          - board: 'openmote-cc2538'
+            python-version: '3.7'
+          - board: 'openmote-cc2538'
+            python-version: '3.8'
+          - board: 'openmote-cc2538'
+            python-version: '3.9'
+          - board: 'iot-lab_M3'
+            python-version: '3.6'
+          - board: 'iot-lab_M3'
+            python-version: '3.7'
+          - board: 'iot-lab_M3'
+            python-version: '3.8'
+          - board: 'iot-lab_M3'
+            python-version: '3.9'
 
-    # The type of runner that the job will run on
     runs-on: windows-latest
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      - name: Set up MinGW
-        uses: egor-tensin/setup-mingw@v2
-        with:
-          platform: x86
-
-      - name: Test GCC
-        run: |
-          gcc --version
-
-      - name: Set up Python 2.7
+      - if: ${{ matrix.board == 'python' }}
+        name: Setup Python
         uses: actions/setup-python@v2
         with:
-          python-version: '2.7.x'
-          architecture: 'x86'
+          python-version: ${{ matrix.python-version }}
+          architecture: 'x64'
 
-      - name: Setup ARM toolchain
+      - if: ${{ matrix.board == 'openmote-cc2538' || matrix.board == 'iot-lab_M3' }}
+        name: Setup compiler toolchain
         uses: fiam/arm-none-eabi-gcc@v1
         with:
           release: '9-2020-q2'
 
-      - name: Test ARM toolchain
-        run: |
-          arm-none-eabi-gcc --version
+      - if: ${{ matrix.board == 'openmote-cc2538' || matrix.board == 'iot-lab_M3' }}
+        name: Test ARM toolchain
+        run: arm-none-eabi-gcc --version
 
-      - name: Installing SCons
+      - if: ${{ matrix.board == 'python' }}
+        name: Building Python Extension
         run: |
-          python -c "import sys; print(sys.version)"
-          python -m pip --version
-          pip install scons
+          python --version
+          python -m pip install -r requirements.txt
+          python setup.py install --user -DPYTHON_VERSION:STRING=${{ matrix.python-version }} -DOPT-UDP:BOOL=ON -DOPT-COAP:BOOL=ON -DOPT-CJOIN:BOOL=ON
+          python -c "import openmote"
 
-      # Runs a set of commands using the runners shell
-      - name: Build firmware
-        run: |
-          scons board=${{ matrix.board }} toolchain=${{ matrix.toolchain }} oos_openwsn
+      - if: ${{ matrix.board != 'python' }}
+        name: Create Build Environment
+        run: cmake -E make_directory ${{github.workspace}}/build
 
+      - if: ${{ matrix.board == 'openmote-cc2538' }}
+        name: Configure CMake
+        # Use a bash shell so we can use the same syntax for environment variable
+        # access regardless of the host operating system
+        shell: bash
+        working-directory: ${{github.workspace}}/build
+        # Note the current convention is to use the -S and -B options here to specify source
+        # and build directories, but this is only available with CMake 3.13 and higher.
+        # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
+        run: cmake $GITHUB_WORKSPACE -G"MinGW Makefiles" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/cc2538.cmake -DBOARD=openmote-cc2538 -DOPT-UDP:BOOL=ON -DOPT-COAP:BOOL=ON -DOPT-CJOIN:BOOL=ON
+
+      - if: ${{ matrix.board == 'iot-lab_M3' }}
+        name: Configure CMake
+        # Use a bash shell so we can use the same syntax for environment variable
+        # access regardless of the host operating system
+        shell: bash
+        working-directory: ${{github.workspace}}/build
+        # Note the current convention is to use the -S and -B options here to specify source
+        # and build directories, but this is only available with CMake 3.13 and higher.
+        # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
+        run: cmake $GITHUB_WORKSPACE -G"MinGW Makefiles" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/m3.cmake -DBOARD=iot-lab_M3 -DOPT-UDP:BOOL=ON -DOPT-COAP:BOOL=ON -DOPT-CJOIN:BOOL=ON
+
+      - if: ${{ matrix.board != 'python' }}
+        working-directory: ${{github.workspace}}/build
+        shell: bash
+        # Execute the build.  You can specify a specific target with "--target <NAME>"
+        run: cmake --build . --config $BUILD_TYPE

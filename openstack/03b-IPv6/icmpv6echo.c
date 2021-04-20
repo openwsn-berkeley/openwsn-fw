@@ -8,7 +8,6 @@
 #include "openserial.h"
 #include "openqueue.h"
 #include "packetfunctions.h"
-#include "debugpins.h"
 
 //=========================== variables =======================================
 
@@ -38,7 +37,7 @@ void icmpv6echo_trigger(void) {
         return;
     };
     icmpv6echo_vars.hisAddress.type = ADDR_128B;
-    memcpy(&(icmpv6echo_vars.hisAddress.addr_128b[0]), &(input_buffer[0]), 16);
+    memcpy(&(icmpv6echo_vars.hisAddress.addr_type.addr_128b[0]), &(input_buffer[0]), 16);
 
     //send
     if (icmpv6echo_vars.busySending == TRUE) {

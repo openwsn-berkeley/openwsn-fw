@@ -45,63 +45,6 @@
 // specifies how long we store fragments or keep vrb allocated
 #define FRAG_REASSEMBLY_TIMEOUT     60000
 
-// 6LoWPAN fragment1 header
-typedef struct {
-    uint16_t dispatch_size_field;
-    uint16_t datagram_tag;
-} frag1_t;
-
-// 6LoWPAN fragmentN header
-typedef struct {
-    uint16_t dispatch_size_field;
-    uint16_t datagram_tag;
-    uint8_t datagram_offset;
-} fragn_t;
-
-/*
- * Describes an entry in the fragment buffer, contains:
- * - If lock is TRUE, fragment is scheduled for Tx (do not delete until cb sendDone!!).
- * - The fragment offset value (multiple of 8)
- * - The tag value used for this fragment.
- * - The reassembly timer (60s after the arrival of the first fragment, reassembly must be completed).
- * - A pointer to the fragment's location in the OpenQueue.
- * - A pointer to the original unfragmented 6LoWPAN packet in the OpenQueue.
-*/
-BEGIN_PACK
-struct fragment_t {
-    bool lock;
-    uint8_t datagram_offset;
-    uint16_t datagram_tag;
-    opentimers_id_t reassembly_timer;
-    OpenQueueEntry_t *pFragment;
-    OpenQueueEntry_t *pOriginalMsg;
-};
-END_PACK
-
-typedef struct fragment_t fragment;
-
-// virtual reassembly buffer struct
-BEGIN_PACK
-typedef struct {
-    uint16_t tag;
-    uint16_t left;
-    uint16_t size;
-    opentimers_id_t forward_timer;
-    OpenQueueEntry_t *frag1;
-    open_addr_t nexthop;
-} vrb_t;
-END_PACK
-
-// state information for fragmentation
-typedef struct {
-    uint16_t global_tag;
-    vrb_t vrbs[NUM_OF_VRBS];
-    fragment fragmentBuf[FRAGMENT_BUFFER_SIZE];
-    opentimers_id_t frag_timerq[NUM_OF_CONCURRENT_TIMERS];
-} frag_vars_t;
-
-
-
 //=========================== variables ======================================= 
 
 //=========================== prototypes ======================================

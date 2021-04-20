@@ -6,7 +6,6 @@
 #include "cwellknown.h"
 #include "coap.h"
 #include "openqueue.h"
-#include "packetfunctions.h"
 #include "idmanager.h"
 
 //=========================== variables =======================================

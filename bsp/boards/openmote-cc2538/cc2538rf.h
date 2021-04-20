@@ -5,8 +5,8 @@
  * Description: CC2538-specific definition of the "radio" bsp module.
  */
 
-#ifndef CC2538RF_H_
-#define CC2538RF_H_
+#ifndef OPENWSN_CC2538RF_H
+#define OPENWSN_CC2538RF_H
 
 #include <headers/hw_rfcore_sfr.h>
 #include <headers/hw_rfcore_xreg.h>
@@ -90,4 +90,4 @@
 /*---------------------------------------------------------------------------*/
 
 
-#endif /* CC2538RF_H_ */
+#endif /* OPENWSN_CC2538RF_H */

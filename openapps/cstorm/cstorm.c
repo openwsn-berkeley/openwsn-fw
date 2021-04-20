@@ -8,8 +8,6 @@
 #include "openqueue.h"
 #include "packetfunctions.h"
 #include "openserial.h"
-#include "openrandom.h"
-#include "scheduler.h"
 #include "IEEE802154E.h"
 #include "schedule.h"
 #include "icmpv6rpl.h"
@@ -97,7 +95,7 @@ owerror_t cstorm_receive(
             // add CoAP payload
             if (packetfunctions_reserveHeader(&msg, 2) == E_FAIL) {
                 openqueue_freePacketBuffer(msg);
-                return;
+                return E_FAIL;
             }
             // return as big endian
             msg->payload[0] = (uint8_t)(cstorm_vars.period >> 8);
@@ -237,7 +235,7 @@ void cstorm_task_cb(void) {
     // metadata
     pkt->l4_destination_port = WKP_UDP_COAP;
     pkt->l3_destinationAdd.type = ADDR_128B;
-    memcpy(&pkt->l3_destinationAdd.addr_128b[0], &dst_addr, 16);
+    memcpy(&pkt->l3_destinationAdd.addr_type.addr_128b[0], &dst_addr, 16);
 
     // send
     outcome = coap_send(

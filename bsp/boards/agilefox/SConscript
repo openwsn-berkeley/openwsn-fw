@@ -1,7 +1,0 @@
-import os
-
-Import('env')
-
-localEnv = env.Clone()
-
-# nothing to do as long as only iar-proj toolchain supported for agilefox board

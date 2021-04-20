@@ -50,7 +50,6 @@
 #include <headers/hw_types.h>
 #include "interrupt.h"
 #include "pka.h"
-#include "sys_ctrl.h"
 #include "debug.h"
 
 //*****************************************************************************
@@ -101,8 +100,7 @@
 //
 //*****************************************************************************
 void
-PKAEnableInt(void)
-{
+PKAEnableInt(void) {
     //
     // Enable the PKA interrupt.
     //
@@ -119,8 +117,7 @@ PKAEnableInt(void)
 //
 //*****************************************************************************
 void
-PKADisableInt( void )
-{
+PKADisableInt(void) {
     //
     // Disables the PKA interrupt.
     //
@@ -138,8 +135,7 @@ PKADisableInt( void )
 //
 //*****************************************************************************
 void
-PKAClearInt(void)
-{
+PKAClearInt(void) {
     //
     // UnPends the PKA interrupt.
     //
@@ -164,8 +160,7 @@ PKAClearInt(void)
 //
 //*****************************************************************************
 void
-PKARegInt(void (*pfnHandler)(void))
-{
+PKARegInt(void (*pfnHandler)(void)) {
     //
     // Register the interrupt handler.
     //
@@ -184,8 +179,7 @@ PKARegInt(void (*pfnHandler)(void))
 //
 //*****************************************************************************
 void
-PKAUnRegInt(void)
-{
+PKAUnRegInt(void) {
     //
     // Unregister the interrupt handler.
     //
@@ -206,14 +200,10 @@ PKAUnRegInt(void)
 //
 //*****************************************************************************
 tPKAStatus
-PKAGetOpsStatus(void)
-{
-    if((HWREG(PKA_FUNCTION) & PKA_FUNCTION_RUN) != 0)
-    {
+PKAGetOpsStatus(void) {
+    if ((HWREG(PKA_FUNCTION) & PKA_FUNCTION_RUN) != 0) {
         return (PKA_STATUS_OPERATION_INPRG);
-    }
-    else
-    {
+    } else {
         return (PKA_STATUS_OPERATION_NOT_INPRG);
     }
 }
@@ -242,10 +232,9 @@ PKAGetOpsStatus(void)
 //
 //*****************************************************************************
 tPKAStatus
-PKABigNumModStart(uint32_t* pui32BNum, uint8_t ui8BNSize,
-                  uint32_t* pui32Modulus, uint8_t ui8ModSize,
-                  uint32_t* pui32ResultVector)
-{
+PKABigNumModStart(const uint32_t *pui32BNum, uint8_t ui8BNSize,
+                  const uint32_t *pui32Modulus, uint8_t ui8ModSize,
+                  uint32_t *pui32ResultVector) {
     uint8_t extraBuf;
     uint32_t offset;
     int i;
@@ -260,8 +249,7 @@ PKABigNumModStart(uint32_t* pui32BNum, uint8_t ui8BNSize,
     //
     // make sure no operation is in progress.
     //
-    if((HWREG(PKA_FUNCTION) & PKA_FUNCTION_RUN) != 0)
-    {
+    if ((HWREG(PKA_FUNCTION) & PKA_FUNCTION_RUN) != 0) {
         return (PKA_STATUS_OPERATION_INPRG);
     }
 
@@ -276,14 +264,13 @@ PKABigNumModStart(uint32_t* pui32BNum, uint8_t ui8BNSize,
     // Update the A ptr with the offset address of the PKA RAM location
     // where the number will be stored.
     //
-    HWREG( (PKA_APTR) ) = offset >>2;
+    HWREG((PKA_APTR)) = offset >> 2;
 
     //
     // Load the number in PKA RAM
     //
-    for(i = 0; i < ui8BNSize; i++)
-    {
-        HWREG((PKA_RAM_BASE + offset + 4*i)) = pui32BNum[i];
+    for (i = 0; i < ui8BNSize; i++) {
+        HWREG((PKA_RAM_BASE + offset + 4 * i)) = pui32BNum[i];
     }
 
     //
@@ -295,14 +282,13 @@ PKABigNumModStart(uint32_t* pui32BNum, uint8_t ui8BNSize,
     // Update the B ptr with the offset address of the PKA RAM location
     // where the divisor will be stored.
     //
-    HWREG( (PKA_BPTR) ) = offset >> 2;
+    HWREG((PKA_BPTR)) = offset >> 2;
 
     //
     // Load the divisor in PKA RAM.
     //
-    for(i = 0; i < ui8ModSize;  i++)
-    {
-        HWREG((PKA_RAM_BASE + offset + 4*i)) = pui32Modulus[i];
+    for (i = 0; i < ui8ModSize; i++) {
+        HWREG((PKA_RAM_BASE + offset + 4 * i)) = pui32Modulus[i];
     }
 
     //
@@ -318,22 +304,22 @@ PKABigNumModStart(uint32_t* pui32BNum, uint8_t ui8BNSize,
     //
     // Load C ptr with the result location in PKA RAM
     //
-    HWREG( (PKA_CPTR) ) = offset >> 2;
+    HWREG((PKA_CPTR)) = offset >> 2;
 
     //
     // Load A length registers with Big number length in 32 bit words.
     //
-    HWREG( (PKA_ALENGTH) ) = ui8BNSize;
+    HWREG((PKA_ALENGTH)) = ui8BNSize;
 
     //
     // Load B length registers  Divisor length in 32-bit words.
     //
-    HWREG( (PKA_BLENGTH) ) = ui8ModSize;
+    HWREG((PKA_BLENGTH)) = ui8ModSize;
 
     //
     // Start the PKCP modulo operation by setting the PKA Function register.
     //
-    HWREG( (PKA_FUNCTION) ) = (PKA_FUNCTION_RUN | PKA_FUNCTION_MODULO);
+    HWREG((PKA_FUNCTION)) = (PKA_FUNCTION_RUN | PKA_FUNCTION_MODULO);
 
     return (PKA_STATUS_SUCCESS);
 }
@@ -361,12 +347,10 @@ PKABigNumModStart(uint32_t* pui32BNum, uint8_t ui8BNSize,
 //
 //*****************************************************************************
 tPKAStatus
-PKABigNumModGetResult(uint32_t* pui32ResultBuf,uint8_t ui8Size,
-                      uint32_t ui32ResVectorLoc)
-{
+PKABigNumModGetResult(uint32_t *pui32ResultBuf, uint8_t ui8Size, uint32_t ui32ResVectorLoc) {
     uint32_t regMSWVal;
     uint32_t len;
-    int i;
+    uint32_t i;
 
     //
     // Check the arguments.
@@ -378,8 +362,7 @@ PKABigNumModGetResult(uint32_t* pui32ResultBuf,uint8_t ui8Size,
     //
     // verify that the operation is complete.
     //
-    if((HWREG(PKA_FUNCTION) & PKA_FUNCTION_RUN) != 0)
-    {
+    if ((HWREG(PKA_FUNCTION) & PKA_FUNCTION_RUN) != 0) {
         return (PKA_STATUS_OPERATION_INPRG);
     }
 
@@ -391,8 +374,7 @@ PKABigNumModGetResult(uint32_t* pui32ResultBuf,uint8_t ui8Size,
     //
     // Check to make sure that the result vector is not all zeroes.
     //
-    if(regMSWVal & PKA_DIVMSW_RESULT_IS_ZERO)
-    {
+    if (regMSWVal & PKA_DIVMSW_RESULT_IS_ZERO) {
         return (PKA_STATUS_RESULT_0);
     }
 
@@ -406,17 +388,15 @@ PKABigNumModGetResult(uint32_t* pui32ResultBuf,uint8_t ui8Size,
     // If the size of the buffer provided is less than the result length than
     // return error.
     //
-    if(ui8Size < len)
-    {
+    if (ui8Size < len) {
         return (PKA_STATUS_BUF_UNDERFLOW);
     }
 
     //
     // copy the result from vector C into the pResult.
     //
-    for(i = 0; i < len; i++)
-    {
-        pui32ResultBuf[i]= HWREG( (ui32ResVectorLoc + 4*i) );
+    for (i = 0; i < len; i++) {
+        pui32ResultBuf[i] = HWREG((ui32ResVectorLoc + 4 * i));
     }
 
     return (PKA_STATUS_SUCCESS);
@@ -440,9 +420,7 @@ PKABigNumModGetResult(uint32_t* pui32ResultBuf,uint8_t ui8Size,
 //! some other operation.
 //
 //*****************************************************************************
-tPKAStatus
-PKABigNumCmpStart(uint32_t* pui32BNum1, uint32_t* pui32BNum2, uint8_t ui8Size)
-{
+tPKAStatus PKABigNumCmpStart(const uint32_t *pui32BNum1, const uint32_t *pui32BNum2, uint8_t ui8Size) {
     uint32_t offset;
     int i;
 
@@ -457,8 +435,7 @@ PKABigNumCmpStart(uint32_t* pui32BNum1, uint32_t* pui32BNum2, uint8_t ui8Size)
     //
     // Make sure no operation is in progress.
     //
-    if((HWREG(PKA_FUNCTION) & PKA_FUNCTION_RUN) != 0)
-    {
+    if ((HWREG(PKA_FUNCTION) & PKA_FUNCTION_RUN) != 0) {
         return (PKA_STATUS_OPERATION_INPRG);
     }
 
@@ -466,14 +443,13 @@ PKABigNumCmpStart(uint32_t* pui32BNum1, uint32_t* pui32BNum2, uint8_t ui8Size)
     // Update the A ptr with the offset address of the PKA RAM location
     // where the first big number will be stored.
     //
-    HWREG( (PKA_APTR) ) = offset >> 2;
+    HWREG((PKA_APTR)) = offset >> 2;
 
     //
     // Load the first big number in PKA RAM.
     //
-    for(i = 0; i < ui8Size; i++)
-    {
-        HWREG( (PKA_RAM_BASE + offset + 4*i) ) = pui32BNum1[i];
+    for (i = 0; i < ui8Size; i++) {
+        HWREG((PKA_RAM_BASE + offset + 4 * i)) = pui32BNum1[i];
     }
 
     //
@@ -485,26 +461,25 @@ PKABigNumCmpStart(uint32_t* pui32BNum1, uint32_t* pui32BNum2, uint8_t ui8Size)
     // Update the B ptr with the offset address of the PKA RAM location
     // where the second big number will be stored.
     //
-    HWREG( (PKA_BPTR) ) = offset >> 2;
+    HWREG((PKA_BPTR)) = offset >> 2;
 
     //
     // Load the second big number in PKA RAM.
     //
-    for(i = 0; i < ui8Size;  i++)
-    {
-        HWREG( (PKA_RAM_BASE + offset + 4*i) ) = pui32BNum2[i];
+    for (i = 0; i < ui8Size; i++) {
+        HWREG((PKA_RAM_BASE + offset + 4 * i)) = pui32BNum2[i];
     }
 
     //
     // Load length registers in 32 bit word size.
     //
-    HWREG( (PKA_ALENGTH) ) = ui8Size;
+    HWREG((PKA_ALENGTH)) = ui8Size;
 
     //
     // Set the PKA Function register for the Compare operation
     // and start the operation.
     //
-    HWREG( (PKA_FUNCTION) ) = (PKA_FUNCTION_RUN | PKA_FUNCTION_COMPARE);
+    HWREG((PKA_FUNCTION)) = (PKA_FUNCTION_RUN | PKA_FUNCTION_COMPARE);
 
     return (PKA_STATUS_SUCCESS);
 }
@@ -524,15 +499,13 @@ PKABigNumCmpStart(uint32_t* pui32BNum1, uint32_t* pui32BNum2, uint8_t ui8Size)
 //
 //*****************************************************************************
 tPKAStatus
-PKABigNumCmpGetResult(void)
-{
+PKABigNumCmpGetResult(void) {
     tPKAStatus status;
 
     //
     // verify that the operation is complete.
     //
-    if((HWREG(PKA_FUNCTION) & PKA_FUNCTION_RUN) != 0)
-    {
+    if ((HWREG(PKA_FUNCTION) & PKA_FUNCTION_RUN) != 0) {
         status = PKA_STATUS_OPERATION_INPRG;
         return (status);
     }
@@ -540,8 +513,7 @@ PKABigNumCmpGetResult(void)
     //
     // Check the COMPARE register.
     //
-    switch(HWREG(PKA_COMPARE))
-    {
+    switch (HWREG(PKA_COMPARE)) {
         case PKA_COMPARE_A_EQUALS_B:
             status = PKA_STATUS_SUCCESS;
             break;
@@ -583,11 +555,11 @@ PKABigNumCmpGetResult(void)
 //! some other operation.
 //
 //*****************************************************************************
-tPKAStatus
-PKABigNumInvModStart(uint32_t* pui32BNum, uint8_t ui8BNSize,
-                     uint32_t* pui32Modulus, uint8_t ui8Size,
-                     uint32_t* pui32ResultVector)
-{
+tPKAStatus PKABigNumInvModStart(const uint32_t *pui32BNum,
+                                uint8_t ui8BNSize,
+                                const uint32_t *pui32Modulus,
+                                uint8_t ui8Size,
+                                uint32_t *pui32ResultVector) {
     uint32_t offset;
     int i;
 
@@ -603,8 +575,7 @@ PKABigNumInvModStart(uint32_t* pui32BNum, uint8_t ui8BNSize,
     //
     // Make sure no operation is in progress.
     //
-    if((HWREG(PKA_FUNCTION) & PKA_FUNCTION_RUN) != 0)
-    {
+    if ((HWREG(PKA_FUNCTION) & PKA_FUNCTION_RUN) != 0) {
         return (PKA_STATUS_OPERATION_INPRG);
     }
 
@@ -612,14 +583,13 @@ PKABigNumInvModStart(uint32_t* pui32BNum, uint8_t ui8BNSize,
     // Update the A ptr with the offset address of the PKA RAM location
     // where the number will be stored.
     //
-    HWREG( (PKA_APTR) ) = offset >>2;
+    HWREG((PKA_APTR)) = offset >> 2;
 
     //
     // Load the \e pui32BNum number in PKA RAM.
     //
-    for(i = 0; i < ui8BNSize; i++)
-    {
-        HWREG( (PKA_RAM_BASE + offset + 4*i) ) = pui32BNum[i];
+    for (i = 0; i < ui8BNSize; i++) {
+        HWREG((PKA_RAM_BASE + offset + 4 * i)) = pui32BNum[i];
     }
 
     //
@@ -631,14 +601,13 @@ PKABigNumInvModStart(uint32_t* pui32BNum, uint8_t ui8BNSize,
     // Update the B ptr with the offset address of the PKA RAM location
     // where the modulus will be stored.
     //
-    HWREG( (PKA_BPTR) ) = offset >> 2;
+    HWREG((PKA_BPTR)) = offset >> 2;
 
     //
     // Load the \e pui32Modulus divisor in PKA RAM.
     //
-    for(i = 0; i < ui8Size;  i++)
-    {
-        HWREG( (PKA_RAM_BASE + offset + 4*i) ) = pui32Modulus[i];
+    for (i = 0; i < ui8Size; i++) {
+        HWREG((PKA_RAM_BASE + offset + 4 * i)) = pui32Modulus[i];
     }
 
     //
@@ -654,18 +623,18 @@ PKABigNumInvModStart(uint32_t* pui32BNum, uint8_t ui8BNSize,
     //
     // Load D ptr with the result location in PKA RAM.
     //
-    HWREG( (PKA_DPTR) ) = offset >> 2;
+    HWREG((PKA_DPTR)) = offset >> 2;
 
     //
     // Load the respective length registers.
     //
-    HWREG( (PKA_ALENGTH) ) = ui8BNSize;
-    HWREG( (PKA_BLENGTH) ) = ui8Size;
+    HWREG((PKA_ALENGTH)) = ui8BNSize;
+    HWREG((PKA_BLENGTH)) = ui8Size;
 
     //
     // set the PKA function to InvMod operation and the start the operation.
     //
-    HWREG( (PKA_FUNCTION) ) = 0x0000F000;
+    HWREG((PKA_FUNCTION)) = 0x0000F000;
 
     return (PKA_STATUS_SUCCESS);
 }
@@ -693,13 +662,10 @@ PKABigNumInvModStart(uint32_t* pui32BNum, uint8_t ui8BNSize,
 //! then the result. 
 //
 //*****************************************************************************
-tPKAStatus
-PKABigNumInvModGetResult(uint32_t* pui32ResultBuf, uint8_t ui8Size,
-                         uint32_t ui32ResVectorLoc)
-{
+tPKAStatus PKABigNumInvModGetResult(uint32_t *pui32ResultBuf, uint8_t ui8Size, uint32_t ui32ResVectorLoc) {
     uint32_t regMSWVal;
     uint32_t len;
-    int i;
+    uint32_t i;
 
     //
     // Check the arguments.
@@ -711,8 +677,7 @@ PKABigNumInvModGetResult(uint32_t* pui32ResultBuf, uint8_t ui8Size,
     //
     // Verify that the operation is complete.
     //
-    if((HWREG(PKA_FUNCTION) & PKA_FUNCTION_RUN) != 0)
-    {
+    if ((HWREG(PKA_FUNCTION) & PKA_FUNCTION_RUN) != 0) {
         return (PKA_STATUS_OPERATION_INPRG);
     }
 
@@ -724,8 +689,7 @@ PKABigNumInvModGetResult(uint32_t* pui32ResultBuf, uint8_t ui8Size,
     //
     // Check to make sure that the result vector is not all zeroes.
     //
-    if(regMSWVal & PKA_MSW_RESULT_IS_ZERO)
-    {
+    if (regMSWVal & PKA_MSW_RESULT_IS_ZERO) {
         return (PKA_STATUS_RESULT_0);
     }
 
@@ -739,16 +703,14 @@ PKABigNumInvModGetResult(uint32_t* pui32ResultBuf, uint8_t ui8Size,
     // Check if the provided buffer length is adequate to store the result
     // data.
     //
-    if(ui8Size < len)
-    {
+    if (ui8Size < len) {
         return (PKA_STATUS_BUF_UNDERFLOW);
     }
 
     //
     // Copy the result from vector C into the \e pui32ResultBuf.
-    for(i = 0; i < len; i++)
-    {
-        pui32ResultBuf[i]= HWREG( (ui32ResVectorLoc + 4*i) );
+    for (i = 0; i < len; i++) {
+        pui32ResultBuf[i] = HWREG((ui32ResVectorLoc + 4 * i));
     }
 
     return (PKA_STATUS_SUCCESS);
@@ -775,11 +737,11 @@ PKABigNumInvModGetResult(uint32_t* pui32ResultBuf, uint8_t ui8Size,
 //! some other operation.
 //
 //*****************************************************************************
-tPKAStatus
-PKABigNumMultiplyStart(uint32_t* pui32Xplicand, uint8_t ui8XplicandSize,
-                       uint32_t* pui32Xplier, uint8_t ui8XplierSize,
-                       uint32_t* pui32ResultVector)
-{
+tPKAStatus PKABigNumMultiplyStart(uint32_t *pui32Xplicand,
+                                  uint8_t ui8XplicandSize,
+                                  uint32_t *pui32Xplier,
+                                  uint8_t ui8XplierSize,
+                                  uint32_t *pui32ResultVector) {
     uint32_t offset;
     int i;
 
@@ -795,8 +757,7 @@ PKABigNumMultiplyStart(uint32_t* pui32Xplicand, uint8_t ui8XplicandSize,
     //
     // Make sure no operation is in progress.
     //
-    if((HWREG(PKA_FUNCTION) & PKA_FUNCTION_RUN) != 0)
-    {
+    if ((HWREG(PKA_FUNCTION) & PKA_FUNCTION_RUN) != 0) {
         return (PKA_STATUS_OPERATION_INPRG);
     }
 
@@ -804,14 +765,13 @@ PKABigNumMultiplyStart(uint32_t* pui32Xplicand, uint8_t ui8XplicandSize,
     // Update the A ptr with the offset address of the PKA RAM location
     // where the multiplicand will be stored.
     //
-    HWREG( (PKA_APTR) ) = offset >> 2;
+    HWREG((PKA_APTR)) = offset >> 2;
 
     //
     // Load the multiplicand in PKA RAM.
     //
-    for(i = 0; i < ui8XplicandSize; i++)
-    {
-        HWREG((PKA_RAM_BASE + offset + 4*i)) = *pui32Xplicand;
+    for (i = 0; i < ui8XplicandSize; i++) {
+        HWREG((PKA_RAM_BASE + offset + 4 * i)) = *pui32Xplicand;
         pui32Xplicand++;
     }
 
@@ -824,14 +784,13 @@ PKABigNumMultiplyStart(uint32_t* pui32Xplicand, uint8_t ui8XplicandSize,
     // Update the B ptr with the offset address of the PKA RAM location
     // where the multiplier will be stored.
     //
-    HWREG( (PKA_BPTR) ) = offset >> 2;
+    HWREG((PKA_BPTR)) = offset >> 2;
 
     //
     // Load the multiplier in PKA RAM.
     //
-    for(i = 0; i < ui8XplierSize; i++)
-    {
-        HWREG( (PKA_RAM_BASE + offset + 4*i) ) = *pui32Xplier;
+    for (i = 0; i < ui8XplierSize; i++) {
+        HWREG((PKA_RAM_BASE + offset + 4 * i)) = *pui32Xplier;
         pui32Xplier++;
     }
 
@@ -848,18 +807,18 @@ PKABigNumMultiplyStart(uint32_t* pui32Xplicand, uint8_t ui8XplicandSize,
     //
     // Load C ptr with the result location in PKA RAM.
     //
-    HWREG( (PKA_CPTR) ) = offset >> 2;
+    HWREG((PKA_CPTR)) = offset >> 2;
 
     //
     // Load the respective length registers.
     //
-    HWREG( (PKA_ALENGTH) ) = ui8XplicandSize;
-    HWREG( (PKA_BLENGTH) ) = ui8XplierSize;
+    HWREG((PKA_ALENGTH)) = ui8XplicandSize;
+    HWREG((PKA_BLENGTH)) = ui8XplierSize;
 
     //
     // Set the PKA function to the multiplication and start it.
     //
-    HWREG( (PKA_FUNCTION) ) = (PKA_FUNCTION_RUN | PKA_FUNCTION_MULTIPLY);
+    HWREG((PKA_FUNCTION)) = (PKA_FUNCTION_RUN | PKA_FUNCTION_MULTIPLY);
 
     return (PKA_STATUS_SUCCESS);
 }
@@ -890,13 +849,10 @@ PKABigNumMultiplyStart(uint32_t* pui32Xplicand, uint8_t ui8XplicandSize,
 //! then the length of the result. 
 //
 //*****************************************************************************
-tPKAStatus
-PKABigNumMultGetResult(uint32_t* pui32ResultBuf, uint32_t* pui32Len,
-                       uint32_t ui32ResVectorLoc)
-{
+tPKAStatus PKABigNumMultGetResult(uint32_t *pui32ResultBuf, uint32_t *pui32Len, uint32_t ui32ResVectorLoc) {
     uint32_t regMSWVal;
     uint32_t len;
-    int i;
+    uint32_t i;
 
     //
     // Check for arguments.
@@ -909,8 +865,7 @@ PKABigNumMultGetResult(uint32_t* pui32ResultBuf, uint32_t* pui32Len,
     //
     // Verify that the operation is complete.
     //
-    if((HWREG(PKA_FUNCTION) & PKA_FUNCTION_RUN) != 0)
-    {
+    if ((HWREG(PKA_FUNCTION) & PKA_FUNCTION_RUN) != 0) {
         return (PKA_STATUS_OPERATION_INPRG);
     }
 
@@ -922,8 +877,7 @@ PKABigNumMultGetResult(uint32_t* pui32ResultBuf, uint32_t* pui32Len,
     //
     // Check to make sure that the result vector is not all zeroes.
     //
-    if(regMSWVal & PKA_MSW_RESULT_IS_ZERO)
-    {
+    if (regMSWVal & PKA_MSW_RESULT_IS_ZERO) {
         return (PKA_STATUS_RESULT_0);
     }
 
@@ -937,8 +891,7 @@ PKABigNumMultGetResult(uint32_t* pui32ResultBuf, uint32_t* pui32Len,
     // Make sure that the length of the supplied result buffer is adequate
     // to store the resultant.
     //
-    if(*pui32Len < len)
-    {
+    if (*pui32Len < len) {
         return (PKA_STATUS_BUF_UNDERFLOW);
     }
 
@@ -950,9 +903,8 @@ PKABigNumMultGetResult(uint32_t* pui32ResultBuf, uint32_t* pui32Len,
     //
     // Copy the result from vector C into the pResult.
     //
-    for(i = 0; i < *pui32Len; i++)
-    {
-        pui32ResultBuf[i]= HWREG( (ui32ResVectorLoc + 4*i) );
+    for (i = 0; i < *pui32Len; i++) {
+        pui32ResultBuf[i] = HWREG((ui32ResVectorLoc + 4 * i));
     }
 
     return (PKA_STATUS_SUCCESS);
@@ -979,11 +931,11 @@ PKABigNumMultGetResult(uint32_t* pui32ResultBuf, uint32_t* pui32Len,
 //! some other operation.
 //
 //*****************************************************************************
-tPKAStatus
-PKABigNumAddStart(uint32_t* pui32BN1, uint8_t ui8BN1Size,
-                  uint32_t* pui32BN2, uint8_t ui8BN2Size,
-                  uint32_t* pui32ResultVector)
-{
+tPKAStatus PKABigNumAddStart(const uint32_t *pui32BN1,
+                             uint8_t ui8BN1Size,
+                             const uint32_t *pui32BN2,
+                             uint8_t ui8BN2Size,
+                             uint32_t *pui32ResultVector) {
     uint32_t offset;
     int i;
 
@@ -999,8 +951,7 @@ PKABigNumAddStart(uint32_t* pui32BN1, uint8_t ui8BN1Size,
     //
     // Make sure no operation is in progress.
     //
-    if((HWREG(PKA_FUNCTION) & PKA_FUNCTION_RUN) != 0)
-    {
+    if ((HWREG(PKA_FUNCTION) & PKA_FUNCTION_RUN) != 0) {
         return (PKA_STATUS_OPERATION_INPRG);
     }
 
@@ -1008,14 +959,13 @@ PKABigNumAddStart(uint32_t* pui32BN1, uint8_t ui8BN1Size,
     // Update the A ptr with the offset address of the PKA RAM location
     // where the big number 1 will be stored.
     //
-    HWREG( (PKA_APTR) ) = offset >> 2;
+    HWREG((PKA_APTR)) = offset >> 2;
 
     //
     // Load the big number 1 in PKA RAM.
     //
-    for(i = 0; i < ui8BN1Size; i++)
-    {
-        HWREG((PKA_RAM_BASE + offset + 4*i)) = pui32BN1[i];
+    for (i = 0; i < ui8BN1Size; i++) {
+        HWREG((PKA_RAM_BASE + offset + 4 * i)) = pui32BN1[i];
     }
 
     //
@@ -1027,14 +977,13 @@ PKABigNumAddStart(uint32_t* pui32BN1, uint8_t ui8BN1Size,
     // Update the B ptr with the offset address of the PKA RAM location
     // where the big number 2 will be stored.
     //
-    HWREG( (PKA_BPTR) ) = offset >> 2;
+    HWREG((PKA_BPTR)) = offset >> 2;
 
     //
     // Load the big number 2 in PKA RAM.
     //
-    for(i = 0; i < ui8BN2Size; i++)
-    {
-        HWREG((PKA_RAM_BASE + offset + 4*i)) = pui32BN2[i];
+    for (i = 0; i < ui8BN2Size; i++) {
+        HWREG((PKA_RAM_BASE + offset + 4 * i)) = pui32BN2[i];
     }
 
     //
@@ -1050,18 +999,18 @@ PKABigNumAddStart(uint32_t* pui32BN1, uint8_t ui8BN1Size,
     //
     // Load C ptr with the result location in PKA RAM.
     //
-    HWREG( (PKA_CPTR) ) = offset >> 2;
+    HWREG((PKA_CPTR)) = offset >> 2;
 
     //
     // Load respective length registers.
     //
-    HWREG( (PKA_ALENGTH) ) = ui8BN1Size;
-    HWREG( (PKA_BLENGTH) ) = ui8BN2Size;
+    HWREG((PKA_ALENGTH)) = ui8BN1Size;
+    HWREG((PKA_BLENGTH)) = ui8BN2Size;
 
     //
     // Set the function for the add operation and start the operation.
     //
-    HWREG( (PKA_FUNCTION) ) = (PKA_FUNCTION_RUN | PKA_FUNCTION_ADD);
+    HWREG((PKA_FUNCTION)) = (PKA_FUNCTION_RUN | PKA_FUNCTION_ADD);
 
     return (PKA_STATUS_SUCCESS);
 }
@@ -1091,13 +1040,12 @@ PKABigNumAddStart(uint32_t* pui32BN1, uint8_t ui8BN1Size,
 //! then the length of the result. 
 //
 //*****************************************************************************
-tPKAStatus
-PKABigNumAddGetResult(uint32_t* pui32ResultBuf, uint32_t* pui32Len,
-                      uint32_t ui32ResVectorLoc)
-{
+tPKAStatus PKABigNumAddGetResult(uint32_t *pui32ResultBuf,
+                                 uint32_t *pui32Len,
+                                 uint32_t ui32ResVectorLoc) {
     uint32_t regMSWVal;
     uint32_t len;
-    int i;
+    uint32_t i;
 
     //
     // Check for the arguments.
@@ -1110,8 +1058,7 @@ PKABigNumAddGetResult(uint32_t* pui32ResultBuf, uint32_t* pui32Len,
     //
     // Verify that the operation is complete.
     //
-    if((HWREG(PKA_FUNCTION) & PKA_FUNCTION_RUN) != 0)
-    {
+    if ((HWREG(PKA_FUNCTION) & PKA_FUNCTION_RUN) != 0) {
         return (PKA_STATUS_OPERATION_INPRG);
     }
 
@@ -1123,8 +1070,7 @@ PKABigNumAddGetResult(uint32_t* pui32ResultBuf, uint32_t* pui32Len,
     //
     // Check to make sure that the result vector is not all zeroes.
     //
-    if(regMSWVal & PKA_MSW_RESULT_IS_ZERO)
-    {
+    if (regMSWVal & PKA_MSW_RESULT_IS_ZERO) {
         return (PKA_STATUS_RESULT_0);
     }
 
@@ -1138,8 +1084,7 @@ PKABigNumAddGetResult(uint32_t* pui32ResultBuf, uint32_t* pui32Len,
     // Make sure that the supplied result buffer is adequate to store the
     // resultant data.
     //
-    if(*pui32Len < len)
-    {
+    if (*pui32Len < len) {
         return (PKA_STATUS_BUF_UNDERFLOW);
     }
 
@@ -1150,9 +1095,8 @@ PKABigNumAddGetResult(uint32_t* pui32ResultBuf, uint32_t* pui32Len,
 
     //
     // Copy the result from vector C into the provided buffer.
-    for(i = 0; i < *pui32Len; i++)
-    {
-        pui32ResultBuf[i] = HWREG( (ui32ResVectorLoc +  4*i) );
+    for (i = 0; i < *pui32Len; i++) {
+        pui32ResultBuf[i] = HWREG((ui32ResVectorLoc + 4 * i));
     }
 
     return (PKA_STATUS_SUCCESS);
@@ -1181,10 +1125,10 @@ PKABigNumAddGetResult(uint32_t* pui32ResultBuf, uint32_t* pui32Len,
 //! some other operation.
 //
 //*****************************************************************************
-tPKAStatus
-PKAECCMultiplyStart(uint32_t* pui32Scalar, tECPt* ptEcPt,
-                    tECCCurveInfo* ptCurve, uint32_t* pui32ResultVector)
-{
+tPKAStatus PKAECCMultiplyStart(uint32_t *pui32Scalar,
+                               tECPt *ptEcPt,
+                               tECCCurveInfo *ptCurve,
+                               uint32_t *pui32ResultVector) {
     uint8_t extraBuf;
     uint32_t offset;
     int i;
@@ -1205,8 +1149,7 @@ PKAECCMultiplyStart(uint32_t* pui32Scalar, tECPt* ptEcPt,
     //
     // Make sure no PKA operation is in progress.
     //
-    if((HWREG(PKA_FUNCTION) & PKA_FUNCTION_RUN) != 0)
-    {
+    if ((HWREG(PKA_FUNCTION) & PKA_FUNCTION_RUN) != 0) {
         return (PKA_STATUS_OPERATION_INPRG);
     }
 
@@ -1224,9 +1167,8 @@ PKAECCMultiplyStart(uint32_t* pui32Scalar, tECPt* ptEcPt,
     //
     // Load the scalar in PKA RAM.
     //
-    for(i = 0; i < ptCurve->ui8Size; i++)
-    {
-        HWREG((PKA_RAM_BASE + offset + 4*i)) = *pui32Scalar++;
+    for (i = 0; i < ptCurve->ui8Size; i++) {
+        HWREG((PKA_RAM_BASE + offset + 4 * i)) = *pui32Scalar++;
     }
 
     //
@@ -1244,10 +1186,9 @@ PKAECCMultiplyStart(uint32_t* pui32Scalar, tECPt* ptEcPt,
     // Write curve parameter 'p' as 1st part of vector B immediately
     // following vector A at PKA RAM
     //
-    for(i = 0; i < ptCurve->ui8Size; i++)
-    {
-        HWREG((PKA_RAM_BASE + offset + 4*i)) =
-            (uint32_t)ptCurve->pui32Prime[i];
+    for (i = 0; i < ptCurve->ui8Size; i++) {
+        HWREG((PKA_RAM_BASE + offset + 4 * i)) =
+                (uint32_t) ptCurve->pui32Prime[i];
     }
 
     //
@@ -1258,9 +1199,8 @@ PKAECCMultiplyStart(uint32_t* pui32Scalar, tECPt* ptEcPt,
     //
     // Copy curve parameter 'a' in PKA RAM.
     //
-    for(i = 0; i < ptCurve->ui8Size; i++)
-    {
-        HWREG((PKA_RAM_BASE + offset + 4*i)) = (uint32_t)ptCurve->pui32A[i];
+    for (i = 0; i < ptCurve->ui8Size; i++) {
+        HWREG((PKA_RAM_BASE + offset + 4 * i)) = (uint32_t) ptCurve->pui32A[i];
     }
 
     //
@@ -1271,9 +1211,8 @@ PKAECCMultiplyStart(uint32_t* pui32Scalar, tECPt* ptEcPt,
     //
     // Copy curve parameter 'b' in PKA RAM.
     //
-    for(i = 0; i < ptCurve->ui8Size; i++)
-    {
-        HWREG((PKA_RAM_BASE + offset + 4*i)) = (uint32_t)ptCurve->pui32B[i];
+    for (i = 0; i < ptCurve->ui8Size; i++) {
+        HWREG((PKA_RAM_BASE + offset + 4 * i)) = (uint32_t) ptCurve->pui32B[i];
     }
 
     //
@@ -1290,9 +1229,8 @@ PKAECCMultiplyStart(uint32_t* pui32Scalar, tECPt* ptEcPt,
     //
     // Write elliptic curve point x co-ordinate value.
     //
-    for(i = 0; i < ptCurve->ui8Size; i++)
-    {
-        HWREG((PKA_RAM_BASE + offset + 4*i)) = ptEcPt->pui32X[i];
+    for (i = 0; i < ptCurve->ui8Size; i++) {
+        HWREG((PKA_RAM_BASE + offset + 4 * i)) = ptEcPt->pui32X[i];
     }
 
     //
@@ -1303,9 +1241,8 @@ PKAECCMultiplyStart(uint32_t* pui32Scalar, tECPt* ptEcPt,
     //
     // Write elliptic curve point y co-ordinate value.
     //
-    for(i = 0; i < ptCurve->ui8Size; i++)
-    {
-        HWREG((PKA_RAM_BASE + offset + 4*i)) = ptEcPt->pui32Y[i];
+    for (i = 0; i < ptCurve->ui8Size; i++) {
+        HWREG((PKA_RAM_BASE + offset + 4 * i)) = ptEcPt->pui32Y[i];
     }
 
     //
@@ -1316,7 +1253,7 @@ PKAECCMultiplyStart(uint32_t* pui32Scalar, tECPt* ptEcPt,
     //
     // Update the result location.
     //
-    *pui32ResultVector =  PKA_RAM_BASE + offset;
+    *pui32ResultVector = PKA_RAM_BASE + offset;
 
     //
     // Load D ptr with the result location in PKA RAM.
@@ -1359,10 +1296,8 @@ PKAECCMultiplyStart(uint32_t* pui32Scalar, tECPt* ptEcPt,
 //! - \b PKA_STATUS_FAILURE if the operation is not successful.
 //
 //*****************************************************************************
-tPKAStatus
-PKAECCMultiplyGetResult(tECPt* ptOutEcPt, uint32_t ui32ResVectorLoc)
-{
-    int i;
+tPKAStatus PKAECCMultiplyGetResult(tECPt *ptOutEcPt, uint32_t ui32ResVectorLoc) {
+    uint32_t i;
     uint32_t addr;
     uint32_t regMSWVal;
     uint32_t len;
@@ -1379,13 +1314,11 @@ PKAECCMultiplyGetResult(tECPt* ptOutEcPt, uint32_t ui32ResVectorLoc)
     //
     // Verify that the operation is completed.
     //
-    if((HWREG(PKA_FUNCTION) & PKA_FUNCTION_RUN) != 0)
-    {
+    if ((HWREG(PKA_FUNCTION) & PKA_FUNCTION_RUN) != 0) {
         return (PKA_STATUS_OPERATION_INPRG);
     }
 
-    if(HWREG(PKA_SHIFT) == 0x00000000)
-    {
+    if (HWREG(PKA_SHIFT) == 0x00000000) {
         //
         // Get the MSW register value.
         //
@@ -1394,8 +1327,7 @@ PKAECCMultiplyGetResult(tECPt* ptOutEcPt, uint32_t ui32ResVectorLoc)
         //
         // Check to make sure that the result vector is not all zeroes.
         //
-        if(regMSWVal & PKA_MSW_RESULT_IS_ZERO)
-        {
+        if (regMSWVal & PKA_MSW_RESULT_IS_ZERO) {
             return (PKA_STATUS_RESULT_0);
         }
 
@@ -1411,9 +1343,8 @@ PKAECCMultiplyGetResult(tECPt* ptOutEcPt, uint32_t ui32ResVectorLoc)
         // copy the x co-ordinate value of the result from vector D into
         // the \e ptOutEcPt.
         //
-        for(i = 0; i < len; i++)
-        {
-            ptOutEcPt->pui32X[i] = HWREG(addr + 4*i);
+        for (i = 0; i < len; i++) {
+            ptOutEcPt->pui32X[i] = HWREG(addr + 4 * i);
         }
 
         addr += 4 * (i + 2 + len % 2);
@@ -1422,15 +1353,12 @@ PKAECCMultiplyGetResult(tECPt* ptOutEcPt, uint32_t ui32ResVectorLoc)
         // copy the y co-ordinate value of the result from vector D into
         // the \e ptOutEcPt.
         //
-        for(i = 0; i < len; i++)
-        {
-            ptOutEcPt->pui32Y[i] = HWREG(addr + 4*i);
+        for (i = 0; i < len; i++) {
+            ptOutEcPt->pui32Y[i] = HWREG(addr + 4 * i);
         }
 
         return (PKA_STATUS_SUCCESS);
-    }
-    else
-    {
+    } else {
         return (PKA_STATUS_FAILURE);
     }
 }
@@ -1455,10 +1383,7 @@ PKAECCMultiplyGetResult(tECPt* ptOutEcPt, uint32_t ui32ResVectorLoc)
 //! some other operation.
 //
 //*****************************************************************************
-tPKAStatus
-PKAECCMultGenPtStart(uint32_t* pui32Scalar, tECCCurveInfo* ptCurve,
-                     uint32_t* pui32ResultVector)
-{
+tPKAStatus PKAECCMultGenPtStart(uint32_t *pui32Scalar, tECCCurveInfo *ptCurve, uint32_t *pui32ResultVector) {
     uint8_t extraBuf;
     uint32_t offset;
     int i;
@@ -1476,8 +1401,7 @@ PKAECCMultGenPtStart(uint32_t* pui32Scalar, tECCCurveInfo* ptCurve,
     //
     // Make sure no operation is in progress.
     //
-    if((HWREG(PKA_FUNCTION) & PKA_FUNCTION_RUN) != 0)
-    {
+    if ((HWREG(PKA_FUNCTION) & PKA_FUNCTION_RUN) != 0) {
         return (PKA_STATUS_OPERATION_INPRG);
     }
 
@@ -1495,9 +1419,8 @@ PKAECCMultGenPtStart(uint32_t* pui32Scalar, tECCCurveInfo* ptCurve,
     //
     // Load the scalar in PKA RAM.
     //
-    for(i = 0; i < ptCurve->ui8Size; i++)
-    {
-        HWREG((PKA_RAM_BASE + offset + 4*i)) = *pui32Scalar++;
+    for (i = 0; i < ptCurve->ui8Size; i++) {
+        HWREG((PKA_RAM_BASE + offset + 4 * i)) = *pui32Scalar++;
     }
 
     //
@@ -1514,10 +1437,9 @@ PKAECCMultGenPtStart(uint32_t* pui32Scalar, tECCCurveInfo* ptCurve,
     //
     // Write curve parameter 'p' as 1st part of vector B.
     //
-    for(i = 0; i < ptCurve->ui8Size; i++)
-    {
-        HWREG((PKA_RAM_BASE + offset + 4*i)) =
-            (uint32_t)ptCurve->pui32Prime[i];
+    for (i = 0; i < ptCurve->ui8Size; i++) {
+        HWREG((PKA_RAM_BASE + offset + 4 * i)) =
+                (uint32_t) ptCurve->pui32Prime[i];
     }
 
     //
@@ -1528,9 +1450,8 @@ PKAECCMultGenPtStart(uint32_t* pui32Scalar, tECCCurveInfo* ptCurve,
     //
     // Write curve parameter 'a' in PKA RAM.
     //
-    for(i = 0; i < ptCurve->ui8Size; i++)
-    {
-        HWREG((PKA_RAM_BASE + offset + 4*i)) = (uint32_t)ptCurve->pui32A[i];
+    for (i = 0; i < ptCurve->ui8Size; i++) {
+        HWREG((PKA_RAM_BASE + offset + 4 * i)) = (uint32_t) ptCurve->pui32A[i];
     }
 
     //
@@ -1541,9 +1462,8 @@ PKAECCMultGenPtStart(uint32_t* pui32Scalar, tECCCurveInfo* ptCurve,
     //
     // write curve parameter 'b' in PKA RAM.
     //
-    for(i = 0; i < ptCurve->ui8Size; i++)
-    {
-        HWREG((PKA_RAM_BASE + offset + 4*i)) = (uint32_t)ptCurve->pui32B[i];
+    for (i = 0; i < ptCurve->ui8Size; i++) {
+        HWREG((PKA_RAM_BASE + offset + 4 * i)) = (uint32_t) ptCurve->pui32B[i];
     }
 
     //
@@ -1560,9 +1480,8 @@ PKAECCMultGenPtStart(uint32_t* pui32Scalar, tECCCurveInfo* ptCurve,
     //
     // Write x co-ordinate value of the Generator point in PKA RAM.
     //
-    for(i = 0; i < ptCurve->ui8Size; i++)
-    {
-        HWREG((PKA_RAM_BASE + offset + 4*i)) = (uint32_t)ptCurve->pui32Gx[i];
+    for (i = 0; i < ptCurve->ui8Size; i++) {
+        HWREG((PKA_RAM_BASE + offset + 4 * i)) = (uint32_t) ptCurve->pui32Gx[i];
     }
 
     //
@@ -1573,9 +1492,8 @@ PKAECCMultGenPtStart(uint32_t* pui32Scalar, tECCCurveInfo* ptCurve,
     //
     // Write y co-ordinate value of the Generator point in PKA RAM.
     //
-    for(i = 0; i < ptCurve->ui8Size; i++)
-    {
-        HWREG((PKA_RAM_BASE + offset + 4*i)) = (uint32_t)ptCurve->pui32Gy[i];
+    for (i = 0; i < ptCurve->ui8Size; i++) {
+        HWREG((PKA_RAM_BASE + offset + 4 * i)) = (uint32_t) ptCurve->pui32Gy[i];
     }
 
     //
@@ -1586,7 +1504,7 @@ PKAECCMultGenPtStart(uint32_t* pui32Scalar, tECCCurveInfo* ptCurve,
     //
     // Update the result location.
     //
-    *pui32ResultVector =  PKA_RAM_BASE + offset;
+    *pui32ResultVector = PKA_RAM_BASE + offset;
 
     //
     // Load D ptr with the result location in PKA RAM.
@@ -1602,7 +1520,7 @@ PKAECCMultGenPtStart(uint32_t* pui32Scalar, tECCCurveInfo* ptCurve,
     //
     // Set the PKA function to ECC-MULT and start the operation.
     //
-    HWREG( (PKA_FUNCTION) ) = 0x0000D000;
+    HWREG((PKA_FUNCTION)) = 0x0000D000;
 
     return (PKA_STATUS_SUCCESS);
 }
@@ -1629,10 +1547,8 @@ PKAECCMultGenPtStart(uint32_t* pui32Scalar, tECCCurveInfo* ptCurve,
 //! - \b PKA_STATUS_FAILURE if the operation is not successful.
 //
 //*****************************************************************************
-tPKAStatus
-PKAECCMultGenPtGetResult(tECPt* ptOutEcPt, uint32_t ui32ResVectorLoc)
-{
-    int i;
+tPKAStatus PKAECCMultGenPtGetResult(tECPt *ptOutEcPt, uint32_t ui32ResVectorLoc) {
+    uint32_t i;
     uint32_t regMSWVal;
     uint32_t addr;
     uint32_t len;
@@ -1649,13 +1565,11 @@ PKAECCMultGenPtGetResult(tECPt* ptOutEcPt, uint32_t ui32ResVectorLoc)
     //
     // Verify that the operation is completed.
     //
-    if((HWREG(PKA_FUNCTION) & PKA_FUNCTION_RUN) != 0)
-    {
+    if ((HWREG(PKA_FUNCTION) & PKA_FUNCTION_RUN) != 0) {
         return (PKA_STATUS_OPERATION_INPRG);
     }
 
-    if(HWREG(PKA_SHIFT) == 0x00000000)
-    {
+    if (HWREG(PKA_SHIFT) == 0x00000000) {
         //
         // Get the MSW register value.
         //
@@ -1664,8 +1578,7 @@ PKAECCMultGenPtGetResult(tECPt* ptOutEcPt, uint32_t ui32ResVectorLoc)
         //
         // Check to make sure that the result vector is not all zeroes.
         //
-        if(regMSWVal & PKA_MSW_RESULT_IS_ZERO)
-        {
+        if (regMSWVal & PKA_MSW_RESULT_IS_ZERO) {
             return (PKA_STATUS_RESULT_0);
         }
 
@@ -1681,9 +1594,8 @@ PKAECCMultGenPtGetResult(tECPt* ptOutEcPt, uint32_t ui32ResVectorLoc)
         // Copy the x co-ordinate value of the result from vector D into the
         // EC point.
         //
-        for(i = 0; i < len; i++)
-        {
-            ptOutEcPt->pui32X[i] = HWREG( (addr + 4*i) );
+        for (i = 0; i < len; i++) {
+            ptOutEcPt->pui32X[i] = HWREG((addr + 4 * i));
         }
 
         addr += 4 * (i + 2 + len % 2);
@@ -1692,15 +1604,12 @@ PKAECCMultGenPtGetResult(tECPt* ptOutEcPt, uint32_t ui32ResVectorLoc)
         // Copy the y co-ordinate value of the result from vector D into the
         // EC point.
         //
-        for(i = 0; i < len; i++)
-        {
-            ptOutEcPt->pui32Y[i] = HWREG( (addr + 4*i) );
+        for (i = 0; i < len; i++) {
+            ptOutEcPt->pui32Y[i] = HWREG((addr + 4 * i));
         }
 
         return (PKA_STATUS_SUCCESS);
-    }
-    else
-    {
+    } else {
         return (PKA_STATUS_FAILURE);
     }
 }
@@ -1727,10 +1636,7 @@ PKAECCMultGenPtGetResult(tECPt* ptOutEcPt, uint32_t ui32ResVectorLoc)
 //! some other operation.
 //
 //*****************************************************************************
-tPKAStatus
-PKAECCAddStart(tECPt* ptEcPt1, tECPt* ptEcPt2,tECCCurveInfo* ptCurve,
-               uint32_t* pui32ResultVector)
-{
+tPKAStatus PKAECCAddStart(tECPt *ptEcPt1, tECPt *ptEcPt2, tECCCurveInfo *ptCurve, uint32_t *pui32ResultVector) {
     uint8_t extraBuf;
     uint32_t offset;
     int i;
@@ -1752,8 +1658,7 @@ PKAECCAddStart(tECPt* ptEcPt1, tECPt* ptEcPt2,tECCCurveInfo* ptCurve,
     //
     // Make sure no operation is in progress.
     //
-    if((HWREG(PKA_FUNCTION) & PKA_FUNCTION_RUN) != 0)
-    {
+    if ((HWREG(PKA_FUNCTION) & PKA_FUNCTION_RUN) != 0) {
         return (PKA_STATUS_OPERATION_INPRG);
     }
 
@@ -1771,9 +1676,8 @@ PKAECCAddStart(tECPt* ptEcPt1, tECPt* ptEcPt2,tECCCurveInfo* ptCurve,
     //
     // Load the x co-ordinate value of the first EC point in PKA RAM.
     //
-    for(i = 0; i < ptCurve->ui8Size; i++)
-    {
-        HWREG((PKA_RAM_BASE + offset + 4*i)) = ptEcPt1->pui32X[i];
+    for (i = 0; i < ptCurve->ui8Size; i++) {
+        HWREG((PKA_RAM_BASE + offset + 4 * i)) = ptEcPt1->pui32X[i];
     }
 
     //
@@ -1784,9 +1688,8 @@ PKAECCAddStart(tECPt* ptEcPt1, tECPt* ptEcPt2,tECCCurveInfo* ptCurve,
     //
     // Load the y co-ordinate value of the first EC point in PKA RAM.
     //
-    for(i = 0; i < ptCurve->ui8Size; i++)
-    {
-        HWREG((PKA_RAM_BASE + offset + 4*i)) = ptEcPt1->pui32Y[i];
+    for (i = 0; i < ptCurve->ui8Size; i++) {
+        HWREG((PKA_RAM_BASE + offset + 4 * i)) = ptEcPt1->pui32Y[i];
     }
 
     //
@@ -1803,10 +1706,9 @@ PKAECCAddStart(tECPt* ptEcPt1, tECPt* ptEcPt2,tECCCurveInfo* ptCurve,
     //
     // Write curve parameter 'p' as 1st part of vector B
     //
-    for(i = 0; i < ptCurve->ui8Size; i++)
-    {
-        HWREG((PKA_RAM_BASE + offset + 4*i)) =
-            (uint32_t)ptCurve->pui32Prime[i];
+    for (i = 0; i < ptCurve->ui8Size; i++) {
+        HWREG((PKA_RAM_BASE + offset + 4 * i)) =
+                (uint32_t) ptCurve->pui32Prime[i];
     }
 
     //
@@ -1817,9 +1719,8 @@ PKAECCAddStart(tECPt* ptEcPt1, tECPt* ptEcPt2,tECCCurveInfo* ptCurve,
     //
     // Write curve parameter 'a'.
     //
-    for(i = 0; i < ptCurve->ui8Size; i++)
-    {
-        HWREG((PKA_RAM_BASE + offset + 4*i)) = (uint32_t)ptCurve->pui32A[i];
+    for (i = 0; i < ptCurve->ui8Size; i++) {
+        HWREG((PKA_RAM_BASE + offset + 4 * i)) = (uint32_t) ptCurve->pui32A[i];
     }
 
     //
@@ -1836,9 +1737,8 @@ PKAECCAddStart(tECPt* ptEcPt1, tECPt* ptEcPt2,tECCCurveInfo* ptCurve,
     //
     // Load the x co-ordinate value of the second EC point in PKA RAM.
     //
-    for(i = 0; i < ptCurve->ui8Size; i++)
-    {
-        HWREG((PKA_RAM_BASE + offset + 4*i)) = ptEcPt2->pui32X[i];
+    for (i = 0; i < ptCurve->ui8Size; i++) {
+        HWREG((PKA_RAM_BASE + offset + 4 * i)) = ptEcPt2->pui32X[i];
     }
 
     //
@@ -1849,9 +1749,8 @@ PKAECCAddStart(tECPt* ptEcPt1, tECPt* ptEcPt2,tECCCurveInfo* ptCurve,
     //
     // Load the y co-ordinate value of the second EC point in PKA RAM.
     //
-    for(i = 0; i < ptCurve->ui8Size; i++)
-    {
-        HWREG((PKA_RAM_BASE + offset + 4*i)) = ptEcPt2->pui32Y[i];
+    for (i = 0; i < ptCurve->ui8Size; i++) {
+        HWREG((PKA_RAM_BASE + offset + 4 * i)) = ptEcPt2->pui32Y[i];
     }
 
     //
@@ -1877,7 +1776,7 @@ PKAECCAddStart(tECPt* ptEcPt1, tECPt* ptEcPt2,tECCCurveInfo* ptCurve,
     //
     // Set the PKA Function to ECC-ADD and start the operation.
     //
-    HWREG( (PKA_FUNCTION) ) = 0x0000B000;
+    HWREG((PKA_FUNCTION)) = 0x0000B000;
 
     return (PKA_STATUS_SUCCESS);
 }
@@ -1905,12 +1804,10 @@ PKAECCAddStart(tECPt* ptEcPt1, tECPt* ptEcPt2,tECCCurveInfo* ptCurve,
 //! - \b PKA_STATUS_FAILURE if the operation is not successful.
 //
 //*****************************************************************************
-tPKAStatus
-PKAECCAddGetResult(tECPt* ptOutEcPt, uint32_t ui32ResVectorLoc)
-{
+tPKAStatus PKAECCAddGetResult(tECPt *ptOutEcPt, uint32_t ui32ResVectorLoc) {
     uint32_t regMSWVal;
     uint32_t addr;
-    int i;
+    uint32_t i;
     uint32_t len;
 
     //
@@ -1922,13 +1819,11 @@ PKAECCAddGetResult(tECPt* ptOutEcPt, uint32_t ui32ResVectorLoc)
     ASSERT((ui32ResVectorLoc > PKA_RAM_BASE) &&
            (ui32ResVectorLoc < (PKA_RAM_BASE + PKA_RAM_SIZE)));
 
-    if((HWREG(PKA_FUNCTION) & PKA_FUNCTION_RUN) != 0)
-    {
+    if ((HWREG(PKA_FUNCTION) & PKA_FUNCTION_RUN) != 0) {
         return (PKA_STATUS_OPERATION_INPRG);
     }
 
-    if(HWREG(PKA_SHIFT) == 0x00000000)
-    {
+    if (HWREG(PKA_SHIFT) == 0x00000000) {
         //
         // Get the MSW register value.
         //
@@ -1937,8 +1832,7 @@ PKAECCAddGetResult(tECPt* ptOutEcPt, uint32_t ui32ResVectorLoc)
         //
         // Check to make sure that the result vector is not all zeroes.
         //
-        if(regMSWVal & PKA_MSW_RESULT_IS_ZERO)
-        {
+        if (regMSWVal & PKA_MSW_RESULT_IS_ZERO) {
             return (PKA_STATUS_RESULT_0);
         }
 
@@ -1954,9 +1848,8 @@ PKAECCAddGetResult(tECPt* ptOutEcPt, uint32_t ui32ResVectorLoc)
         // Copy the x co-ordinate value of result from vector D into the
         // the output EC Point.
         //
-        for(i = 0; i < len; i++)
-        {
-            ptOutEcPt->pui32X[i] = HWREG((addr + 4*i));
+        for (i = 0; i < len; i++) {
+            ptOutEcPt->pui32X[i] = HWREG((addr + 4 * i));
         }
 
         addr += 4 * (i + 2 + len % 2);
@@ -1965,15 +1858,12 @@ PKAECCAddGetResult(tECPt* ptOutEcPt, uint32_t ui32ResVectorLoc)
         // Copy the y co-ordinate value of result from vector D into the
         // the output EC Point.
         //
-        for(i = 0; i < len; i++)
-        {
-            ptOutEcPt->pui32Y[i] = HWREG((addr + 4*i));
+        for (i = 0; i < len; i++) {
+            ptOutEcPt->pui32Y[i] = HWREG((addr + 4 * i));
         }
 
         return (PKA_STATUS_SUCCESS);
-    }
-    else
-    {
+    } else {
         return (PKA_STATUS_FAILURE);
     }
 }
