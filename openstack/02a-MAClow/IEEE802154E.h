@@ -37,7 +37,7 @@ static const uint8_t ebIEsBytestream[] = {
 
 #define EB_IE_LEN                   28
 
-#define NUM_CHANNELS                16 // number of channels to channel hop on
+#define NUM_CHANNELS                 4 // number of channels to channel hop on
 #define TXRETRIES                    3 // number of MAC retries before declaring failed
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to successfully synchronize

@@ -41,6 +41,9 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 // maximum celllist length
 #define CELLLIST_MAX_LEN 5
 
+bool trueClicked;
+bool falseClicked;
+
 enum {
    E_SUCCESS                           = 0,
    E_FAIL                              = 1,
@@ -171,6 +174,7 @@ enum {
    COMPONENT_CJOIN                     = 0x27,
    COMPONENT_OPENOSCOAP                = 0x28,
    COMPONENT_CINFRARED                 = 0x29,
+   COMPONENT_CLICKER                   = 0x2a,
 };
 
 /**

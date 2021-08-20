@@ -92,6 +92,7 @@ void openbridge_receive(OpenQueueEntry_t* msg) {
    memcpy(msg->payload,idmanager_getMyID(ADDR_64B)->addr_64b,LENGTH_ADDR64b);
    
    // send packet over serial (will be memcopied into serial buffer)
+   
    openserial_printData((uint8_t*)(msg->payload),msg->length);
    
    // free packet

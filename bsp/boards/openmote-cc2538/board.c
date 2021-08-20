@@ -28,11 +28,17 @@
 #include "uart.h"
 #include "cryptoengine.h"
 #include "pwm.h"
+#include "opendefs.h"
 
 //=========================== variables =======================================
 
 #define BSP_BUTTON_BASE                 ( GPIO_C_BASE )
 #define BSP_BUTTON_USER                 ( GPIO_PIN_3 )
+
+#define BSP_SENDPACKET_BASE             ( GPIO_D_BASE )
+#define BSP_SENDPACKET_PIN             ( GPIO_PIN_3)
+
+#define BSP_SENDPACKET_FALSE_PIN        ( GPIO_PIN_0)
 
 #ifdef REVA1 //Rev.A1 uses SF23 cc2538 which start at diffferent location
     #define CC2538_FLASH_ADDRESS            ( 0x0023F800 )
@@ -48,6 +54,7 @@ bool board_timer_expired(uint32_t future);
 static void clock_init(void);
 static void gpio_init(void);
 static void button_init(void);
+static void sendpacket_init(void);
 
 static void SysCtrlDeepSleepSetting(void);
 static void SysCtrlSleepSetting(void);
@@ -55,8 +62,10 @@ static void SysCtrlRunSetting(void);
 static void SysCtrlWakeupSetting(void);
 
 static void GPIO_C_Handler(void);
+static void GPIO_D_Handler(void);
 
 bool user_button_initialized;
+bool sendpacket_initialized;
 
 //=========================== main ============================================
 
@@ -70,13 +79,16 @@ int main(void) {
 
 void board_init(void) {
    user_button_initialized = FALSE;
-   
+   sendpacket_initialized = FALSE;
+   trueClicked = FALSE;
+   falseClicked = FALSE;
    gpio_init();
    clock_init();
    board_timer_init();
    leds_init();
    debugpins_init();
    button_init();
+   
    sctimer_init();
    uart_init();
    radio_init();
@@ -84,6 +96,8 @@ void board_init(void) {
    sensors_init();
    cryptoengine_init();
    pwm_init();
+   sendpacket_init();
+
 }
 
 /**
@@ -210,7 +224,7 @@ static void button_init(void) {
     /* The button is an input GPIO on falling edge */
     GPIOPinTypeGPIOInput(BSP_BUTTON_BASE, BSP_BUTTON_USER);
     GPIOIntTypeSet(BSP_BUTTON_BASE, BSP_BUTTON_USER, GPIO_FALLING_EDGE);
-
+    
     /* Register the interrupt */
     GPIOPortIntRegister(BSP_BUTTON_BASE, GPIO_C_Handler);
 
@@ -218,6 +232,34 @@ static void button_init(void) {
     GPIOPinIntClear(BSP_BUTTON_BASE, BSP_BUTTON_USER);
     GPIOPinIntEnable(BSP_BUTTON_BASE, BSP_BUTTON_USER);
     user_button_initialized = TRUE;
+}
+
+static void sendpacket_init(void)
+{
+    volatile uint32_t i;
+
+    /* Delay to avoid pin floating problems */
+    for (i = 0xFFFF; i != 0; i--);
+
+    GPIOPinIntDisable(BSP_SENDPACKET_BASE, BSP_SENDPACKET_PIN);
+    GPIOPinIntClear(BSP_SENDPACKET_BASE, BSP_SENDPACKET_PIN);
+
+    GPIOPinIntDisable(BSP_SENDPACKET_BASE, BSP_SENDPACKET_FALSE_PIN);
+    GPIOPinIntClear(BSP_SENDPACKET_BASE, BSP_SENDPACKET_FALSE_PIN);
+    
+    GPIOPinTypeGPIOInput(BSP_SENDPACKET_BASE, BSP_SENDPACKET_PIN);
+    GPIOPinTypeGPIOInput(BSP_SENDPACKET_BASE, BSP_SENDPACKET_FALSE_PIN);
+
+    GPIOIntTypeSet(BSP_SENDPACKET_BASE, BSP_SENDPACKET_PIN, GPIO_FALLING_EDGE);
+    GPIOIntTypeSet(BSP_SENDPACKET_BASE, BSP_SENDPACKET_FALSE_PIN, GPIO_FALLING_EDGE);
+    
+    GPIOPortIntRegister(BSP_SENDPACKET_BASE, GPIO_D_Handler);
+
+    GPIOPinIntClear(BSP_SENDPACKET_BASE, BSP_SENDPACKET_PIN);
+    GPIOPinIntEnable(BSP_SENDPACKET_BASE, BSP_SENDPACKET_PIN);
+    GPIOPinIntClear(BSP_SENDPACKET_BASE, BSP_SENDPACKET_FALSE_PIN);
+    GPIOPinIntEnable(BSP_SENDPACKET_BASE, BSP_SENDPACKET_FALSE_PIN);
+    sendpacket_initialized = TRUE;
 }
 
 static void SysCtrlRunSetting(void) {
@@ -316,4 +358,25 @@ static void GPIO_C_Handler(void) {
     
     /* Reset the board */
     SysCtrlReset();
+}
+
+
+static void GPIO_D_Handler(void) {
+    if (!sendpacket_initialized) return;
+    /* Disable the interrupts */
+    
+    IntMasterDisable();
+    if (GPIOPinIntStatus(BSP_SENDPACKET_BASE, 1) & BSP_SENDPACKET_PIN ) {
+        //falseClicked = TRUE;
+        usendpacket_task_cb(true);
+    
+    }
+    if (GPIOPinIntStatus(BSP_SENDPACKET_BASE, 1) & BSP_SENDPACKET_FALSE_PIN) {
+        usendpacket_task_cb(false);
+        
+    }
+    GPIOPinIntClear(BSP_SENDPACKET_BASE, BSP_SENDPACKET_PIN);
+    GPIOPinIntClear(BSP_SENDPACKET_BASE, BSP_SENDPACKET_FALSE_PIN);
+    IntMasterEnable();
+    
 }

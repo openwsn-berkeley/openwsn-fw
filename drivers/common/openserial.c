@@ -243,6 +243,7 @@ owerror_t openserial_printData(uint8_t* buffer, uint8_t length) {
     return E_SUCCESS;
 }
 
+
 owerror_t openserial_printSniffedPacket(uint8_t* buffer, uint8_t length, uint8_t channel) {
     uint8_t  i;
 

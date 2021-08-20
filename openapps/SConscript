@@ -6,7 +6,7 @@ localEnv      = env.Clone()
 
 #===== retrieve the list of apps to build
 
-defaultApps   = ['cjoin']
+defaultApps   = []
 if localEnv['board']=='python':
     defaultApps  += [
         'c6t',
@@ -55,7 +55,7 @@ apps      = ['opencoap']
 apps     += sorted(list(set(defaultApps+userApps)))
 
 appsInit  = ['opencoap'] # make sure opencoap is initialized first
-appsInit += ['cjoin']    # enable cjoin by defualt
+#appsInit += ['cjoin']    # enable cjoin by defualt
 if userApps:
     appsInit += sorted(list(set(userApps)))
 

@@ -150,6 +150,7 @@ owerror_t openserial_printData(
     uint8_t*            buffer,
     uint8_t             length
 );
+
 owerror_t openserial_printSniffedPacket(
     uint8_t*            buffer,
     uint8_t             length,

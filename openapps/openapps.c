@@ -17,6 +17,7 @@
 // UDP
 #include "uecho.h"
 #include "uinject.h"
+#include "usendpacket.h"
 #include "userialbridge.h"
 #include "uexpiration.h"
 #include "uexpiration_monitor.h"
@@ -37,13 +38,14 @@ void openapps_init(void) {
    //c6t_init();
    cinfo_init();
    cleds__init();
-   cjoin_init();
+   //cjoin_init();
    cwellknown_init();
    //rrt_init();
 
    // UDP
    //uecho_init();
-   // uinject_init();
+   uinject_init();
+   usendpacket_init();
    //userialbridge_init();
    //uexpiration_init();
    //umonitor_init();

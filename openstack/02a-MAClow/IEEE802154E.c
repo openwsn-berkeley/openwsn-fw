@@ -1776,6 +1776,9 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
             &ieee154e_vars.dataReceived->l1_crc
         );
 
+
+
+
         // break if wrong length
         if (ieee154e_vars.dataReceived->length<LENGTH_CRC || ieee154e_vars.dataReceived->length>LENGTH_IEEE154_MAX ) {
             // jump to the error code below this do-while loop
