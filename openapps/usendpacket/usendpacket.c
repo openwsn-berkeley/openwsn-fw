@@ -9,6 +9,8 @@
 #include "icmpv6rpl.h"
 #include "idmanager.h"
 
+//#define PACKET_TEST
+
 //=========================== variables =======================================
 
 usendpacket_vars_t usendpacket_vars;
@@ -41,7 +43,7 @@ void usendpacket_init(void) {
     usendpacket_vars.period = USENDPACKET_PERIOD_MS;
     // start periodic timer
     usendpacket_vars.timerId = opentimers_create(TIMER_GENERAL_PURPOSE, TASKPRIO_UDP);
-    /*
+#ifdef PACKET_TEST
     opentimers_scheduleIn(
         usendpacket_vars.timerId,
         USENDPACKET_PERIOD_MS,
@@ -49,7 +51,8 @@ void usendpacket_init(void) {
         TIMER_PERIODIC,
         usendpacket_timer_cb
     );
-    */
+#endif
+    //test 용 나중에 주석처리 ㄱ
 }
 
 void usendpacket_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
@@ -74,13 +77,14 @@ void usendpacket_receive(OpenQueueEntry_t* pkt) {
 }
 
 //=========================== private =========================================
-/*
+#ifdef PACKET_TEST
 void usendpacket_timer_cb(opentimers_id_t id){
     // calling the task directly as the timer_cb function is executed in
     // task mode by opentimer already
-    usendpacket_task_cb();
+    usendpacket_task_cb(true);
 }
-*/
+#endif
+
 
 void usendpacket_task_cb(bool answer) {
     
