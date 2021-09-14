@@ -30,6 +30,8 @@ ieee154e_dbg_t      ieee154e_dbg;
 slotTemplate_t      slotTemplate;
 slot_154e_vars_t    slot_154e_vars [MAX_SLOT_TYPES];
 
+uint32_t Tics1;
+uint32_t Tics2;
 //=========================== prototypes ======================================
 
 // SYNCHRONIZING
@@ -79,6 +81,8 @@ bool     ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE);
 void     timeslotTemplateIDStoreFromEB(uint8_t id);
 void     channelhoppingTemplateIDStoreFromEB(uint8_t id);
 // ASN handling
+void     storeStartASN(void);
+void     getStartAsn(uint8_t* array);
 void     incrementAsnOffset(void);
 void     ieee154e_resetAsn(void);
 void     ieee154e_syncSlotOffset(void);
@@ -159,11 +163,13 @@ void ieee154e_init(void) {
         SLOT_40ms_OFDM1MCS0_3_SUBGHZ , RADIOSETTING_OFDM_OPTION_1_MCS2
         SLOT_40ms_OFDM1MCS0_3_SUBGHZ , RADIOSETTING_OFDM_OPTION_1_MCS3
     */
-    ieee154e_select_slot_template (SLOT_40ms_24GHZ);
-
+    
+    // TODO: convert the 3 lines to one function
+    ieee154e_select_slot_template (SLOT_40ms_FSK_SUBGHZ);
     //set the radio setting to use for scanning, default is RADIOSETTING_24GHZ
-    radio_setConfig (RADIOSETTING_FSK_OPTION1_FEC); 
-    ieee154e_vars.cellRadioSetting = CELLRADIOSETTING_2;
+    ieee154e_vars.cellRadioSetting = CELLRADIOSETTING_FALLBACK;
+    radio_setConfig (cellRadioSettingMap[CELLRADIOSETTING_FALLBACK]); 
+    
 
     // switch radio on
     radio_rfOn();
@@ -225,28 +231,28 @@ void ieee154e_slot_template_init(void)
     slot_154e_vars [SLOT_40ms_24GHZ].wdAckDuration               =  ( 3000  /PORT_US_PER_TICK ) ;   //  3000us (measured 1000us)
 
     //40ms slot for FSK
-    slot_154e_vars [SLOT_40ms_FSK_SUBGHZ].TsTxOffset             =  ( 4000  /PORT_US_PER_TICK );   //  measured: 131 ticks
+    slot_154e_vars [SLOT_40ms_FSK_SUBGHZ].TsTxOffset             =  ( 6500  /PORT_US_PER_TICK );   //5500  measured: 131 ticks
     slot_154e_vars [SLOT_40ms_FSK_SUBGHZ].TsLongGT               =  ( 2000  /PORT_US_PER_TICK );   //  measured: 66 ticks
-    slot_154e_vars [SLOT_40ms_FSK_SUBGHZ].TsTxAckDelay           =  ( 3700  /PORT_US_PER_TICK );   //  measured: 121 ticks
+    slot_154e_vars [SLOT_40ms_FSK_SUBGHZ].TsTxAckDelay           =  ( 6500  /PORT_US_PER_TICK );   //5000  measured: 121 ticks
     slot_154e_vars [SLOT_40ms_FSK_SUBGHZ].TsShortGT              =  ( 1831  /PORT_US_PER_TICK );   //  measured: 60 ticks
-    slot_154e_vars [SLOT_40ms_FSK_SUBGHZ].wdRadioTx              =  ( 7000  /PORT_US_PER_TICK );   //  230 ticks  7019us delayTx+Tx time for 10 bytes( (needs to be >delayTx) (SCuM need a larger value; 45 is tested and works)
-    slot_154e_vars [SLOT_40ms_FSK_SUBGHZ].wdDataDuration         =  ( 30000 /PORT_US_PER_TICK );   //  983 ticks ; estimated based on max payload
-    slot_154e_vars [SLOT_40ms_FSK_SUBGHZ].wdAckDuration          =  ( 20000 /PORT_US_PER_TICK );   //  655 ticks; estimated
+    slot_154e_vars [SLOT_40ms_FSK_SUBGHZ].wdRadioTx              =  ( 3800  /PORT_US_PER_TICK );   //7000  230 ticks  7019us delayTx+Tx time for 10 bytes( (needs to be >delayTx) (SCuM need a larger value; 45 is tested and works)
+    slot_154e_vars [SLOT_40ms_FSK_SUBGHZ].wdDataDuration         =  ( 25000 /PORT_US_PER_TICK );   //  983 ticks ; estimated based on max payload
+    slot_154e_vars [SLOT_40ms_FSK_SUBGHZ].wdAckDuration          =  ( 10000 /PORT_US_PER_TICK );   //  655 ticks; estimated
 
     //40ms slot for OFDM1 MCS0-3  
-    slot_154e_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].TsTxOffset     =  ( 3500  /PORT_US_PER_TICK );   //  measured: 115 ticks; 
+    slot_154e_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].TsTxOffset     =  ( 5000  /PORT_US_PER_TICK );   //  3500 measured: 115 ticks; 
     slot_154e_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].TsLongGT       =  ( 2000  /PORT_US_PER_TICK );   //  measured: 66 ticks; 
-    slot_154e_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].TsTxAckDelay   =  ( 3700  /PORT_US_PER_TICK );   //  measured: 121 ticks
-    slot_154e_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].TsShortGT      =  ( 1831  /PORT_US_PER_TICK );   //  measured: 60 ticks 
-    slot_154e_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].wdRadioTx      =  ( 7000  /PORT_US_PER_TICK );   //  230 ticks  7019us delayTx+Tx time for 10 bytes( (needs to be >delayTx) (SCuM need a larger value; 45 is tested and works)
-    slot_154e_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].wdDataDuration =  ( 30000 /PORT_US_PER_TICK );   //  983 ticks; estimated based on max payload
-    slot_154e_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].wdAckDuration  =  ( 20000 /PORT_US_PER_TICK );   //  655 ticks;  estimated
+    slot_154e_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].TsTxAckDelay   =  ( 5000  /PORT_US_PER_TICK );   //  measured: 121 ticks
+    slot_154e_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].TsShortGT      =  ( 1500  /PORT_US_PER_TICK );   //  measured: 60 ticks 
+    slot_154e_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].wdRadioTx      =  ( 3800  /PORT_US_PER_TICK );   //  230 ticks  7019us delayTx+Tx time for 10 bytes( (needs to be >delayTx) (SCuM need a larger value; 45 is tested and works)
+    slot_154e_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].wdDataDuration =  ( 5000 /PORT_US_PER_TICK );    //  983 ticks; estimated based on max payload
+    slot_154e_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].wdAckDuration  =  ( 3000 /PORT_US_PER_TICK );    //  655 ticks;  estimated
 }
 
 /**
-\brief This function initializes the lookup table for the slot templates.
+\brief This function copies the variables of a selected tamplate from board vars and 154e vars in one variable.
 
-Call this function once, preferrably at end of the ieee154e_init function
+This is called at init function and at the beginning of the slot after the radio setting is selected
 */
 void ieee154e_select_slot_template(slotType_t slotType)
 {   
@@ -390,15 +396,18 @@ This function executes in ISR mode, when the new slot timer fires.
 void isr_ieee154e_newSlot(opentimers_id_t id) {
 
     ieee154e_vars.startOfSlotReference = opentimers_getCurrentCompareValue();
-    
+    ieee154e_vars.slotDuration          = MICROSLOTDURATION; 
     opentimers_scheduleAbsolute(
         ieee154e_vars.timerId,                  // timerId
+        // this should be which duration?
         slotTemplate.slotDuration,                         // duration
         ieee154e_vars.startOfSlotReference,     // reference
         TIME_TICS,                              // timetype
         isr_ieee154e_newSlot                    // callback
     );
-    ieee154e_vars.slotDuration          = slotTemplate.slotDuration;
+   
+      
+    
     
     // radiotimer_setPeriod(ieee154e_vars.slotDuration);
     if (ieee154e_vars.isSync==FALSE) {
@@ -968,18 +977,22 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
         // at this point, ASN and frame length are known
         // the current slotoffset can be inferred
         ieee154e_syncSlotOffset();
-        schedule_syncSlotOffset(ieee154e_vars.slotOffset);
+        
+        // Issue?: this is called inside ieee154e_syncSlotOffset as well. 
+        // will comment it out
+        //schedule_syncSlotOffset(ieee154e_vars.slotOffset);
+        
         ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
         /*
         infer the asnOffset based on the fact that
         ieee154e_vars.freq = 11 + (asnOffset + channelOffset)%16
         */
-        for (i=0;i<NUM_CHANNELS;i++){
-            if ((ieee154e_vars.freq - 11)==ieee154e_vars.chTemplate[i]){
-                break;
-            }
-        }
-        ieee154e_vars.asnOffset = i - schedule_getChannelOffset();
+//        for (i=0;i<NUM_CHANNELS;i++){
+//            if ((ieee154e_vars.freq - 11)==ieee154e_vars.chTemplate[i]){
+//                break;
+//            }
+//        }
+//        ieee154e_vars.asnOffset = i - schedule_getChannelOffset();
         return TRUE;
     } else {
         // wrong eb format
@@ -987,6 +1000,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
         return FALSE;
     }
 }
+
 
 //======= TX
 
@@ -997,7 +1011,9 @@ port_INLINE void activity_ti1ORri1(void) {
     uint8_t     asn[5];
     uint8_t     join_priority;
     bool        couldSendEB=FALSE;
-
+    bool        isMinimalCell=FALSE;
+    
+    Tics1 = sctimer_readCounter();
     // increment ASN (do this first so debug pins are in sync)
     incrementAsnOffset();
 
@@ -1012,17 +1028,23 @@ port_INLINE void activity_ti1ORri1(void) {
         if(ieee154e_vars.deSyncTimeout > ieee154e_vars.numOfSleepSlots){
             ieee154e_vars.deSyncTimeout -= ieee154e_vars.numOfSleepSlots;
         } else {
-            // Reset sleep slots
-            ieee154e_vars.numOfSleepSlots = 1;
 
-            // declare myself desynchronized
-            changeIsSync(FALSE);
 
             // log the error
             openserial_printError(COMPONENT_IEEE802154E,ERR_DESYNCHRONIZED,
                                   (errorparameter_t)ieee154e_vars.slotOffset,
                                   (errorparameter_t)0);
+            //poipoi: for debugging
+            openserial_printError(COMPONENT_IEEE802154E,ERR_SECURITY,
+                      (errorparameter_t)ieee154e_vars.deSyncTimeout,
+                      (errorparameter_t)ieee154e_vars.numOfSleepSlots);
+            
+            // Reset sleep slots
+            ieee154e_vars.numOfSleepSlots = 1;
 
+            // declare myself desynchronized
+            changeIsSync(FALSE);
+            
             // update the statistics
             ieee154e_stats.numDeSync++;
 
@@ -1049,9 +1071,10 @@ port_INLINE void activity_ti1ORri1(void) {
     // update nextActiveSlotOffset before using
     ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
     if (ieee154e_vars.slotOffset==ieee154e_vars.nextActiveSlotOffset) {
+
         // this is the next active slot
 
-        // advance the schedule
+        // advance the schedule : update current slot entry to this active slot
         schedule_advanceSlot();
 
         // Perhaps this is also where th radiosetting will be selected
@@ -1097,31 +1120,42 @@ port_INLINE void activity_ti1ORri1(void) {
           break;
             
         }
-
+        // increment AsnOffset for superslots
+        ieee154e_vars.superSlotLength      = schedule_getCurrentSuperSlotLength();
         
+        // store start ASN before incremeneting, to use in EBs 
+        storeStartASN();
+        
+        for (i=0;i<ieee154e_vars.superSlotLength-1;i++){
+          incrementAsnOffset();
+        }
         // find the next one
         ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
+        // this is SlotSKIP is true only in non-root motes
         if (idmanager_getIsSlotSkip() && idmanager_getIsDAGroot()==FALSE) {
-            if (ieee154e_vars.nextActiveSlotOffset>ieee154e_vars.slotOffset) {
-                ieee154e_vars.numOfSleepSlots = ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset;
+          if (ieee154e_vars.nextActiveSlotOffset>ieee154e_vars.slotOffset) {
+                
+                ieee154e_vars.numOfSleepSlots = ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset-ieee154e_vars.superSlotLength;
             } else {
-                ieee154e_vars.numOfSleepSlots = schedule_getFrameLength()+ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset;
+                ieee154e_vars.numOfSleepSlots = schedule_getFrameLength()+ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset-ieee154e_vars.superSlotLength;
             }
-
+        
+            // this is really weird, don't get it
             opentimers_scheduleAbsolute(
                 ieee154e_vars.timerId,                            // timerId
-                slotTemplate.slotDuration*(ieee154e_vars.numOfSleepSlots),   // duration
+                MICROSLOTDURATION*(ieee154e_vars.numOfSleepSlots),   // duration
                 ieee154e_vars.startOfSlotReference,               // reference
                 TIME_TICS,                                        // timetype
                 isr_ieee154e_newSlot                              // callback
             );
-            ieee154e_vars.slotDuration = slotTemplate.slotDuration*(ieee154e_vars.numOfSleepSlots);
-            // radiotimer_setPeriod(slotDuration*(ieee154e_vars.numOfSleepSlots));
-
+            
+            ieee154e_vars.slotDuration = MICROSLOTDURATION*(ieee154e_vars.numOfSleepSlots);
+            
             //increase ASN by numOfSleepSlots-1 slots as at this slot is already incremented by 1
-            for (i=0;i<ieee154e_vars.numOfSleepSlots-1;i++){
+            for (i = 0; i < ieee154e_vars.numOfSleepSlots - 1; i++) {
                 incrementAsnOffset();
             }
+            
         }
     } else {
         // this is NOT the next active slot, abort
@@ -1142,15 +1176,22 @@ port_INLINE void activity_ti1ORri1(void) {
             schedule_getNeighbor(&neighbor);
 
             // check whether we can send
+            // if non-shared slot, be default OK to send; otherwise, check backoff
             if (schedule_getOkToSend()) {
                 if (packetfunctions_isBroadcastMulticast(&neighbor)==FALSE){
 
                     // look for a unicast packet to send
                     // you need to ensure that it is getting the packet for the radio as well.
+                    // this includes sxitop packets
                     ieee154e_vars.dataToSend = openqueue_macGetUnicastPakcet(&neighbor);
 
                         if (ieee154e_vars.dataToSend == NULL){
                             ieee154e_vars.dataToSend = openqueue_macGetKaPacket(&neighbor);
+                        }else{
+                     // poipoi: debugging, print asnOffset in tx auto cell
+//                          openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_ADDR_TYPE,
+//                     (errorparameter_t)ieee154e_vars.asnOffset,
+//                     (errorparameter_t)ieee154e_vars.slotOffset);
                         }
 
                     if (schedule_getShared()==FALSE){
@@ -1163,7 +1204,11 @@ port_INLINE void activity_ti1ORri1(void) {
                     }
                 } else {
                         // this is minimal cell
+                        isMinimalCell = TRUE;
+                        // add a condition here, if the this cell has the default radio setting for DIO
+                        //if (ieee154e_vars.cellRadioSetting == CELLRADIOSETTING_FALLBACK){
                         ieee154e_vars.dataToSend = openqueue_macGetDIOPacket();
+                        //}
                         if (ieee154e_vars.dataToSend==NULL){
                             couldSendEB=TRUE;
                             // look for an EB packet in the queue
@@ -1186,13 +1231,18 @@ port_INLINE void activity_ti1ORri1(void) {
                 if (couldSendEB==TRUE) {        // I will be sending an EB
                     //copy synch IE  -- should be Little endian???
                     // fill in the ASN field of the EB
-                    ieee154e_getAsn(asn);
+                    getStartAsn(asn);
                     join_priority = ((radioMinHopRankIncreaseFactor[schedule_getCellRadioSetting()]*icmpv6rpl_getMyDAGrank())/MINHOPRANKINCREASE)-1; //poipoi -- use dagrank(rank)-1
+                    // This is where the ASN of the slot is added to the EB. 
                     memcpy(ieee154e_vars.dataToSend->l2_ASNpayload,&asn[0],sizeof(asn_t));
                     memcpy(ieee154e_vars.dataToSend->l2_ASNpayload+sizeof(asn_t),&join_priority,sizeof(uint8_t));
                 }
+
                 // record that I attempt to transmit this packet
                 ieee154e_vars.dataToSend->l2_numTxAttempts++;
+                
+                //poipoi debug
+                Tics2 = sctimer_readCounter();
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
                 // 1. schedule timer for loading packet
                 sctimer_scheduleActionIn(ACTION_LOAD_PACKET, ieee154e_vars.startOfSlotReference+DURATION_tt1);
@@ -1240,8 +1290,22 @@ port_INLINE void activity_ti1ORri1(void) {
                 break;
             }
         case CELLTYPE_RX:
+            if(isMinimalCell){
+              if( openrandom_get16b()< (0xffff/MIN_RX_PORTION)){
+                // do nothing
+              }else{
+                endSlot();
+                break;
+              }
+            }
             // change state
             changeState(S_RXDATAOFFSET);
+            // poipoi: debugging, print asnOffset in rx auto cell
+//          openserial_printError(COMPONENT_IEEE802154E,ERR_BUSY_RECEIVING,
+//         (errorparameter_t)ieee154e_vars.asnOffset,
+//         (errorparameter_t)ieee154e_vars.slotOffset);
+          //poipoi debug
+          Tics2 = sctimer_readCounter();
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
             // arm rt1
          sctimer_scheduleActionIn(ACTION_RADIORX_ENABLE,ieee154e_vars.startOfSlotReference+DURATION_rt1);
@@ -1284,7 +1348,8 @@ port_INLINE void activity_ti2(void) {
 
     // change state
     changeState(S_TXDATAPREPARE);
-
+    //debugpins_slot_toggle();
+    //debugpins_slot_toggle();
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
 #else
     // arm tt2
@@ -1414,7 +1479,8 @@ port_INLINE void activity_tie3(void) {
     openserial_printError(COMPONENT_IEEE802154E,ERR_WDDATADURATION_OVERFLOWS,
                          (errorparameter_t)ieee154e_vars.state,
                          (errorparameter_t)ieee154e_vars.slotOffset);
-
+            debugpins_frame_toggle();
+            debugpins_frame_toggle();
     // abort
     endSlot();
 }
@@ -1890,7 +1956,8 @@ port_INLINE void activity_rie3(void) {
     openserial_printError(COMPONENT_IEEE802154E,ERR_WDDATADURATION_OVERFLOWS,
                          (errorparameter_t)ieee154e_vars.state,
                          (errorparameter_t)ieee154e_vars.slotOffset);
-
+            debugpins_slot_toggle();
+            debugpins_slot_toggle();
     // abort
     endSlot();
 }
@@ -2469,15 +2536,17 @@ port_INLINE bool isValidAck(ieee802154_header_iht* ieee802514_header, OpenQueueE
 
 port_INLINE void incrementAsnOffset(void) {
     frameLength_t frameLength;
-
+     uint8_t i;
     // increment the asn
-    ieee154e_vars.asn.bytes0and1++;
-    if (ieee154e_vars.asn.bytes0and1==0) {
-        ieee154e_vars.asn.bytes2and3++;
-        if (ieee154e_vars.asn.bytes2and3==0) {
-            ieee154e_vars.asn.byte4++;
-        }
-    }
+
+      ieee154e_vars.asn.bytes0and1++;
+      if (ieee154e_vars.asn.bytes0and1==0) {
+          ieee154e_vars.asn.bytes2and3++;
+          if (ieee154e_vars.asn.bytes2and3==0) {
+              ieee154e_vars.asn.byte4++;
+          }
+      }
+
 
     // increment the offsets
     frameLength = schedule_getFrameLength();
@@ -2501,11 +2570,19 @@ port_INLINE void ieee154e_resetAsn(void) {
 
 //from upper layer that want to send the ASN to compute timing or latency
 port_INLINE void ieee154e_getAsn(uint8_t* array) {
-    array[0]         = (ieee154e_vars.asn.bytes0and1     & 0xff);
-    array[1]         = (ieee154e_vars.asn.bytes0and1/256 & 0xff);
-    array[2]         = (ieee154e_vars.asn.bytes2and3     & 0xff);
-    array[3]         = (ieee154e_vars.asn.bytes2and3/256 & 0xff);
-    array[4]         =  ieee154e_vars.asn.byte4;
+    array[0]         = (ieee154e_vars.startAsn.bytes0and1     & 0xff);
+    array[1]         = (ieee154e_vars.startAsn.bytes0and1/256 & 0xff);
+    array[2]         = (ieee154e_vars.startAsn.bytes2and3     & 0xff);
+    array[3]         = (ieee154e_vars.startAsn.bytes2and3/256 & 0xff);
+    array[4]         =  ieee154e_vars.startAsn.byte4;
+}
+
+port_INLINE void getStartAsn(uint8_t* array) {
+    array[0]         = (ieee154e_vars.startAsn.bytes0and1     & 0xff);
+    array[1]         = (ieee154e_vars.startAsn.bytes0and1/256 & 0xff);
+    array[2]         = (ieee154e_vars.startAsn.bytes2and3     & 0xff);
+    array[3]         = (ieee154e_vars.startAsn.bytes2and3/256 & 0xff);
+    array[4]         =  ieee154e_vars.startAsn.byte4;
 }
 
 port_INLINE uint16_t ieee154e_getTimeCorrection(void) {
@@ -2687,6 +2764,7 @@ bool isValidEbFormat(OpenQueueEntry_t* pkt, uint16_t* lenIE){
             sublen = (temp16b & IEEE802154E_DESC_LEN_SHORT_MLME_IE_MASK);
             switch(subid){
             case IEEE802154E_MLME_SYNC_IE_SUBID:
+                // this is where the ASN is stored
                 asnStoreFromEB((uint8_t*)(pkt->payload+ptr));
                 joinPriorityStoreFromEB(*((uint8_t*)(pkt->payload)+ptr+5));
                 sync_ie_checkPass    = TRUE;
@@ -2764,14 +2842,23 @@ port_INLINE void asnStoreFromEB(uint8_t* asn) {
     ieee154e_vars.asn.byte4        =     asn[4];
 }
 
+port_INLINE void storeStartASN(void) {
+
+    // store the ASN
+    ieee154e_vars.startAsn.bytes0and1   =   ieee154e_vars.asn.bytes0and1;  
+    ieee154e_vars.startAsn.bytes2and3   =   ieee154e_vars.asn.bytes2and3;
+    ieee154e_vars.startAsn.byte4        =   ieee154e_vars.asn.byte4;
+}
+
 port_INLINE void ieee154e_syncSlotOffset(void) {
     frameLength_t frameLength;
     uint32_t slotOffset;
     uint8_t i;
+    uint8_t superSlotLength;
 
     frameLength = schedule_getFrameLength();
 
-    // determine the current slotOffset
+    // determine the current slotOffset (of the ASN from EB?)
     slotOffset = ieee154e_vars.asn.byte4;
     slotOffset = slotOffset % frameLength;
     slotOffset = slotOffset << 16;
@@ -2780,12 +2867,20 @@ port_INLINE void ieee154e_syncSlotOffset(void) {
     slotOffset = slotOffset << 16;
     slotOffset = slotOffset + ieee154e_vars.asn.bytes0and1;
     slotOffset = slotOffset % frameLength;
-
+    
+    // this is the offset sent from EB (at end of the superSLot of a minimal cell)
     ieee154e_vars.slotOffset       = (slotOffset_t) slotOffset;
-
+    
+    // get the superSlot length of this PHY
+    superSlotLength = superSlotLengthMap[ieee154e_vars.cellRadioSetting];
+    
+    // update the current offset to the initial Microslot
+    //ieee154e_vars.slotOffset = ieee154e_vars.slotOffset; - superSlotLength +1; 
+    
+    // change the current slot to this entry
     schedule_syncSlotOffset(ieee154e_vars.slotOffset);
-    ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
-    /*
+    
+     /*
     infer the asnOffset based on the fact that
     ieee154e_vars.freq = 11 + (asnOffset + channelOffset)%16
     */
@@ -2794,7 +2889,20 @@ port_INLINE void ieee154e_syncSlotOffset(void) {
             break;
         }
     }
+    // what is going on here?
     ieee154e_vars.asnOffset = i - schedule_getChannelOffset();
+    
+    // get the next active slot. 
+    ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
+    
+    // then fast-forward the offset to the end of the superSlot
+    // otherwise, the frame length will be extended 
+    
+    for (i=0;i<superSlotLength -1;i++){
+      incrementAsnOffset();
+    }
+
+    
 }
 
 void ieee154e_setIsAckEnabled(bool isEnabled){
@@ -2897,6 +3005,11 @@ void synchronizePacket(PORT_TIMER_WIDTH timeReceived) {
         openserial_printError(COMPONENT_IEEE802154E,ERR_LARGE_TIMECORRECTION,
                               (errorparameter_t)timeCorrection,
                               (errorparameter_t)0);
+        uint32_t res = Tics2-Tics1;
+            openserial_printError(COMPONENT_IEEE802154E,ERR_SECURITY,
+                      (errorparameter_t)ieee154e_vars.slotOffset,
+                      (errorparameter_t)res);
+
     }
 
     // update the stats
@@ -2944,6 +3057,12 @@ void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
         openserial_printError(COMPONENT_IEEE802154E,ERR_LARGE_TIMECORRECTION,
                               (errorparameter_t)timeCorrection,
                               (errorparameter_t)1);
+        uint32_t res = Tics2-Tics1;
+        openserial_printError(COMPONENT_IEEE802154E,ERR_SECURITY,
+                  (errorparameter_t)ieee154e_vars.slotOffset,
+                  (errorparameter_t)res);
+        debugpins_frame_toggle();
+        debugpins_frame_toggle();
     }
 
     // update the stats
@@ -3271,9 +3390,10 @@ void endSlot(void) {
 
     // check if this is auto tx cell
     if (
-        schedule_getSlottOffset() == ieee154e_vars.slotOffset &&
+        schedule_getSlottOffset() == (ieee154e_vars.slotOffset- ieee154e_vars.superSlotLength+1) &&
         schedule_getIsAutoCell()                              &&
-        schedule_getType()        == CELLTYPE_TX
+        schedule_getType()        == CELLTYPE_TX              
+        
     ){
         // check if there are unicast packets to the neighbor of this slot
         // if no, remove the cell
@@ -3281,12 +3401,13 @@ void endSlot(void) {
         schedule_getNeighbor(&slotNeighbor);
         if (openqueue_macGetUnicastPakcet(&slotNeighbor)==NULL) {
             schedule_removeActiveSlot(
-                ieee154e_vars.slotOffset,
+                ieee154e_vars.slotOffset- ieee154e_vars.superSlotLength+1,
                 CELLTYPE_TX,
                 TRUE,
                 &slotNeighbor
             );
         }
+        
     }
 
     // change state

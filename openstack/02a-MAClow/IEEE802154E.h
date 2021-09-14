@@ -37,6 +37,7 @@ static const uint8_t cellLinkOptions [SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS] = {
 };
 //=========================== define ==========================================
 
+
 #define EB_ASN0_OFFSET               4
 #define EB_JP_OFFSET                 9
 #define EB_SLOTFRAME_TS_ID_OFFSET   12
@@ -47,12 +48,13 @@ static const uint8_t cellLinkOptions [SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS] = {
 #define EB_IE_LEN                   28
 
 #define NUM_CHANNELS                16 // number of channels to channel hop on
-#define TXRETRIES                   15 // number of MAC retries before declaring failed
+#define TXRETRIES                   15 // number of MAC retries before declaring failed // original 15
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
-#define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to successfully synchronize
+#define RESYNCHRONIZATIONGUARD      5 // in 32kHz ticks. min distance to the end of the slot to successfully synchronize
 #define EB_PORTION                  10 // set EB on minimal cell for 1/EB_PORTION portion
-#define MAXKAPERIOD               1000  // in slots: 1500@20ms per slot -> ~30 seconds. Max value used by adaptive synchronization.
-#define DESYNCTIMEOUT             1750  // in slots: 1750@20ms per slot -> ~35 seconds. A larger DESYNCTIMEOUT is needed if using a larger KATIMEOUT.
+#define MIN_RX_PORTION              1  // Turn On receiver at min cell
+#define MAXKAPERIOD               2000  // in slots: 1500@20ms per slot -> ~30 seconds. Max value used by adaptive synchronization (30000 ms / slot duration). Keep alives sent over auto cells or dedicated cells.
+#define DESYNCTIMEOUT             3500  // in slots: 1750@20ms per slot -> ~35 seconds. A larger DESYNCTIMEOUT is needed if using a larger KATIMEOUT. (35000 ms / slot duration)
 #define LIMITLARGETIMECORRECTION    5 // threshold number of ticks to declare a timeCorrection "large"
 #define LENGTH_IEEE154_MAX         128 // max length of a valid radio packet
 #define DUTY_CYCLE_WINDOW_LIMIT    (0xFFFFFFFF>>1) // limit of the dutycycle window
@@ -255,8 +257,10 @@ typedef struct {
 
 typedef struct {
    // misc
-   asn_t                     asn;                     // current absolute slot number
+   asn_t                     asn;                     // current absolute slot number (end of superSlot)
+   asn_t                     startAsn;                // current absolute slot number (beginning of superSlot)
    slotOffset_t              slotOffset;              // current slot offset
+   uint8_t                   superSlotLength;         // current superSlot length
    radioSetting_t            radioSetting;            // current slot layer 1 radio setting
    cellRadioSetting_t        cellRadioSetting;        // current slot layer 2 radio setting
    slotOffset_t              nextActiveSlotOffset;    // next active slot offset

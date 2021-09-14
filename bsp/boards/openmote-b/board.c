@@ -71,6 +71,7 @@ int main(void) {
 
 void board_init(void) {
 
+
     gpio_init();
     clock_init();
     antenna_init();
@@ -182,7 +183,7 @@ void board_init_slot_vars(void){
     slot_board_vars [SLOT_10ms].delayRx                              =  0  ;  // 0us (can not measure)
 
     // 20ms slot
-    slot_board_vars [SLOT_20ms_24GHZ].slotDuration                   =  655  ; // tics  
+    slot_board_vars [SLOT_20ms_24GHZ].slotDuration                   =  328*2  ; // tics  
     slot_board_vars [SLOT_20ms_24GHZ].maxTxDataPrepare               =  15   ;  // 457us (based on measurement)
     slot_board_vars [SLOT_20ms_24GHZ].maxRxAckPrepare                =  10   ; // 305us (based on measurement)
     slot_board_vars [SLOT_20ms_24GHZ].maxRxDataPrepare               =  10   ; // 305us (based on measurement)
@@ -191,7 +192,7 @@ void board_init_slot_vars(void){
     slot_board_vars [SLOT_20ms_24GHZ].delayRx                        =  0    ; // 0us (can not measure)
     
     //40ms slot for 24ghz cc2538
-    slot_board_vars [SLOT_40ms_24GHZ].slotDuration                   =   1310 ;  // tics 
+    slot_board_vars [SLOT_40ms_24GHZ].slotDuration                   =   328*2  ;  // tics 
     slot_board_vars [SLOT_40ms_24GHZ].maxTxDataPrepare               =   30  ;  // 457us (based on measurement) 
     slot_board_vars [SLOT_40ms_24GHZ].maxRxAckPrepare                =   20  ;  // 305us (based on measurement)
     slot_board_vars [SLOT_40ms_24GHZ].maxRxDataPrepare               =   20  ;  // 305us (based on measurement)
@@ -200,20 +201,20 @@ void board_init_slot_vars(void){
     slot_board_vars [SLOT_40ms_24GHZ].delayRx                        =   0  ;  // 0us (can not measure)
 
     //40ms slot for FSK
-    slot_board_vars [SLOT_40ms_FSK_SUBGHZ].slotDuration              =   1310   ;  // tics  
-    slot_board_vars [SLOT_40ms_FSK_SUBGHZ].maxTxDataPrepare          =   50   ;  // 1525us  (based on measurement)
-    slot_board_vars [SLOT_40ms_FSK_SUBGHZ].maxRxAckPrepare           =   10   ;  // 305µs   (based on measurement)
-    slot_board_vars [SLOT_40ms_FSK_SUBGHZ].maxRxDataPrepare          =   10   ;  // 305µs   (based on measurement)
-    slot_board_vars [SLOT_40ms_FSK_SUBGHZ].maxTxAckPrepare           =   33   ;  // 1000µs  (based on measurement)
-    slot_board_vars [SLOT_40ms_FSK_SUBGHZ].delayTx                   =   66   ;  // 2000µs  (based on measurement)
-    slot_board_vars [SLOT_40ms_FSK_SUBGHZ].delayRx                   =   16   ;  // 488µs. This parameter is usually set to 0, however for Atmel on openmote-b, it takes at least 1ms for the transmission to occure because of spi delay (or other implementation specific overhead), so reciver is expected to wait a little more before turning on the radio. 
+    slot_board_vars [SLOT_40ms_FSK_SUBGHZ].slotDuration              =   328*5   ;  // tics  
+    slot_board_vars [SLOT_40ms_FSK_SUBGHZ].maxTxDataPrepare          =   65   ;  // 2000us  (based on measurement)
+    slot_board_vars [SLOT_40ms_FSK_SUBGHZ].maxRxAckPrepare           =   42;//10   ;  // 305µs   (based on measurement)
+    slot_board_vars [SLOT_40ms_FSK_SUBGHZ].maxRxDataPrepare          =   42;//10   ;  // 305µs   (based on measurement)
+    slot_board_vars [SLOT_40ms_FSK_SUBGHZ].maxTxAckPrepare           =   65   ;  // 1525µs  (based on measurement)
+    slot_board_vars [SLOT_40ms_FSK_SUBGHZ].delayTx                   =   67;//69, 66   ;  // 2000µs  (based on measurement)
+    slot_board_vars [SLOT_40ms_FSK_SUBGHZ].delayRx                   =   19;//16   ;  // 488µs. This parameter is usually set to 0, however for Atmel on openmote-b, it takes at least 1ms for the transmission to occure because of spi delay (or other implementation specific overhead), so reciver is expected to wait a little more before turning on the radio. 
     
-    //40ms slot for OFDM1 MCS0-3    
-    slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].slotDuration      =  1310    ;  // tics  
-    slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].maxTxDataPrepare  =  50    ;  // 1525us (based on measurement) 
-    slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].maxRxAckPrepare   =  10    ;  // 305us (based on measurement) 
-    slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].maxRxDataPrepare  =  10    ;  // 305us (based on measurement) 
-    slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].maxTxAckPrepare   =  33    ;  // 1000us (based on measurement) 
+    //40ms slot for OFDM1 MCS3  
+    slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].slotDuration      =  328*2   ;  // tics  
+    slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].maxTxDataPrepare  =  65    ;  // 1525us (based on measurement) 
+    slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].maxRxAckPrepare   =  42;//10    ;  // 305us (based on measurement) 
+    slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].maxRxDataPrepare  =  42;//10    ;  // 305us (based on measurement) 
+    slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].maxTxAckPrepare   =  50    ;  // 1000us (based on measurement) 
     slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].delayTx           =  41    ;  // 1251us (based on measurement)  
     slot_board_vars [SLOT_40ms_OFDM1MCS0_3_SUBGHZ].delayRx           =  16    ;  // 488µs. This parameter is usually set to 0, however for Atmel on openmote-b, it takes at least 1ms for the transmission to occure because of spi delay (or other implementation specific overhead), so reciver is expected to wait a little more before turning on the radio. 
 }
@@ -222,7 +223,8 @@ void board_init_slot_vars(void){
 // if you need the value in MS, divide by PORT_TICS_PER_MS (which varies by board and clock frequency and defined in board_info.h)
 uint16_t board_getSlotDuration (void)
 {
-    return slot_board_vars [selected_slot_type].slotDuration;
+    //return slot_board_vars [selected_slot_type].slotDuration;
+  return MICROSLOTDURATION;
 }
 
 // Setter/Getter function for slot_board_vars
