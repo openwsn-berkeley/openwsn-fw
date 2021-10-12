@@ -26,6 +26,7 @@ see the character on the terminal client) and the "ERROR" led blinks.
 
 //=========================== defines =========================================
 #define CPU_CLOCK_FREQ             32768  // 32kHz = 1s
+#define VAR_NOT_SET                0xFF
 
 // Serial input
 
@@ -69,13 +70,16 @@ typedef struct {
   //rx
   volatile uint8_t      rxpk_done;
   uint8_t               rxpk_buf[LENGTH_PACKET];
-  uint8_t              rxpk_len;
+  uint8_t               rxpk_len;
   uint8_t               rxpk_num;
   uint8_t               rxpk_src;
   int8_t                rxpk_rssi;
   uint8_t               rxpk_lqi;
   bool                  rxpk_crc;
   uint8_t               rxpk_freq_offset;
+  
+  // routing 
+  uint8_t               rank;
 } app_vars_t;
 
 app_vars_t app_vars;
@@ -103,6 +107,9 @@ uint8_t cb_uartRxCb(void);
 void cb_startFrame(PORT_TIMER_WIDTH timestamp);
 void cb_endFrame(PORT_TIMER_WIDTH timestamp);
 
+// frame validity check
+bool checkFrame (void);
+
 //=========================== main ============================================
 
 /**
@@ -117,8 +124,8 @@ int mote_main(void) {
   writeIndex= 0;
   IAmTransmitter = false;
   app_dbg.counter = 0;
-  
   app_vars.uartSendNow = 1;
+  app_vars.rank = VAR_NOT_SET;
   
   // initialize the board
   board_init();
@@ -308,5 +315,61 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
                            );
   
   // check the frame is sent by radio_tx project
-  expectedFrame = TRUE;
+  
+  expectedFrame = checkFrame();
+  
+  // if valid frame, relay immediately. 
+  memcpy(app_vars.txpk_buf, app_vars.rxpk_buf,app_vars.rxpk_len);
+  app_vars.txpk_len = app_vars.rxpk_len;
+  
+  // update my rank
+  app_vars.txpk_buf [1] = app_vars.rank;
+  
+  // prepare and transmit
+  radio_rfOff();
+  radio_loadPacket(app_vars.txpk_buf,app_vars.txpk_len);
+  radio_txEnable();
+  radio_txNow();
+  
+  // leds
+  leds_debug_toggle();
+  
+  // then print to serial
+}
+
+bool checkFrame (){
+  
+  // check length 
+  if (app_vars.rxpk_len>LENGTH_PACKET){
+    return false;
+  }
+  
+  uint8_t* frame = &app_vars.rxpk_buf[0];
+  uint8_t frame_no = *frame++;
+  uint8_t hop_no   = *frame++;
+  uint16_t netid   = *frame++;
+  netid            = netid<<8 | *frame;
+  
+  // check net id
+  if (netid != NETID){
+    return false;
+  }
+  
+  // check routing
+  if (app_vars.rank == VAR_NOT_SET){
+    app_vars.rank = hop_no+1;
+  }else{
+    
+    if (hop_no<app_vars.rank){
+      // a frame from a node closer hop-distance to the root, OK to forward
+    }else{
+      
+      // a frame from a node further in hop-distance or at the same hop-distance
+      // to the root, not OK to forward. 
+      
+      return false;
+    }
+  }
+  return true;
+  
 }
