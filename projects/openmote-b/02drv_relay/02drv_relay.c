@@ -60,10 +60,22 @@ typedef struct {
   
   // MAC related
   
-  uint8_t              txpk_txNow;
-  uint8_t              txpk_buf[LENGTH_PACKET];
-  uint8_t              txpk_len;
-  uint8_t              txpk_num;
+  // tx
+  uint8_t               txpk_txNow;
+  uint8_t               txpk_buf[LENGTH_PACKET];
+  uint8_t               txpk_len;
+  uint8_t               txpk_num;
+  
+  //rx
+  volatile uint8_t      rxpk_done;
+  uint8_t               rxpk_buf[LENGTH_PACKET];
+  uint8_t              rxpk_len;
+  uint8_t               rxpk_num;
+  uint8_t               rxpk_src;
+  int8_t                rxpk_rssi;
+  uint8_t               rxpk_lqi;
+  bool                  rxpk_crc;
+  uint8_t               rxpk_freq_offset;
 } app_vars_t;
 
 app_vars_t app_vars;
@@ -121,20 +133,21 @@ int mote_main(void) {
   
   // setup the radios
   
-
+  
   
   // cc2538 callbacks 
   radio_setConfig (RADIOSETTING_24GHZ);
   radio_setStartFrameCb(cb_startFrame);
   radio_setEndFrameCb(cb_startFrame);
   
-    // atmel callbacks
+  // atmel callbacks
   radio_setConfig (RADIOSETTING_FSK_OPTION1_FEC);
   radio_setStartFrameCb(cb_startFrame);
   radio_setEndFrameCb(cb_endFrame);
   
   // radio frequency
   radio_setFrequency(CHANNEL, FREQ_TX);
+  radio_rfOn();
   
   while(1) {
     
@@ -150,6 +163,7 @@ int mote_main(void) {
         1B hop number
         2B NET ID
         1B payload size
+        100B payload
       */          
       app_vars.txpk_num++;
       app_vars.txpk_len             = sizeof(app_vars.txpk_buf);
@@ -174,13 +188,25 @@ int mote_main(void) {
       app_dbg.counter++;
       
       // transmit
+      leds_error_toggle();
+      radio_rfOff();
       radio_loadPacket(app_vars.txpk_buf,app_vars.txpk_len);
       radio_txEnable();
       radio_txNow();
       
+      
     }
     
     // otherwise, listen and relay
+    radio_setFrequency(CHANNEL, FREQ_RX);
+    radio_rxEnable();
+    radio_rxNow();
+    
+    app_vars.rxpk_done = 0;
+    while (app_vars.rxpk_done==0 && IAmTransmitter == 0) {
+      board_sleep();
+    }
+    // if I get here, I just received a packet
     
     
     //while (app_vars.uartSendNow==0);
@@ -246,19 +272,41 @@ uint8_t cb_uartRxCb(void) {
 }
 
 void cb_startFrame(PORT_TIMER_WIDTH timestamp) {
-
-   // update debug vals
-   app_dbg.num_startFrame++;
-
-   // led
-   leds_sync_on();
-
+  
+  // update debug vals
+  app_dbg.num_startFrame++;
+  
+  // led
+  leds_sync_on();
+  
 }
 
 void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
-   // update debug vals
-   app_dbg.num_endFrame++;
-
-   // led
-   leds_sync_off();
+  
+  // update debug vals
+  app_dbg.num_endFrame++;
+  
+  bool     expectedFrame;
+  
+  // led
+  leds_sync_off();
+  
+  app_dbg.num_endFrame++;
+  app_vars.rxpk_done = 1 ;
+  memset(&app_vars.rxpk_buf[0],0,LENGTH_PACKET);
+  
+  app_vars.rxpk_freq_offset = radio_getFrequencyOffset();
+  
+  // get packet from radio
+  radio_getReceivedFrame(
+                         app_vars.rxpk_buf,
+                         &app_vars.rxpk_len,
+                         sizeof(app_vars.rxpk_buf),
+                         &app_vars.rxpk_rssi,
+                         &app_vars.rxpk_lqi,
+                         &app_vars.rxpk_crc
+                           );
+  
+  // check the frame is sent by radio_tx project
+  expectedFrame = TRUE;
 }
