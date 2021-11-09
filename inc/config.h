@@ -442,6 +442,20 @@
 #define BOARD_FASTSIM_ENABLED (0)
 #endif
 
+// ======================== Driver configuration ========================
+
+
+/**
+ * \def TIMER_ISR_NUMBER
+ *
+ * Number of TIMER_ISR, this does not include TIMER_TSCH or TIMER_INHIBIT
+ *
+ */
+#ifndef TIMER_ISR_NUMBER
+#define TIMER_ISR_NUMBER (0)
+#endif
+
+
 // ======================== Kernel configuration ========================
 
 /**
