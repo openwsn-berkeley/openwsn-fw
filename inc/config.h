@@ -431,6 +431,17 @@
 #endif
 
 /**
+ * \def BOARD_LEDS
+ *
+ * Turn on leds
+ *
+ */
+#ifndef BOARD_LEDS
+#define BOARD_LEDS (1)
+#endif
+
+
+/**
  * \def BOARD_FASTSIM_ENABLED
  *
  * Enables fast UART printing in simulation mode. Active by default.
