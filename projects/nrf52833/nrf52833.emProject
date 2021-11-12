@@ -77,6 +77,72 @@
       path="../../../inc"
       recurse="Yes" />
   </project>
+  <project Name="01bsp_radio_ble">
+    <configuration
+      Name="Common"
+      arm_architecture="v8M_Mainline"
+      arm_core_type="Cortex-M4"
+      arm_endian="Little"
+      arm_fpu_type="FPv5-SP-D16"
+      arm_linker_heap_size="1024"
+      arm_linker_process_stack_size="0"
+      arm_linker_stack_size="1024"
+      arm_linker_variant="SEGGER"
+      arm_simulator_memory_simulation_parameter="RX 00000000,00100000,FFFFFFFF;RWX 20000000,00040000,CDCDCDCD"
+      arm_target_device_name="NRF52833_XXAA"
+      arm_target_interface_type="SWD"
+      c_user_include_directories="SEGGER"
+      debug_target_connection="J-Link"
+      link_linker_script_file="../../../bsp/boards/nrf52833/sdk/nrf52833_xxaa.ld"
+      linker_output_format="hex"
+      linker_section_placements_segments="FLASH1 RX 0x00000000 0x00100000;RAM1 RWX 0x20000000 0x00040000"
+      project_directory="01bsp_radio_ble"
+      project_type="Executable" />
+    <configuration
+      Name="Debug"
+      arm_architecture="v7EM"
+      arm_assembler_variant="gcc"
+      arm_compiler_variant="gcc"
+      arm_core_type="Cortex-M4"
+      arm_endian="Little"
+      arm_fp_abi="Soft"
+      arm_fpu_type="FPv4-SP-D16"
+      arm_linker_variant="GNU"
+      arm_rtl_variant="Embedded Studio"
+      arm_simulator_memory_simulation_parameter="RX 00000000,00080000,FFFFFFFF;RWX 20000000,00020000,CDCDCDCD"
+      arm_target_device_name="nRF52833_xxAA"
+      c_preprocessor_definitions="NRF52833_XXAA"
+      c_user_include_directories="../../../bsp/boards/nrf52833/sdk;../../../bsp/boards/nrf52833;../../../bsp/boards/;../../../inc/"
+      debug_start_from_entry_point_symbol="No"
+      gcc_entry_point="Reset_Handler"
+      link_linker_script_file="../../../bsp/boards/nrf52833/sdk/nrf52833.ld"
+      link_use_linker_script_file="Yes"
+      linker_additional_files=""
+      linker_section_placement_file="flash_placement.xml"
+      linker_section_placements_segments="FLASH1 RX 0x00000000 0x00080000;RAM1 RWX 0x20000000 0x00020000" />
+    <folder
+      Name="application"
+      exclude=""
+      filter="*.c"
+      path="."
+      recurse="No" />
+    <folder Name="bsp">
+      <folder Name="board">
+        <folder
+          Name="nrf52833"
+          exclude=""
+          filter="*.c;*.s;*.h"
+          path="../../../bsp/boards/nrf52833"
+          recurse="Yes" />
+      </folder>
+    </folder>
+    <folder
+      Name="inc"
+      exclude=""
+      filter="*.h"
+      path="../../../inc"
+      recurse="Yes" />
+  </project>
   <project Name="01bsp_hornet_monitor">
     <configuration
       Name="Common"
