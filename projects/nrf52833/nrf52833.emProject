@@ -77,7 +77,7 @@
       path="../../../inc"
       recurse="Yes" />
   </project>
-  <project Name="01bsp_radio_rx">
+  <project Name="01bsp_radio_ble">
     <configuration
       Name="Common"
       arm_architecture="v8M_Mainline"
@@ -96,7 +96,7 @@
       link_linker_script_file="../../../bsp/boards/nrf52833/sdk/nrf52833_xxaa.ld"
       linker_output_format="hex"
       linker_section_placements_segments="FLASH1 RX 0x00000000 0x00100000;RAM1 RWX 0x20000000 0x00040000"
-      project_directory="01bsp_radio_rx"
+      project_directory="01bsp_radio_ble"
       project_type="Executable" />
     <configuration
       Name="Debug"
