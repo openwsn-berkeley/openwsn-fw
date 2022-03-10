@@ -4,10 +4,12 @@ import matplotlib.pyplot    as plt
 from matplotlib             import  rcParams
 
 # direction finding related
-from config     import *
+import config
 from calc_angle import *
 
 rcParams['font.size'] = 20
+
+last_angles_file = []
 
 def generate_time_line():
     
@@ -16,8 +18,9 @@ def generate_time_line():
     return time_data
     
 def get_angle_to_pkt(pkt_id = 0, on_board_calculation=False, contine_mode=False):
-
-    with open(sample_file, 'r') as f:
+    global last_angles_file
+    last_angles_file = []
+    with open(config.sample_file, 'r') as f:
         num_pkt = 0
         for line in f:
             one_entry_samples = eval(line)
@@ -113,15 +116,23 @@ def get_angle_to_pkt(pkt_id = 0, on_board_calculation=False, contine_mode=False)
                     )
                 )
                 ax.clear()
+                
+            
             
             if contine_mode == False:
                 if on_board_calculation == False:
                     return angle, one_entry_samples['array']
                 else:
                     if one_entry_samples['angle'] == 254:
+                        
                         return None, one_entry_samples['array']
                     else:
+                    
                         return one_entry_samples['angle'], one_entry_samples['array']
+            else:
+                if on_board_calculation == True:
+                    if one_entry_samples['angle'] != 254:
+                        last_angles_file.append((one_entry_samples['array'], one_entry_samples['angle']))
             
         # the pkt_id not exist
         return None, None  

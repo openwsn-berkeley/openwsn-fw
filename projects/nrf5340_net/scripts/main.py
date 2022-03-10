@@ -149,8 +149,8 @@ def animate(i, data_source, on_board_calculation):
         
 if __name__ == '__main__':
 
-    data_source             = raw_input("Replay from file (r) or real-time from serial (s)?")
-    on_board_calculation    = raw_input("on board angle calculation ? (y/n)")
+    data_source             = input("Replay from file (r) or real-time from serial (s)?")
+    on_board_calculation    = input("on board angle calculation ? (y/n)")
     
     if on_board_calculation == 'n':
         on_board_calculation = False
@@ -159,7 +159,7 @@ if __name__ == '__main__':
     
     if data_source == 's':
         
-        print "start serial reading..."
+        print("start serial reading...")
         serial_thread = Thread( target = start_read)
         serial_thread.start()
     

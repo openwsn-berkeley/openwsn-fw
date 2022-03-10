@@ -129,7 +129,7 @@ def aoa_angle_calculation(phase_data, num_pkt, array):
             )
         else:
             angle = None
-        if angle < 0:
+        if angle < 0 and type(angle) != 'NoneType':
             angle = 180 + angle
     elif theta_1 == None and theta_2 != None:
         angle = 180 * (theta_2) / M_PI

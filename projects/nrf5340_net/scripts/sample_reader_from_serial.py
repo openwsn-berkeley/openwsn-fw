@@ -40,11 +40,11 @@ def start_read():
             new_sample_read = False
             if len(input_data) == NUM_SAMPLES*4+10:
                 for i in range(NUM_SAMPLES):
-                    magnitude, phase = struct.unpack('>Hh', ''.join(input_data[4*i: 4*(i+1)]))
+                    magnitude, phase = struct.unpack('>Hh', b''.join(input_data[4*i: 4*(i+1)]))
                     sample['magnitude'] = magnitude
                     sample['phase']     = phase
                     data['samples'].append(sample.copy())
-                data['rssi']        = struct.unpack('>b', ''.join(input_data[NUM_SAMPLES*4]))
+                data['rssi']        = struct.unpack('>b', b''.join(input_data[NUM_SAMPLES*4: NUM_SAMPLES*4+1]))
                 data['setting']     = ((ord(input_data[NUM_SAMPLES*4+1])) << 10 ) | ((ord(input_data[NUM_SAMPLES*4+2])) << 5) | (ord(input_data[NUM_SAMPLES*4+3]))
                 data['array']       = ord(input_data[NUM_SAMPLES*4+4])
                 data['angle']       = ord(input_data[NUM_SAMPLES*4+5])
@@ -62,6 +62,6 @@ def start_read():
                     f.write(str(data)+'\n')
                     data['samples'] = []
             else:
-                print len(input_data), [ord(c) for c in input_data]
+                print(len(input_data), [ord(c) for c in input_data])
                 
             input_data = []
