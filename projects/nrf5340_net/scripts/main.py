@@ -48,10 +48,12 @@ def gauge(colors='jet_r', title=''):
 
     [ax.add_patch(p) for p in patches]
 
-    labels = mid_points = [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330]
+    labels = [30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 0]
+    mid_points = [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330]
+    labels.reverse()
     
     for mid, lab in zip(mid_points, labels):
-    
+        
         ax.text(0.42 * np.cos(np.radians(mid)), 0.42 * np.sin(np.radians(mid)),
                 lab, ha='center', va='center', fontsize=14, fontweight='bold',
                 rotation=rot_text(mid))
