@@ -141,13 +141,13 @@ void uart_setCTS(bool state) {
 
 void uart_writeByte(uint8_t byteToWrite){
 
-    if (byteToWrite==XON || byteToWrite==XOFF || byteToWrite==XONXOFF_ESCAPE) {
-        uart_vars.fXonXoffEscaping     = 0x01;
-        uart_vars.xonXoffEscapedByte   = byteToWrite;
-        NRF_UART0->TXD = XONXOFF_ESCAPE;
-    } else {
+    //if (byteToWrite==XON || byteToWrite==XOFF || byteToWrite==XONXOFF_ESCAPE) {
+    //    uart_vars.fXonXoffEscaping     = 0x01;
+    //    uart_vars.xonXoffEscapedByte   = byteToWrite;
+    //    NRF_UART0->TXD = XONXOFF_ESCAPE;
+    //} else {
         NRF_UART0->TXD = byteToWrite;
-    }
+    //}
 }
 
 uint8_t uart_readByte(void) {
@@ -181,14 +181,19 @@ void UARTE0_UART0_IRQHandler(void) {
 
 kick_scheduler_t uart_tx_isr(void) {
     
-    if (uart_vars.fXonXoffEscaping==0x01) {
-        uart_vars.fXonXoffEscaping = 0x00;
-        NRF_UART0->TXD = uart_vars.xonXoffEscapedByte^XONXOFF_MASK;
-    } else {
-        if (uart_vars.txCb != NULL){
-            uart_vars.txCb();
-            return KICK_SCHEDULER;
-        }
+    //if (uart_vars.fXonXoffEscaping==0x01) {
+    //    uart_vars.fXonXoffEscaping = 0x00;
+    //    NRF_UART0->TXD = uart_vars.xonXoffEscapedByte^XONXOFF_MASK;
+    //} else {
+    //    if (uart_vars.txCb != NULL){
+    //        uart_vars.txCb();
+    //        return KICK_SCHEDULER;
+    //    }
+    //}
+
+    if (uart_vars.txCb != NULL){
+        uart_vars.txCb();
+        return KICK_SCHEDULER;
     }
 
     return DO_NOT_KICK_SCHEDULER;
