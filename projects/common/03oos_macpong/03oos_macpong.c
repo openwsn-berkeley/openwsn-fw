@@ -195,10 +195,6 @@ dagrank_t icmpv6rpl_getMyDAGrank(void) {
     return 0;
 }
 
-bool icmpv6rpl_daoSent(void) {
-    return TRUE;
-}
-
 void icmpv6rpl_setMyDAGrank(dagrank_t rank) { return; }
 
 void icmpv6rpl_updateMyDAGrankAndParentSelection(void) { return; }

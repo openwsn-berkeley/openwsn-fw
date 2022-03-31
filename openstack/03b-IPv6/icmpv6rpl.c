@@ -39,6 +39,9 @@ void icmpv6rpl_timer_DAO_task(void);
 
 void sendDAO(void);
 
+// Algorithm related
+uint16_t icmpv6rpl_getLinkMetric(uint8_t index);
+
 //=========================== public ==========================================
 
 /**
@@ -57,7 +60,7 @@ void icmpv6rpl_init(void) {
 
     //=== routing
     icmpv6rpl_vars.haveParent = FALSE;
-    icmpv6rpl_vars.daoSent = FALSE;
+    icmpv6rpl_vars.isReachable = FALSE;
 
     if (idmanager_getIsDAGroot() == TRUE) {
         icmpv6rpl_vars.myDAGrank = MINHOPRANKINCREASE;
@@ -389,7 +392,7 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection(void) {
                 // I havn't enough transmission to my parent, don't update.
                 return;
             }
-            rankIncrease = neighbors_getLinkMetric(icmpv6rpl_vars.ParentIndex);
+            rankIncrease = icmpv6rpl_getLinkMetric(icmpv6rpl_vars.ParentIndex);
             neighborRank = neighbors_getNeighborRank(icmpv6rpl_vars.ParentIndex);
             tentativeDAGrank = (uint32_t) neighborRank + rankIncrease;
             if (tentativeDAGrank > 65535) {
@@ -413,7 +416,7 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection(void) {
                 continue;
             }
             // get link cost to this neighbor
-            rankIncrease = neighbors_getLinkMetric(i);
+            rankIncrease = icmpv6rpl_getLinkMetric(i);
             // get this neighbor's advertized rank
             neighborRank = neighbors_getNeighborRank(i);
             // if this neighbor has unknown/infinite rank, pass on it
@@ -1033,15 +1036,78 @@ void sendDAO(void) {
     //===== send
     if (icmpv6_send(msg) == E_SUCCESS) {
         icmpv6rpl_vars.busySendingDAO = TRUE;
-        icmpv6rpl_vars.daoSent = TRUE;
+        icmpv6rpl_vars.isReachable = TRUE;
     } else {
         openqueue_freePacketBuffer(msg);
     }
 }
 
-bool icmpv6rpl_daoSent(void) {
+bool icmpv6rpl_isReachable(void)
+{
     if (idmanager_getIsDAGroot() == TRUE) {
         return TRUE;
     }
-    return icmpv6rpl_vars.daoSent;
+    return icmpv6rpl_vars.isReachable;
 }
+
+//===== managing routing info
+
+/**
+\brief return the link cost to a neighbor, expressed as a rank increase from this neighbor to this node
+
+This really belongs to icmpv6rpl but it would require a much more complex interface to the neighbor table
+*/
+
+uint16_t icmpv6rpl_getLinkMetric(uint8_t index) {
+    uint16_t rankIncrease;
+    uint32_t rankIncreaseIntermediary; // stores intermediary results of rankIncrease calculation
+
+    // we assume that this neighbor has already been checked for being in use
+    // calculate link cost to this neighbor
+    if (neighbors_getNumTxACK(index) == 0) {
+        if (neighbors_getNumTx(index) > DEFAULTLINKCOST) {
+            if (neighbors_getNumTx(index) < MINIMAL_NUM_TX) {
+                rankIncrease = (3 * neighbors_getNumTx(index) - 2) * MINHOPRANKINCREASE;
+            } else {
+                rankIncrease = 65535;
+            }
+        } else {
+            rankIncrease = (3 * DEFAULTLINKCOST - 2) * MINHOPRANKINCREASE;
+        }
+    } else {
+        //6TiSCH minimal draft using OF0 for rank computation: ((3*numTx/numTxAck)-2)*minHopRankIncrease
+        // numTx is on 8 bits, so scaling up 10 bits won't lead to saturation
+        // but this <<10 followed by >>10 does not provide any benefit either. Result is the same.
+        rankIncreaseIntermediary = (((uint32_t) neighbors_getNumTx(index)) << 10);
+        rankIncreaseIntermediary = (3 * rankIncreaseIntermediary * MINHOPRANKINCREASE) /
+                                   ((uint32_t) neighbors_getNumTxACK(index));
+        rankIncreaseIntermediary = rankIncreaseIntermediary - ((uint32_t)(2 * MINHOPRANKINCREASE) << 10);
+        // this could still overflow for numTx large and numTxAck small, Casting to 16 bits will yiel the least significant bits
+        if (rankIncreaseIntermediary >= (65536 << 10)) {
+            rankIncrease = 65535;
+        } else {
+            rankIncrease = (uint16_t)(rankIncreaseIntermediary >> 10);
+        }
+    }
+    return rankIncrease;
+}
+
+//======= debugging
+
+/**
+\brief Trigger this module to print status information, over serial.
+
+debugPrint_* functions are used by the openserial module to continuously print
+status information about several modules in the OpenWSN stack.
+
+\returns TRUE if this function printed something, FALSE otherwise.
+*/
+bool debugPrint_myDAGrank(void) {
+    uint16_t output;
+
+    output = 0;
+    output = icmpv6rpl_getMyDAGrank();
+    openserial_printStatus(STATUS_DAGRANK, (uint8_t * ) & output, sizeof(uint16_t));
+    return TRUE;
+}
+

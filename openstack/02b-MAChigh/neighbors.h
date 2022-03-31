@@ -27,11 +27,6 @@
 #endif
 #define MINIMAL_NUM_TX            16
 
-#define MAXDAGRANK                0xffff
-#define DEFAULTDAGRANK            MAXDAGRANK
-#define MINHOPRANKINCREASE        256  // default value in RPL and Minimal 6TiSCH draft
-#define DAGMAXRANKINCREASE        768  // per RFC6550 https://tools.ietf.org/html/rfc6550#section-8.2.2.4 point 3
-
 #define DEFAULTJOINPRIORITY       0xff
 
 //=========================== typedef =========================================
@@ -66,11 +61,15 @@ typedef struct {
 void neighbors_init(void);
 
 // getters
+uint8_t neighbors_getNumTxACK(uint8_t index);
+
+uint8_t neighbors_getNumTx(uint8_t index);
+
+uint8_t neighbors_getNumRx(uint8_t index);
+
 dagrank_t neighbors_getNeighborRank(uint8_t index);
 
 uint8_t neighbors_getNumNeighbors(void);
-
-uint16_t neighbors_getLinkMetric(uint8_t index);
 
 open_addr_t* neighbors_getKANeighbor(uint16_t kaPeriod);
 
