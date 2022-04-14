@@ -2,7 +2,7 @@
 #define OPENWSN_SOCK_H
 
 #include "opendefs.h"
-#include "async_types.h"
+#include "sock_types.h"
 
 #if defined (__WIN32__)
 #define EADDRINUSE      (1)
@@ -10,29 +10,6 @@
 #define ENOBUFS         (1)
 #define ENOTCONN        (1)
 #endif
-
-/**
- * @brief   A Common IP-based transport layer endpoint
- */
-struct _sock_tl_ep {
-    int family;
-    union {
-        uint8_t ipv6[16];
-    } addr;
-
-    uint16_t netif;
-    uint16_t port;
-};
-
-/**
- *  @brief  Type for a UDP endpoint
- */
-typedef struct _sock_tl_ep sock_udp_ep_t;
-
-/**
- * @brief   Type for a UDP sock object
- */
-typedef struct sock_udp sock_udp_t;
 
 /**
  * @brief   Initialize the internal UDP socket structures
@@ -68,7 +45,5 @@ int sock_udp_get_remote(sock_udp_t* sock, sock_udp_ep_t* ep);
  * @brief   Receives a UDP message from a remote end point
  */
 int sock_udp_recv(sock_udp_t* sock, void* data, size_t max_len, uint32_t timeout, sock_udp_ep_t* remote);
-
-#include "sock_types.h"
 
 #endif /* OPENWSN_SOCK_H */

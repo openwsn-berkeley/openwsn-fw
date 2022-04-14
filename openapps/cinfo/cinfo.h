@@ -1,5 +1,5 @@
-#ifndef __CINFO_H
-#define __CINFO_H
+#ifndef OPENWSN_CINFO_H
+#define OPENWSN_CINFO_H
 
 /**
 \addtogroup AppCoAP
@@ -30,4 +30,4 @@ void cinfo_init(void);
 \}
 */
 
-#endif
+#endif /* OPENWSN_CINFO_H */

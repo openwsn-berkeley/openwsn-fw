@@ -1,0 +1,2 @@
+C:\MinGW\bin\ar.exe qc libkernel.a CMakeFiles/kernel.dir/openos/scheduler.c.obj
+C:\MinGW\bin\ranlib.exe libkernel.a

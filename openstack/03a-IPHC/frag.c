@@ -30,6 +30,61 @@ This module implements 6LoWPAN fragmentation according to RFC 4944,
 #define DISPATCH_MASK       0x1F
 #define SIZE_MASK           0x7FF
 
+// 6LoWPAN fragment1 header
+typedef struct {
+    uint16_t dispatch_size_field;
+    uint16_t datagram_tag;
+} frag1_t;
+
+// 6LoWPAN fragmentN header
+typedef struct {
+    uint16_t dispatch_size_field;
+    uint16_t datagram_tag;
+    uint8_t datagram_offset;
+} fragn_t;
+
+/*
+ * Describes an entry in the fragment buffer, contains:
+ * - If lock is TRUE, fragment is scheduled for Tx (do not delete until cb sendDone!!).
+ * - The fragment offset value (multiple of 8)
+ * - The tag value used for this fragment.
+ * - The reassembly timer (60s after the arrival of the first fragment, reassembly must be completed).
+ * - A pointer to the fragment's location in the OpenQueue.
+ * - A pointer to the original unfragmented 6LoWPAN packet in the OpenQueue.
+*/
+BEGIN_PACK
+struct fragment_t {
+    bool lock;
+    uint8_t datagram_offset;
+    uint16_t datagram_tag;
+    opentimers_id_t reassembly_timer;
+    OpenQueueEntry_t *pFragment;
+    OpenQueueEntry_t *pOriginalMsg;
+};
+END_PACK
+
+typedef struct fragment_t fragment;
+
+// virtual reassembly buffer struct
+BEGIN_PACK
+typedef struct {
+    uint16_t tag;
+    uint16_t left;
+    uint16_t size;
+    opentimers_id_t forward_timer;
+    OpenQueueEntry_t *frag1;
+    open_addr_t nexthop;
+} vrb_t;
+END_PACK
+
+// state information for fragmentation
+typedef struct {
+    uint16_t global_tag;
+    vrb_t vrbs[NUM_OF_VRBS];
+    fragment fragmentBuf[FRAGMENT_BUFFER_SIZE];
+    opentimers_id_t frag_timerq[NUM_OF_CONCURRENT_TIMERS];
+} frag_vars_t;
+
 //============================= macros ========================================
 
 #define LOCK(fragment)      ((fragment).lock = TRUE)
@@ -45,6 +100,7 @@ This module implements 6LoWPAN fragmentation according to RFC 4944,
             memset(&frag_vars.fragmentBuf[i], 0, sizeof(fragment)); \
         } \
     } while (0)
+
 
 //=========================== variables =======================================
 
@@ -73,6 +129,8 @@ owerror_t frag_timerq_enqueue(opentimers_id_t id);
 owerror_t frag_timerq_remove(opentimers_id_t id);
 
 opentimers_id_t frag_timerq_dequeue(void);
+
+
 //============================= public ========================================
 
 void frag_init() {

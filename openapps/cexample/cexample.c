@@ -4,7 +4,7 @@
 
 #include "config.h"
 
-#if OPENWSN_EXAMPLE_C
+#if OPENWSN_CEXAMPLE_C
 
 #include "opendefs.h"
 #include "cexample.h"
@@ -25,9 +25,12 @@
 #define CEXAMPLEPERIOD  10000
 #define PAYLOADLEN      40
 
-const uint8_t cexample_path0[] = "ex";
-
 //=========================== variables =======================================
+
+static const uint8_t ipAddr_motesEecs[] = {0x20, 0x01, 0x04, 0x70, 0x00, 0x66, 0x00, 0x19,
+                                           0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02};
+
+static const uint8_t cexample_path0[] = "ex";
 
 cexample_vars_t cexample_vars;
 
@@ -52,7 +55,7 @@ void cexample_init(void) {
 
     // prepare the resource descriptor for the /ex path
     cexample_vars.desc.path0len = sizeof(cexample_path0) - 1;
-    cexample_vars.desc.path0val = (uint8_t * )(&cexample_path0);
+    cexample_vars.desc.path0val = (uint8_t *) (&cexample_path0);
     cexample_vars.desc.path1len = 0;
     cexample_vars.desc.path1val = NULL;
     cexample_vars.desc.componentID = COMPONENT_CEXAMPLE;
@@ -172,7 +175,7 @@ void cexample_task_cb(void) {
     pkt->l4_destination_port = WKP_UDP_COAP;
     pkt->l3_destinationAdd.type = ADDR_128B;
     // does the ipAddr_motesEecs still work?
-    memcpy(&pkt->l3_destinationAdd.addr_128b[0], &ipAddr_motesEecs, 16);
+    memcpy(&pkt->l3_destinationAdd.addr_type.addr_128b[0], &ipAddr_motesEecs, 16);
 
     // send
     outcome = coap_send(

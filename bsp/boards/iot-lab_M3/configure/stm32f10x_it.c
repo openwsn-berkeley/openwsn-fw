@@ -28,8 +28,6 @@
 #include "spi.h"
 #include "radio.h"
 #include "uart.h"
-#include "debugpins.h"
-#include "rcc.h"
 #include "board.h"
 
 /** @addtogroup STM32F10x_StdPeriph_Template

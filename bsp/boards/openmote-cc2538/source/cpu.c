@@ -48,9 +48,9 @@
 //
 //*****************************************************************************
 #if defined(__GNUC__)
+
 uint32_t __attribute__((naked))
-CPUcpsid(void)
-{
+CPUcpsid(void) {
     uint32_t ui32Ret;
 
     //
@@ -59,7 +59,7 @@ CPUcpsid(void)
     __asm("    mrs     r0, PRIMASK\n"
           "    cpsid   i\n"
           "    bx      lr\n"
-          : "=r" (ui32Ret));
+    : "=r" (ui32Ret));
 
     //
     // The return is handled in the inline assembly, but the compiler will
@@ -67,8 +67,9 @@ CPUcpsid(void)
     // that this does not result in any code being produced because of the
     // naked attribute).
     //
-    return(ui32Ret);
+    return (ui32Ret);
 }
+
 #endif
 #if (__ICCARM__)
 uint32_t
@@ -130,9 +131,9 @@ CPUcpsid(void)
 //
 //*****************************************************************************
 #if defined(__GNUC__)
+
 uint32_t __attribute__((naked))
-CPUprimask(void)
-{
+CPUprimask(void) {
     uint32_t ui32Ret;
 
     //
@@ -140,7 +141,7 @@ CPUprimask(void)
     //
     __asm("    mrs     r0, PRIMASK\n"
           "    bx      lr\n"
-          : "=r" (ui32Ret));
+    : "=r" (ui32Ret));
 
     //
     // The return is handled in the inline assembly, but the compiler will
@@ -148,8 +149,9 @@ CPUprimask(void)
     // that this does not result in any code being produced because of the
     // naked attribute).
     //
-    return(ui32Ret);
+    return (ui32Ret);
 }
+
 #endif
 #if (__ICCARM__)
 uint32_t
@@ -208,9 +210,9 @@ CPUprimask(void)
 //
 //*****************************************************************************
 #if defined(__GNUC__)
+
 uint32_t __attribute__((naked))
-CPUcpsie(void)
-{
+CPUcpsie(void) {
     uint32_t ui32Ret;
 
     //
@@ -219,7 +221,7 @@ CPUcpsie(void)
     __asm("    mrs     r0, PRIMASK\n"
           "    cpsie   i\n"
           "    bx      lr\n"
-          : "=r" (ui32Ret));
+    : "=r" (ui32Ret));
 
     //
     // The return is handled in the inline assembly, but the compiler will
@@ -227,8 +229,9 @@ CPUcpsie(void)
     // that this does not result in any code being produced because of the
     // naked attribute).
     //
-    return(ui32Ret);
+    return (ui32Ret);
 }
+
 #endif
 #if (__ICCARM__)
 uint32_t
@@ -289,15 +292,16 @@ CPUcpsie(void)
 //
 //*****************************************************************************
 #if defined(__GNUC__)
+
 void __attribute__((naked))
-CPUwfi(void)
-{
+CPUwfi(void) {
     //
     // Wait for the next interrupt.
     //
     __asm("    wfi\n"
           "    bx      lr\n");
 }
+
 #endif
 #if (__ICCARM__)
 void
@@ -337,15 +341,16 @@ CPUwfi(void)
 //
 //*****************************************************************************
 #if defined(__GNUC__)
+
 void __attribute__((naked))
-CPUwfe(void)
-{
+CPUwfe(void) {
     //
     // Wait for the next event
     //
     __asm("    wfe\n"
           "    bx      lr\n");
 }
+
 #endif
 #if (__ICCARM__)
 void
@@ -385,15 +390,16 @@ CPUwfe(void)
 //
 //*****************************************************************************
 #if defined(__GNUC__)
+
 void __attribute__((naked))
-CPUsev(void)
-{
+CPUsev(void) {
     //
     // Send event
     //
     __asm("    sev\n"
           "    bx      lr\n");
 }
+
 #endif
 #if (__ICCARM__)
 void
@@ -433,9 +439,9 @@ CPUsev(void)
 //
 //*****************************************************************************
 #if defined(__GNUC__)
+
 void __attribute__((naked))
-CPUbasepriSet(uint32_t ui32NewBasepri)
-{
+CPUbasepriSet(uint32_t ui32NewBasepri) {
 
     //
     // Set the BASEPRI register
@@ -443,6 +449,7 @@ CPUbasepriSet(uint32_t ui32NewBasepri)
     __asm("    msr     BASEPRI, r0\n"
           "    bx      lr\n");
 }
+
 #endif
 #if (__ICCARM__)
 void
@@ -482,9 +489,9 @@ CPUbasepriSet(uint32_t ui32NewBasepri)
 //
 //*****************************************************************************
 #if defined(__GNUC__)
+
 uint32_t __attribute__((naked))
-CPUbasepriGet(void)
-{
+CPUbasepriGet(void) {
     uint32_t ui32Ret;
 
     //
@@ -492,7 +499,7 @@ CPUbasepriGet(void)
     //
     __asm("    mrs     r0, BASEPRI\n"
           "    bx      lr\n"
-          : "=r" (ui32Ret));
+    : "=r" (ui32Ret));
 
     //
     // The return is handled in the inline assembly, but the compiler will
@@ -500,8 +507,9 @@ CPUbasepriGet(void)
     // that this does not result in any code being produced because of the
     // naked attribute).
     //
-    return(ui32Ret);
+    return (ui32Ret);
 }
+
 #endif
 #if (__ICCARM__)
 uint32_t

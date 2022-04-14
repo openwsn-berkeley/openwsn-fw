@@ -1,0 +1,9 @@
+C:/Users/fmaksimo/Documents/openmote/openwsn-fw/CMakeFiles/def-parser.dir
+C:/Users/fmaksimo/Documents/openmote/openwsn-fw/CMakeFiles/edit_cache.dir
+C:/Users/fmaksimo/Documents/openmote/openwsn-fw/CMakeFiles/rebuild_cache.dir
+C:/Users/fmaksimo/Documents/openmote/openwsn-fw/bsp/boards/openmote-cc2538/CMakeFiles/bsp.dir
+C:/Users/fmaksimo/Documents/openmote/openwsn-fw/bsp/boards/openmote-cc2538/CMakeFiles/edit_cache.dir
+C:/Users/fmaksimo/Documents/openmote/openwsn-fw/bsp/boards/openmote-cc2538/CMakeFiles/rebuild_cache.dir
+C:/Users/fmaksimo/Documents/openmote/openwsn-fw/projects/common/01bsp_radio_tx/CMakeFiles/bsp_radio_tx.dir
+C:/Users/fmaksimo/Documents/openmote/openwsn-fw/projects/common/01bsp_radio_tx/CMakeFiles/edit_cache.dir
+C:/Users/fmaksimo/Documents/openmote/openwsn-fw/projects/common/01bsp_radio_tx/CMakeFiles/rebuild_cache.dir

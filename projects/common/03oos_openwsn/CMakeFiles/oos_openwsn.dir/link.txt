@@ -1,0 +1,3 @@
+"C:\Program Files\CMake\bin\cmake.exe" -E rm -f CMakeFiles\oos_openwsn.dir/objects.a
+C:\MinGW\bin\ar.exe qc CMakeFiles\oos_openwsn.dir/objects.a @CMakeFiles\oos_openwsn.dir\objects1.rsp
+C:\MinGW\bin\gcc.exe -g -Wl,--whole-archive CMakeFiles\oos_openwsn.dir/objects.a -Wl,--no-whole-archive -o oos_openwsn.exe -Wl,--out-implib,liboos_openwsn.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\oos_openwsn.dir\linklibs.rsp

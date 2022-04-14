@@ -1,0 +1,3 @@
+"C:\Program Files\CMake\bin\cmake.exe" -E rm -f CMakeFiles\bsp_radio_tx.dir/objects.a
+C:\MinGW\bin\ar.exe qc CMakeFiles\bsp_radio_tx.dir/objects.a @CMakeFiles\bsp_radio_tx.dir\objects1.rsp
+C:\MinGW\bin\gcc.exe -g -Wl,--whole-archive CMakeFiles\bsp_radio_tx.dir/objects.a -Wl,--no-whole-archive -o bsp_radio_tx.exe -Wl,--out-implib,libbsp_radio_tx.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\bsp_radio_tx.dir\linklibs.rsp

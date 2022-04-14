@@ -55,13 +55,13 @@ extern "C"
     
 extern uint8_t CCMAuthEncryptStart (bool bEncrypt,
                                     uint8_t ui8Mval, 
-                                    uint8_t *pui8N, 
-                                    uint8_t *pui8M, 
+                                    const uint8_t *pui8N,
+                                    const uint8_t *pui8M,
                                     uint16_t ui16LenM, 
-                                    uint8_t *pui8A, 
+                                    const uint8_t *pui8A,
                                     uint16_t ui16LenA, 
                                     uint8_t ui8KeyLocation, 
-                                    uint8_t *pui8Cstate, 
+                                    const uint8_t *pui8Cstate,
                                     uint8_t ui8CCMLVal, 
                                     uint8_t ui8IntEnable);
 extern uint8_t CCMAuthEncryptCheckResult(void);
@@ -70,18 +70,18 @@ extern uint8_t CCMAuthEncryptGetResult(uint8_t ui8Mval,
                                        uint8_t *pui8Cstate);
 extern uint8_t CCMInvAuthDecryptStart (bool bDecrypt,
                                        uint8_t ui8Mval, 
-                                       uint8_t *pui8N, 
-                                       uint8_t *pui8C, 
+                                       const uint8_t *pui8N,
+                                       const uint8_t *pui8C,
                                        uint16_t ui16LenC, 
-                                       uint8_t *pui8A, 
+                                       const uint8_t *pui8A,
                                        uint16_t ui16LenA,
                                        uint8_t ui8KeyLocation, 
-                                       uint8_t *pui8Cstate, 
+                                       const uint8_t *pui8Cstate,
                                        uint8_t ui8CCMLVal, 
                                        uint8_t ui8IntEnable);
 extern uint8_t CCMInvAuthDecryptCheckResult(void);
 extern uint8_t CCMInvAuthDecryptGetResult(uint8_t ui8Mval, 
-                                          uint8_t *pui8C, 
+                                          const uint8_t *pui8C,
                                           uint16_t ui16LenC, 
                                           uint8_t *pui8Cstate);
     

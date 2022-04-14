@@ -5,10 +5,6 @@
 */
 
 #include "config.h"
-
-#if BOARD_SENSORS_ENABLED
-
-#include "opendefs.h"
 #include "opensensors.h"
 #include "sensors.h"
 
@@ -20,11 +16,11 @@ opensensors_vars_t opensensors_vars;
 
 //=========================== prototypes ======================================
 
-void opensensors_register(
-        uint8_t sensorType
-);
+void opensensors_register(uint8_t sensorType);
 
 //=========================== public ==========================================
+
+#if BOARD_SENSORS_ENABLED
 
 /**
    \brief Initialize OpenSensors

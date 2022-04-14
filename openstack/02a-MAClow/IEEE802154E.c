@@ -19,13 +19,44 @@
 #include "openrandom.h"
 #include "msf.h"
 
-//=========================== definition ======================================
+//=========================== typedefs ========================================
+
+/**
+ * @brief A IEEE 802.15.4E status entry. The struct is periodically transmitted over the serial port.
+ */
+BEGIN_PACK
+typedef struct {
+    uint8_t numSyncPkt;              // how many times synchronized on a non-ACK packet
+    uint8_t numSyncAck;              // how many times synchronized on an ACK
+    int16_t minCorrection;           // minimum time correction
+    int16_t maxCorrection;           // maximum time correction
+    uint8_t numDeSync;               // number of times a desync happened
+    uint32_t numTicsOn;              // mac dutyCycle
+    uint32_t numTicsTotal;           // total tics for which the dutycycle is computed
+} ieee154eStatusEntry_t;
+END_PACK
+
+/**
+ * @brief A IEEE 802.15.4E status context structure.
+ */
+BEGIN_PACK
+typedef struct {
+    statusCtx_t asnState;
+    statusCtx_t isSyncState;
+    statusCtx_t macState;
+} ieee154eStatusCtx_t;
+END_PACK
 
 //=========================== variables =======================================
 
-ieee154e_vars_t ieee154e_vars;
-ieee154e_stats_t ieee154e_stats;
-ieee154e_dbg_t ieee154e_dbg;
+ieee154eVars_t ieee154e_vars;
+ieee154eStatusEntry_t ieee154e_status_entry;
+ieee154eStatusCtx_t ieee154e_status_ctx;
+
+#if PYTHON_BOARD
+bool passed_msgBarrier;
+bool passed_ackBarrier;
+#endif
 
 //=========================== prototypes ======================================
 
@@ -119,7 +150,7 @@ void ieee154e_resetAsn(void);
 
 void ieee154e_syncSlotOffset(void);
 
-void asnStoreFromEB(uint8_t *asn);
+void asnStoreFromEB(const uint8_t *asn);
 
 void joinPriorityStoreFromEB(uint8_t jp);
 
@@ -143,13 +174,9 @@ void updateStats(PORT_SIGNED_INT_WIDTH timeCorrection);
 // misc
 uint8_t calculateFrequency(uint8_t channelOffset);
 
-void changeState(ieee154e_state_t newstate);
+void changeState(ieee154eState_t newstate);
 
 void endSlot(void);
-
-bool debugPrint_asn(void);
-
-bool debugPrint_isSync(void);
 
 // interrupts
 void isr_ieee154e_newSlot(opentimers_id_t id);
@@ -157,6 +184,13 @@ void isr_ieee154e_newSlot(opentimers_id_t id);
 void isr_ieee154e_timer(opentimers_id_t id);
 
 void isr_ieee154e_inhibitStart(opentimers_id_t id);
+
+// status printing
+static bool statusPrint_asn(void);
+
+static bool statusPrint_isSync(void);
+
+static bool statusPrint_macStats(void);
 
 //=========================== admin ===========================================
 
@@ -169,8 +203,8 @@ during boot-up.
 void ieee154e_init(void) {
 
     // initialize variables
-    memset(&ieee154e_vars, 0, sizeof(ieee154e_vars_t));
-    memset(&ieee154e_dbg, 0, sizeof(ieee154e_dbg_t));
+    memset(&ieee154e_vars, 0, sizeof(ieee154eVars_t));
+    memset(&ieee154e_status_ctx, 0, sizeof(ieee154eStatusCtx_t));
 
     // set singleChannel to 0 to enable channel hopping.
 #if IEEE802154E_SINGLE_CHANNEL
@@ -193,7 +227,7 @@ void ieee154e_init(void) {
     }
 
     resetStats();
-    ieee154e_stats.numDeSync = 0;
+    ieee154e_status_entry.numDeSync = 0;
 
     // switch radio on
     radio_rfOn();
@@ -214,6 +248,22 @@ void ieee154e_init(void) {
     );
     IEEE802154_security_init();
     ieee154e_vars.serialInhibitTimerId = opentimers_create(TIMER_INHIBIT, TASKPRIO_NONE);
+
+    // set openserial callbacks
+    openserial_setAsnCb(ieee154e_getAsn);
+
+    // set status print contexts
+    ieee154e_status_ctx.asnState.id = STATUS_ASN;
+    ieee154e_status_ctx.asnState.statusPrint_cb = statusPrint_asn;
+    openserial_appendStatusCtx(&ieee154e_status_ctx.asnState);
+
+    ieee154e_status_ctx.isSyncState.id = STATUS_ISSYNC;
+    ieee154e_status_ctx.isSyncState.statusPrint_cb = statusPrint_isSync;
+    openserial_appendStatusCtx(&ieee154e_status_ctx.isSyncState);
+
+    ieee154e_status_ctx.macState.id = STATUS_MACSTATS;
+    ieee154e_status_ctx.macState.statusPrint_cb = statusPrint_macStats;
+    openserial_appendStatusCtx(&ieee154e_status_ctx.macState);
 }
 
 //=========================== public ==========================================
@@ -227,16 +277,21 @@ void ieee154e_init(void) {
 */
 PORT_TIMER_WIDTH ieee154e_asnDiff(asn_t *someASN) {
     PORT_TIMER_WIDTH diff;
+
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
+
     if (ieee154e_vars.asn.byte4 != someASN->byte4) {
+
         ENABLE_INTERRUPTS();
+
         return (PORT_TIMER_WIDTH) 0xFFFFFFFF;;
     }
 
-    diff = 0;
     if (ieee154e_vars.asn.bytes2and3 == someASN->bytes2and3) {
+
         ENABLE_INTERRUPTS();
+
         return ieee154e_vars.asn.bytes0and1 - someASN->bytes0and1;
     } else if (ieee154e_vars.asn.bytes2and3 - someASN->bytes2and3 == 1) {
         diff = ieee154e_vars.asn.bytes0and1;
@@ -245,7 +300,9 @@ PORT_TIMER_WIDTH ieee154e_asnDiff(asn_t *someASN) {
     } else {
         diff = (PORT_TIMER_WIDTH) 0xFFFFFFFF;;
     }
+
     ENABLE_INTERRUPTS();
+
     return diff;
 }
 
@@ -329,6 +386,13 @@ void ieee154e_orderToASNStructure(uint8_t *in, asn_t *val_asn) {
 This function executes in ISR mode, when the new slot timer fires.
 */
 void isr_ieee154e_newSlot(opentimers_id_t id) {
+    (void) id;
+
+#if PYTHON_BOARD
+    board_barrier_slot_sync();
+    passed_msgBarrier = FALSE;
+    passed_ackBarrier = FALSE;
+#endif
 
     ieee154e_vars.startOfSlotReference = opentimers_getCurrentCompareValue();
 
@@ -346,6 +410,7 @@ void isr_ieee154e_newSlot(opentimers_id_t id) {
             changeIsSync(TRUE);
             ieee154e_resetAsn();
             ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
+            endSlot();
         } else {
             activity_synchronize_newSlot();
         }
@@ -356,7 +421,6 @@ void isr_ieee154e_newSlot(opentimers_id_t id) {
 #endif
         activity_ti1ORri1();
     }
-    ieee154e_dbg.num_newSlot++;
 }
 
 /**
@@ -365,6 +429,8 @@ void isr_ieee154e_newSlot(opentimers_id_t id) {
 This function executes in ISR mode, when the FSM timer fires.
 */
 void isr_ieee154e_timer(opentimers_id_t id) {
+    (void) id;
+
     switch (ieee154e_vars.state) {
         case S_TXDATAOFFSET:
             activity_ti2();
@@ -437,7 +503,6 @@ void isr_ieee154e_timer(opentimers_id_t id) {
             endSlot();
             break;
     }
-    ieee154e_dbg.num_timer++;
 }
 
 /**
@@ -448,6 +513,8 @@ This needs to happen
 This function executes in ISR mode.
 */
 void isr_ieee154e_inhibitStart(opentimers_id_t id) {
+    (void) id;
+
     // inhibit serial activity
     openserial_inhibitStart(); // activity_inhibitSerial
 }
@@ -488,14 +555,13 @@ void ieee154e_startOfFrame(PORT_TIMER_WIDTH capturedTime) {
             default:
                 // log the error
                 LOG_ERROR(COMPONENT_IEEE802154E, ERR_WRONG_STATE_IN_NEWSLOT,
-                          (errorparameter_t)ieee154e_vars.state,
-                          (errorparameter_t)ieee154e_vars.slotOffset);
+                          (errorparameter_t) ieee154e_vars.state,
+                          (errorparameter_t) ieee154e_vars.slotOffset);
                 // abort
                 endSlot();
                 break;
         }
     }
-    ieee154e_dbg.num_startOfFrame++;
 }
 
 /**
@@ -532,7 +598,6 @@ void ieee154e_endOfFrame(PORT_TIMER_WIDTH capturedTime) {
                 break;
         }
     }
-    ieee154e_dbg.num_endOfFrame++;
 }
 
 //======= misc
@@ -545,12 +610,12 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_asn(void) {
+static bool statusPrint_asn(void) {
     asn_t output;
     output.byte4 = ieee154e_vars.asn.byte4;
     output.bytes2and3 = ieee154e_vars.asn.bytes2and3;
     output.bytes0and1 = ieee154e_vars.asn.bytes0and1;
-    openserial_printStatus(STATUS_ASN, (uint8_t * ) & output, sizeof(output));
+    openserial_printStatus(STATUS_ASN, (uint8_t *) &output, sizeof(output));
     return TRUE;
 }
 
@@ -562,10 +627,10 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_isSync(void) {
+static bool statusPrint_isSync(void) {
     uint8_t output = 0;
     output = ieee154e_vars.isSync;
-    openserial_printStatus(STATUS_ISSYNC, (uint8_t * ) & output, sizeof(uint8_t));
+    openserial_printStatus(STATUS_ISSYNC, (uint8_t *) &output, sizeof(uint8_t));
     return TRUE;
 }
 
@@ -577,9 +642,9 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_macStats(void) {
+static bool statusPrint_macStats(void) {
     // send current stats over serial
-    openserial_printStatus(STATUS_MACSTATS, (uint8_t * ) & ieee154e_stats, sizeof(ieee154e_stats_t));
+    openserial_printStatus(STATUS_MACSTATS, (uint8_t *) &ieee154e_status_entry, sizeof(ieee154eStatusEntry_t));
     return TRUE;
 }
 
@@ -626,8 +691,8 @@ port_INLINE void activity_synchronize_newSlot(void) {
         radio_rxNow();
     } else {
         // I'm listening last slot
-        ieee154e_stats.numTicsOn += ieee154e_vars.slotDuration;
-        ieee154e_stats.numTicsTotal += ieee154e_vars.slotDuration;
+        ieee154e_status_entry.numTicsOn += ieee154e_vars.slotDuration;
+        ieee154e_status_entry.numTicsTotal += ieee154e_vars.slotDuration;
 
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
         sctimer_setCapture(ACTION_RX_SFD_DONE);
@@ -688,6 +753,18 @@ port_INLINE void activity_synchronize_newSlot(void) {
             isr_ieee154e_inhibitStart               // callback
     );
 
+#if PYTHON_BOARD
+    if (!passed_msgBarrier) {
+        board_barrier_msg_sync();
+        passed_msgBarrier = TRUE;
+    }
+
+    if (!passed_ackBarrier) {
+        board_barrier_ack_sync();
+        passed_ackBarrier = TRUE;
+    }
+#endif
+
     openserial_inhibitStop();
 }
 
@@ -714,6 +791,8 @@ port_INLINE void activity_synchronize_startOfFrame(PORT_TIMER_WIDTH capturedTime
 }
 
 port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) {
+    (void) capturedTime;
+
     ieee802154_header_iht ieee802514_header;
     uint16_t lenIE;
 
@@ -731,8 +810,8 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
     changeState(S_SYNCPROC);
 
     // get a buffer to put the (received) frame in
-    ieee154e_vars.dataReceived = openqueue_getFreePacketBuffer(COMPONENT_IEEE802154E);
-    if (ieee154e_vars.dataReceived == NULL) {
+
+    if ((ieee154e_vars.dataReceived = openqueue_getFreePacketBuffer(COMPONENT_IEEE802154E)) == NULL) {
         LOG_ERROR(COMPONENT_IEEE802154E, ERR_NO_FREE_PACKET_BUFFER, (errorparameter_t) 0, (errorparameter_t) 0);
         // abort
         return;
@@ -755,7 +834,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
         // retrieve the received data frame from the radio's Rx buffer
         ieee154e_vars.dataReceived->payload = &(ieee154e_vars.dataReceived->packet[FIRST_FRAME_BYTE]);
         radio_getReceivedFrame(ieee154e_vars.dataReceived->payload,
-                               (uint8_t * ) & ieee154e_vars.dataReceived->length,
+                               (uint8_t *) &ieee154e_vars.dataReceived->length,
                                sizeof(ieee154e_vars.dataReceived->packet),
                                &ieee154e_vars.dataReceived->l1_rssi,
                                &ieee154e_vars.dataReceived->l1_lqi,
@@ -846,8 +925,8 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
         changeIsSync(TRUE);
         // log the info
         LOG_SUCCESS(COMPONENT_IEEE802154E, ERR_SYNCHRONIZED,
-                (errorparameter_t) ieee154e_vars.slotOffset,
-                (errorparameter_t) 0);
+                    (errorparameter_t) ieee154e_vars.slotOffset,
+                    (errorparameter_t) ieee802514_header.src.addr_type.addr_64b[7]);
 
         // send received EB up the stack so RES can update statistics (synchronizing)
         notif_receive(ieee154e_vars.dataReceived);
@@ -873,17 +952,17 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
     changeState(S_SYNCLISTEN);
 }
 
-port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
+port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t *pkt, uint16_t *lenIE) {
     uint8_t i;
-    if (isValidEbFormat(pkt, lenIE) == TRUE){
+    if (isValidEbFormat(pkt, lenIE) == TRUE) {
         // At this point, ASN and frame length are known and the current slotoffset can be inferred
         ieee154e_syncSlotOffset();
         schedule_syncSlotOffset(ieee154e_vars.slotOffset);
         ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
 
         /* infer the asnOffset based on the fact that ieee154e_vars.freq = 11 + (asnOffset + channelOffset)%16 */
-        for (i = 0; i < NUM_CHANNELS; i++){
-            if ((ieee154e_vars.freq - 11) == ieee154e_vars.chTemplate[i]){
+        for (i = 0; i < NUM_CHANNELS; i++) {
+            if ((ieee154e_vars.freq - 11) == ieee154e_vars.chTemplate[i]) {
                 break;
             }
         }
@@ -891,7 +970,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
         return TRUE;
     } else {
         // wrong eb format
-        LOG_ERROR(COMPONENT_IEEE802154E, ERR_UNSUPPORTED_FORMAT, (errorparameter_t)3, (errorparameter_t)0);
+        LOG_ERROR(COMPONENT_IEEE802154E, ERR_UNSUPPORTED_FORMAT, (errorparameter_t) 3, (errorparameter_t) 0);
         return FALSE;
     }
 }
@@ -901,7 +980,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
 port_INLINE void activity_ti1ORri1(void) {
     cellType_t cellType;
     open_addr_t neighbor;
-    uint8_t i;
+    uint32_t i;
     uint8_t asn[5];
     uint8_t join_priority;
     bool couldSendEB = FALSE;
@@ -928,11 +1007,11 @@ port_INLINE void activity_ti1ORri1(void) {
 
             // log the error
             LOG_ERROR(COMPONENT_IEEE802154E, ERR_DESYNCHRONIZED,
-                      (errorparameter_t)ieee154e_vars.slotOffset,
-                      (errorparameter_t)0);
+                      (errorparameter_t) ieee154e_vars.slotOffset,
+                      (errorparameter_t) 0);
 
             // update the statistics
-            ieee154e_stats.numDeSync++;
+            ieee154e_status_entry.numDeSync++;
 
             // abort
             endSlot();
@@ -971,8 +1050,12 @@ port_INLINE void activity_ti1ORri1(void) {
             if (ieee154e_vars.nextActiveSlotOffset > ieee154e_vars.slotOffset) {
                 ieee154e_vars.numOfSleepSlots = ieee154e_vars.nextActiveSlotOffset - ieee154e_vars.slotOffset;
             } else {
+#if !PYTHON_BOARD
                 ieee154e_vars.numOfSleepSlots =
                         schedule_getFrameLength() + ieee154e_vars.nextActiveSlotOffset - ieee154e_vars.slotOffset;
+#else
+                ieee154e_vars.numOfSleepSlots = 1;
+#endif
             }
 
             opentimers_scheduleAbsolute(
@@ -1174,9 +1257,9 @@ port_INLINE void activity_ti2(void) {
 
     // add 2 CRC bytes only to the local copy as we end up here for each retransmission
 
-    OpenQueueEntry_t* localCopy;
+    OpenQueueEntry_t *localCopy;
     localCopy = &ieee154e_vars.localCopyForTransmission;
-    if (packetfunctions_reserveFooter(&localCopy, 2) == E_FAIL){
+    if (packetfunctions_reserveFooter(&localCopy, 2) == E_FAIL) {
         // packet too big, will never successfully be transmitted, drop immediately
         // set retries to 1, so after it get decremented in endSlot, we drop the packet
         ieee154e_vars.dataToSend->l2_retriesLeft = 1;
@@ -1230,8 +1313,8 @@ port_INLINE void activity_ti3(void) {
 port_INLINE void activity_tie2(void) {
     // log the error
     LOG_ERROR(COMPONENT_IEEE802154E, ERR_WDRADIO_OVERFLOWS,
-              (errorparameter_t)ieee154e_vars.state,
-              (errorparameter_t)ieee154e_vars.slotOffset);
+              (errorparameter_t) ieee154e_vars.state,
+              (errorparameter_t) ieee154e_vars.slotOffset);
 
     // abort
     endSlot();
@@ -1338,6 +1421,13 @@ port_INLINE void activity_ti5(PORT_TIMER_WIDTH capturedTime) {
                 isr_ieee154e_timer                                // callback
         );
 #endif
+
+#if PYTHON_BOARD
+        if (!passed_msgBarrier) {
+            board_barrier_msg_sync();
+            passed_msgBarrier = TRUE;
+        }
+#endif
     } else {
         // indicate succesful Tx to schedule to keep statistics
         schedule_indicateTx(&ieee154e_vars.asn, TRUE);
@@ -1407,6 +1497,13 @@ port_INLINE void activity_ti7(void) {
             TIME_TICS,                                        // timetype
             isr_ieee154e_timer                                // callback
     );
+#endif
+
+#if PYTHON_BOARD
+    if (!passed_ackBarrier) {
+        board_barrier_ack_sync();
+        passed_ackBarrier = TRUE;
+    }
 #endif
 }
 
@@ -1525,7 +1622,7 @@ port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
         ieee154e_vars.ackReceived->payload = &(ieee154e_vars.ackReceived->packet[FIRST_FRAME_BYTE]);
         radio_getReceivedFrame(
                 ieee154e_vars.ackReceived->payload,
-                (uint8_t * ) & ieee154e_vars.ackReceived->length,
+                (uint8_t *) &ieee154e_vars.ackReceived->length,
                 sizeof(ieee154e_vars.ackReceived->packet),
                 &ieee154e_vars.ackReceived->l1_rssi,
                 &ieee154e_vars.ackReceived->l1_lqi,
@@ -1669,6 +1766,13 @@ port_INLINE void activity_ri3(void) {
             isr_ieee154e_timer                                // callback
     );
 #endif
+
+#if PYTHON_BOARD
+    if (!passed_msgBarrier) {
+        board_barrier_msg_sync();
+        passed_msgBarrier = TRUE;
+    }
+#endif
 }
 
 port_INLINE void activity_rie2(void) {
@@ -1765,7 +1869,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
         ieee154e_vars.dataReceived->payload = &(ieee154e_vars.dataReceived->packet[FIRST_FRAME_BYTE]);
         radio_getReceivedFrame(
                 ieee154e_vars.dataReceived->payload,
-                (uint8_t * ) & ieee154e_vars.dataReceived->length,
+                (uint8_t *) &ieee154e_vars.dataReceived->length,
                 sizeof(ieee154e_vars.dataReceived->packet),
                 &ieee154e_vars.dataReceived->l1_rssi,
                 &ieee154e_vars.dataReceived->l1_lqi,
@@ -1861,7 +1965,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
         }
 
         // record the timeCorrection and print out at end of slot
-        ieee154e_vars.dataReceived->l2_timeCorrection = (PORT_SIGNED_INT_WIDTH)(
+        ieee154e_vars.dataReceived->l2_timeCorrection = (PORT_SIGNED_INT_WIDTH) (
                 (PORT_SIGNED_INT_WIDTH) TsTxOffset - (PORT_SIGNED_INT_WIDTH) ieee154e_vars.syncCapturedTime);
 
         // check if ack requested
@@ -2006,7 +2110,7 @@ port_INLINE void activity_ri6(void) {
     ieee154e_vars.ackToSend = openqueue_getFreePacketBuffer(COMPONENT_IEEE802154E);
     if (ieee154e_vars.ackToSend == NULL) {
         // log the error
-        LOG_ERROR(COMPONENT_IEEE802154E, ERR_NO_FREE_PACKET_BUFFER, (errorparameter_t)0, (errorparameter_t)0);
+        LOG_ERROR(COMPONENT_IEEE802154E, ERR_NO_FREE_PACKET_BUFFER, (errorparameter_t) 0, (errorparameter_t) 0);
         // indicate we received a packet anyway (we don't want to loose any)
         notif_receive(ieee154e_vars.dataReceived);
         // free local variable
@@ -2022,7 +2126,7 @@ port_INLINE void activity_ri6(void) {
 
     // calculate the time timeCorrection (this is the time the sender is off w.r.t to this node. A negative number means
     // the sender is too late.
-    ieee154e_vars.timeCorrection = (PORT_SIGNED_INT_WIDTH)(
+    ieee154e_vars.timeCorrection = (PORT_SIGNED_INT_WIDTH) (
             (PORT_SIGNED_INT_WIDTH) TsTxOffset - (PORT_SIGNED_INT_WIDTH) ieee154e_vars.syncCapturedTime);
 
     // prepend the IEEE802.15.4 header to the ACK
@@ -2051,7 +2155,7 @@ port_INLINE void activity_ri6(void) {
         }
     }
     // space for 2-byte CRC
-    if (packetfunctions_reserveFooter(&ieee154e_vars.ackToSend, 2) == E_FAIL){
+    if (packetfunctions_reserveFooter(&ieee154e_vars.ackToSend, 2) == E_FAIL) {
         endSlot();
         return;
     }
@@ -2188,6 +2292,13 @@ port_INLINE void activity_ri9(PORT_TIMER_WIDTH capturedTime) {
     // clear local variable
     ieee154e_vars.dataReceived = NULL;
 
+#if PYTHON_BOARD
+    if (!passed_ackBarrier) {
+        board_barrier_ack_sync();
+        passed_ackBarrier = TRUE;
+    }
+#endif
+
     // official end of Rx slot
     endSlot();
 }
@@ -2207,12 +2318,14 @@ A valid Rx frame satisfies the following constraints:
 
 \returns TRUE if packet is valid received frame, FALSE otherwise
 */
-port_INLINE bool isValidRxFrame(ieee802154_header_iht* ieee802514_header) {
+port_INLINE bool isValidRxFrame(ieee802154_header_iht *ieee802514_header) {
     return
-    (ieee802514_header->valid == TRUE &&
-    (ieee802514_header->frameType==IEEE154_TYPE_DATA  || ieee802514_header->frameType==IEEE154_TYPE_BEACON) &&
-    packetfunctions_sameAddress(&ieee802514_header->panid, idmanager_getMyID(ADDR_PANID))  &&
-    (idmanager_isMyAddress(&ieee802514_header->dest) || packetfunctions_isBroadcastMulticast(&ieee802514_header->dest)));
+            (ieee802514_header->valid == TRUE &&
+             (ieee802514_header->frameType == IEEE154_TYPE_DATA ||
+              ieee802514_header->frameType == IEEE154_TYPE_BEACON) &&
+             packetfunctions_sameAddress(&ieee802514_header->panid, idmanager_getMyID(ADDR_PANID)) &&
+             (idmanager_isMyAddress(&ieee802514_header->dest) ||
+              packetfunctions_isBroadcastMulticast(&ieee802514_header->dest)));
 }
 
 /**
@@ -2231,7 +2344,7 @@ A packet is a valid ACK if it satisfies the following conditions:
 
 \returns TRUE if packet is a valid ACK, FALSE otherwise.
 */
-port_INLINE bool isValidAck(ieee802154_header_iht* ieee802514_header, OpenQueueEntry_t* packetSent) {
+port_INLINE bool isValidAck(ieee802154_header_iht *ieee802514_header, OpenQueueEntry_t *packetSent) {
     return ieee802514_header->valid == TRUE && \
         ieee802514_header->frameType == IEEE154_TYPE_ACK && \
         packetfunctions_sameAddress(&ieee802514_header->panid, idmanager_getMyID(ADDR_PANID)) && \
@@ -2273,7 +2386,7 @@ port_INLINE void ieee154e_resetAsn(void) {
     ieee154e_vars.asn.bytes0and1 = 0;
 }
 
-//from upper layer that want to send the ASN to compute timing or latency
+// from upper layer that want to send the ASN to compute timing or latency
 port_INLINE void ieee154e_getAsn(uint8_t *array) {
     array[0] = (ieee154e_vars.asn.bytes0and1 & 0xff);
     array[1] = (ieee154e_vars.asn.bytes0and1 / 256 & 0xff);
@@ -2282,16 +2395,11 @@ port_INLINE void ieee154e_getAsn(uint8_t *array) {
     array[4] = ieee154e_vars.asn.byte4;
 }
 
-port_INLINE uint16_t ieee154e_getTimeCorrection(void) {
+uint16_t ieee154e_getTimeCorrection(void) {
     int16_t returnVal;
 
-    returnVal = (uint16_t)(ieee154e_vars.timeCorrection);
+    returnVal = (uint16_t) (ieee154e_vars.timeCorrection);
     return returnVal;
-}
-
-void ieee154e_getTicsInfo(uint32_t *numTicsOn, uint32_t *numTicsTotal) {
-    *numTicsOn = (uint32_t)(ieee154e_stats.numTicsOn);
-    *numTicsTotal = (uint32_t)(ieee154e_stats.numTicsTotal);
 }
 
 port_INLINE void joinPriorityStoreFromEB(uint8_t jp) {
@@ -2326,7 +2434,7 @@ bool isValidJoin(OpenQueueEntry_t *eb, ieee802154_header_iht *parsedHeader) {
 
     // put everything back in place in order to invoke security-incoming on the correct frame length and correct
     // pointers (first byte of the frame)
-    if (packetfunctions_reserveHeader(&eb, parsedHeader->headerLength) == E_FAIL){
+    if (packetfunctions_reserveHeader(&eb, parsedHeader->headerLength) == E_FAIL) {
         // this should not happen!
         return FALSE;
     }
@@ -2379,8 +2487,8 @@ bool isValidEbFormat(OpenQueueEntry_t *pkt, uint16_t *lenIE) {
 
     while (ptr < pkt->length) {
 
-        temp16b = *((uint8_t * )(pkt->payload) + ptr);
-        temp16b |= (*((uint8_t * )(pkt->payload) + ptr + 1)) << 8;
+        temp16b = *((uint8_t *) (pkt->payload) + ptr);
+        temp16b |= (*((uint8_t *) (pkt->payload) + ptr + 1)) << 8;
         ptr += 2;
 
         ielen = temp16b & IEEE802154E_DESC_LEN_PAYLOAD_IE_MASK;
@@ -2413,8 +2521,8 @@ bool isValidEbFormat(OpenQueueEntry_t *pkt, uint16_t *lenIE) {
             )
             ) {
         // subID
-        temp16b = *((uint8_t * )(pkt->payload) + ptr);
-        temp16b |= (*((uint8_t * )(pkt->payload) + ptr + 1)) << 8;
+        temp16b = *((uint8_t *) (pkt->payload) + ptr);
+        temp16b |= (*((uint8_t *) (pkt->payload) + ptr + 1)) << 8;
         ptr += 2;
 
         subtype = (temp16b & IEEE802154E_DESC_TYPE_IE_MASK) >> IEEE802154E_DESC_TYPE_IE_SHIFT;
@@ -2424,7 +2532,7 @@ bool isValidEbFormat(OpenQueueEntry_t *pkt, uint16_t *lenIE) {
             sublen = (temp16b & IEEE802154E_DESC_LEN_LONG_MLME_IE_MASK);
             switch (subid) {
                 case IEEE802154E_MLME_CHANNELHOPPING_IE_SUBID:
-                    channelhoppingTemplateIDStoreFromEB(*((uint8_t * )(pkt->payload + ptr)));
+                    channelhoppingTemplateIDStoreFromEB(*((uint8_t *) (pkt->payload + ptr)));
                     chTemplate_checkPass = TRUE;
                     break;
                 default:
@@ -2437,34 +2545,36 @@ bool isValidEbFormat(OpenQueueEntry_t *pkt, uint16_t *lenIE) {
             sublen = (temp16b & IEEE802154E_DESC_LEN_SHORT_MLME_IE_MASK);
             switch (subid) {
                 case IEEE802154E_MLME_SYNC_IE_SUBID:
-                    asnStoreFromEB((uint8_t * )(pkt->payload + ptr));
-                    joinPriorityStoreFromEB(*((uint8_t * )(pkt->payload) + ptr + 5));
+                    asnStoreFromEB((uint8_t *) (pkt->payload + ptr));
+                    joinPriorityStoreFromEB(*((uint8_t *) (pkt->payload) + ptr + 5));
                     sync_ie_checkPass = TRUE;
                     break;
                 case IEEE802154E_MLME_TIMESLOT_IE_SUBID:
-                    timeslotTemplateIDStoreFromEB(*((uint8_t * )(pkt->payload) + ptr));
+                    timeslotTemplateIDStoreFromEB(*((uint8_t *) (pkt->payload) + ptr));
                     tsTemplate_checkpass = TRUE;
                     break;
                 case IEEE802154E_MLME_SLOTFRAME_LINK_IE_SUBID:
-                    schedule_setFrameNumber(*((uint8_t * )(pkt->payload) + ptr));           // number of slotframes
-                    schedule_setFrameHandle(*((uint8_t * )(pkt->payload) + ptr + 1));       // slotframe id
+                    schedule_setFrameNumber(*((uint8_t *) (pkt->payload) + ptr));           // number of slotframes
+                    schedule_setFrameHandle(*((uint8_t *) (pkt->payload) + ptr + 1));       // slotframe id
                     oldFrameLength = schedule_getFrameLength();
                     if (oldFrameLength == 0) {
-                        temp16b = *((uint8_t * )(pkt->payload + ptr + 2));                  // slotframes length
-                        temp16b |= *((uint8_t * )(pkt->payload + ptr + 3)) << 8;
+                        temp16b = *((uint8_t *) (pkt->payload + ptr + 2));                  // slotframes length
+                        temp16b |= *((uint8_t *) (pkt->payload + ptr + 3)) << 8;
                         schedule_setFrameLength(temp16b);
-                        numlinks = *((uint8_t * )(pkt->payload + ptr + 4));                 // number of links
+                        numlinks = *((uint8_t *) (pkt->payload + ptr + 4));                 // number of links
 
                         // shared TXRX anycast slot(s)
                         memset(&temp_neighbor, 0, sizeof(temp_neighbor));
                         temp_neighbor.type = ADDR_ANYCAST;
 
                         for (i = 0; i < numlinks; i++) {
-                            slotoffset = *((uint8_t * )(pkt->payload + ptr + 5 + 5 * i));               // slotframes length
-                            slotoffset |= *((uint8_t * )(pkt->payload + ptr + 5 + 5 * i + 1)) << 8;
+                            slotoffset = *((uint8_t *) (pkt->payload + ptr + 5 +
+                                                        5 * i));               // slotframes length
+                            slotoffset |= *((uint8_t *) (pkt->payload + ptr + 5 + 5 * i + 1)) << 8;
 
-                            channeloffset = *((uint8_t * )(pkt->payload + ptr + 5 + 5 * i + 2));        // slotframes length
-                            channeloffset |= *((uint8_t * )(pkt->payload + ptr + 5 + 5 * i + 3)) << 8;
+                            channeloffset = *((uint8_t *) (pkt->payload + ptr + 5 + 5 * i +
+                                                           2));        // slotframes length
+                            channeloffset |= *((uint8_t *) (pkt->payload + ptr + 5 + 5 * i + 3)) << 8;
 
                             schedule_addActiveSlot(
                                     slotoffset,    // slot offset
@@ -2494,7 +2604,7 @@ bool isValidEbFormat(OpenQueueEntry_t *pkt, uint16_t *lenIE) {
     }
 }
 
-port_INLINE void asnStoreFromEB(uint8_t *asn) {
+port_INLINE void asnStoreFromEB(const uint8_t *asn) {
 
     // store the ASN
     ieee154e_vars.asn.bytes0and1 = asn[0] + 256 * asn[1];
@@ -2551,7 +2661,7 @@ port_INLINE void channelhoppingTemplateIDStoreFromEB(uint8_t id) {
 //======= synchronization
 
 void synchronizePacket(PORT_TIMER_WIDTH timeReceived) {
-    PORT_SIGNED_INT_WIDTH timeCorrection;
+    PORT_SIGNED_INT_WIDTH timeCorr;
     PORT_TIMER_WIDTH newPeriod;
     PORT_TIMER_WIDTH currentPeriod;
     PORT_TIMER_WIDTH currentValue;
@@ -2561,7 +2671,7 @@ void synchronizePacket(PORT_TIMER_WIDTH timeReceived) {
     currentPeriod = ieee154e_vars.slotDuration;
 
     // calculate new period
-    timeCorrection = (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH) timeReceived - (PORT_SIGNED_INT_WIDTH) TsTxOffset);
+    timeCorr = (PORT_SIGNED_INT_WIDTH) ((PORT_SIGNED_INT_WIDTH) timeReceived - (PORT_SIGNED_INT_WIDTH) TsTxOffset);
 
     // The interrupt beginning a new slot can either occur after the packet has been or while it is being received,
     // possibly because the mote is not yet synchronized. In the former case we simply take the usual slotLength and
@@ -2570,9 +2680,9 @@ void synchronizePacket(PORT_TIMER_WIDTH timeReceived) {
     // and in this constellation is guaranteed to be positive.
 
     if (currentValue < timeReceived) {
-        newPeriod = (PORT_TIMER_WIDTH) timeCorrection;
+        newPeriod = (PORT_TIMER_WIDTH) timeCorr;
     } else {
-        newPeriod = (PORT_TIMER_WIDTH)((PORT_SIGNED_INT_WIDTH) currentPeriod + timeCorrection);
+        newPeriod = (PORT_TIMER_WIDTH) ((PORT_SIGNED_INT_WIDTH) currentPeriod + timeCorr);
     }
 
     // detect whether I'm too close to the edge of the slot, in that case, skip a slot and increase the temporary slot
@@ -2600,20 +2710,16 @@ void synchronizePacket(PORT_TIMER_WIDTH timeReceived) {
     ieee154e_vars.deSyncTimeout = DESYNCTIMEOUT;
 
     // log a large timeCorrection
-    if (
-            ieee154e_vars.isSync == TRUE &&
-            (
-                    timeCorrection < -LIMITLARGETIMECORRECTION || timeCorrection > LIMITLARGETIMECORRECTION
-            )
-            ) {
+    if (ieee154e_vars.isSync == TRUE && (timeCorr < -TIME_CORR_THRESHOLD || timeCorr > TIME_CORR_THRESHOLD)) {
+
         LOG_WARNING(COMPONENT_IEEE802154E, ERR_LARGE_TIMECORRECTION,
-                (errorparameter_t) timeCorrection,
-                (errorparameter_t) 0);
+                    (errorparameter_t) timeCorr,
+                    (errorparameter_t) 0);
     }
 
     // update the stats
-    ieee154e_stats.numSyncPkt++;
-    updateStats(timeCorrection);
+    ieee154e_status_entry.numSyncPkt++;
+    updateStats(timeCorr);
 
 #ifdef OPENSIM
     debugpins_syncPacket_set();
@@ -2627,7 +2733,7 @@ void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
 
     // calculate new period
     currentPeriod = ieee154e_vars.slotDuration;
-    newPeriod = (PORT_TIMER_WIDTH)((PORT_SIGNED_INT_WIDTH) currentPeriod + timeCorrection);
+    newPeriod = (PORT_TIMER_WIDTH) ((PORT_SIGNED_INT_WIDTH) currentPeriod + timeCorrection);
 
     // resynchronize by applying the new period
     opentimers_scheduleAbsolute(
@@ -2648,15 +2754,15 @@ void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
 #endif
     // log a large timeCorrection
     if (ieee154e_vars.isSync == TRUE && (
-            timeCorrection < -LIMITLARGETIMECORRECTION || timeCorrection > LIMITLARGETIMECORRECTION
-            )) {
+            timeCorrection < -TIME_CORR_THRESHOLD || timeCorrection > TIME_CORR_THRESHOLD
+    )) {
         LOG_WARNING(COMPONENT_IEEE802154E, ERR_LARGE_TIMECORRECTION,
-                (errorparameter_t) timeCorrection,
-                (errorparameter_t) 1);
+                    (errorparameter_t) timeCorrection,
+                    (errorparameter_t) 1);
     }
 
     // update the stats
-    ieee154e_stats.numSyncAck++;
+    ieee154e_status_entry.numSyncAck++;
     updateStats(timeCorrection);
 
 #ifdef OPENSIM
@@ -2709,23 +2815,23 @@ void notif_receive(OpenQueueEntry_t *packetReceived) {
 //======= stats
 
 port_INLINE void resetStats(void) {
-    ieee154e_stats.numSyncPkt = 0;
-    ieee154e_stats.numSyncAck = 0;
-    ieee154e_stats.minCorrection = 127;
-    ieee154e_stats.maxCorrection = -127;
-    ieee154e_stats.numTicsOn = 0;
-    ieee154e_stats.numTicsTotal = 0;
+    ieee154e_status_entry.numSyncPkt = 0;
+    ieee154e_status_entry.numSyncAck = 0;
+    ieee154e_status_entry.minCorrection = 127;
+    ieee154e_status_entry.maxCorrection = -127;
+    ieee154e_status_entry.numTicsOn = 0;
+    ieee154e_status_entry.numTicsTotal = 0;
     // do not reset the number of de-synchronizations
 }
 
 void updateStats(PORT_SIGNED_INT_WIDTH timeCorrection) {
     // update minCorrection
-    if (timeCorrection < ieee154e_stats.minCorrection) {
-        ieee154e_stats.minCorrection = timeCorrection;
+    if (timeCorrection < ieee154e_status_entry.minCorrection) {
+        ieee154e_status_entry.minCorrection = timeCorrection;
     }
     // update maxConnection
-    if (timeCorrection > ieee154e_stats.maxCorrection) {
-        ieee154e_stats.maxCorrection = timeCorrection;
+    if (timeCorrection > ieee154e_status_entry.maxCorrection) {
+        ieee154e_status_entry.maxCorrection = timeCorrection;
     }
 }
 
@@ -2748,7 +2854,7 @@ different channel offsets in the same slot.
 \returns The calculated frequency channel, an integer between 11 and 26.
 */
 port_INLINE uint8_t calculateFrequency(uint8_t channelOffset) {
-    if (ieee154e_vars.singleChannel >= 11 && ieee154e_vars.singleChannel <= 26 ) {
+    if (ieee154e_vars.singleChannel >= 11 && ieee154e_vars.singleChannel <= 26) {
         return ieee154e_vars.singleChannel; // single channel
     } else {
         // channel hopping enabled, use the channel depending on hopping template
@@ -2763,7 +2869,7 @@ Besides simply updating the state global variable, this function toggles the FSM
 
 \param[in] newstate The state the IEEE802.15.4e FSM is now in.
 */
-void changeState(ieee154e_state_t newstate) {
+void changeState(ieee154eState_t newstate) {
     // update the state
     ieee154e_vars.state = newstate;
     // wiggle the FSM debug pin
@@ -2819,6 +2925,20 @@ void endSlot(void) {
     open_addr_t parentAddress;
     slotinfo_element_t info;
 
+#if PYTHON_BOARD
+    if (!passed_msgBarrier) {
+        board_barrier_msg_sync();
+        passed_msgBarrier = TRUE;
+    }
+#endif
+
+#if PYTHON_BOARD
+    if (!passed_ackBarrier) {
+        board_barrier_ack_sync();
+        passed_ackBarrier = TRUE;
+    }
+#endif
+
     // turn off the radio
     radio_rfOff();
 
@@ -2843,12 +2963,12 @@ void endSlot(void) {
     ieee154e_vars.syncCapturedTime = 0;
 
     // compute duty cycle.
-    ieee154e_stats.numTicsOn += ieee154e_vars.radioOnTics;//accumulate and tics the radio is on for that window
-    ieee154e_stats.numTicsTotal += ieee154e_vars.slotDuration;//increment total tics by timer period.
+    ieee154e_status_entry.numTicsOn += ieee154e_vars.radioOnTics;//accumulate and tics the radio is on for that window
+    ieee154e_status_entry.numTicsTotal += ieee154e_vars.slotDuration;//increment total tics by timer period.
 
-    if (ieee154e_stats.numTicsTotal > DUTY_CYCLE_WINDOW_LIMIT) {
-        ieee154e_stats.numTicsTotal = ieee154e_stats.numTicsTotal >> 1;
-        ieee154e_stats.numTicsOn = ieee154e_stats.numTicsOn >> 1;
+    if (ieee154e_status_entry.numTicsTotal > DUTY_CYCLE_WINDOW_LIMIT) {
+        ieee154e_status_entry.numTicsTotal = ieee154e_status_entry.numTicsTotal >> 1;
+        ieee154e_status_entry.numTicsOn = ieee154e_status_entry.numTicsOn >> 1;
     }
 
     // clear vars for duty cycle on this slot

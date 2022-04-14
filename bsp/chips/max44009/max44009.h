@@ -5,8 +5,8 @@
  *         Pere Tuset, OpenMote <peretuset@openmote.com>
  */
 
-#ifndef __MAX44009_H__
-#define __MAX44009_H__
+#ifndef OPENWSN_MAX44009_H
+#define OPENWSN_MAX44009_H
 
 void max44009_init(void);
 void max44009_reset(void);
@@ -14,5 +14,5 @@ uint8_t max44009_is_present(void);
 uint16_t max44009_read_light(void);
 float max44009_convert_light(uint16_t light);
 
-#endif /* ifndef __MAX44009_H__ */
+#endif /* OPENWSN_MAX44009_H */
 

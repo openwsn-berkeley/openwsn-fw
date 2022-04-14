@@ -4,10 +4,8 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, October 2014.
 */
 
+#include <stdio.h>
 #include "config.h"
-#include "opendefs.h"
-//===== drivers
-#include "openserial.h"
 
 //===== stack
 #include "openstack.h"
@@ -15,7 +13,6 @@
 #include "idmanager.h"
 #include "openqueue.h"
 #include "openrandom.h"
-#include "opentimers.h"
 //-- 02a-TSCH
 #include "adaptive_sync.h"
 #include "IEEE802154E.h"
@@ -34,14 +31,7 @@
 #include "icmpv6echo.h"
 #include "icmpv6rpl.h"
 //-- 04-TRAN
-#include "sock.h"
-
-//===== application-layer
-#include "openweb.h"
-
-//===== applications
-#include "openapps.h"
-
+#include "sock/sock.h"
 
 //=========================== variables =======================================
 
@@ -52,10 +42,6 @@
 //=========================== private =========================================
 
 void openstack_init(void) {
-
-    //===== drivers
-    opentimers_init();
-    openserial_init();
 
     //===== stack
     //-- cross-layer
@@ -96,12 +82,4 @@ void openstack_init(void) {
 #if OPENWSN_UDP_C
     sock_udp_init();
 #endif
-
-    //===== application-layer
-    openweb_init();
-
-    //===== applications
-    openapps_init();
-
-    LOG_SUCCESS(COMPONENT_OPENWSN, ERR_BOOTED, (errorparameter_t) 0, (errorparameter_t) 0);
 }

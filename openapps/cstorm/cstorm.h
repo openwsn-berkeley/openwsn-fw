@@ -1,5 +1,5 @@
-#ifndef __CSTORM_H
-#define __CSTORM_H
+#ifndef OPENWSN_CSTORM_H
+#define OPENWSN_CSTORM_H
 
 /**
 \addtogroup AppUdp
@@ -10,6 +10,7 @@
 
 #include "config.h"
 #include "coap.h"
+#include "opentimers.h"
 
 //=========================== define ==========================================
 
@@ -33,5 +34,5 @@ void cstorm_init(void);
 \}
 */
 
-#endif
+#endif /* OPENWSN_CSTORM_H */
 

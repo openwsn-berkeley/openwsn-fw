@@ -4,8 +4,8 @@
 \author Tengfei Chang <tengfei.chang@inria.fr>, December, 2017
 */
 
-#ifndef __CINFRARED_H
-#define __CINFRARED_H
+#ifndef OPENWSN_CINFRARED_H
+#define OPENWSN_CINFRARED_H
 
 /**
 \addtogroup AppCoAP
@@ -72,4 +72,4 @@ void cinfrared_init(void);
 \}
 */
 
-#endif
+#endif /* OPENWSN_CINFRARED_H */

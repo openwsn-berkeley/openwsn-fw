@@ -11,7 +11,6 @@
 #include "coap.h"
 #include "openqueue.h"
 #include "packetfunctions.h"
-#include "openrandom.h"
 #include "board.h"
 #include "idmanager.h"
 
@@ -94,46 +93,46 @@ owerror_t cinfo_receive(
             // radio name
             if (packetfunctions_reserveHeader(&msg, sizeof(infoRadioName) - 1) == E_FAIL) {
                 openqueue_freePacketBuffer(msg);
-                return;
+                return E_FAIL;
             }
             memcpy(&msg->payload[0], &infoRadioName, sizeof(infoRadioName) - 1);
 
             // uC name
             if (packetfunctions_reserveHeader(&msg, 1) == E_FAIL) {
                 openqueue_freePacketBuffer(msg);
-                return;
+                return E_FAIL;
             }
             msg->payload[0] = '\n';
 
             if (packetfunctions_reserveHeader(&msg, sizeof(infouCName) - 1) == E_FAIL) {
                 openqueue_freePacketBuffer(msg);
-                return;
+                return E_FAIL;
             }
             memcpy(&msg->payload[0], &infouCName, sizeof(infouCName) - 1);
 
             // board name
             if (packetfunctions_reserveHeader(&msg, 1) == E_FAIL) {
                 openqueue_freePacketBuffer(msg);
-                return;
+                return E_FAIL;
             }
             msg->payload[0] = '\n';
 
             if (packetfunctions_reserveHeader(&msg, sizeof(infoBoardname) - 1) == E_FAIL) {
                 openqueue_freePacketBuffer(msg);
-                return;
+                return E_FAIL;
             }
             memcpy(&msg->payload[0], &infoBoardname, sizeof(infoBoardname) - 1);
 
             // stack name and version
             if (packetfunctions_reserveHeader(&msg, 1) == E_FAIL) {
                 openqueue_freePacketBuffer(msg);
-                return;
+                return E_FAIL;
             }
             msg->payload[0] = '\n';
 
             if (packetfunctions_reserveHeader(&msg, sizeof(infoStackName)) == E_FAIL) {
                 openqueue_freePacketBuffer(msg);
-                return;
+                return E_FAIL;
             }
             memcpy(&msg->payload[0], &infoStackName, sizeof(infoStackName) - 1);
 

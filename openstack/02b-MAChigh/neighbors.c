@@ -2,32 +2,46 @@
 #include "neighbors.h"
 #include "openqueue.h"
 #include "packetfunctions.h"
-#include "idmanager.h"
 #include "openserial.h"
 #include "IEEE802154E.h"
 #include "openrandom.h"
 #include "msf.h"
 
+//=========================== typedefs ========================================
+
+BEGIN_PACK
+typedef struct {
+    uint8_t row;
+    neighborRow_t neighborEntry;
+} debugNeighborEntry_t;
+END_PACK
+
+typedef struct {
+    statusCtx_t statusNeighborEntries;
+} neighborStatus_t;
+
 //=========================== variables =======================================
 
-static neighbors_vars_t neighbors_vars;
+neighborsVars_t neighbors_vars;
+neighborStatus_t neighbors_status_ctx;
 
 //=========================== prototypes ======================================
 
-void registerNewNeighbor(
-        open_addr_t *neighborID,
-        int8_t rssi,
-        asn_t *asnTimestamp,
-        bool joinPrioPresent,
-        uint8_t joinPrio,
-        bool insecure
-);
+void registerNewNeighbor(const open_addr_t *neighborID,
+                         int8_t rssi,
+                         const asn_t *asnTimestamp,
+                         bool joinPrioPresent,
+                         uint8_t joinPrio,
+                         bool insecure);
 
-bool isNeighbor(open_addr_t *neighbor);
+bool isNeighbor(const open_addr_t *neighbor);
 
 void removeNeighbor(uint8_t neighborIndex);
 
-bool isThisRowMatching(open_addr_t *address, uint8_t rowNumber);
+bool isThisRowMatching(const open_addr_t *address, uint8_t rowNumber);
+
+// debug
+static bool statusPrint_neighbors(void);
 
 //=========================== public ==========================================
 
@@ -36,8 +50,12 @@ bool isThisRowMatching(open_addr_t *address, uint8_t rowNumber);
 */
 void neighbors_init(void) {
     // clear module variables
-    memset(&neighbors_vars, 0, sizeof(neighbors_vars_t));
     // The .used fields get reset to FALSE by this memset.
+    memset(&neighbors_vars, 0, sizeof(neighborsVars_t));
+
+    neighbors_status_ctx.statusNeighborEntries.id = STATUS_NEIGHBORS;
+    neighbors_status_ctx.statusNeighborEntries.statusPrint_cb = statusPrint_neighbors;
+    openserial_appendStatusCtx(&neighbors_status_ctx.statusNeighborEntries);
 }
 
 //===== getters
@@ -86,7 +104,7 @@ conditions:
 
 \returns A pointer to the neighbor's address, or NULL if no KA is needed.
 */
-open_addr_t* neighbors_getKANeighbor(uint16_t kaPeriod) {
+open_addr_t *neighbors_getKANeighbor(uint16_t kaPeriod) {
     uint8_t i;
     uint16_t timeSinceHeard;
 
@@ -96,10 +114,11 @@ open_addr_t* neighbors_getKANeighbor(uint16_t kaPeriod) {
             timeSinceHeard = ieee154e_asnDiff(&neighbors_vars.neighbors[i].asn);
             if (timeSinceHeard > kaPeriod) {
                 // this neighbor needs to be KA'ed to
-                return &(neighbors_vars.neighbors[i].addr_64b);
+                return &(neighbors_vars.neighbors[i].addr);
             }
         }
     }
+
     return NULL;
 }
 
@@ -111,7 +130,7 @@ with lowest join priority metric to send join traffic through.
 
 \returns A pointer to the neighbor's address, or NULL if no join proxy is found.
 */
-open_addr_t* neighbors_getJoinProxy(void) {
+open_addr_t *neighbors_getJoinProxy(void) {
     uint8_t i;
     uint8_t joinPrioMinimum;
     open_addr_t *joinProxy;
@@ -124,7 +143,7 @@ open_addr_t* neighbors_getJoinProxy(void) {
                 neighbors_vars.neighbors[i].stableNeighbor == TRUE &&
                 neighbors_vars.neighbors[i].joinPrio <= joinPrioMinimum
                 ) {
-            joinProxy = &(neighbors_vars.neighbors[i].addr_64b);
+            joinProxy = &(neighbors_vars.neighbors[i].addr);
             joinPrioMinimum = neighbors_vars.neighbors[i].joinPrio;
         }
     }
@@ -139,7 +158,7 @@ bool neighbors_getNeighborNoResource(uint8_t index) {
 uint8_t neighbors_getSequenceNumber(open_addr_t *address) {
     uint8_t i;
     for (i = 0; i < MAXNUMNEIGHBORS; i++) {
-        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b)) {
+        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr)) {
             break;
         }
     }
@@ -314,6 +333,7 @@ void neighbors_indicateRx(open_addr_t *l2_src,
             neighbors_vars.neighbors[i].numRx++;
             neighbors_vars.neighbors[i].rssi = rssi;
             memcpy(&neighbors_vars.neighbors[i].asn, asnTs, sizeof(asn_t));
+
             //update jp
             if (joinPrioPresent == TRUE) {
                 neighbors_vars.neighbors[i].joinPrio = joinPrio;
@@ -367,17 +387,11 @@ The fields which are updated are:
 \param[in] l2_dest MAC destination address of the packet, i.e. the neighbor
    who I just sent the packet to.
 \param[in] numTxAttempts Number of transmission attempts to this neighbor.
-\param[in] was_finally_acked TRUE iff the packet was ACK'ed by the neighbor
+\param[in] wasAcked TRUE if the packet was ACK'ed by the neighbor
    on final transmission attempt.
 \param[in] asnTs ASN of the last transmission attempt.
 */
-void neighbors_indicateTx(
-        open_addr_t *l2_dest,
-        uint8_t numTxAttempts,
-        bool sentOnTxCell,
-        bool was_finally_acked,
-        asn_t *asnTs
-) {
+void neighbors_indicateTx(open_addr_t *l2_dest, uint8_t numTxAttempts, bool sentOnTxCell, bool wasAcked, asn_t *asnTs) {
     uint8_t i;
     // don't run through this function if packet was sent to broadcast address
     if (packetfunctions_isBroadcastMulticast(l2_dest) == TRUE) {
@@ -394,7 +408,7 @@ void neighbors_indicateTx(
             neighbors_vars.neighbors[i].backoff = 0;
 
             // update asn if ack'ed
-            if (was_finally_acked == TRUE) {
+            if (wasAcked == TRUE) {
                 memcpy(&neighbors_vars.neighbors[i].asn, asnTs, sizeof(asn_t));
             }
 
@@ -408,7 +422,7 @@ void neighbors_indicateTx(
                 // update statistics
                 neighbors_vars.neighbors[i].numTx += numTxAttempts;
 
-                if (was_finally_acked == TRUE) {
+                if (wasAcked == TRUE) {
                     neighbors_vars.neighbors[i].numTxACK++;
                 }
 
@@ -423,7 +437,7 @@ void neighbors_indicateTx(
 void neighbors_updateSequenceNumber(open_addr_t *address) {
     uint8_t i;
     for (i = 0; i < MAXNUMNEIGHBORS; i++) {
-        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b)) {
+        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr)) {
             neighbors_vars.neighbors[i].sequenceNumber = (neighbors_vars.neighbors[i].sequenceNumber + 1) & 0xFF;
             // rollover from 0xff to 0x01
             if (neighbors_vars.neighbors[i].sequenceNumber == 0) {
@@ -437,7 +451,7 @@ void neighbors_updateSequenceNumber(open_addr_t *address) {
 void neighbors_resetSequenceNumber(open_addr_t *address) {
     uint8_t i;
     for (i = 0; i < MAXNUMNEIGHBORS; i++) {
-        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b)) {
+        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr)) {
             neighbors_vars.neighbors[i].sequenceNumber = 0;
             break;
         }
@@ -451,27 +465,33 @@ void neighbors_resetSequenceNumber(open_addr_t *address) {
 // Returns false if neighbor not in use or address type is not 64bits
 */
 bool neighbors_getNeighborEui64(open_addr_t *address, uint8_t addr_type, uint8_t index) {
-    bool ReturnVal = FALSE;
+    bool returnVal;
+
+    returnVal = FALSE;
+
     switch (addr_type) {
         case ADDR_64B:
-            memcpy(&(address->addr_64b), &(neighbors_vars.neighbors[index].addr_64b.addr_64b), LENGTH_ADDR64b);
+            memcpy(address->addr_type.addr_64b, neighbors_vars.neighbors[index].addr.addr_type.addr_64b, LENGTH_ADDR64b);
             address->type = ADDR_64B;
-            ReturnVal = neighbors_vars.neighbors[index].used;
+            returnVal = neighbors_vars.neighbors[index].used;
             break;
+        case ADDR_16B:
+        case ADDR_128B:
         default:
             LOG_CRITICAL(COMPONENT_NEIGHBORS, ERR_WRONG_ADDR_TYPE,
                          (errorparameter_t) addr_type,
                          (errorparameter_t) 2);
             break;
     }
-    return ReturnVal;
+
+    return returnVal;
 }
 
 // ==== update backoff
 void neighbors_updateBackoff(open_addr_t *address) {
     uint8_t i;
     for (i = 0; i < MAXNUMNEIGHBORS; i++) {
-        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b)) {
+        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr)) {
             // increase the backoffExponent
             if (neighbors_vars.neighbors[i].backoffExponenton < MAXBE) {
                 neighbors_vars.neighbors[i].backoffExponenton++;
@@ -487,7 +507,7 @@ void neighbors_updateBackoff(open_addr_t *address) {
 void neighbors_decreaseBackoff(open_addr_t *address) {
     uint8_t i;
     for (i = 0; i < MAXNUMNEIGHBORS; i++) {
-        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b)) {
+        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr)) {
             if (neighbors_vars.neighbors[i].backoff > 0) {
                 neighbors_vars.neighbors[i].backoff--;
             }
@@ -502,7 +522,7 @@ bool neighbors_backoffHitZero(open_addr_t *address) {
 
     returnVal = FALSE;
     for (i = 0; i < MAXNUMNEIGHBORS; i++) {
-        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b)) {
+        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr)) {
             returnVal = (neighbors_vars.neighbors[i].backoff == 0);
             break;
         }
@@ -523,7 +543,7 @@ void neighbors_resetBackoff(open_addr_t *address) {
     uint8_t i;
 
     for (i = 0; i < MAXNUMNEIGHBORS; i++) {
-        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr_64b)) {
+        if (packetfunctions_sameAddress(address, &neighbors_vars.neighbors[i].addr)) {
             neighbors_vars.neighbors[i].backoffExponenton = MINBE - 1;
             neighbors_vars.neighbors[i].backoff = 0;
             break;
@@ -587,12 +607,12 @@ uint16_t neighbors_getLinkMetric(uint8_t index) {
         rankIncreaseIntermediary = (((uint32_t) neighbors_vars.neighbors[index].numTx) << 10);
         rankIncreaseIntermediary = (3 * rankIncreaseIntermediary * MINHOPRANKINCREASE) /
                                    ((uint32_t) neighbors_vars.neighbors[index].numTxACK);
-        rankIncreaseIntermediary = rankIncreaseIntermediary - ((uint32_t)(2 * MINHOPRANKINCREASE) << 10);
+        rankIncreaseIntermediary = rankIncreaseIntermediary - ((uint32_t) (2 * MINHOPRANKINCREASE) << 10);
         // this could still overflow for numTx large and numTxAck small, Casting to 16 bits will yiel the least significant bits
         if (rankIncreaseIntermediary >= (65536 << 10)) {
             rankIncrease = 65535;
         } else {
-            rankIncrease = (uint16_t)(rankIncreaseIntermediary >> 10);
+            rankIncrease = (uint16_t) (rankIncreaseIntermediary >> 10);
         }
     }
     return rankIncrease;
@@ -628,7 +648,7 @@ void neighbors_removeOld(void) {
                 if (neighbors_vars.neighbors[i].f6PNORES == FALSE &&
                     neighbors_vars.neighbors[i].parentPreference == 0) {
                     // remove neighbor only when there is no packet in queue
-                    if (openqueue_macGetUnicastPacket(&(neighbors_vars.neighbors[i].addr_64b)) == NULL) {
+                    if (openqueue_macGetUnicastPacket(&(neighbors_vars.neighbors[i].addr)) == NULL) {
                         removeNeighbor(i);
                     }
                 }
@@ -647,34 +667,35 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_neighbors(void) {
+static bool statusPrint_neighbors(void) {
     debugNeighborEntry_t temp;
+
     neighbors_vars.debugRow = (neighbors_vars.debugRow + 1) % MAXNUMNEIGHBORS;
     temp.row = neighbors_vars.debugRow;
     temp.neighborEntry = neighbors_vars.neighbors[neighbors_vars.debugRow];
-    openserial_printStatus(STATUS_NEIGHBORS, (uint8_t * ) & temp, sizeof(debugNeighborEntry_t));
+    openserial_printStatus(STATUS_NEIGHBORS, (uint8_t *) &temp, sizeof(debugNeighborEntry_t));
     return TRUE;
 }
 
 //=========================== private =========================================
 
-void registerNewNeighbor(open_addr_t *address,
+void registerNewNeighbor(const open_addr_t *neighborID,
                          int8_t rssi,
-                         asn_t *asnTimestamp,
+                         const asn_t *asnTimestamp,
                          bool joinPrioPresent,
                          uint8_t joinPrio,
                          bool insecure) {
     uint8_t i;
 
     // filter errors
-    if (address->type != ADDR_64B) {
+    if (neighborID->type != ADDR_64B) {
         LOG_CRITICAL(COMPONENT_NEIGHBORS, ERR_WRONG_ADDR_TYPE,
-                    (errorparameter_t) address->type,
-                    (errorparameter_t) 3);
+                     (errorparameter_t) neighborID->type,
+                     (errorparameter_t) 3);
         return;
     }
     // add this neighbor
-    if (isNeighbor(address) == FALSE) {
+    if (isNeighbor(neighborID) == FALSE) {
         i = 0;
         while (i < MAXNUMNEIGHBORS) {
             if (neighbors_vars.neighbors[i].used == FALSE) {
@@ -688,7 +709,7 @@ void registerNewNeighbor(open_addr_t *address,
                 // Note: all new neighbors are consider stable
                 neighbors_vars.neighbors[i].stableNeighbor = TRUE;
                 neighbors_vars.neighbors[i].switchStabilityCounter = 0;
-                memcpy(&neighbors_vars.neighbors[i].addr_64b, address, sizeof(open_addr_t));
+                memcpy(&neighbors_vars.neighbors[i].addr, neighborID, sizeof(open_addr_t));
                 neighbors_vars.neighbors[i].DAGrank = DEFAULTDAGRANK;
                 // since we don't have a DAG rank at this point, no need to call for routing table update
                 neighbors_vars.neighbors[i].rssi = rssi;
@@ -717,7 +738,7 @@ void registerNewNeighbor(open_addr_t *address,
     }
 }
 
-bool isNeighbor(open_addr_t *neighbor) {
+bool isNeighbor(const open_addr_t *neighbor) {
     uint8_t i = 0;
     for (i = 0; i < MAXNUMNEIGHBORS; i++) {
         if (isThisRowMatching(neighbor, i)) {
@@ -745,16 +766,16 @@ void removeNeighbor(uint8_t neighborIndex) {
     neighbors_vars.neighbors[neighborIndex].sequenceNumber = 0;
     neighbors_vars.neighbors[neighborIndex].backoffExponenton = MINBE - 1;
     neighbors_vars.neighbors[neighborIndex].backoff = 0;
-    neighbors_vars.neighbors[neighborIndex].addr_64b.type = ADDR_NONE;
+    neighbors_vars.neighbors[neighborIndex].addr.type = ADDR_NONE;
 }
 
 //=========================== helpers =========================================
 
-bool isThisRowMatching(open_addr_t *address, uint8_t rowNumber) {
+bool isThisRowMatching(const open_addr_t *address, uint8_t rowNumber) {
     switch (address->type) {
         case ADDR_64B:
             return neighbors_vars.neighbors[rowNumber].used &&
-                   packetfunctions_sameAddress(address, &neighbors_vars.neighbors[rowNumber].addr_64b);
+                   packetfunctions_sameAddress(address, &neighbors_vars.neighbors[rowNumber].addr);
         default:
             LOG_CRITICAL(COMPONENT_NEIGHBORS, ERR_WRONG_ADDR_TYPE,
                          (errorparameter_t) address->type,

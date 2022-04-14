@@ -71,7 +71,7 @@ int8_t              radio_getFrequencyOffset(void);
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
 void                radio_loadPacket_prepare(uint8_t* packet, uint16_t len);
 #endif
-void                radio_loadPacket(uint8_t* packet, uint16_t len);
+void                radio_loadPacket(const uint8_t* packet, uint16_t len);
 void                radio_txEnable(void);
 void                radio_txNow(void);
 // RX

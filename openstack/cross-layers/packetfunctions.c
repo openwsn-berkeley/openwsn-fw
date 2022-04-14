@@ -2,22 +2,25 @@
 #include "packetfunctions.h"
 #include "IEEE802154_security.h"
 #include "openserial.h"
-#include "openqueue.h"
 #include "idmanager.h"
 #include "radio.h"
+
+#if OPENWSN_6LO_FRAGMENTATION_C
+#include "openqueue.h"
+#endif
 
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
 
-void onesComplementSum(uint8_t *global_sum, uint8_t *ptr, int length);
+void onesComplementSum(uint8_t *global_sum, const uint8_t *ptr, int length);
 
 //=========================== public ==========================================
 
 //======= address translation
 
 //assuming an ip128b is a concatenation of prefix64b followed by a mac64b
-void packetfunctions_ip128bToMac64b(open_addr_t *ip128b, open_addr_t *prefix64btoWrite, open_addr_t *mac64btoWrite) {
+void packetfunctions_ip128bToMac64b(const open_addr_t *ip128b, open_addr_t *prefix64btoWrite, open_addr_t *mac64btoWrite) {
     if (ip128b->type != ADDR_128B) {
         LOG_CRITICAL(COMPONENT_PACKETFUNCTIONS, ERR_WRONG_ADDR_TYPE,
                      (errorparameter_t) ip128b->type,
@@ -27,12 +30,12 @@ void packetfunctions_ip128bToMac64b(open_addr_t *ip128b, open_addr_t *prefix64bt
     }
 
     prefix64btoWrite->type = ADDR_PREFIX;
-    memcpy(prefix64btoWrite->prefix, &(ip128b->addr_128b[0]), 8);
+    memcpy(prefix64btoWrite->addr_type.prefix, &(ip128b->addr_type.addr_128b[0]), 8);
     mac64btoWrite->type = ADDR_64B;
-    memcpy(mac64btoWrite->addr_64b, &(ip128b->addr_128b[8]), 8);
+    memcpy(mac64btoWrite->addr_type.addr_64b, &(ip128b->addr_type.addr_128b[8]), 8);
 }
 
-void packetfunctions_mac64bToIp128b(open_addr_t *prefix64b, open_addr_t *mac64b, open_addr_t *ip128bToWrite) {
+void packetfunctions_mac64bToIp128b(const open_addr_t *prefix64b, const open_addr_t *mac64b, open_addr_t *ip128bToWrite) {
     if (prefix64b->type != ADDR_PREFIX || mac64b->type != ADDR_64B) {
         LOG_CRITICAL(COMPONENT_PACKETFUNCTIONS, ERR_WRONG_ADDR_TYPE,
                      (errorparameter_t) prefix64b->type,
@@ -42,12 +45,12 @@ void packetfunctions_mac64bToIp128b(open_addr_t *prefix64b, open_addr_t *mac64b,
     }
 
     ip128bToWrite->type = ADDR_128B;
-    memcpy(&(ip128bToWrite->addr_128b[0]), &(prefix64b->prefix[0]), 8);
-    memcpy(&(ip128bToWrite->addr_128b[8]), &(mac64b->addr_64b[0]), 8);
+    memcpy(&(ip128bToWrite->addr_type.addr_128b[0]), &(prefix64b->addr_type.prefix[0]), 8);
+    memcpy(&(ip128bToWrite->addr_type.addr_128b[8]), &(mac64b->addr_type.addr_64b[0]), 8);
 }
 
 //assuming an mac16b is lower 2B of mac64b
-void packetfunctions_mac64bToMac16b(open_addr_t *mac64b, open_addr_t *mac16btoWrite) {
+void packetfunctions_mac64bToMac16b(const open_addr_t *mac64b, open_addr_t *mac16btoWrite) {
     if (mac64b->type != ADDR_64B) {
         LOG_CRITICAL(COMPONENT_PACKETFUNCTIONS, ERR_WRONG_ADDR_TYPE,
                      (errorparameter_t) mac64b->type,
@@ -57,11 +60,11 @@ void packetfunctions_mac64bToMac16b(open_addr_t *mac64b, open_addr_t *mac16btoWr
     }
 
     mac16btoWrite->type = ADDR_16B;
-    mac16btoWrite->addr_16b[0] = mac64b->addr_64b[6];
-    mac16btoWrite->addr_16b[1] = mac64b->addr_64b[7];
+    mac16btoWrite->addr_type.addr_16b[0] = mac64b->addr_type.addr_64b[6];
+    mac16btoWrite->addr_type.addr_16b[1] = mac64b->addr_type.addr_64b[7];
 }
 
-void packetfunctions_mac16bToMac64b(open_addr_t *mac16b, open_addr_t *mac64btoWrite) {
+void packetfunctions_mac16bToMac64b(const open_addr_t *mac16b, open_addr_t *mac64btoWrite) {
     if (mac16b->type != ADDR_16B) {
         LOG_CRITICAL(COMPONENT_PACKETFUNCTIONS, ERR_WRONG_ADDR_TYPE,
                      (errorparameter_t) mac16b->type,
@@ -70,19 +73,19 @@ void packetfunctions_mac16bToMac64b(open_addr_t *mac16b, open_addr_t *mac64btoWr
         return;
     }
     mac64btoWrite->type = ADDR_64B;
-    mac64btoWrite->addr_64b[0] = 0;
-    mac64btoWrite->addr_64b[1] = 0;
-    mac64btoWrite->addr_64b[2] = 0;
-    mac64btoWrite->addr_64b[3] = 0;
-    mac64btoWrite->addr_64b[4] = 0;
-    mac64btoWrite->addr_64b[5] = 0;
-    mac64btoWrite->addr_64b[6] = mac16b->addr_16b[0];
-    mac64btoWrite->addr_64b[7] = mac16b->addr_16b[1];
+    mac64btoWrite->addr_type.addr_64b[0] = 0;
+    mac64btoWrite->addr_type.addr_64b[1] = 0;
+    mac64btoWrite->addr_type.addr_64b[2] = 0;
+    mac64btoWrite->addr_type.addr_64b[3] = 0;
+    mac64btoWrite->addr_type.addr_64b[4] = 0;
+    mac64btoWrite->addr_type.addr_64b[5] = 0;
+    mac64btoWrite->addr_type.addr_64b[6] = mac16b->addr_type.addr_16b[0];
+    mac64btoWrite->addr_type.addr_64b[7] = mac16b->addr_type.addr_16b[1];
 }
 
 //======= address recognition
 
-bool packetfunctions_isBroadcastMulticast(open_addr_t *address) {
+bool packetfunctions_isBroadcastMulticast(const open_addr_t *address) {
     uint8_t i;
     uint8_t address_length;
 
@@ -93,7 +96,7 @@ bool packetfunctions_isBroadcastMulticast(open_addr_t *address) {
 
     //IPv6 multicast
     if (address->type == ADDR_128B) {
-        if (address->addr_128b[0] == 0xff) {
+        if (address->addr_type.addr_128b[0] == 0xff) {
             return TRUE;
         } else {
             return FALSE;
@@ -114,87 +117,90 @@ bool packetfunctions_isBroadcastMulticast(open_addr_t *address) {
                          (errorparameter_t) 4);
             return FALSE;
     }
+
     for (i = 0; i < address_length; i++) {
-        if (address->addr_128b[i] != 0xFF) {
+        if (address->addr_type.addr_128b[i] != 0xFF) {
             return FALSE;
         }
     }
     return TRUE;
 }
 
-bool packetfunctions_isAllRoutersMulticast(open_addr_t *address) {
+bool packetfunctions_isAllRoutersMulticast(const open_addr_t *address) {
     if (
             address->type == ADDR_128B &&
-            address->addr_128b[0] == 0xff &&
-            address->addr_128b[1] == 0x02 &&
-            address->addr_128b[2] == 0x00 &&
-            address->addr_128b[3] == 0x00 &&
-            address->addr_128b[4] == 0x00 &&
-            address->addr_128b[5] == 0x00 &&
-            address->addr_128b[6] == 0x00 &&
-            address->addr_128b[7] == 0x00 &&
-            address->addr_128b[8] == 0x00 &&
-            address->addr_128b[9] == 0x00 &&
-            address->addr_128b[10] == 0x00 &&
-            address->addr_128b[11] == 0x00 &&
-            address->addr_128b[12] == 0x00 &&
-            address->addr_128b[13] == 0x00 &&
-            address->addr_128b[14] == 0x00 &&
-            address->addr_128b[15] == 0x1a
+            address->addr_type.addr_128b[0] == 0xff &&
+            address->addr_type.addr_128b[1] == 0x02 &&
+            address->addr_type.addr_128b[2] == 0x00 &&
+            address->addr_type.addr_128b[3] == 0x00 &&
+            address->addr_type.addr_128b[4] == 0x00 &&
+            address->addr_type.addr_128b[5] == 0x00 &&
+            address->addr_type.addr_128b[6] == 0x00 &&
+            address->addr_type.addr_128b[7] == 0x00 &&
+            address->addr_type.addr_128b[8] == 0x00 &&
+            address->addr_type.addr_128b[9] == 0x00 &&
+            address->addr_type.addr_128b[10] == 0x00 &&
+            address->addr_type.addr_128b[11] == 0x00 &&
+            address->addr_type.addr_128b[12] == 0x00 &&
+            address->addr_type.addr_128b[13] == 0x00 &&
+            address->addr_type.addr_128b[14] == 0x00 &&
+            address->addr_type.addr_128b[15] == 0x1a
             ) {
         return TRUE;
     }
     return FALSE;
 }
 
-bool packetfunctions_isAllHostsMulticast(open_addr_t *address) {
+bool packetfunctions_isAllHostsMulticast(const open_addr_t *address) {
     if (
             address->type == ADDR_128B &&
-            address->addr_128b[0] == 0xff &&
-            address->addr_128b[1] == 0x02 &&
-            address->addr_128b[2] == 0x00 &&
-            address->addr_128b[3] == 0x00 &&
-            address->addr_128b[4] == 0x00 &&
-            address->addr_128b[5] == 0x00 &&
-            address->addr_128b[6] == 0x00 &&
-            address->addr_128b[7] == 0x00 &&
-            address->addr_128b[8] == 0x00 &&
-            address->addr_128b[9] == 0x00 &&
-            address->addr_128b[10] == 0x00 &&
-            address->addr_128b[11] == 0x00 &&
-            address->addr_128b[12] == 0x00 &&
-            address->addr_128b[13] == 0x00 &&
-            address->addr_128b[14] == 0x00 &&
-            address->addr_128b[15] == 0x01
+            address->addr_type.addr_128b[0] == 0xff &&
+            address->addr_type.addr_128b[1] == 0x02 &&
+            address->addr_type.addr_128b[2] == 0x00 &&
+            address->addr_type.addr_128b[3] == 0x00 &&
+            address->addr_type.addr_128b[4] == 0x00 &&
+            address->addr_type.addr_128b[5] == 0x00 &&
+            address->addr_type.addr_128b[6] == 0x00 &&
+            address->addr_type.addr_128b[7] == 0x00 &&
+            address->addr_type.addr_128b[8] == 0x00 &&
+            address->addr_type.addr_128b[9] == 0x00 &&
+            address->addr_type.addr_128b[10] == 0x00 &&
+            address->addr_type.addr_128b[11] == 0x00 &&
+            address->addr_type.addr_128b[12] == 0x00 &&
+            address->addr_type.addr_128b[13] == 0x00 &&
+            address->addr_type.addr_128b[14] == 0x00 &&
+            address->addr_type.addr_128b[15] == 0x01
             ) {
         return TRUE;
     }
     return FALSE;
 }
 
-bool packetfunctions_isLinkLocal(open_addr_t *address) {
+bool packetfunctions_isLinkLocal(const open_addr_t *address) {
     if (
             address->type == ADDR_128B &&
-            address->addr_128b[0] == 0xfe &&
-            address->addr_128b[1] == 0x80 &&
-            address->addr_128b[2] == 0x00 &&
-            address->addr_128b[3] == 0x00 &&
-            address->addr_128b[4] == 0x00 &&
-            address->addr_128b[5] == 0x00 &&
-            address->addr_128b[6] == 0x00 &&
-            address->addr_128b[7] == 0x00
+            address->addr_type.addr_128b[0] == 0xfe &&
+            address->addr_type.addr_128b[1] == 0x80 &&
+            address->addr_type.addr_128b[2] == 0x00 &&
+            address->addr_type.addr_128b[3] == 0x00 &&
+            address->addr_type.addr_128b[4] == 0x00 &&
+            address->addr_type.addr_128b[5] == 0x00 &&
+            address->addr_type.addr_128b[6] == 0x00 &&
+            address->addr_type.addr_128b[7] == 0x00
             ) {
         return TRUE;
     }
     return FALSE;
 }
 
-bool packetfunctions_sameAddress(open_addr_t *address_1, open_addr_t *address_2) {
+bool packetfunctions_sameAddress(const open_addr_t *address_1, const open_addr_t *address_2) {
+
     uint8_t address_length;
 
     if (address_1->type != address_2->type) {
         return FALSE;
     }
+
     switch (address_1->type) {
         case ADDR_16B:
         case ADDR_PANID:
@@ -214,7 +220,8 @@ bool packetfunctions_sameAddress(open_addr_t *address_1, open_addr_t *address_2)
                          (errorparameter_t) 5);
             return FALSE;
     }
-    if (memcmp((void *) address_1->addr_128b, (void *) address_2->addr_128b, address_length) == 0) {
+
+    if (memcmp(address_1->addr_type.addr_128b, address_2->addr_type.addr_128b, address_length) == 0) {
         return TRUE;
     }
     return FALSE;
@@ -222,7 +229,7 @@ bool packetfunctions_sameAddress(open_addr_t *address_1, open_addr_t *address_2)
 
 //======= address read/write
 
-void packetfunctions_readAddress(uint8_t *payload, uint8_t type, open_addr_t *writeToAddress, bool littleEndian) {
+void packetfunctions_readAddress(const uint8_t *payload, uint8_t type, open_addr_t *writeToAddress, bool littleEndian) {
     uint8_t i;
     uint8_t address_length;
 
@@ -248,14 +255,14 @@ void packetfunctions_readAddress(uint8_t *payload, uint8_t type, open_addr_t *wr
 
     for (i = 0; i < address_length; i++) {
         if (littleEndian) {
-            writeToAddress->addr_128b[address_length - 1 - i] = *(payload + i);
+            writeToAddress->addr_type.addr_128b[address_length - 1 - i] = *(payload + i);
         } else {
-            writeToAddress->addr_128b[i] = *(payload + i);
+            writeToAddress->addr_type.addr_128b[i] = *(payload + i);
         }
     }
 }
 
-owerror_t packetfunctions_writeAddress(OpenQueueEntry_t **msg, open_addr_t *address, bool littleEndian) {
+owerror_t packetfunctions_writeAddress(OpenQueueEntry_t **msg, const open_addr_t *address, bool littleEndian) {
     uint8_t i;
     uint8_t address_length;
 
@@ -283,9 +290,9 @@ owerror_t packetfunctions_writeAddress(OpenQueueEntry_t **msg, open_addr_t *addr
             return E_FAIL;
         }
         if (littleEndian) {
-            *((uint8_t * )((*msg)->payload)) = address->addr_128b[i];
+            *((uint8_t * )((*msg)->payload)) = address->addr_type.addr_128b[i];
         } else {
-            *((uint8_t * )((*msg)->payload)) = address->addr_128b[address_length - 1 - i];
+            *((uint8_t * )((*msg)->payload)) = address->addr_type.addr_128b[address_length - 1 - i];
         }
     }
 
@@ -512,7 +519,7 @@ void packetfunctions_tossFooter(OpenQueueEntry_t **pkt, uint16_t footer_length) 
 // function duplicates a frame from one OpenQueueEntry structure to the other,
 // updating pointers to the new memory location. Used to make a local copy of
 // the frame before transmission (where it can possibly be encrypted). 
-void packetfunctions_duplicatePacket(OpenQueueEntry_t *dst, OpenQueueEntry_t *src) {
+void packetfunctions_duplicatePacket(OpenQueueEntry_t *dst, const OpenQueueEntry_t *src) {
     // make a copy of the frame
 
     memcpy(dst, src, sizeof(OpenQueueEntry_t));
@@ -538,7 +545,7 @@ void packetfunctions_duplicatePacket(OpenQueueEntry_t *dst, OpenQueueEntry_t *sr
 void packetfunctions_calculateCRC(OpenQueueEntry_t *msg) {
     uint16_t crc;
     uint8_t i;
-    uint8_t count;
+    uint16_t count;
     crc = 0;
     for (count = 1; count < msg->length - 2; count++) {
         crc = crc ^ (uint8_t) * (msg->payload + count);
@@ -555,10 +562,10 @@ void packetfunctions_calculateCRC(OpenQueueEntry_t *msg) {
     *(msg->payload + (msg->length - 1)) = crc / 256;
 }
 
-bool packetfunctions_checkCRC(OpenQueueEntry_t *msg) {
+bool packetfunctions_checkCRC(const OpenQueueEntry_t *msg) {
     uint16_t crc;
     uint8_t i;
-    uint8_t count;
+    uint16_t count;
     crc = 0;
     for (count = 0; count < msg->length - 2; count++) {
         crc = crc ^ (uint8_t) * (msg->payload + count);
@@ -602,19 +609,19 @@ void packetfunctions_calculateChecksum(OpenQueueEntry_t *msg, uint8_t *checksum_
         onesComplementSum(temp_checksum, (uint8_t *) linklocalprefix, 8);
         memcpy(&localscopeAddress, idmanager_getMyID(ADDR_64B), sizeof(open_addr_t));
         // invert 'u' bit (section 2.5.1 at https://www.ietf.org/rfc/rfc2373.txt)
-        localscopeAddress.addr_64b[0] ^= 0x02;
-        onesComplementSum(temp_checksum, localscopeAddress.addr_64b, 8);
+        localscopeAddress.addr_type.addr_64b[0] ^= 0x02;
+        onesComplementSum(temp_checksum, localscopeAddress.addr_type.addr_64b, 8);
 
         // boardcast destination address
-        onesComplementSum(temp_checksum, msg->l3_destinationAdd.addr_128b, 16);
+        onesComplementSum(temp_checksum, msg->l3_destinationAdd.addr_type.addr_128b, 16);
     } else {
         // use 128-bit ipv6 address for source address and destination address
 
         // source address
-        onesComplementSum(temp_checksum, (idmanager_getMyID(ADDR_PREFIX))->prefix, 8);
-        onesComplementSum(temp_checksum, (idmanager_getMyID(ADDR_64B))->addr_64b, 8);
+        onesComplementSum(temp_checksum, (idmanager_getMyID(ADDR_PREFIX))->addr_type.prefix, 8);
+        onesComplementSum(temp_checksum, (idmanager_getMyID(ADDR_64B))->addr_type.addr_64b, 8);
         // destination address
-        onesComplementSum(temp_checksum, msg->l3_destinationAdd.addr_128b, 16);
+        onesComplementSum(temp_checksum, msg->l3_destinationAdd.addr_type.addr_128b, 16);
     }
 
     // length
@@ -643,7 +650,7 @@ void packetfunctions_calculateChecksum(OpenQueueEntry_t *msg, uint8_t *checksum_
 }
 
 
-void onesComplementSum(uint8_t *global_sum, uint8_t *ptr, int length) {
+void onesComplementSum(uint8_t *global_sum, const uint8_t *ptr, int length) {
     uint32_t sum = 0xFFFF & (global_sum[0] << 8 | global_sum[1]);
     while (length > 1) {
         sum += 0xFFFF & (*ptr << 8 | *(ptr + 1));

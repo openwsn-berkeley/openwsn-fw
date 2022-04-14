@@ -6,7 +6,6 @@
 */
 
 #include "config.h"
-#include "opendefs.h"
 
 #if OPENWSN_C6T_C
 #include "c6t.h"

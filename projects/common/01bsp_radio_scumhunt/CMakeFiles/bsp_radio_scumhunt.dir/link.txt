@@ -1,0 +1,3 @@
+"C:\Program Files\CMake\bin\cmake.exe" -E rm -f CMakeFiles\bsp_radio_scumhunt.dir/objects.a
+C:\MinGW\bin\ar.exe qc CMakeFiles\bsp_radio_scumhunt.dir/objects.a @CMakeFiles\bsp_radio_scumhunt.dir\objects1.rsp
+C:\MinGW\bin\gcc.exe -g -Wl,--whole-archive CMakeFiles\bsp_radio_scumhunt.dir/objects.a -Wl,--no-whole-archive -o bsp_radio_scumhunt.exe -Wl,--out-implib,libbsp_radio_scumhunt.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\bsp_radio_scumhunt.dir\linklibs.rsp

@@ -44,8 +44,8 @@ def mote_connect(motename=None , serialport= None, baudrate='115200'):
 #============================ configuration and connection ===================================
 
 iotlab_serialport = False
-motename = 'wsn430-35'
-serialport = 'COM10'
+motename = 'openmote-cc2538'
+serialport = 'COM31'
 mote = None
 
 t = raw_input('Are you running on IoT-LAB nodes ? (Y|N): ')

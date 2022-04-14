@@ -74,7 +74,7 @@ len=17  num=84  rssi=-81  lqi=108 crc=1
 
 #define LENGTH_PACKET        125+LENGTH_CRC // maximum length is 127 bytes
 #define CHANNEL              11             // 24ghz: 11 = 2.405GHz, subghz: 11 = 865.325 in  FSK operating mode #1
-#define LENGTH_SERIAL_FRAME  9              // length of the serial frame
+#define LENGTH_SERIAL_FRAME  20              // length of the serial frame
 
 //=========================== variables =======================================
 
@@ -163,7 +163,8 @@ int mote_main(void) {
         leds_error_on();
 
         // format frame to send over serial port
-        i = 0;
+        /*
+	i = 0;
         app_vars.uart_txFrame[i++] = app_vars.rxpk_len;  // packet length
         app_vars.uart_txFrame[i++] = app_vars.rxpk_num;  // packet number
         app_vars.uart_txFrame[i++] = app_vars.rxpk_rssi; // RSSI
@@ -173,7 +174,23 @@ int mote_main(void) {
         app_vars.uart_txFrame[i++] = 0xff;               // closing flag
         app_vars.uart_txFrame[i++] = 0xff;               // closing flag
         app_vars.uart_txFrame[i++] = 0xff;               // closing flag
+	*/
 
+	app_vars.uart_txFrame[0]  = app_vars.rxpk_crc + 42;
+	app_vars.uart_txFrame[1]  = app_vars.rxpk_len/10 + 48;
+	app_vars.uart_txFrame[2]  = app_vars.rxpk_len%10 + 48;
+	app_vars.uart_txFrame[3]  = ' ';
+	app_vars.uart_txFrame[4]  = app_vars.rxpk_buf[0];
+	app_vars.uart_txFrame[5]  = app_vars.rxpk_buf[1];
+	app_vars.uart_txFrame[6]  = app_vars.rxpk_buf[2];
+	app_vars.uart_txFrame[7]  = app_vars.rxpk_buf[3];
+	app_vars.uart_txFrame[8]  = ' ';
+	app_vars.uart_txFrame[9]  = 48;//app_vars.rxpk_num/1000 + 48;
+	app_vars.uart_txFrame[10] = app_vars.rxpk_num/100 + 48;
+	app_vars.uart_txFrame[11] = (app_vars.rxpk_num - 100*(app_vars.rxpk_num/100))/10 + 48;
+	app_vars.uart_txFrame[12] = app_vars.rxpk_num%10 + 48;
+	app_vars.uart_txFrame[13] = '\r';
+	app_vars.uart_txFrame[14] = '\n';
         app_vars.uart_done          = 0;
         app_vars.uart_lastTxByte    = 0;
 
@@ -227,20 +244,29 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
 
     if (app_vars.rxpk_len>LENGTH_PACKET){
         expectedFrame = FALSE;
-    } else {
-        for(i=1;i<10;i++){
-            if(app_vars.rxpk_buf[i]!=i){
-                expectedFrame = FALSE;
-                break;
-            }
-        }
+    } 
+
+    if (app_vars.rxpk_crc == 0) {
+	expectedFrame = FALSE;
     }
+    //else {
+    //    for(i=1;i<10;i++){
+    //        if(app_vars.rxpk_buf[i]!=i){
+    //            //expectedFrame = FALSE;
+	//	expectedFrame = TRUE;
+        //        break;
+        //    }
+        //}
+    //}
 
     // read the packet number
-    app_vars.rxpk_num = app_vars.rxpk_buf[0];
+    //app_vars.rxpk_num = app_vars.rxpk_buf[0];
 
     // toggle led if the frame is expected
     if (expectedFrame){
+	// increment the valid packet counter
+	app_vars.rxpk_num++;	
+
         // indicate I just received a packet from bsp_radio_tx mote
         app_vars.rxpk_done = 1;
 

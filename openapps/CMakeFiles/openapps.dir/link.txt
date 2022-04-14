@@ -1,0 +1,2 @@
+C:\MinGW\bin\ar.exe qc libopenapps.a CMakeFiles/openapps.dir/openapps.c.obj
+C:\MinGW\bin\ranlib.exe libopenapps.a
