@@ -26,8 +26,11 @@ end of frame event), it will turn on its error LED.
 
 #define LENGTH_PACKET   125+LENGTH_CRC ///< maximum length is 127 bytes
 #define CHANNEL         11             ///< 11=2.405GHz
-#define TIMER_PERIOD    0xfff         ///< 0xffff = 2s@32kHz
+#define TIMER_PERIOD    1000000        ///< 0xffff = 2s@32kHz
 #define ID              0x12           ///< byte sent in the packets
+
+#define TX_ENABLE_DELAY 1000           ///< add this delay before calling txNow
+#define RX_ENABLE_DELAY 15000          ///< add this delay before enable Rx from Tx
 
 //=========================== variables =======================================
 
@@ -59,6 +62,7 @@ typedef struct {
    uint8_t              rxpk_lqi;
    bool                 rxpk_crc;
     bool                txFlag;
+    bool                rxFlag;
 } app_vars_t;
 
 app_vars_t app_vars;
@@ -170,17 +174,15 @@ int mote_main(void) {
                   
                   // led
                   leds_error_off();
-//                  if (app_vars.packet_len==22) {
-//                        app_vars.flags |= APP_FLAG_TIMER;
-//                  }
+                  printf("packet received %c%c%c%c !\r\n", app_vars.packet[0], app_vars.packet[1], app_vars.packet[2], app_vars.packet[3]);
+
                   break;
                case APP_STATE_TX:
                   // done sending a packet
+
+                  app_vars.rxFlag = TRUE;
+                  sctimer_setCompare(sctimer_readCounter()+RX_ENABLE_DELAY);
                
-                  radio_setFrequency(CHANNEL, APP_STATE_RX);
-                  
-                  // switch to RX mode
-                  radio_rxEnable();
                   app_vars.state = APP_STATE_RX;
                   
                   // led
@@ -203,7 +205,7 @@ int mote_main(void) {
            // prepare packet
            app_vars.packet_len = sizeof(app_vars.packet);
            for (i=0;i<app_vars.packet_len;i++) {
-              app_vars.packet[i] = ID;
+              app_vars.packet[i] = 'A'+i;
            }
            
            radio_setFrequency(CHANNEL, APP_STATE_TX);
@@ -212,7 +214,7 @@ int mote_main(void) {
            radio_loadPacket(app_vars.packet,125);
            radio_txEnable();
            app_vars.txFlag = TRUE;
-           sctimer_setCompare(sctimer_readCounter()+10);
+           sctimer_setCompare(sctimer_readCounter()+TX_ENABLE_DELAY);
            app_vars.state = APP_STATE_TX;
             
             // clear flag
@@ -241,15 +243,25 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
 }
 
 void cb_timer(void) {
-   // set flag
+    // set flag
     if (app_vars.txFlag==FALSE) {
-        app_vars.flags |= APP_FLAG_TIMER;
-        sctimer_setCompare(sctimer_readCounter()+TIMER_PERIOD);
-    } else {
-        app_vars.txFlag = FALSE;
-        radio_txNow();
-        sctimer_setCompare(sctimer_readCounter()+TIMER_PERIOD);
-    }
+        if (app_vars.rxFlag==TRUE) {
+            app_vars.rxFlag = FALSE;
+            radio_setFrequency(CHANNEL, APP_STATE_RX);
+
+            // switch to RX mode
+            radio_rxEnable();
+            radio_rxNow();
+            // schedule next tx
+            sctimer_setCompare(sctimer_readCounter()+TIMER_PERIOD);
+        } else {
+            app_vars.flags |= APP_FLAG_TIMER;
+        }
+   } else {
+       app_vars.txFlag = FALSE;
+       radio_txNow();
+       sctimer_setCompare(sctimer_readCounter()+TIMER_PERIOD);
+   }
    
    // update debug stats
    app_dbg.num_timer++;
