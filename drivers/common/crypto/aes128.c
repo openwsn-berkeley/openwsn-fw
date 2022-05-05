@@ -46,7 +46,7 @@ void aes_enc(unsigned char *state, unsigned char *expandedKey);
 
 //=========================== public ==========================================
 
-owerror_t aes128_enc(uint8_t buffer[16], uint8_t key[16]) {
+owerror_t aes128_enc(uint8_t *buffer, uint8_t *key) {
     uint8_t expandedKey[176];
 
     expand_key(expandedKey, key);       // expand the key into 176 bytes
