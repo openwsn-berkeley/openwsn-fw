@@ -16,7 +16,7 @@
         <TargetCommonOption>
           <Device>ARMCM0</Device>
           <Vendor>ARM</Vendor>
-          <PackID>ARM.CMSIS.5.3.0</PackID>
+          <PackID>ARM.CMSIS.5.4.0</PackID>
           <PackURL>http://www.keil.com/pack/</PackURL>
           <Cpu>IRAM(0x20000000,0x20000) IROM(0x00000000,0x40000) CPUTYPE("Cortex-M0") CLOCK(12000000) ESEL ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -184,6 +184,7 @@
             <hadXRAM>0</hadXRAM>
             <uocXRam>0</uocXRam>
             <RvdsVP>0</RvdsVP>
+            <RvdsMve>0</RvdsMve>
             <hadIRAM2>0</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <StupSel>8</StupSel>
@@ -335,9 +336,9 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls>--gnu</MiscControls>
-              <Define></Define>
+              <Define>SCUM</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\bsp\boards\scum;..\..\..\bsp\boards;..\..\..\drivers\common;..\..\..\inc;..\..\..\openstack\02a-MAClow;..\..\..\openstack\02b-MAChigh;..\..\..\openstack\03a-IPHC;..\..\..\openstack\03b-IPv6;..\..\..\openstack\04-TRAN;..\..\..\openstack\cross-layers;..\..\..\kernel;..\..\..\openstack;..\..\..\bsp\boards\common</IncludePath>
+              <IncludePath>..\..\..\bsp\boards\scum;..\..\..\bsp\boards;..\..\..\drivers\common;..\..\..\inc;..\..\..\openstack\02a-MAClow;..\..\..\openstack\02b-MAChigh;..\..\..\openstack\03a-IPHC;..\..\..\openstack\03b-IPv6;..\..\..\openstack\04-TRAN;..\..\..\openstack\cross-layers;..\..\..\kernel;..\..\..\openstack;..\..\..\bsp\boards\common;..\..\..\drivers\common\crypto;..\..\..\openweb;..\..\..\openapps</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -526,6 +527,36 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\drivers\common\openserial.c</FilePath>
             </File>
+            <File>
+              <FileName>aes128.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\drivers\common\crypto\aes128.c</FilePath>
+            </File>
+            <File>
+              <FileName>ccms.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\drivers\common\crypto\ccms.c</FilePath>
+            </File>
+            <File>
+              <FileName>hkdf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\drivers\common\crypto\hkdf.c</FilePath>
+            </File>
+            <File>
+              <FileName>hmac.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\drivers\common\crypto\hmac.c</FilePath>
+            </File>
+            <File>
+              <FileName>sha224-256.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\drivers\common\crypto\sha224-256.c</FilePath>
+            </File>
+            <File>
+              <FileName>usha.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\drivers\common\crypto\usha.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -687,9 +718,29 @@
           <GroupName>04-TRAN</GroupName>
           <Files>
             <File>
-              <FileName>openudp.c</FileName>
+              <FileName>udp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\openstack\04-TRAN\openudp.c</FilePath>
+              <FilePath>..\..\..\openstack\04-TRAN\udp.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>openwsb</GroupName>
+          <Files>
+            <File>
+              <FileName>openweb.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\openweb\openweb.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>openapp</GroupName>
+          <Files>
+            <File>
+              <FileName>openapps.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\openapps\openapps.c</FilePath>
             </File>
           </Files>
         </Group>

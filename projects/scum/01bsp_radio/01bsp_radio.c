@@ -29,8 +29,8 @@ end of frame event), it will turn on its error LED.
 #define TIMER_PERIOD    1000000        ///< 0xffff = 2s@32kHz
 #define ID              0x12           ///< byte sent in the packets
 
-#define TX_ENABLE_DELAY 1000           ///< add this delay before calling txNow
-#define RX_ENABLE_DELAY 15000          ///< add this delay before enable Rx from Tx
+#define TX_ENABLE_DELAY 200            ///< add this delay before calling txNow
+#define RX_ENABLE_DELAY 10             ///< add this delay before enable Rx from Tx
 
 //=========================== variables =======================================
 

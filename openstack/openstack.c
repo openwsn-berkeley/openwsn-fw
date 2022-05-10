@@ -34,7 +34,9 @@
 #include "icmpv6echo.h"
 #include "icmpv6rpl.h"
 //-- 04-TRAN
+#if OPENWSN_UDP_C
 #include "sock.h"
+#endif
 
 //===== application-layer
 #include "openweb.h"
