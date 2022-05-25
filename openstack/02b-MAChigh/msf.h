@@ -35,7 +35,7 @@
 #define LIM_NUMCELLSUSED_LOW           MSF_LIM_NUMCELLSUSED_LOW
 #endif
 
-#define HOUSEKEEPING_PERIOD          30000 // miliseconds
+#define HOUSEKEEPING_PERIOD          10000 // miliseconds
 #define QUARANTINE_DURATION            300 // seconds
 #define WAITDURATION_MIN             30000 // miliseconds
 #define WAITDURATION_RANDOM_RANGE    30000 // miliseconds

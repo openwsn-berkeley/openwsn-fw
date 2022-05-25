@@ -16,8 +16,8 @@
 
 //=========================== definition ======================================
 
-#define DIO_PORTION 10
-#define DAO_PORTION 60
+#define DIO_PORTION 2
+#define DAO_PORTION 4
 
 //=========================== variables =======================================
 
@@ -1034,6 +1034,9 @@ void sendDAO(void) {
     if (icmpv6_send(msg) == E_SUCCESS) {
         icmpv6rpl_vars.busySendingDAO = TRUE;
         icmpv6rpl_vars.daoSent = TRUE;
+#ifdef SCUM_DEBUG
+        printf("DAO sent\r\n");
+#endif
     } else {
         openqueue_freePacketBuffer(msg);
     }

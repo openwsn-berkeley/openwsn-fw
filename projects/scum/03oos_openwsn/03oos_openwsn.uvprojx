@@ -336,7 +336,7 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls>--gnu</MiscControls>
-              <Define>SCUM</Define>
+              <Define>SCUM, SCUM_DEBUG</Define>
               <Undefine></Undefine>
               <IncludePath>..\..\..\bsp\boards\scum;..\..\..\bsp\boards;..\..\..\drivers\common;..\..\..\inc;..\..\..\openstack\02a-MAClow;..\..\..\openstack\02b-MAChigh;..\..\..\openstack\03a-IPHC;..\..\..\openstack\03b-IPv6;..\..\..\openstack\04-TRAN;..\..\..\openstack\cross-layers;..\..\..\kernel;..\..\..\openstack;..\..\..\bsp\boards\common;..\..\..\drivers\common\crypto;..\..\..\openweb;..\..\..\openapps</IncludePath>
             </VariousControls>

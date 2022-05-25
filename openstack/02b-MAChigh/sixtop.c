@@ -177,6 +177,10 @@ owerror_t sixtop_request(
         // neighbor can't be none or previous transcation doesn't finish yet
         return E_FAIL;
     }
+    
+#ifdef SCUM_DEBUG
+    printf("sixtop operation code %d\r\n", code);
+#endif
 
     if (openqueue_getNum6PReq(neighbor) > 0) {
         // remove previous request as it's not sent out
@@ -895,6 +899,11 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t *msg, owerror_t error) {
 
     // if this is a request send done
     if (msg->l2_sixtop_messageType == SIXTOP_CELL_REQUEST) {
+        
+#ifdef SCUM_DEBUG       
+        printf("sixtop senddone %d state %d \r\n", error, sixtop_vars.six2six_state);
+#endif
+        
         if (error == E_FAIL) {
             // max retries, without ack
             switch (sixtop_vars.six2six_state) {
@@ -909,6 +918,7 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t *msg, owerror_t error) {
                     break;
             }
         } else {
+            
             // the packet has been sent out successfully
             switch (sixtop_vars.six2six_state) {
                 case SIX_STATE_WAIT_ADDREQUEST_SENDDONE:
@@ -1468,6 +1478,9 @@ void sixtop_six2six_notifyReceive(
 
     if (type == SIXTOP_CELL_RESPONSE) {
         // this is a 6p response message
+#ifdef SCUM_DEBUG
+        printf("six top response received: RC %d status %d\r\n", code, sixtop_vars.six2six_state);
+#endif
 
         // if the code is SUCCESS
         if (code == IANA_6TOP_RC_SUCCESS || code == IANA_6TOP_RC_EOL) {
@@ -1491,6 +1504,11 @@ void sixtop_six2six_notifyReceive(
                             &(pkt->l2_nextORpreviousHop), // neighbor that cells to be added to
                             sixtop_vars.cellOptions       // cell options
                     );
+                    
+#ifdef SCUM_DEBUG
+                    printf("six top add cell\r\n");
+#endif
+                    
                     neighbors_updateSequenceNumber(&(pkt->l2_nextORpreviousHop));
                     break;
                 case SIX_STATE_WAIT_DELETERESPONSE:
@@ -1646,7 +1664,11 @@ bool sixtop_addCells(
             schedule_addActiveSlot(cellList[i].slotoffset, type, isShared, FALSE, cellList[i].channeloffset,
                                    &temp_neighbor);
         }
-    }
+    }    
+    
+#ifdef  SCUM_DEBUG
+    printf("slot add %d\r\n", hasCellsAdded);
+#endif
     return hasCellsAdded;
 }
 

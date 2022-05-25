@@ -930,6 +930,9 @@ port_INLINE void activity_ti1ORri1(void) {
             LOG_ERROR(COMPONENT_IEEE802154E, ERR_DESYNCHRONIZED,
                       (errorparameter_t)ieee154e_vars.slotOffset,
                       (errorparameter_t)0);
+#ifdef SCUM_DEBUG
+            printf("desync %d %d\r\n", ieee154e_vars.asn.bytes2and3, ieee154e_vars.asn.bytes0and1);
+#endif
 
             // update the statistics
             ieee154e_stats.numDeSync++;
@@ -1588,7 +1591,7 @@ port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
 
         if (idmanager_getIsDAGroot() == FALSE &&
             icmpv6rpl_isPreferredParent(&(ieee154e_vars.ackReceived->l2_nextORpreviousHop))) {
-            synchronizeAck(ieee802514_header.timeCorrection);
+            //synchronizeAck(ieee802514_header.timeCorrection);
         }
 
         // inform schedule of successful transmission
@@ -1609,11 +1612,16 @@ port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
 
     // official end of Tx slot
     endSlot();
+#ifdef SCUM_DEBUG
+    printf("ack received\r\n");
+#endif
 }
 
 //======= RX
 
 port_INLINE void activity_ri2(void) {
+    
+    uint32_t i;
     // change state
     changeState(S_RXDATAPREPARE);
 
@@ -1628,10 +1636,11 @@ port_INLINE void activity_ri2(void) {
             TIME_TICS,                                        // timetype
             isr_ieee154e_timer                                // callback
     );
+    
     // configure the radio to listen to the default synchronizing channel
     radio_setFrequency(ieee154e_vars.freq, FREQ_RX);
-
     radio_rxEnable();
+    
 #endif
     ieee154e_vars.radioOnInit = sctimer_readCounter();
     ieee154e_vars.radioOnThisSlot = TRUE;
@@ -1863,6 +1872,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
         // record the timeCorrection and print out at end of slot
         ieee154e_vars.dataReceived->l2_timeCorrection = (PORT_SIGNED_INT_WIDTH)(
                 (PORT_SIGNED_INT_WIDTH) TsTxOffset - (PORT_SIGNED_INT_WIDTH) ieee154e_vars.syncCapturedTime);
+        
 
         // check if ack requested
         if (ieee802514_header.ackRequested == 1 && ieee154e_vars.isAckEnabled == TRUE) {
@@ -2609,7 +2619,11 @@ void synchronizePacket(PORT_TIMER_WIDTH timeReceived) {
         LOG_WARNING(COMPONENT_IEEE802154E, ERR_LARGE_TIMECORRECTION,
                 (errorparameter_t) timeCorrection,
                 (errorparameter_t) 0);
+        
     }
+#ifdef SCUM_DEBUG
+    printf("pkt sync in network %d us\r\n", timeCorrection*2);
+#endif
 
     // update the stats
     ieee154e_stats.numSyncPkt++;
@@ -2654,6 +2668,10 @@ void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
                 (errorparameter_t) timeCorrection,
                 (errorparameter_t) 1);
     }
+            
+#ifdef SCUM_DEBUG
+    printf("ack sync in network %d us\r\n", timeCorrection*2);
+#endif
 
     // update the stats
     ieee154e_stats.numSyncAck++;

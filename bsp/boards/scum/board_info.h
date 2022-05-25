@@ -45,12 +45,12 @@ to return the board's description.
 //// time-slot related
 #define PORT_TsSlotDuration                 9991   // 10000 ticks =   20ms  @500000hz
 #define PORT_maxTxDataPrepare               1650   // 1650  ticks = 3300us  @500000hz
-#define PORT_maxRxAckPrepare                504    // 504   ticks = 1006us  @500000hz
+#define PORT_maxRxAckPrepare                604    // 504   ticks = 1006us  @500000hz
 #define PORT_maxRxDataPrepare               504    // 504   ticks = 1006us  @500000hz
 #define PORT_maxTxAckPrepare                1500   // 1500  ticks = 3000us  @500000hz
 // radio speed related
 #define PORT_delayTx                        39     //  39  ticks  =   78us  @500000hz
-#define PORT_delayRx                        0      //  0us (can not measure)
+#define PORT_delayRx                        30     //  0us (can not measure)
 
 //===== adaptive_sync accuracy
 

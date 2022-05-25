@@ -43,18 +43,18 @@ static const uint8_t ebIEsBytestream[] = {
 #define TX_POWER                    31  // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5  // in 32kHz ticks. min distance to the end of the slot to successfully synchronize
 #ifndef EB_PORTION
-#define EB_PORTION                  10 // set EB on minimal cell for 1/EB_PORTION portion
+#define EB_PORTION                   2 // set EB on minimal cell for 1/EB_PORTION portion
 #endif
 #ifndef MAXKAPERIOD
 #define MAXKAPERIOD               1000  // in slots: 1500@20ms per slot -> ~30 seconds. Max value used by adaptive synchronization.
 #endif
 #ifndef DESYNCTIMEOUT
-#define DESYNCTIMEOUT             1750  // in slots: 1750@20ms per slot -> ~35 seconds. A larger DESYNCTIMEOUT is needed if using a larger KATIMEOUT.
+#define DESYNCTIMEOUT              500  // in slots: 1750@20ms per slot -> ~35 seconds. A larger DESYNCTIMEOUT is needed if using a larger KATIMEOUT.
 #endif
 #define LIMITLARGETIMECORRECTION     5  // threshold number of ticks to declare a timeCorrection "large"
 #define LENGTH_IEEE154_MAX         128  // max length of a valid radio packet
 #define DUTY_CYCLE_WINDOW_LIMIT    (0xFFFFFFFF>>1) // limit of the dutycycle window
-#define SERIALINHIBITGUARD         (1000/PORT_US_PER_TICK) // 32@32kHz ~ 1ms
+#define SERIALINHIBITGUARD         (2000/PORT_US_PER_TICK) // 32@32kHz ~ 1ms
 
 //15.4e information elements related
 #define IEEE802154E_PAYLOAD_DESC_LEN_SHIFT                 0x04
