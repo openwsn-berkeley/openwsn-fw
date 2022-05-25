@@ -588,6 +588,8 @@ bool debugPrint_macStats(void) {
 //======= SYNCHRONIZING
 
 port_INLINE void activity_synchronize_newSlot(void) {
+    
+    uint16_t i;
 
     // I'm in the middle of receiving a packet
     if (ieee154e_vars.state == S_SYNCRX) {
@@ -623,6 +625,9 @@ port_INLINE void activity_synchronize_newSlot(void) {
 
         // switch on the radio in Rx mode.
         radio_rxEnable();
+        
+        for (i=0;i<100;i++);
+        
         radio_rxNow();
     } else {
         // I'm listening last slot

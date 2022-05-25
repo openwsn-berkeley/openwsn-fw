@@ -73,7 +73,7 @@ void msf_init(void) {
     msf_vars.housekeepingPeriod = HOUSEKEEPING_PERIOD;
     opentimers_scheduleIn(
             msf_vars.housekeepingTimerId,
-            openrandom_getRandomizePeriod(msf_vars.housekeepingPeriod, msf_vars.housekeepingPeriod),
+            HOUSEKEEPING_PERIOD,
             TIME_MS,
             TIMER_PERIODIC,
             msf_timer_housekeeping_cb
@@ -231,8 +231,8 @@ void msf_timer_housekeeping_cb(opentimers_id_t id) {
     PORT_TIMER_WIDTH newDuration;
 
     // update the timer period
-    newDuration = openrandom_getRandomizePeriod(msf_vars.housekeepingPeriod, msf_vars.housekeepingPeriod),
-            opentimers_updateDuration(msf_vars.housekeepingTimerId, newDuration);
+//    newDuration = openrandom_getRandomizePeriod(msf_vars.housekeepingPeriod, msf_vars.housekeepingPeriod),
+//            opentimers_updateDuration(msf_vars.housekeepingTimerId, newDuration);
 
     // calling the task directly as the timer_cb function is executed in
     // task mode by opentimer already

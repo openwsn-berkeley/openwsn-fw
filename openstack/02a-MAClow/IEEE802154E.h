@@ -39,7 +39,7 @@ static const uint8_t ebIEsBytestream[] = {
 #define EB_IE_LEN                   28
 
 #define NUM_CHANNELS                16  // number of channels to channel hop on
-#define TXRETRIES                   15  // number of MAC retries before declaring failed
+#define TXRETRIES                    8  // number of MAC retries before declaring failed
 #define TX_POWER                    31  // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5  // in 32kHz ticks. min distance to the end of the slot to successfully synchronize
 #ifndef EB_PORTION
@@ -54,7 +54,7 @@ static const uint8_t ebIEsBytestream[] = {
 #define LIMITLARGETIMECORRECTION     5  // threshold number of ticks to declare a timeCorrection "large"
 #define LENGTH_IEEE154_MAX         128  // max length of a valid radio packet
 #define DUTY_CYCLE_WINDOW_LIMIT    (0xFFFFFFFF>>1) // limit of the dutycycle window
-#define SERIALINHIBITGUARD         (2000/PORT_US_PER_TICK) // 32@32kHz ~ 1ms
+#define SERIALINHIBITGUARD         (1500/PORT_US_PER_TICK) // 32@32kHz ~ 1ms
 
 //15.4e information elements related
 #define IEEE802154E_PAYLOAD_DESC_LEN_SHIFT                 0x04

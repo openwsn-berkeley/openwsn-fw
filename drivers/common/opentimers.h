@@ -8,6 +8,7 @@
 #define __OPENTIMERS_H
 
 #include "opendefs.h"
+#include "board_info.h"
 
 /**
 \addtogroup drivers
@@ -31,7 +32,7 @@
 
 #define TIMER_NUMBER_NON_GENERAL   2
 
-#define SPLITE_TIMER_DURATION     15 // in ticks
+#define SPLITE_TIMER_DURATION     (500/PORT_US_PER_TICK) // in 500us
 #define PRE_CALL_TIMER_WINDOW     PORT_TsSlotDuration
 
 typedef void (*opentimers_cbt)(opentimers_id_t id);
