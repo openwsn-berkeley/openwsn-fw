@@ -625,6 +625,8 @@ void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t *msg) {
             }
         }
     }
+    
+    printf("DIO received!\r\n");
 }
 
 void icmpv6rpl_killPreferredParent(void) {
