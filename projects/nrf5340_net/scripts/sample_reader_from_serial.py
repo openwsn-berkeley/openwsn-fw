@@ -48,7 +48,7 @@ def start_read():
                 data['setting']     = ((ord(input_data[NUM_SAMPLES*4+1])) << 10 ) | ((ord(input_data[NUM_SAMPLES*4+2])) << 5) | (ord(input_data[NUM_SAMPLES*4+3]))
                 data['array']       = ord(input_data[NUM_SAMPLES*4+4])
                 data['angle']       = ord(input_data[NUM_SAMPLES*4+5])
-                data['timestampe']  = '{0}'.format(datetime.datetime.now())
+                data['timestamp']   = '{0}'.format(datetime.datetime.now())
                 
                 phase_data  = []
                 for sample in data['samples']:
