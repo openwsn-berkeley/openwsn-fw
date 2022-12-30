@@ -238,7 +238,7 @@ enum {
    ERR_NO_RECEIVED_PACKET              = 0x23, // there is no received packet in queue
    ERR_SCHEDULE_OVERFLOWN              = 0x24, // schedule overflown
    ERR_SIXTOP_RETURNCODE               = 0x25, // sixtop return code {0} at sixtop state {1}
-   ERR_SIXTOP_REQUEST                  = 0x26, // sending a 6top request
+   ERR_SIXTOP_REQUEST                  = 0x26, // sending a 6top request {0}
    ERR_SIXTOP_COUNT                    = 0x27, // there are {0} cells to request mote
    ERR_SIXTOP_LIST                     = 0x28, // the cells reserved to request mote contains slot {0} and slot {1}
    ERR_UNSUPPORTED_FORMAT              = 0x29, // the received packet format is not supported (code location {0})
@@ -289,6 +289,7 @@ enum {
    ERR_INVALID_PARAM                   = 0x53, // received an invalid parameter
    ERR_COPY_TO_SPKT                    = 0x54, // copy packet content to small packet (pkt len {} < max len {})
    ERR_COPY_TO_BPKT                    = 0x55, // copy packet content to big packet (pkt len {} > max len {})
+   ERR_NEW_NEIGHBOR                    = 0x56, // New neighbor {1:04x} with RSSI {0},
 };
 
 //=========================== typedef =========================================
