@@ -10,8 +10,8 @@
 */
 
 #include "nrf52840.h"
-#include "nrf52840.h"
 #include "sctimer.h"
+#include "debugpins.h"
 
 // ========================== define ==========================================
 
@@ -22,20 +22,14 @@
 #define LFCLKSTAT_SRC_POS     0
 #define LFCLKSTAT_STATE_POS   16
 
-#define MINIMUM_ISR_ADVANCE         16         ///< number of ticks to set CC ahead to make sure the RTC will fire (should this be equal to TIMERTHRESHOLD of opentimers?)
+#define MINIMUM_ISR_ADVANCE         16        ///< number of ticks to set CC ahead to make sure the RTC will fire (should this be equal to TIMERTHRESHOLD of opentimers?)
 #define TIMERLOOP_THRESHOLD         0x20000   ///< 3s, if sctimer_setCompare() is late by max that many ticks, we still issue the ISR 
 #define MAX_RTC_TASKS_DELAY         47        ///< maximum delay in us until an RTC config task is executed
 
-
 // ========================== variable ========================================
 
-typedef struct
-{
-  sctimer_cbt         cb;
-  uint32_t            last_counter;
-  uint32_t            counter_MSB;      ///< the first 8 bits of the 32 bit counter (which do not exist in the physical timer)
-  uint32_t            cc32bit_MSB;      ///< the first 8 bits of the 32 bit CC (capture and compare) value, set
-  bool                RTC_enabled;
+typedef struct {
+    sctimer_cbt         cb;
 } sctimer_vars_t;
 
 sctimer_vars_t sctimer_vars= {0};
@@ -70,6 +64,13 @@ void sctimer_init(void) {
     NRF_RTC0->INTENSET          = 0x1<<16;
 
     NRF_RTC0->TASKS_START       = 1;
+
+    NVIC->IP[SWI0_EGU0_IRQn]         = (uint8_t)((RTC_PRIORITY << (8 - __NVIC_PRIO_BITS)) & (uint32_t)0xFF);
+    NVIC->ISER[SWI0_EGU0_IRQn>>5]    = (uint32_t)(0x1 << (SWI0_EGU0_IRQn & 0x1f));
+
+    // configure egu for manually interrupts
+    NRF_EGU0->EVENTS_TRIGGERED[0] = 0;
+    NRF_EGU0->INTENSET            = 1;
 }
 
 void sctimer_set_callback(sctimer_cbt cb) {
@@ -87,12 +88,12 @@ void sctimer_setCompare(PORT_TIMER_WIDTH val) {
 
     if (counter_current - val < TIMERLOOP_THRESHOLD) {
         // the timer is already late, schedule the ISR right now manually 
-        NRF_RTC0->EVENTS_COMPARE[0] = 1; // need to check if this works
+        NRF_EGU0->TASKS_TRIGGER[0] = 1;
     } else {
         if (val - counter_current < MINIMUM_ISR_ADVANCE)  {
             // there is hardware limitation to schedule the timer within TIMERTHRESHOLD ticks
             // schedule ISR right now manually
-            NRF_RTC0->EVENTS_COMPARE[0] = 1; // need to check if this works
+            NRF_EGU0->TASKS_TRIGGER[0] = 1;
         } else {
             // schedule the timer at val
             NRF_RTC0->CC[0] = val;
@@ -106,6 +107,7 @@ void sctimer_setCompare(PORT_TIMER_WIDTH val) {
  \returns The current value of the timer's counter.
 */
 PORT_TIMER_WIDTH sctimer_readCounter(void) {
+
     return NRF_RTC0->COUNTER;
 }
 
@@ -123,5 +125,32 @@ void sctimer_disable(void) {
 //=========================== interrupt handler ===============================
 
 void RTC0_IRQHandler(void) {
+
+    debugpins_isr_set();
     
+    if (NRF_RTC0->EVENTS_COMPARE[0] != 0) {
+        NRF_RTC0->EVENTS_COMPARE[0] = 0;
+
+        if (sctimer_vars.cb != NULL) {
+            sctimer_vars.cb();
+        }
+    }
+
+    debugpins_isr_clr();
+}
+
+
+void SWI0_EGU0_IRQHandler(void) {
+
+    debugpins_isr_set();
+    
+    if (NRF_EGU0->EVENTS_TRIGGERED[0] != 0) {
+        NRF_EGU0->EVENTS_TRIGGERED[0] = 0;
+
+        if (sctimer_vars.cb != NULL) {
+            sctimer_vars.cb();
+        }
+    }
+
+    debugpins_isr_clr();
 }
