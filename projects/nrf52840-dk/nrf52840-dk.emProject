@@ -1,0 +1,65 @@
+<!DOCTYPE CrossStudio_Project_File>
+<solution Name="nrf52840-dk" target="8" version="2">
+  <project Name="01bsp_leds">
+    <configuration
+      LIBRARY_IO_TYPE="RTT"
+      Name="Common"
+      arm_architecture="v7EM"
+      arm_compiler_variant="SEGGER"
+      arm_core_type="Cortex-M4"
+      arm_endian="Little"
+      arm_fpu_type="FPv4-SP-D16"
+      arm_linker_heap_size="2048"
+      arm_linker_process_stack_size="0"
+      arm_linker_stack_size="2048"
+      arm_linker_variant="SEGGER"
+      arm_target_device_name="nRF52840_xxAA"
+      arm_target_interface_type="SWD"
+      c_preprocessor_definitions="NRF52840_XXAA"
+      debug_stack_pointer_start="__stack_end__"
+      debug_target_connection="J-Link"
+      gcc_entry_point="Reset_Handler"
+      link_linker_script_file="Setup/SEGGER_Flash.icf"
+      linker_output_format="hex"
+      linker_section_placements_segments="FLASH1 RX 0x00000000 0x00100000;RAM1 RWX 0x20000000 0x00040000"
+      project_directory=""
+      project_type="Executable" />
+    <configuration Name="Release" link_dedupe_code="Yes" />
+    <folder
+      Name="bsp"
+      exclude=""
+      filter="*.c;*s;*.h"
+      path="../../bsp/boards/nrf52840-dk"
+      recurse="Yes" />
+    <folder
+      Name="application"
+      exclude=""
+      filter="*.c"
+      path="../common/01bsp_leds"
+      recurse="Yes" />
+    <configuration
+      Name="Debug"
+      arm_linker_variant="GNU"
+      c_preprocessor_definitions="NRF52840_DK"
+      c_user_include_directories="../../bsp/boards;../../bsp/boards/nrf52840-dk;../../bsp/boards/nrf52840-dk/sdk;../../inc"
+      link_use_linker_script_file="No" />
+    <folder
+      Name="inc"
+      exclude=""
+      filter="*.h"
+      path="../../inc"
+      recurse="Yes" />
+  </project>
+  <configuration
+    Name="Debug"
+    c_preprocessor_definitions="DEBUG"
+    gcc_debugging_level="Level 3"
+    gcc_omit_frame_pointer="Yes"
+    gcc_optimization_level="None" />
+  <configuration
+    Name="Release"
+    c_preprocessor_definitions="NDEBUG"
+    gcc_debugging_level="Level 2"
+    gcc_omit_frame_pointer="Yes"
+    gcc_optimization_level="Level 2 balanced" />
+</solution>
