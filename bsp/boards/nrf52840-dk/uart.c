@@ -5,37 +5,15 @@
  */
 
 
-#include "sdk/components/boards/boards.h"
-#include "sdk/components/libraries/uart/app_uart.h"
-#include "sdk/modules/nrfx/hal/nrf_uart.h"
-#include "sdk/integration/nrfx/legacy/nrf_drv_clock.h"
-#include "sdk/modules/nrfx/drivers/include/nrfx_systick.h"
-#include "sdk/modules/nrfx/mdk/nrf52840_bitfields.h"
-#include "sdk/modules/nrfx/mdk/nrf52840.h"
+#include "nrf52840.h"
+#include "nrf52840_bitfields.h"
+#include "board_info.h"
 
-#include "board.h"
 #include "leds.h"
 #include "debugpins.h"
 #include "uart.h"
 
-#include <stdint.h>
-#include <stdio.h>
-#include <string.h>
-
-#ifndef UART_DISABLED  
-
 //=========================== defines =========================================
-
-// see sdk/config/nrf52840/config/sdk_config.h for UART related settings
-#if BOARD_PCA10059
-// nrf52840-DONGLE
-#define RX_PIN_NUMBER  47
-#define TX_PIN_NUMBER  45
-#define RTS_PIN_NUMBER UART_PIN_DISCONNECTED
-#define CTS_PIN_NUMBER UART_PIN_DISCONNECTED
-#endif
-
-#define NRF_GPIO_PIN_MAP(port, pin) (((port) << 5) | ((pin) & 0x1F))
 
 #define UART_RX_PIN       NRF_GPIO_PIN_MAP(0,8) // p0.08
 #define UART_TX_PIN       NRF_GPIO_PIN_MAP(0,6) // p0.06
@@ -67,23 +45,11 @@ uart_vars_t uart_vars;
 
 //=========================== prototypes ======================================
 
-static void uart_event_handler(app_uart_evt_t * p_event);
-
 //=========================== public ==========================================
 
 void uart_init(void) {
     // reset local variables
     memset(&uart_vars,0,sizeof(uart_vars_t));
-
-    // UART baudrate accuracy depends on HFCLK
-   // see radio.c for details on enabling HFCLK
-    #define hfclk_request_timeout_us 380
-    {
-      nrfx_systick_state_t systick_time;
-        nrfx_systick_get(&systick_time);
-        nrf_drv_clock_hfclk_request(NULL);
-        while ((!nrf_drv_clock_hfclk_is_running()) && (!nrfx_systick_test(&systick_time, hfclk_request_timeout_us))) {}
-    }
 
     // configure txd and rxd pin
     NRF_P0->OUTSET =  1 << UART_TX_PIN;
@@ -119,7 +85,7 @@ void uart_init(void) {
         | (uint32_t)(1<<UART_INTEN_TXDRDY_POS);
 
     // set priority and enable interrupt in NVIC
-    NVIC_SetPriority(UARTE0_UART0_IRQn, NRFX_UART_DEFAULT_CONFIG_IRQ_PRIORITY);
+    NVIC_SetPriority(UARTE0_UART0_IRQn, UART_PRIORITY);
 
     NVIC->ISER[((uint32_t)UARTE0_UART0_IRQn)>>5] = 
        ((uint32_t)1) << ( ((uint32_t)UARTE0_UART0_IRQn) & 0x1f);
@@ -227,4 +193,3 @@ kick_scheduler_t uart_rx_isr(void) {
 
     return DO_NOT_KICK_SCHEDULER;
 }
-#endif // UART_DISABLED  

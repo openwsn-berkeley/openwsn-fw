@@ -3,8 +3,8 @@
     \author Frank Senf <frank.senf@imms.de>, July 2018.
 */
 
-#ifndef __ADC_SENSOR_H__
-#define __ADC_SENSOR_H__
+#ifndef __ADC_H__
+#define __ADC_H__
 
 #include "board_info.h"
 
@@ -16,12 +16,7 @@
 
 //=========================== prototypes ======================================
 
-bool adc_sens_init(void);
-uint16_t adc_sens_read_battery(void);
-float adc_sens_convert_battery(uint16_t raw);
-
-uint16_t adc_sens_read_temperature(void);
-float adc_sens_convert_temperature(uint16_t cpu_temp_raw);
-
+void adc_init(void);
+uint16_t adc_read(void);
 
 #endif // __ADC_SENSOR_H__

@@ -4,135 +4,129 @@
  * Description: nRF52840-specific definition of the "leds" bsp module.
  */
 
-#include "sdk/components/boards/boards.h"
-#include "sdk/components/libraries/delay/nrf_delay.h"
-
-#include "stdint.h"
-#include "leds.h"
-#include "board.h"
+ #include "stdbool.h"
+#include "nrf52840.h"
 #include "board_info.h"
+#include "leds.h"
 
 
 //=========================== defines =========================================
-#if BOARD_PCA10056
-// nrf52840-DK
-#define LED_IDX_ERROR 0
-#define LED_IDX_DEBUG 1
-#define LED_IDX_SYNC  2
-#define LED_IDX_RADIO 3
-#endif
-#if BOARD_PCA10059
-// nrf52840-DONGLE
-#define LED_IDX_ERROR 0 // LED1
-#define LED_IDX_DEBUG 2	// LED2_G
-#define LED_IDX_RADIO 3 // LED2_B
-#endif
 
+// nrf52840-DK
+#define LED_1           NRF_GPIO_PIN_MAP(0,13)
+#define LED_2           NRF_GPIO_PIN_MAP(0,14)
+#define LED_3           NRF_GPIO_PIN_MAP(0,15)
+#define LED_4           NRF_GPIO_PIN_MAP(0,16)
 
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
 
-void bspLedSet(uint8_t ui8Led);
-void bspLedClear(uint8_t ui8Led);
-void bspLedToggle(uint8_t ui8Led);
-bool bspLedGet(uint8_t ui8Led);
-
-
 //=========================== public ==========================================
 
 void leds_init() {
-#ifndef NO_LEDS
-    // LEDs have probably been already initialized in board.c:board_init(), but we can do that again without problems
 
-    const uint8_t m_board_led_list[LEDS_NUMBER] = LEDS_LIST;
-
-    for (uint8_t l=0; l < LEDS_NUMBER; ++l) {
-        nrf_gpio_cfg_output(m_board_led_list[l]);
-    }
-
-    bsp_board_leds_off();
-#endif // NO_LEDS
+    NRF_P0->DIRSET = 1<<LED_1;
+    NRF_P0->DIRSET = 1<<LED_2;
+    NRF_P0->DIRSET = 1<<LED_3;
+    NRF_P0->DIRSET = 1<<LED_4;
 }
 
-
-void leds_error_on(void) {
-    bspLedSet(LED_IDX_ERROR);
-}
+//==== error led
 
 void leds_error_off(void) {
-    bspLedClear(LED_IDX_ERROR);
+    NRF_P0->OUTSET = 1<<LED_1;
+}
+
+void leds_error_on(void) {
+    NRF_P0->OUTCLR = 1<<LED_1;
 }
 
 void leds_error_toggle(void) {
-    bspLedToggle(LED_IDX_ERROR);
+    if ((NRF_P0->OUT & (1<<LED_1))!=0) {        
+        NRF_P0->OUTCLR = 1<<LED_1;
+    } else {
+        NRF_P0->OUTSET = 1<<LED_1;
+    }
 }
 
 uint8_t leds_error_isOn(void) {
-    return((uint8_t) bspLedGet(LED_IDX_ERROR));
+    if (NRF_P0->OUT & (1<<LED_1)) {
+        return 0;
+    } else {
+        return 1;
+    }
 }
 
-
-void leds_sync_on(void) {
-#if BOARD_PCA10056
-    bspLedSet(LED_IDX_SYNC);
-#endif
-}
+//==== sync led
 
 void leds_sync_off(void) {
-#if BOARD_PCA10056
-    bspLedClear(LED_IDX_SYNC);
-#endif
+    NRF_P0->OUTSET = 1<<LED_2;
+}
+
+void leds_sync_on(void) {
+    NRF_P0->OUTCLR = 1<<LED_2;
 }
 
 void leds_sync_toggle(void) {
-#if BOARD_PCA10056
-    bspLedToggle(LED_IDX_SYNC);
-#endif
+    if ((NRF_P0->OUT & (1<<LED_2))!=0) {        
+        NRF_P0->OUTCLR = 1<<LED_2;
+    } else {
+        NRF_P0->OUTSET = 1<<LED_2;
+    }
 }
 
 uint8_t leds_sync_isOn(void) {
-#if BOARD_PCA10056
-    return((uint8_t) bspLedGet(LED_IDX_SYNC));
-#else
-    return FALSE;
-#endif
+    return (uint8_t)(NRF_P0->OUT & (1<<LED_2));
 }
 
+//==== radio led
 
-void leds_radio_on(void) {
-    bspLedSet(LED_IDX_RADIO);
-}
 
 void leds_radio_off(void) {
-    bspLedClear(LED_IDX_RADIO);
+    NRF_P0->OUTSET = 1<<LED_3;
+}
+
+void leds_radio_on(void) {
+    NRF_P0->OUTCLR = 1<<LED_3;
 }
 
 void leds_radio_toggle(void) {
-    bspLedToggle(LED_IDX_RADIO);
+    if ((NRF_P0->OUT & (1<<LED_3))!=0) {        
+        NRF_P0->OUTCLR = 1<<LED_3;
+    } else {
+        NRF_P0->OUTSET = 1<<LED_3;
+    }
 }
 
 uint8_t leds_radio_isOn(void) {
-    return((uint8_t) bspLedGet(LED_IDX_RADIO));
+    return (uint8_t)(NRF_P0->OUT & (1<<LED_3));
 }
 
+//==== debug led
 
-void leds_debug_on(void) {
-    bspLedSet(LED_IDX_DEBUG);
-}
 
 void leds_debug_off(void) {
-    bspLedClear(LED_IDX_DEBUG);
+    NRF_P0->OUTSET = 1<<LED_4;
+}
+
+void leds_debug_on(void) {
+    NRF_P0->OUTCLR = 1<<LED_4;
 }
 
 void leds_debug_toggle(void) {
-    bspLedToggle(LED_IDX_DEBUG);
+    if ((NRF_P0->OUT & (1<<LED_4))!=0) {        
+        NRF_P0->OUTCLR = 1<<LED_4;
+    } else {
+        NRF_P0->OUTSET = 1<<LED_4;
+    }
 }
 
 uint8_t leds_debug_isOn(void) {
-    return((uint8_t) bspLedGet(LED_IDX_DEBUG));
+    return (uint8_t)(NRF_P0->OUT & (1<<LED_4));
 }
 
+//==== all leds
 
 void leds_all_on(void) {
     leds_radio_on();
@@ -200,36 +194,3 @@ void leds_increment(void) {
 }
 
 //=========================== private =========================================
-
-void bspLedSet(uint8_t ui8Led) {
-#ifndef NO_LEDS
-    bsp_board_led_on(ui8Led);
-#else
-    (void)ui8Led;
-#endif
-}
-
-void bspLedClear(uint8_t ui8Led) {
-#ifndef NO_LEDS
-    bsp_board_led_off(ui8Led);
-#else
-    (void)ui8Led;
-#endif
-}
-
-void bspLedToggle(uint8_t ui8Led) {
-#ifndef NO_LEDS
-    bsp_board_led_invert(ui8Led);
-#else
-    (void)ui8Led;
-#endif
-}
-
-bool bspLedGet(uint8_t ui8Led) {
-#ifndef NO_LEDS
-    return bsp_board_led_state_get(ui8Led);
-#else
-    (void)ui8Led;
-    return false;
-#endif
-}

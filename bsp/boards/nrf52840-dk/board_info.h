@@ -10,10 +10,6 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "sdk/modules/nrfx/templates/nRF52840/nrfx_config.h"
-#include "opendefs.h"
-
-
 //=========================== defines =========================================
 
 //===== interrupt state
@@ -38,6 +34,15 @@
 // this is a workaround from the fact that the interrupt pin for the GINA radio
 // is not connected to a pin on the MSP which allows time capture.
 #define CAPTURE_TIME()
+
+
+// pin selection
+#define NRF_GPIO_PIN_MAP(port, pin) (((port) << 5) | ((pin) & 0x1F))
+
+// interrupt priority
+#define RTC_PRIORITY    0
+#define RADIO_PRIORITY  1
+#define UART_PRIORITY   2
 
 //===== IEEE802154E timing
 // 1 clock tick = 30.5 us

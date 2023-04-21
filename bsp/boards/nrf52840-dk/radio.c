@@ -7,28 +7,12 @@
  *    Date: June 2018
 */
 
-#include <stdio.h>
-#include <stdint.h>
-#include <string.h>
-#include <stdbool.h>
-
-#include "sdk/components/boards/boards.h"
-#include "sdk/components/drivers_nrf/radio_config/radio_config.h"
-#include "sdk/modules/nrfx/drivers/include/nrfx_systick.h"
-#include "sdk/modules/nrfx/mdk/nrf52840.h"
-
-#include "sdk/integration/nrfx/legacy/nrf_drv_clock.h"
-
-#include "nrf_delay.h"
-
-#include "app_config.h"
-#include "leds.h"
-#include "radio.h"
-#include "board.h"
+#include "nrf52840.h"
+#include "nrf52840_bitfields.h"
 #include "board_info.h"
 #include "debugpins.h"
-#include "sctimer.h"
-#include "radio_ble.h"
+#include "leds.h"
+#include "radio.h"
 
 
 //=========================== defines =========================================
@@ -81,7 +65,7 @@ static radio_vars_t radio_vars;
 
 static uint32_t swap_bits(uint32_t inp);
 static uint32_t bytewise_bitswap(uint32_t inp);
-static uint8_t  ble_channel_to_frequency(channel);
+static uint8_t  ble_channel_to_frequency(uint8_t channel);
 
 //=========================== public ==========================================
 
@@ -137,7 +121,7 @@ void radio_init(void) {
     NRF_RADIO->INTENSET = // RADIO_INTENSET_READY_Enabled << RADIO_INTENSET_READY_Pos | 
                         RADIO_INTENSET_ADDRESS_Enabled << RADIO_INTENSET_ADDRESS_Pos |
                         RADIO_INTENSET_END_Enabled << RADIO_INTENSET_END_Pos; 
-    NVIC_SetPriority(RADIO_IRQn, NRFX_RADIO_CONFIG_IRQ_PRIORITY);
+    NVIC_SetPriority(RADIO_IRQn, RADIO_PRIORITY);
 
     NVIC_ClearPendingIRQ(RADIO_IRQn);
     NVIC_EnableIRQ(RADIO_IRQn);
@@ -431,7 +415,7 @@ static uint32_t bytewise_bitswap(uint32_t inp) {
           | (swap_bits(inp));
 }
 
-static uint8_t ble_channel_to_frequency(channel) {
+static uint8_t ble_channel_to_frequency(uint8_t channel) {
 
     uint8_t frequency;
     

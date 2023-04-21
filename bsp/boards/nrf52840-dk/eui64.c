@@ -7,19 +7,14 @@
  * Date:   May 2018
 */
 
-#include "sdk/modules/nrfx/mdk/nrf52840.h"
-
-#include "eui64.h"
-
+#include "nrf52840.h"
+#include "nrf52840_bitfields.h"
 #include "string.h"
-#include <stdbool.h>
+#include "eui64.h"
 
 //=========================== defines =========================================
 
 //=========================== variables =======================================
-
-static uint32_t m_deviceID[2]= {0};   ///< this will be filled with the HW-unique serial number
-static bool m_deviceIDRead= false;    ///< will become true once the device ID has been read from the chip
 
 //=========================== prototypes ======================================
 
@@ -27,15 +22,19 @@ static bool m_deviceIDRead= false;    ///< will become true once the device ID h
 
 void eui64_get(uint8_t* addressToWrite) {
     
-    if (!m_deviceIDRead)  {
-        // get ID from Nordic chip
-        m_deviceID[0]= NRF_FICR->DEVICEID[0];
-        m_deviceID[1]= NRF_FICR->DEVICEID[1];
-        m_deviceIDRead= true;
-    }
+    uint32_t tmp;
+    uint8_t i;
 
-    if (addressToWrite) {
-        memcpy(addressToWrite, m_deviceID, 2*sizeof(uint32_t));
+    i = 0;
+
+    // get ID from Nordic chip
+    tmp = NRF_FICR->DEVICEID[0];
+    for (i=0;i<4;i++) {
+        addressToWrite[i] = (uint8_t)((tmp >> (i*8)) & 0x000000ff);
+    }
+    tmp = NRF_FICR->DEVICEID[1];
+    for (i=0;i<4;i++) {
+        addressToWrite[i+4] = (uint8_t)((tmp >> (i*8)) & 0x000000ff);
     }
 }
 
