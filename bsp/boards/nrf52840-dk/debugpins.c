@@ -13,12 +13,12 @@
 
 // board debug PINS defines
 
-#define DEBUGPIN_FRAME  NRF_PIN_MAP(0,26)
-#define DEBUGPIN_SLOT   NRF_PIN_MAP(0,27)
-#define DEBUGPIN_FSM    NRF_PIN_MAP(0,29)
-#define DEBUGPIN_TASK   NRF_PIN_MAP(0,28)
-#define DEBUGPIN_ISR    NRF_PIN_MAP(0,30)
-#define DEBUGPIN_RADIO  NRF_PIN_MAP(0,31)
+#define DEBUGPIN_FRAME  NRF_GPIO_PIN_MAP(0,26)
+#define DEBUGPIN_SLOT   NRF_GPIO_PIN_MAP(0,27)
+#define DEBUGPIN_FSM    NRF_GPIO_PIN_MAP(0,28)
+#define DEBUGPIN_TASK   NRF_GPIO_PIN_MAP(0,29)
+#define DEBUGPIN_ISR    NRF_GPIO_PIN_MAP(0,30)
+#define DEBUGPIN_RADIO  NRF_GPIO_PIN_MAP(0,31)
 
 //=========================== variables =======================================
 
@@ -27,6 +27,14 @@
 //=========================== public ==========================================
 
 void debugpins_init(void) {
+
+    NRF_P0->DIRSET = 1<<DEBUGPIN_FRAME;
+    NRF_P0->DIRSET = 1<<DEBUGPIN_SLOT;
+    NRF_P0->DIRSET = 1<<DEBUGPIN_FSM;
+    NRF_P0->DIRSET = 1<<DEBUGPIN_TASK;
+    NRF_P0->DIRSET = 1<<DEBUGPIN_ISR;
+    NRF_P0->DIRSET = 1<<DEBUGPIN_RADIO;
+
 }
 
 void debugpins_frame_set(void) {

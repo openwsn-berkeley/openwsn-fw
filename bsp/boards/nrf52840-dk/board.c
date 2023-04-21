@@ -33,6 +33,12 @@ int main(void) {
 
 void board_init(void) {
 
+    leds_init();
+    debugpins_init();
+
+    uart_init();
+    sctimer_init();
+    radio_init();
 }
 
 /**

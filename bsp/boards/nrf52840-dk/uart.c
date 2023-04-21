@@ -51,51 +51,36 @@ void uart_init(void) {
     // reset local variables
     memset(&uart_vars,0,sizeof(uart_vars_t));
 
-    // configure txd and rxd pin
-    NRF_P0->OUTSET =  1 << UART_TX_PIN;
+    NRF_P0->PIN_CNF[UART_TX_PIN] = ((uint32_t)GPIO_PIN_CNF_DIR_Output << GPIO_PIN_CNF_DIR_Pos)
+                               | ((uint32_t)GPIO_PIN_CNF_INPUT_Disconnect << GPIO_PIN_CNF_INPUT_Pos)
+                               | ((uint32_t)GPIO_PIN_CNF_PULL_Disabled << GPIO_PIN_CNF_PULL_Pos)
+                               | ((uint32_t)GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos)
+                               | ((uint32_t)GPIO_PIN_CNF_SENSE_Disabled << GPIO_PIN_CNF_SENSE_Pos);
+    NRF_P0->PIN_CNF[UART_RX_PIN] = ((uint32_t)GPIO_PIN_CNF_DIR_Input << GPIO_PIN_CNF_DIR_Pos)
+                               | ((uint32_t)GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos)
+                               | ((uint32_t)GPIO_PIN_CNF_PULL_Disabled << GPIO_PIN_CNF_PULL_Pos)
+                               | ((uint32_t)GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos)
+                               | ((uint32_t)GPIO_PIN_CNF_SENSE_Disabled << GPIO_PIN_CNF_SENSE_Pos);
+    
+    NRF_UART0->PSEL.TXD = UART_TX_PIN;
+    NRF_UART0->PSEL.RXD = UART_RX_PIN;
 
-    // tx pin configured as output
-    NRF_P0->PIN_CNF[UART_TX_PIN] =   \
-          ((uint32_t)GPIO_PIN_CNF_DIR_Output << GPIO_PIN_CNF_DIR_Pos)
-        | ((uint32_t)GPIO_PIN_CNF_INPUT_Disconnect << GPIO_PIN_CNF_INPUT_Pos)
-        | ((uint32_t)GPIO_PIN_CNF_PULL_Disabled << GPIO_PIN_CNF_PULL_Pos)
-        | ((uint32_t)GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos)
-        | ((uint32_t)GPIO_PIN_CNF_SENSE_Disabled << GPIO_PIN_CNF_SENSE_Pos);
- 
-    // rx pin configured as input
-    NRF_P0->PIN_CNF[UART_RX_PIN] =   \
-           ((uint32_t)GPIO_PIN_CNF_DIR_Input << GPIO_PIN_CNF_DIR_Pos)
-         | ((uint32_t)GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos)
-         | ((uint32_t)GPIO_PIN_CNF_PULL_Disabled << GPIO_PIN_CNF_PULL_Pos)
-         | ((uint32_t)GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos)
-         | ((uint32_t)GPIO_PIN_CNF_SENSE_Disabled << GPIO_PIN_CNF_SENSE_Pos);
+    // default: stop 1 bit, no parity, no HWFC
+    NRF_UART0->CONFIG   = 0 ;
+    NRF_UART0->BAUDRATE = UART_BAUDRATE_115200;
 
-    // configure uart
-    NRF_UART0->BAUDRATE = (uint32_t)(UART_BAUDRATE_115200);
-    NRF_UART0->CONFIG   = 
-          (uint32_t)(UART_CONFIG_PARITY << UART_CONFIG_PARITY_POS)
-        | (uint32_t)(UART_CONFIG_HWFC   << UART_CONFIG_HWFC_POS);
-    NRF_UART0->PSEL.RXD = (uint32_t)UART_RX_PIN;
-    NRF_UART0->PSEL.TXD = (uint32_t)UART_TX_PIN;
+    NRF_UART0->EVENTS_TXDRDY      = 0;
+    NRF_UART0->EVENTS_RXDRDY      = 0;
+    NRF_UART0->INTENSET = (1 << UART_INTEN_RXDRDY_POS) |\
+                          (1 << UART_INTEN_TXDRDY_POS);
 
-    // enable UART rx done ready and tx done ready interrupts
+    NVIC->IP[UARTE0_UART0_IRQn]         = (uint8_t)((UART_PRIORITY << (8 - __NVIC_PRIO_BITS)) & (uint32_t)0xFF);
+    NVIC->ISER[UARTE0_UART0_IRQn>>5]    = (uint32_t)(0x1 << (UARTE0_UART0_IRQn & 0x1f));
 
-    NRF_UART0->INTENSET = 
-          (uint32_t)(1<<UART_INTEN_RXDRDY_POS)
-        | (uint32_t)(1<<UART_INTEN_TXDRDY_POS);
+    NRF_UART0->ENABLE   = 4;  // set to 4 to enable
 
-    // set priority and enable interrupt in NVIC
-    NVIC_SetPriority(UARTE0_UART0_IRQn, UART_PRIORITY);
-
-    NVIC->ISER[((uint32_t)UARTE0_UART0_IRQn)>>5] = 
-       ((uint32_t)1) << ( ((uint32_t)UARTE0_UART0_IRQn) & 0x1f);
-
-    // enable uart
-    NRF_UART0->ENABLE = (uint32_t)UART_ENABLE_ENABLE_Enabled;
-
-    // start to tx and rx
-    NRF_UART0->TASKS_STARTTX = (uint32_t)1;
-    NRF_UART0->TASKS_STARTRX = (uint32_t)1;
+    NRF_UART0->TASKS_STARTTX = 1;
+    NRF_UART0->TASKS_STARTRX = 1;
 }
 
 void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb) {

@@ -30,6 +30,8 @@ void leds_init() {
     NRF_P0->DIRSET = 1<<LED_2;
     NRF_P0->DIRSET = 1<<LED_3;
     NRF_P0->DIRSET = 1<<LED_4;
+
+    leds_all_off();
 }
 
 //==== error led
@@ -150,7 +152,9 @@ void leds_all_toggle(void) {
 }
 
 void leds_error_blink(void) {
+    
     uint8_t i;
+    uint32_t j;
 
     // turn all LEDs off
     leds_all_off();
@@ -158,39 +162,32 @@ void leds_error_blink(void) {
     // blink error LED for ~10s
     for (i = 0; i < 100; i++) {
         leds_error_toggle();
-        nrf_delay_ms(100);
+        for(j=0;j<0x1ffff;j++);
     }
 }
 
 void leds_circular_shift(void) {
-    bool led3_state= bspLedGet(3);
-    (bspLedGet(2))?(bspLedSet(3)):(bspLedClear(3));
-    (bspLedGet(1))?(bspLedSet(2)):(bspLedClear(2));
-    (bspLedGet(0))?(bspLedSet(1)):(bspLedClear(1));
-    (led3_state)?(bspLedSet(0)):(bspLedClear(0));
+
+    uint32_t led_new_value;
+    uint32_t led_read;
+    uint32_t shift_bit;
+
+    led_read = NRF_P0->OUT & 0x0001e000;
+    shift_bit = (NRF_P0->OUT & 0x00010000)>>3;
+    led_new_value = ((led_read<<1) & 0x0001e000) | shift_bit; 
+    
+    NRF_P0->OUTSET = led_new_value;
 }
 
 void leds_increment(void) {
-    if (bspLedGet(3))     {
-        leds_all_off();
-    } else {
-        if (bspLedGet(2)) {
-            bspLedSet(3);
-            return;
-        }
+    
+    uint32_t led_new_value;
+    uint32_t led_read;
 
-        if (bspLedGet(1)) {
-            bspLedSet(2);
-            return;
-        }
-  
-        if (bspLedGet(0)) {
-            bspLedSet(1);
-            return;
-        }
+    led_read = (NRF_P0->OUT & 0x0001e000)>>13;
+    led_new_value = ((led_read+1) & 0x0000000f)<<13;
 
-        bspLedSet(0);
-    }
+    NRF_P0->OUTSET = led_new_value;
 }
 
 //=========================== private =========================================
