@@ -56,7 +56,8 @@ void board_init(void) {
  */
 void board_sleep(void) {
 
-    __WFI();
+    __WFE();
+    __WFE();
 }
 
 /**
