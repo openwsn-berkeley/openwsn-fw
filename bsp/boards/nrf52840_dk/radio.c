@@ -228,8 +228,6 @@ void radio_rfOff(void) {
     debugpins_radio_clr();
 
     radio_vars.state  = RADIOSTATE_RFOFF;
-
-    hfclock_stop();
 }
 
 
@@ -268,8 +266,6 @@ void radio_ble_loadPacket(uint8_t* packet, uint16_t len) {
 
 void radio_txEnable(void) {
 
-    hfclock_start();
-
     radio_vars.state  = RADIOSTATE_ENABLING_TX;
 
     NRF_RADIO->EVENTS_READY = (uint32_t)0;
@@ -301,8 +297,6 @@ void radio_rxEnable(void) {
 
         // turn off radio first
         radio_rfOff();
-
-        hfclock_start();
 
         NRF_RADIO->EVENTS_READY = (uint32_t)0;
 
