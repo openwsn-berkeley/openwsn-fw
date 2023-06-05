@@ -45,19 +45,23 @@ void sctimer_init(void) {
 
     memset(&sctimer_vars, 0, sizeof(sctimer_vars_t));
 
-    while((NRF_CLOCK->LFCLKSTAT & (1<<LFCLKSTAT_STATE_POS)) == 1){
-        NRF_CLOCK->TASKS_LFCLKSTOP = 1;
-    };
-
-    NRF_CLOCK->LFCLKSRC = (1<<LFCLKSRC_SRC_POS) |\
-                          (1<<LFCLKSRC_EXTERNAL_POS);
-    NRF_CLOCK->TASKS_LFCLKSTART     = 1;
-    while(NRF_CLOCK->LFCLKRUN==0);
-
     NVIC->IP[RTC0_IRQn]         = (uint8_t)((RTC_PRIORITY << (8 - __NVIC_PRIO_BITS)) & (uint32_t)0xFF);
     NVIC->ISER[RTC0_IRQn>>5]    = (uint32_t)(0x1 << (RTC0_IRQn & 0x1f));
 
+    // stop LFCLK
+    NRF_CLOCK->TASKS_LFCLKSTOP     = 1;
+    while((NRF_CLOCK->LFCLKSTAT & (1<<LFCLKSTAT_STATE_POS)) == 1);
+    
+    // configure prescaler
     NRF_RTC0->PRESCALER         = 0;
+
+    // configure the source
+    NRF_CLOCK->LFCLKSRC = (1<<LFCLKSRC_SRC_POS);
+
+    // start LFCLK
+    NRF_CLOCK->TASKS_LFCLKSTART = (uint32_t)1;
+    while((NRF_CLOCK->LFCLKSTAT & (1<<LFCLKSTAT_STATE_POS)) == 0);
+
 
     // enable compare 0 1, and 2
     NRF_RTC0->EVENTS_COMPARE[0] = 0;
