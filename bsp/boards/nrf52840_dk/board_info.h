@@ -9,14 +9,15 @@
 
 #include <stdint.h>
 #include <string.h>
+#include "cmsis_gcc.h"
 
 //=========================== defines =========================================
 
 //===== interrupt state
 
 #define INTERRUPT_DECLARATION()
-#define DISABLE_INTERRUPTS() __asm volatile ("cpsid i" : : : "memory")    ///< or use __disable_irq() from core_cmFunc.h
-#define ENABLE_INTERRUPTS() __asm volatile ("cpsie i" : : : "memory")     ///< or use __enable_irq() from core_cmFunc.h
+#define DISABLE_INTERRUPTS()  __disable_irq()
+#define ENABLE_INTERRUPTS()   __enable_irq()
 
 //===== timer
 
