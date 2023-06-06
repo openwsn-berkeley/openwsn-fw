@@ -470,28 +470,48 @@ static void hfclock_stop(void) {
 
 //=========================== callbacks =======================================
 
+
+kick_scheduler_t radio_isr(void){
+
+    uint32_t time_stampe;
+
+    time_stampe = NRF_RTC0->COUNTER;
+
+    // start of frame (payload)
+    if (NRF_RADIO->EVENTS_FRAMESTART){
+
+        // start sampling rssi
+        NRF_RADIO->TASKS_RSSISTART = (uint32_t)1;
+
+        if (radio_vars.startFrame_cb!=NULL){
+            radio_vars.startFrame_cb(time_stampe);
+        }
+        
+        NRF_RADIO->EVENTS_FRAMESTART = (uint32_t)0;
+        return KICK_SCHEDULER;
+    }
+
+    // END 
+    if (NRF_RADIO->EVENTS_END) {
+
+        if (radio_vars.endFrame_cb!=NULL){
+            radio_vars.endFrame_cb(time_stampe);
+        }
+        
+        NRF_RADIO->EVENTS_END = (uint32_t)0;
+        return KICK_SCHEDULER;
+    }
+
+    return DO_NOT_KICK_SCHEDULER;
+}
+
 //=========================== interrupt handlers ==============================
 
 void RADIO_IRQHandler(void) {
 
-    if (NRF_RADIO->EVENTS_FRAMESTART) {
+    debugpins_isr_set();
 
-        NRF_RADIO->EVENTS_FRAMESTART = 0;
+    radio_isr();
 
-        // start sampling rssi
-        NRF_RADIO->TASKS_RSSISTART = 1;
-
-        if (radio_vars.startFrame_cb) {
-            radio_vars.startFrame_cb(sctimer_readCounter());
-        }
-    }
-
-    if (NRF_RADIO->EVENTS_END) {
-
-        NRF_RADIO->EVENTS_END = 0;
-
-        if (radio_vars.endFrame_cb) {
-            radio_vars.endFrame_cb(sctimer_readCounter());
-        }
-    }
+    debugpins_isr_clr();
 }
