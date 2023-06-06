@@ -22,14 +22,15 @@
 #define LFCLKSTAT_SRC_POS     0
 #define LFCLKSTAT_STATE_POS   16
 
-#define MINIMUM_ISR_ADVANCE         16        ///< number of ticks to set CC ahead to make sure the RTC will fire (should this be equal to TIMERTHRESHOLD of opentimers?)
-#define TIMERLOOP_THRESHOLD         0x20000   ///< 3s, if sctimer_setCompare() is late by max that many ticks, we still issue the ISR 
-#define MAX_RTC_TASKS_DELAY         47        ///< maximum delay in us until an RTC config task is executed
+#define MINIMUM_ISR_ADVANCE         5        // nRF52840_PS_v1.7 (page 370)
+#define TIMERLOOP_THRESHOLD         0xffff 
+#define TIMERMASK                   0xffffff
 
 // ========================== variable ========================================
 
 typedef struct {
     sctimer_cbt         cb;
+    uint8_t             lastFireMode;
 } sctimer_vars_t;
 
 sctimer_vars_t sctimer_vars= {0};
@@ -90,17 +91,20 @@ void sctimer_setCompare(PORT_TIMER_WIDTH val) {
     
     counter_current = NRF_RTC0->COUNTER;
 
-    if (counter_current - val < TIMERLOOP_THRESHOLD) {
+    if (((counter_current - val) & TIMERMASK) < TIMERLOOP_THRESHOLD) {
         // the timer is already late, schedule the ISR right now manually 
         NRF_EGU0->TASKS_TRIGGER[0] = 1;
+        sctimer_vars.lastFireMode  = 1;
     } else {
-        if (val - counter_current < MINIMUM_ISR_ADVANCE)  {
+        if (((val - counter_current) & TIMERMASK) < MINIMUM_ISR_ADVANCE)  {
             // there is hardware limitation to schedule the timer within TIMERTHRESHOLD ticks
             // schedule ISR right now manually
             NRF_EGU0->TASKS_TRIGGER[0] = 1;
+            sctimer_vars.lastFireMode  = 2;
         } else {
             // schedule the timer at val
             NRF_RTC0->CC[0] = val;
+            sctimer_vars.lastFireMode = 0;
         }
     }
 }
