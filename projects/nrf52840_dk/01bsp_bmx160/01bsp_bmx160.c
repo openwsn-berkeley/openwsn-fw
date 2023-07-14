@@ -22,7 +22,7 @@ Then it sends out the gyro data through uart at interval of SAMPLE_PERIOD.
 
 //=========================== defines =========================================
 
-#define SAMPLE_PERIOD   32768  // @32kHz = 1s
+#define SAMPLE_PERIOD   (32768>>4)  // @32kHz = 1s
 #define BUFFER_SIZE     0x08   //2B*3 axises value + 2B ending with '\r\n'
 
 //=========================== variables =======================================
@@ -52,6 +52,7 @@ app_vars_t app_vars;
 
 void cb_compare(void);
 void cb_uartTxDone(void);
+uint8_t cb_uartRxCb(void);
 
 //=========================== main ============================================
 
@@ -65,6 +66,12 @@ int mote_main(void) {
 
     // initialize board. 
     board_init();
+
+    i2c_init();
+
+    // setup UART
+    uart_setCallbacks(cb_uartTxDone,cb_uartRxCb);
+    uart_enableInterrupts();
    
     sctimer_set_callback(cb_compare);
     sctimer_setCompare(sctimer_readCounter()+SAMPLE_PERIOD);
@@ -154,4 +161,20 @@ void cb_uartTxDone(void) {
     } else {
         app_vars.uartDone = 1;
     }
+}
+
+uint8_t cb_uartRxCb(void) {
+   
+   uint8_t byte;
+   
+   // toggle LED
+   leds_error_toggle();
+   
+   // read received byte
+   byte = uart_readByte();
+   
+   // echo that byte over serial
+   uart_writeByte(byte);
+   
+   return 0;
 }
