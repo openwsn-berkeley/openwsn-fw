@@ -89,7 +89,7 @@ void i2c_set_addr(uint8_t address) {
 }
 
 
-void i2c_read_bytes(uint8_t address, uint8_t* buffer, uint32_t length) {
+uint32_t i2c_read_bytes(uint8_t address, uint8_t* buffer, uint32_t length) {
 
     uint8_t tx_buffer[1];
 
@@ -127,9 +127,12 @@ void i2c_read_bytes(uint8_t address, uint8_t* buffer, uint32_t length) {
     while( NRF_TWIM0->EVENTS_STOPPED==0);
     NRF_TWIM0->EVENTS_LASTRX  = 0;
     NRF_TWIM0->EVENTS_STOPPED = 0;
+
+    // only for compatible purpose, return value has no meaning.
+    return 0xffffffff;
 }
 
-void i2c_write_bytes(uint8_t address, uint8_t* buffer, uint32_t length) {
+uint32_t i2c_write_bytes(uint8_t address, uint8_t* buffer, uint32_t length) {
     
     uint8_t tx_buffer[1+length];
 
@@ -149,6 +152,9 @@ void i2c_write_bytes(uint8_t address, uint8_t* buffer, uint32_t length) {
     while( NRF_TWIM0->EVENTS_STOPPED==0);
     NRF_TWIM0->EVENTS_LASTTX = 0;
     NRF_TWIM0->EVENTS_STOPPED = 0;
+
+    // only for compatible purpose, return value has no meaning.
+    return 0xffffffff;
 }
 
 //=========================== private =========================================
