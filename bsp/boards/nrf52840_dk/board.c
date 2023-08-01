@@ -47,6 +47,8 @@ void board_init(void) {
     sctimer_init();
     radio_init();
 
+    i2c_init();
+
     // configure dcdc
     enable_dcdc();
 }

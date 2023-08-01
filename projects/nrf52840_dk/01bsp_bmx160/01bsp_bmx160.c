@@ -67,8 +67,6 @@ int mote_main(void) {
     // initialize board. 
     board_init();
 
-    i2c_init();
-
     // setup UART
     uart_setCallbacks(cb_uartTxDone,cb_uartRxCb);
     uart_enableInterrupts();
