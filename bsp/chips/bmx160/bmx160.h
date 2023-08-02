@@ -14,7 +14,7 @@
 
 #define BMX160_REG_ADDR_CHIPID      0x00
 #define BMX160_REG_ADDR_ERR_REG     0x02
-#define BMX160_REG_ADDR_PWU_STATUS  0x03
+#define BMX160_REG_ADDR_PMU_STATUS  0x03
 
 // sensor data
 

@@ -60,7 +60,7 @@ uint8_t bmx160_power_down(void) {
 uint8_t bmx160_get_pmu_status(void) {
 
     uint8_t pmu_status;
-    i2c_read_bytes(BMX160_REG_ADDR_PWU_STATUS, &pmu_status, 1);
+    i2c_read_bytes(BMX160_REG_ADDR_PMU_STATUS, &pmu_status, 1);
     return pmu_status;
 }
 
@@ -106,19 +106,19 @@ void bmx160_read_9dof_data(void) {
     // enable  accelarometer
     bmx160_set_cmd(BMX160_CMD_PMU_ACC_NORMAL);
     do {
-        i2c_read_bytes(BMX160_REG_ADDR_PWU_STATUS, &pmu_status, 1);
+        i2c_read_bytes(BMX160_REG_ADDR_PMU_STATUS, &pmu_status, 1);
     } while ((pmu_status & 0x10) != 0x10); 
 
     // enable gyroscope
     bmx160_set_cmd(BMX160_CMD_PMU_GYR_NORMAL);
     do {
-        i2c_read_bytes(BMX160_REG_ADDR_PWU_STATUS, &pmu_status, 1);
+        i2c_read_bytes(BMX160_REG_ADDR_PMU_STATUS, &pmu_status, 1);
     } while ((pmu_status & 0x04) != 0x04); 
 
     // enabel mag
     bmx160_set_cmd(BMX160_CMD_PMU_MAG_IF_NORMAL);
     do {
-        i2c_read_bytes(BMX160_REG_ADDR_PWU_STATUS, &pmu_status, 1);
+        i2c_read_bytes(BMX160_REG_ADDR_PMU_STATUS, &pmu_status, 1);
     } while ((pmu_status & 0x01) != 0x01); 
 
     // wait until pmu status are correct
