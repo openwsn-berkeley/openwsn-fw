@@ -109,7 +109,6 @@ int mote_main(void) {
 
     while (1) {
 
-
         // wait for timer to elapse
         while (app_vars.uartSendNow==0);
         app_vars.uartSendNow = 0;

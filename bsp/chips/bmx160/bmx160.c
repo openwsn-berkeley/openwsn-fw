@@ -104,20 +104,20 @@ void bmx160_read_9dof_data(void) {
     uint8_t pmu_status;
 
     // enable  accelarometer
-    bmx160_set_cmd(BMX160_CMD_PMU_ACC_NORMAL);
     do {
+        bmx160_set_cmd(BMX160_CMD_PMU_ACC_NORMAL);
         i2c_read_bytes(BMX160_REG_ADDR_PMU_STATUS, &pmu_status, 1);
     } while ((pmu_status & 0x10) != 0x10); 
 
     // enable gyroscope
-    bmx160_set_cmd(BMX160_CMD_PMU_GYR_NORMAL);
     do {
+        bmx160_set_cmd(BMX160_CMD_PMU_GYR_NORMAL);
         i2c_read_bytes(BMX160_REG_ADDR_PMU_STATUS, &pmu_status, 1);
     } while ((pmu_status & 0x04) != 0x04); 
 
     // enabel mag
-    bmx160_set_cmd(BMX160_CMD_PMU_MAG_IF_NORMAL);
     do {
+        bmx160_set_cmd(BMX160_CMD_PMU_MAG_IF_NORMAL);
         i2c_read_bytes(BMX160_REG_ADDR_PMU_STATUS, &pmu_status, 1);
     } while ((pmu_status & 0x01) != 0x01); 
 
