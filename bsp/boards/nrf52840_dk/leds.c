@@ -79,7 +79,11 @@ void leds_sync_toggle(void) {
 }
 
 uint8_t leds_sync_isOn(void) {
-    return (uint8_t)(NRF_P0->OUT & (1<<LED_2));
+    if (NRF_P0->OUT & (1<<LED_2)) {
+        return 0;
+    } else {
+        return 1;
+    }
 }
 
 //==== radio led
@@ -102,7 +106,11 @@ void leds_radio_toggle(void) {
 }
 
 uint8_t leds_radio_isOn(void) {
-    return (uint8_t)(NRF_P0->OUT & (1<<LED_3));
+    if (NRF_P0->OUT & (1<<LED_3)) {
+        return 0;
+    } else {
+        return 1;
+    }
 }
 
 //==== debug led
@@ -125,7 +133,11 @@ void leds_debug_toggle(void) {
 }
 
 uint8_t leds_debug_isOn(void) {
-    return (uint8_t)(NRF_P0->OUT & (1<<LED_4));
+    if (NRF_P0->OUT & (1<<LED_4)) {
+        return 0;
+    } else {
+        return 1;
+    }
 }
 
 //==== all leds
