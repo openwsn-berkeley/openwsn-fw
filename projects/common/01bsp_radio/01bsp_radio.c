@@ -50,6 +50,9 @@ typedef struct {
     uint8_t              num_startFrame;
     uint8_t              num_endFrame;
     uint8_t              num_timer;
+    
+    uint8_t              num_rx_startFrame;
+    uint8_t              num_rx_endFrame;
 } app_dbg_t;
 
 app_dbg_t app_dbg;
@@ -299,6 +302,10 @@ void cb_startFrame(PORT_TIMER_WIDTH timestamp) {
 
     // update debug stats
     app_dbg.num_startFrame++;
+
+    if (app_vars.state == APP_STATE_RX) {
+        app_dbg.num_rx_startFrame++;
+    }
 }
 
 void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
@@ -307,6 +314,10 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
 
     // update debug stats
     app_dbg.num_endFrame++;
+
+    if (app_vars.state == APP_STATE_RX) {
+        app_dbg.num_rx_endFrame++;
+    }
 }
 
 void cb_timer(void) {

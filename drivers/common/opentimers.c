@@ -133,9 +133,9 @@ void opentimers_scheduleIn(opentimers_id_t    id,
     }
 
     if (opentimers_vars.timersBuf[id].wraps_remaining==0){
-        opentimers_vars.timersBuf[id].currentCompareValue = opentimers_vars.timersBuf[id].duration+sctimer_readCounter();
+        opentimers_vars.timersBuf[id].currentCompareValue = (opentimers_vars.timersBuf[id].duration+sctimer_readCounter()) & MAX_TICKS_IN_SINGLE_CLOCK;
     } else {
-        opentimers_vars.timersBuf[id].currentCompareValue = MAX_TICKS_IN_SINGLE_CLOCK+sctimer_readCounter();
+        opentimers_vars.timersBuf[id].currentCompareValue = (MAX_TICKS_IN_SINGLE_CLOCK+sctimer_readCounter()) & MAX_TICKS_IN_SINGLE_CLOCK;
     }
 
     opentimers_vars.timersBuf[id].isrunning           = TRUE;
@@ -149,11 +149,11 @@ void opentimers_scheduleIn(opentimers_id_t    id,
         while (opentimers_vars.timersBuf[i].isrunning==FALSE){
             i++;
         }
-        timerGap     = opentimers_vars.timersBuf[i].currentCompareValue-opentimers_vars.lastCompareValue;
+        timerGap     = (opentimers_vars.timersBuf[i].currentCompareValue-opentimers_vars.lastCompareValue) & MAX_TICKS_IN_SINGLE_CLOCK;
         idToSchedule = i;
         for (i=idToSchedule+1;i<MAX_NUM_TIMERS;i++){
             if (opentimers_vars.timersBuf[i].isrunning){
-                tempTimerGap = opentimers_vars.timersBuf[i].currentCompareValue-opentimers_vars.lastCompareValue;
+                tempTimerGap = (opentimers_vars.timersBuf[i].currentCompareValue-opentimers_vars.lastCompareValue) & MAX_TICKS_IN_SINGLE_CLOCK;
                 if (tempTimerGap < timerGap){
                     // timer "i" is more close to lastCompare value
                     timerGap     = tempTimerGap;
@@ -225,9 +225,9 @@ void opentimers_scheduleAbsolute(opentimers_id_t    id,
     }
 
     if (opentimers_vars.timersBuf[id].wraps_remaining==0){
-        opentimers_vars.timersBuf[id].currentCompareValue = opentimers_vars.timersBuf[id].duration+reference;
+        opentimers_vars.timersBuf[id].currentCompareValue = (opentimers_vars.timersBuf[id].duration+reference) & MAX_TICKS_IN_SINGLE_CLOCK;
     } else {
-        opentimers_vars.timersBuf[id].currentCompareValue = MAX_TICKS_IN_SINGLE_CLOCK+reference;
+        opentimers_vars.timersBuf[id].currentCompareValue = (MAX_TICKS_IN_SINGLE_CLOCK+reference) & MAX_TICKS_IN_SINGLE_CLOCK;
     }
 
     opentimers_vars.timersBuf[id].isrunning = TRUE;
@@ -241,11 +241,11 @@ void opentimers_scheduleAbsolute(opentimers_id_t    id,
         while (opentimers_vars.timersBuf[i].isrunning==FALSE){
             i++;
         }
-        timerGap     = opentimers_vars.timersBuf[i].currentCompareValue-opentimers_vars.lastCompareValue;
+        timerGap     = (opentimers_vars.timersBuf[i].currentCompareValue-opentimers_vars.lastCompareValue) & MAX_TICKS_IN_SINGLE_CLOCK;
         idToSchedule = i;
         for (i=idToSchedule+1;i<MAX_NUM_TIMERS;i++){
             if (opentimers_vars.timersBuf[i].isrunning){
-                tempTimerGap = opentimers_vars.timersBuf[i].currentCompareValue-opentimers_vars.lastCompareValue;
+                tempTimerGap = (opentimers_vars.timersBuf[i].currentCompareValue-opentimers_vars.lastCompareValue) & MAX_TICKS_IN_SINGLE_CLOCK;
                 if (tempTimerGap < timerGap){
                     // timer "i" is more close to lastCompare value
                     timerGap     = tempTimerGap;
@@ -374,7 +374,7 @@ void opentimers_timer_callback(void){
             // this is the timer interrupt right after inhibit timer, pre call the non-tsch, non-inhibit timer interrupt here to avoid interrupt during receiving serial bytes
             for (i=0;i<MAX_NUM_TIMERS;i++){
                 if (opentimers_vars.timersBuf[i].isrunning==TRUE){
-                    if (i!=TIMER_TSCH && i!=TIMER_INHIBIT && opentimers_vars.timersBuf[i].currentCompareValue - opentimers_vars.currentCompareValue < PRE_CALL_TIMER_WINDOW){
+                    if (i!=TIMER_TSCH && i!=TIMER_INHIBIT && ((opentimers_vars.timersBuf[i].currentCompareValue - opentimers_vars.currentCompareValue) & MAX_TICKS_IN_SINGLE_CLOCK) < PRE_CALL_TIMER_WINDOW){
                         opentimers_vars.timersBuf[i].currentCompareValue = opentimers_vars.currentCompareValue;
                     }
                 }
@@ -409,7 +409,7 @@ void opentimers_timer_callback(void){
                             opentimers_vars.timersBuf[i].wraps_remaining--;
                             if (opentimers_vars.timersBuf[i].wraps_remaining == 0){
                                 opentimers_vars.timersBuf[i].currentCompareValue = (opentimers_vars.timersBuf[i].duration+opentimers_vars.timersBuf[i].lastCompareValue) & MAX_TICKS_IN_SINGLE_CLOCK;
-                                if (opentimers_vars.timersBuf[i].currentCompareValue - opentimers_vars.currentCompareValue < PRE_CALL_TIMER_WINDOW){
+                                if (((opentimers_vars.timersBuf[i].currentCompareValue - opentimers_vars.currentCompareValue) & MAX_TICKS_IN_SINGLE_CLOCK) < PRE_CALL_TIMER_WINDOW){
                                     // pre-call the timer here if it will be fired within PRE_CALL_TIMER_WINDOW, when wraps_remaining decrease to 0
                                     opentimers_vars.timersBuf[i].isrunning  = FALSE;
                                     scheduler_push_task((task_cbt)(opentimers_vars.timersBuf[i].callback),(task_prio_t)opentimers_vars.timersBuf[i].timer_task_prio);
@@ -426,7 +426,7 @@ void opentimers_timer_callback(void){
                                     }
                                 }
                             } else {
-                                opentimers_vars.timersBuf[i].currentCompareValue = opentimers_vars.timersBuf[i].lastCompareValue + MAX_TICKS_IN_SINGLE_CLOCK;
+                                opentimers_vars.timersBuf[i].currentCompareValue = (opentimers_vars.timersBuf[i].lastCompareValue + MAX_TICKS_IN_SINGLE_CLOCK) & MAX_TICKS_IN_SINGLE_CLOCK;
                             }
                         }
                     }
@@ -442,11 +442,11 @@ void opentimers_timer_callback(void){
         i++;
     }
     if(i<MAX_NUM_TIMERS){
-        timerGap     = opentimers_vars.timersBuf[i].currentCompareValue-opentimers_vars.lastCompareValue;
+        timerGap     = (opentimers_vars.timersBuf[i].currentCompareValue-opentimers_vars.lastCompareValue) & MAX_TICKS_IN_SINGLE_CLOCK;
         idToSchedule = i;
         for (i=idToSchedule+1;i<MAX_NUM_TIMERS;i++){
             if (opentimers_vars.timersBuf[i].isrunning){
-                tempTimerGap = opentimers_vars.timersBuf[i].currentCompareValue-opentimers_vars.lastCompareValue;
+                tempTimerGap = (opentimers_vars.timersBuf[i].currentCompareValue-opentimers_vars.lastCompareValue) & MAX_TICKS_IN_SINGLE_CLOCK;
                 if (tempTimerGap < timerGap){
                     timerGap     = tempTimerGap;
                     idToSchedule = i;
