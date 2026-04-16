@@ -78,7 +78,7 @@ void leds_off(led_id_t led_id);
 //=========================== public ==========================================
 
 void leds_init() {
-
+    leds_all_off();
 }
 
 //==== error led
