@@ -10,12 +10,12 @@
 
 // board debug PINS defines
 
-#define DEBUGPIN_FRAME  NRF_GPIO_PIN_MAP(0,26)
-#define DEBUGPIN_SLOT   NRF_GPIO_PIN_MAP(0,27)
-#define DEBUGPIN_FSM    NRF_GPIO_PIN_MAP(0,28)
-#define DEBUGPIN_TASK   NRF_GPIO_PIN_MAP(0,29)
-#define DEBUGPIN_ISR    NRF_GPIO_PIN_MAP(0,30)
-#define DEBUGPIN_RADIO  NRF_GPIO_PIN_MAP(0,31)
+#define DEBUGPIN_FRAME  NRF_GPIO_PIN_MAP(0,2)   // P0 on the expansion header, large pad
+#define DEBUGPIN_SLOT   NRF_GPIO_PIN_MAP(0,3)   // P1 on the expansion header, large pad
+#define DEBUGPIN_FSM    NRF_GPIO_PIN_MAP(0,4)   // P2 on the expansion header, large pad
+#define DEBUGPIN_TASK   NRF_GPIO_PIN_MAP(0,10)  // P8 on the expansion header
+#define DEBUGPIN_ISR    NRF_GPIO_PIN_MAP(0,9)   // P9 on the expansion header
+#define DEBUGPIN_RADIO  NRF_GPIO_PIN_MAP(0,12)  // P12 on the expansion header
 
 //=========================== variables =======================================
 
