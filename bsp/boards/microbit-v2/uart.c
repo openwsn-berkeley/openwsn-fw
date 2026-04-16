@@ -3,8 +3,8 @@
  */
 
 
-#include "nrf52840.h"
-#include "nrf52840_bitfields.h"
+#include "nrf52833.h"
+#include "nrf52833_bitfields.h"
 #include "board_info.h"
 
 #include "leds.h"
@@ -13,10 +13,10 @@
 
 //=========================== defines =========================================
 
-#define UART_RX_PIN       NRF_GPIO_PIN_MAP(0,8) // p0.08
-#define UART_TX_PIN       NRF_GPIO_PIN_MAP(0,6) // p0.06
-#define UART_CTS_PIN      NRF_GPIO_PIN_MAP(0,7) // p0.07
-#define UART_RTS_PIN      NRF_GPIO_PIN_MAP(0,5) // p0.05
+#define UART_TX_PIN       NRF_GPIO_PIN_MAP(0,6) // p0.06 - nRF52833 TX to USB bridge
+#define UART_RX_PIN       NRF_GPIO_PIN_MAP(1,8) // p1.08 - nRF52833 RX from USB bridge
+//#define UART_CTS_PIN      NRF_GPIO_PIN_MAP(0,7) // p0.07
+//#define UART_RTS_PIN      NRF_GPIO_PIN_MAP(0,5) // p0.05
 
 #define UART_BAUDRATE_115200        0x01D7E000  // Baud 115200
 #define UART_BAUDRATE_1M            0x10000000  // Baud 1M
@@ -49,12 +49,14 @@ void uart_init(void) {
     // reset local variables
     memset(&uart_vars,0,sizeof(uart_vars_t));
 
+    // TX is P0.06 — use NRF_P0 with the pin's absolute index (which equals the relative index for port 0)
     NRF_P0->PIN_CNF[UART_TX_PIN] = ((uint32_t)GPIO_PIN_CNF_DIR_Output << GPIO_PIN_CNF_DIR_Pos)
                                | ((uint32_t)GPIO_PIN_CNF_INPUT_Disconnect << GPIO_PIN_CNF_INPUT_Pos)
                                | ((uint32_t)GPIO_PIN_CNF_PULL_Disabled << GPIO_PIN_CNF_PULL_Pos)
                                | ((uint32_t)GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos)
                                | ((uint32_t)GPIO_PIN_CNF_SENSE_Disabled << GPIO_PIN_CNF_SENSE_Pos);
-    NRF_P0->PIN_CNF[UART_RX_PIN] = ((uint32_t)GPIO_PIN_CNF_DIR_Input << GPIO_PIN_CNF_DIR_Pos)
+    // RX is P1.08 — must use NRF_P1 with the relative pin index (UART_RX_PIN & 0x1F = 8)
+    NRF_P1->PIN_CNF[UART_RX_PIN & 0x1F] = ((uint32_t)GPIO_PIN_CNF_DIR_Input << GPIO_PIN_CNF_DIR_Pos)
                                | ((uint32_t)GPIO_PIN_CNF_INPUT_Connect << GPIO_PIN_CNF_INPUT_Pos)
                                | ((uint32_t)GPIO_PIN_CNF_PULL_Disabled << GPIO_PIN_CNF_PULL_Pos)
                                | ((uint32_t)GPIO_PIN_CNF_DRIVE_S0S1 << GPIO_PIN_CNF_DRIVE_Pos)
