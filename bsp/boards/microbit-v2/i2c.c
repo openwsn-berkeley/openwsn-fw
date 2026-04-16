@@ -14,7 +14,7 @@
 #define NRF_GPIO_PIN_MAP(port, pin) (((port) << 5) | ((pin) & 0x1F))
 
 #define DOF10_SCL_PIN   NRF_GPIO_PIN_MAP(1,0)   // SCL signal pin P1.00
-#define DOF10_SDA_PIN   NRF_GPIO_PIN_MAP(0,24)  // SDA signal pin P0.24
+#define DOF10_SDA_PIN   NRF_GPIO_PIN_MAP(0,8)  // SDA signal pin P0.8
 #define DOF10_FREQ      0x06400000              // frequency 6400000->400kbps
 
 #define TWIM_INTENSET_STOPPED_POS    1
