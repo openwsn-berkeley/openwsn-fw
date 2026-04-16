@@ -40,15 +40,12 @@ void board_init(void) {
     while (NRF_CLOCK->EVENTS_HFCLKSTARTED == 0);
 
     leds_init();
-    //debugpins_init();
-    //uart_init();
-    //sctimer_init();
-    //radio_init();
+    debugpins_init();
+    uart_init();
+    sctimer_init();
+    radio_init();
 
-    //i2c_init();
-
-    //// configure dcdc
-    //enable_dcdc();
+    i2c_init();
 }
 
 /**
@@ -69,20 +66,5 @@ void board_reset(void) {
 }
 
 //=========================== private =========================================
-
-void enable_dcdc(void) {
-
-    uint32_t status; 
-
-    status = NRF_POWER->MAINREGSTATUS;
-
-    if (status == 0) {
-
-        while (NRF_POWER->DCDCEN == 0){
-            // in normal voltage mode: PS1.2, page 59
-            NRF_POWER->DCDCEN = (uint32_t)1;
-        }
-    }
-}
 
 //=========================== interrupt handlers ==============================
