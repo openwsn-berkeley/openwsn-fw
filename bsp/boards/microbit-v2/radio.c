@@ -64,7 +64,6 @@ static uint32_t bytewise_bitswap(uint32_t inp);
 static uint8_t  ble_channel_to_frequency(uint8_t channel);
 
 static void hfclock_start(void);
-static void hfclock_stop(void);
 
 
 //=========================== public ==========================================
@@ -263,6 +262,8 @@ void radio_txEnable(void) {
 
     radio_vars.state  = RADIOSTATE_ENABLING_TX;
 
+    hfclock_start();
+
     NRF_RADIO->EVENTS_READY = (uint32_t)0;
 
     NRF_RADIO->TASKS_TXEN = (uint32_t)1;
@@ -292,6 +293,8 @@ void radio_rxEnable(void) {
 
         // turn off radio first
         radio_rfOff();
+
+        hfclock_start();
 
         NRF_RADIO->EVENTS_READY = (uint32_t)0;
 
@@ -449,19 +452,6 @@ static void hfclock_start(void) {
     while (NRF_CLOCK->EVENTS_HFCLKSTARTED == 0);
 }
 
-static void hfclock_stop(void) {
-    
-    // check clock source
-    if((NRF_CLOCK->HFCLKSTAT & 0x00000001) != 0) {
-        
-        // clock running?
-        if((NRF_CLOCK->HFCLKSTAT & 0x00010000) != 0) {
-            
-            NRF_CLOCK->TASKS_HFCLKSTOP = 1;
-            while((NRF_CLOCK->HFCLKSTAT & 0x00000001) != 0);
-        }
-    }
-}
 
 //=========================== callbacks =======================================
 

@@ -11,10 +11,7 @@
 // ========================== define ==========================================
 
 #define LFCLKSRC_SRC_POS      0
-#define LFCLKSRC_BYPASS_POS   16
-#define LFCLKSRC_EXTERNAL_POS 17
 
-#define LFCLKSTAT_SRC_POS     0
 #define LFCLKSTAT_STATE_POS   16
 
 #define MINIMUM_ISR_ADVANCE         5        // nRF52840_PS_v1.7 (page 370)
@@ -44,15 +41,20 @@ void sctimer_init(void) {
     NVIC->IP[RTC0_IRQn]         = (uint8_t)((RTC_PRIORITY << (8 - __NVIC_PRIO_BITS)) & (uint32_t)0xFF);
     NVIC->ISER[RTC0_IRQn>>5]    = (uint32_t)(0x1 << (RTC0_IRQn & 0x1f));
 
+    // start HFXO (required for synthesized LFCLK)
+    NRF_CLOCK->EVENTS_HFCLKSTARTED = 0;
+    NRF_CLOCK->TASKS_HFCLKSTART    = 1;
+    while (NRF_CLOCK->EVENTS_HFCLKSTARTED == 0);
+
     // stop LFCLK
     NRF_CLOCK->TASKS_LFCLKSTOP     = 1;
     while((NRF_CLOCK->LFCLKSTAT & (1<<LFCLKSTAT_STATE_POS)) == 1);
-    
+
     // configure prescaler
     NRF_RTC0->PRESCALER         = 0;
 
-    // configure the source
-    NRF_CLOCK->LFCLKSRC = (1<<LFCLKSRC_SRC_POS);
+    // configure the source: synthesized from HFXO (no 32.768 kHz crystal on micro:bit v2.2.1)
+    NRF_CLOCK->LFCLKSRC = (2<<LFCLKSRC_SRC_POS);
 
     // start LFCLK
     NRF_CLOCK->TASKS_LFCLKSTART = (uint32_t)1;
