@@ -32,6 +32,12 @@ void board_init(void);
 void board_sleep(void);
 void board_reset(void);
 
+#if PYTHON_BOARD
+void board_barrier_slot_sync(void);
+void board_barrier_msg_sync(void);
+void board_barrier_ack_sync(void);
+#endif
+
 /**
 \}
 \}
