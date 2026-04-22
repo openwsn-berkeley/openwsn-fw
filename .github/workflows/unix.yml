@@ -1,4 +1,4 @@
-name: SCons build Linux
+name: SCons build Unix
 
 on:
   push:
@@ -9,7 +9,11 @@ on:
 
 jobs:
   build-python:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v4
@@ -22,16 +26,23 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { toolchain: armgcc, board: openmote-cc2538}
-          - { toolchain: armgcc, board: iot-lab_M3}
+          - { os: ubuntu-latest, toolchain: armgcc, board: openmote-cc2538 }
+          - { os: ubuntu-latest, toolchain: armgcc, board: iot-lab_M3 }
+          - { os: macos-latest,  toolchain: armgcc, board: openmote-cc2538 }
+          - { os: macos-latest,  toolchain: armgcc, board: iot-lab_M3 }
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install SCons
+      - name: Install SCons (Linux)
+        if: runner.os == 'Linux'
         run: sudo apt install scons
+
+      - name: Install SCons (macOS)
+        if: runner.os == 'macOS'
+        run: pip install scons
 
       - name: Setup ARM toolchain
         uses: carlosperate/arm-none-eabi-gcc-action@v1
