@@ -1,0 +1,27 @@
+name: Segger Embedded Studio build
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+  workflow_dispatch:
+
+jobs:
+  build-nrf52840_dk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Segger Embedded Studio
+        run: |
+          wget -q "https://www.segger.com/downloads/embedded-studio/Setup_EmbeddedStudio_ARM_v630_linux_x64.tar.gz" -O ses.tar.gz
+          tar zxf ses.tar.gz
+          printf 'yes\n' | sudo $(find . -name "install_segger_embedded_studio") --copy-files-to /opt/ses
+
+      - name: Build nrf52840_dk (Release)
+        run: /opt/ses/bin/emBuild -config Release -project 03oos_openwsn projects/nrf52840_dk/nrf52840_dk.emProject
+
+      - name: Build nrf52840_dk (Debug)
+        run: /opt/ses/bin/emBuild -config Debug -project 03oos_openwsn projects/nrf52840_dk/nrf52840_dk.emProject

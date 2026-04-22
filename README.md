@@ -13,6 +13,7 @@ Build status
 | openmote-cc2538 | armgcc | Windows | [![Windows](https://github.com/openwsn-berkeley/openwsn-fw/actions/workflows/windows.yml/badge.svg?branch=develop)](https://github.com/openwsn-berkeley/openwsn-fw/actions/workflows/windows.yml) |
 | iot-lab\_M3 | armgcc | Linux, macOS | [![Unix](https://github.com/openwsn-berkeley/openwsn-fw/actions/workflows/unix.yml/badge.svg?branch=develop)](https://github.com/openwsn-berkeley/openwsn-fw/actions/workflows/unix.yml) |
 | iot-lab\_M3 | armgcc | Windows | [![Windows](https://github.com/openwsn-berkeley/openwsn-fw/actions/workflows/windows.yml/badge.svg?branch=develop)](https://github.com/openwsn-berkeley/openwsn-fw/actions/workflows/windows.yml) |
+| nrf52840-dk | Segger Embedded Studio 6.30 | Linux, macOS, Windows | [![Segger](https://github.com/openwsn-berkeley/openwsn-fw/actions/workflows/segger.yml/badge.svg?branch=develop)](https://github.com/openwsn-berkeley/openwsn-fw/actions/workflows/segger.yml) |
 
 Documentation
 -------------
