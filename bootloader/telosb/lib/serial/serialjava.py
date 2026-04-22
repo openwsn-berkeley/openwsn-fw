@@ -6,7 +6,7 @@
 # this is distributed under a free software license, see license.txt
 
 import sys, os, string, javax.comm
-import serialutil
+from . import serialutil
 
 VERSION = "$Revision: 1.5 $"     #extract CVS version
 
@@ -48,9 +48,9 @@ class Serial(serialutil.FileLike):
         self.portstr = portId.getName()
         try:
             self.sPort = portId.open("python serial module", 10)
-        except Exception, msg:
+        except Exception as msg:
             self.sPort = None
-            raise serialutil.SerialException, "could not open port: %s" % msg
+            raise serialutil.SerialException("could not open port: %s" % msg)
         self.instream = self.sPort.getInputStream()
         self.outstream = self.sPort.getOutputStream()
         self.sPort.enableReceiveTimeout(30)
@@ -63,8 +63,8 @@ class Serial(serialutil.FileLike):
         elif bytesize == EIGHTBITS:
             self.databits = javax.comm.SerialPort.DATABITS_8
         else:
-            raise ValueError, "unsupported bytesize"
-        
+            raise ValueError("unsupported bytesize")
+
         if stopbits == STOPBITS_ONE:
             self.jstopbits = javax.comm.SerialPort.STOPBITS_1
         elif stopbits == STOPBITS_ONE_HALVE:
@@ -72,7 +72,7 @@ class Serial(serialutil.FileLike):
         elif stopbits == STOPBITS_TWO:
             self.jstopbits = javax.comm.SerialPort.STOPBITS_2
         else:
-            raise ValueError, "unsupported number of stopbits"
+            raise ValueError("unsupported number of stopbits")
 
         if parity == PARITY_NONE:
             self.jparity = javax.comm.SerialPort.PARITY_NONE
@@ -85,19 +85,19 @@ class Serial(serialutil.FileLike):
         elif parity == PARITY_SPACE:
             self.jparity = javax.comm.SerialPort.PARITY_SPACE
         else:
-            raise ValueError, "unsupported parity type"
+            raise ValueError("unsupported parity type")
 
         jflowin = jflowout = 0
         if rtscts:
-            jflowin = jflowin | javax.comm.SerialPort.FLOWCONTROL_RTSCTS_IN 
+            jflowin = jflowin | javax.comm.SerialPort.FLOWCONTROL_RTSCTS_IN
             jflowout = jflowout | javax.comm.SerialPort.FLOWCONTROL_RTSCTS_OUT
         if xonxoff:
             jflowin = jflowin | javax.comm.SerialPort.FLOWCONTROL_XONXOFF_IN
             jflowout = jflowout | javax.comm.SerialPort.FLOWCONTROL_XONXOFF_OUT
-        
+
         self.sPort.setSerialPortParams(baudrate, self.databits, self.jstopbits, self.jparity)
         self.sPort.setFlowControlMode(jflowin | jflowout)
-        
+
         self.timeout = timeout
         if timeout >= 0:
             self.sPort.enableReceiveTimeout(timeout*1000)
@@ -189,8 +189,8 @@ if __name__ == '__main__':
     s.flushInput()
     s.flushOutput()
     s.write('hello')
-    print repr(s.read(5))
-    print s.inWaiting()
+    print(repr(s.read(5)))
+    print(s.inWaiting())
     del s
 
 

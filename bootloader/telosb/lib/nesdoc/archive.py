@@ -2,9 +2,9 @@
 # Copyright (c) 2005 Intel Corporation
 # All rights reserved.
 #
-# This file is distributed under the terms in the attached INTEL-LICENSE     
+# This file is distributed under the terms in the attached INTEL-LICENSE
 # file. If you do not find these files, copies can be found by writing to
-# Intel Research Berkeley, 2150 Shattuck Avenue, Suite 1300, Berkeley, CA, 
+# Intel Research Berkeley, 2150 Shattuck Avenue, Suite 1300, Berkeley, CA,
 # 94704.  Attention:  Intel License Inquiry.
 
 # Archive nesdoc information from a given compilation in a nesdoc repository.
@@ -46,7 +46,7 @@ import os
 
 def check(x):
   if not x:
-    print "%s is not a nesC documentation file" % argv[1]
+    print("%s is not a nesC documentation file" % argv[1])
     exit(2)
   return x
 
@@ -54,15 +54,15 @@ def get1(x, tag):
   return check(xml_tagfind(x, tag))
 
 def usage():
-  print "Usage: %s [-t dir] [--topdir dir] [--preserve] [--app] [--quiet] repository" % argv[0]
-  print "  where -t/--topdir specify prefixes to remove from file names"
-  print "  to create nice, package-like names for interface and components"
-  print "  (based on their full filename)."
-  print "  If --preserve is specified, existing XML files are preserved."
-  print "  If --app is specified, a page for this application is created in the"
-  print "  current directory."
-  print "  If --quiet is specified, the program is less verbose."
-  print "  The XML input is read from stdin."
+  print("Usage: %s [-t dir] [--topdir dir] [--preserve] [--app] [--quiet] repository" % argv[0])
+  print("  where -t/--topdir specify prefixes to remove from file names")
+  print("  to create nice, package-like names for interface and components")
+  print("  (based on their full filename).")
+  print("  If --preserve is specified, existing XML files are preserved.")
+  print("  If --app is specified, a page for this application is created in the")
+  print("  current directory.")
+  print("  If --quiet is specified, the program is less verbose.")
+  print("  The XML input is read from stdin.")
 
 # Return package name for elem, or None if no valid name is found
 # (i.e., if the element's file name does not match any known topdir)
@@ -93,7 +93,7 @@ def canonicalise(name):
     name = "/%s/%s" %(name[0], name[2:])
   name = replace(name, "\\", "/")
   return name
-  
+
 # canonicalise a directory. like canonicalise, but ensures
 # there is trailing /
 def canonicalisedir(dirname):
@@ -106,7 +106,7 @@ def canonicalisedir(dirname):
 # option processing. See usage string for details.
 def process_opts(argv):
   options = {
-    "topdir":	 (True,  lambda (x): topdir + [canonicalisedir(x)]),
+    "topdir":	 (True,  lambda x: topdir + [canonicalisedir(x)]),
     "preserve":	 (False, lambda x: True),
     "app":	 (False, lambda x: True),
     "quiet":	 (False, lambda x: True),
@@ -161,7 +161,7 @@ speclist = {}
 # interfaces
 for x in interfaces.getElementsByTagName("interface"):
   incomponent = get1(x, "component-ref").getAttribute("qname")
-  if speclist.has_key(incomponent):
+  if incomponent in speclist:
     speclist[incomponent].append(x)
   else:
     speclist[incomponent] = [x]
@@ -171,7 +171,7 @@ for x in functions.getElementsByTagName("function"):
   # don't include commands/events from interfaces
   if (x.hasAttribute("event") or x.hasAttribute("command")) and (not xml_tag(x, "interface-ref")):
     incomponent = get1(x, "component-ref").getAttribute("qname")
-    if speclist.has_key(incomponent):
+    if incomponent in speclist:
       speclist[incomponent].append(x)
     else:
       speclist[incomponent] = [x]
@@ -237,7 +237,7 @@ for x in interfacedefs.getElementsByTagName("interfacedef"):
   if preserve and os.path.exists(filename):
     continue
   if not quiet:
-    print "interface %s (%s)" % (name, nicename)
+    print("interface %s (%s)" % (name, nicename))
   doc = creator.createDocument(None, None, None)
   copy = x.cloneNode(True)
   doc.appendChild(copy)
@@ -256,7 +256,7 @@ for x in components.getElementsByTagName("component"):
     if preserve and os.path.exists(filename):
       continue
     if not quiet:
-      print "component %s (%s)" % (name, nicename)
+      print("component %s (%s)" % (name, nicename))
     doc = creator.createDocument(None, None, None)
     # copy component and create its specification
     copy = x.cloneNode(True)
@@ -290,7 +290,7 @@ for x in components.getElementsByTagName("component"):
       refd.appendChild(refidx[ref].cloneNode(True))
     for qname in allcomps.keys():
       refd.appendChild(qnameidx[qname].cloneNode(True))
-    
+
     doc.appendChild(copy)
     ifile = file(filename, "w")
     doc.writexml(ifile)

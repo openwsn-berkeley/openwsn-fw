@@ -20,11 +20,11 @@ def find(env):
     try:
         if env['mingw_prefer_amd64']:
             prefixes.insert(0, 'x86_64-w64-mingw32-')
-            print "Inserted amd64 prefix"
+            print("Inserted amd64 prefix")
     except KeyError:
         pass
-    print "prefixes list len {0}".format(len(prefixes))
-        
+    print("prefixes list len {0}".format(len(prefixes)))
+
     for prefix in prefixes:
         # First search in the SCons path and then the OS path:
         if env.WhereIs(prefix + 'gcc') or SCons.Util.WhereIs(prefix + 'gcc'):
@@ -55,7 +55,7 @@ def shlib_emitter(target, source, env):
     no_import_lib = env.get('no_import_lib', 0)
 
     if not dll:
-        raise SCons.Errors.UserError, "A shared library should have exactly one target with the suffix: %s" % env.subst("$SHLIBSUFFIX")
+        raise SCons.Errors.UserError("A shared library should have exactly one target with the suffix: %s" % env.subst("$SHLIBSUFFIX"))
 
     if not no_import_lib and \
        not env.FindIxes(target, 'LIBPREFIX', 'LIBSUFFIX'):

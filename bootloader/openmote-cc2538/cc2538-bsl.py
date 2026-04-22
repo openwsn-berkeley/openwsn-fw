@@ -847,7 +847,7 @@ def query_yes_no(question, default="yes"):
         if PY3:
             choice = input().lower()
         else:
-            choice = raw_input().lower()
+            choice = input().lower()
         if default is not None and choice == '':
             return valid[default]
         elif choice in valid:
@@ -869,7 +869,7 @@ def parse_ieee_address (inaddr):
         if len(bytes) != 8:
             raise ValueError("Supplied IEEE address does not contain 8 bytes")
         addr = 0
-        for i,b in zip(range(8), bytes):
+        for i,b in zip(list(range(8)), bytes):
             try:
                 addr += int(b, 16) << (56-(i*8))
             except ValueError:

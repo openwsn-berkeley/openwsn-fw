@@ -44,7 +44,7 @@ import struct
     #~ Elf32_Word sh_info;
     #~ Elf32_Word sh_addralign;
     #~ Elf32_Word sh_entsize;
-#~ } Elf32_Shdr; 
+#~ } Elf32_Shdr;
 
 #~ typedef struct {
     #~ Elf32_Word p_type;
@@ -63,7 +63,7 @@ class ELFException(Exception): pass
 class ELFSection:
     """read and store a section"""
     Elf32_Shdr = "<IIIIIIIIII"          #header format
-    
+
     #section types
     SHT_NULL        = 0
     SHT_PROGBITS    = 1
@@ -77,15 +77,15 @@ class ELFSection:
     SHT_REL         = 9
     SHT_SHLIB       = 10
     SHT_DYNSYM      = 11
-    SHT_LOPROC      = 0x70000000L
-    SHT_HIPROC      = 0x7fffffffL
-    SHT_LOUSER      = 0x80000000L
-    SHT_HIUSER      = 0xffffffffL
+    SHT_LOPROC      = 0x70000000
+    SHT_HIPROC      = 0x7fffffff
+    SHT_LOUSER      = 0x80000000
+    SHT_HIUSER      = 0xffffffff
     #section attribute flags
     SHF_WRITE       = 0x1
     SHF_ALLOC       = 0x2
     SHF_EXECINSTR   = 0x4
-    SHF_MASKPROC    = 0xf0000000L
+    SHF_MASKPROC    = 0xf0000000
 
     def __init__(self):
         """creat a new empty section object"""
@@ -101,7 +101,7 @@ class ELFSection:
         (self.sh_name, self.sh_type, self.sh_flags, self.sh_addr,
          self.sh_offset, self.sh_size, self.sh_link, self.sh_info,
          self.sh_addralign, self.sh_entsize) = struct.unpack(self.Elf32_Shdr, s)
-         
+
     def __str__(self):
         """pretty print for debug..."""
         return "%s(%s, sh_type=%s, sh_flags=%s, "\
@@ -116,7 +116,7 @@ class ELFSection:
 class ELFProgramHeader:
     """Store and parse a program header"""
     Elf32_Phdr = "<IIIIIIII"            #header format
-    
+
     #segmet types
     PT_NULL         = 0
     PT_LOAD         = 1
@@ -125,14 +125,14 @@ class ELFProgramHeader:
     PT_NOTE         = 4
     PT_SHLIB        = 5
     PT_PHDR         = 6
-    PT_LOPROC       = 0x70000000L
-    PT_HIPROC       = 0x7fffffffL
-    
+    PT_LOPROC       = 0x70000000
+    PT_HIPROC       = 0x7fffffff
+
     #segment flags
     PF_R            = 0x4       #segment is readable
     PF_W            = 0x2       #segment is writable
     PF_X            = 0x1       #segment is executable
-     
+
     def __init__(self):
         """create a new, empty segment/program header"""
         (self.p_type, self.p_offset, self.p_vaddr, self.p_paddr,
@@ -159,7 +159,7 @@ class ELFObject:
     """Object to read and handle an LEF object file"""
     #header information
     Elf32_Ehdr = "<16sHHIIIIIHHHHHH"
-    
+
     #offsets within e_ident
     EI_MAG0         = 0     #File identification
     EI_MAG1         = 1     #File identification
@@ -237,7 +237,7 @@ class ELFObject:
             elfsection = ELFSection()
             elfsection.fromString(shdr)
             self.sections.append(elfsection)
-        
+
         #load data for all sections
         for section in self.sections:
             fileobj.seek(section.sh_offset)
@@ -246,18 +246,18 @@ class ELFObject:
             if section.sh_type == ELFSection.SHT_STRTAB:
                 section.values = data.split('\0')
             section.lma = self.getLMA(section)
-        
+
         #get section names
         for section in self.sections:
             start = self.sections[self.e_shstrndx].data[section.sh_name:]
             section.name = start.split('\0')[0]
-        
+
     def getSection(self, name):
         """get section by name"""
         for section in self.sections:
             if section.name == '.text':
                 return section
-    
+
     def getProgrammableSections(self):
         """get all program headers that are marked as executable and
         have suitable attributes to be code"""
@@ -295,24 +295,24 @@ class ELFObject:
     def __str__(self):
         """pretty print for debug..."""
         return "%s(self.e_type=%r, self.e_machine=%r, self.e_version=%r, sections=%r)" % (
-            self.__class__.__name__, 
+            self.__class__.__name__,
             self.e_type, self.e_machine, self.e_version,
             [section.name for section in self.sections])
 
 
 if __name__ == '__main__':
-    print "This is only a module test!"
+    print("This is only a module test!")
     elf = ELFObject()
     elf.fromFile(open("test.elf"))
     if elf.e_type != ELFObject.ET_EXEC:
         raise Exception("No executable")
-    print elf
+    print(elf)
 
     #~ print repr(elf.getSection('.text').data)
     #~ print [(s.name, hex(s.sh_addr)) for s in elf.getSections()]
-    print "-"*20
-    for p in elf.sections: print p
-    print "-"*20
-    for p in elf.getSections(): print p
-    print "-"*20
-    for p in elf.getProgrammableSections(): print p
+    print("-"*20)
+    for p in elf.sections: print(p)
+    print("-"*20)
+    for p in elf.getSections(): print(p)
+    print("-"*20)
+    for p in elf.getProgrammableSections(): print(p)

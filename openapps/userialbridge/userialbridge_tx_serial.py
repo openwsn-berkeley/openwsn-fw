@@ -194,9 +194,9 @@ class MoteProbe(threading.Thread):
     def _handle_input(self,inputBuf):
         if inputBuf[0] == ord('E'):
             if inputBuf[4]==0x39:
-                print '{0}: CRC error'.format(time.time())
+                print('{0}: CRC error'.format(time.time()))
             else:
-                print inputBuf
+                print(inputBuf)
 
 class OpenHdlc(object):
     

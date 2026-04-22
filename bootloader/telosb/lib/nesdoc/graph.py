@@ -38,7 +38,7 @@ def generate_graph(dir, repository, xml, wiring, name, nicename):
     endpoint = xml_tag(wire, tag)
     elem = lookup_elem(endpoint)
     ref = elem.getAttribute("ref")
-    if endpoints.has_key(ref): return
+    if ref in endpoints: return
     
     compref = xml_tag(lookup_elem(endpoint), "component-ref")
     if compref.getAttribute("qname") == name:
@@ -96,7 +96,7 @@ def generate_graph(dir, repository, xml, wiring, name, nicename):
     elem = lookup_elem(endpoint)
     if elem.tagName == "function":
       # missing: bold style for parameterised functions
-      styles = ['label="%s"' % function_signature_str(elem, lambda (name): "X")]
+      styles = ['label="%s"' % function_signature_str(elem, lambda name: "X")]
     else:
       assert elem.tagName == "interface"
       instance = xml_tag(elem, "instance")
@@ -107,11 +107,11 @@ def generate_graph(dir, repository, xml, wiring, name, nicename):
 
       sig = def_name
       if arguments:
-        iargs = join(map(lambda (arg): typename_str(arg, ""),
+        iargs = join(map(lambda arg: typename_str(arg, ""),
                          xml_elements(arguments)), ", ")
         sig += "<" + iargs + ">"
       if parameters:
-        iparms = join(map(lambda (arg): typename_str(arg, ""),
+        iparms = join(map(lambda arg: typename_str(arg, ""),
                           xml_elements(parameters)),  ", ")
         sig += "[" + iparms + "]"
       styles = [ 'label="%s"' % sig ]

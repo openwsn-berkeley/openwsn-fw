@@ -55,7 +55,7 @@ elif env['board'] == 'nrf52840':
 elif env['board'] == 'samr21_xpro':
     env.Append(CPPDEFINES='SAMR21_XPRO')
 else:
-    print "Unsupported board: {}".format(env['board'])
+    print("Unsupported board: {}".format(env['board']))
     Exit(-1)
 
 # check which modules we have to include in the build
@@ -137,7 +137,7 @@ for option in env['stackcfg'].split(','):
     elif name == 'panid':
         env.Append(CPPDEFINES='PANID_DEFINED={}'.format(value))
     else:
-        print 'Unknown or invalid option for stackcfg: {}'.format(name)
+        print('Unknown or invalid option for stackcfg: {}'.format(name))
 
 # common include paths
 if env['board'] != 'python':
@@ -166,7 +166,7 @@ if env['atmel_24ghz'] == 1:
 
 if env['toolchain'] == 'mspgcc':
     if env['board'] not in ['telosb', 'wsn430v13b', 'wsn430v14', 'gina', 'z1']:
-        print 'Toolchain {0} can not be used for board {1}'.format(env['toolchain'], env['board'])
+        print('Toolchain {0} can not be used for board {1}'.format(env['toolchain'], env['board']))
         Exit(-1)
 
     # compiler
@@ -200,7 +200,7 @@ if env['toolchain'] == 'mspgcc':
 elif env['toolchain'] == 'iar':
 
     if env['board'] not in ['telosb', 'wsn430v13b', 'wsn430v14', 'gina', 'z1']:
-        print 'Toolchain {0} can not be used for board {1}'.format(env['toolchain'], env['board'])
+        print('Toolchain {0} can not be used for board {1}'.format(env['toolchain'], env['board']))
         Exit(-1)
 
     env['IAR_EW430_INSTALLDIR'] = os.environ['IAR_EW430_INSTALLDIR']
@@ -208,9 +208,7 @@ elif env['toolchain'] == 'iar':
     try:
         iarEw430BinDir = os.path.join(env['IAR_EW430_INSTALLDIR'], '430', 'bin')
     except KeyError as err:
-        print 'You need to install environment variable IAR_EW430_INSTALLDIR which points to the ' \
-              'installation directory of IAR Embedded Workbench for MSP430.' \
-              ' Example: C:\Program Files\IAR Systems\Embedded Workbench 6.5'
+        print('You need to install environment variable IAR_EW430_INSTALLDIR which points to the '               'installation directory of IAR Embedded Workbench for MSP430.'               ' Example: C:\Program Files\IAR Systems\Embedded Workbench 6.5')
         Exit(-1)
 
     # compiler
@@ -260,7 +258,7 @@ elif env['toolchain'] == 'iar':
         base_name = str(target[0]).split('.')[0]
         from_extension = '.a43'
         to_extension = '.ihex'
-        print 'change extension {0} {1}->{2}'.format(base_name, from_extension, to_extension)
+        print('change extension {0} {1}->{2}'.format(base_name, from_extension, to_extension))
         os.rename(base_name + from_extension,base_name + to_extension)
 
     change_ext_builder = Builder(action=change_ext_function,suffix='.ihex')
@@ -275,7 +273,7 @@ elif env['toolchain'] == 'iar':
 elif env['toolchain'] == 'iar-proj':
     if env['board'] not in ['telosb', 'gina', 'wsn430v13b', 'wsn430v14', 'z1', 'openmotestm', 'agilefox',
                             'openmote-cc2538', 'openmote-b', 'openmote-b-24ghz', 'openmote-b-subghz', 'iot-lab_M3']:
-        print 'Toolchain {0} can not be used for board {1}'.format(env['toolchain'], env['board'])
+        print('Toolchain {0} can not be used for board {1}'.format(env['toolchain'], env['board']))
         Exit(-1)
 
     env['IAR_EW430_INSTALLDIR'] = os.environ['IAR_EW430_INSTALLDIR']
@@ -283,9 +281,7 @@ elif env['toolchain'] == 'iar-proj':
     try:
         iarEw430CommonBinDir = os.path.join(env['IAR_EW430_INSTALLDIR'], 'common', 'bin')
     except KeyError as err:
-        print 'You need to install environment variable IAR_EW430_INSTALLDIR which points to the ' \
-              'installation directory of IAR Embedded Workbench for MSP430. ' \
-              'Example: C:\Program Files\IAR Systems\Embedded Workbench 6.5'
+        print('You need to install environment variable IAR_EW430_INSTALLDIR which points to the '               'installation directory of IAR Embedded Workbench for MSP430. '               'Example: C:\Program Files\IAR Systems\Embedded Workbench 6.5')
         Exit(-1)
 
     iar_proj_builder_func = Builder(
@@ -305,13 +301,13 @@ elif env['toolchain'] == 'armgcc':
 
     if env['board'] not in ['silabs-ezr32wg', 'openmote-cc2538', 'openmote-b', 'openmote-b-24ghz', 'openmote-b-subghz',
                             'iot-lab_M3', 'iot-lab_A8-M3', 'openmotestm', 'samr21_xpro', 'scum', 'nrf52840']:
-        print 'Toolchain {0} can not be used for board {1}'.format(env['toolchain'], env['board'])
+        print('Toolchain {0} can not be used for board {1}'.format(env['toolchain'], env['board']))
         Exit(-1)
 
     if env['board'] in ['openmote-cc2538', 'openmote-b', 'openmote-b-24ghz', 'openmote-b-subghz']:
         if env['revision'] == "A1":
             linker_file = 'cc2538sf23.lds'
-            print "*** OPENMOTE CC2538 REV. A1 ***\n"
+            print("*** OPENMOTE CC2538 REV. A1 ***\n")
         else:
             linker_file = 'cc2538sf53.lds'
 
@@ -531,13 +527,13 @@ elif env['toolchain'] == 'armgcc':
         env.Append(CCFLAGS='-DNRF52840_XXAA=1')  # set the CPU to nRF52840 (ARM Cortex M4f)
         if env['revision'] == "DK":
             env.Append(CCFLAGS='-DBOARD_PCA10056=1')  # set the board to be the nRF52840 Development Kit
-            print "*** nrf52840-DK ***\n"
+            print("*** nrf52840-DK ***\n")
         elif env['revision'] == "DONGLE":
             env.Append(CCFLAGS='-DBOARD_PCA10059=1')  # set the board to be the nRF52840 Dongle
             env.Append(CCFLAGS='-DCONFIG_NFCT_PINS_AS_GPIOS=1')  # configure NFCT pins as GPIOs
-            print "*** nrf52840-DONGLE ***\n"
+            print("*** nrf52840-DONGLE ***\n")
         else:
-            print "*** unknown ***\n"
+            print("*** unknown ***\n")
 
         env.Append(
             CCFLAGS='-DCONFIG_GPIO_AS_PINRESET=1')  # just to be able to reset the board via the on-board reset pin
@@ -607,7 +603,7 @@ elif env['toolchain'] == 'armgcc':
         env.Replace(SIZE='arm-none-eabi-size')
 
     else:
-        print 'Unexpected board={0}'.format(env['board'])
+        print('Unexpected board={0}'.format(env['board']))
         Exit(-1)
 
     # converts ELF to iHex
@@ -638,7 +634,7 @@ elif env['toolchain'] == 'gcc':
     env.Append(CCFLAGS='-O3')
 
     if env['board'] not in ['python']:
-        print 'Toolchain {0} can not be used for board {1}'.format(env['toolchain'], env['board'])
+        print('Toolchain {0} can not be used for board {1}'.format(env['toolchain'], env['board']))
         Exit(-1)
 
     if env['board'] in ['python']:
@@ -674,7 +670,7 @@ elif env['toolchain'] == 'gcc':
     env.Append(BUILDERS={'PrintSize': dummyFunc})
 
 else:
-    print 'Unexpected toolchain {0}'.format(env['toolchain'])
+    print('Unexpected toolchain {0}'.format(env['toolchain']))
     Exit(-1)
 
 
@@ -696,7 +692,7 @@ def jtag_upload_func(location):
                     src_suffix='.elf',
                 )
             else:
-                print 'Only nRF52840 DK flashing is supported at the moment.'
+                print('Only nRF52840 DK flashing is supported at the moment.')
                 Exit(-1)
     else:
         if env['fet_version'] == 2:
@@ -721,7 +717,7 @@ def jtag_upload_func(location):
                     src_suffix='.ihex',
                 )
         else:
-            print 'fet_version={0} unsupported.'.format(fet_version)
+            print('fet_version={0} unsupported.'.format(fet_version))
             Exit(-1)
 
 
@@ -765,7 +761,7 @@ def expand_bootload_port_list(ports):
 
     # Check if new list is empty
     if not ports:
-        print "Bootload port expansion is empty or erroneous!"
+        print("Bootload port expansion is empty or erroneous!")
         Exit(-1)
 
     return ports
@@ -783,13 +779,13 @@ class TelsosbBootloadThread(threading.Thread):
         self.name = 'TelsosbBootloadThread_{0}'.format(self.com_port)
 
     def run(self):
-        print 'starting bootloading on {0}'.format(self.com_port)
+        print('starting bootloading on {0}'.format(self.com_port))
         subprocess.call(
             PYTHON_PY + os.path.join('bootloader', 'telosb', 'bsl') + ' --telosb -c {0} -r -e -I -p "{1}"'.format(
                 self.com_port, self.hex_file),
             shell=True
         )
-        print 'done bootloading on {0}'.format(self.com_port)
+        print('done bootloading on {0}'.format(self.com_port))
 
         # indicate done
         self.counting_sem.release()
@@ -827,14 +823,14 @@ class OpenMoteCC2538BootloadThread(threading.Thread):
         self.name = 'OpenMoteCC2538BootloadThread_{0}'.format(self.com_port)
 
     def run(self):
-        print 'starting bootloading on {0}'.format(self.com_port)
+        print('starting bootloading on {0}'.format(self.com_port))
         subprocess.call(
             PYTHON_PY + os.path.join('bootloader', 'openmote-cc2538',
                                      'cc2538-bsl.py') + ' -e --bootloader-invert-lines -w -b 400000 -p {0} {1}'.format(
                 self.com_port, self.hex_file),
             shell=True
         )
-        print 'done bootloading on {0}'.format(self.com_port)
+        print('done bootloading on {0}'.format(self.com_port))
 
         # indicate done
         self.counting_sem.release()
@@ -881,7 +877,7 @@ class OpentestbedBootloadThread(threading.Thread):
         self.name = 'OpenMoteCC2538BootloadThread_{0}'.format(self.mote)
 
     def run(self):
-        print 'starting bootloading on {0}'.format(self.mote)
+        print('starting bootloading on {0}'.format(self.mote))
         if self.mote == 'opentestbed':
             target = 'all'
         else:
@@ -891,7 +887,7 @@ class OpentestbedBootloadThread(threading.Thread):
                                                                                                               self.hex_file),
             shell=True
         )
-        print 'done bootloading on {0}'.format(self.mote)
+        print('done bootloading on {0}'.format(self.mote))
 
         # indicate done
         self.counting_sem.release()
@@ -933,13 +929,13 @@ class OpenMoteStmBootloadThread(threading.Thread):
         self.name = 'OpenMoteStmBootloadThread_{0}'.format(self.com_port)
 
     def run(self):
-        print 'starting bootloading on {0}'.format(self.com_port)
+        print('starting bootloading on {0}'.format(self.com_port))
         subprocess.call(
             PYTHON_PY + os.path.join('bootloader', 'openmotestm',
                                      'bin.py' + ' -p {0} {1}'.format(self.com_port, self.binary_file)),
             shell=True
         )
-        print 'done bootloading on {0}'.format(self.com_port)
+        print('done bootloading on {0}'.format(self.com_port))
 
         # indicate done
         self.counting_sem.release()
@@ -977,13 +973,13 @@ class IotLabM3BootloadThread(threading.Thread):
         self.name = 'IotLabM3BootloadThread_{0}'.format(self.com_port)
 
     def run(self):
-        print 'starting bootloading on {0}'.format(self.com_port)
+        print('starting bootloading on {0}'.format(self.com_port))
         subprocess.call(
             PYTHON_PY + os.path.join('bootloader', 'iot-lab_M3',
                                      'iotlab-m3-bsl.py' + ' -i {0} -p {1}'.format(self.binary_file, self.com_port)),
             shell=True
         )
-        print 'done bootloading on {0}'.format(self.com_port)
+        print('done bootloading on {0}'.format(self.com_port))
 
         # indicate done
         self.counting_sem.release()
@@ -1025,13 +1021,13 @@ class ScumBootloadThread(threading.Thread):
         self.name = 'ScumBootloadThread{0}'.format(self.com_port)
 
     def run(self):
-        print 'starting bootloading on {0}'.format(self.com_port)
+        print('starting bootloading on {0}'.format(self.com_port))
         subprocess.call(
             PYTHON_PY + os.path.join('bootloader', 'scum',
                                      'scum_bootloader.py' + ' -p {0} {1}'.format(self.com_port, self.binary_file)),
             shell=True
         )
-        print 'done bootloading on {0}'.format(self.com_port)
+        print('done bootloading on {0}'.format(self.com_port))
 
         # indicate done
         self.counting_sem.release()
@@ -1101,7 +1097,7 @@ def bootload_func():
             src_suffix='.bin'
         )
     else:
-        print 'bootloading on board={0} unsupported.'.format(env['board'])
+        print('bootloading on board={0} unsupported.'.format(env['board']))
         Exit(-1)
 
 
@@ -1258,7 +1254,7 @@ def project_finder(localEnv):
                 if path_names:
                     path_name = path_names[0]
                 else:
-                    print "Can't find python dll in provided simhostpy"
+                    print("Can't find python dll in provided simhostpy")
                     Exit(-1)
 
                 # ':' means no prefix, like 'lib', for shared library name

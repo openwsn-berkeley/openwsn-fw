@@ -17,7 +17,7 @@ __all__ = [ "generate_component" ]
 # Output HTML describing a specification element
 def spec_signature_html(ht, elem):
   if elem.tagName == "function":
-    ht.pfnsig(elem, lambda (name): "<b>%s</b>" % name)
+    ht.pfnsig(elem, lambda name: "<b>%s</b>" % name)
   else:
     assert elem.tagName == "interface"
     instance = xml_tag(elem, "instance")
@@ -30,13 +30,13 @@ def spec_signature_html(ht, elem):
 
     sig = 'interface <a href="../ihtml/%s.html">%s</a>' % (fullname, def_name)
     if arguments:
-      iargs = join(map(lambda (arg): typename_str(arg, ""),
+      iargs = join(map(lambda arg: typename_str(arg, ""),
                        xml_elements(arguments)), ", ")
       sig += "&lt;" + iargs + "&gt;"
     if instance_name != def_name:
       sig += " as <b>%s</b>" % instance_name
     if parameters:
-      iparms = join(map(lambda (arg): typename_str(arg, ""),
+      iparms = join(map(lambda arg: typename_str(arg, ""),
                         xml_elements(parameters)),  ", ")
       sig += "[" + iparms + "]"
     ht.p(sig)
@@ -95,8 +95,8 @@ def generate_component(comp):
   interfaces = spec.getElementsByTagName("interface")
   functions = spec.getElementsByTagName("function")
   spec = interfaces + functions
-  provided = filter(lambda (x): x.getAttribute("provided") == "1", spec)
-  used = filter(lambda (x): x.getAttribute("provided") == "0", spec)
+  provided = filter(lambda x: x.getAttribute("provided") == "1", spec)
+  used = filter(lambda x: x.getAttribute("provided") == "0", spec)
 
   # sort arrays
   provided.sort(interface_compare)

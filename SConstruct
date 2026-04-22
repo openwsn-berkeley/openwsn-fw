@@ -15,7 +15,7 @@ banner += ["`___'|  _/\___.|_|_||__/_/ <___/|_\_|"]
 banner += ["     |_|                  openwsn.org"]
 banner += [""]
 banner = '\n'.join(banner)
-print banner
+print(banner)
 
 # ===== help text
 
@@ -33,15 +33,15 @@ project:
 
     variable=value pairs
     These pairs qualify how the project is built, and are organized here into
-    functional groups. Below each variable's description are the valid 
+    functional groups. Below each variable's description are the valid
     options, with the default value listed first.
-    
+
     board          Board to build for. 'python' is for software simulation.
                    telosb, wsn430v14, wsn430v13b, gina, z1, python,
                    iot-lab_M3, iot-lab_A8-M3, nrf52840
 
     version        Board version
-        
+
     toolchain      Toolchain implementation. The 'python' board requires gcc
                    (MinGW on Windows build host).
                    mspgcc, iar, iar-proj, gcc
@@ -53,7 +53,7 @@ project:
     boardopt       A comma, separated list of board options.
 
     Connected hardware variables:
-    bootload       Location of the board to bootload the binary on. 
+    bootload       Location of the board to bootload the binary on.
                    COMx for Windows, /dev entries for Linux
                    Supports parallel operation with a comma-separated list,
                    for example 'COM5,COM6,COM7'.
@@ -61,22 +61,22 @@ project:
                    COMx for Windows, /dev entry for Linux
     fet_version    Firmware version running on the MSP-FET430uif for jtag.
                    2, 3
-    
+
     These simulation variables are for a cross-platform build, and are valid
     only from an amd64-linux build host.
     simhost        Host platform and OS for simulation. Default selection is
                    the current platform/OS, which of course is not a cross-
                    build. '-windows' cross-builds require MinGW-w64 toolchain.
                    amd64-linux, x86-linux, amd64-windows, x86-windows
-    simhostpy      Home directory for simhost cross-build Python headers and 
+    simhostpy      Home directory for simhost cross-build Python headers and
                    shared library.
-    
+
     Common variables:
     oflag          Change the compiler optimization level. Default is -O0.
 
     verbose        Print each complete compile/link command.
                    0 (off), 1 (on)
-    
+
 docs:
     Generate source documentation in build{0}docs{0}html directory
 
@@ -139,7 +139,7 @@ command_line_options = {
 
 def validate_option(key, value, env):
     if key not in command_line_options:
-        print "Unknown switch {0}.".format(key)
+        print("Unknown switch {0}.".format(key))
         Exit(-1)
 
     if key == 'modules' or key == 'apps':
@@ -153,8 +153,8 @@ def validate_option(key, value, env):
         if ':' in v:
             v = v.split(':')[0]
         if v not in command_line_options[key]:
-            print "Unknown {0} \"{1}\". Options are: {2}.\n\n".format(key, v, ', '.join(
-                command_line_options[key]))
+            print("Unknown {0} \"{1}\". Options are: {2}.\n\n".format(key, v, ', '.join(
+                command_line_options[key])))
             Exit(-1)
 
 
@@ -301,7 +301,7 @@ else:
 
 
 def default(env, target, source):
-    print SCons.Script.help_text
+    print(SCons.Script.help_text)
 
 
 Default(env.Command('default', None, default))
@@ -345,7 +345,7 @@ def list_function(env, target, source):
         for t in v:
             output += ['    - {0}'.format(t)]
     output = '\n'.join(output)
-    print output
+    print(output)
 
 
 list_output = env.Command('list', None, list_function)
@@ -356,7 +356,7 @@ Alias('list', list_output)
 # ===== env
 
 def env_function(env, target, source):
-    print env.Dump()
+    print(env.Dump())
 
 env_command = env.Command('env', None, env_function)
 AlwaysBuild(env_command)

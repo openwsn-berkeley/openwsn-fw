@@ -32,7 +32,7 @@ def nfind(f, l):
 
 # True if a is in l
 def nmember(a, l):
-  return nfind(lambda (b): a == b, l)
+  return nfind(lambda b: a == b, l)
 
 # Return a sub-element with the specified tag
 def xml_tag(x, tag):
@@ -67,7 +67,7 @@ def xml_idx(x, i):
 
 # Return all element children
 def xml_elements(x):
-  return filter(lambda (child): child.nodeType == Node.ELEMENT_NODE, x.childNodes)
+  return filter(lambda child: child.nodeType == Node.ELEMENT_NODE, x.childNodes)
 
 # Join all CDATA children into a single string
 def xml_text(x):

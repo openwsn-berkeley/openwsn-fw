@@ -1,7 +1,7 @@
 import os
 import sys
 here = sys.path[0]
-print here
+print(here)
 sys.path.insert(0,os.path.join(here,'..','..','..','..','..','..','coap'))
 
 from coap import coap
@@ -13,7 +13,7 @@ c = coap.coap(udpPort=UDPPORT)
 
 # read status of debug LED
 p = c.GET('coap://[{0}]/l'.format(MOTE_IP))
-print chr(p[0])
+print(chr(p[0]))
 
 # toggle debug LED
 p = c.PUT(
@@ -23,6 +23,6 @@ p = c.PUT(
 
 # read status of debug LED
 p = c.GET('coap://[{0}]/l'.format(MOTE_IP))
-print chr(p[0])
+print(chr(p[0]))
 
-raw_input("Done. Press enter to close.")
+input("Done. Press enter to close.")

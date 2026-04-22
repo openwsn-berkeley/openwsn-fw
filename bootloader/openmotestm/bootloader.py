@@ -21,11 +21,11 @@ class CommandInterface(object):
             rtscts=0,               # don't enable RTS/CTS flow control
             timeout=5               # set a timeout value, None for waiting forever
         )
-        
+
     def mdebug(self, message):
         if self.debugging:
-            print >> sys.stderr , message
-    
+            print(message, file=sys.stderr)
+
     def quiet(self):
         self.debugging = False
 
@@ -200,7 +200,7 @@ class CommandInterface(object):
             self.sp.write(chr(0x00))
             tmp = self.sp.timeout
             self.sp.timeout = 30
-            print "Extended erase (0x44), this can take ten seconds or more"
+            print("Extended erase (0x44), this can take ten seconds or more")
             self._wait_for_ask("0x44 erasing failed")
             self.sp.timeout = tmp
             self.mdebug( "    Extended Erase memory done")
@@ -253,7 +253,7 @@ class CommandInterface(object):
 
     def readMemory(self, addr, lng):
         data = []
-        
+
         while lng > 256:
             sys.stdout.write("Read {1} bytes at 0x{0:x}\r".format(addr, 256))
             sys.stdout.flush()
@@ -266,7 +266,7 @@ class CommandInterface(object):
 
     def writeMemory(self, addr, data):
         lng = len(data)
-        
+
         offs = 0
         while lng > 256:
             sys.stdout.write("Write {1} bytes at 0x{0:x}\r".format(addr, 256))

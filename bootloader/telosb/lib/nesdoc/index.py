@@ -24,7 +24,7 @@ def generate_indices(compfiles, intffiles):
       package = fmatch.group(1)
       entity = fmatch.group(2)
       packages[package] = True
-      if not to.has_key(package):
+      if package not in to:
         to[package] = []
       to[package].append((package, entity))
       all.append((package, entity))
@@ -71,7 +71,7 @@ def generate_indices(compfiles, intffiles):
 
   # Per-package index
   def pkglist(l, pkg, kind):
-    if l.has_key(pkg):
+    if pkg in l:
       entitylist(pkgfile, l[pkg], kind)
 
   # collect packages

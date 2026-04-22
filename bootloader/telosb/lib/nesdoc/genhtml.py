@@ -33,7 +33,7 @@ from shutil import copyfile
 import os
 from nesdoc.html import *
 
-param_pattern = compile("^\s*([a-zA-Z0-9_]+)")
+param_pattern = compile(r"^\s*([a-zA-Z0-9_]+)")
 
 # Print @param doc tags as Parameters:, and put parameter name as <code>
 def param_doctag(val):
