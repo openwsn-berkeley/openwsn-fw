@@ -22,7 +22,7 @@ def generate_fnlist_short(ht, name, fns):
     ht.heading(name)
     for fn in fns:
       ht.func_sig_start();
-      ht.pfnsig(fn, lambda (name): '<a href="#%s">%s</a>' % (name, name))
+      ht.pfnsig(fn, lambda name: '<a href="#%s">%s</a>' % (name, name))
       doc = nd_doc_short(fn)
       if doc != None:
         ht.push("menu")
@@ -43,7 +43,7 @@ def generate_fnlist_long(ht, name, fns):
       name = fn.getAttribute("name")
       ht.pln('<a name="%s"></a>' % name)
       ht.push("h4"); ht.p(name); ht.popln()
-      ht.pfnsig(fn, lambda (name): '<b>%s</b>' % name)
+      ht.pfnsig(fn, lambda name: '<b>%s</b>' % name)
       doc = nd_doc_long(fn)
       if doc:
         ht.startline(); ht.tag("p")
@@ -74,8 +74,8 @@ def generate_interface(intf):
   ht.tag("p")
 
   functions = intf.getElementsByTagName("function")
-  commands = filter(lambda (x): x.hasAttribute("command"), functions)
-  events = filter(lambda (x): x.hasAttribute("event"), functions)
+  commands = filter(lambda x: x.hasAttribute("command"), functions)
+  events = filter(lambda x: x.hasAttribute("event"), functions)
   commands.sort(lambda x, y: cmp(x.getAttribute("name").lower(), y.getAttribute("name").lower()));
   events.sort(lambda x, y: cmp(x.getAttribute("name").lower(), y.getAttribute("name").lower()));
   generate_fnlist_short(ht, "Commands", commands)

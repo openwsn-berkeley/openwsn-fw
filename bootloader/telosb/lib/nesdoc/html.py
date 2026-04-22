@@ -123,7 +123,7 @@ class Html:
   # escape <> enclosed email addresses
   def escape_email(self, s):
     while True:
-      email = search("<\S+@\S+>", s)
+      email = search(r"<\S+@\S+>", s)
       if not email:
         break
       start = email.start()
@@ -140,7 +140,7 @@ class Html:
       self.pushln("dl")
       lasttag = None
       for (tag, val) in tags:
-        if _doctags.has_key(tag):
+        if tag in _doctags:
           (tag, val) = _doctags[tag](val)
         if tag != lasttag:
           self.tag("dt");

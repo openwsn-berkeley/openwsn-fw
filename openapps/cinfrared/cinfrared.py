@@ -1,7 +1,7 @@
 import os
 import sys
 here = sys.path[0]
-print here
+print(here)
 sys.path.insert(0,os.path.join(here,'..','..','..','coap'))
 
 from coap import coap
@@ -19,8 +19,8 @@ p = c.PUT(
 )
 
 while True:
-    input = raw_input("Done. Press q to close. ")
+    input = input("Done. Press q to close. ")
     if input=='q':
-        print 'bye bye.'
+        print('bye bye.')
         #c.close()
         os.kill(os.getpid(), signal.SIGTERM)

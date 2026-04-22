@@ -19,9 +19,9 @@ else:
    extension = ''
 
 def usage():
-    print("""Usage: %s [-i binary file] [-p port] 
+    print("""Usage: %s [-i binary file] [-p port]
 Examples:
-    ./%s example/main -p /dev/ttyUSB0 
+    ./%s example/main -p /dev/ttyUSB0
     """ % (sys.argv[0], sys.argv[0]))
 
 
@@ -54,7 +54,7 @@ try:
    opts, args = getopt.getopt(sys.argv[1:], "hi:p:", ["help", "input=","port="])
 except getopt.GetoptError as err:
    # print help information and exit:
-   print str(err) # will print something like "option -a not recognized"
+   print(str(err)) # will print something like "option -a not recognized"
    usage()
    sys.exit(2)
 binary = None
@@ -68,9 +68,9 @@ for o, a in opts:
    elif o in ("-p", "--port"):
       port = a
    else:
-      assert False, "unhandled option" 
+      assert False, "unhandled option"
 
-try: 
+try:
    os.path.isfile(binary)
 except:
    print('ERROR: Binary file not found/specified.')
@@ -88,7 +88,7 @@ call([OPENOCD,
    '-c', 'init',
    '-c', 'targets',
    '-c', 'reset halt',
-   '-c', 'reset init', 
+   '-c', 'reset init',
    '-c', 'flash write_image erase ' + binary,
    '-c', 'verify_image ' + binary,
    '-c', 'reset run',

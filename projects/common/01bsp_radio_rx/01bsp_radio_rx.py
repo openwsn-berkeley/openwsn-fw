@@ -12,13 +12,13 @@ except ImportError:
 banner  = []
 banner += [""]
 banner += [" ___                 _ _ _  ___  _ _ "]
-banner += ["| . | ___  ___ ._ _ | | | |/ __>| \ |"]
-banner += ["| | || . \/ ._>| ' || | | |\__ \|   |"]
-banner += ["`___'|  _/\___.|_|_||__/_/ <___/|_\_|"]
+banner += [r"| . | ___  ___ ._ _ | | | |/ __>| \ |"]
+banner += [r"| | || . \/ ._>| ' || | | |\__ \|   |"]
+banner += [r"`___'|  _/\___.|_|_||__/_/ <___/|_\_|"]
 banner += ["     |_|                  openwsn.org"]
 banner += [""]
 banner  = '\n'.join(banner)
-print banner
+print(banner)
 
 XOFF           = 0x13
 XON            = 0x11
@@ -36,8 +36,8 @@ def mote_connect(motename=None , serialport= None, baudrate='115200'):
             mote = serial.Serial(serialport, baudrate)
         return mote
     except Exception as err:
-        print "{0}".format(err)
-        raw_input('Press Enter to close.')
+        print("{0}".format(err))
+        input('Press Enter to close.')
         sys.exit(1)
     
 
@@ -48,9 +48,9 @@ motename = 'wsn430-35'
 serialport = 'COM10'
 mote = None
 
-t = raw_input('Are you running on IoT-LAB nodes ? (Y|N): ')
+t = input('Are you running on IoT-LAB nodes ? (Y|N): ')
 if  (not t.strip() or t.strip() in ['1','yes','y','Y']):
-    t = raw_input('Enter mote name ? (e.g. {0}): '.format(motename))
+    t = input('Enter mote name ? (e.g. {0}): '.format(motename))
     if t.strip():
         motename = t.strip()
     archi = motename.split('-')
@@ -63,7 +63,7 @@ if  (not t.strip() or t.strip() in ['1','yes','y','Y']):
         mote = mote_connect(serialport='/dev/ttyA8_M3', baudrate='500000')
     
 else:
-    t = raw_input('Enter serial port name (e.g. {0}): '.format(serialport))    
+    t = input('Enter serial port name (e.g. {0}): '.format(serialport))    
     if t.strip():
         serialport = t.strip()
     mote = mote_connect(serialport=serialport)
@@ -110,17 +110,17 @@ while True:
             rxpk_freq_offset
         )
         
-        print output
+        print(output)
         
         with open('log.txt','a') as f:
             f.write(output+'\n')
         
         if rxpk_len>127:
-            print "ERROR: frame too long.\a"
+            print("ERROR: frame too long.\a")
         else:
             if previousFrame>rxpk_num:
                 output = "frameCounter={0:<3}, PDR={1}%".format(frameCounter, frameCounter*100/MAX_NUM_PACKET)
-                print output
+                print(output)
                 frameCounter  = 0
                 with open('log.txt','a') as f:
                     f.write(output+'\n')

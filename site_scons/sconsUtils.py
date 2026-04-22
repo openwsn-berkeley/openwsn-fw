@@ -11,11 +11,11 @@ def printEnv(env):
     envDict = env.Dictionary()
     envKeys = envDict.keys()
     envKeys.sort()
-    
-    print 'Environment Contents'
-    print '===================='
+
+    print('Environment Contents')
+    print('====================')
     for key in envKeys:
-        print '* {0}\n  {1}'.format(key, envDict[key])
+        print('* {0}\n  {1}'.format(key, envDict[key]))
 
 
 def findPattern(pattern, path):

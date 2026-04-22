@@ -27,6 +27,11 @@ ieee154e_vars_t ieee154e_vars;
 ieee154e_stats_t ieee154e_stats;
 ieee154e_dbg_t ieee154e_dbg;
 
+#if PYTHON_BOARD
+bool passed_msgBarrier;
+bool passed_ackBarrier;
+#endif
+
 //=========================== prototypes ======================================
 
 // SYNCHRONIZING
@@ -330,6 +335,12 @@ This function executes in ISR mode, when the new slot timer fires.
 */
 void isr_ieee154e_newSlot(opentimers_id_t id) {
 
+#if PYTHON_BOARD
+    board_barrier_slot_sync();
+    passed_msgBarrier = FALSE;
+    passed_ackBarrier = FALSE;
+#endif
+
     ieee154e_vars.startOfSlotReference = opentimers_getCurrentCompareValue();
 
     opentimers_scheduleAbsolute(
@@ -346,6 +357,7 @@ void isr_ieee154e_newSlot(opentimers_id_t id) {
             changeIsSync(TRUE);
             ieee154e_resetAsn();
             ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
+            endSlot();
         } else {
             activity_synchronize_newSlot();
         }
@@ -688,6 +700,18 @@ port_INLINE void activity_synchronize_newSlot(void) {
             isr_ieee154e_inhibitStart               // callback
     );
 
+#if PYTHON_BOARD
+    if (!passed_msgBarrier){
+        board_barrier_msg_sync();
+        passed_msgBarrier = TRUE;
+    }
+
+    if (!passed_ackBarrier){
+        board_barrier_ack_sync();
+        passed_ackBarrier = TRUE;
+    }
+#endif
+
     openserial_inhibitStop();
 }
 
@@ -971,8 +995,12 @@ port_INLINE void activity_ti1ORri1(void) {
             if (ieee154e_vars.nextActiveSlotOffset > ieee154e_vars.slotOffset) {
                 ieee154e_vars.numOfSleepSlots = ieee154e_vars.nextActiveSlotOffset - ieee154e_vars.slotOffset;
             } else {
+#if !PYTHON_BOARD
                 ieee154e_vars.numOfSleepSlots =
                         schedule_getFrameLength() + ieee154e_vars.nextActiveSlotOffset - ieee154e_vars.slotOffset;
+#else
+                ieee154e_vars.numOfSleepSlots = 1;
+#endif
             }
 
             opentimers_scheduleAbsolute(
@@ -1338,6 +1366,13 @@ port_INLINE void activity_ti5(PORT_TIMER_WIDTH capturedTime) {
                 isr_ieee154e_timer                                // callback
         );
 #endif
+
+#if PYTHON_BOARD
+        if (!passed_msgBarrier){
+            board_barrier_msg_sync();
+            passed_msgBarrier = TRUE;
+        }
+#endif
     } else {
         // indicate succesful Tx to schedule to keep statistics
         schedule_indicateTx(&ieee154e_vars.asn, TRUE);
@@ -1407,6 +1442,13 @@ port_INLINE void activity_ti7(void) {
             TIME_TICS,                                        // timetype
             isr_ieee154e_timer                                // callback
     );
+#endif
+
+#if PYTHON_BOARD
+    if (!passed_ackBarrier){
+        board_barrier_ack_sync();
+        passed_ackBarrier = TRUE;
+    }
 #endif
 }
 
@@ -1668,6 +1710,13 @@ port_INLINE void activity_ri3(void) {
             TIME_TICS,                                        // timetype
             isr_ieee154e_timer                                // callback
     );
+#endif
+
+#if PYTHON_BOARD
+    if (!passed_msgBarrier){
+        board_barrier_msg_sync();
+        passed_msgBarrier = TRUE;
+    }
 #endif
 }
 
@@ -2187,6 +2236,13 @@ port_INLINE void activity_ri9(PORT_TIMER_WIDTH capturedTime) {
 
     // clear local variable
     ieee154e_vars.dataReceived = NULL;
+
+#if PYTHON_BOARD
+    if (!passed_ackBarrier){
+        board_barrier_ack_sync();
+        passed_ackBarrier = TRUE;
+    }
+#endif
 
     // official end of Rx slot
     endSlot();
@@ -2818,6 +2874,20 @@ void endSlot(void) {
     open_addr_t slotNeighbor;
     open_addr_t parentAddress;
     slotinfo_element_t info;
+
+#if PYTHON_BOARD
+    if (!passed_msgBarrier){
+        board_barrier_msg_sync();
+        passed_msgBarrier = TRUE;
+    }
+#endif
+
+#if PYTHON_BOARD
+    if (!passed_ackBarrier){
+        board_barrier_ack_sync();
+        passed_ackBarrier = TRUE;
+    }
+#endif
 
     // turn off the radio
     radio_rfOff();

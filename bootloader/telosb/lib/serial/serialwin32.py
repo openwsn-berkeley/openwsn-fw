@@ -9,11 +9,11 @@ import win32file  # The base COM port and file IO functions.
 import win32event # We use events and the WaitFor[Single|Multiple]Objects functions.
 import win32con   # constants.
 import sys, string
-import serialutil
+from . import serialutil
 
 VERSION = "$Revision: 1.5 $"     #extract CVS version
 
-PARITY_NONE, PARITY_EVEN, PARITY_ODD = range(3)
+PARITY_NONE, PARITY_EVEN, PARITY_ODD = list(range(3))
 STOPBITS_ONE, STOPBITS_TWO = (1, 2)
 FIVEBITS, SIXBITS, SEVENBITS, EIGHTBITS = (5,6,7,8)
 
@@ -63,9 +63,9 @@ class Serial(serialutil.FileLike):
                    win32con.OPEN_EXISTING,
                    win32con.FILE_ATTRIBUTE_NORMAL | win32con.FILE_FLAG_OVERLAPPED,
                    None)
-        except Exception, msg:
+        except Exception as msg:
             self.hComPort = None    #'cause __del__ is called anyway
-            raise serialutil.SerialException, "could not open port: %s" % msg
+            raise serialutil.SerialException("could not open port: %s" % msg)
         # Setup a 4k buffer
         win32file.SetupComm(self.hComPort, 4096, 4096)
 
@@ -275,6 +275,6 @@ class Serial(serialutil.FileLike):
 
 #Nur Testfunktion!!
 if __name__ == '__main__':
-    print __name__
+    print(__name__)
     s = Serial(0)
 

@@ -41,15 +41,15 @@ class SerialRxThread(threading.Thread):
                 if self.lastRxByte!=None:
                     expectedRxByte = self._expectedRxByte(self.lastRxByte)
                     if rxByte!=expectedRxByte:
-                        print 'got 0x{0:02x}, expected 0x{1:02x}'.format(rxByte,expectedRxByte)
+                        print('got 0x{0:02x}, expected 0x{1:02x}'.format(rxByte,expectedRxByte))
                         #raw_input('')
                 self.lastRxByte = rxByte
         
         except Exception as err:
-            print '{0}: {1}'.format(
+            print('{0}: {1}'.format(
                 self.name,
                 err,
-            )
+            ))
     
     def _expectedRxByte(self,lastRxByte):
         expectedRxByte = (lastRxByte+1) & 0xff
@@ -88,10 +88,10 @@ class SerialTxThread(threading.Thread):
                     self.serial.write(chr(self.txByte))
         
         except Exception as err:
-            print '{0}: {1}'.format(
+            print('{0}: {1}'.format(
                 self.name,
                 err,
-            )
+            ))
     
 #============================ main ============================================
 

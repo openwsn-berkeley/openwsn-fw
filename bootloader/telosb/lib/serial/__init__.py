@@ -10,12 +10,12 @@ VERSION = "$Revision: 1.5 $"     #extract CVS version
 
 #chose an implementation, depending on os
 if os.name == 'nt': #sys.platform == 'win32':
-    from serialwin32 import *
+    from .serialwin32 import *
 elif os.name == 'posix':
-    from serialposix import *
+    from .serialposix import *
 elif os.name == 'java':
-    from serialjava import *
+    from .serialjava import *
 else:
-    raise "Sorry no implementation for your platform available."
+    raise NotImplementedError("Sorry no implementation for your platform available.")
 
 #no "mac" implementation. someone want's to write it? i have no access to a mac.

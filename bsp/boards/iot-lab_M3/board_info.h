@@ -33,6 +33,7 @@ to return the board's description.
 #define PORT_RADIOTIMER_WIDTH               uint32_t
 
 #define PORT_SIGNED_INT_WIDTH               int32_t
+#define PORT_MAX_TICKS_IN_SINGLE_CLOCK      (uint32_t)(0xffffffff>>1)
 #define PORT_TICS_PER_MS                    32
 #define PORT_US_PER_TICK                    30 // number of us per 32kHz clock tick
 #define SCHEDULER_WAKEUP()                  EXTI->SWIER |= EXTI_Line1;

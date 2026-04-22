@@ -21,15 +21,15 @@ def pretty_print(lst):
     return pld_str
 
 
-print "\n  UDP Echo Application"
-print "------------------------\n"
+print("\n  UDP Echo Application")
+print("------------------------\n")
 
-num_tries = raw_input("> Number of echoes [10]? ")
-pld_size = raw_input("> Payload size [50]? ")
-address = raw_input("> Destination address [bbbb::1415:92cc:0:2]? ")
-timeout = raw_input("> Set timeout value [10]? ")
+num_tries = input("> Number of echoes [10]? ")
+pld_size = input("> Payload size [50]? ")
+address = input("> Destination address [bbbb::1415:92cc:0:2]? ")
+timeout = input("> Set timeout value [10]? ")
 
-print '\n Starting ...\n'
+print('\n Starting ...\n')
 
 if num_tries == '':
     num_tries = 10
@@ -69,7 +69,7 @@ for i in range(num_tries):
     output += ['  - Address    [{0}]:{1} --> [{2}]:{3}'.format(myAddress, myPort, hisAddress, hisPort)]
     output += ['  - Payload    {0} ({1} bytes)'.format(pretty_print(request), len(request))]
     output = '\n'.join(output)
-    print output
+    print(output)
 
     # open socket
     socket_handler = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)
@@ -88,9 +88,9 @@ for i in range(num_tries):
         fail += 1
 
         # log
-        print '\n'
-        print c.Back.YELLOW + c.Fore.BLACK + "TIMEOUT" + c.Style.RESET_ALL
-        print "\n=========================================\n"
+        print('\n')
+        print(c.Back.YELLOW + c.Fore.BLACK + "TIMEOUT" + c.Style.RESET_ALL)
+        print("\n=========================================\n")
 
     else:
         if reply == request:
@@ -115,9 +115,9 @@ for i in range(num_tries):
             output += ['  - Payload    {0} ({1} bytes)'.format(pretty_print(reply), len(reply))]
             output = '\n'.join(output)
 
-        print output
+        print(output)
 
-        print "\n=========================================\n"
+        print("\n=========================================\n")
 
     # close socket
     socket_handler.close()
@@ -134,6 +134,6 @@ if len(delays) > 0:
         float(sum(delays)) / float(len(delays)))]
 
 output = '\n'.join(output)
-print output
+print(output)
 
-raw_input("\nPress return to close this window...")
+input("\nPress return to close this window...")

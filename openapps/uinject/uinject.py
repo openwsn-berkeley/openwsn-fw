@@ -19,7 +19,7 @@ mote_counter_asn_cellusage = {}
 
 # get data from file?
 
-fromFile = raw_input("get data from file? (yes, no):")
+fromFile = input("get data from file? (yes, no):")
 
 if fromFile == 'yes':
 
@@ -29,9 +29,9 @@ if fromFile == 'yes':
 else:
     
     # get the network start time
-    raw_input("Press Enter at the same time when network starts...")
+    input("Press Enter at the same time when network starts...")
     network_start_time = time.time()
-    print "Network starts at {0}\n".format(time.ctime(network_start_time))
+    print("Network starts at {0}\n".format(time.ctime(network_start_time)))
     
     with open('network_start_time.txt','a') as f:
         f.write(str(network_start_time))
@@ -74,7 +74,7 @@ else:
         mote_counter_asn_cellusage[mote]['latency'].append(time.time()-asn*SLOTDURATION-network_start_time)
         mote_counter_asn_cellusage[mote]['numCellsUsed'].append(numCellsUsed)
         
-        print 'received "{0}" at asn {1} from [{2}]:{3}, numCellsUsed={4}'.format(counter, asnBytes, hisAddress,hisPort,numCellsUsed)
+        print('received "{0}" at asn {1} from [{2}]:{3}, numCellsUsed={4}'.format(counter, asnBytes, hisAddress,hisPort,numCellsUsed))
         
         # record data every 10 minutes
         if time.time()-previous_time>600:

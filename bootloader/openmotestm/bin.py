@@ -34,86 +34,86 @@ class BootLoaderJobs():
         0x411: "STM32F2xx",
         0x413: "STM32F4xx",
     }
-    
+
     def __init__(self,port,baund = 115200, address = 0x08000000):
         self.port    = port
         self.baund   = baund
         self.address = address
         self.cmd     = CommandInterface()
-    
+
     def initialChip(self):
 
         self.cmd.open(self.port, self.baund)
-        print "Open port" + self.port + ", baud " + str(self.baund)
+        print("Open port" + self.port + ", baud " + str(self.baund))
         self.cmd.initChip()
 
     # turn of debugging information
     def turnOffDebugging(self):
         self.cmd.quiet()
-    
+
     # this function will download the target file to the device at 0x8000000 and verify.
     def downloadJob(self,binFile):
         status = False # True instead of success, False instead of Failed
-        print "Erasing..."
+        print("Erasing...")
         self.cmd.cmdEraseMemory(WRPxPages)
         data = map(lambda c: ord(c), file(binFile, 'rb').read())
-        print "Starting to write {0}KB data into flash...".format(len(data)>>10)
+        print("Starting to write {0}KB data into flash...".format(len(data)>>10))
         self.cmd.writeMemory(self.address, data)
-        print "Writing complete."
-        print "Verifying the data..."
+        print("Writing complete.")
+        print("Verifying the data...")
         verify = self.cmd.readMemory(self.address, len(data))
         if(data == verify):
-            print "The data is OK."
-            print "Download on port " + self.port + " successfully!"
+            print("The data is OK.")
+            print("Download on port " + self.port + " successfully!")
             status = True
         else:
-            print "Verifying failded."
-            print str(len(data)) + ' vs ' + str(len(verify))
-            for i in xrange(0, len(data)):
+            print("Verifying failded.")
+            print(str(len(data)) + ' vs ' + str(len(verify)))
+            for i in range(0, len(data)):
                 if data[i] != verify[i]:
-                    print hex(i) + ': ' + hex(data[i]) + ' vs ' + hex(verify[i])
+                    print(hex(i) + ': ' + hex(data[i]) + ' vs ' + hex(verify[i]))
         return status
-        
+
     def getChipInformation(self):
         bootversion = self.cmd.cmdGet()
-        print "Bootloader version " + str(bootversion)
+        print("Bootloader version " + str(bootversion))
         chipId = self.cmd.cmdGetID()
-        print "Chip id: 0x" + str(chipId) + " " + self.chip_ids.get(chipId, "Unknown")
-        
+        print("Chip id: 0x" + str(chipId) + " " + self.chip_ids.get(chipId, "Unknown"))
+
     def releasePort(self):
         self.cmd.releaseChip()
         self.cmd.sp.close()
 
 if __name__ == "__main__":
-    
+
     serialPort = "COM6"
-    
+
     # get options and arguments
     try:
         opts, args = getopt.getopt(sys.argv[1:], "p:h")
-    except getopt.GetoptError, err:
+    except getopt.GetoptError as err:
         # print help information and exit:
-        print str(err) # will print something like "option -a not recognized"
+        print(str(err)) # will print something like "option -a not recognized"
         sys.exit(2)
-    
+
     # filter options
     for option,value in opts:
         if option == '-p':
             serialPort = str(value)
         elif option == '-h':
-            print ""
-            print "    example: bin.py -p 'port' file.bin "
-            print "    Note: The 'port' represents your serial port. default value is COM6"
+            print("")
+            print("    example: bin.py -p 'port' file.bin ")
+            print("    Note: The 'port' represents your serial port. default value is COM6")
             sys.exit(0)
         else:
             assert False, "can't handled the option"
             sys.exit(2)
-        
+
     # create an bootloader jobs object
     bljobs = BootLoaderJobs(serialPort)
     bljobs.initialChip()
     bljobs.downloadJob(args[0])
     bljobs.releasePort()
-            
-    
+
+
 
