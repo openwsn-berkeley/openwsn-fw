@@ -213,4 +213,5 @@ void coap_init(void) { return; }
 //===== L7
 
 void openapps_init(void) { return; }
+void openweb_init(void) { return; }
 

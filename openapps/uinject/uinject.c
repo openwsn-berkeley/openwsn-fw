@@ -19,7 +19,7 @@
 
 //=========================== defines =========================================
 
-#define UINJECT_TRAFFIC_RATE 2 ///> the value X indicates 1 packet/X minutes
+#define UINJECT_TRAFFIC_RATE 1 ///> the value X indicates 1 packet/X minutes
 
 //=========================== variables =======================================
 

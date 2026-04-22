@@ -24,6 +24,7 @@
 //=========================== prototypes ======================================
 
 void i2c_init(void);
+void i2c_set_addr(uint8_t address);
 void i2c_read_registers(uint8_t bus_num,uint8_t slave_addr,
                              uint8_t reg_addr,
                              uint8_t numBytes,
