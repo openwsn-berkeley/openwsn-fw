@@ -97,7 +97,7 @@ openmote = Extension(
         ('OPENWSN_UDP_C', '1'),
         ('OPENWSN_ICMPV6ECHO_C', '0'),
     ],
-    extra_compile_args=['-Wno-implicit-function-declaration'],
+    extra_compile_args=[] if sys.platform == 'win32' else ['-Wno-implicit-function-declaration'],
 )
 
 setup(
