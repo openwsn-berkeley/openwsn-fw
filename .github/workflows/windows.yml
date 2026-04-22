@@ -14,8 +14,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up MinGW with Python
+        uses: msys2/setup-msys2@v2
+        with:
+          install: >-
+            mingw-w64-x86_64-python
+            mingw-w64-x86_64-python-pip
+            mingw-w64-x86_64-gcc
+
       - name: Build python board
-        run: pip install .
+        run: pip install --break-system-packages .
+        shell: msys2 {0}
 
   build-embedded:
     strategy:
