@@ -8,10 +8,10 @@ import SCons
 
 banner = []
 banner += [""]
-banner += [" ___                 _ _ _  ___  _ _ "]
-banner += ["| . | ___  ___ ._ _ | | | |/ __>| \ |"]
-banner += ["| | || . \/ ._>| ' || | | |\__ \|   |"]
-banner += ["`___'|  _/\___.|_|_||__/_/ <___/|_\_|"]
+banner += [r" ___                 _ _ _  ___  _ _ "]
+banner += [r"| . | ___  ___ ._ _ | | | |/ __>| \ |"]
+banner += [r"| | || . \/ ._>| ' || | | |\__ \|   |"]
+banner += [r"`___'|  _/\___.|_|_||__/_/ <___/|_\_|"]
 banner += ["     |_|                  openwsn.org"]
 banner += [""]
 banner = '\n'.join(banner)
@@ -150,11 +150,12 @@ def validate_option(key, value, env):
         values = [value]
 
     for v in values:
+        v = str(v)
         if ':' in v:
             v = v.split(':')[0]
         if v not in command_line_options[key]:
             print("Unknown {0} \"{1}\". Options are: {2}.\n\n".format(key, v, ', '.join(
-                command_line_options[key])))
+                [str(o) for o in command_line_options[key]])))
             Exit(-1)
 
 

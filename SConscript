@@ -6,7 +6,7 @@ import sys
 import threading
 
 import SCons
-import distutils.sysconfig
+import sysconfig
 import sconsUtils
 
 Import('env')
@@ -208,7 +208,7 @@ elif env['toolchain'] == 'iar':
     try:
         iarEw430BinDir = os.path.join(env['IAR_EW430_INSTALLDIR'], '430', 'bin')
     except KeyError as err:
-        print('You need to install environment variable IAR_EW430_INSTALLDIR which points to the '               'installation directory of IAR Embedded Workbench for MSP430.'               ' Example: C:\Program Files\IAR Systems\Embedded Workbench 6.5')
+        print('You need to install environment variable IAR_EW430_INSTALLDIR which points to the '               'installation directory of IAR Embedded Workbench for MSP430.'               r' Example: C:\Program Files\IAR Systems\Embedded Workbench 6.5')
         Exit(-1)
 
     # compiler
@@ -281,7 +281,7 @@ elif env['toolchain'] == 'iar-proj':
     try:
         iarEw430CommonBinDir = os.path.join(env['IAR_EW430_INSTALLDIR'], 'common', 'bin')
     except KeyError as err:
-        print('You need to install environment variable IAR_EW430_INSTALLDIR which points to the '               'installation directory of IAR Embedded Workbench for MSP430. '               'Example: C:\Program Files\IAR Systems\Embedded Workbench 6.5')
+        print('You need to install environment variable IAR_EW430_INSTALLDIR which points to the '               'installation directory of IAR Embedded Workbench for MSP430. '               r'Example: C:\Program Files\IAR Systems\Embedded Workbench 6.5')
         Exit(-1)
 
     iar_proj_builder_func = Builder(
@@ -1178,8 +1178,8 @@ def populateTargetGroup(localEnv, targetName):
 def project_finder(localEnv):
     """
     This function is called from the following directories:
-    - projects\common\
-    - projects\<board>\
+    - projects\\common\\
+    - projects\\<board>\\
     """
 
     # list subdirectories
@@ -1261,8 +1261,8 @@ def project_finder(localEnv):
                 pysyslib = ':{0}'.format(os.path.basename(path_name))
                 pylib_ext = '.pyd'
             else:
-                pysyslib = 'python' + distutils.sysconfig.get_config_var('VERSION')
-                pylib_ext = distutils.sysconfig.get_config_var('SO')
+                pysyslib = 'python' + sysconfig.get_config_var('VERSION')
+                pylib_ext = sysconfig.get_config_var('EXT_SUFFIX')
 
             target = target_name
             source = [localEnv.ObjectifiedFilename(s) for s in sources_c]
