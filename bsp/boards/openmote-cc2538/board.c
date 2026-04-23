@@ -107,8 +107,19 @@ void board_init(void) {
  * Puts the board to sleep
  */
 void board_sleep(void) {
+#if BOARD_DEEP_SLEEP
+    if(radio_is_enabled()) {
+      SysCtrlPowerModeSet(SYS_CTRL_PM_NOACTION);
+      SysCtrlSleep();
+    }
+    else {
+      SysCtrlPowerModeSet(SYS_CTRL_PM_1);
+      SysCtrlDeepSleep();
+    }
+#else
     SysCtrlPowerModeSet(SYS_CTRL_PM_NOACTION);
     SysCtrlSleep();
+#endif
 }
 
 /**
