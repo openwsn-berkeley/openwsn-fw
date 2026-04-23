@@ -1,0 +1,882 @@
+<!DOCTYPE CrossStudio_Project_File>
+<solution Name="microbit" target="8" version="2">
+  <configuration
+    Name="Debug"
+    c_preprocessor_definitions="DEBUG"
+    gcc_debugging_level="Level 3"
+    gcc_omit_frame_pointer="Yes"
+    gcc_optimization_level="None"
+    linker_output_format="hex" />
+  <configuration
+    Name="Release"
+    c_preprocessor_definitions="NDEBUG"
+    gcc_debugging_level="Level 2"
+    gcc_omit_frame_pointer="Yes"
+    gcc_optimization_level="Level 2 balanced" />
+  <project Name="01bsp_leds">
+    <configuration
+      LIBRARY_IO_TYPE="RTT"
+      Name="Common"
+      Target="nRF52833_xxAA"
+      arm_architecture="v7EM"
+      arm_compiler_variant="SEGGER"
+      arm_core_type="Cortex-M4"
+      arm_endian="Little"
+      arm_fp_abi="Hard"
+      arm_fpu_type="FPv4-SP-D16"
+      arm_linker_heap_size="1024"
+      arm_linker_process_stack_size="0"
+      arm_linker_stack_size="2048"
+      arm_linker_treat_warnings_as_errors="No"
+      arm_linker_variant="SEGGER"
+      arm_rtl_variant="SEGGER"
+      arm_simulator_memory_simulation_parameter="ROM;0x00000000;0x00080000;RAM;0x00800000;0x00020000;RAM;0x20000000;0x00020000"
+      arm_target_debug_interface_type="ADIv5"
+      arm_target_device_name="nRF52833_xxAA"
+      arm_target_interface_type="SWD"
+      c_preprocessor_definitions="ARM_MATH_CM4;NRF52833_XXAA;__NRF_FAMILY;MICROBIT"
+      c_user_include_directories="../../bsp/boards/microbit-v2/system/CMSIS_5/CMSIS/Core/Include;../../bsp/boards/microbit-v2/system/nRF/Device/Include;../../bsp/boards;../../bsp/boards/microbit-v2;../../inc"
+      debug_register_definition_file="../../bsp/boards/microbit-v2/system/nrf52833_Registers.xml"
+      debug_start_from_entry_point_symbol="No"
+      debug_target_connection="J-Link"
+      gcc_entry_point="Reset_Handler"
+      link_linker_script_file="../../bsp/boards/microbit-v2/system/nRF_Flash_Variant1.icf"
+      linker_memory_map_file="../../bsp/boards/microbit-v2/system/nRF52833_xxAA_MemoryMap.xml"
+      macros="DeviceHeaderFile=$(ProjectDir)/../../bsp/boards/microbit-v2/system/nRF/Device/Include/nrf.h;DeviceSystemFile=$(ProjectDir)/../../bsp/boards/microbit-v2/system/nRF/Device/Source/system_nrf52.c;DeviceVectorsFile=$(ProjectDir)/../../bsp/boards/microbit-v2/system/nRF/Source/nrf52833_Vectors.s;DeviceFamily=nRF;Target=nRF52833_xxAA"
+      project_directory=""
+      project_type="Executable"
+      target_reset_script="Reset();"
+      target_trace_initialize_script="EnableTrace(&quot;$(TraceInterfaceType)&quot;)" />
+    <folder Name="CMSIS Files">
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Device/Include/nrf.h" />
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Device/Source/system_nrf52.c">
+        <configuration Name="Common" default_code_section=".init" default_const_section=".init_rodata" />
+      </file>
+    </folder>
+    <folder Name="Script Files">
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Scripts/nRF_Target.js">
+        <configuration Name="Common" file_type="Reset Script" />
+      </file>
+    </folder>
+    <folder Name="Source Files">
+      <configuration Name="Common" filter="c;cpp;cxx;cc;h;s;asm;inc" />
+    </folder>
+    <folder Name="System Files">
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Source/nrf52833_Vectors.s">
+        <configuration Name="Common" file_type="Assembly" />
+      </file>
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Source/nRF_Startup.s" />
+      <file file_name="../../bsp/boards/microbit-v2/system/SEGGER_THUMB_Startup.s" />
+    </folder>
+    <folder
+      Name="application"
+      exclude=""
+      filter="*.c"
+      path="../common/01bsp_leds"
+      recurse="Yes" />
+    <folder
+      Name="bsp"
+      exclude="system;system_nrf52.c"
+      filter="*.s;*.c;*.h"
+      path="../../bsp/boards/microbit-v2"
+      recurse="Yes" />
+    <folder
+      Name="inc"
+      exclude=""
+      filter="*.h"
+      path="../../inc"
+      recurse="Yes" />
+  </project>
+  <project Name="01bsp_debugpins">
+    <configuration
+      LIBRARY_IO_TYPE="RTT"
+      Name="Common"
+      Target="nRF52833_xxAA"
+      arm_architecture="v7EM"
+      arm_compiler_variant="SEGGER"
+      arm_core_type="Cortex-M4"
+      arm_endian="Little"
+      arm_fp_abi="Hard"
+      arm_fpu_type="FPv4-SP-D16"
+      arm_linker_heap_size="1024"
+      arm_linker_process_stack_size="0"
+      arm_linker_stack_size="2048"
+      arm_linker_treat_warnings_as_errors="No"
+      arm_linker_variant="SEGGER"
+      arm_rtl_variant="SEGGER"
+      arm_simulator_memory_simulation_parameter="ROM;0x00000000;0x00080000;RAM;0x00800000;0x00020000;RAM;0x20000000;0x00020000"
+      arm_target_debug_interface_type="ADIv5"
+      arm_target_device_name="nRF52833_xxAA"
+      arm_target_interface_type="SWD"
+      c_preprocessor_definitions="ARM_MATH_CM4;NRF52833_XXAA;__NRF_FAMILY;MICROBIT"
+      c_user_include_directories="../../bsp/boards/microbit-v2/system/CMSIS_5/CMSIS/Core/Include;../../bsp/boards/microbit-v2/system/nRF/Device/Include;../../bsp/boards;../../bsp/boards/microbit-v2;../../inc"
+      debug_register_definition_file="../../bsp/boards/microbit-v2/system/nrf52833_Registers.xml"
+      debug_start_from_entry_point_symbol="No"
+      debug_target_connection="J-Link"
+      gcc_entry_point="Reset_Handler"
+      link_linker_script_file="../../bsp/boards/microbit-v2/system/nRF_Flash_Variant1.icf"
+      linker_memory_map_file="../../bsp/boards/microbit-v2/system/nRF52833_xxAA_MemoryMap.xml"
+      macros="DeviceHeaderFile=$(ProjectDir)/../../bsp/boards/microbit-v2/system/nRF/Device/Include/nrf.h;DeviceSystemFile=$(ProjectDir)/../../bsp/boards/microbit-v2/system/nRF/Device/Source/system_nrf52.c;DeviceVectorsFile=$(ProjectDir)/../../bsp/boards/microbit-v2/system/nRF/Source/nrf52833_Vectors.s;DeviceFamily=nRF;Target=nRF52833_xxAA"
+      project_directory=""
+      project_type="Executable"
+      target_reset_script="Reset();"
+      target_trace_initialize_script="EnableTrace(&quot;$(TraceInterfaceType)&quot;)" />
+    <folder Name="CMSIS Files">
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Device/Include/nrf.h" />
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Device/Source/system_nrf52.c">
+        <configuration Name="Common" default_code_section=".init" default_const_section=".init_rodata" />
+      </file>
+    </folder>
+    <folder Name="Script Files">
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Scripts/nRF_Target.js">
+        <configuration Name="Common" file_type="Reset Script" />
+      </file>
+    </folder>
+    <folder Name="System Files">
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Source/nrf52833_Vectors.s">
+        <configuration Name="Common" file_type="Assembly" />
+      </file>
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Source/nRF_Startup.s" />
+      <file file_name="../../bsp/boards/microbit-v2/system/SEGGER_THUMB_Startup.s" />
+    </folder>
+    <folder
+      Name="application"
+      exclude=""
+      filter="*.c"
+      path="../common/01bsp_debugpins"
+      recurse="Yes" />
+    <folder
+      Name="bsp"
+      exclude="system;system_nrf52.c"
+      filter="*.s;*.c;*.h"
+      path="../../bsp/boards/microbit-v2"
+      recurse="Yes" />
+    <folder
+      Name="inc"
+      exclude=""
+      filter="*.h"
+      path="../../inc"
+      recurse="Yes" />
+  </project>
+  <project Name="01bsp_eui64">
+    <configuration
+      LIBRARY_IO_TYPE="RTT"
+      Name="Common"
+      Target="nRF52833_xxAA"
+      arm_architecture="v7EM"
+      arm_compiler_variant="SEGGER"
+      arm_core_type="Cortex-M4"
+      arm_endian="Little"
+      arm_fp_abi="Hard"
+      arm_fpu_type="FPv4-SP-D16"
+      arm_linker_heap_size="1024"
+      arm_linker_process_stack_size="0"
+      arm_linker_stack_size="2048"
+      arm_linker_treat_warnings_as_errors="No"
+      arm_linker_variant="SEGGER"
+      arm_rtl_variant="SEGGER"
+      arm_simulator_memory_simulation_parameter="ROM;0x00000000;0x00080000;RAM;0x00800000;0x00020000;RAM;0x20000000;0x00020000"
+      arm_target_debug_interface_type="ADIv5"
+      arm_target_device_name="nRF52833_xxAA"
+      arm_target_interface_type="SWD"
+      c_preprocessor_definitions="ARM_MATH_CM4;NRF52833_XXAA;__NRF_FAMILY;MICROBIT"
+      c_user_include_directories="../../bsp/boards/microbit-v2/system/CMSIS_5/CMSIS/Core/Include;../../bsp/boards/microbit-v2/system/nRF/Device/Include;../../bsp/boards;../../bsp/boards/microbit-v2;../../inc"
+      debug_register_definition_file="../../bsp/boards/microbit-v2/system/nrf52833_Registers.xml"
+      debug_start_from_entry_point_symbol="No"
+      debug_target_connection="J-Link"
+      gcc_entry_point="Reset_Handler"
+      link_linker_script_file="../../bsp/boards/microbit-v2/system/nRF_Flash_Variant1.icf"
+      linker_memory_map_file="../../bsp/boards/microbit-v2/system/nRF52833_xxAA_MemoryMap.xml"
+      macros="DeviceHeaderFile=$(ProjectDir)/../../bsp/boards/microbit-v2/system/nRF/Device/Include/nrf.h;DeviceSystemFile=$(ProjectDir)/../../bsp/boards/microbit-v2/system/nRF/Device/Source/system_nrf52.c;DeviceVectorsFile=$(ProjectDir)/../../bsp/boards/microbit-v2/system/nRF/Source/nrf52833_Vectors.s;DeviceFamily=nRF;Target=nRF52833_xxAA"
+      project_directory=""
+      project_type="Executable"
+      target_reset_script="Reset();"
+      target_trace_initialize_script="EnableTrace(&quot;$(TraceInterfaceType)&quot;)" />
+    <folder Name="CMSIS Files">
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Device/Include/nrf.h" />
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Device/Source/system_nrf52.c">
+        <configuration Name="Common" default_code_section=".init" default_const_section=".init_rodata" />
+      </file>
+    </folder>
+    <folder Name="Script Files">
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Scripts/nRF_Target.js">
+        <configuration Name="Common" file_type="Reset Script" />
+      </file>
+    </folder>
+    <folder Name="System Files">
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Source/nrf52833_Vectors.s">
+        <configuration Name="Common" file_type="Assembly" />
+      </file>
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Source/nRF_Startup.s" />
+      <file file_name="../../bsp/boards/microbit-v2/system/SEGGER_THUMB_Startup.s" />
+    </folder>
+    <folder
+      Name="application"
+      exclude=""
+      filter="*.c"
+      path="../common/01bsp_eui64"
+      recurse="Yes" />
+    <folder
+      Name="bsp"
+      exclude="system;system_nrf52.c"
+      filter="*.s;*.c;*.h"
+      path="../../bsp/boards/microbit-v2"
+      recurse="Yes" />
+    <folder
+      Name="inc"
+      exclude=""
+      filter="*.h"
+      path="../../inc"
+      recurse="Yes" />
+  </project>
+  <project Name="01bsp_uart">
+    <configuration
+      LIBRARY_IO_TYPE="RTT"
+      Name="Common"
+      Target="nRF52833_xxAA"
+      arm_architecture="v7EM"
+      arm_compiler_variant="SEGGER"
+      arm_core_type="Cortex-M4"
+      arm_endian="Little"
+      arm_fp_abi="Hard"
+      arm_fpu_type="FPv4-SP-D16"
+      arm_linker_heap_size="1024"
+      arm_linker_process_stack_size="0"
+      arm_linker_stack_size="2048"
+      arm_linker_treat_warnings_as_errors="No"
+      arm_linker_variant="SEGGER"
+      arm_rtl_variant="SEGGER"
+      arm_simulator_memory_simulation_parameter="ROM;0x00000000;0x00080000;RAM;0x00800000;0x00020000;RAM;0x20000000;0x00020000"
+      arm_target_debug_interface_type="ADIv5"
+      arm_target_device_name="nRF52833_xxAA"
+      arm_target_interface_type="SWD"
+      c_preprocessor_definitions="ARM_MATH_CM4;NRF52833_XXAA;__NRF_FAMILY;MICROBIT"
+      c_user_include_directories="../../bsp/boards/microbit-v2/system/CMSIS_5/CMSIS/Core/Include;../../bsp/boards/microbit-v2/system/nRF/Device/Include;../../bsp/boards;../../bsp/boards/microbit-v2;../../inc"
+      debug_register_definition_file="../../bsp/boards/microbit-v2/system/nrf52833_Registers.xml"
+      debug_start_from_entry_point_symbol="No"
+      debug_target_connection="J-Link"
+      gcc_entry_point="Reset_Handler"
+      link_linker_script_file="../../bsp/boards/microbit-v2/system/nRF_Flash_Variant1.icf"
+      linker_memory_map_file="../../bsp/boards/microbit-v2/system/nRF52833_xxAA_MemoryMap.xml"
+      macros="DeviceHeaderFile=$(ProjectDir)/../../bsp/boards/microbit-v2/system/nRF/Device/Include/nrf.h;DeviceSystemFile=$(ProjectDir)/../../bsp/boards/microbit-v2/system/nRF/Device/Source/system_nrf52.c;DeviceVectorsFile=$(ProjectDir)/../../bsp/boards/microbit-v2/system/nRF/Source/nrf52833_Vectors.s;DeviceFamily=nRF;Target=nRF52833_xxAA"
+      project_directory=""
+      project_type="Executable"
+      target_reset_script="Reset();"
+      target_trace_initialize_script="EnableTrace(&quot;$(TraceInterfaceType)&quot;)" />
+    <folder Name="CMSIS Files">
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Device/Include/nrf.h" />
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Device/Source/system_nrf52.c">
+        <configuration Name="Common" default_code_section=".init" default_const_section=".init_rodata" />
+      </file>
+    </folder>
+    <folder Name="Script Files">
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Scripts/nRF_Target.js">
+        <configuration Name="Common" file_type="Reset Script" />
+      </file>
+    </folder>
+    <folder Name="System Files">
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Source/nrf52833_Vectors.s">
+        <configuration Name="Common" file_type="Assembly" />
+      </file>
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Source/nRF_Startup.s" />
+      <file file_name="../../bsp/boards/microbit-v2/system/SEGGER_THUMB_Startup.s" />
+    </folder>
+    <folder
+      Name="application"
+      exclude=""
+      filter="*.c"
+      path="../common/01bsp_uart"
+      recurse="Yes" />
+    <folder
+      Name="bsp"
+      exclude="system;system_nrf52.c"
+      filter="*.s;*.c;*.h"
+      path="../../bsp/boards/microbit-v2"
+      recurse="Yes" />
+    <folder
+      Name="inc"
+      exclude=""
+      filter="*.h"
+      path="../../inc"
+      recurse="Yes" />
+  </project>
+  <project Name="01bsp_sctimer">
+    <configuration
+      LIBRARY_IO_TYPE="RTT"
+      Name="Common"
+      Target="nRF52833_xxAA"
+      arm_architecture="v7EM"
+      arm_compiler_variant="SEGGER"
+      arm_core_type="Cortex-M4"
+      arm_endian="Little"
+      arm_fp_abi="Hard"
+      arm_fpu_type="FPv4-SP-D16"
+      arm_linker_heap_size="1024"
+      arm_linker_process_stack_size="0"
+      arm_linker_stack_size="2048"
+      arm_linker_treat_warnings_as_errors="No"
+      arm_linker_variant="SEGGER"
+      arm_rtl_variant="SEGGER"
+      arm_simulator_memory_simulation_parameter="ROM;0x00000000;0x00080000;RAM;0x00800000;0x00020000;RAM;0x20000000;0x00020000"
+      arm_target_debug_interface_type="ADIv5"
+      arm_target_device_name="nRF52833_xxAA"
+      arm_target_interface_type="SWD"
+      c_preprocessor_definitions="ARM_MATH_CM4;NRF52833_XXAA;__NRF_FAMILY;MICROBIT"
+      c_user_include_directories="../../bsp/boards/microbit-v2/system/CMSIS_5/CMSIS/Core/Include;../../bsp/boards/microbit-v2/system/nRF/Device/Include;../../bsp/boards;../../bsp/boards/microbit-v2;../../inc"
+      debug_register_definition_file="../../bsp/boards/microbit-v2/system/nrf52833_Registers.xml"
+      debug_start_from_entry_point_symbol="No"
+      debug_target_connection="J-Link"
+      gcc_entry_point="Reset_Handler"
+      link_linker_script_file="../../bsp/boards/microbit-v2/system/nRF_Flash_Variant1.icf"
+      linker_memory_map_file="../../bsp/boards/microbit-v2/system/nRF52833_xxAA_MemoryMap.xml"
+      macros="DeviceHeaderFile=$(ProjectDir)/../../bsp/boards/microbit-v2/system/nRF/Device/Include/nrf.h;DeviceSystemFile=$(ProjectDir)/../../bsp/boards/microbit-v2/system/nRF/Device/Source/system_nrf52.c;DeviceVectorsFile=$(ProjectDir)/../../bsp/boards/microbit-v2/system/nRF/Source/nrf52833_Vectors.s;DeviceFamily=nRF;Target=nRF52833_xxAA"
+      project_directory=""
+      project_type="Executable"
+      target_reset_script="Reset();"
+      target_trace_initialize_script="EnableTrace(&quot;$(TraceInterfaceType)&quot;)" />
+    <folder Name="CMSIS Files">
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Device/Include/nrf.h" />
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Device/Source/system_nrf52.c">
+        <configuration Name="Common" default_code_section=".init" default_const_section=".init_rodata" />
+      </file>
+    </folder>
+    <folder Name="Script Files">
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Scripts/nRF_Target.js">
+        <configuration Name="Common" file_type="Reset Script" />
+      </file>
+    </folder>
+    <folder Name="System Files">
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Source/nrf52833_Vectors.s">
+        <configuration Name="Common" file_type="Assembly" />
+      </file>
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Source/nRF_Startup.s" />
+      <file file_name="../../bsp/boards/microbit-v2/system/SEGGER_THUMB_Startup.s" />
+    </folder>
+    <folder
+      Name="application"
+      exclude=""
+      filter="*.c"
+      path="../common/01bsp_sctimer"
+      recurse="Yes" />
+    <folder
+      Name="bsp"
+      exclude="system;system_nrf52.c"
+      filter="*.s;*.c;*.h"
+      path="../../bsp/boards/microbit-v2"
+      recurse="Yes" />
+    <folder
+      Name="inc"
+      exclude=""
+      filter="*.h"
+      path="../../inc"
+      recurse="Yes" />
+  </project>
+  <project Name="01bsp_i2c">
+    <configuration
+      LIBRARY_IO_TYPE="RTT"
+      Name="Common"
+      Target="nRF52833_xxAA"
+      arm_architecture="v7EM"
+      arm_compiler_variant="SEGGER"
+      arm_core_type="Cortex-M4"
+      arm_endian="Little"
+      arm_fp_abi="Hard"
+      arm_fpu_type="FPv4-SP-D16"
+      arm_linker_heap_size="1024"
+      arm_linker_process_stack_size="0"
+      arm_linker_stack_size="2048"
+      arm_linker_treat_warnings_as_errors="No"
+      arm_linker_variant="SEGGER"
+      arm_rtl_variant="SEGGER"
+      arm_simulator_memory_simulation_parameter="ROM;0x00000000;0x00080000;RAM;0x00800000;0x00020000;RAM;0x20000000;0x00020000"
+      arm_target_debug_interface_type="ADIv5"
+      arm_target_device_name="nRF52833_xxAA"
+      arm_target_interface_type="SWD"
+      c_preprocessor_definitions="ARM_MATH_CM4;NRF52833_XXAA;__NRF_FAMILY;MICROBIT"
+      c_user_include_directories="../../bsp/boards/microbit-v2/system/CMSIS_5/CMSIS/Core/Include;../../bsp/boards/microbit-v2/system/nRF/Device/Include;../../bsp/boards;../../bsp/boards/microbit-v2;../../bsp/chips/bmx160;../../inc"
+      debug_register_definition_file="../../bsp/boards/microbit-v2/system/nrf52833_Registers.xml"
+      debug_start_from_entry_point_symbol="No"
+      debug_target_connection="J-Link"
+      gcc_entry_point="Reset_Handler"
+      link_linker_script_file="../../bsp/boards/microbit-v2/system/nRF_Flash_Variant1.icf"
+      linker_memory_map_file="../../bsp/boards/microbit-v2/system/nRF52833_xxAA_MemoryMap.xml"
+      macros="DeviceHeaderFile=$(ProjectDir)/../../bsp/boards/microbit-v2/system/nRF/Device/Include/nrf.h;DeviceSystemFile=$(ProjectDir)/../../bsp/boards/microbit-v2/system/nRF/Device/Source/system_nrf52.c;DeviceVectorsFile=$(ProjectDir)/../../bsp/boards/microbit-v2/system/nRF/Source/nrf52833_Vectors.s;DeviceFamily=nRF;Target=nRF52833_xxAA"
+      project_directory=""
+      project_type="Executable"
+      target_reset_script="Reset();"
+      target_trace_initialize_script="EnableTrace(&quot;$(TraceInterfaceType)&quot;)" />
+    <folder Name="CMSIS Files">
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Device/Include/nrf.h" />
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Device/Source/system_nrf52.c">
+        <configuration Name="Common" default_code_section=".init" default_const_section=".init_rodata" />
+      </file>
+    </folder>
+    <folder Name="Script Files">
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Scripts/nRF_Target.js">
+        <configuration Name="Common" file_type="Reset Script" />
+      </file>
+    </folder>
+    <folder Name="System Files">
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Source/nrf52833_Vectors.s">
+        <configuration Name="Common" file_type="Assembly" />
+      </file>
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Source/nRF_Startup.s" />
+      <file file_name="../../bsp/boards/microbit-v2/system/SEGGER_THUMB_Startup.s" />
+    </folder>
+    <folder
+      Name="application"
+      exclude=""
+      filter="*.c"
+      path="../common/01bsp_i2c"
+      recurse="Yes" />
+    <folder
+      Name="bsp"
+      exclude="system;system_nrf52.c"
+      filter="*.s;*.c;*.h"
+      path="../../bsp/boards/microbit-v2"
+      recurse="Yes" />
+    <folder
+      Name="chips"
+      exclude=""
+      filter=""
+      path="../../bsp/chips/bmx160"
+      recurse="Yes" />
+    <folder
+      Name="inc"
+      exclude=""
+      filter="*.h"
+      path="../../inc"
+      recurse="Yes" />
+  </project>
+  <project Name="01bsp_radio">
+    <configuration
+      LIBRARY_IO_TYPE="RTT"
+      Name="Common"
+      Target="nRF52833_xxAA"
+      arm_architecture="v7EM"
+      arm_compiler_variant="SEGGER"
+      arm_core_type="Cortex-M4"
+      arm_endian="Little"
+      arm_fp_abi="Hard"
+      arm_fpu_type="FPv4-SP-D16"
+      arm_linker_heap_size="1024"
+      arm_linker_process_stack_size="0"
+      arm_linker_stack_size="2048"
+      arm_linker_treat_warnings_as_errors="No"
+      arm_linker_variant="SEGGER"
+      arm_rtl_variant="SEGGER"
+      arm_simulator_memory_simulation_parameter="ROM;0x00000000;0x00080000;RAM;0x00800000;0x00020000;RAM;0x20000000;0x00020000"
+      arm_target_debug_interface_type="ADIv5"
+      arm_target_device_name="nRF52833_xxAA"
+      arm_target_interface_type="SWD"
+      c_preprocessor_definitions="ARM_MATH_CM4;NRF52833_XXAA;__NRF_FAMILY;MICROBIT"
+      c_user_include_directories="../../bsp/boards/microbit-v2/system/CMSIS_5/CMSIS/Core/Include;../../bsp/boards/microbit-v2/system/nRF/Device/Include;../../bsp/boards;../../bsp/boards/microbit-v2;../../inc"
+      debug_register_definition_file="../../bsp/boards/microbit-v2/system/nrf52833_Registers.xml"
+      debug_start_from_entry_point_symbol="No"
+      debug_target_connection="J-Link"
+      gcc_entry_point="Reset_Handler"
+      link_linker_script_file="../../bsp/boards/microbit-v2/system/nRF_Flash_Variant1.icf"
+      linker_memory_map_file="../../bsp/boards/microbit-v2/system/nRF52833_xxAA_MemoryMap.xml"
+      macros="DeviceHeaderFile=$(ProjectDir)/../../bsp/boards/microbit-v2/system/nRF/Device/Include/nrf.h;DeviceSystemFile=$(ProjectDir)/../../bsp/boards/microbit-v2/system/nRF/Device/Source/system_nrf52.c;DeviceVectorsFile=$(ProjectDir)/../../bsp/boards/microbit-v2/system/nRF/Source/nrf52833_Vectors.s;DeviceFamily=nRF;Target=nRF52833_xxAA"
+      project_directory=""
+      project_type="Executable"
+      target_reset_script="Reset();"
+      target_trace_initialize_script="EnableTrace(&quot;$(TraceInterfaceType)&quot;)" />
+    <folder Name="CMSIS Files">
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Device/Include/nrf.h" />
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Device/Source/system_nrf52.c">
+        <configuration Name="Common" default_code_section=".init" default_const_section=".init_rodata" />
+      </file>
+    </folder>
+    <folder Name="Script Files">
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Scripts/nRF_Target.js">
+        <configuration Name="Common" file_type="Reset Script" />
+      </file>
+    </folder>
+    <folder Name="System Files">
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Source/nrf52833_Vectors.s">
+        <configuration Name="Common" file_type="Assembly" />
+      </file>
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Source/nRF_Startup.s" />
+      <file file_name="../../bsp/boards/microbit-v2/system/SEGGER_THUMB_Startup.s" />
+    </folder>
+    <folder
+      Name="application"
+      exclude=""
+      filter="*.c"
+      path="../common/01bsp_radio"
+      recurse="Yes" />
+    <folder
+      Name="bsp"
+      exclude="system;system_nrf52.c"
+      filter="*.s;*.c;*.h"
+      path="../../bsp/boards/microbit-v2"
+      recurse="Yes" />
+    <folder
+      Name="inc"
+      exclude=""
+      filter="*.h"
+      path="../../inc"
+      recurse="Yes" />
+  </project>
+  <project Name="02drv_openserial">
+    <configuration
+      LIBRARY_IO_TYPE="RTT"
+      Name="Common"
+      Target="nRF52833_xxAA"
+      arm_architecture="v7EM"
+      arm_compiler_variant="SEGGER"
+      arm_core_type="Cortex-M4"
+      arm_endian="Little"
+      arm_fp_abi="Hard"
+      arm_fpu_type="FPv4-SP-D16"
+      arm_linker_heap_size="1024"
+      arm_linker_process_stack_size="0"
+      arm_linker_stack_size="2048"
+      arm_linker_treat_warnings_as_errors="No"
+      arm_linker_variant="SEGGER"
+      arm_rtl_variant="SEGGER"
+      arm_simulator_memory_simulation_parameter="ROM;0x00000000;0x00080000;RAM;0x00800000;0x00020000;RAM;0x20000000;0x00020000"
+      arm_target_debug_interface_type="ADIv5"
+      arm_target_device_name="nRF52833_xxAA"
+      arm_target_interface_type="SWD"
+      c_preprocessor_definitions="ARM_MATH_CM4;NRF52833_XXAA;__NRF_FAMILY;MICROBIT"
+      c_user_include_directories="../../bsp/boards/microbit-v2/system/CMSIS_5/CMSIS/Core/Include;../../bsp/boards/microbit-v2/system/nRF/Device/Include;../../bsp/boards;../../bsp/boards/microbit-v2;../../inc;../../drivers/common;../../kernel;../../openstack/02a-MAClow;../../openstack/02b-MAChigh;../../openstack/03a-IPHC;../../openstack/03b-IPv6;../../openstack/04-TRAN;../../openstack/cross-layers"
+      debug_register_definition_file="../../bsp/boards/microbit-v2/system/nrf52833_Registers.xml"
+      debug_start_from_entry_point_symbol="No"
+      debug_target_connection="J-Link"
+      gcc_entry_point="Reset_Handler"
+      link_linker_script_file="../../bsp/boards/microbit-v2/system/nRF_Flash_Variant1.icf"
+      linker_memory_map_file="../../bsp/boards/microbit-v2/system/nRF52833_xxAA_MemoryMap.xml"
+      macros="DeviceHeaderFile=$(ProjectDir)/../../bsp/boards/microbit-v2/system/nRF/Device/Include/nrf.h;DeviceSystemFile=$(ProjectDir)/../../bsp/boards/microbit-v2/system/nRF/Device/Source/system_nrf52.c;DeviceVectorsFile=$(ProjectDir)/../../bsp/boards/microbit-v2/system/nRF/Source/nrf52833_Vectors.s;DeviceFamily=nRF;Target=nRF52833_xxAA"
+      project_directory=""
+      project_type="Executable"
+      target_reset_script="Reset();"
+      target_trace_initialize_script="EnableTrace(&quot;$(TraceInterfaceType)&quot;)" />
+    <folder Name="CMSIS Files">
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Device/Include/nrf.h" />
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Device/Source/system_nrf52.c">
+        <configuration Name="Common" default_code_section=".init" default_const_section=".init_rodata" />
+      </file>
+    </folder>
+    <folder Name="Script Files">
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Scripts/nRF_Target.js">
+        <configuration Name="Common" file_type="Reset Script" />
+      </file>
+    </folder>
+    <folder Name="System Files">
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Source/nrf52833_Vectors.s">
+        <configuration Name="Common" file_type="Assembly" />
+      </file>
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Source/nRF_Startup.s" />
+      <file file_name="../../bsp/boards/microbit-v2/system/SEGGER_THUMB_Startup.s" />
+    </folder>
+    <folder
+      Name="application"
+      exclude=""
+      filter="*.c"
+      path="../common/02drv_openserial"
+      recurse="Yes" />
+    <folder
+      Name="bsp"
+      exclude="system;system_nrf52.c"
+      filter="*.s;*.c;*.h"
+      path="../../bsp/boards/microbit-v2"
+      recurse="Yes" />
+    <folder
+      Name="drivers"
+      exclude=""
+      filter="*.h;*.c"
+      path="../../drivers/common"
+      recurse="Yes" />
+    <folder
+      Name="inc"
+      exclude=""
+      filter="*.h"
+      path="../../inc"
+      recurse="Yes" />
+    <folder
+      Name="kernel"
+      exclude=""
+      filter="*.h"
+      path="../../kernel"
+      recurse="Yes" />
+  </project>
+  <project Name="02drv_opentimers">
+    <configuration
+      LIBRARY_IO_TYPE="RTT"
+      Name="Common"
+      Target="nRF52833_xxAA"
+      arm_architecture="v7EM"
+      arm_compiler_variant="SEGGER"
+      arm_core_type="Cortex-M4"
+      arm_endian="Little"
+      arm_fp_abi="Hard"
+      arm_fpu_type="FPv4-SP-D16"
+      arm_linker_heap_size="1024"
+      arm_linker_process_stack_size="0"
+      arm_linker_stack_size="2048"
+      arm_linker_treat_warnings_as_errors="No"
+      arm_linker_variant="SEGGER"
+      arm_rtl_variant="SEGGER"
+      arm_simulator_memory_simulation_parameter="ROM;0x00000000;0x00080000;RAM;0x00800000;0x00020000;RAM;0x20000000;0x00020000"
+      arm_target_debug_interface_type="ADIv5"
+      arm_target_device_name="nRF52833_xxAA"
+      arm_target_interface_type="SWD"
+      c_preprocessor_definitions="ARM_MATH_CM4;NRF52833_XXAA;__NRF_FAMILY;MICROBIT"
+      c_user_include_directories="../../bsp/boards/microbit-v2/system/CMSIS_5/CMSIS/Core/Include;../../bsp/boards/microbit-v2/system/nRF/Device/Include;../../bsp/boards;../../bsp/boards/microbit-v2;../../inc;../../drivers/common;../../kernel;../../openstack/02a-MAClow;../../openstack/02b-MAChigh;../../openstack/03a-IPHC;../../openstack/03b-IPv6;../../openstack/04-TRAN;../../openstack/cross-layers"
+      debug_register_definition_file="../../bsp/boards/microbit-v2/system/nrf52833_Registers.xml"
+      debug_start_from_entry_point_symbol="No"
+      debug_target_connection="J-Link"
+      gcc_entry_point="Reset_Handler"
+      link_linker_script_file="../../bsp/boards/microbit-v2/system/nRF_Flash_Variant1.icf"
+      linker_memory_map_file="../../bsp/boards/microbit-v2/system/nRF52833_xxAA_MemoryMap.xml"
+      macros="DeviceHeaderFile=$(ProjectDir)/../../bsp/boards/microbit-v2/system/nRF/Device/Include/nrf.h;DeviceSystemFile=$(ProjectDir)/../../bsp/boards/microbit-v2/system/nRF/Device/Source/system_nrf52.c;DeviceVectorsFile=$(ProjectDir)/../../bsp/boards/microbit-v2/system/nRF/Source/nrf52833_Vectors.s;DeviceFamily=nRF;Target=nRF52833_xxAA"
+      project_directory=""
+      project_type="Executable"
+      target_reset_script="Reset();"
+      target_trace_initialize_script="EnableTrace(&quot;$(TraceInterfaceType)&quot;)" />
+    <folder Name="CMSIS Files">
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Device/Include/nrf.h" />
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Device/Source/system_nrf52.c">
+        <configuration Name="Common" default_code_section=".init" default_const_section=".init_rodata" />
+      </file>
+    </folder>
+    <folder Name="Script Files">
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Scripts/nRF_Target.js">
+        <configuration Name="Common" file_type="Reset Script" />
+      </file>
+    </folder>
+    <folder Name="System Files">
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Source/nrf52833_Vectors.s">
+        <configuration Name="Common" file_type="Assembly" />
+      </file>
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Source/nRF_Startup.s" />
+      <file file_name="../../bsp/boards/microbit-v2/system/SEGGER_THUMB_Startup.s" />
+    </folder>
+    <folder
+      Name="application"
+      exclude=""
+      filter="*.c"
+      path="../common/02drv_opentimers"
+      recurse="Yes" />
+    <folder
+      Name="bsp"
+      exclude="system;system_nrf52.c"
+      filter="*.s;*.c;*.h"
+      path="../../bsp/boards/microbit-v2"
+      recurse="Yes" />
+    <folder
+      Name="drivers"
+      exclude=""
+      filter="*.h;*.c"
+      path="../../drivers/common"
+      recurse="Yes" />
+    <folder
+      Name="inc"
+      exclude=""
+      filter="*.h"
+      path="../../inc"
+      recurse="Yes" />
+    <folder
+      Name="kernel"
+      exclude=""
+      filter="*.h;*.c"
+      path="../../kernel"
+      recurse="Yes" />
+  </project>
+  <project Name="03oos_macpong">
+    <configuration
+      LIBRARY_IO_TYPE="RTT"
+      Name="Common"
+      Target="nRF52833_xxAA"
+      arm_architecture="v7EM"
+      arm_compiler_variant="SEGGER"
+      arm_core_type="Cortex-M4"
+      arm_endian="Little"
+      arm_fp_abi="Hard"
+      arm_fpu_type="FPv4-SP-D16"
+      arm_linker_heap_size="1024"
+      arm_linker_process_stack_size="0"
+      arm_linker_stack_size="2048"
+      arm_linker_treat_warnings_as_errors="No"
+      arm_linker_variant="SEGGER"
+      arm_rtl_variant="SEGGER"
+      arm_simulator_memory_simulation_parameter="ROM;0x00000000;0x00080000;RAM;0x00800000;0x00020000;RAM;0x20000000;0x00020000"
+      arm_target_debug_interface_type="ADIv5"
+      arm_target_device_name="nRF52833_xxAA"
+      arm_target_interface_type="SWD"
+      c_preprocessor_definitions="ARM_MATH_CM4;NRF52833_XXAA;__NRF_FAMILY;MICROBIT"
+      c_user_include_directories="../../bsp/boards/microbit-v2/system/CMSIS_5/CMSIS/Core/Include;../../bsp/boards/microbit-v2/system/nRF/Device/Include;../../bsp/boards;../../bsp/boards/microbit-v2;../../inc;../../drivers/common;../../drivers/common/crypto;../../kernel;../../openstack;../../openstack/02a-MAClow;../../openstack/02b-MAChigh;../../openstack/03a-IPHC;../../openstack/03b-IPv6;../../openstack/04-TRAN;../../openstack/04-TRAN/sock;../../openstack/cross-layers;../../openweb/;../../openweb/opencoap;../../openapps"
+      debug_register_definition_file="../../bsp/boards/microbit-v2/system/nrf52833_Registers.xml"
+      debug_start_from_entry_point_symbol="No"
+      debug_target_connection="J-Link"
+      gcc_entry_point="Reset_Handler"
+      link_linker_script_file="../../bsp/boards/microbit-v2/system/nRF_Flash_Variant1.icf"
+      linker_memory_map_file="../../bsp/boards/microbit-v2/system/nRF52833_xxAA_MemoryMap.xml"
+      macros="DeviceHeaderFile=$(ProjectDir)/../../bsp/boards/microbit-v2/system/nRF/Device/Include/nrf.h;DeviceSystemFile=$(ProjectDir)/../../bsp/boards/microbit-v2/system/nRF/Device/Source/system_nrf52.c;DeviceVectorsFile=$(ProjectDir)/../../bsp/boards/microbit-v2/system/nRF/Source/nrf52833_Vectors.s;DeviceFamily=nRF;Target=nRF52833_xxAA"
+      project_directory=""
+      project_type="Executable"
+      target_reset_script="Reset();"
+      target_trace_initialize_script="EnableTrace(&quot;$(TraceInterfaceType)&quot;)" />
+    <folder Name="CMSIS Files">
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Device/Include/nrf.h" />
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Device/Source/system_nrf52.c">
+        <configuration Name="Common" default_code_section=".init" default_const_section=".init_rodata" />
+      </file>
+    </folder>
+    <folder Name="Script Files">
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Scripts/nRF_Target.js">
+        <configuration Name="Common" file_type="Reset Script" />
+      </file>
+    </folder>
+    <folder Name="System Files">
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Source/nrf52833_Vectors.s">
+        <configuration Name="Common" file_type="Assembly" />
+      </file>
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Source/nRF_Startup.s" />
+      <file file_name="../../bsp/boards/microbit-v2/system/SEGGER_THUMB_Startup.s" />
+    </folder>
+    <folder
+      Name="application"
+      exclude=""
+      filter="*.c"
+      path="../common/03oos_macpong"
+      recurse="Yes" />
+    <folder
+      Name="bsp"
+      exclude="system;system_nrf52.c"
+      filter="*.s;*.c;*.h"
+      path="../../bsp/boards/microbit-v2"
+      recurse="Yes" />
+    <folder
+      Name="drivers"
+      exclude=""
+      filter="*.h;*.c"
+      path="../../drivers/common"
+      recurse="Yes" />
+    <folder
+      Name="inc"
+      exclude=""
+      filter="*.h"
+      path="../../inc"
+      recurse="Yes" />
+    <folder
+      Name="kernel"
+      exclude=""
+      filter="*.h;*.c"
+      path="../../kernel"
+      recurse="Yes" />
+    <folder
+      Name="openstack"
+      exclude="04-TRAN;03b-IPv6;03a-IPHC"
+      filter="*.h;*.c"
+      path="../../openstack"
+      recurse="Yes" />
+  </project>
+  <project Name="03oos_openwsn">
+    <configuration
+      LIBRARY_IO_TYPE="None"
+      Name="Common"
+      Target="nRF52833_xxAA"
+      arm_architecture="v7EM"
+      arm_compiler_variant="SEGGER"
+      arm_core_type="Cortex-M4"
+      arm_endian="Little"
+      arm_fp_abi="Hard"
+      arm_fpu_type="FPv4-SP-D16"
+      arm_linker_heap_size="1024"
+      arm_linker_process_stack_size="0"
+      arm_linker_stack_size="2048"
+      arm_linker_treat_warnings_as_errors="No"
+      arm_linker_variant="SEGGER"
+      arm_rtl_variant="SEGGER"
+      arm_simulator_memory_simulation_parameter="ROM;0x00000000;0x00080000;RAM;0x00800000;0x00020000;RAM;0x20000000;0x00020000"
+      arm_target_debug_interface_type="ADIv5"
+      arm_target_device_name="nRF52833_xxAA"
+      arm_target_interface_type="SWD"
+      c_preprocessor_definitions="ARM_MATH_CM4;NRF52833_XXAA;__NRF_FAMILY;MICROBIT;__WIN32__;OPENWSN_UDP_C;OPENWSN_UINJECT_C"
+      c_user_include_directories="../../bsp/boards/microbit-v2/system/CMSIS_5/CMSIS/Core/Include;../../bsp/boards/microbit-v2/system/nRF/Device/Include;../../inc;../../bsp/boards;../../bsp/boards/microbit-v2;../../drivers/common;../../drivers/common/crypto;../../kernel;../../openstack;../../openstack/02a-MAClow;../../openstack/02b-MAChigh;../../openstack/03a-IPHC;../../openstack/03b-IPv6;../../openstack/04-TRAN;../../openstack/04-TRAN/sock;../../openstack/cross-layers;../../openweb/;../../openweb/opencoap;../../openapps;../../openapps/uinject;../../openapps/cinfo;../../openapps/cjoin;../../openapps/cled;../../openapps/cwellknown;../../openapps/uecho"
+      debug_register_definition_file="../../bsp/boards/microbit-v2/system/nrf52833_Registers.xml"
+      debug_start_from_entry_point_symbol="No"
+      debug_target_connection="J-Link"
+      gcc_debugging_level="Level 3"
+      gcc_entry_point="Reset_Handler"
+      link_linker_script_file="../../bsp/boards/microbit-v2/system/nRF_Flash_Variant1.icf"
+      linker_memory_map_file="../../bsp/boards/microbit-v2/system/nRF52833_xxAA_MemoryMap.xml"
+      linker_section_placements_segments=""
+      macros="DeviceHeaderFile=$(ProjectDir)/../../bsp/boards/microbit-v2/system/nRF/Device/Include/nrf.h;DeviceSystemFile=$(ProjectDir)/../../bsp/boards/microbit-v2/system/nRF/Device/Source/system_nrf52.c;DeviceVectorsFile=$(ProjectDir)/../../bsp/boards/microbit-v2/system/nRF/Source/nrf52833_Vectors.s;DeviceFamily=nRF;Target=nRF52833_xxAA"
+      project_directory=""
+      project_type="Executable" />
+    <folder Name="CMSIS Files">
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Device/Include/nrf.h" />
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Device/Source/system_nrf52.c" />
+    </folder>
+    <folder Name="Script Files">
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Scripts/nRF_Target.js">
+        <configuration Name="Common" file_type="Reset Script" />
+      </file>
+    </folder>
+    <folder Name="System Files">
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Source/nrf52833_Vectors.s">
+        <configuration Name="Common" file_type="Assembly" />
+      </file>
+      <file file_name="../../bsp/boards/microbit-v2/system/nRF/Source/nRF_Startup.s" />
+      <file file_name="../../bsp/boards/microbit-v2/system/SEGGER_THUMB_Startup.s" />
+    </folder>
+    <folder
+      Name="bsp"
+      exclude="system;system_nrf52.c"
+      filter="*.s;*.c;*.h"
+      path="../../bsp/boards/microbit-v2"
+      recurse="Yes" />
+    <folder
+      Name="application"
+      exclude=""
+      filter="*.c"
+      path="../common/03oos_openwsn"
+      recurse="Yes" />
+    <folder
+      Name="inc"
+      exclude=""
+      filter="*.h"
+      path="../../inc"
+      recurse="Yes" />
+    <folder
+      Name="drivers"
+      exclude=""
+      filter="*.h;*.c"
+      path="../../drivers/common"
+      recurse="Yes" />
+    <folder
+      Name="kernel"
+      exclude=""
+      filter="*.h;*.c"
+      path="../../kernel"
+      recurse="Yes" />
+    <folder
+      Name="openstack"
+      filter="*.h;*.c"
+      path="../../openstack"
+      recurse="Yes" />
+    <folder
+      Name="openapps"
+      exclude=""
+      filter="*.h;*.c"
+      path="../../openapps"
+      recurse="Yes" />
+    <folder
+      Name="openweb"
+      exclude=""
+      filter="*.h;*.c"
+      path="../../openweb"
+      recurse="Yes" />
+    <configuration
+      LIBRARY_IO_TYPE="RTT"
+      Name="Debug"
+      linker_output_format="hex"
+      linker_printf_fmt_level="long"
+      linker_printf_width_precision_supported="Yes"
+      linker_scanf_fmt_level="long" />
+  </project>
+</solution>

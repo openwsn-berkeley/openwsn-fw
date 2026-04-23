@@ -16,7 +16,8 @@
     !defined(IOTLAB_M3) && \
     !defined(IOTLAB_A8_M3) && \
     !defined(SAMR21_XPRO) && \
-    !defined(NRF52840_DK)
+    !defined(NRF52840_DK) && \
+    !defined(MICROBIT)
 #error 'Board name must be specified to check for configuration errors'
 #endif
 
@@ -30,6 +31,7 @@
     defined(OPENMOTESTM) || \
     defined(GINA) || \
     defined(NRF52840_DK) || \
+    defined(MICROBIT) || \
     defined(AGILEFOX) || \
     defined(IOTLAB_M3) || \
     defined(IOTLAB_A8_M3) || \
@@ -46,6 +48,7 @@
     defined(AGILEFOX) || \
     defined(GINA) || \
     defined(NRF52840_DK) || \
+    defined(MICROBIT) || \
     defined(SAMR21_XPRO) || \
     defined(Z1) || \
     defined(OPENMOTESTM))
