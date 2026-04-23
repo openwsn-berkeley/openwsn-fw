@@ -1,0 +1,128 @@
+/*********************************************************************
+*                    SEGGER Microcontroller GmbH                     *
+*                        The Embedded Experts                        *
+**********************************************************************
+*                                                                    *
+*            (c) 2014 - 2022 SEGGER Microcontroller GmbH             *
+*                                                                    *
+*       www.segger.com     Support: support@segger.com               *
+*                                                                    *
+**********************************************************************
+*                                                                    *
+* All rights reserved.                                               *
+*                                                                    *
+* Redistribution and use in source and binary forms, with or         *
+* without modification, are permitted provided that the following    *
+* condition is met:                                                  *
+*                                                                    *
+* - Redistributions of source code must retain the above copyright   *
+*   notice, this condition and the following disclaimer.             *
+*                                                                    *
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND             *
+* CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,        *
+* INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF           *
+* MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE           *
+* DISCLAIMED. IN NO EVENT SHALL SEGGER Microcontroller BE LIABLE FOR *
+* ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR           *
+* CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT  *
+* OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;    *
+* OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF      *
+* LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT          *
+* (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE  *
+* USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH   *
+* DAMAGE.                                                            *
+*                                                                    *
+**********************************************************************
+-------------------------- END-OF-HEADER -----------------------------
+
+File    : nRF_Flash_Variant1.icf
+Purpose : nRF linker script for application placement in Flash,
+          for use with the SEGGER Linker.
+Maps    : nRF52805_xxAA, nRF52810_xxAA, nRF52811_xxAA, nRF52820_xxAA, 
+          nRF52832_xxAA, nRF52832_xxAB, nRF52833_xxAA
+Literature:
+  [1]  SEGGER Linker User Guide (https://www.segger.com/doc/UM20005_Linker.html)
+  [2]  SEGGER Linker Section Placement (https://wiki.segger.com/SEGGER_Linker_Script_Files)
+*/
+
+define memory with size = 4G;
+
+//
+// Combined regions per memory type
+//
+define region FLASH = FLASH1;
+define region RAM   = RAM1;
+
+//
+// Block definitions
+//
+define block vectors                        { section .vectors };                                   // Vector table section
+define block vectors_ram                    { section .vectors_ram };                               // Vector table section
+define block ctors                          { section .ctors,     section .ctors.*, block with         alphabetical order { init_array } };
+define block dtors                          { section .dtors,     section .dtors.*, block with reverse alphabetical order { fini_array } };
+define block exidx                          { section .ARM.exidx, section .ARM.exidx.* };
+define block tbss                           { section .tbss,      section .tbss.*  };
+define block tdata                          { section .tdata,     section .tdata.* };
+define block tls with fixed order           { block tbss, block tdata };
+define block tdata_load                     { copy of block tdata };
+define block heap  with auto size = __HEAPSIZE__,  alignment = 8, readwrite access { };
+define block stack with      size = __STACKSIZE__, alignment = 8, readwrite access { };
+
+//
+// Explicit initialization settings for sections
+// Packing options for initialize by copy: packing=auto/lzss/zpak/packbits
+//
+do not initialize                           { section .non_init, section .non_init.*, section .*.non_init, section .*.non_init.* };
+do not initialize                           { section .no_init, section .no_init.*, section .*.no_init, section .*.no_init.* };   // Legacy sections, kept for backwards compatibility
+do not initialize                           { section .noinit, section .noinit.*, section .*.noinit, section .*.noinit.* };       // Legacy sections, used by some SDKs/HALs
+do not initialize                           { block vectors_ram };
+initialize by copy with packing=auto        { section .data, section .data.*, section .*.data, section .*.data.* };               // Static data sections
+initialize by copy with packing=auto        { section .fast, section .fast.*, section .*.fast, section .*.fast.* };               // "RAM Code" sections
+
+#define USES_ALLOC_FUNC                                   \
+  linked symbol malloc || linked symbol aligned_alloc ||  \
+  linked symbol calloc || linked symbol realloc
+
+initialize by calling __SEGGER_init_heap if USES_ALLOC_FUNC { block heap };                        // Init the heap if one is required
+initialize by calling __SEGGER_init_ctors    { block ctors };                                      // Call constructors for global objects which need to be constructed before reaching main (if any). Make sure this is done after setting up heap.
+
+//assert with warning "free() linked into application but there are no calls to an allocation function!" {
+//  linked symbol free => USES_ALLOC_FUNC
+//};
+
+assert with error "heap is too small!"              { USES_ALLOC_FUNC => size  of block heap >= 48 };
+assert with error "heap size not a multiple of 8!"  { USES_ALLOC_FUNC => size  of block heap % 8 == 0 };
+assert with error "heap not correctly aligned!"     { USES_ALLOC_FUNC => start of block heap % 8 == 0 };
+
+//
+// Explicit placement in FLASHn
+//
+place in FLASH1                             { section .FLASH1, section .FLASH1.* };
+//
+// FLASH Placement
+//
+place at start of FLASH                     { block vectors };                                      // Vector table section
+place in FLASH with minimum size order      { block tdata_load,                                     // Thread-local-storage load image
+                                              block exidx,                                          // ARM exception unwinding block
+                                              block ctors,                                          // Constructors block
+                                              block dtors,                                          // Destructors block
+                                              readonly,                                             // Catch-all for readonly data (e.g. .rodata, .srodata)
+                                              readexec                                              // Catch-all for (readonly) executable code (e.g. .text)
+                                            };
+
+//
+// Explicit placement in RAMn
+//
+place in CODE_RAM1                          { section .CODE_RAM1, section .CODE_RAM1.* };  // This region may be deactivated and not accessible
+place in RAM1                               { section .RAM1, section .RAM1.* };
+//
+// RAM Placement
+//
+place at start of RAM                       { block vectors_ram };
+place in RAM                                { section .fast, section .fast.* };                     // "ramfunc" section
+place in RAM with auto order                { block tls,                                            // Thread-local-storage block
+                                              readwrite,                                            // Catch-all for initialized/uninitialized data sections (e.g. .data, .noinit)
+                                              zeroinit                                              // Catch-all for zero-initialized data sections (e.g. .bss)
+                                            };
+place in RAM                                { block heap };                                         // Heap reserved block
+place at end of RAM                         { block stack };                                        // Stack reserved block at the end

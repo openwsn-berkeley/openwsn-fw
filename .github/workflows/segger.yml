@@ -1,0 +1,65 @@
+name: Segger Embedded Studio build
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+  workflow_dispatch:
+
+jobs:
+  install-ses:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Cache Segger Embedded Studio
+        id: cache-ses
+        uses: actions/cache@v4
+        with:
+          path: /opt/ses
+          key: ses-6.30-linux
+
+      - name: Install Segger Embedded Studio
+        if: steps.cache-ses.outputs.cache-hit != 'true'
+        run: |
+          wget -q "https://www.segger.com/downloads/embedded-studio/Setup_EmbeddedStudio_ARM_v630_linux_x64.tar.gz" -O ses.tar.gz
+          tar zxf ses.tar.gz
+          printf 'yes\n' | sudo $(find . -name "install_segger_embedded_studio") --copy-files-to /opt/ses
+
+  build-nrf52840_dk:
+    needs: install-ses
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore Segger Embedded Studio
+        uses: actions/cache@v4
+        with:
+          path: /opt/ses
+          key: ses-6.30-linux
+
+      - name: Build nrf52840_dk (Release)
+        run: /opt/ses/bin/emBuild -config Release projects/nrf52840_dk/nrf52840_dk.emProject
+
+      - name: Build nrf52840_dk (Debug)
+        run: /opt/ses/bin/emBuild -config Debug projects/nrf52840_dk/nrf52840_dk.emProject
+
+  build-microbit:
+    needs: install-ses
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore Segger Embedded Studio
+        uses: actions/cache@v4
+        with:
+          path: /opt/ses
+          key: ses-6.30-linux
+
+      - name: Build microbit (Release)
+        run: /opt/ses/bin/emBuild -config Release projects/microbit/microbit.emProject
+
+      - name: Build microbit (Debug)
+        run: /opt/ses/bin/emBuild -config Debug projects/microbit/microbit.emProject
