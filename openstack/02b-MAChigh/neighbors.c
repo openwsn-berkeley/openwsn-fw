@@ -7,6 +7,7 @@
 #include "IEEE802154E.h"
 #include "openrandom.h"
 #include "msf.h"
+#include "openserial.h"
 
 //=========================== variables =======================================
 
@@ -665,6 +666,8 @@ void registerNewNeighbor(open_addr_t *address,
                          uint8_t joinPrio,
                          bool insecure) {
     uint8_t i;
+    open_addr_t addr_16;
+    uint16_t short_addr;
 
     // filter errors
     if (address->type != ADDR_64B) {
@@ -681,6 +684,13 @@ void registerNewNeighbor(open_addr_t *address,
                 if (rssi < GOODNEIGHBORMINRSSI) {
                     break;
                 }
+                addr_16.type = ADDR_16B;
+                packetfunctions_mac64bToMac16b(address, &addr_16);
+                short_addr = ((addr_16.addr_16b[0] << 8) & 0xff00) |
+                             (addr_16.addr_16b[1] & 0x00ff);
+                LOG_VERBOSE(COMPONENT_NEIGHBORS, ERR_NEW_NEIGHBOR,
+                    (errorparameter_t) rssi,
+                    (errorparameter_t) short_addr);
                 // add this neighbor
                 neighbors_vars.neighbors[i].used = TRUE;
                 neighbors_vars.neighbors[i].insecure = insecure;
