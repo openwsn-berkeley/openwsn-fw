@@ -75,6 +75,16 @@ owerror_t frag_timerq_remove(opentimers_id_t id);
 opentimers_id_t frag_timerq_dequeue(void);
 //============================= public ========================================
 
+void upper_sendDone(OpenQueueEntry_t *msg, owerror_t error)
+{
+    iphc_sendDone(msg, error);
+}
+
+void upper_receive(OpenQueueEntry_t *msg)
+{
+    iphc_receive(msg);
+}
+
 void frag_init() {
     memset(&frag_vars, 0, sizeof(frag_vars_t));
 
@@ -251,13 +261,13 @@ void frag_sendDone(OpenQueueEntry_t *msg, owerror_t sendError) {
             }
 
             if (frags_queued == FALSE) {
-                iphc_sendDone(original_msg, sendError);
+                upper_sendDone(original_msg, sendError);
             }
 
         } else if (sendError == E_FAIL && upward_relay == FALSE) {
             // transmission failed, remove the other fragments that are not locked in for transmission
             cleanup_fragments(datagram_tag);
-            iphc_sendDone(original_msg, sendError);
+            upper_sendDone(original_msg, sendError);
         } else {
             openqueue_freePacketBuffer(msg);
         }
@@ -280,7 +290,7 @@ void frag_sendDone(OpenQueueEntry_t *msg, owerror_t sendError) {
 
     } else {
         // if the sent msg is not a fragment, just pass along to higher layer 
-        iphc_sendDone(msg, sendError);
+        upper_sendDone(msg, sendError);
     }
 }
 
@@ -335,7 +345,7 @@ void frag_receive(OpenQueueEntry_t *msg) {
                 // fast forwarding / source routing
                 msg->creator = COMPONENT_FRAG;
                 allocate_vrb(msg, size, tag);
-                iphc_receive(msg);
+                upper_receive(msg);
             }
         }
     } else if (dispatch == DISPATCH_FRAG_SUBSEQ) {
@@ -406,7 +416,7 @@ void frag_receive(OpenQueueEntry_t *msg) {
         }
     } else {
         // not a fragment
-        iphc_receive(msg);
+        upper_receive(msg);
     }
 }
 
@@ -530,7 +540,7 @@ static void store_fragment(OpenQueueEntry_t *msg, uint16_t size, uint16_t tag, u
         if (reassembled_msg == NULL) {
             return;
         } else {
-            iphc_receive(reassembled_msg);
+            upper_receive(reassembled_msg);
         }
     }
 }

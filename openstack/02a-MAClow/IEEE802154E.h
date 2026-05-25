@@ -348,6 +348,9 @@ void ieee154e_startOfFrame(PORT_TIMER_WIDTH capturedTime);
 
 void ieee154e_endOfFrame(PORT_TIMER_WIDTH capturedTime);
 
+// weak declaration
+void ieee154e_indicate_sync(bool isSync);
+
 // misc
 bool debugPrint_asn(void);
 
