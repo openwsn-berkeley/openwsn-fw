@@ -533,23 +533,6 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_myDAGrank(void) {
-    uint16_t output;
-
-    output = 0;
-    output = icmpv6rpl_getMyDAGrank();
-    openserial_printStatus(STATUS_DAGRANK, (uint8_t * ) & output, sizeof(uint16_t));
-    return TRUE;
-}
-
-/**
-\brief Trigger this module to print status information, over serial.
-
-debugPrint_* functions are used by the openserial module to continuously print
-status information about several modules in the OpenWSN stack.
-
-\returns TRUE if this function printed something, FALSE otherwise.
-*/
 bool debugPrint_kaPeriod(void) {
     uint16_t output;
 
@@ -706,7 +689,7 @@ port_INLINE void sixtop_sendEB(void) {
             (ieee154e_isSynch() == FALSE) ||
             (IEEE802154_security_isConfigured() == FALSE) ||
             (icmpv6rpl_getMyDAGrank() == DEFAULTDAGRANK) ||
-            icmpv6rpl_daoSent() == FALSE) {
+            (icmpv6rpl_isReachable() == FALSE)) {
         // I'm not sync'ed, or did not join, or did not acquire a DAGrank or did not send out a DAO
         // before starting to advertize the network, we need to make sure that we are reachable downwards,
         // thus, the condition if DAO was sent

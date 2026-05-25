@@ -68,6 +68,11 @@ enum {
     OPTION_TRANSIT_INFORMATION_TYPE = 0x06,
 };
 
+#define MAXDAGRANK                0xffff
+#define DEFAULTDAGRANK            MAXDAGRANK
+#define MINHOPRANKINCREASE        256  // default value in RPL and Minimal 6TiSCH draft
+#define DAGMAXRANKINCREASE        768  // per RFC6550 https://tools.ietf.org/html/rfc6550#section-8.2.2.4 point 3
+
 //=========================== static ==========================================
 
 /**
@@ -198,12 +203,12 @@ typedef struct {
     dagrank_t lowestRankInHistory;            ///< lowest Rank that the node has advertised
     uint16_t rankIncrease;                    ///< the cost of the link to the parent, in units of rank
     bool haveParent;                          ///< this router has a route to DAG root
+    bool isReachable;                         ///< this router is reachable
     uint8_t ParentIndex;                      ///< index of Parent in neighbor table (iff haveParent==TRUE)
     // actually only here for debug
     icmpv6rpl_dio_ht *incomingDio;            ///< keep it global to be able to debug correctly.
     icmpv6rpl_pio_t *incomingPio;             ///< pio structure incoming
     icmpv6rpl_config_ht *incomingConf;        ///< configuration incoming
-    bool daoSent;
 } icmpv6rpl_vars_t;
 
 
@@ -238,8 +243,10 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection(void);
 
 void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t *msg);
 
-bool icmpv6rpl_daoSent(void);
+void icmpv6rpl_setReachable(bool reachable);
 
+// debugging
+bool debugPrint_myDAGrank(void);
 
 /**
 \}

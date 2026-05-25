@@ -5,6 +5,7 @@
 #include "idmanager.h"
 #include "openserial.h"
 #include "topology.h"
+#include "icmpv6rpl.h"
 #include "IEEE802154_security.h"
 
 //=========================== define ==========================================
