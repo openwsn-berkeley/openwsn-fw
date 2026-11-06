@@ -29,6 +29,22 @@
 */
 #define MAX6PRESPONSE             1
 
+// 6P field sizes in bytes (RFC 8480 section 3.2), used to bound received bodies
+#define SIXTOP_IE_DESC_LEN        2 // payload IE descriptor
+#define SIXTOP_HEADER_LEN         5 // sub-IE ID, version/type, code, SFID, SeqNum
+#define SIXTOP_METADATA_LEN       2
+#define SIXTOP_CELLOPTIONS_LEN    1
+#define SIXTOP_NUMCELLS_LEN       1
+#define SIXTOP_CELL_LEN           4 // slotOffset (2) + channelOffset (2)
+// COUNT request: Metadata + CellOptions
+#define SIXTOP_COUNT_REQ_LEN      (SIXTOP_METADATA_LEN + SIXTOP_CELLOPTIONS_LEN)
+// LIST request: Metadata + CellOptions + Reserved (1) + Offset (2) + MaxNumCells (2)
+#define SIXTOP_LIST_REQ_LEN       (SIXTOP_METADATA_LEN + SIXTOP_CELLOPTIONS_LEN + 1 + 2 + 2)
+// ADD/DELETE/RELOCATE request, before the cell list(s): Metadata + CellOptions + NumCells
+#define SIXTOP_CELLS_REQ_HDR_LEN  (SIXTOP_METADATA_LEN + SIXTOP_CELLOPTIONS_LEN + SIXTOP_NUMCELLS_LEN)
+// COUNT response: NumCells (2)
+#define SIXTOP_COUNT_RESP_LEN     2
+
 //=========================== variables =======================================
 
 sixtop_vars_t sixtop_vars;
@@ -1031,7 +1047,8 @@ port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
     }
     len = temp_16b & IEEE802154E_DESC_LEN_PAYLOAD_IE_MASK;
     // The descriptor and its 6P header must be inside the received payload.
-    if (pkt->length < 2 || len < 5 || len > (uint16_t)(pkt->length - 2)) {
+    if (pkt->length < SIXTOP_IE_DESC_LEN || len < SIXTOP_HEADER_LEN ||
+        len > (uint16_t)(pkt->length - SIXTOP_IE_DESC_LEN)) {
         return FALSE;
     }
     *lenIE += len;
@@ -1075,26 +1092,31 @@ port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
     // Check command bodies before the handler reads fields or copies cells.
     bodylen = len - headerlen;
     if (type == SIXTOP_CELL_REQUEST) {
-        if (bodylen < 2) {
+        // every request body starts with the 2-byte Metadata field
+        if (bodylen < SIXTOP_METADATA_LEN) {
             return FALSE;
         }
         if (code == IANA_6TOP_CMD_CLEAR) {
             // metadata only
         } else if (code == IANA_6TOP_CMD_COUNT) {
-            if (bodylen < 3) return FALSE;
+            if (bodylen < SIXTOP_COUNT_REQ_LEN) return FALSE;
         } else if (code == IANA_6TOP_CMD_LIST) {
-            if (bodylen < 8) return FALSE;
+            if (bodylen < SIXTOP_LIST_REQ_LEN) return FALSE;
         } else if (code == IANA_6TOP_CMD_ADD || code == IANA_6TOP_CMD_DELETE ||
                    code == IANA_6TOP_CMD_RELOCATE) {
-            if (bodylen < 4) return FALSE;
+            if (bodylen < SIXTOP_CELLS_REQ_HDR_LEN) return FALSE;
+            // DELETE: the rest is one cell list of whole cells, at most CELLLIST_MAX_LEN
             if (code == IANA_6TOP_CMD_DELETE &&
-                ((bodylen - 4) % 4 || (bodylen - 4) / 4 > CELLLIST_MAX_LEN)) return FALSE;
+                ((bodylen - SIXTOP_CELLS_REQ_HDR_LEN) % SIXTOP_CELL_LEN ||
+                 (bodylen - SIXTOP_CELLS_REQ_HDR_LEN) / SIXTOP_CELL_LEN > CELLLIST_MAX_LEN)) return FALSE;
+            // RELOCATE: NumCells cells to relocate, then the candidate cell list
             if (code == IANA_6TOP_CMD_RELOCATE) {
-                uint8_t numCells = *((uint8_t *)(pkt->payload) + ptr + 3);
-                uint16_t remaining = bodylen - 4;
-                if (numCells > CELLLIST_MAX_LEN || remaining < 4 * numCells ||
-                    (remaining - 4 * numCells) % 4 ||
-                    (remaining - 4 * numCells) / 4 > CELLLIST_MAX_LEN) return FALSE;
+                uint8_t numCells = *((uint8_t *)(pkt->payload) + ptr +
+                                     SIXTOP_METADATA_LEN + SIXTOP_CELLOPTIONS_LEN);
+                uint16_t remaining = bodylen - SIXTOP_CELLS_REQ_HDR_LEN;
+                if (numCells > CELLLIST_MAX_LEN || remaining < SIXTOP_CELL_LEN * numCells ||
+                    (remaining - SIXTOP_CELL_LEN * numCells) % SIXTOP_CELL_LEN ||
+                    (remaining - SIXTOP_CELL_LEN * numCells) / SIXTOP_CELL_LEN > CELLLIST_MAX_LEN) return FALSE;
             }
         } else {
             // SIGNAL and unknown commands have no receive handler.
@@ -1102,14 +1124,14 @@ port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
         }
     } else if (type == SIXTOP_CELL_RESPONSE &&
                (code == IANA_6TOP_RC_SUCCESS || code == IANA_6TOP_RC_EOL)) {
-        if (sixtop_vars.six2six_state == SIX_STATE_WAIT_COUNTRESPONSE && bodylen < 2) {
+        if (sixtop_vars.six2six_state == SIX_STATE_WAIT_COUNTRESPONSE && bodylen < SIXTOP_COUNT_RESP_LEN) {
             return FALSE;
         }
         if ((sixtop_vars.six2six_state == SIX_STATE_WAIT_ADDRESPONSE ||
              sixtop_vars.six2six_state == SIX_STATE_WAIT_DELETERESPONSE ||
              sixtop_vars.six2six_state == SIX_STATE_WAIT_RELOCATERESPONSE ||
              sixtop_vars.six2six_state == SIX_STATE_WAIT_LISTRESPONSE) &&
-            (bodylen % 4 || bodylen / 4 > CELLLIST_MAX_LEN)) return FALSE;
+            (bodylen % SIXTOP_CELL_LEN || bodylen / SIXTOP_CELL_LEN > CELLLIST_MAX_LEN)) return FALSE;
     }
 
     // give six2six to process
@@ -1225,6 +1247,7 @@ void sixtop_six2six_notifyReceive(
                 maxNumCells = *((uint8_t * )(pkt->payload) + ptr);
                 maxNumCells |= *((uint8_t * )(pkt->payload) + ptr + 1) << 8;
                 ptr += 2;
+                // schedule_getOneCellAfterOffset() takes a uint8_t slot offset
                 if (offset > 0xff) {
                     returnCode = IANA_6TOP_RC_EOL;
                     break;
