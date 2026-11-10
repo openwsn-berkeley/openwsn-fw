@@ -29,6 +29,22 @@
 */
 #define MAX6PRESPONSE             1
 
+// 6P field sizes in bytes (RFC 8480 section 3.2), used to bound received bodies
+#define SIXTOP_IE_DESC_LEN        2 // payload IE descriptor
+#define SIXTOP_HEADER_LEN         5 // sub-IE ID, version/type, code, SFID, SeqNum
+#define SIXTOP_METADATA_LEN       2
+#define SIXTOP_CELLOPTIONS_LEN    1
+#define SIXTOP_NUMCELLS_LEN       1
+#define SIXTOP_CELL_LEN           4 // slotOffset (2) + channelOffset (2)
+// COUNT request: Metadata + CellOptions
+#define SIXTOP_COUNT_REQ_LEN      (SIXTOP_METADATA_LEN + SIXTOP_CELLOPTIONS_LEN)
+// LIST request: Metadata + CellOptions + Reserved (1) + Offset (2) + MaxNumCells (2)
+#define SIXTOP_LIST_REQ_LEN       (SIXTOP_METADATA_LEN + SIXTOP_CELLOPTIONS_LEN + 1 + 2 + 2)
+// ADD/DELETE/RELOCATE request, before the cell list(s): Metadata + CellOptions + NumCells
+#define SIXTOP_CELLS_REQ_HDR_LEN  (SIXTOP_METADATA_LEN + SIXTOP_CELLOPTIONS_LEN + SIXTOP_NUMCELLS_LEN)
+// COUNT response: NumCells (2)
+#define SIXTOP_COUNT_RESP_LEN     2
+
 //=========================== variables =======================================
 
 sixtop_vars_t sixtop_vars;
@@ -1012,7 +1028,7 @@ port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
     uint8_t ptr;
     uint8_t temp_8b;
     uint8_t subtypeid,code,sfid,version,type,seqNum;
-    uint16_t temp_16b,len,headerlen;
+    uint16_t temp_16b,len,headerlen,bodylen;
 
     ptr = 0;
     headerlen = 0;
@@ -1030,6 +1046,11 @@ port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
         return FALSE;
     }
     len = temp_16b & IEEE802154E_DESC_LEN_PAYLOAD_IE_MASK;
+    // The descriptor and its 6P header must be inside the received payload.
+    if (pkt->length < SIXTOP_IE_DESC_LEN || len < SIXTOP_HEADER_LEN ||
+        len > (uint16_t)(pkt->length - SIXTOP_IE_DESC_LEN)) {
+        return FALSE;
+    }
     *lenIE += len;
 
     // check 6p subtype Id
@@ -1068,8 +1089,53 @@ port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
     ptr += 1;
     headerlen += 1;
 
+    // Check command bodies before the handler reads fields or copies cells.
+    bodylen = len - headerlen;
+    if (type == SIXTOP_CELL_REQUEST) {
+        // every request body starts with the 2-byte Metadata field
+        if (bodylen < SIXTOP_METADATA_LEN) {
+            return FALSE;
+        }
+        if (code == IANA_6TOP_CMD_CLEAR) {
+            // metadata only
+        } else if (code == IANA_6TOP_CMD_COUNT) {
+            if (bodylen < SIXTOP_COUNT_REQ_LEN) return FALSE;
+        } else if (code == IANA_6TOP_CMD_LIST) {
+            if (bodylen < SIXTOP_LIST_REQ_LEN) return FALSE;
+        } else if (code == IANA_6TOP_CMD_ADD || code == IANA_6TOP_CMD_DELETE ||
+                   code == IANA_6TOP_CMD_RELOCATE) {
+            if (bodylen < SIXTOP_CELLS_REQ_HDR_LEN) return FALSE;
+            // DELETE: the rest is one cell list of whole cells, at most CELLLIST_MAX_LEN
+            if (code == IANA_6TOP_CMD_DELETE &&
+                ((bodylen - SIXTOP_CELLS_REQ_HDR_LEN) % SIXTOP_CELL_LEN ||
+                 (bodylen - SIXTOP_CELLS_REQ_HDR_LEN) / SIXTOP_CELL_LEN > CELLLIST_MAX_LEN)) return FALSE;
+            // RELOCATE: NumCells cells to relocate, then the candidate cell list
+            if (code == IANA_6TOP_CMD_RELOCATE) {
+                uint8_t numCells = *((uint8_t *)(pkt->payload) + ptr +
+                                     SIXTOP_METADATA_LEN + SIXTOP_CELLOPTIONS_LEN);
+                uint16_t remaining = bodylen - SIXTOP_CELLS_REQ_HDR_LEN;
+                if (numCells > CELLLIST_MAX_LEN || remaining < SIXTOP_CELL_LEN * numCells ||
+                    (remaining - SIXTOP_CELL_LEN * numCells) % SIXTOP_CELL_LEN ||
+                    (remaining - SIXTOP_CELL_LEN * numCells) / SIXTOP_CELL_LEN > CELLLIST_MAX_LEN) return FALSE;
+            }
+        } else {
+            // SIGNAL and unknown commands have no receive handler.
+            return FALSE;
+        }
+    } else if (type == SIXTOP_CELL_RESPONSE &&
+               (code == IANA_6TOP_RC_SUCCESS || code == IANA_6TOP_RC_EOL)) {
+        if (sixtop_vars.six2six_state == SIX_STATE_WAIT_COUNTRESPONSE && bodylen < SIXTOP_COUNT_RESP_LEN) {
+            return FALSE;
+        }
+        if ((sixtop_vars.six2six_state == SIX_STATE_WAIT_ADDRESPONSE ||
+             sixtop_vars.six2six_state == SIX_STATE_WAIT_DELETERESPONSE ||
+             sixtop_vars.six2six_state == SIX_STATE_WAIT_RELOCATERESPONSE ||
+             sixtop_vars.six2six_state == SIX_STATE_WAIT_LISTRESPONSE) &&
+            (bodylen % SIXTOP_CELL_LEN || bodylen / SIXTOP_CELL_LEN > CELLLIST_MAX_LEN)) return FALSE;
+    }
+
     // give six2six to process
-    sixtop_six2six_notifyReceive(version, type, code, sfid, seqNum, ptr, len-headerlen, pkt);
+    sixtop_six2six_notifyReceive(version, type, code, sfid, seqNum, ptr, bodylen, pkt);
     *lenIE = len+2;
     return TRUE;
 }
@@ -1091,7 +1157,7 @@ void sixtop_six2six_notifyReceive(
     uint16_t offset;
     uint16_t length_groupid_type;
     uint16_t startingOffset;
-    uint8_t maxNumCells;
+    uint16_t maxNumCells;
     uint16_t i;
     uint16_t slotoffset;
     uint16_t channeloffset;
@@ -1181,6 +1247,12 @@ void sixtop_six2six_notifyReceive(
                 maxNumCells = *((uint8_t * )(pkt->payload) + ptr);
                 maxNumCells |= *((uint8_t * )(pkt->payload) + ptr + 1) << 8;
                 ptr += 2;
+                // schedule_getOneCellAfterOffset() takes a uint8_t slot offset
+                if (offset > 0xff) {
+                    returnCode = IANA_6TOP_RC_EOL;
+                    break;
+                }
+                if (maxNumCells > CELLLIST_MAX_LEN) maxNumCells = CELLLIST_MAX_LEN;
 
                 returnCode = IANA_6TOP_RC_SUCCESS;
                 startingOffset = offset;
@@ -1273,7 +1345,7 @@ void sixtop_six2six_notifyReceive(
                 // retrieve cell list
                 i = 0;
                 memset(response_pkt->l2_sixtop_celllist_add, 0, sizeof(response_pkt->l2_sixtop_celllist_add));
-                while (pktLen > 0) {
+                while (pktLen >= 4 && i < CELLLIST_MAX_LEN) {
                     response_pkt->l2_sixtop_celllist_add[i].slotoffset = *((uint8_t * )(pkt->payload) + ptr);
                     response_pkt->l2_sixtop_celllist_add[i].slotoffset |=
                             (*((uint8_t * )(pkt->payload) + ptr + 1)) << 8;
@@ -1309,7 +1381,7 @@ void sixtop_six2six_notifyReceive(
             if (code == IANA_6TOP_CMD_DELETE) {
                 i = 0;
                 memset(response_pkt->l2_sixtop_celllist_delete, 0, sizeof(response_pkt->l2_sixtop_celllist_delete));
-                while (pktLen > 0) {
+                while (pktLen >= 4 && i < CELLLIST_MAX_LEN) {
                     response_pkt->l2_sixtop_celllist_delete[i].slotoffset = *((uint8_t * )(pkt->payload) + ptr);
                     response_pkt->l2_sixtop_celllist_delete[i].slotoffset |=
                             (*((uint8_t * )(pkt->payload) + ptr + 1)) << 8;
@@ -1355,7 +1427,7 @@ void sixtop_six2six_notifyReceive(
                 i = 0;
                 memset(response_pkt->l2_sixtop_celllist_delete, 0, sizeof(response_pkt->l2_sixtop_celllist_delete));
                 temp16 = numCells;
-                while (temp16 > 0) {
+                while (temp16 > 0 && pktLen >= 4 && i < CELLLIST_MAX_LEN) {
                     response_pkt->l2_sixtop_celllist_delete[i].slotoffset = *((uint8_t * )(pkt->payload) + ptr);
                     response_pkt->l2_sixtop_celllist_delete[i].slotoffset |=
                             (*((uint8_t * )(pkt->payload) + ptr + 1)) << 8;
@@ -1382,7 +1454,7 @@ void sixtop_six2six_notifyReceive(
                 // retrieve cell list to be relocated
                 i = 0;
                 memset(response_pkt->l2_sixtop_celllist_add, 0, sizeof(response_pkt->l2_sixtop_celllist_add));
-                while (pktLen > 0) {
+                while (pktLen >= 4 && i < CELLLIST_MAX_LEN) {
                     response_pkt->l2_sixtop_celllist_add[i].slotoffset = *((uint8_t * )(pkt->payload) + ptr);
                     response_pkt->l2_sixtop_celllist_add[i].slotoffset |=
                             (*((uint8_t * )(pkt->payload) + ptr + 1)) << 8;
@@ -1475,7 +1547,7 @@ void sixtop_six2six_notifyReceive(
                 case SIX_STATE_WAIT_ADDRESPONSE:
                     i = 0;
                     memset(pkt->l2_sixtop_celllist_add, 0, sizeof(pkt->l2_sixtop_celllist_add));
-                    while (pktLen > 0) {
+                    while (pktLen >= 4 && i < CELLLIST_MAX_LEN) {
                         pkt->l2_sixtop_celllist_add[i].slotoffset = *((uint8_t * )(pkt->payload) + ptr);
                         pkt->l2_sixtop_celllist_add[i].slotoffset |= (*((uint8_t * )(pkt->payload) + ptr + 1)) << 8;
                         pkt->l2_sixtop_celllist_add[i].channeloffset = *((uint8_t * )(pkt->payload) + ptr + 2);
@@ -1496,7 +1568,7 @@ void sixtop_six2six_notifyReceive(
                 case SIX_STATE_WAIT_DELETERESPONSE:
                     i = 0;
                     memset(pkt->l2_sixtop_celllist_delete, 0, sizeof(pkt->l2_sixtop_celllist_delete));
-                    while (pktLen > 0) {
+                    while (pktLen >= 4 && i < CELLLIST_MAX_LEN) {
                         pkt->l2_sixtop_celllist_delete[i].slotoffset = *((uint8_t * )(pkt->payload) + ptr);
                         pkt->l2_sixtop_celllist_delete[i].slotoffset |= (*((uint8_t * )(pkt->payload) + ptr + 1)) << 8;
                         pkt->l2_sixtop_celllist_delete[i].channeloffset = *((uint8_t * )(pkt->payload) + ptr + 2);
@@ -1518,7 +1590,7 @@ void sixtop_six2six_notifyReceive(
                 case SIX_STATE_WAIT_RELOCATERESPONSE:
                     i = 0;
                     memset(pkt->l2_sixtop_celllist_add, 0, sizeof(pkt->l2_sixtop_celllist_add));
-                    while (pktLen > 0) {
+                    while (pktLen >= 4 && i < CELLLIST_MAX_LEN) {
                         pkt->l2_sixtop_celllist_add[i].slotoffset = *((uint8_t * )(pkt->payload) + ptr);
                         pkt->l2_sixtop_celllist_add[i].slotoffset |= (*((uint8_t * )(pkt->payload) + ptr + 1)) << 8;
                         pkt->l2_sixtop_celllist_add[i].channeloffset = *((uint8_t * )(pkt->payload) + ptr + 2);
@@ -1554,7 +1626,7 @@ void sixtop_six2six_notifyReceive(
                 case SIX_STATE_WAIT_LISTRESPONSE:
                     i = 0;
                     memset(celllist_list, 0, CELLLIST_MAX_LEN * sizeof(cellInfo_ht));
-                    while (pktLen > 0) {
+                    while (pktLen >= 4 && i < CELLLIST_MAX_LEN) {
                         celllist_list[i].slotoffset = *((uint8_t * )(pkt->payload) + ptr);
                         celllist_list[i].slotoffset |= (*((uint8_t * )(pkt->payload) + ptr + 1)) << 8;
                         celllist_list[i].channeloffset = *((uint8_t * )(pkt->payload) + ptr + 2);
